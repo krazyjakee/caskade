@@ -343,6 +343,39 @@ impl InnoExtractor {
             .remove(artifact)
     }
 }
+/// The installer plus its external slices (`<name>-1.bin`, `<name>-1a.bin`,
+/// …), which hold the data of most GOG installers: the expansion-ratio budget
+/// measures what was downloaded, not the small setup program alone.
+fn packed_bytes(path: &Path) -> std::io::Result<u64> {
+    let mut total = std::fs::metadata(path)?.len();
+    let (Some(parent), Some(stem)) = (path.parent(), path.file_stem().and_then(|s| s.to_str()))
+    else {
+        return Ok(total);
+    };
+    let prefix = format!("{}-", stem.to_lowercase());
+    for entry in std::fs::read_dir(parent)? {
+        let entry = entry?;
+        let Some(name) = entry.file_name().to_str().map(str::to_lowercase) else {
+            continue;
+        };
+        let Some(slice) = name
+            .strip_prefix(&prefix)
+            .and_then(|rest| rest.strip_suffix(".bin"))
+        else {
+            continue;
+        };
+        let numbered = slice.trim_end_matches(|c: char| c.is_ascii_lowercase());
+        if numbered.is_empty() || !numbered.chars().all(|c| c.is_ascii_digit()) {
+            continue;
+        }
+        let metadata = entry.metadata()?;
+        if metadata.is_file() {
+            total = total.saturating_add(metadata.len());
+        }
+    }
+    Ok(total)
+}
+
 impl Extractor for InnoExtractor {
     fn extract(
         &self,
@@ -354,8 +387,7 @@ impl Extractor for InnoExtractor {
     ) -> std::result::Result<(), ExecError> {
         let path = crate::exec::source_path(&self.sources, artifact)?;
         context.checkpoint(0)?;
-        let mut directory =
-            context.open_destination(destination, std::fs::metadata(path)?.len())?;
+        let mut directory = context.open_destination(destination, packed_bytes(path)?)?;
         let mut options = ArchiveOptions::default();
         options.select = select.to_vec();
         options.strip = strip.map(Path::to_path_buf);
@@ -419,5 +451,24 @@ fn exec_error(error: InnoError) -> ExecError {
         other => ExecError::Extract {
             message: other.to_string(),
         },
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::packed_bytes;
+
+    #[test]
+    fn packed_bytes_count_the_installers_own_slices() {
+        let dir = tempfile::tempdir().unwrap();
+        let write = |name: &str, len: usize| std::fs::write(dir.path().join(name), vec![0; len]);
+        write("setup_game_(1).exe", 10).unwrap();
+        write("setup_game_(1)-1.bin", 100).unwrap();
+        write("Setup_Game_(1)-2A.BIN", 1000).unwrap();
+        write("setup_game_(1)-extra.bin", 10_000).unwrap();
+        write("setup_other-1.bin", 100_000).unwrap();
+        write("setup_game_(1)-3.txt", 1_000_000).unwrap();
+        let packed = packed_bytes(&dir.path().join("setup_game_(1).exe")).unwrap();
+        assert_eq!(packed, 1110);
     }
 }

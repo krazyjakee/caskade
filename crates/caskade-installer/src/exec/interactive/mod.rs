@@ -37,6 +37,9 @@ impl Default for InteractiveConfig {
 #[derive(Default)]
 struct Events {
     paths: BTreeSet<PathBuf>,
+    /// Paths the watcher saw created: what proves a folder in an outside
+    /// root is new, since those roots are too large to inventory.
+    created: BTreeSet<PathBuf>,
     overflow: bool,
     failed: bool,
 }
@@ -45,6 +48,9 @@ pub(super) struct Observation {
     events: Arc<Mutex<Events>>,
     before: BTreeSet<PathBuf>,
     scopes: Vec<PathBuf>,
+    /// The storage root and the prefix, inventoried before and after. The
+    /// outside roots (AppData, Documents, …) hold far more than any bound.
+    inventoried: Vec<PathBuf>,
     expect: Vec<PathBuf>,
     config: InteractiveConfig,
     prefix: Option<PathBuf>,
@@ -143,30 +149,31 @@ impl Observation {
         }
         let prefix = (*runtime != RuntimeSpec::Native)
             .then(|| crate::runtime::proton::PrefixRuntime::prefix_for(command).join("drive_c"));
-        let mut scopes = vec![request.root.clone()];
-        scopes.extend(config.outside_roots.iter().cloned());
+        let mut inventoried = vec![request.root.clone()];
         if let Some(prefix) = &prefix
             && !prefix.starts_with(&request.root)
         {
-            scopes.push(prefix.clone());
+            inventoried.push(prefix.clone());
         }
-        for scope in &mut scopes {
+        let mut outside = config.outside_roots.clone();
+        for scope in inventoried.iter_mut().chain(outside.iter_mut()) {
             if !scope.is_absolute() {
                 return Err(invalid("interactive observation scopes must be absolute"));
             }
-            // Canonical spelling also normalizes Windows extended path prefixes.
+            // One spelling for every scope and the request root (which the
+            // executor canonicalizes the same way), without `\\?\` prefixes.
             // This is an injected read-only observation scope, not write authority.
             if scope.exists() {
-                *scope = std::fs::canonicalize(&*scope)?;
+                *scope = dunce::canonicalize(&*scope)?;
             }
         }
+        inventoried.sort();
+        inventoried.dedup();
+        let mut scopes: Vec<PathBuf> = inventoried.iter().chain(&outside).cloned().collect();
         scopes.sort();
         scopes.dedup();
         let mut before = BTreeSet::new();
-        for scope in &scopes {
-            if !scope.is_absolute() {
-                return Err(invalid("interactive observation scopes must be absolute"));
-            }
+        for scope in &inventoried {
             scan(scope, &mut before, config.max_entries, 0)?;
         }
         let events = Arc::new(Mutex::new(Events::default()));
@@ -177,10 +184,14 @@ impl Observation {
                 let mut events = shared.lock().expect("interactive watcher poisoned");
                 match event {
                     Ok(event) => {
+                        let created = matches!(event.kind, notify::EventKind::Create(_));
                         for path in event.paths {
                             if events.paths.len() >= limit {
                                 events.overflow = true;
                                 break;
+                            }
+                            if created {
+                                events.created.insert(path.clone());
                             }
                             events.paths.insert(path);
                         }
@@ -208,6 +219,7 @@ impl Observation {
             events,
             before,
             scopes,
+            inventoried,
             expect,
             config: config.clone(),
             prefix,
@@ -228,7 +240,7 @@ impl Observation {
             return Err(invalid("interactive watcher lost events"));
         }
         let mut after = BTreeSet::new();
-        for scope in &self.scopes {
+        for scope in &self.inventoried {
             scan(scope, &mut after, self.config.max_entries, 0)?;
         }
         let paths: BTreeSet<_> = after
@@ -236,7 +248,17 @@ impl Observation {
             .cloned()
             .chain(events.paths.iter().cloned())
             .collect();
+        let created = events.created.clone();
         drop(events);
+        // Inventoried scopes prove a path new by its absence before; outside
+        // roots only by the watcher seeing it created.
+        let fresh = |path: &Path| {
+            if self.inventoried.iter().any(|scope| path.starts_with(scope)) {
+                !self.before.contains(path)
+            } else {
+                created.contains(path)
+            }
+        };
         let game = &context.working_dir;
         let target_ok = if self.expect.is_empty() {
             paths.iter().any(|p| {
@@ -261,7 +283,7 @@ impl Observation {
                     .is_some_and(|prefix| candidate.starts_with(prefix));
                 if (!candidate.starts_with(game) || in_prefix)
                     && (!candidate.starts_with(request.root.join(".caskade")) || in_prefix)
-                    && !self.before.contains(candidate)
+                    && fresh(candidate)
                     && !self.scopes.iter().any(|scope| scope == candidate)
                     && let Some(scope) = self
                         .scopes

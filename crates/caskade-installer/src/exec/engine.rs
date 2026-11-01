@@ -100,7 +100,11 @@ impl Executor {
         cancellation: CancellationToken,
     ) -> Result<ExecReport> {
         validate(&request)?;
-        request.root = std::fs::canonicalize(&request.root)?;
+        // Not `\\?\C:\…` on Windows: installers get paths under the root in
+        // their arguments and working directory, and Inno Setup refuses a
+        // verbatim `/DIR=` (exit code 1). dunce keeps the prefix only where
+        // the path needs it.
+        request.root = dunce::canonicalize(&request.root)?;
         let token = cancellation.child_token();
         let _cancel_on_drop = token.clone().drop_guard();
         let lock = root_lock(&request.root);
@@ -124,7 +128,7 @@ impl Executor {
     /// Startup recovery is serialized against all jobs for the same canonical
     /// root, including workers whose async caller has already been dropped.
     pub async fn cleanup(&self, root: &Path) -> Result<usize> {
-        let root = std::fs::canonicalize(root)?;
+        let root = dunce::canonicalize(root)?;
         let guard = root_lock(&root).lock_owned().await;
         let runtimes = self.runtimes.clone();
         caskade_jobs::blocking("Recovering installs", move || {
@@ -177,7 +181,7 @@ impl Executor {
     {
         one_component(relative_dir)?;
         one_component(Path::new(job_id))?;
-        let root_path = std::fs::canonicalize(root)?;
+        let root_path = dunce::canonicalize(root)?;
         let token = cancellation.child_token();
         let _cancel_on_drop = token.clone().drop_guard();
         let guard = tokio::select! {

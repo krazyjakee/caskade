@@ -16,7 +16,7 @@ where
     E: From<ExecError> + Send + 'static,
     F: FnOnce(PathBuf, CancellationToken) -> Result<T, E> + Send + 'static,
 {
-    let root = std::fs::canonicalize(root)
+    let root = dunce::canonicalize(root)
         .map_err(ExecError::Io)
         .map_err(E::from)?;
     let token = cancellation.child_token();
@@ -58,7 +58,7 @@ where
 {
     let mut canonical = roots
         .iter()
-        .map(|root| std::fs::canonicalize(root).map_err(ExecError::Io))
+        .map(|root| dunce::canonicalize(root).map_err(ExecError::Io))
         .collect::<Result<Vec<_>, _>>()
         .map_err(E::from)?;
     canonical.sort();

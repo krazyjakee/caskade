@@ -1201,6 +1201,7 @@ dependencies = [
  "cpio",
  "cpio-archive",
  "criterion",
+ "dunce",
  "encoding_rs",
  "flate2",
  "fs2",

@@ -33,6 +33,7 @@ url = { version = "2", features = ["serde"] }
 cap-std = "4"
 cap-fs-ext = "4"
 fs2 = "0.4"
+dunce = "1"
 chardetng = "0.1"
 encoding_rs = "0.8"
 codepage-437 = "0.1"

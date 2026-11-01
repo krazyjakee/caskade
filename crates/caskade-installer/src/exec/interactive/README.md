@@ -4,7 +4,8 @@
 Proton runtime. It never sends keys, clicks controls, or automates a wizard.
 
 The executor watches the storage root with `notify`, takes bounded before/after
-inventories (100,000 entries and depth 64 by default), and checks expected regular
+inventories of the storage root and any prefix (100,000 entries and depth 64 by
+default), and checks expected regular
 files using confined directory handles. Expectations come from
 `ExecConfig.interactive.expect`, or matching silent steps of the same handler,
 program and runtime. Unknown installers without expectations must produce a new
@@ -15,6 +16,8 @@ Only the requested game tree is accepted automatically. Newly created folders
 with matching expectations elsewhere produce
 `ExecError::NeedsUser(Question::ChooseInstallDirectory)` after rollback. Native
 external observation scopes must be explicitly injected through `outside_roots`.
+They are watched but not inventoried (AppData or Documents hold far more than
+the bound), so a folder there counts as new only when the watcher saw it created.
 The observer never treats a preexisting directory or symlink as a new install.
 No folder outside the requested root is moved automatically.
 
