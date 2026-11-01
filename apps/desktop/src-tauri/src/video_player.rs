@@ -195,6 +195,26 @@ pub fn run(options: Options) -> Result<i32, String> {
         target_os = "openbsd",
     )))]
     let webview = builder.build(&window).map_err(|error| error.to_string())?;
+    // A webview that lost its processes would stay black: close (#3).
+    #[cfg(windows)]
+    {
+        use crate::webview_recovery::{Policy, Step, failure_of, log};
+        use wry::WebViewExtWindows;
+        let fails = event_loop.create_proxy();
+        let policy = std::cell::RefCell::new(Policy::default());
+        let watched = caskade_webview2::watch(&webview.webview(), move |failed| {
+            log("video window", &failed);
+            let step = policy
+                .borrow_mut()
+                .next(failure_of(failed.kind), std::time::Instant::now());
+            if step != Step::Wait {
+                let _ = fails.send_event(UserEvent::Close);
+            }
+        });
+        if let Err(error) = watched {
+            tracing::warn!(%error, "can't watch the video window's webview");
+        }
+    }
     tracing::info!(video = %options.video_id, "video window open");
 
     // The app holds the other end of stdin: when it ends, so does the app.

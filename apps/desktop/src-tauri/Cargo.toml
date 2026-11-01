@@ -41,6 +41,9 @@ caskade-discovery = { path = "../../../crates/caskade-discovery" }
 caskade-plugin-host = { path = "../../../crates/caskade-plugin-host" }
 # Gamepads for console mode (#146).
 caskade-input = { path = "../../../crates/caskade-input" }
+# WebView2's process failures, for `webview_recovery.rs` (#3); empty
+# outside Windows.
+caskade-webview2 = { path = "../../../crates/caskade-webview2" }
 # The tray icon (`tray.rs`).
 tauri = { version = "2.12", features = ["tray-icon"] }
 # Forwards a second launch's deep link to the running app (#57).
