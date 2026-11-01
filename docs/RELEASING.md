@@ -36,14 +36,17 @@ The jobs, in order:
    gh repo create krazyjakee/caskade --public
    ```
 
-2. Add it as a remote and push `master`:
+2. Add it as a remote:
 
    ```sh
-   git remote add github git@github.com:krazyjakee/caskade.git
-   git push github master
+   git remote add github https://github.com/krazyjakee/caskade.git
    ```
 
-   A Gitea push mirror to the same repo works too, as long as it pushes tags.
+   GitHub doesn't get Gitea's history: its `master` is a line of squashed
+   commits, one per publish, each holding Gitea `master`'s tree at that
+   point (the first is "Caskade 0.1.0"). So never `git push github master`
+   (it is rejected as unrelated) and don't set up a push mirror; publish as
+   in step 2 of Cutting a release.
 
 3. Give the workflow the updater's signing key. `gh` drops the files' trailing
    newline.
@@ -74,13 +77,21 @@ The jobs, in order:
 
    Commit them to `master`.
 
-2. Tag the commit and push the tag to both remotes:
+2. Push `master` to Gitea, then publish its tree to GitHub as one commit on
+   top of GitHub's `master`, and tag that commit there:
 
    ```sh
-   git tag -a v0.2.0 -m "Caskade 0.2.0"
-   git push origin master v0.2.0
-   git push github master v0.2.0
+   git push origin master
+   git fetch github
+   NEW=$(git commit-tree "master^{tree}" -p github/master \
+     -m "Caskade 0.2.0" -m "From master $(git rev-parse master).")
+   git push github "$NEW:refs/heads/master"
+   git tag -a v0.2.0 -m "Caskade 0.2.0" "$NEW"
+   git push github v0.2.0
    ```
+
+   The tag lives on GitHub only: its commit isn't in Gitea's history. The
+   squashed commit's message names the Gitea commit it came from.
 
    A version with a suffix (`v0.2.0-beta.1`) becomes a prerelease, which the
    updater never offers.
