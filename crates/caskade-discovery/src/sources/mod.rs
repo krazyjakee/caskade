@@ -49,9 +49,12 @@ use crate::{
     types::{LaunchTarget, SourceError, UninstallInfo},
 };
 use std::{
+    collections::BTreeSet,
     fs,
     io::{self, Read},
     path::{Component, Path, PathBuf},
+    sync::{Arc, Mutex, PoisonError, mpsc},
+    time::Duration,
 };
 
 /// Joins a relative path written with either separator.
@@ -166,6 +169,57 @@ pub(crate) fn canonical(env: &HostEnv, path: &Path) -> PathBuf {
     env.resolve_path(path)
         .and_then(fs::canonicalize)
         .unwrap_or_else(|_| path.to_path_buf())
+}
+
+/// How long a folder a launcher lists may take to answer before a source
+/// skips it. A network share whose server is gone, a disconnected mapped
+/// drive or a `\\wsl.localhost` path while WSL hangs blocks inside the OS,
+/// where the scan's cancellation can't reach it, and would run the whole
+/// source out of its time budget.
+pub(crate) const ANSWER_WAIT: Duration = Duration::from_secs(2);
+
+/// Whether `path` is a folder, or `None` when the OS hasn't answered within
+/// `wait` (the folder is unreachable for now).
+pub(crate) fn dir_within(env: &HostEnv, path: &Path, wait: Duration) -> Option<bool> {
+    let (env, path) = (env.clone(), path.to_path_buf());
+    within(path.clone(), wait, move || is_dir(&env, &path))
+}
+
+/// Paths whose check is still blocked in the OS.
+static BLOCKED: Mutex<BTreeSet<PathBuf>> = Mutex::new(BTreeSet::new());
+
+/// Runs `work` on a thread of its own and waits up to `wait` for it. A
+/// check still blocked on the same `key` from an earlier call answers `None`
+/// at once, so repeated scans of a dead path don't pile up stuck threads.
+/// The thread holds no job slot (`caskade_jobs::inherit`): one stuck for
+/// good would hold the slot for good.
+fn within<T, F>(key: PathBuf, wait: Duration, work: F) -> Option<T>
+where
+    T: Send + 'static,
+    F: Fn() -> T + Send + Sync + 'static,
+{
+    let blocked = || BLOCKED.lock().unwrap_or_else(PoisonError::into_inner);
+    if !blocked().insert(key.clone()) {
+        return None;
+    }
+    let work = Arc::new(work);
+    let (sender, receiver) = mpsc::sync_channel(1);
+    let (thread_key, thread_work) = (key.clone(), work.clone());
+    let spawned = std::thread::Builder::new()
+        .name("discovery-probe".into())
+        .spawn(move || {
+            let answer = thread_work();
+            blocked().remove(&thread_key);
+            let _ = sender.send(answer);
+        });
+    match spawned {
+        Ok(_) => receiver.recv_timeout(wait).ok(),
+        Err(error) => {
+            tracing::warn!(%error, "could not start a probe thread; checking inline");
+            blocked().remove(&key);
+            Some(work())
+        }
+    }
 }
 
 /// Reads and parses a bounded JSON file.
@@ -379,4 +433,53 @@ pub(crate) fn macos_bundle_executable(env: &HostEnv, bundle: &Path) -> Option<Pa
     let target =
         crate::identity::canonical_path(env, &executable, &crate::GameRuntime::Native).ok()?;
     (bundle.contains(&target) && is_file(env, &executable)).then_some(executable)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::Instant;
+
+    #[test]
+    fn within_answers_in_time() {
+        let answer = within(PathBuf::from("probe-test/quick"), ANSWER_WAIT, || 7);
+        assert_eq!(answer, Some(7));
+    }
+
+    #[test]
+    fn within_gives_up_on_a_blocked_check_and_does_not_start_another() {
+        let key = PathBuf::from("probe-test/stuck");
+        let (release, gate) = mpsc::channel::<()>();
+        let gate = Mutex::new(gate);
+        let wait = Duration::from_millis(50);
+        let started = Instant::now();
+        assert_eq!(
+            within(key.clone(), wait, move || {
+                let _ = gate.lock().unwrap().recv();
+                true
+            }),
+            None
+        );
+        assert!(started.elapsed() >= wait);
+
+        // Still blocked: answered at once, without running anything.
+        let started = Instant::now();
+        let ran = Arc::new(Mutex::new(false));
+        let flag = ran.clone();
+        let again = within(key.clone(), Duration::from_secs(5), move || {
+            *flag.lock().unwrap() = true;
+        });
+        assert_eq!(again, None);
+        assert!(started.elapsed() < Duration::from_secs(1));
+        assert!(!*ran.lock().unwrap());
+
+        // Once the first check returns, the path is checked again.
+        release.send(()).unwrap();
+        let deadline = Instant::now() + Duration::from_secs(5);
+        while BLOCKED.lock().unwrap().contains(&key) {
+            assert!(Instant::now() < deadline, "the blocked check never finished");
+            std::thread::sleep(Duration::from_millis(5));
+        }
+        assert_eq!(within(key, ANSWER_WAIT, || false), Some(false));
+    }
 }

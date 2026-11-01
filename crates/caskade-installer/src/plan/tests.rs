@@ -107,8 +107,8 @@ fn host_fallback_order_and_all_alternatives_are_preserved() {
         let expected = if profile == "windows" {
             vec![
                 Strategy::RunSilent,
-                Strategy::RunInteractive,
                 Strategy::Extract,
+                Strategy::RunInteractive,
                 Strategy::Delegate,
             ]
         } else {

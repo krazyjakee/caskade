@@ -138,12 +138,14 @@ pub(super) fn available(
 fn strategy_rank(strategy: Strategy, context: &PlanContext<'_>) -> u8 {
     let extract_first = context.host.os != OperatingSystem::Windows
         || context.policy.windows_method == WindowsMethod::Extract;
+    // Installers run silently first; extraction is the fallback when that
+    // fails, ahead of an installer that needs someone to click through it.
     match strategy {
         Strategy::Copy | Strategy::HandOff => 0,
         Strategy::Extract if extract_first => 1,
         Strategy::RunSilent => 2,
-        Strategy::RunInteractive => 3,
-        Strategy::Extract => 4,
+        Strategy::Extract => 3,
+        Strategy::RunInteractive => 4,
         Strategy::Delegate => 5,
     }
 }

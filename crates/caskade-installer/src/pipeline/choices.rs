@@ -35,6 +35,24 @@ impl RunControl {
         };
         only.then_some(0)
     }
+    /// The latest answer to an engine fallback question given after
+    /// `question` was answered, if its strategy is still in the plan.
+    fn fallback_after<'a>(&'a self, question: &Question, plans: &PlanSet) -> Option<&'a Candidate> {
+        let start = self
+            .answers
+            .iter()
+            .rposition(|(q, _)| q == question)
+            .map_or(0, |at| at + 1);
+        self.answers[start..]
+            .iter()
+            .rev()
+            .find_map(|(q, index)| match q {
+                Question::ConfirmExecution { candidates } => candidates
+                    .get(*index as usize)
+                    .filter(|candidate| plans.candidates.contains(candidate)),
+                _ => None,
+            })
+    }
     fn picked_download(&self) -> bool {
         self.answers
             .iter()
@@ -65,6 +83,11 @@ impl RunControl {
                     let selected = candidates
                         .get(index)
                         .ok_or("candidate choice is out of range")?;
+                    // When the chosen strategy failed, the engine asked
+                    // before falling back to installer code (CSK-01). That
+                    // later answer decides the rerun; the first one would
+                    // retry the failed strategy and ask again forever.
+                    let selected = self.fallback_after(question, plans).unwrap_or(selected);
                     let index = plans
                         .candidates
                         .iter()
@@ -187,5 +210,43 @@ mod tests {
             candidates: vec![runs, candidate("extract")],
         };
         assert_eq!(control.answer(&several), None);
+    }
+    #[test]
+    fn the_fallback_answer_replaces_a_failed_choice_on_the_rerun() {
+        let mut silent = candidate("silent");
+        silent.requires.executes_code = true;
+        let mut interactive = candidate("interactive");
+        interactive.requires.executes_code = true;
+        let extract = candidate("extract");
+        let all = vec![silent.clone(), extract.clone(), interactive.clone()];
+        let asked = Question::ConfirmExecution {
+            candidates: all.clone(),
+        };
+        let mut control = RunControl::default();
+        // Extract first; it failed, and the engine asked before running code.
+        control.answers.push((asked.clone(), 1));
+        control.answers.push((
+            Question::ConfirmExecution {
+                candidates: vec![silent.clone(), interactive.clone()],
+            },
+            0,
+        ));
+        let mut plans = PlanSet {
+            candidates: all.clone(),
+            selected: None,
+            question: Some(asked.clone()),
+        };
+        control.apply(&mut plans).unwrap();
+        assert_eq!(plans.selected, Some(0));
+        assert!(plans.question.is_none());
+        // An answer to the plan's question given after a fallback still wins.
+        control.answers.push((asked.clone(), 2));
+        let mut plans = PlanSet {
+            candidates: all,
+            selected: None,
+            question: Some(asked),
+        };
+        control.apply(&mut plans).unwrap();
+        assert_eq!(plans.selected, Some(2));
     }
 }

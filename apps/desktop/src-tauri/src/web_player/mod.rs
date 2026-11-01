@@ -119,9 +119,13 @@ enum UserEvent {
     /// What the page shows, `find::FIND`'s answer.
     #[cfg(target_os = "linux")]
     Seen(String),
-    /// Stop (SIGTERM): close as the window's close button does.
-    #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
+    /// Stop (SIGTERM), or a webview that can't come back: close as the
+    /// window's close button does.
+    #[cfg_attr(not(any(target_os = "linux", windows)), allow(dead_code))]
     Stop,
+    /// The page's renderer failed: load it again (#3).
+    #[cfg(windows)]
+    Reload,
 }
 
 /// Stop's signal, the same number on every Linux architecture.
@@ -328,6 +332,29 @@ pub fn run(options: Options) -> Result<i32, String> {
         (),
     );
     load(&webview, &start).map_err(|error| error.to_string())?;
+    // A webview that lost its processes would stay white (#3).
+    #[cfg(windows)]
+    {
+        use crate::webview_recovery::{Policy, Step as Recover, failure_of, log};
+        use wry::WebViewExtWindows;
+        let fails = event_loop.create_proxy();
+        let policy = std::cell::RefCell::new(Policy::default());
+        let watched = caskade_webview2::watch(&webview.webview(), move |failed| {
+            log("game window", &failed);
+            let event = match policy
+                .borrow_mut()
+                .next(failure_of(failed.kind), std::time::Instant::now())
+            {
+                Recover::Wait => return,
+                Recover::Reload => UserEvent::Reload,
+                Recover::Restart => UserEvent::Stop,
+            };
+            let _ = fails.send_event(event);
+        });
+        if let Err(error) = watched {
+            tracing::warn!(%error, "can't watch the game window's webview");
+        }
+    }
     tracing::info!(
         host = url_host(&start),
         bundle = session.is_some(),
@@ -397,6 +424,14 @@ pub fn run(options: Options) -> Result<i32, String> {
             Event::UserEvent(UserEvent::Title(title)) => {
                 let title = title.trim();
                 window.set_title(if title.is_empty() { "Caskade" } else { title });
+            }
+            #[cfg(windows)]
+            Event::UserEvent(UserEvent::Reload) => {
+                tracing::warn!("reloading the game window's page");
+                if let Err(error) = webview.reload() {
+                    tracing::error!(%error, "the game window's page couldn't reload");
+                    *control_flow = ControlFlow::ExitWithCode(EXIT_SAVED);
+                }
             }
             #[cfg(target_os = "linux")]
             Event::UserEvent(UserEvent::Bar(action)) => {

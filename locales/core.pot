@@ -3893,6 +3893,7 @@ msgid "Restore from backup…"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/lib.rs
+#: apps/desktop/src-tauri/src/webview_recovery.rs
 msgid "Quit"
 msgstr ""
 
@@ -3945,4 +3946,12 @@ msgstr ""
 
 #: apps/desktop/src-tauri/src/tray.rs
 msgid "Quit Caskade"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/webview_recovery.rs
+msgid "Caskade's window stopped working and couldn't be brought back on its own."
+msgstr ""
+
+#: apps/desktop/src-tauri/src/webview_recovery.rs
+msgid "Restart Caskade"
 msgstr ""

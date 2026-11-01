@@ -1,0 +1,18 @@
+[package]
+name = "caskade-webview2"
+version = "0.1.0"
+description = "WebView2's process-failure events behind a safe API, for the desktop app's webview recovery (#3)"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+# The webview2-com and windows-core that wry already builds.
+[target.'cfg(windows)'.dependencies]
+webview2-com = "0.39"
+windows-core = "0.62"
+
+# Not the workspace lints: they forbid `unsafe_code`, and WebView2's COM calls
+# are all `unsafe`. The crate denies unsafe code itself and allows it call by
+# call.
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"

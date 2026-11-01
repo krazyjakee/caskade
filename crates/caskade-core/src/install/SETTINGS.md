@@ -8,7 +8,7 @@ errors rather than silently resetting.
 
 | Preference | Default | Effect |
 | --- | --- | --- |
-| `windowsMethod` | `run_installer` | Rank native Windows installer runs or extraction first. |
+| `windowsMethod` | `run_installer` | Rank native Windows installer runs or extraction first. `run_installer` tries a silent run, then extraction, then an interactive run. |
 | `execution` | `allow` | Allow, ask before, or reject plans that execute installer code. |
 | `downloadExecution` | `ask` | The same for games downloaded from a link (deep links, pasted or dropped URLs, magnet links, torrents, updates); the stricter of the two applies. A static strategy that fails falls back to installer code only under `allow`; otherwise the job asks. |
 | `askBelowConfidence` | `0.5` | Pause for a choice below this plan confidence. |

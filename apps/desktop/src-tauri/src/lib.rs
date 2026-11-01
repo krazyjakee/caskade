@@ -28,6 +28,7 @@ pub mod tray;
 pub mod video_player;
 pub mod web_player;
 pub mod webkit;
+pub mod webview_recovery;
 pub mod window_state;
 
 use tracing_subscriber::EnvFilter;
@@ -115,8 +116,10 @@ pub fn run() {
     .setup(move |app| {
         use tauri::Manager;
         specta.mount_events(app);
-        // The main window, with its navigation guard (CSK-14).
-        navigation::create_main_window(app.handle())?;
+        // The main window, with its navigation guard (CSK-14), brought back
+        // when its webview loses its processes (#3).
+        let main = navigation::create_main_window(app.handle())?;
+        webview_recovery::watch(&main, setup_paths.cache.join("webview-restarts"));
         background::bridge(app.handle().clone());
         let bus = caskade_core::bus::Bus::default();
         events::bridge(app.handle().clone(), &bus);

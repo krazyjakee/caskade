@@ -89,6 +89,9 @@ impl Source for Steam {
             let tools = users::compat_tools(env, &root.path, ctx);
             let mut found = Vec::new();
             for library in library::libraries(env, &root.path, ctx) {
+                if !answers(env, &library, Some(ctx)) {
+                    continue;
+                }
                 let key = canonical(env, &library);
                 if !seen_libraries.insert(key) {
                     continue;
@@ -160,7 +163,9 @@ impl Source for Steam {
                 paths.insert((join(&root.path, &config), false));
             }
             for library in library::libraries(env, &root.path, &ctx) {
-                paths.insert((join(&library, "steamapps"), false));
+                if answers(env, &library, None) {
+                    paths.insert((join(&library, "steamapps"), false));
+                }
             }
         }
         paths
@@ -168,6 +173,25 @@ impl Source for Steam {
             .map(|(path, recursive)| WatchPath { path, recursive })
             .collect()
     }
+}
+
+/// Whether a library's drive answers. One that doesn't (a WSL, network or
+/// unplugged path that blocks) is skipped with a warning, so the other
+/// libraries' games still count instead of the whole source timing out.
+/// A library that answers but has no `steamapps` warns later, as before.
+fn answers(env: &HostEnv, library: &Path, ctx: Option<&ScanCtx>) -> bool {
+    if super::dir_within(env, &join(library, "steamapps"), super::ANSWER_WAIT).is_some() {
+        return true;
+    }
+    tracing::warn!(library = %library.display(), "Steam library did not answer; skipped");
+    if let Some(ctx) = ctx {
+        ctx.warn(format!(
+            "library {} did not answer within {} s; skipped",
+            library.display(),
+            super::ANSWER_WAIT.as_secs()
+        ));
+    }
+    false
 }
 
 fn game(
