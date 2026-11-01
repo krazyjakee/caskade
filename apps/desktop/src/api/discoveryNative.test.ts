@@ -11,6 +11,7 @@ const snapshot: DiscoverySnapshot_Serialize = {
   revision: 7,
   os: "windows",
   phase: "complete",
+  activeSources: [],
   checks: [{ id: "registry", label: "Registry", sources: ["uninstall"] }],
   launchers: [],
   sources: [
@@ -68,8 +69,9 @@ it("normalizes typed events and unregisters the listener", async () => {
   mockIPC(() => null, { shouldMockEvents: true });
   const listener = vi.fn();
   const stop = await nativeDiscoveryApi.subscribe(listener);
-  await events.discoveryChanged.emit(snapshot);
+  await events.discoveryChanged.emit({ ...snapshot, phase: "scanning", activeSources: ["steam"] });
   expect(listener.mock.calls[0]?.[0].sources[0].durationMs).toBe(12);
+  expect(listener.mock.calls[0]?.[0].activeSources).toEqual(["steam"]);
   stop();
   await events.discoveryChanged.emit({ ...snapshot, revision: 8 });
   expect(listener).toHaveBeenCalledOnce();

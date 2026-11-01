@@ -43,7 +43,14 @@ export const defaultChoices: Choices = {
 };
 
 export type TaskId = "games" | "emulators" | "roms" | "romm" | "artwork";
-export type TaskState = "waiting" | "running" | "done" | "warning" | "failed";
+export type TaskState =
+  | "waiting"
+  | "running"
+  | "done"
+  | "warning"
+  | "failed"
+  | "background"
+  | "skipped";
 export interface Task {
   id: TaskId;
   label: string;
@@ -61,6 +68,8 @@ export interface SetupApis {
 export interface RunOptions {
   update(tasks: Task[]): void;
   cue(cue: Cue): void;
+  /** Settings are saved; remaining work can continue after leaving setup. */
+  ready?(): void;
   /** Between polls of running work. */
   pollMs?: number;
   signal?: AbortSignal;
@@ -108,11 +117,14 @@ export async function markCompleted(api: SettingsApi): Promise<void> {
 
 const sleep = (ms: number, signal?: AbortSignal) =>
   new Promise<void>((resolve) => {
-    const timer = setTimeout(resolve, ms);
-    signal?.addEventListener("abort", () => {
+    const finish = () => {
       clearTimeout(timer);
+      signal?.removeEventListener("abort", finish);
       resolve();
-    });
+    };
+    const timer = setTimeout(finish, ms);
+    if (signal?.aborted) finish();
+    else signal?.addEventListener("abort", finish, { once: true });
   });
 
 async function until<T>(
@@ -150,7 +162,7 @@ export async function runSetup(apis: SetupApis, choices: Choices, options: RunOp
   // own first scan doesn't run a second one.
   let scan: Promise<void> = Promise.resolve();
   if (choices.pcGames) {
-    set("games", "running", t`Looking…`);
+    set("games", "running", t`Scanning installed launchers and game folders…`);
     const announced = new Set<string>();
     const show = (snapshot: DiscoverySnapshot) => {
       const found = snapshot.sources.filter((source) => source.count > 0);
@@ -160,7 +172,17 @@ export async function runSetup(apis: SetupApis, choices: Choices, options: RunOp
         options.cue("found");
       }
       const listed = found.map((source) => `${formatSource(source.source)} ${source.count}`);
-      if (!finished(snapshot)) set("games", "running", listed.join(" · ") || t`Looking…`);
+      const active = (snapshot.activeSources ?? []).map(formatSource).join(" · ");
+      if (!finished(snapshot))
+        set(
+          "games",
+          "running",
+          snapshot.phase === "importing"
+            ? t`Adding discovered games — ${{ count: gameCount(snapshot.found) }} found`
+            : active
+              ? t`Scanning ${{ sources: active }} — ${{ found: listed.join(" · ") || gameCount(0) }} found so far`
+              : listed.join(" · ") || t`Scanning installed launchers and game folders…`,
+        );
     };
     scan = apis.discovery
       .scan()
@@ -169,9 +191,33 @@ export async function runSetup(apis: SetupApis, choices: Choices, options: RunOp
         until(() => apis.discovery.status(), finished, show, options).then((snapshot) => {
           if (snapshot.phase === "failed")
             set("games", "failed", snapshot.error ?? t`The scan didn't finish.`);
+          else if (snapshot.phase === "cancelled")
+            set("games", "skipped", t`Scan cancelled. Retry in Settings → Library.`);
+          else if (
+            snapshot.sources.some((source) => source.error || source.warnings.length > 0) ||
+            snapshot.warnings.length > 0
+          )
+            set(
+              "games",
+              "warning",
+              [
+                gameCount(snapshot.imported),
+                ...snapshot.sources.flatMap((source) =>
+                  [...(source.error ? [source.error] : []), ...source.warnings].map(
+                    (warning) => `${formatSource(source.source)}: ${warning}`,
+                  ),
+                ),
+                ...snapshot.warnings,
+              ].join(" · "),
+            );
           else if (snapshot.found === 0) set("games", "warning", t`None found`);
           // Found but none added: they wait for review in Settings.
-          else if (snapshot.imported === 0) set("games", "warning", gameCount(snapshot.found));
+          else if (snapshot.imported === 0)
+            set(
+              "games",
+              "warning",
+              t`${{ count: gameCount(snapshot.found) }} awaiting review in Settings → Library.`,
+            );
           // What was added, as the library counts it: games waiting for
           // review aren't.
           else set("games", "done", gameCount(snapshot.imported));
@@ -180,12 +226,20 @@ export async function runSetup(apis: SetupApis, choices: Choices, options: RunOp
       .catch((error) => set("games", "failed", errorMessage(error)));
   }
   await markCompleted(apis.settings);
-  if (choices.online) set("artwork", "running", t`Covers fill in as games arrive`);
+  options.ready?.();
+  if (choices.online)
+    set(
+      "artwork",
+      "background",
+      t`Matches and downloads run in the background as games arrive. You can open your library now.`,
+    );
 
-  if (choices.romFolder) await retroGames(apis.emulation, choices.romFolder, set, options);
-  if (choices.romm) await romm(apis.romm, choices.romm, set, options);
-  await scan;
-  if (choices.online) set("artwork", "done", t`Keeps going in the background`);
+  await Promise.all([
+    scan,
+    choices.romFolder ? retroGames(apis.emulation, choices.romFolder, set, options) : undefined,
+    choices.romm ? romm(apis.romm, choices.romm, set, options) : undefined,
+  ]);
+
   return tasks;
 }
 
@@ -205,13 +259,26 @@ async function retroGames(
         options.cue("found");
       }
       if (!detected(detection))
-        set("emulators", "running", names(detection.candidates) || t`Looking…`);
+        set(
+          "emulators",
+          "running",
+          names(detection.candidates) || detection.message || t`Looking for installed emulators…`,
+        );
     };
     const started = await api.detect(null);
     const detection = detected(started)
       ? started
       : await until(() => api.detection(), detected, show, options);
     show(detection);
+    if (detection.status === "failed")
+      throw new Error(
+        detection.error ?? t`Emulator detection failed. Retry in Settings → Emulation.`,
+      );
+    if (detection.status === "cancelled") {
+      set("emulators", "skipped", t`Emulator detection was cancelled.`);
+      set("roms", "skipped", t`Set up ROM folders in Settings → Emulation.`);
+      return;
+    }
     const fresh = detection.candidates.filter((candidate) => !candidate.configuredAs);
     if (fresh.length > 0)
       await api.importDetected(
@@ -220,7 +287,12 @@ async function retroGames(
       );
     const all = detection.candidates;
     if (all.length === 0) set("emulators", "warning", t`None found`);
-    else set("emulators", "done", names(all));
+    else
+      set(
+        "emulators",
+        detection.warnings.length ? "warning" : "done",
+        [names(all), ...detection.warnings].join(" · "),
+      );
   } catch (error) {
     set("emulators", "failed", errorMessage(error));
   }
@@ -291,7 +363,11 @@ async function romm(
     const [report] = await api.sync(server.id);
     const games = (report?.added ?? 0) + (report?.updated ?? 0) + (report?.unchanged ?? 0);
     if (games > 0) options.cue("found");
-    set("romm", "done", gameCount(games));
+    set(
+      "romm",
+      report?.warnings.length ? "warning" : "done",
+      [gameCount(games), ...(report?.warnings ?? [])].join(" · "),
+    );
   } catch (error) {
     set("romm", "failed", errorMessage(error));
   }

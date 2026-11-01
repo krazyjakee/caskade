@@ -394,6 +394,10 @@ msgid_plural "Edit # games"
 msgstr[0] "Redigera # spel"
 msgstr[1] "Redigera # spel"
 
+#: apps/desktop/src/onboarding/run.ts
+msgid "{count} awaiting review in Settings → Library."
+msgstr ""
+
 #. How many emulators are configured
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "{count} configured"
@@ -1414,6 +1418,10 @@ msgctxt "library source"
 msgid "Added by hand"
 msgstr "Tillagt för hand"
 
+#: apps/desktop/src/onboarding/run.ts
+msgid "Adding discovered games — {count} found"
+msgstr ""
+
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/views/activity/AddGame.tsx
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
@@ -1630,10 +1638,6 @@ msgstr "Valfri titel"
 #: apps/desktop/src/views/StoreView.tsx
 msgid "Any year"
 msgstr "Valfritt år"
-
-#: apps/desktop/src/onboarding/SetupStep.tsx
-msgid "Anything that didn't work can be set up in Settings."
-msgstr "Det som inte fungerade kan du ställa in i Inställningar."
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "API key"
@@ -2693,6 +2697,13 @@ msgstr "Fortsätt"
 msgid "Continue Playing"
 msgstr "Fortsätt spela"
 
+#: apps/desktop/src/onboarding/SetupStep.tsx
+#, fuzzy
+#| msgid "Continue with the last game"
+#| msgid_plural "Continue with the # games left"
+msgid "Continue with current settings"
+msgstr "Fortsätt med det sista spelet"
+
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Contributions"
 msgstr "Bidrag"
@@ -2815,10 +2826,6 @@ msgstr "Omslag"
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Covers and images you chose or imported, and web games' pictures."
 msgstr "Omslag och bilder som du valt eller importerat, och webbspels bilder."
-
-#: apps/desktop/src/onboarding/run.ts
-msgid "Covers fill in as games arrive"
-msgstr "Omslagen fylls i allteftersom spelen kommer in"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Covers, descriptions and genres from IGDB and Hasheous, looked up in the background."
@@ -3145,6 +3152,10 @@ msgstr "Frånkopplad"
 msgid "Disconnecting keeps the account's games. Removing it takes out the games only it brought; installed games stay."
 msgstr "Att koppla från behåller kontots spel. Att ta bort det tar bort spelen som bara det tog med; installerade spel stannar."
 
+#: apps/desktop/src/onboarding/SetupStep.tsx
+msgid "Discovery has finished. Review any warnings below, or open your library."
+msgstr ""
+
 #. The heading over a game's disc images
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 msgid "Discs"
@@ -3349,6 +3360,12 @@ msgstr "Redigera…"
 msgid "Editor sections"
 msgstr "Redigerarens avsnitt"
 
+#: apps/desktop/src/onboarding/SetupStep.tsx
+#, fuzzy
+#| msgid "Reset {section} settings"
+msgid "Elapsed: {seconds} seconds"
+msgstr "Återställ inställningar för {section}"
+
 #. romm-cache is a folder name; keep it as is
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 msgid "Empty uses romm-cache on your default storage location. Now: {folder}"
@@ -3395,6 +3412,16 @@ msgstr "Emulator"
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "Emulator · Profile"
 msgstr "Emulator · Profil"
+
+#: apps/desktop/src/onboarding/run.ts
+msgid "Emulator detection failed. Retry in Settings → Emulation."
+msgstr ""
+
+#: apps/desktop/src/onboarding/run.ts
+#, fuzzy
+#| msgid "Emulator settings are unavailable."
+msgid "Emulator detection was cancelled."
+msgstr "Emulatorinställningarna är inte tillgängliga."
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "Emulator executable"
@@ -3877,6 +3904,10 @@ msgstr "spel och deras sparfiler"
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
 msgid "Games ask which emulator to use."
 msgstr "Spelen frågar vilken emulator som ska användas."
+
+#: apps/desktop/src/onboarding/SetupStep.tsx
+msgid "Games found so far are ready to play. More may appear while discovery continues in the background."
+msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 msgid "Games from a server you can't reach stay in your library. Downloaded ones still play; the rest show as unavailable until the server is back."
@@ -4677,10 +4708,6 @@ msgstr "Fortsätt spela"
 msgid "Keep separate"
 msgstr "Håll isär"
 
-#: apps/desktop/src/onboarding/run.ts
-msgid "Keeps going in the background"
-msgstr "Fortsätter i bakgrunden"
-
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
 msgid "Keeps your CSS but stops applying it, to recover from a broken look."
 msgstr "Behåller din CSS men slutar tillämpa den, så att du kan återställa ett trasigt utseende."
@@ -5106,6 +5133,12 @@ msgstr "Sök i alla mappar under genomsökningsmappen."
 msgid "Look inside archives"
 msgstr "Sök i arkiv"
 
+#: apps/desktop/src/onboarding/run.ts
+#, fuzzy
+#| msgid "Loading emulators…"
+msgid "Looking for installed emulators…"
+msgstr "Läser in emulatorer…"
+
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 msgid "Looking on RomM…"
 msgstr "Letar på RomM…"
@@ -5220,6 +5253,10 @@ msgstr "Matchar"
 #: apps/desktop/src/views/CollectionView.tsx
 msgid "Matches all rules"
 msgstr "Uppfyller alla regler"
+
+#: apps/desktop/src/onboarding/run.ts
+msgid "Matches and downloads run in the background as games arrive. You can open your library now."
+msgstr ""
 
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
 msgid "Matches games that have no match yet and fills in what they lack from what Caskade already has."
@@ -5670,6 +5707,10 @@ msgstr "Inga matchande emulatorer hittades. Prova en mapp med en portabel emulat
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgid "No network interfaces found."
 msgstr "Inga nätverksgränssnitt hittades."
+
+#: apps/desktop/src/onboarding/SetupStep.tsx
+msgid "No new progress reported for {seconds} seconds. A scan or network request may be taking longer. Open your library now; you can check or retry discovery in Settings → Library, and ROMs or RomM in Settings."
+msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
 msgid "No notifications yet. New games, failed jobs and updates show here."
@@ -7372,6 +7413,10 @@ msgctxt "job"
 msgid "Retry"
 msgstr "Försök igen"
 
+#: apps/desktop/src/onboarding/SetupStep.tsx
+msgid "Retry discovery in Settings → Library, ROM folders in Settings → Emulation, or RomM in Settings → RomM."
+msgstr ""
+
 #. Runs a failed job again with another install strategy, named by the installer
 #. Runs a failed job again with another install strategy, named by the installer
 #: apps/desktop/src/views/activity/JobCard.tsx
@@ -7639,6 +7684,14 @@ msgstr "Sparade skanningar som gör ROM-mappar till spel. Spel med flera skivor 
 msgid "Saving a different specification removes its old built-in profiles. Custom profiles are kept."
 msgstr "Om du sparar en annan specifikation tas dess gamla inbyggda profiler bort. Anpassade profiler behålls."
 
+#: apps/desktop/src/onboarding/SetupStep.tsx
+msgid "Saving is taking longer than expected. Continue with your current settings, or wait. You can run setup again from Settings → General."
+msgstr ""
+
+#: apps/desktop/src/onboarding/SetupStep.tsx
+msgid "Saving your choices before opening the library…"
+msgstr ""
+
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
@@ -7679,6 +7732,10 @@ msgstr "Skanningsbeteende"
 msgid "Scan cancelled."
 msgstr "Skanningen avbröts."
 
+#: apps/desktop/src/onboarding/run.ts
+msgid "Scan cancelled. Retry in Settings → Library."
+msgstr ""
+
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "Scan failed: {error}"
 msgstr "Skanningen misslyckades: {error}"
@@ -7708,6 +7765,14 @@ msgstr "Skannerns namn"
 msgctxt "discovery phase"
 msgid "Scanning"
 msgstr "Skannar"
+
+#: apps/desktop/src/onboarding/run.ts
+msgid "Scanning {sources} — {found} found so far"
+msgstr ""
+
+#: apps/desktop/src/onboarding/run.ts
+msgid "Scanning installed launchers and game folders…"
+msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
@@ -7952,6 +8017,10 @@ msgstr "Ange regioner"
 msgid "Set up"
 msgstr "Konfigurera"
 
+#: apps/desktop/src/onboarding/run.ts
+msgid "Set up ROM folders in Settings → Emulation."
+msgstr ""
+
 #: apps/desktop/src/onboarding/SetupStep.tsx
 msgid "Setting things up"
 msgstr "Förbereder allt"
@@ -7980,6 +8049,19 @@ msgstr "Inställningsavsnitt"
 msgctxt "settings section"
 msgid "Setup"
 msgstr "Konfiguration"
+
+#: apps/desktop/src/onboarding/SetupStep.tsx
+#, fuzzy
+#| msgid "# task needs attention"
+#| msgid_plural "# tasks need attention"
+msgid "Setup needs attention"
+msgstr "# uppgift behöver uppmärksamhet"
+
+#: apps/desktop/src/onboarding/SetupStep.tsx
+#, fuzzy
+#| msgid "Keeps going in the background"
+msgid "Setup will keep running in the background."
+msgstr "Fortsätter i bakgrunden"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "Shell"
@@ -9003,6 +9085,7 @@ msgstr "Spårningsmapp"
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/desktop/src/onboarding/SetupStep.tsx
 #: apps/desktop/src/shell/ErrorFallback.tsx
 #: apps/desktop/src/views/activity/ActivityView.tsx
 #: apps/desktop/src/views/activity/JobRecovery.tsx
@@ -9732,6 +9815,10 @@ msgstr "Dina bilder"
 msgid "Your browser and file manager send magnet links and .torrent files to Caskade instead of your torrent client. Turning this off gives them back."
 msgstr "Webbläsaren och filhanteraren skickar magnetlänkar och .torrent-filer till Caskade i stället för till din torrentklient. Stäng av det här för att lämna tillbaka dem."
 
+#: apps/desktop/src/onboarding/SetupStep.tsx
+msgid "Your choices could not be saved. Try again to finish setup, or continue with your current settings."
+msgstr ""
+
 #: apps/desktop/src/views/CollectionsView.tsx
 msgid "Your Collections"
 msgstr "Dina samlingar"
@@ -9788,6 +9875,12 @@ msgstr "ÅÅÅÅ-MM-DD"
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "YYYY-MM-DD, or empty for none"
 msgstr "ÅÅÅÅ-MM-DD, eller tomt för inget"
+
+#~ msgid "Anything that didn't work can be set up in Settings."
+#~ msgstr "Det som inte fungerade kan du ställa in i Inställningar."
+
+#~ msgid "Covers fill in as games arrive"
+#~ msgstr "Omslagen fylls i allteftersom spelen kommer in"
 
 #~ msgid "Games · {0}"
 #~ msgstr "Spel · {0}"

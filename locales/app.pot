@@ -393,6 +393,10 @@ msgid_plural "Edit # games"
 msgstr[0] ""
 msgstr[1] ""
 
+#: apps/desktop/src/onboarding/run.ts
+msgid "{count} awaiting review in Settings → Library."
+msgstr ""
+
 #. How many emulators are configured
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "{count} configured"
@@ -1414,6 +1418,10 @@ msgctxt "library source"
 msgid "Added by hand"
 msgstr ""
 
+#: apps/desktop/src/onboarding/run.ts
+msgid "Adding discovered games — {count} found"
+msgstr ""
+
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/views/activity/AddGame.tsx
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
@@ -1629,10 +1637,6 @@ msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
 msgid "Any year"
-msgstr ""
-
-#: apps/desktop/src/onboarding/SetupStep.tsx
-msgid "Anything that didn't work can be set up in Settings."
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
@@ -2696,6 +2700,10 @@ msgstr ""
 msgid "Continue Playing"
 msgstr ""
 
+#: apps/desktop/src/onboarding/SetupStep.tsx
+msgid "Continue with current settings"
+msgstr ""
+
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Contributions"
 msgstr ""
@@ -2817,10 +2825,6 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Covers and images you chose or imported, and web games' pictures."
-msgstr ""
-
-#: apps/desktop/src/onboarding/run.ts
-msgid "Covers fill in as games arrive"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
@@ -3148,6 +3152,10 @@ msgstr ""
 msgid "Disconnecting keeps the account's games. Removing it takes out the games only it brought; installed games stay."
 msgstr ""
 
+#: apps/desktop/src/onboarding/SetupStep.tsx
+msgid "Discovery has finished. Review any warnings below, or open your library."
+msgstr ""
+
 #. The heading over a game's disc images
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 msgid "Discs"
@@ -3352,6 +3360,10 @@ msgstr ""
 msgid "Editor sections"
 msgstr ""
 
+#: apps/desktop/src/onboarding/SetupStep.tsx
+msgid "Elapsed: {seconds} seconds"
+msgstr ""
+
 #. romm-cache is a folder name; keep it as is
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 msgid "Empty uses romm-cache on your default storage location. Now: {folder}"
@@ -3397,6 +3409,14 @@ msgstr ""
 #. ROM scanners table column
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "Emulator · Profile"
+msgstr ""
+
+#: apps/desktop/src/onboarding/run.ts
+msgid "Emulator detection failed. Retry in Settings → Emulation."
+msgstr ""
+
+#: apps/desktop/src/onboarding/run.ts
+msgid "Emulator detection was cancelled."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
@@ -3879,6 +3899,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
 msgid "Games ask which emulator to use."
+msgstr ""
+
+#: apps/desktop/src/onboarding/SetupStep.tsx
+msgid "Games found so far are ready to play. More may appear while discovery continues in the background."
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
@@ -4682,10 +4706,6 @@ msgstr ""
 msgid "Keep separate"
 msgstr ""
 
-#: apps/desktop/src/onboarding/run.ts
-msgid "Keeps going in the background"
-msgstr ""
-
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
 msgid "Keeps your CSS but stops applying it, to recover from a broken look."
 msgstr ""
@@ -5112,6 +5132,10 @@ msgstr ""
 msgid "Look inside archives"
 msgstr ""
 
+#: apps/desktop/src/onboarding/run.ts
+msgid "Looking for installed emulators…"
+msgstr ""
+
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 msgid "Looking on RomM…"
 msgstr ""
@@ -5225,6 +5249,10 @@ msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
 msgid "Matches all rules"
+msgstr ""
+
+#: apps/desktop/src/onboarding/run.ts
+msgid "Matches and downloads run in the background as games arrive. You can open your library now."
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
@@ -5677,6 +5705,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgid "No network interfaces found."
+msgstr ""
+
+#: apps/desktop/src/onboarding/SetupStep.tsx
+msgid "No new progress reported for {seconds} seconds. A scan or network request may be taking longer. Open your library now; you can check or retry discovery in Settings → Library, and ROMs or RomM in Settings."
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
@@ -7382,6 +7414,10 @@ msgctxt "job"
 msgid "Retry"
 msgstr ""
 
+#: apps/desktop/src/onboarding/SetupStep.tsx
+msgid "Retry discovery in Settings → Library, ROM folders in Settings → Emulation, or RomM in Settings → RomM."
+msgstr ""
+
 #. Runs a failed job again with another install strategy, named by the installer
 #. Runs a failed job again with another install strategy, named by the installer
 #: apps/desktop/src/views/activity/JobCard.tsx
@@ -7649,6 +7685,14 @@ msgstr ""
 msgid "Saving a different specification removes its old built-in profiles. Custom profiles are kept."
 msgstr ""
 
+#: apps/desktop/src/onboarding/SetupStep.tsx
+msgid "Saving is taking longer than expected. Continue with your current settings, or wait. You can run setup again from Settings → General."
+msgstr ""
+
+#: apps/desktop/src/onboarding/SetupStep.tsx
+msgid "Saving your choices before opening the library…"
+msgstr ""
+
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
@@ -7689,6 +7733,10 @@ msgstr ""
 msgid "Scan cancelled."
 msgstr ""
 
+#: apps/desktop/src/onboarding/run.ts
+msgid "Scan cancelled. Retry in Settings → Library."
+msgstr ""
+
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "Scan failed: {error}"
 msgstr ""
@@ -7717,6 +7765,14 @@ msgstr ""
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgctxt "discovery phase"
 msgid "Scanning"
+msgstr ""
+
+#: apps/desktop/src/onboarding/run.ts
+msgid "Scanning {sources} — {found} found so far"
+msgstr ""
+
+#: apps/desktop/src/onboarding/run.ts
+msgid "Scanning installed launchers and game folders…"
 msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
@@ -7963,6 +8019,10 @@ msgstr ""
 msgid "Set up"
 msgstr ""
 
+#: apps/desktop/src/onboarding/run.ts
+msgid "Set up ROM folders in Settings → Emulation."
+msgstr ""
+
 #: apps/desktop/src/onboarding/SetupStep.tsx
 msgid "Setting things up"
 msgstr ""
@@ -7991,6 +8051,14 @@ msgstr ""
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgctxt "settings section"
 msgid "Setup"
+msgstr ""
+
+#: apps/desktop/src/onboarding/SetupStep.tsx
+msgid "Setup needs attention"
+msgstr ""
+
+#: apps/desktop/src/onboarding/SetupStep.tsx
+msgid "Setup will keep running in the background."
 msgstr ""
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
@@ -9016,6 +9084,7 @@ msgstr ""
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/desktop/src/onboarding/SetupStep.tsx
 #: apps/desktop/src/shell/ErrorFallback.tsx
 #: apps/desktop/src/views/activity/ActivityView.tsx
 #: apps/desktop/src/views/activity/JobRecovery.tsx
@@ -9743,6 +9812,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
 msgid "Your browser and file manager send magnet links and .torrent files to Caskade instead of your torrent client. Turning this off gives them back."
+msgstr ""
+
+#: apps/desktop/src/onboarding/SetupStep.tsx
+msgid "Your choices could not be saved. Try again to finish setup, or continue with your current settings."
 msgstr ""
 
 #: apps/desktop/src/views/CollectionsView.tsx

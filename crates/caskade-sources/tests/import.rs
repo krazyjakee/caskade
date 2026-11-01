@@ -667,3 +667,29 @@ async fn persistence_failure_rolls_back_the_game_entries_and_first_import_marker
     let saved = store.import_group(&game, &[entry], None).await.unwrap();
     assert!(saved.created);
 }
+
+#[tokio::test]
+async fn discovery_progress_reports_real_sources_without_changing_the_result() {
+    use caskade_sources::DiscoveryProgress;
+    let store = LibraryStore::in_memory().await.unwrap();
+    let service = service(&store, &Bus::default());
+    let progress = Arc::new(std::sync::Mutex::new(Vec::new()));
+    let collected = progress.clone();
+    let config = caskade_discovery::Config::default();
+    let result = service
+        .discover_with_progress(&config, &Cancel::new(), move |event| {
+            collected.lock().unwrap().push(event);
+        })
+        .await
+        .unwrap();
+    let progress = progress.lock().unwrap();
+    assert!(!result.sources.is_empty());
+    for report in &result.sources {
+        assert!(progress.iter().any(
+            |event| matches!(event, DiscoveryProgress::Started(source) if source == &report.source)
+        ));
+        if report.error.is_none() {
+            assert!(progress.iter().any(|event| matches!(event, DiscoveryProgress::Finished { source, count, error: None } if source == &report.source && count == &report.count)));
+        }
+    }
+}

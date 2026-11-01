@@ -45,7 +45,7 @@ describe("the setup run", () => {
       ["emulators", "done"],
       ["roms", "done"],
       ["romm", "done"],
-      ["artwork", "done"],
+      ["artwork", "background"],
     ]);
     expect(last).toEqual(tasks);
     expect(tasks[0]?.detail).toBe("12 games");
@@ -61,6 +61,69 @@ describe("the setup run", () => {
     );
     expect(found.scan).toHaveBeenCalledOnce();
     expect(cues).toContain("found");
+  });
+
+  it("allows entry while discovery is still running and reports its eventual failure", async () => {
+    const found = discovery();
+    let finish!: (snapshot: Awaited<ReturnType<typeof found.api.status>>) => void;
+    found.api.status = () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      });
+    const ready = vi.fn();
+    let tasks: Task[] = [];
+    const run = runSetup(
+      {
+        settings: createSettingsFixture().api,
+        discovery: found.api,
+        emulation: createEmulationFixtureApi(),
+        romm: romm(),
+      },
+      defaultChoices,
+      {
+        ready,
+        update: (next) => {
+          tasks = next;
+        },
+        cue: () => {},
+      },
+    );
+    await waitFor(() => expect(ready).toHaveBeenCalledOnce());
+    expect(tasks.find((task) => task.id === "games")?.state).toBe("running");
+    expect(tasks.find((task) => task.id === "artwork")?.state).toBe("background");
+    finish({ ...(await discovery().api.scan()), phase: "failed", error: "Steam scan failed" });
+    await run;
+    expect(tasks.find((task) => task.id === "games")).toMatchObject({
+      state: "failed",
+      detail: "Steam scan failed",
+    });
+  });
+
+  it("surfaces a source's skipped-folder warnings even when the scan completes", async () => {
+    const found = discovery();
+    const snapshot = { ...(await found.api.scan()), phase: "complete", found: 12, imported: 12 };
+    snapshot.sources = [
+      {
+        source: "steam",
+        count: 12,
+        durationMs: 2000,
+        warnings: ["Skipped an unresponsive game drive"],
+        error: null,
+      },
+    ];
+    found.api.status = async () => snapshot;
+    const tasks = await runSetup(
+      {
+        settings: createSettingsFixture().api,
+        discovery: found.api,
+        emulation: createEmulationFixtureApi(),
+        romm: romm(),
+      },
+      { ...defaultChoices, online: false },
+      { update: () => {}, cue: () => {} },
+    );
+    expect(tasks[0]).toMatchObject({ state: "warning" });
+    expect(tasks[0]?.detail).toContain("Steam: Skipped an unresponsive game drive");
   });
 
   it("signs in to RomM with an API token", async () => {
@@ -143,7 +206,7 @@ describe("the setup run", () => {
     });
     expect(await run({ found: 3, imported: 0 })).toMatchObject({
       state: "warning",
-      detail: "3 games",
+      detail: "3 games awaiting review in Settings → Library.",
     });
   });
 });
@@ -183,7 +246,7 @@ describe("first-run setup", () => {
 
     const open = await screen.findByRole("button", { name: "Open my library" }, { timeout: 5000 });
     const games = document.querySelector('[data-task="games"]');
-    expect(games?.getAttribute("data-status")).toBe("done");
+    await waitFor(() => expect(games?.getAttribute("data-status")).toBe("done"));
     expect(games?.textContent).toContain("12 games");
     expect(document.querySelector('[data-task="artwork"]')).toBeNull();
     expect(settings.values["core.metadata"]).toEqual({ online: false });
@@ -194,6 +257,41 @@ describe("first-run setup", () => {
     fireEvent.click(open);
     expect(onDone).toHaveBeenCalledOnce();
     expect(screen.getByText("The library")).toBeTruthy();
+  });
+
+  it("opens the library before a stalled scan finishes", async () => {
+    const found = discovery();
+    const snapshot = await found.api.scan();
+    let complete!: (value: typeof snapshot) => void;
+    found.api.status = () =>
+      new Promise((resolve) => {
+        complete = resolve;
+      });
+    const { onDone } = renderOnboarding(createSettingsFixture(), found);
+    fireEvent.click(await screen.findByRole("button", { name: "Get started" }));
+    for (let step = 0; step < 4; step++) {
+      fireEvent.click(await screen.findByRole("button", { name: "Continue" }));
+    }
+    fireEvent.click(await screen.findByRole("button", { name: "Set up" }));
+    const open = await screen.findByRole("button", { name: "Open my library" });
+    expect(document.querySelector('[data-task="games"]')?.getAttribute("data-status")).toBe(
+      "running",
+    );
+    expect(screen.getByText(/More may appear/)).toBeTruthy();
+    const now = vi.spyOn(Date, "now").mockReturnValue(Date.now() + 31_000);
+    try {
+      expect(
+        await screen.findByText(/No new progress reported/, {}, { timeout: 2000 }),
+      ).toBeTruthy();
+    } finally {
+      now.mockRestore();
+    }
+    fireEvent.click(open);
+    expect(onDone).toHaveBeenCalledOnce();
+    expect(screen.getByText("The library")).toBeTruthy();
+    await act(async () => {
+      complete({ ...snapshot, phase: "complete" });
+    });
   });
 
   it("plays the startup sound as the logo shows, before any press", async () => {

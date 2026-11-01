@@ -59,12 +59,29 @@ impl DiscoveryService {
     }
     /// Read-only discovery using this service's injected environment and sources.
     pub async fn discover(&self, config: &Config, cancel: &Cancel) -> Result<ScanReport> {
-        let (env, config, sources, token) = (
-            self.env.clone(),
-            config.clone(),
-            self.sources.clone(),
-            cancel.clone(),
-        );
+        self.discover_with_progress(config, cancel, |_| {}).await
+    }
+    /// Reports each selected source as its worker detects and scans it.
+    /// Callbacks run on discovery worker threads and must not block.
+    pub async fn discover_with_progress(
+        &self,
+        config: &Config,
+        cancel: &Cancel,
+        report: impl Fn(crate::DiscoveryProgress) + Send + Sync + 'static,
+    ) -> Result<ScanReport> {
+        let report = Arc::new(report);
+        let sources: Vec<Arc<dyn Source>> = self
+            .sources
+            .iter()
+            .map(|source| {
+                Arc::new(crate::progress::ReportingSource {
+                    source: source.clone(),
+                    report: report.clone(),
+                }) as Arc<dyn Source>
+            })
+            .collect();
+        let (env, config, sources, token) =
+            (self.env.clone(), config.clone(), sources, cancel.clone());
         Ok(caskade_jobs::blocking("Scanning library", move || {
             caskade_discovery::scan_with_sources(&env, &config, &token, &sources)
         })

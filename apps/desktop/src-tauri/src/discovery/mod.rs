@@ -40,6 +40,8 @@ pub struct DiscoverySnapshot {
     pub os: String,
     pub checks: Vec<OsCheck>,
     pub phase: String,
+    #[serde(default)]
+    pub active_sources: Vec<String>,
     pub launchers: Vec<LauncherStatus>,
     pub sources: Vec<SourceReport>,
     pub found: u32,
@@ -85,6 +87,7 @@ impl DiscoveryController {
             os: config::os_name(os).into(),
             checks: config::os_checks(os),
             phase: "idle".into(),
+            active_sources: vec![],
             launchers: vec![],
             sources: vec![],
             found: 0,
@@ -199,6 +202,11 @@ impl DiscoveryController {
         state.cancel = Some(cancel.clone());
         state.scanning_with = Some((config.clone(), options.clone()));
         state.snapshot.phase = "scanning".into();
+        state.snapshot.active_sources.clear();
+        state.snapshot.sources.clear();
+        state.snapshot.found = 0;
+        state.snapshot.imported = 0;
+        state.snapshot.warnings.clear();
         state.snapshot.error = None;
         state.snapshot.storage = None;
         self.publish(&mut state);
@@ -211,18 +219,39 @@ impl DiscoveryController {
             let _operation = controller.0.operation.lock().await;
             let result = async {
                 controller.refresh_storage(&cancel).await?;
-                let scan = controller
-                    .0
-                    .service
-                    .discover(&config, &cancel)
-                    .await
-                    .map_err(|e| e.to_string())?;
+                let (progress, mut updates) = tokio::sync::mpsc::unbounded_channel();
+                let discovery = controller.0.service.discover_with_progress(&config, &cancel, move |update| {
+                    let _ = progress.send(update);
+                });
+                tokio::pin!(discovery);
+                let scan = loop {
+                    tokio::select! {
+                        result = &mut discovery => break result.map_err(|e| e.to_string())?,
+                        Some(update) = updates.recv() => {
+                            let mut state = controller.0.state.lock().await;
+                            match update {
+                                caskade_sources::DiscoveryProgress::Started(source) => {
+                                    state.snapshot.active_sources.push(source.to_string());
+                                }
+                                caskade_sources::DiscoveryProgress::Finished { source, count, error } => {
+                                    state.snapshot.active_sources.retain(|active| active != source.as_str());
+                                    state.snapshot.sources.push(SourceReport {
+                                        source, count, duration_ms: 0, warnings: vec![],
+                                        error: error.map(|message| caskade_discovery::SourceError::Other { message }),
+                                    });
+                                }
+                            }
+                            controller.publish(&mut state);
+                        }
+                    }
+                };
                 if cancel.is_cancelled() {
                     return Err(caskade_core::tr!("Scan cancelled"));
                 }
                 {
                     let mut state = controller.0.state.lock().await;
                     state.snapshot.phase = "importing".into();
+                    state.snapshot.active_sources.clear();
                     state.snapshot.sources = scan.sources.clone();
                     state.snapshot.found = scan.groups.len() as u32;
                     state.snapshot.launchers = scan.launchers.clone();
@@ -239,6 +268,7 @@ impl DiscoveryController {
             .await;
             let mut state = controller.0.state.lock().await;
             state.cancel = None;
+            state.snapshot.active_sources.clear();
             state.scanning_with = None;
             match result {
                 Ok(import) => {

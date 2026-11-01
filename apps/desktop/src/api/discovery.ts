@@ -13,6 +13,7 @@ export interface DiscoverySnapshot {
   os: "windows" | "linux" | "macos";
   checks: { id: string; label: string; sources: string[] }[];
   phase: string;
+  activeSources?: string[];
   launchers: {
     source: string;
     found: boolean;

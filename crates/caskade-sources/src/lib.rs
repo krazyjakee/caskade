@@ -3,7 +3,9 @@
 mod adapter;
 pub mod emulation;
 mod import;
+mod progress;
 mod roms;
+pub use progress::DiscoveryProgress;
 mod service;
 mod settings;
 pub mod storage;
