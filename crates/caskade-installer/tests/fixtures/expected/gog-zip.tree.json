@@ -1,0 +1,49 @@
+[
+  {
+    "path": "FixtureGame.exe",
+    "kind": "file",
+    "size": 273408,
+    "sha256": "552ec0771276642c98698e69a0ac61205e35ecd7265cd95eff95a8b03c7c5e0b",
+    "executable": true
+  },
+  {
+    "path": "__redist",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "__redist/DirectX",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "__redist/DirectX/DXSETUP.exe",
+    "kind": "file",
+    "size": 273408,
+    "sha256": "552ec0771276642c98698e69a0ac61205e35ecd7265cd95eff95a8b03c7c5e0b",
+    "executable": true
+  },
+  {
+    "path": "__redist/vcredist_x64.exe",
+    "kind": "file",
+    "size": 273408,
+    "sha256": "552ec0771276642c98698e69a0ac61205e35ecd7265cd95eff95a8b03c7c5e0b",
+    "executable": true
+  },
+  {
+    "path": "goggame-1234567890.info",
+    "kind": "file",
+    "size": 307,
+    "sha256": "be82ebcd7811eea760ade1c4c00c71fd1cf1de89a2229e85e6ea80d3b0ad66ce",
+    "executable": false
+  },
+  {
+    "path": "steam_appid.txt",
+    "kind": "file",
+    "size": 4,
+    "sha256": "66c342932aa7c18f7bf1fa212aa011069fc2e50e0c7e9e4c73fcaa6851854c47",
+    "executable": false
+  }
+]

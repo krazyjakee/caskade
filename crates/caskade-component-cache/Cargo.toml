@@ -1,0 +1,22 @@
+[package]
+name = "caskade-component-cache"
+version = "0.1.0"
+description = "Verified on-disk cache of compiled plugin components (HMAC-checked wasmtime artifacts)"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+wasmtime = { version = "=50.0.0", default-features = false, features = ["component-model", "cranelift", "runtime", "std"] }
+hmac = "0.13"
+sha2 = "0.11"
+getrandom = "0.3"
+tracing = "0.1"
+
+[dev-dependencies]
+tempfile = "=3.27.0"
+
+# Not the workspace lints: they forbid `unsafe_code`, and loading a verified
+# artifact needs one `unsafe` call. The crate denies unsafe code itself.
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"

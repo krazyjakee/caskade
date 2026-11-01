@@ -1,0 +1,31 @@
+schema_version = 1
+id = "legacy-registry-path"
+title = "Fixture Game"
+layout = "unity"
+format = "inno"
+platform = "windows"
+input = "bin/windows/legacy-registry-path/setup.exe"
+parts = ["bin/windows/legacy-registry-path/setup.exe"]
+tree = "windows/legacy-registry-path.tree.json"
+launch_target = "FixtureGame.exe"
+
+[windows]
+builder = "ISCC"
+version = "6.4.3"
+features = ["REGISTRY", "INI", "UNINSTALL"]
+native_generated = ["config.ini:Game/InstallPath={app}", "unins000.exe", "unins000.dat"]
+
+[host.windows]
+outcome = "Installed"
+strategy = "RunSilent"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

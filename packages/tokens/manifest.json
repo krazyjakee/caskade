@@ -1,0 +1,480 @@
+[
+  {
+    "name": "--cs-font-sans",
+    "path": "font.sans",
+    "tier": "primitive",
+    "type": "fontFamily",
+    "description": "Body text.",
+    "resolved": "\"Inter Variable\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif"
+  },
+  {
+    "name": "--cs-font-display",
+    "path": "font.display",
+    "tier": "primitive",
+    "type": "fontFamily",
+    "description": "Headings, numbers and HUD labels.",
+    "resolved": "\"Oxanium Variable\", \"Inter Variable\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif"
+  },
+  {
+    "name": "--cs-font-mono",
+    "path": "font.mono",
+    "tier": "primitive",
+    "type": "fontFamily",
+    "description": "Data, paths and labels.",
+    "resolved": "\"JetBrains Mono Variable\", ui-monospace, \"SF Mono\", monospace"
+  },
+  {
+    "name": "--cs-color-palette-indigo",
+    "path": "color.palette.indigo",
+    "tier": "primitive",
+    "type": "color",
+    "resolved": "#5b5ff7"
+  },
+  {
+    "name": "--cs-color-palette-violet",
+    "path": "color.palette.violet",
+    "tier": "primitive",
+    "type": "color",
+    "resolved": "#7a6cff"
+  },
+  {
+    "name": "--cs-color-palette-cyan",
+    "path": "color.palette.cyan",
+    "tier": "primitive",
+    "type": "color",
+    "resolved": "#38d9f5"
+  },
+  {
+    "name": "--cs-color-palette-white",
+    "path": "color.palette.white",
+    "tier": "primitive",
+    "type": "color",
+    "resolved": "#ffffff"
+  },
+  {
+    "name": "--cs-color-palette-green",
+    "path": "color.palette.green",
+    "tier": "primitive",
+    "type": "color",
+    "resolved": "#22c55e"
+  },
+  {
+    "name": "--cs-color-palette-orange",
+    "path": "color.palette.orange",
+    "tier": "primitive",
+    "type": "color",
+    "resolved": "#f97316"
+  },
+  {
+    "name": "--cs-color-palette-purple",
+    "path": "color.palette.purple",
+    "tier": "primitive",
+    "type": "color",
+    "resolved": "#7c5cff"
+  },
+  {
+    "name": "--cs-color-palette-slate",
+    "path": "color.palette.slate",
+    "tier": "primitive",
+    "type": "color",
+    "resolved": "#64748b"
+  },
+  {
+    "name": "--cs-color-palette-amber",
+    "path": "color.palette.amber",
+    "tier": "primitive",
+    "type": "color",
+    "resolved": "#f5a524"
+  },
+  {
+    "name": "--cs-color-palette-red",
+    "path": "color.palette.red",
+    "tier": "primitive",
+    "type": "color",
+    "resolved": "#f0475b"
+  },
+  {
+    "name": "--cs-color-surface-base",
+    "path": "color.surface.base",
+    "tier": "semantic",
+    "type": "color",
+    "description": "The app background.",
+    "resolved": "#060914"
+  },
+  {
+    "name": "--cs-color-surface-raised",
+    "path": "color.surface.raised",
+    "tier": "semantic",
+    "type": "color",
+    "description": "Panels and cards above the background.",
+    "resolved": "#0d1224d9"
+  },
+  {
+    "name": "--cs-color-surface-overlay",
+    "path": "color.surface.overlay",
+    "tier": "semantic",
+    "type": "color",
+    "description": "Popovers, menus and inputs.",
+    "resolved": "#131a31"
+  },
+  {
+    "name": "--cs-color-surface-hover",
+    "path": "color.surface.hover",
+    "tier": "semantic",
+    "type": "color",
+    "description": "A hovered row or control.",
+    "resolved": "#18203f"
+  },
+  {
+    "name": "--cs-color-border",
+    "path": "color.border",
+    "tier": "semantic",
+    "type": "color",
+    "description": "Hairlines between areas.",
+    "resolved": "#8ea2ff17"
+  },
+  {
+    "name": "--cs-color-border-strong",
+    "path": "color.border.strong",
+    "tier": "semantic",
+    "type": "color",
+    "description": "Control outlines.",
+    "resolved": "#8ea2ff33"
+  },
+  {
+    "name": "--cs-color-fg",
+    "path": "color.fg",
+    "tier": "semantic",
+    "type": "color",
+    "description": "Primary text.",
+    "resolved": "#eef0fb"
+  },
+  {
+    "name": "--cs-color-fg-muted",
+    "path": "color.fg.muted",
+    "tier": "semantic",
+    "type": "color",
+    "description": "Secondary text.",
+    "resolved": "#a3a9c4"
+  },
+  {
+    "name": "--cs-color-fg-subtle",
+    "path": "color.fg.subtle",
+    "tier": "semantic",
+    "type": "color",
+    "description": "Hints and captions.",
+    "resolved": "#6a7194"
+  },
+  {
+    "name": "--cs-color-accent",
+    "path": "color.accent",
+    "tier": "semantic",
+    "type": "color",
+    "description": "Primary actions and selection.",
+    "resolved": "#5b5ff7"
+  },
+  {
+    "name": "--cs-color-accent-strong",
+    "path": "color.accent.strong",
+    "tier": "semantic",
+    "type": "color",
+    "description": "Hovered or emphasised accent.",
+    "resolved": "#7a6cff"
+  },
+  {
+    "name": "--cs-color-accent-alt",
+    "path": "color.accent.alt",
+    "tier": "semantic",
+    "type": "color",
+    "description": "The second accent: icons, rails, focus.",
+    "resolved": "#38d9f5"
+  },
+  {
+    "name": "--cs-color-accent-fg",
+    "path": "color.accent.fg",
+    "tier": "semantic",
+    "type": "color",
+    "description": "Text on the accent.",
+    "resolved": "#ffffff"
+  },
+  {
+    "name": "--cs-color-glow",
+    "path": "color.glow",
+    "tier": "semantic",
+    "type": "color",
+    "description": "Glows around accented elements.",
+    "resolved": "#6f66ff80"
+  },
+  {
+    "name": "--cs-color-status-installed",
+    "path": "color.status.installed",
+    "tier": "semantic",
+    "type": "color",
+    "resolved": "#22c55e"
+  },
+  {
+    "name": "--cs-color-status-available",
+    "path": "color.status.available",
+    "tier": "semantic",
+    "type": "color",
+    "resolved": "#f97316"
+  },
+  {
+    "name": "--cs-color-status-emulated",
+    "path": "color.status.emulated",
+    "tier": "semantic",
+    "type": "color",
+    "resolved": "#7c5cff"
+  },
+  {
+    "name": "--cs-color-status-missing",
+    "path": "color.status.missing",
+    "tier": "semantic",
+    "type": "color",
+    "resolved": "#64748b"
+  },
+  {
+    "name": "--cs-color-warning",
+    "path": "color.warning",
+    "tier": "semantic",
+    "type": "color",
+    "resolved": "#f5a524"
+  },
+  {
+    "name": "--cs-color-danger",
+    "path": "color.danger",
+    "tier": "semantic",
+    "type": "color",
+    "resolved": "#f0475b"
+  },
+  {
+    "name": "--cs-radius-card",
+    "path": "radius.card",
+    "tier": "semantic",
+    "type": "dimension",
+    "resolved": "0.5rem"
+  },
+  {
+    "name": "--cs-radius-control",
+    "path": "radius.control",
+    "tier": "semantic",
+    "type": "dimension",
+    "resolved": "0.5rem"
+  },
+  {
+    "name": "--cs-radius-panel",
+    "path": "radius.panel",
+    "tier": "semantic",
+    "type": "dimension",
+    "resolved": "0.875rem"
+  },
+  {
+    "name": "--cs-effect-glass-blur",
+    "path": "effect.glass.blur",
+    "tier": "semantic",
+    "type": "dimension",
+    "description": "Backdrop blur of glass surfaces.",
+    "resolved": "16px"
+  },
+  {
+    "name": "--cs-effect-grid-opacity",
+    "path": "effect.grid.opacity",
+    "tier": "semantic",
+    "type": "number",
+    "description": "The backdrop grid.",
+    "resolved": "0.07"
+  },
+  {
+    "name": "--cs-effect-scanline-opacity",
+    "path": "effect.scanline.opacity",
+    "tier": "semantic",
+    "type": "number",
+    "description": "Hero scanlines.",
+    "resolved": "0.06"
+  },
+  {
+    "name": "--cs-effect-glow-strength",
+    "path": "effect.glow.strength",
+    "tier": "semantic",
+    "type": "number",
+    "description": "Multiplier for hover glows.",
+    "resolved": "1"
+  },
+  {
+    "name": "--cs-motion-duration-fast",
+    "path": "motion.duration.fast",
+    "tier": "semantic",
+    "type": "duration",
+    "resolved": "140ms"
+  },
+  {
+    "name": "--cs-motion-duration-base",
+    "path": "motion.duration.base",
+    "tier": "semantic",
+    "type": "duration",
+    "resolved": "240ms"
+  },
+  {
+    "name": "--cs-motion-duration-slow",
+    "path": "motion.duration.slow",
+    "tier": "semantic",
+    "type": "duration",
+    "resolved": "520ms"
+  },
+  {
+    "name": "--cs-motion-ease-out",
+    "path": "motion.ease.out",
+    "tier": "semantic",
+    "type": "cubicBezier",
+    "resolved": "cubic-bezier(0.2, 0.8, 0.2, 1)"
+  },
+  {
+    "name": "--cs-motion-stagger",
+    "path": "motion.stagger",
+    "tier": "semantic",
+    "type": "duration",
+    "description": "Delay between staggered siblings.",
+    "resolved": "35ms"
+  },
+  {
+    "name": "--cs-motion-ambient",
+    "path": "motion.ambient",
+    "tier": "semantic",
+    "type": "keyword",
+    "description": "Looping animations: running or paused (the animation-play-state).",
+    "resolved": "running"
+  },
+  {
+    "name": "--cs-density-scale",
+    "path": "density.scale",
+    "tier": "semantic",
+    "type": "number",
+    "description": "Multiplier for spacing and control sizes (console mode raises it).",
+    "resolved": "1"
+  },
+  {
+    "name": "--cs-type-scale",
+    "path": "type.scale",
+    "tier": "semantic",
+    "type": "number",
+    "description": "Multiplier for font sizes (console mode raises it).",
+    "resolved": "1"
+  },
+  {
+    "name": "--cs-focus-ring-width",
+    "path": "focus.ring.width",
+    "tier": "semantic",
+    "type": "dimension",
+    "description": "Focus ring thickness: the clear edge that marks keyboard and pad focus.",
+    "resolved": "2px"
+  },
+  {
+    "name": "--cs-focus-ring-offset",
+    "path": "focus.ring.offset",
+    "tier": "semantic",
+    "type": "dimension",
+    "description": "Where the ring sits: positive is outside the element, minus the width inside it. Console mode draws it inside, where clipping parents can't cut it.",
+    "resolved": "2px"
+  },
+  {
+    "name": "--cs-focus-ring-glow",
+    "path": "focus.ring.glow",
+    "tier": "semantic",
+    "type": "color",
+    "description": "Focus ring colour and glow.",
+    "resolved": "#38d9f5"
+  },
+  {
+    "name": "--cs-focus-ring-inner",
+    "path": "focus.ring.inner",
+    "tier": "semantic",
+    "type": "dimension",
+    "description": "Blur of the glow fading inward from the ring; 0px for none. Scaled by effect.glow.strength.",
+    "resolved": "0px"
+  },
+  {
+    "name": "--cs-focus-ring-halo",
+    "path": "focus.ring.halo",
+    "tier": "semantic",
+    "type": "dimension",
+    "description": "Blur of the soft glow outside the element where space allows; parents may clip it. Scaled by effect.glow.strength.",
+    "resolved": "0px"
+  },
+  {
+    "name": "--cs-ui-scale",
+    "path": "ui.scale",
+    "tier": "semantic",
+    "type": "number",
+    "description": "Appearance → UI scale; the root font size follows it.",
+    "resolved": "1"
+  },
+  {
+    "name": "--cs-sidebar-width",
+    "path": "sidebar.width",
+    "tier": "component",
+    "type": "dimension",
+    "resolved": "15rem"
+  },
+  {
+    "name": "--cs-topbar-height",
+    "path": "topbar.height",
+    "tier": "component",
+    "type": "dimension",
+    "resolved": "4.5rem"
+  },
+  {
+    "name": "--cs-card-aspect",
+    "path": "card.aspect",
+    "tier": "component",
+    "type": "keyword",
+    "description": "Game card artwork ratio.",
+    "resolved": "16 / 10"
+  },
+  {
+    "name": "--cs-card-width",
+    "path": "card.width",
+    "tier": "component",
+    "type": "dimension",
+    "description": "Game card width in grids (Appearance → Card size).",
+    "resolved": "176px"
+  },
+  {
+    "name": "--cs-hero-height",
+    "path": "hero.height",
+    "tier": "component",
+    "type": "dimension",
+    "resolved": "20rem"
+  },
+  {
+    "name": "--cs-chamfer",
+    "path": "chamfer",
+    "tier": "component",
+    "type": "dimension",
+    "description": "Cut corner of chamfered actions and tiles.",
+    "resolved": "10px"
+  },
+  {
+    "name": "--cs-frame-corner",
+    "path": "frame.corner",
+    "tier": "component",
+    "type": "dimension",
+    "description": "HUD corner brackets.",
+    "resolved": "14px"
+  },
+  {
+    "name": "--cs-grid-size",
+    "path": "grid.size",
+    "tier": "component",
+    "type": "dimension",
+    "description": "Backdrop grid cell.",
+    "resolved": "48px"
+  },
+  {
+    "name": "--cs-hintbar-height",
+    "path": "hintbar.height",
+    "tier": "component",
+    "type": "dimension",
+    "description": "Console mode's controller hint bar.",
+    "resolved": "3rem"
+  }
+]

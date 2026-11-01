@@ -1,0 +1,19 @@
+{
+  "FixtureEpicApp": {
+    "app_name": "FixtureEpicApp",
+    "title": "Fixture Epic Quest",
+    "platform": "Windows",
+    "install_path": "/home/fixture/Games/Heroic/Fixture Epic Quest",
+    "executable": "Binaries/FixtureEpic.exe",
+    "is_dlc": false
+  },
+  "FixtureEpicTwo": {
+    "app_name": "FixtureEpicTwo",
+    "title": "Fixture Epic Two",
+    "platform": "Windows",
+    "install_path": "/home/fixture/Games/Legendary/Fixture Epic Two",
+    "executable": "Two.exe",
+    "is_dlc": false,
+    "install_size": 1024
+  }
+}

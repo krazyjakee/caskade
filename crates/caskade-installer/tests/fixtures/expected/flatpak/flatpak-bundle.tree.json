@@ -1,0 +1,15 @@
+[
+  {
+    "path": "bin",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "bin/fixture-game",
+    "kind": "file",
+    "size": 304328,
+    "sha256": "d26f6098adc1a474ac48c3c4e5e71de918cf3a69f92829ba4a4f7755ceba22d3",
+    "executable": true
+  }
+]

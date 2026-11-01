@@ -1,0 +1,4449 @@
+---
+source: crates/caskade-discovery/tests/fixtures/support/mod.rs
+expression: "relative_value(value, root).expect(\"serializable snapshot\")"
+---
+{
+  "groups": [
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/Users/fixture/AppData/Local/Amazon Games/Data/Games/Sql/GameInstallInfo.sqlite"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "amazon",
+              "value": {
+                "id": "amzn1.adg.product.d2-fixture"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/c/Amazon Games/Library/D2 Racer",
+          "key": "amzn1.adg.product.d2-fixture",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "amazon-games://play/amzn1.adg.product.d2-fixture"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "amazon",
+          "state": {
+            "type": "installed"
+          },
+          "title": "D2 Racer",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": "$FIXTURE/root/drives/c/Amazon Games/Library/D2 Racer",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/ProgramData/Battle.net/Agent/product.db"
+              }
+            },
+            {
+              "type": "registry",
+              "value": {
+                "key": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Battle.net WoW",
+                "value": null
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "battle_net",
+              "value": {
+                "code": "wow"
+              }
+            },
+            {
+              "type": "battle_net",
+              "value": {
+                "code": "WOW"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/c/Games/World of Warcraft",
+          "key": "wow",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "battlenet://WoW"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "battlenet",
+          "state": {
+            "type": "installed"
+          },
+          "title": "World of Warcraft",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": "$FIXTURE/root/drives/c/Games/World of Warcraft",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": null,
+            "registry_key": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Battle.net WoW",
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "battlenet://WoW"
+              }
+            }
+          }
+        },
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Battle.net WoW",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "alias.launcher_owned",
+                "score": 0
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "battle_net",
+              "value": {
+                "code": "WOW"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/c/Games/World of Warcraft",
+          "key": "localmachine:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\battle.net wow",
+          "last_played_unix": null,
+          "launch": [],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "World of Warcraft",
+          "tracking": null,
+          "uninstall": {
+            "quiet": null,
+            "registry_key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Battle.net WoW",
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "battlenet://WoW"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine\\SOFTWARE\\EA Games\\Fixture",
+                "value": "Install Dir"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/EA Games/The Sims 4/__Installer/installerdata.xml"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "ea",
+              "value": {
+                "offer": "OFB-EAST:109552316"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/c/EA Games/The Sims 4",
+          "key": "OFB-EAST:109552316",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "link2ea://launchgame/OFB-EAST:109552316"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "ea",
+          "state": {
+            "type": "installed"
+          },
+          "title": "The Sims 4",
+          "tracking": {
+            "exe_names": [
+              "Game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/EA Games/The Sims 4",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": null,
+            "registry_key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\EA App fixture",
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "link2ea://launchgame/OFB-EAST:109552316"
+              }
+            }
+          }
+        },
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\EA App fixture",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "alias.launcher_owned",
+                "score": 0
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "ea",
+              "value": {
+                "offer": "OFB-EAST:109552316"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/c/EA Games/The Sims 4",
+          "key": "localmachine:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\ea app fixture",
+          "last_played_unix": null,
+          "launch": [],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "The Sims 4",
+          "tracking": null,
+          "uninstall": {
+            "quiet": null,
+            "registry_key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\EA App fixture",
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "link2ea://launchgame/OFB-EAST:109552316"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/ProgramData/Epic/EpicGamesLauncher/Data/Manifests/fixture.item"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "epic",
+              "value": {
+                "app_name": "FixtureEpic",
+                "catalog_item": "fixture-item",
+                "namespace": "fixture-namespace"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Fixture Adventure",
+          "key": "FixtureEpic",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "com.epicgames.launcher://apps/fixture-namespace%3Afixture-item%3AFixtureEpic?action=launch&silent=true"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "epic",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Adventure",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Fixture Adventure",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        },
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Epic Adventure.url"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "identity.proxy",
+                "score": 0
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "epic",
+              "value": {
+                "app_name": "FixtureEpic",
+                "catalog_item": "fixture-item",
+                "namespace": "fixture-namespace"
+              }
+            }
+          ],
+          "install_dir": null,
+          "key": "$FIXTURE/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Epic Adventure.url",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "com.epicgames.launcher://apps/fixture-namespace:fixture-item:FixtureEpic?action=launch&silent=true"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "startmenu",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Epic Adventure",
+          "tracking": null,
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/ProgramData/Epic/EpicGamesLauncher/Data/Manifests/library.item"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "epic",
+              "value": {
+                "app_name": "LibraryAlias",
+                "catalog_item": "d2-library",
+                "namespace": "d2-original"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/c/Program Files/Epic Games/Library Alias",
+          "key": "LibraryAlias",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "com.epicgames.launcher://apps/d2-original%3Ad2-library%3ALibraryAlias?action=launch&silent=true"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "epic",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Library Alias",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Program Files/Epic Games/Library Alias",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": null,
+            "registry_key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Library Alias",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Program Files/Epic Games/Library Alias/uninstall.exe"
+              }
+            }
+          }
+        },
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Library Alias",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "alias.launcher_owned",
+                "score": 0
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Program Files/Epic Games/Library Alias",
+          "key": "localmachine:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\library alias",
+          "last_played_unix": null,
+          "launch": [],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Library Alias",
+          "tracking": null,
+          "uninstall": {
+            "quiet": null,
+            "registry_key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Library Alias",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Program Files/Epic Games/Library Alias/uninstall.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "HKLM\\SOFTWARE\\GOG.com\\Games\\1207658924",
+                "value": null
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/ProgramData/GOG.com/Galaxy/storage/galaxy-2.0.db"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/GOG Games/The Witcher/goggame-1207658924.info"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "gog",
+              "value": {
+                "product_id": "1207658924"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/c/GOG Games/The Witcher",
+          "key": "1207658924",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/command=runGame",
+                  "/gameId=1207658924",
+                  "/path=$FIXTURE/root/drives/c/GOG Games/The Witcher"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Program Files (x86)/GOG Galaxy/GalaxyClient.exe"
+              }
+            },
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/GOG Games/The Witcher",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/GOG Games/The Witcher/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": 720,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "gog",
+          "state": {
+            "type": "installed"
+          },
+          "title": "The Witcher",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/GOG Games/The Witcher",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": null,
+            "registry_key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\1207658924_is1",
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "goggalaxy://openGameView/1207658924"
+              }
+            }
+          }
+        },
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\1207658924_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "alias.launcher_owned",
+                "score": 0
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "gog",
+              "value": {
+                "product_id": "1207658924"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/c/GOG Games/The Witcher",
+          "key": "localmachine:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\1207658924_is1",
+          "last_played_unix": null,
+          "launch": [],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "The Witcher",
+          "tracking": null,
+          "uninstall": {
+            "quiet": null,
+            "registry_key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\1207658924_is1",
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "goggalaxy://openGameView/1207658924"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/ProgramData/Riot Games/Metadata/valorant.live/valorant.live.product_settings.yaml"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "riot",
+              "value": {
+                "product": "valorant"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/c/Riot Games/VALORANT/live",
+          "key": "valorant",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "--launch-product=valorant",
+                  "--launch-patchline=live"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Riot Games/Riot Client/RiotClientServices.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "riot",
+          "state": {
+            "type": "installed"
+          },
+          "title": "VALORANT",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": "$FIXTURE/root/drives/c/Riot Games/VALORANT/live",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "HKLM\\SOFTWARE\\Rockstar Games\\D2 Heist",
+                "value": "InstallFolder"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "rockstar",
+              "value": {
+                "title": "D2 Heist"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/c/Rockstar Games/D2 Heist",
+          "key": "D2 Heist",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "-launchTitleInFolder",
+                  "$FIXTURE/root/drives/c/Rockstar Games/D2 Heist"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Program Files/Rockstar Games/Launcher/Launcher.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "rockstar",
+          "state": {
+            "type": "installed"
+          },
+          "title": "D2 Heist",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": "$FIXTURE/root/drives/c/Rockstar Games/D2 Heist",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/Steam/steamapps/appmanifest_620.acf"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "steam",
+              "value": {
+                "app_id": 620
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/c/Steam/steamapps/common/Portal 2",
+          "key": "620",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "steam://rungameid/620"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "steam",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Portal 2",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": "$FIXTURE/root/drives/c/Steam/steamapps/common/Portal 2",
+            "steam_app_id": 620
+          },
+          "uninstall": {
+            "quiet": null,
+            "registry_key": null,
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "steam://uninstall/620"
+              }
+            }
+          }
+        },
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Steam App 620",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "alias.launcher_owned",
+                "score": 0
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "steam",
+              "value": {
+                "app_id": 620
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Portal 2",
+          "key": "localmachine:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\steam app 620",
+          "last_played_unix": null,
+          "launch": [],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Portal 2",
+          "tracking": null,
+          "uninstall": {
+            "quiet": null,
+            "registry_key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Steam App 620",
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "steam://uninstall/620"
+              }
+            }
+          }
+        },
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Portal 2.url"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "identity.proxy",
+                "score": 0
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "steam",
+              "value": {
+                "app_id": 620
+              }
+            }
+          ],
+          "install_dir": null,
+          "key": "$FIXTURE/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Portal 2.url",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "steam://rungameid/620"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "startmenu",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Portal 2",
+          "tracking": null,
+          "uninstall": null
+        },
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Portal 2 command.lnk"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "identity.proxy",
+                "score": 0
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "steam",
+              "value": {
+                "app_id": 620
+              }
+            }
+          ],
+          "install_dir": null,
+          "key": "$FIXTURE/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Portal 2 command.lnk",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "-applaunch",
+                  "620"
+                ],
+                "cwd": "$FIXTURE/root/drives/c/Steam",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Steam/steam.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "startmenu",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Portal 2 command",
+          "tracking": null,
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine\\SOFTWARE\\Ubisoft\\Launcher\\Installs\\1800",
+                "value": "InstallDir"
+              }
+            },
+            {
+              "type": "registry",
+              "value": {
+                "key": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Uplay Install 1800",
+                "value": "DisplayName"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "ubisoft",
+              "value": {
+                "id": "1800"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Anno 1800",
+          "key": "1800",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "uplay://launch/1800/0"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "ubisoft",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Anno 1800",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Anno 1800",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": null,
+            "registry_key": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Uplay Install 1800",
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "uplay://launch/1800/0"
+              }
+            }
+          }
+        },
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Uplay Install 1800",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "alias.launcher_owned",
+                "score": 0
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "ubisoft",
+              "value": {
+                "id": "1800"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Anno 1800",
+          "key": "localmachine:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\uplay install 1800",
+          "last_played_unix": null,
+          "launch": [],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Anno 1800",
+          "tracking": null,
+          "uninstall": {
+            "quiet": null,
+            "registry_key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Uplay Install 1800",
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "uplay://launch/1800/0"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine\\SOFTWARE\\Ubisoft\\Launcher\\Installs\\54",
+                "value": "InstallDir"
+              }
+            },
+            {
+              "type": "registry",
+              "value": {
+                "key": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Uplay Install 54",
+                "value": "DisplayName"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "ubisoft",
+              "value": {
+                "id": "54"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Assassins Creed II",
+          "key": "54",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "uplay://launch/54/0"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "ubisoft",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Assassins Creed II",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Assassins Creed II",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": null,
+            "registry_key": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Uplay Install 54",
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "uplay://launch/54/0"
+              }
+            }
+          }
+        },
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Uplay Install 54",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "alias.launcher_owned",
+                "score": 0
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "ubisoft",
+              "value": {
+                "id": "54"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Assassins Creed II",
+          "key": "localmachine:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\uplay install 54",
+          "last_played_unix": null,
+          "launch": [],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Assassins Creed II",
+          "tracking": null,
+          "uninstall": {
+            "quiet": null,
+            "registry_key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Uplay Install 54",
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "uplay://launch/54/0"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/d/XboxGames/Fixture Game/Content/MicrosoftGame.config"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/d/XboxGames/Fixture Game/Content/AppxManifest.xml"
+              }
+            }
+          ],
+          "icon": "$FIXTURE/root/drives/d/XboxGames/Fixture Game/Content/logo.png",
+          "ids": [
+            {
+              "type": "xbox",
+              "value": {
+                "pfn": "Fixture.GamePass_8wekyb3d8bbwe"
+              }
+            },
+            {
+              "type": "microsoft_store",
+              "value": {
+                "store_id": "9N000FIXTURE1"
+              }
+            },
+            {
+              "type": "xbox",
+              "value": {
+                "pfn": "fixture.gamepass_8wekyb3d8bbwe"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/d/XboxGames/Fixture Game/Content",
+          "key": "Fixture.GamePass_8wekyb3d8bbwe!MainGame",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "shell:AppsFolder\\Fixture.GamePass_8wekyb3d8bbwe!MainGame"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "xbox",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Game & Friends",
+          "tracking": {
+            "exe_names": [
+              "play.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/d/XboxGames/Fixture Game/Content",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\GameUX\\Games\\{11111111-2222-3333-4444-555555555555}",
+                "value": "Title"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/Games/Hollow Knight/GameDefinition.dll"
+              }
+            },
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\HollowKnight_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Hollow Knight.lnk"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Hollow Knight",
+          "key": "hklm:registry64\\software\\microsoft\\windows\\currentversion\\gameux\\games\\{11111111-2222-3333-4444-555555555555}",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Hollow Knight",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Hollow Knight/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "gameux",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Hollow Knight",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Hollow Knight",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Hollow Knight/unins000.exe"
+              }
+            },
+            "registry_key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\HollowKnight_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Hollow Knight/unins000.exe"
+              }
+            }
+          }
+        },
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\HollowKnight_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Hollow Knight",
+          "key": "localmachine:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\hollowknight_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Hollow Knight",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Hollow Knight/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Hollow Knight",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Hollow Knight",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Hollow Knight/unins000.exe"
+              }
+            },
+            "registry_key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\HollowKnight_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Hollow Knight/unins000.exe"
+              }
+            }
+          }
+        },
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Hollow Knight.lnk"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Hollow Knight",
+          "key": "$FIXTURE/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Hollow Knight.lnk",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Hollow Knight",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Hollow Knight/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "startmenu",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Hollow Knight",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Hollow Knight",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "CurrentUser:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Bastion_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.fna",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "fna.dll"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "publisher.game",
+                "score": 15
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Bastion",
+          "key": "currentuser:registry32\\software\\microsoft\\windows\\currentversion\\uninstall\\bastion_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Bastion",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Bastion/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Bastion",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Bastion",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Bastion/unins000.exe"
+              }
+            },
+            "registry_key": "CurrentUser:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Bastion_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Bastion/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "CurrentUser:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Celeste_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.fna",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "fna.dll"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Celeste",
+          "key": "currentuser:registry32\\software\\microsoft\\windows\\currentversion\\uninstall\\celeste_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Celeste",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Celeste/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Celeste",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Celeste",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Celeste/unins000.exe"
+              }
+            },
+            "registry_key": "CurrentUser:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Celeste_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Celeste/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "CurrentUser:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\CitiesSkylines_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "publisher.game",
+                "score": 15
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Cities Skylines",
+          "key": "currentuser:registry32\\software\\microsoft\\windows\\currentversion\\uninstall\\citiesskylines_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Cities Skylines",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Cities Skylines/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Cities Skylines",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Cities Skylines",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Cities Skylines/unins000.exe"
+              }
+            },
+            "registry_key": "CurrentUser:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\CitiesSkylines_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Cities Skylines/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "CurrentUser:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ReturnoftheObraDinn_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Return of the Obra Dinn",
+          "key": "currentuser:registry32\\software\\microsoft\\windows\\currentversion\\uninstall\\returnoftheobradinn_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Return of the Obra Dinn",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Return of the Obra Dinn/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Return of the Obra Dinn",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Return of the Obra Dinn",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Return of the Obra Dinn/unins000.exe"
+              }
+            },
+            "registry_key": "CurrentUser:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ReturnoftheObraDinn_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Return of the Obra Dinn/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "CurrentUser:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Rust_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "publisher.game",
+                "score": 15
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Rust",
+          "key": "currentuser:registry32\\software\\microsoft\\windows\\currentversion\\uninstall\\rust_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Rust",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Rust/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Rust",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Rust",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Rust/unins000.exe"
+              }
+            },
+            "registry_key": "CurrentUser:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Rust_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Rust/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "CurrentUser:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Undertale_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.gamemaker",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "data.win"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Undertale",
+          "key": "currentuser:registry32\\software\\microsoft\\windows\\currentversion\\uninstall\\undertale_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Undertale",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Undertale/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Undertale",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Undertale",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Undertale/unins000.exe"
+              }
+            },
+            "registry_key": "CurrentUser:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Undertale_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Undertale/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "CurrentUser:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Cuphead_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Cuphead",
+          "key": "currentuser:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\cuphead_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Cuphead",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Cuphead/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Cuphead",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Cuphead",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Cuphead/unins000.exe"
+              }
+            },
+            "registry_key": "CurrentUser:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Cuphead_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Cuphead/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "CurrentUser:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\DiscoElysium_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Disco Elysium",
+          "key": "currentuser:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\discoelysium_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Disco Elysium",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Disco Elysium/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Disco Elysium",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Disco Elysium",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Disco Elysium/unins000.exe"
+              }
+            },
+            "registry_key": "CurrentUser:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\DiscoElysium_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Disco Elysium/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "CurrentUser:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Firewatch_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Firewatch",
+          "key": "currentuser:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\firewatch_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Firewatch",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Firewatch/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Firewatch",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Firewatch",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Firewatch/unins000.exe"
+              }
+            },
+            "registry_key": "CurrentUser:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Firewatch_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Firewatch/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "CurrentUser:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\HyperLightDrifter_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.gamemaker",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "data.win"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Hyper Light Drifter",
+          "key": "currentuser:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\hyperlightdrifter_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Hyper Light Drifter",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Hyper Light Drifter/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Hyper Light Drifter",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Hyper Light Drifter",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Hyper Light Drifter/unins000.exe"
+              }
+            },
+            "registry_key": "CurrentUser:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\HyperLightDrifter_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Hyper Light Drifter/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "CurrentUser:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OriandtheBlindForest_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "publisher.game",
+                "score": 15
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Ori and the Blind Forest",
+          "key": "currentuser:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\oriandtheblindforest_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Ori and the Blind Forest",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Ori and the Blind Forest/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Ori and the Blind Forest",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Ori and the Blind Forest",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Ori and the Blind Forest/unins000.exe"
+              }
+            },
+            "registry_key": "CurrentUser:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OriandtheBlindForest_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Ori and the Blind Forest/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "CurrentUser:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Terraria_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.fna",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "fna.dll"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "publisher.game",
+                "score": 15
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Terraria",
+          "key": "currentuser:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\terraria_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Terraria",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Terraria/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Terraria",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Terraria",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Terraria/unins000.exe"
+              }
+            },
+            "registry_key": "CurrentUser:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Terraria_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Terraria/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\FEZ_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.fna",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "fna.dll"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/FEZ",
+          "key": "localmachine:registry32\\software\\microsoft\\windows\\currentversion\\uninstall\\fez_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/FEZ",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/FEZ/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "FEZ",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/FEZ",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/FEZ/unins000.exe"
+              }
+            },
+            "registry_key": "LocalMachine:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\FEZ_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/FEZ/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\HotlineMiami_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.gamemaker",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "data.win"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Hotline Miami",
+          "key": "localmachine:registry32\\software\\microsoft\\windows\\currentversion\\uninstall\\hotlinemiami_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Hotline Miami",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Hotline Miami/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Hotline Miami",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Hotline Miami",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Hotline Miami/unins000.exe"
+              }
+            },
+            "registry_key": "LocalMachine:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\HotlineMiami_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Hotline Miami/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Subnautica_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "publisher.game",
+                "score": 15
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Subnautica",
+          "key": "localmachine:registry32\\software\\microsoft\\windows\\currentversion\\uninstall\\subnautica_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Subnautica",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Subnautica/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Subnautica",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Subnautica",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Subnautica/unins000.exe"
+              }
+            },
+            "registry_key": "LocalMachine:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Subnautica_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Subnautica/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Superhot_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Superhot",
+          "key": "localmachine:registry32\\software\\microsoft\\windows\\currentversion\\uninstall\\superhot_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Superhot",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Superhot/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Superhot",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Superhot",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Superhot/unins000.exe"
+              }
+            },
+            "registry_key": "LocalMachine:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Superhot_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Superhot/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Tunic_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Tunic",
+          "key": "localmachine:registry32\\software\\microsoft\\windows\\currentversion\\uninstall\\tunic_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Tunic",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Tunic/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Tunic",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Tunic",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Tunic/unins000.exe"
+              }
+            },
+            "registry_key": "LocalMachine:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Tunic_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Tunic/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\UntitledGooseGame_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Untitled Goose Game",
+          "key": "localmachine:registry32\\software\\microsoft\\windows\\currentversion\\uninstall\\untitledgoosegame_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Untitled Goose Game",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Untitled Goose Game/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Untitled Goose Game",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Untitled Goose Game",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Untitled Goose Game/unins000.exe"
+              }
+            },
+            "registry_key": "LocalMachine:Registry32\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\UntitledGooseGame_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Untitled Goose Game/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Deltarune_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.gamemaker",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "data.win"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Deltarune",
+          "key": "localmachine:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\deltarune_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Deltarune",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Deltarune/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Deltarune",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Deltarune",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Deltarune/unins000.exe"
+              }
+            },
+            "registry_key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Deltarune_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Deltarune/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\KerbalSpaceProgram_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Kerbal Space Program",
+          "key": "localmachine:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\kerbalspaceprogram_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Kerbal Space Program",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Kerbal Space Program/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Kerbal Space Program",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Kerbal Space Program",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Kerbal Space Program/unins000.exe"
+              }
+            },
+            "registry_key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\KerbalSpaceProgram_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Kerbal Space Program/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OuterWilds_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Outer Wilds",
+          "key": "localmachine:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\outerwilds_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Outer Wilds",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Outer Wilds/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Outer Wilds",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Outer Wilds",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Outer Wilds/unins000.exe"
+              }
+            },
+            "registry_key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OuterWilds_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Outer Wilds/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\SlimeRancher_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Slime Rancher",
+          "key": "localmachine:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\slimerancher_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Slime Rancher",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Slime Rancher/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Slime Rancher",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Slime Rancher",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Slime Rancher/unins000.exe"
+              }
+            },
+            "registry_key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\SlimeRancher_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Slime Rancher/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "registry",
+              "value": {
+                "key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\StardewValley_is1",
+                "value": "DisplayName"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.fna",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "fna.dll"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "publisher.game",
+                "score": 15
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Games/Stardew Valley",
+          "key": "localmachine:registry64\\software\\microsoft\\windows\\currentversion\\uninstall\\stardewvalley_is1",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/drives/c/Games/Stardew Valley",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Stardew Valley/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4194304,
+          "source": "uninstall",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Stardew Valley",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Games/Stardew Valley",
+            "steam_app_id": null
+          },
+          "uninstall": {
+            "quiet": {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "/VERYSILENT"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Stardew Valley/unins000.exe"
+              }
+            },
+            "registry_key": "LocalMachine:Registry64\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\StardewValley_is1",
+            "target": {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Games/Stardew Valley/unins000.exe"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Games/Portable Café.lnk"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Relative Café.lnk"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Portable Duplicate.lnk"
+              }
+            }
+          ],
+          "icon": "$FIXTURE/root/drives/c/Portable/Portable Café/icon.ico",
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Portable/Portable Café",
+          "key": "$FIXTURE/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Games/Portable Café.lnk",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "--profile",
+                  "Café user",
+                  "&"
+                ],
+                "cwd": "$FIXTURE/root/drives/c/Portable/Portable Café/saves",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Portable/Portable Café/game.exe"
+              }
+            },
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "--relative"
+                ],
+                "cwd": "$FIXTURE/root/drives/c/Portable/Portable Café",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Portable/Portable Café/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "startmenu",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Portable Café",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Portable/Portable Café",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        },
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Relative Café.lnk"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Portable/Portable Café",
+          "key": "$FIXTURE/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Relative Café.lnk",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "--relative"
+                ],
+                "cwd": "$FIXTURE/root/drives/c/Portable/Portable Café",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Portable/Portable Café/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "startmenu",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Relative Café",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Portable/Portable Café",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        },
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Portable Duplicate.lnk"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.unity",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "unityplayer.dll"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "game_data/globalgamemanagers"
+              }
+            }
+          ],
+          "icon": "$FIXTURE/root/drives/c/Portable/Portable Café/icon.ico",
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Portable/Portable Café",
+          "key": "$FIXTURE/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Portable Duplicate.lnk",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "--profile",
+                  "Café user",
+                  "&"
+                ],
+                "cwd": "$FIXTURE/root/drives/c/Portable/Portable Café/saves",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Portable/Portable Café/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "startmenu",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Portable Duplicate",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Portable/Portable Café",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Environment.lnk"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "fingerprint.gamemaker",
+                "score": 70
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "data.win"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/drives/c/Users/fixture/Games/Environment",
+          "key": "$FIXTURE/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Environment.lnk",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "--environment"
+                ],
+                "cwd": "$FIXTURE/root/drives/c/Users/fixture/Games/Environment",
+                "env": {},
+                "program": "$FIXTURE/root/drives/c/Users/fixture/Games/Environment/game.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "startmenu",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Environment",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/drives/c/Users/fixture/Games/Environment",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    }
+  ],
+  "launchers": [
+    {
+      "data_dir": "$FIXTURE/root/drives/c/Steam",
+      "found": true,
+      "kind": {
+        "type": "native"
+      },
+      "path": "$FIXTURE/root/drives/c/Steam",
+      "source": "steam",
+      "version": null
+    },
+    {
+      "data_dir": "$FIXTURE/root/drives/c/ProgramData/Epic/EpicGamesLauncher/Data",
+      "found": true,
+      "kind": {
+        "type": "native"
+      },
+      "path": "$FIXTURE/root/drives/c/Program Files (x86)/Epic Games/Launcher/Portal/Binaries/Win64/EpicGamesLauncher.exe",
+      "source": "epic",
+      "version": null
+    },
+    {
+      "data_dir": "$FIXTURE/root/drives/c/ProgramData/Origin/LocalContent",
+      "found": true,
+      "kind": {
+        "type": "native"
+      },
+      "path": "$FIXTURE/root/drives/c/Program Files/Electronic Arts/EA Desktop/EA Desktop/EADesktop.exe",
+      "source": "ea",
+      "version": null
+    },
+    {
+      "data_dir": "$FIXTURE/root/drives/c/Program Files (x86)/Ubisoft/Ubisoft Game Launcher",
+      "found": true,
+      "kind": {
+        "type": "native"
+      },
+      "path": "$FIXTURE/root/drives/c/Program Files (x86)/Ubisoft/Ubisoft Game Launcher/UbisoftConnect.exe",
+      "source": "ubisoft",
+      "version": null
+    },
+    {
+      "data_dir": "$FIXTURE/root/drives/c/ProgramData/GOG.com/Galaxy/storage",
+      "found": true,
+      "kind": {
+        "type": "native"
+      },
+      "path": "$FIXTURE/root/drives/c/Program Files (x86)/GOG Galaxy/GalaxyClient.exe",
+      "source": "gog",
+      "version": null
+    },
+    {
+      "data_dir": "$FIXTURE/root/drives/c/ProgramData/Battle.net",
+      "found": true,
+      "kind": {
+        "type": "native"
+      },
+      "path": "$FIXTURE/root/drives/c/Program Files (x86)/Battle.net/Battle.net.exe",
+      "source": "battlenet",
+      "version": null
+    },
+    {
+      "data_dir": "$FIXTURE/root/drives/c/Users/fixture/AppData/Local/Amazon Games/Data",
+      "found": true,
+      "kind": {
+        "type": "native"
+      },
+      "path": "$FIXTURE/root/drives/c/Users/fixture/AppData/Local/Amazon Games/App/Amazon Games.exe",
+      "source": "amazon",
+      "version": null
+    },
+    {
+      "data_dir": "$FIXTURE/root/drives/c/ProgramData/Riot Games",
+      "found": true,
+      "kind": {
+        "type": "native"
+      },
+      "path": "$FIXTURE/root/drives/c/Riot Games/Riot Client/RiotClientServices.exe",
+      "source": "riot",
+      "version": null
+    },
+    {
+      "data_dir": "$FIXTURE/root/drives/c/Program Files/Rockstar Games/Launcher",
+      "found": true,
+      "kind": {
+        "type": "native"
+      },
+      "path": "$FIXTURE/root/drives/c/Program Files/Rockstar Games/Launcher/Launcher.exe",
+      "source": "rockstar",
+      "version": null
+    }
+  ],
+  "sources": [
+    {
+      "count": 1,
+      "duration_ms": 0,
+      "error": null,
+      "source": "steam",
+      "warnings": []
+    },
+    {
+      "count": 2,
+      "duration_ms": 0,
+      "error": null,
+      "source": "epic",
+      "warnings": []
+    },
+    {
+      "count": 1,
+      "duration_ms": 0,
+      "error": null,
+      "source": "ea",
+      "warnings": []
+    },
+    {
+      "count": 2,
+      "duration_ms": 0,
+      "error": null,
+      "source": "ubisoft",
+      "warnings": []
+    },
+    {
+      "count": 1,
+      "duration_ms": 0,
+      "error": null,
+      "source": "gog",
+      "warnings": []
+    },
+    {
+      "count": 1,
+      "duration_ms": 0,
+      "error": null,
+      "source": "battlenet",
+      "warnings": []
+    },
+    {
+      "count": 1,
+      "duration_ms": 0,
+      "error": null,
+      "source": "amazon",
+      "warnings": []
+    },
+    {
+      "count": 1,
+      "duration_ms": 0,
+      "error": null,
+      "source": "riot",
+      "warnings": []
+    },
+    {
+      "count": 1,
+      "duration_ms": 0,
+      "error": null,
+      "source": "rockstar",
+      "warnings": []
+    },
+    {
+      "count": 1,
+      "duration_ms": 0,
+      "error": null,
+      "source": "xbox",
+      "warnings": []
+    },
+    {
+      "count": 1,
+      "duration_ms": 0,
+      "error": null,
+      "source": "gameux",
+      "warnings": []
+    },
+    {
+      "count": 32,
+      "duration_ms": 0,
+      "error": null,
+      "source": "uninstall",
+      "warnings": []
+    },
+    {
+      "count": 9,
+      "duration_ms": 0,
+      "error": null,
+      "source": "startmenu",
+      "warnings": [
+        "$FIXTURE/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Corrupt.lnk: $FIXTURE/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Corrupt.lnk: invalid metadata: Shell Link header",
+        "$FIXTURE/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Missing.lnk: shortcut target is missing"
+      ]
+    }
+  ]
+}

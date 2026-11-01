@@ -1,0 +1,963 @@
+---
+source: crates/caskade-installer/tests/recipes.rs
+expression: schema
+---
+{
+  "$defs": {
+    "ArtifactId": {
+      "description": "Stable identifier within one probe result, also used by extraction steps.",
+      "type": "string"
+    },
+    "DelegateCheck": {
+      "description": "A host-tool query that exits 0 while a delegate command has something to\ndo, such as the package manager's \"is this package installed\".",
+      "properties": {
+        "args": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "tool": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "args"
+      ],
+      "type": "object"
+    },
+    "DelegateCommand": {
+      "description": "A recorded host-tool command that reverses an out-of-root installation.",
+      "properties": {
+        "args": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "only_if": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DelegateCheck"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Runs first; the command is skipped unless it exits 0, so a package\nremoved by hand needs no removal."
+        },
+        "tool": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "args"
+      ],
+      "type": "object"
+    },
+    "Match": {
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "sha256"
+          ]
+        },
+        {
+          "required": [
+            "gog_id"
+          ]
+        },
+        {
+          "required": [
+            "app_id"
+          ]
+        }
+      ],
+      "properties": {
+        "app_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gog_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sha256": {
+          "pattern": "^[a-fA-F0-9]{64}$",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "PresetOverrides": {
+      "additionalProperties": false,
+      "properties": {
+        "language": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "no_shortcuts": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "Program": {
+      "description": "A program from the input, the game tree or a host tool resolved by runtime.",
+      "oneOf": [
+        {
+          "properties": {
+            "type": {
+              "const": "source",
+              "type": "string"
+            },
+            "value": {
+              "$ref": "#/$defs/SourcePath"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "tool",
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "RegistryEntry": {
+      "description": "A registry value to replay into a Proton/Wine prefix, never the host registry.",
+      "properties": {
+        "hive": {
+          "$ref": "#/$defs/RegistryHive"
+        },
+        "key": {
+          "type": "string"
+        },
+        "name": {
+          "description": "Empty for the key's default value.",
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/RegistryValue"
+        }
+      },
+      "required": [
+        "hive",
+        "key",
+        "name",
+        "value"
+      ],
+      "type": "object"
+    },
+    "RegistryHive": {
+      "enum": [
+        "current_user",
+        "local_machine",
+        "classes_root",
+        "users",
+        "current_config"
+      ],
+      "type": "string"
+    },
+    "RegistryValue": {
+      "oneOf": [
+        {
+          "properties": {
+            "type": {
+              "const": "string",
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "expand_string",
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "multi_string",
+              "type": "string"
+            },
+            "value": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "dword",
+              "type": "string"
+            },
+            "value": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "qword",
+              "type": "string"
+            },
+            "value": {
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "binary",
+              "type": "string"
+            },
+            "value": {
+              "items": {
+                "format": "uint8",
+                "maximum": 255,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "RuntimeSpec": {
+      "description": "The runtime to execute under. Prefix IDs are resolved by the runtime layer.",
+      "oneOf": [
+        {
+          "properties": {
+            "type": {
+              "const": "native",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "proton_prefix",
+              "type": "string"
+            },
+            "value": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "wine_prefix",
+              "type": "string"
+            },
+            "value": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "SourcePath": {
+      "description": "A source is either an input artifact or a path in the staging/game tree.",
+      "oneOf": [
+        {
+          "description": "An entry relative to an identified source artifact (`.` means its root).",
+          "properties": {
+            "type": {
+              "const": "artifact",
+              "type": "string"
+            },
+            "value": {
+              "properties": {
+                "artifact": {
+                  "$ref": "#/$defs/ArtifactId"
+                },
+                "path": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "artifact",
+                "path"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "game",
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Step": {
+      "description": "Fixed plan DSL: analysis describes operations; only the executor acts on them.\n\nAll `to`, `expect`, `target_dir`, `path` and `mount_point` paths are relative\nto staging/the final game directory. Symlink targets are relative to the\nlink's parent and must resolve inside the game tree. The executor validates\nthese invariants through the safety layer before performing any operation.",
+      "oneOf": [
+        {
+          "properties": {
+            "type": {
+              "const": "extract",
+              "type": "string"
+            },
+            "value": {
+              "properties": {
+                "from": {
+                  "$ref": "#/$defs/ArtifactId"
+                },
+                "select": {
+                  "description": "Include globs; empty selects every entry.",
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "strip": {
+                  "description": "Optional prefix removed before writing selected entries.",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "to": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "from",
+                "select",
+                "to"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "copy",
+              "type": "string"
+            },
+            "value": {
+              "properties": {
+                "from": {
+                  "$ref": "#/$defs/SourcePath"
+                },
+                "to": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "from",
+                "to"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "move",
+              "type": "string"
+            },
+            "value": {
+              "properties": {
+                "from": {
+                  "$ref": "#/$defs/SourcePath"
+                },
+                "to": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "from",
+                "to"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "run",
+              "type": "string"
+            },
+            "value": {
+              "properties": {
+                "args": {
+                  "description": "Argument vector; never interpreted by a shell.",
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "env": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "expect": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "program": {
+                  "$ref": "#/$defs/Program"
+                },
+                "runtime": {
+                  "$ref": "#/$defs/RuntimeSpec"
+                },
+                "timeout_secs": {
+                  "description": "Wall-clock limit in seconds; must be non-zero before execution.",
+                  "format": "uint64",
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "program",
+                "args",
+                "env",
+                "runtime",
+                "timeout_secs",
+                "expect"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "run_interactive",
+              "type": "string"
+            },
+            "value": {
+              "properties": {
+                "args": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "env": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "program": {
+                  "$ref": "#/$defs/Program"
+                },
+                "runtime": {
+                  "$ref": "#/$defs/RuntimeSpec"
+                },
+                "target_dir": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "program",
+                "args",
+                "env",
+                "runtime",
+                "target_dir"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "mount",
+              "type": "string"
+            },
+            "value": {
+              "properties": {
+                "from": {
+                  "$ref": "#/$defs/ArtifactId"
+                },
+                "mount_point": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "from",
+                "mount_point"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "unmount",
+              "type": "string"
+            },
+            "value": {
+              "properties": {
+                "mount_point": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "mount_point"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "set_executable",
+              "type": "string"
+            },
+            "value": {
+              "properties": {
+                "path": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "symlink",
+              "type": "string"
+            },
+            "value": {
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path",
+                "target"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "write_file",
+              "type": "string"
+            },
+            "value": {
+              "properties": {
+                "contents": {
+                  "items": {
+                    "format": "uint8",
+                    "maximum": 255,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "type": "array"
+                },
+                "path": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path",
+                "contents"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Writes `length` bytes of a file artifact, from `offset`, to `path`:\nhow a plugin `install-handler` unpacks a container format it knows\nwithout writing files itself (#55).",
+          "properties": {
+            "type": {
+              "const": "copy_range",
+              "type": "string"
+            },
+            "value": {
+              "properties": {
+                "from": {
+                  "$ref": "#/$defs/ArtifactId"
+                },
+                "length": {
+                  "format": "uint64",
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "offset": {
+                  "format": "uint64",
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "path": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "from",
+                "offset",
+                "length",
+                "path"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "registry_import",
+              "type": "string"
+            },
+            "value": {
+              "properties": {
+                "entries": {
+                  "items": {
+                    "$ref": "#/$defs/RegistryEntry"
+                  },
+                  "type": "array"
+                },
+                "runtime": {
+                  "$ref": "#/$defs/RuntimeSpec",
+                  "description": "Execution rejects Native; registry replay only targets prefixes."
+                }
+              },
+              "required": [
+                "runtime",
+                "entries"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "delegate",
+              "type": "string"
+            },
+            "value": {
+              "properties": {
+                "args": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "only_if": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/DelegateCheck"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Runs first; the step is skipped unless it exits 0."
+                },
+                "tool": {
+                  "type": "string"
+                },
+                "uninstall": {
+                  "description": "Required compensation recorded for uninstall and rollback.",
+                  "items": {
+                    "$ref": "#/$defs/DelegateCommand"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "tool",
+                "args",
+                "uninstall"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Strategy": {
+      "enum": [
+        "copy",
+        "extract",
+        "run_silent",
+        "run_interactive",
+        "delegate",
+        "hand_off"
+      ],
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "add_steps": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Step"
+      },
+      "maxItems": 256,
+      "type": "array"
+    },
+    "description": {
+      "default": "",
+      "maxLength": 2048,
+      "type": "string"
+    },
+    "disable_alias": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "id": {
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$",
+      "type": "string"
+    },
+    "match": {
+      "$ref": "#/$defs/Match"
+    },
+    "preset_args": {
+      "$ref": "#/$defs/PresetOverrides",
+      "default": {}
+    },
+    "schema_version": {
+      "format": "uint32",
+      "maximum": 1,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "strategy": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Strategy"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "match"
+  ],
+  "title": "Recipe",
+  "type": "object"
+}

@@ -1,0 +1,9 @@
+[
+  {
+    "id": "fixture-entitlement-1",
+    "product": {
+      "id": "amzn1.adg.product.fixture-0001",
+      "title": "Fixture Amazon Drive"
+    }
+  }
+]

@@ -1,0 +1,5 @@
+{
+  "cat-control": { "id": "cat-control", "title": "Control", "namespace": "a1b2c3", "categories": [{ "path": "games" }, { "path": "applications" }], "releaseInfo": [{ "platform": ["Windows"] }] },
+  "cat-control-ultimate": { "id": "cat-control-ultimate", "title": "Control", "namespace": "a1b2c3", "categories": [{ "path": "games" }, { "path": "applications" }], "releaseInfo": [{ "platform": ["Windows"] }] },
+  "cat-control-dlc": { "id": "cat-control-dlc", "title": "Control: The Foundation", "namespace": "a1b2c3", "categories": [{ "path": "addons" }, { "path": "applications" }], "mainGameItem": { "id": "cat-control", "namespace": "a1b2c3" } }
+}

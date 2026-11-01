@@ -1,0 +1,61 @@
+[package]
+name = "caskade-plugin-host"
+version = "0.1.0"
+description = "Caskade's plugin host: plugin.json manifests, discovery, and the wasmtime runtime for backend components"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+# Integration tests are declared below, not discovered from tests/.
+autotests = false
+
+[dependencies]
+caskade-jobs = { path = "../caskade-jobs" }
+caskade-core = { path = "../caskade-core" }
+caskade-component-cache = { path = "../caskade-component-cache" }
+# Plugins' own PO catalogs (#219).
+caskade-i18n = { path = "../caskade-i18n" }
+# `fetch` for its network grant rules (`fetch::grant`), which backends'
+# own HTTP requests follow too (CSK-03).
+caskade-installer = { path = "../caskade-installer", default-features = false, features = ["fetch"] }
+# Provider adapters return discovered games (#126).
+caskade-discovery = { path = "../caskade-discovery", default-features = false }
+wasmtime = { version = "=50.0.0", default-features = false, features = ["component-model", "async", "cranelift", "runtime", "std", "parallel-compilation"] }
+wasmtime-wasi = { version = "=50.0.0", default-features = false, features = ["p2"] }
+# Outbound HTTP for plugins with a `network` grant (#124).
+wasmtime-wasi-http = { version = "=50.0.0", default-features = false, features = ["p2", "default-send-request"] }
+http = "1"
+http-body = "1"
+http-body-util = "0.1"
+# Backends' requests connect to the addresses their grant allows, so the
+# host sends them itself instead of `default_send_request`, with the same
+# crates wasmtime-wasi-http uses for it (CSK-03).
+hyper = { version = "1", features = ["client", "http1"] }
+tokio-rustls = { version = "0.26", default-features = false, features = ["ring", "logging", "tls12"] }
+webpki-roots = "1"
+semver = { version = "1", features = ["serde"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_path_to_error = "0.1"
+url = "2"
+schemars = "1"
+specta = { version = "=2.0.0-rc.26", features = ["derive", "serde_json"] }
+thiserror = "2"
+tracing = "0.1"
+async-trait = "0.1"
+# Dev mode watches plugin folders (#131).
+notify = { version = "8", default-features = false, features = ["macos_kqueue"] }
+tokio = { version = "1", features = ["sync", "time", "rt", "macros", "net"] }
+
+[dev-dependencies]
+# The built-in import path plugin library sources join (#126).
+caskade-sources = { path = "../caskade-sources", default-features = false }
+tempfile = "=3.27.0"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+
+[lints]
+workspace = true
+
+# One binary for the integration tests (tests/main.rs); see its header.
+[[test]]
+name = "it"
+path = "tests/main.rs"

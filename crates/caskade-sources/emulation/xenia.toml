@@ -1,0 +1,41 @@
+# SPDX-License-Identifier: MIT
+# Authored for Caskade from docs/research/emulator-sources.md (sources and
+# flags checked 2026-10-28).
+
+id = "xenia"
+name = "Xenia Canary"
+website = "https://xenia.jp/"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^xenia(?:_canary)?\\.exe$"
+locations = ["{ProgramFiles}/Xenia", "{UserHome}/AppData/Local/Xenia"]
+
+[detect.linux]
+executable = "^xenia(?:_canary)?$"
+appimage = "(?i)^xenia(?:[-_].*)?\\.AppImage$"
+
+[detect.macos]
+executable = "^xenia(?:_canary)?$"
+path = ["xenia_canary"]
+
+# Every build is released under a commit tag. No macOS build here.
+[install.windows]
+source = "github"
+repo = "xenia-canary/xenia-canary"
+asset = '^xenia_canary_windows\.7z$'
+rolling = true
+[install.linux]
+source = "github"
+repo = "xenia-canary/xenia-canary"
+asset = '^xenia_canary_linux\.AppImage$'
+rolling = true
+
+[display]
+fullscreen = ["--fullscreen"]
+
+[[profile]]
+name = "Xbox 360"
+platforms = ["microsoft_xbox360"]
+extensions = ["iso", "xex", "zar"]
+args = ["{RomPath}"]

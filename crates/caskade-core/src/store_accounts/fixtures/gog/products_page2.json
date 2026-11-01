@@ -1,0 +1,5 @@
+{ "page": 2, "totalProducts": 5, "totalPages": 3,
+  "products": [
+    { "id": 1207666394, "title": "The Making of a Fixture", "worksOn": { "Windows": true, "Mac": true, "Linux": true }, "isGame": false, "isMovie": true },
+    { "id": 1207658930, "title": "The Witcher 2: Assassins of Kings Enhanced Edition", "worksOn": { "Windows": true, "Mac": true, "Linux": true }, "isGame": true, "isMovie": false, "dlcCount": 4 }
+  ] }

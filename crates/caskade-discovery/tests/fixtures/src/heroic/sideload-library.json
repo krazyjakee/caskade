@@ -1,0 +1,15 @@
+{
+  "games": [
+    {
+      "runner": "sideload",
+      "app_name": "fixtureSideload01",
+      "title": "Fixture Sideload",
+      "install": {
+        "executable": "/home/fixture/Games/Sideload/run.exe",
+        "platform": "Windows"
+      },
+      "folder_name": "/home/fixture/Games/Sideload",
+      "is_installed": true
+    }
+  ]
+}

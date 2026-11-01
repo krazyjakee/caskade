@@ -1,0 +1,24 @@
+{
+  "FixtureEpicApp": {
+    "app_name": "FixtureEpicApp",
+    "title": "Fixture Epic Quest",
+    "version": "1.0",
+    "platform": "Windows",
+    "install_path": "/home/fixture/Games/Heroic/Fixture Epic Quest",
+    "executable": "Binaries/FixtureEpic.exe",
+    "launch_parameters": "",
+    "is_dlc": false,
+    "install_size": 4096,
+    "can_run_offline": true,
+    "needs_verification": false
+  },
+  "FixtureEpicDlc": {
+    "app_name": "FixtureEpicDlc",
+    "title": "Fixture Epic Quest - Soundtrack",
+    "platform": "Windows",
+    "install_path": "/home/fixture/Games/Heroic/Fixture Epic Quest",
+    "executable": "",
+    "is_dlc": true,
+    "install_size": 10
+  }
+}

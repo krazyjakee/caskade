@@ -1,0 +1,85 @@
+{
+  "fields": [
+    {
+      "number": 1,
+      "wire": "message",
+      "fields": [
+        {
+          "number": 1,
+          "wire": "string",
+          "value": "agent"
+        },
+        {
+          "number": 2,
+          "wire": "string",
+          "value": "agent"
+        },
+        {
+          "number": 3,
+          "wire": "message",
+          "fields": [
+            {
+              "number": 1,
+              "wire": "string",
+              "value": "C:\\ProgramData\\Battle.net\\Agent"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 1,
+      "wire": "message",
+      "fields": [
+        {
+          "number": 1,
+          "wire": "string",
+          "value": "battle.net"
+        },
+        {
+          "number": 2,
+          "wire": "string",
+          "value": "bna"
+        },
+        {
+          "number": 3,
+          "wire": "message",
+          "fields": [
+            {
+              "number": 1,
+              "wire": "string",
+              "value": "C:\\Program Files (x86)\\Battle.net"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 1,
+      "wire": "message",
+      "fields": [
+        {
+          "number": 1,
+          "wire": "string",
+          "value": "wow"
+        },
+        {
+          "number": 2,
+          "wire": "string",
+          "value": "wow"
+        },
+        {
+          "number": 3,
+          "wire": "message",
+          "fields": [
+            {
+              "number": 1,
+              "wire": "string",
+              "value": "C:\\Games\\World of Warcraft"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

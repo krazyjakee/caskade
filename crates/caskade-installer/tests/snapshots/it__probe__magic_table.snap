@@ -1,0 +1,649 @@
+---
+source: crates/caskade-installer/tests/probe.rs
+expression: snapshots
+---
+{
+  "7z": {
+    "root": {
+      "id": "source:0",
+      "path": "7z",
+      "format": "seven_zip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 6,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 6,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "appimage": {
+    "root": {
+      "id": "source:0",
+      "path": "appimage",
+      "format": "app_image",
+      "platform": {
+        "type": "linux"
+      },
+      "role": "application",
+      "size": 64,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 64,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "bzip2": {
+    "root": {
+      "id": "source:0",
+      "path": "bzip2",
+      "format": "bzip2",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 4,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "cab": {
+    "root": {
+      "id": "source:0",
+      "path": "cab",
+      "format": "cab",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 4,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "chd": {
+    "root": {
+      "id": "source:0",
+      "path": "chd",
+      "format": "chd",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "data",
+      "size": 8,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 8,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "deb": {
+    "root": {
+      "id": "source:0",
+      "path": "deb",
+      "format": "deb",
+      "platform": {
+        "type": "linux"
+      },
+      "role": "installer",
+      "size": 21,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 21,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "dmg": {
+    "root": {
+      "id": "source:0",
+      "path": "dmg",
+      "format": "dmg",
+      "platform": {
+        "type": "macos"
+      },
+      "role": "unknown",
+      "size": 1024,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 1028,
+      "read_calls": 2,
+      "seek_calls": 3
+    }
+  },
+  "elf": {
+    "root": {
+      "id": "source:0",
+      "path": "elf",
+      "format": "elf",
+      "platform": {
+        "type": "linux"
+      },
+      "role": "application",
+      "size": 64,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 64,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "empty-zip": {
+    "root": {
+      "id": "source:0",
+      "path": "empty-zip",
+      "format": "zip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 4,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "gzip": {
+    "root": {
+      "id": "source:0",
+      "path": "gzip",
+      "format": "gzip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 3,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 3,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "iso": {
+    "root": {
+      "id": "source:0",
+      "path": "iso",
+      "format": "iso",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "data",
+      "size": 34816,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4105,
+      "read_calls": 3,
+      "seek_calls": 4
+    }
+  },
+  "macho-be": {
+    "root": {
+      "id": "source:0",
+      "path": "macho-be",
+      "format": "mach_o",
+      "platform": {
+        "type": "macos"
+      },
+      "role": "application",
+      "size": 4,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 4,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "macho-fat": {
+    "root": {
+      "id": "source:0",
+      "path": "macho-fat",
+      "format": "mach_o",
+      "platform": {
+        "type": "macos"
+      },
+      "role": "application",
+      "size": 4,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 4,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "macho-fat-swapped": {
+    "root": {
+      "id": "source:0",
+      "path": "macho-fat-swapped",
+      "format": "mach_o",
+      "platform": {
+        "type": "macos"
+      },
+      "role": "application",
+      "size": 4,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 4,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "macho-fat64": {
+    "root": {
+      "id": "source:0",
+      "path": "macho-fat64",
+      "format": "mach_o",
+      "platform": {
+        "type": "macos"
+      },
+      "role": "application",
+      "size": 4,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 4,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "macho-fat64-swapped": {
+    "root": {
+      "id": "source:0",
+      "path": "macho-fat64-swapped",
+      "format": "mach_o",
+      "platform": {
+        "type": "macos"
+      },
+      "role": "application",
+      "size": 4,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 4,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "macho-le": {
+    "root": {
+      "id": "source:0",
+      "path": "macho-le",
+      "format": "mach_o",
+      "platform": {
+        "type": "macos"
+      },
+      "role": "application",
+      "size": 4,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 4,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "macho64-be": {
+    "root": {
+      "id": "source:0",
+      "path": "macho64-be",
+      "format": "mach_o",
+      "platform": {
+        "type": "macos"
+      },
+      "role": "application",
+      "size": 4,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 4,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "macho64-le": {
+    "root": {
+      "id": "source:0",
+      "path": "macho64-le",
+      "format": "mach_o",
+      "platform": {
+        "type": "macos"
+      },
+      "role": "application",
+      "size": 4,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 4,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "nes": {
+    "root": {
+      "id": "source:0",
+      "path": "nes",
+      "format": "rom",
+      "platform": {
+        "type": "console_rom",
+        "value": {
+          "platform": "nes"
+        }
+      },
+      "role": "data",
+      "size": 4,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 4,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "pe": {
+    "root": {
+      "id": "source:0",
+      "path": "pe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "application",
+      "size": 256,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 256,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "pkg": {
+    "root": {
+      "id": "source:0",
+      "path": "pkg",
+      "format": "pkg",
+      "platform": {
+        "type": "macos"
+      },
+      "role": "installer",
+      "size": 4,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "rar4": {
+    "root": {
+      "id": "source:0",
+      "path": "rar4",
+      "format": "rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 7,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 7,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "rar5": {
+    "root": {
+      "id": "source:0",
+      "path": "rar5",
+      "format": "rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 8,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 8,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "rpm": {
+    "root": {
+      "id": "source:0",
+      "path": "rpm",
+      "format": "rpm",
+      "platform": {
+        "type": "linux"
+      },
+      "role": "installer",
+      "size": 4,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "script": {
+    "root": {
+      "id": "source:0",
+      "path": "script",
+      "format": "script",
+      "platform": {
+        "type": "linux"
+      },
+      "role": "application",
+      "size": 17,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 17,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "tar": {
+    "root": {
+      "id": "source:0",
+      "path": "tar",
+      "format": "tar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 512,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 512,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "unknown": {
+    "root": {
+      "id": "source:0",
+      "path": "unknown",
+      "format": "unknown",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 18,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 18,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "wim": {
+    "root": {
+      "id": "source:0",
+      "path": "wim",
+      "format": "wim",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "unknown",
+      "size": 8,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 8,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "xz": {
+    "root": {
+      "id": "source:0",
+      "path": "xz",
+      "format": "xz",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 6,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 6,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "zip": {
+    "root": {
+      "id": "source:0",
+      "path": "zip",
+      "format": "zip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 4,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "zstd": {
+    "root": {
+      "id": "source:0",
+      "path": "zstd",
+      "format": "zstd",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 4,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  }
+}

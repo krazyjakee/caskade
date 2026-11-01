@@ -1,0 +1,15 @@
+{
+  "gameId": "1234567890",
+  "rootGameId": "1234567890",
+  "name": "Fixture Game",
+  "language": "English",
+  "playTasks": [{
+    "isPrimary": true,
+    "category": "game",
+    "type": "FileTask",
+    "name": "Fixture Game",
+    "path": "FixtureGame.exe",
+    "workingDir": ".",
+    "arguments": ""
+  }]
+}

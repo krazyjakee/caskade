@@ -1,0 +1,24 @@
+schema_version = 1
+id = "iso-pc-disc"
+title = "Caskade Disc Fixture"
+layout = "disc"
+format = "iso"
+platform = "windows"
+input = "bin/disc/iso-pc-disc.iso"
+parts = ["bin/disc/iso-pc-disc.iso"]
+tree = "disc/iso-pc-disc.tree.json"
+launch_target = "FixtureGame.exe"
+[host.windows]
+outcome = "installed"
+strategy = "run_silent"
+runtime = "native_windows"
+
+[host.linux]
+outcome = "installed"
+strategy = "extract"
+runtime = "none"
+
+[host.macos]
+outcome = "installed"
+strategy = "extract"
+runtime = "none"

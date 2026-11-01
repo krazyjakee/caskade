@@ -1,0 +1,11 @@
+---
+source: crates/caskade-discovery/tests/parsers.rs
+expression: "parsers::plist::parse(&sample(\"Info.plist\"), &LIMITS).unwrap()"
+---
+{
+  "CFBundleIdentifier": "io.caskade.fixture.puzzle",
+  "CFBundleName": "Fixture Puzzle",
+  "CFBundleExecutable": "fixture-game",
+  "CFBundlePackageType": "APPL",
+  "LSApplicationCategoryType": "public.app-category.games"
+}

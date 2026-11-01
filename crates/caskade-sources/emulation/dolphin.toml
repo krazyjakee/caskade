@@ -1,0 +1,58 @@
+# SPDX-License-Identifier: MIT
+# Adapted from Playnite (c) 2020 Josef Nemec, commit 3e8abb241873e326e27c75b59dd0d2ea367698e3.
+# Source: source/Playnite/Emulation/Emulators/Dolphin/emulator.yaml
+# Windows rules/profiles ported with attribution; Linux/macOS rules by Caskade.
+# See ../THIRD-PARTY.md for the license and adaptation notes.
+
+
+id = "dolphin"
+name = "Dolphin"
+website = "https://dolphin-emu.org/"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^Dolphin\\.exe$"
+locations = ["{ProgramFiles}/Dolphin", "{AppData}/Dolphin", "{UserHome}/AppData/Local/Dolphin", "{UserHome}/scoop/apps/dolphin/current", "C:/ProgramData/chocolatey/lib/dolphin/tools"]
+
+[detect.linux]
+executable = "^(?:dolphin\\-emu)$"
+path = ["dolphin-emu"]
+flatpak = "org.DolphinEmu.dolphin-emu"
+appimage = "(?i)^Dolphin(?:[-_].*)?\\.AppImage$"
+locations = ["{UserHome}/Applications/Dolphin", "{UserHome}/Emulation/tools/dolphin", "{UserHome}/Emulation/tools/launchers", "/opt/dolphin"]
+
+[detect.macos]
+executable = "(?i)^(?:dolphin\\-emu|Dolphin)$"
+bundle = "org.dolphin-emu.dolphin"
+path = ["dolphin-emu"]
+locations = ["/Applications/Dolphin.app/Contents/MacOS", "{UserHome}/Applications/Dolphin.app/Contents/MacOS"]
+
+# Dolphin has no GitHub releases; its update endpoint names each build's
+# files. Stable Linux builds are Flatpak only.
+[install.windows]
+source = "dolphin"
+artifact = "Windows x64"
+[install.linux]
+source = "flatpak"
+app = "org.DolphinEmu.dolphin-emu"
+[install.macos]
+source = "dolphin"
+artifact = "macOS (ARM/Intel Universal)"
+
+[display]
+fullscreen = ["--config=Dolphin.Display.Fullscreen=True"]
+windowed = ["--config=Dolphin.Display.Fullscreen=False"]
+
+[[profile]]
+name = "Nintendo GameCube"
+platforms = ["nintendo_gamecube"]
+extensions = ["elf", "dol", "gcm", "tgc", "ciso", "gcz", "iso", "wad", "dff", "rvz", "m3u"]
+args = ["--config=Dolphin.Analytics.PermissionAsked=True", "--exec={RomPath}", "--batch"]
+requires = []
+
+[[profile]]
+name = "Nintendo Wii"
+platforms = ["nintendo_wii"]
+extensions = ["elf", "dol", "tgc", "wbfs", "ciso", "gcz", "iso", "wad", "dff", "rvz", "wia", "m3u"]
+args = ["--config=Dolphin.Analytics.PermissionAsked=True", "--exec={RomPath}", "--batch"]
+requires = []

@@ -1,0 +1,71 @@
+[
+  {
+    "path": "Engine",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "Engine/Binaries",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "Engine/Binaries/Win64",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "FixtureGame",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "FixtureGame.exe",
+    "kind": "file",
+    "size": 273408,
+    "sha256": "552ec0771276642c98698e69a0ac61205e35ecd7265cd95eff95a8b03c7c5e0b",
+    "executable": true
+  },
+  {
+    "path": "FixtureGame/Binaries",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "FixtureGame/Binaries/Win64",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "FixtureGame/Binaries/Win64/FixtureGame-Win64-Shipping.exe",
+    "kind": "file",
+    "size": 273408,
+    "sha256": "552ec0771276642c98698e69a0ac61205e35ecd7265cd95eff95a8b03c7c5e0b",
+    "executable": true
+  },
+  {
+    "path": "FixtureGame/Content",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "FixtureGame/Content/Paks",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "FixtureGame/Content/Paks/FixtureGame.pak",
+    "kind": "file",
+    "size": 57,
+    "sha256": "b95b942a58e59af861ad4c38c4efcb18e11492dcc6133267361aef0fff543711",
+    "executable": false
+  }
+]

@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: MIT
+# Authored for Caskade from docs/research/emulator-sources.md (sources and
+# flags checked 2026-10-28).
+
+id = "flycast"
+name = "Flycast"
+website = "https://github.com/flyinghead/flycast"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^flycast\\.exe$"
+locations = ["{ProgramFiles}/Flycast", "{UserHome}/AppData/Local/flycast", "{UserHome}/scoop/apps/flycast/current"]
+
+[detect.linux]
+executable = "^flycast$"
+path = ["flycast"]
+flatpak = "org.flycast.Flycast"
+appimage = "(?i)^flycast(?:[-_].*)?\\.AppImage$"
+locations = ["{UserHome}/Applications/Flycast", "{UserHome}/Emulation/tools/flycast"]
+
+[detect.macos]
+executable = "^Flycast$"
+bundle = "com.flyinghead.Flycast"
+locations = ["/Applications/Flycast.app/Contents/MacOS"]
+
+[install.windows]
+source = "github"
+repo = "flyinghead/flycast"
+asset = '^flycast-win64-[\d.]+\.zip$'
+[install.linux]
+source = "github"
+repo = "flyinghead/flycast"
+asset = '^flycast-x86_64-[\d.]+\.AppImage$'
+[install.macos]
+source = "github"
+repo = "flyinghead/flycast"
+asset = '^flycast-macOS-[\d.]+\.zip$'
+
+# No fullscreen flag: a one-launch config override instead.
+[display]
+fullscreen = ["-config", "window:fullscreen=yes"]
+windowed = ["-config", "window:fullscreen=no"]
+
+[[profile]]
+name = "Dreamcast"
+platforms = ["sega_dreamcast"]
+extensions = ["cdi", "gdi", "chd", "cue", "m3u"]
+args = ["{RomPath}"]

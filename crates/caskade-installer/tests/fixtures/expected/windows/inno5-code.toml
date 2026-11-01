@@ -1,0 +1,31 @@
+schema_version = 1
+id = "inno5-code"
+title = "Fixture Game"
+layout = "unity"
+format = "inno"
+platform = "windows"
+input = "bin/windows/inno5-code/setup.exe"
+parts = ["bin/windows/inno5-code/setup.exe"]
+tree = "windows/inno5-code.tree.json"
+launch_target = "FixtureGame.exe"
+
+[windows]
+builder = "ISCC"
+version = "5.6.1"
+features = ["CODE"]
+native_generated = ["code-path.txt={app}"]
+
+[host.windows]
+outcome = "Installed"
+strategy = "RunSilent"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

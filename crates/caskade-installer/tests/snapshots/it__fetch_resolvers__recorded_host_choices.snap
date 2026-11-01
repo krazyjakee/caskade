@@ -1,0 +1,115 @@
+---
+source: crates/caskade-installer/tests/fetch_resolvers.rs
+expression: snapshots
+---
+{
+  "linux": {
+    "downloads": [
+      {
+        "file_name": "7z2605-linux-x64.tar.xz",
+        "headers": {},
+        "sha256": "22cf82fcc6eb7474f1d5bb4f02c0f8ebd573a718089d6833dc30f8350a3b232e",
+        "size": 1579976,
+        "url": "https://fixture.invalid/assets/7z2605-linux-x64.tar.xz"
+      }
+    ]
+  },
+  "linux-arm64": {
+    "downloads": [
+      {
+        "file_name": "7z2605-linux-arm64.tar.xz",
+        "headers": {},
+        "sha256": "0b71f6cfc34669b3bf69f2347efd3429f77020665003a13b9cdc53b784270421",
+        "size": 1317128,
+        "url": "https://fixture.invalid/assets/7z2605-linux-arm64.tar.xz"
+      }
+    ]
+  },
+  "linux-exfat-root": {
+    "downloads": [
+      {
+        "file_name": "7z2605-linux-x64.tar.xz",
+        "headers": {},
+        "sha256": "22cf82fcc6eb7474f1d5bb4f02c0f8ebd573a718089d6833dc30f8350a3b232e",
+        "size": 1579976,
+        "url": "https://fixture.invalid/assets/7z2605-linux-x64.tar.xz"
+      }
+    ]
+  },
+  "linux-no-umu": {
+    "downloads": [
+      {
+        "file_name": "7z2605-linux-x64.tar.xz",
+        "headers": {},
+        "sha256": "22cf82fcc6eb7474f1d5bb4f02c0f8ebd573a718089d6833dc30f8350a3b232e",
+        "size": 1579976,
+        "url": "https://fixture.invalid/assets/7z2605-linux-x64.tar.xz"
+      }
+    ]
+  },
+  "macos": {
+    "downloads": [
+      {
+        "file_name": "7z2605-mac.tar.xz",
+        "headers": {},
+        "sha256": "12ef6830317743cfd3f0ab1724bde43fcc270d8b6d8564f8c12c2a2b7f993570",
+        "size": 1868068,
+        "url": "https://fixture.invalid/assets/7z2605-mac.tar.xz"
+      }
+    ]
+  },
+  "macos-arm64": {
+    "downloads": [
+      {
+        "file_name": "7z2605-mac.tar.xz",
+        "headers": {},
+        "sha256": "12ef6830317743cfd3f0ab1724bde43fcc270d8b6d8564f8c12c2a2b7f993570",
+        "size": 1868068,
+        "url": "https://fixture.invalid/assets/7z2605-mac.tar.xz"
+      }
+    ]
+  },
+  "macos-no-wine": {
+    "downloads": [
+      {
+        "file_name": "7z2605-mac.tar.xz",
+        "headers": {},
+        "sha256": "12ef6830317743cfd3f0ab1724bde43fcc270d8b6d8564f8c12c2a2b7f993570",
+        "size": 1868068,
+        "url": "https://fixture.invalid/assets/7z2605-mac.tar.xz"
+      }
+    ]
+  },
+  "windows": {
+    "needs_user": {
+      "type": "choose_asset",
+      "value": {
+        "assets": [
+          {
+            "name": "7z2605-x64.exe",
+            "sha256": "fd99e86f57d8f429ef5ed045bf98315af962e2309b0f1ba87a147a44c71647d0",
+            "size": 1663506,
+            "url": "https://fixture.invalid/assets/7z2605-x64.exe"
+          },
+          {
+            "name": "7z2605-x64.msi",
+            "sha256": "3fe4ab99fa15629c652944309a2b2bc6e41fc933fc6b63f5df1ebcf3aea68263",
+            "size": 2008576,
+            "url": "https://fixture.invalid/assets/7z2605-x64.msi"
+          }
+        ]
+      }
+    }
+  },
+  "windows-arm64": {
+    "downloads": [
+      {
+        "file_name": "7z2605-arm64.exe",
+        "headers": {},
+        "sha256": "86d5790d5dd84cab4636c3bb7fab10d3ed7cd3e57e6119401bd2769e28165268",
+        "size": 1595161,
+        "url": "https://fixture.invalid/assets/7z2605-arm64.exe"
+      }
+    ]
+  }
+}

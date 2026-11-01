@@ -1,0 +1,10 @@
+{
+  "records": [
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Valve\\Steam",
+      "values": {
+        "SteamPath": "C:\\Steam"
+      }
+    }
+  ]
+}

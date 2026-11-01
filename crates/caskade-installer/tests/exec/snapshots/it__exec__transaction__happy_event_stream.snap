@@ -1,0 +1,166 @@
+---
+source: crates/caskade-installer/tests/exec.rs
+expression: events
+---
+[
+  {
+    "bytes": 0,
+    "eta_secs": null,
+    "files": 0,
+    "job_id": "test-job",
+    "message": "started",
+    "phase": "install",
+    "step": null,
+    "total_bytes": 131077
+  },
+  {
+    "bytes": 0,
+    "eta_secs": null,
+    "files": 0,
+    "job_id": "test-job",
+    "message": "candidate_started",
+    "phase": "install",
+    "step": null,
+    "total_bytes": 131077
+  },
+  {
+    "bytes": 0,
+    "eta_secs": null,
+    "files": 0,
+    "job_id": "test-job",
+    "message": "step_started",
+    "phase": "install",
+    "step": 0,
+    "total_bytes": 131077
+  },
+  {
+    "bytes": 65536,
+    "eta_secs": null,
+    "files": 0,
+    "job_id": "test-job",
+    "message": "progress",
+    "phase": "install",
+    "step": 0,
+    "total_bytes": 131077
+  },
+  {
+    "bytes": 131072,
+    "eta_secs": null,
+    "files": 0,
+    "job_id": "test-job",
+    "message": "progress",
+    "phase": "install",
+    "step": 0,
+    "total_bytes": 131077
+  },
+  {
+    "bytes": 131072,
+    "eta_secs": null,
+    "files": 1,
+    "job_id": "test-job",
+    "message": "progress",
+    "phase": "install",
+    "step": 0,
+    "total_bytes": 131077
+  },
+  {
+    "bytes": 131072,
+    "eta_secs": null,
+    "files": 1,
+    "job_id": "test-job",
+    "message": "step_completed",
+    "phase": "install",
+    "step": 0,
+    "total_bytes": 131077
+  },
+  {
+    "bytes": 131072,
+    "eta_secs": null,
+    "files": 1,
+    "job_id": "test-job",
+    "message": "step_started",
+    "phase": "install",
+    "step": 1,
+    "total_bytes": 131077
+  },
+  {
+    "bytes": 131077,
+    "eta_secs": null,
+    "files": 1,
+    "job_id": "test-job",
+    "message": "progress",
+    "phase": "install",
+    "step": 1,
+    "total_bytes": 131077
+  },
+  {
+    "bytes": 131077,
+    "eta_secs": null,
+    "files": 2,
+    "job_id": "test-job",
+    "message": "progress",
+    "phase": "install",
+    "step": 1,
+    "total_bytes": 131077
+  },
+  {
+    "bytes": 131077,
+    "eta_secs": null,
+    "files": 2,
+    "job_id": "test-job",
+    "message": "step_completed",
+    "phase": "install",
+    "step": 1,
+    "total_bytes": 131077
+  },
+  {
+    "bytes": 131077,
+    "eta_secs": null,
+    "files": 2,
+    "job_id": "test-job",
+    "message": "step_started",
+    "phase": "install",
+    "step": 2,
+    "total_bytes": 131077
+  },
+  {
+    "bytes": 131077,
+    "eta_secs": null,
+    "files": 2,
+    "job_id": "test-job",
+    "message": "step_completed",
+    "phase": "install",
+    "step": 2,
+    "total_bytes": 131077
+  },
+  {
+    "bytes": 131077,
+    "eta_secs": null,
+    "files": 2,
+    "job_id": "test-job",
+    "message": "commit_started",
+    "phase": "install",
+    "step": null,
+    "total_bytes": 131077
+  },
+  {
+    "bytes": 131077,
+    "eta_secs": null,
+    "files": 2,
+    "job_id": "test-job",
+    "message": "committed",
+    "phase": "install",
+    "step": null,
+    "total_bytes": 131077
+  },
+  {
+    "bytes": 131077,
+    "eta_secs": null,
+    "files": 2,
+    "job_id": "test-job",
+    "message": "completed",
+    "phase": "install",
+    "step": null,
+    "total_bytes": 131077
+  }
+]

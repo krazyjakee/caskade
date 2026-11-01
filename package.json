@@ -1,0 +1,23 @@
+{
+  "name": "caskade",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "dev": "pnpm --filter @caskade/desktop dev",
+    "build": "pnpm --filter @caskade/desktop build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "test": "pnpm -r test",
+    "tauri": "pnpm --filter @caskade/desktop tauri",
+    "storybook": "pnpm --filter @caskade/storybook storybook",
+    "build-storybook": "pnpm --filter @caskade/storybook build-storybook",
+    "bindings": "cargo run -q -p caskade-desktop --bin export-bindings",
+    "i18n:extract": "pnpm --filter @caskade/i18n extract",
+    "i18n:check": "pnpm --filter @caskade/i18n check",
+    "i18n:compile": "pnpm --filter @caskade/i18n compile"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.3"
+  }
+}

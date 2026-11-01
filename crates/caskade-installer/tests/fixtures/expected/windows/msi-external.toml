@@ -1,0 +1,31 @@
+schema_version = 1
+id = "msi-external"
+title = "Fixture Game"
+layout = "unity"
+format = "msi"
+platform = "windows"
+input = "bin/windows/msi-external/setup.msi"
+parts = ["bin/windows/msi-external/setup.msi", "bin/windows/msi-external/fixture.cab"]
+tree = "windows/msi-external.tree.json"
+launch_target = "FixtureGame.exe"
+
+[windows]
+builder = "wixl"
+version = "0.103"
+features = ["external-cab"]
+native_generated = []
+
+[host.windows]
+outcome = "Installed"
+strategy = "RunSilent"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

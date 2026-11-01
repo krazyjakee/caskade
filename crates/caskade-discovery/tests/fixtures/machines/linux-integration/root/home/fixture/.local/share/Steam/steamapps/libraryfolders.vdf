@@ -1,0 +1,15 @@
+"libraryfolders"
+{
+	"0"
+	{
+		"path"		"/home/fixture/.local/share/Steam"
+		"label"		""
+		"apps"		{ "620" "4096" "1493710" "1" "1628350" "1" "228980" "1" }
+	}
+	"1"
+	{
+		"path"		"/mnt/games/SteamLibrary"
+		"label"		"Shared"
+		"apps"		{ "2000010" "8192" "2000020" "0" }
+	}
+}

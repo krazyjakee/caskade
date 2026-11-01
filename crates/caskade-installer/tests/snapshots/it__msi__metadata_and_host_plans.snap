@@ -1,0 +1,2367 @@
+---
+source: crates/caskade-installer/tests/msi.rs
+expression: snapshots
+---
+{
+  "msi-embedded": [
+    {
+      "properties": {
+        "Manufacturer": "Caskade",
+        "ProductCode": "{4B9D439B-A390-4134-AECD-4AD0ECA76327}",
+        "ProductLanguage": "1033",
+        "ProductName": "Caskade Fixture Game",
+        "ProductVersion": "1.0.0",
+        "UpgradeCode": "{C865996A-444F-4A46-BDDD-EA90118908F7}"
+      },
+      "files": [
+        {
+          "id": "F0",
+          "path": "FixtureGame.exe",
+          "size": 273408,
+          "sequence": 1,
+          "cabinet": "#fixture.cab"
+        },
+        {
+          "id": "F2",
+          "path": "FixtureGame_Data/globalgamemanagers",
+          "size": 65,
+          "sequence": 2,
+          "cabinet": "#fixture.cab"
+        },
+        {
+          "id": "F3",
+          "path": "UnityCrashHandler64.exe",
+          "size": 273408,
+          "sequence": 3,
+          "cabinet": "#fixture.cab"
+        },
+        {
+          "id": "F4",
+          "path": "UnityPlayer.dll",
+          "size": 0,
+          "sequence": 4,
+          "cabinet": "#fixture.cab"
+        }
+      ],
+      "media": [
+        {
+          "disk_id": 1,
+          "last_sequence": 4,
+          "cabinet": "#fixture.cab"
+        }
+      ],
+      "shortcuts": [],
+      "custom_actions": [],
+      "omitted_files": []
+    },
+    {
+      "linux": {
+        "candidates": [
+          {
+            "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "exact",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": []
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/qn",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "linux-exfat-root": {
+        "candidates": [
+          {
+            "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "exact",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": []
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/qn",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "linux-no-umu": {
+        "candidates": [
+          {
+            "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "exact",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": []
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "macos": {
+        "candidates": [
+          {
+            "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "exact",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": []
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "wine_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/qn",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "wine_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "wine_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "wine_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "macos-no-wine": {
+        "candidates": [
+          {
+            "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "exact",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": []
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "windows": {
+        "candidates": [
+          {
+            "handler": "msi",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "native"
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/qn",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "native"
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "native"
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "native"
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "exact",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": []
+          }
+        ],
+        "selected": 0,
+        "question": null
+      }
+    }
+  ],
+  "msi-external": [
+    {
+      "properties": {
+        "Manufacturer": "Caskade",
+        "ProductCode": "{8BC22C6B-3B0F-4B1A-B50F-86324EFC0721}",
+        "ProductLanguage": "1033",
+        "ProductName": "Caskade Fixture Game",
+        "ProductVersion": "1.0.0",
+        "UpgradeCode": "{C865996A-444F-4A46-BDDD-EA90118908F7}"
+      },
+      "files": [
+        {
+          "id": "F0",
+          "path": "FixtureGame.exe",
+          "size": 273408,
+          "sequence": 1,
+          "cabinet": "fixture.cab"
+        },
+        {
+          "id": "F2",
+          "path": "FixtureGame_Data/globalgamemanagers",
+          "size": 65,
+          "sequence": 2,
+          "cabinet": "fixture.cab"
+        },
+        {
+          "id": "F3",
+          "path": "UnityCrashHandler64.exe",
+          "size": 273408,
+          "sequence": 3,
+          "cabinet": "fixture.cab"
+        },
+        {
+          "id": "F4",
+          "path": "UnityPlayer.dll",
+          "size": 0,
+          "sequence": 4,
+          "cabinet": "fixture.cab"
+        }
+      ],
+      "media": [
+        {
+          "disk_id": 1,
+          "last_sequence": 4,
+          "cabinet": "fixture.cab"
+        }
+      ],
+      "shortcuts": [],
+      "custom_actions": [],
+      "omitted_files": []
+    },
+    {
+      "linux": {
+        "candidates": [
+          {
+            "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "exact",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": []
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/qn",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "linux-exfat-root": {
+        "candidates": [
+          {
+            "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "exact",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": []
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/qn",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "linux-no-umu": {
+        "candidates": [
+          {
+            "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "exact",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": []
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "macos": {
+        "candidates": [
+          {
+            "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "exact",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": []
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "wine_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/qn",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "wine_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "wine_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "wine_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "macos-no-wine": {
+        "candidates": [
+          {
+            "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "exact",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": []
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "windows": {
+        "candidates": [
+          {
+            "handler": "msi",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "native"
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/qn",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "native"
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "native"
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "native"
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "exact",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": []
+          }
+        ],
+        "selected": 0,
+        "question": null
+      }
+    }
+  ],
+  "msi-plus-cab": [
+    {
+      "properties": {
+        "ALLUSERS": "1",
+        "Manufacturer": "Caskade",
+        "ProductCode": "{E8AEE435-3746-51E3-B090-78112E5A78A7}",
+        "ProductLanguage": "1033",
+        "ProductName": "Caskade Fixture Game",
+        "ProductVersion": "1.0.0",
+        "UpgradeCode": "{C865996A-444F-4A46-BDDD-EA90118908F7}"
+      },
+      "files": [
+        {
+          "id": "F0",
+          "path": "FixtureGame.exe",
+          "size": 273408,
+          "sequence": 1,
+          "cabinet": "fixture.cab"
+        },
+        {
+          "id": "F2",
+          "path": "FixtureGame_Data/globalgamemanagers",
+          "size": 65,
+          "sequence": 2,
+          "cabinet": "fixture.cab"
+        },
+        {
+          "id": "F3",
+          "path": "UnityCrashHandler64.exe",
+          "size": 273408,
+          "sequence": 3,
+          "cabinet": "fixture.cab"
+        },
+        {
+          "id": "F4",
+          "path": "UnityPlayer.dll",
+          "size": 0,
+          "sequence": 4,
+          "cabinet": "fixture.cab"
+        }
+      ],
+      "media": [
+        {
+          "disk_id": 1,
+          "last_sequence": 4,
+          "cabinet": "fixture.cab"
+        }
+      ],
+      "shortcuts": [],
+      "custom_actions": [
+        {
+          "Action": "RecordFixturePath",
+          "ExtendedType": null,
+          "Source": "CASKADE_FIXTURE_PATH",
+          "Target": "[INSTALLDIR]",
+          "Type": 51
+        }
+      ],
+      "omitted_files": []
+    },
+    {
+      "linux": {
+        "candidates": [
+          {
+            "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.partial",
+                "message": "Table extraction omits custom actions, external shortcuts and files outside the application directory",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/qn",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "linux-exfat-root": {
+        "candidates": [
+          {
+            "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.partial",
+                "message": "Table extraction omits custom actions, external shortcuts and files outside the application directory",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/qn",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "linux-no-umu": {
+        "candidates": [
+          {
+            "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.partial",
+                "message": "Table extraction omits custom actions, external shortcuts and files outside the application directory",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "macos": {
+        "candidates": [
+          {
+            "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.partial",
+                "message": "Table extraction omits custom actions, external shortcuts and files outside the application directory",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "wine_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/qn",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "wine_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "wine_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "wine_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "macos-no-wine": {
+        "candidates": [
+          {
+            "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.partial",
+                "message": "Table extraction omits custom actions, external shortcuts and files outside the application directory",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "windows": {
+        "candidates": [
+          {
+            "handler": "msi",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "native"
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/qn",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "native"
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "native"
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "tool",
+                    "value": "msiexec"
+                  },
+                  "args": [
+                    "/i",
+                    "{caskade.source:source:0}",
+                    "/norestart",
+                    "INSTALLDIR={caskade.install_dir}",
+                    "TARGETDIR={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "native"
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.preset",
+                "message": "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "msi.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.partial",
+                "message": "Table extraction omits custom actions, external shortcuts and files outside the application directory",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      }
+    }
+  ]
+}

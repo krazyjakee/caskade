@@ -1,0 +1,51 @@
+# SPDX-License-Identifier: MIT
+# Adapted from Playnite (c) 2020 Josef Nemec, commit 3e8abb241873e326e27c75b59dd0d2ea367698e3.
+# Source: source/Playnite/Emulation/Emulators/melonDS/emulator.yaml
+# Windows rules/profiles ported with attribution; Linux/macOS rules by Caskade.
+# See ../THIRD-PARTY.md for the license and adaptation notes.
+
+
+id = "melonds"
+name = "melonDS"
+website = "http://melonds.kuribo64.net/"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^melonDS\\.exe$"
+locations = ["{ProgramFiles}/melonDS", "{AppData}/melonDS", "{UserHome}/AppData/Local/melonDS", "{UserHome}/scoop/apps/melonds/current", "C:/ProgramData/chocolatey/lib/melonds/tools"]
+
+[detect.linux]
+executable = "^(?:melonDS|melonds)$"
+path = ["melonDS", "melonds"]
+flatpak = "net.kuribo64.melonDS"
+appimage = "(?i)^melonDS(?:[-_].*)?\\.AppImage$"
+locations = ["{UserHome}/Applications/melonDS", "{UserHome}/Emulation/tools/melonds", "{UserHome}/Emulation/tools/launchers", "/opt/melonds"]
+
+[detect.macos]
+executable = "(?i)^(?:melonDS|melonDS)$"
+bundle = "net.kuribo64.melonDS"
+path = ["melonDS"]
+locations = ["/Applications/melonDS.app/Contents/MacOS", "{UserHome}/Applications/melonDS.app/Contents/MacOS"]
+
+[install.windows]
+source = "github"
+repo = "melonDS-emu/melonDS"
+asset = '^melonDS-[\d.]+-windows-x86_64\.zip$'
+[install.linux]
+source = "github"
+repo = "melonDS-emu/melonDS"
+asset = '^melonDS-[\d.]+-appimage-x86_64\.zip$'
+[install.macos]
+source = "github"
+repo = "melonDS-emu/melonDS"
+asset = '^melonDS-[\d.]+-macOS-universal\.zip$'
+
+[display]
+fullscreen = ["--fullscreen"]
+
+[[profile]]
+name = "Default"
+platforms = ["nintendo_ds"]
+extensions = ["nds", "zip"]
+args = ["{RomPath}"]
+requires = []

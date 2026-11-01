@@ -1,0 +1,18 @@
+{
+  "game": {
+    "id": 201,
+    "title": "Fixture Receipt Only"
+  },
+  "upload": {
+    "id": 2001,
+    "platforms": {
+      "linux": "all",
+      "osx": "all"
+    }
+  },
+  "files": [
+    "../outside.sh",
+    "start.sh"
+  ],
+  "installerName": "archive"
+}

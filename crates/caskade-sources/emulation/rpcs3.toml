@@ -1,0 +1,58 @@
+# SPDX-License-Identifier: MIT
+# Adapted from Playnite (c) 2020 Josef Nemec, commit 3e8abb241873e326e27c75b59dd0d2ea367698e3.
+# Source: source/Playnite/Emulation/Emulators/RPCS3/emulator.yaml
+# Windows rules/profiles ported with attribution; Linux/macOS rules by Caskade.
+# See ../THIRD-PARTY.md for the license and adaptation notes.
+
+
+id = "rpcs3"
+name = "RPCS3"
+website = "https://rpcs3.net/"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^rpcs3.*\\.exe$"
+locations = ["{ProgramFiles}/RPCS3", "{AppData}/RPCS3", "{UserHome}/AppData/Local/RPCS3", "{UserHome}/scoop/apps/rpcs3/current", "C:/ProgramData/chocolatey/lib/rpcs3/tools"]
+
+[detect.linux]
+executable = "^(?:rpcs3)$"
+path = ["rpcs3"]
+flatpak = "net.rpcs3.RPCS3"
+appimage = "(?i)^RPCS3(?:[-_].*)?\\.AppImage$"
+locations = ["{UserHome}/Applications/RPCS3", "{UserHome}/Emulation/tools/rpcs3", "{UserHome}/Emulation/tools/launchers", "/opt/rpcs3"]
+
+[detect.macos]
+executable = "(?i)^(?:rpcs3|RPCS3)$"
+bundle = "net.rpcs3.rpcs3"
+path = ["rpcs3"]
+locations = ["/Applications/RPCS3.app/Contents/MacOS", "{UserHome}/Applications/RPCS3.app/Contents/MacOS"]
+
+# Every master build is released in per-OS binaries repositories under a
+# commit tag (`build-<hash>`), so builds compare by publish time; the main
+# repository's releases have no files.
+[install.windows]
+source = "github"
+repo = "RPCS3/rpcs3-binaries-win"
+asset = '^rpcs3-v[\d.]+-\d+-[0-9a-f]+_win64_msvc\.7z$'
+rolling = true
+[install.linux]
+source = "github"
+repo = "RPCS3/rpcs3-binaries-linux"
+asset = '^rpcs3-v[\d.]+-\d+-[0-9a-f]+_linux64\.AppImage$'
+rolling = true
+[install.macos]
+source = "github"
+repo = "RPCS3/rpcs3-binaries-mac-arm64"
+asset = '^rpcs3-v[\d.]+-\d+-[0-9a-f]+_macos_aarch64\.7z$'
+rolling = true
+
+# `--fullscreen` works only with `--no-gui`, which every profile passes.
+[display]
+fullscreen = ["--fullscreen"]
+
+[[profile]]
+name = "Default"
+platforms = ["sony_playstation3"]
+extensions = ["bin", "elf", "self"]
+args = ["--no-gui", "{RomPath}"]
+requires = []

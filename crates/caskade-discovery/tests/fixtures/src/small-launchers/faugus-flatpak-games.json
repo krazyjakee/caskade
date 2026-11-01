@@ -1,0 +1,11 @@
+[
+  {
+    "gameid": "fixture-flatpak",
+    "title": "Faugus Flatpak Game",
+    "path": "/home/fixture/Faugus/Flatpak/drive_c/game/game.exe",
+    "prefix": "/home/fixture/Faugus/Flatpak",
+    "runner": "UMU-Proton-fixture",
+    "game_arguments": "--test",
+    "playtime": 300
+  }
+]

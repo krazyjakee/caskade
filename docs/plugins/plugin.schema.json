@@ -1,0 +1,281 @@
+{
+  "$defs": {
+    "Command": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "type": "object"
+    },
+    "Contributes": {
+      "additionalProperties": false,
+      "properties": {
+        "commands": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Command"
+          },
+          "type": "array"
+        },
+        "emulation": {
+          "default": [],
+          "description": "Data contributions such as emulator definitions (EMULATION-PLAN §8).",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "hooks": {
+          "default": [],
+          "description": "Events and interceptor points the backend handles.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "providers": {
+          "default": [],
+          "description": "Providers the backend implements, e.g. `library-source`.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "settings": {
+          "default": null,
+          "description": "A JSON Schema for the plugin's settings (#128)."
+        },
+        "slots": {
+          "default": [],
+          "description": "UI contribution points, e.g. `game.details.tabs`.",
+          "items": {
+            "$ref": "#/$defs/Slot"
+          },
+          "type": "array"
+        },
+        "themes": {
+          "default": [],
+          "description": "Theme folders the plugin bundles, each with a `theme.json` (#139).",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "views": {
+          "default": [],
+          "description": "Full pages with sidebar entries.",
+          "items": {
+            "$ref": "#/$defs/View"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "LibraryAccess": {
+      "enum": [
+        "none",
+        "read",
+        "write"
+      ],
+      "type": "string"
+    },
+    "Permissions": {
+      "additionalProperties": false,
+      "description": "What the plugin asks for; granted by the user (#124 enforces).",
+      "properties": {
+        "fs": {
+          "default": [],
+          "description": "Folders the backend may open, e.g. `$HOME/ROMs:ro`.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "library": {
+          "$ref": "#/$defs/LibraryAccess",
+          "default": "none"
+        },
+        "network": {
+          "default": [],
+          "description": "Hosts the backend may reach, e.g. `howlongtobeat.com`.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "process": {
+          "default": false,
+          "description": "May spawn processes and rewrite launch commands.",
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "Slot": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "modes": {
+          "default": [],
+          "description": "`desktop`, `console` or both. Empty means the slot's default: the\ngame page and Home show in console mode too, other slots only on the\ndesktop (#152).",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "slot": {
+          "type": "string"
+        },
+        "title": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "slot",
+        "id"
+      ],
+      "type": "object"
+    },
+    "View": {
+      "additionalProperties": false,
+      "properties": {
+        "icon": {
+          "default": null,
+          "description": "A lucide icon name for the sidebar entry.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "modes": {
+          "default": [],
+          "description": "`desktop`, `console` or both (default).",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "description": "Editor hint; ignored.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "activation": {
+      "default": [],
+      "description": "When to activate: `onStartup`, `onView:<id>`, `onEvent:<name>`,\n`onCommand:<id>`, `onRequest`.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "api": {
+      "description": "The `caskade:plugin` API range the plugin targets, e.g. `^0.1`.",
+      "type": "string"
+    },
+    "author": {
+      "default": null,
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "backend": {
+      "default": null,
+      "description": "The backend half: a WebAssembly component inside the plugin folder.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "contributes": {
+      "$ref": "#/$defs/Contributes",
+      "default": {
+        "commands": [],
+        "emulation": [],
+        "hooks": [],
+        "providers": [],
+        "settings": null,
+        "slots": [],
+        "themes": [],
+        "views": []
+      }
+    },
+    "description": {
+      "default": null,
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "id": {
+      "description": "Reverse-DNS, e.g. `dev.example.howlongtobeat`.",
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "permissions": {
+      "$ref": "#/$defs/Permissions",
+      "default": {
+        "fs": [],
+        "library": "none",
+        "network": [],
+        "process": false
+      }
+    },
+    "ui": {
+      "default": null,
+      "description": "The UI half: an ES module inside the plugin folder.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "version": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "version",
+    "api"
+  ],
+  "title": "Manifest",
+  "type": "object"
+}

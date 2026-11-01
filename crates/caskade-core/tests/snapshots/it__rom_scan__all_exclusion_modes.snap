@@ -1,0 +1,76 @@
+---
+source: crates/caskade-core/tests/rom_scan.rs
+assertion_line: 198
+expression: report
+---
+{
+  "games": [
+    {
+      "title": "Game",
+      "platform": "sony_playstation",
+      "regions": [
+        "us"
+      ],
+      "properties": [
+        "USA"
+      ],
+      "roms": [
+        {
+          "location": {
+            "type": "scanner",
+            "scannerId": "fixture-scanner",
+            "path": "Game (USA).bin"
+          },
+          "name": null,
+          "size": 4
+        }
+      ],
+      "files": [
+        "Game (USA).bin"
+      ]
+    },
+    {
+      "title": "Game",
+      "platform": "sony_playstation",
+      "regions": [],
+      "properties": [],
+      "roms": [
+        {
+          "location": {
+            "type": "scanner",
+            "scannerId": "fixture-scanner",
+            "path": "nested/beta/Game.bin"
+          },
+          "name": null,
+          "size": 4
+        }
+      ],
+      "files": [
+        "nested/beta/Game.bin"
+      ]
+    },
+    {
+      "title": "Game",
+      "platform": "sony_playstation",
+      "regions": [],
+      "properties": [],
+      "roms": [
+        {
+          "location": {
+            "type": "scanner",
+            "scannerId": "fixture-scanner",
+            "path": "nested/bios/Game.bin"
+          },
+          "name": null,
+          "size": 4
+        }
+      ],
+      "files": [
+        "nested/bios/Game.bin"
+      ]
+    }
+  ],
+  "warnings": [],
+  "enumerated": 9,
+  "skipped": 6
+}

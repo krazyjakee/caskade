@@ -1,0 +1,31 @@
+schema_version = 1
+id = "nsis251-ansi-solid"
+title = "Fixture Game"
+layout = "unity"
+format = "nsis"
+platform = "windows"
+input = "bin/windows/nsis251-ansi-solid/setup.exe"
+parts = ["bin/windows/nsis251-ansi-solid/setup.exe"]
+tree = "windows/nsis251-ansi-solid.tree.json"
+launch_target = "FixtureGame.exe"
+
+[windows]
+builder = "makensis"
+version = "2.51"
+features = ["ansi", "solid-lzma", "shortcut", "ini"]
+native_generated = ["config.ini:Game/InstallPath={app}"]
+
+[host.windows]
+outcome = "Installed"
+strategy = "RunSilent"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

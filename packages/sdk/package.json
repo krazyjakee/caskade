@@ -1,0 +1,29 @@
+{
+  "name": "@caskade/sdk",
+  "version": "0.1.1",
+  "description": "The plugin API for Caskade UI halves: definePlugin, the plugin context and React hooks. Its version is the caskade:plugin WIT version.",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/core-types.mjs --check && vitest run",
+    "core-types": "node scripts/core-types.mjs"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5",
+    "react": "^19"
+  },
+  "devDependencies": {
+    "@tanstack/react-query": "^5.105.0",
+    "@testing-library/react": "^16.3.3",
+    "@types/react": "^19.3.0",
+    "jsdom": "^30.1.3",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

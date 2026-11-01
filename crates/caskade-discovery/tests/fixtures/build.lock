@@ -1,0 +1,2454 @@
+{
+  "schema_version": 1,
+  "source_sha256": "35be739c82c530f4b8bedb02f54e36f53285e36849f145d103e67d70180d6e96",
+  "outputs": {
+    "formats/GameInstallInfo.sqlite": {
+      "size": 12288,
+      "sha256": "84ad2b58e531b12748e0d3833b8cc9d754337cebaad584ab2f12971df5494fc6"
+    },
+    "formats/Info.plist": {
+      "size": 497,
+      "sha256": "5af0783a02298898e85a70f65d316fb84dbe9e7acc1d2be6399d00ccaf76b4f1"
+    },
+    "formats/appinfo-v28.vdf": {
+      "size": 264,
+      "sha256": "4a1e2a9875e06108c53fc1a260708e44997ebac5a5ffcca4e3c97512428eced3"
+    },
+    "formats/appinfo-v29.vdf": {
+      "size": 287,
+      "sha256": "2302a381786b2a5612aaa0a7e3fca983d88a5ce6a6e3ee240e69c1455a121b4e"
+    },
+    "formats/fixture.desktop": {
+      "size": 288,
+      "sha256": "d8f8d95b22504d505e37175ff98bb36581226a894d4c60ad50b4cad863c1fb86"
+    },
+    "formats/fixture.url": {
+      "size": 57,
+      "sha256": "2af624deb2d66911699ba889e4dfd288601f0b45358e069bd51840470638dc93"
+    },
+    "formats/pga.db": {
+      "size": 8192,
+      "sha256": "87ee29d4775ff8685ffd68480aec1f76b30eb7076ea3a4f18cbb2daf77435368"
+    },
+    "formats/product.db": {
+      "size": 73,
+      "sha256": "e17d180f5f7a416da0bf9f7f8a048c831dcf3faba4ca10fafef829de4a2188f4"
+    },
+    "formats/registry66/proton/system.reg": {
+      "size": 865,
+      "sha256": "063e366438a4cb2b4ad025835a8174280dc9df38573397e0dcce6831d3d8559f"
+    },
+    "formats/registry66/proton/user.reg": {
+      "size": 865,
+      "sha256": "063e366438a4cb2b4ad025835a8174280dc9df38573397e0dcce6831d3d8559f"
+    },
+    "formats/registry66/wine/system.reg": {
+      "size": 502,
+      "sha256": "b3e16023909818c43e02a3f87c645cce3d0bd89c554b3593c1e2eb941fea4061"
+    },
+    "formats/registry66/wine/user.reg": {
+      "size": 865,
+      "sha256": "063e366438a4cb2b4ad025835a8174280dc9df38573397e0dcce6831d3d8559f"
+    },
+    "formats/shortcuts.vdf": {
+      "size": 204,
+      "sha256": "7260356815823074661431157e7b69ea968938ebf65274178f70ed4c7902886d"
+    },
+    "formats/unicode.lnk": {
+      "size": 574,
+      "sha256": "4978bdecfaf3e606ad5038a91374b5dcbb4ccee5fe90db13961814779edf0403"
+    },
+    "machines/epic-linux/machine.toml": {
+      "size": 152,
+      "sha256": "7471a576c2b32f8a9e33b730493eb6e25d6d8cec3a517b5479b90b7209311c56"
+    },
+    "machines/epic-linux/root/home/fixture/.config/Rare/Rare.conf": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/epic-linux/root/home/fixture/.config/heroic/GamesConfig/FixtureEpicApp.json": {
+      "size": 324,
+      "sha256": "69eaf91ed3aa5dde9d874edbcc24ddd62a8e150120735171b893ac5c8e877e86"
+    },
+    "machines/epic-linux/root/home/fixture/.config/heroic/gog_store/installed.json": {
+      "size": 455,
+      "sha256": "955e7ec748c239df200520bb90bfd302117af242215e86f0fa22424647b8ca8e"
+    },
+    "machines/epic-linux/root/home/fixture/.config/heroic/legendaryConfig/legendary/installed.json": {
+      "size": 670,
+      "sha256": "29138c1f198ea6d79e87c5093c13d1fccbac89ab17978b93f8de6e43dddca069"
+    },
+    "machines/epic-linux/root/home/fixture/.config/heroic/legendaryConfig/legendary/metadata/FixtureEpicApp.json": {
+      "size": 186,
+      "sha256": "fb7a2b9bb5b8472ab35a523f1663e7cf2074c68ad699507e614e3832380c7232"
+    },
+    "machines/epic-linux/root/home/fixture/.config/heroic/nile_config/nile/installed.json": {
+      "size": 156,
+      "sha256": "c1cd60b863af9155d5f90ec7d36901f3c2038c785f2f8cc907c7e92c25341973"
+    },
+    "machines/epic-linux/root/home/fixture/.config/heroic/nile_config/nile/library.json": {
+      "size": 154,
+      "sha256": "bad612c448668486d02d1dcb0bf89b32854c67ef45fded26a871fd087f31e948"
+    },
+    "machines/epic-linux/root/home/fixture/.config/heroic/sideload_apps/library.json": {
+      "size": 335,
+      "sha256": "ed1c8c461f0dbe8027e4fedd8c64a9f0b6a0304a8011b3cdf18d86adb28b34fc"
+    },
+    "machines/epic-linux/root/home/fixture/.config/heroic/store/timestamp.json": {
+      "size": 145,
+      "sha256": "decbd890939152f06277a586248edf571b8d3eed35ab67f29ad220d29152c89b"
+    },
+    "machines/epic-linux/root/home/fixture/.config/heroic/store_cache/gog_library.json": {
+      "size": 124,
+      "sha256": "21a393c772b76002fcca65e6f7b7247d11d6c6d7be7e01cbd667f99e72f960af"
+    },
+    "machines/epic-linux/root/home/fixture/.config/heroic/tools/proton/GE-Proton10-34/proton": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/epic-linux/root/home/fixture/.config/legendary/config.ini": {
+      "size": 99,
+      "sha256": "f6d83352e0c7644b48f6bcc9b59d41e60e9d8373c76da559f0eac178994caa40"
+    },
+    "machines/epic-linux/root/home/fixture/.config/legendary/installed.json": {
+      "size": 527,
+      "sha256": "02291530c34d6077b88be486fc0cebbb5c0fbb8b2b87ac420a51c17af3e9041d"
+    },
+    "machines/epic-linux/root/home/fixture/.config/legendary/metadata/FixtureEpicTwo.json": {
+      "size": 193,
+      "sha256": "d3a93ec7df446e1930c9a90d6c84c4aa551353baab12c8f0f8bb0c32013cea9c"
+    },
+    "machines/epic-linux/root/home/fixture/.local/share/Steam/steamapps/libraryfolders.vdf": {
+      "size": 77,
+      "sha256": "aa9c156ce7316a3938ac253e688c1654c20994354341a888d567da97d4ed7d1f"
+    },
+    "machines/epic-linux/root/home/fixture/.local/share/Steam/userdata/424242/config/shortcuts.vdf": {
+      "size": 1178,
+      "sha256": "413792acea718173ff3eea70dfac74a2e8f1a776ba082a65fdef82492df35763"
+    },
+    "machines/epic-linux/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/gog_store/installed.json": {
+      "size": 235,
+      "sha256": "bb9b40237c50cd4289bbd949b964b17527ff5262301894dc70054181c79a821a"
+    },
+    "machines/epic-linux/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/gog_store/library.json": {
+      "size": 102,
+      "sha256": "14c03366b180832083487439ac8b429bbcd44a235b7de841ef59a1d79ad299c4"
+    },
+    "machines/epic-linux/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/legendaryConfig/legendary/installed.json": {
+      "size": 286,
+      "sha256": "0f901867ff6d9fa298d1e60909bf9f8061d4d4a88a44c3faa9c564f0f3bb717c"
+    },
+    "machines/epic-linux/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/nile_config/nile/installed.json": {
+      "size": 155,
+      "sha256": "095dee75d43f74ee4180ff53b275eba9a1d298ff717470bb1f749b0f256050d4"
+    },
+    "machines/epic-linux/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/sideload_apps/library.json": {
+      "size": 534,
+      "sha256": "94c81924aa6f333155a71575382b2644cbaa872ff478821d4cc47b3cce9b5173"
+    },
+    "machines/epic-linux/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/store_cache/nile_library.json": {
+      "size": 127,
+      "sha256": "937195cf94218cac5e843f832d52fef04e92ce56f2833a605db4354dfe09baa8"
+    },
+    "machines/epic-linux/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak Amazon/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/epic-linux/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak Epic/Flat.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/epic-linux/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak GOG/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/epic-linux/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Sideload Two/run.sh": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/epic-linux/root/home/fixture/Games/Heroic/Fixture Amazon Drive/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/epic-linux/root/home/fixture/Games/Heroic/Fixture Epic Quest/Binaries/FixtureEpic.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/epic-linux/root/home/fixture/Games/Heroic/Fixture GOG Native/start.sh": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/epic-linux/root/home/fixture/Games/Heroic/Prefixes/default/Fixture Epic Quest/.fixture-empty": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/epic-linux/root/home/fixture/Games/Legendary/Fixture Epic Two/Two.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/epic-linux/root/home/fixture/Games/Legendary/Prefix/.fixture-empty": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/epic-linux/root/home/fixture/Games/Sideload/run.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/faugus-linux/machine.toml": {
+      "size": 91,
+      "sha256": "fc039501603c712da99888d46ee438bfe24000155f3d7ae1a76463e07c9a1946"
+    },
+    "machines/faugus-linux/root/home/fixture/.config/faugus-launcher/games.json": {
+      "size": 213,
+      "sha256": "6e55ddf7e6f3d055b5d5ef1e52c0552d952a58b8366cfbdc22a1eba03e7f39af"
+    },
+    "machines/faugus-linux/root/home/fixture/.local/share/faugus-launcher/games.json": {
+      "size": 940,
+      "sha256": "d57db836206c8672905bb9f4939ad628416226c01b106ad1fca8639b087b939e"
+    },
+    "machines/faugus-linux/root/home/fixture/.var/app/io.github.Faugus.faugus-launcher/data/faugus-launcher/games.json": {
+      "size": 281,
+      "sha256": "668f889dd84697d6bf19a5349228360012040d75040315aff6825178dfd66629"
+    },
+    "machines/faugus-linux/root/home/fixture/Faugus/Fixture/drive_c/game/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/faugus-linux/root/home/fixture/Faugus/Flatpak/drive_c/game/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/faugus-linux/root/home/fixture/Games/Faugus Native/game": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/expected.json": {
+      "size": 1533,
+      "sha256": "7765f81503ca78db74ba1844de58a36e8cc5468a683f07ea2dd5b57471bafbfe"
+    },
+    "machines/linux-integration/machine.toml": {
+      "size": 200,
+      "sha256": "f33d2298eff100005bfa022bfb97e47ab10c84675ba80739ae2dcddaa0a31f2c"
+    },
+    "machines/linux-integration/root/.fixture-provenance.txt": {
+      "size": 607,
+      "sha256": "d9acc94f515ad42ebcd694af4646ea7d893ad0362d751fef6200a971369fb0bd"
+    },
+    "machines/linux-integration/root/home/fixture/.config/Rare/Rare.conf": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/.config/heroic/GamesConfig/FixtureEpicApp.json": {
+      "size": 324,
+      "sha256": "69eaf91ed3aa5dde9d874edbcc24ddd62a8e150120735171b893ac5c8e877e86"
+    },
+    "machines/linux-integration/root/home/fixture/.config/heroic/gog_store/installed.json": {
+      "size": 626,
+      "sha256": "7d7d11d1d7139522d26c1921bf16227530ce8bad19a477d0845b119350c66d90"
+    },
+    "machines/linux-integration/root/home/fixture/.config/heroic/legendaryConfig/legendary/installed.json": {
+      "size": 670,
+      "sha256": "29138c1f198ea6d79e87c5093c13d1fccbac89ab17978b93f8de6e43dddca069"
+    },
+    "machines/linux-integration/root/home/fixture/.config/heroic/legendaryConfig/legendary/metadata/FixtureEpicApp.json": {
+      "size": 186,
+      "sha256": "fb7a2b9bb5b8472ab35a523f1663e7cf2074c68ad699507e614e3832380c7232"
+    },
+    "machines/linux-integration/root/home/fixture/.config/heroic/nile_config/nile/installed.json": {
+      "size": 156,
+      "sha256": "c1cd60b863af9155d5f90ec7d36901f3c2038c785f2f8cc907c7e92c25341973"
+    },
+    "machines/linux-integration/root/home/fixture/.config/heroic/nile_config/nile/library.json": {
+      "size": 154,
+      "sha256": "bad612c448668486d02d1dcb0bf89b32854c67ef45fded26a871fd087f31e948"
+    },
+    "machines/linux-integration/root/home/fixture/.config/heroic/sideload_apps/library.json": {
+      "size": 335,
+      "sha256": "ed1c8c461f0dbe8027e4fedd8c64a9f0b6a0304a8011b3cdf18d86adb28b34fc"
+    },
+    "machines/linux-integration/root/home/fixture/.config/heroic/store/timestamp.json": {
+      "size": 145,
+      "sha256": "decbd890939152f06277a586248edf571b8d3eed35ab67f29ad220d29152c89b"
+    },
+    "machines/linux-integration/root/home/fixture/.config/heroic/store_cache/gog_library.json": {
+      "size": 124,
+      "sha256": "21a393c772b76002fcca65e6f7b7247d11d6c6d7be7e01cbd667f99e72f960af"
+    },
+    "machines/linux-integration/root/home/fixture/.config/heroic/tools/proton/GE-Proton10-34/proton": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/.config/legendary/config.ini": {
+      "size": 99,
+      "sha256": "f6d83352e0c7644b48f6bcc9b59d41e60e9d8373c76da559f0eac178994caa40"
+    },
+    "machines/linux-integration/root/home/fixture/.config/legendary/installed.json": {
+      "size": 527,
+      "sha256": "02291530c34d6077b88be486fc0cebbb5c0fbb8b2b87ac420a51c17af3e9041d"
+    },
+    "machines/linux-integration/root/home/fixture/.config/legendary/metadata/FixtureEpicTwo.json": {
+      "size": 193,
+      "sha256": "d3a93ec7df446e1930c9a90d6c84c4aa551353baab12c8f0f8bb0c32013cea9c"
+    },
+    "machines/linux-integration/root/home/fixture/.config/lutris/games/puzzle-config.yml": {
+      "size": 112,
+      "sha256": "0738ae2e908157c3718f08710e17358c4f01de4700fe03ded2604d707c1f6861"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/Steam/appcache/appinfo.vdf": {
+      "size": 564,
+      "sha256": "466ee96f217453596e84a49fe79af8dd2c795544c878b9835602a723d74e055a"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/Steam/appcache/librarycache/2000010/0123456789abcdef0123456789abcdef01234567.jpg": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/Steam/appcache/librarycache/2000010/header.jpg": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/Steam/appcache/librarycache/620_icon.jpg": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/Steam/appcache/librarycache/620_library_600x900.jpg": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/Steam/config/config.vdf": {
+      "size": 226,
+      "sha256": "b5836fd8aed61c2c5f658f2d1fbfd2572676334242459f7ceba21c681e036083"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/Steam/config/loginusers.vdf": {
+      "size": 141,
+      "sha256": "10ee3133f0727699bc7ff2f64233168b91da6166f60344b9cf1d83c26bae78ea"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/Steam/package/steam_client_ubuntu12.manifest": {
+      "size": 40,
+      "sha256": "f5799c997f036eb25194ec62c9b380e572244f1c039ef20dbed496414b55aed2"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/Steam/steamapps/appmanifest_1493710.acf": {
+      "size": 177,
+      "sha256": "09d8b9863e87972d407f45ece203602e3440a69f84b3b334e4911e6054536fc9"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/Steam/steamapps/appmanifest_1628350.acf": {
+      "size": 193,
+      "sha256": "612e15296ba7287237dbf65984644ae8b714efad0987be25f491a7ca691bc54e"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/Steam/steamapps/appmanifest_228980.acf": {
+      "size": 187,
+      "sha256": "0c6c5c794d5561722fa7cf653d13e2f77e3dba8aa2990b83c8a72f79ef328699"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/Steam/steamapps/appmanifest_620.acf": {
+      "size": 192,
+      "sha256": "08b74327828162ad5c7e9c231984c27b4be0221c76df8a85a74f5bbf590a598f"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/Steam/steamapps/common/Fixture Puzzle/game": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/Steam/steamapps/compatdata/2294968294/pfx/system.reg": {
+      "size": 71,
+      "sha256": "7b5aabdf2e8b4557a55a74372ec88648a2721949dd76d7b3a224e91466f5d21e"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/Steam/steamapps/libraryfolders.vdf": {
+      "size": 271,
+      "sha256": "842236f656ab318be0c84749366d5c32f9de74379d453344cd8459c202c6be6e"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/Steam/userdata/424242/config/localconfig.vdf": {
+      "size": 239,
+      "sha256": "3668f59015cdca1c6649ad5e29f60c8ec1ee17d3358e4cf0dc2906ab726946d1"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/Steam/userdata/424242/config/shortcuts.vdf": {
+      "size": 1178,
+      "sha256": "413792acea718173ff3eea70dfac74a2e8f1a776ba082a65fdef82492df35763"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/applications/epic.desktop": {
+      "size": 160,
+      "sha256": "eedaf94ad286c5284fecc65f13016714943ea27ccaa28734e24e090a61d0f1ec"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/applications/hidden.desktop": {
+      "size": 102,
+      "sha256": "06b8e7bd4aeb1f29f1fc246e88d1da3c2467c536404c18c11b270191d74a8339"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/applications/indie.desktop": {
+      "size": 126,
+      "sha256": "f42de0c0e0aeb00b3b0e2bbfd190e2461344c8bb36c7af36eecf9449243f9af3"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/applications/lutris.desktop": {
+      "size": 104,
+      "sha256": "691de07061fdb6d21ca15ee9417001558d8026c5dfd16c26576f2eed8ce8e6c3"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/applications/runtime.desktop": {
+      "size": 112,
+      "sha256": "9d7d22e1101efe6e629de2f853c40a3b5dc98cd31c38f25e690f223c1e80fbb5"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/applications/steam.desktop": {
+      "size": 103,
+      "sha256": "9326e33a4844d5ebf9349a0f37556ea50e7603f44ef3590023d52422c0acc04a"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/applications/utility.desktop": {
+      "size": 94,
+      "sha256": "e5102ae9497ea14e9e5d8015a340eff5d1c0f611d8058c9b58bb9982f2b8d423"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/lutris/games/adventure-config.yml": {
+      "size": 186,
+      "sha256": "0e67ad289a813a22dc10ea33bb1170c39dabb69117f30109665719f76a2d45ef"
+    },
+    "machines/linux-integration/root/home/fixture/.local/share/lutris/pga.db": {
+      "size": 8192,
+      "sha256": "ab654a549c23604a2bd40bf0eea73664db11d1b861675af34ade476d17f6df27"
+    },
+    "machines/linux-integration/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/gog_store/installed.json": {
+      "size": 235,
+      "sha256": "bb9b40237c50cd4289bbd949b964b17527ff5262301894dc70054181c79a821a"
+    },
+    "machines/linux-integration/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/gog_store/library.json": {
+      "size": 102,
+      "sha256": "14c03366b180832083487439ac8b429bbcd44a235b7de841ef59a1d79ad299c4"
+    },
+    "machines/linux-integration/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/legendaryConfig/legendary/installed.json": {
+      "size": 286,
+      "sha256": "0f901867ff6d9fa298d1e60909bf9f8061d4d4a88a44c3faa9c564f0f3bb717c"
+    },
+    "machines/linux-integration/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/nile_config/nile/installed.json": {
+      "size": 155,
+      "sha256": "095dee75d43f74ee4180ff53b275eba9a1d298ff717470bb1f749b0f256050d4"
+    },
+    "machines/linux-integration/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/sideload_apps/library.json": {
+      "size": 534,
+      "sha256": "94c81924aa6f333155a71575382b2644cbaa872ff478821d4cc47b3cce9b5173"
+    },
+    "machines/linux-integration/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/store_cache/nile_library.json": {
+      "size": 127,
+      "sha256": "937195cf94218cac5e843f832d52fef04e92ce56f2833a605db4354dfe09baa8"
+    },
+    "machines/linux-integration/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak Amazon/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak Epic/Flat.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak GOG/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Sideload Two/run.sh": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/config/loginusers.vdf": {
+      "size": 141,
+      "sha256": "10ee3133f0727699bc7ff2f64233168b91da6166f60344b9cf1d83c26bae78ea"
+    },
+    "machines/linux-integration/root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/appmanifest_2000030.acf": {
+      "size": 182,
+      "sha256": "486c256fdc35254a0bcb0f234acc7dc52f2644d182a838982daae44817741809"
+    },
+    "machines/linux-integration/root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Fixture Flatpak Racer/game": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/libraryfolders.vdf": {
+      "size": 233,
+      "sha256": "873143728d32b21dd2c6a81da2b7db5a953677cf8f31cfff5d06a843b738d4ed"
+    },
+    "machines/linux-integration/root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/userdata/424242/config/localconfig.vdf": {
+      "size": 192,
+      "sha256": "23d7ac811ea1d46d25fd1fc22854379e06fbb2b7cdec6946baf96f0ac01d19d7"
+    },
+    "machines/linux-integration/root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/games/adventure-flatpak.yml": {
+      "size": 186,
+      "sha256": "0e67ad289a813a22dc10ea33bb1170c39dabb69117f30109665719f76a2d45ef"
+    },
+    "machines/linux-integration/root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/games/flatpak-only.yml": {
+      "size": 47,
+      "sha256": "81c2068d9e864051450f6191de063181062786bfc63559026c43ba9a4a54475a"
+    },
+    "machines/linux-integration/root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/pga.db": {
+      "size": 8192,
+      "sha256": "b6404ced01ad1766fc5b3f243c5ec60dfe302ef74001d2a8b974f06fc76cc3e6"
+    },
+    "machines/linux-integration/root/home/fixture/Games/Fixture Adventure/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/Games/Fixture Indie/icon.png": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/Games/Fixture Indie/indie": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/Games/Fixture Legacy/legacy": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/Games/Fixture Puzzle/game": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/Games/Fixture Windows Port/port.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/Games/Flatpak Only/game": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/Games/Heroic/Fixture Amazon Drive/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/Games/Heroic/Fixture Epic Quest/Binaries/FixtureEpic.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/Games/Heroic/Fixture GOG Native/start.sh": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/Games/Heroic/Prefixes/default/Fixture Epic Quest/.fixture-empty": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/Games/Legendary/Fixture Epic Two/Two.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/Games/Legendary/Prefix/.fixture-empty": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/Games/Local Café/game": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/Games/Sideload/run.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/home/fixture/Games/prefixes/fixture/drive_c/Game/adventure.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/mnt/games/SteamLibrary/steamapps/appmanifest_2000010.acf": {
+      "size": 182,
+      "sha256": "f9a200ec8ce4eca1ef1a42a28fef0ba5af68590ed3c94203184b09103e208fc4"
+    },
+    "machines/linux-integration/root/mnt/games/SteamLibrary/steamapps/appmanifest_2000020.acf": {
+      "size": 233,
+      "sha256": "f7b3e1fd219e5511ad2d8a4397139709d5a473fa4a69261614cd6de9c2b58859"
+    },
+    "machines/linux-integration/root/mnt/games/SteamLibrary/steamapps/common/Fixture Windows Quest/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/mnt/games/SteamLibrary/steamapps/compatdata/2000010/pfx/system.reg": {
+      "size": 71,
+      "sha256": "7b5aabdf2e8b4557a55a74372ec88648a2721949dd76d7b3a224e91466f5d21e"
+    },
+    "machines/linux-integration/root/mnt/games/SteamLibrary/steamapps/downloading/2000020/.fixture-empty": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/var/lib/flatpak/app/org.caskade.FixtureGame/current/active/files/bin/fixture": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-integration/root/var/lib/flatpak/app/org.caskade.FixtureGame/current/active/files/share/metainfo/org.caskade.FixtureGame.metainfo.xml": {
+      "size": 172,
+      "sha256": "51f7e9474c74098891478774a96a1371adab0d7518547d69171ae3d44304b6fa"
+    },
+    "machines/linux-integration/root/var/lib/flatpak/app/org.caskade.FixtureGame/current/active/metadata": {
+      "size": 59,
+      "sha256": "1bafc073cd8a483bddbb04542524a332e242681ec678426202357ba0d79afbca"
+    },
+    "machines/linux-integration/root/var/lib/flatpak/exports/share/applications/org.caskade.FixtureGame.desktop": {
+      "size": 157,
+      "sha256": "1a9538d883bfbec63a1ffddb8ed1a2e531ceebc1aeef195eab52ff7e856d0e09"
+    },
+    "machines/linux-integration/root/var/lib/flatpak/runtime/org.freedesktop.Platform/x86_64/24.08/active/metadata": {
+      "size": 40,
+      "sha256": "8bdf1697aea81b356677477d7959484a17489d5c42e52c71e302fabca672f4bd"
+    },
+    "machines/linux-mixed/machine.toml": {
+      "size": 152,
+      "sha256": "7471a576c2b32f8a9e33b730493eb6e25d6d8cec3a517b5479b90b7209311c56"
+    },
+    "machines/linux-mixed/root/home/fixture/.config/heroic/legendaryConfig/legendary/installed.json": {
+      "size": 307,
+      "sha256": "65b34e76c7b9356804dc8b7773292eb6120585007b52a1ee06a265c345feeb62"
+    },
+    "machines/linux-mixed/root/home/fixture/.config/lutris/games/fixture-adventure.yml": {
+      "size": 106,
+      "sha256": "156ce05063782b7eb31220d66b78ba43572a4f45fd67916421b9bf2b14321c1a"
+    },
+    "machines/linux-mixed/root/home/fixture/.local/share/Steam/appcache/appinfo.vdf": {
+      "size": 287,
+      "sha256": "2302a381786b2a5612aaa0a7e3fca983d88a5ce6a6e3ee240e69c1455a121b4e"
+    },
+    "machines/linux-mixed/root/home/fixture/.local/share/Steam/steamapps/appmanifest_620.acf": {
+      "size": 158,
+      "sha256": "f6581cc0db4baa49ceba456cf39a9469342563ac136bf6c1aeb4747a07b978d4"
+    },
+    "machines/linux-mixed/root/home/fixture/.local/share/Steam/steamapps/libraryfolders.vdf": {
+      "size": 148,
+      "sha256": "1f7ea2fe1f027da1dc54b4e77739cd95290c51a7982079eb215e78f2652c2995"
+    },
+    "machines/linux-mixed/root/home/fixture/.local/share/Steam/userdata/424242/config/shortcuts.vdf": {
+      "size": 204,
+      "sha256": "7260356815823074661431157e7b69ea968938ebf65274178f70ed4c7902886d"
+    },
+    "machines/linux-mixed/root/home/fixture/.local/share/applications/fixture-puzzle.desktop": {
+      "size": 288,
+      "sha256": "d8f8d95b22504d505e37175ff98bb36581226a894d4c60ad50b4cad863c1fb86"
+    },
+    "machines/linux-mixed/root/home/fixture/.local/share/lutris/pga.db": {
+      "size": 8192,
+      "sha256": "87ee29d4775ff8685ffd68480aec1f76b30eb7076ea3a4f18cbb2daf77435368"
+    },
+    "machines/linux-mixed/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/gog_store/installed.json": {
+      "size": 195,
+      "sha256": "540f840a222cc5df0ce3095e93848d81ce1c77c3e094effc27113e90bcfb5156"
+    },
+    "machines/linux-mixed/root/home/fixture/Games/Fixture Adventure/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-mixed/root/home/fixture/Games/Fixture Puzzle/game": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-wine/machine.toml": {
+      "size": 128,
+      "sha256": "d28ebe3f0b87e77f7be3d72fcb8ca6c21d5a635322b8363456b1de815c5ba61c"
+    },
+    "machines/linux-wine/root/home/fixture/.wine/drive_c/Games/Fixture Adventure/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/linux-wine/root/home/fixture/.wine/drive_c/ProgramData/Epic/EpicGamesLauncher/Data/Manifests/fixture.item": {
+      "size": 335,
+      "sha256": "a10e11dbd47b2867ebb5f8eb7ade3f162cdb4b8709e73684140c4202a313b3d3"
+    },
+    "machines/linux-wine/root/home/fixture/.wine/system.reg": {
+      "size": 438,
+      "sha256": "cf43e272afdbb0215e43d35b0dac9dc676bf403750e3d339fd3efa5427561fed"
+    },
+    "machines/linux-wine/root/home/fixture/.wine/user.reg": {
+      "size": 124,
+      "sha256": "3043992d2643a06538b3f892a32f82114a0bb9b6f066133222021122e34847ab"
+    },
+    "machines/lutris-linux/machine.toml": {
+      "size": 91,
+      "sha256": "fc039501603c712da99888d46ee438bfe24000155f3d7ae1a76463e07c9a1946"
+    },
+    "machines/lutris-linux/root/home/fixture/.config/heroic/gog_store/installed.json": {
+      "size": 195,
+      "sha256": "540f840a222cc5df0ce3095e93848d81ce1c77c3e094effc27113e90bcfb5156"
+    },
+    "machines/lutris-linux/root/home/fixture/.config/lutris/games/puzzle-config.yml": {
+      "size": 112,
+      "sha256": "0738ae2e908157c3718f08710e17358c4f01de4700fe03ded2604d707c1f6861"
+    },
+    "machines/lutris-linux/root/home/fixture/.local/share/Steam/steamapps/appmanifest_620.acf": {
+      "size": 158,
+      "sha256": "f6581cc0db4baa49ceba456cf39a9469342563ac136bf6c1aeb4747a07b978d4"
+    },
+    "machines/lutris-linux/root/home/fixture/.local/share/Steam/steamapps/libraryfolders.vdf": {
+      "size": 148,
+      "sha256": "1f7ea2fe1f027da1dc54b4e77739cd95290c51a7982079eb215e78f2652c2995"
+    },
+    "machines/lutris-linux/root/home/fixture/.local/share/lutris/games/adventure-config.yml": {
+      "size": 186,
+      "sha256": "0e67ad289a813a22dc10ea33bb1170c39dabb69117f30109665719f76a2d45ef"
+    },
+    "machines/lutris-linux/root/home/fixture/.local/share/lutris/pga.db": {
+      "size": 8192,
+      "sha256": "ab654a549c23604a2bd40bf0eea73664db11d1b861675af34ade476d17f6df27"
+    },
+    "machines/lutris-linux/root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/games/adventure-flatpak.yml": {
+      "size": 186,
+      "sha256": "0e67ad289a813a22dc10ea33bb1170c39dabb69117f30109665719f76a2d45ef"
+    },
+    "machines/lutris-linux/root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/games/flatpak-only.yml": {
+      "size": 47,
+      "sha256": "81c2068d9e864051450f6191de063181062786bfc63559026c43ba9a4a54475a"
+    },
+    "machines/lutris-linux/root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/pga.db": {
+      "size": 8192,
+      "sha256": "b6404ced01ad1766fc5b3f243c5ec60dfe302ef74001d2a8b974f06fc76cc3e6"
+    },
+    "machines/lutris-linux/root/home/fixture/Games/Fixture Adventure/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/lutris-linux/root/home/fixture/Games/Fixture Puzzle/game": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/lutris-linux/root/home/fixture/Games/Flatpak Only/game": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/lutris-linux/root/home/fixture/Games/Local Café/game": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/lutris-linux/root/home/fixture/Games/prefixes/fixture/drive_c/Game/adventure.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/macos-mixed/machine.toml": {
+      "size": 92,
+      "sha256": "a391290a6e8d658b207e88ebae2908ab0f453b4c345a17da1469d0b4c59b6fb8"
+    },
+    "machines/macos-mixed/root/Applications/Fixture Puzzle.app/Contents/Info.plist": {
+      "size": 497,
+      "sha256": "5af0783a02298898e85a70f65d316fb84dbe9e7acc1d2be6399d00ccaf76b4f1"
+    },
+    "machines/macos-mixed/root/Applications/Fixture Puzzle.app/Contents/MacOS/fixture-game": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/macos-mixed/root/Users/fixture/Games/Fixture Adventure/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/macos-mixed/root/Users/fixture/Library/Application Support/heroic/legendaryConfig/legendary/installed.json": {
+      "size": 308,
+      "sha256": "dc1a5fefa84a5457645158a65c0c5acb1d30412836db4503ce5231ac55024e5f"
+    },
+    "machines/minigalaxy-linux/machine.toml": {
+      "size": 91,
+      "sha256": "fc039501603c712da99888d46ee438bfe24000155f3d7ae1a76463e07c9a1946"
+    },
+    "machines/minigalaxy-linux/root/home/fixture/.config/heroic/gog_store/installed.json": {
+      "size": 195,
+      "sha256": "540f840a222cc5df0ce3095e93848d81ce1c77c3e094effc27113e90bcfb5156"
+    },
+    "machines/minigalaxy-linux/root/home/fixture/.config/minigalaxy/config.json": {
+      "size": 47,
+      "sha256": "640196d1edad6d0c6c67412c221b13be185c5c077ceca493f7321cae201cd164"
+    },
+    "machines/minigalaxy-linux/root/home/fixture/GOG Games/Fixture Adventure/goggame-1207658924.info": {
+      "size": 246,
+      "sha256": "51c292b4d2e4064de30bd25a836ae1a4c52f2ae599555959b95bdf497e6cc34d"
+    },
+    "machines/minigalaxy-linux/root/home/fixture/GOG Games/Fixture Adventure/start.sh": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/minigalaxy-linux/root/home/fixture/GOG Games/Legacy Info/minigalaxy-info.json": {
+      "size": 23,
+      "sha256": "2cdfde28f802c589637eff58fe37804c937ce46dac46e38b497712aa8261ce0f"
+    },
+    "machines/minigalaxy-linux/root/home/fixture/GOG Games/Legacy Info/start.sh": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/minigalaxy-linux/root/home/fixture/GOG Games/Windows Mini/drive_c/game/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/minigalaxy-linux/root/home/fixture/GOG Games/Windows Mini/drive_c/game/goggame-1207658925.info": {
+      "size": 202,
+      "sha256": "5a0e14dea911c5b26025925a5d39849242b3507a95f217ff2057824f9d82c064"
+    },
+    "machines/minigalaxy-linux/root/home/fixture/Games/Fixture Adventure/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/startmenu-windows/machine.toml": {
+      "size": 205,
+      "sha256": "88af80a336a41bab6b511f6d5094f7b2c83e60afa5453bd273476c5bc53f0026"
+    },
+    "machines/startmenu-windows/registry/hkcu.reg": {
+      "size": 104,
+      "sha256": "e76892f58ebb6af21d3cbee32c7b9825344c4e811abd31c895836209dde7efd1"
+    },
+    "machines/startmenu-windows/root/drives/c/Games/Fixture Adventure/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/startmenu-windows/root/drives/c/Portable/Portable Café/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/startmenu-windows/root/drives/c/Portable/Portable Café/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/startmenu-windows/root/drives/c/Portable/Portable Café/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/startmenu-windows/root/drives/c/Portable/Portable Café/icon.ico": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/startmenu-windows/root/drives/c/Portable/Portable Café/manual.pdf": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/startmenu-windows/root/drives/c/Portable/Portable Café/saves/.keep": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/startmenu-windows/root/drives/c/Portable/Portable Café/unins000.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/startmenu-windows/root/drives/c/ProgramData/Epic/EpicGamesLauncher/Data/Manifests/fixture.item": {
+      "size": 335,
+      "sha256": "a10e11dbd47b2867ebb5f8eb7ade3f162cdb4b8709e73684140c4202a313b3d3"
+    },
+    "machines/startmenu-windows/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Games/Portable Café.lnk": {
+      "size": 494,
+      "sha256": "954f217930dcc00fb4713722c025016d8bc715759f6e922df6f2e16e49f6e275"
+    },
+    "machines/startmenu-windows/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Games/Uninstall Portable Café.lnk": {
+      "size": 494,
+      "sha256": "954f217930dcc00fb4713722c025016d8bc715759f6e922df6f2e16e49f6e275"
+    },
+    "machines/startmenu-windows/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Portal 2.url": {
+      "size": 45,
+      "sha256": "274c9f39e22fb4bf59b2d63dab6c4370dfaca84fd37832398df5d5b829dac40b"
+    },
+    "machines/startmenu-windows/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Relative Café.lnk": {
+      "size": 248,
+      "sha256": "08baab8896780be435a0d4ba299595c14c4308bfe3b820388cd86da8d9feaa3a"
+    },
+    "machines/startmenu-windows/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Website.url": {
+      "size": 52,
+      "sha256": "91b81c78106efee649172e3d368c91c14602e1e28380b028959a6b2390bf7e8c"
+    },
+    "machines/startmenu-windows/root/drives/c/Steam/steam.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/startmenu-windows/root/drives/c/Steam/steamapps/appmanifest_620.acf": {
+      "size": 92,
+      "sha256": "ec850b392d84c29d025d538019d94f41ab6b942312b13cb438c7516eac23d641"
+    },
+    "machines/startmenu-windows/root/drives/c/Steam/steamapps/common/Portal 2/portal2.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/startmenu-windows/root/drives/c/Steam/steamapps/libraryfolders.vdf": {
+      "size": 73,
+      "sha256": "649f8dc817d798db657af95d423decf98932159e55feb2b76fcd643bf646d790"
+    },
+    "machines/startmenu-windows/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Absent Steam game.url": {
+      "size": 48,
+      "sha256": "e235185c14129260b4400c3f6b9eeb30ed6bb0c18414ce8a1a3b287bb35526f2"
+    },
+    "machines/startmenu-windows/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Corrupt.lnk": {
+      "size": 37,
+      "sha256": "6e160500b2a824a209198fe8198995bcf50b54e60aa0e59e098b9028efca3736"
+    },
+    "machines/startmenu-windows/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Environment.lnk": {
+      "size": 354,
+      "sha256": "c30513b51d2ebde260a40be5d0c6540ee4063b64638fefc9f062ac2f556eb620"
+    },
+    "machines/startmenu-windows/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Epic Adventure.url": {
+      "size": 122,
+      "sha256": "68686e21284a6db138fa3d5f8ed97efb9633af8c2872b9d14af53f57587c2c45"
+    },
+    "machines/startmenu-windows/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Game Community.url": {
+      "size": 55,
+      "sha256": "b3ae384797909f22618e514ae378ca07bd4f3211cce1ec8db42133c97189b03d"
+    },
+    "machines/startmenu-windows/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Maintenance.lnk": {
+      "size": 256,
+      "sha256": "634c41c197e04da1bb6e93735946e6e4ae9e5141ca3eaf247bee867590753cae"
+    },
+    "machines/startmenu-windows/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Manual Portable.lnk": {
+      "size": 494,
+      "sha256": "954f217930dcc00fb4713722c025016d8bc715759f6e922df6f2e16e49f6e275"
+    },
+    "machines/startmenu-windows/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Missing.lnk": {
+      "size": 199,
+      "sha256": "8c814e581b209bf49fa53c04bec527bf8ab5ac857f7512cbc220c92a26395113"
+    },
+    "machines/startmenu-windows/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Notes.lnk": {
+      "size": 250,
+      "sha256": "a777652e465f411a1e7ea717ac359f4dce5d7da8d9be8402eb53d5f6c3f60359"
+    },
+    "machines/startmenu-windows/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Portable Duplicate.lnk": {
+      "size": 494,
+      "sha256": "954f217930dcc00fb4713722c025016d8bc715759f6e922df6f2e16e49f6e275"
+    },
+    "machines/startmenu-windows/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Portal 2 command.lnk": {
+      "size": 226,
+      "sha256": "9e10a14f8586c3a833bb48aaeefba03aeaf4199d086c28bd1e09ffeed34972f1"
+    },
+    "machines/startmenu-windows/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Readme.lnk": {
+      "size": 494,
+      "sha256": "954f217930dcc00fb4713722c025016d8bc715759f6e922df6f2e16e49f6e275"
+    },
+    "machines/startmenu-windows/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Remove game.url": {
+      "size": 45,
+      "sha256": "9c35c65f371524469fa28cab9c17cac3ddd2ba72ce132145997e6d17b76ac98b"
+    },
+    "machines/startmenu-windows/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Support.lnk": {
+      "size": 494,
+      "sha256": "954f217930dcc00fb4713722c025016d8bc715759f6e922df6f2e16e49f6e275"
+    },
+    "machines/startmenu-windows/root/drives/c/Users/fixture/Games/Environment/data.win": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/startmenu-windows/root/drives/c/Users/fixture/Games/Environment/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/steam-linux-shared/machine.toml": {
+      "size": 152,
+      "sha256": "7471a576c2b32f8a9e33b730493eb6e25d6d8cec3a517b5479b90b7209311c56"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.local/share/Steam/appcache/appinfo.vdf": {
+      "size": 564,
+      "sha256": "466ee96f217453596e84a49fe79af8dd2c795544c878b9835602a723d74e055a"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.local/share/Steam/appcache/librarycache/2000010/0123456789abcdef0123456789abcdef01234567.jpg": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.local/share/Steam/appcache/librarycache/2000010/header.jpg": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.local/share/Steam/appcache/librarycache/620_icon.jpg": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.local/share/Steam/appcache/librarycache/620_library_600x900.jpg": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.local/share/Steam/config/config.vdf": {
+      "size": 226,
+      "sha256": "b5836fd8aed61c2c5f658f2d1fbfd2572676334242459f7ceba21c681e036083"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.local/share/Steam/config/loginusers.vdf": {
+      "size": 141,
+      "sha256": "10ee3133f0727699bc7ff2f64233168b91da6166f60344b9cf1d83c26bae78ea"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.local/share/Steam/package/steam_client_ubuntu12.manifest": {
+      "size": 40,
+      "sha256": "f5799c997f036eb25194ec62c9b380e572244f1c039ef20dbed496414b55aed2"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.local/share/Steam/steamapps/appmanifest_1493710.acf": {
+      "size": 177,
+      "sha256": "09d8b9863e87972d407f45ece203602e3440a69f84b3b334e4911e6054536fc9"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.local/share/Steam/steamapps/appmanifest_1628350.acf": {
+      "size": 193,
+      "sha256": "612e15296ba7287237dbf65984644ae8b714efad0987be25f491a7ca691bc54e"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.local/share/Steam/steamapps/appmanifest_228980.acf": {
+      "size": 187,
+      "sha256": "0c6c5c794d5561722fa7cf653d13e2f77e3dba8aa2990b83c8a72f79ef328699"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.local/share/Steam/steamapps/appmanifest_620.acf": {
+      "size": 192,
+      "sha256": "08b74327828162ad5c7e9c231984c27b4be0221c76df8a85a74f5bbf590a598f"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.local/share/Steam/steamapps/common/Fixture Puzzle/game": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.local/share/Steam/steamapps/libraryfolders.vdf": {
+      "size": 271,
+      "sha256": "842236f656ab318be0c84749366d5c32f9de74379d453344cd8459c202c6be6e"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.local/share/Steam/userdata/424242/config/localconfig.vdf": {
+      "size": 239,
+      "sha256": "3668f59015cdca1c6649ad5e29f60c8ec1ee17d3358e4cf0dc2906ab726946d1"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/config/loginusers.vdf": {
+      "size": 141,
+      "sha256": "10ee3133f0727699bc7ff2f64233168b91da6166f60344b9cf1d83c26bae78ea"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/appmanifest_2000030.acf": {
+      "size": 182,
+      "sha256": "486c256fdc35254a0bcb0f234acc7dc52f2644d182a838982daae44817741809"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Fixture Flatpak Racer/game": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/libraryfolders.vdf": {
+      "size": 233,
+      "sha256": "873143728d32b21dd2c6a81da2b7db5a953677cf8f31cfff5d06a843b738d4ed"
+    },
+    "machines/steam-linux-shared/root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/userdata/424242/config/localconfig.vdf": {
+      "size": 192,
+      "sha256": "23d7ac811ea1d46d25fd1fc22854379e06fbb2b7cdec6946baf96f0ac01d19d7"
+    },
+    "machines/steam-linux-shared/root/mnt/games/SteamLibrary/steamapps/appmanifest_2000010.acf": {
+      "size": 182,
+      "sha256": "f9a200ec8ce4eca1ef1a42a28fef0ba5af68590ed3c94203184b09103e208fc4"
+    },
+    "machines/steam-linux-shared/root/mnt/games/SteamLibrary/steamapps/appmanifest_2000020.acf": {
+      "size": 233,
+      "sha256": "f7b3e1fd219e5511ad2d8a4397139709d5a473fa4a69261614cd6de9c2b58859"
+    },
+    "machines/steam-linux-shared/root/mnt/games/SteamLibrary/steamapps/common/Fixture Windows Quest/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/steam-linux-shared/root/mnt/games/SteamLibrary/steamapps/compatdata/2000010/pfx/system.reg": {
+      "size": 71,
+      "sha256": "7b5aabdf2e8b4557a55a74372ec88648a2721949dd76d7b3a224e91466f5d21e"
+    },
+    "machines/steam-linux-shared/root/mnt/games/SteamLibrary/steamapps/downloading/2000020/.fixture-empty": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/steam-shortcuts/machine.toml": {
+      "size": 152,
+      "sha256": "7471a576c2b32f8a9e33b730493eb6e25d6d8cec3a517b5479b90b7209311c56"
+    },
+    "machines/steam-shortcuts/root/home/fixture/.local/share/Steam/config/config.vdf": {
+      "size": 181,
+      "sha256": "d237d3b09a021da6e34a227d5b1141f9777341a598fcacb9783eaf758587134c"
+    },
+    "machines/steam-shortcuts/root/home/fixture/.local/share/Steam/steamapps/compatdata/2294968294/pfx/system.reg": {
+      "size": 71,
+      "sha256": "7b5aabdf2e8b4557a55a74372ec88648a2721949dd76d7b3a224e91466f5d21e"
+    },
+    "machines/steam-shortcuts/root/home/fixture/.local/share/Steam/steamapps/libraryfolders.vdf": {
+      "size": 77,
+      "sha256": "aa9c156ce7316a3938ac253e688c1654c20994354341a888d567da97d4ed7d1f"
+    },
+    "machines/steam-shortcuts/root/home/fixture/.local/share/Steam/userdata/424242/config/shortcuts.vdf": {
+      "size": 1178,
+      "sha256": "413792acea718173ff3eea70dfac74a2e8f1a776ba082a65fdef82492df35763"
+    },
+    "machines/steam-shortcuts/root/home/fixture/Games/Fixture Indie/icon.png": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/steam-shortcuts/root/home/fixture/Games/Fixture Indie/indie": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/steam-shortcuts/root/home/fixture/Games/Fixture Legacy/legacy": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/steam-shortcuts/root/home/fixture/Games/Fixture Windows Port/port.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/steam-windows-libraries/machine.toml": {
+      "size": 300,
+      "sha256": "da4aad857d51d2ed80f2b9e26fa3ad803ef27b1cd8e56fccfa9f87af70c8de31"
+    },
+    "machines/steam-windows-libraries/registry/hkcu.reg": {
+      "size": 122,
+      "sha256": "4c053f49e3d2b6b98a1e472cc0d89b978cdd6d562f6978dcb4fd69696721bb95"
+    },
+    "machines/steam-windows-libraries/root/drives/c/Program Files (x86)/Steam/config/loginusers.vdf": {
+      "size": 141,
+      "sha256": "10ee3133f0727699bc7ff2f64233168b91da6166f60344b9cf1d83c26bae78ea"
+    },
+    "machines/steam-windows-libraries/root/drives/c/Program Files (x86)/Steam/package/steam_client_win32.manifest": {
+      "size": 37,
+      "sha256": "3d6ad62e7550aa2964e40d12836ea5498494a7eaa3afaf05de0d68312f587ef0"
+    },
+    "machines/steam-windows-libraries/root/drives/c/Program Files (x86)/Steam/steamapps/appmanifest_228980.acf": {
+      "size": 187,
+      "sha256": "0c6c5c794d5561722fa7cf653d13e2f77e3dba8aa2990b83c8a72f79ef328699"
+    },
+    "machines/steam-windows-libraries/root/drives/c/Program Files (x86)/Steam/steamapps/appmanifest_620.acf": {
+      "size": 192,
+      "sha256": "08b74327828162ad5c7e9c231984c27b4be0221c76df8a85a74f5bbf590a598f"
+    },
+    "machines/steam-windows-libraries/root/drives/c/Program Files (x86)/Steam/steamapps/common/Fixture Puzzle/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/steam-windows-libraries/root/drives/c/Program Files (x86)/Steam/steamapps/libraryfolders.vdf": {
+      "size": 264,
+      "sha256": "495bf5a53abd69e083e49358bdd3c9839b5d5053f43baad874b82bb15bb6a8bc"
+    },
+    "machines/steam-windows-libraries/root/drives/c/Program Files (x86)/Steam/userdata/424242/config/localconfig.vdf": {
+      "size": 239,
+      "sha256": "3668f59015cdca1c6649ad5e29f60c8ec1ee17d3358e4cf0dc2906ab726946d1"
+    },
+    "machines/steam-windows-libraries/root/drives/d/SteamLibrary/steamapps/appmanifest_2000040.acf": {
+      "size": 182,
+      "sha256": "febd478f83e8f4d2b62d5471e5a8e4435f73f87e74017fe26c8c93c9462534fb"
+    },
+    "machines/steam-windows-libraries/root/drives/d/SteamLibrary/steamapps/common/Fixture Updating Saga/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/steam-windows-libraries/root/drives/e/Games/SteamLibrary/steamapps/appmanifest_2000050.acf": {
+      "size": 170,
+      "sha256": "9f29bffe95535d973b878c13fa344c91a2721d9a9b25c4b0b6192d9112d18134"
+    },
+    "machines/steam-windows-libraries/root/drives/e/Games/SteamLibrary/steamapps/common/Fixture Drive E/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/machine.toml": {
+      "size": 205,
+      "sha256": "88af80a336a41bab6b511f6d5094f7b2c83e60afa5453bd273476c5bc53f0026"
+    },
+    "machines/uninstall-windows/records.json": {
+      "size": 41737,
+      "sha256": "e6daa8859a7a3ec0e132ba6968e5358216d5ea05883a899050aa910e0a38f69a"
+    },
+    "machines/uninstall-windows/registry/hkcu.reg": {
+      "size": 13339,
+      "sha256": "b1f76708c29c65abea880afb2a65732913dc36ab9a5be95fb2396724494d0eb9"
+    },
+    "machines/uninstall-windows/registry/hklm32.reg": {
+      "size": 6695,
+      "sha256": "9b90e67d04adce1c6fdbc8762b6e0db0aa858350a4d0ad6276d5fd556321694e"
+    },
+    "machines/uninstall-windows/registry/hklm64.reg": {
+      "size": 9642,
+      "sha256": "ce0603e172008bebc3c5af10195da9d9d649f81c533bf50039f5c758f93a2ed8"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Bastion/FNA.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Bastion/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Celeste/FNA.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Celeste/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Cities Skylines/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Cities Skylines/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Cities Skylines/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Cuphead/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Cuphead/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Cuphead/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Deltarune/data.win": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Deltarune/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Disco Elysium/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Disco Elysium/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Disco Elysium/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/FEZ/FNA.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/FEZ/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Firewatch/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Firewatch/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Firewatch/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Hollow Knight/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Hollow Knight/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Hollow Knight/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Hotline Miami/data.win": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Hotline Miami/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Hyper Light Drifter/data.win": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Hyper Light Drifter/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Kerbal Space Program/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Kerbal Space Program/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Kerbal Space Program/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Ori and the Blind Forest/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Ori and the Blind Forest/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Ori and the Blind Forest/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Outer Wilds/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Outer Wilds/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Outer Wilds/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Return of the Obra Dinn/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Return of the Obra Dinn/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Return of the Obra Dinn/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Rust/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Rust/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Rust/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Slime Rancher/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Slime Rancher/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Slime Rancher/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Stardew Valley/FNA.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Stardew Valley/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Subnautica/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Subnautica/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Subnautica/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Superhot/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Superhot/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Superhot/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Terraria/FNA.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Terraria/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Tunic/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Tunic/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Tunic/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Undertale/data.win": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Undertale/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Untitled Goose Game/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Untitled Goose Game/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Games/Untitled Goose Game/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/7-Zip/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/AMD Software/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Adobe Acrobat Reader/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Audacity/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Bitwarden/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Blender/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/CPUID CPU-Z/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Calibre/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Corsair iCUE/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/CrystalDiskInfo/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Discord/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Docker Desktop/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Dropbox/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Epic Games Launcher/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Everything/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/FileZilla/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/GIMP/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/GOG GALAXY/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Git/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Godot Engine/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Google Chrome/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Google Drive/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/HWiNFO/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/HandBrake/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Inkscape/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Intel Graphics Driver/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Java Development Kit/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/KeePass/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/LibreOffice/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Logitech G HUB/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/MSI Afterburner/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Microsoft .NET SDK/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Microsoft Edge/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Microsoft Teams/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Microsoft Visual C++ 2015-2022 Redistributable/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Mozilla Firefox/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/NVIDIA Graphics Driver/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Node.js/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Notepad++/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/OBS Studio/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/OneDrive/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/PowerToys/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/PuTTY/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Python 3.12/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Razer Synapse/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Rufus/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Slack/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Spotify/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Steam/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/SumatraPDF/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Unity Editor/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Unreal Engine/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/VLC media player/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/VMware Workstation/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/VirtualBox/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Visual Studio Code/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/WinSCP/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Windows SDK/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Wireshark/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Program Files/Zoom Workplace/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Steam/steamapps/appmanifest_620.acf": {
+      "size": 92,
+      "sha256": "ec850b392d84c29d025d538019d94f41ab6b942312b13cb438c7516eac23d641"
+    },
+    "machines/uninstall-windows/root/drives/c/Steam/steamapps/common/Portal 2/portal2.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/uninstall-windows/root/drives/c/Steam/steamapps/libraryfolders.vdf": {
+      "size": 73,
+      "sha256": "649f8dc817d798db657af95d423decf98932159e55feb2b76fcd643bf646d790"
+    },
+    "machines/windows-integration/expected.json": {
+      "size": 1114,
+      "sha256": "f7b62665b44df87bc7de665688b444ee8a411097ed63e1145e439a5299a44e2d"
+    },
+    "machines/windows-integration/machine.toml": {
+      "size": 270,
+      "sha256": "f05edc389ef4580d5af81f86aa6aa5f49fd5e96d93684bacad3d664d9dab2477"
+    },
+    "machines/windows-integration/records.json": {
+      "size": 41737,
+      "sha256": "e6daa8859a7a3ec0e132ba6968e5358216d5ea05883a899050aa910e0a38f69a"
+    },
+    "machines/windows-integration/registry/hkcu.reg": {
+      "size": 13339,
+      "sha256": "b1f76708c29c65abea880afb2a65732913dc36ab9a5be95fb2396724494d0eb9"
+    },
+    "machines/windows-integration/registry/hklm32.reg": {
+      "size": 7633,
+      "sha256": "61ae090ee51192ba6b0e4981d296b76e8ac22ecd944f4205e421f7e0b2a36e77"
+    },
+    "machines/windows-integration/registry/hklm64.reg": {
+      "size": 9952,
+      "sha256": "44f2db09766f7a0d3bcb15f393cb398d0fdaeeb9b777ea59cbaa37be7a097398"
+    },
+    "machines/windows-integration/root/drives/c/Amazon Games/Library/D2 Racer/racer.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/EA Games/The Sims 4/__Installer/installerdata.xml": {
+      "size": 240,
+      "sha256": "e43d221d9f1b4c543c677456642e1a78039673555e89cc7bffaa0430eb86c879"
+    },
+    "machines/windows-integration/root/drives/c/EA Games/The Sims 4/bin/Game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/GOG Games/The Witcher/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/GOG Games/The Witcher/goggame-1207658924.info": {
+      "size": 164,
+      "sha256": "aba0cc177a2cf4cf5c57c93a75eb75e017bfcfa51d4ea448d30db80d185ec788"
+    },
+    "machines/windows-integration/root/drives/c/Games/Anno 1800/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Assassins Creed II/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Bastion/FNA.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Bastion/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Celeste/FNA.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Celeste/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Cities Skylines/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Cities Skylines/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Cities Skylines/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Cuphead/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Cuphead/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Cuphead/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Deltarune/data.win": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Deltarune/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Disco Elysium/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Disco Elysium/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Disco Elysium/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/FEZ/FNA.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/FEZ/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Firewatch/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Firewatch/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Firewatch/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Fixture Adventure/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Hollow Knight/GameDefinition.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Hollow Knight/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Hollow Knight/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Hollow Knight/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Hotline Miami/data.win": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Hotline Miami/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Hyper Light Drifter/data.win": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Hyper Light Drifter/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Kerbal Space Program/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Kerbal Space Program/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Kerbal Space Program/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Ori and the Blind Forest/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Ori and the Blind Forest/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Ori and the Blind Forest/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Outer Wilds/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Outer Wilds/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Outer Wilds/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Return of the Obra Dinn/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Return of the Obra Dinn/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Return of the Obra Dinn/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Rust/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Rust/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Rust/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Slime Rancher/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Slime Rancher/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Slime Rancher/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Stardew Valley/FNA.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Stardew Valley/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Subnautica/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Subnautica/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Subnautica/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Superhot/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Superhot/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Superhot/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Terraria/FNA.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Terraria/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Tunic/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Tunic/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Tunic/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Undertale/data.win": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Undertale/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Untitled Goose Game/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Untitled Goose Game/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/Untitled Goose Game/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Games/World of Warcraft/Wow.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Portable/Portable Café/Game_Data/globalgamemanagers": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Portable/Portable Café/UnityPlayer.dll": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Portable/Portable Café/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Portable/Portable Café/icon.ico": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Portable/Portable Café/manual.pdf": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Portable/Portable Café/saves/.keep": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Portable/Portable Café/unins000.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files (x86)/Battle.net/Battle.net.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files (x86)/Epic Games/Launcher/Portal/Binaries/Win64/EpicGamesLauncher.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files (x86)/GOG Galaxy/GalaxyClient.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files (x86)/Ubisoft/Ubisoft Game Launcher/UbisoftConnect.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/7-Zip/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/AMD Software/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Adobe Acrobat Reader/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Audacity/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Bitwarden/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Blender/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/CPUID CPU-Z/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Calibre/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Corsair iCUE/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/CrystalDiskInfo/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Discord/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Docker Desktop/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Dropbox/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Electronic Arts/EA Desktop/EA Desktop/EADesktop.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Epic Games Launcher/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Epic Games/Library Alias/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Everything/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/FileZilla/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/GIMP/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/GOG GALAXY/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Git/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Godot Engine/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Google Chrome/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Google Drive/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/HWiNFO/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/HandBrake/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Inkscape/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Intel Graphics Driver/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Java Development Kit/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/KeePass/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/LibreOffice/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Logitech G HUB/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/MSI Afterburner/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Microsoft .NET SDK/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Microsoft Edge/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Microsoft Teams/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Microsoft Visual C++ 2015-2022 Redistributable/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Mozilla Firefox/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/NVIDIA Graphics Driver/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Node.js/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Notepad++/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/OBS Studio/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/OneDrive/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/PowerToys/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/PuTTY/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Python 3.12/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Razer Synapse/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Rockstar Games/Launcher/Launcher.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Rufus/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Slack/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Spotify/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Steam/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/SumatraPDF/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Unity Editor/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Unreal Engine/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/VLC media player/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/VMware Workstation/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/VirtualBox/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Visual Studio Code/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/WinSCP/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Windows SDK/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Wireshark/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Program Files/Zoom Workplace/app.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/ProgramData/Battle.net/Agent/product.db": {
+      "size": 149,
+      "sha256": "1ea02ce3840bea4415440dae964e37989c1a7a159fd818d4683d027139212ce7"
+    },
+    "machines/windows-integration/root/drives/c/ProgramData/Epic/EpicGamesLauncher/Data/Manifests/fixture.item": {
+      "size": 335,
+      "sha256": "a10e11dbd47b2867ebb5f8eb7ade3f162cdb4b8709e73684140c4202a313b3d3"
+    },
+    "machines/windows-integration/root/drives/c/ProgramData/Epic/EpicGamesLauncher/Data/Manifests/library.item": {
+      "size": 276,
+      "sha256": "8e037eab746bd291cab8c48bd47c373258bf1b1132565f52e99bd3ce02e4c5c3"
+    },
+    "machines/windows-integration/root/drives/c/ProgramData/GOG.com/Galaxy/storage/galaxy-2.0.db": {
+      "size": 20480,
+      "sha256": "a2fdad078965f08f6b00fa3cc121ffa17ddc8e46dfc2e518f48ad062ab0e4a58"
+    },
+    "machines/windows-integration/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Games/Portable Café.lnk": {
+      "size": 494,
+      "sha256": "954f217930dcc00fb4713722c025016d8bc715759f6e922df6f2e16e49f6e275"
+    },
+    "machines/windows-integration/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Games/Uninstall Portable Café.lnk": {
+      "size": 494,
+      "sha256": "954f217930dcc00fb4713722c025016d8bc715759f6e922df6f2e16e49f6e275"
+    },
+    "machines/windows-integration/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Hollow Knight.lnk": {
+      "size": 263,
+      "sha256": "6879eca242aa1f3e4e88c8eca838cee1e277490d1259abcee009195570960168"
+    },
+    "machines/windows-integration/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Portal 2.url": {
+      "size": 45,
+      "sha256": "274c9f39e22fb4bf59b2d63dab6c4370dfaca84fd37832398df5d5b829dac40b"
+    },
+    "machines/windows-integration/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Relative Café.lnk": {
+      "size": 248,
+      "sha256": "08baab8896780be435a0d4ba299595c14c4308bfe3b820388cd86da8d9feaa3a"
+    },
+    "machines/windows-integration/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Website.url": {
+      "size": 52,
+      "sha256": "91b81c78106efee649172e3d368c91c14602e1e28380b028959a6b2390bf7e8c"
+    },
+    "machines/windows-integration/root/drives/c/ProgramData/Riot Games/Metadata/riot_client.live/riot_client.live.product_settings.yaml": {
+      "size": 55,
+      "sha256": "5ca3243a05f2a6378424ebe00d9a7ffbd424d6d832df9d19332a77142641d3ca"
+    },
+    "machines/windows-integration/root/drives/c/ProgramData/Riot Games/Metadata/valorant.live/valorant.live.product_settings.yaml": {
+      "size": 85,
+      "sha256": "d322dbffeab9d5b2ff3ecd0fecf832d1efcd6b21e251d10480339d2c53f06518"
+    },
+    "machines/windows-integration/root/drives/c/ProgramData/Riot Games/RiotClientInstalls.json": {
+      "size": 98,
+      "sha256": "6451a2db7d441dfa30a299d54ade7f4c9ddc1627673a6fcb312213fee3872c69"
+    },
+    "machines/windows-integration/root/drives/c/Riot Games/Riot Client/RiotClientServices.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Riot Games/VALORANT/live/VALORANT.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Rockstar Games/D2 Heist/heist.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Steam/steam.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Steam/steamapps/appmanifest_620.acf": {
+      "size": 92,
+      "sha256": "ec850b392d84c29d025d538019d94f41ab6b942312b13cb438c7516eac23d641"
+    },
+    "machines/windows-integration/root/drives/c/Steam/steamapps/common/Portal 2/portal2.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Steam/steamapps/libraryfolders.vdf": {
+      "size": 73,
+      "sha256": "649f8dc817d798db657af95d423decf98932159e55feb2b76fcd643bf646d790"
+    },
+    "machines/windows-integration/root/drives/c/Users/fixture/AppData/Local/Amazon Games/App/Amazon Games.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Users/fixture/AppData/Local/Amazon Games/Data/Games/Sql/GameInstallInfo.sqlite": {
+      "size": 12288,
+      "sha256": "280286ce5f38e98b7ee65c0a77741932f85b1783ae422b152a10a6aa6ffd395e"
+    },
+    "machines/windows-integration/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Absent Steam game.url": {
+      "size": 48,
+      "sha256": "e235185c14129260b4400c3f6b9eeb30ed6bb0c18414ce8a1a3b287bb35526f2"
+    },
+    "machines/windows-integration/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Corrupt.lnk": {
+      "size": 37,
+      "sha256": "6e160500b2a824a209198fe8198995bcf50b54e60aa0e59e098b9028efca3736"
+    },
+    "machines/windows-integration/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Environment.lnk": {
+      "size": 354,
+      "sha256": "c30513b51d2ebde260a40be5d0c6540ee4063b64638fefc9f062ac2f556eb620"
+    },
+    "machines/windows-integration/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Epic Adventure.url": {
+      "size": 122,
+      "sha256": "68686e21284a6db138fa3d5f8ed97efb9633af8c2872b9d14af53f57587c2c45"
+    },
+    "machines/windows-integration/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Game Community.url": {
+      "size": 55,
+      "sha256": "b3ae384797909f22618e514ae378ca07bd4f3211cce1ec8db42133c97189b03d"
+    },
+    "machines/windows-integration/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Maintenance.lnk": {
+      "size": 256,
+      "sha256": "634c41c197e04da1bb6e93735946e6e4ae9e5141ca3eaf247bee867590753cae"
+    },
+    "machines/windows-integration/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Manual Portable.lnk": {
+      "size": 494,
+      "sha256": "954f217930dcc00fb4713722c025016d8bc715759f6e922df6f2e16e49f6e275"
+    },
+    "machines/windows-integration/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Missing.lnk": {
+      "size": 199,
+      "sha256": "8c814e581b209bf49fa53c04bec527bf8ab5ac857f7512cbc220c92a26395113"
+    },
+    "machines/windows-integration/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Notes.lnk": {
+      "size": 250,
+      "sha256": "a777652e465f411a1e7ea717ac359f4dce5d7da8d9be8402eb53d5f6c3f60359"
+    },
+    "machines/windows-integration/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Portable Duplicate.lnk": {
+      "size": 494,
+      "sha256": "954f217930dcc00fb4713722c025016d8bc715759f6e922df6f2e16e49f6e275"
+    },
+    "machines/windows-integration/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Portal 2 command.lnk": {
+      "size": 226,
+      "sha256": "9e10a14f8586c3a833bb48aaeefba03aeaf4199d086c28bd1e09ffeed34972f1"
+    },
+    "machines/windows-integration/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Readme.lnk": {
+      "size": 494,
+      "sha256": "954f217930dcc00fb4713722c025016d8bc715759f6e922df6f2e16e49f6e275"
+    },
+    "machines/windows-integration/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Remove game.url": {
+      "size": 45,
+      "sha256": "9c35c65f371524469fa28cab9c17cac3ddd2ba72ce132145997e6d17b76ac98b"
+    },
+    "machines/windows-integration/root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Support.lnk": {
+      "size": 494,
+      "sha256": "954f217930dcc00fb4713722c025016d8bc715759f6e922df6f2e16e49f6e275"
+    },
+    "machines/windows-integration/root/drives/c/Users/fixture/Games/Environment/data.win": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/c/Users/fixture/Games/Environment/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/d/.GamingRoot": {
+      "size": 30,
+      "sha256": "97e6a3d538820824d92400b306b37a75592d19c279c12668c19798c446e2bb93"
+    },
+    "machines/windows-integration/root/drives/d/XboxGames/Fixture Game/Content/AppxManifest.xml": {
+      "size": 457,
+      "sha256": "190e80648ef476d3b6bc0b5510f15bee909411477fb1950472f812c632dc2760"
+    },
+    "machines/windows-integration/root/drives/d/XboxGames/Fixture Game/Content/MicrosoftGame.config": {
+      "size": 405,
+      "sha256": "98c20c72751317e3b930f0e146653a5dfdb877fafba0425edd9a7cb264895806"
+    },
+    "machines/windows-integration/root/drives/d/XboxGames/Fixture Game/Content/bin/play.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-integration/root/drives/d/XboxGames/Fixture Game/Content/logo.png": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-mixed/machine.toml": {
+      "size": 239,
+      "sha256": "7e7a87d28e69118c78b83c1dcce59c515afaa92bb12df680a8270c40875453f0"
+    },
+    "machines/windows-mixed/registry/hkcu.reg": {
+      "size": 124,
+      "sha256": "3043992d2643a06538b3f892a32f82114a0bb9b6f066133222021122e34847ab"
+    },
+    "machines/windows-mixed/registry/hklm64.reg": {
+      "size": 438,
+      "sha256": "cf43e272afdbb0215e43d35b0dac9dc676bf403750e3d339fd3efa5427561fed"
+    },
+    "machines/windows-mixed/root/drives/c/Games/Fixture Adventure/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-mixed/root/drives/c/Games/Fixture Café/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    },
+    "machines/windows-mixed/root/drives/c/ProgramData/Amazon Games/Data/Games/Sql/GameInstallInfo.sqlite": {
+      "size": 12288,
+      "sha256": "84ad2b58e531b12748e0d3833b8cc9d754337cebaad584ab2f12971df5494fc6"
+    },
+    "machines/windows-mixed/root/drives/c/ProgramData/Battle.net/Agent/product.db": {
+      "size": 73,
+      "sha256": "e17d180f5f7a416da0bf9f7f8a048c831dcf3faba4ca10fafef829de4a2188f4"
+    },
+    "machines/windows-mixed/root/drives/c/ProgramData/Epic/EpicGamesLauncher/Data/Manifests/fixture.item": {
+      "size": 335,
+      "sha256": "a10e11dbd47b2867ebb5f8eb7ade3f162cdb4b8709e73684140c4202a313b3d3"
+    },
+    "machines/windows-mixed/root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Fixture Puzzle.lnk": {
+      "size": 574,
+      "sha256": "4978bdecfaf3e606ad5038a91374b5dcbb4ccee5fe90db13961814779edf0403"
+    },
+    "machines/windows-mixed/root/drives/c/Users/fixture/Desktop/Fixture Puzzle.url": {
+      "size": 57,
+      "sha256": "2af624deb2d66911699ba889e4dfd288601f0b45358e069bd51840470638dc93"
+    },
+    "machines/windows-mixed/root/drives/d/Games/Fixture Puzzle/game.exe": {
+      "size": 83,
+      "sha256": "e573e816b86dee93eb6571cd33219af812f328c056b1926c0b88afb1ff2739d7"
+    }
+  }
+}

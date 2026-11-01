@@ -1,0 +1,31 @@
+schema_version = 1
+id = "gog-inno-unity"
+title = "Fixture Game"
+layout = "gog"
+format = "inno"
+platform = "windows"
+input = "bin/windows/gog-inno-unity/setup.exe"
+parts = ["bin/windows/gog-inno-unity/setup.exe"]
+tree = "windows/gog-inno-unity.tree.json"
+launch_target = "FixtureGame.exe"
+
+[windows]
+builder = "ISCC"
+version = "6.4.3"
+features = ["GOG", "REGISTRY", "INI", "CODE", "UNINSTALL"]
+native_generated = ["config.ini:Game/InstallPath={app}", "unins000.exe", "unins000.dat", "code-path.txt={app}"]
+
+[host.windows]
+outcome = "Installed"
+strategy = "RunSilent"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

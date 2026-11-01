@@ -1,0 +1,111 @@
+# Argument vectors, not shell command lines. {install_dir} is expanded by the
+# builder to exec::INSTALL_DIR and by the executor to the final managed folder.
+# Empty capability arrays mean no generic switch exists: the builder warns
+# instead of guessing package-authored task names, properties or response files.
+# checked_versions records actual native wizard checks only. None have been
+# performed yet; documentation versions below are not hand-check evidence.
+
+[families.inno]
+silent_args = ["/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/SP-"]
+interactive_args = ["/NORESTART", "/SP-"]
+dir_args = ['/DIR="{install_dir}"']
+language_args = ["/LANG={language}"]
+no_shortcuts_args = ["/NOICONS"]
+no_launch_args = []
+dir_last = false
+silent_supported = true
+checked_versions = []
+notes = "Inno Setup 5/6 command-line contract. Language is an authored internal name (e.g. english), not an arbitrary locale. /NOICONS presets only the Start Menu folder checkbox; desktop tasks need package-specific /TASKS. No universal no-launch switch: [Run] skipifsilent is installer-authored."
+sources = ["https://jrsoftware.org/ishelp/topic_setupcmdline.htm"]
+
+[families.nsis]
+silent_args = ["/S"]
+interactive_args = []
+dir_args = ["/D={install_dir}"]
+language_args = []
+no_shortcuts_args = []
+no_launch_args = []
+dir_last = true
+silent_supported = true
+checked_versions = []
+notes = "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific."
+sources = ["https://nsis.sourceforge.io/Docs/Chapter3.html"]
+
+[families.msi]
+silent_args = ["/qn", "/norestart"]
+interactive_args = ["/norestart"]
+dir_args = ["INSTALLDIR={install_dir}", "TARGETDIR={install_dir}"]
+language_args = []
+no_shortcuts_args = []
+no_launch_args = []
+dir_last = false
+silent_supported = true
+checked_versions = []
+notes = "Windows Installer msiexec /i: caller prepends /i and the package path as separate argv entries. Public INSTALLDIR/TARGETDIR properties are conventional and package-dependent. argv entries containing spaces remain single arguments. Language requires a package-specific transform; shortcut/custom-action suppression requires authored properties."
+sources = ["https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/msiexec", "https://learn.microsoft.com/en-us/windows/win32/msi/standard-installer-command-line-options"]
+
+[families.burn]
+silent_args = ["/quiet", "/norestart"]
+interactive_args = ["/norestart"]
+dir_args = ["InstallFolder={install_dir}"]
+language_args = []
+no_shortcuts_args = []
+no_launch_args = []
+dir_last = false
+silent_supported = true
+checked_versions = []
+notes = "WiX Burn/WixStdBA: InstallFolder is a bundle-authored variable and must be overridable (bal:Overridable=yes in WixStdBA, including WiX 3.14.1). Custom bootstrapper applications can differ. Language, shortcuts and launch actions require a bundle-specific recipe."
+sources = ["https://docs.firegiant.com/wix/schema/wxs/variable/", "https://docs.firegiant.com/wix/tools/burn/wixstdba/"]
+
+[families.install_shield]
+identified_msi_silent_args = ["/s", '/v/qn /norestart INSTALLDIR="{install_dir}"']
+silent_args = []
+interactive_args = []
+dir_args = []
+language_args = []
+no_shortcuts_args = []
+no_launch_args = []
+dir_last = false
+silent_supported = false
+checked_versions = []
+notes = "InstallShield variants cannot share one silent command. Basic MSI needs /s and nested /v MSI arguments; InstallScript needs a recorded response file. Only enable a silent recipe after identifying the variant; unknown variants use the interactive wizard."
+sources = ["https://docs.revenera.com/installshield/helplibrary/IHelpSetup_EXECmdLine.htm"]
+
+[families.wise]
+silent_args = []
+interactive_args = []
+dir_args = []
+language_args = []
+no_shortcuts_args = []
+no_launch_args = []
+dir_last = false
+silent_supported = false
+checked_versions = []
+notes = "Wise versions and authored scripts differ. No verified generic preset; use an identified package recipe or the interactive wizard."
+sources = []
+
+[families.setup_factory]
+silent_args = []
+interactive_args = []
+dir_args = []
+language_args = []
+no_shortcuts_args = []
+no_launch_args = []
+dir_last = false
+silent_supported = false
+checked_versions = []
+notes = "Setup Factory 8/10 /S only works when silent/unattended support was enabled by the author. /S:settings.ini can supply authored SetupValues; it is not a universal directory argument. Unknown projects use the interactive wizard."
+sources = ["https://www.indigorose.com/docs/suf/program_reference_command_line_options.htm"]
+
+[families.custom]
+silent_args = []
+interactive_args = []
+dir_args = []
+language_args = []
+no_shortcuts_args = []
+no_launch_args = []
+dir_last = false
+silent_supported = false
+checked_versions = []
+notes = "Unknown installer: no generic switches are safe. Use the interactive wizard or a package-specific recipe."
+sources = []

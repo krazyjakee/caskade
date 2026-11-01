@@ -1,0 +1,17 @@
+os = "macos"
+arch = "aarch64"
+seven_zip = "/opt/homebrew/bin/7zz"
+proton_builds = []
+
+[[runners]]
+kind = "native"
+program = ""
+[[runners]]
+kind = "wine"
+program = "/Applications/Wine.app/Contents/MacOS/wine"
+
+[filesystem]
+writable = true
+exec_bits = true
+symlinks = true
+case_sensitive = false

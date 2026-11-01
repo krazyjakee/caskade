@@ -1,0 +1,25 @@
+schema_version = 1
+id = "itch-zip-with-manifest"
+title = "Caskade Itch Fixture"
+layout = "itch"
+format = "zip"
+platform = "linux"
+input = "bin/linux-mini/itch-zip-with-manifest.zip"
+parts = ["bin/linux-mini/itch-zip-with-manifest.zip"]
+tree = "linux-mini/itch-zip-with-manifest.tree.json"
+launch_target = "bin/FixtureGame.x86_64"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.windows]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"

@@ -1,0 +1,1596 @@
+---
+source: crates/caskade-discovery/tests/classify.rs
+expression: results
+---
+[
+  {
+    "id": "game-unity-0",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-unity-1",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-unity-2",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-unity-3",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-unity-4",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-unity-5",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-unity-linux-0",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-unity-linux-1",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-unity-linux-2",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-unity-linux-3",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-unity-linux-4",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-unity-linux-5",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-unreal-0",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-unreal-1",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-unreal-2",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-unreal-3",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-unreal-4",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-unreal-5",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-godot-0",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-godot-1",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-godot-2",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-godot-3",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-godot-4",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-godot-5",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-gamemaker-0",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-gamemaker-1",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-gamemaker-2",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-gamemaker-3",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-gamemaker-4",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-gamemaker-5",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-rpg-mv-0",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-rpg-mv-1",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-rpg-mv-2",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-rpg-mv-3",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-rpg-mv-4",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-rpg-mv-5",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-rpg-mz-0",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-rpg-mz-1",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-rpg-mz-2",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-rpg-mz-3",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-rpg-mz-4",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-rpg-mz-5",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-renpy-0",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-renpy-1",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-renpy-2",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-renpy-3",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-renpy-4",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-renpy-5",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-source-0",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-source-1",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-source-2",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-source-3",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-source-4",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-source-5",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-fna-0",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-fna-1",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-fna-2",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-fna-3",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-fna-4",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-fna-5",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-xna-0",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-xna-1",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-xna-2",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-xna-3",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-xna-4",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-xna-5",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-love-0",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-love-1",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-love-2",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-love-3",
+    "label": "game",
+    "score": 95,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-love-4",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-love-5",
+    "label": "game",
+    "score": 80,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-0-0",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-0-1",
+    "label": "game",
+    "score": 60,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-0-2",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-0-3",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-1-0",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-1-1",
+    "label": "game",
+    "score": 60,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-1-2",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-1-3",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-2-0",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-2-1",
+    "label": "game",
+    "score": 60,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-2-2",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-2-3",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-3-0",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-3-1",
+    "label": "game",
+    "score": 60,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-3-2",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-3-3",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-4-0",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-4-1",
+    "label": "game",
+    "score": 60,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-4-2",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-4-3",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-5-0",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-5-1",
+    "label": "game",
+    "score": 60,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-5-2",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-5-3",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-6-0",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-6-1",
+    "label": "game",
+    "score": 60,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-6-2",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-6-3",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-7-0",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-7-1",
+    "label": "game",
+    "score": 60,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-7-2",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-7-3",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-8-0",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-8-1",
+    "label": "game",
+    "score": 60,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-8-2",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-store-8-3",
+    "label": "game",
+    "score": 110,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-metadata-0",
+    "label": "game",
+    "score": 90,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-metadata-1",
+    "label": "game",
+    "score": 90,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-metadata-2",
+    "label": "game",
+    "score": 90,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-metadata-3",
+    "label": "game",
+    "score": 90,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-metadata-4",
+    "label": "game",
+    "score": 90,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-metadata-5",
+    "label": "game",
+    "score": 90,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-metadata-6",
+    "label": "game",
+    "score": 90,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-metadata-7",
+    "label": "game",
+    "score": 90,
+    "verdict": "likely"
+  },
+  {
+    "id": "game-weak-0",
+    "label": "game",
+    "score": 25,
+    "verdict": "maybe"
+  },
+  {
+    "id": "game-weak-1",
+    "label": "game",
+    "score": 25,
+    "verdict": "maybe"
+  },
+  {
+    "id": "game-weak-2",
+    "label": "game",
+    "score": 25,
+    "verdict": "maybe"
+  },
+  {
+    "id": "game-weak-3",
+    "label": "game",
+    "score": 25,
+    "verdict": "maybe"
+  },
+  {
+    "id": "game-weak-4",
+    "label": "game",
+    "score": 25,
+    "verdict": "maybe"
+  },
+  {
+    "id": "game-weak-5",
+    "label": "game",
+    "score": 25,
+    "verdict": "maybe"
+  },
+  {
+    "id": "game-weak-6",
+    "label": "game",
+    "score": 25,
+    "verdict": "maybe"
+  },
+  {
+    "id": "game-weak-7",
+    "label": "game",
+    "score": 25,
+    "verdict": "maybe"
+  },
+  {
+    "id": "game-weak-8",
+    "label": "game",
+    "score": 25,
+    "verdict": "maybe"
+  },
+  {
+    "id": "game-weak-9",
+    "label": "game",
+    "score": 25,
+    "verdict": "maybe"
+  },
+  {
+    "id": "game-weak-10",
+    "label": "game",
+    "score": 25,
+    "verdict": "maybe"
+  },
+  {
+    "id": "game-weak-11",
+    "label": "game",
+    "score": 25,
+    "verdict": "maybe"
+  },
+  {
+    "id": "game-weak-12",
+    "label": "game",
+    "score": 25,
+    "verdict": "maybe"
+  },
+  {
+    "id": "game-weak-13",
+    "label": "game",
+    "score": 25,
+    "verdict": "maybe"
+  },
+  {
+    "id": "game-weak-14",
+    "label": "game",
+    "score": 25,
+    "verdict": "maybe"
+  },
+  {
+    "id": "game-weak-15",
+    "label": "game",
+    "score": 25,
+    "verdict": "maybe"
+  },
+  {
+    "id": "negative-redist-0-0",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-0-1",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-0-2",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-1-0",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-1-1",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-1-2",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-2-0",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-2-1",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-2-2",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-3-0",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-3-1",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-3-2",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-4-0",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-4-1",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-4-2",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-5-0",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-5-1",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-5-2",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-6-0",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-6-1",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-6-2",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-7-0",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-7-1",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-7-2",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-8-0",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-8-1",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-8-2",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-9-0",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-9-1",
+    "label": "non_game",
+    "score": -10,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-redist-9-2",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-0-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-0-1",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-0-2",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-1-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-1-1",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-1-2",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-2-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-2-1",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-2-2",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-3-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-3-1",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-3-2",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-4-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-4-1",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-4-2",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-5-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-5-1",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-5-2",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-6-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-6-1",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-6-2",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-7-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-7-1",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-driver-7-2",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-0-0",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-0-1",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-1-0",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-1-1",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-2-0",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-2-1",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-3-0",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-3-1",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-4-0",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-4-1",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-5-0",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-5-1",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-6-0",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-6-1",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-7-0",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-7-1",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-8-0",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-8-1",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-9-0",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-9-1",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-10-0",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-10-1",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-11-0",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-sdk-11-1",
+    "label": "non_game",
+    "score": 19,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-0-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-0-1",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-1-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-1-1",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-2-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-2-1",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-3-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-3-1",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-4-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-4-1",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-5-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-5-1",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-6-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-6-1",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-7-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-7-1",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-8-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-8-1",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-9-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-9-1",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-10-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-10-1",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-11-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-11-1",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-12-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-12-1",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-13-0",
+    "label": "non_game",
+    "score": -107,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-tool-13-1",
+    "label": "non_game",
+    "score": -2,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-emulator-0",
+    "label": "non_game",
+    "score": -12,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-emulator-1",
+    "label": "non_game",
+    "score": -12,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-emulator-2",
+    "label": "non_game",
+    "score": -12,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-emulator-3",
+    "label": "non_game",
+    "score": -12,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-emulator-4",
+    "label": "non_game",
+    "score": -12,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-emulator-5",
+    "label": "non_game",
+    "score": -12,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-emulator-6",
+    "label": "non_game",
+    "score": -12,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-emulator-7",
+    "label": "non_game",
+    "score": -12,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-emulator-8",
+    "label": "non_game",
+    "score": -12,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-emulator-9",
+    "label": "non_game",
+    "score": -12,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-launcher-0",
+    "label": "non_game",
+    "score": 15,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-launcher-1",
+    "label": "non_game",
+    "score": 15,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-launcher-2",
+    "label": "non_game",
+    "score": 15,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-launcher-3",
+    "label": "non_game",
+    "score": 15,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-launcher-4",
+    "label": "non_game",
+    "score": 15,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-weak-0",
+    "label": "non_game",
+    "score": 18,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-weak-1",
+    "label": "non_game",
+    "score": 33,
+    "verdict": "maybe"
+  },
+  {
+    "id": "negative-weak-2",
+    "label": "non_game",
+    "score": 18,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-weak-3",
+    "label": "non_game",
+    "score": 33,
+    "verdict": "maybe"
+  },
+  {
+    "id": "negative-weak-4",
+    "label": "non_game",
+    "score": 18,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-weak-5",
+    "label": "non_game",
+    "score": 33,
+    "verdict": "maybe"
+  },
+  {
+    "id": "negative-weak-6",
+    "label": "non_game",
+    "score": 18,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-weak-7",
+    "label": "non_game",
+    "score": 33,
+    "verdict": "maybe"
+  },
+  {
+    "id": "negative-weak-8",
+    "label": "non_game",
+    "score": 18,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-weak-9",
+    "label": "non_game",
+    "score": 33,
+    "verdict": "maybe"
+  },
+  {
+    "id": "negative-weak-10",
+    "label": "non_game",
+    "score": 18,
+    "verdict": "not_a_game"
+  },
+  {
+    "id": "negative-weak-11",
+    "label": "non_game",
+    "score": 33,
+    "verdict": "maybe"
+  }
+]

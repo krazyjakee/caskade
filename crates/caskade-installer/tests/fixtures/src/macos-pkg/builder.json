@@ -1,0 +1,7 @@
+{
+  "bomutils_commit": "c247002e2f49878bab32dd0fcf805810ae0992cb",
+  "bomutils_url": "https://codeload.github.com/hogliux/bomutils/tar.gz/c247002e2f49878bab32dd0fcf805810ae0992cb",
+  "bomutils_sha256": "286e49560a3f84650b5a60ca0f22f775c0526aa4fb199db7a66f4d310378d4dd",
+  "cpio": "GNU cpio 2.15, odc/newc --reproducible --owner=0:0",
+  "epoch": 1700000000
+}

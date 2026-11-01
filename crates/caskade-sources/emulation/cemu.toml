@@ -1,0 +1,51 @@
+# SPDX-License-Identifier: MIT
+# Adapted from Playnite (c) 2020 Josef Nemec, commit 3e8abb241873e326e27c75b59dd0d2ea367698e3.
+# Source: source/Playnite/Emulation/Emulators/Cemu/emulator.yaml
+# Windows rules/profiles ported with attribution; Linux/macOS rules by Caskade.
+# See ../THIRD-PARTY.md for the license and adaptation notes.
+
+
+id = "cemu"
+name = "Cemu"
+website = "https://cemu.info/"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^cemu.*\\.exe$"
+locations = ["{ProgramFiles}/Cemu", "{AppData}/Cemu", "{UserHome}/AppData/Local/Cemu", "{UserHome}/scoop/apps/cemu/current", "C:/ProgramData/chocolatey/lib/cemu/tools"]
+
+[detect.linux]
+executable = "^(?:Cemu|cemu)$"
+path = ["Cemu", "cemu"]
+flatpak = "info.cemu.Cemu"
+appimage = "(?i)^Cemu(?:[-_].*)?\\.AppImage$"
+locations = ["{UserHome}/Applications/Cemu", "{UserHome}/Emulation/tools/cemu", "{UserHome}/Emulation/tools/launchers", "/opt/cemu"]
+
+[detect.macos]
+executable = "(?i)^(?:Cemu|Cemu)$"
+bundle = "info.cemu.Cemu"
+path = ["Cemu"]
+locations = ["/Applications/Cemu.app/Contents/MacOS", "{UserHome}/Applications/Cemu.app/Contents/MacOS"]
+
+[install.windows]
+source = "github"
+repo = "cemu-project/Cemu"
+asset = '^cemu-[\d.]+-windows-x64\.zip$'
+[install.linux]
+source = "github"
+repo = "cemu-project/Cemu"
+asset = '^Cemu-[\d.]+-x86_64\.AppImage$'
+[install.macos]
+source = "github"
+repo = "cemu-project/Cemu"
+asset = '^cemu-[\d.]+-macos-12-x64\.dmg$'
+
+[display]
+fullscreen = ["--fullscreen"]
+
+[[profile]]
+name = "Default"
+platforms = ["nintendo_wiiu"]
+extensions = ["wud", "wux", "rpx", "wua"]
+args = ["-g", "{RomPath}"]
+requires = []

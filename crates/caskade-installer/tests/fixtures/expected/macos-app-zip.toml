@@ -1,0 +1,25 @@
+schema_version = 1
+id = "macos-app-zip"
+title = "Fixture Game"
+layout = "macos"
+format = "zip"
+platform = "macos"
+input = "bin/macos-app.zip"
+parts = ["bin/macos-app.zip"]
+tree = "macos-app-zip.tree.json"
+launch_target = "FixtureGame.app/Contents/MacOS/FixtureGame"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.windows]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"

@@ -1,0 +1,12 @@
+DROP TRIGGER games_search_update;
+DROP TRIGGER games_search_delete;
+DROP TRIGGER games_search_insert;
+DROP TABLE game_search;
+DROP TABLE settings;
+DROP TABLE collection_members;
+DROP TABLE collections;
+DROP TABLE artwork;
+DROP TABLE play_sessions;
+DROP TABLE game_entries;
+DROP TABLE storage_roots;
+DROP TABLE games;

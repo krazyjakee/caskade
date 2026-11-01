@@ -1,0 +1,19 @@
+[package]
+name = "crashy"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+caskade-plugin-sdk = { path = "../../../../crates/caskade-plugin-sdk" }
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true
+
+# An example plugin, outside the Caskade workspace.
+[workspace]

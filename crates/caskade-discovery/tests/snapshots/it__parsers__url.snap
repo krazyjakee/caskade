@@ -1,0 +1,10 @@
+---
+source: crates/caskade-discovery/tests/parsers.rs
+expression: "parsers::url::parse(&sample(\"fixture.url\"), &LIMITS).unwrap()"
+---
+{
+  "url": "steam://rungameid/620",
+  "working_dir": null,
+  "icon": null,
+  "icon_index": 0
+}

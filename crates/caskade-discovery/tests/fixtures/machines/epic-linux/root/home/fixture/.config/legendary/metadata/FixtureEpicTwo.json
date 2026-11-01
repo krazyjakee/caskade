@@ -1,0 +1,10 @@
+{
+  "app_name": "FixtureEpicTwo",
+  "asset_infos": {
+    "Windows": {
+      "app_name": "FixtureEpicTwo",
+      "namespace": "fixturens02",
+      "catalog_item_id": "fixtureitem02"
+    }
+  }
+}

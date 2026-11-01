@@ -1,0 +1,30 @@
+{
+  "$schema": "https://caskade.dev/schemas/plugin.json",
+  "id": "dev.caskade.howlongtobeat",
+  "name": "HowLongToBeat",
+  "version": "0.1.0",
+  "api": "^0.1",
+  "description": "How long a game takes to beat, from howlongtobeat.com, on the game page.",
+  "author": "Caskade",
+  "ui": "dist/ui.js",
+  "backend": "dist/backend.wasm",
+  "permissions": {
+    "network": ["howlongtobeat.com"]
+  },
+  "activation": ["onRequest"],
+  "contributes": {
+    "slots": [{ "slot": "game.details.tabs", "id": "hltb", "title": "How long to beat" }],
+    "settings": {
+      "type": "object",
+      "properties": {
+        "endpoint": {
+          "type": "string",
+          "title": "Search endpoint",
+          "description": "HowLongToBeat's search API; it must be on an allowed host.",
+          "default": "https://howlongtobeat.com/api/search"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

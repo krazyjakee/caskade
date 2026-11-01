@@ -1,0 +1,436 @@
+{
+  "records": [
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Cuphead_is1",
+      "values": {
+        "DisplayName": "Cuphead",
+        "Publisher": "Studio MDHR",
+        "InstallLocation": "C:\\Games\\Cuphead",
+        "DisplayIcon": "\"C:\\Games\\Cuphead\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Cuphead\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Cuphead\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\CitiesSkylines_is1",
+      "values": {
+        "DisplayName": "Cities Skylines",
+        "Publisher": "Paradox Interactive",
+        "InstallLocation": "C:\\Games\\Cities Skylines",
+        "DisplayIcon": "\"C:\\Games\\Cities Skylines\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Cities Skylines\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Cities Skylines\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OriandtheBlindForest_is1",
+      "values": {
+        "DisplayName": "Ori and the Blind Forest",
+        "Publisher": "Microsoft Studios",
+        "InstallLocation": "C:\\Games\\Ori and the Blind Forest",
+        "DisplayIcon": "\"C:\\Games\\Ori and the Blind Forest\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Ori and the Blind Forest\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Ori and the Blind Forest\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Rust_is1",
+      "values": {
+        "DisplayName": "Rust",
+        "Publisher": "Facepunch Studios",
+        "InstallLocation": "C:\\Games\\Rust",
+        "DisplayIcon": "\"C:\\Games\\Rust\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Rust\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Rust\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Firewatch_is1",
+      "values": {
+        "DisplayName": "Firewatch",
+        "Publisher": "Campo Santo",
+        "InstallLocation": "C:\\Games\\Firewatch",
+        "DisplayIcon": "\"C:\\Games\\Firewatch\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Firewatch\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Firewatch\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ReturnoftheObraDinn_is1",
+      "values": {
+        "DisplayName": "Return of the Obra Dinn",
+        "Publisher": "3909",
+        "InstallLocation": "C:\\Games\\Return of the Obra Dinn",
+        "DisplayIcon": "\"C:\\Games\\Return of the Obra Dinn\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Return of the Obra Dinn\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Return of the Obra Dinn\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\DiscoElysium_is1",
+      "values": {
+        "DisplayName": "Disco Elysium",
+        "Publisher": "ZA/UM",
+        "InstallLocation": "C:\\Games\\Disco Elysium",
+        "DisplayIcon": "\"C:\\Games\\Disco Elysium\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Disco Elysium\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Disco Elysium\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Undertale_is1",
+      "values": {
+        "DisplayName": "Undertale",
+        "Publisher": "tobyfox",
+        "InstallLocation": "C:\\Games\\Undertale",
+        "DisplayIcon": "\"C:\\Games\\Undertale\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Undertale\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Undertale\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\HyperLightDrifter_is1",
+      "values": {
+        "DisplayName": "Hyper Light Drifter",
+        "Publisher": "Heart Machine",
+        "InstallLocation": "C:\\Games\\Hyper Light Drifter",
+        "DisplayIcon": "\"C:\\Games\\Hyper Light Drifter\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Hyper Light Drifter\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Hyper Light Drifter\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Celeste_is1",
+      "values": {
+        "DisplayName": "Celeste",
+        "Publisher": "Maddy Makes Games",
+        "InstallLocation": "C:\\Games\\Celeste",
+        "DisplayIcon": "\"C:\\Games\\Celeste\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Celeste\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Celeste\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Terraria_is1",
+      "values": {
+        "DisplayName": "Terraria",
+        "Publisher": "Re-Logic",
+        "InstallLocation": "C:\\Games\\Terraria",
+        "DisplayIcon": "\"C:\\Games\\Terraria\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Terraria\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Terraria\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Bastion_is1",
+      "values": {
+        "DisplayName": "Bastion",
+        "Publisher": "Supergiant Games",
+        "InstallLocation": "C:\\Games\\Bastion",
+        "DisplayIcon": "\"C:\\Games\\Bastion\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Bastion\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Bastion\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Mozilla Firefox",
+      "values": {
+        "DisplayName": "Mozilla Firefox",
+        "Publisher": "Mozilla",
+        "InstallLocation": "C:\\Program Files\\Mozilla Firefox",
+        "UninstallString": "\"C:\\Program Files\\Mozilla Firefox\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Microsoft Edge",
+      "values": {
+        "DisplayName": "Microsoft Edge",
+        "Publisher": "Microsoft",
+        "InstallLocation": "C:\\Program Files\\Microsoft Edge",
+        "UninstallString": "\"C:\\Program Files\\Microsoft Edge\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Notepad++",
+      "values": {
+        "DisplayName": "Notepad++",
+        "Publisher": "Notepad++",
+        "InstallLocation": "C:\\Program Files\\Notepad++",
+        "UninstallString": "\"C:\\Program Files\\Notepad++\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OBS Studio",
+      "values": {
+        "DisplayName": "OBS Studio",
+        "Publisher": "OBS",
+        "InstallLocation": "C:\\Program Files\\OBS Studio",
+        "UninstallString": "\"C:\\Program Files\\OBS Studio\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\GIMP",
+      "values": {
+        "DisplayName": "GIMP",
+        "Publisher": "GIMP",
+        "InstallLocation": "C:\\Program Files\\GIMP",
+        "UninstallString": "\"C:\\Program Files\\GIMP\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Audacity",
+      "values": {
+        "DisplayName": "Audacity",
+        "Publisher": "Audacity",
+        "InstallLocation": "C:\\Program Files\\Audacity",
+        "UninstallString": "\"C:\\Program Files\\Audacity\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Adobe Acrobat Reader",
+      "values": {
+        "DisplayName": "Adobe Acrobat Reader",
+        "Publisher": "Adobe",
+        "InstallLocation": "C:\\Program Files\\Adobe Acrobat Reader",
+        "UninstallString": "\"C:\\Program Files\\Adobe Acrobat Reader\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Microsoft Teams",
+      "values": {
+        "DisplayName": "Microsoft Teams",
+        "Publisher": "Microsoft",
+        "InstallLocation": "C:\\Program Files\\Microsoft Teams",
+        "UninstallString": "\"C:\\Program Files\\Microsoft Teams\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Discord",
+      "values": {
+        "DisplayName": "Discord",
+        "Publisher": "Discord",
+        "InstallLocation": "C:\\Program Files\\Discord",
+        "UninstallString": "\"C:\\Program Files\\Discord\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Dropbox",
+      "values": {
+        "DisplayName": "Dropbox",
+        "Publisher": "Dropbox",
+        "InstallLocation": "C:\\Program Files\\Dropbox",
+        "UninstallString": "\"C:\\Program Files\\Dropbox\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Google Drive",
+      "values": {
+        "DisplayName": "Google Drive",
+        "Publisher": "Google",
+        "InstallLocation": "C:\\Program Files\\Google Drive",
+        "UninstallString": "\"C:\\Program Files\\Google Drive\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Git",
+      "values": {
+        "DisplayName": "Git",
+        "Publisher": "Git",
+        "InstallLocation": "C:\\Program Files\\Git",
+        "UninstallString": "\"C:\\Program Files\\Git\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Java Development Kit",
+      "values": {
+        "DisplayName": "Java Development Kit",
+        "Publisher": "Java",
+        "InstallLocation": "C:\\Program Files\\Java Development Kit",
+        "UninstallString": "\"C:\\Program Files\\Java Development Kit\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\NVIDIA Graphics Driver",
+      "values": {
+        "DisplayName": "NVIDIA Graphics Driver",
+        "Publisher": "NVIDIA",
+        "InstallLocation": "C:\\Program Files\\NVIDIA Graphics Driver",
+        "UninstallString": "\"C:\\Program Files\\NVIDIA Graphics Driver\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Intel Graphics Driver",
+      "values": {
+        "DisplayName": "Intel Graphics Driver",
+        "Publisher": "Intel",
+        "InstallLocation": "C:\\Program Files\\Intel Graphics Driver",
+        "UninstallString": "\"C:\\Program Files\\Intel Graphics Driver\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Windows SDK",
+      "values": {
+        "DisplayName": "Windows SDK",
+        "Publisher": "Windows",
+        "InstallLocation": "C:\\Program Files\\Windows SDK",
+        "UninstallString": "\"C:\\Program Files\\Windows SDK\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Unreal Engine",
+      "values": {
+        "DisplayName": "Unreal Engine",
+        "Publisher": "Unreal",
+        "InstallLocation": "C:\\Program Files\\Unreal Engine",
+        "UninstallString": "\"C:\\Program Files\\Unreal Engine\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Docker Desktop",
+      "values": {
+        "DisplayName": "Docker Desktop",
+        "Publisher": "Docker",
+        "InstallLocation": "C:\\Program Files\\Docker Desktop",
+        "UninstallString": "\"C:\\Program Files\\Docker Desktop\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\VMware Workstation",
+      "values": {
+        "DisplayName": "VMware Workstation",
+        "Publisher": "VMware",
+        "InstallLocation": "C:\\Program Files\\VMware Workstation",
+        "UninstallString": "\"C:\\Program Files\\VMware Workstation\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\WinSCP",
+      "values": {
+        "DisplayName": "WinSCP",
+        "Publisher": "WinSCP",
+        "InstallLocation": "C:\\Program Files\\WinSCP",
+        "UninstallString": "\"C:\\Program Files\\WinSCP\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Wireshark",
+      "values": {
+        "DisplayName": "Wireshark",
+        "Publisher": "Wireshark",
+        "InstallLocation": "C:\\Program Files\\Wireshark",
+        "UninstallString": "\"C:\\Program Files\\Wireshark\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Calibre",
+      "values": {
+        "DisplayName": "Calibre",
+        "Publisher": "Calibre",
+        "InstallLocation": "C:\\Program Files\\Calibre",
+        "UninstallString": "\"C:\\Program Files\\Calibre\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\KeePass",
+      "values": {
+        "DisplayName": "KeePass",
+        "Publisher": "KeePass",
+        "InstallLocation": "C:\\Program Files\\KeePass",
+        "UninstallString": "\"C:\\Program Files\\KeePass\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\PowerToys",
+      "values": {
+        "DisplayName": "PowerToys",
+        "Publisher": "PowerToys",
+        "InstallLocation": "C:\\Program Files\\PowerToys",
+        "UninstallString": "\"C:\\Program Files\\PowerToys\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Rufus",
+      "values": {
+        "DisplayName": "Rufus",
+        "Publisher": "Rufus",
+        "InstallLocation": "C:\\Program Files\\Rufus",
+        "UninstallString": "\"C:\\Program Files\\Rufus\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\HWiNFO",
+      "values": {
+        "DisplayName": "HWiNFO",
+        "Publisher": "HWiNFO",
+        "InstallLocation": "C:\\Program Files\\HWiNFO",
+        "UninstallString": "\"C:\\Program Files\\HWiNFO\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\MSI Afterburner",
+      "values": {
+        "DisplayName": "MSI Afterburner",
+        "Publisher": "MSI",
+        "InstallLocation": "C:\\Program Files\\MSI Afterburner",
+        "UninstallString": "\"C:\\Program Files\\MSI Afterburner\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Razer Synapse",
+      "values": {
+        "DisplayName": "Razer Synapse",
+        "Publisher": "Razer",
+        "InstallLocation": "C:\\Program Files\\Razer Synapse",
+        "UninstallString": "\"C:\\Program Files\\Razer Synapse\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Steam",
+      "values": {
+        "DisplayName": "Steam",
+        "Publisher": "Steam",
+        "InstallLocation": "C:\\Program Files\\Steam",
+        "UninstallString": "\"C:\\Program Files\\Steam\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\GOG GALAXY",
+      "values": {
+        "DisplayName": "GOG GALAXY",
+        "Publisher": "GOG",
+        "InstallLocation": "C:\\Program Files\\GOG GALAXY",
+        "UninstallString": "\"C:\\Program Files\\GOG GALAXY\\uninstall.exe\""
+      }
+    },
+    {
+      "key": "HKEY_CURRENT_USER\\Software\\Valve\\Steam",
+      "values": {
+        "SteamPath": "C:\\Steam"
+      }
+    }
+  ]
+}

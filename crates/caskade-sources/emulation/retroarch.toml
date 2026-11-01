@@ -1,0 +1,160 @@
+# SPDX-License-Identifier: MIT
+# Adapted from Playnite (c) 2020 Josef Nemec, commit 3e8abb241873e326e27c75b59dd0d2ea367698e3.
+# Source: source/Playnite/Emulation/Emulators/RetroArch/emulator.yaml
+# Windows rules/profiles ported with attribution; Linux/macOS rules by Caskade.
+# See ../THIRD-PARTY.md for the license and adaptation notes.
+
+
+id = "retroarch"
+name = "RetroArch"
+website = "http://www.retroarch.com/"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^retroarch\\.exe$"
+locations = ["{ProgramFiles}/RetroArch", "{AppData}/RetroArch", "{UserHome}/AppData/Local/RetroArch", "{UserHome}/scoop/apps/retroarch/current", "C:/ProgramData/chocolatey/lib/retroarch/tools"]
+
+[detect.linux]
+executable = "^(?:retroarch)$"
+path = ["retroarch"]
+flatpak = "org.libretro.RetroArch"
+appimage = "(?i)^RetroArch(?:[-_].*)?\\.AppImage$"
+locations = ["{UserHome}/Applications/RetroArch", "{UserHome}/Emulation/tools/retroarch", "{UserHome}/Emulation/tools/launchers", "/opt/retroarch"]
+
+[detect.macos]
+executable = "(?i)^(?:retroarch|RetroArch)$"
+bundle = "com.libretro.RetroArch"
+path = ["retroarch"]
+locations = ["/Applications/RetroArch.app/Contents/MacOS", "{UserHome}/Applications/RetroArch.app/Contents/MacOS"]
+
+# `bios` is where the emulator looks for BIOS files (#122).
+[vars]
+cores = "{EmulatorDir}/cores"
+bios = "{EmulatorDir}/system"
+lib = ".dll"
+[vars.linux]
+cores = "{XdgConfig}/retroarch/cores"
+bios = "{XdgConfig}/retroarch/system"
+lib = ".so"
+[vars.linux.flatpak]
+cores = "{UserHome}/.var/app/org.libretro.RetroArch/config/retroarch/cores"
+bios = "{UserHome}/.var/app/org.libretro.RetroArch/config/retroarch/system"
+[vars.macos]
+cores = "{AppSupport}/RetroArch/cores"
+bios = "{AppSupport}/RetroArch/system"
+lib = ".dylib"
+
+# The version is RetroArch's GitHub tag; the builds are on libretro's
+# buildbot. Cores install separately (EMULATOR-SETUP-PLAN §2.4).
+[install.windows]
+source = "github"
+repo = "libretro/RetroArch"
+url = "https://buildbot.libretro.com/stable/{version}/windows/x86_64/RetroArch.7z"
+[install.linux]
+source = "github"
+repo = "libretro/RetroArch"
+url = "https://buildbot.libretro.com/stable/{version}/linux/x86_64/RetroArch.7z"
+[install.macos]
+source = "github"
+repo = "libretro/RetroArch"
+url = "https://buildbot.libretro.com/stable/{version}/apple/osx/universal/RetroArch_Metal.dmg"
+
+[display]
+fullscreen = ["--fullscreen"]
+
+# Cores (the profiles' `requires`) come from libretro's nightly buildbot.
+[requires_from]
+windows = "https://buildbot.libretro.com/nightly/windows/x86_64/latest/{file}.zip"
+linux = "https://buildbot.libretro.com/nightly/linux/x86_64/latest/{file}.zip"
+macos = "https://buildbot.libretro.com/nightly/apple/osx/{arch}/latest/{file}.zip"
+
+[[profile]]
+name = "Mesen"
+platforms = ["nintendo_nes"]
+extensions = ["7z", "fds", "nes", "unf", "unif", "zip"]
+args = ["-L", "{cores}/mesen_libretro{lib}", "{RomPath}"]
+requires = ["{cores}/mesen_libretro{lib}"]
+
+[[profile]]
+name = "Snes9x"
+platforms = ["nintendo_snes"]
+extensions = ["7z", "bs", "fig", "sfc", "smc", "st", "swc", "zip"]
+args = ["-L", "{cores}/snes9x_libretro{lib}", "{RomPath}"]
+requires = ["{cores}/snes9x_libretro{lib}"]
+
+[[profile]]
+name = "Mupen64Plus-Next"
+platforms = ["nintendo_n64"]
+extensions = ["7z", "bin", "n64", "ndd", "u1", "v64", "z64", "zip"]
+args = ["-L", "{cores}/mupen64plus_next_libretro{lib}", "{RomPath}"]
+requires = ["{cores}/mupen64plus_next_libretro{lib}"]
+
+[[profile]]
+name = "Gambatte"
+platforms = ["nintendo_gb", "nintendo_gbc"]
+extensions = ["7z", "dmg", "gb", "gbc", "zip"]
+args = ["-L", "{cores}/gambatte_libretro{lib}", "{RomPath}"]
+requires = ["{cores}/gambatte_libretro{lib}"]
+
+[[profile]]
+name = "mGBA"
+platforms = ["nintendo_gb", "nintendo_gba", "nintendo_gbc"]
+extensions = ["7z", "gb", "gba", "gbc", "zip"]
+args = ["-L", "{cores}/mgba_libretro{lib}", "{RomPath}"]
+requires = ["{cores}/mgba_libretro{lib}"]
+
+[[profile]]
+name = "DeSmuME"
+platforms = ["nintendo_ds"]
+extensions = ["nds", "bin", "zip", "7z"]
+args = ["-L", "{cores}/desmume_libretro{lib}", "{RomPath}"]
+requires = ["{cores}/desmume_libretro{lib}"]
+
+[[profile]]
+name = "Dolphin"
+platforms = ["nintendo_gamecube", "nintendo_wii"]
+extensions = ["7z", "ciso", "dff", "dol", "elf", "gcm", "gcz", "iso", "m3u", "rvz", "tgc", "wad", "wbfs", "wia", "zip"]
+args = ["-L", "{cores}/dolphin_libretro{lib}", "{RomPath}"]
+requires = ["{cores}/dolphin_libretro{lib}"]
+
+[[profile]]
+name = "Genesis Plus GX"
+platforms = ["sega_genesis", "sega_mastersystem"]
+extensions = ["68k", "7z", "bin", "gen", "md", "mdx", "sg", "sgd", "smd", "sms", "zip"]
+args = ["-L", "{cores}/genesis_plus_gx_libretro{lib}", "{RomPath}"]
+requires = ["{cores}/genesis_plus_gx_libretro{lib}"]
+
+[[profile]]
+name = "Beetle Saturn"
+platforms = ["sega_saturn"]
+extensions = ["7z", "ccd", "chd", "cue", "m3u", "toc", "zip"]
+args = ["-L", "{cores}/mednafen_saturn_libretro{lib}", "{RomPath}"]
+requires = ["{cores}/mednafen_saturn_libretro{lib}"]
+
+[[profile]]
+name = "Flycast"
+platforms = ["sega_dreamcast", "arcade"]
+extensions = ["7z", "bin", "cdi", "chd", "cue", "dat", "elf", "gdi", "lst", "m3u", "zip"]
+args = ["-L", "{cores}/flycast_libretro{lib}", "{RomPath}"]
+requires = ["{cores}/flycast_libretro{lib}"]
+
+[[profile]]
+name = "Beetle PSX HW"
+platforms = ["sony_playstation"]
+extensions = ["7z", "ccd", "chd", "cue", "exe", "m3u", "pbp", "toc", "zip"]
+args = ["-L", "{cores}/mednafen_psx_hw_libretro{lib}", "{RomPath}"]
+requires = ["{cores}/mednafen_psx_hw_libretro{lib}"]
+
+[[profile]]
+name = "PPSSPP"
+platforms = ["sony_psp"]
+extensions = ["7z", "chd", "cso", "elf", "iso", "pbp", "prx", "zip"]
+args = ["-L", "{cores}/ppsspp_libretro{lib}", "{RomPath}"]
+requires = ["{cores}/ppsspp_libretro{lib}"]
+
+[[profile]]
+name = "FinalBurn Neo"
+platforms = ["arcade"]
+extensions = ["zip", "7z"]
+args = ["-L", "{cores}/fbneo_libretro{lib}", "{RomPath}"]
+requires = ["{cores}/fbneo_libretro{lib}"]

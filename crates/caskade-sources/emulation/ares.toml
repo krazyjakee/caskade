@@ -1,0 +1,51 @@
+# SPDX-License-Identifier: MIT
+# Authored for Caskade from docs/research/emulator-sources.md (sources and
+# flags checked 2026-10-28).
+
+id = "ares"
+name = "ares"
+website = "https://ares-emu.net/"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^ares\\.exe$"
+locations = ["{ProgramFiles}/ares", "{UserHome}/scoop/apps/ares/current"]
+
+[detect.linux]
+executable = "^ares$"
+path = ["ares"]
+flatpak = "dev.ares.ares"
+appimage = "(?i)^ares(?:[-_].*)?\\.AppImage$"
+
+[detect.macos]
+executable = "^ares$"
+bundle = "dev.ares.ares"
+locations = ["/Applications/ares.app/Contents/MacOS"]
+
+# Upstream builds no Linux binary; Flathub has one.
+[install.windows]
+source = "github"
+repo = "ares-emulator/ares"
+asset = '^ares-windows-x64\.zip$'
+[install.linux]
+source = "flatpak"
+app = "dev.ares.ares"
+[install.macos]
+source = "github"
+repo = "ares-emulator/ares"
+asset = '^ares-macos-universal\.zip$'
+
+[display]
+fullscreen = ["--fullscreen"]
+
+[[profile]]
+name = "Master System"
+platforms = ["sega_mastersystem"]
+extensions = ["sms", "zip"]
+args = ["--system", "Master System", "--no-file-prompt", "{RomPath}"]
+
+[[profile]]
+name = "Mega Drive"
+platforms = ["sega_genesis"]
+extensions = ["md", "gen", "smd", "bin", "zip"]
+args = ["--system", "Mega Drive", "--no-file-prompt", "{RomPath}"]

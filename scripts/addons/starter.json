@@ -1,0 +1,76 @@
+{
+  "format": 1,
+  "packages": [
+    {
+      "path": "../../plugins/examples/playtime-stats",
+      "kind": "plugin",
+      "summary": "Where your play time goes: your most played games, charted.",
+      "description": "A Playtime stats page in the sidebar: total hours across your most played games and a bar chart of the top ten, with a table view of the same numbers. When a session ends, a note says what you played and for how long.\n\nIt asks for no permissions: it reads your library through the plugin API like any page does, and nothing leaves your computer.",
+      "license": "MIT",
+      "homepage": "https://github.com/krazyjakee/caskade/tree/master/plugins/examples/playtime-stats",
+      "categories": [
+        "stats"
+      ],
+      "screenshots": [
+        {
+          "file": "media/playtime-stats-chart.webp",
+          "alt": "The Playtime stats page: total hours and a chart of the most played games"
+        },
+        {
+          "file": "media/playtime-stats-table.webp",
+          "alt": "The same numbers as a table"
+        }
+      ],
+      "notes": "First catalogue release.",
+      "published": "2026-10-30"
+    },
+    {
+      "path": "../../plugins/examples/gamemode",
+      "kind": "plugin",
+      "summary": "Runs your games through Feral GameMode on Linux.",
+      "description": "Starts games with Feral GameMode's gamemoderun, which asks the system for performance settings while a game runs. Caskade still tracks the game itself.\n\nIt needs GameMode installed (the gamemode package of most distributions). It may start processes and change what a launch runs, which is why it asks for that, and it may only look at /usr/bin, /usr/games and /usr/local/bin, read-only, to find gamemoderun. Without GameMode, launches are left alone. Linux only.",
+      "license": "MIT",
+      "homepage": "https://github.com/krazyjakee/caskade/tree/master/plugins/examples/gamemode",
+      "categories": [
+        "launching"
+      ],
+      "screenshots": [
+        {
+          "file": "media/gamemode-review.webp",
+          "alt": "Installing GameMode: the folders it may read and that it may change what a launch runs"
+        },
+        {
+          "file": "media/gamemode-settings.webp",
+          "alt": "GameMode's settings: turn it off, or name the gamemoderun to use"
+        }
+      ],
+      "os": [
+        "linux"
+      ],
+      "notes": "First catalogue release.",
+      "published": "2026-10-30"
+    },
+    {
+      "path": "../../themes/ember",
+      "kind": "theme",
+      "summary": "Nexus in warm light: ember-orange actions and amber highlights.",
+      "license": "MIT",
+      "homepage": "https://github.com/krazyjakee/caskade/tree/master/themes/ember",
+      "categories": [
+        "dark"
+      ],
+      "screenshots": [
+        {
+          "file": "media/ember-playtime.webp",
+          "alt": "Ember's ember-orange accents on a plugin's page"
+        },
+        {
+          "file": "media/ember-quick-look.webp",
+          "alt": "A game's quick look in Ember"
+        }
+      ],
+      "notes": "First catalogue release.",
+      "published": "2026-10-30"
+    }
+  ]
+}

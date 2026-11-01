@@ -1,0 +1,15 @@
+---
+source: crates/caskade-installer/tests/fetch_resolvers.rs
+expression: "snapshot(Resolution::Downloads(vec![request.clone()]), &server)"
+---
+{
+  "downloads": [
+    {
+      "file_name": null,
+      "headers": {},
+      "sha256": null,
+      "size": null,
+      "url": "https://fixture.invalid/content/download?confirm=t&export=download&id=fixture_file&resourcekey=key%26part&uuid=anonymous-fixture-uuid"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "FixtureFlatEpic": {
+    "app_name": "FixtureFlatEpic",
+    "title": "Fixture Flatpak Epic",
+    "platform": "Windows",
+    "install_path": "/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak Epic",
+    "executable": "Flat.exe",
+    "is_dlc": false
+  }
+}

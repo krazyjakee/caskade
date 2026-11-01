@@ -1,0 +1,9 @@
+{
+  "app_name": "FixtureEpicApp",
+  "app_title": "Fixture Epic Quest",
+  "metadata": {
+    "namespace": "fixturens01",
+    "id": "fixtureitem01",
+    "title": "Fixture Epic Quest"
+  }
+}

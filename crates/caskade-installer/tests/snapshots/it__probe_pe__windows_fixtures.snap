@@ -1,0 +1,422 @@
+---
+source: crates/caskade-installer/tests/probe_pe.rs
+expression: outputs
+---
+{
+  "fixture-game-windows-x86_64.exe": {
+    "root": {
+      "id": "source:0",
+      "path": "fixture-game-windows-x86_64.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "application",
+      "size": 273408,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 34404,
+          "overlay_offset": 273408,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text",
+            ".data",
+            ".rdata",
+            ".pdata",
+            ".xdata",
+            ".bss",
+            ".idata",
+            ".CRT",
+            ".tls",
+            ".reloc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 3,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 273408,
+        "pe.subsystem": 3,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 1352,
+      "read_calls": 4,
+      "seek_calls": 7
+    }
+  },
+  "gog.zip/FixtureGame.exe": {
+    "root": {
+      "id": "source:0",
+      "path": "FixtureGame.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "application",
+      "size": 273408,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 34404,
+          "overlay_offset": 273408,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text",
+            ".data",
+            ".rdata",
+            ".pdata",
+            ".xdata",
+            ".bss",
+            ".idata",
+            ".CRT",
+            ".tls",
+            ".reloc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 3,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 273408,
+        "pe.subsystem": 3,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 1352,
+      "read_calls": 4,
+      "seek_calls": 7
+    }
+  },
+  "gog.zip/__redist/DirectX/DXSETUP.exe": {
+    "root": {
+      "id": "source:0",
+      "path": "__redist/DirectX/DXSETUP.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "redistributable",
+      "size": 273408,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 34404,
+          "overlay_offset": 273408,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text",
+            ".data",
+            ".rdata",
+            ".pdata",
+            ".xdata",
+            ".bss",
+            ".idata",
+            ".CRT",
+            ".tls",
+            ".reloc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 3,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 273408,
+        "pe.subsystem": 3,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 1352,
+      "read_calls": 4,
+      "seek_calls": 7
+    }
+  },
+  "gog.zip/__redist/vcredist_x64.exe": {
+    "root": {
+      "id": "source:0",
+      "path": "__redist/vcredist_x64.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "redistributable",
+      "size": 273408,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 34404,
+          "overlay_offset": 273408,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text",
+            ".data",
+            ".rdata",
+            ".pdata",
+            ".xdata",
+            ".bss",
+            ".idata",
+            ".CRT",
+            ".tls",
+            ".reloc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 3,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 273408,
+        "pe.subsystem": 3,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 1352,
+      "read_calls": 4,
+      "seek_calls": 7
+    }
+  },
+  "unity.zip/FixtureGame.exe": {
+    "root": {
+      "id": "source:0",
+      "path": "FixtureGame.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "application",
+      "size": 273408,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 34404,
+          "overlay_offset": 273408,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text",
+            ".data",
+            ".rdata",
+            ".pdata",
+            ".xdata",
+            ".bss",
+            ".idata",
+            ".CRT",
+            ".tls",
+            ".reloc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 3,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 273408,
+        "pe.subsystem": 3,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 1352,
+      "read_calls": 4,
+      "seek_calls": 7
+    }
+  },
+  "unity.zip/UnityCrashHandler64.exe": {
+    "root": {
+      "id": "source:0",
+      "path": "UnityCrashHandler64.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "application",
+      "size": 273408,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 34404,
+          "overlay_offset": 273408,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text",
+            ".data",
+            ".rdata",
+            ".pdata",
+            ".xdata",
+            ".bss",
+            ".idata",
+            ".CRT",
+            ".tls",
+            ".reloc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 3,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 273408,
+        "pe.subsystem": 3,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 1352,
+      "read_calls": 4,
+      "seek_calls": 7
+    }
+  },
+  "unreal.zip/FixtureGame.exe": {
+    "root": {
+      "id": "source:0",
+      "path": "FixtureGame.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "application",
+      "size": 273408,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 34404,
+          "overlay_offset": 273408,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text",
+            ".data",
+            ".rdata",
+            ".pdata",
+            ".xdata",
+            ".bss",
+            ".idata",
+            ".CRT",
+            ".tls",
+            ".reloc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 3,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 273408,
+        "pe.subsystem": 3,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 1352,
+      "read_calls": 4,
+      "seek_calls": 7
+    }
+  },
+  "unreal.zip/FixtureGame/Binaries/Win64/FixtureGame-Win64-Shipping.exe": {
+    "root": {
+      "id": "source:0",
+      "path": "FixtureGame/Binaries/Win64/FixtureGame-Win64-Shipping.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "application",
+      "size": 273408,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 34404,
+          "overlay_offset": 273408,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text",
+            ".data",
+            ".rdata",
+            ".pdata",
+            ".xdata",
+            ".bss",
+            ".idata",
+            ".CRT",
+            ".tls",
+            ".reloc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 3,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 273408,
+        "pe.subsystem": 3,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 1352,
+      "read_calls": 4,
+      "seek_calls": 7
+    }
+  }
+}

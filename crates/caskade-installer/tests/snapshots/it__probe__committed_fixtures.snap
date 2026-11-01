@@ -1,0 +1,646 @@
+---
+source: crates/caskade-installer/tests/probe.rs
+expression: snapshots
+---
+{
+  "bin/fixture-game-linux-x86_64": {
+    "root": {
+      "id": "source:0",
+      "path": "bin/fixture-game-linux-x86_64",
+      "format": "elf",
+      "platform": {
+        "type": "linux"
+      },
+      "role": "application",
+      "size": 304328,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "bin/fixture-game-windows-x86_64.exe": {
+    "root": {
+      "id": "source:0",
+      "path": "bin/fixture-game-windows-x86_64.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "application",
+      "size": 273408,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "bin/gog.zip": {
+    "root": {
+      "id": "source:0",
+      "path": "bin/gog.zip",
+      "format": "zip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 428339,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "bin/humble-linux.tar.gz": {
+    "root": {
+      "id": "source:0",
+      "path": "bin/humble-linux.tar.gz",
+      "format": "gzip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 154077,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "bin/linux.tar": {
+    "root": {
+      "id": "source:0",
+      "path": "bin/linux.tar",
+      "format": "tar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 309760,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "bin/linux.tar.bz2": {
+    "root": {
+      "id": "source:0",
+      "path": "bin/linux.tar.bz2",
+      "format": "bzip2",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 148380,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "bin/linux.tar.xz": {
+    "root": {
+      "id": "source:0",
+      "path": "bin/linux.tar.xz",
+      "format": "xz",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 130104,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "bin/linux.tar.zst": {
+    "root": {
+      "id": "source:0",
+      "path": "bin/linux.tar.zst",
+      "format": "zstd",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 139812,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "bin/macos-app.tar.gz": {
+    "root": {
+      "id": "source:0",
+      "path": "bin/macos-app.tar.gz",
+      "format": "gzip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 933,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 933,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "bin/macos-app.zip": {
+    "root": {
+      "id": "source:0",
+      "path": "bin/macos-app.zip",
+      "format": "zip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 3382,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 3382,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "bin/unity-multivolume.7z.001": {
+    "root": {
+      "id": "source:0",
+      "path": "bin/unity-multivolume.7z.001",
+      "format": "seven_zip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 32768,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "bin/unity-multivolume.7z.002": {
+    "root": {
+      "id": "source:0",
+      "path": "bin/unity-multivolume.7z.002",
+      "format": "unknown",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 32768,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 4100,
+      "read_calls": 2,
+      "seek_calls": 3
+    }
+  },
+  "bin/unity-multivolume.7z.003": {
+    "root": {
+      "id": "source:0",
+      "path": "bin/unity-multivolume.7z.003",
+      "format": "unknown",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 32768,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 4100,
+      "read_calls": 2,
+      "seek_calls": 3
+    }
+  },
+  "bin/unity-multivolume.7z.004": {
+    "root": {
+      "id": "source:0",
+      "path": "bin/unity-multivolume.7z.004",
+      "format": "unknown",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 20434,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 4100,
+      "read_calls": 2,
+      "seek_calls": 3
+    }
+  },
+  "bin/unity.7z": {
+    "root": {
+      "id": "source:0",
+      "path": "bin/unity.7z",
+      "format": "seven_zip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 118738,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "bin/unity.zip": {
+    "root": {
+      "id": "source:0",
+      "path": "bin/unity.zip",
+      "format": "zip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 285572,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "bin/unreal.zip": {
+    "root": {
+      "id": "source:0",
+      "path": "bin/unreal.zip",
+      "format": "zip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 286326,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "handmade/rar-multivolume-portable.part01.rar": {
+    "root": {
+      "id": "source:0",
+      "path": "handmade/rar-multivolume-portable.part01.rar",
+      "format": "rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 32768,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "handmade/rar-multivolume-portable.part02.rar": {
+    "root": {
+      "id": "source:0",
+      "path": "handmade/rar-multivolume-portable.part02.rar",
+      "format": "rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 32768,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "handmade/rar-multivolume-portable.part03.rar": {
+    "root": {
+      "id": "source:0",
+      "path": "handmade/rar-multivolume-portable.part03.rar",
+      "format": "rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 32768,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "handmade/rar-multivolume-portable.part04.rar": {
+    "root": {
+      "id": "source:0",
+      "path": "handmade/rar-multivolume-portable.part04.rar",
+      "format": "rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 32768,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "handmade/rar-multivolume-portable.part05.rar": {
+    "root": {
+      "id": "source:0",
+      "path": "handmade/rar-multivolume-portable.part05.rar",
+      "format": "rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 32768,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "handmade/rar-multivolume-portable.part06.rar": {
+    "root": {
+      "id": "source:0",
+      "path": "handmade/rar-multivolume-portable.part06.rar",
+      "format": "rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 32768,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "handmade/rar-multivolume-portable.part07.rar": {
+    "root": {
+      "id": "source:0",
+      "path": "handmade/rar-multivolume-portable.part07.rar",
+      "format": "rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 32768,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "handmade/rar-multivolume-portable.part08.rar": {
+    "root": {
+      "id": "source:0",
+      "path": "handmade/rar-multivolume-portable.part08.rar",
+      "format": "rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 32768,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "handmade/rar-multivolume-portable.part09.rar": {
+    "root": {
+      "id": "source:0",
+      "path": "handmade/rar-multivolume-portable.part09.rar",
+      "format": "rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 32768,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "handmade/rar-multivolume-portable.part10.rar": {
+    "root": {
+      "id": "source:0",
+      "path": "handmade/rar-multivolume-portable.part10.rar",
+      "format": "rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 32768,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "handmade/rar-multivolume-portable.part11.rar": {
+    "root": {
+      "id": "source:0",
+      "path": "handmade/rar-multivolume-portable.part11.rar",
+      "format": "rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 32768,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "handmade/rar-multivolume-portable.part12.rar": {
+    "root": {
+      "id": "source:0",
+      "path": "handmade/rar-multivolume-portable.part12.rar",
+      "format": "rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 19656,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "handmade/rar-sfx.exe": {
+    "root": {
+      "id": "source:0",
+      "path": "handmade/rar-sfx.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "application",
+      "size": 732221,
+      "facts": {},
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "handmade/unity-rar5.rar": {
+    "root": {
+      "id": "source:0",
+      "path": "handmade/unity-rar5.rar",
+      "format": "rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 252158,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  },
+  "handmade/unreal-rar5.rar": {
+    "root": {
+      "id": "source:0",
+      "path": "handmade/unreal-rar5.rar",
+      "format": "rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 252430,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4096,
+      "read_calls": 1,
+      "seek_calls": 2
+    }
+  }
+}

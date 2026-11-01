@@ -1,0 +1,18 @@
+crates/caskade-installer/tests/fixtures/bin/** binary
+crates/caskade-installer/tests/fixtures/handmade/** binary
+crates/caskade-installer/tests/fixtures/handmade/*.md text eol=lf diff merge
+crates/caskade-installer/tests/fixtures/src/** text eol=lf
+crates/caskade-installer/tests/fixtures/expected/** text eol=lf
+crates/caskade-installer/tests/fixtures/build.lock text eol=lf
+xtask/** text eol=lf
+crates/caskade-installer/tests/fixture-game/** text eol=lf
+crates/caskade-discovery/tests/fixtures/** text eol=lf
+crates/caskade-discovery/tests/fixtures/**/*.db binary
+crates/caskade-discovery/tests/fixtures/**/*.sqlite binary
+crates/caskade-discovery/tests/fixtures/**/*.lnk binary
+crates/caskade-discovery/tests/fixtures/formats/*.vdf binary
+crates/caskade-discovery/tests/fixtures/machines/**/appinfo.vdf binary
+crates/caskade-discovery/tests/fixtures/machines/**/shortcuts.vdf binary
+crates/caskade-discovery/tests/fixtures/machines/**/.GamingRoot binary
+# Generated .reg blocks conventionally end with a blank separator line.
+crates/caskade-discovery/tests/fixtures/machines/**/registry/*.reg whitespace=-blank-at-eof

@@ -1,0 +1,71 @@
+name: installer-linux-native
+on:
+  push:
+    branches: [master]
+  schedule:
+    - cron: '17 1 * * *'
+  workflow_dispatch:
+  pull_request_target:
+    types: [labeled, synchronize, reopened]
+permissions:
+  contents: read
+concurrency:
+  group: installer-linux-native
+  cancel-in-progress: false
+jobs:
+  native:
+    # A label never overrides the fork prohibition.
+    if: >-
+      github.event_name != 'pull_request_target' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       github.event.pull_request.head.repo.fork == false &&
+       contains(github.event.pull_request.labels.*.name, 'run-native'))
+    runs-on: caskade-linux-native
+    timeout-minutes: 90
+    container:
+      image: caskade/installer-ci:1.93.0
+      # Docker runs INSIDE this fresh job container; no host Docker socket.
+      options: --privileged --tmpfs /caskade-move:rw,exec,nosuid,nodev,size=8g
+      volumes:
+        - /srv/caskade-cache:/caskade-cache:ro
+    env:
+      CARGO_TARGET_DIR: target
+      CASKADE_TEST_NATIVE: '1'
+      CASKADE_TEST_MOVE_ROOT: /caskade-move
+      DOCKER_HOST: unix:///tmp/caskade-docker.sock
+      INSTA_UPDATE: 'no'
+    steps:
+      - uses: https://github.com/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Start private package-manager test daemon
+        run: |
+          dockerd --host "$DOCKER_HOST" --data-root /tmp/caskade-docker > /tmp/dockerd.log 2>&1 &
+          for attempt in $(seq 1 60); do docker info >/dev/null 2>&1 && break; sleep 1; done
+          docker info
+      - name: Provision SHA-verified official sidecar
+        run: |
+          mkdir -p target/sidecars
+          if [ -d /caskade-cache/sidecars ]; then cp -a /caskade-cache/sidecars/. target/sidecars/; fi
+          python3 scripts/7zz-download.py > sidecar.json
+          python3 -c "import json,os; d=json.load(open('sidecar.json')); f=open(os.environ['GITHUB_ENV'],'a'); f.write('CASKADE_7ZZ='+d['program']+'\n'); f.close()"
+      - name: Restore cached umu, Steam Runtime and UMU-Proton into a private XDG tree
+        run: python3 xtask/runner/prepare-proton.py --cache /caskade-cache --destination "$GITHUB_WORKSPACE/target/native-home/share" --evidence target/native-cache.json
+      - name: Native Proton install, launch, registry self-check and own-uninstaller proof
+        run: python3 xtask/runner/native-profile.py --proton
+      - name: Native serial profile, including Debian, Fedora and Flatpak delegates
+        run: python3 xtask/runner/native-profile.py
+      - name: Upload native evidence
+        if: always()
+        uses: https://github.com/actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5
+        with:
+          name: installer-linux-native-${{ github.run_id }}
+          path: |
+            target/nextest/native/junit.xml
+            sidecar.json
+            target/native-cache.json
+            target/proton-junit.xml
+            target/native-junit.xml
+            crates/caskade-installer/tests/fixtures/src/linux-mini/STEAM-DECK.md
+          retention-days: 14

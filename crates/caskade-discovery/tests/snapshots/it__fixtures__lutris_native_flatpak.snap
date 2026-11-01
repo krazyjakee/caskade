@@ -1,0 +1,388 @@
+---
+source: crates/caskade-discovery/tests/fixtures/support/mod.rs
+expression: "relative_value(value, root).expect(\"serializable snapshot\")"
+---
+[
+  {
+    "artwork": [],
+    "confidence": "certain",
+    "evidence": [
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/pga.db"
+        }
+      },
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/games/adventure-flatpak.yml"
+        }
+      }
+    ],
+    "icon": null,
+    "ids": [
+      {
+        "type": "lutris",
+        "value": {
+          "slug": "fixture-adventure"
+        }
+      },
+      {
+        "type": "gog",
+        "value": {
+          "product_id": "1207658924"
+        }
+      }
+    ],
+    "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Adventure",
+    "key": "flatpak:1",
+    "last_played_unix": 1699999500,
+    "launch": [
+      {
+        "type": "flatpak",
+        "value": {
+          "app_id": "net.lutris.Lutris",
+          "args": [
+            "lutris:rungameid/1"
+          ]
+        }
+      },
+      {
+        "type": "exec",
+        "value": {
+          "args": [
+            "--name",
+            "Fixture Adventure",
+            ""
+          ],
+          "cwd": "$FIXTURE/root/home/fixture/Games/Fixture Adventure",
+          "env": {},
+          "program": "$FIXTURE/root/home/fixture/Games/prefixes/fixture/drive_c/Game/adventure.exe"
+        }
+      }
+    ],
+    "playtime_secs": 10800,
+    "runtime": {
+      "type": "windows",
+      "value": {
+        "prefix": {
+          "arch": "win64",
+          "owner": "lutris",
+          "path": "$FIXTURE/root/home/fixture/Games/prefixes/fixture"
+        },
+        "runner": {
+          "kind": "wine",
+          "name": "wine-ge-fixture",
+          "path": null
+        }
+      }
+    },
+    "size": null,
+    "source": "lutris",
+    "state": {
+      "type": "installed"
+    },
+    "title": "Fixture Adventure Flatpak",
+    "tracking": {
+      "exe_names": [
+        "adventure.exe"
+      ],
+      "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Adventure",
+      "steam_app_id": null
+    },
+    "uninstall": null
+  },
+  {
+    "artwork": [],
+    "confidence": "certain",
+    "evidence": [
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/pga.db"
+        }
+      },
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/games/flatpak-only.yml"
+        }
+      }
+    ],
+    "icon": null,
+    "ids": [
+      {
+        "type": "lutris",
+        "value": {
+          "slug": "flatpak-only"
+        }
+      }
+    ],
+    "install_dir": "$FIXTURE/root/home/fixture/Games/Flatpak Only",
+    "key": "flatpak:2",
+    "last_played_unix": null,
+    "launch": [
+      {
+        "type": "flatpak",
+        "value": {
+          "app_id": "net.lutris.Lutris",
+          "args": [
+            "lutris:rungameid/2"
+          ]
+        }
+      },
+      {
+        "type": "exec",
+        "value": {
+          "args": [
+            "--test"
+          ],
+          "cwd": "$FIXTURE/root/home/fixture/Games/Flatpak Only",
+          "env": {},
+          "program": "$FIXTURE/root/home/fixture/Games/Flatpak Only/game"
+        }
+      }
+    ],
+    "playtime_secs": 1800,
+    "runtime": {
+      "type": "native"
+    },
+    "size": null,
+    "source": "lutris",
+    "state": {
+      "type": "installed"
+    },
+    "title": "Flatpak Only",
+    "tracking": {
+      "exe_names": [
+        "game"
+      ],
+      "install_dir": "$FIXTURE/root/home/fixture/Games/Flatpak Only",
+      "steam_app_id": null
+    },
+    "uninstall": null
+  },
+  {
+    "artwork": [],
+    "confidence": "certain",
+    "evidence": [
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/.local/share/lutris/pga.db"
+        }
+      },
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/.config/lutris/games/puzzle-config.yml"
+        }
+      }
+    ],
+    "icon": null,
+    "ids": [
+      {
+        "type": "lutris",
+        "value": {
+          "slug": "fixture-puzzle"
+        }
+      },
+      {
+        "type": "steam",
+        "value": {
+          "app_id": 620
+        }
+      }
+    ],
+    "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Puzzle",
+    "key": "native:1",
+    "last_played_unix": 1699999000,
+    "launch": [
+      {
+        "type": "uri",
+        "value": {
+          "uri": "lutris:rungameid/1"
+        }
+      },
+      {
+        "type": "exec",
+        "value": {
+          "args": [
+            "--name",
+            "Fixture Puzzle",
+            "--literal",
+            "$(no-shell)"
+          ],
+          "cwd": "$FIXTURE/root/home/fixture/Games/Fixture Puzzle",
+          "env": {},
+          "program": "$FIXTURE/root/home/fixture/Games/Fixture Puzzle/game"
+        }
+      }
+    ],
+    "playtime_secs": 5400,
+    "runtime": {
+      "type": "native"
+    },
+    "size": null,
+    "source": "lutris",
+    "state": {
+      "type": "installed"
+    },
+    "title": "Fixture Puzzle",
+    "tracking": {
+      "exe_names": [
+        "game"
+      ],
+      "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Puzzle",
+      "steam_app_id": 620
+    },
+    "uninstall": null
+  },
+  {
+    "artwork": [],
+    "confidence": "certain",
+    "evidence": [
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/.local/share/lutris/pga.db"
+        }
+      },
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/.local/share/lutris/games/adventure-config.yml"
+        }
+      }
+    ],
+    "icon": null,
+    "ids": [
+      {
+        "type": "lutris",
+        "value": {
+          "slug": "fixture-adventure"
+        }
+      },
+      {
+        "type": "gog",
+        "value": {
+          "product_id": "1207658924"
+        }
+      }
+    ],
+    "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Adventure",
+    "key": "native:2",
+    "last_played_unix": 1699998000,
+    "launch": [
+      {
+        "type": "uri",
+        "value": {
+          "uri": "lutris:rungameid/2"
+        }
+      },
+      {
+        "type": "exec",
+        "value": {
+          "args": [
+            "--name",
+            "Fixture Adventure",
+            ""
+          ],
+          "cwd": "$FIXTURE/root/home/fixture/Games/Fixture Adventure",
+          "env": {},
+          "program": "$FIXTURE/root/home/fixture/Games/prefixes/fixture/drive_c/Game/adventure.exe"
+        }
+      }
+    ],
+    "playtime_secs": 8100,
+    "runtime": {
+      "type": "windows",
+      "value": {
+        "prefix": {
+          "arch": "win64",
+          "owner": "lutris",
+          "path": "$FIXTURE/root/home/fixture/Games/prefixes/fixture"
+        },
+        "runner": {
+          "kind": "wine",
+          "name": "wine-ge-fixture",
+          "path": null
+        }
+      }
+    },
+    "size": null,
+    "source": "lutris",
+    "state": {
+      "type": "installed"
+    },
+    "title": "Fixture Adventure",
+    "tracking": {
+      "exe_names": [
+        "adventure.exe"
+      ],
+      "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Adventure",
+      "steam_app_id": null
+    },
+    "uninstall": null
+  },
+  {
+    "artwork": [],
+    "confidence": "certain",
+    "evidence": [
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/.local/share/lutris/pga.db"
+        }
+      }
+    ],
+    "icon": null,
+    "ids": [
+      {
+        "type": "lutris",
+        "value": {
+          "slug": "local-cafe"
+        }
+      }
+    ],
+    "install_dir": "$FIXTURE/root/home/fixture/Games/Local Café",
+    "key": "native:4",
+    "last_played_unix": null,
+    "launch": [
+      {
+        "type": "uri",
+        "value": {
+          "uri": "lutris:rungameid/4"
+        }
+      },
+      {
+        "type": "exec",
+        "value": {
+          "args": [],
+          "cwd": "$FIXTURE/root/home/fixture/Games/Local Café",
+          "env": {},
+          "program": "$FIXTURE/root/home/fixture/Games/Local Café/game"
+        }
+      }
+    ],
+    "playtime_secs": null,
+    "runtime": {
+      "type": "native"
+    },
+    "size": null,
+    "source": "lutris",
+    "state": {
+      "type": "installed"
+    },
+    "title": "Local Café",
+    "tracking": {
+      "exe_names": [
+        "game"
+      ],
+      "install_dir": "$FIXTURE/root/home/fixture/Games/Local Café",
+      "steam_app_id": null
+    },
+    "uninstall": null
+  }
+]

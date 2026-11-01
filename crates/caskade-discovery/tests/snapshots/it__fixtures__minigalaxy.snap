@@ -1,0 +1,181 @@
+---
+source: crates/caskade-discovery/tests/fixtures/support/mod.rs
+expression: "relative_value(value, root).expect(\"serializable snapshot\")"
+---
+[
+  {
+    "artwork": [],
+    "confidence": "certain",
+    "evidence": [
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/.config/minigalaxy/config.json"
+        }
+      },
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/GOG Games/Fixture Adventure/goggame-1207658924.info"
+        }
+      }
+    ],
+    "icon": null,
+    "ids": [
+      {
+        "type": "gog",
+        "value": {
+          "product_id": "1207658924"
+        }
+      }
+    ],
+    "install_dir": "$FIXTURE/root/home/fixture/GOG Games/Fixture Adventure",
+    "key": "1207658924",
+    "last_played_unix": null,
+    "launch": [
+      {
+        "type": "exec",
+        "value": {
+          "args": [
+            "--name",
+            "Fixture Adventure"
+          ],
+          "cwd": "$FIXTURE/root/home/fixture/GOG Games/Fixture Adventure",
+          "env": {},
+          "program": "$FIXTURE/root/home/fixture/GOG Games/Fixture Adventure/start.sh"
+        }
+      }
+    ],
+    "playtime_secs": null,
+    "runtime": {
+      "type": "native"
+    },
+    "size": null,
+    "source": "minigalaxy",
+    "state": {
+      "type": "installed"
+    },
+    "title": "Fixture Adventure",
+    "tracking": {
+      "exe_names": [
+        "start.sh"
+      ],
+      "install_dir": "$FIXTURE/root/home/fixture/GOG Games/Fixture Adventure",
+      "steam_app_id": null
+    },
+    "uninstall": null
+  },
+  {
+    "artwork": [],
+    "confidence": "certain",
+    "evidence": [
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/.config/minigalaxy/config.json"
+        }
+      },
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/GOG Games/Windows Mini/drive_c/game/goggame-1207658925.info"
+        }
+      }
+    ],
+    "icon": null,
+    "ids": [
+      {
+        "type": "gog",
+        "value": {
+          "product_id": "1207658925"
+        }
+      }
+    ],
+    "install_dir": "$FIXTURE/root/home/fixture/GOG Games/Windows Mini/drive_c/game",
+    "key": "1207658925",
+    "last_played_unix": null,
+    "launch": [
+      {
+        "type": "exec",
+        "value": {
+          "args": [
+            "--test"
+          ],
+          "cwd": "$FIXTURE/root/home/fixture/GOG Games/Windows Mini/drive_c/game",
+          "env": {},
+          "program": "$FIXTURE/root/home/fixture/GOG Games/Windows Mini/drive_c/game/game.exe"
+        }
+      }
+    ],
+    "playtime_secs": null,
+    "runtime": {
+      "type": "windows",
+      "value": {
+        "prefix": {
+          "arch": null,
+          "owner": "minigalaxy",
+          "path": "$FIXTURE/root/home/fixture/GOG Games/Windows Mini"
+        },
+        "runner": {
+          "kind": "wine",
+          "name": null,
+          "path": null
+        }
+      }
+    },
+    "size": null,
+    "source": "minigalaxy",
+    "state": {
+      "type": "installed"
+    },
+    "title": "Fixture Windows Mini",
+    "tracking": {
+      "exe_names": [
+        "game.exe"
+      ],
+      "install_dir": "$FIXTURE/root/home/fixture/GOG Games/Windows Mini/drive_c/game",
+      "steam_app_id": null
+    },
+    "uninstall": null
+  },
+  {
+    "artwork": [],
+    "confidence": "certain",
+    "evidence": [
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/GOG Games/Legacy Info/minigalaxy-info.json"
+        }
+      }
+    ],
+    "icon": null,
+    "ids": [],
+    "install_dir": "$FIXTURE/root/home/fixture/GOG Games/Legacy Info",
+    "key": "legacy:Legacy Info",
+    "last_played_unix": null,
+    "launch": [
+      {
+        "type": "exec",
+        "value": {
+          "args": [],
+          "cwd": "$FIXTURE/root/home/fixture/GOG Games/Legacy Info",
+          "env": {},
+          "program": "$FIXTURE/root/home/fixture/GOG Games/Legacy Info/start.sh"
+        }
+      }
+    ],
+    "playtime_secs": null,
+    "runtime": {
+      "type": "native"
+    },
+    "size": null,
+    "source": "minigalaxy",
+    "state": {
+      "type": "installed"
+    },
+    "title": "Legacy Info",
+    "tracking": null,
+    "uninstall": null
+  }
+]

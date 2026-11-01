@@ -1,0 +1,25 @@
+schema_version = 1
+id = "rpm-self-contained"
+title = "Caskade Fixture Game"
+layout = "linux-package"
+format = "rpm"
+platform = "linux"
+input = "bin/packages/rpm-self-contained.rpm"
+parts = ["bin/packages/rpm-self-contained.rpm"]
+tree = "packages/rpm-self-contained.tree.json"
+launch_target = "opt/caskade-fixture/start.sh"
+
+[host.windows]
+outcome = "Unsupported"
+strategy = "Extract"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.macos]
+outcome = "Unsupported"
+strategy = "Extract"
+runtime = "Native"

@@ -1,0 +1,244 @@
+/*
+ * Nexus: the sci-fi accents and motion of Caskade's default look, written
+ * against the public anatomy selectors (docs/theming/anatomy.md) like any
+ * other theme. Every duration comes from --cs-motion-* and every ambient loop
+ * honours --cs-motion-ambient, so reduced motion turns them off in one place.
+ */
+
+@keyframes cs-grid-pan {
+  to {
+    background-position:
+      0 var(--cs-grid-size),
+      var(--cs-grid-size) 0;
+  }
+}
+
+@keyframes cs-drift {
+  50% {
+    transform: translate(-4%, 3%) scale(1.08);
+  }
+}
+
+/* The backdrop's drift moves the glows, in steps: a scaled full-screen
+   layer is re-rastered, and a moving one is composited again on every
+   frame. Moving the layer itself left seams, a row or column where WebKit
+   composited it twice or not at all, so the gradients move inside it. */
+@keyframes cs-nebula {
+  50% {
+    background-position: -3vw 2vh;
+  }
+}
+
+@keyframes cs-scan {
+  from {
+    translate: 0 -100%;
+  }
+  to {
+    translate: 0 100%;
+  }
+}
+
+@keyframes cs-sweep {
+  from {
+    translate: -150% 0;
+  }
+  to {
+    translate: 250% 0;
+  }
+}
+
+@keyframes cs-pulse {
+  50% {
+    opacity: 0.35;
+    scale: 0.8;
+  }
+}
+
+/* ── Backdrop: faint HUD grid over slowly drifting nebula glows ── */
+
+[data-cs="backdrop"] {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+[data-cs="backdrop"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: var(--cs-effect-grid-opacity);
+  background-image:
+    linear-gradient(var(--cs-color-accent-alt) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cs-color-accent-alt) 1px, transparent 1px);
+  background-size: var(--cs-grid-size) var(--cs-grid-size);
+  mask-image: radial-gradient(ellipse 80% 70% at 60% 30%, #000 20%, transparent 75%);
+  /* Moving the background repaints the whole screen, so the pan steps
+     (a pixel per step at the default 48px cell) instead of moving on
+     every frame. */
+  animation: cs-grid-pan 40s steps(48) infinite;
+  animation-play-state: var(--cs-motion-ambient);
+}
+
+[data-cs="backdrop"]::after {
+  content: "";
+  position: absolute;
+  inset: -6%;
+  background:
+    radial-gradient(
+      40% 35% at 75% 15%,
+      color-mix(in oklab, var(--cs-color-accent) 22%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      35% 30% at 20% 85%,
+      color-mix(in oklab, var(--cs-color-accent-alt) 10%, transparent),
+      transparent 70%
+    );
+  /* A pixel or two per step at 4K: 4 frames a second instead of 60. */
+  animation: cs-nebula 30s steps(120) infinite;
+  animation-play-state: var(--cs-motion-ambient);
+}
+
+/* ── HUD corner brackets on framed panels ── */
+
+:is([data-cs="hero"], [data-cs="panel"]) {
+  position: relative;
+}
+
+:is([data-cs="hero"], [data-cs="panel"])::before,
+:is([data-cs="hero"], [data-cs="panel"])::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  width: var(--cs-frame-corner);
+  height: var(--cs-frame-corner);
+  border-color: var(--cs-color-accent-alt);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+:is([data-cs="hero"], [data-cs="panel"])::before {
+  top: 8px;
+  left: 8px;
+  border-top: 1.5px solid;
+  border-left: 1.5px solid;
+}
+
+:is([data-cs="hero"], [data-cs="panel"])::after {
+  right: 8px;
+  bottom: 8px;
+  border-right: 1.5px solid;
+  border-bottom: 1.5px solid;
+}
+
+/* ── Hero: scanlines plus a slow scanning beam ── */
+
+[data-cs="hero"] [data-part="fx"] {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0 2px,
+    rgb(255 255 255 / var(--cs-effect-scanline-opacity)) 2px 3px
+  );
+}
+
+[data-cs="hero"] [data-part="fx"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 40%,
+    color-mix(in oklab, var(--cs-color-accent-alt) 9%, transparent) 50%,
+    transparent 60%
+  );
+  animation: cs-scan 7s linear infinite;
+  animation-play-state: var(--cs-motion-ambient);
+}
+
+[data-cs="hero"] [data-part="glow"] {
+  animation: cs-drift 18s ease-in-out infinite;
+  animation-play-state: var(--cs-motion-ambient);
+}
+
+/* ── Game and collection cards: a glow beneath and a light sweep across the art ──
+   Hovered cards stay in place and keep their size: a lift moved them out of
+   line with their neighbours and slid them out from under the pointer. */
+
+:is([data-cs="game-card"], [data-cs="collection-card"]) {
+  transition-property: border-color, box-shadow, background-color;
+  transition-duration: var(--cs-motion-duration-base);
+  transition-timing-function: var(--cs-motion-ease-out);
+}
+
+[data-cs="game-card"]:is(:hover, :focus-visible),
+[data-cs="collection-card"]:is(:hover, :focus-visible) {
+  border-color: color-mix(in oklab, var(--cs-color-accent-alt) 45%, transparent);
+  box-shadow: 0 12px calc(32px * var(--cs-effect-glow-strength)) -12px var(--cs-color-glow);
+}
+
+[data-cs="game-card"] [data-part="art"]::after,
+[data-cs="collection-card"] [data-part="art"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  translate: -150% 0;
+  background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.18), transparent);
+  pointer-events: none;
+}
+
+[data-cs="game-card"]:is(:hover, :focus-visible) [data-part="art"]::after,
+[data-cs="collection-card"]:is(:hover, :focus-visible) [data-part="art"]::after {
+  animation: cs-sweep calc(var(--cs-motion-duration-slow) * 1.75) var(--cs-motion-ease-out);
+}
+
+/* ── Sidebar: glowing rail on the active item ── */
+
+[data-part="nav-item"][data-status="active"] {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--cs-color-accent) 32%, transparent),
+    color-mix(in oklab, var(--cs-color-accent) 6%, transparent)
+  );
+}
+
+[data-part="nav-item"][data-status="active"]::before {
+  content: "";
+  position: absolute;
+  inset-block: 8px;
+  left: 0;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--cs-color-accent-alt);
+  box-shadow: 0 0 calc(10px * var(--cs-effect-glow-strength)) var(--cs-color-accent-alt);
+}
+
+[data-part="nav-item"][data-status="active"] [data-part="icon"] {
+  color: var(--cs-color-accent-alt);
+  filter: drop-shadow(
+    0 0 calc(6px * var(--cs-effect-glow-strength))
+      color-mix(in oklab, var(--cs-color-accent-alt) 60%, transparent)
+  );
+}
+
+/* ── Primary action glow (drop-shadow, so it survives the chamfer clip) ── */
+
+[data-part="primary-action"] {
+  transition: filter var(--cs-motion-duration-base) var(--cs-motion-ease-out);
+}
+
+[data-part="primary-action"]:hover {
+  filter: drop-shadow(0 0 calc(12px * var(--cs-effect-glow-strength)) var(--cs-color-glow));
+}
+
+/* ── Live indicator (pulsing dot) ── */
+
+[data-part="live-dot"] {
+  animation: cs-pulse 2.4s ease-in-out infinite;
+  animation-play-state: var(--cs-motion-ambient);
+}

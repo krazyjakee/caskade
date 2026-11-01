@@ -1,0 +1,12 @@
+{
+  "gameId": "1207658925",
+  "name": "Fixture Windows Mini",
+  "playTasks": [
+    {
+      "isPrimary": true,
+      "type": "FileTask",
+      "path": "game.exe",
+      "arguments": "--test"
+    }
+  ]
+}

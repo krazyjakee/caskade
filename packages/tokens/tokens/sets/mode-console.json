@@ -1,0 +1,15 @@
+{
+  "$description": "Console mode (#148): read from a couch. Bigger type (rem sizes follow it), cards and hero, and a heavier focus ring drawn inside the element, softened by an inward glow (#161).",
+  "$extensions": { "dev.caskade.condition": { "selector": "[data-mode=\"console\"]" } },
+  "type": { "scale": { "$value": 1.25 } },
+  "focus": {
+    "ring": {
+      "width": { "$value": "3px" },
+      "offset": { "$value": "-3px" },
+      "inner": { "$value": "18px" },
+      "halo": { "$value": "16px" }
+    }
+  },
+  "card": { "width": { "$value": "232px" } },
+  "hero": { "height": { "$value": "24rem" } }
+}

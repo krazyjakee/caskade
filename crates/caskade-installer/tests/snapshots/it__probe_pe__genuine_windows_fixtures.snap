@@ -1,0 +1,1790 @@
+---
+source: crates/caskade-installer/tests/probe_pe.rs
+expression: outputs
+---
+{
+  "gog-inno-sliced": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1859812,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 332,
+          "overlay_offset": 867840,
+          "overlay_size": 991972,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(6)",
+            "Id(10)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".itext",
+            ".data",
+            ".bss",
+            ".idata",
+            ".didata",
+            ".edata",
+            ".tls",
+            ".rdata",
+            ".reloc",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "000004b0/Comments": "This installation was built with Inno Setup.",
+            "000004b0/FileDescription": "Caskade Fixture Game Setup",
+            "000004b0/ProductName": "Caskade Fixture Game",
+            "000004b0/ProductVersion": "1.0"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 867840,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 1063452,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "gog-inno-unity": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1974900,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 332,
+          "overlay_offset": 867840,
+          "overlay_size": 1107060,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(6)",
+            "Id(10)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".itext",
+            ".data",
+            ".bss",
+            ".idata",
+            ".didata",
+            ".edata",
+            ".tls",
+            ".rdata",
+            ".reloc",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "000004b0/Comments": "This installation was built with Inno Setup.",
+            "000004b0/FileDescription": "Caskade Fixture Game Setup",
+            "000004b0/ProductName": "Caskade Fixture Game",
+            "000004b0/ProductVersion": "1.0"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 867840,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 1178540,
+      "read_calls": 7,
+      "seek_calls": 8
+    }
+  },
+  "gog-inno5-legacy": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 421687,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 332,
+          "overlay_offset": 58368,
+          "overlay_size": 363319,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(6)",
+            "Id(10)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            "CODE",
+            "DATA",
+            "BSS",
+            ".idata",
+            ".tls",
+            ".rdata",
+            ".reloc",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "000004b0/Comments": "This installation was built with Inno Setup.",
+            "000004b0/FileDescription": "Caskade Fixture Game Setup",
+            "000004b0/ProductName": "Caskade Fixture Game",
+            "000004b0/ProductVersion": "1.0"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 58368,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 375919,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "humble-win-zip": {
+    "root": {
+      "id": "source:0",
+      "path": "payload.zip",
+      "format": "zip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 277317,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4160,
+      "read_calls": 2,
+      "seek_calls": 3
+    }
+  },
+  "inno5-code": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 421690,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 332,
+          "overlay_offset": 58368,
+          "overlay_size": 363322,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(6)",
+            "Id(10)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            "CODE",
+            "DATA",
+            "BSS",
+            ".idata",
+            ".tls",
+            ".rdata",
+            ".reloc",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "000004b0/Comments": "This installation was built with Inno Setup.",
+            "000004b0/FileDescription": "Caskade Fixture Game Setup",
+            "000004b0/ProductName": "Caskade Fixture Game",
+            "000004b0/ProductVersion": "1.0"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 58368,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 375922,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "inno5-ini": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 421531,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 332,
+          "overlay_offset": 58368,
+          "overlay_size": 363163,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(6)",
+            "Id(10)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            "CODE",
+            "DATA",
+            "BSS",
+            ".idata",
+            ".tls",
+            ".rdata",
+            ".reloc",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "000004b0/Comments": "This installation was built with Inno Setup.",
+            "000004b0/FileDescription": "Caskade Fixture Game Setup",
+            "000004b0/ProductName": "Caskade Fixture Game",
+            "000004b0/ProductVersion": "1.0"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 58368,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 375763,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "inno5-password": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 422189,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 332,
+          "overlay_offset": 58368,
+          "overlay_size": 363821,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(6)",
+            "Id(10)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            "CODE",
+            "DATA",
+            "BSS",
+            ".idata",
+            ".tls",
+            ".rdata",
+            ".reloc",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "000004b0/Comments": "This installation was built with Inno Setup.",
+            "000004b0/FileDescription": "Caskade Fixture Game Setup",
+            "000004b0/ProductName": "Caskade Fixture Game",
+            "000004b0/ProductVersion": "1.0"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 58368,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 376421,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "inno5-registry": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 421536,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 332,
+          "overlay_offset": 58368,
+          "overlay_size": 363168,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(6)",
+            "Id(10)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            "CODE",
+            "DATA",
+            "BSS",
+            ".idata",
+            ".tls",
+            ".rdata",
+            ".reloc",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "000004b0/Comments": "This installation was built with Inno Setup.",
+            "000004b0/FileDescription": "Caskade Fixture Game Setup",
+            "000004b0/ProductName": "Caskade Fixture Game",
+            "000004b0/ProductVersion": "1.0"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 58368,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 375768,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "inno5-sliced": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 306943,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 332,
+          "overlay_offset": 58368,
+          "overlay_size": 248575,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(6)",
+            "Id(10)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            "CODE",
+            "DATA",
+            "BSS",
+            ".idata",
+            ".tls",
+            ".rdata",
+            ".reloc",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "000004b0/Comments": "This installation was built with Inno Setup.",
+            "000004b0/FileDescription": "Caskade Fixture Game Setup",
+            "000004b0/ProductName": "Caskade Fixture Game",
+            "000004b0/ProductVersion": "1.0"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 58368,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 261175,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "inno60-basic": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1594428,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 332,
+          "overlay_offset": 780800,
+          "overlay_size": 813628,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(6)",
+            "Id(10)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".itext",
+            ".data",
+            ".bss",
+            ".idata",
+            ".didata",
+            ".edata",
+            ".tls",
+            ".rdata",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "000004b0/Comments": "This installation was built with Inno Setup.",
+            "000004b0/FileDescription": "Caskade Fixture Game Setup",
+            "000004b0/ProductName": "Caskade Fixture Game",
+            "000004b0/ProductVersion": "1.0"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 780800,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 833396,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "inno60-code": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1594727,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 332,
+          "overlay_offset": 780800,
+          "overlay_size": 813927,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(6)",
+            "Id(10)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".itext",
+            ".data",
+            ".bss",
+            ".idata",
+            ".didata",
+            ".edata",
+            ".tls",
+            ".rdata",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "000004b0/Comments": "This installation was built with Inno Setup.",
+            "000004b0/FileDescription": "Caskade Fixture Game Setup",
+            "000004b0/ProductName": "Caskade Fixture Game",
+            "000004b0/ProductVersion": "1.0"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 780800,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 833695,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "inno60-ini": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1594449,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 332,
+          "overlay_offset": 780800,
+          "overlay_size": 813649,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(6)",
+            "Id(10)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".itext",
+            ".data",
+            ".bss",
+            ".idata",
+            ".didata",
+            ".edata",
+            ".tls",
+            ".rdata",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "000004b0/Comments": "This installation was built with Inno Setup.",
+            "000004b0/FileDescription": "Caskade Fixture Game Setup",
+            "000004b0/ProductName": "Caskade Fixture Game",
+            "000004b0/ProductVersion": "1.0"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 780800,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 833417,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "inno60-password": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1595157,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 332,
+          "overlay_offset": 780800,
+          "overlay_size": 814357,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(6)",
+            "Id(10)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".itext",
+            ".data",
+            ".bss",
+            ".idata",
+            ".didata",
+            ".edata",
+            ".tls",
+            ".rdata",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "000004b0/Comments": "This installation was built with Inno Setup.",
+            "000004b0/FileDescription": "Caskade Fixture Game Setup",
+            "000004b0/ProductName": "Caskade Fixture Game",
+            "000004b0/ProductVersion": "1.0"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 780800,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 834125,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "inno60-registry": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1594458,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 332,
+          "overlay_offset": 780800,
+          "overlay_size": 813658,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(6)",
+            "Id(10)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".itext",
+            ".data",
+            ".bss",
+            ".idata",
+            ".didata",
+            ".edata",
+            ".tls",
+            ".rdata",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "000004b0/Comments": "This installation was built with Inno Setup.",
+            "000004b0/FileDescription": "Caskade Fixture Game Setup",
+            "000004b0/ProductName": "Caskade Fixture Game",
+            "000004b0/ProductVersion": "1.0"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 780800,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 833426,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "inno60-sliced": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1479864,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 332,
+          "overlay_offset": 780800,
+          "overlay_size": 699064,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(6)",
+            "Id(10)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".itext",
+            ".data",
+            ".bss",
+            ".idata",
+            ".didata",
+            ".edata",
+            ".tls",
+            ".rdata",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "000004b0/Comments": "This installation was built with Inno Setup.",
+            "000004b0/FileDescription": "Caskade Fixture Game Setup",
+            "000004b0/ProductName": "Caskade Fixture Game",
+            "000004b0/ProductVersion": "1.0"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 780800,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 718832,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "inno64-code": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1974569,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 332,
+          "overlay_offset": 867840,
+          "overlay_size": 1106729,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(6)",
+            "Id(10)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".itext",
+            ".data",
+            ".bss",
+            ".idata",
+            ".didata",
+            ".edata",
+            ".tls",
+            ".rdata",
+            ".reloc",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "000004b0/Comments": "This installation was built with Inno Setup.",
+            "000004b0/FileDescription": "Caskade Fixture Game Setup",
+            "000004b0/ProductName": "Caskade Fixture Game",
+            "000004b0/ProductVersion": "1.0"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 867840,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 1178209,
+      "read_calls": 7,
+      "seek_calls": 8
+    }
+  },
+  "inno64-ini": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1974308,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 332,
+          "overlay_offset": 867840,
+          "overlay_size": 1106468,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(6)",
+            "Id(10)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".itext",
+            ".data",
+            ".bss",
+            ".idata",
+            ".didata",
+            ".edata",
+            ".tls",
+            ".rdata",
+            ".reloc",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "000004b0/Comments": "This installation was built with Inno Setup.",
+            "000004b0/FileDescription": "Caskade Fixture Game Setup",
+            "000004b0/ProductName": "Caskade Fixture Game",
+            "000004b0/ProductVersion": "1.0"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 867840,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 1177948,
+      "read_calls": 7,
+      "seek_calls": 8
+    }
+  },
+  "inno64-password": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1974309,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 332,
+          "overlay_offset": 867840,
+          "overlay_size": 1106469,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(6)",
+            "Id(10)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".itext",
+            ".data",
+            ".bss",
+            ".idata",
+            ".didata",
+            ".edata",
+            ".tls",
+            ".rdata",
+            ".reloc",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "000004b0/Comments": "This installation was built with Inno Setup.",
+            "000004b0/FileDescription": "Caskade Fixture Game Setup",
+            "000004b0/ProductName": "Caskade Fixture Game",
+            "000004b0/ProductVersion": "1.0"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 867840,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 1177949,
+      "read_calls": 7,
+      "seek_calls": 8
+    }
+  },
+  "legacy-registry-path": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1974356,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 332,
+          "overlay_offset": 867840,
+          "overlay_size": 1106516,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(6)",
+            "Id(10)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".itext",
+            ".data",
+            ".bss",
+            ".idata",
+            ".didata",
+            ".edata",
+            ".tls",
+            ".rdata",
+            ".reloc",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "000004b0/Comments": "This installation was built with Inno Setup.",
+            "000004b0/FileDescription": "Caskade Fixture Game Setup",
+            "000004b0/ProductName": "Caskade Fixture Game",
+            "000004b0/ProductVersion": "1.0"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 867840,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 1177996,
+      "read_calls": 7,
+      "seek_calls": 8
+    }
+  },
+  "msi-embedded": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.msi",
+      "format": "unknown",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "installer",
+      "size": 297984,
+      "facts": {
+        "container.kind": "cfb"
+      },
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 4160,
+      "read_calls": 2,
+      "seek_calls": 3
+    }
+  },
+  "msi-external": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.msi",
+      "format": "unknown",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "installer",
+      "size": 9728,
+      "facts": {
+        "container.kind": "cfb"
+      },
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 4160,
+      "read_calls": 2,
+      "seek_calls": 3
+    }
+  },
+  "msi-plus-cab": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.msi",
+      "format": "unknown",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "installer",
+      "size": 11264,
+      "facts": {
+        "container.kind": "cfb"
+      },
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 4160,
+      "read_calls": 2,
+      "seek_calls": 3
+    }
+  },
+  "nsis-indie": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "nsis",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 156707,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "nsis",
+          "machine": 332,
+          "overlay_offset": 37376,
+          "overlay_size": 119331,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(5)",
+            "Id(14)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".rdata",
+            ".data",
+            ".ndata",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 37376,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 123307,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "nsis251-ansi-nonsolid": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "nsis",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 173340,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "nsis",
+          "machine": 332,
+          "overlay_offset": 34816,
+          "overlay_size": 138524,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(5)",
+            "Id(14)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".rdata",
+            ".data",
+            ".ndata",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 34816,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 142388,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "nsis251-ansi-solid": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "nsis",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 153055,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "nsis",
+          "machine": 332,
+          "overlay_offset": 33792,
+          "overlay_size": 119263,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(5)",
+            "Id(14)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".rdata",
+            ".data",
+            ".ndata",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 33792,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 123127,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "nsis3-ansi-nonsolid": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "nsis",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 176621,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "nsis",
+          "machine": 332,
+          "overlay_offset": 37376,
+          "overlay_size": 139245,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(5)",
+            "Id(14)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".rdata",
+            ".data",
+            ".ndata",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 37376,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 143221,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "nsis3-ansi-solid": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "nsis",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 156075,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "nsis",
+          "machine": 332,
+          "overlay_offset": 36864,
+          "overlay_size": 119211,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(5)",
+            "Id(14)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".rdata",
+            ".data",
+            ".ndata",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 36864,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 123187,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "nsis3-unicode-nonsolid": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "nsis",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 177767,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": "nsis",
+          "machine": 332,
+          "overlay_offset": 38400,
+          "overlay_size": 139367,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Id(3)",
+            "Id(5)",
+            "Id(14)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".rdata",
+            ".data",
+            ".ndata",
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 38400,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 143343,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "rar-sfx": {
+    "root": {
+      "id": "source:0",
+      "path": "rar-sfx.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 732221,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 34404,
+          "overlay_offset": 480768,
+          "overlay_size": 251453,
+          "requested_execution_level": "asInvoker",
+          "resource_types": [
+            "Wide([80, 78, 71])",
+            "Id(3)",
+            "Id(5)",
+            "Id(6)",
+            "Id(14)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".rdata",
+            ".data",
+            ".pdata",
+            ".didat",
+            ".fptable",
+            ".rsrc",
+            ".reloc"
+          ],
+          "sfx_format": "rar",
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 480768,
+        "pe.requested_execution_level": "asInvoker",
+        "pe.sfx_format": "rar",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 307421,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "sevenzip-sfx": {
+    "root": {
+      "id": "source:0",
+      "path": "sevenzip-sfx.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 336903,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 332,
+          "overlay_offset": 214528,
+          "overlay_size": 122375,
+          "requested_execution_level": null,
+          "resource_types": [
+            "Id(3)",
+            "Id(5)",
+            "Id(6)",
+            "Id(14)",
+            "Id(16)",
+            "Id(24)"
+          ],
+          "sections": [
+            ".text",
+            ".rdata",
+            ".data",
+            ".sxdata",
+            ".rsrc"
+          ],
+          "sfx_format": "seven_zip",
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {
+            "040904b0/CompanyName": "Igor Pavlov",
+            "040904b0/FileDescription": "7z SFX",
+            "040904b0/FileVersion": "26.01",
+            "040904b0/InternalName": "7z.sfx",
+            "040904b0/LegalCopyright": "Copyright (c) 1999-2026 Igor Pavlov",
+            "040904b0/OriginalFilename": "7z.sfx.exe",
+            "040904b0/ProductName": "7-Zip",
+            "040904b0/ProductVersion": "26.01"
+          },
+          "warnings": []
+        },
+        "pe.overlay_offset": 214528,
+        "pe.sfx_format": "seven_zip",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 133687,
+      "read_calls": 6,
+      "seek_calls": 8
+    }
+  },
+  "steamlike-commonredist": {
+    "root": {
+      "id": "source:0",
+      "path": "payload.zip",
+      "format": "zip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 415718,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4160,
+      "read_calls": 2,
+      "seek_calls": 3
+    }
+  },
+  "unreal-zip": {
+    "root": {
+      "id": "source:0",
+      "path": "payload.zip",
+      "format": "zip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 277890,
+      "facts": {},
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 4160,
+      "read_calls": 2,
+      "seek_calls": 3
+    }
+  },
+  "zip-sfx": {
+    "root": {
+      "id": "source:0",
+      "path": "zip-sfx.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 293009,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 34404,
+          "overlay_offset": 15872,
+          "overlay_size": 277137,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text",
+            ".data",
+            ".rdata",
+            ".pdata",
+            ".xdata",
+            ".bss",
+            ".idata",
+            ".CRT",
+            ".tls",
+            ".reloc"
+          ],
+          "sfx_format": "zip",
+          "signature_scan_truncated": false,
+          "subsystem": 3,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 15872,
+        "pe.sfx_format": "zip",
+        "pe.subsystem": 3,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 278489,
+      "read_calls": 5,
+      "seek_calls": 7
+    }
+  }
+}

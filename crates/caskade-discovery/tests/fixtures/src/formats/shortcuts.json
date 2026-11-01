@@ -1,0 +1,52 @@
+{
+  "entries": [
+    {
+      "key": "shortcuts",
+      "type": "object",
+      "value": [
+        {
+          "key": "0",
+          "type": "object",
+          "value": [
+            {
+              "key": "appid",
+              "type": "int32",
+              "value": -2147483000
+            },
+            {
+              "key": "AppName",
+              "type": "string",
+              "value": "Fixture Puzzle"
+            },
+            {
+              "key": "Exe",
+              "type": "string",
+              "value": "\"/home/fixture/Games/Fixture Puzzle/game\""
+            },
+            {
+              "key": "StartDir",
+              "type": "string",
+              "value": "\"/home/fixture/Games/Fixture Puzzle\""
+            },
+            {
+              "key": "LaunchOptions",
+              "type": "string",
+              "value": "--title \"Fixture Puzzle\""
+            },
+            {
+              "key": "tags",
+              "type": "object",
+              "value": [
+                {
+                  "key": "0",
+                  "type": "string",
+                  "value": "Fixture"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

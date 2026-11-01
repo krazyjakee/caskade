@@ -1,0 +1,25 @@
+schema_version = 1
+id = "linux-tar-bz2"
+title = "Fixture Game"
+layout = "linux"
+format = "tar.bz2"
+platform = "linux"
+input = "bin/linux.tar.bz2"
+parts = ["bin/linux.tar.bz2"]
+tree = "linux-tar-bz2.tree.json"
+launch_target = "start.sh"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.windows]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"

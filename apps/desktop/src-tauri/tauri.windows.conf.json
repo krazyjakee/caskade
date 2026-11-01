@@ -1,0 +1,13 @@
+{
+  "bundle": {
+    "resources": {
+      "binaries/7z.dll": "7z.dll",
+      "binaries/7zip-License.txt": "licenses/7zip-License.txt"
+    },
+    "targets": ["nsis"]
+  },
+  "build": {
+    "beforeDevCommand": "python ../../scripts/tauri-sidecar.py && pnpm vite",
+    "beforeBuildCommand": "python ../../scripts/tauri-sidecar.py && pnpm vite build"
+  }
+}

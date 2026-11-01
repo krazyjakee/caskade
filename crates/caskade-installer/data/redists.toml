@@ -1,0 +1,96 @@
+# Redistributables shipped with Windows games (INSTALLER-PLAN §4.6).
+# files: lower-case glob on the file name (`*` = any run, `?` = one char).
+# product_names: case-insensitive prefixes of the PE/MSI ProductName.
+# silent: argv for an unattended, no-prompt install.
+# installed: Windows registry value that exists once the runtime is present.
+# winetricks: protonfixes/winetricks verbs used instead inside a prefix.
+
+[[redist]]
+id = "vcredist-2015-2022-x64"
+name = "Microsoft Visual C++ 2015-2022 Redistributable (x64)"
+files = ["vcredist_x64.exe", "vc_redist.x64.exe", "vcredist_2015*_x64.exe", "vcredist_2017*_x64.exe", "vcredist_2019*_x64.exe", "vc_redist_2022*_x64.exe"]
+product_names = ["Microsoft Visual C++ 2015", "Microsoft Visual C++ 2017", "Microsoft Visual C++ 2019", "Microsoft Visual C++ 2022"]
+silent = ["/install", "/quiet", "/norestart"]
+installed = { hive = "HKLM", key = 'SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64', value = "Installed" }
+winetricks = ["vcrun2022"]
+
+[[redist]]
+id = "vcredist-2015-2022-x86"
+name = "Microsoft Visual C++ 2015-2022 Redistributable (x86)"
+files = ["vcredist_x86.exe", "vc_redist.x86.exe", "vcredist_2015*_x86.exe", "vcredist_2017*_x86.exe", "vcredist_2019*_x86.exe", "vc_redist_2022*_x86.exe"]
+silent = ["/install", "/quiet", "/norestart"]
+installed = { hive = "HKLM", key = 'SOFTWARE\WOW6432Node\Microsoft\VisualStudio\14.0\VC\Runtimes\x86', value = "Installed" }
+winetricks = ["vcrun2022"]
+
+[[redist]]
+id = "vcredist-2013-x64"
+name = "Microsoft Visual C++ 2013 Redistributable (x64)"
+files = ["vcredist_2013*_x64.exe", "vcredist_x64_2013.exe"]
+product_names = ["Microsoft Visual C++ 2013"]
+silent = ["/install", "/quiet", "/norestart"]
+installed = { hive = "HKLM", key = 'SOFTWARE\Microsoft\VisualStudio\12.0\VC\Runtimes\x64', value = "Installed" }
+winetricks = ["vcrun2013"]
+
+[[redist]]
+id = "vcredist-2010-x64"
+name = "Microsoft Visual C++ 2010 Redistributable (x64)"
+files = ["vcredist_2010*_x64.exe", "vcredist_x64_2010.exe"]
+product_names = ["Microsoft Visual C++ 2010"]
+silent = ["/q", "/norestart"]
+installed = { hive = "HKLM", key = 'SOFTWARE\Microsoft\VisualStudio\10.0\VC\VCRedist\x64', value = "Installed" }
+winetricks = ["vcrun2010"]
+
+[[redist]]
+id = "directx-jun2010"
+name = "DirectX End-User Runtime (June 2010)"
+files = ["dxsetup.exe"]
+product_names = ["DirectX"]
+silent = ["/silent"]
+# The legacy D3DX DLLs are not tracked by a registry value; probe the file.
+installed = { file = 'System32\d3dx9_43.dll' }
+winetricks = ["d3dx9", "d3dx10", "d3dx11_43", "d3dcompiler_43", "xact"]
+
+[[redist]]
+id = "dotnet-framework-4.8"
+name = "Microsoft .NET Framework 4.8"
+files = ["ndp48*.exe", "dotnetfx48*.exe"]
+product_names = ["Microsoft .NET Framework 4.8"]
+silent = ["/q", "/norestart"]
+installed = { hive = "HKLM", key = 'SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full', value = "Release" }
+winetricks = ["dotnet48"]
+
+[[redist]]
+id = "dotnet-framework-3.5"
+name = "Microsoft .NET Framework 3.5"
+files = ["dotnetfx35*.exe"]
+product_names = ["Microsoft .NET Framework 3.5"]
+silent = ["/q", "/norestart"]
+installed = { hive = "HKLM", key = 'SOFTWARE\Microsoft\NET Framework Setup\NDP\v3.5', value = "Install" }
+winetricks = ["dotnet35"]
+
+[[redist]]
+id = "physx-legacy"
+name = "NVIDIA PhysX System Software"
+files = ["physx*.exe", "physx*.msi"]
+product_names = ["NVIDIA PhysX"]
+silent = ["/quiet", "/norestart"]
+installed = { hive = "HKLM", key = 'SOFTWARE\WOW6432Node\NVIDIA Corporation\PhysX', value = "Version" }
+winetricks = ["physx"]
+
+[[redist]]
+id = "openal"
+name = "OpenAL"
+files = ["oalinst.exe"]
+product_names = ["OpenAL"]
+silent = ["/s"]
+installed = { file = 'System32\OpenAL32.dll' }
+winetricks = ["openal"]
+
+[[redist]]
+id = "xna-4.0"
+name = "Microsoft XNA Framework Redistributable 4.0"
+files = ["xnafx40_redist.msi", "xnafx40*.msi"]
+product_names = ["Microsoft XNA Framework Redistributable 4.0"]
+silent = ["/quiet", "/norestart"]
+installed = { hive = "HKLM", key = 'SOFTWARE\WOW6432Node\Microsoft\XNA\Framework\v4.0', value = "Installed" }
+winetricks = ["xna40"]

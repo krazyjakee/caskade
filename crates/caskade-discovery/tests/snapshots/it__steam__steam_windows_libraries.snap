@@ -1,0 +1,227 @@
+---
+source: crates/caskade-discovery/tests/steam.rs
+expression: "support::relative_value(report, root).unwrap()"
+---
+{
+  "groups": [
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/d/SteamLibrary/steamapps/appmanifest_2000040.acf"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "steam",
+              "value": {
+                "app_id": 2000040
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/d/SteamLibrary/steamapps/common/Fixture Updating Saga",
+          "key": "2000040",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "steam://rungameid/2000040"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4096,
+          "source": "steam",
+          "state": {
+            "type": "updating"
+          },
+          "title": "Fixture Updating Saga",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": "$FIXTURE/root/drives/d/SteamLibrary/steamapps/common/Fixture Updating Saga",
+            "steam_app_id": 2000040
+          },
+          "uninstall": {
+            "quiet": null,
+            "registry_key": null,
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "steam://uninstall/2000040"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/e/Games/SteamLibrary/steamapps/appmanifest_2000050.acf"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "steam",
+              "value": {
+                "app_id": 2000050
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/e/Games/SteamLibrary/steamapps/common/Fixture Drive E",
+          "key": "2000050",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "steam://rungameid/2000050"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4096,
+          "source": "steam",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Drive E",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": "$FIXTURE/root/drives/e/Games/SteamLibrary/steamapps/common/Fixture Drive E",
+            "steam_app_id": 2000050
+          },
+          "uninstall": {
+            "quiet": null,
+            "registry_key": null,
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "steam://uninstall/2000050"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/drives/c/Program Files (x86)/Steam/steamapps/appmanifest_620.acf"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "steam",
+              "value": {
+                "app_id": 620
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/drives/c/Program Files (x86)/Steam/steamapps/common/Fixture Puzzle",
+          "key": "620",
+          "last_played_unix": 1699990000,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "steam://rungameid/620"
+              }
+            }
+          ],
+          "playtime_secs": 5400,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 4096,
+          "source": "steam",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Puzzle",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": "$FIXTURE/root/drives/c/Program Files (x86)/Steam/steamapps/common/Fixture Puzzle",
+            "steam_app_id": 620
+          },
+          "uninstall": {
+            "quiet": null,
+            "registry_key": null,
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "steam://uninstall/620"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    }
+  ],
+  "launchers": [
+    {
+      "data_dir": "$FIXTURE/root/drives/c/Program Files (x86)/Steam",
+      "found": true,
+      "kind": {
+        "type": "native"
+      },
+      "path": "$FIXTURE/root/drives/c/Program Files (x86)/Steam",
+      "source": "steam",
+      "version": "1700000000"
+    }
+  ],
+  "sources": [
+    {
+      "count": 3,
+      "duration_ms": 0,
+      "error": null,
+      "source": "steam",
+      "warnings": []
+    }
+  ]
+}

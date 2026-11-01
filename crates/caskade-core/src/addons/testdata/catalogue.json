@@ -1,0 +1,162 @@
+{
+  "format": 1,
+  "generated": "2026-10-30T00:00:00Z",
+  "packages": [
+    {
+      "id": "dev.caskade.playtime-stats",
+      "kind": "plugin",
+      "name": "Playtime stats",
+      "author": "Caskade",
+      "summary": "Charts of your play time.",
+      "description": "A page of charts.\n<script>alert(1)</script> stays text.",
+      "license": "MIT",
+      "homepage": "https://example.org/stats",
+      "categories": [
+        "stats"
+      ],
+      "screenshots": [
+        {
+          "url": "media/stats.png",
+          "alt": "The stats page"
+        }
+      ],
+      "releases": [
+        {
+          "version": "0.2.0",
+          "api": "^9.0",
+          "os": [
+            "linux",
+            "windows",
+            "macos"
+          ],
+          "modes": [
+            "desktop"
+          ],
+          "permissions": [
+            "library.read"
+          ],
+          "notes": "Needs a newer Caskade.",
+          "published": "2026-10-29",
+          "artifact": {
+            "url": "packages/stats-0.2.0.zip",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "size": 1000
+          }
+        },
+        {
+          "version": "0.1.0",
+          "api": "^0.1",
+          "modes": [
+            "desktop"
+          ],
+          "permissions": [
+            "library.read"
+          ],
+          "notes": "First release.",
+          "published": "2026-10-01",
+          "artifact": {
+            "url": "packages/stats-0.1.0.zip",
+            "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "size": 900
+          }
+        },
+        {
+          "version": "0.0.1",
+          "api": "not a range",
+          "artifact": {
+            "url": "packages/x.zip",
+            "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "size": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "caskade.paper",
+      "kind": "theme",
+      "name": "Paper",
+      "author": "Caskade",
+      "summary": "A light, printed look.",
+      "license": "MIT",
+      "releases": [
+        {
+          "version": "1.0.0",
+          "artifact": {
+            "url": "https://cdn.example.org/paper-1.0.0.zip",
+            "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "size": 2000
+          }
+        }
+      ]
+    },
+    {
+      "id": "Bad Id",
+      "kind": "plugin",
+      "name": "x",
+      "author": "x",
+      "summary": "x",
+      "license": "MIT",
+      "releases": []
+    },
+    {
+      "id": "caskade.paper",
+      "kind": "theme",
+      "name": "Paper again",
+      "author": "x",
+      "summary": "x",
+      "license": "MIT",
+      "releases": [
+        {
+          "version": "2.0.0",
+          "artifact": {
+            "url": "p.zip",
+            "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "size": 5
+          }
+        }
+      ]
+    },
+    {
+      "id": "dev.example.metadata",
+      "kind": "plugin",
+      "name": "Meta",
+      "author": "x",
+      "summary": "x",
+      "license": "MIT",
+      "releases": [
+        {
+          "version": "1.0.0",
+          "api": "^0.1",
+          "provides": [
+            "metadata-provider"
+          ],
+          "artifact": {
+            "url": "m.zip",
+            "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "size": 5
+          }
+        }
+      ]
+    },
+    {
+      "id": "dev.example.insecure",
+      "kind": "plugin",
+      "name": "Insecure",
+      "author": "x",
+      "summary": "x",
+      "license": "MIT",
+      "releases": [
+        {
+          "version": "1.0.0",
+          "api": "^0.1",
+          "artifact": {
+            "url": "http://elsewhere.example/i.zip",
+            "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+            "size": 5
+          }
+        }
+      ]
+    },
+    "not an object"
+  ]
+}

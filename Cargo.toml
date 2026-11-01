@@ -1,0 +1,38 @@
+[workspace]
+members = ["crates/*", "apps/desktop/src-tauri", "xtask"]
+# Vendored upstream crates keep their own lints and tests (see their PATCHES.md).
+exclude = ["vendor"]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.94"
+
+# Dev builds keep file:line in backtraces but skip full DWARF, and dependencies
+# carry none: full debug info made each test binary ~90% DWARF and dominated
+# link times. For debugger sessions, override with
+# CARGO_PROFILE_DEV_DEBUG=full (dependencies stay without).
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
+
+# Account PIN hashing (#202) takes seconds unoptimized; tests hash many.
+[profile.dev.package.argon2]
+opt-level = 3
+
+[profile.dev.package.blake2]
+opt-level = 3
+
+# Library pages sorted by title compare every title through ICU (#218).
+[profile.dev.package.icu_collator]
+opt-level = 3
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+# Bounded-allocation safety patches over the pinned upstream releases (#26).
+[patch.crates-io]
+inno = { path = "vendor/inno-0.7.1" }
+innospect = { path = "vendor/innospect-0.2.0" }

@@ -1,0 +1,77 @@
+---
+source: crates/caskade-installer/tests/nsis.rs
+expression: metadata
+---
+{
+  "uninstaller": false,
+  "version": "V3",
+  "encoding": "Unicode",
+  "compression": "Lzma",
+  "mode": "NonSolid",
+  "files": [
+    {
+      "destination": "$INSTDIR\\空白 Game\\game.txt",
+      "path": "空白 Game/game.txt",
+      "size": null
+    }
+  ],
+  "shortcuts": [
+    {
+      "link": "$SMPROGRAMS\\Caskade Effect Fixture.lnk",
+      "target": "$INSTDIR\\空白 Game\\game.exe",
+      "path": "空白 Game/game.exe",
+      "parameters": "--safe"
+    }
+  ],
+  "effects": [
+    {
+      "kind": "registry_write",
+      "fields": {
+        "data": "$INSTDIR",
+        "encoded_data": "164",
+        "key": "Software\\CaskadeEffectFixture",
+        "name": "InstallDir",
+        "root": "HKCU",
+        "type": "REG_SZ"
+      }
+    },
+    {
+      "kind": "registry_write",
+      "fields": {
+        "data": "1",
+        "encoded_data": "175",
+        "key": "Software\\CaskadeEffectFixture",
+        "name": "Enabled",
+        "root": "HKCU",
+        "type": "REG_DWORD"
+      }
+    },
+    {
+      "kind": "registry_delete",
+      "fields": {
+        "key": "Software\\CaskadeEffectFixture",
+        "name": "OldValue",
+        "root": "HKCU"
+      }
+    },
+    {
+      "kind": "execute",
+      "fields": {
+        "command": "\"$INSTDIR\\game.exe\" --token \"空白 test\"",
+        "wait": "true"
+      }
+    },
+    {
+      "kind": "execute",
+      "fields": {
+        "file": "$INSTDIR\\manual.txt",
+        "parameters": "",
+        "verb": "open"
+      }
+    }
+  ],
+  "custom_instructions": [],
+  "uninstallers": [
+    "uninstall.exe"
+  ]
+}

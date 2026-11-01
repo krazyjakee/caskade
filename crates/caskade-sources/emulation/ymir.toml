@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: MIT
+# Authored for Caskade from docs/research/emulator-sources.md (sources and
+# flags checked 2026-10-28).
+
+id = "ymir"
+name = "Ymir"
+website = "https://github.com/ymir-emu/Ymir"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^ymir(?:-sdl3)?\\.exe$"
+locations = ["{ProgramFiles}/Ymir"]
+
+[detect.linux]
+executable = "^ymir(?:-sdl3)?$"
+flatpak = "io.github.strikerx3.ymir"
+locations = ["{UserHome}/Applications/Ymir"]
+
+[detect.macos]
+executable = "^(?:Ymir|ymir-sdl3)$"
+locations = ["/Applications/Ymir.app/Contents/MacOS"]
+
+# The AVX2 builds (any x86-64 CPU since 2013); macOS is Apple Silicon's.
+[install.windows]
+source = "github"
+repo = "ymir-emu/Ymir"
+asset = '^ymir-windows-x86_64-AVX2-v[\d.]+\.zip$'
+[install.linux]
+source = "github"
+repo = "ymir-emu/Ymir"
+asset = '^ymir-linux-x86_64-AVX2-v[\d.]+\.tar\.xz$'
+[install.macos]
+source = "github"
+repo = "ymir-emu/Ymir"
+asset = '^ymir-macos-arm64-v[\d.]+\.zip$'
+
+# Ymir keeps a profile folder; the Saturn IPL ROM in its roms/ipl is used.
+[vars]
+profile = "{EmulatorDir}/profile"
+bios = "{profile}/roms/ipl"
+[vars.macos]
+profile = "{AppSupport}/Ymir"
+[vars.linux.flatpak]
+profile = "{UserHome}/.var/app/io.github.strikerx3.ymir/data/Ymir"
+
+[display]
+fullscreen = ["--fullscreen"]
+
+[[profile]]
+name = "Saturn"
+platforms = ["sega_saturn"]
+extensions = ["cue", "chd", "ccd", "iso", "mds"]
+args = ["--profile", "{profile}", "--disc", "{RomPath}"]

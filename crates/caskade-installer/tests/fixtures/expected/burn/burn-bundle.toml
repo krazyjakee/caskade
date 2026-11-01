@@ -1,0 +1,31 @@
+schema_version = 1
+id = "burn-bundle"
+title = "Fixture Game"
+layout = "unity"
+format = "burn"
+platform = "windows"
+input = "bin/burn/burn-bundle.exe"
+parts = ["bin/burn/burn-bundle.exe"]
+tree = "burn/burn-bundle.tree.json"
+launch_target = "FixtureGame.exe"
+
+[windows]
+builder = "WiX Burn"
+version = "3.14.1"
+features = ["embedded-msi", "InstallFolder-variable", "per-user"]
+native_generated = []
+
+[host.windows]
+outcome = "Installed"
+strategy = "RunSilent"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

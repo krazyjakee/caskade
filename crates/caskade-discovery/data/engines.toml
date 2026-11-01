@@ -1,0 +1,144 @@
+# Original Caskade fingerprint data (DISCOVERY-PLAN §6.7).
+# All patterns in one rule must match. Alternative layouts use separate rules.
+# Paths include directories and use globset's ** for zero or more parents.
+# SDK presence is weaker than an engine; store-* rules cannot establish Likely alone.
+
+[[engine]]
+id = "unity"
+name = "Unity"
+files = ["**/UnityPlayer.dll", "**/*_Data/globalgamemanagers"]
+
+[[engine]]
+id = "unity-linux"
+name = "Unity (Linux)"
+files = ["**/UnityPlayer.so", "**/*_Data/globalgamemanagers"]
+
+[[engine]]
+id = "unity-macos"
+name = "Unity (macOS)"
+files = ["**/UnityPlayer.dylib", "**/Data/globalgamemanagers"]
+
+[[engine]]
+id = "unreal"
+name = "Unreal"
+files = ["**/*-Shipping.exe"]
+
+[[engine]]
+id = "unreal-paks"
+name = "Unreal packaged content"
+files = ["**/Engine/Binaries", "**/Content/Paks/*.pak"]
+
+[[engine]]
+id = "godot"
+name = "Godot"
+files = ["**/*.pck"]
+
+[[engine]]
+id = "gamemaker"
+name = "GameMaker"
+files = ["**/data.win"]
+
+[[engine]]
+id = "gamemaker-linux"
+name = "GameMaker (Linux)"
+files = ["**/game.unx"]
+
+[[engine]]
+id = "rpg-maker-mv"
+name = "RPG Maker MV"
+files = ["**/js/rpg_core.js", "**/data/System.json"]
+
+[[engine]]
+id = "rpg-maker-mz"
+name = "RPG Maker MZ"
+files = ["**/js/rmmz_core.js", "**/data/System.json"]
+
+[[engine]]
+id = "rpg-maker-xp"
+name = "RPG Maker XP"
+files = ["**/*.rgssad"]
+
+[[engine]]
+id = "rpg-maker-vx"
+name = "RPG Maker VX"
+files = ["**/*.rgss2a"]
+
+[[engine]]
+id = "rpg-maker-vx-ace"
+name = "RPG Maker VX Ace"
+files = ["**/*.rgss3a"]
+
+[[engine]]
+id = "renpy"
+name = "Ren’Py"
+files = ["**/renpy", "**/game/*.rpa"]
+
+[[engine]]
+id = "source"
+name = "Source"
+files = ["**/gameinfo.txt", "**/bin/client.dll"]
+
+[[engine]]
+id = "source-linux"
+name = "Source (Linux)"
+files = ["**/gameinfo.txt", "**/bin/client.so"]
+
+[[engine]]
+id = "fna"
+name = "FNA"
+files = ["**/FNA.dll"]
+
+[[engine]]
+id = "xna"
+name = "XNA"
+files = ["**/Microsoft.Xna.Framework.Game.dll"]
+
+[[engine]]
+id = "love"
+name = "LÖVE"
+files = ["**/*.love"]
+
+[[engine]]
+id = "store-steam"
+name = "Steam SDK (Windows)"
+files = ["**/steam_api.dll"]
+
+[[engine]]
+id = "store-steam64"
+name = "Steam SDK (Windows x64)"
+files = ["**/steam_api64.dll"]
+
+[[engine]]
+id = "store-steam-linux"
+name = "Steam SDK (Linux)"
+files = ["**/libsteam_api.so"]
+
+[[engine]]
+id = "store-steam-macos"
+name = "Steam SDK (macOS)"
+files = ["**/libsteam_api.dylib"]
+
+[[engine]]
+id = "store-steam-appid"
+name = "Steam application id"
+files = ["**/steam_appid.txt"]
+
+[[engine]]
+id = "store-gog"
+name = "GOG metadata"
+files = ["**/goggame-*.info"]
+
+[[engine]]
+id = "store-itch"
+name = "itch metadata"
+files = ["**/.itch.toml"]
+
+[[engine]]
+id = "store-epic"
+name = "Epic Online Services SDK"
+files = ["**/EOSSDK-*.dll"]
+
+[[engine]]
+id = "store-galaxy"
+name = "GOG Galaxy SDK"
+files = ["**/Galaxy*.dll"]

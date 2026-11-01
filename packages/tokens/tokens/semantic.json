@@ -1,0 +1,212 @@
+{
+  "$description": "Semantic tier: what things mean. Most themes only change these.",
+  "color": {
+    "$type": "color",
+    "surface": {
+      "base": {
+        "$value": "#060914",
+        "$description": "The app background."
+      },
+      "raised": {
+        "$value": "#0d1224d9",
+        "$description": "Panels and cards above the background."
+      },
+      "overlay": {
+        "$value": "#131a31",
+        "$description": "Popovers, menus and inputs."
+      },
+      "hover": {
+        "$value": "#18203f",
+        "$description": "A hovered row or control."
+      }
+    },
+    "border": {
+      "$root": {
+        "$value": "#8ea2ff17",
+        "$description": "Hairlines between areas."
+      },
+      "strong": {
+        "$value": "#8ea2ff33",
+        "$description": "Control outlines."
+      }
+    },
+    "fg": {
+      "$root": {
+        "$value": "#eef0fb",
+        "$description": "Primary text."
+      },
+      "muted": {
+        "$value": "#a3a9c4",
+        "$description": "Secondary text."
+      },
+      "subtle": {
+        "$value": "#6a7194",
+        "$description": "Hints and captions."
+      }
+    },
+    "accent": {
+      "$root": {
+        "$value": "{color.palette.indigo}",
+        "$description": "Primary actions and selection."
+      },
+      "strong": {
+        "$value": "{color.palette.violet}",
+        "$description": "Hovered or emphasised accent."
+      },
+      "alt": {
+        "$value": "{color.palette.cyan}",
+        "$description": "The second accent: icons, rails, focus."
+      },
+      "fg": {
+        "$value": "{color.palette.white}",
+        "$description": "Text on the accent."
+      }
+    },
+    "glow": {
+      "$value": "#6f66ff80",
+      "$description": "Glows around accented elements."
+    },
+    "status": {
+      "installed": {
+        "$value": "{color.palette.green}"
+      },
+      "available": {
+        "$value": "{color.palette.orange}"
+      },
+      "emulated": {
+        "$value": "{color.palette.purple}"
+      },
+      "missing": {
+        "$value": "{color.palette.slate}"
+      }
+    },
+    "warning": {
+      "$value": "{color.palette.amber}"
+    },
+    "danger": {
+      "$value": "{color.palette.red}"
+    }
+  },
+  "radius": {
+    "$type": "dimension",
+    "card": {
+      "$value": "0.5rem"
+    },
+    "control": {
+      "$value": "0.5rem"
+    },
+    "panel": {
+      "$value": "0.875rem"
+    }
+  },
+  "effect": {
+    "glass": {
+      "blur": {
+        "$type": "dimension",
+        "$value": "16px",
+        "$description": "Backdrop blur of glass surfaces."
+      }
+    },
+    "grid": {
+      "opacity": {
+        "$type": "number",
+        "$value": 0.07,
+        "$description": "The backdrop grid."
+      }
+    },
+    "scanline": {
+      "opacity": {
+        "$type": "number",
+        "$value": 0.06,
+        "$description": "Hero scanlines."
+      }
+    },
+    "glow": {
+      "strength": {
+        "$type": "number",
+        "$value": 1,
+        "$description": "Multiplier for hover glows."
+      }
+    }
+  },
+  "motion": {
+    "duration": {
+      "$type": "duration",
+      "fast": {
+        "$value": "140ms"
+      },
+      "base": {
+        "$value": "240ms"
+      },
+      "slow": {
+        "$value": "520ms"
+      }
+    },
+    "ease": {
+      "out": {
+        "$type": "cubicBezier",
+        "$value": [0.2, 0.8, 0.2, 1]
+      }
+    },
+    "stagger": {
+      "$type": "duration",
+      "$value": "35ms",
+      "$description": "Delay between staggered siblings."
+    },
+    "ambient": {
+      "$type": "keyword",
+      "$value": "running",
+      "$description": "Looping animations: running or paused (the animation-play-state)."
+    }
+  },
+  "density": {
+    "scale": {
+      "$type": "number",
+      "$value": 1,
+      "$description": "Multiplier for spacing and control sizes (console mode raises it)."
+    }
+  },
+  "type": {
+    "scale": {
+      "$type": "number",
+      "$value": 1,
+      "$description": "Multiplier for font sizes (console mode raises it)."
+    }
+  },
+  "focus": {
+    "ring": {
+      "width": {
+        "$type": "dimension",
+        "$value": "2px",
+        "$description": "Focus ring thickness: the clear edge that marks keyboard and pad focus."
+      },
+      "offset": {
+        "$type": "dimension",
+        "$value": "2px",
+        "$description": "Where the ring sits: positive is outside the element, minus the width inside it. Console mode draws it inside, where clipping parents can't cut it."
+      },
+      "glow": {
+        "$type": "color",
+        "$value": "{color.palette.cyan}",
+        "$description": "Focus ring colour and glow."
+      },
+      "inner": {
+        "$type": "dimension",
+        "$value": "0px",
+        "$description": "Blur of the glow fading inward from the ring; 0px for none. Scaled by effect.glow.strength."
+      },
+      "halo": {
+        "$type": "dimension",
+        "$value": "0px",
+        "$description": "Blur of the soft glow outside the element where space allows; parents may clip it. Scaled by effect.glow.strength."
+      }
+    }
+  },
+  "ui": {
+    "scale": {
+      "$type": "number",
+      "$value": 1,
+      "$description": "Appearance → UI scale; the root font size follows it."
+    }
+  }
+}

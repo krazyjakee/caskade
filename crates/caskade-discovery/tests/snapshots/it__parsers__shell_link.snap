@@ -1,0 +1,52 @@
+---
+source: crates/caskade-discovery/tests/parsers.rs
+expression: link
+---
+{
+  "value": {
+    "target": "C:\\Games\\Fixture Café\\game.exe",
+    "relative_path": "..\\..\\Games\\Fixture Café\\game.exe",
+    "arguments": [
+      "--name",
+      "Fixture Café",
+      "--flag"
+    ],
+    "raw_arguments": "--name \"Fixture Café\" --flag",
+    "working_dir": "C:\\Games\\Fixture Café",
+    "icon": "C:\\Games\\Fixture Café\\icon.ico",
+    "icon_index": 0,
+    "description": "Synthetic discovery shortcut",
+    "known_folders": [
+      {
+        "guid": "905e63b6-c1bf-494e-b29c-65b732d3d21a",
+        "id_list_offset": 0
+      }
+    ],
+    "environment_target": null,
+    "id_list": [
+      20,
+      0,
+      31,
+      80,
+      182,
+      99,
+      94,
+      144,
+      191,
+      193,
+      78,
+      73,
+      178,
+      156,
+      101,
+      183,
+      50,
+      211,
+      210,
+      26,
+      0,
+      0
+    ]
+  },
+  "warnings": []
+}

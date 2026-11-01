@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Fixture Puzzle
+Name[fr]=Casse-tête fictif
+Exec=env FIXTURE_MODE=1 "/home/fixture/Games/Fixture Puzzle/game" --name "Fixture Puzzle" %U
+TryExec=/home/fixture/Games/Fixture Puzzle/game
+Icon=/home/fixture/Games/Fixture Puzzle/icon.png
+Categories=Game;

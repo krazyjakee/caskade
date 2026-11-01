@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: MIT
+# Authored for Caskade from docs/research/emulator-sources.md (sources and
+# flags checked 2026-10-28).
+
+id = "shadps4"
+name = "shadPS4"
+website = "https://shadps4.net/"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^shadps4\\.exe$"
+locations = ["{ProgramFiles}/shadPS4"]
+
+[detect.linux]
+executable = "^shadps4$"
+flatpak = "net.shadps4.shadPS4"
+appimage = "(?i)^shadps4(?:[-_].*)?\\.AppImage$"
+
+[detect.macos]
+executable = "^shadps4$"
+locations = ["/Applications/shadps4.app/Contents/MacOS"]
+
+# The SDL builds: the Qt launcher has prereleases only.
+[install.windows]
+source = "github"
+repo = "shadps4-emu/shadPS4"
+asset = '^shadps4-win64-sdl-.*\.zip$'
+[install.linux]
+source = "github"
+repo = "shadps4-emu/shadPS4"
+asset = '^shadps4-linux-sdl-.*\.zip$'
+[install.macos]
+source = "github"
+repo = "shadps4-emu/shadPS4"
+asset = '^shadps4-macos-sdl-.*\.zip$'
+
+[display]
+fullscreen = ["--fullscreen", "true"]
+windowed = ["--fullscreen", "false"]
+
+[[profile]]
+name = "PlayStation 4"
+platforms = ["sony_playstation4"]
+extensions = ["bin"]
+args = ["-g", "{RomPath}"]

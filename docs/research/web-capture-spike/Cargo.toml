@@ -1,0 +1,15 @@
+[package]
+name = "webspike"
+version = "0.0.0"
+edition = "2024"
+
+[dependencies]
+tao = { version = "0.37", default-features = false, features = ["rwh_06", "x11"] }
+wry = { version = "0.57", default-features = false, features = ["os-webview", "linux-body", "x11"] }
+webkit2gtk = "2"
+gtk = "0.18"
+hudsucker = "0.25"
+http-body-util = "0.1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+
+[workspace]

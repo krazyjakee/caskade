@@ -1,0 +1,23 @@
+[
+  {
+    "path": "FixtureGame.x86_64",
+    "kind": "file",
+    "size": 304328,
+    "executable": true,
+    "sha256": "d26f6098adc1a474ac48c3c4e5e71de918cf3a69f92829ba4a4f7755ceba22d3"
+  },
+  {
+    "path": "gameinfo",
+    "kind": "file",
+    "size": 54,
+    "executable": false,
+    "sha256": "cb94e8f2e326bed09cfc5cb39717886a39fba952a042616c20f378ed07df0478"
+  },
+  {
+    "path": "start.sh",
+    "kind": "file",
+    "size": 104,
+    "executable": true,
+    "sha256": "7fe0eca3d47b9b5599c76d1f8a68d660795de4202b96bc6fb70954b5c50df74e"
+  }
+]

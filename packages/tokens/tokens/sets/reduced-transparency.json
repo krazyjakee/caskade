@@ -1,0 +1,9 @@
+{
+  "$description": "The OS asks for less transparency.",
+  "$extensions": { "dev.caskade.condition": { "media": "(prefers-reduced-transparency: reduce)" } },
+  "effect": {
+    "glass": { "blur": { "$value": "0px" } },
+    "grid": { "opacity": { "$value": 0 } },
+    "scanline": { "opacity": { "$value": 0 } }
+  }
+}

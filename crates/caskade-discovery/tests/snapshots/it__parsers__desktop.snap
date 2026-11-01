@@ -1,0 +1,15 @@
+---
+source: crates/caskade-discovery/tests/parsers.rs
+expression: desktop
+---
+{
+  "fields": {
+    "Categories": "Game;",
+    "Exec": "env FIXTURE_MODE=1 \"/home/fixture/Games/Fixture Puzzle/game\" --name \"Fixture Puzzle\" %U",
+    "Icon": "/home/fixture/Games/Fixture Puzzle/icon.png",
+    "Name": "Fixture Puzzle",
+    "Name[fr]": "Casse-tête fictif",
+    "TryExec": "/home/fixture/Games/Fixture Puzzle/game",
+    "Type": "Application"
+  }
+}

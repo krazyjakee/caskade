@@ -1,0 +1,15 @@
+---
+source: crates/caskade-installer/tests/input.rs
+expression: value
+---
+{
+  "files": [
+    "bin/unity-multivolume.7z.001",
+    "bin/unity-multivolume.7z.002",
+    "bin/unity-multivolume.7z.003",
+    "bin/unity-multivolume.7z.004"
+  ],
+  "kind": "seven_zip",
+  "primary": "bin/unity-multivolume.7z.001",
+  "type": "multi_part"
+}

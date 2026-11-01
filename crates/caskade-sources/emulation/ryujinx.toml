@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: MIT
+# Adapted from Playnite (c) 2020 Josef Nemec, commit 3e8abb241873e326e27c75b59dd0d2ea367698e3.
+# Source: source/Playnite/Emulation/Emulators/Ryujinx/emulator.yaml
+# Windows rules/profiles ported with attribution; Linux/macOS rules by Caskade.
+# See ../THIRD-PARTY.md for the license and adaptation notes.
+
+
+id = "ryujinx"
+name = "Ryujinx"
+website = "https://ryujinx.org/"
+tracking = { type = "process_name", name = "{process}" }
+
+[detect.windows]
+executable = "(?i)^ryujinx(?:\\.ava)?\\.exe$"
+locations = ["{ProgramFiles}/Ryujinx", "{AppData}/Ryujinx", "{UserHome}/AppData/Local/Ryujinx", "{UserHome}/scoop/apps/ryujinx/current", "C:/ProgramData/chocolatey/lib/ryujinx/tools"]
+
+[detect.linux]
+executable = "^(?:Ryujinx)$"
+path = ["Ryujinx"]
+flatpak = "org.ryujinx.Ryujinx"
+appimage = "(?i)^Ryujinx(?:[-_].*)?\\.AppImage$"
+locations = ["{UserHome}/Applications/Ryujinx", "{UserHome}/Emulation/tools/ryujinx", "{UserHome}/Emulation/tools/launchers", "/opt/ryujinx"]
+
+[detect.macos]
+executable = "(?i)^(?:Ryujinx|Ryujinx)$"
+bundle = "org.ryujinx.Ryujinx"
+path = ["Ryujinx"]
+locations = ["/Applications/Ryujinx.app/Contents/MacOS", "{UserHome}/Applications/Ryujinx.app/Contents/MacOS"]
+
+[vars]
+process = "Ryujinx"
+[vars.windows]
+process = "Ryujinx.exe"
+
+# No install source: Nintendo's DMCA notice of 2026-02-12 took Switch
+# emulators off GitHub (EMULATOR-SETUP-PLAN §1).
+[display]
+fullscreen = ["--fullscreen"]
+
+[[profile]]
+name = "Default"
+platforms = ["nintendo_switch"]
+extensions = ["xci", "nsp"]
+args = ["{RomPath}"]
+requires = []

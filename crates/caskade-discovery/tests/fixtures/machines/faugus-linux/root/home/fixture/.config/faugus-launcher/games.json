@@ -1,0 +1,9 @@
+[
+  {
+    "gameid": "fixture-windows",
+    "title": "Stale old duplicate",
+    "path": "/home/fixture/Faugus/Fixture/drive_c/game/game.exe",
+    "prefix": "/home/fixture/Faugus/Fixture",
+    "runner": "old"
+  }
+]

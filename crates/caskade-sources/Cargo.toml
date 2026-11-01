@@ -1,0 +1,43 @@
+[package]
+name = "caskade-sources"
+version = "0.1.0"
+description = "Discovery-backed library sources and transactional imports for Caskade"
+edition.workspace = true
+rust-version.workspace = true
+# Integration tests are declared below, not discovered from tests/.
+autotests = false
+
+[features]
+default = ["sqlite"]
+sqlite = ["caskade-discovery/sqlite"]
+# The ignored live test of the shipped install sources reaches GitHub.
+live-tests = ["caskade-core/net"]
+
+[dependencies]
+caskade-jobs = { path = "../caskade-jobs" }
+caskade-core = { path = "../caskade-core", default-features = false }
+caskade-installer = { path = "../caskade-installer", default-features = false }
+caskade-discovery = { path = "../caskade-discovery", default-features = false, features = ["windows-sources", "linux-sources", "macos-sources", "deep", "watch"] }
+async-trait = "0.1"
+cap-std = "4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+schemars = "1"
+specta = { version = "=2.0.0-rc.26", features = ["derive", "serde_json"] }
+thiserror = "2"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync"] }
+tracing = "0.1"
+
+[dev-dependencies]
+regex = "1"
+insta = { version = "1", features = ["json"] }
+caskade-emulation-fixtures = { path = "../caskade-emulation-fixtures" }
+tempfile = "=3.27.0"
+
+[lints]
+workspace = true
+
+# One binary for the integration tests (tests/main.rs); see its header.
+[[test]]
+name = "it"
+path = "tests/main.rs"

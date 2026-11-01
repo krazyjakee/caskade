@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: MIT
+# Authored for Caskade from docs/research/emulator-sources.md (sources and
+# flags checked 2026-10-28).
+
+id = "rmg"
+name = "Rosalie's Mupen GUI"
+website = "https://github.com/Rosalie241/RMG"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^RMG\\.exe$"
+locations = ["{ProgramFiles}/RMG", "{UserHome}/AppData/Local/RMG"]
+
+[detect.linux]
+executable = "^RMG$"
+path = ["RMG"]
+flatpak = "com.github.Rosalie241.RMG"
+appimage = "(?i)^RMG(?:[-_].*)?\\.AppImage$"
+locations = ["{UserHome}/Applications/RMG", "{UserHome}/Emulation/tools/rmg"]
+
+[detect.macos]
+executable = "^RMG$"
+path = ["RMG"]
+
+# No macOS build: gopher64 runs N64 games there.
+[install.windows]
+source = "github"
+repo = "Rosalie241/RMG"
+asset = '^RMG-Portable-Windows64-v[\d.]+\.zip$'
+[install.linux]
+source = "github"
+repo = "Rosalie241/RMG"
+asset = '^RMG-Portable-Linux64-v[\d.]+\.AppImage$'
+
+[display]
+fullscreen = ["--fullscreen"]
+
+[[profile]]
+name = "Nintendo 64"
+platforms = ["nintendo_n64"]
+extensions = ["z64", "n64", "v64", "ndd", "zip", "7z"]
+args = ["--nogui", "--quit-after-emulation", "{RomPath}"]

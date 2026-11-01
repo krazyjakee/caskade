@@ -1,0 +1,12 @@
+{
+  "FixtureEpicApp": {
+    "winePrefix": "/home/fixture/Games/Heroic/Prefixes/default/Fixture Epic Quest",
+    "wineVersion": {
+      "bin": "/home/fixture/.config/heroic/tools/proton/GE-Proton10-34/proton",
+      "name": "Proton - GE-Proton10-34",
+      "type": "proton"
+    }
+  },
+  "version": "v0",
+  "explicit": true
+}

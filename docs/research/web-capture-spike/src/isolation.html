@@ -1,0 +1,6 @@
+<!doctype html><meta charset="utf-8"><title>spike</title>
+<script>
+let made = "no";
+try { new SharedArrayBuffer(8); made = "yes"; } catch (e) { made = "err:" + e.name; }
+document.title = `RESULT secure=${isSecureContext} isolated=${self.crossOriginIsolated} sab=${typeof SharedArrayBuffer} new=${made}`;
+</script>

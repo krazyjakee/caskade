@@ -1,0 +1,1381 @@
+{
+  "provenance": "Original authored examples of public product names and conventional uninstall-key shapes. NOT registry exports. Fields, paths, dates, sizes, GUID-free key spellings, and fingerprint payloads are generated/sanitised representatives; marker files are synthetic text, not product binaries or an exact product installation inventory.",
+  "references": [
+    "https://learn.microsoft.com/en-us/windows/win32/msi/uninstall-registry-key",
+    "https://learn.microsoft.com/en-us/windows/win32/msi/arpsystemcomponent",
+    "https://partner.steamgames.com/doc/features/steam_browser_protocol"
+  ],
+  "records": [
+    {
+      "name": "HollowKnight_is1",
+      "title": "Hollow Knight",
+      "expect": "game",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Hollow Knight",
+        "Publisher": "Team Cherry",
+        "InstallLocation": "C:\\Games\\Hollow Knight",
+        "DisplayIcon": "\"C:\\Games\\Hollow Knight\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Hollow Knight\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Hollow Knight\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "Cuphead_is1",
+      "title": "Cuphead",
+      "expect": "game",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "Cuphead",
+        "Publisher": "Studio MDHR",
+        "InstallLocation": "C:\\Games\\Cuphead",
+        "DisplayIcon": "\"C:\\Games\\Cuphead\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Cuphead\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Cuphead\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "Subnautica_is1",
+      "title": "Subnautica",
+      "expect": "game",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "Subnautica",
+        "Publisher": "Unknown Worlds Entertainment",
+        "InstallLocation": "C:\\Games\\Subnautica",
+        "DisplayIcon": "\"C:\\Games\\Subnautica\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Subnautica\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Subnautica\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "CitiesSkylines_is1",
+      "title": "Cities Skylines",
+      "expect": "game",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "Cities Skylines",
+        "Publisher": "Paradox Interactive",
+        "InstallLocation": "C:\\Games\\Cities Skylines",
+        "DisplayIcon": "\"C:\\Games\\Cities Skylines\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Cities Skylines\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Cities Skylines\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "KerbalSpaceProgram_is1",
+      "title": "Kerbal Space Program",
+      "expect": "game",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Kerbal Space Program",
+        "Publisher": "Squad",
+        "InstallLocation": "C:\\Games\\Kerbal Space Program",
+        "DisplayIcon": "\"C:\\Games\\Kerbal Space Program\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Kerbal Space Program\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Kerbal Space Program\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "OriandtheBlindForest_is1",
+      "title": "Ori and the Blind Forest",
+      "expect": "game",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "Ori and the Blind Forest",
+        "Publisher": "Microsoft Studios",
+        "InstallLocation": "C:\\Games\\Ori and the Blind Forest",
+        "DisplayIcon": "\"C:\\Games\\Ori and the Blind Forest\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Ori and the Blind Forest\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Ori and the Blind Forest\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "Superhot_is1",
+      "title": "Superhot",
+      "expect": "game",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "Superhot",
+        "Publisher": "SUPERHOT Team",
+        "InstallLocation": "C:\\Games\\Superhot",
+        "DisplayIcon": "\"C:\\Games\\Superhot\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Superhot\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Superhot\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "Rust_is1",
+      "title": "Rust",
+      "expect": "game",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "Rust",
+        "Publisher": "Facepunch Studios",
+        "InstallLocation": "C:\\Games\\Rust",
+        "DisplayIcon": "\"C:\\Games\\Rust\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Rust\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Rust\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "SlimeRancher_is1",
+      "title": "Slime Rancher",
+      "expect": "game",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Slime Rancher",
+        "Publisher": "Monomi Park",
+        "InstallLocation": "C:\\Games\\Slime Rancher",
+        "DisplayIcon": "\"C:\\Games\\Slime Rancher\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Slime Rancher\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Slime Rancher\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "Firewatch_is1",
+      "title": "Firewatch",
+      "expect": "game",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "Firewatch",
+        "Publisher": "Campo Santo",
+        "InstallLocation": "C:\\Games\\Firewatch",
+        "DisplayIcon": "\"C:\\Games\\Firewatch\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Firewatch\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Firewatch\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "UntitledGooseGame_is1",
+      "title": "Untitled Goose Game",
+      "expect": "game",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "Untitled Goose Game",
+        "Publisher": "House House",
+        "InstallLocation": "C:\\Games\\Untitled Goose Game",
+        "DisplayIcon": "\"C:\\Games\\Untitled Goose Game\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Untitled Goose Game\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Untitled Goose Game\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "ReturnoftheObraDinn_is1",
+      "title": "Return of the Obra Dinn",
+      "expect": "game",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "Return of the Obra Dinn",
+        "Publisher": "3909",
+        "InstallLocation": "C:\\Games\\Return of the Obra Dinn",
+        "DisplayIcon": "\"C:\\Games\\Return of the Obra Dinn\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Return of the Obra Dinn\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Return of the Obra Dinn\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "OuterWilds_is1",
+      "title": "Outer Wilds",
+      "expect": "game",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Outer Wilds",
+        "Publisher": "Mobius Digital",
+        "InstallLocation": "C:\\Games\\Outer Wilds",
+        "DisplayIcon": "\"C:\\Games\\Outer Wilds\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Outer Wilds\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Outer Wilds\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "DiscoElysium_is1",
+      "title": "Disco Elysium",
+      "expect": "game",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "Disco Elysium",
+        "Publisher": "ZA/UM",
+        "InstallLocation": "C:\\Games\\Disco Elysium",
+        "DisplayIcon": "\"C:\\Games\\Disco Elysium\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Disco Elysium\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Disco Elysium\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "Tunic_is1",
+      "title": "Tunic",
+      "expect": "game",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "Tunic",
+        "Publisher": "Finji",
+        "InstallLocation": "C:\\Games\\Tunic",
+        "DisplayIcon": "\"C:\\Games\\Tunic\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Tunic\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Tunic\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "Undertale_is1",
+      "title": "Undertale",
+      "expect": "game",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "Undertale",
+        "Publisher": "tobyfox",
+        "InstallLocation": "C:\\Games\\Undertale",
+        "DisplayIcon": "\"C:\\Games\\Undertale\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Undertale\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Undertale\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "Deltarune_is1",
+      "title": "Deltarune",
+      "expect": "game",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Deltarune",
+        "Publisher": "tobyfox",
+        "InstallLocation": "C:\\Games\\Deltarune",
+        "DisplayIcon": "\"C:\\Games\\Deltarune\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Deltarune\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Deltarune\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "HyperLightDrifter_is1",
+      "title": "Hyper Light Drifter",
+      "expect": "game",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "Hyper Light Drifter",
+        "Publisher": "Heart Machine",
+        "InstallLocation": "C:\\Games\\Hyper Light Drifter",
+        "DisplayIcon": "\"C:\\Games\\Hyper Light Drifter\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Hyper Light Drifter\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Hyper Light Drifter\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "HotlineMiami_is1",
+      "title": "Hotline Miami",
+      "expect": "game",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "Hotline Miami",
+        "Publisher": "Dennaton Games",
+        "InstallLocation": "C:\\Games\\Hotline Miami",
+        "DisplayIcon": "\"C:\\Games\\Hotline Miami\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Hotline Miami\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Hotline Miami\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "Celeste_is1",
+      "title": "Celeste",
+      "expect": "game",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "Celeste",
+        "Publisher": "Maddy Makes Games",
+        "InstallLocation": "C:\\Games\\Celeste",
+        "DisplayIcon": "\"C:\\Games\\Celeste\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Celeste\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Celeste\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "StardewValley_is1",
+      "title": "Stardew Valley",
+      "expect": "game",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Stardew Valley",
+        "Publisher": "ConcernedApe",
+        "InstallLocation": "C:\\Games\\Stardew Valley",
+        "DisplayIcon": "\"C:\\Games\\Stardew Valley\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Stardew Valley\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Stardew Valley\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "Terraria_is1",
+      "title": "Terraria",
+      "expect": "game",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "Terraria",
+        "Publisher": "Re-Logic",
+        "InstallLocation": "C:\\Games\\Terraria",
+        "DisplayIcon": "\"C:\\Games\\Terraria\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Terraria\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Terraria\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "FEZ_is1",
+      "title": "FEZ",
+      "expect": "game",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "FEZ",
+        "Publisher": "Polytron Corporation",
+        "InstallLocation": "C:\\Games\\FEZ",
+        "DisplayIcon": "\"C:\\Games\\FEZ\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\FEZ\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\FEZ\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "Bastion_is1",
+      "title": "Bastion",
+      "expect": "game",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "Bastion",
+        "Publisher": "Supergiant Games",
+        "InstallLocation": "C:\\Games\\Bastion",
+        "DisplayIcon": "\"C:\\Games\\Bastion\\game.exe\",0",
+        "EstimatedSize": 4096,
+        "InstallDate": "20241031",
+        "UninstallString": "\"C:\\Games\\Bastion\\unins000.exe\"",
+        "QuietUninstallString": "\"C:\\Games\\Bastion\\unins000.exe\" /VERYSILENT"
+      }
+    },
+    {
+      "name": "7-Zip",
+      "title": "7-Zip",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "7-Zip",
+        "Publisher": "7-Zip",
+        "InstallLocation": "C:\\Program Files\\7-Zip",
+        "UninstallString": "\"C:\\Program Files\\7-Zip\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Mozilla Firefox",
+      "title": "Mozilla Firefox",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "Mozilla Firefox",
+        "Publisher": "Mozilla",
+        "InstallLocation": "C:\\Program Files\\Mozilla Firefox",
+        "UninstallString": "\"C:\\Program Files\\Mozilla Firefox\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Google Chrome",
+      "title": "Google Chrome",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "Google Chrome",
+        "Publisher": "Google",
+        "InstallLocation": "C:\\Program Files\\Google Chrome",
+        "UninstallString": "\"C:\\Program Files\\Google Chrome\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Microsoft Edge",
+      "title": "Microsoft Edge",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "Microsoft Edge",
+        "Publisher": "Microsoft",
+        "InstallLocation": "C:\\Program Files\\Microsoft Edge",
+        "UninstallString": "\"C:\\Program Files\\Microsoft Edge\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Visual Studio Code",
+      "title": "Visual Studio Code",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Visual Studio Code",
+        "Publisher": "Visual",
+        "InstallLocation": "C:\\Program Files\\Visual Studio Code",
+        "UninstallString": "\"C:\\Program Files\\Visual Studio Code\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Notepad++",
+      "title": "Notepad++",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "Notepad++",
+        "Publisher": "Notepad++",
+        "InstallLocation": "C:\\Program Files\\Notepad++",
+        "UninstallString": "\"C:\\Program Files\\Notepad++\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "VLC media player",
+      "title": "VLC media player",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "VLC media player",
+        "Publisher": "VLC",
+        "InstallLocation": "C:\\Program Files\\VLC media player",
+        "UninstallString": "\"C:\\Program Files\\VLC media player\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "OBS Studio",
+      "title": "OBS Studio",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "OBS Studio",
+        "Publisher": "OBS",
+        "InstallLocation": "C:\\Program Files\\OBS Studio",
+        "UninstallString": "\"C:\\Program Files\\OBS Studio\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Blender",
+      "title": "Blender",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Blender",
+        "Publisher": "Blender",
+        "InstallLocation": "C:\\Program Files\\Blender",
+        "UninstallString": "\"C:\\Program Files\\Blender\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "GIMP",
+      "title": "GIMP",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "GIMP",
+        "Publisher": "GIMP",
+        "InstallLocation": "C:\\Program Files\\GIMP",
+        "UninstallString": "\"C:\\Program Files\\GIMP\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Inkscape",
+      "title": "Inkscape",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "Inkscape",
+        "Publisher": "Inkscape",
+        "InstallLocation": "C:\\Program Files\\Inkscape",
+        "UninstallString": "\"C:\\Program Files\\Inkscape\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Audacity",
+      "title": "Audacity",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "Audacity",
+        "Publisher": "Audacity",
+        "InstallLocation": "C:\\Program Files\\Audacity",
+        "UninstallString": "\"C:\\Program Files\\Audacity\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "LibreOffice",
+      "title": "LibreOffice",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "LibreOffice",
+        "Publisher": "LibreOffice",
+        "InstallLocation": "C:\\Program Files\\LibreOffice",
+        "UninstallString": "\"C:\\Program Files\\LibreOffice\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Adobe Acrobat Reader",
+      "title": "Adobe Acrobat Reader",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "Adobe Acrobat Reader",
+        "Publisher": "Adobe",
+        "InstallLocation": "C:\\Program Files\\Adobe Acrobat Reader",
+        "UninstallString": "\"C:\\Program Files\\Adobe Acrobat Reader\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Zoom Workplace",
+      "title": "Zoom Workplace",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "Zoom Workplace",
+        "Publisher": "Zoom",
+        "InstallLocation": "C:\\Program Files\\Zoom Workplace",
+        "UninstallString": "\"C:\\Program Files\\Zoom Workplace\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Microsoft Teams",
+      "title": "Microsoft Teams",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "Microsoft Teams",
+        "Publisher": "Microsoft",
+        "InstallLocation": "C:\\Program Files\\Microsoft Teams",
+        "UninstallString": "\"C:\\Program Files\\Microsoft Teams\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Slack",
+      "title": "Slack",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Slack",
+        "Publisher": "Slack",
+        "InstallLocation": "C:\\Program Files\\Slack",
+        "UninstallString": "\"C:\\Program Files\\Slack\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Discord",
+      "title": "Discord",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "Discord",
+        "Publisher": "Discord",
+        "InstallLocation": "C:\\Program Files\\Discord",
+        "UninstallString": "\"C:\\Program Files\\Discord\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Spotify",
+      "title": "Spotify",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "Spotify",
+        "Publisher": "Spotify",
+        "InstallLocation": "C:\\Program Files\\Spotify",
+        "UninstallString": "\"C:\\Program Files\\Spotify\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Dropbox",
+      "title": "Dropbox",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "Dropbox",
+        "Publisher": "Dropbox",
+        "InstallLocation": "C:\\Program Files\\Dropbox",
+        "UninstallString": "\"C:\\Program Files\\Dropbox\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "OneDrive",
+      "title": "OneDrive",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "OneDrive",
+        "Publisher": "OneDrive",
+        "InstallLocation": "C:\\Program Files\\OneDrive",
+        "UninstallString": "\"C:\\Program Files\\OneDrive\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Google Drive",
+      "title": "Google Drive",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "Google Drive",
+        "Publisher": "Google",
+        "InstallLocation": "C:\\Program Files\\Google Drive",
+        "UninstallString": "\"C:\\Program Files\\Google Drive\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Python 3.12",
+      "title": "Python 3.12",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "Python 3.12",
+        "Publisher": "Python",
+        "InstallLocation": "C:\\Program Files\\Python 3.12",
+        "UninstallString": "\"C:\\Program Files\\Python 3.12\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Git",
+      "title": "Git",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "Git",
+        "Publisher": "Git",
+        "InstallLocation": "C:\\Program Files\\Git",
+        "UninstallString": "\"C:\\Program Files\\Git\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Node.js",
+      "title": "Node.js",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Node.js",
+        "Publisher": "Node.js",
+        "InstallLocation": "C:\\Program Files\\Node.js",
+        "UninstallString": "\"C:\\Program Files\\Node.js\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Java Development Kit",
+      "title": "Java Development Kit",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "Java Development Kit",
+        "Publisher": "Java",
+        "InstallLocation": "C:\\Program Files\\Java Development Kit",
+        "UninstallString": "\"C:\\Program Files\\Java Development Kit\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Microsoft Visual C++ 2015-2022 Redistributable",
+      "title": "Microsoft Visual C++ 2015-2022 Redistributable",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "Microsoft Visual C++ 2015-2022 Redistributable",
+        "Publisher": "Microsoft",
+        "InstallLocation": "C:\\Program Files\\Microsoft Visual C++ 2015-2022 Redistributable",
+        "UninstallString": "\"C:\\Program Files\\Microsoft Visual C++ 2015-2022 Redistributable\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "NVIDIA Graphics Driver",
+      "title": "NVIDIA Graphics Driver",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "NVIDIA Graphics Driver",
+        "Publisher": "NVIDIA",
+        "InstallLocation": "C:\\Program Files\\NVIDIA Graphics Driver",
+        "UninstallString": "\"C:\\Program Files\\NVIDIA Graphics Driver\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "AMD Software",
+      "title": "AMD Software",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "AMD Software",
+        "Publisher": "AMD",
+        "InstallLocation": "C:\\Program Files\\AMD Software",
+        "UninstallString": "\"C:\\Program Files\\AMD Software\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Intel Graphics Driver",
+      "title": "Intel Graphics Driver",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "Intel Graphics Driver",
+        "Publisher": "Intel",
+        "InstallLocation": "C:\\Program Files\\Intel Graphics Driver",
+        "UninstallString": "\"C:\\Program Files\\Intel Graphics Driver\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Microsoft .NET SDK",
+      "title": "Microsoft .NET SDK",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "Microsoft .NET SDK",
+        "Publisher": "Microsoft",
+        "InstallLocation": "C:\\Program Files\\Microsoft .NET SDK",
+        "UninstallString": "\"C:\\Program Files\\Microsoft .NET SDK\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Windows SDK",
+      "title": "Windows SDK",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "Windows SDK",
+        "Publisher": "Windows",
+        "InstallLocation": "C:\\Program Files\\Windows SDK",
+        "UninstallString": "\"C:\\Program Files\\Windows SDK\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Unity Editor",
+      "title": "Unity Editor",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Unity Editor",
+        "Publisher": "Unity",
+        "InstallLocation": "C:\\Program Files\\Unity Editor",
+        "UninstallString": "\"C:\\Program Files\\Unity Editor\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Unreal Engine",
+      "title": "Unreal Engine",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "Unreal Engine",
+        "Publisher": "Unreal",
+        "InstallLocation": "C:\\Program Files\\Unreal Engine",
+        "UninstallString": "\"C:\\Program Files\\Unreal Engine\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Godot Engine",
+      "title": "Godot Engine",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "Godot Engine",
+        "Publisher": "Godot",
+        "InstallLocation": "C:\\Program Files\\Godot Engine",
+        "UninstallString": "\"C:\\Program Files\\Godot Engine\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Docker Desktop",
+      "title": "Docker Desktop",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "Docker Desktop",
+        "Publisher": "Docker",
+        "InstallLocation": "C:\\Program Files\\Docker Desktop",
+        "UninstallString": "\"C:\\Program Files\\Docker Desktop\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "VirtualBox",
+      "title": "VirtualBox",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "VirtualBox",
+        "Publisher": "VirtualBox",
+        "InstallLocation": "C:\\Program Files\\VirtualBox",
+        "UninstallString": "\"C:\\Program Files\\VirtualBox\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "VMware Workstation",
+      "title": "VMware Workstation",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "VMware Workstation",
+        "Publisher": "VMware",
+        "InstallLocation": "C:\\Program Files\\VMware Workstation",
+        "UninstallString": "\"C:\\Program Files\\VMware Workstation\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "PuTTY",
+      "title": "PuTTY",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "PuTTY",
+        "Publisher": "PuTTY",
+        "InstallLocation": "C:\\Program Files\\PuTTY",
+        "UninstallString": "\"C:\\Program Files\\PuTTY\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "WinSCP",
+      "title": "WinSCP",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "WinSCP",
+        "Publisher": "WinSCP",
+        "InstallLocation": "C:\\Program Files\\WinSCP",
+        "UninstallString": "\"C:\\Program Files\\WinSCP\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "FileZilla",
+      "title": "FileZilla",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "FileZilla",
+        "Publisher": "FileZilla",
+        "InstallLocation": "C:\\Program Files\\FileZilla",
+        "UninstallString": "\"C:\\Program Files\\FileZilla\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Wireshark",
+      "title": "Wireshark",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "Wireshark",
+        "Publisher": "Wireshark",
+        "InstallLocation": "C:\\Program Files\\Wireshark",
+        "UninstallString": "\"C:\\Program Files\\Wireshark\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "HandBrake",
+      "title": "HandBrake",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "HandBrake",
+        "Publisher": "HandBrake",
+        "InstallLocation": "C:\\Program Files\\HandBrake",
+        "UninstallString": "\"C:\\Program Files\\HandBrake\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Calibre",
+      "title": "Calibre",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "Calibre",
+        "Publisher": "Calibre",
+        "InstallLocation": "C:\\Program Files\\Calibre",
+        "UninstallString": "\"C:\\Program Files\\Calibre\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "SumatraPDF",
+      "title": "SumatraPDF",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "SumatraPDF",
+        "Publisher": "SumatraPDF",
+        "InstallLocation": "C:\\Program Files\\SumatraPDF",
+        "UninstallString": "\"C:\\Program Files\\SumatraPDF\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "KeePass",
+      "title": "KeePass",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "KeePass",
+        "Publisher": "KeePass",
+        "InstallLocation": "C:\\Program Files\\KeePass",
+        "UninstallString": "\"C:\\Program Files\\KeePass\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Bitwarden",
+      "title": "Bitwarden",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "Bitwarden",
+        "Publisher": "Bitwarden",
+        "InstallLocation": "C:\\Program Files\\Bitwarden",
+        "UninstallString": "\"C:\\Program Files\\Bitwarden\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "PowerToys",
+      "title": "PowerToys",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "PowerToys",
+        "Publisher": "PowerToys",
+        "InstallLocation": "C:\\Program Files\\PowerToys",
+        "UninstallString": "\"C:\\Program Files\\PowerToys\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Everything",
+      "title": "Everything",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Everything",
+        "Publisher": "Everything",
+        "InstallLocation": "C:\\Program Files\\Everything",
+        "UninstallString": "\"C:\\Program Files\\Everything\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Rufus",
+      "title": "Rufus",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "Rufus",
+        "Publisher": "Rufus",
+        "InstallLocation": "C:\\Program Files\\Rufus",
+        "UninstallString": "\"C:\\Program Files\\Rufus\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "CrystalDiskInfo",
+      "title": "CrystalDiskInfo",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "CrystalDiskInfo",
+        "Publisher": "CrystalDiskInfo",
+        "InstallLocation": "C:\\Program Files\\CrystalDiskInfo",
+        "UninstallString": "\"C:\\Program Files\\CrystalDiskInfo\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "HWiNFO",
+      "title": "HWiNFO",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "HWiNFO",
+        "Publisher": "HWiNFO",
+        "InstallLocation": "C:\\Program Files\\HWiNFO",
+        "UninstallString": "\"C:\\Program Files\\HWiNFO\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "CPUID CPU-Z",
+      "title": "CPUID CPU-Z",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "CPUID CPU-Z",
+        "Publisher": "CPUID",
+        "InstallLocation": "C:\\Program Files\\CPUID CPU-Z",
+        "UninstallString": "\"C:\\Program Files\\CPUID CPU-Z\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "MSI Afterburner",
+      "title": "MSI Afterburner",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "MSI Afterburner",
+        "Publisher": "MSI",
+        "InstallLocation": "C:\\Program Files\\MSI Afterburner",
+        "UninstallString": "\"C:\\Program Files\\MSI Afterburner\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Logitech G HUB",
+      "title": "Logitech G HUB",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "Logitech G HUB",
+        "Publisher": "Logitech",
+        "InstallLocation": "C:\\Program Files\\Logitech G HUB",
+        "UninstallString": "\"C:\\Program Files\\Logitech G HUB\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Razer Synapse",
+      "title": "Razer Synapse",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "Razer Synapse",
+        "Publisher": "Razer",
+        "InstallLocation": "C:\\Program Files\\Razer Synapse",
+        "UninstallString": "\"C:\\Program Files\\Razer Synapse\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Corsair iCUE",
+      "title": "Corsair iCUE",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Corsair iCUE",
+        "Publisher": "Corsair",
+        "InstallLocation": "C:\\Program Files\\Corsair iCUE",
+        "UninstallString": "\"C:\\Program Files\\Corsair iCUE\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Steam",
+      "title": "Steam",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 64,
+      "values": {
+        "DisplayName": "Steam",
+        "Publisher": "Steam",
+        "InstallLocation": "C:\\Program Files\\Steam",
+        "UninstallString": "\"C:\\Program Files\\Steam\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Epic Games Launcher",
+      "title": "Epic Games Launcher",
+      "expect": "app",
+      "hive": "HKLM",
+      "view": 32,
+      "values": {
+        "DisplayName": "Epic Games Launcher",
+        "Publisher": "Epic",
+        "InstallLocation": "C:\\Program Files\\Epic Games Launcher",
+        "UninstallString": "\"C:\\Program Files\\Epic Games Launcher\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "GOG GALAXY",
+      "title": "GOG GALAXY",
+      "expect": "app",
+      "hive": "HKCU",
+      "view": 32,
+      "values": {
+        "DisplayName": "GOG GALAXY",
+        "Publisher": "GOG",
+        "InstallLocation": "C:\\Program Files\\GOG GALAXY",
+        "UninstallString": "\"C:\\Program Files\\GOG GALAXY\\uninstall.exe\""
+      }
+    },
+    {
+      "name": "Hidden0",
+      "expect": "hidden",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Hidden component 0",
+        "Publisher": "Microsoft Corporation",
+        "SystemComponent": 1
+      }
+    },
+    {
+      "name": "Hidden1",
+      "expect": "hidden",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Hidden component 1",
+        "Publisher": "Microsoft Corporation",
+        "ParentKeyName": "Parent"
+      }
+    },
+    {
+      "name": "Hidden2",
+      "expect": "hidden",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Hidden component 2",
+        "Publisher": "Microsoft Corporation",
+        "ReleaseType": "Update"
+      }
+    },
+    {
+      "name": "Hidden3",
+      "expect": "hidden",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Hidden component 3",
+        "Publisher": "Microsoft Corporation",
+        "ReleaseType": "Hotfix"
+      }
+    },
+    {
+      "name": "Hidden4",
+      "expect": "hidden",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Hidden component 4",
+        "Publisher": "Microsoft Corporation",
+        "ReleaseType": "Security Update"
+      }
+    },
+    {
+      "name": "Hidden5",
+      "expect": "hidden",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Hidden component 5",
+        "Publisher": "Microsoft Corporation",
+        "ReleaseType": "ServicePack"
+      }
+    },
+    {
+      "name": "Hidden6",
+      "expect": "hidden",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Hidden component 6",
+        "Publisher": "Microsoft Corporation",
+        "ReleaseType": "Update Rollup"
+      }
+    },
+    {
+      "name": "Hidden7",
+      "expect": "hidden",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "",
+        "Publisher": "Microsoft Corporation"
+      }
+    },
+    {
+      "name": "Steam App 620",
+      "title": "Portal 2",
+      "expect": "alias",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Portal 2",
+        "InstallLocation": "C:\\Games\\Portal 2",
+        "UninstallString": "steam://uninstall/620"
+      }
+    },
+    {
+      "name": "Steam App 480",
+      "title": "Spacewar",
+      "expect": "alias",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Spacewar",
+        "InstallLocation": "C:\\Games\\Spacewar",
+        "UninstallString": "steam://uninstall/480"
+      }
+    },
+    {
+      "name": "Uplay Install 54",
+      "title": "Assassins Creed II",
+      "expect": "alias",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Assassins Creed II",
+        "InstallLocation": "C:\\Games\\Assassins Creed II",
+        "UninstallString": "uplay://launch/54/0"
+      }
+    },
+    {
+      "name": "Uplay Install 1800",
+      "title": "Anno 1800",
+      "expect": "alias",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Anno 1800",
+        "InstallLocation": "C:\\Games\\Anno 1800",
+        "UninstallString": "uplay://launch/1800/0"
+      }
+    },
+    {
+      "name": "1207658924_is1",
+      "title": "The Witcher",
+      "expect": "alias",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "The Witcher",
+        "InstallLocation": "C:\\GOG Games\\The Witcher",
+        "UninstallString": "goggalaxy://openGameView/1207658924"
+      }
+    },
+    {
+      "name": "Battle.net WoW",
+      "title": "World of Warcraft",
+      "expect": "alias",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "World of Warcraft",
+        "InstallLocation": "C:\\Games\\World of Warcraft",
+        "UninstallString": "battlenet://WoW"
+      }
+    },
+    {
+      "name": "EA App fixture",
+      "title": "The Sims 4",
+      "expect": "alias",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "The Sims 4",
+        "InstallLocation": "C:\\EA Games\\The Sims 4",
+        "UninstallString": "link2ea://launchgame/OFB-EAST:109552316"
+      }
+    },
+    {
+      "name": "Library Alias",
+      "title": "Library Alias",
+      "expect": "alias",
+      "hive": "HKLM",
+      "view": 64,
+      "values": {
+        "DisplayName": "Library Alias",
+        "InstallLocation": "C:\\Program Files\\Epic Games\\Library Alias",
+        "UninstallString": "\"C:\\Program Files\\Epic Games\\Library Alias\\uninstall.exe\""
+      }
+    }
+  ]
+}

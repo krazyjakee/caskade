@@ -1,0 +1,205 @@
+# Machine-drafted Swedish; needs review by a native speaker (#220).
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-29 00:07+0000\n"
+"PO-Revision-Date: 2026-10-29 00:07+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: sv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. Hours played, abbreviated
+#: packages/ui/src/GameCard.tsx
+msgid "{playtimeHours}h"
+msgstr "{playtimeHours} h"
+
+#. Hours played
+#: packages/ui/src/Hero.tsx
+msgid "{playtimeHours}h played"
+msgstr "{playtimeHours} h spelat"
+
+#. A game's size on disk, in gigabytes
+#. A game's size on disk, in gigabytes
+#: packages/ui/src/GameCard.tsx packages/ui/src/Hero.tsx
+msgid "{sizeGb} GB"
+msgstr "{sizeGb} GB"
+
+#. How many stores sell a game
+#. js-lingui:icu=%7Bstores%2C+plural%2C+one+%7B%23+store%7D+other+%7B%23+stores%7D%7D&pluralize_on=stores
+#: packages/ui/src/GameCard.tsx
+msgid "# store"
+msgid_plural "# stores"
+msgstr[0] "# butik"
+msgstr[1] "# butiker"
+
+#: packages/ui/src/avatars.ts
+msgid "Alien"
+msgstr "Utomjording"
+
+#: packages/ui/src/avatars.ts
+msgid "Astronaut"
+msgstr "Astronaut"
+
+#: packages/ui/src/avatars.ts
+msgid "Atom"
+msgstr "Atom"
+
+#. A game that can be bought in a store
+#: packages/ui/src/StatusBadge.tsx
+msgid "Available to Buy"
+msgstr "Kan köpas"
+
+#. The picker of an account's picture
+#: packages/ui/src/Avatar.tsx
+msgid "Avatar"
+msgstr "Avatar"
+
+#. The avatar showing the Caskade logo; usually kept as the brand name
+#: packages/ui/src/avatars.ts
+msgctxt "avatar"
+msgid "Caskade"
+msgstr "Caskade"
+
+#: packages/ui/src/avatars.ts
+msgid "Chip"
+msgstr "Chip"
+
+#: packages/ui/src/avatars.ts
+msgid "Comet"
+msgstr "Komet"
+
+#: packages/ui/src/avatars.ts
+msgid "Crystal"
+msgstr "Kristall"
+
+#: packages/ui/src/avatars.ts
+msgid "Cyber cat"
+msgstr "Cyberkatt"
+
+#: packages/ui/src/avatars.ts
+msgid "Droid"
+msgstr "Droid"
+
+#. A game played through an emulator
+#: packages/ui/src/StatusBadge.tsx
+msgid "Emulator"
+msgstr "Emulator"
+
+#: packages/ui/src/avatars.ts
+msgid "Energy bolt"
+msgstr "Energiblixt"
+
+#: packages/ui/src/avatars.ts
+msgid "Flying saucer"
+msgstr "Flygande tefat"
+
+#: packages/ui/src/avatars.ts
+msgid "Gamepad"
+msgstr "Handkontroll"
+
+#: packages/ui/src/avatars.ts
+msgid "Ghost"
+msgstr "Spöke"
+
+#. Hides an error's technical details
+#: packages/ui/src/ErrorNotice.tsx
+msgid "Hide details"
+msgstr "Dölj detaljer"
+
+#: packages/ui/src/StatusBadge.tsx
+msgid "Installed"
+msgstr "Installerat"
+
+#: packages/ui/src/Hero.tsx
+msgid "Last played {lastPlayed}"
+msgstr "Senast spelat {lastPlayed}"
+
+#: packages/ui/src/avatars.ts
+msgid "Mech helmet"
+msgstr "Mechhjälm"
+
+#: packages/ui/src/avatars.ts
+msgid "Moon"
+msgstr "Måne"
+
+#. A button opening more actions
+#: packages/ui/src/Hero.tsx
+msgid "More"
+msgstr "Mer"
+
+#: packages/ui/src/Hero.tsx
+msgid "More launch options"
+msgstr "Fler startalternativ"
+
+#: packages/ui/src/StatusBadge.tsx
+msgid "Not Installed"
+msgstr "Inte installerat"
+
+#. A store game the user already owns
+#: packages/ui/src/GameCard.tsx
+msgid "Owned"
+msgstr "Ägs"
+
+#: packages/ui/src/avatars.ts
+msgid "Portal"
+msgstr "Portal"
+
+#: packages/ui/src/avatars.ts
+msgid "Pulsar"
+msgstr "Pulsar"
+
+#: packages/ui/src/avatars.ts
+msgid "Radar"
+msgstr "Radar"
+
+#. The id an error's details are logged under
+#: packages/ui/src/ErrorNotice.tsx
+msgid "Reference: {reference}"
+msgstr "Referens: {reference}"
+
+#: packages/ui/src/avatars.ts
+msgid "Ringed planet"
+msgstr "Planet med ringar"
+
+#: packages/ui/src/avatars.ts
+msgid "Rocket"
+msgstr "Raket"
+
+#: packages/ui/src/avatars.ts
+msgid "Satellite"
+msgstr "Satellit"
+
+#: packages/ui/src/avatars.ts
+msgid "Sentinel eye"
+msgstr "Vaktöga"
+
+#. Shows an error's technical details
+#: packages/ui/src/ErrorNotice.tsx
+msgid "Show details"
+msgstr "Visa detaljer"
+
+#: packages/ui/src/avatars.ts
+msgid "Spiral galaxy"
+msgstr "Spiralgalax"
+
+#: packages/ui/src/avatars.ts
+msgid "Star"
+msgstr "Stjärna"
+
+#: packages/ui/src/avatars.ts
+msgid "Starfighter"
+msgstr "Rymdjaktplan"
+
+#: packages/ui/src/Shelf.tsx
+msgid "View All"
+msgstr "Visa alla"
+
+#: packages/ui/src/Hero.tsx
+msgid "View Details"
+msgstr "Visa detaljer"

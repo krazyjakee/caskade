@@ -1,0 +1,83 @@
+# Steam app ids that are not games (Proton, runtimes, redistributables), used
+# when appinfo.vdf is unavailable. The source also drops apps named like
+# Proton, the Steam Linux Runtime or the Steamworks redistributables.
+
+[[tool]]
+app_id = 228980
+name = "Steamworks Common Redistributables"
+
+[[tool]]
+app_id = 1070560
+name = "Steam Linux Runtime 1.0 (scout)"
+
+[[tool]]
+app_id = 1391110
+name = "Steam Linux Runtime 2.0 (soldier)"
+
+[[tool]]
+app_id = 1628350
+name = "Steam Linux Runtime 3.0 (sniper)"
+
+[[tool]]
+app_id = 858280
+name = "Proton 3.7"
+
+[[tool]]
+app_id = 930400
+name = "Proton 3.7 Beta"
+
+[[tool]]
+app_id = 961940
+name = "Proton 3.16"
+
+[[tool]]
+app_id = 1054830
+name = "Proton 4.2"
+
+[[tool]]
+app_id = 1113280
+name = "Proton 4.11"
+
+[[tool]]
+app_id = 1245040
+name = "Proton 5.0"
+
+[[tool]]
+app_id = 1420170
+name = "Proton 5.13"
+
+[[tool]]
+app_id = 1580130
+name = "Proton 6.3"
+
+[[tool]]
+app_id = 1887720
+name = "Proton 7.0"
+
+[[tool]]
+app_id = 2348590
+name = "Proton 8.0"
+
+[[tool]]
+app_id = 2805730
+name = "Proton 9.0"
+
+[[tool]]
+app_id = 1493710
+name = "Proton Experimental"
+
+[[tool]]
+app_id = 2180100
+name = "Proton Hotfix"
+
+[[tool]]
+app_id = 1161040
+name = "Proton BattlEye Runtime"
+
+[[tool]]
+app_id = 1826330
+name = "Proton EasyAntiCheat Runtime"
+
+[[tool]]
+app_id = 250820
+name = "SteamVR"

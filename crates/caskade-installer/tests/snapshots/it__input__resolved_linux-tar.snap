@@ -1,0 +1,8 @@
+---
+source: crates/caskade-installer/tests/input.rs
+expression: value
+---
+{
+  "path": "bin/linux.tar",
+  "type": "file"
+}

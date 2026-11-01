@@ -1,0 +1,15 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "The main window: core events, window state and the title bar Caskade draws (move, minimize, maximize, close). No fs or shell plugins reach the webview (TECH-PLAN §7).",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "window-state:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-close",
+    "dialog:allow-open"
+  ]
+}

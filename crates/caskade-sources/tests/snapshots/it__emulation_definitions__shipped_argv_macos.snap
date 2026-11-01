@@ -1,0 +1,283 @@
+---
+source: crates/caskade-sources/tests/emulation_definitions.rs
+expression: table
+---
+ares / Master System / folder
+  argv: ["--system", "Master System", "--no-file-prompt", "/Volumes/ROMs/Sample Game (USA).rom"]
+ares / Master System / path
+  argv: ["--system", "Master System", "--no-file-prompt", "/Volumes/ROMs/Sample Game (USA).rom"]
+ares / Master System / bundle
+  argv: ["--system", "Master System", "--no-file-prompt", "/Volumes/ROMs/Sample Game (USA).rom"]
+ares / Mega Drive / folder
+  argv: ["--system", "Mega Drive", "--no-file-prompt", "/Volumes/ROMs/Sample Game (USA).rom"]
+ares / Mega Drive / path
+  argv: ["--system", "Mega Drive", "--no-file-prompt", "/Volumes/ROMs/Sample Game (USA).rom"]
+ares / Mega Drive / bundle
+  argv: ["--system", "Mega Drive", "--no-file-prompt", "/Volumes/ROMs/Sample Game (USA).rom"]
+azahar / Nintendo 3DS / folder
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+azahar / Nintendo 3DS / path
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+azahar / Nintendo 3DS / bundle
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+cemu / Default / folder
+  argv: ["-g", "/Volumes/ROMs/Sample Game (USA).rom"]
+cemu / Default / path
+  argv: ["-g", "/Volumes/ROMs/Sample Game (USA).rom"]
+cemu / Default / bundle
+  argv: ["-g", "/Volumes/ROMs/Sample Game (USA).rom"]
+dolphin / Nintendo GameCube / folder
+  argv: ["--config=Dolphin.Analytics.PermissionAsked=True", "--exec=/Volumes/ROMs/Sample Game (USA).rom", "--batch"]
+dolphin / Nintendo GameCube / path
+  argv: ["--config=Dolphin.Analytics.PermissionAsked=True", "--exec=/Volumes/ROMs/Sample Game (USA).rom", "--batch"]
+dolphin / Nintendo GameCube / bundle
+  argv: ["--config=Dolphin.Analytics.PermissionAsked=True", "--exec=/Volumes/ROMs/Sample Game (USA).rom", "--batch"]
+dolphin / Nintendo Wii / folder
+  argv: ["--config=Dolphin.Analytics.PermissionAsked=True", "--exec=/Volumes/ROMs/Sample Game (USA).rom", "--batch"]
+dolphin / Nintendo Wii / path
+  argv: ["--config=Dolphin.Analytics.PermissionAsked=True", "--exec=/Volumes/ROMs/Sample Game (USA).rom", "--batch"]
+dolphin / Nintendo Wii / bundle
+  argv: ["--config=Dolphin.Analytics.PermissionAsked=True", "--exec=/Volumes/ROMs/Sample Game (USA).rom", "--batch"]
+duckstation / Default / folder
+  argv: ["-batch", "--", "/Volumes/ROMs/Sample Game (USA).rom"]
+duckstation / Default / path
+  argv: ["-batch", "--", "/Volumes/ROMs/Sample Game (USA).rom"]
+duckstation / Default / bundle
+  argv: ["-batch", "--", "/Volumes/ROMs/Sample Game (USA).rom"]
+flycast / Dreamcast / folder
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+flycast / Dreamcast / path
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+flycast / Dreamcast / bundle
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+gopher64 / Nintendo 64 / folder
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+gopher64 / Nintendo 64 / path
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+gopher64 / Nintendo 64 / bundle
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mame / Arcade / folder
+  argv: ["-rompath", "/Volumes/ROMs", "-skip_gameinfo", "Sample Game (USA)"]
+mame / Arcade / path
+  argv: ["-rompath", "/Volumes/ROMs", "-skip_gameinfo", "Sample Game (USA)"]
+mame / Arcade / bundle
+  argv: ["-rompath", "/Volumes/ROMs", "-skip_gameinfo", "Sample Game (USA)"]
+melonds / Default / folder
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+melonds / Default / path
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+melonds / Default / bundle
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mesen / NES / folder
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mesen / NES / path
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mesen / NES / bundle
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mesen / SNES / folder
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mesen / SNES / path
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mesen / SNES / bundle
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mesen / Game Boy / folder
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mesen / Game Boy / path
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mesen / Game Boy / bundle
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mesen / Master System / folder
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mesen / Master System / path
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mesen / Master System / bundle
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mgba / Nintendo Game Boy / folder
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mgba / Nintendo Game Boy / path
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mgba / Nintendo Game Boy / bundle
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mgba / Nintendo Game Boy Color / folder
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mgba / Nintendo Game Boy Color / path
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mgba / Nintendo Game Boy Color / bundle
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mgba / Nintendo Game Boy Advance / folder
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mgba / Nintendo Game Boy Advance / path
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+mgba / Nintendo Game Boy Advance / bundle
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+pcsx2 / Default / folder
+  argv: ["-nogui", "-slowboot", "--", "/Volumes/ROMs/Sample Game (USA).rom"]
+pcsx2 / Default / path
+  argv: ["-nogui", "-slowboot", "--", "/Volumes/ROMs/Sample Game (USA).rom"]
+pcsx2 / Default / bundle
+  argv: ["-nogui", "-slowboot", "--", "/Volumes/ROMs/Sample Game (USA).rom"]
+ppsspp / Default / folder
+  argv: ["--pause-menu-exit", "/Volumes/ROMs/Sample Game (USA).rom"]
+ppsspp / Default / path
+  argv: ["--pause-menu-exit", "/Volumes/ROMs/Sample Game (USA).rom"]
+ppsspp / Default / bundle
+  argv: ["--pause-menu-exit", "/Volumes/ROMs/Sample Game (USA).rom"]
+retroarch / Mesen / folder
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/mesen_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/mesen_libretro.dylib"]
+retroarch / Mesen / path
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/mesen_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/mesen_libretro.dylib"]
+retroarch / Mesen / bundle
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/mesen_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/mesen_libretro.dylib"]
+retroarch / Snes9x / folder
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/snes9x_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/snes9x_libretro.dylib"]
+retroarch / Snes9x / path
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/snes9x_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/snes9x_libretro.dylib"]
+retroarch / Snes9x / bundle
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/snes9x_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/snes9x_libretro.dylib"]
+retroarch / Mupen64Plus-Next / folder
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/mupen64plus_next_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/mupen64plus_next_libretro.dylib"]
+retroarch / Mupen64Plus-Next / path
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/mupen64plus_next_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/mupen64plus_next_libretro.dylib"]
+retroarch / Mupen64Plus-Next / bundle
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/mupen64plus_next_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/mupen64plus_next_libretro.dylib"]
+retroarch / Gambatte / folder
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/gambatte_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/gambatte_libretro.dylib"]
+retroarch / Gambatte / path
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/gambatte_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/gambatte_libretro.dylib"]
+retroarch / Gambatte / bundle
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/gambatte_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/gambatte_libretro.dylib"]
+retroarch / mGBA / folder
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/mgba_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/mgba_libretro.dylib"]
+retroarch / mGBA / path
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/mgba_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/mgba_libretro.dylib"]
+retroarch / mGBA / bundle
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/mgba_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/mgba_libretro.dylib"]
+retroarch / DeSmuME / folder
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/desmume_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/desmume_libretro.dylib"]
+retroarch / DeSmuME / path
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/desmume_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/desmume_libretro.dylib"]
+retroarch / DeSmuME / bundle
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/desmume_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/desmume_libretro.dylib"]
+retroarch / Dolphin / folder
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/dolphin_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/dolphin_libretro.dylib"]
+retroarch / Dolphin / path
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/dolphin_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/dolphin_libretro.dylib"]
+retroarch / Dolphin / bundle
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/dolphin_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/dolphin_libretro.dylib"]
+retroarch / Genesis Plus GX / folder
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/genesis_plus_gx_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/genesis_plus_gx_libretro.dylib"]
+retroarch / Genesis Plus GX / path
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/genesis_plus_gx_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/genesis_plus_gx_libretro.dylib"]
+retroarch / Genesis Plus GX / bundle
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/genesis_plus_gx_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/genesis_plus_gx_libretro.dylib"]
+retroarch / Beetle Saturn / folder
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/mednafen_saturn_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/mednafen_saturn_libretro.dylib"]
+retroarch / Beetle Saturn / path
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/mednafen_saturn_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/mednafen_saturn_libretro.dylib"]
+retroarch / Beetle Saturn / bundle
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/mednafen_saturn_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/mednafen_saturn_libretro.dylib"]
+retroarch / Flycast / folder
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/flycast_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/flycast_libretro.dylib"]
+retroarch / Flycast / path
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/flycast_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/flycast_libretro.dylib"]
+retroarch / Flycast / bundle
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/flycast_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/flycast_libretro.dylib"]
+retroarch / Beetle PSX HW / folder
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/mednafen_psx_hw_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/mednafen_psx_hw_libretro.dylib"]
+retroarch / Beetle PSX HW / path
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/mednafen_psx_hw_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/mednafen_psx_hw_libretro.dylib"]
+retroarch / Beetle PSX HW / bundle
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/mednafen_psx_hw_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/mednafen_psx_hw_libretro.dylib"]
+retroarch / PPSSPP / folder
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/ppsspp_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/ppsspp_libretro.dylib"]
+retroarch / PPSSPP / path
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/ppsspp_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/ppsspp_libretro.dylib"]
+retroarch / PPSSPP / bundle
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/ppsspp_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/ppsspp_libretro.dylib"]
+retroarch / FinalBurn Neo / folder
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/fbneo_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/fbneo_libretro.dylib"]
+retroarch / FinalBurn Neo / path
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/fbneo_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/fbneo_libretro.dylib"]
+retroarch / FinalBurn Neo / bundle
+  argv: ["-L", "/Users/fixture/Library/Application Support/RetroArch/cores/fbneo_libretro.dylib", "/Volumes/ROMs/Sample Game (USA).rom"]
+  requires: ["/Users/fixture/Library/Application Support/RetroArch/cores/fbneo_libretro.dylib"]
+rmg / Nintendo 64 / folder
+  argv: ["--nogui", "--quit-after-emulation", "/Volumes/ROMs/Sample Game (USA).rom"]
+rmg / Nintendo 64 / path
+  argv: ["--nogui", "--quit-after-emulation", "/Volumes/ROMs/Sample Game (USA).rom"]
+rmg / Nintendo 64 / bundle
+  argv: ["--nogui", "--quit-after-emulation", "/Volumes/ROMs/Sample Game (USA).rom"]
+rpcs3 / Default / folder
+  argv: ["--no-gui", "/Volumes/ROMs/Sample Game (USA).rom"]
+rpcs3 / Default / path
+  argv: ["--no-gui", "/Volumes/ROMs/Sample Game (USA).rom"]
+rpcs3 / Default / bundle
+  argv: ["--no-gui", "/Volumes/ROMs/Sample Game (USA).rom"]
+ryujinx / Default / folder
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+ryujinx / Default / path
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+ryujinx / Default / bundle
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+shadps4 / PlayStation 4 / folder
+  argv: ["-g", "/Volumes/ROMs/Sample Game (USA).rom"]
+shadps4 / PlayStation 4 / path
+  argv: ["-g", "/Volumes/ROMs/Sample Game (USA).rom"]
+shadps4 / PlayStation 4 / bundle
+  argv: ["-g", "/Volumes/ROMs/Sample Game (USA).rom"]
+xemu / Xbox / folder
+  argv: ["-dvd_path", "/Volumes/ROMs/Sample Game (USA).rom"]
+xemu / Xbox / path
+  argv: ["-dvd_path", "/Volumes/ROMs/Sample Game (USA).rom"]
+xemu / Xbox / bundle
+  argv: ["-dvd_path", "/Volumes/ROMs/Sample Game (USA).rom"]
+xenia / Xbox 360 / folder
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+xenia / Xbox 360 / path
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+xenia / Xbox 360 / bundle
+  argv: ["/Volumes/ROMs/Sample Game (USA).rom"]
+ymir / Saturn / folder
+  argv: ["--profile", "/Users/fixture/Library/Application Support/Ymir", "--disc", "/Volumes/ROMs/Sample Game (USA).rom"]
+ymir / Saturn / path
+  argv: ["--profile", "/Users/fixture/Library/Application Support/Ymir", "--disc", "/Volumes/ROMs/Sample Game (USA).rom"]
+ymir / Saturn / bundle
+  argv: ["--profile", "/Users/fixture/Library/Application Support/Ymir", "--disc", "/Volumes/ROMs/Sample Game (USA).rom"]

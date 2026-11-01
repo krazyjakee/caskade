@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800" font-family="Georgia, 'Times New Roman', serif">
+  <title>Paper: the Home view</title>
+  <defs>
+    <pattern id="halftone" width="6" height="6" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="3" r="1.1" fill="#1f1b14" fill-opacity="0.22" />
+    </pattern>
+    <linearGradient id="art-hero" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7d8fa6" />
+      <stop offset="1" stop-color="#3d4f66" />
+    </linearGradient>
+    <linearGradient id="shade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0.35" stop-color="#fbf8f1" />
+      <stop offset="0.7" stop-color="#fbf8f1" stop-opacity="0.65" />
+      <stop offset="1" stop-color="#fbf8f1" stop-opacity="0.4" />
+    </linearGradient>
+    <linearGradient id="fade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0.35" stop-color="#fff" stop-opacity="0" />
+      <stop offset="0.85" stop-color="#fff" stop-opacity="1" />
+    </linearGradient>
+    <mask id="halftone-mask">
+      <rect x="264" y="104" width="992" height="300" fill="url(#fade)" />
+    </mask>
+    <linearGradient id="blank" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fbf8f1" />
+      <stop offset="1" stop-color="#f3eee3" />
+    </linearGradient>
+    <pattern id="hatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="1" height="9" fill="#2b2518" fill-opacity="0.2" />
+    </pattern>
+  </defs>
+
+  <!-- Paper -->
+  <rect width="1280" height="800" fill="#f3eee3" />
+
+  <!-- Sidebar -->
+  <rect width="224" height="764" fill="#efe8da" />
+  <line x1="224.5" y1="0" x2="224.5" y2="764" stroke="#2b2518" stroke-opacity="0.53" />
+  <line x1="0" y1="64.5" x2="1280" y2="64.5" stroke="#2b2518" stroke-opacity="0.53" />
+  <rect x="24" y="18" width="28" height="28" fill="#a33224" />
+  <text x="64" y="41" font-size="20" font-weight="600" letter-spacing="6" fill="#1f1b14">CASKADE</text>
+  <rect x="16" y="88" width="192" height="40" fill="#fbf8f1" stroke="#2b2518" stroke-opacity="0.2" />
+  <rect x="16" y="88" width="3" height="40" fill="#a33224" />
+  <g font-family="Inter, 'Segoe UI', sans-serif" font-size="14" fill="#4d4537">
+    <rect x="30" y="100" width="16" height="16" fill="none" stroke="#a33224" stroke-width="2" />
+    <text x="58" y="113" fill="#1f1b14" font-weight="600">Home</text>
+    <rect x="30" y="148" width="16" height="16" fill="none" stroke="#4d4537" stroke-width="2" />
+    <text x="58" y="161">Library</text>
+    <rect x="30" y="196" width="16" height="16" fill="none" stroke="#4d4537" stroke-width="2" />
+    <text x="58" y="209">Collections</text>
+    <rect x="30" y="244" width="16" height="16" fill="none" stroke="#4d4537" stroke-width="2" />
+    <text x="58" y="257">Store</text>
+  </g>
+  <line x1="16" y1="292" x2="208" y2="292" stroke="#2b2518" stroke-opacity="0.53" />
+  <line x1="16" y1="295" x2="208" y2="295" stroke="#2b2518" stroke-opacity="0.53" />
+  <g font-family="Inter, 'Segoe UI', sans-serif" font-size="14" fill="#4d4537">
+    <rect x="30" y="316" width="16" height="16" fill="none" stroke="#4d4537" stroke-width="2" />
+    <text x="58" y="329">Emulation</text>
+    <rect x="30" y="364" width="16" height="16" fill="none" stroke="#4d4537" stroke-width="2" />
+    <text x="58" y="377">Settings</text>
+  </g>
+
+  <!-- Topbar search -->
+  <rect x="248" y="16" width="420" height="34" fill="#fffdf8" stroke="#2b2518" stroke-opacity="0.53" />
+  <text x="264" y="38" font-family="Inter, 'Segoe UI', sans-serif" font-size="13" fill="#675d4c">Search your library…</text>
+
+  <!-- Hero -->
+  <rect x="270" y="110" width="992" height="300" fill="#2b2518" fill-opacity="0.2" />
+  <rect x="264" y="104" width="992" height="300" fill="url(#art-hero)" />
+  <rect x="264" y="104" width="992" height="300" fill="url(#shade)" />
+  <rect x="264" y="104" width="992" height="300" fill="url(#halftone)" mask="url(#halftone-mask)" />
+  <rect x="264.5" y="104.5" width="991" height="299" fill="none" stroke="#2b2518" stroke-opacity="0.53" />
+  <rect x="304" y="152" width="6" height="6" fill="#a33224" />
+  <text x="318" y="159" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="2.5" fill="#a33224">CONTINUE PLAYING</text>
+  <text x="304" y="222" font-size="52" font-weight="600" fill="#1f1b14">The Long Voyage</text>
+  <text x="304" y="258" font-size="16" fill="#4d4537">A slow, quiet crossing of a drowned continent.</text>
+  <text x="304" y="290" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1" fill="#4d4537">ADVENTURE  //  42H PLAYED  //  LAST PLAYED YESTERDAY</text>
+  <rect x="307" y="319" width="132" height="40" fill="#1f1b14" />
+  <rect x="304" y="316" width="132" height="40" fill="#a33224" />
+  <text x="370" y="341" text-anchor="middle" font-size="14" font-weight="600" letter-spacing="1.5" fill="#fffdf8">▶ PLAY</text>
+  <rect x="452" y="316" width="130" height="40" fill="#fffdf8" stroke="#2b2518" stroke-opacity="0.53" />
+  <text x="517" y="341" text-anchor="middle" font-family="Inter, 'Segoe UI', sans-serif" font-size="13" fill="#1f1b14">View Details</text>
+
+  <!-- Shelf -->
+  <text x="264" y="458" font-size="22" font-weight="600" fill="#1f1b14">Recently Played</text>
+  <text x="1256" y="458" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" letter-spacing="1.5" fill="#a33224">VIEW ALL →</text>
+  <rect x="264" y="468" width="992" height="2" fill="#1f1b14" />
+
+  <!-- Cards -->
+  <g font-size="15" font-weight="600" fill="#1f1b14">
+    <g transform="translate(262 488)">
+      <rect x="4" y="4" width="184" height="212" fill="#1f1b14" />
+      <rect x="0" y="0" width="184" height="212" fill="#fbf8f1" stroke="#2b2518" stroke-opacity="0.53" />
+      <rect x="0.5" y="0.5" width="183" height="122" fill="#b89a8a" />
+      <line x1="0" y1="123" x2="184" y2="123" stroke="#2b2518" stroke-opacity="0.53" />
+      <rect x="8.5" y="8.5" width="66" height="16" fill="#fffdf8" stroke="#2a6640" />
+      <text x="12.5" y="20.5" font-family="Inter, sans-serif" font-size="9" font-weight="650" letter-spacing="0.6" fill="#2a6640">INSTALLED</text>
+      <text x="12" y="146">Emberfall</text>
+      <text x="12" y="166" font-family="Inter, sans-serif" font-size="11" font-weight="400" fill="#675d4c">Action RPG</text>
+      <text x="12" y="192" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="400" fill="#4d4537">12h        18.4 GB</text>
+      <rect x="3" y="3" width="178" height="206" fill="none" stroke="#fffdf8" stroke-width="2" />
+      <rect x="1" y="1" width="182" height="210" fill="none" stroke="#1f4a73" stroke-width="2" />
+    </g>
+    <g transform="translate(468 490)">
+      <rect x="0" y="0" width="184" height="212" fill="#fbf8f1" stroke="#2b2518" stroke-opacity="0.53" />
+      <rect x="0.5" y="0.5" width="183" height="122" fill="#8fa596" />
+      <line x1="0" y1="123" x2="184" y2="123" stroke="#2b2518" stroke-opacity="0.53" />
+      <rect x="8.5" y="8.5" width="66" height="16" fill="#fffdf8" stroke="#2a6640" />
+      <text x="12.5" y="20.5" font-family="Inter, sans-serif" font-size="9" font-weight="650" letter-spacing="0.6" fill="#2a6640">INSTALLED</text>
+      <text x="12" y="146">Greenhollow</text>
+      <text x="12" y="166" font-family="Inter, sans-serif" font-size="11" font-weight="400" fill="#675d4c">Farming sim</text>
+      <text x="12" y="192" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="400" fill="#4d4537">87h         2.1 GB</text>
+    </g>
+    <g transform="translate(672 490)">
+      <rect x="0" y="0" width="184" height="212" fill="#fbf8f1" stroke="#2b2518" stroke-opacity="0.53" />
+      <rect x="0.5" y="0.5" width="183" height="122" fill="#9a93b8" />
+      <line x1="0" y1="123" x2="184" y2="123" stroke="#2b2518" stroke-opacity="0.53" />
+      <rect x="8.5" y="8.5" width="66" height="16" fill="#fffdf8" stroke="#55458f" />
+      <text x="12.5" y="20.5" font-family="Inter, sans-serif" font-size="9" font-weight="650" letter-spacing="0.6" fill="#55458f">EMULATOR</text>
+      <text x="12" y="146">Starwake</text>
+      <text x="12" y="166" font-family="Inter, sans-serif" font-size="11" font-weight="400" fill="#675d4c">Shooter</text>
+      <text x="12" y="192" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="400" fill="#4d4537">5h          0.3 GB</text>
+    </g>
+    <g transform="translate(876 490)">
+      <rect x="0" y="0" width="184" height="212" fill="#fbf8f1" stroke="#2b2518" stroke-opacity="0.53" />
+      <rect x="0.5" y="0.5" width="183" height="122" fill="url(#blank)" />
+      <rect x="0.5" y="0.5" width="183" height="122" fill="url(#hatch)" />
+      <line x1="0" y1="123" x2="184" y2="123" stroke="#2b2518" stroke-opacity="0.53" />
+      <rect x="8.5" y="8.5" width="90" height="16" fill="#fffdf8" stroke="#5f584a" />
+      <text x="12.5" y="20.5" font-family="Inter, sans-serif" font-size="9" font-weight="650" letter-spacing="0.6" fill="#5f584a">NOT INSTALLED</text>
+      <text x="12" y="146">Salt Roads</text>
+      <text x="12" y="166" font-family="Inter, sans-serif" font-size="11" font-weight="400" fill="#675d4c">Strategy</text>
+      <text x="12" y="192" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="400" fill="#4d4537">—          11.0 GB</text>
+    </g>
+    <g transform="translate(1080 490)">
+      <rect x="0" y="0" width="176" height="212" fill="#fbf8f1" stroke="#2b2518" stroke-opacity="0.53" />
+      <rect x="0.5" y="0.5" width="175" height="122" fill="#a3b2bf" />
+      <line x1="0" y1="123" x2="176" y2="123" stroke="#2b2518" stroke-opacity="0.53" />
+      <rect x="8.5" y="8.5" width="66" height="16" fill="#fffdf8" stroke="#2a6640" />
+      <text x="12.5" y="20.5" font-family="Inter, sans-serif" font-size="9" font-weight="650" letter-spacing="0.6" fill="#2a6640">INSTALLED</text>
+      <text x="12" y="146">Northlight</text>
+      <text x="12" y="166" font-family="Inter, sans-serif" font-size="11" font-weight="400" fill="#675d4c">Puzzle</text>
+      <text x="12" y="192" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="400" fill="#4d4537">3h          0.9 GB</text>
+    </g>
+  </g>
+
+  <!-- Status bar -->
+  <rect x="0" y="764" width="1280" height="36" fill="#f3eee3" />
+  <line x1="0" y1="764.5" x2="1280" y2="764.5" stroke="#2b2518" stroke-opacity="0.53" />
+  <text x="16" y="787" font-family="Inter, sans-serif" font-size="12" fill="#4d4537">Ready</text>
+  <text x="1264" y="787" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" fill="#675d4c">Caskade v0.1.0</text>
+</svg>

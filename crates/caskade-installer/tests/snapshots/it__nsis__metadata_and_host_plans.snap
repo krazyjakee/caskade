@@ -1,0 +1,4902 @@
+---
+source: crates/caskade-installer/tests/nsis.rs
+expression: snapshots
+---
+{
+  "nsis-indie": [
+    {
+      "uninstaller": false,
+      "version": "V3",
+      "encoding": "Unicode",
+      "compression": "Lzma",
+      "mode": "Solid",
+      "files": [
+        {
+          "destination": "$INSTDIR\\FixtureGame.exe",
+          "path": "FixtureGame.exe",
+          "size": 273408
+        },
+        {
+          "destination": "$INSTDIR\\UnityCrashHandler64.exe",
+          "path": "UnityCrashHandler64.exe",
+          "size": 273408
+        },
+        {
+          "destination": "$INSTDIR\\UnityPlayer.dll",
+          "path": "UnityPlayer.dll",
+          "size": 0
+        },
+        {
+          "destination": "$INSTDIR\\FixtureGame_Data\\globalgamemanagers",
+          "path": "FixtureGame_Data/globalgamemanagers",
+          "size": 65
+        }
+      ],
+      "shortcuts": [
+        {
+          "link": "$SMPROGRAMS\\Caskade Fixture\\Fixture Game.lnk",
+          "target": "$INSTDIR\\FixtureGame.exe",
+          "path": "FixtureGame.exe",
+          "parameters": ""
+        }
+      ],
+      "effects": [],
+      "custom_instructions": [
+        48
+      ],
+      "uninstallers": []
+    },
+    {
+      "linux": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "linux-exfat-root": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "linux-no-umu": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "macos": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "wine_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "wine_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "wine_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "wine_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "macos-no-wine": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "windows": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "native"
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "native"
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "native"
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "native"
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      }
+    }
+  ],
+  "nsis251-ansi-nonsolid": [
+    {
+      "uninstaller": false,
+      "version": "V2",
+      "encoding": "ANSI",
+      "compression": "Deflate",
+      "mode": "NonSolid",
+      "files": [
+        {
+          "destination": "$INSTDIR\\FixtureGame.exe",
+          "path": "FixtureGame.exe",
+          "size": null
+        },
+        {
+          "destination": "$INSTDIR\\UnityCrashHandler64.exe",
+          "path": "UnityCrashHandler64.exe",
+          "size": null
+        },
+        {
+          "destination": "$INSTDIR\\UnityPlayer.dll",
+          "path": "UnityPlayer.dll",
+          "size": 0
+        },
+        {
+          "destination": "$INSTDIR\\FixtureGame_Data\\globalgamemanagers",
+          "path": "FixtureGame_Data/globalgamemanagers",
+          "size": 65
+        }
+      ],
+      "shortcuts": [
+        {
+          "link": "$SMPROGRAMS\\Caskade Fixture\\Fixture Game.lnk",
+          "target": "$INSTDIR\\FixtureGame.exe",
+          "path": "FixtureGame.exe",
+          "parameters": ""
+        }
+      ],
+      "effects": [],
+      "custom_instructions": [
+        48
+      ],
+      "uninstallers": []
+    },
+    {
+      "linux": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "linux-exfat-root": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "linux-no-umu": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "macos": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "wine_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "wine_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "wine_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "wine_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "macos-no-wine": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "windows": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "native"
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "native"
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "native"
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "native"
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      }
+    }
+  ],
+  "nsis251-ansi-solid": [
+    {
+      "uninstaller": false,
+      "version": "V2",
+      "encoding": "ANSI",
+      "compression": "Lzma",
+      "mode": "Solid",
+      "files": [
+        {
+          "destination": "$INSTDIR\\FixtureGame.exe",
+          "path": "FixtureGame.exe",
+          "size": 273408
+        },
+        {
+          "destination": "$INSTDIR\\UnityCrashHandler64.exe",
+          "path": "UnityCrashHandler64.exe",
+          "size": 273408
+        },
+        {
+          "destination": "$INSTDIR\\UnityPlayer.dll",
+          "path": "UnityPlayer.dll",
+          "size": 0
+        },
+        {
+          "destination": "$INSTDIR\\FixtureGame_Data\\globalgamemanagers",
+          "path": "FixtureGame_Data/globalgamemanagers",
+          "size": 65
+        }
+      ],
+      "shortcuts": [
+        {
+          "link": "$SMPROGRAMS\\Caskade Fixture\\Fixture Game.lnk",
+          "target": "$INSTDIR\\FixtureGame.exe",
+          "path": "FixtureGame.exe",
+          "parameters": ""
+        }
+      ],
+      "effects": [],
+      "custom_instructions": [
+        48
+      ],
+      "uninstallers": []
+    },
+    {
+      "linux": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "linux-exfat-root": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "linux-no-umu": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "macos": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "wine_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "wine_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "wine_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "wine_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "macos-no-wine": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "windows": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "native"
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "native"
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "native"
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "native"
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      }
+    }
+  ],
+  "nsis3-ansi-nonsolid": [
+    {
+      "uninstaller": false,
+      "version": "V3",
+      "encoding": "ANSI",
+      "compression": "Deflate",
+      "mode": "NonSolid",
+      "files": [
+        {
+          "destination": "$INSTDIR\\FixtureGame.exe",
+          "path": "FixtureGame.exe",
+          "size": null
+        },
+        {
+          "destination": "$INSTDIR\\UnityCrashHandler64.exe",
+          "path": "UnityCrashHandler64.exe",
+          "size": null
+        },
+        {
+          "destination": "$INSTDIR\\UnityPlayer.dll",
+          "path": "UnityPlayer.dll",
+          "size": 0
+        },
+        {
+          "destination": "$INSTDIR\\FixtureGame_Data\\globalgamemanagers",
+          "path": "FixtureGame_Data/globalgamemanagers",
+          "size": 65
+        }
+      ],
+      "shortcuts": [
+        {
+          "link": "$SMPROGRAMS\\Caskade Fixture\\Fixture Game.lnk",
+          "target": "$INSTDIR\\FixtureGame.exe",
+          "path": "FixtureGame.exe",
+          "parameters": ""
+        }
+      ],
+      "effects": [],
+      "custom_instructions": [
+        48
+      ],
+      "uninstallers": []
+    },
+    {
+      "linux": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "linux-exfat-root": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "linux-no-umu": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "macos": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "wine_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "wine_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "wine_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "wine_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "macos-no-wine": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "windows": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "native"
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "native"
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "native"
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "native"
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      }
+    }
+  ],
+  "nsis3-ansi-solid": [
+    {
+      "uninstaller": false,
+      "version": "V3",
+      "encoding": "ANSI",
+      "compression": "Lzma",
+      "mode": "Solid",
+      "files": [
+        {
+          "destination": "$INSTDIR\\FixtureGame.exe",
+          "path": "FixtureGame.exe",
+          "size": 273408
+        },
+        {
+          "destination": "$INSTDIR\\UnityCrashHandler64.exe",
+          "path": "UnityCrashHandler64.exe",
+          "size": 273408
+        },
+        {
+          "destination": "$INSTDIR\\UnityPlayer.dll",
+          "path": "UnityPlayer.dll",
+          "size": 0
+        },
+        {
+          "destination": "$INSTDIR\\FixtureGame_Data\\globalgamemanagers",
+          "path": "FixtureGame_Data/globalgamemanagers",
+          "size": 65
+        }
+      ],
+      "shortcuts": [
+        {
+          "link": "$SMPROGRAMS\\Caskade Fixture\\Fixture Game.lnk",
+          "target": "$INSTDIR\\FixtureGame.exe",
+          "path": "FixtureGame.exe",
+          "parameters": ""
+        }
+      ],
+      "effects": [],
+      "custom_instructions": [
+        48
+      ],
+      "uninstallers": []
+    },
+    {
+      "linux": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "linux-exfat-root": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "linux-no-umu": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "macos": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "wine_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "wine_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "wine_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "wine_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "macos-no-wine": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "windows": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "native"
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "native"
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "native"
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "native"
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      }
+    }
+  ],
+  "nsis3-unicode-nonsolid": [
+    {
+      "uninstaller": false,
+      "version": "V3",
+      "encoding": "Unicode",
+      "compression": "Deflate",
+      "mode": "NonSolid",
+      "files": [
+        {
+          "destination": "$INSTDIR\\FixtureGame.exe",
+          "path": "FixtureGame.exe",
+          "size": null
+        },
+        {
+          "destination": "$INSTDIR\\UnityCrashHandler64.exe",
+          "path": "UnityCrashHandler64.exe",
+          "size": null
+        },
+        {
+          "destination": "$INSTDIR\\UnityPlayer.dll",
+          "path": "UnityPlayer.dll",
+          "size": 0
+        },
+        {
+          "destination": "$INSTDIR\\FixtureGame_Data\\globalgamemanagers",
+          "path": "FixtureGame_Data/globalgamemanagers",
+          "size": 65
+        }
+      ],
+      "shortcuts": [
+        {
+          "link": "$SMPROGRAMS\\Caskade Fixture\\Fixture Game.lnk",
+          "target": "$INSTDIR\\FixtureGame.exe",
+          "path": "FixtureGame.exe",
+          "parameters": ""
+        }
+      ],
+      "effects": [],
+      "custom_instructions": [
+        48
+      ],
+      "uninstallers": []
+    },
+    {
+      "linux": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "linux-exfat-root": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "proton_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "proton_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "linux-no-umu": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "macos": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "wine_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "wine_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "wine_prefix",
+                "value": {
+                  "id": "default"
+                }
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "wine_prefix",
+                    "value": {
+                      "id": "default"
+                    }
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "macos-no-wine": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      },
+      "windows": {
+        "candidates": [
+          {
+            "handler": "nsis",
+            "strategy": "run_silent",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "native"
+              },
+              "may_prompt_elevation": true,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/S",
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "native"
+                  },
+                  "timeout_secs": 900,
+                  "expect": [
+                    "FixtureGame.exe"
+                  ]
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "run_interactive",
+            "confidence": 1.0,
+            "fidelity": "native",
+            "requires": {
+              "executes_code": true,
+              "runtime": {
+                "type": "native"
+              },
+              "may_prompt_elevation": true,
+              "interactive": true,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "run_interactive",
+                "value": {
+                  "program": {
+                    "type": "source",
+                    "value": {
+                      "type": "artifact",
+                      "value": {
+                        "artifact": "source:0",
+                        "path": "."
+                      }
+                    }
+                  },
+                  "args": [
+                    "/D={caskade.install_dir}"
+                  ],
+                  "env": {},
+                  "runtime": {
+                    "type": "native"
+                  },
+                  "target_dir": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.preset",
+                "message": "NSIS 2/3: /S is case-sensitive. /D= must be last and unquoted even with spaces; native process adapters must preserve that tail when serializing Windows command lines. Language, shortcuts and finish actions are script-specific.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Presets have not yet been hand-checked against a native installer version.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Shortcut suppression needs a package-specific recipe.",
+                "path": null
+              },
+              {
+                "code": "nsis.preset",
+                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          }
+        ],
+        "selected": 0,
+        "question": null
+      }
+    }
+  ]
+}

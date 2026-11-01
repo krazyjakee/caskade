@@ -1,0 +1,9 @@
+{
+  "target": "C:\\Games\\Fixture Café\\game.exe",
+  "relative_path": "..\\..\\Games\\Fixture Café\\game.exe",
+  "working_dir": "C:\\Games\\Fixture Café",
+  "args": "--name \"Fixture Café\" --flag",
+  "icon": "C:\\Games\\Fixture Café\\icon.ico",
+  "description": "Synthetic discovery shortcut",
+  "known_folder": "905e63b6-c1bf-494e-b29c-65b732d3d21a"
+}

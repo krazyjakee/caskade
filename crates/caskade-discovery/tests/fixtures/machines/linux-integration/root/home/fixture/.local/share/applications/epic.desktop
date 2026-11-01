@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=Fixture Epic Proxy
+Exec=flatpak run com.heroicgameslauncher.hgl heroic://launch/legendary/FixtureEpicApp
+Categories=Game;

@@ -1,0 +1,75 @@
+---
+source: crates/caskade-discovery/tests/parsers.rs
+expression: shortcuts
+---
+{
+  "type": "object",
+  "value": [
+    [
+      "shortcuts",
+      {
+        "type": "object",
+        "value": [
+          [
+            "0",
+            {
+              "type": "object",
+              "value": [
+                [
+                  "appid",
+                  {
+                    "type": "int",
+                    "value": -2147483000
+                  }
+                ],
+                [
+                  "AppName",
+                  {
+                    "type": "string",
+                    "value": "Fixture Puzzle"
+                  }
+                ],
+                [
+                  "Exe",
+                  {
+                    "type": "string",
+                    "value": "\"/home/fixture/Games/Fixture Puzzle/game\""
+                  }
+                ],
+                [
+                  "StartDir",
+                  {
+                    "type": "string",
+                    "value": "\"/home/fixture/Games/Fixture Puzzle\""
+                  }
+                ],
+                [
+                  "LaunchOptions",
+                  {
+                    "type": "string",
+                    "value": "--title \"Fixture Puzzle\""
+                  }
+                ],
+                [
+                  "tags",
+                  {
+                    "type": "object",
+                    "value": [
+                      [
+                        "0",
+                        {
+                          "type": "string",
+                          "value": "Fixture"
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              ]
+            }
+          ]
+        ]
+      }
+    ]
+  ]
+}

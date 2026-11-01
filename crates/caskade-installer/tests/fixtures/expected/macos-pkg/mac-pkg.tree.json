@@ -1,0 +1,99 @@
+[
+  {
+    "path": "FixtureGame.app",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "FixtureGame.app/Contents",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "FixtureGame.app/Contents/Frameworks",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "FixtureGame.app/Contents/Frameworks/X.framework",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "FixtureGame.app/Contents/Frameworks/X.framework/Resources",
+    "kind": "symlink",
+    "size": 0,
+    "executable": false,
+    "symlink_target": "Versions/Current/Resources"
+  },
+  {
+    "path": "FixtureGame.app/Contents/Frameworks/X.framework/Versions",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "FixtureGame.app/Contents/Frameworks/X.framework/Versions/A",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "FixtureGame.app/Contents/Frameworks/X.framework/Versions/A/Resources",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "FixtureGame.app/Contents/Frameworks/X.framework/Versions/A/Resources/Info.plist",
+    "kind": "file",
+    "size": 139,
+    "sha256": "854eed11db1b1663716f51cd2b496b2d3c1101a8711e247a0ac66fe7fb819629",
+    "executable": false
+  },
+  {
+    "path": "FixtureGame.app/Contents/Frameworks/X.framework/Versions/A/X",
+    "kind": "file",
+    "size": 67,
+    "sha256": "2369d7e0171cd41cb695f62c759321479b1d3eba42ade66de19373870d4d512f",
+    "executable": false
+  },
+  {
+    "path": "FixtureGame.app/Contents/Frameworks/X.framework/Versions/Current",
+    "kind": "symlink",
+    "size": 0,
+    "executable": false,
+    "symlink_target": "A"
+  },
+  {
+    "path": "FixtureGame.app/Contents/Frameworks/X.framework/X",
+    "kind": "symlink",
+    "size": 0,
+    "executable": false,
+    "symlink_target": "Versions/Current/X"
+  },
+  {
+    "path": "FixtureGame.app/Contents/Info.plist",
+    "kind": "file",
+    "size": 480,
+    "sha256": "94349fb0b7d89bc49e5e76cac90c5f4107ba134ddee88f2f26d951ac54faed73",
+    "executable": false
+  },
+  {
+    "path": "FixtureGame.app/Contents/MacOS",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "FixtureGame.app/Contents/MacOS/FixtureGame",
+    "kind": "file",
+    "size": 402,
+    "sha256": "fbef9229891c9fa91492b216a6752aa491c17880fd2fb2d62adf0310ecbdb960",
+    "executable": true
+  }
+]

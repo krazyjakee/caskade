@@ -1,0 +1,44 @@
+# SPDX-License-Identifier: MIT
+# Authored for Caskade from docs/research/emulator-sources.md (sources and
+# flags checked 2026-10-28).
+
+id = "gopher64"
+name = "gopher64"
+website = "https://github.com/gopher64/gopher64"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^gopher64(?:-windows-x86_64)?\\.exe$"
+locations = ["{ProgramFiles}/gopher64"]
+
+[detect.linux]
+executable = "^gopher64(?:-linux-x86_64)?$"
+flatpak = "io.github.gopher64.gopher64"
+locations = ["{UserHome}/Applications/gopher64"]
+
+[detect.macos]
+executable = "^gopher64$"
+locations = ["/Applications/gopher64.app/Contents/MacOS"]
+
+# Bare programs on Windows and Linux; macOS is Apple Silicon only.
+[install.windows]
+source = "github"
+repo = "gopher64/gopher64"
+asset = '^gopher64-windows-x86_64\.exe$'
+[install.linux]
+source = "github"
+repo = "gopher64/gopher64"
+asset = '^gopher64-linux-x86_64$'
+[install.macos]
+source = "github"
+repo = "gopher64/gopher64"
+asset = '^gopher64-macos-aarch64\.zip$'
+
+[display]
+fullscreen = ["-f"]
+
+[[profile]]
+name = "Nintendo 64"
+platforms = ["nintendo_n64"]
+extensions = ["z64", "n64", "v64", "zip", "7z"]
+args = ["{RomPath}"]

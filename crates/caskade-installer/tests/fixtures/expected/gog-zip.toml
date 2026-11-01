@@ -1,0 +1,25 @@
+schema_version = 1
+id = "gog-zip"
+title = "Fixture Game"
+layout = "gog"
+format = "zip"
+platform = "windows"
+input = "bin/gog.zip"
+parts = ["bin/gog.zip"]
+tree = "gog-zip.tree.json"
+launch_target = "FixtureGame.exe"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"
+
+[host.windows]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"

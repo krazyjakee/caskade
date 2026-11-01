@@ -1,0 +1,21 @@
+schema_version = 1
+os = "windows"
+now_unix_secs = 1700000000
+
+[env]
+"USERPROFILE" = "C:\\Users\\fixture"
+
+[[volumes]]
+path = "C:\\"
+kind = "fixed"
+case_sensitive = false
+
+[[volumes]]
+path = "D:\\"
+kind = "fixed"
+case_sensitive = false
+
+[[volumes]]
+path = "E:\\"
+kind = "fixed"
+case_sensitive = false

@@ -1,0 +1,144 @@
+[package]
+name = "caskade-installer"
+version = "0.1.0"
+description = "Standalone, plan-driven game installation library"
+edition.workspace = true
+rust-version.workspace = true
+# Integration tests are declared below, not discovered from tests/.
+autotests = false
+
+[features]
+default = ["windows-formats", "linux-formats", "macos-formats", "disc", "fetch"]
+windows-formats = ["dep:inno", "dep:innospect", "dep:msi", "dep:cfb", "dep:cab", "dep:nsis", "dep:sha1"]
+linux-formats = ["dep:backhand", "dep:lz4_flex", "dep:ar", "dep:rpm", "dep:cpio", "dep:gvariant"]
+macos-formats = ["dep:xattr", "dep:cpio-archive", "dep:sha1", "dep:md-5"]
+disc = []
+fetch = ["dep:reqwest", "dep:futures-util", "dep:httpdate", "dep:scraper", "dep:percent-encoding"]
+# Magnet links and .torrent files (#159). Off by default: librqbit brings a
+# large tree and aws-lc (C, for SHA-1). caskade-core's `net` turns it on.
+torrent = ["fetch", "dep:librqbit", "dep:librqbit-core", "dep:librqbit-sha1-wrapper", "dep:reqwest013", "dep:rustls"]
+cli = ["dep:clap", "dep:tracing-subscriber"]
+
+[dependencies]
+caskade-jobs = { path = "../caskade-jobs" }
+thiserror = "2"
+tracing = "0.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+uuid = { version = "1", features = ["v7"] }
+schemars = { version = "1", features = ["url2"] }
+specta = { version = "=2.0.0-rc.26", features = ["derive", "url", "serde_json"] }
+url = { version = "2", features = ["serde"] }
+cap-std = "4"
+cap-fs-ext = "4"
+fs2 = "0.4"
+chardetng = "0.1"
+encoding_rs = "0.8"
+codepage-437 = "0.1"
+unicode-normalization = "0.1"
+tempfile = "=3.27.0"
+infer = { version = "0.22", default-features = false }
+tokio = { version = "1", features = ["rt-multi-thread", "sync", "macros", "time", "fs", "io-util", "net", "signal"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+zip = { version = "=9.1.3", default-features = false, features = ["deflate"] }
+sevenz-rust2 = { version = "=0.20.2", default-features = false, features = ["aes256", "bzip2", "ppmd", "deflate"] }
+tar = "0.4"
+globset = "0.4"
+flate2 = "1"
+lzma-rust2 = { version = "0.24", default-features = false, features = ["std", "xz"] }
+ruzstd = "0.9"
+bzip2 = "0.6"
+image = { version = "0.25", default-features = false, features = ["png", "ico", "jpeg"] }
+icns = { version = "0.5", default-features = false, features = ["pngio"] }
+plist = "1"
+pelite = { version = "0.10", default-features = false, features = ["std"] }
+quick-xml = "0.42"
+backhand = { version = "=0.25.5", default-features = false, features = ["gzip"], optional = true }
+lz4_flex = { version = "0.11", default-features = false, features = ["std", "safe-decode", "checked-decode"], optional = true }
+ar = { version = "=0.9.0", optional = true }
+# Payload access only: no pgp, and C zstd/liblzma stay disabled.
+rpm = { version = "=0.30.2", default-features = false, features = ["payload"], optional = true }
+cpio = { version = "=0.4.1", optional = true }
+# Flatpak OSTree bundle metadata (#39).
+gvariant = { version = "=0.5.1", optional = true }
+# XAR (.pkg) TOC checksums and Apple odc/newc payloads (#43).
+cpio-archive = { version = "0.10", optional = true }
+sha1 = { version = "0.10", optional = true }
+md-5 = { version = "0.10", optional = true }
+inno = { version = "=0.7.1", default-features = false, features = ["extract"], optional = true }
+innospect = { version = "=0.2.0", default-features = false, optional = true }
+msi = { version = "=0.10.0", optional = true }
+cfb = { version = "=0.14.0", optional = true }
+cab = { version = "=0.6.0", optional = true }
+nsis = { version = "=0.6.0", optional = true }
+toml = "0.8"
+# Embedded-schema validation only: no HTTP or file reference resolution.
+jsonschema = { version = "=0.60.1", default-features = false }
+notify = { version = "8", default-features = false, features = ["macos_kqueue"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream"], optional = true }
+futures-util = { version = "0.3", optional = true }
+httpdate = { version = "0.3", optional = true }
+# Resolver HTML (Drive confirmations) and percent-encoded IDs/tags (#56).
+scraper = { version = "0.29", default-features = false, optional = true }
+percent-encoding = { version = "2", optional = true }
+# BitTorrent (#159): no HTTP API, web UI, UPnP or persistence; uploads can be
+# turned off per session. SHA-1 comes from aws-lc-rs ("sha1-ring" names it),
+# not librqbit's TLS features, which would add aws-lc to rustls next to ring.
+librqbit = { version = "=9.0.1", default-features = false, features = ["disable-upload"], optional = true }
+librqbit-core = { version = "=9.0.1", default-features = false, features = ["sha1-ring"], optional = true }
+librqbit-sha1-wrapper = { version = "=9.0.1", default-features = false, features = ["sha1-ring"], optional = true }
+# librqbit's tracker client; TLS through the ring provider installed at start.
+reqwest013 = { package = "reqwest", version = "0.13", default-features = false, features = ["rustls-no-provider"], optional = true }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std"], optional = true }
+clap = { version = "4", features = ["derive"], optional = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter"], optional = true }
+# Default running-game check for moves (`pipeline::relocate`, #61; the app
+# injects its own tracker), also used by the Windows native-run tests (#35).
+# 0.38 keeps MSRV 1.93.
+sysinfo = { version = "=0.38.4", default-features = false, features = ["system"] }
+
+[target.'cfg(unix)'.dependencies]
+rustix = { version = "1", features = ["process", "fs"] }
+xattr = { version = "=1.6.1", default-features = false, optional = true }
+
+[target.'cfg(windows)'.dependencies]
+win32job = "=2.0.3"
+winreg = { version = "=0.56.0", default-features = false }
+junction = "=2.1.0"
+
+# Benchmarks run on the Linux runner only; criterion pulls in a C build
+# (alloca) that the cross-compilation gates cannot link.
+[target.'cfg(target_os = "linux")'.dev-dependencies]
+criterion = { version = "=0.8.2", default-features = false, features = ["cargo_bench_support", "plotters"] }
+
+[dev-dependencies]
+insta = { version = "1", features = ["json"] }
+proptest = "1"
+wiremock = "0.6"
+
+[[bin]]
+name = "caskade-install"
+path = "src/bin/caskade-install.rs"
+required-features = ["cli"]
+
+[lints]
+workspace = true
+
+[[bench]]
+name = "installer"
+harness = false
+required-features = ["windows-formats", "linux-formats"]
+
+# One binary for the integration tests (tests/main.rs); see its header.
+[[test]]
+name = "it"
+path = "tests/main.rs"
+
+[[test]]
+name = "cli"
+path = "tests/cli.rs"
+
+[[test]]
+name = "performance"
+path = "tests/performance.rs"

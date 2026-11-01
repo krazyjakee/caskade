@@ -1,0 +1,27 @@
+WINE REGISTRY Version 2
+;; Only original CaskadeDiscoveryFixture keys from a fresh generated prefix.
+#arch=win64
+
+[Software\\CaskadeDiscoveryFixture] 1700000000
+#time=1da1747c66d0000
+"Big"=hex(b):08,07,06,05,04,03,02,01
+"Blob"=hex:00,01,ff
+"Count"=dword:12345678
+"Expand"=str(2):"%USERPROFILE%\\Games"
+"InstallPath"="C:\\Users\\fixture\\Games\\\x6e38\x620f \xd83c\xdfae"
+"Multi"=str(7):"one\0two\0"
+
+[Software\\CaskadeDiscoveryFixture\\Empty] 1700000000
+#time=1da1747c66d0000
+
+[Software\\Wow6432Node\\CaskadeDiscoveryFixture] 1700000000
+#time=1da1747c66d0000
+"Big"=hex(b):08,07,06,05,04,03,02,01
+"Blob"=hex:00,01,ff
+"Count"=dword:12345678
+"Expand"=str(2):"%USERPROFILE%\\Games"
+"InstallPath"="C:\\Users\\fixture\\Games\\\x6e38\x620f \xd83c\xdfae"
+"Multi"=str(7):"one\0two\0"
+
+[Software\\Wow6432Node\\CaskadeDiscoveryFixture\\Empty] 1700000000
+#time=1da1747c66d0000

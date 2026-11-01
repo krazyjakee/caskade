@@ -1,0 +1,81 @@
+//! Integration tests, compiled as one binary: a change relinks once instead
+//! of once per file. Run one file's tests with `cargo test --test it <file>::`.
+//! `cli`, `performance` stay separate binaries (see Cargo.toml).
+
+#[allow(dead_code)]
+#[path = "fixtures/support/mod.rs"]
+mod fixtures;
+
+mod adversarial;
+mod alias;
+mod appimage;
+mod archive_fixtures;
+mod archive_safety;
+mod archive_sfx;
+mod cli_delegates;
+mod cli_dmg_native;
+mod cli_reconcile;
+mod disc;
+mod discover;
+mod discover_icons;
+mod discover_titles;
+mod dmg;
+mod exec;
+mod exec_alias;
+mod fetch;
+mod fetch_resolvers;
+mod fetch_resolvers_live;
+mod flatpak;
+mod inno_matrix;
+mod inno_prefix;
+mod inno_regressions;
+mod inno_safety;
+mod input;
+mod interactive;
+mod linux_delegate;
+mod linux_mini;
+mod macos_app;
+mod macos_native;
+mod macos_pkg;
+mod macos_pkg_native;
+mod makeself;
+mod manifest;
+mod manifest_verify;
+mod moving_properties;
+mod moving_proton;
+mod moving_transactions;
+mod moving_windows;
+mod msi;
+mod native_runtime;
+mod native_windows;
+mod nsis;
+mod offline_windows;
+mod packages;
+mod packages_delegate;
+mod perf_proton;
+mod plan_presets;
+mod plan_snapshots;
+mod portable;
+mod probe;
+mod probe_pe;
+mod proton;
+mod recipes;
+mod reconcile;
+mod reconcile_lock;
+mod reconcile_wine;
+mod recovery;
+mod redist;
+mod registry_read;
+mod relocate;
+mod relocate_recovery;
+mod safety;
+mod scan;
+mod seams;
+mod sevenzip;
+mod torrent;
+mod types;
+mod uninstall;
+mod uninstall_effects;
+mod uninstall_fixtures;
+mod uninstall_native;
+mod windows_fallback;

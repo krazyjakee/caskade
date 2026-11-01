@@ -1,0 +1,5 @@
+[Application]
+name=io.caskade.FixtureGame
+runtime=io.caskade.FixtureRuntime/x86_64/1
+sdk=io.caskade.FixtureRuntime/x86_64/1
+command=fixture-game

@@ -1,0 +1,11 @@
+"AppState"
+{
+	"appid"		"2000020"
+	"name"		"Fixture Downloading"
+	"StateFlags"		"1026"
+	"installdir"		"Fixture Downloading"
+	"SizeOnDisk"		"0"
+	"LastOwner"		"76561198000000000"
+	"BytesToDownload"		"10000"
+	"BytesDownloaded"		"2500"
+}

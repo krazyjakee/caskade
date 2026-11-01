@@ -1,0 +1,25 @@
+schema_version = 1
+id = "rar-multivolume-portable"
+title = "Fixture Game"
+layout = "gog"
+format = "rar5-multivolume"
+platform = "windows"
+input = "handmade/rar-multivolume-portable.part01.rar"
+parts = ["handmade/rar-multivolume-portable.part01.rar", "handmade/rar-multivolume-portable.part02.rar", "handmade/rar-multivolume-portable.part03.rar", "handmade/rar-multivolume-portable.part04.rar", "handmade/rar-multivolume-portable.part05.rar", "handmade/rar-multivolume-portable.part06.rar", "handmade/rar-multivolume-portable.part07.rar", "handmade/rar-multivolume-portable.part08.rar", "handmade/rar-multivolume-portable.part09.rar", "handmade/rar-multivolume-portable.part10.rar", "handmade/rar-multivolume-portable.part11.rar", "handmade/rar-multivolume-portable.part12.rar"]
+tree = "rar-multivolume-portable.tree.json"
+launch_target = "FixtureGame.exe"
+
+[host.windows]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

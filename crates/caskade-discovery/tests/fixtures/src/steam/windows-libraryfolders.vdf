@@ -1,0 +1,18 @@
+"libraryfolders"
+{
+	"0"
+	{
+		"path"		"C:\\Program Files (x86)\\Steam"
+		"apps"		{ "620" "4096" "228980" "1" }
+	}
+	"1"
+	{
+		"path"		"D:\\SteamLibrary"
+		"apps"		{ "2000040" "4096" }
+	}
+	"2"
+	{
+		"path"		"E:\\Games\\SteamLibrary"
+		"apps"		{ "2000050" "4096" }
+	}
+}

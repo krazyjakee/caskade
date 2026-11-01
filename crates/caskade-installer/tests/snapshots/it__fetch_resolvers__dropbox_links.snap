@@ -1,0 +1,28 @@
+---
+source: crates/caskade-installer/tests/fetch_resolvers.rs
+expression: snapshots
+---
+[
+  {
+    "downloads": [
+      {
+        "file_name": null,
+        "headers": {},
+        "sha256": null,
+        "size": null,
+        "url": "https://fixture.invalid/dropbox/s/token/Caf%C3%A9.zip?key=keep&dl=1"
+      }
+    ]
+  },
+  {
+    "downloads": [
+      {
+        "file_name": null,
+        "headers": {},
+        "sha256": null,
+        "size": null,
+        "url": "https://fixture.invalid/dropbox/scl/fi/token/game.zip?rlkey=resource&dl=1#sha256=abcdef"
+      }
+    ]
+  }
+]

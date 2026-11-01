@@ -1,0 +1,495 @@
+//! Shared ingress for file drops, DOM paste/link drops and deep links.
+//! Merely requesting never resolves a URL, downloads bytes or executes input.
+use caskade_core::install::{InstallService, JobSnapshot, dropped::DropPlan};
+use serde::{Deserialize, Serialize};
+use specta::Type;
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, Mutex},
+    time::{Duration, Instant},
+};
+use tauri::Runtime;
+use tauri_specta::Event;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct InstallRequest {
+    pub request_id: String,
+    pub kind: InputKind,
+    pub value: String,
+    /// How a dropped file or folder installs; `None` for other requests.
+    pub plan: Option<DropPlan>,
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "snake_case")]
+pub enum InputKind {
+    Path,
+    Url,
+}
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+pub struct InstallRequested(pub InstallRequest);
+/// A deep link turned down because the signed-in account may not install
+/// (#205), with the reason for people. Nothing was queued. Pastes and drops
+/// get the reason as their command's error instead.
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+pub struct InstallRefused(pub String);
+struct Pending {
+    request: InstallRequest,
+    created: Instant,
+    claimed: bool,
+}
+#[derive(Clone, Default)]
+pub struct InstallRequests {
+    pending: Arc<Mutex<BTreeMap<String, Pending>>>,
+}
+/// How long an unconfirmed request waits.
+const EXPIRY: Duration = Duration::from_secs(600);
+fn locked<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+    mutex.lock().unwrap_or_else(|e| e.into_inner())
+}
+impl InstallRequests {
+    /// The queue, without unclaimed requests that expired.
+    fn live(&self) -> std::sync::MutexGuard<'_, BTreeMap<String, Pending>> {
+        let mut pending = locked(&self.pending);
+        pending.retain(|_, p| p.claimed || p.created.elapsed() < EXPIRY);
+        pending
+    }
+    /// Queues input that [`validate`] already checked.
+    fn queue(
+        &self,
+        kind: InputKind,
+        value: String,
+        plan: Option<DropPlan>,
+    ) -> Result<InstallRequest, String> {
+        let mut pending = self.live();
+        if let Some(existing) = pending
+            .values()
+            .find(|p| p.request.kind == kind && p.request.value == value && p.request.plan == plan)
+        {
+            return Ok(existing.request.clone());
+        }
+        if pending.len() >= 32 {
+            return Err(caskade_core::tr!(
+                "too many pending install requests; dismiss one first"
+            ));
+        }
+        let request = InstallRequest {
+            request_id: caskade_core::model::new_id(),
+            kind,
+            value,
+            plan,
+        };
+        pending.insert(
+            request.request_id.clone(),
+            Pending {
+                request: request.clone(),
+                created: Instant::now(),
+                claimed: false,
+            },
+        );
+        Ok(request)
+    }
+    pub fn pending(&self) -> Vec<InstallRequest> {
+        self.live()
+            .values()
+            .filter(|p| !p.claimed)
+            .map(|p| p.request.clone())
+            .collect()
+    }
+    pub fn dismiss(&self, id: &str) -> Result<(), String> {
+        let mut pending = locked(&self.pending);
+        if pending.get(id).is_some_and(|p| p.claimed) {
+            return Err(caskade_core::tr!("request is already being confirmed"));
+        }
+        pending
+            .remove(id)
+            .map(|_| ())
+            .ok_or_else(|| caskade_core::tr!("unknown or expired request"))
+    }
+    fn claim(&self, id: &str) -> Result<Claim, String> {
+        let mut pending = locked(&self.pending);
+        let p = pending
+            .get_mut(id)
+            .ok_or_else(|| caskade_core::tr!("unknown or expired request"))?;
+        if p.claimed || p.created.elapsed() >= EXPIRY {
+            return Err(caskade_core::tr!(
+                "request is expired or already being confirmed"
+            ));
+        }
+        p.claimed = true;
+        Ok(Claim {
+            queue: self.clone(),
+            request: p.request.clone(),
+            complete: false,
+        })
+    }
+    pub async fn confirm(
+        &self,
+        id: &str,
+        root_id: Option<String>,
+        service: &InstallService,
+    ) -> Result<JobSnapshot, String> {
+        let mut claim = self.claim(id)?;
+        let hints = claim
+            .request
+            .plan
+            .as_ref()
+            .map(DropPlan::hints)
+            .unwrap_or_default();
+        let job = service
+            .install_with(claim.request.value.clone(), root_id, hints)
+            .await
+            .map_err(|e| e.to_string())?;
+        locked(&self.pending).remove(id);
+        claim.complete = true;
+        Ok(job)
+    }
+    /// Used by the deep-link owner (#57). A path is checked on the
+    /// blocking pool, never on the caller's thread: a stale network mount
+    /// can hang a stat for minutes.
+    pub async fn request_and_emit<R: Runtime>(
+        &self,
+        app: &tauri::AppHandle<R>,
+        value: String,
+    ) -> Result<InstallRequest, String> {
+        let (kind, value) = validated(value).await?;
+        self.queue_and_emit(app, kind, value, None)
+    }
+    fn queue_and_emit<R: Runtime>(
+        &self,
+        app: &tauri::AppHandle<R>,
+        kind: InputKind,
+        value: String,
+        plan: Option<DropPlan>,
+    ) -> Result<InstallRequest, String> {
+        let request = self.queue(kind, value, plan)?;
+        InstallRequested(request.clone())
+            .emit(app)
+            .map_err(|e| e.to_string())?;
+        Ok(request)
+    }
+}
+struct Claim {
+    queue: InstallRequests,
+    request: InstallRequest,
+    complete: bool,
+}
+impl Drop for Claim {
+    fn drop(&mut self) {
+        if !self.complete
+            && let Some(p) = locked(&self.queue.pending).get_mut(&self.request.request_id)
+        {
+            p.claimed = false;
+        }
+    }
+}
+/// [`validate`] on the blocking pool.
+async fn validated(value: String) -> Result<(InputKind, String), String> {
+    tauri::async_runtime::spawn_blocking(move || validate(value))
+        .await
+        .map_err(|e| e.to_string())?
+}
+fn validate(value: String) -> Result<(InputKind, String), String> {
+    let value = value.trim();
+    if value.is_empty() || value.len() > 32_768 || value.chars().any(char::is_control) {
+        return Err(caskade_core::tr!("input must be one path or HTTP(S) URL"));
+    }
+    if let Ok(url) = tauri::Url::parse(value)
+        && matches!(url.scheme(), "http" | "https")
+    {
+        if url.host_str().is_none() || !url.username().is_empty() || url.password().is_some() {
+            return Err(caskade_core::tr!("invalid download URL"));
+        }
+        return Ok((InputKind::Url, url.to_string()));
+    }
+    // A magnet link (#159) names a BitTorrent v1 or hybrid info hash.
+    if let Ok(url) = tauri::Url::parse(value)
+        && url.scheme() == "magnet"
+    {
+        if !url
+            .query_pairs()
+            .any(|(key, value)| key == "xt" && value.starts_with("urn:btih:"))
+        {
+            return Err(caskade_core::tr!(
+                "a magnet link needs a BitTorrent info hash (xt=urn:btih:…)"
+            ));
+        }
+        return Ok((InputKind::Url, url.to_string()));
+    }
+    let path = std::path::Path::new(value);
+    // Checked before anything touches the filesystem: on Windows, statting
+    // `\\host\share` connects to that host over SMB.
+    if is_network_or_device_path(value) {
+        return Err(caskade_core::tr!(
+            "choose a local path, not a network or device path"
+        ));
+    }
+    if !path.is_absolute() {
+        return Err(caskade_core::tr!(
+            "choose an absolute local path or HTTP(S) URL"
+        ));
+    }
+    let path = std::fs::canonicalize(path).map_err(|e| e.to_string())?;
+    let metadata = std::fs::metadata(&path).map_err(|e| e.to_string())?;
+    if !metadata.is_file() && !metadata.is_dir() {
+        return Err(caskade_core::tr!("input is not a file or folder"));
+    }
+    Ok((
+        InputKind::Path,
+        path.into_os_string()
+            .into_string()
+            .map_err(|_| caskade_core::tr!("path is not UTF-8"))?,
+    ))
+}
+/// Whether `value` is a UNC (`\\host\share`), verbatim (`\\?\`) or device
+/// (`\\.\`) path. They all start with two separators, either slash.
+fn is_network_or_device_path(value: &str) -> bool {
+    let mut chars = value.chars();
+    let separator = |c: Option<char>| matches!(c, Some('\\' | '/'));
+    if separator(chars.next()) && separator(chars.next()) {
+        return true;
+    }
+    #[cfg(windows)]
+    if let Some(std::path::Component::Prefix(prefix)) =
+        std::path::Path::new(value).components().next()
+        && !matches!(prefix.kind(), std::path::Prefix::Disk(_))
+    {
+        return true;
+    }
+    false
+}
+#[tauri::command]
+#[specta::specta]
+pub async fn request_install_input<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    state: tauri::State<'_, InstallRequests>,
+    value: String,
+) -> Result<InstallRequest, String> {
+    state.request_and_emit(&app, value).await
+}
+#[tauri::command]
+#[specta::specta]
+pub fn pending_install_requests(state: tauri::State<'_, InstallRequests>) -> Vec<InstallRequest> {
+    state.pending()
+}
+#[tauri::command]
+#[specta::specta]
+pub fn dismiss_install_request(
+    state: tauri::State<'_, InstallRequests>,
+    request_id: String,
+) -> Result<(), String> {
+    state.dismiss(&request_id)
+}
+#[tauri::command]
+#[specta::specta]
+pub async fn confirm_install_request(
+    state: tauri::State<'_, InstallRequests>,
+    service: tauri::State<'_, InstallService>,
+    request_id: String,
+    root_id: Option<String>,
+) -> Result<JobSnapshot, String> {
+    state.confirm(&request_id, root_id, &service).await
+}
+
+/// A file or folder dropped on the library, planned first: a shortcut
+/// stands for its target and a game's executable for its folder
+/// (`caskade_core::install::dropped`). It then waits for confirmation like
+/// any other request. Drops elsewhere use `request_install_input`.
+#[tauri::command]
+#[specta::specta]
+pub async fn request_dropped_install<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    state: tauri::State<'_, InstallRequests>,
+    path: String,
+) -> Result<InstallRequest, String> {
+    if is_network_or_device_path(&path) {
+        return Err(caskade_core::tr!(
+            "choose a local path, not a network or device path"
+        ));
+    }
+    let (plan, (kind, value)) = tauri::async_runtime::spawn_blocking(move || {
+        let plan = caskade_core::install::dropped::plan(std::path::Path::new(&path))
+            .map_err(|e| e.to_string())?;
+        let input = validate(plan.input.clone())?;
+        Ok::<_, String>((plan, input))
+    })
+    .await
+    .map_err(|e| e.to_string())??;
+    state.queue_and_emit(&app, kind, value, Some(plan))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::commands::test_ipc::invoke;
+    use serde_json::{Value, json};
+    use tauri::{
+        Listener,
+        test::{mock_builder, mock_context, noop_assets},
+    };
+    impl InstallRequests {
+        fn request(&self, value: String) -> Result<InstallRequest, String> {
+            let (kind, value) = validate(value)?;
+            self.queue(kind, value, None)
+        }
+    }
+    #[test]
+    fn bounded_deduplicated_requests_expire_and_claims_are_exclusive() {
+        let queue = InstallRequests::default();
+        let request = queue
+            .request("https://example.invalid/game.zip".into())
+            .unwrap();
+        assert_eq!(request, queue.request(request.value.clone()).unwrap());
+        let claim = queue.claim(&request.request_id).unwrap();
+        assert!(queue.claim(&request.request_id).is_err());
+        assert!(queue.dismiss(&request.request_id).is_err());
+        drop(claim);
+        assert_eq!(queue.pending(), vec![request.clone()]);
+        locked(&queue.pending)
+            .get_mut(&request.request_id)
+            .unwrap()
+            .created = Instant::now() - Duration::from_secs(601);
+        assert!(queue.pending().is_empty());
+        assert!(queue.claim(&request.request_id).is_err());
+        for i in 0..32 {
+            queue
+                .request(format!("https://example.invalid/{i}.zip"))
+                .unwrap();
+        }
+        assert!(
+            queue
+                .request("https://example.invalid/overflow.zip".into())
+                .is_err()
+        );
+        for value in [
+            "javascript:alert(1)",
+            "file:///tmp/game",
+            "https://user:secret@example.invalid/x",
+            "relative.zip",
+            "https://example.invalid/a\nhttps://example.invalid/b",
+            "magnet:?dn=no-hash",
+        ] {
+            assert!(validate(value.into()).is_err(), "{value}");
+        }
+        let magnet = "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567&dn=Game";
+        assert_eq!(
+            validate(magnet.into()).unwrap(),
+            (InputKind::Url, magnet.to_owned())
+        );
+    }
+    #[test]
+    fn network_and_device_paths_are_refused_before_any_lookup() {
+        for value in [
+            r"\\host\share\game.exe",
+            "//host/share/game.exe",
+            r"\\?\C:\games\game.exe",
+            r"\\?\UNC\host\share\game.exe",
+            r"\\.\pipe\game",
+            r"/\host\share",
+        ] {
+            assert!(is_network_or_device_path(value), "{value}");
+            let error = validate(value.into()).unwrap_err();
+            assert!(error.contains("network or device"), "{value}: {error}");
+        }
+        for value in [
+            "/tmp/game.zip",
+            r"C:\games\game.zip",
+            "/",
+            "relative/game.zip",
+        ] {
+            assert!(!is_network_or_device_path(value), "{value}");
+        }
+        let dir = tempfile::tempdir().unwrap();
+        let (kind, _) = validate(dir.path().to_string_lossy().into_owned()).unwrap();
+        assert!(matches!(kind, InputKind::Path));
+    }
+    #[test]
+    fn drops_and_pastes_only_queue_and_failed_confirmation_remains_pending() {
+        let store =
+            tauri::async_runtime::block_on(caskade_core::db::LibraryStore::in_memory()).unwrap();
+        let service = InstallService::new(
+            store,
+            caskade_core::bus::Bus::default(),
+            caskade_core::install::InstallOptions::default(),
+        );
+        let queue = InstallRequests::default();
+        let specta = tauri_specta::Builder::<tauri::test::MockRuntime>::new()
+            .dangerously_cast_bigints_to_number()
+            .commands(tauri_specta::collect_commands![
+                request_install_input::<tauri::test::MockRuntime>,
+                request_dropped_install::<tauri::test::MockRuntime>,
+                pending_install_requests,
+                confirm_install_request,
+                dismiss_install_request
+            ])
+            .events(tauri_specta::collect_events![InstallRequested]);
+        let app = mock_builder()
+            .manage(service.clone())
+            .manage(queue.clone())
+            .invoke_handler(specta.invoke_handler())
+            .build(mock_context(noop_assets()))
+            .unwrap();
+        specta.mount_events(&app);
+        let window = tauri::WebviewWindowBuilder::new(&app, "main", Default::default())
+            .build()
+            .unwrap();
+        let seen = Arc::new(Mutex::new(Vec::<Value>::new()));
+        let events = seen.clone();
+        app.listen(InstallRequested::NAME, move |event| {
+            events
+                .lock()
+                .unwrap()
+                .push(serde_json::from_str(event.payload()).unwrap())
+        });
+        let request = invoke(
+            &window,
+            "request_install_input",
+            json!({"value":"https://example.invalid/game.zip"}),
+        )
+        .unwrap();
+        assert_eq!(request["kind"], "url");
+        assert!(service.jobs().is_empty());
+        let id = request["requestId"].as_str().unwrap();
+        assert!(
+            invoke(
+                &window,
+                "confirm_install_request",
+                json!({"requestId":id,"rootId":"missing"})
+            )
+            .is_err()
+        );
+        assert_eq!(queue.pending().len(), 1);
+        assert!(service.jobs().is_empty());
+        let temp = tempfile::tempdir().unwrap();
+        let file = temp.path().join("Café game.zip");
+        std::fs::write(&file, b"not executed").unwrap();
+        let dropped = invoke(
+            &window,
+            "request_dropped_install",
+            json!({"path": file.to_string_lossy()}),
+        )
+        .unwrap();
+        assert_eq!(dropped["plan"]["kind"], "file");
+        assert_eq!(dropped["value"], dropped["plan"]["input"]);
+        assert_eq!(queue.pending().len(), 2);
+        assert!(service.jobs().is_empty());
+        assert_eq!(seen.lock().unwrap().len(), 2);
+        invoke(&window, "dismiss_install_request", json!({"requestId":id})).unwrap();
+        assert_eq!(
+            invoke(&window, "pending_install_requests", json!({}))
+                .unwrap()
+                .as_array()
+                .unwrap()
+                .len(),
+            1
+        );
+        assert!(
+            invoke(
+                &window,
+                "confirm_install_request",
+                json!({"requestId":id,"rootId":null})
+            )
+            .is_err()
+        );
+    }
+}

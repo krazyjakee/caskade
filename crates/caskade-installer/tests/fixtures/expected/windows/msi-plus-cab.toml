@@ -1,0 +1,31 @@
+schema_version = 1
+id = "msi-plus-cab"
+title = "Fixture Game"
+layout = "unity"
+format = "msi"
+platform = "windows"
+input = "bin/windows/msi-plus-cab/setup.msi"
+parts = ["bin/windows/msi-plus-cab/setup.msi", "bin/windows/msi-plus-cab/fixture.cab"]
+tree = "windows/msi-plus-cab.tree.json"
+launch_target = "FixtureGame.exe"
+
+[windows]
+builder = "wixl"
+version = "0.103"
+features = ["external-cab", "custom-action-type51", "ini", "registry64", "native-uninstall"]
+native_generated = ["config.ini:Game/InstallPath={app}"]
+
+[host.windows]
+outcome = "Installed"
+strategy = "RunSilent"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

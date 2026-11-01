@@ -1,0 +1,5449 @@
+{
+  "provenance": "Original synthetic uninstall metadata and folder inventories; no third-party code, copied corpus, launcher userdata, or executable payloads. Labels describe the authored scenario, not the classifier output.",
+  "cases": [
+    {
+      "id": "game-unity-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original unity Adventure 0",
+        "install_dir": "C:/Games/Original unity Adventure 0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Adventure_Data/globalgamemanagers",
+        "Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-unity-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original unity Adventure 1",
+        "install_dir": "C:/Games/Original unity Adventure 1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "portable/UnityPlayer.dll",
+        "portable/Adventure_Data/globalgamemanagers",
+        "portable/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-unity-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original unity Adventure 2",
+        "install_dir": "C:/Games/Original unity Adventure 2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "Game/UnityPlayer.dll",
+        "Game/Adventure_Data/globalgamemanagers",
+        "Game/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-unity-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original unity Adventure 3",
+        "install_dir": "C:/Games/Original unity Adventure 3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "resources/game/UnityPlayer.dll",
+        "resources/game/Adventure_Data/globalgamemanagers",
+        "resources/game/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-unity-4",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original unity Adventure 4",
+        "install_dir": "C:/Games/Original unity Adventure 4",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "深い/UNITYPLAYER.DLL",
+        "深い/ADVENTURE_DATA/GLOBALGAMEMANAGERS",
+        "深い/ADVENTURE.EXE"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-unity-5",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original unity Adventure 5",
+        "install_dir": "C:/Games/Original unity Adventure 5",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "bin/UnityPlayer.dll",
+        "bin/Adventure_Data/globalgamemanagers",
+        "bin/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-unity-linux-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original unity-linux Adventure 0",
+        "install_dir": "C:/Games/Original unity-linux Adventure 0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "UnityPlayer.so",
+        "Adventure_Data/globalgamemanagers",
+        "Adventure.x86_64"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-unity-linux-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original unity-linux Adventure 1",
+        "install_dir": "C:/Games/Original unity-linux Adventure 1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "portable/UnityPlayer.so",
+        "portable/Adventure_Data/globalgamemanagers",
+        "portable/Adventure.x86_64"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-unity-linux-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original unity-linux Adventure 2",
+        "install_dir": "C:/Games/Original unity-linux Adventure 2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "Game/UnityPlayer.so",
+        "Game/Adventure_Data/globalgamemanagers",
+        "Game/Adventure.x86_64"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-unity-linux-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original unity-linux Adventure 3",
+        "install_dir": "C:/Games/Original unity-linux Adventure 3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "resources/game/UnityPlayer.so",
+        "resources/game/Adventure_Data/globalgamemanagers",
+        "resources/game/Adventure.x86_64"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-unity-linux-4",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original unity-linux Adventure 4",
+        "install_dir": "C:/Games/Original unity-linux Adventure 4",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "深い/UNITYPLAYER.SO",
+        "深い/ADVENTURE_DATA/GLOBALGAMEMANAGERS",
+        "深い/ADVENTURE.X86_64"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-unity-linux-5",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original unity-linux Adventure 5",
+        "install_dir": "C:/Games/Original unity-linux Adventure 5",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "bin/UnityPlayer.so",
+        "bin/Adventure_Data/globalgamemanagers",
+        "bin/Adventure.x86_64"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-unreal-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original unreal Adventure 0",
+        "install_dir": "C:/Games/Original unreal Adventure 0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "Binaries/Win64/Adventure-Win64-Shipping.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-unreal-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original unreal Adventure 1",
+        "install_dir": "C:/Games/Original unreal Adventure 1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "portable/Binaries/Win64/Adventure-Win64-Shipping.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-unreal-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original unreal Adventure 2",
+        "install_dir": "C:/Games/Original unreal Adventure 2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "Game/Binaries/Win64/Adventure-Win64-Shipping.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-unreal-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original unreal Adventure 3",
+        "install_dir": "C:/Games/Original unreal Adventure 3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "resources/game/Binaries/Win64/Adventure-Win64-Shipping.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-unreal-4",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original unreal Adventure 4",
+        "install_dir": "C:/Games/Original unreal Adventure 4",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "深い/BINARIES/WIN64/ADVENTURE-WIN64-SHIPPING.EXE"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-unreal-5",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original unreal Adventure 5",
+        "install_dir": "C:/Games/Original unreal Adventure 5",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "bin/Binaries/Win64/Adventure-Win64-Shipping.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-godot-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original godot Adventure 0",
+        "install_dir": "C:/Games/Original godot Adventure 0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "Adventure.pck",
+        "Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-godot-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original godot Adventure 1",
+        "install_dir": "C:/Games/Original godot Adventure 1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "portable/Adventure.pck",
+        "portable/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-godot-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original godot Adventure 2",
+        "install_dir": "C:/Games/Original godot Adventure 2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "Game/Adventure.pck",
+        "Game/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-godot-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original godot Adventure 3",
+        "install_dir": "C:/Games/Original godot Adventure 3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "resources/game/Adventure.pck",
+        "resources/game/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-godot-4",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original godot Adventure 4",
+        "install_dir": "C:/Games/Original godot Adventure 4",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "深い/ADVENTURE.PCK",
+        "深い/ADVENTURE.EXE"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-godot-5",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original godot Adventure 5",
+        "install_dir": "C:/Games/Original godot Adventure 5",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "bin/Adventure.pck",
+        "bin/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-gamemaker-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original gamemaker Adventure 0",
+        "install_dir": "C:/Games/Original gamemaker Adventure 0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "data.win",
+        "Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-gamemaker-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original gamemaker Adventure 1",
+        "install_dir": "C:/Games/Original gamemaker Adventure 1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "portable/data.win",
+        "portable/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-gamemaker-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original gamemaker Adventure 2",
+        "install_dir": "C:/Games/Original gamemaker Adventure 2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "Game/data.win",
+        "Game/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-gamemaker-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original gamemaker Adventure 3",
+        "install_dir": "C:/Games/Original gamemaker Adventure 3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "resources/game/data.win",
+        "resources/game/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-gamemaker-4",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original gamemaker Adventure 4",
+        "install_dir": "C:/Games/Original gamemaker Adventure 4",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "深い/DATA.WIN",
+        "深い/ADVENTURE.EXE"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-gamemaker-5",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original gamemaker Adventure 5",
+        "install_dir": "C:/Games/Original gamemaker Adventure 5",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "bin/data.win",
+        "bin/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-rpg-mv-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original rpg-mv Adventure 0",
+        "install_dir": "C:/Games/Original rpg-mv Adventure 0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "www/js/rpg_core.js",
+        "www/data/System.json",
+        "Game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-rpg-mv-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original rpg-mv Adventure 1",
+        "install_dir": "C:/Games/Original rpg-mv Adventure 1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "portable/www/js/rpg_core.js",
+        "portable/www/data/System.json",
+        "portable/Game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-rpg-mv-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original rpg-mv Adventure 2",
+        "install_dir": "C:/Games/Original rpg-mv Adventure 2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "Game/www/js/rpg_core.js",
+        "Game/www/data/System.json",
+        "Game/Game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-rpg-mv-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original rpg-mv Adventure 3",
+        "install_dir": "C:/Games/Original rpg-mv Adventure 3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "resources/game/www/js/rpg_core.js",
+        "resources/game/www/data/System.json",
+        "resources/game/Game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-rpg-mv-4",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original rpg-mv Adventure 4",
+        "install_dir": "C:/Games/Original rpg-mv Adventure 4",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "深い/WWW/JS/RPG_CORE.JS",
+        "深い/WWW/DATA/SYSTEM.JSON",
+        "深い/GAME.EXE"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-rpg-mv-5",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original rpg-mv Adventure 5",
+        "install_dir": "C:/Games/Original rpg-mv Adventure 5",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "bin/www/js/rpg_core.js",
+        "bin/www/data/System.json",
+        "bin/Game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-rpg-mz-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original rpg-mz Adventure 0",
+        "install_dir": "C:/Games/Original rpg-mz Adventure 0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "js/rmmz_core.js",
+        "data/System.json",
+        "Game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-rpg-mz-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original rpg-mz Adventure 1",
+        "install_dir": "C:/Games/Original rpg-mz Adventure 1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "portable/js/rmmz_core.js",
+        "portable/data/System.json",
+        "portable/Game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-rpg-mz-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original rpg-mz Adventure 2",
+        "install_dir": "C:/Games/Original rpg-mz Adventure 2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "Game/js/rmmz_core.js",
+        "Game/data/System.json",
+        "Game/Game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-rpg-mz-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original rpg-mz Adventure 3",
+        "install_dir": "C:/Games/Original rpg-mz Adventure 3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "resources/game/js/rmmz_core.js",
+        "resources/game/data/System.json",
+        "resources/game/Game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-rpg-mz-4",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original rpg-mz Adventure 4",
+        "install_dir": "C:/Games/Original rpg-mz Adventure 4",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "深い/JS/RMMZ_CORE.JS",
+        "深い/DATA/SYSTEM.JSON",
+        "深い/GAME.EXE"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-rpg-mz-5",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original rpg-mz Adventure 5",
+        "install_dir": "C:/Games/Original rpg-mz Adventure 5",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "bin/js/rmmz_core.js",
+        "bin/data/System.json",
+        "bin/Game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-renpy-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original renpy Adventure 0",
+        "install_dir": "C:/Games/Original renpy Adventure 0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "renpy",
+        "game/script.rpa",
+        "start.sh"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-renpy-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original renpy Adventure 1",
+        "install_dir": "C:/Games/Original renpy Adventure 1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "portable/renpy",
+        "portable/game/script.rpa",
+        "portable/start.sh"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-renpy-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original renpy Adventure 2",
+        "install_dir": "C:/Games/Original renpy Adventure 2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "Game/renpy",
+        "Game/game/script.rpa",
+        "Game/start.sh"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-renpy-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original renpy Adventure 3",
+        "install_dir": "C:/Games/Original renpy Adventure 3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "resources/game/renpy",
+        "resources/game/game/script.rpa",
+        "resources/game/start.sh"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-renpy-4",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original renpy Adventure 4",
+        "install_dir": "C:/Games/Original renpy Adventure 4",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "深い/RENPY",
+        "深い/GAME/SCRIPT.RPA",
+        "深い/START.SH"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-renpy-5",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original renpy Adventure 5",
+        "install_dir": "C:/Games/Original renpy Adventure 5",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "bin/renpy",
+        "bin/game/script.rpa",
+        "bin/start.sh"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-source-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original source Adventure 0",
+        "install_dir": "C:/Games/Original source Adventure 0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "gameinfo.txt",
+        "bin/client.dll",
+        "hl2.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-source-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original source Adventure 1",
+        "install_dir": "C:/Games/Original source Adventure 1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "portable/gameinfo.txt",
+        "portable/bin/client.dll",
+        "portable/hl2.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-source-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original source Adventure 2",
+        "install_dir": "C:/Games/Original source Adventure 2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "Game/gameinfo.txt",
+        "Game/bin/client.dll",
+        "Game/hl2.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-source-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original source Adventure 3",
+        "install_dir": "C:/Games/Original source Adventure 3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "resources/game/gameinfo.txt",
+        "resources/game/bin/client.dll",
+        "resources/game/hl2.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-source-4",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original source Adventure 4",
+        "install_dir": "C:/Games/Original source Adventure 4",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "深い/GAMEINFO.TXT",
+        "深い/BIN/CLIENT.DLL",
+        "深い/HL2.EXE"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-source-5",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original source Adventure 5",
+        "install_dir": "C:/Games/Original source Adventure 5",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "bin/gameinfo.txt",
+        "bin/bin/client.dll",
+        "bin/hl2.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-fna-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original fna Adventure 0",
+        "install_dir": "C:/Games/Original fna Adventure 0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "FNA.dll",
+        "Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-fna-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original fna Adventure 1",
+        "install_dir": "C:/Games/Original fna Adventure 1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "portable/FNA.dll",
+        "portable/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-fna-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original fna Adventure 2",
+        "install_dir": "C:/Games/Original fna Adventure 2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "Game/FNA.dll",
+        "Game/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-fna-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original fna Adventure 3",
+        "install_dir": "C:/Games/Original fna Adventure 3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "resources/game/FNA.dll",
+        "resources/game/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-fna-4",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original fna Adventure 4",
+        "install_dir": "C:/Games/Original fna Adventure 4",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "深い/FNA.DLL",
+        "深い/ADVENTURE.EXE"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-fna-5",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original fna Adventure 5",
+        "install_dir": "C:/Games/Original fna Adventure 5",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "bin/FNA.dll",
+        "bin/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-xna-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original xna Adventure 0",
+        "install_dir": "C:/Games/Original xna Adventure 0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "Microsoft.Xna.Framework.Game.dll",
+        "Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-xna-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original xna Adventure 1",
+        "install_dir": "C:/Games/Original xna Adventure 1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "portable/Microsoft.Xna.Framework.Game.dll",
+        "portable/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-xna-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original xna Adventure 2",
+        "install_dir": "C:/Games/Original xna Adventure 2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "Game/Microsoft.Xna.Framework.Game.dll",
+        "Game/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-xna-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original xna Adventure 3",
+        "install_dir": "C:/Games/Original xna Adventure 3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "resources/game/Microsoft.Xna.Framework.Game.dll",
+        "resources/game/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-xna-4",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original xna Adventure 4",
+        "install_dir": "C:/Games/Original xna Adventure 4",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "深い/MICROSOFT.XNA.FRAMEWORK.GAME.DLL",
+        "深い/ADVENTURE.EXE"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-xna-5",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original xna Adventure 5",
+        "install_dir": "C:/Games/Original xna Adventure 5",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "bin/Microsoft.Xna.Framework.Game.dll",
+        "bin/Adventure.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-love-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original love Adventure 0",
+        "install_dir": "C:/Games/Original love Adventure 0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "Adventure.love",
+        "love.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-love-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original love Adventure 1",
+        "install_dir": "C:/Games/Original love Adventure 1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "portable/Adventure.love",
+        "portable/love.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-love-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original love Adventure 2",
+        "install_dir": "C:/Games/Original love Adventure 2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "Game/Adventure.love",
+        "Game/love.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-love-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original love Adventure 3",
+        "install_dir": "C:/Games/Original love Adventure 3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "resources/game/Adventure.love",
+        "resources/game/love.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-love-4",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original love Adventure 4",
+        "install_dir": "C:/Games/Original love Adventure 4",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "深い/ADVENTURE.LOVE",
+        "深い/LOVE.EXE"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-love-5",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original love Adventure 5",
+        "install_dir": "C:/Games/Original love Adventure 5",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "bin/Adventure.love",
+        "bin/love.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-0-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 0-0",
+        "install_dir": "C:/Games/Original Store Adventure 0-0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "steam_api.dll",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-0-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 0-1",
+        "install_dir": "C:/Games/Original Store Adventure 0-1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "steam_api.dll",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-0-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 0-2",
+        "install_dir": "C:/Games/Original Store Adventure 0-2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "steam_api.dll",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-0-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 0-3",
+        "install_dir": "C:/Games/Original Store Adventure 0-3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "steam_api.dll",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-1-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 1-0",
+        "install_dir": "C:/Games/Original Store Adventure 1-0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "steam_api64.dll",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-1-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 1-1",
+        "install_dir": "C:/Games/Original Store Adventure 1-1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "steam_api64.dll",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-1-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 1-2",
+        "install_dir": "C:/Games/Original Store Adventure 1-2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "steam_api64.dll",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-1-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 1-3",
+        "install_dir": "C:/Games/Original Store Adventure 1-3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "steam_api64.dll",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-2-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 2-0",
+        "install_dir": "C:/Games/Original Store Adventure 2-0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "libsteam_api.so",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-2-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 2-1",
+        "install_dir": "C:/Games/Original Store Adventure 2-1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "libsteam_api.so",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-2-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 2-2",
+        "install_dir": "C:/Games/Original Store Adventure 2-2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "libsteam_api.so",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-2-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 2-3",
+        "install_dir": "C:/Games/Original Store Adventure 2-3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "libsteam_api.so",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-3-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 3-0",
+        "install_dir": "C:/Games/Original Store Adventure 3-0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "libsteam_api.dylib",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-3-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 3-1",
+        "install_dir": "C:/Games/Original Store Adventure 3-1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "libsteam_api.dylib",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-3-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 3-2",
+        "install_dir": "C:/Games/Original Store Adventure 3-2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "libsteam_api.dylib",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-3-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 3-3",
+        "install_dir": "C:/Games/Original Store Adventure 3-3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "libsteam_api.dylib",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-4-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 4-0",
+        "install_dir": "C:/Games/Original Store Adventure 4-0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "steam_appid.txt",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-4-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 4-1",
+        "install_dir": "C:/Games/Original Store Adventure 4-1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "steam_appid.txt",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-4-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 4-2",
+        "install_dir": "C:/Games/Original Store Adventure 4-2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "steam_appid.txt",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-4-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 4-3",
+        "install_dir": "C:/Games/Original Store Adventure 4-3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "steam_appid.txt",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-5-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 5-0",
+        "install_dir": "C:/Games/Original Store Adventure 5-0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "goggame-123.info",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-5-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 5-1",
+        "install_dir": "C:/Games/Original Store Adventure 5-1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "goggame-123.info",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-5-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 5-2",
+        "install_dir": "C:/Games/Original Store Adventure 5-2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "goggame-123.info",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-5-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 5-3",
+        "install_dir": "C:/Games/Original Store Adventure 5-3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "goggame-123.info",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-6-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 6-0",
+        "install_dir": "C:/Games/Original Store Adventure 6-0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        ".itch.toml",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-6-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 6-1",
+        "install_dir": "C:/Games/Original Store Adventure 6-1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        ".itch.toml",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-6-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 6-2",
+        "install_dir": "C:/Games/Original Store Adventure 6-2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        ".itch.toml",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-6-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 6-3",
+        "install_dir": "C:/Games/Original Store Adventure 6-3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        ".itch.toml",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-7-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 7-0",
+        "install_dir": "C:/Games/Original Store Adventure 7-0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "EOSSDK-Win64-Shipping.dll",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-7-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 7-1",
+        "install_dir": "C:/Games/Original Store Adventure 7-1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "EOSSDK-Win64-Shipping.dll",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-7-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 7-2",
+        "install_dir": "C:/Games/Original Store Adventure 7-2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "EOSSDK-Win64-Shipping.dll",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-7-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 7-3",
+        "install_dir": "C:/Games/Original Store Adventure 7-3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "EOSSDK-Win64-Shipping.dll",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-8-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 8-0",
+        "install_dir": "C:/Games/Original Store Adventure 8-0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "Galaxy64.dll",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-8-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 8-1",
+        "install_dir": "C:/Games/Original Store Adventure 8-1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "Galaxy64.dll",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-8-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 8-2",
+        "install_dir": "C:/Games/Original Store Adventure 8-2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "Galaxy64.dll",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-store-8-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Store Adventure 8-3",
+        "install_dir": "C:/Games/Original Store Adventure 8-3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "category": "Game;AdventureGame;"
+      },
+      "files": [
+        "Galaxy64.dll",
+        "game.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-metadata-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Category Game 0",
+        "install_dir": "C:/Games/Original Category Game 0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Games"
+      },
+      "files": [
+        "play.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-metadata-1",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Category Game 1",
+        "install_dir": "C:/Games/Original Category Game 1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "SEGA",
+        "category": "Games"
+      },
+      "files": [
+        "play.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-metadata-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Category Game 2",
+        "install_dir": "C:/Games/Original Category Game 2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "CAPCOM",
+        "category": "Games"
+      },
+      "files": [
+        "play.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-metadata-3",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Category Game 3",
+        "install_dir": "C:/Games/Original Category Game 3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "CD PROJEKT RED",
+        "category": "Games"
+      },
+      "files": [
+        "play.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-metadata-4",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Category Game 4",
+        "install_dir": "C:/Games/Original Category Game 4",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Team17",
+        "category": "Games"
+      },
+      "files": [
+        "play.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-metadata-5",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Category Game 5",
+        "install_dir": "C:/Games/Original Category Game 5",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Supergiant Games",
+        "category": "Games"
+      },
+      "files": [
+        "play.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-metadata-6",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Category Game 6",
+        "install_dir": "C:/Games/Original Category Game 6",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "ConcernedApe",
+        "category": "Games"
+      },
+      "files": [
+        "play.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-metadata-7",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Category Game 7",
+        "install_dir": "C:/Games/Original Category Game 7",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Wube Software",
+        "category": "Games"
+      },
+      "files": [
+        "play.exe"
+      ],
+      "expected": "likely",
+      "prohibited": false
+    },
+    {
+      "id": "game-weak-0",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Older Game 0",
+        "install_dir": "C:/Games/Original Older Game 0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "game.exe"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "game-weak-1",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Older Game 1",
+        "install_dir": "C:/Games/Original Older Game 1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "game.exe"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "game-weak-2",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Older Game 2",
+        "install_dir": "C:/Games/Original Older Game 2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "game.exe"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "game-weak-3",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Older Game 3",
+        "install_dir": "C:/Games/Original Older Game 3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "game.exe"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "game-weak-4",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Older Game 4",
+        "install_dir": "C:/Games/Original Older Game 4",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "game.exe"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "game-weak-5",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Older Game 5",
+        "install_dir": "C:/Games/Original Older Game 5",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "game.exe"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "game-weak-6",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Older Game 6",
+        "install_dir": "C:/Games/Original Older Game 6",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "game.exe"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "game-weak-7",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Older Game 7",
+        "install_dir": "C:/Games/Original Older Game 7",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "game.exe"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "game-weak-8",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Older Game 8",
+        "install_dir": "C:/Games/Original Older Game 8",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "game.exe"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "game-weak-9",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Older Game 9",
+        "install_dir": "C:/Games/Original Older Game 9",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "game.exe"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "game-weak-10",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Older Game 10",
+        "install_dir": "C:/Games/Original Older Game 10",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "game.exe"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "game-weak-11",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Older Game 11",
+        "install_dir": "C:/Games/Original Older Game 11",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "game.exe"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "game-weak-12",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Older Game 12",
+        "install_dir": "C:/Games/Original Older Game 12",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "game.exe"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "game-weak-13",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Older Game 13",
+        "install_dir": "C:/Games/Original Older Game 13",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "game.exe"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "game-weak-14",
+      "kind": "uninstall",
+      "label": "game",
+      "metadata": {
+        "title": "Original Older Game 14",
+        "install_dir": "C:/Games/Original Older Game 14",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "game.exe"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "game-weak-15",
+      "kind": "folder",
+      "label": "game",
+      "metadata": {
+        "title": "Original Older Game 15",
+        "install_dir": "C:/Games/Original Older Game 15",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "game.exe"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "negative-redist-0-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft Visual C++ 2015 Redistributable 0.0",
+        "install_dir": "C:/Games/Microsoft Visual C++ 2015 Redistributable 0.0",
+        "executable": "vc_redist.x64.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "vc_redist.x64.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-0-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft Visual C++ 2015 Redistributable 1.0",
+        "install_dir": "C:/Games/Microsoft Visual C++ 2015 Redistributable 1.0",
+        "executable": "vc_redist.x64.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "vc_redist.x64.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-0-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft Visual C++ 2015 Redistributable 2.0",
+        "install_dir": "C:/Games/Microsoft Visual C++ 2015 Redistributable 2.0",
+        "executable": "vc_redist.x64.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Game"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "vc_redist.x64.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-1-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft Visual C++ 2013 Redistributable 0.0",
+        "install_dir": "C:/Games/Microsoft Visual C++ 2013 Redistributable 0.0",
+        "executable": "vcredist_2013_x64.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "vcredist_2013_x64.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-1-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft Visual C++ 2013 Redistributable 1.0",
+        "install_dir": "C:/Games/Microsoft Visual C++ 2013 Redistributable 1.0",
+        "executable": "vcredist_2013_x64.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "vcredist_2013_x64.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-1-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft Visual C++ 2013 Redistributable 2.0",
+        "install_dir": "C:/Games/Microsoft Visual C++ 2013 Redistributable 2.0",
+        "executable": "vcredist_2013_x64.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Game"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "vcredist_2013_x64.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-2-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft Visual C++ 2010 Redistributable 0.0",
+        "install_dir": "C:/Games/Microsoft Visual C++ 2010 Redistributable 0.0",
+        "executable": "vcredist_2010_x64.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "vcredist_2010_x64.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-2-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft Visual C++ 2010 Redistributable 1.0",
+        "install_dir": "C:/Games/Microsoft Visual C++ 2010 Redistributable 1.0",
+        "executable": "vcredist_2010_x64.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "vcredist_2010_x64.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-2-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft Visual C++ 2010 Redistributable 2.0",
+        "install_dir": "C:/Games/Microsoft Visual C++ 2010 Redistributable 2.0",
+        "executable": "vcredist_2010_x64.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Game"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "vcredist_2010_x64.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-3-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "DirectX End-User Runtime 0.0",
+        "install_dir": "C:/Games/DirectX End-User Runtime 0.0",
+        "executable": "dxsetup.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "dxsetup.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-3-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "DirectX End-User Runtime 1.0",
+        "install_dir": "C:/Games/DirectX End-User Runtime 1.0",
+        "executable": "dxsetup.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "dxsetup.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-3-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "DirectX End-User Runtime 2.0",
+        "install_dir": "C:/Games/DirectX End-User Runtime 2.0",
+        "executable": "dxsetup.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Game"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "dxsetup.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-4-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft .NET Framework 4.8 0.0",
+        "install_dir": "C:/Games/Microsoft .NET Framework 4.8 0.0",
+        "executable": "ndp48-x86-x64-allos.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "ndp48-x86-x64-allos.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-4-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft .NET Framework 4.8 1.0",
+        "install_dir": "C:/Games/Microsoft .NET Framework 4.8 1.0",
+        "executable": "ndp48-x86-x64-allos.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "ndp48-x86-x64-allos.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-4-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft .NET Framework 4.8 2.0",
+        "install_dir": "C:/Games/Microsoft .NET Framework 4.8 2.0",
+        "executable": "ndp48-x86-x64-allos.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Game"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "ndp48-x86-x64-allos.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-5-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft .NET Framework 3.5 0.0",
+        "install_dir": "C:/Games/Microsoft .NET Framework 3.5 0.0",
+        "executable": "dotnetfx35.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "dotnetfx35.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-5-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft .NET Framework 3.5 1.0",
+        "install_dir": "C:/Games/Microsoft .NET Framework 3.5 1.0",
+        "executable": "dotnetfx35.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "dotnetfx35.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-5-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft .NET Framework 3.5 2.0",
+        "install_dir": "C:/Games/Microsoft .NET Framework 3.5 2.0",
+        "executable": "dotnetfx35.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Game"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "dotnetfx35.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-6-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "NVIDIA PhysX System Software 0.0",
+        "install_dir": "C:/Games/NVIDIA PhysX System Software 0.0",
+        "executable": "PhysX_9.23.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "PhysX_9.23.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-6-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "NVIDIA PhysX System Software 1.0",
+        "install_dir": "C:/Games/NVIDIA PhysX System Software 1.0",
+        "executable": "PhysX_9.23.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "PhysX_9.23.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-6-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "NVIDIA PhysX System Software 2.0",
+        "install_dir": "C:/Games/NVIDIA PhysX System Software 2.0",
+        "executable": "PhysX_9.23.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Game"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "PhysX_9.23.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-7-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "OpenAL 0.0",
+        "install_dir": "C:/Games/OpenAL 0.0",
+        "executable": "oalinst.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "oalinst.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-7-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "OpenAL 1.0",
+        "install_dir": "C:/Games/OpenAL 1.0",
+        "executable": "oalinst.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "oalinst.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-7-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "OpenAL 2.0",
+        "install_dir": "C:/Games/OpenAL 2.0",
+        "executable": "oalinst.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Game"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "oalinst.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-8-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft XNA Framework Redistributable 4.0 0.0",
+        "install_dir": "C:/Games/Microsoft XNA Framework Redistributable 4.0 0.0",
+        "executable": "xnafx40_redist.msi",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "xnafx40_redist.msi"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-8-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft XNA Framework Redistributable 4.0 1.0",
+        "install_dir": "C:/Games/Microsoft XNA Framework Redistributable 4.0 1.0",
+        "executable": "xnafx40_redist.msi",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "xnafx40_redist.msi"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-8-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft XNA Framework Redistributable 4.0 2.0",
+        "install_dir": "C:/Games/Microsoft XNA Framework Redistributable 4.0 2.0",
+        "executable": "xnafx40_redist.msi",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Game"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "xnafx40_redist.msi"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-9-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Windows Desktop Runtime 0.0",
+        "install_dir": "C:/Games/Windows Desktop Runtime 0.0",
+        "executable": "windowsdesktop-runtime.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "windowsdesktop-runtime.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-9-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Windows Desktop Runtime 1.0",
+        "install_dir": "C:/Games/Windows Desktop Runtime 1.0",
+        "executable": "windowsdesktop-runtime.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "windowsdesktop-runtime.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-redist-9-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Windows Desktop Runtime 2.0",
+        "install_dir": "C:/Games/Windows Desktop Runtime 2.0",
+        "executable": "windowsdesktop-runtime.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Game"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Runtime_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "windowsdesktop-runtime.exe"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-0-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "NVIDIA Graphics Driver 0.2",
+        "install_dir": "C:/Games/NVIDIA Graphics Driver 0.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-0-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "NVIDIA Graphics Driver 1.2",
+        "install_dir": "C:/Games/NVIDIA Graphics Driver 1.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-0-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "NVIDIA Graphics Driver 2.2",
+        "install_dir": "C:/Games/NVIDIA Graphics Driver 2.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation",
+        "category": "Game"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll",
+        "data.win",
+        "steam_api.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-1-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "AMD Display Driver 0.2",
+        "install_dir": "C:/Games/AMD Display Driver 0.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-1-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "AMD Display Driver 1.2",
+        "install_dir": "C:/Games/AMD Display Driver 1.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-1-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "AMD Display Driver 2.2",
+        "install_dir": "C:/Games/AMD Display Driver 2.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation",
+        "category": "Game"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll",
+        "data.win",
+        "steam_api.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-2-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Intel Graphics Driver 0.2",
+        "install_dir": "C:/Games/Intel Graphics Driver 0.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-2-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Intel Graphics Driver 1.2",
+        "install_dir": "C:/Games/Intel Graphics Driver 1.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-2-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Intel Graphics Driver 2.2",
+        "install_dir": "C:/Games/Intel Graphics Driver 2.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation",
+        "category": "Game"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll",
+        "data.win",
+        "steam_api.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-3-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Realtek Audio Driver 0.2",
+        "install_dir": "C:/Games/Realtek Audio Driver 0.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-3-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Realtek Audio Driver 1.2",
+        "install_dir": "C:/Games/Realtek Audio Driver 1.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-3-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Realtek Audio Driver 2.2",
+        "install_dir": "C:/Games/Realtek Audio Driver 2.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation",
+        "category": "Game"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll",
+        "data.win",
+        "steam_api.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-4-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Intel Network Driver 0.2",
+        "install_dir": "C:/Games/Intel Network Driver 0.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-4-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Intel Network Driver 1.2",
+        "install_dir": "C:/Games/Intel Network Driver 1.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-4-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Intel Network Driver 2.2",
+        "install_dir": "C:/Games/Intel Network Driver 2.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation",
+        "category": "Game"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll",
+        "data.win",
+        "steam_api.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-5-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "AMD Chipset Software 0.2",
+        "install_dir": "C:/Games/AMD Chipset Software 0.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-5-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "AMD Chipset Software 1.2",
+        "install_dir": "C:/Games/AMD Chipset Software 1.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-5-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "AMD Chipset Software 2.2",
+        "install_dir": "C:/Games/AMD Chipset Software 2.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation",
+        "category": "Game"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll",
+        "data.win",
+        "steam_api.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-6-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "NVIDIA Driver Package 0.2",
+        "install_dir": "C:/Games/NVIDIA Driver Package 0.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-6-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "NVIDIA Driver Package 1.2",
+        "install_dir": "C:/Games/NVIDIA Driver Package 1.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-6-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "NVIDIA Driver Package 2.2",
+        "install_dir": "C:/Games/NVIDIA Driver Package 2.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation",
+        "category": "Game"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll",
+        "data.win",
+        "steam_api.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-7-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Intel Driver Update 0.2",
+        "install_dir": "C:/Games/Intel Driver Update 0.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-7-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Intel Driver Update 1.2",
+        "install_dir": "C:/Games/Intel Driver Update 1.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-driver-7-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Intel Driver Update 2.2",
+        "install_dir": "C:/Games/Intel Driver Update 2.2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "NVIDIA Corporation",
+        "category": "Game"
+      },
+      "files": [
+        "Vulkan-1.dll",
+        "XInput1_4.dll",
+        "data.win",
+        "steam_api.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-0-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Windows SDK 0.0",
+        "install_dir": "C:/Games/Windows SDK 0.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-0-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Windows SDK 1.0",
+        "install_dir": "C:/Games/Windows SDK 1.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-1-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Vulkan SDK 0.0",
+        "install_dir": "C:/Games/Vulkan SDK 0.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-1-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Vulkan SDK 1.0",
+        "install_dir": "C:/Games/Vulkan SDK 1.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-2-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Steamworks SDK 0.0",
+        "install_dir": "C:/Games/Steamworks SDK 0.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-2-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Steamworks SDK 1.0",
+        "install_dir": "C:/Games/Steamworks SDK 1.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-3-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Unreal Engine 0.0",
+        "install_dir": "C:/Games/Unreal Engine 0.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-3-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Unreal Engine 1.0",
+        "install_dir": "C:/Games/Unreal Engine 1.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-4-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Unity Editor 0.0",
+        "install_dir": "C:/Games/Unity Editor 0.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-4-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Unity Editor 1.0",
+        "install_dir": "C:/Games/Unity Editor 1.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-5-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Godot Engine 0.0",
+        "install_dir": "C:/Games/Godot Engine 0.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-5-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Godot Engine 1.0",
+        "install_dir": "C:/Games/Godot Engine 1.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-6-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "GameMaker Studio 0.0",
+        "install_dir": "C:/Games/GameMaker Studio 0.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-6-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "GameMaker Studio 1.0",
+        "install_dir": "C:/Games/GameMaker Studio 1.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-7-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "RPG Maker MV 0.0",
+        "install_dir": "C:/Games/RPG Maker MV 0.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-7-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "RPG Maker MV 1.0",
+        "install_dir": "C:/Games/RPG Maker MV 1.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-8-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "RenPy Development Kit 0.0",
+        "install_dir": "C:/Games/RenPy Development Kit 0.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-8-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "RenPy Development Kit 1.0",
+        "install_dir": "C:/Games/RenPy Development Kit 1.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-9-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "DirectX Software Development Kit 0.0",
+        "install_dir": "C:/Games/DirectX Software Development Kit 0.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-9-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "DirectX Software Development Kit 1.0",
+        "install_dir": "C:/Games/DirectX Software Development Kit 1.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-10-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Xbox GDK SDK 0.0",
+        "install_dir": "C:/Games/Xbox GDK SDK 0.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-10-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Xbox GDK SDK 1.0",
+        "install_dir": "C:/Games/Xbox GDK SDK 1.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-11-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Source SDK 0.0",
+        "install_dir": "C:/Games/Source SDK 0.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Microsoft Corporation",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-sdk-11-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Source SDK 1.0",
+        "install_dir": "C:/Games/Source SDK 1.0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve",
+        "category": "Development;IDE;"
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Sample_Data/globalgamemanagers",
+        "steam_api64.dll",
+        "d3d11.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": true
+    },
+    {
+      "id": "negative-tool-0-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Google Chrome 0.0",
+        "install_dir": "C:/Games/Google Chrome 0.0",
+        "executable": "chrome.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-0-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Google Chrome 1.0",
+        "install_dir": "C:/Games/Google Chrome 1.0",
+        "executable": "chrome.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll",
+        "FNA.dll",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-1-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Mozilla Firefox 0.0",
+        "install_dir": "C:/Games/Mozilla Firefox 0.0",
+        "executable": "firefox.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-1-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Mozilla Firefox 1.0",
+        "install_dir": "C:/Games/Mozilla Firefox 1.0",
+        "executable": "firefox.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll",
+        "FNA.dll",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-2-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft Edge 0.0",
+        "install_dir": "C:/Games/Microsoft Edge 0.0",
+        "executable": "msedge.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-2-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Microsoft Edge 1.0",
+        "install_dir": "C:/Games/Microsoft Edge 1.0",
+        "executable": "msedge.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll",
+        "FNA.dll",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-3-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Discord 0.0",
+        "install_dir": "C:/Games/Discord 0.0",
+        "executable": "Discord.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-3-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Discord 1.0",
+        "install_dir": "C:/Games/Discord 1.0",
+        "executable": "Discord.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll",
+        "FNA.dll",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-4-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Slack 0.0",
+        "install_dir": "C:/Games/Slack 0.0",
+        "executable": "slack.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-4-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Slack 1.0",
+        "install_dir": "C:/Games/Slack 1.0",
+        "executable": "slack.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll",
+        "FNA.dll",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-5-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "OBS Studio 0.0",
+        "install_dir": "C:/Games/OBS Studio 0.0",
+        "executable": "obs64.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-5-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "OBS Studio 1.0",
+        "install_dir": "C:/Games/OBS Studio 1.0",
+        "executable": "obs64.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll",
+        "FNA.dll",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-6-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Visual Studio Code 0.0",
+        "install_dir": "C:/Games/Visual Studio Code 0.0",
+        "executable": "Code.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-6-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Visual Studio Code 1.0",
+        "install_dir": "C:/Games/Visual Studio Code 1.0",
+        "executable": "Code.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll",
+        "FNA.dll",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-7-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Blender 0.0",
+        "install_dir": "C:/Games/Blender 0.0",
+        "executable": "blender.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-7-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Blender 1.0",
+        "install_dir": "C:/Games/Blender 1.0",
+        "executable": "blender.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll",
+        "FNA.dll",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-8-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "7-Zip 0.0",
+        "install_dir": "C:/Games/7-Zip 0.0",
+        "executable": "7z.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-8-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "7-Zip 1.0",
+        "install_dir": "C:/Games/7-Zip 1.0",
+        "executable": "7z.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll",
+        "FNA.dll",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-9-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "WinRAR 0.0",
+        "install_dir": "C:/Games/WinRAR 0.0",
+        "executable": "WinRAR.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-9-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "WinRAR 1.0",
+        "install_dir": "C:/Games/WinRAR 1.0",
+        "executable": "WinRAR.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll",
+        "FNA.dll",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-10-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Notepad++ 0.0",
+        "install_dir": "C:/Games/Notepad++ 0.0",
+        "executable": "notepad++.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-10-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Notepad++ 1.0",
+        "install_dir": "C:/Games/Notepad++ 1.0",
+        "executable": "notepad++.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll",
+        "FNA.dll",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-11-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Python 0.0",
+        "install_dir": "C:/Games/Python 0.0",
+        "executable": "python.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-11-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Python 1.0",
+        "install_dir": "C:/Games/Python 1.0",
+        "executable": "python.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll",
+        "FNA.dll",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-12-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Node.js 0.0",
+        "install_dir": "C:/Games/Node.js 0.0",
+        "executable": "node.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-12-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Node.js 1.0",
+        "install_dir": "C:/Games/Node.js 1.0",
+        "executable": "node.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll",
+        "FNA.dll",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-13-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Docker Desktop 0.0",
+        "install_dir": "C:/Games/Docker Desktop 0.0",
+        "executable": "docker.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-tool-13-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Docker Desktop 1.0",
+        "install_dir": "C:/Games/Docker Desktop 1.0",
+        "executable": "docker.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Google LLC"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll",
+        "FNA.dll",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-emulator-0",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "RetroArch",
+        "install_dir": "C:/Games/RetroArch",
+        "executable": "RetroArch.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "SDL2.dll",
+        "data.win"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-emulator-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Dolphin",
+        "install_dir": "C:/Games/Dolphin",
+        "executable": "Dolphin.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "SDL2.dll",
+        "data.win"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-emulator-2",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "PCSX2",
+        "install_dir": "C:/Games/PCSX2",
+        "executable": "PCSX2.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "SDL2.dll",
+        "data.win"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-emulator-3",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "RPCS3",
+        "install_dir": "C:/Games/RPCS3",
+        "executable": "RPCS3.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "SDL2.dll",
+        "data.win"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-emulator-4",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Ryujinx",
+        "install_dir": "C:/Games/Ryujinx",
+        "executable": "Ryujinx.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "SDL2.dll",
+        "data.win"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-emulator-5",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Citra",
+        "install_dir": "C:/Games/Citra",
+        "executable": "Citra.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "SDL2.dll",
+        "data.win"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-emulator-6",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "PPSSPP",
+        "install_dir": "C:/Games/PPSSPP",
+        "executable": "PPSSPP.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "SDL2.dll",
+        "data.win"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-emulator-7",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "MAME",
+        "install_dir": "C:/Games/MAME",
+        "executable": "MAME.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "SDL2.dll",
+        "data.win"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-emulator-8",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "DuckStation",
+        "install_dir": "C:/Games/DuckStation",
+        "executable": "DuckStation.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "SDL2.dll",
+        "data.win"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-emulator-9",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Cemu",
+        "install_dir": "C:/Games/Cemu",
+        "executable": "Cemu.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "SDL2.dll",
+        "data.win"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-launcher-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Steam",
+        "install_dir": "C:/Games/Steam",
+        "executable": "steam.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Launcher_Data/globalgamemanagers",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-launcher-1",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Epic Games Launcher",
+        "install_dir": "C:/Games/Epic Games Launcher",
+        "executable": "EpicGamesLauncher.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Launcher_Data/globalgamemanagers",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-launcher-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "GOG Galaxy",
+        "install_dir": "C:/Games/GOG Galaxy",
+        "executable": "GalaxyClient.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Launcher_Data/globalgamemanagers",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-launcher-3",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Battle.net",
+        "install_dir": "C:/Games/Battle.net",
+        "executable": "Battle.net.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Launcher_Data/globalgamemanagers",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-launcher-4",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Ubisoft Connect",
+        "install_dir": "C:/Games/Ubisoft Connect",
+        "executable": "UbisoftConnect.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "UnityPlayer.dll",
+        "Launcher_Data/globalgamemanagers",
+        "steam_api64.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-weak-0",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Original Utility 0",
+        "install_dir": "C:/Games/Original Utility 0",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-weak-1",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Original Utility 1",
+        "install_dir": "C:/Games/Original Utility 1",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "negative-weak-2",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Original Utility 2",
+        "install_dir": "C:/Games/Original Utility 2",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-weak-3",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Original Utility 3",
+        "install_dir": "C:/Games/Original Utility 3",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "negative-weak-4",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Original Utility 4",
+        "install_dir": "C:/Games/Original Utility 4",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-weak-5",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Original Utility 5",
+        "install_dir": "C:/Games/Original Utility 5",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "negative-weak-6",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Original Utility 6",
+        "install_dir": "C:/Games/Original Utility 6",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-weak-7",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Original Utility 7",
+        "install_dir": "C:/Games/Original Utility 7",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "negative-weak-8",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Original Utility 8",
+        "install_dir": "C:/Games/Original Utility 8",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-weak-9",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Original Utility 9",
+        "install_dir": "C:/Games/Original Utility 9",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    },
+    {
+      "id": "negative-weak-10",
+      "kind": "uninstall",
+      "label": "non_game",
+      "metadata": {
+        "title": "Original Utility 10",
+        "install_dir": "C:/Games/Original Utility 10",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ]
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "not_a_game",
+      "prohibited": false
+    },
+    {
+      "id": "negative-weak-11",
+      "kind": "folder",
+      "label": "non_game",
+      "metadata": {
+        "title": "Original Utility 11",
+        "install_dir": "C:/Games/Original Utility 11",
+        "executable": "game.exe",
+        "known_game_folders": [
+          "C:/Games"
+        ],
+        "publisher": "Valve"
+      },
+      "files": [
+        "SDL2.dll",
+        "vulkan-1.dll"
+      ],
+      "expected": "maybe",
+      "prohibited": false
+    }
+  ]
+}

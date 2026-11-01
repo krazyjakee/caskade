@@ -1,0 +1,20 @@
+[package]
+name = "caskade-test-plugin"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+caskade-plugin-sdk = { path = "../../../caskade-plugin-sdk" }
+# Outbound HTTP through wasi:http (capability tests).
+wasi = "0.14"
+
+[profile.release]
+panic = "abort"
+opt-level = "s"
+
+# Built by the host's tests for wasm32-unknown-unknown, outside the workspace.
+[workspace]

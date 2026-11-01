@@ -1,0 +1,14 @@
+{
+  "$schema": "https://caskade.dev/schemas/plugin.json",
+  "id": "dev.caskade.playtime-stats",
+  "name": "Playtime stats",
+  "version": "0.1.0",
+  "api": "^0.1",
+  "description": "Where your playtime goes: your most played games, and a note when a session ends.",
+  "author": "Caskade",
+  "ui": "dist/ui.js",
+  "permissions": {},
+  "contributes": {
+    "views": [{ "id": "stats", "title": "Playtime stats", "modes": ["desktop", "console"] }]
+  }
+}

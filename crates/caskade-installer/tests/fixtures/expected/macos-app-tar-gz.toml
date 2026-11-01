@@ -1,0 +1,25 @@
+schema_version = 1
+id = "macos-app-tar-gz"
+title = "Fixture Game"
+layout = "macos"
+format = "tar.gz"
+platform = "macos"
+input = "bin/macos-app.tar.gz"
+parts = ["bin/macos-app.tar.gz"]
+tree = "macos-app-tar-gz.tree.json"
+launch_target = "FixtureGame.app/Contents/MacOS/FixtureGame"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.windows]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"

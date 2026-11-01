@@ -1,0 +1,28 @@
+[package]
+name = "caskade-i18n"
+version = "0.1.0"
+description = "Gettext PO catalogs for Caskade's Rust side: lookups with context and plurals, locale negotiation and extraction, in pure Rust (no libintl)"
+edition.workspace = true
+rust-version.workspace = true
+
+[features]
+# The extractor behind `just i18n` and the core's stale-template test; the
+# app doesn't need it.
+extract = ["dep:proc-macro2", "dep:syn"]
+
+[dependencies]
+# The OS's preferred languages; no C dependencies on desktop targets.
+sys-locale = "0.3"
+tracing = "0.1"
+# The extractor reads Rust sources as tokens, so strings inside other
+# macros' arguments are found too, and string literals unescape exactly.
+proc-macro2 = { version = "1", optional = true }
+syn = { version = "2", default-features = false, features = ["parsing"], optional = true }
+
+[[bin]]
+name = "caskade-i18n"
+path = "src/main.rs"
+required-features = ["extract"]
+
+[lints]
+workspace = true

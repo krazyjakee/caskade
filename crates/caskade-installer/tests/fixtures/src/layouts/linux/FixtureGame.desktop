@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Fixture Game
+Exec=./start.sh
+Path=.
+Icon=fixture-game
+Terminal=false
+Categories=Game;

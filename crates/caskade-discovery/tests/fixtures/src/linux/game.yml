@@ -1,0 +1,5 @@
+game:
+  exe: game.exe
+  prefix: /home/fixture/Games/prefixes/fixture
+name: Fixture Adventure
+runner: wine

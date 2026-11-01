@@ -1,0 +1,31 @@
+schema_version = 1
+id = "native-inno-shortcuts"
+title = "Caskade Native INNO Fixture"
+layout = "unity"
+format = "inno"
+platform = "windows"
+input = "bin/native-uninstall/native-inno-shortcuts/setup.exe"
+parts = ["bin/native-uninstall/native-inno-shortcuts/setup.exe"]
+tree = "native-uninstall/native-inno-shortcuts.tree.json"
+launch_target = "FixtureGame.exe"
+
+[windows]
+builder = "ISCC"
+version = "6.0.5"
+features = ["native-uninstall", "registry", "ini"]
+native_generated = ["config.ini", "unins000.exe", "unins000.dat"]
+
+[host.windows]
+outcome = "Installed"
+strategy = "RunSilent"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

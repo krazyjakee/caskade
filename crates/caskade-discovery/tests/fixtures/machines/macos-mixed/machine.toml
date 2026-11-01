@@ -1,0 +1,6 @@
+schema_version = 1
+os = "macos"
+now_unix_secs = 1700000000
+
+[env]
+"HOME" = "/Users/fixture"

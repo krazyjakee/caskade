@@ -1,0 +1,24 @@
+[package]
+name = "caskade-input"
+version = "0.1.0"
+description = "Gamepad input for console mode: gilrs pads normalized to UI actions (no Tauri dependency)"
+edition.workspace = true
+rust-version.workspace = true
+
+# `gilrs` reads real pads (libudev on Linux). Without it the service only
+# carries injected input, which tests and hosts without pad support use.
+[features]
+default = ["gilrs"]
+gilrs = ["dep:gilrs"]
+
+[dependencies]
+gilrs = { version = "0.11", optional = true }
+serde = { version = "1", features = ["derive"] }
+specta = { version = "=2.0.0-rc.26", features = ["derive"] }
+tracing = "0.1"
+
+[dev-dependencies]
+serde_json = "1"
+
+[lints]
+workspace = true

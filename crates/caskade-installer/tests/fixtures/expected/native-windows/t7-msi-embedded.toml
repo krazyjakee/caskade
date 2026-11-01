@@ -1,0 +1,31 @@
+schema_version = 1
+id = "t7-msi-embedded"
+title = "Fixture Game"
+layout = "unity"
+format = "msi"
+platform = "windows"
+input = "bin/native-windows/t7-msi-embedded/setup.msi"
+parts = ["bin/native-windows/t7-msi-embedded/setup.msi"]
+tree = "native-windows/unity.tree.json"
+launch_target = "FixtureGame.exe"
+
+[windows]
+builder = "wixl"
+version = "0.103"
+features = ["native-windows", "native-uninstall", "embedded-cab", "start-menu-shortcut", "authored-CASKADE_NOSHORTCUTS"]
+native_generated = []
+
+[host.windows]
+outcome = "Installed"
+strategy = "RunSilent"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

@@ -1,0 +1,836 @@
+---
+source: crates/caskade-installer/tests/probe_pe.rs
+expression: outputs
+---
+{
+  "burn": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "burn",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1024,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": "burn",
+          "machine": 34404,
+          "overlay_offset": 1024,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".wixburn"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 840,
+      "read_calls": 4,
+      "seek_calls": 7
+    }
+  },
+  "inno/overlay": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1053,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 34404,
+          "overlay_offset": 1024,
+          "overlay_size": 29,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 869,
+      "read_calls": 5,
+      "seek_calls": 7
+    }
+  },
+  "inno/resource": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "inno",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1024,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": "inno",
+          "machine": 34404,
+          "overlay_offset": 1024,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [
+            "Id(10)"
+          ],
+          "sections": [
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 960,
+      "read_calls": 5,
+      "seek_calls": 8
+    }
+  },
+  "installshield/overlay": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "install_shield",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1037,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": "install_shield",
+          "machine": 34404,
+          "overlay_offset": 1024,
+          "overlay_size": 13,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 853,
+      "read_calls": 5,
+      "seek_calls": 7
+    }
+  },
+  "installshield/resource": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "install_shield",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1024,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": "install_shield",
+          "machine": 34404,
+          "overlay_offset": 1024,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [
+            "Id(10)"
+          ],
+          "sections": [
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 944,
+      "read_calls": 5,
+      "seek_calls": 8
+    }
+  },
+  "nsis/overlay": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "nsis",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1040,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": "nsis",
+          "machine": 34404,
+          "overlay_offset": 1024,
+          "overlay_size": 16,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 856,
+      "read_calls": 5,
+      "seek_calls": 7
+    }
+  },
+  "nsis/resource": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "nsis",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1024,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": "nsis",
+          "machine": 34404,
+          "overlay_offset": 1024,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [
+            "Id(10)"
+          ],
+          "sections": [
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 944,
+      "read_calls": 5,
+      "seek_calls": 8
+    }
+  },
+  "role/Game.exe": {
+    "root": {
+      "id": "source:0",
+      "path": "Game.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "application",
+      "size": 1024,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 332,
+          "overlay_offset": 1024,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 824,
+      "read_calls": 4,
+      "seek_calls": 7
+    }
+  },
+  "role/GameLauncher.exe": {
+    "root": {
+      "id": "source:0",
+      "path": "GameLauncher.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "launcher",
+      "size": 1024,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 332,
+          "overlay_offset": 1024,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 824,
+      "read_calls": 4,
+      "seek_calls": 7
+    }
+  },
+  "role/setup.exe": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "application",
+      "size": 1024,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 332,
+          "overlay_offset": 1024,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 824,
+      "read_calls": 4,
+      "seek_calls": 7
+    }
+  },
+  "role/unins000.exe": {
+    "root": {
+      "id": "source:0",
+      "path": "unins000.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "uninstaller",
+      "size": 1024,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 332,
+          "overlay_offset": 1024,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 824,
+      "read_calls": 4,
+      "seek_calls": 7
+    }
+  },
+  "role/vc_redist.x64.exe": {
+    "root": {
+      "id": "source:0",
+      "path": "vc_redist.x64.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "redistributable",
+      "size": 1024,
+      "facts": {
+        "pe.arch": "x86",
+        "pe.metadata": {
+          "architecture": "x86",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 332,
+          "overlay_offset": 1024,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": true
+    },
+    "io": {
+      "bytes_read": 824,
+      "read_calls": 4,
+      "seek_calls": 7
+    }
+  },
+  "setupfactory/overlay": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "setup_factory",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1037,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": "setup_factory",
+          "machine": 34404,
+          "overlay_offset": 1024,
+          "overlay_size": 13,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 853,
+      "read_calls": 5,
+      "seek_calls": 7
+    }
+  },
+  "setupfactory/resource": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "setup_factory",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1024,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": "setup_factory",
+          "machine": 34404,
+          "overlay_offset": 1024,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [
+            "Id(10)"
+          ],
+          "sections": [
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 944,
+      "read_calls": 5,
+      "seek_calls": 8
+    }
+  },
+  "sfx/rar": {
+    "root": {
+      "id": "source:0",
+      "path": "sfx.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1039,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 34404,
+          "overlay_offset": 1024,
+          "overlay_size": 15,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text"
+          ],
+          "sfx_format": "rar",
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.sfx_format": "rar",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 855,
+      "read_calls": 5,
+      "seek_calls": 7
+    }
+  },
+  "sfx/seven_zip": {
+    "root": {
+      "id": "source:0",
+      "path": "sfx.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1037,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 34404,
+          "overlay_offset": 1024,
+          "overlay_size": 13,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text"
+          ],
+          "sfx_format": "seven_zip",
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.sfx_format": "seven_zip",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 853,
+      "read_calls": 5,
+      "seek_calls": 7
+    }
+  },
+  "sfx/zip": {
+    "root": {
+      "id": "source:0",
+      "path": "sfx.exe",
+      "format": "pe",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1035,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": null,
+          "machine": 34404,
+          "overlay_offset": 1024,
+          "overlay_size": 11,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text"
+          ],
+          "sfx_format": "zip",
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.sfx_format": "zip",
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 851,
+      "read_calls": 5,
+      "seek_calls": 7
+    }
+  },
+  "wise/overlay": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "wise",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1048,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": "wise",
+          "machine": 34404,
+          "overlay_offset": 1024,
+          "overlay_size": 24,
+          "requested_execution_level": null,
+          "resource_types": [],
+          "sections": [
+            ".text"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 864,
+      "read_calls": 5,
+      "seek_calls": 7
+    }
+  },
+  "wise/resource": {
+    "root": {
+      "id": "source:0",
+      "path": "setup.exe",
+      "format": "wise",
+      "platform": {
+        "type": "windows"
+      },
+      "role": "installer",
+      "size": 1024,
+      "facts": {
+        "pe.arch": "x86_64",
+        "pe.metadata": {
+          "architecture": "x86_64",
+          "certificate_bytes": 0,
+          "installer_format": "wise",
+          "machine": 34404,
+          "overlay_offset": 1024,
+          "overlay_size": 0,
+          "requested_execution_level": null,
+          "resource_types": [
+            "Id(10)"
+          ],
+          "sections": [
+            ".rsrc"
+          ],
+          "sfx_format": null,
+          "signature_scan_truncated": false,
+          "subsystem": 2,
+          "version_info": {},
+          "warnings": []
+        },
+        "pe.overlay_offset": 1024,
+        "pe.subsystem": 2,
+        "probe.handler": "pe"
+      },
+      "children": [],
+      "children_complete": false
+    },
+    "io": {
+      "bytes_read": 952,
+      "read_calls": 5,
+      "seek_calls": 8
+    }
+  }
+}

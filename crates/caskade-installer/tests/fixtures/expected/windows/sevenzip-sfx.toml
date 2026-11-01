@@ -1,0 +1,31 @@
+schema_version = 1
+id = "sevenzip-sfx"
+title = "Fixture Game"
+layout = "unity"
+format = "7z-sfx"
+platform = "windows"
+input = "bin/windows/sevenzip-sfx/sevenzip-sfx.exe"
+parts = ["bin/windows/sevenzip-sfx/sevenzip-sfx.exe"]
+tree = "windows/sevenzip-sfx.tree.json"
+launch_target = "FixtureGame.exe"
+
+[windows]
+builder = "7zz + official 7z.sfx"
+version = "26.05 / 26.01"
+features = []
+native_generated = []
+
+[host.windows]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

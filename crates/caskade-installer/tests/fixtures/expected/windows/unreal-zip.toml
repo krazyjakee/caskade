@@ -1,0 +1,31 @@
+schema_version = 1
+id = "unreal-zip"
+title = "Fixture Game"
+layout = "unreal"
+format = "zip"
+platform = "windows"
+input = "bin/windows/unreal-zip/payload.zip"
+parts = ["bin/windows/unreal-zip/payload.zip"]
+tree = "windows/unreal-zip.tree.json"
+launch_target = "FixtureGame/Binaries/Win64/FixtureGame-Win64-Shipping.exe"
+
+[windows]
+builder = "Python zipfile"
+version = "stdlib"
+features = []
+native_generated = []
+
+[host.windows]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

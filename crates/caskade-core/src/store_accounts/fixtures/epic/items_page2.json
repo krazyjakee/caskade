@@ -1,0 +1,7 @@
+{ "responseMetadata": { "stateToken": "state" },
+  "records": [
+    { "namespace": "ue", "catalogItemId": "ue-asset-1", "appName": "UeAsset", "sandboxType": "PUBLIC", "recordType": "APPLICATION" },
+    { "namespace": "d4e5f6", "catalogItemId": "cat-claimed", "appName": "Bluebird", "sandboxType": "PUBLIC", "recordType": "APPLICATION" },
+    { "namespace": "pr1v4t", "catalogItemId": "cat-private", "appName": "Secret", "sandboxType": "PRIVATE", "recordType": "APPLICATION" },
+    { "namespace": "x9y8z7", "catalogItemId": "cat-unknown", "appName": "Gone", "sandboxType": "PUBLIC", "recordType": "APPLICATION" }
+  ] }

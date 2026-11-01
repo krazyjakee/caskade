@@ -1,0 +1,65 @@
+# SPDX-License-Identifier: MIT
+# Adapted from Playnite (c) 2020 Josef Nemec, commit 3e8abb241873e326e27c75b59dd0d2ea367698e3.
+# Source: source/Playnite/Emulation/Emulators/mGBA/emulator.yaml
+# Windows rules/profiles ported with attribution; Linux/macOS rules by Caskade.
+# See ../THIRD-PARTY.md for the license and adaptation notes.
+
+
+id = "mgba"
+name = "mGBA"
+website = "https://mgba.io/"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^mGBA\\.exe$"
+locations = ["{ProgramFiles}/mGBA", "{AppData}/mGBA", "{UserHome}/AppData/Local/mGBA", "{UserHome}/scoop/apps/mgba/current", "C:/ProgramData/chocolatey/lib/mgba/tools"]
+
+[detect.linux]
+executable = "^(?:mgba|mgba-qt)$"
+path = ["mgba", "mgba-qt"]
+flatpak = "io.mgba.mGBA"
+appimage = "(?i)^mGBA(?:[-_].*)?\\.AppImage$"
+locations = ["{UserHome}/Applications/mGBA", "{UserHome}/Emulation/tools/mgba", "{UserHome}/Emulation/tools/launchers", "/opt/mgba"]
+
+[detect.macos]
+executable = "(?i)^(?:mgba|mGBA)$"
+bundle = "com.endrift.mgba-qt"
+path = ["mgba", "mgba-qt"]
+locations = ["/Applications/mGBA.app/Contents/MacOS", "{UserHome}/Applications/mGBA.app/Contents/MacOS"]
+
+[install.windows]
+source = "github"
+repo = "mgba-emu/mgba"
+asset = '^mGBA-[\d.]+-win64\.7z$'
+[install.linux]
+source = "github"
+repo = "mgba-emu/mgba"
+asset = '^mGBA-[\d.]+-appimage-x64\.appimage$'
+[install.macos]
+source = "github"
+repo = "mgba-emu/mgba"
+asset = '^mGBA-[\d.]+-macos\.dmg$'
+
+[display]
+fullscreen = ["--fullscreen"]
+
+[[profile]]
+name = "Nintendo Game Boy"
+platforms = ["nintendo_gb"]
+extensions = ["zip", "7z", "rar", "bin", "gb", "dmg"]
+args = ["{RomPath}"]
+requires = []
+
+[[profile]]
+name = "Nintendo Game Boy Color"
+platforms = ["nintendo_gbc"]
+extensions = ["zip", "7z", "rar", "bin", "gbc", "cgb", "sgb"]
+args = ["{RomPath}"]
+requires = []
+
+[[profile]]
+name = "Nintendo Game Boy Advance"
+platforms = ["nintendo_gba"]
+extensions = ["zip", "7z", "rar", "bin", "elf", "mb", "gba", "agb"]
+args = ["{RomPath}"]
+requires = []

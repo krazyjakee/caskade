@@ -1,0 +1,26 @@
+{
+  "installed": [
+    {
+      "appName": "1207658930",
+      "platform": "linux",
+      "install_path": "/home/fixture/Games/Heroic/Fixture GOG Native",
+      "executable": "",
+      "install_size": "12 MiB",
+      "is_dlc": false,
+      "version": "1.0"
+    },
+    {
+      "appName": "1207658931",
+      "platform": "linux",
+      "install_path": "/home/fixture/Games/Heroic/Fixture GOG Native",
+      "executable": "",
+      "is_dlc": true
+    },
+    {
+      "appName": "1207658924",
+      "title": "Fixture Adventure",
+      "install_path": "/home/fixture/Games/Fixture Adventure",
+      "platform": "windows"
+    }
+  ]
+}

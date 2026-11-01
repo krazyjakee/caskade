@@ -1,0 +1,31 @@
+schema_version = 1
+id = "inno60-sliced"
+title = "Fixture Game"
+layout = "unity"
+format = "inno"
+platform = "windows"
+input = "bin/windows/inno60-sliced/setup.exe"
+parts = ["bin/windows/inno60-sliced/setup.exe", "bin/windows/inno60-sliced/setup-1.bin", "bin/windows/inno60-sliced/setup-2.bin", "bin/windows/inno60-sliced/setup-3.bin"]
+tree = "windows/inno60-sliced.tree.json"
+launch_target = "FixtureGame.exe"
+
+[windows]
+builder = "ISCC"
+version = "6.0.5"
+features = ["SLICED"]
+native_generated = []
+
+[host.windows]
+outcome = "Installed"
+strategy = "RunSilent"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

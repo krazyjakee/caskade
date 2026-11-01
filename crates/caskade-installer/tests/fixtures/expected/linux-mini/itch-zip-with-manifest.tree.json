@@ -1,0 +1,35 @@
+[
+  {
+    "path": ".itch.toml",
+    "kind": "file",
+    "size": 98,
+    "sha256": "59df8730e0a663ed1e278ae8b9043d5026eb998816dbe0e9e3251e672bf4e0b5",
+    "executable": false
+  },
+  {
+    "path": "bin",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "bin/FixtureGame.x86_64",
+    "kind": "file",
+    "size": 304328,
+    "sha256": "d26f6098adc1a474ac48c3c4e5e71de918cf3a69f92829ba4a4f7755ceba22d3",
+    "executable": true
+  },
+  {
+    "path": "tools",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "tools/Editor.x86_64",
+    "kind": "file",
+    "size": 304328,
+    "sha256": "d26f6098adc1a474ac48c3c4e5e71de918cf3a69f92829ba4a4f7755ceba22d3",
+    "executable": true
+  }
+]

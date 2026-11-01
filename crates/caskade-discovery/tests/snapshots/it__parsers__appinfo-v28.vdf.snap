@@ -1,0 +1,189 @@
+---
+source: crates/caskade-discovery/tests/parsers.rs
+expression: info
+---
+{
+  "version": 40,
+  "universe": 1,
+  "apps": [
+    {
+      "app_id": 620,
+      "info_state": 2,
+      "last_updated": 1700000000,
+      "access_token": 0,
+      "text_sha1": [
+        188,
+        143,
+        57,
+        44,
+        18,
+        35,
+        155,
+        35,
+        56,
+        128,
+        165,
+        231,
+        203,
+        23,
+        144,
+        29,
+        254,
+        11,
+        71,
+        152
+      ],
+      "change_number": 1,
+      "binary_sha1": [
+        188,
+        143,
+        57,
+        44,
+        18,
+        35,
+        155,
+        35,
+        56,
+        128,
+        165,
+        231,
+        203,
+        23,
+        144,
+        29,
+        254,
+        11,
+        71,
+        152
+      ],
+      "data": {
+        "type": "object",
+        "value": [
+          [
+            "appinfo",
+            {
+              "type": "object",
+              "value": [
+                [
+                  "appid",
+                  {
+                    "type": "string",
+                    "value": "620"
+                  }
+                ],
+                [
+                  "common",
+                  {
+                    "type": "object",
+                    "value": [
+                      [
+                        "name",
+                        {
+                          "type": "string",
+                          "value": "Fixture Puzzle"
+                        }
+                      ],
+                      [
+                        "type",
+                        {
+                          "type": "string",
+                          "value": "Game"
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "app_id": 1493710,
+      "info_state": 2,
+      "last_updated": 1700000000,
+      "access_token": 0,
+      "text_sha1": [
+        96,
+        49,
+        113,
+        198,
+        250,
+        3,
+        145,
+        67,
+        14,
+        120,
+        249,
+        14,
+        122,
+        11,
+        112,
+        204,
+        232,
+        200,
+        28,
+        8
+      ],
+      "change_number": 1,
+      "binary_sha1": [
+        96,
+        49,
+        113,
+        198,
+        250,
+        3,
+        145,
+        67,
+        14,
+        120,
+        249,
+        14,
+        122,
+        11,
+        112,
+        204,
+        232,
+        200,
+        28,
+        8
+      ],
+      "data": {
+        "type": "object",
+        "value": [
+          [
+            "appinfo",
+            {
+              "type": "object",
+              "value": [
+                [
+                  "common",
+                  {
+                    "type": "object",
+                    "value": [
+                      [
+                        "name",
+                        {
+                          "type": "string",
+                          "value": "Fixture Runtime"
+                        }
+                      ],
+                      [
+                        "type",
+                        {
+                          "type": "string",
+                          "value": "Tool"
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              ]
+            }
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "DisplayName": "Fixture Adventure",
+  "AppName": "FixtureEpic",
+  "MainGameAppName": "FixtureEpic",
+  "InstallLocation": "C:\\Games\\Fixture Adventure",
+  "LaunchExecutable": "game.exe",
+  "LaunchCommand": "--offline",
+  "bIsIncompleteInstall": false,
+  "CatalogNamespace": "fixture-namespace",
+  "CatalogItemId": "fixture-item"
+}

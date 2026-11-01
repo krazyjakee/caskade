@@ -1,0 +1,149 @@
+{
+  "schema_version": 0,
+  "title": "Fixture Game",
+  "ids": {
+    "gog": "1234567890"
+  },
+  "source": {
+    "input": {
+      "type": "path",
+      "value": "downloads/fixture.tar.gz"
+    },
+    "final_url": null,
+    "checksum": "0eb3e36bfb24dcd9bb1d1bece1531216b59539a8fde17ee80224af0653c92aa3"
+  },
+  "plan": {
+    "schema_version": 1,
+    "input": {
+      "type": "path",
+      "value": "downloads/fixture.tar.gz"
+    },
+    "artifacts": [
+      {
+        "id": "source",
+        "path": "downloads/setup.zip",
+        "format": "zip",
+        "platform": {
+          "type": "linux"
+        },
+        "role": "installer",
+        "size": 123,
+        "facts": {},
+        "children": [
+          {
+            "id": "game",
+            "path": "bin/FixtureGame",
+            "format": "elf",
+            "platform": {
+              "type": "linux"
+            },
+            "role": "application",
+            "size": 4,
+            "facts": {},
+            "children": [],
+            "children_complete": true
+          }
+        ],
+        "children_complete": true
+      }
+    ],
+    "root_id": "root-fixture-0001",
+    "relative_dir": "Library/Fixture Game",
+    "candidate": {
+      "handler": "archive.zip",
+      "strategy": "extract",
+      "confidence": 1.0,
+      "fidelity": "exact",
+      "requires": {
+        "executes_code": false,
+        "runtime": null,
+        "may_prompt_elevation": false,
+        "interactive": false,
+        "est_disk_bytes": 12
+      },
+      "steps": [
+        {
+          "type": "extract",
+          "value": {
+            "from": "source",
+            "select": [],
+            "strip": null,
+            "to": "."
+          }
+        },
+        {
+          "type": "set_executable",
+          "value": {
+            "path": "bin/FixtureGame"
+          }
+        }
+      ],
+      "warnings": [
+        {
+          "code": "fixture",
+          "message": "Fixture metadata only",
+          "path": "data/config.ini"
+        }
+      ]
+    }
+  },
+  "handlers": {
+    "archive.zip": "0.1.0"
+  },
+  "files": [
+    {
+      "path": "bin/FixtureGame",
+      "size": 4,
+      "hash": "6ca5cab77e702c787b4c14b3d3bf26bad43da606be6eed04ab0b9720120ae081"
+    },
+    {
+      "path": "data/config.ini",
+      "size": 6,
+      "hash": null
+    },
+    {
+      "path": "data/café.txt",
+      "size": 2,
+      "hash": "2689367b205c16ce32ed4200942b8b8b1e262dfc70d9bc9fbc77c49699a4f1df"
+    }
+  ],
+  "launch_targets": [
+    {
+      "path": "bin/FixtureGame",
+      "args": [],
+      "working_dir": ".",
+      "env": {},
+      "runtime": {
+        "type": "native"
+      },
+      "score": 1.0,
+      "reason": "Fixture metadata"
+    }
+  ],
+  "runtime": {
+    "type": "native"
+  },
+  "uninstall_steps": [
+    {
+      "type": "run",
+      "value": {
+        "program": {
+          "type": "source",
+          "value": {
+            "type": "game",
+            "value": "bin/uninstall"
+          }
+        },
+        "args": [
+          "--uninstall"
+        ],
+        "env": {},
+        "runtime": {
+          "type": "native"
+        },
+        "timeout_secs": 30,
+        "expect": []
+      }
+    }
+  ]
+}

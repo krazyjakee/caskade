@@ -1,0 +1,154 @@
+name: installer-nightly
+on:
+  schedule:
+    - cron: '43 2 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: installer-nightly
+  cancel-in-progress: false
+jobs:
+  targets:
+    runs-on: caskade-linux
+    outputs:
+      targets: ${{ steps.discover.outputs.targets }}
+    steps:
+      - uses: https://github.com/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: master
+          persist-credentials: false
+      - id: discover
+        name: Discover every registered robustness target
+        run: |
+          python3 - <<'PYTHON'
+          import json, os, tomllib
+          from pathlib import Path
+          manifest = tomllib.loads(Path('crates/caskade-installer/fuzz/Cargo.toml').read_text())
+          targets = sorted(item['name'] for item in manifest['bin'])
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('targets=' + json.dumps(targets) + '\n')
+          PYTHON
+  fuzz:
+    needs: targets
+    runs-on: caskade-linux-native
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        target: ${{ fromJson(needs.targets.outputs.targets) }}
+    container:
+      image: caskade/installer-ci:1.93.0
+      volumes:
+        - /srv/caskade-cache:/caskade-cache:ro
+        # Trusted master only; corpus bytes are separate from executable tools.
+        - /srv/caskade-fuzz-corpora:/caskade-corpus:rw
+    steps:
+      - uses: https://github.com/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: master
+          persist-credentials: false
+      - name: Seed bounded job-local corpus from retained mutations and read-only seeds
+        run: |
+          python3 xtask/runner/fuzz-corpus.py /caskade-cache/fuzz/${{ matrix.target }} crates/caskade-installer/fuzz/corpus/${{ matrix.target }}
+          python3 xtask/runner/fuzz-corpus.py /caskade-corpus/${{ matrix.target }} crates/caskade-installer/fuzz/corpus/${{ matrix.target }}
+      - name: T8 ten-minute bounded robustness run
+        run: python3 crates/caskade-installer/fuzz/run.py ${{ matrix.target }} --seconds 600
+      - name: Retain bounded corpus for the next run
+        if: always()
+        run: python3 xtask/runner/fuzz-corpus.py crates/caskade-installer/fuzz/corpus/${{ matrix.target }} /caskade-corpus/${{ matrix.target }}
+      - name: Upload reports, corpus and run evidence
+        if: always()
+        uses: https://github.com/actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5
+        with:
+          name: installer-fuzz-${{ matrix.target }}-${{ github.run_id }}
+          path: |
+            crates/caskade-installer/fuzz/logs/**
+            crates/caskade-installer/fuzz/artifacts/**
+            crates/caskade-installer/fuzz/corpus/${{ matrix.target }}
+          retention-days: 14
+  performance:
+    runs-on: caskade-linux-native
+    timeout-minutes: 60
+    container:
+      image: caskade/installer-ci:1.93.0
+      volumes:
+        - /srv/caskade-cache:/caskade-cache:ro
+    env:
+      CARGO_TARGET_DIR: target
+      CASKADE_PERF_OUTPUT: ${{ github.workspace }}/target/performance
+    steps:
+      - uses: https://github.com/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: master
+          persist-credentials: false
+      - name: Provision SHA-verified official reference extractor
+        run: |
+          python3 scripts/7zz-download.py > sidecar.json
+          python3 -c "import json,os; d=json.load(open('sidecar.json')); f=open(os.environ['GITHUB_ENV'],'a'); f.write('CASKADE_7ZZ='+d['program']+'\n'); f.close()"
+      - name: T10 strict release gates, including 20-GiB probe and 10-GiB RSS
+        run: flock /tmp/caskade-heavy.lock cargo test -p caskade-installer --all-features --locked --release --test performance -- --ignored --nocapture --test-threads=1
+      - name: Criterion timing distributions for the same generated workloads
+        run: flock /tmp/caskade-heavy.lock cargo bench -p caskade-installer --all-features --locked --bench installer -- --noplot
+      - name: Upload performance measurements
+        if: always()
+        uses: https://github.com/actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5
+        with:
+          name: installer-performance-${{ github.run_id }}
+          path: |
+            target/performance/**
+            target/criterion/**
+            sidecar.json
+          retention-days: 30
+  scoreboard:
+    runs-on: caskade-linux-native
+    timeout-minutes: 90
+    container:
+      image: caskade/installer-ci:1.93.0
+      options: --privileged --tmpfs /caskade-move:rw,exec,nosuid,nodev,size=8g
+      volumes:
+        - /srv/caskade-cache:/caskade-cache:ro
+    env:
+      CASKADE_TEST_NATIVE: '1'
+      CASKADE_TEST_MOVE_ROOT: /caskade-move
+      CARGO_TARGET_DIR: target
+      DOCKER_HOST: unix:///tmp/caskade-docker.sock
+      INSTA_UPDATE: 'no'
+    steps:
+      - uses: https://github.com/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: master
+          persist-credentials: false
+      - name: Start private package-manager test daemon
+        run: |
+          dockerd --host "$DOCKER_HOST" --data-root /tmp/caskade-docker > /tmp/dockerd.log 2>&1 &
+          for attempt in $(seq 1 60); do docker info >/dev/null 2>&1 && break; sleep 1; done
+          docker info
+      - name: Provision SHA-verified official sidecar
+        run: |
+          python3 scripts/7zz-download.py > sidecar.json
+          python3 -c "import json,os; d=json.load(open('sidecar.json')); f=open(os.environ['GITHUB_ENV'],'a'); f.write('CASKADE_7ZZ='+d['program']+'\n'); f.close()"
+      - name: Restore cached umu, Steam Runtime and UMU-Proton into private XDG directories
+        run: python3 xtask/runner/prepare-proton.py --cache /caskade-cache --destination "$GITHUB_WORKSPACE/target/native-home/share" --evidence target/native-cache.json
+      - name: T7 Proton install, launch, registry self-check and own-uninstaller proof
+        run: python3 xtask/runner/native-profile.py --proton
+      - name: T7 and T9 complete serial native corpus, including isolated delegates
+        run: python3 xtask/runner/native-profile.py
+      - name: T9 measured per-mini scoreboard
+        if: always()
+        run: |
+          flock /tmp/caskade-heavy.lock cargo build -p caskade-installer --all-features --locked --bin caskade-install
+          python3 xtask/scoreboard/run.py --binary target/debug/caskade-install --seven-zip "$CASKADE_7ZZ" --native-junit target/native-junit.xml --output target/scoreboard
+      - name: Upload scoreboard and native evidence
+        if: always()
+        uses: https://github.com/actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5
+        with:
+          name: installer-scoreboard-${{ github.run_id }}
+          path: |
+            target/scoreboard/**
+            target/native-cache.json
+            target/proton-junit.xml
+            target/native-junit.xml
+            sidecar.json
+          retention-days: 30

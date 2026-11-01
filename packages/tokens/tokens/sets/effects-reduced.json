@@ -1,0 +1,10 @@
+{
+  "$description": "Appearance → Reduce effects: no blur, grid, scanlines or glows.",
+  "$extensions": { "dev.caskade.condition": { "selector": "[data-effects=\"reduced\"]" } },
+  "effect": {
+    "glass": { "blur": { "$value": "0px" } },
+    "grid": { "opacity": { "$value": 0 } },
+    "scanline": { "opacity": { "$value": 0 } },
+    "glow": { "strength": { "$value": 0 } }
+  }
+}

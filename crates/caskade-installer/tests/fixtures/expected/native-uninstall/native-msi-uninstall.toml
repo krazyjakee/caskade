@@ -1,0 +1,31 @@
+schema_version = 1
+id = "native-msi-uninstall"
+title = "Caskade Native MSI Fixture"
+layout = "unity"
+format = "msi"
+platform = "windows"
+input = "bin/native-uninstall/native-msi-uninstall/setup.msi"
+parts = ["bin/native-uninstall/native-msi-uninstall/setup.msi"]
+tree = "native-uninstall/native-msi-uninstall.tree.json"
+launch_target = "FixtureGame.exe"
+
+[windows]
+builder = "wixl"
+version = "0.103"
+features = ["native-uninstall", "registry", "ini"]
+native_generated = []
+
+[host.windows]
+outcome = "Installed"
+strategy = "RunSilent"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

@@ -1,0 +1,25 @@
+schema_version = 1
+id = "linux-tar-zst"
+title = "Fixture Game"
+layout = "linux"
+format = "tar.zst"
+platform = "linux"
+input = "bin/linux.tar.zst"
+parts = ["bin/linux.tar.zst"]
+tree = "linux-tar-zst.tree.json"
+launch_target = "start.sh"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.windows]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"

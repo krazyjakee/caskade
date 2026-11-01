@@ -1,0 +1,92 @@
+# nextest 0.9.114, pinned in the runner image/setup instructions.
+[test-groups.native]
+max-threads = 1
+
+[test-groups.network]
+max-threads = 1
+
+# Integration tests share one `it` binary per crate, so per-file filters match
+# the test path prefix (`test(/^file::/)`) rather than `binary(file)`.
+[profile.default]
+test-threads = 4
+retries = 0
+slow-timeout = { period = "60s", terminate-after = 3 }
+
+# Only downloads from real external services retry. Local wiremock tests do not.
+[[profile.default.overrides]]
+filter = 'test(/^packages_delegate::/) | test(/^fetch_resolvers_live::/) | test(proton_first_download)'
+test-group = 'network'
+retries = 2
+
+[profile.ci]
+fail-fast = false
+retries = 0
+
+[profile.ci.junit]
+path = "junit.xml"
+report-name = "installer"
+store-success-output = false
+store-failure-output = true
+
+# Invoke with CASKADE_TEST_NATIVE=1 and --run-ignored all. The dedicated nightly
+# performance job runs the 3 GiB T10 case, rather than every native run.
+[profile.native]
+fail-fast = false
+test-threads = 1
+retries = 0
+default-filter = 'not (test(three_gib_archive_keeps_peak_rss_below_256_mib) | binary(performance) | test(/^fetch_resolvers_live::/))'
+slow-timeout = { period = "120s", terminate-after = 10 }
+
+[profile.native.junit]
+path = "junit.xml"
+report-name = "installer-native"
+store-failure-output = true
+
+[[profile.native.overrides]]
+filter = 'all()'
+test-group = 'native'
+
+[[profile.native.overrides]]
+filter = 'test(/^packages_delegate::/) | test(/^fetch_resolvers_live::/) | test(proton_first_download)'
+retries = 2
+
+# Discovery profiles intentionally work with pinned nextest 0.9.114: custom
+# profiles inherit default settings without the newer `inherits` field.
+[test-groups.discovery-live]
+max-threads = 1
+
+[test-groups.discovery-network]
+max-threads = 1
+
+[profile.discovery-ci]
+fail-fast = false
+retries = 0
+default-filter = 'package(caskade-discovery)'
+
+[profile.discovery-ci.junit]
+path = "junit.xml"
+report-name = "discovery"
+store-success-output = false
+store-failure-output = true
+
+[profile.discovery-live]
+fail-fast = false
+test-threads = 1
+retries = 0
+default-filter = 'package(caskade-discovery)'
+slow-timeout = { period = "120s", terminate-after = 3 }
+
+[profile.discovery-live.junit]
+path = "junit.xml"
+report-name = "discovery-live"
+store-success-output = false
+store-failure-output = true
+
+[[profile.discovery-live.overrides]]
+filter = 'package(caskade-discovery) & test(live_network)'
+test-group = 'discovery-network'
+retries = 2
+
+[[profile.discovery-live.overrides]]
+filter = 'package(caskade-discovery)'
+test-group = 'discovery-live'

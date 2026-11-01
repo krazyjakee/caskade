@@ -1,0 +1,13 @@
+{
+  "gameId": "1207658924",
+  "name": "Fixture Adventure",
+  "playTasks": [
+    {
+      "isPrimary": true,
+      "type": "FileTask",
+      "path": "start.sh",
+      "arguments": "--name \"Fixture Adventure\"",
+      "workingDir": "."
+    }
+  ]
+}

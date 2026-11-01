@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Caskade Fixture Game
+Exec=/opt/caskade-fixture/start.sh --name FixtureGame
+Icon=/opt/caskade-fixture/icon.svg
+Path=/opt/caskade-fixture
+Categories=Game;

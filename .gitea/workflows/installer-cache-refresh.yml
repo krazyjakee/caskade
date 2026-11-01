@@ -1,0 +1,33 @@
+name: installer-cache-refresh
+# The only job allowed to write the runner's shared cache. User initiated;
+# always consumes the trusted default branch, never PR code.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: installer-cache-refresh
+  cancel-in-progress: false
+jobs:
+  refresh:
+    if: github.ref == 'refs/heads/master'
+    runs-on: caskade-linux-native
+    timeout-minutes: 30
+    container:
+      image: caskade/installer-ci:1.93.0
+      volumes:
+        - /srv/caskade-cache:/caskade-cache:rw
+    steps:
+      - uses: https://github.com/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: master
+          persist-credentials: false
+      - name: Refresh only SHA-verified sidecar packages
+        run: python3 scripts/7zz-download.py --output /caskade-cache/sidecars/7zip/26.05
+      - name: Refresh project-owned fuzz seeds
+        run: |
+          for target in crates/caskade-installer/fuzz/fuzz_targets/*.rs; do
+            python3 crates/caskade-installer/fuzz/seed.py "$(basename "$target" .rs)"
+          done
+          mkdir -p /caskade-cache/fuzz
+          cp -a crates/caskade-installer/fuzz/corpus/. /caskade-cache/fuzz/

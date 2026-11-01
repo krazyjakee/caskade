@@ -1,0 +1,12 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\Software\GOG.com\Games\1207658924]
+"gameID"="1207658924"
+"gameName"="Fixture Adventure"
+"path"="C:\\Games\\Fixture Adventure"
+"exe"="C:\\Games\\Fixture Adventure\\game.exe"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 620]
+"DisplayName"="Fixture Puzzle"
+"InstallLocation"="C:\\Games\\Fixture Puzzle"
+"UninstallString"="steam://uninstall/620"

@@ -1,0 +1,5 @@
+{ "page": 3, "totalProducts": 5, "totalPages": 3,
+  "products": [
+    { "id": 1207666393, "title": "Stardew Valley", "worksOn": { "Windows": true, "Mac": true, "Linux": true }, "isGame": true, "isMovie": false },
+    { "id": 1435848814, "title": "", "worksOn": { "Windows": true }, "isGame": true, "isMovie": false }
+  ] }

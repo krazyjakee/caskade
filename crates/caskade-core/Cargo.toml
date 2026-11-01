@@ -1,0 +1,101 @@
+[package]
+name = "caskade-core"
+version = "0.1.0"
+description = "Caskade's domain, library store, launch pipeline and hook bus (no Tauri dependency)"
+edition.workspace = true
+rust-version.workspace = true
+
+# `net` pulls in rustls/ring, which the macOS cross gate cannot build
+# without the Apple SDK; that gate runs with --no-default-features.
+# Integration tests are declared below, not discovered from tests/.
+autotests = false
+[features]
+default = ["net"]
+net = ["dep:reqwest", "dep:flate2", "dep:scraper", "caskade-installer/fetch", "caskade-installer/torrent"]
+
+[dependencies]
+caskade-jobs = { path = "../caskade-jobs" }
+# The core's gettext domain (#212): catalogs, lookups and the language.
+caskade-i18n = { path = "../caskade-i18n" }
+# Tracking hints, aliases and path normalisation (#108); no ring or SQLite.
+caskade-discovery = { path = "../caskade-discovery", default-features = false, features = ["windows-sources", "linux-sources", "macos-sources", "deep"] }
+caskade-installer = { path = "../caskade-installer", default-features = false, features = ["windows-formats", "linux-formats", "macos-formats", "disc"] }
+# Theme packages (#139): format, lint and compiler.
+caskade-theme = { path = "../caskade-theme" }
+# Dev themes (#140) are watched like dev plugins (#131); same pin.
+notify = { version = "8", default-features = false, features = ["macos_kqueue"] }
+thiserror = "2"
+tracing = "0.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+schemars = "1"
+specta = { version = "=2.0.0-rc.26", features = ["derive", "serde_json"] }
+directories = "6"
+# Emulator definitions (EMULATION-PLAN §3): TOML data and detection regexes.
+toml = "0.8"
+regex = "1"
+globset = "0.4"
+# Custom profile arguments typed as one string (§4).
+shlex = "2"
+# BIOS checks against the definitions' MD5s (#122).
+md5 = { package = "md-5", version = "0.10" }
+tokio = { version = "1", features = ["rt-multi-thread", "sync", "macros", "time", "process", "fs", "io-util"] }
+tokio-util = "0.7"
+async-trait = "0.1"
+# Game process tracking (#108); same pin as the installer. Disks and
+# networks for Settings → Statistics (#156).
+sysinfo = { version = "=0.38.4", default-features = false, features = ["system", "disk", "network"] }
+# Library store (#105): SQLx over bundled SQLite (one libsqlite3-sys with
+# discovery's rusqlite), UUIDv7 ids.
+sqlx = { version = "=0.9.0", default-features = false, features = ["runtime-tokio", "sqlite", "migrate", "macros", "json"] }
+uuid = { version = "1", features = ["v7", "serde"] }
+# Titles in the language's alphabetical order and accent-folded short
+# searches (#218); the ICU4X 2.4 crates url's idna already builds.
+icu_collator = "2.4"
+icu_locale_core = "2.4"
+icu_normalizer = "2.4"
+# Artwork cache (#106).
+image = { version = "=0.25.10", default-features = false, features = ["png", "jpeg", "webp", "ico"] }
+sha2 = "0.10"
+# Settings validation (#110), same pin as the installer; no HTTP or file
+# reference resolution.
+jsonschema = { version = "=0.60.1", default-features = false }
+cap-std = "4"
+fs2 = "0.4"
+url = "2"
+percent-encoding = "2"
+trash = { version = "=5.2.9", default-features = false, features = ["coinit_multithreaded"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream"], optional = true }
+# Gzip answers from the metadata server; the backend zip already uses.
+flate2 = { version = "1", default-features = false, features = ["rust_backend"], optional = true }
+# Web games' pages (WEB-GAMES-PLAN §4), same pin as the installer.
+scraper = { version = "0.29", default-features = false, optional = true }
+# Hasheous data dumps (zips of JSON), same pin as the installer.
+zip = { version = "=9.1.3", default-features = false, features = ["deflate"] }
+# RomM (#1): credentials in the OS keychain (Secret Service, Keychain,
+# Credential Manager) and download verification against RomM's hashes.
+keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service", "crypto-rust"] }
+sha1 = "0.10"
+crc32fast = "1"
+# Account PINs (#202): argon2id hashes; pure Rust, so it builds for every target.
+argon2 = { version = "0.5", features = ["std"] }
+# The add-on catalogue (#181): its signature (minisign, the updater's key
+# and the same crate the updater uses) and plugin API ranges.
+minisign-verify = "=0.3.0"
+semver = { version = "1", features = ["serde"] }
+
+[dev-dependencies]
+caskade-emulation-fixtures = { path = "../caskade-emulation-fixtures" }
+# The stale-template test runs extraction (tests/i18n.rs).
+caskade-i18n = { path = "../caskade-i18n", features = ["extract"] }
+insta = { version = "1", features = ["json"] }
+tempfile = "=3.27.0"
+wiremock = "0.6"
+
+[lints]
+workspace = true
+
+# One binary for the integration tests (tests/main.rs); see its header.
+[[test]]
+name = "it"
+path = "tests/main.rs"

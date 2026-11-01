@@ -1,0 +1,40 @@
+# SPDX-License-Identifier: MIT
+# Authored for Caskade from docs/research/emulator-sources.md (sources and
+# flags checked 2026-10-28).
+
+id = "mame"
+name = "MAME"
+website = "https://www.mamedev.org/"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^mame(?:64)?\\.exe$"
+locations = ["{ProgramFiles}/MAME", "C:/mame", "{UserHome}/scoop/apps/mame/current"]
+
+[detect.linux]
+executable = "^mame$"
+path = ["mame"]
+flatpak = "org.mamedev.MAME"
+
+[detect.macos]
+executable = "^mame$"
+path = ["mame"]
+
+# Windows: a self-extracting archive. Linux: Flathub. No macOS build here.
+[install.windows]
+source = "github"
+repo = "mamedev/mame"
+asset = '^mame\d+b_x64\.exe$'
+[install.linux]
+source = "flatpak"
+app = "org.mamedev.MAME"
+
+# MAME starts fullscreen unless told otherwise.
+[display]
+windowed = ["-window"]
+
+[[profile]]
+name = "Arcade"
+platforms = ["arcade"]
+extensions = ["zip", "7z", "chd"]
+args = ["-rompath", "{RomDir}", "-skip_gameinfo", "{RomNameNoExt}"]

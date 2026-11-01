@@ -1,0 +1,80 @@
+# SPDX-License-Identifier: MIT
+# Adapted from Playnite (c) 2020 Josef Nemec, commit 3e8abb241873e326e27c75b59dd0d2ea367698e3.
+# Source: source/Playnite/Emulation/Emulators/DuckStation/emulator.yaml
+# Windows rules/profiles ported with attribution; Linux/macOS rules by Caskade.
+# See ../THIRD-PARTY.md for the license and adaptation notes.
+
+
+id = "duckstation"
+name = "DuckStation"
+website = "https://github.com/stenzek/duckstation"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^duckstation(?:-qt)?(?:-x64)?(?:-ReleaseLTCG)?\\.exe$"
+locations = ["{ProgramFiles}/DuckStation", "{AppData}/DuckStation", "{UserHome}/AppData/Local/DuckStation", "{UserHome}/scoop/apps/duckstation/current", "C:/ProgramData/chocolatey/lib/duckstation/tools"]
+
+[detect.linux]
+executable = "^(?:duckstation\\-qt)$"
+path = ["duckstation-qt"]
+flatpak = "org.duckstation.DuckStation"
+appimage = "(?i)^DuckStation(?:[-_].*)?\\.AppImage$"
+locations = ["{UserHome}/Applications/DuckStation", "{UserHome}/Emulation/tools/duckstation", "{UserHome}/Emulation/tools/launchers", "/opt/duckstation"]
+
+[detect.macos]
+executable = "(?i)^(?:duckstation\\-qt|DuckStation)$"
+bundle = "com.github.stenzek.duckstation"
+path = ["duckstation-qt"]
+locations = ["/Applications/DuckStation.app/Contents/MacOS", "{UserHome}/Applications/DuckStation.app/Contents/MacOS"]
+
+# `data` is the emulator's settings folder, `bios` where it looks for BIOS
+# files (#122).
+[vars]
+data = "{UserHome}/Documents/DuckStation"
+bios = "{data}/bios"
+[vars.linux]
+data = "{UserHome}/.local/share/duckstation"
+[vars.linux.flatpak]
+data = "{UserHome}/.var/app/org.duckstation.DuckStation/data/duckstation"
+[vars.macos]
+data = "{AppSupport}/DuckStation"
+
+# The `latest` tag is re-published with every build. Flathub's package is
+# end-of-life, so Linux installs take the AppImage.
+[install.windows]
+source = "github"
+repo = "stenzek/duckstation"
+asset = '^duckstation-windows-x64-release\.zip$'
+rolling = true
+[install.linux]
+source = "github"
+repo = "stenzek/duckstation"
+asset = '^DuckStation-x64\.AppImage$'
+rolling = true
+[install.macos]
+source = "github"
+repo = "stenzek/duckstation"
+asset = '^duckstation-mac-release\.zip$'
+rolling = true
+
+[display]
+fullscreen = ["-fullscreen"]
+windowed = ["-nofullscreen"]
+
+[[setup]]
+ini = "{data}/settings.ini"
+section = "Main"
+key = "SetupWizardIncomplete"
+value = "false"
+[[setup]]
+ini = "{data}/settings.ini"
+section = "BIOS"
+key = "SearchDirectory"
+value = "{bios}"
+
+[[profile]]
+name = "Default"
+platforms = ["sony_playstation"]
+extensions = ["bin", "img", "exe", "chd", "psexe", "m3u", "cue", "pbp", "iso"]
+args = ["-batch", "--", "{RomPath}"]
+requires = []

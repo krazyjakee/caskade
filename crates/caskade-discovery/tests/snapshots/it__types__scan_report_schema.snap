@@ -1,0 +1,1398 @@
+---
+source: crates/caskade-discovery/tests/types.rs
+expression: schema_for!(ScanReport)
+---
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ScanReport",
+  "description": "The result of one scan.",
+  "type": "object",
+  "properties": {
+    "groups": {
+      "description": "Merged results, one group per game.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/GameGroup"
+      }
+    },
+    "launchers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/LauncherStatus"
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/SourceReport"
+      }
+    }
+  },
+  "required": [
+    "groups",
+    "launchers",
+    "sources"
+  ],
+  "$defs": {
+    "Artwork": {
+      "description": "A local image of a game.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/ArtworkKind"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "path"
+      ]
+    },
+    "ArtworkKind": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "logo"
+          ]
+        },
+        {
+          "description": "Portrait box art.",
+          "type": "string",
+          "const": "cover"
+        },
+        {
+          "description": "Landscape banner.",
+          "type": "string",
+          "const": "header"
+        },
+        {
+          "description": "Wide background.",
+          "type": "string",
+          "const": "hero"
+        }
+      ]
+    },
+    "Confidence": {
+      "description": "How sure the source is that this is an installed game.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "likely"
+          ]
+        },
+        {
+          "description": "The classifier's review list.",
+          "type": "string",
+          "const": "maybe"
+        },
+        {
+          "description": "A launcher's own record.",
+          "type": "string",
+          "const": "certain"
+        }
+      ]
+    },
+    "DetectedGame": {
+      "description": "One game as one source reports it.",
+      "type": "object",
+      "properties": {
+        "artwork": {
+          "description": "Local cover, header, hero and logo images.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Artwork"
+          }
+        },
+        "confidence": {
+          "$ref": "#/$defs/Confidence"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          }
+        },
+        "icon": {
+          "description": "A local icon file.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExternalId"
+          }
+        },
+        "install_dir": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "key": {
+          "description": "Stable within the source: app id, registry key, file path, …",
+          "type": "string"
+        },
+        "last_played_unix": {
+          "description": "Last played, in seconds since the Unix epoch.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "launch": {
+          "description": "Ways to launch, best first.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LaunchTarget"
+          }
+        },
+        "playtime_secs": {
+          "description": "Total playtime in seconds.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "runtime": {
+          "$ref": "#/$defs/GameRuntime"
+        },
+        "size": {
+          "description": "Bytes on disk.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "source": {
+          "$ref": "#/$defs/SourceId"
+        },
+        "state": {
+          "$ref": "#/$defs/InstallState"
+        },
+        "title": {
+          "type": "string"
+        },
+        "tracking": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TrackingHint"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "uninstall": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UninstallInfo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "source",
+        "key",
+        "title",
+        "ids",
+        "launch",
+        "runtime",
+        "state",
+        "artwork",
+        "confidence",
+        "evidence"
+      ]
+    },
+    "Evidence": {
+      "description": "Why a result was reported.",
+      "oneOf": [
+        {
+          "description": "A file the source read.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "file"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "description": "A registry key, and the value within it when one decided.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "registry"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "key"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "description": "A classifier rule and its score contribution.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "rule"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "rule": {
+                  "type": "string"
+                },
+                "score": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              "required": [
+                "rule",
+                "score"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        }
+      ]
+    },
+    "ExternalId": {
+      "description": "A store or launcher identifier for a game. `Display` and `FromStr` give a\nstable string form (`steam:620`, `gog:1207658924`,\n`epic:<namespace>:<catalog item>:<app name>`, `xbox:<pfn>`, …) for\n`GameEntry.external_id`. Within a component, `%` and `:` are written as\n`%25` and `%3A`; numbers have no sign or leading zeros.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "steam"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "app_id": {
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "app_id"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "description": "A non-Steam shortcut's computed app id.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "steam_shortcut"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "app_id": {
+                  "type": "integer",
+                  "format": "uint32",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "app_id"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "gog"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "product_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "product_id"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "epic"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "app_name": {
+                  "type": "string"
+                },
+                "catalog_item": {
+                  "type": "string"
+                },
+                "namespace": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "namespace",
+                "catalog_item",
+                "app_name"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "itch"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "game_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "game_id"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "amazon"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "ubisoft"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "battle_net"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "code"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "ea"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "offer": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "offer"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "xbox"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "pfn": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "pfn"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "description": "A Microsoft Store product id (e.g. `9NBLGGH4R315`).",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "microsoft_store"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "store_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "store_id"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "riot"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "product": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "product"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "rockstar"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "title"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "lutris"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "slug": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "slug"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        }
+      ]
+    },
+    "GameGroup": {
+      "description": "One game reported by one or more sources.",
+      "type": "object",
+      "properties": {
+        "entries": {
+          "description": "One entry per source that reported the game.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DetectedGame"
+          }
+        },
+        "primary": {
+          "description": "Index into `entries`, chosen by source priority.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "primary",
+        "entries"
+      ]
+    },
+    "GameRuntime": {
+      "description": "What the game runs on.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "native"
+            }
+          },
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "A Windows game, on Windows itself or in a Wine-family prefix.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "windows"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "prefix": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/Prefix"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "runner": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/RunnerHint"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        }
+      ]
+    },
+    "InstallState": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "installed"
+            }
+          },
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "updating"
+            }
+          },
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "description": "Downloaded or installed in part.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "partial"
+            }
+          },
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "broken"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "reason"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        }
+      ]
+    },
+    "LaunchTarget": {
+      "description": "How to start a game.",
+      "oneOf": [
+        {
+          "description": "A launcher URI such as `steam://rungameid/620`.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "uri"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "uri": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "uri"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "description": "A program with an explicit argv; never run through a shell.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "exec"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "cwd": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "env": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "program": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "program",
+                "args",
+                "env"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "flatpak"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "app_id": {
+                  "type": "string"
+                },
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "app_id",
+                "args"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        }
+      ]
+    },
+    "LauncherKind": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "native"
+            }
+          },
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "flatpak"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "app_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "app_id"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "snap"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "description": "A Windows launcher inside a Wine-family prefix.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "wine"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "prefix": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "prefix"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        }
+      ]
+    },
+    "LauncherStatus": {
+      "description": "One install of a launcher, or a launcher that was looked for and not found.",
+      "type": "object",
+      "properties": {
+        "data_dir": {
+          "description": "The launcher's data or config directory that sources read.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "found": {
+          "type": "boolean"
+        },
+        "kind": {
+          "description": "`None` when not found.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LauncherKind"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "path": {
+          "description": "The executable, bundle or install directory.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source": {
+          "$ref": "#/$defs/SourceId"
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "source",
+        "found"
+      ]
+    },
+    "Prefix": {
+      "description": "A Wine-family prefix and the launcher that owns it, if any.",
+      "type": "object",
+      "properties": {
+        "arch": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrefixArch"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "owner": {
+          "description": "The source that manages the prefix (`\"lutris\"`, `\"bottles\"`, …).",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ]
+    },
+    "PrefixArch": {
+      "type": "string",
+      "enum": [
+        "win32",
+        "win64"
+      ]
+    },
+    "RunnerHint": {
+      "description": "The compatibility tool a source recorded for a Windows game.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/RunnerKind"
+        },
+        "name": {
+          "description": "As the source names it, e.g. `GE-Proton10-34` or `wine-ge-8-26`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "RunnerKind": {
+      "type": "string",
+      "enum": [
+        "wine",
+        "proton",
+        "umu",
+        "cross_over",
+        "other"
+      ]
+    },
+    "SourceError": {
+      "description": "Why a source returned no games. It never fails the scan.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "io"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path",
+                "message"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "parse"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path",
+                "message"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "registry"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "message"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "cancelled"
+            }
+          },
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "timed_out"
+            }
+          },
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "panicked"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "message"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "other"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "message"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        }
+      ]
+    },
+    "SourceId": {
+      "description": "Identifies a source: `\"steam\"`, `\"heroic.gog\"`, `\"windows.uninstall\"`, …",
+      "type": "string"
+    },
+    "SourceReport": {
+      "description": "How one source did during a scan.",
+      "type": "object",
+      "properties": {
+        "count": {
+          "description": "Games the source returned.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "duration_ms": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceError"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source": {
+          "$ref": "#/$defs/SourceId"
+        },
+        "warnings": {
+          "description": "Unknown fields, newer format versions, skipped records, …",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "source",
+        "duration_ms",
+        "count",
+        "warnings"
+      ]
+    },
+    "TrackingHint": {
+      "description": "Hints for M2 process tracking.",
+      "type": "object",
+      "properties": {
+        "exe_names": {
+          "description": "Executable file names a launcher spawns for this game.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "install_dir": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "steam_app_id": {
+          "description": "Steam's reaper and `SteamAppId` carry it.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "exe_names"
+      ]
+    },
+    "UninstallInfo": {
+      "description": "How to uninstall the game through its owner; discovery never runs it.",
+      "type": "object",
+      "properties": {
+        "quiet": {
+          "description": "An unattended variant (`QuietUninstallString`).",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LaunchTarget"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "registry_key": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "target": {
+          "$ref": "#/$defs/LaunchTarget"
+        }
+      },
+      "required": [
+        "target"
+      ]
+    }
+  }
+}

@@ -1,0 +1,117 @@
+[package]
+name = "caskade-installer-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+caskade-installer = { path = "..", default-features = false, features = ["windows-formats", "linux-formats", "macos-formats", "fetch"] }
+
+[[bin]]
+name = "pe"
+path = "fuzz_targets/pe.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "probe"
+path = "fuzz_targets/probe.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "archive_listing"
+path = "fuzz_targets/archive_listing.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "content_disposition"
+path = "fuzz_targets/content_disposition.rs"
+test = false
+doc = false
+bench = false
+
+[workspace]
+
+# Same vendored patches as the product workspace (root patches do not apply here).
+[patch.crates-io]
+inno = { path = "../../../vendor/inno-0.7.1" }
+innospect = { path = "../../../vendor/innospect-0.2.0" }
+
+[[bin]]
+name = "makeself_header"
+path = "fuzz_targets/makeself_header.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "appimage"
+path = "fuzz_targets/appimage.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "inno"
+path = "fuzz_targets/inno.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "msi"
+path = "fuzz_targets/msi.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "deb"
+path = "fuzz_targets/deb.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "rpm"
+path = "fuzz_targets/rpm.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "nsis"
+path = "fuzz_targets/nsis.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "pkg"
+path = "fuzz_targets/pkg.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "dmg"
+path = "fuzz_targets/dmg.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "burn"
+path = "fuzz_targets/burn.rs"
+test = false
+doc = false
+bench = false

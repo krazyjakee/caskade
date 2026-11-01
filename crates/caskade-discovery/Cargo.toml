@@ -1,0 +1,86 @@
+[package]
+name = "caskade-discovery"
+version = "0.1.0"
+description = "Finds games already installed by launchers, stores and the OS"
+edition.workspace = true
+rust-version.workspace = true
+
+# Every source parser compiles on every host; the OS-family features only trim
+# the build. `sqlite` bundles a C build, so the macOS cross gate leaves it off.
+# Integration tests are declared below, not discovered from tests/.
+autotests = false
+[features]
+default = ["windows-sources", "linux-sources", "macos-sources", "deep", "watch", "sqlite"]
+windows-sources = []
+linux-sources = []
+macos-sources = []
+deep = ["caskade-installer/linux-formats"]
+watch = ["dep:notify"]
+sqlite = ["dep:rusqlite"]
+cli = ["dep:clap", "dep:tracing-subscriber"]
+
+[dependencies]
+caskade-jobs = { path = "../caskade-jobs" }
+caskade-installer = { path = "../caskade-installer", default-features = false }
+thiserror = "2"
+tracing = "0.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+schemars = "1"
+specta = { version = "=2.0.0-rc.26", features = ["derive", "serde_json"] }
+toml = "0.8"
+globset = "0.4"
+# Xbox PublisherID → package family name (#89).
+sha2 = "0.10"
+# itch receipts (.itch/receipt.json.gz, #94); pure-Rust backend.
+flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
+# Capability-scoped folder walks for the classifier (#79).
+cap-std = "4"
+url = "2"
+percent-encoding = "2"
+# Lutris game YAML (#76); pure Rust.
+serde_yaml_ng = "=0.10.0"
+tempfile = "=3.27.0"
+steamlocate = "2.1.1"
+keyvalues-parser = "0.2.4"
+# pest 2.9 (via keyvalues-parser) pulls stacker/psm, a C build the macOS
+# cross gate cannot link; 2.8 has no stack guard.
+pest = "=2.8.6"
+pest_derive = "=2.8.6"
+plist = "1"
+quick-xml = "0.42"
+prost = "0.14"
+encoding_rs = "0.8"
+# Recomputes appinfo.vdf hashes after anonymising a dump (#70).
+sha1 = "0.10.6"
+directories = "6"
+sysinfo = { version = "=0.38.4", default-features = false, features = ["disk"] }
+notify = { version = "8", default-features = false, features = ["macos_kqueue"], optional = true }
+rusqlite = { version = "0.39", features = ["bundled", "hooks", "limits"], optional = true }
+clap = { version = "4", features = ["derive"], optional = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter"], optional = true }
+
+[target.'cfg(windows)'.dependencies]
+# Live registry reads (#66), same pin as the installer.
+winreg = { version = "=0.56.0", default-features = false }
+
+[dev-dependencies]
+insta = { version = "1", features = ["json"] }
+proptest = "1"
+
+[[bin]]
+name = "caskade-discovery"
+path = "src/bin/caskade-discovery.rs"
+required-features = ["cli"]
+
+[lints]
+workspace = true
+
+# One binary for the integration tests (tests/main.rs); see its header.
+[[test]]
+name = "it"
+path = "tests/main.rs"
+
+[[test]]
+name = "performance"
+path = "tests/performance.rs"

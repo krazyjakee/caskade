@@ -1,0 +1,22 @@
+{
+  "name": "@caskade/tokens",
+  "version": "0.1.0",
+  "description": "Caskade's design token contract as W3C Design Tokens (DTCG) JSON, compiled to --cs-* CSS custom properties.",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.css": "./tokens.css",
+    "./manifest.json": "./manifest.json"
+  },
+  "scripts": {
+    "build": "node scripts/build.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/build.ts --check && vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

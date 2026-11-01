@@ -1,0 +1,487 @@
+name: release
+# Builds Caskade from a `v*` tag for Linux, Windows and macOS, and uploads the
+# bundles, their updater signatures and `latest.json` to a draft GitHub
+# release. The build legs run with a read-only token and never see the
+# updater signing key: build scripts, proc-macros and npm packages run there.
+# Only the `sign` job holds the key, and it runs nothing but the pinned Tauri
+# CLI's `signer sign` on the legs' artifacts. Publishing the draft by hand is
+# what ships it: the in-app updater
+# reads releases/latest/download/latest.json, and releases/latest skips
+# drafts. This runs only on GitHub Actions (Gitea runs .gitea/workflows/ and
+# ignores this folder). See docs/RELEASING.md.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to build again, e.g. v0.1.0 (it must already be pushed)
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Everything that can fail without a build: the secrets, the key and its
+  # password, the versions. Then the draft release the sign job uploads to.
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release-id: ${{ steps.release.outputs.id }}
+    steps:
+      - name: Updater signing secrets are set
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          missing=""
+          [ -n "$TAURI_SIGNING_PRIVATE_KEY" ] || missing="$missing TAURI_SIGNING_PRIVATE_KEY"
+          [ -n "$TAURI_SIGNING_PRIVATE_KEY_PASSWORD" ] || missing="$missing TAURI_SIGNING_PRIVATE_KEY_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::error title=Updater signing secrets missing::Set the repository secret(s)$missing (Settings > Secrets and variables > Actions). Without them the bundles can't be signed for the in-app updater. See docs/RELEASING.md, One-time setup."
+            exit 1
+          fi
+
+      - name: Tag is vX.Y.Z
+        run: |
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error title=Bad tag::'$TAG' is not a release tag: use vX.Y.Z or vX.Y.Z-suffix."
+            exit 1
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          persist-credentials: false
+
+      - name: Tag matches the app's version
+        id: version
+        run: |
+          python3 - <<'PY'
+          import json, os, sys, tomllib
+
+          tag = os.environ["TAG"]
+          version = tag[1:]
+          app = "apps/desktop"
+          found = {
+              f"{app}/src-tauri/tauri.conf.json": json.load(open(f"{app}/src-tauri/tauri.conf.json"))["version"],
+              f"{app}/src-tauri/Cargo.toml": tomllib.load(open(f"{app}/src-tauri/Cargo.toml", "rb"))["package"]["version"],
+              "Cargo.lock (caskade-desktop)": next(
+                  p["version"]
+                  for p in tomllib.load(open("Cargo.lock", "rb"))["package"]
+                  if p["name"] == "caskade-desktop"
+              ),
+          }
+          package = json.load(open(f"{app}/package.json"))
+          if "version" in package:
+              found[f"{app}/package.json"] = package["version"]
+          wrong = {path: v for path, v in found.items() if v != version}
+          for path, v in wrong.items():
+              print(f"::error file={path.split(' ')[0]},title=Version mismatch::{path} says {v}, the tag {tag} says {version}")
+          if wrong:
+              print("Bump every version listed above (docs/RELEASING.md, Cutting a release), then tag again.")
+              sys.exit(1)
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"version={version}\n")
+          print(f"{tag}: version {version} everywhere")
+          PY
+
+      # Signs a scratch file with the secret key, then checks that the
+      # signature's key id is the committed public key's. A wrong password or
+      # a key from another pair fails here instead of after four builds.
+      - name: Signing key works and matches the committed public key
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          cli=$(sed -nE "s/^  '@tauri-apps\/cli@([0-9][^'(]*)':.*/\1/p" pnpm-lock.yaml | head -n1)
+          if [ -z "$cli" ]; then
+            echo "::error::Can't find @tauri-apps/cli's version in pnpm-lock.yaml."
+            exit 1
+          fi
+          probe="$RUNNER_TEMP/signing-probe"
+          echo "caskade $TAG" > "$probe"
+          if ! npx --yes "@tauri-apps/cli@$cli" signer sign "$probe" > /dev/null; then
+            echo "::error title=Signing failed::The TAURI_SIGNING_PRIVATE_KEY secret isn't a Tauri private key, or TAURI_SIGNING_PRIVATE_KEY_PASSWORD isn't its password."
+            exit 1
+          fi
+          python3 - "$probe.sig" <<'PY'
+          import base64, json, sys
+
+          def key_id(wrapped):
+              # Tauri stores minisign keys and signatures base64-encoded; the
+              # second line holds the algorithm (2 bytes) then the key id (8).
+              return base64.b64decode(base64.b64decode(wrapped).decode().splitlines()[1])[2:10]
+
+          conf = "apps/desktop/src-tauri/tauri.conf.json"
+          pubkey = json.load(open(conf)).get("plugins", {}).get("updater", {}).get("pubkey")
+          if not pubkey:
+              print(f"::error file={conf},title=No updater public key::plugins.updater.pubkey is missing in {conf}.")
+              sys.exit(1)
+          signed, committed = key_id(open(sys.argv[1]).read()), key_id(pubkey)
+          if signed != committed:
+              print(
+                  f"::error title=Wrong signing key::The secret key (id {signed[::-1].hex().upper()}) is not the pair of "
+                  f"the public key in {conf} (id {committed[::-1].hex().upper()}). Installed copies would reject the update."
+              )
+              sys.exit(1)
+          print(f"Signing key {committed[::-1].hex().upper()} matches {conf}")
+          PY
+
+      # The draft, made before the builds, so a refused tag (a published
+      # release) stops the run before anything builds.
+      - name: Draft release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          existing=$(gh api "repos/$REPO/releases?per_page=100" --paginate \
+            --jq ".[] | select(.tag_name == \"$TAG\") | \"\(.id) \(.draft)\"" | head -n1)
+          if [ -n "$existing" ]; then
+            read -r id draft <<< "$existing"
+            if [ "$draft" != "true" ]; then
+              echo "::error title=Already published::The release for $TAG is published. Don't replace a published release's files: bump the version and tag again."
+              exit 1
+            fi
+            echo "Uploading to the existing draft for $TAG (id $id)"
+          else
+            prerelease=false
+            [[ "$VERSION" == *-* ]] && prerelease=true
+            body=$(cat <<'BODY'
+          Which file to download:
+
+          - Windows: `Caskade_@VERSION@_x64-setup.exe`
+          - macOS: `Caskade_@VERSION@_aarch64.dmg` (Apple silicon) or `Caskade_@VERSION@_x64.dmg` (Intel)
+          - Linux: `Caskade_@VERSION@_amd64.AppImage`, or `Caskade_@VERSION@_amd64.deb` for Debian and Ubuntu
+
+          The Windows install, the macOS app and the AppImage update themselves from inside Caskade. The .deb doesn't: install the next .deb over it.
+
+          These builds aren't code-signed yet. On Windows, SmartScreen warns about an unknown publisher: choose More info, then Run anyway. On macOS, Gatekeeper blocks the first start: run `xattr -dr com.apple.quarantine /Applications/Caskade.app` in Terminal, or allow it under System Settings > Privacy & Security.
+          BODY
+            )
+            body=${body//@VERSION@/$VERSION}
+            id=$(gh api "repos/$REPO/releases" \
+              -f tag_name="$TAG" -f name="Caskade $VERSION" -f body="$body" \
+              -F draft=true -F prerelease="$prerelease" --jq .id)
+            echo "Created a draft release for $TAG (id $id)"
+          fi
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: build (${{ matrix.target }})
+    needs: prepare
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    # Read-only, and no signing secrets in any step: everything this job runs
+    # comes from dependencies.
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # 22.04 for an old enough glibc: the AppImage runs on the glibc it
+          # was built against and newer.
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os: macos-latest
+            target: aarch64-apple-darwin
+          - os: macos-latest
+            target: x86_64-apple-darwin
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          persist-credentials: false
+
+      # WebKitGTK 4.1 and GTK for Tauri, librsvg for the AppImage's GTK
+      # plugin, AppIndicator for the tray icon (the CLI finds it through
+      # pkg-config), libudev for gilrs, D-Bus for the keyring.
+      - name: Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential pkg-config file patchelf \
+            libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libxdo-dev libssl-dev \
+            libayatana-appindicator3-dev libudev-dev libdbus-1-dev
+
+      - name: Rust toolchain
+        shell: bash
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          rustup toolchain install stable --profile minimal --target "$TARGET"
+          rustup default stable
+          rustc -Vv
+
+      # pnpm's version comes from `packageManager` in package.json.
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The committed config leaves createUpdaterArtifacts off, so local and
+      # Gitea builds need no key. A file rather than inline JSON, so no
+      # shell on any runner has to keep the quotes. With it on, the bundler
+      # also makes macOS's updater bundle (Caskade.app.tar.gz); --no-sign
+      # below leaves the signatures to the sign job.
+      - name: Turn on updater artifacts
+        shell: bash
+        run: echo '{"bundle":{"createUpdaterArtifacts":true}}' > apps/desktop/updater-artifacts.conf.json
+
+      # Builds through beforeBuildCommand (the 7-Zip sidecar for the target,
+      # then the UI). No key here: --no-sign skips the updater signatures.
+      - name: Build
+        working-directory: apps/desktop
+        run: pnpm tauri build --target ${{ matrix.target }} --config updater-artifacts.conf.json --no-sign -- --locked
+
+      # The files the release carries, under their release names. Tauri calls
+      # macOS's updater bundle Caskade.app.tar.gz on both architectures, so it
+      # gets the version and architecture the dmg has.
+      - name: Collect the bundles
+        shell: bash
+        env:
+          TARGET: ${{ matrix.target }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          shopt -s nullglob
+          bundle="target/$TARGET/release/bundle"
+          out="$RUNNER_TEMP/bundles"
+          mkdir -p "$out"
+          case "$TARGET" in
+            *-linux-*) files=("$bundle"/deb/*.deb "$bundle"/appimage/*.AppImage) want=2 ;;
+            *-windows-*) files=("$bundle"/nsis/*-setup.exe) want=1 ;;
+            *-apple-darwin)
+              files=("$bundle"/dmg/*.dmg) want=2
+              arch=${TARGET%%-*}
+              [ "$arch" = x86_64 ] && arch=x64
+              for tarball in "$bundle"/macos/*.app.tar.gz; do
+                cp "$tarball" "$out/$(basename "$tarball" .app.tar.gz)_${VERSION}_${arch}.app.tar.gz"
+              done
+              ;;
+          esac
+          [ ${#files[@]} -gt 0 ] && cp "${files[@]}" "$out/"
+          ls -l "$out"
+          found=$(( $(ls "$out" | wc -l) ))
+          if [ "$found" -ne "$want" ]; then
+            echo "::error title=Missing bundles::Expected $want release files for $TARGET under $bundle, found $found."
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bundles-${{ matrix.target }}
+          path: ${{ runner.temp }}/bundles
+          if-no-files-found: error
+          retention-days: 7
+
+  # The only job with the signing key. It runs no project code: it signs the
+  # legs' updater bundles with the Tauri CLI version pinned in pnpm-lock.yaml,
+  # writes latest.json and uploads everything to the draft in one go.
+  sign:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          persist-credentials: false
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: bundles-*
+          path: ${{ runner.temp }}/release
+          merge-multiple: true
+
+      # --app-version binds each signature to the version, as `tauri build`
+      # does: the app's updater config has requireSignedVersion on.
+      - name: Sign the updater bundles
+        working-directory: ${{ runner.temp }}/release
+        env:
+          LOCKFILE: ${{ github.workspace }}/pnpm-lock.yaml
+          VERSION: ${{ needs.prepare.outputs.version }}
+          NPM_CONFIG_IGNORE_SCRIPTS: "true"
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          cli=$(sed -nE "s/^  '@tauri-apps\/cli@([0-9][^'(]*)':.*/\1/p" "$LOCKFILE" | head -n1)
+          if [ -z "$cli" ]; then
+            echo "::error::Can't find @tauri-apps/cli's version in pnpm-lock.yaml."
+            exit 1
+          fi
+          shopt -s nullglob
+          for file in *.AppImage *.deb *-setup.exe *.app.tar.gz; do
+            npx --yes "@tauri-apps/cli@$cli" signer sign --app-version "$VERSION" "$file" > /dev/null
+            echo "Signed $file"
+          done
+
+      # The same entries tauri-action wrote: the plain platform key, which the
+      # updater falls back to, and one per bundle type. Windows prefers NSIS.
+      - name: Write latest.json
+        working-directory: ${{ runner.temp }}/release
+        env:
+          REPO: ${{ github.repository }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          python3 - <<'PY'
+          import glob, json, os, sys
+          from datetime import datetime, timezone
+          from urllib.parse import quote
+
+          repo, tag, version = (os.environ[k] for k in ("REPO", "TAG", "VERSION"))
+
+          def one(pattern):
+              found = glob.glob(pattern)
+              if len(found) != 1:
+                  print(f"::error title=latest.json::Expected one {pattern}, found {found}")
+                  sys.exit(1)
+              return found[0]
+
+          def entry(pattern):
+              name = one(pattern)
+              return {
+                  "signature": open(f"{name}.sig").read(),
+                  "url": f"https://github.com/{repo}/releases/download/{tag}/{quote(name)}",
+              }
+
+          appimage, deb, nsis = entry("*.AppImage"), entry("*.deb"), entry("*-setup.exe")
+          mac_arm, mac_x64 = entry("*_aarch64.app.tar.gz"), entry("*_x64.app.tar.gz")
+          manifest = {
+              "version": version,
+              "notes": "",
+              "pub_date": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+              "platforms": {
+                  "linux-x86_64": appimage,
+                  "linux-x86_64-appimage": appimage,
+                  "linux-x86_64-deb": deb,
+                  "windows-x86_64": nsis,
+                  "windows-x86_64-nsis": nsis,
+                  "darwin-aarch64": mac_arm,
+                  "darwin-aarch64-app": mac_arm,
+                  "darwin-x86_64": mac_x64,
+                  "darwin-x86_64-app": mac_x64,
+              },
+          }
+          with open("latest.json", "w") as out:
+              json.dump(manifest, out, indent=2)
+          PY
+          ls -l
+
+      # --clobber replaces files of the same name, so a re-run of the
+      # workflow for the same tag refreshes the draft.
+      - name: Upload to the draft release
+        working-directory: ${{ runner.temp }}/release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: gh release upload "$TAG" --repo "$REPO" --clobber ./*
+
+  # Reads the draft back as installed copies will: latest.json lists every
+  # platform, and each entry points at a file on the release whose .sig it
+  # carries, signed with the committed key. Check it before anyone publishes.
+  verify:
+    needs: [prepare, sign]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          persist-credentials: false
+
+      - name: latest.json lists every platform, signed with the committed key
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          RELEASE_ID: ${{ needs.prepare.outputs.release-id }}
+        run: |
+          python3 - <<'PY'
+          import base64, json, os, subprocess, sys
+          from urllib.parse import unquote
+
+          repo, tag, version, release = (os.environ[k] for k in ("REPO", "TAG", "VERSION", "RELEASE_ID"))
+
+          def gh(*args):
+              return subprocess.run(["gh", "api", *args], check=True, capture_output=True).stdout
+
+          def download(name):
+              return gh("-H", "Accept: application/octet-stream", f"repos/{repo}/releases/assets/{assets[name]}")
+
+          def key_id(wrapped):
+              return base64.b64decode(base64.b64decode(wrapped).decode().splitlines()[1])[2:10]
+
+          assets = dict(
+              reversed(line.split("\t", 1))
+              for line in gh(f"repos/{repo}/releases/{release}/assets?per_page=100", "--paginate",
+                             "--jq", ".[] | [(.id | tostring), .name] | @tsv").decode().splitlines()
+          )
+          if "latest.json" not in assets:
+              print("::error title=No latest.json::The draft has no latest.json: see the sign job's log.")
+              sys.exit(1)
+          manifest = json.loads(download("latest.json"))
+          pubkey = key_id(json.load(open("apps/desktop/src-tauri/tauri.conf.json"))["plugins"]["updater"]["pubkey"])
+          prefix = f"https://github.com/{repo}/releases/download/{tag}/"
+          expected = {
+              "linux-x86_64": ".AppImage",
+              "windows-x86_64": "-setup.exe",
+              "darwin-aarch64": ".app.tar.gz",
+              "darwin-x86_64": ".app.tar.gz",
+          }
+          errors, rows = [], []
+          if manifest.get("version") != version:
+              errors.append(f"latest.json says version {manifest.get('version')}, the tag {tag}")
+          platforms = manifest.get("platforms", {})
+          for platform, suffix in expected.items():
+              entry = platforms.get(platform)
+              if not entry:
+                  errors.append(f"{platform} is missing from latest.json: see the sign job's log")
+                  continue
+              url, signature = entry.get("url", ""), entry.get("signature", "")
+              name = unquote(url[len(prefix):]) if url.startswith(prefix) else ""
+              if not name or "/" in name or not name.endswith(suffix) or name not in assets:
+                  errors.append(f"{platform}: {url} is not a {suffix} on this release")
+                  continue
+              if f"{name}.sig" not in assets or download(f"{name}.sig").decode().strip() != signature.strip():
+                  errors.append(f"{platform}: the signature isn't {name}.sig's")
+              elif key_id(signature) != pubkey:
+                  errors.append(f"{platform}: signed with another key than tauri.conf.json's")
+              rows.append(f"| `{platform}` | `{name}` |")
+          mac = [platforms[p]["url"] for p in ("darwin-aarch64", "darwin-x86_64") if p in platforms]
+          if len(mac) == 2 and mac[0] == mac[1]:
+              errors.append("darwin-aarch64 and darwin-x86_64 point at the same file")
+          for error in errors:
+              print(f"::error title=latest.json::{error}")
+          html = json.loads(gh(f"repos/{repo}/releases/{release}"))["html_url"]
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+              summary.write(f"## Caskade {version}\n\nDraft: {html}\n\n| Updater platform | File |\n| --- | --- |\n")
+              summary.write("\n".join(rows) + "\n")
+              summary.write(f"\nOther entries in latest.json: {', '.join(sorted(set(platforms) - set(expected))) or 'none'}\n")
+          if errors:
+              sys.exit(1)
+          print(f"::notice title=Draft ready::{html}: check it, then publish it to ship {tag}.")
+          PY

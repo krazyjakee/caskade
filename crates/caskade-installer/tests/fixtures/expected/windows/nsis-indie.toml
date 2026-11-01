@@ -1,0 +1,31 @@
+schema_version = 1
+id = "nsis-indie"
+title = "Fixture Game"
+layout = "unity"
+format = "nsis"
+platform = "windows"
+input = "bin/windows/nsis-indie/setup.exe"
+parts = ["bin/windows/nsis-indie/setup.exe"]
+tree = "windows/nsis-indie.tree.json"
+launch_target = "FixtureGame.exe"
+
+[windows]
+builder = "makensis"
+version = "3.11"
+features = ["unicode", "solid-lzma", "shortcut", "ini"]
+native_generated = ["config.ini:Game/InstallPath={app}"]
+
+[host.windows]
+outcome = "Installed"
+strategy = "RunSilent"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

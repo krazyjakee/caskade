@@ -1,0 +1,31 @@
+schema_version = 1
+id = "inno64-ini"
+title = "Fixture Game"
+layout = "unity"
+format = "inno"
+platform = "windows"
+input = "bin/windows/inno64-ini/setup.exe"
+parts = ["bin/windows/inno64-ini/setup.exe"]
+tree = "windows/inno64-ini.tree.json"
+launch_target = "FixtureGame.exe"
+
+[windows]
+builder = "ISCC"
+version = "6.4.3"
+features = ["INI"]
+native_generated = ["config.ini:Game/InstallPath={app}"]
+
+[host.windows]
+outcome = "Installed"
+strategy = "RunSilent"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "epoch": 1700000000,
+  "max_artifact_binary_bytes": 1500000,
+  "ids": [
+    "mac-native-app-zip",
+    "mac-dmg-udzo",
+    "mac-dmg-ulfo",
+    "mac-dmg-sla",
+    "mac-native-pkg",
+    "mac-native-pkg-system",
+    "mac-native-product-pkg"
+  ],
+  "bundle": "FixtureGame.app",
+  "identifier": "org.caskade.fixture.nativeapp",
+  "system_location": "/Library/CaskadePkgFixtureNative",
+  "tools": [
+    "hdiutil",
+    "pkgbuild",
+    "productbuild",
+    "codesign",
+    "ditto",
+    "rustc",
+    "clang"
+  ],
+  "provenance": "Native Apple command-line tools on the macOS runner only. No prebuilt/fake DMGs or Mach-O bytes."
+}

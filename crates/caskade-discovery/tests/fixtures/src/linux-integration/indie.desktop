@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=Fixture Indie
+Exec="/home/fixture/Games/Fixture Indie/indie" --desktop
+Categories=Game;

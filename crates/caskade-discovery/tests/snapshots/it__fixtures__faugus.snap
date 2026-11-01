@@ -1,0 +1,212 @@
+---
+source: crates/caskade-discovery/tests/fixtures/support/mod.rs
+expression: "relative_value(value, root).expect(\"serializable snapshot\")"
+---
+[
+  {
+    "artwork": [],
+    "confidence": "certain",
+    "evidence": [
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/.var/app/io.github.Faugus.faugus-launcher/data/faugus-launcher/games.json"
+        }
+      }
+    ],
+    "icon": null,
+    "ids": [],
+    "install_dir": "$FIXTURE/root/home/fixture/Faugus/Flatpak/drive_c/game",
+    "key": "flatpak:fixture-flatpak",
+    "last_played_unix": null,
+    "launch": [
+      {
+        "type": "exec",
+        "value": {
+          "args": [
+            "--test"
+          ],
+          "cwd": "$FIXTURE/root/home/fixture/Faugus/Flatpak/drive_c/game",
+          "env": {},
+          "program": "$FIXTURE/root/home/fixture/Faugus/Flatpak/drive_c/game/game.exe"
+        }
+      }
+    ],
+    "playtime_secs": 300,
+    "runtime": {
+      "type": "windows",
+      "value": {
+        "prefix": {
+          "arch": null,
+          "owner": "faugus",
+          "path": "$FIXTURE/root/home/fixture/Faugus/Flatpak"
+        },
+        "runner": {
+          "kind": "umu",
+          "name": "UMU-Proton-fixture",
+          "path": null
+        }
+      }
+    },
+    "size": null,
+    "source": "faugus",
+    "state": {
+      "type": "installed"
+    },
+    "title": "Faugus Flatpak Game",
+    "tracking": {
+      "exe_names": [
+        "game.exe"
+      ],
+      "install_dir": "$FIXTURE/root/home/fixture/Faugus/Flatpak/drive_c/game",
+      "steam_app_id": null
+    },
+    "uninstall": null
+  },
+  {
+    "artwork": [],
+    "confidence": "certain",
+    "evidence": [
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/.local/share/faugus-launcher/games.json"
+        }
+      }
+    ],
+    "icon": null,
+    "ids": [],
+    "install_dir": "$FIXTURE/root/home/fixture/Games/Faugus Native",
+    "key": "native:fixture-native",
+    "last_played_unix": null,
+    "launch": [
+      {
+        "type": "exec",
+        "value": {
+          "args": [
+            "--test"
+          ],
+          "cwd": "$FIXTURE/root/home/fixture/Games/Faugus Native",
+          "env": {},
+          "program": "$FIXTURE/root/home/fixture/Games/Faugus Native/game"
+        }
+      }
+    ],
+    "playtime_secs": 30,
+    "runtime": {
+      "type": "native"
+    },
+    "size": null,
+    "source": "faugus",
+    "state": {
+      "type": "installed"
+    },
+    "title": "Faugus Fixture Native",
+    "tracking": {
+      "exe_names": [
+        "game"
+      ],
+      "install_dir": "$FIXTURE/root/home/fixture/Games/Faugus Native",
+      "steam_app_id": null
+    },
+    "uninstall": null
+  },
+  {
+    "artwork": [],
+    "confidence": "certain",
+    "evidence": [
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/.local/share/faugus-launcher/games.json"
+        }
+      }
+    ],
+    "icon": null,
+    "ids": [],
+    "install_dir": null,
+    "key": "native:fixture-steam",
+    "last_played_unix": null,
+    "launch": [
+      {
+        "type": "uri",
+        "value": {
+          "uri": "steam://rungameid/620"
+        }
+      }
+    ],
+    "playtime_secs": null,
+    "runtime": {
+      "type": "native"
+    },
+    "size": null,
+    "source": "faugus",
+    "state": {
+      "type": "installed"
+    },
+    "title": "Faugus Steam Proxy",
+    "tracking": null,
+    "uninstall": null
+  },
+  {
+    "artwork": [],
+    "confidence": "certain",
+    "evidence": [
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/.local/share/faugus-launcher/games.json"
+        }
+      }
+    ],
+    "icon": null,
+    "ids": [],
+    "install_dir": "$FIXTURE/root/home/fixture/Faugus/Fixture/drive_c/game",
+    "key": "native:fixture-windows",
+    "last_played_unix": null,
+    "launch": [
+      {
+        "type": "exec",
+        "value": {
+          "args": [
+            "--name",
+            "Fixture Windows"
+          ],
+          "cwd": "$FIXTURE/root/home/fixture/Faugus/Fixture/drive_c/game",
+          "env": {},
+          "program": "$FIXTURE/root/home/fixture/Faugus/Fixture/drive_c/game/game.exe"
+        }
+      }
+    ],
+    "playtime_secs": 1800,
+    "runtime": {
+      "type": "windows",
+      "value": {
+        "prefix": {
+          "arch": null,
+          "owner": "faugus",
+          "path": "$FIXTURE/root/home/fixture/Faugus/Fixture"
+        },
+        "runner": {
+          "kind": "umu",
+          "name": "UMU-Proton-fixture",
+          "path": null
+        }
+      }
+    },
+    "size": null,
+    "source": "faugus",
+    "state": {
+      "type": "installed"
+    },
+    "title": "Faugus Fixture Windows",
+    "tracking": {
+      "exe_names": [
+        "game.exe"
+      ],
+      "install_dir": "$FIXTURE/root/home/fixture/Faugus/Fixture/drive_c/game",
+      "steam_app_id": null
+    },
+    "uninstall": null
+  }
+]

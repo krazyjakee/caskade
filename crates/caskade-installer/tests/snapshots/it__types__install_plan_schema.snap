@@ -1,0 +1,1230 @@
+---
+source: crates/caskade-installer/tests/types.rs
+expression: schema_for!(InstallPlan)
+---
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "InstallPlan",
+  "description": "Complete, serializable execution request. Source paths may be absolute;\n`relative_dir` is always relative to the root identified by `root_id`.",
+  "type": "object",
+  "properties": {
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ArtifactNode"
+      }
+    },
+    "candidate": {
+      "$ref": "#/$defs/Candidate"
+    },
+    "input": {
+      "$ref": "#/$defs/Input"
+    },
+    "relative_dir": {
+      "type": "string"
+    },
+    "root_id": {
+      "description": "Resolved to an absolute root only at the executor boundary.",
+      "type": "string"
+    },
+    "schema_version": {
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "schema_version",
+    "input",
+    "artifacts",
+    "root_id",
+    "relative_dir",
+    "candidate"
+  ],
+  "$defs": {
+    "ArtifactId": {
+      "description": "Stable identifier within one probe result, also used by extraction steps.",
+      "type": "string"
+    },
+    "ArtifactNode": {
+      "description": "A statically identified file, directory or entry inside a container.",
+      "type": "object",
+      "properties": {
+        "children": {
+          "description": "Empty while a container has not been listed, or when it has no children.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArtifactNode"
+          }
+        },
+        "children_complete": {
+          "description": "Distinguishes an unlisted container from one whose listing is empty.",
+          "type": "boolean"
+        },
+        "facts": {
+          "description": "Namespaced format metadata, e.g. `inno.app_name` or `pe.overlay_offset`.",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "format": {
+          "$ref": "#/$defs/Format"
+        },
+        "id": {
+          "$ref": "#/$defs/ArtifactId"
+        },
+        "path": {
+          "description": "Root nodes use an input-relative name; children use container-relative names.",
+          "type": "string"
+        },
+        "platform": {
+          "$ref": "#/$defs/PayloadPlatform"
+        },
+        "role": {
+          "$ref": "#/$defs/Role"
+        },
+        "size": {
+          "description": "Unknown for some container entries until their headers have been read.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "id",
+        "path",
+        "format",
+        "platform",
+        "role",
+        "facts",
+        "children",
+        "children_complete"
+      ]
+    },
+    "Candidate": {
+      "type": "object",
+      "properties": {
+        "confidence": {
+          "description": "A finite probability in 0..=1; validated by the plan engine.",
+          "type": "number",
+          "format": "float",
+          "maximum": 1,
+          "minimum": 0
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        },
+        "handler": {
+          "$ref": "#/$defs/HandlerId"
+        },
+        "requires": {
+          "$ref": "#/$defs/Requirements"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Step"
+          }
+        },
+        "strategy": {
+          "$ref": "#/$defs/Strategy"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Warning"
+          }
+        }
+      },
+      "required": [
+        "handler",
+        "strategy",
+        "confidence",
+        "fidelity",
+        "requires",
+        "steps",
+        "warnings"
+      ]
+    },
+    "DelegateCheck": {
+      "description": "A host-tool query that exits 0 while a delegate command has something to\ndo, such as the package manager's \"is this package installed\".",
+      "type": "object",
+      "properties": {
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tool": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "args"
+      ]
+    },
+    "DelegateCommand": {
+      "description": "A recorded host-tool command that reverses an out-of-root installation.",
+      "type": "object",
+      "properties": {
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "only_if": {
+          "description": "Runs first; the command is skipped unless it exits 0, so a package\nremoved by hand needs no removal.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DelegateCheck"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tool": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "tool",
+        "args"
+      ]
+    },
+    "Fidelity": {
+      "type": "string",
+      "enum": [
+        "exact",
+        "equivalent",
+        "partial",
+        "native"
+      ]
+    },
+    "Format": {
+      "description": "Detected from bytes or a directory's structure, never by running the input.",
+      "type": "string",
+      "enum": [
+        "unknown",
+        "directory",
+        "zip",
+        "seven_zip",
+        "tar",
+        "gzip",
+        "xz",
+        "zstd",
+        "bzip2",
+        "rar",
+        "cab",
+        "wim",
+        "pe",
+        "elf",
+        "mach_o",
+        "script",
+        "inno",
+        "nsis",
+        "msi",
+        "burn",
+        "install_shield",
+        "wise",
+        "setup_factory",
+        "app_image",
+        "makeself",
+        "mojo_setup",
+        "deb",
+        "rpm",
+        "flatpak",
+        "app_bundle",
+        "dmg",
+        "pkg",
+        "iso",
+        "cue",
+        "bin",
+        "chd",
+        "rom"
+      ]
+    },
+    "HandlerId": {
+      "description": "Built-in or plugin handler identifier; unrelated to the Cargo feature set.",
+      "type": "string"
+    },
+    "Input": {
+      "description": "A user-selected local input or one or more URLs forming a single set.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "path"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "urls"
+            },
+            "value": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        }
+      ]
+    },
+    "PayloadPlatform": {
+      "description": "The payload's platform, independent of the machine doing the analysis.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "windows"
+            }
+          },
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "linux"
+            }
+          },
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "macos"
+            }
+          },
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "console_rom"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "platform": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "unknown"
+            }
+          },
+          "required": [
+            "type"
+          ]
+        }
+      ]
+    },
+    "Program": {
+      "description": "A program from the input, the game tree or a host tool resolved by runtime.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "source"
+            },
+            "value": {
+              "$ref": "#/$defs/SourcePath"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "tool"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        }
+      ]
+    },
+    "RegistryEntry": {
+      "description": "A registry value to replay into a Proton/Wine prefix, never the host registry.",
+      "type": "object",
+      "properties": {
+        "hive": {
+          "$ref": "#/$defs/RegistryHive"
+        },
+        "key": {
+          "type": "string"
+        },
+        "name": {
+          "description": "Empty for the key's default value.",
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/RegistryValue"
+        }
+      },
+      "required": [
+        "hive",
+        "key",
+        "name",
+        "value"
+      ]
+    },
+    "RegistryHive": {
+      "type": "string",
+      "enum": [
+        "current_user",
+        "local_machine",
+        "classes_root",
+        "users",
+        "current_config"
+      ]
+    },
+    "RegistryValue": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "expand_string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "multi_string"
+            },
+            "value": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "dword"
+            },
+            "value": {
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "qword"
+            },
+            "value": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "binary"
+            },
+            "value": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "uint8",
+                "maximum": 255,
+                "minimum": 0
+              }
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        }
+      ]
+    },
+    "Requirements": {
+      "description": "Capabilities and side effects used by policy to filter/rank a proposal.",
+      "type": "object",
+      "properties": {
+        "est_disk_bytes": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "executes_code": {
+          "type": "boolean"
+        },
+        "interactive": {
+          "type": "boolean"
+        },
+        "may_prompt_elevation": {
+          "type": "boolean"
+        },
+        "runtime": {
+          "description": "None means no process runtime is needed (e.g. pure extraction).",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RuntimeSpec"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "executes_code",
+        "may_prompt_elevation",
+        "interactive"
+      ]
+    },
+    "Role": {
+      "description": "Role inferred from metadata, container entries and file names.",
+      "type": "string",
+      "enum": [
+        "installer",
+        "application",
+        "uninstaller",
+        "redistributable",
+        "launcher",
+        "data",
+        "document",
+        "unknown"
+      ]
+    },
+    "RuntimeSpec": {
+      "description": "The runtime to execute under. Prefix IDs are resolved by the runtime layer.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "native"
+            }
+          },
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "proton_prefix"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "wine_prefix"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        }
+      ]
+    },
+    "SourcePath": {
+      "description": "A source is either an input artifact or a path in the staging/game tree.",
+      "oneOf": [
+        {
+          "description": "An entry relative to an identified source artifact (`.` means its root).",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "artifact"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "artifact": {
+                  "$ref": "#/$defs/ArtifactId"
+                },
+                "path": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "artifact",
+                "path"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "game"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        }
+      ]
+    },
+    "Step": {
+      "description": "Fixed plan DSL: analysis describes operations; only the executor acts on them.\n\nAll `to`, `expect`, `target_dir`, `path` and `mount_point` paths are relative\nto staging/the final game directory. Symlink targets are relative to the\nlink's parent and must resolve inside the game tree. The executor validates\nthese invariants through the safety layer before performing any operation.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "extract"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "$ref": "#/$defs/ArtifactId"
+                },
+                "select": {
+                  "description": "Include globs; empty selects every entry.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "strip": {
+                  "description": "Optional prefix removed before writing selected entries.",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "to": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "from",
+                "select",
+                "to"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "copy"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "$ref": "#/$defs/SourcePath"
+                },
+                "to": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "from",
+                "to"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "move"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "$ref": "#/$defs/SourcePath"
+                },
+                "to": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "from",
+                "to"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "run"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "args": {
+                  "description": "Argument vector; never interpreted by a shell.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "env": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "expect": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "program": {
+                  "$ref": "#/$defs/Program"
+                },
+                "runtime": {
+                  "$ref": "#/$defs/RuntimeSpec"
+                },
+                "timeout_secs": {
+                  "description": "Wall-clock limit in seconds; must be non-zero before execution.",
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "program",
+                "args",
+                "env",
+                "runtime",
+                "timeout_secs",
+                "expect"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "run_interactive"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "env": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "program": {
+                  "$ref": "#/$defs/Program"
+                },
+                "runtime": {
+                  "$ref": "#/$defs/RuntimeSpec"
+                },
+                "target_dir": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "program",
+                "args",
+                "env",
+                "runtime",
+                "target_dir"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "mount"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "$ref": "#/$defs/ArtifactId"
+                },
+                "mount_point": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "from",
+                "mount_point"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "unmount"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "mount_point": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "mount_point"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "set_executable"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "symlink"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path",
+                "target"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "write_file"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "contents": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "uint8",
+                    "maximum": 255,
+                    "minimum": 0
+                  }
+                },
+                "path": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path",
+                "contents"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "description": "Writes `length` bytes of a file artifact, from `offset`, to `path`:\nhow a plugin `install-handler` unpacks a container format it knows\nwithout writing files itself (#55).",
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "copy_range"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "$ref": "#/$defs/ArtifactId"
+                },
+                "length": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0
+                },
+                "offset": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0
+                },
+                "path": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "from",
+                "offset",
+                "length",
+                "path"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "registry_import"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "entries": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/RegistryEntry"
+                  }
+                },
+                "runtime": {
+                  "description": "Execution rejects Native; registry replay only targets prefixes.",
+                  "$ref": "#/$defs/RuntimeSpec"
+                }
+              },
+              "required": [
+                "runtime",
+                "entries"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "delegate"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "only_if": {
+                  "description": "Runs first; the step is skipped unless it exits 0.",
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/DelegateCheck"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "tool": {
+                  "type": "string"
+                },
+                "uninstall": {
+                  "description": "Required compensation recorded for uninstall and rollback.",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/DelegateCommand"
+                  }
+                }
+              },
+              "required": [
+                "tool",
+                "args",
+                "uninstall"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        }
+      ]
+    },
+    "Strategy": {
+      "type": "string",
+      "enum": [
+        "copy",
+        "extract",
+        "run_silent",
+        "run_interactive",
+        "delegate",
+        "hand_off"
+      ]
+    },
+    "Warning": {
+      "description": "Nonfatal, machine-readable diagnostic with human-readable context.",
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "path": {
+          "description": "When present, relative to the game directory.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ]
+    }
+  }
+}

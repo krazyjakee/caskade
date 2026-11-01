@@ -1,0 +1,106 @@
+name: app
+# Desktop app (caskade-core + Tauri adapter + React UI). Linux evidence
+# closes issues; Windows and macOS runners are on the #22/#71 lists.
+# Gitea loads this base-branch definition before any trusted PR-head checkout.
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled]
+  push:
+    branches: [master]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: app-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  linux:
+    if: >-
+      github.event_name != 'pull_request_target' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       github.event.pull_request.head.repo.fork == false)
+    runs-on: caskade-linux
+    timeout-minutes: 90
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: https://github.com/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Record toolchains
+        run: |
+          rustc -Vv
+          node --version
+          pnpm --version
+      - name: WebAssembly target for the plugin host's test guests
+        run: rustup target add wasm32-wasip2
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile
+      # Known vulnerabilities in Rust and JS dependencies (#157).
+      - name: Dependency advisories
+        run: |
+          command -v cargo-audit >/dev/null || cargo install cargo-audit --locked
+          cargo audit
+          pnpm audit --prod
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Lint (Biome)
+        run: pnpm lint
+      - name: Frontend tests (Vitest)
+        run: pnpm test
+      # `just i18n-check` (#220): fails on a stale template, a PO file
+      # msgfmt rejects or a translation that drops a placeholder or tag,
+      # then prints each language's completion. The runner needs gettext
+      # (msgfmt).
+      - name: Translation catalogs
+        run: |
+          cargo run -q -p caskade-i18n --features extract --bin caskade-i18n --locked -- extract --check
+          pnpm i18n:check
+      - name: Prepare SHA-pinned 7-Zip sidecars (native and Windows cross checks)
+        run: |
+          python3 scripts/tauri-sidecar.py
+          python3 scripts/tauri-sidecar.py --target x86_64-pc-windows-gnu
+      - name: Format app crates
+        run: cargo fmt -p caskade-core -p caskade-desktop -p caskade-plugin-host -p caskade-input --check
+      - name: Strict Clippy (workspace)
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Emulation fixtures, definitions and source tests (no real emulator or ROM data)
+        run: python3 scripts/app-ci.py emulation
+      - name: Core and adapter tests (includes the bindings-are-current check)
+        run: cargo test -p caskade-core -p caskade-desktop --locked
+      # gilrs reads pads through libudev: the runner needs libudev-dev (#146).
+      - name: Gamepad input (console mode)
+        run: cargo test -p caskade-input --locked
+      - name: Example plugins (#133)
+        run: node plugins/examples/build.mjs gamemode howlongtobeat playtime-stats
+      - name: Plugin host tests (builds a wasm32-wasip2 test guest; manifest schema check)
+        run: cargo test -p caskade-plugin-host --locked
+      # Theme sandbox rules (no scripts, remote imports or class selectors)
+      # and the component cache's rejection of foreign entries live here.
+      - name: Theme packages, component cache, jobs and plugin SDK
+        run: cargo test -p caskade-theme -p caskade-component-cache -p caskade-jobs -p caskade-plugin-sdk --locked
+      # The M5 exit (#153): the built app in console mode, driven by a pad
+      # only, under Xvfb. The `e2e` feature embeds the built UI. The runner
+      # needs xvfb (xvfb-run, xauth) and dbus-run-session.
+      - name: Console mode end to end (pad only)
+        run: |
+          pnpm --filter @caskade/desktop build
+          cargo clippy -p caskade-desktop --features e2e --all-targets --locked -- -D warnings
+          xvfb-run -a -s "-screen 0 1600x1000x24" dbus-run-session -- cargo test -p caskade-desktop --features e2e --locked --test it console_e2e:: -- --ignored
+      - name: Windows GNU cross Clippy
+        run: cargo clippy -p caskade-core -p caskade-desktop -p caskade-plugin-host -p caskade-input --all-targets --locked --target x86_64-pc-windows-gnu -- -D warnings
+      # The tray icon: the Tauri CLI finds libayatana-appindicator3 through
+      # pkg-config, so the runner needs libayatana-appindicator3-dev.
+      - name: Debug app bundle
+        run: pnpm tauri build --debug
+      - name: Upload bundles
+        if: always()
+        uses: https://github.com/actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5
+        with:
+          name: app-linux-${{ github.run_id }}
+          path: |
+            ${{ env.CARGO_TARGET_DIR || 'target' }}/debug/bundle/deb/*.deb
+            ${{ env.CARGO_TARGET_DIR || 'target' }}/debug/bundle/appimage/*.AppImage
+            target/emulation-fixtures-report.json
+          if-no-files-found: ignore

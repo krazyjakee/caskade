@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=Fixture GOG Proxy
+Exec=lutris lutris:rungameid/2
+Categories=Game;

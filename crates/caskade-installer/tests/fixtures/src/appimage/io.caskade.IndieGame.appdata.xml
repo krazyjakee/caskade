@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.caskade.IndieGame</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Indie Game</name>
+  <summary>Caskade AppImage fixture</summary>
+  <description>
+    <p>Minimal game payload used to test AppImage installation.</p>
+  </description>
+  <launchable type="desktop-id">io.caskade.IndieGame.desktop</launchable>
+  <categories>
+    <category>Game</category>
+  </categories>
+</component>

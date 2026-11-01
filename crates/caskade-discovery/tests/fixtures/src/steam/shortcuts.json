@@ -1,0 +1,232 @@
+{
+  "entries": [
+    {
+      "key": "shortcuts",
+      "type": "object",
+      "value": [
+        {
+          "key": "0",
+          "type": "object",
+          "value": [
+            {
+              "key": "appid",
+              "type": "int32",
+              "value": -1999999001
+            },
+            {
+              "key": "AppName",
+              "type": "string",
+              "value": "Fixture Indie"
+            },
+            {
+              "key": "Exe",
+              "type": "string",
+              "value": "\"/home/fixture/Games/Fixture Indie/indie\""
+            },
+            {
+              "key": "StartDir",
+              "type": "string",
+              "value": "\"/home/fixture/Games/Fixture Indie\""
+            },
+            {
+              "key": "icon",
+              "type": "string",
+              "value": "/home/fixture/Games/Fixture Indie/icon.png"
+            },
+            {
+              "key": "LaunchOptions",
+              "type": "string",
+              "value": "--windowed \"--profile=Fixture One\""
+            },
+            {
+              "key": "IsHidden",
+              "type": "int32",
+              "value": 0
+            },
+            {
+              "key": "LastPlayTime",
+              "type": "int32",
+              "value": 1699100000
+            }
+          ]
+        },
+        {
+          "key": "1",
+          "type": "object",
+          "value": [
+            {
+              "key": "appid",
+              "type": "int32",
+              "value": -1999999002
+            },
+            {
+              "key": "AppName",
+              "type": "string",
+              "value": "Fixture Windows Port"
+            },
+            {
+              "key": "Exe",
+              "type": "string",
+              "value": "\"/home/fixture/Games/Fixture Windows Port/port.exe\""
+            },
+            {
+              "key": "StartDir",
+              "type": "string",
+              "value": "\"/home/fixture/Games/Fixture Windows Port\""
+            },
+            {
+              "key": "LaunchOptions",
+              "type": "string",
+              "value": ""
+            }
+          ]
+        },
+        {
+          "key": "2",
+          "type": "object",
+          "value": [
+            {
+              "key": "appid",
+              "type": "int32",
+              "value": -1999999003
+            },
+            {
+              "key": "AppName",
+              "type": "string",
+              "value": "Fixture Epic Quest"
+            },
+            {
+              "key": "Exe",
+              "type": "string",
+              "value": "\"/usr/bin/flatpak\""
+            },
+            {
+              "key": "StartDir",
+              "type": "string",
+              "value": "\"/usr/bin\""
+            },
+            {
+              "key": "LaunchOptions",
+              "type": "string",
+              "value": "run com.heroicgameslauncher.hgl --no-gui --no-sandbox \"heroic://launch/legendary/FixtureEpicApp\""
+            }
+          ]
+        },
+        {
+          "key": "3",
+          "type": "object",
+          "value": [
+            {
+              "key": "appid",
+              "type": "int32",
+              "value": -1999999004
+            },
+            {
+              "key": "AppName",
+              "type": "string",
+              "value": "Fixture Epic Two"
+            },
+            {
+              "key": "Exe",
+              "type": "string",
+              "value": "legendary"
+            },
+            {
+              "key": "StartDir",
+              "type": "string",
+              "value": "\"/home/fixture\""
+            },
+            {
+              "key": "LaunchOptions",
+              "type": "string",
+              "value": "launch FixtureEpicTwo"
+            }
+          ]
+        },
+        {
+          "key": "4",
+          "type": "object",
+          "value": [
+            {
+              "key": "appid",
+              "type": "int32",
+              "value": -1999999005
+            },
+            {
+              "key": "AppName",
+              "type": "string",
+              "value": "Fixture SNES"
+            },
+            {
+              "key": "Exe",
+              "type": "string",
+              "value": "\"/usr/bin/retroarch\""
+            },
+            {
+              "key": "StartDir",
+              "type": "string",
+              "value": "\"/home/fixture/ROMs\""
+            },
+            {
+              "key": "LaunchOptions",
+              "type": "string",
+              "value": "-L snes9x_libretro.so \"/home/fixture/ROMs/fixture.sfc\""
+            }
+          ]
+        },
+        {
+          "key": "5",
+          "type": "object",
+          "value": [
+            {
+              "key": "appid",
+              "type": "int32",
+              "value": -1999999006
+            },
+            {
+              "key": "AppName",
+              "type": "string",
+              "value": "Fixture Puzzle via Steam"
+            },
+            {
+              "key": "Exe",
+              "type": "string",
+              "value": "\"steam\""
+            },
+            {
+              "key": "StartDir",
+              "type": "string",
+              "value": "\"/home/fixture\""
+            },
+            {
+              "key": "LaunchOptions",
+              "type": "string",
+              "value": "steam://rungameid/620"
+            }
+          ]
+        },
+        {
+          "key": "6",
+          "type": "object",
+          "value": [
+            {
+              "key": "AppName",
+              "type": "string",
+              "value": "Fixture Legacy"
+            },
+            {
+              "key": "Exe",
+              "type": "string",
+              "value": "\"/home/fixture/Games/Fixture Legacy/legacy\""
+            },
+            {
+              "key": "StartDir",
+              "type": "string",
+              "value": "\"/home/fixture/Games/Fixture Legacy\""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

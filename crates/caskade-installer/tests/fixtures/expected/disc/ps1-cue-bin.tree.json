@@ -1,0 +1,16 @@
+[
+  {
+    "path": "CASKADE.EXE",
+    "kind": "file",
+    "size": 4096,
+    "executable": false,
+    "sha256": "3952cbaf67c86989287212920068de0c5ced99e66f020b41be8bb3dcf95fa0f0"
+  },
+  {
+    "path": "SYSTEM.CNF",
+    "kind": "file",
+    "size": 64,
+    "executable": false,
+    "sha256": "134a3933e57c05309fe748e4a51f416baa804ab8763e00bd0cb9d15f2987590e"
+  }
+]

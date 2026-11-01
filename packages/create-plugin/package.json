@@ -1,0 +1,13 @@
+{
+  "name": "create-caskade-plugin",
+  "version": "0.1.0",
+  "description": "Scaffolds a Caskade plugin: a React UI half, a Rust backend half, or both.",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "create-caskade-plugin": "./index.mjs"
+  },
+  "exports": {
+    ".": "./generate.mjs"
+  }
+}

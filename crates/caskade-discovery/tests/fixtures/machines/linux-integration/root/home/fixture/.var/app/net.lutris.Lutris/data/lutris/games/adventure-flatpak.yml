@@ -1,0 +1,8 @@
+game:
+  exe: 'C:\Game\adventure.exe'
+  prefix: /home/fixture/Games/prefixes/fixture
+  arch: win64
+  args: [--name, 'Fixture Adventure', '']
+wine:
+  version: wine-ge-fixture
+runner: wine

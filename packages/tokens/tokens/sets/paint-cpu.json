@@ -1,0 +1,9 @@
+{
+  "$description": "The webview paints on the CPU, so ambient loops would repaint the screen every frame. They pause unless Appearance → Motion is Full.",
+  "$extensions": {
+    "dev.caskade.condition": { "selector": "[data-paint=\"cpu\"]:not([data-motion=\"full\"])" }
+  },
+  "motion": {
+    "ambient": { "$value": "paused" }
+  }
+}

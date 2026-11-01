@@ -1,0 +1,15 @@
+schema_version = 1
+id = "appimage-indie"
+title = "Indie Game"
+layout = "appimage-indie"
+format = "appimage"
+platform = "linux"
+input = "bin/appimage/Indie_Game-x86_64.AppImage"
+parts = ["bin/appimage/Indie_Game-x86_64.AppImage"]
+tree = "appimage/appimage-indie.tree.json"
+launch_target = "Indie_Game-x86_64.AppImage"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Copy"
+runtime = "Native"

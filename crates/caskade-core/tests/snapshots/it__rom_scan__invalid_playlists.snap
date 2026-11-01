@@ -1,0 +1,49 @@
+---
+source: crates/caskade-core/tests/rom_scan.rs
+assertion_line: 225
+expression: report
+---
+{
+  "games": [
+    {
+      "title": "Valid",
+      "platform": "sony_playstation",
+      "regions": [],
+      "properties": [],
+      "roms": [
+        {
+          "location": {
+            "type": "scanner",
+            "scannerId": "fixture-scanner",
+            "path": "Valid.bin"
+          },
+          "name": null,
+          "size": 4
+        }
+      ],
+      "files": [
+        "Valid.bin"
+      ]
+    }
+  ],
+  "warnings": [
+    {
+      "path": "Escape.m3u",
+      "message": "invalid ROM scan: playlist reference escapes scanner"
+    },
+    {
+      "path": "Missing.cue",
+      "message": "invalid ROM scan: playlist member is missing or ambiguous: missing.bin"
+    },
+    {
+      "path": "Cycle A.m3u",
+      "message": "playlist contains a cycle, invalid member or excessive nesting"
+    },
+    {
+      "path": "Cycle B.m3u",
+      "message": "playlist contains a cycle, invalid member or excessive nesting"
+    }
+  ],
+  "enumerated": 5,
+  "skipped": 4
+}

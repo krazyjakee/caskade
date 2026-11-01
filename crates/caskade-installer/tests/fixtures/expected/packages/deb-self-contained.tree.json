@@ -1,0 +1,60 @@
+[
+  {
+    "path": "opt",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "opt/caskade-fixture",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "opt/caskade-fixture/FixtureGame.x86_64",
+    "kind": "file",
+    "size": 304328,
+    "executable": true,
+    "sha256": "d26f6098adc1a474ac48c3c4e5e71de918cf3a69f92829ba4a4f7755ceba22d3"
+  },
+  {
+    "path": "opt/caskade-fixture/icon.svg",
+    "kind": "file",
+    "size": 115,
+    "executable": false,
+    "sha256": "922c0cdddf09528923e14e1249644a0c524532f8cf3f972809522a17eba24e0c"
+  },
+  {
+    "path": "opt/caskade-fixture/start.sh",
+    "kind": "file",
+    "size": 104,
+    "executable": true,
+    "sha256": "7fe0eca3d47b9b5599c76d1f8a68d660795de4202b96bc6fb70954b5c50df74e"
+  },
+  {
+    "path": "usr",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "usr/share",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "usr/share/applications",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "usr/share/applications/caskade-fixture.desktop",
+    "kind": "file",
+    "size": 191,
+    "executable": false,
+    "sha256": "a55c1f06866cb6f91c350e0917e7e0bd99a4c5a52cb1a63e254f52acfba03cee"
+  }
+]

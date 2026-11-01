@@ -1,0 +1,5 @@
+game:
+  exe: game
+  args: --name 'Fixture Puzzle' --literal '$(no-shell)'
+  working_dir: $GAMEDIR
+runner: linux

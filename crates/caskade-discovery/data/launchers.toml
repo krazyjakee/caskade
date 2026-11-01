@@ -1,0 +1,194 @@
+# Original Caskade launcher identity data. Never exclude game entries merely
+# because their URI or command launches one of these clients.
+
+[[launcher]]
+id = "steam"
+bundle_ids = ["com.valvesoftware.steam"]
+name = "Steam"
+exes = ["steam.exe", "steam"]
+flatpak_ids = ["com.valvesoftware.Steam"]
+uri_schemes = ["steam"]
+
+[[launcher]]
+id = "heroic"
+bundle_ids = ["com.heroicgameslauncher.hgl"]
+name = "Heroic Games Launcher"
+exes = ["Heroic.exe", "heroic"]
+flatpak_ids = ["com.heroicgameslauncher.hgl"]
+uri_schemes = ["heroic"]
+
+[[launcher]]
+id = "epic"
+bundle_ids = ["com.epicgames.EpicGamesLauncher"]
+name = "Epic Games Launcher"
+exes = ["EpicGamesLauncher.exe"]
+flatpak_ids = []
+uri_schemes = ["com.epicgames.launcher"]
+
+[[launcher]]
+id = "gog"
+bundle_ids = ["com.gog.galaxy"]
+name = "GOG Galaxy"
+exes = ["GalaxyClient.exe"]
+flatpak_ids = []
+uri_schemes = ["goggalaxy"]
+
+[[launcher]]
+id = "ea"
+name = "EA app"
+exes = ["EADesktop.exe", "Origin.exe"]
+flatpak_ids = []
+uri_schemes = ["origin", "origin2"]
+
+[[launcher]]
+id = "ubisoft"
+name = "Ubisoft Connect"
+exes = ["UbisoftConnect.exe", "upc.exe"]
+flatpak_ids = []
+uri_schemes = ["uplay"]
+
+[[launcher]]
+id = "battlenet"
+bundle_ids = ["net.battle.net.app", "net.battle.app"]
+name = "Battle.net"
+exes = ["Battle.net.exe"]
+flatpak_ids = []
+uri_schemes = ["battlenet"]
+
+[[launcher]]
+id = "amazon"
+name = "Amazon Games"
+exes = ["Amazon Games.exe"]
+flatpak_ids = []
+uri_schemes = []
+
+[[launcher]]
+id = "itch"
+bundle_ids = ["io.itch.mac", "io.kitch.mac"]
+name = "itch"
+exes = ["itch.exe", "itch"]
+flatpak_ids = []
+uri_schemes = ["itchio"]
+
+[[launcher]]
+id = "lutris"
+name = "Lutris"
+exes = ["lutris"]
+flatpak_ids = ["net.lutris.Lutris"]
+uri_schemes = ["lutris"]
+
+[[launcher]]
+id = "rockstar"
+name = "Rockstar Games Launcher"
+exes = [] # Generic Launcher.exe is also used by games; match title/URI instead.
+flatpak_ids = []
+uri_schemes = [] # No verified public game URI form.
+
+[[launcher]]
+id = "riot"
+bundle_ids = ["com.riotgames.RiotGames.RiotClient"]
+name = "Riot Client"
+exes = ["RiotClientServices.exe"]
+flatpak_ids = []
+uri_schemes = [] # No verified public game URI form.
+
+[[launcher]]
+id = "rare"
+name = "Rare"
+exes = ["Rare.exe", "rare"]
+flatpak_ids = ["io.github.dummerle.rare"]
+uri_schemes = []
+
+# Battle.net games by product.db product code. `launch` is the code for
+# battlenet://<launch>; `agent` and `bna` (the Agent and Battle.net itself)
+# are launchers, not games.
+
+[[battlenet]]
+code = "wow"
+title = "World of Warcraft"
+launch = "WoW"
+
+[[battlenet]]
+code = "wow_classic"
+title = "World of Warcraft Classic"
+launch = "WoWC"
+
+[[battlenet]]
+code = "d3"
+title = "Diablo III"
+launch = "D3"
+
+[[battlenet]]
+code = "osi"
+title = "Diablo II: Resurrected"
+launch = "OSI"
+
+[[battlenet]]
+code = "fenris"
+title = "Diablo IV"
+launch = "Fen"
+
+[[battlenet]]
+code = "pro"
+title = "Overwatch 2"
+launch = "Pro"
+
+[[battlenet]]
+code = "hs_beta"
+title = "Hearthstone"
+launch = "WTCG"
+
+[[battlenet]]
+code = "heroes"
+title = "Heroes of the Storm"
+launch = "Hero"
+
+[[battlenet]]
+code = "s2"
+title = "StarCraft II"
+launch = "S2"
+
+[[battlenet]]
+code = "s1"
+title = "StarCraft: Remastered"
+launch = "S1"
+
+[[battlenet]]
+code = "w3"
+title = "Warcraft III: Reforged"
+launch = "W3"
+
+[[battlenet]]
+code = "viper"
+title = "Call of Duty: Black Ops 4"
+launch = "VIPR"
+
+[[battlenet]]
+code = "odin"
+title = "Call of Duty: Modern Warfare"
+launch = "ODIN"
+
+[[battlenet]]
+code = "lazr"
+title = "Call of Duty: Modern Warfare 2 Campaign Remastered"
+launch = "LAZR"
+
+[[battlenet]]
+code = "zeus"
+title = "Call of Duty: Black Ops Cold War"
+launch = "ZEUS"
+
+[[battlenet]]
+code = "fore"
+title = "Call of Duty: Vanguard"
+launch = "FORE"
+
+[[battlenet]]
+code = "wlby"
+title = "Crash Bandicoot 4: It's About Time"
+launch = "WLBY"
+
+[[battlenet]]
+code = "rtro"
+title = "Blizzard Arcade Collection"
+launch = "RTRO"

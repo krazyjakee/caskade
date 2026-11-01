@@ -1,0 +1,5 @@
+{ "sortBy": null, "page": 1, "totalProducts": 5, "totalPages": 3, "productsPerPage": 2, "contentSystemCompatibility": null, "moviesCount": 1,
+  "products": [
+    { "isGalaxyCompatible": true, "tags": [], "id": 1207658924, "availability": { "isAvailable": true, "isAvailableInAccount": true }, "title": "Unreal Tournament 2004 Editor's Choice Edition", "image": "//images.gog.com/example", "url": "/game/unreal_tournament_2004_ece", "worksOn": { "Windows": true, "Mac": false, "Linux": false }, "category": "Shooter", "rating": 0, "isComingSoon": false, "isMovie": false, "isGame": true, "slug": "unreal_tournament_2004_ece", "updates": 0, "isNew": false, "dlcCount": 0, "releaseDate": { "date": "2004-03-16 00:00:00.000000", "timezone_type": 3, "timezone": "Europe/Nicosia" }, "isBaseProductMissing": false, "isHidingDisabled": false, "isInDevelopment": false, "hidden": false },
+    { "id": 1207666393, "title": "Stardew Valley", "worksOn": { "Windows": true, "Mac": true, "Linux": true }, "isGame": true, "isMovie": false, "dlcCount": 0 }
+  ] }

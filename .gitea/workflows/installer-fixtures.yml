@@ -1,0 +1,117 @@
+# Runner labels/secrets are provisioned by #22. Trusted source changes only:
+# installer compilation and generated binaries never run for fork pull requests.
+name: installer-fixtures
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'crates/caskade-installer/tests/fixtures/src/**'
+      - 'crates/caskade-installer/tests/fixture-game/**'
+      - 'xtask/**'
+      - '.gitea/workflows/installer-fixtures.yml'
+jobs:
+  windows:
+    runs-on: caskade-windows-x64
+    steps:
+      - uses: https://github.com/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Record runner toolchain (provisioned by #22)
+        shell: pwsh
+        run: |
+          rustc -Vv
+          python --version
+      - name: Build genuine Inno and NSIS families with verified downloads
+        shell: pwsh
+        env:
+          PYTHON: python
+        run: cargo xtask fixtures windows --prepare --families inno,nsis --artifact target/fixture-artifact
+      - uses: https://github.com/actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5
+        with:
+          name: fixtures-windows
+          path: target/fixture-artifact
+  linux:
+    runs-on: caskade-linux-native
+    steps:
+      - uses: https://github.com/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Provision pinned official sidecar
+        run: python3 scripts/7zz-download.py --platform linux-x64
+      # #22 must configure CASKADE_7ZZ to the downloaded pinned official binary,
+      # x86_64-w64-mingw32-gcc, dpkg-deb, 7z, and Python 3.12 on this runner.
+      - name: Build MSI, SFX and portable mini installers
+        env:
+          CASKADE_7ZZ: target/sidecars/7zip/26.05/linux-x64/7zz
+        run: cargo xtask fixtures windows --prepare --families msi,sfx,archives --artifact target/fixture-artifact
+      - name: Build genuine WiX Burn bundle with verified toolchain
+        run: cargo xtask fixtures burn --artifact target/fixture-artifact
+      - name: Build genuine Linux minis and acceptance catalogue
+        run: |
+          cargo xtask fixtures linux-shell --prepare
+          cargo xtask fixtures appimage --prepare
+          cargo xtask fixtures packages
+          cargo xtask fixtures flatpak
+          cargo xtask fixtures linux-mini
+          python3 - <<'PYTHON'
+          from pathlib import Path
+          import shutil
+          source = Path('crates/caskade-installer/tests/fixtures')
+          artifact = Path('target/fixture-artifact')
+          for directory in ['bin/linux-shell', 'bin/appimage', 'bin/packages', 'bin/flatpak', 'bin/linux-mini', 'expected/linux-shell', 'expected/appimage', 'expected/packages', 'expected/flatpak', 'expected/linux-mini']:
+              shutil.copytree(source / directory, artifact / directory, dirs_exist_ok=True)
+          PYTHON
+      - uses: https://github.com/actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5
+        with:
+          name: fixtures-linux
+          path: target/fixture-artifact
+  macos:
+    runs-on: caskade-macos
+    steps:
+      - uses: https://github.com/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Record native Apple toolchain
+        run: |
+          sw_vers
+          rustc -Vv
+          xcrun clang --version
+      - name: Build genuine UDZO, ULFO, SLA and native package fixtures
+        run: python3 xtask/macos-fixtures.py --artifact target/macos-fixture-artifact
+      - uses: https://github.com/actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5
+        with:
+          name: fixtures-macos
+          path: target/macos-fixture-artifact
+  propose:
+    needs: [windows, linux, macos]
+    runs-on: caskade-linux-native
+    steps:
+      - uses: https://github.com/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          token: ${{ secrets.FIXTURE_PR_TOKEN }}
+      - uses: https://github.com/actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a
+        with:
+          name: fixtures-windows
+          path: crates/caskade-installer/tests/fixtures
+      - uses: https://github.com/actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a
+        with:
+          name: fixtures-linux
+          path: crates/caskade-installer/tests/fixtures
+      - uses: https://github.com/actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a
+        with:
+          name: fixtures-macos
+          path: crates/caskade-installer/tests/fixtures
+      - name: Finalize combined inventory and check budgets
+        run: |
+          cargo xtask fixtures record-build
+          cargo xtask fixtures check
+          cargo test -p xtask --locked
+      - name: Commit only generated fixture outputs
+        run: |
+          git config user.name 'Caskade fixture bot'
+          git config user.email 'fixtures@caskade.local'
+          git fetch origin refs/heads/automation/installer-fixtures:refs/remotes/origin/automation/installer-fixtures || true
+          git checkout -B automation/installer-fixtures
+          git add -- crates/caskade-installer/tests/fixtures/bin/burn crates/caskade-installer/tests/fixtures/expected/burn crates/caskade-installer/tests/fixtures/bin/windows crates/caskade-installer/tests/fixtures/expected/windows crates/caskade-installer/tests/fixtures/bin/macos-native crates/caskade-installer/tests/fixtures/expected/macos-native crates/caskade-installer/tests/fixtures/bin/linux-shell crates/caskade-installer/tests/fixtures/bin/appimage crates/caskade-installer/tests/fixtures/bin/packages crates/caskade-installer/tests/fixtures/bin/flatpak crates/caskade-installer/tests/fixtures/bin/linux-mini crates/caskade-installer/tests/fixtures/expected/linux-shell crates/caskade-installer/tests/fixtures/expected/appimage crates/caskade-installer/tests/fixtures/expected/packages crates/caskade-installer/tests/fixtures/expected/flatpak crates/caskade-installer/tests/fixtures/expected/linux-mini crates/caskade-installer/tests/fixtures/build.lock
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Refresh genuine Windows, Linux and macOS installer fixtures (#34, #40, #44)'
+          git push --force-with-lease origin automation/installer-fixtures
+      - name: Open the review PR
+        env:
+          FIXTURE_PR_TOKEN: ${{ secrets.FIXTURE_PR_TOKEN }}
+        run: python3 xtask/fixture-pr.py

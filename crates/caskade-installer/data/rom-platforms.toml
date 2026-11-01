@@ -1,0 +1,40 @@
+# Stable IDs match EMULATION-PLAN.md's Platform convention.
+# Shared archive/disc extensions (zip,7z,iso,bin,cue,chd) intentionally excluded.
+[[platforms]]
+id = "nintendo_nes"
+name = "Nintendo Entertainment System"
+extensions = ["nes"]
+signatures = [{ offset = 0, bytes = [78,69,83,26] }]
+[[platforms]]
+id = "nintendo_snes"
+name = "Super Nintendo Entertainment System"
+extensions = ["sfc", "smc", "fig"]
+[[platforms]]
+id = "nintendo_game_boy"
+name = "Nintendo Game Boy"
+extensions = ["gb"]
+[[platforms]]
+id = "nintendo_game_boy_color"
+name = "Nintendo Game Boy Color"
+extensions = ["gbc"]
+[[platforms]]
+id = "nintendo_game_boy_advance"
+name = "Nintendo Game Boy Advance"
+extensions = ["gba"]
+[[platforms]]
+id = "nintendo_64"
+name = "Nintendo 64"
+extensions = ["z64", "v64", "n64"]
+signatures = [{ offset = 0, bytes = [128,55,18,64] }, { offset = 0, bytes = [55,128,64,18] }, { offset = 0, bytes = [64,18,55,128] }]
+[[platforms]]
+id = "sega_megadrive"
+name = "Sega Mega Drive"
+extensions = ["md", "gen", "smd"]
+require_header = true
+signatures = [{ offset = 256, bytes = [83,69,71,65] }]
+# Disc platforms: no suffix or header match here (bin/cue/iso are shared).
+# DiscProbe resolves them by ID from filesystem evidence such as SYSTEM.CNF.
+[[platforms]]
+id = "sony_playstation"
+name = "Sony PlayStation"
+extensions = []

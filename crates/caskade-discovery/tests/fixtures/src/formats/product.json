@@ -1,0 +1,46 @@
+{
+  "fields": [
+    {
+      "number": 1,
+      "wire": "message",
+      "fields": [
+        {
+          "number": 1,
+          "wire": "string",
+          "value": "fixture-product"
+        },
+        {
+          "number": 2,
+          "wire": "string",
+          "value": "fixture"
+        },
+        {
+          "number": 3,
+          "wire": "message",
+          "fields": [
+            {
+              "number": 1,
+              "wire": "string",
+              "value": "C:\\Games\\Fixture Strategy"
+            },
+            {
+              "number": 2,
+              "wire": "string",
+              "value": "eu"
+            },
+            {
+              "number": 6,
+              "wire": "string",
+              "value": "enUS"
+            },
+            {
+              "number": 7,
+              "wire": "string",
+              "value": "enUS"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

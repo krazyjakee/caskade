@@ -1,0 +1,25 @@
+schema_version = 1
+id = "mac-pkg-system"
+title = "Fixture Game"
+layout = "macos-pkg"
+format = "pkg"
+platform = "macos"
+input = "bin/macos-pkg/mac-pkg-system.pkg"
+parts = ["bin/macos-pkg/mac-pkg-system.pkg"]
+tree = "macos-pkg/mac-pkg-system.tree.json"
+launch_target = "FixtureGame.app/Contents/MacOS/FixtureGame"
+
+[host.windows]
+outcome = "Unsupported"
+strategy = "Delegate"
+runtime = "Native"
+
+[host.linux]
+outcome = "Unsupported"
+strategy = "Delegate"
+runtime = "Native"
+
+[host.macos]
+outcome = "Delegated"
+strategy = "Delegate"
+runtime = "Native"

@@ -1,0 +1,11 @@
+{
+  "gameId": "1207658924",
+  "name": "The Witcher",
+  "playTasks": [
+    {
+      "isPrimary": true,
+      "type": "FileTask",
+      "path": "game.exe"
+    }
+  ]
+}

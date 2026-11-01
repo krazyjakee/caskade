@@ -1,0 +1,119 @@
+{
+  "tag_name": "26.05",
+  "draft": false,
+  "prerelease": false,
+  "assets": [
+    {
+      "name": "7z2605-arm.exe",
+      "browser_download_url": "https://github.com/ip7z/7zip/releases/download/26.05/7z2605-arm.exe",
+      "size": 1666731,
+      "state": "uploaded",
+      "digest": "sha256:e4f8d95defa771742db2a81592510d84bee0d57c4856fac0840bf2ea7365745c"
+    },
+    {
+      "name": "7z2605-arm64.exe",
+      "browser_download_url": "https://github.com/ip7z/7zip/releases/download/26.05/7z2605-arm64.exe",
+      "size": 1595161,
+      "state": "uploaded",
+      "digest": "sha256:86d5790d5dd84cab4636c3bb7fab10d3ed7cd3e57e6119401bd2769e28165268"
+    },
+    {
+      "name": "7z2605-extra.7z",
+      "browser_download_url": "https://github.com/ip7z/7zip/releases/download/26.05/7z2605-extra.7z",
+      "size": 1763900,
+      "state": "uploaded",
+      "digest": "sha256:f27a8f103c84785026edcba1f67faf1357225df9d19ddb0b7760d55947141bc7"
+    },
+    {
+      "name": "7z2605-linux-arm.tar.xz",
+      "browser_download_url": "https://github.com/ip7z/7zip/releases/download/26.05/7z2605-linux-arm.tar.xz",
+      "size": 1217708,
+      "state": "uploaded",
+      "digest": "sha256:fcc6744c35f5af3dda0d57de379e885626b2c0fca2ac8a33410eba17d1d94954"
+    },
+    {
+      "name": "7z2605-linux-arm64.tar.xz",
+      "browser_download_url": "https://github.com/ip7z/7zip/releases/download/26.05/7z2605-linux-arm64.tar.xz",
+      "size": 1317128,
+      "state": "uploaded",
+      "digest": "sha256:0b71f6cfc34669b3bf69f2347efd3429f77020665003a13b9cdc53b784270421"
+    },
+    {
+      "name": "7z2605-linux-x64.tar.xz",
+      "browser_download_url": "https://github.com/ip7z/7zip/releases/download/26.05/7z2605-linux-x64.tar.xz",
+      "size": 1579976,
+      "state": "uploaded",
+      "digest": "sha256:22cf82fcc6eb7474f1d5bb4f02c0f8ebd573a718089d6833dc30f8350a3b232e"
+    },
+    {
+      "name": "7z2605-linux-x86.tar.xz",
+      "browser_download_url": "https://github.com/ip7z/7zip/releases/download/26.05/7z2605-linux-x86.tar.xz",
+      "size": 1712924,
+      "state": "uploaded",
+      "digest": "sha256:e8d8b762a4ee97fffa36a35b9831bbd0a7bb4645e5fafad839f9c22e297587a8"
+    },
+    {
+      "name": "7z2605-mac.tar.xz",
+      "browser_download_url": "https://github.com/ip7z/7zip/releases/download/26.05/7z2605-mac.tar.xz",
+      "size": 1868068,
+      "state": "uploaded",
+      "digest": "sha256:12ef6830317743cfd3f0ab1724bde43fcc270d8b6d8564f8c12c2a2b7f993570"
+    },
+    {
+      "name": "7z2605-src.7z",
+      "browser_download_url": "https://github.com/ip7z/7zip/releases/download/26.05/7z2605-src.7z",
+      "size": 1552479,
+      "state": "uploaded",
+      "digest": "sha256:fa081a1a33186158d71e9e24f494ed852ef8d0c9d06e21a86fb4713d94b55ae9"
+    },
+    {
+      "name": "7z2605-src.tar.xz",
+      "browser_download_url": "https://github.com/ip7z/7zip/releases/download/26.05/7z2605-src.tar.xz",
+      "size": 1565688,
+      "state": "uploaded",
+      "digest": "sha256:0b6080b8c3e7a579161d2d495224c0e51c467576cb4c7048b0ab485ef44cc22e"
+    },
+    {
+      "name": "7z2605-x64.exe",
+      "browser_download_url": "https://github.com/ip7z/7zip/releases/download/26.05/7z2605-x64.exe",
+      "size": 1663506,
+      "state": "uploaded",
+      "digest": "sha256:fd99e86f57d8f429ef5ed045bf98315af962e2309b0f1ba87a147a44c71647d0"
+    },
+    {
+      "name": "7z2605-x64.msi",
+      "browser_download_url": "https://github.com/ip7z/7zip/releases/download/26.05/7z2605-x64.msi",
+      "size": 2008576,
+      "state": "uploaded",
+      "digest": "sha256:3fe4ab99fa15629c652944309a2b2bc6e41fc933fc6b63f5df1ebcf3aea68263"
+    },
+    {
+      "name": "7z2605.exe",
+      "browser_download_url": "https://github.com/ip7z/7zip/releases/download/26.05/7z2605.exe",
+      "size": 1362132,
+      "state": "uploaded",
+      "digest": "sha256:6435a470fe7c4769962dbed8a60c641ee21401c833ced06077c80e33e7845a5e"
+    },
+    {
+      "name": "7z2605.msi",
+      "browser_download_url": "https://github.com/ip7z/7zip/releases/download/26.05/7z2605.msi",
+      "size": 1574400,
+      "state": "uploaded",
+      "digest": "sha256:4c2dab7e18696f25f98348fd981db664a982fb159a5f2dd77c9d985a847c6acd"
+    },
+    {
+      "name": "7zr.exe",
+      "browser_download_url": "https://github.com/ip7z/7zip/releases/download/26.05/7zr.exe",
+      "size": 602624,
+      "state": "uploaded",
+      "digest": "sha256:9bf582b894dfa665f852d7e9112b02290a1c303c2d95a21fcdc41ffcb03143b7"
+    },
+    {
+      "name": "lzma2605.7z",
+      "browser_download_url": "https://github.com/ip7z/7zip/releases/download/26.05/lzma2605.7z",
+      "size": 1786350,
+      "state": "uploaded",
+      "digest": "sha256:668fda469b7f584f246008cf28359c66ef98d65fafb3b22a52672eebe6970c28"
+    }
+  ]
+}

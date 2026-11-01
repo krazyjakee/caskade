@@ -1,0 +1,13 @@
+schema_version = 1
+os = "linux"
+now_unix_secs = 1700000000
+
+[env]
+"HOME" = "/home/fixture"
+"LANG" = "en_US.UTF-8"
+"PATH" = "/usr/bin:/bin"
+
+[[volumes]]
+path = "/"
+kind = "fixed"
+case_sensitive = true

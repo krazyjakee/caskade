@@ -1,0 +1,103 @@
+# SPDX-License-Identifier: MIT
+# Caskade region aliases for No-Intro/GoodTools ROM names.
+# Combined tags such as (USA, Europe) are parsed by the ROM-name reader.
+
+[[region]]
+id = "usa"
+name = "USA"
+codes = ["USA", "U", "US"]
+
+[[region]]
+id = "europe"
+name = "Europe"
+codes = ["Europe", "E", "EUR"]
+
+[[region]]
+id = "japan"
+name = "Japan"
+codes = ["Japan", "J", "JPN"]
+
+[[region]]
+id = "world"
+name = "World"
+codes = ["World", "W"]
+
+[[region]]
+id = "australia"
+name = "Australia"
+codes = ["Australia", "A", "AUS"]
+
+[[region]]
+id = "asia"
+name = "Asia"
+codes = ["Asia", "As"]
+
+[[region]]
+id = "korea"
+name = "Korea"
+codes = ["Korea", "K", "Kor"]
+
+[[region]]
+id = "china"
+name = "China"
+codes = ["China", "Ch"]
+
+[[region]]
+id = "taiwan"
+name = "Taiwan"
+codes = ["Taiwan", "Tw"]
+
+[[region]]
+id = "brazil"
+name = "Brazil"
+codes = ["Brazil", "B", "BR"]
+
+[[region]]
+id = "canada"
+name = "Canada"
+codes = ["Canada", "C"]
+
+[[region]]
+id = "france"
+name = "France"
+codes = ["France", "F", "Fr"]
+
+[[region]]
+id = "germany"
+name = "Germany"
+codes = ["Germany", "G", "De"]
+
+[[region]]
+id = "italy"
+name = "Italy"
+codes = ["Italy", "I", "It"]
+
+[[region]]
+id = "spain"
+name = "Spain"
+codes = ["Spain", "S", "Es"]
+
+[[region]]
+id = "russia"
+name = "Russia"
+codes = ["Russia", "R", "Ru"]
+
+[[region]]
+id = "netherlands"
+name = "Netherlands"
+codes = ["Netherlands", "Nl"]
+
+[[region]]
+id = "sweden"
+name = "Sweden"
+codes = ["Sweden", "Sw"]
+
+[[region]]
+id = "united_kingdom"
+name = "United Kingdom"
+codes = ["United Kingdom", "UK"]
+
+[[region]]
+id = "hong_kong"
+name = "Hong Kong"
+codes = ["Hong Kong", "HK"]

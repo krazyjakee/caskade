@@ -1,0 +1,24 @@
+schema_version = 1
+id = "ps1-cue-bin"
+title = "Caskade Disc Fixture"
+layout = "disc"
+format = "cue"
+platform = "sony_playstation"
+input = "bin/disc/ps1-cue-bin.cue"
+parts = ["bin/disc/ps1-cue-bin.cue", "bin/disc/ps1-cue-bin.bin"]
+tree = "disc/ps1-cue-bin.tree.json"
+launch_target = "CASKADE.EXE"
+[host.windows]
+outcome = "handoff"
+strategy = "handoff"
+runtime = "none"
+
+[host.linux]
+outcome = "handoff"
+strategy = "handoff"
+runtime = "none"
+
+[host.macos]
+outcome = "handoff"
+strategy = "handoff"
+runtime = "none"

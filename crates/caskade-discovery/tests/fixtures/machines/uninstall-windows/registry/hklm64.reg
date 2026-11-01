@@ -1,0 +1,231 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\HollowKnight_is1]
+"DisplayIcon"="\"C:\\Games\\Hollow Knight\\game.exe\",0"
+"DisplayName"="Hollow Knight"
+"EstimatedSize"=dword:00001000
+"InstallDate"="20241031"
+"InstallLocation"="C:\\Games\\Hollow Knight"
+"Publisher"="Team Cherry"
+"QuietUninstallString"="\"C:\\Games\\Hollow Knight\\unins000.exe\" /VERYSILENT"
+"UninstallString"="\"C:\\Games\\Hollow Knight\\unins000.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\KerbalSpaceProgram_is1]
+"DisplayIcon"="\"C:\\Games\\Kerbal Space Program\\game.exe\",0"
+"DisplayName"="Kerbal Space Program"
+"EstimatedSize"=dword:00001000
+"InstallDate"="20241031"
+"InstallLocation"="C:\\Games\\Kerbal Space Program"
+"Publisher"="Squad"
+"QuietUninstallString"="\"C:\\Games\\Kerbal Space Program\\unins000.exe\" /VERYSILENT"
+"UninstallString"="\"C:\\Games\\Kerbal Space Program\\unins000.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\SlimeRancher_is1]
+"DisplayIcon"="\"C:\\Games\\Slime Rancher\\game.exe\",0"
+"DisplayName"="Slime Rancher"
+"EstimatedSize"=dword:00001000
+"InstallDate"="20241031"
+"InstallLocation"="C:\\Games\\Slime Rancher"
+"Publisher"="Monomi Park"
+"QuietUninstallString"="\"C:\\Games\\Slime Rancher\\unins000.exe\" /VERYSILENT"
+"UninstallString"="\"C:\\Games\\Slime Rancher\\unins000.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\OuterWilds_is1]
+"DisplayIcon"="\"C:\\Games\\Outer Wilds\\game.exe\",0"
+"DisplayName"="Outer Wilds"
+"EstimatedSize"=dword:00001000
+"InstallDate"="20241031"
+"InstallLocation"="C:\\Games\\Outer Wilds"
+"Publisher"="Mobius Digital"
+"QuietUninstallString"="\"C:\\Games\\Outer Wilds\\unins000.exe\" /VERYSILENT"
+"UninstallString"="\"C:\\Games\\Outer Wilds\\unins000.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Deltarune_is1]
+"DisplayIcon"="\"C:\\Games\\Deltarune\\game.exe\",0"
+"DisplayName"="Deltarune"
+"EstimatedSize"=dword:00001000
+"InstallDate"="20241031"
+"InstallLocation"="C:\\Games\\Deltarune"
+"Publisher"="tobyfox"
+"QuietUninstallString"="\"C:\\Games\\Deltarune\\unins000.exe\" /VERYSILENT"
+"UninstallString"="\"C:\\Games\\Deltarune\\unins000.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\StardewValley_is1]
+"DisplayIcon"="\"C:\\Games\\Stardew Valley\\game.exe\",0"
+"DisplayName"="Stardew Valley"
+"EstimatedSize"=dword:00001000
+"InstallDate"="20241031"
+"InstallLocation"="C:\\Games\\Stardew Valley"
+"Publisher"="ConcernedApe"
+"QuietUninstallString"="\"C:\\Games\\Stardew Valley\\unins000.exe\" /VERYSILENT"
+"UninstallString"="\"C:\\Games\\Stardew Valley\\unins000.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\7-Zip]
+"DisplayName"="7-Zip"
+"InstallLocation"="C:\\Program Files\\7-Zip"
+"Publisher"="7-Zip"
+"UninstallString"="\"C:\\Program Files\\7-Zip\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Visual Studio Code]
+"DisplayName"="Visual Studio Code"
+"InstallLocation"="C:\\Program Files\\Visual Studio Code"
+"Publisher"="Visual"
+"UninstallString"="\"C:\\Program Files\\Visual Studio Code\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Blender]
+"DisplayName"="Blender"
+"InstallLocation"="C:\\Program Files\\Blender"
+"Publisher"="Blender"
+"UninstallString"="\"C:\\Program Files\\Blender\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\LibreOffice]
+"DisplayName"="LibreOffice"
+"InstallLocation"="C:\\Program Files\\LibreOffice"
+"Publisher"="LibreOffice"
+"UninstallString"="\"C:\\Program Files\\LibreOffice\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Slack]
+"DisplayName"="Slack"
+"InstallLocation"="C:\\Program Files\\Slack"
+"Publisher"="Slack"
+"UninstallString"="\"C:\\Program Files\\Slack\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\OneDrive]
+"DisplayName"="OneDrive"
+"InstallLocation"="C:\\Program Files\\OneDrive"
+"Publisher"="OneDrive"
+"UninstallString"="\"C:\\Program Files\\OneDrive\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Node.js]
+"DisplayName"="Node.js"
+"InstallLocation"="C:\\Program Files\\Node.js"
+"Publisher"="Node.js"
+"UninstallString"="\"C:\\Program Files\\Node.js\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\AMD Software]
+"DisplayName"="AMD Software"
+"InstallLocation"="C:\\Program Files\\AMD Software"
+"Publisher"="AMD"
+"UninstallString"="\"C:\\Program Files\\AMD Software\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Unity Editor]
+"DisplayName"="Unity Editor"
+"InstallLocation"="C:\\Program Files\\Unity Editor"
+"Publisher"="Unity"
+"UninstallString"="\"C:\\Program Files\\Unity Editor\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\VirtualBox]
+"DisplayName"="VirtualBox"
+"InstallLocation"="C:\\Program Files\\VirtualBox"
+"Publisher"="VirtualBox"
+"UninstallString"="\"C:\\Program Files\\VirtualBox\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\FileZilla]
+"DisplayName"="FileZilla"
+"InstallLocation"="C:\\Program Files\\FileZilla"
+"Publisher"="FileZilla"
+"UninstallString"="\"C:\\Program Files\\FileZilla\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\SumatraPDF]
+"DisplayName"="SumatraPDF"
+"InstallLocation"="C:\\Program Files\\SumatraPDF"
+"Publisher"="SumatraPDF"
+"UninstallString"="\"C:\\Program Files\\SumatraPDF\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Everything]
+"DisplayName"="Everything"
+"InstallLocation"="C:\\Program Files\\Everything"
+"Publisher"="Everything"
+"UninstallString"="\"C:\\Program Files\\Everything\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\CPUID CPU-Z]
+"DisplayName"="CPUID CPU-Z"
+"InstallLocation"="C:\\Program Files\\CPUID CPU-Z"
+"Publisher"="CPUID"
+"UninstallString"="\"C:\\Program Files\\CPUID CPU-Z\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Corsair iCUE]
+"DisplayName"="Corsair iCUE"
+"InstallLocation"="C:\\Program Files\\Corsair iCUE"
+"Publisher"="Corsair"
+"UninstallString"="\"C:\\Program Files\\Corsair iCUE\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Hidden0]
+"DisplayName"="Hidden component 0"
+"Publisher"="Microsoft Corporation"
+"SystemComponent"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Hidden1]
+"DisplayName"="Hidden component 1"
+"ParentKeyName"="Parent"
+"Publisher"="Microsoft Corporation"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Hidden2]
+"DisplayName"="Hidden component 2"
+"Publisher"="Microsoft Corporation"
+"ReleaseType"="Update"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Hidden3]
+"DisplayName"="Hidden component 3"
+"Publisher"="Microsoft Corporation"
+"ReleaseType"="Hotfix"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Hidden4]
+"DisplayName"="Hidden component 4"
+"Publisher"="Microsoft Corporation"
+"ReleaseType"="Security Update"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Hidden5]
+"DisplayName"="Hidden component 5"
+"Publisher"="Microsoft Corporation"
+"ReleaseType"="ServicePack"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Hidden6]
+"DisplayName"="Hidden component 6"
+"Publisher"="Microsoft Corporation"
+"ReleaseType"="Update Rollup"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Hidden7]
+"DisplayName"=""
+"Publisher"="Microsoft Corporation"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 620]
+"DisplayName"="Portal 2"
+"InstallLocation"="C:\\Games\\Portal 2"
+"UninstallString"="steam://uninstall/620"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 480]
+"DisplayName"="Spacewar"
+"InstallLocation"="C:\\Games\\Spacewar"
+"UninstallString"="steam://uninstall/480"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Uplay Install 54]
+"DisplayName"="Assassins Creed II"
+"InstallLocation"="C:\\Games\\Assassins Creed II"
+"UninstallString"="uplay://launch/54/0"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Uplay Install 1800]
+"DisplayName"="Anno 1800"
+"InstallLocation"="C:\\Games\\Anno 1800"
+"UninstallString"="uplay://launch/1800/0"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\1207658924_is1]
+"DisplayName"="The Witcher"
+"InstallLocation"="C:\\GOG Games\\The Witcher"
+"UninstallString"="goggalaxy://openGameView/1207658924"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Battle.net WoW]
+"DisplayName"="World of Warcraft"
+"InstallLocation"="C:\\Games\\World of Warcraft"
+"UninstallString"="battlenet://WoW"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\EA App fixture]
+"DisplayName"="The Sims 4"
+"InstallLocation"="C:\\EA Games\\The Sims 4"
+"UninstallString"="link2ea://launchgame/OFB-EAST:109552316"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Library Alias]
+"DisplayName"="Library Alias"
+"InstallLocation"="C:\\Program Files\\Epic Games\\Library Alias"
+"UninstallString"="\"C:\\Program Files\\Epic Games\\Library Alias\\uninstall.exe\""
+

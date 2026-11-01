@@ -1,0 +1,4 @@
+game:
+  exe: game
+  args: --test
+runner: linux

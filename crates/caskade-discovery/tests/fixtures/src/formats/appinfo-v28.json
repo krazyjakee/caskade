@@ -1,0 +1,64 @@
+{
+  "version": 28,
+  "apps": [
+    {
+      "app_id": 620,
+      "entries": [
+        {
+          "key": "appinfo",
+          "type": "object",
+          "value": [
+            {
+              "key": "appid",
+              "type": "string",
+              "value": "620"
+            },
+            {
+              "key": "common",
+              "type": "object",
+              "value": [
+                {
+                  "key": "name",
+                  "type": "string",
+                  "value": "Fixture Puzzle"
+                },
+                {
+                  "key": "type",
+                  "type": "string",
+                  "value": "Game"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "app_id": 1493710,
+      "entries": [
+        {
+          "key": "appinfo",
+          "type": "object",
+          "value": [
+            {
+              "key": "common",
+              "type": "object",
+              "value": [
+                {
+                  "key": "name",
+                  "type": "string",
+                  "value": "Fixture Runtime"
+                },
+                {
+                  "key": "type",
+                  "type": "string",
+                  "value": "Tool"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+schema_version = 1
+id = "makeself-generic"
+title = "Caskade Fixture Game"
+layout = "makeself-generic"
+format = "makeself"
+platform = "linux"
+input = "bin/linux-shell/makeself-generic.sh"
+parts = ["bin/linux-shell/makeself-generic.sh"]
+tree = "linux-shell/makeself-generic.tree.json"
+launch_target = "start.sh"
+
+[host.windows]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"

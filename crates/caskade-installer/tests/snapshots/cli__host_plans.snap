@@ -1,0 +1,479 @@
+---
+source: crates/caskade-installer/tests/cli.rs
+assertion_line: 151
+expression: profiles
+---
+{
+  "linux": {
+    "host": {
+      "arch": "x86_64",
+      "filesystem": {
+        "case_sensitive": true,
+        "exec_bits": true,
+        "symlinks": true,
+        "writable": true
+      },
+      "os": "linux",
+      "proton_builds": [
+        "/opt/UMU-Proton"
+      ],
+      "runners": [
+        {
+          "kind": "native",
+          "program": ""
+        },
+        {
+          "kind": "proton",
+          "program": "/usr/bin/umu-run"
+        }
+      ],
+      "seven_zip": "/usr/bin/7zz"
+    },
+    "plans": {
+      "candidates": [
+        {
+          "confidence": 1.0,
+          "fidelity": "exact",
+          "handler": "archive",
+          "requires": {
+            "est_disk_bytes": null,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        },
+        {
+          "confidence": 0.8999999761581421,
+          "fidelity": "equivalent",
+          "handler": "sevenzip",
+          "requires": {
+            "est_disk_bytes": null,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        }
+      ],
+      "question": null,
+      "selected": 0
+    }
+  },
+  "linux-exfat-root": {
+    "host": {
+      "arch": "x86_64",
+      "filesystem": {
+        "case_sensitive": false,
+        "exec_bits": false,
+        "symlinks": false,
+        "writable": true
+      },
+      "os": "linux",
+      "proton_builds": [
+        "/opt/UMU-Proton"
+      ],
+      "runners": [
+        {
+          "kind": "native",
+          "program": ""
+        },
+        {
+          "kind": "proton",
+          "program": "/usr/bin/umu-run"
+        }
+      ],
+      "seven_zip": "/usr/bin/7zz"
+    },
+    "plans": {
+      "candidates": [
+        {
+          "confidence": 1.0,
+          "fidelity": "exact",
+          "handler": "archive",
+          "requires": {
+            "est_disk_bytes": null,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        },
+        {
+          "confidence": 0.8999999761581421,
+          "fidelity": "equivalent",
+          "handler": "sevenzip",
+          "requires": {
+            "est_disk_bytes": null,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        }
+      ],
+      "question": null,
+      "selected": 0
+    }
+  },
+  "linux-no-umu": {
+    "host": {
+      "arch": "x86_64",
+      "filesystem": {
+        "case_sensitive": true,
+        "exec_bits": true,
+        "symlinks": true,
+        "writable": true
+      },
+      "os": "linux",
+      "proton_builds": [],
+      "runners": [
+        {
+          "kind": "native",
+          "program": ""
+        }
+      ],
+      "seven_zip": "/usr/bin/7zz"
+    },
+    "plans": {
+      "candidates": [
+        {
+          "confidence": 1.0,
+          "fidelity": "exact",
+          "handler": "archive",
+          "requires": {
+            "est_disk_bytes": null,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        },
+        {
+          "confidence": 0.8999999761581421,
+          "fidelity": "equivalent",
+          "handler": "sevenzip",
+          "requires": {
+            "est_disk_bytes": null,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        }
+      ],
+      "question": null,
+      "selected": 0
+    }
+  },
+  "macos": {
+    "host": {
+      "arch": "aarch64",
+      "filesystem": {
+        "case_sensitive": false,
+        "exec_bits": true,
+        "symlinks": true,
+        "writable": true
+      },
+      "os": "macos",
+      "proton_builds": [],
+      "runners": [
+        {
+          "kind": "native",
+          "program": ""
+        },
+        {
+          "kind": "wine",
+          "program": "/Applications/Wine.app/Contents/MacOS/wine"
+        }
+      ],
+      "seven_zip": "/opt/homebrew/bin/7zz"
+    },
+    "plans": {
+      "candidates": [
+        {
+          "confidence": 1.0,
+          "fidelity": "exact",
+          "handler": "archive",
+          "requires": {
+            "est_disk_bytes": null,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        },
+        {
+          "confidence": 0.8999999761581421,
+          "fidelity": "equivalent",
+          "handler": "sevenzip",
+          "requires": {
+            "est_disk_bytes": null,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        }
+      ],
+      "question": null,
+      "selected": 0
+    }
+  },
+  "macos-no-wine": {
+    "host": {
+      "arch": "aarch64",
+      "filesystem": {
+        "case_sensitive": false,
+        "exec_bits": true,
+        "symlinks": true,
+        "writable": true
+      },
+      "os": "macos",
+      "proton_builds": [],
+      "runners": [
+        {
+          "kind": "native",
+          "program": ""
+        }
+      ],
+      "seven_zip": "/opt/homebrew/bin/7zz"
+    },
+    "plans": {
+      "candidates": [
+        {
+          "confidence": 1.0,
+          "fidelity": "exact",
+          "handler": "archive",
+          "requires": {
+            "est_disk_bytes": null,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        },
+        {
+          "confidence": 0.8999999761581421,
+          "fidelity": "equivalent",
+          "handler": "sevenzip",
+          "requires": {
+            "est_disk_bytes": null,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        }
+      ],
+      "question": null,
+      "selected": 0
+    }
+  },
+  "windows": {
+    "host": {
+      "arch": "x86_64",
+      "filesystem": {
+        "case_sensitive": false,
+        "exec_bits": false,
+        "symlinks": true,
+        "writable": true
+      },
+      "os": "windows",
+      "proton_builds": [],
+      "runners": [
+        {
+          "kind": "native",
+          "program": ""
+        }
+      ],
+      "seven_zip": "C:\\Caskade\\7zz.exe"
+    },
+    "plans": {
+      "candidates": [
+        {
+          "confidence": 1.0,
+          "fidelity": "exact",
+          "handler": "archive",
+          "requires": {
+            "est_disk_bytes": null,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        },
+        {
+          "confidence": 0.8999999761581421,
+          "fidelity": "equivalent",
+          "handler": "sevenzip",
+          "requires": {
+            "est_disk_bytes": null,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        }
+      ],
+      "question": null,
+      "selected": 0
+    }
+  }
+}

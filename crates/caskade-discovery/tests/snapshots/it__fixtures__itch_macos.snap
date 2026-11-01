@@ -1,0 +1,241 @@
+---
+source: crates/caskade-discovery/tests/fixtures/support/mod.rs
+expression: "relative_value(value, root).expect(\"serializable snapshot\")"
+---
+[
+  {
+    "artwork": [],
+    "confidence": "certain",
+    "evidence": [
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/Users/fixture/Library/Application Support/itch/butler.db"
+        }
+      }
+    ],
+    "icon": null,
+    "ids": [
+      {
+        "type": "itch",
+        "value": {
+          "game_id": "103"
+        }
+      }
+    ],
+    "install_dir": "$FIXTURE/root/Users/fixture/itch-games/missing",
+    "key": "cave-missing",
+    "last_played_unix": null,
+    "launch": [
+      {
+        "type": "uri",
+        "value": {
+          "uri": "itch://caves/cave-missing/launch"
+        }
+      }
+    ],
+    "playtime_secs": 0,
+    "runtime": {
+      "type": "native"
+    },
+    "size": 0,
+    "source": "itch",
+    "state": {
+      "type": "broken",
+      "value": {
+        "reason": "installed directory missing"
+      }
+    },
+    "title": "Missing Fixture",
+    "tracking": {
+      "exe_names": [],
+      "install_dir": "$FIXTURE/root/Users/fixture/itch-games/missing",
+      "steam_app_id": null
+    },
+    "uninstall": null
+  },
+  {
+    "artwork": [],
+    "confidence": "certain",
+    "evidence": [
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/Users/fixture/Library/Application Support/itch/butler.db"
+        }
+      },
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/Users/fixture/itch-games/portable/.itch.toml"
+        }
+      }
+    ],
+    "icon": null,
+    "ids": [
+      {
+        "type": "itch",
+        "value": {
+          "game_id": "101"
+        }
+      }
+    ],
+    "install_dir": "$FIXTURE/root/Users/fixture/itch-games/portable",
+    "key": "cave-portable",
+    "last_played_unix": null,
+    "launch": [
+      {
+        "type": "uri",
+        "value": {
+          "uri": "itch://caves/cave-portable/launch"
+        }
+      },
+      {
+        "type": "exec",
+        "value": {
+          "args": [
+            "--macos"
+          ],
+          "cwd": "$FIXTURE/root/Users/fixture/itch-games/portable",
+          "env": {},
+          "program": "$FIXTURE/root/Users/fixture/itch-games/portable/game.sh"
+        }
+      }
+    ],
+    "playtime_secs": 3600,
+    "runtime": {
+      "type": "native"
+    },
+    "size": 4096,
+    "source": "itch",
+    "state": {
+      "type": "installed"
+    },
+    "title": "Fixture Itch Portable",
+    "tracking": {
+      "exe_names": [
+        "game.sh"
+      ],
+      "install_dir": "$FIXTURE/root/Users/fixture/itch-games/portable",
+      "steam_app_id": null
+    },
+    "uninstall": null
+  },
+  {
+    "artwork": [],
+    "confidence": "certain",
+    "evidence": [
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/Users/fixture/Library/Application Support/itch/butler.db"
+        }
+      },
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/Users/fixture/itch-games/receipt-only/.itch/receipt.json.gz"
+        }
+      }
+    ],
+    "icon": null,
+    "ids": [
+      {
+        "type": "itch",
+        "value": {
+          "game_id": "201"
+        }
+      }
+    ],
+    "install_dir": "$FIXTURE/root/Users/fixture/itch-games/receipt-only",
+    "key": "cave-receipt",
+    "last_played_unix": null,
+    "launch": [
+      {
+        "type": "uri",
+        "value": {
+          "uri": "itch://caves/cave-receipt/launch"
+        }
+      },
+      {
+        "type": "exec",
+        "value": {
+          "args": [],
+          "cwd": "$FIXTURE/root/Users/fixture/itch-games/receipt-only",
+          "env": {},
+          "program": "$FIXTURE/root/Users/fixture/itch-games/receipt-only/start.sh"
+        }
+      }
+    ],
+    "playtime_secs": 30,
+    "runtime": {
+      "type": "native"
+    },
+    "size": 1024,
+    "source": "itch",
+    "state": {
+      "type": "installed"
+    },
+    "title": "Fixture Receipt Only",
+    "tracking": {
+      "exe_names": [
+        "start.sh"
+      ],
+      "install_dir": "$FIXTURE/root/Users/fixture/itch-games/receipt-only",
+      "steam_app_id": null
+    },
+    "uninstall": null
+  },
+  {
+    "artwork": [],
+    "confidence": "certain",
+    "evidence": [
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/Users/fixture/Library/Application Support/itch/butler.db"
+        }
+      }
+    ],
+    "icon": null,
+    "ids": [
+      {
+        "type": "itch",
+        "value": {
+          "game_id": "102"
+        }
+      }
+    ],
+    "install_dir": "$FIXTURE/root/Users/fixture/itch-games/windows",
+    "key": "cave-windows",
+    "last_played_unix": null,
+    "launch": [
+      {
+        "type": "uri",
+        "value": {
+          "uri": "itch://caves/cave-windows/launch"
+        }
+      }
+    ],
+    "playtime_secs": 120,
+    "runtime": {
+      "type": "windows",
+      "value": {
+        "prefix": null,
+        "runner": null
+      }
+    },
+    "size": 8192,
+    "source": "itch",
+    "state": {
+      "type": "installed"
+    },
+    "title": "Fixture Itch Windows",
+    "tracking": {
+      "exe_names": [],
+      "install_dir": "$FIXTURE/root/Users/fixture/itch-games/windows",
+      "steam_app_id": null
+    },
+    "uninstall": null
+  }
+]

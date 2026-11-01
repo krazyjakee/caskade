@@ -1,0 +1,82 @@
+html,
+body,
+#root {
+  height: 100%;
+  /* The views scroll inside the shell. Clipped, not hidden: a hidden
+     overflow can still be scrolled by focus, which moved the whole shell
+     out of the window with no way back. */
+  overflow: clip;
+}
+
+body {
+  background: var(--cs-color-surface-base);
+  color: var(--cs-color-fg);
+  font-family: var(--cs-font-sans);
+  -webkit-font-smoothing: antialiased;
+  color-scheme: dark;
+}
+
+/* A theme's light scheme (#140) restyles native controls and scrollbars too. */
+[data-color-scheme="light"] body {
+  color-scheme: light;
+}
+
+/* The focus ring is in index.css, with its utilities (#161). */
+
+/* The enter animation of `animate-enter` (index.css); themes add their own
+ * effects in cs.theme. */
+@keyframes cs-enter {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+
+@keyframes cs-worker {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes cs-rise {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+    scale: 0.97;
+    filter: blur(6px);
+  }
+}
+
+@keyframes cs-progress {
+  from {
+    translate: -100% 0;
+  }
+  to {
+    translate: 250% 0;
+  }
+}
+
+@keyframes cs-wait {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* A refused PIN (`animate-shake`). */
+@keyframes cs-shake {
+  20%,
+  60% {
+    translate: -8px 0;
+  }
+  40%,
+  80% {
+    translate: 8px 0;
+  }
+}
+
+/* A drop zone while files are dragged over it (drop/DropProvider.tsx). */
+[data-drop-active] {
+  outline: 2px dashed var(--cs-color-accent-strong);
+  outline-offset: 4px;
+  border-radius: var(--cs-radius-control);
+}

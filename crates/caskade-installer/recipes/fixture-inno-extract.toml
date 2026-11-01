@@ -1,0 +1,14 @@
+schema_version = 1
+id = "fixture-inno-extract"
+description = "Extract the committed Inno fixture and record a recipe marker."
+strategy = "extract"
+disable_alias = true
+
+[match]
+sha256 = "d64c9f3729873ef315ae490104db9cf96f147b1da5cc967d2ac78cf0fd4e7327"
+
+[[add_steps]]
+type = "write_file"
+[add_steps.value]
+path = "recipe-applied.txt"
+contents = [114, 101, 99, 105, 112, 101, 32, 97, 112, 112, 108, 105, 101, 100, 10]

@@ -1,0 +1,3224 @@
+{
+  "schema_version": 1,
+  "provenance": "Original generated synthetic records only. No live machine files, account data, or game binaries.",
+  "machines": [
+    {
+      "id": "linux-mixed",
+      "os": "linux",
+      "env": {
+        "HOME": "/home/fixture"
+      },
+      "volumes": [
+        {
+          "path": "/",
+          "kind": "fixed",
+          "case_sensitive": true
+        }
+      ],
+      "files": [
+        {
+          "source": "linux/appmanifest.acf",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/appmanifest_620.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "linux/libraryfolders.vdf",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/libraryfolders.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "formats/shortcuts.json",
+          "path": "root/home/fixture/.local/share/Steam/userdata/424242/config/shortcuts.vdf",
+          "kind": "binary-vdf"
+        },
+        {
+          "source": "formats/appinfo-v29.json",
+          "path": "root/home/fixture/.local/share/Steam/appcache/appinfo.vdf",
+          "kind": "appinfo"
+        },
+        {
+          "source": "linux/pga.sql",
+          "path": "root/home/fixture/.local/share/lutris/pga.db",
+          "kind": "sqlite"
+        },
+        {
+          "source": "linux/game.yml",
+          "path": "root/home/fixture/.config/lutris/games/fixture-adventure.yml",
+          "kind": "copy"
+        },
+        {
+          "source": "linux/heroic-installed.json",
+          "path": "root/home/fixture/.config/heroic/legendaryConfig/legendary/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "linux/gog-installed.json",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/gog_store/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "linux/puzzle.desktop",
+          "path": "root/home/fixture/.local/share/applications/fixture-puzzle.desktop",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Fixture Puzzle/game",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Fixture Adventure/game.exe",
+          "kind": "copy"
+        }
+      ]
+    },
+    {
+      "id": "windows-mixed",
+      "os": "windows",
+      "env": {
+        "USERPROFILE": "C:\\Users\\fixture"
+      },
+      "volumes": [
+        {
+          "path": "C:\\",
+          "kind": "fixed",
+          "case_sensitive": false
+        },
+        {
+          "path": "D:\\",
+          "kind": "removable",
+          "case_sensitive": false
+        }
+      ],
+      "files": [
+        {
+          "source": "windows/epic.item",
+          "path": "root/drives/c/ProgramData/Epic/EpicGamesLauncher/Data/Manifests/fixture.item",
+          "kind": "copy"
+        },
+        {
+          "source": "windows/hklm64.reg",
+          "path": "registry/hklm64.reg",
+          "kind": "copy"
+        },
+        {
+          "source": "windows/hkcu.reg",
+          "path": "registry/hkcu.reg",
+          "kind": "copy"
+        },
+        {
+          "source": "formats/unicode-link.json",
+          "path": "root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Fixture Puzzle.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "linux/steam.url",
+          "path": "root/drives/c/Users/fixture/Desktop/Fixture Puzzle.url",
+          "kind": "copy"
+        },
+        {
+          "source": "windows/amazon.sql",
+          "path": "root/drives/c/ProgramData/Amazon Games/Data/Games/Sql/GameInstallInfo.sqlite",
+          "kind": "sqlite"
+        },
+        {
+          "source": "formats/product.json",
+          "path": "root/drives/c/ProgramData/Battle.net/Agent/product.db",
+          "kind": "protobuf"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Fixture Adventure/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Fixture Caf\u00e9/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/d/Games/Fixture Puzzle/game.exe",
+          "kind": "copy"
+        }
+      ]
+    },
+    {
+      "id": "macos-mixed",
+      "os": "macos",
+      "env": {
+        "HOME": "/Users/fixture"
+      },
+      "files": [
+        {
+          "source": "macos/Info.plist",
+          "path": "root/Applications/Fixture Puzzle.app/Contents/Info.plist",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/Applications/Fixture Puzzle.app/Contents/MacOS/fixture-game",
+          "kind": "copy"
+        },
+        {
+          "source": "macos/heroic-installed.json",
+          "path": "root/Users/fixture/Library/Application Support/heroic/legendaryConfig/legendary/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/Users/fixture/Games/Fixture Adventure/game.exe",
+          "kind": "copy"
+        }
+      ]
+    },
+    {
+      "id": "linux-wine",
+      "os": "linux",
+      "env": {
+        "HOME": "/home/fixture",
+        "WINEPREFIX": "/home/fixture/.wine"
+      },
+      "files": [
+        {
+          "source": "windows/hklm64.reg",
+          "path": "root/home/fixture/.wine/system.reg",
+          "kind": "copy"
+        },
+        {
+          "source": "windows/hkcu.reg",
+          "path": "root/home/fixture/.wine/user.reg",
+          "kind": "copy"
+        },
+        {
+          "source": "windows/epic.item",
+          "path": "root/home/fixture/.wine/drive_c/ProgramData/Epic/EpicGamesLauncher/Data/Manifests/fixture.item",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.wine/drive_c/Games/Fixture Adventure/game.exe",
+          "kind": "copy"
+        }
+      ]
+    },
+    {
+      "id": "steam-linux-shared",
+      "os": "linux",
+      "env": {
+        "HOME": "/home/fixture"
+      },
+      "volumes": [
+        {
+          "path": "/",
+          "kind": "fixed",
+          "case_sensitive": true
+        }
+      ],
+      "files": [
+        {
+          "source": "steam/linux-native-libraryfolders.vdf",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/libraryfolders.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/appmanifest_620.acf",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/appmanifest_620.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/appmanifest_1493710.acf",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/appmanifest_1493710.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/appmanifest_1628350.acf",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/appmanifest_1628350.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/appmanifest_228980.acf",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/appmanifest_228980.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/common/Fixture Puzzle/game",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/linux-appinfo.json",
+          "path": "root/home/fixture/.local/share/Steam/appcache/appinfo.vdf",
+          "kind": "appinfo"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.local/share/Steam/appcache/librarycache/620_icon.jpg",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.local/share/Steam/appcache/librarycache/620_library_600x900.jpg",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.local/share/Steam/appcache/librarycache/2000010/0123456789abcdef0123456789abcdef01234567.jpg",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.local/share/Steam/appcache/librarycache/2000010/header.jpg",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/loginusers.vdf",
+          "path": "root/home/fixture/.local/share/Steam/config/loginusers.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/linux-config.vdf",
+          "path": "root/home/fixture/.local/share/Steam/config/config.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/localconfig.vdf",
+          "path": "root/home/fixture/.local/share/Steam/userdata/424242/config/localconfig.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/steam_client.manifest",
+          "path": "root/home/fixture/.local/share/Steam/package/steam_client_ubuntu12.manifest",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/linux-flatpak-libraryfolders.vdf",
+          "path": "root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/libraryfolders.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/appmanifest_2000030.acf",
+          "path": "root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/appmanifest_2000030.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Fixture Flatpak Racer/game",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/loginusers.vdf",
+          "path": "root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/config/loginusers.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/flatpak-localconfig.vdf",
+          "path": "root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/userdata/424242/config/localconfig.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/appmanifest_2000010.acf",
+          "path": "root/mnt/games/SteamLibrary/steamapps/appmanifest_2000010.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/appmanifest_2000020.acf",
+          "path": "root/mnt/games/SteamLibrary/steamapps/appmanifest_2000020.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/mnt/games/SteamLibrary/steamapps/common/Fixture Windows Quest/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/system.reg",
+          "path": "root/mnt/games/SteamLibrary/steamapps/compatdata/2000010/pfx/system.reg",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/mnt/games/SteamLibrary/steamapps/downloading/2000020/.fixture-empty",
+          "kind": "copy"
+        }
+      ]
+    },
+    {
+      "id": "steam-windows-libraries",
+      "os": "windows",
+      "env": {
+        "USERPROFILE": "C:\\Users\\fixture"
+      },
+      "volumes": [
+        {
+          "path": "C:\\",
+          "kind": "fixed",
+          "case_sensitive": false
+        },
+        {
+          "path": "D:\\",
+          "kind": "fixed",
+          "case_sensitive": false
+        },
+        {
+          "path": "E:\\",
+          "kind": "fixed",
+          "case_sensitive": false
+        }
+      ],
+      "files": [
+        {
+          "source": "steam/windows-hkcu.reg",
+          "path": "registry/hkcu.reg",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/windows-libraryfolders.vdf",
+          "path": "root/drives/c/Program Files (x86)/Steam/steamapps/libraryfolders.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/appmanifest_620.acf",
+          "path": "root/drives/c/Program Files (x86)/Steam/steamapps/appmanifest_620.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/appmanifest_228980.acf",
+          "path": "root/drives/c/Program Files (x86)/Steam/steamapps/appmanifest_228980.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files (x86)/Steam/steamapps/common/Fixture Puzzle/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/loginusers.vdf",
+          "path": "root/drives/c/Program Files (x86)/Steam/config/loginusers.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/windows-localconfig.vdf",
+          "path": "root/drives/c/Program Files (x86)/Steam/userdata/424242/config/localconfig.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/windows-steam_client.manifest",
+          "path": "root/drives/c/Program Files (x86)/Steam/package/steam_client_win32.manifest",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/appmanifest_2000040.acf",
+          "path": "root/drives/d/SteamLibrary/steamapps/appmanifest_2000040.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/d/SteamLibrary/steamapps/common/Fixture Updating Saga/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/appmanifest_2000050.acf",
+          "path": "root/drives/e/Games/SteamLibrary/steamapps/appmanifest_2000050.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/e/Games/SteamLibrary/steamapps/common/Fixture Drive E/game.exe",
+          "kind": "copy"
+        }
+      ]
+    },
+    {
+      "id": "steam-shortcuts",
+      "os": "linux",
+      "env": {
+        "HOME": "/home/fixture"
+      },
+      "volumes": [
+        {
+          "path": "/",
+          "kind": "fixed",
+          "case_sensitive": true
+        }
+      ],
+      "files": [
+        {
+          "source": "steam/empty-libraryfolders.vdf",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/libraryfolders.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/shortcuts.json",
+          "path": "root/home/fixture/.local/share/Steam/userdata/424242/config/shortcuts.vdf",
+          "kind": "binary-vdf"
+        },
+        {
+          "source": "steam/shortcuts-config.vdf",
+          "path": "root/home/fixture/.local/share/Steam/config/config.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/system.reg",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/compatdata/2294968294/pfx/system.reg",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Fixture Indie/indie",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Fixture Indie/icon.png",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Fixture Windows Port/port.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Fixture Legacy/legacy",
+          "kind": "copy"
+        }
+      ]
+    },
+    {
+      "id": "epic-linux",
+      "os": "linux",
+      "env": {
+        "HOME": "/home/fixture"
+      },
+      "volumes": [
+        {
+          "path": "/",
+          "kind": "fixed",
+          "case_sensitive": true
+        }
+      ],
+      "files": [
+        {
+          "source": "heroic/legendary-installed.json",
+          "path": "root/home/fixture/.config/heroic/legendaryConfig/legendary/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/legendary-metadata.json",
+          "path": "root/home/fixture/.config/heroic/legendaryConfig/legendary/metadata/FixtureEpicApp.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/gog-installed.json",
+          "path": "root/home/fixture/.config/heroic/gog_store/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/gog-library-cache.json",
+          "path": "root/home/fixture/.config/heroic/store_cache/gog_library.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/nile-installed.json",
+          "path": "root/home/fixture/.config/heroic/nile_config/nile/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/nile-library.json",
+          "path": "root/home/fixture/.config/heroic/nile_config/nile/library.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/sideload-library.json",
+          "path": "root/home/fixture/.config/heroic/sideload_apps/library.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/games-config.json",
+          "path": "root/home/fixture/.config/heroic/GamesConfig/FixtureEpicApp.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/timestamp.json",
+          "path": "root/home/fixture/.config/heroic/store/timestamp.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/flatpak-legendary-installed.json",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/legendaryConfig/legendary/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/flatpak-gog-installed.json",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/gog_store/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/flatpak-gog-library-old.json",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/gog_store/library.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/flatpak-nile-installed.json",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/nile_config/nile/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/flatpak-nile-library-cache.json",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/store_cache/nile_library.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/flatpak-sideload-library.json",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/sideload_apps/library.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/cli-installed.json",
+          "path": "root/home/fixture/.config/legendary/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/cli-metadata-two.json",
+          "path": "root/home/fixture/.config/legendary/metadata/FixtureEpicTwo.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/cli-config.ini",
+          "path": "root/home/fixture/.config/legendary/config.ini",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.config/Rare/Rare.conf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/empty-libraryfolders.vdf",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/libraryfolders.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/shortcuts.json",
+          "path": "root/home/fixture/.local/share/Steam/userdata/424242/config/shortcuts.vdf",
+          "kind": "binary-vdf"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Heroic/Fixture Epic Quest/Binaries/FixtureEpic.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Heroic/Fixture GOG Native/start.sh",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Heroic/Fixture Amazon Drive/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Heroic/Prefixes/default/Fixture Epic Quest/.fixture-empty",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.config/heroic/tools/proton/GE-Proton10-34/proton",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Sideload/run.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Legendary/Fixture Epic Two/Two.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Legendary/Prefix/.fixture-empty",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak Epic/Flat.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak GOG/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak Amazon/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Sideload Two/run.sh",
+          "kind": "copy"
+        }
+      ]
+    },
+    {
+      "id": "lutris-linux",
+      "os": "linux",
+      "env": {
+        "HOME": "/home/fixture"
+      },
+      "files": [
+        {
+          "source": "lutris/native.sql",
+          "path": "root/home/fixture/.local/share/lutris/pga.db",
+          "kind": "sqlite"
+        },
+        {
+          "source": "lutris/flatpak.sql",
+          "path": "root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/pga.db",
+          "kind": "sqlite"
+        },
+        {
+          "source": "lutris/puzzle.yml",
+          "path": "root/home/fixture/.config/lutris/games/puzzle-config.yml",
+          "kind": "copy"
+        },
+        {
+          "source": "lutris/adventure.yml",
+          "path": "root/home/fixture/.local/share/lutris/games/adventure-config.yml",
+          "kind": "copy"
+        },
+        {
+          "source": "lutris/adventure.yml",
+          "path": "root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/games/adventure-flatpak.yml",
+          "kind": "copy"
+        },
+        {
+          "source": "lutris/flatpak.yml",
+          "path": "root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/games/flatpak-only.yml",
+          "kind": "copy"
+        },
+        {
+          "source": "linux/appmanifest.acf",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/appmanifest_620.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "linux/libraryfolders.vdf",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/libraryfolders.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "linux/gog-installed.json",
+          "path": "root/home/fixture/.config/heroic/gog_store/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Fixture Puzzle/game",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Fixture Adventure/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/prefixes/fixture/drive_c/Game/adventure.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Flatpak Only/game",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Local Caf\u00e9/game",
+          "kind": "copy"
+        }
+      ]
+    },
+    {
+      "id": "minigalaxy-linux",
+      "os": "linux",
+      "env": {
+        "HOME": "/home/fixture"
+      },
+      "files": [
+        {
+          "source": "small-launchers/minigalaxy-config.json",
+          "path": "root/home/fixture/.config/minigalaxy/config.json",
+          "kind": "copy"
+        },
+        {
+          "source": "small-launchers/goggame-1207658924.info",
+          "path": "root/home/fixture/GOG Games/Fixture Adventure/goggame-1207658924.info",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/GOG Games/Fixture Adventure/start.sh",
+          "kind": "copy"
+        },
+        {
+          "source": "small-launchers/minigalaxy-info.json",
+          "path": "root/home/fixture/GOG Games/Legacy Info/minigalaxy-info.json",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/GOG Games/Legacy Info/start.sh",
+          "kind": "copy"
+        },
+        {
+          "source": "small-launchers/goggame-1207658925.info",
+          "path": "root/home/fixture/GOG Games/Windows Mini/drive_c/game/goggame-1207658925.info",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/GOG Games/Windows Mini/drive_c/game/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "linux/gog-installed.json",
+          "path": "root/home/fixture/.config/heroic/gog_store/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Fixture Adventure/game.exe",
+          "kind": "copy"
+        }
+      ]
+    },
+    {
+      "id": "faugus-linux",
+      "os": "linux",
+      "env": {
+        "HOME": "/home/fixture"
+      },
+      "files": [
+        {
+          "source": "small-launchers/faugus-games.json",
+          "path": "root/home/fixture/.local/share/faugus-launcher/games.json",
+          "kind": "copy"
+        },
+        {
+          "source": "small-launchers/faugus-old-games.json",
+          "path": "root/home/fixture/.config/faugus-launcher/games.json",
+          "kind": "copy"
+        },
+        {
+          "source": "small-launchers/faugus-flatpak-games.json",
+          "path": "root/home/fixture/.var/app/io.github.Faugus.faugus-launcher/data/faugus-launcher/games.json",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Faugus/Fixture/drive_c/game/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Faugus Native/game",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Faugus/Flatpak/drive_c/game/game.exe",
+          "kind": "copy"
+        }
+      ]
+    },
+    {
+      "id": "linux-integration",
+      "os": "linux",
+      "env": {
+        "HOME": "/home/fixture",
+        "PATH": "/usr/bin:/bin",
+        "LANG": "en_US.UTF-8"
+      },
+      "volumes": [
+        {
+          "path": "/",
+          "kind": "fixed",
+          "case_sensitive": true
+        }
+      ],
+      "files": [
+        {
+          "source": "steam/linux-native-libraryfolders.vdf",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/libraryfolders.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/appmanifest_620.acf",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/appmanifest_620.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/appmanifest_1493710.acf",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/appmanifest_1493710.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/appmanifest_1628350.acf",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/appmanifest_1628350.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/appmanifest_228980.acf",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/appmanifest_228980.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/common/Fixture Puzzle/game",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/linux-appinfo.json",
+          "path": "root/home/fixture/.local/share/Steam/appcache/appinfo.vdf",
+          "kind": "appinfo"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.local/share/Steam/appcache/librarycache/620_icon.jpg",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.local/share/Steam/appcache/librarycache/620_library_600x900.jpg",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.local/share/Steam/appcache/librarycache/2000010/0123456789abcdef0123456789abcdef01234567.jpg",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.local/share/Steam/appcache/librarycache/2000010/header.jpg",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/loginusers.vdf",
+          "path": "root/home/fixture/.local/share/Steam/config/loginusers.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/linux-config.vdf",
+          "path": "root/home/fixture/.local/share/Steam/config/config.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/localconfig.vdf",
+          "path": "root/home/fixture/.local/share/Steam/userdata/424242/config/localconfig.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/steam_client.manifest",
+          "path": "root/home/fixture/.local/share/Steam/package/steam_client_ubuntu12.manifest",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/linux-flatpak-libraryfolders.vdf",
+          "path": "root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/libraryfolders.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/appmanifest_2000030.acf",
+          "path": "root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/appmanifest_2000030.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Fixture Flatpak Racer/game",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/loginusers.vdf",
+          "path": "root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/config/loginusers.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/flatpak-localconfig.vdf",
+          "path": "root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/userdata/424242/config/localconfig.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/appmanifest_2000010.acf",
+          "path": "root/mnt/games/SteamLibrary/steamapps/appmanifest_2000010.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/appmanifest_2000020.acf",
+          "path": "root/mnt/games/SteamLibrary/steamapps/appmanifest_2000020.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/mnt/games/SteamLibrary/steamapps/common/Fixture Windows Quest/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/system.reg",
+          "path": "root/mnt/games/SteamLibrary/steamapps/compatdata/2000010/pfx/system.reg",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/mnt/games/SteamLibrary/steamapps/downloading/2000020/.fixture-empty",
+          "kind": "copy"
+        },
+        {
+          "source": "steam/shortcuts.json",
+          "path": "root/home/fixture/.local/share/Steam/userdata/424242/config/shortcuts.vdf",
+          "kind": "binary-vdf"
+        },
+        {
+          "source": "steam/system.reg",
+          "path": "root/home/fixture/.local/share/Steam/steamapps/compatdata/2294968294/pfx/system.reg",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Fixture Indie/indie",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Fixture Indie/icon.png",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Fixture Windows Port/port.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Fixture Legacy/legacy",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/legendary-installed.json",
+          "path": "root/home/fixture/.config/heroic/legendaryConfig/legendary/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/legendary-metadata.json",
+          "path": "root/home/fixture/.config/heroic/legendaryConfig/legendary/metadata/FixtureEpicApp.json",
+          "kind": "copy"
+        },
+        {
+          "source": "linux-integration/gog-installed.json",
+          "path": "root/home/fixture/.config/heroic/gog_store/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/gog-library-cache.json",
+          "path": "root/home/fixture/.config/heroic/store_cache/gog_library.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/nile-installed.json",
+          "path": "root/home/fixture/.config/heroic/nile_config/nile/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/nile-library.json",
+          "path": "root/home/fixture/.config/heroic/nile_config/nile/library.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/sideload-library.json",
+          "path": "root/home/fixture/.config/heroic/sideload_apps/library.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/games-config.json",
+          "path": "root/home/fixture/.config/heroic/GamesConfig/FixtureEpicApp.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/timestamp.json",
+          "path": "root/home/fixture/.config/heroic/store/timestamp.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/flatpak-legendary-installed.json",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/legendaryConfig/legendary/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/flatpak-gog-installed.json",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/gog_store/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/flatpak-gog-library-old.json",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/gog_store/library.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/flatpak-nile-installed.json",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/nile_config/nile/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/flatpak-nile-library-cache.json",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/store_cache/nile_library.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/flatpak-sideload-library.json",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/sideload_apps/library.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/cli-installed.json",
+          "path": "root/home/fixture/.config/legendary/installed.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/cli-metadata-two.json",
+          "path": "root/home/fixture/.config/legendary/metadata/FixtureEpicTwo.json",
+          "kind": "copy"
+        },
+        {
+          "source": "heroic/cli-config.ini",
+          "path": "root/home/fixture/.config/legendary/config.ini",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.config/Rare/Rare.conf",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Heroic/Fixture Epic Quest/Binaries/FixtureEpic.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Heroic/Fixture GOG Native/start.sh",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Heroic/Fixture Amazon Drive/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Heroic/Prefixes/default/Fixture Epic Quest/.fixture-empty",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.config/heroic/tools/proton/GE-Proton10-34/proton",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Sideload/run.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Legendary/Fixture Epic Two/Two.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Legendary/Prefix/.fixture-empty",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak Epic/Flat.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak GOG/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak Amazon/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Sideload Two/run.sh",
+          "kind": "copy"
+        },
+        {
+          "source": "lutris/native.sql",
+          "path": "root/home/fixture/.local/share/lutris/pga.db",
+          "kind": "sqlite"
+        },
+        {
+          "source": "lutris/flatpak.sql",
+          "path": "root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/pga.db",
+          "kind": "sqlite"
+        },
+        {
+          "source": "lutris/puzzle.yml",
+          "path": "root/home/fixture/.config/lutris/games/puzzle-config.yml",
+          "kind": "copy"
+        },
+        {
+          "source": "lutris/adventure.yml",
+          "path": "root/home/fixture/.local/share/lutris/games/adventure-config.yml",
+          "kind": "copy"
+        },
+        {
+          "source": "lutris/adventure.yml",
+          "path": "root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/games/adventure-flatpak.yml",
+          "kind": "copy"
+        },
+        {
+          "source": "lutris/flatpak.yml",
+          "path": "root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/games/flatpak-only.yml",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Fixture Puzzle/game",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Fixture Adventure/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/prefixes/fixture/drive_c/Game/adventure.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Flatpak Only/game",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/home/fixture/Games/Local Caf\u00e9/game",
+          "kind": "copy"
+        },
+        {
+          "source": "linux-integration/steam.desktop",
+          "path": "root/home/fixture/.local/share/applications/steam.desktop",
+          "kind": "copy"
+        },
+        {
+          "source": "linux-integration/epic.desktop",
+          "path": "root/home/fixture/.local/share/applications/epic.desktop",
+          "kind": "copy"
+        },
+        {
+          "source": "linux-integration/indie.desktop",
+          "path": "root/home/fixture/.local/share/applications/indie.desktop",
+          "kind": "copy"
+        },
+        {
+          "source": "linux-integration/lutris.desktop",
+          "path": "root/home/fixture/.local/share/applications/lutris.desktop",
+          "kind": "copy"
+        },
+        {
+          "source": "linux-integration/hidden.desktop",
+          "path": "root/home/fixture/.local/share/applications/hidden.desktop",
+          "kind": "copy"
+        },
+        {
+          "source": "linux-integration/utility.desktop",
+          "path": "root/home/fixture/.local/share/applications/utility.desktop",
+          "kind": "copy"
+        },
+        {
+          "source": "linux-integration/runtime.desktop",
+          "path": "root/home/fixture/.local/share/applications/runtime.desktop",
+          "kind": "copy"
+        },
+        {
+          "source": "linux-integration/flatpak-metadata",
+          "path": "root/var/lib/flatpak/app/org.caskade.FixtureGame/current/active/metadata",
+          "kind": "copy"
+        },
+        {
+          "source": "linux-integration/flatpak-metainfo.xml",
+          "path": "root/var/lib/flatpak/app/org.caskade.FixtureGame/current/active/files/share/metainfo/org.caskade.FixtureGame.metainfo.xml",
+          "kind": "copy"
+        },
+        {
+          "source": "linux-integration/flatpak-game.desktop",
+          "path": "root/var/lib/flatpak/exports/share/applications/org.caskade.FixtureGame.desktop",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/var/lib/flatpak/app/org.caskade.FixtureGame/current/active/files/bin/fixture",
+          "kind": "copy"
+        },
+        {
+          "source": "linux-integration/flatpak-runtime-metadata",
+          "path": "root/var/lib/flatpak/runtime/org.freedesktop.Platform/x86_64/24.08/active/metadata",
+          "kind": "copy"
+        },
+        {
+          "source": "linux-integration/README.md",
+          "path": "root/.fixture-provenance.txt",
+          "kind": "copy"
+        },
+        {
+          "source": "linux-integration/expected.json",
+          "path": "expected.json",
+          "kind": "copy"
+        }
+      ]
+    },
+    {
+      "id": "uninstall-windows",
+      "os": "windows",
+      "env": {
+        "USERPROFILE": "C:\\Users\\fixture",
+        "PROCESSOR_ARCHITECTURE": "AMD64"
+      },
+      "volumes": [
+        {
+          "path": "C:\\",
+          "kind": "fixed",
+          "case_sensitive": false
+        }
+      ],
+      "files": [
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Hollow Knight/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Hollow Knight/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Hollow Knight/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Cuphead/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Cuphead/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Cuphead/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Subnautica/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Subnautica/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Subnautica/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Cities Skylines/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Cities Skylines/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Cities Skylines/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Kerbal Space Program/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Kerbal Space Program/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Kerbal Space Program/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Ori and the Blind Forest/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Ori and the Blind Forest/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Ori and the Blind Forest/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Superhot/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Superhot/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Superhot/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Rust/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Rust/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Rust/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Slime Rancher/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Slime Rancher/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Slime Rancher/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Firewatch/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Firewatch/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Firewatch/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Untitled Goose Game/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Untitled Goose Game/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Untitled Goose Game/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Return of the Obra Dinn/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Return of the Obra Dinn/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Return of the Obra Dinn/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Outer Wilds/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Outer Wilds/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Outer Wilds/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Disco Elysium/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Disco Elysium/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Disco Elysium/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Tunic/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Tunic/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Tunic/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Undertale/data.win",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Undertale/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Deltarune/data.win",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Deltarune/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Hyper Light Drifter/data.win",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Hyper Light Drifter/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Hotline Miami/data.win",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Hotline Miami/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Celeste/FNA.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Celeste/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Stardew Valley/FNA.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Stardew Valley/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Terraria/FNA.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Terraria/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/FEZ/FNA.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/FEZ/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Bastion/FNA.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Bastion/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/7-Zip/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Mozilla Firefox/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Google Chrome/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Microsoft Edge/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Visual Studio Code/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Notepad++/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/VLC media player/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/OBS Studio/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Blender/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/GIMP/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Inkscape/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Audacity/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/LibreOffice/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Adobe Acrobat Reader/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Zoom Workplace/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Microsoft Teams/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Slack/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Discord/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Spotify/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Dropbox/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/OneDrive/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Google Drive/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Python 3.12/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Git/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Node.js/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Java Development Kit/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Microsoft Visual C++ 2015-2022 Redistributable/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/NVIDIA Graphics Driver/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/AMD Software/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Intel Graphics Driver/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Microsoft .NET SDK/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Windows SDK/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Unity Editor/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Unreal Engine/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Godot Engine/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Docker Desktop/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/VirtualBox/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/VMware Workstation/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/PuTTY/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/WinSCP/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/FileZilla/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Wireshark/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/HandBrake/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Calibre/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/SumatraPDF/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/KeePass/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Bitwarden/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/PowerToys/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Everything/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Rufus/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/CrystalDiskInfo/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/HWiNFO/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/CPUID CPU-Z/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/MSI Afterburner/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Logitech G HUB/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Razer Synapse/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Corsair iCUE/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Steam/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Epic Games Launcher/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/GOG GALAXY/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "uninstall-windows/hklm64.json",
+          "path": "registry/hklm64.reg",
+          "kind": "registry"
+        },
+        {
+          "source": "uninstall-windows/hklm32.json",
+          "path": "registry/hklm32.reg",
+          "kind": "registry"
+        },
+        {
+          "source": "uninstall-windows/hkcu.json",
+          "path": "registry/hkcu.reg",
+          "kind": "registry"
+        },
+        {
+          "source": "uninstall-windows/appmanifest.acf",
+          "path": "root/drives/c/Steam/steamapps/appmanifest_620.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "uninstall-windows/libraryfolders.vdf",
+          "path": "root/drives/c/Steam/steamapps/libraryfolders.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Steam/steamapps/common/Portal 2/portal2.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "uninstall-windows/records.json",
+          "path": "records.json",
+          "kind": "copy"
+        }
+      ]
+    },
+    {
+      "id": "startmenu-windows",
+      "os": "windows",
+      "env": {
+        "USERPROFILE": "C:\\Users\\fixture",
+        "PROCESSOR_ARCHITECTURE": "AMD64"
+      },
+      "volumes": [
+        {
+          "path": "C:\\",
+          "kind": "fixed",
+          "case_sensitive": false
+        }
+      ],
+      "files": [
+        {
+          "source": "startmenu-windows/portable.json",
+          "path": "root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Games/Portable Caf\u00e9.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/duplicate.json",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Portable Duplicate.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/relative.json",
+          "path": "root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Relative Caf\u00e9.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/uninstall-name.json",
+          "path": "root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Games/Uninstall Portable Caf\u00e9.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/readme-name.json",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Readme.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/manual-name.json",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Manual Portable.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/support-name.json",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Support.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/uninstall-target.json",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Maintenance.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/manual-target.json",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Notes.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/broken.json",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Missing.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/env.json",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Environment.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/steam-argv.json",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Portal 2 command.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/steam.url",
+          "path": "root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Portal 2.url",
+          "kind": "copy"
+        },
+        {
+          "source": "startmenu-windows/epic.url",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Epic Adventure.url",
+          "kind": "copy"
+        },
+        {
+          "source": "startmenu-windows/orphan.url",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Absent Steam game.url",
+          "kind": "copy"
+        },
+        {
+          "source": "startmenu-windows/website.url",
+          "path": "root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Website.url",
+          "kind": "copy"
+        },
+        {
+          "source": "startmenu-windows/support.url",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Game Community.url",
+          "kind": "copy"
+        },
+        {
+          "source": "startmenu-windows/uninstall.url",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Remove game.url",
+          "kind": "copy"
+        },
+        {
+          "source": "startmenu-windows/corrupt-link.bin",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Corrupt.lnk",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Portable/Portable Caf\u00e9/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Portable/Portable Caf\u00e9/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Portable/Portable Caf\u00e9/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Portable/Portable Caf\u00e9/icon.ico",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Portable/Portable Caf\u00e9/unins000.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Portable/Portable Caf\u00e9/manual.pdf",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Portable/Portable Caf\u00e9/saves/.keep",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Users/fixture/Games/Environment/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Users/fixture/Games/Environment/data.win",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Fixture Adventure/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Steam/steamapps/common/Portal 2/portal2.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Steam/steam.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "uninstall-windows/appmanifest.acf",
+          "path": "root/drives/c/Steam/steamapps/appmanifest_620.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "uninstall-windows/libraryfolders.vdf",
+          "path": "root/drives/c/Steam/steamapps/libraryfolders.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "windows/epic.item",
+          "path": "root/drives/c/ProgramData/Epic/EpicGamesLauncher/Data/Manifests/fixture.item",
+          "kind": "copy"
+        },
+        {
+          "source": "startmenu-windows/registry.json",
+          "path": "registry/hkcu.reg",
+          "kind": "registry"
+        }
+      ]
+    },
+    {
+      "id": "windows-integration",
+      "os": "windows",
+      "env": {
+        "USERPROFILE": "C:\\Users\\fixture",
+        "PROCESSOR_ARCHITECTURE": "AMD64"
+      },
+      "volumes": [
+        {
+          "path": "C:\\",
+          "kind": "fixed",
+          "case_sensitive": false
+        },
+        {
+          "path": "D:\\",
+          "kind": "fixed",
+          "case_sensitive": false
+        }
+      ],
+      "files": [
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Hollow Knight/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Hollow Knight/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Hollow Knight/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Cuphead/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Cuphead/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Cuphead/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Subnautica/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Subnautica/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Subnautica/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Cities Skylines/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Cities Skylines/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Cities Skylines/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Kerbal Space Program/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Kerbal Space Program/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Kerbal Space Program/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Ori and the Blind Forest/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Ori and the Blind Forest/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Ori and the Blind Forest/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Superhot/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Superhot/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Superhot/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Rust/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Rust/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Rust/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Slime Rancher/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Slime Rancher/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Slime Rancher/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Firewatch/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Firewatch/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Firewatch/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Untitled Goose Game/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Untitled Goose Game/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Untitled Goose Game/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Return of the Obra Dinn/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Return of the Obra Dinn/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Return of the Obra Dinn/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Outer Wilds/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Outer Wilds/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Outer Wilds/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Disco Elysium/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Disco Elysium/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Disco Elysium/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Tunic/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Tunic/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Tunic/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Undertale/data.win",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Undertale/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Deltarune/data.win",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Deltarune/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Hyper Light Drifter/data.win",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Hyper Light Drifter/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Hotline Miami/data.win",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Hotline Miami/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Celeste/FNA.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Celeste/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Stardew Valley/FNA.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Stardew Valley/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Terraria/FNA.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Terraria/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/FEZ/FNA.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/FEZ/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Bastion/FNA.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Bastion/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/7-Zip/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Mozilla Firefox/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Google Chrome/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Microsoft Edge/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Visual Studio Code/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Notepad++/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/VLC media player/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/OBS Studio/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Blender/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/GIMP/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Inkscape/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Audacity/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/LibreOffice/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Adobe Acrobat Reader/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Zoom Workplace/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Microsoft Teams/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Slack/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Discord/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Spotify/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Dropbox/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/OneDrive/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Google Drive/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Python 3.12/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Git/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Node.js/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Java Development Kit/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Microsoft Visual C++ 2015-2022 Redistributable/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/NVIDIA Graphics Driver/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/AMD Software/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Intel Graphics Driver/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Microsoft .NET SDK/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Windows SDK/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Unity Editor/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Unreal Engine/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Godot Engine/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Docker Desktop/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/VirtualBox/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/VMware Workstation/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/PuTTY/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/WinSCP/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/FileZilla/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Wireshark/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/HandBrake/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Calibre/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/SumatraPDF/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/KeePass/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Bitwarden/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/PowerToys/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Everything/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Rufus/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/CrystalDiskInfo/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/HWiNFO/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/CPUID CPU-Z/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/MSI Afterburner/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Logitech G HUB/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Razer Synapse/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Corsair iCUE/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Steam/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Epic Games Launcher/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/GOG GALAXY/app.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "uninstall-windows/appmanifest.acf",
+          "path": "root/drives/c/Steam/steamapps/appmanifest_620.acf",
+          "kind": "copy"
+        },
+        {
+          "source": "uninstall-windows/libraryfolders.vdf",
+          "path": "root/drives/c/Steam/steamapps/libraryfolders.vdf",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Steam/steamapps/common/Portal 2/portal2.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "uninstall-windows/records.json",
+          "path": "records.json",
+          "kind": "copy"
+        },
+        {
+          "source": "startmenu-windows/portable.json",
+          "path": "root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Games/Portable Caf\u00e9.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/duplicate.json",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Portable Duplicate.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/relative.json",
+          "path": "root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Relative Caf\u00e9.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/uninstall-name.json",
+          "path": "root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Games/Uninstall Portable Caf\u00e9.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/readme-name.json",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Readme.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/manual-name.json",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Manual Portable.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/support-name.json",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Support.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/uninstall-target.json",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Maintenance.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/manual-target.json",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Notes.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/broken.json",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Missing.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/env.json",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Environment.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/steam-argv.json",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Portal 2 command.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "startmenu-windows/steam.url",
+          "path": "root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Portal 2.url",
+          "kind": "copy"
+        },
+        {
+          "source": "startmenu-windows/epic.url",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Epic Adventure.url",
+          "kind": "copy"
+        },
+        {
+          "source": "startmenu-windows/orphan.url",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Absent Steam game.url",
+          "kind": "copy"
+        },
+        {
+          "source": "startmenu-windows/website.url",
+          "path": "root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Website.url",
+          "kind": "copy"
+        },
+        {
+          "source": "startmenu-windows/support.url",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Game Community.url",
+          "kind": "copy"
+        },
+        {
+          "source": "startmenu-windows/uninstall.url",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Remove game.url",
+          "kind": "copy"
+        },
+        {
+          "source": "startmenu-windows/corrupt-link.bin",
+          "path": "root/drives/c/Users/fixture/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Corrupt.lnk",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Portable/Portable Caf\u00e9/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Portable/Portable Caf\u00e9/UnityPlayer.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Portable/Portable Caf\u00e9/Game_Data/globalgamemanagers",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Portable/Portable Caf\u00e9/icon.ico",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Portable/Portable Caf\u00e9/unins000.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Portable/Portable Caf\u00e9/manual.pdf",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Portable/Portable Caf\u00e9/saves/.keep",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Users/fixture/Games/Environment/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Users/fixture/Games/Environment/data.win",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Fixture Adventure/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Steam/steam.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "windows/epic.item",
+          "path": "root/drives/c/ProgramData/Epic/EpicGamesLauncher/Data/Manifests/fixture.item",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Hollow Knight/GameDefinition.dll",
+          "kind": "copy"
+        },
+        {
+          "source": "windows-integration/hollow.json",
+          "path": "root/drives/c/ProgramData/Microsoft/Windows/Start Menu/Programs/Hollow Knight.lnk",
+          "kind": "lnk"
+        },
+        {
+          "source": "windows-integration/epic.item",
+          "path": "root/drives/c/ProgramData/Epic/EpicGamesLauncher/Data/Manifests/library.item",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Epic Games/Library Alias/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files (x86)/Epic Games/Launcher/Portal/Binaries/Win64/EpicGamesLauncher.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files (x86)/GOG Galaxy/GalaxyClient.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/GOG Games/The Witcher/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "windows-integration/gog.info",
+          "path": "root/drives/c/GOG Games/The Witcher/goggame-1207658924.info",
+          "kind": "copy"
+        },
+        {
+          "source": "windows-integration/galaxy.sql",
+          "path": "root/drives/c/ProgramData/GOG.com/Galaxy/storage/galaxy-2.0.db",
+          "kind": "sqlite"
+        },
+        {
+          "source": "windows-integration/ea.xml",
+          "path": "root/drives/c/EA Games/The Sims 4/__Installer/installerdata.xml",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/EA Games/The Sims 4/bin/Game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Electronic Arts/EA Desktop/EA Desktop/EADesktop.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Assassins Creed II/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/Anno 1800/game.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files (x86)/Ubisoft/Ubisoft Game Launcher/UbisoftConnect.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "windows-integration/product.json",
+          "path": "root/drives/c/ProgramData/Battle.net/Agent/product.db",
+          "kind": "protobuf"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Games/World of Warcraft/Wow.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files (x86)/Battle.net/Battle.net.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "windows-integration/amazon.sql",
+          "path": "root/drives/c/Users/fixture/AppData/Local/Amazon Games/Data/Games/Sql/GameInstallInfo.sqlite",
+          "kind": "sqlite"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Amazon Games/Library/D2 Racer/racer.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Users/fixture/AppData/Local/Amazon Games/App/Amazon Games.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "windows-integration/riot.json",
+          "path": "root/drives/c/ProgramData/Riot Games/RiotClientInstalls.json",
+          "kind": "copy"
+        },
+        {
+          "source": "windows-integration/valorant.yaml",
+          "path": "root/drives/c/ProgramData/Riot Games/Metadata/valorant.live/valorant.live.product_settings.yaml",
+          "kind": "copy"
+        },
+        {
+          "source": "windows-integration/riot-client.yaml",
+          "path": "root/drives/c/ProgramData/Riot Games/Metadata/riot_client.live/riot_client.live.product_settings.yaml",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Riot Games/Riot Client/RiotClientServices.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Riot Games/VALORANT/live/VALORANT.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Program Files/Rockstar Games/Launcher/Launcher.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/c/Rockstar Games/D2 Heist/heist.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "windows-integration/gaming-root.json",
+          "path": "root/drives/d/.GamingRoot",
+          "kind": "gaming-root"
+        },
+        {
+          "source": "windows-integration/MicrosoftGame.config",
+          "path": "root/drives/d/XboxGames/Fixture Game/Content/MicrosoftGame.config",
+          "kind": "copy"
+        },
+        {
+          "source": "windows-integration/AppxManifest.xml",
+          "path": "root/drives/d/XboxGames/Fixture Game/Content/AppxManifest.xml",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/d/XboxGames/Fixture Game/Content/bin/play.exe",
+          "kind": "copy"
+        },
+        {
+          "source": "placeholder.txt",
+          "path": "root/drives/d/XboxGames/Fixture Game/Content/logo.png",
+          "kind": "copy"
+        },
+        {
+          "source": "windows-integration/hklm64.json",
+          "path": "registry/hklm64.reg",
+          "kind": "registry"
+        },
+        {
+          "source": "windows-integration/hklm32.json",
+          "path": "registry/hklm32.reg",
+          "kind": "registry"
+        },
+        {
+          "source": "windows-integration/hkcu.json",
+          "path": "registry/hkcu.reg",
+          "kind": "registry"
+        },
+        {
+          "source": "windows-integration/expected.json",
+          "path": "expected.json",
+          "kind": "copy"
+        }
+      ]
+    }
+  ],
+  "formats": [
+    {
+      "source": "formats/shortcuts.json",
+      "path": "shortcuts.vdf",
+      "kind": "binary-vdf"
+    },
+    {
+      "source": "formats/appinfo-v28.json",
+      "path": "appinfo-v28.vdf",
+      "kind": "appinfo"
+    },
+    {
+      "source": "formats/appinfo-v29.json",
+      "path": "appinfo-v29.vdf",
+      "kind": "appinfo"
+    },
+    {
+      "source": "formats/unicode-link.json",
+      "path": "unicode.lnk",
+      "kind": "lnk"
+    },
+    {
+      "source": "formats/product.json",
+      "path": "product.db",
+      "kind": "protobuf"
+    },
+    {
+      "source": "linux/pga.sql",
+      "path": "pga.db",
+      "kind": "sqlite"
+    },
+    {
+      "source": "windows/amazon.sql",
+      "path": "GameInstallInfo.sqlite",
+      "kind": "sqlite"
+    },
+    {
+      "source": "linux/puzzle.desktop",
+      "path": "fixture.desktop",
+      "kind": "copy"
+    },
+    {
+      "source": "linux/steam.url",
+      "path": "fixture.url",
+      "kind": "copy"
+    },
+    {
+      "source": "macos/Info.plist",
+      "path": "Info.plist",
+      "kind": "copy"
+    },
+    {
+      "source": "registry66/wine/system.reg",
+      "path": "registry66/wine/system.reg",
+      "kind": "copy"
+    },
+    {
+      "source": "registry66/wine/user.reg",
+      "path": "registry66/wine/user.reg",
+      "kind": "copy"
+    },
+    {
+      "source": "registry66/proton/system.reg",
+      "path": "registry66/proton/system.reg",
+      "kind": "copy"
+    },
+    {
+      "source": "registry66/proton/user.reg",
+      "path": "registry66/proton/user.reg",
+      "kind": "copy"
+    }
+  ]
+}

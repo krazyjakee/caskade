@@ -1,0 +1,12 @@
+{
+  "response": {
+    "game_count": 5,
+    "games": [
+      { "appid": 620, "name": "Portal 2", "playtime_forever": 1534, "img_icon_url": "2e478fc6874d06ae5baf0d147f6f21203291aa02", "has_community_visible_stats": true, "playtime_windows_forever": 1200, "playtime_mac_forever": 0, "playtime_linux_forever": 334, "rtime_last_played": 1793010000 },
+      { "appid": 400, "name": "Portal", "playtime_forever": 0, "img_icon_url": "cfa928ab4119dd137e50d728e8fe703e4e970aff", "rtime_last_played": 0 },
+      { "appid": 440, "name": "Team Fortress 2", "playtime_forever": 98, "rtime_last_played": 1600000000 },
+      { "appid": 1172470, "name": "Apex Legends" },
+      { "appid": 999999, "name": "  " }
+    ]
+  }
+}

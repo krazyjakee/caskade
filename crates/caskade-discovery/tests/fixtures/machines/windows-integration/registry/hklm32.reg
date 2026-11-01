@@ -1,0 +1,179 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Subnautica_is1]
+"DisplayIcon"="\"C:\\Games\\Subnautica\\game.exe\",0"
+"DisplayName"="Subnautica"
+"EstimatedSize"=dword:00001000
+"InstallDate"="20241031"
+"InstallLocation"="C:\\Games\\Subnautica"
+"Publisher"="Unknown Worlds Entertainment"
+"QuietUninstallString"="\"C:\\Games\\Subnautica\\unins000.exe\" /VERYSILENT"
+"UninstallString"="\"C:\\Games\\Subnautica\\unins000.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Superhot_is1]
+"DisplayIcon"="\"C:\\Games\\Superhot\\game.exe\",0"
+"DisplayName"="Superhot"
+"EstimatedSize"=dword:00001000
+"InstallDate"="20241031"
+"InstallLocation"="C:\\Games\\Superhot"
+"Publisher"="SUPERHOT Team"
+"QuietUninstallString"="\"C:\\Games\\Superhot\\unins000.exe\" /VERYSILENT"
+"UninstallString"="\"C:\\Games\\Superhot\\unins000.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\UntitledGooseGame_is1]
+"DisplayIcon"="\"C:\\Games\\Untitled Goose Game\\game.exe\",0"
+"DisplayName"="Untitled Goose Game"
+"EstimatedSize"=dword:00001000
+"InstallDate"="20241031"
+"InstallLocation"="C:\\Games\\Untitled Goose Game"
+"Publisher"="House House"
+"QuietUninstallString"="\"C:\\Games\\Untitled Goose Game\\unins000.exe\" /VERYSILENT"
+"UninstallString"="\"C:\\Games\\Untitled Goose Game\\unins000.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Tunic_is1]
+"DisplayIcon"="\"C:\\Games\\Tunic\\game.exe\",0"
+"DisplayName"="Tunic"
+"EstimatedSize"=dword:00001000
+"InstallDate"="20241031"
+"InstallLocation"="C:\\Games\\Tunic"
+"Publisher"="Finji"
+"QuietUninstallString"="\"C:\\Games\\Tunic\\unins000.exe\" /VERYSILENT"
+"UninstallString"="\"C:\\Games\\Tunic\\unins000.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\HotlineMiami_is1]
+"DisplayIcon"="\"C:\\Games\\Hotline Miami\\game.exe\",0"
+"DisplayName"="Hotline Miami"
+"EstimatedSize"=dword:00001000
+"InstallDate"="20241031"
+"InstallLocation"="C:\\Games\\Hotline Miami"
+"Publisher"="Dennaton Games"
+"QuietUninstallString"="\"C:\\Games\\Hotline Miami\\unins000.exe\" /VERYSILENT"
+"UninstallString"="\"C:\\Games\\Hotline Miami\\unins000.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\FEZ_is1]
+"DisplayIcon"="\"C:\\Games\\FEZ\\game.exe\",0"
+"DisplayName"="FEZ"
+"EstimatedSize"=dword:00001000
+"InstallDate"="20241031"
+"InstallLocation"="C:\\Games\\FEZ"
+"Publisher"="Polytron Corporation"
+"QuietUninstallString"="\"C:\\Games\\FEZ\\unins000.exe\" /VERYSILENT"
+"UninstallString"="\"C:\\Games\\FEZ\\unins000.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome]
+"DisplayName"="Google Chrome"
+"InstallLocation"="C:\\Program Files\\Google Chrome"
+"Publisher"="Google"
+"UninstallString"="\"C:\\Program Files\\Google Chrome\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\VLC media player]
+"DisplayName"="VLC media player"
+"InstallLocation"="C:\\Program Files\\VLC media player"
+"Publisher"="VLC"
+"UninstallString"="\"C:\\Program Files\\VLC media player\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Inkscape]
+"DisplayName"="Inkscape"
+"InstallLocation"="C:\\Program Files\\Inkscape"
+"Publisher"="Inkscape"
+"UninstallString"="\"C:\\Program Files\\Inkscape\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Zoom Workplace]
+"DisplayName"="Zoom Workplace"
+"InstallLocation"="C:\\Program Files\\Zoom Workplace"
+"Publisher"="Zoom"
+"UninstallString"="\"C:\\Program Files\\Zoom Workplace\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Spotify]
+"DisplayName"="Spotify"
+"InstallLocation"="C:\\Program Files\\Spotify"
+"Publisher"="Spotify"
+"UninstallString"="\"C:\\Program Files\\Spotify\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Python 3.12]
+"DisplayName"="Python 3.12"
+"InstallLocation"="C:\\Program Files\\Python 3.12"
+"Publisher"="Python"
+"UninstallString"="\"C:\\Program Files\\Python 3.12\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Visual C++ 2015-2022 Redistributable]
+"DisplayName"="Microsoft Visual C++ 2015-2022 Redistributable"
+"InstallLocation"="C:\\Program Files\\Microsoft Visual C++ 2015-2022 Redistributable"
+"Publisher"="Microsoft"
+"UninstallString"="\"C:\\Program Files\\Microsoft Visual C++ 2015-2022 Redistributable\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft .NET SDK]
+"DisplayName"="Microsoft .NET SDK"
+"InstallLocation"="C:\\Program Files\\Microsoft .NET SDK"
+"Publisher"="Microsoft"
+"UninstallString"="\"C:\\Program Files\\Microsoft .NET SDK\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Godot Engine]
+"DisplayName"="Godot Engine"
+"InstallLocation"="C:\\Program Files\\Godot Engine"
+"Publisher"="Godot"
+"UninstallString"="\"C:\\Program Files\\Godot Engine\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\PuTTY]
+"DisplayName"="PuTTY"
+"InstallLocation"="C:\\Program Files\\PuTTY"
+"Publisher"="PuTTY"
+"UninstallString"="\"C:\\Program Files\\PuTTY\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\HandBrake]
+"DisplayName"="HandBrake"
+"InstallLocation"="C:\\Program Files\\HandBrake"
+"Publisher"="HandBrake"
+"UninstallString"="\"C:\\Program Files\\HandBrake\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Bitwarden]
+"DisplayName"="Bitwarden"
+"InstallLocation"="C:\\Program Files\\Bitwarden"
+"Publisher"="Bitwarden"
+"UninstallString"="\"C:\\Program Files\\Bitwarden\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\CrystalDiskInfo]
+"DisplayName"="CrystalDiskInfo"
+"InstallLocation"="C:\\Program Files\\CrystalDiskInfo"
+"Publisher"="CrystalDiskInfo"
+"UninstallString"="\"C:\\Program Files\\CrystalDiskInfo\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Logitech G HUB]
+"DisplayName"="Logitech G HUB"
+"InstallLocation"="C:\\Program Files\\Logitech G HUB"
+"Publisher"="Logitech"
+"UninstallString"="\"C:\\Program Files\\Logitech G HUB\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\Epic Games Launcher]
+"DisplayName"="Epic Games Launcher"
+"InstallLocation"="C:\\Program Files\\Epic Games Launcher"
+"Publisher"="Epic"
+"UninstallString"="\"C:\\Program Files\\Epic Games Launcher\\uninstall.exe\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\GOG.com\GalaxyClient\paths]
+"client"="C:\\Program Files (x86)\\GOG Galaxy"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\GOG.com\Games\1207658924]
+"exe"="C:\\GOG Games\\The Witcher\\game.exe"
+"gameID"="1207658924"
+"gameName"="The Witcher"
+"path"="C:\\GOG Games\\The Witcher"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\EA Games\Fixture]
+"Install Dir"="C:\\EA Games\\The Sims 4"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Ubisoft\Launcher\Installs\54]
+"InstallDir"="C:\\Games\\Assassins Creed II"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Ubisoft\Launcher\Installs\1800]
+"InstallDir"="C:\\Games\\Anno 1800"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Rockstar Games\Launcher]
+"InstallFolder"="C:\\Program Files\\Rockstar Games\\Launcher"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Rockstar Games\Rockstar Games Social Club]
+"InstallFolder"="C:\\Program Files\\Rockstar Games\\Social Club"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Rockstar Games\D2 Heist]
+"InstallFolder"="C:\\Rockstar Games\\D2 Heist"
+

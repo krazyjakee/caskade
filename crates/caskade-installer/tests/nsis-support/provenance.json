@@ -1,0 +1,11 @@
+{
+  "builder": "NSIS 3.11 makensis.exe",
+  "archive_url": "https://downloads.sourceforge.net/project/nsis/NSIS%203/3.11/nsis-3.11.zip",
+  "archive_sha256": "c7d27f780ddb6cffb4730138cd1591e841f4b7edb155856901cdf5f214394fa1",
+  "compiler_sha256": "f497e92deb9f179f7b8f7553fcb3bd04f511bb2949e5e4a2aee80a10f7b20431",
+  "command": "makensis.exe /V2 /INPUTCHARSET UTF8 effects.nsi",
+  "source_sha256": "8cf9cf13d218e6e51f33c4b5aed4af52722051ae383cccc04a91cc4ebc120953",
+  "binary_sha256": "abab197293ba6e0d2a07b64f51c45d428dc2d42ce8f05fc273bc787e348aada1",
+  "binary_bytes": 39210,
+  "purpose": "Static parser regression only. Never run this installer; its script declares registry, exec, shortcut and uninstall effects for analysis."
+}

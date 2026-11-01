@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Indie Game
+Comment=Caskade AppImage fixture
+Exec=indie-game
+Icon=indie-game
+Categories=Game;
+Terminal=false

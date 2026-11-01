@@ -1,0 +1,25 @@
+schema_version = 1
+id = "unity-7z"
+title = "Fixture Game"
+layout = "unity"
+format = "7z"
+platform = "windows"
+input = "bin/unity.7z"
+parts = ["bin/unity.7z"]
+tree = "unity-7z.tree.json"
+launch_target = "FixtureGame.exe"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"
+
+[host.windows]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"

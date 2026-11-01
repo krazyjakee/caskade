@@ -1,0 +1,10 @@
+#!/bin/sh
+# Portable .app entrypoint for archive/discovery tests. A native universal Rust
+# build can replace this in the macOS native fixture workflow; no fake Mach-O.
+set -eu
+if [ "$#" -ne 2 ] || [ "$1" != --token ]; then
+    printf '%s\n' 'usage: FixtureGame --token <path>' >&2
+    exit 1
+fi
+directory=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)
+printf '%s/FixtureGame\n' "$directory" > "$2"

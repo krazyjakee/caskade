@@ -1,0 +1,31 @@
+schema_version = 1
+id = "t7-nsis3"
+title = "Fixture Game"
+layout = "unity"
+format = "nsis"
+platform = "windows"
+input = "bin/native-windows/t7-nsis3/setup.exe"
+parts = ["bin/native-windows/t7-nsis3/setup.exe"]
+tree = "native-windows/unity.tree.json"
+launch_target = "FixtureGame.exe"
+
+[windows]
+builder = "makensis"
+version = "3.11"
+features = ["native-windows", "native-uninstall", "start-menu-shortcut", "authored-CASKADE_NO_SHORTCUTS"]
+native_generated = ["Uninstall.exe"]
+
+[host.windows]
+outcome = "Installed"
+strategy = "RunSilent"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

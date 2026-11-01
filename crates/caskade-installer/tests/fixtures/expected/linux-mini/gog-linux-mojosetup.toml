@@ -1,0 +1,25 @@
+schema_version = 1
+id = "gog-linux-mojosetup"
+title = "Caskade Fixture Game"
+layout = "gog-linux-mojosetup"
+format = "gog-sh"
+platform = "linux"
+input = "bin/linux-shell/gog-linux-mojosetup.sh"
+parts = ["bin/linux-shell/gog-linux-mojosetup.sh"]
+tree = "linux-shell/gog-linux-mojosetup.tree.json"
+launch_target = "start.sh"
+
+[host.windows]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"

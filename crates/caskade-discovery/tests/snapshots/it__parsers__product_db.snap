@@ -1,0 +1,18 @@
+---
+source: crates/caskade-discovery/tests/parsers.rs
+expression: db
+---
+{
+  "products": [
+    {
+      "uid": "fixture-product",
+      "product_code": "fixture",
+      "settings": {
+        "install_path": "C:\\Games\\Fixture Strategy",
+        "play_region": "eu",
+        "text_language": "enUS",
+        "speech_language": "enUS"
+      }
+    }
+  ]
+}

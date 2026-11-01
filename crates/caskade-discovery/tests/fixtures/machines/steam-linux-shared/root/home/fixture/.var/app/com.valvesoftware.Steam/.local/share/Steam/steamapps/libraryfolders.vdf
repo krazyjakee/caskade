@@ -1,0 +1,13 @@
+"libraryfolders"
+{
+	"0"
+	{
+		"path"		"/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam"
+		"apps"		{ "2000030" "2048" }
+	}
+	"1"
+	{
+		"path"		"/mnt/games/SteamLibrary"
+		"apps"		{ "2000010" "8192" "2000020" "0" }
+	}
+}

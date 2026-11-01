@@ -1,0 +1,23 @@
+{
+  "games": [
+    {
+      "runner": "sideload",
+      "app_name": "fixtureSideload02",
+      "title": "Fixture Flatpak Sideload",
+      "install": {
+        "executable": "/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Sideload Two/run.sh",
+        "platform": "linux"
+      },
+      "is_installed": true
+    },
+    {
+      "runner": "sideload",
+      "app_name": "fixtureBrowser",
+      "title": "Fixture Browser Game",
+      "install": {
+        "platform": "Browser"
+      },
+      "is_installed": true
+    }
+  ]
+}

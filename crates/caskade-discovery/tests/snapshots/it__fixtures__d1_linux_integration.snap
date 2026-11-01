@@ -1,0 +1,2345 @@
+---
+source: crates/caskade-discovery/tests/fixtures/support/mod.rs
+expression: "relative_value(value, root).expect(\"serializable snapshot\")"
+---
+{
+  "groups": [
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/var/lib/flatpak/exports/share/applications/org.caskade.FixtureGame.desktop"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "metadata.game_category",
+                "score": 65
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/var/lib/flatpak/app/org.caskade.FixtureGame/current/active/metadata"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/var/lib/flatpak/app/org.caskade.FixtureGame/current/active/files",
+          "key": "org.caskade.FixtureGame",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "flatpak",
+              "value": {
+                "app_id": "org.caskade.FixtureGame",
+                "args": []
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "native"
+          },
+          "size": null,
+          "source": "flatpak",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Flatpak Standalone",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": "$FIXTURE/root/var/lib/flatpak/app/org.caskade.FixtureGame/current/active/files",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.config/heroic/gog_store/installed.json"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/pga.db"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/games/adventure-flatpak.yml"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/lutris/pga.db"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/lutris/games/adventure-config.yml"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "gog",
+              "value": {
+                "product_id": "1207658924"
+              }
+            },
+            {
+              "type": "lutris",
+              "value": {
+                "slug": "fixture-adventure"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Adventure",
+          "key": "gog:1207658924",
+          "last_played_unix": 1699999500,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "heroic://launch/gog/1207658924"
+              }
+            },
+            {
+              "type": "flatpak",
+              "value": {
+                "app_id": "net.lutris.Lutris",
+                "args": [
+                  "lutris:rungameid/1"
+                ]
+              }
+            },
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "--name",
+                  "Fixture Adventure",
+                  ""
+                ],
+                "cwd": "$FIXTURE/root/home/fixture/Games/Fixture Adventure",
+                "env": {},
+                "program": "$FIXTURE/root/home/fixture/Games/prefixes/fixture/drive_c/Game/adventure.exe"
+              }
+            },
+            {
+              "type": "uri",
+              "value": {
+                "uri": "lutris:rungameid/2"
+              }
+            }
+          ],
+          "playtime_secs": 10800,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": {
+                "arch": "win64",
+                "owner": "lutris",
+                "path": "$FIXTURE/root/home/fixture/Games/prefixes/fixture"
+              },
+              "runner": {
+                "kind": "wine",
+                "name": "wine-ge-fixture",
+                "path": null
+              }
+            }
+          },
+          "size": null,
+          "source": "heroic",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Adventure",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Adventure",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        },
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/pga.db"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/games/adventure-flatpak.yml"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "lutris",
+              "value": {
+                "slug": "fixture-adventure"
+              }
+            },
+            {
+              "type": "gog",
+              "value": {
+                "product_id": "1207658924"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Adventure",
+          "key": "flatpak:1",
+          "last_played_unix": 1699999500,
+          "launch": [
+            {
+              "type": "flatpak",
+              "value": {
+                "app_id": "net.lutris.Lutris",
+                "args": [
+                  "lutris:rungameid/1"
+                ]
+              }
+            },
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "--name",
+                  "Fixture Adventure",
+                  ""
+                ],
+                "cwd": "$FIXTURE/root/home/fixture/Games/Fixture Adventure",
+                "env": {},
+                "program": "$FIXTURE/root/home/fixture/Games/prefixes/fixture/drive_c/Game/adventure.exe"
+              }
+            }
+          ],
+          "playtime_secs": 10800,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": {
+                "arch": "win64",
+                "owner": "lutris",
+                "path": "$FIXTURE/root/home/fixture/Games/prefixes/fixture"
+              },
+              "runner": {
+                "kind": "wine",
+                "name": "wine-ge-fixture",
+                "path": null
+              }
+            }
+          },
+          "size": null,
+          "source": "lutris",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Adventure Flatpak",
+          "tracking": {
+            "exe_names": [
+              "adventure.exe"
+            ],
+            "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Adventure",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        },
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/lutris/pga.db"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/lutris/games/adventure-config.yml"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "lutris",
+              "value": {
+                "slug": "fixture-adventure"
+              }
+            },
+            {
+              "type": "gog",
+              "value": {
+                "product_id": "1207658924"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Adventure",
+          "key": "native:2",
+          "last_played_unix": 1699998000,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "lutris:rungameid/2"
+              }
+            },
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "--name",
+                  "Fixture Adventure",
+                  ""
+                ],
+                "cwd": "$FIXTURE/root/home/fixture/Games/Fixture Adventure",
+                "env": {},
+                "program": "$FIXTURE/root/home/fixture/Games/prefixes/fixture/drive_c/Game/adventure.exe"
+              }
+            }
+          ],
+          "playtime_secs": 8100,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": {
+                "arch": "win64",
+                "owner": "lutris",
+                "path": "$FIXTURE/root/home/fixture/Games/prefixes/fixture"
+              },
+              "runner": {
+                "kind": "wine",
+                "name": "wine-ge-fixture",
+                "path": null
+              }
+            }
+          },
+          "size": null,
+          "source": "lutris",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Adventure",
+          "tracking": {
+            "exe_names": [
+              "adventure.exe"
+            ],
+            "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Adventure",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        },
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/applications/lutris.desktop"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "identity.proxy",
+                "score": 0
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": null,
+          "key": "lutris.desktop",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "lutris:rungameid/2"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "lutris"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "native"
+          },
+          "size": null,
+          "source": "desktop",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture GOG Proxy",
+          "tracking": null,
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.config/heroic/gog_store/installed.json"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "gog",
+              "value": {
+                "product_id": "1207658930"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/home/fixture/Games/Heroic/Fixture GOG Native",
+          "key": "gog:1207658930",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "heroic://launch/gog/1207658930"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "native"
+          },
+          "size": null,
+          "source": "heroic",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture GOG Native",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": "$FIXTURE/root/home/fixture/Games/Heroic/Fixture GOG Native",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/gog_store/installed.json"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "gog",
+              "value": {
+                "product_id": "1207658940"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak GOG",
+          "key": "gog:1207658940",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "flatpak",
+              "value": {
+                "app_id": "com.heroicgameslauncher.hgl",
+                "args": [
+                  "--no-gui",
+                  "--no-sandbox",
+                  "heroic://launch/gog/1207658940"
+                ]
+              }
+            },
+            {
+              "type": "uri",
+              "value": {
+                "uri": "heroic://launch/gog/1207658940"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "heroic",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Flatpak GOG",
+          "tracking": {
+            "exe_names": [
+              "game.exe"
+            ],
+            "install_dir": "$FIXTURE/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak GOG",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.config/heroic/legendaryConfig/legendary/installed.json"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.config/legendary/installed.json"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "epic",
+              "value": {
+                "app_name": "FixtureEpicApp",
+                "catalog_item": "fixtureitem01",
+                "namespace": "fixturens01"
+              }
+            },
+            {
+              "type": "steam_shortcut",
+              "value": {
+                "app_id": 2294968293
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/home/fixture/Games/Heroic/Fixture Epic Quest",
+          "key": "legendary:FixtureEpicApp",
+          "last_played_unix": 1700000000,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "heroic://launch/legendary/FixtureEpicApp"
+              }
+            },
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "launch",
+                  "FixtureEpicApp"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "legendary"
+              }
+            }
+          ],
+          "playtime_secs": 5700,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": {
+                "arch": null,
+                "owner": "heroic",
+                "path": "$FIXTURE/root/home/fixture/Games/Heroic/Prefixes/default/Fixture Epic Quest"
+              },
+              "runner": {
+                "kind": "proton",
+                "name": "Proton - GE-Proton10-34",
+                "path": "$FIXTURE/root/home/fixture/.config/heroic/tools/proton/GE-Proton10-34/proton"
+              }
+            }
+          },
+          "size": 4096,
+          "source": "heroic",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Epic Quest",
+          "tracking": {
+            "exe_names": [
+              "FixtureEpic.exe"
+            ],
+            "install_dir": "$FIXTURE/root/home/fixture/Games/Heroic/Fixture Epic Quest",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        },
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.config/legendary/installed.json"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/home/fixture/Games/Heroic/Fixture Epic Quest",
+          "key": "FixtureEpicApp",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "launch",
+                  "FixtureEpicApp"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "legendary"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": {
+                "kind": "wine",
+                "name": null,
+                "path": "$FIXTURE/root/usr/bin/wine"
+              }
+            }
+          },
+          "size": null,
+          "source": "legendary",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Epic Quest",
+          "tracking": {
+            "exe_names": [
+              "FixtureEpic.exe"
+            ],
+            "install_dir": "$FIXTURE/root/home/fixture/Games/Heroic/Fixture Epic Quest",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        },
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/applications/epic.desktop"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "identity.proxy",
+                "score": 0
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": null,
+          "key": "epic.desktop",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "flatpak",
+              "value": {
+                "app_id": "com.heroicgameslauncher.hgl",
+                "args": [
+                  "heroic://launch/legendary/FixtureEpicApp"
+                ]
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "native"
+          },
+          "size": null,
+          "source": "desktop",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Epic Proxy",
+          "tracking": null,
+          "uninstall": null
+        },
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/Steam/userdata/424242/config/shortcuts.vdf"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "steam.shortcut.proxy",
+                "score": 0
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "steam_shortcut",
+              "value": {
+                "app_id": 2294968293
+              }
+            }
+          ],
+          "install_dir": null,
+          "key": "2294968293",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "steam://rungameid/9856813763825500160"
+              }
+            },
+            {
+              "type": "uri",
+              "value": {
+                "uri": "heroic://launch/legendary/FixtureEpicApp"
+              }
+            },
+            {
+              "type": "flatpak",
+              "value": {
+                "app_id": "com.heroicgameslauncher.hgl",
+                "args": [
+                  "--no-gui",
+                  "--no-sandbox",
+                  "heroic://launch/legendary/FixtureEpicApp"
+                ]
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "native"
+          },
+          "size": null,
+          "source": "steam.shortcuts",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Epic Quest",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": null,
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/legendaryConfig/legendary/installed.json"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak Epic",
+          "key": "legendary:FixtureFlatEpic",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "flatpak",
+              "value": {
+                "app_id": "com.heroicgameslauncher.hgl",
+                "args": [
+                  "--no-gui",
+                  "--no-sandbox",
+                  "heroic://launch/legendary/FixtureFlatEpic"
+                ]
+              }
+            },
+            {
+              "type": "uri",
+              "value": {
+                "uri": "heroic://launch/legendary/FixtureFlatEpic"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "heroic",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Flatpak Epic",
+          "tracking": {
+            "exe_names": [
+              "Flat.exe"
+            ],
+            "install_dir": "$FIXTURE/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak Epic",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.config/heroic/nile_config/nile/installed.json"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "amazon",
+              "value": {
+                "id": "amzn1.adg.product.fixture-0001"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/home/fixture/Games/Heroic/Fixture Amazon Drive",
+          "key": "nile:amzn1.adg.product.fixture-0001",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "heroic://launch/nile/amzn1.adg.product.fixture-0001"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": 2048,
+          "source": "heroic",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Amazon Drive",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": "$FIXTURE/root/home/fixture/Games/Heroic/Fixture Amazon Drive",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/nile_config/nile/installed.json"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "amazon",
+              "value": {
+                "id": "amzn1.adg.product.fixture-0002"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak Amazon",
+          "key": "nile:amzn1.adg.product.fixture-0002",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "flatpak",
+              "value": {
+                "app_id": "com.heroicgameslauncher.hgl",
+                "args": [
+                  "--no-gui",
+                  "--no-sandbox",
+                  "heroic://launch/nile/amzn1.adg.product.fixture-0002"
+                ]
+              }
+            },
+            {
+              "type": "uri",
+              "value": {
+                "uri": "heroic://launch/nile/amzn1.adg.product.fixture-0002"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "heroic",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Flatpak Amazon",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": "$FIXTURE/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak Amazon",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.config/heroic/sideload_apps/library.json"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/home/fixture/Games/Sideload",
+          "key": "sideload:fixtureSideload01",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "heroic://launch/sideload/fixtureSideload01"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": null,
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "heroic",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Sideload",
+          "tracking": {
+            "exe_names": [
+              "run.exe"
+            ],
+            "install_dir": "$FIXTURE/root/home/fixture/Games/Sideload",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic/sideload_apps/library.json"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [],
+          "install_dir": "$FIXTURE/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Sideload Two",
+          "key": "sideload:fixtureSideload02",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "flatpak",
+              "value": {
+                "app_id": "com.heroicgameslauncher.hgl",
+                "args": [
+                  "--no-gui",
+                  "--no-sandbox",
+                  "heroic://launch/sideload/fixtureSideload02"
+                ]
+              }
+            },
+            {
+              "type": "uri",
+              "value": {
+                "uri": "heroic://launch/sideload/fixtureSideload02"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "native"
+          },
+          "size": null,
+          "source": "heroic",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Flatpak Sideload",
+          "tracking": {
+            "exe_names": [
+              "run.sh"
+            ],
+            "install_dir": "$FIXTURE/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Sideload Two",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.config/legendary/installed.json"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "epic",
+              "value": {
+                "app_name": "FixtureEpicTwo",
+                "catalog_item": "fixtureitem02",
+                "namespace": "fixturens02"
+              }
+            },
+            {
+              "type": "steam_shortcut",
+              "value": {
+                "app_id": 2294968292
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/home/fixture/Games/Legendary/Fixture Epic Two",
+          "key": "FixtureEpicTwo",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "launch",
+                  "FixtureEpicTwo"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "legendary"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": {
+                "arch": null,
+                "owner": "legendary",
+                "path": "$FIXTURE/root/home/fixture/Games/Legendary/Prefix"
+              },
+              "runner": {
+                "kind": "wine",
+                "name": null,
+                "path": "$FIXTURE/root/usr/bin/wine"
+              }
+            }
+          },
+          "size": 1024,
+          "source": "legendary",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Epic Two",
+          "tracking": {
+            "exe_names": [
+              "Two.exe"
+            ],
+            "install_dir": "$FIXTURE/root/home/fixture/Games/Legendary/Fixture Epic Two",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        },
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/Steam/userdata/424242/config/shortcuts.vdf"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "steam.shortcut.proxy",
+                "score": 0
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "steam_shortcut",
+              "value": {
+                "app_id": 2294968292
+              }
+            }
+          ],
+          "install_dir": null,
+          "key": "2294968292",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "steam://rungameid/9856813759530532864"
+              }
+            },
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "launch",
+                  "FixtureEpicTwo"
+                ],
+                "cwd": "$FIXTURE/root/home/fixture",
+                "env": {},
+                "program": "legendary"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "native"
+          },
+          "size": null,
+          "source": "steam.shortcuts",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Epic Two",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": null,
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/pga.db"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.var/app/net.lutris.Lutris/data/lutris/games/flatpak-only.yml"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "lutris",
+              "value": {
+                "slug": "flatpak-only"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/home/fixture/Games/Flatpak Only",
+          "key": "flatpak:2",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "flatpak",
+              "value": {
+                "app_id": "net.lutris.Lutris",
+                "args": [
+                  "lutris:rungameid/2"
+                ]
+              }
+            },
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "--test"
+                ],
+                "cwd": "$FIXTURE/root/home/fixture/Games/Flatpak Only",
+                "env": {},
+                "program": "$FIXTURE/root/home/fixture/Games/Flatpak Only/game"
+              }
+            }
+          ],
+          "playtime_secs": 1800,
+          "runtime": {
+            "type": "native"
+          },
+          "size": null,
+          "source": "lutris",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Flatpak Only",
+          "tracking": {
+            "exe_names": [
+              "game"
+            ],
+            "install_dir": "$FIXTURE/root/home/fixture/Games/Flatpak Only",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [
+            {
+              "kind": "cover",
+              "path": "$FIXTURE/root/home/fixture/.local/share/Steam/appcache/librarycache/620_library_600x900.jpg"
+            }
+          ],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/lutris/pga.db"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.config/lutris/games/puzzle-config.yml"
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/Steam/steamapps/appmanifest_620.acf"
+              }
+            }
+          ],
+          "icon": "$FIXTURE/root/home/fixture/.local/share/Steam/appcache/librarycache/620_icon.jpg",
+          "ids": [
+            {
+              "type": "lutris",
+              "value": {
+                "slug": "fixture-puzzle"
+              }
+            },
+            {
+              "type": "steam",
+              "value": {
+                "app_id": 620
+              }
+            },
+            {
+              "type": "steam_shortcut",
+              "value": {
+                "app_id": 2294968290
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Puzzle",
+          "key": "native:1",
+          "last_played_unix": 1699999000,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "lutris:rungameid/1"
+              }
+            },
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "--name",
+                  "Fixture Puzzle",
+                  "--literal",
+                  "$(no-shell)"
+                ],
+                "cwd": "$FIXTURE/root/home/fixture/Games/Fixture Puzzle",
+                "env": {},
+                "program": "$FIXTURE/root/home/fixture/Games/Fixture Puzzle/game"
+              }
+            },
+            {
+              "type": "uri",
+              "value": {
+                "uri": "steam://rungameid/620"
+              }
+            }
+          ],
+          "playtime_secs": 5400,
+          "runtime": {
+            "type": "native"
+          },
+          "size": 4096,
+          "source": "lutris",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Puzzle",
+          "tracking": {
+            "exe_names": [
+              "game"
+            ],
+            "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Puzzle",
+            "steam_app_id": 620
+          },
+          "uninstall": {
+            "quiet": null,
+            "registry_key": null,
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "steam://uninstall/620"
+              }
+            }
+          }
+        },
+        {
+          "artwork": [
+            {
+              "kind": "cover",
+              "path": "$FIXTURE/root/home/fixture/.local/share/Steam/appcache/librarycache/620_library_600x900.jpg"
+            }
+          ],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/Steam/steamapps/appmanifest_620.acf"
+              }
+            }
+          ],
+          "icon": "$FIXTURE/root/home/fixture/.local/share/Steam/appcache/librarycache/620_icon.jpg",
+          "ids": [
+            {
+              "type": "steam",
+              "value": {
+                "app_id": 620
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/home/fixture/.local/share/Steam/steamapps/common/Fixture Puzzle",
+          "key": "620",
+          "last_played_unix": 1699990000,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "steam://rungameid/620"
+              }
+            }
+          ],
+          "playtime_secs": 5400,
+          "runtime": {
+            "type": "native"
+          },
+          "size": 4096,
+          "source": "steam",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Puzzle",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": "$FIXTURE/root/home/fixture/.local/share/Steam/steamapps/common/Fixture Puzzle",
+            "steam_app_id": 620
+          },
+          "uninstall": {
+            "quiet": null,
+            "registry_key": null,
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "steam://uninstall/620"
+              }
+            }
+          }
+        },
+        {
+          "artwork": [],
+          "confidence": "likely",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/applications/steam.desktop"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "identity.proxy",
+                "score": 0
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "steam",
+              "value": {
+                "app_id": 620
+              }
+            }
+          ],
+          "install_dir": null,
+          "key": "steam.desktop",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "steam://rungameid/620"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "steam"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "native"
+          },
+          "size": null,
+          "source": "desktop",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Puzzle",
+          "tracking": null,
+          "uninstall": null
+        },
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/Steam/userdata/424242/config/shortcuts.vdf"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "steam.shortcut.proxy",
+                "score": 0
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "steam_shortcut",
+              "value": {
+                "app_id": 2294968290
+              }
+            },
+            {
+              "type": "steam",
+              "value": {
+                "app_id": 620
+              }
+            }
+          ],
+          "install_dir": null,
+          "key": "2294968290",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "steam://rungameid/9856813750940598272"
+              }
+            },
+            {
+              "type": "uri",
+              "value": {
+                "uri": "steam://rungameid/620"
+              }
+            },
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "steam://rungameid/620"
+                ],
+                "cwd": "$FIXTURE/root/home/fixture",
+                "env": {},
+                "program": "steam"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "native"
+          },
+          "size": null,
+          "source": "steam.shortcuts",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Puzzle via Steam",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": null,
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/lutris/pga.db"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "lutris",
+              "value": {
+                "slug": "local-cafe"
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/home/fixture/Games/Local Café",
+          "key": "native:4",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "lutris:rungameid/4"
+              }
+            },
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/home/fixture/Games/Local Café",
+                "env": {},
+                "program": "$FIXTURE/root/home/fixture/Games/Local Café/game"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "native"
+          },
+          "size": null,
+          "source": "lutris",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Local Café",
+          "tracking": {
+            "exe_names": [
+              "game"
+            ],
+            "install_dir": "$FIXTURE/root/home/fixture/Games/Local Café",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [
+            {
+              "kind": "header",
+              "path": "$FIXTURE/root/home/fixture/.local/share/Steam/appcache/librarycache/2000010/header.jpg"
+            }
+          ],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/mnt/games/SteamLibrary/steamapps/appmanifest_2000010.acf"
+              }
+            }
+          ],
+          "icon": "$FIXTURE/root/home/fixture/.local/share/Steam/appcache/librarycache/2000010/0123456789abcdef0123456789abcdef01234567.jpg",
+          "ids": [
+            {
+              "type": "steam",
+              "value": {
+                "app_id": 2000010
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/mnt/games/SteamLibrary/steamapps/common/Fixture Windows Quest",
+          "key": "2000010",
+          "last_played_unix": 1699500000,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "steam://rungameid/2000010"
+              }
+            }
+          ],
+          "playtime_secs": 1800,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": {
+                "arch": "win64",
+                "owner": "steam",
+                "path": "$FIXTURE/root/mnt/games/SteamLibrary/steamapps/compatdata/2000010/pfx"
+              },
+              "runner": {
+                "kind": "proton",
+                "name": "proton_experimental",
+                "path": null
+              }
+            }
+          },
+          "size": 8192,
+          "source": "steam",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Windows Quest",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": "$FIXTURE/root/mnt/games/SteamLibrary/steamapps/common/Fixture Windows Quest",
+            "steam_app_id": 2000010
+          },
+          "uninstall": {
+            "quiet": null,
+            "registry_key": null,
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "steam://uninstall/2000010"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/mnt/games/SteamLibrary/steamapps/appmanifest_2000020.acf"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "steam",
+              "value": {
+                "app_id": 2000020
+              }
+            }
+          ],
+          "install_dir": null,
+          "key": "2000020",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "steam://rungameid/2000020"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "native"
+          },
+          "size": null,
+          "source": "steam",
+          "state": {
+            "type": "partial"
+          },
+          "title": "Fixture Downloading",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": null,
+            "steam_app_id": 2000020
+          },
+          "uninstall": {
+            "quiet": null,
+            "registry_key": null,
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "steam://uninstall/2000020"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/appmanifest_2000030.acf"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "steam",
+              "value": {
+                "app_id": 2000030
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Fixture Flatpak Racer",
+          "key": "2000030",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "steam://rungameid/2000030"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "native"
+          },
+          "size": 2048,
+          "source": "steam",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Flatpak Racer",
+          "tracking": {
+            "exe_names": [],
+            "install_dir": "$FIXTURE/root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Fixture Flatpak Racer",
+            "steam_app_id": 2000030
+          },
+          "uninstall": {
+            "quiet": null,
+            "registry_key": null,
+            "target": {
+              "type": "uri",
+              "value": {
+                "uri": "steam://uninstall/2000030"
+              }
+            }
+          }
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/applications/indie.desktop"
+              }
+            },
+            {
+              "type": "rule",
+              "value": {
+                "rule": "metadata.game_category",
+                "score": 65
+              }
+            },
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/Steam/userdata/424242/config/shortcuts.vdf"
+              }
+            }
+          ],
+          "icon": "$FIXTURE/root/home/fixture/Games/Fixture Indie/icon.png",
+          "ids": [
+            {
+              "type": "steam_shortcut",
+              "value": {
+                "app_id": 2294968295
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Indie",
+          "key": "indie.desktop",
+          "last_played_unix": 1699100000,
+          "launch": [
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "--desktop"
+                ],
+                "cwd": null,
+                "env": {},
+                "program": "$FIXTURE/root/home/fixture/Games/Fixture Indie/indie"
+              }
+            },
+            {
+              "type": "uri",
+              "value": {
+                "uri": "steam://rungameid/9856813772415434752"
+              }
+            },
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "--windowed",
+                  "--profile=Fixture One"
+                ],
+                "cwd": "$FIXTURE/root/home/fixture/Games/Fixture Indie",
+                "env": {},
+                "program": "$FIXTURE/root/home/fixture/Games/Fixture Indie/indie"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "native"
+          },
+          "size": null,
+          "source": "desktop",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Indie",
+          "tracking": {
+            "exe_names": [
+              "indie"
+            ],
+            "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Indie",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        },
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/Steam/userdata/424242/config/shortcuts.vdf"
+              }
+            }
+          ],
+          "icon": "$FIXTURE/root/home/fixture/Games/Fixture Indie/icon.png",
+          "ids": [
+            {
+              "type": "steam_shortcut",
+              "value": {
+                "app_id": 2294968295
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Indie",
+          "key": "2294968295",
+          "last_played_unix": 1699100000,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "steam://rungameid/9856813772415434752"
+              }
+            },
+            {
+              "type": "exec",
+              "value": {
+                "args": [
+                  "--windowed",
+                  "--profile=Fixture One"
+                ],
+                "cwd": "$FIXTURE/root/home/fixture/Games/Fixture Indie",
+                "env": {},
+                "program": "$FIXTURE/root/home/fixture/Games/Fixture Indie/indie"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "native"
+          },
+          "size": null,
+          "source": "steam.shortcuts",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Indie",
+          "tracking": {
+            "exe_names": [
+              "indie"
+            ],
+            "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Indie",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/Steam/userdata/424242/config/shortcuts.vdf"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "steam_shortcut",
+              "value": {
+                "app_id": 2294968294
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Windows Port",
+          "key": "2294968294",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "steam://rungameid/9856813768120467456"
+              }
+            },
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/home/fixture/Games/Fixture Windows Port",
+                "env": {},
+                "program": "$FIXTURE/root/home/fixture/Games/Fixture Windows Port/port.exe"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "windows",
+            "value": {
+              "prefix": {
+                "arch": "win64",
+                "owner": "steam",
+                "path": "$FIXTURE/root/home/fixture/.local/share/Steam/steamapps/compatdata/2294968294/pfx"
+              },
+              "runner": null
+            }
+          },
+          "size": null,
+          "source": "steam.shortcuts",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Windows Port",
+          "tracking": {
+            "exe_names": [
+              "port.exe"
+            ],
+            "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Windows Port",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    },
+    {
+      "entries": [
+        {
+          "artwork": [],
+          "confidence": "certain",
+          "evidence": [
+            {
+              "type": "file",
+              "value": {
+                "path": "$FIXTURE/root/home/fixture/.local/share/Steam/userdata/424242/config/shortcuts.vdf"
+              }
+            }
+          ],
+          "icon": null,
+          "ids": [
+            {
+              "type": "steam_shortcut",
+              "value": {
+                "app_id": 3674432894
+              }
+            }
+          ],
+          "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Legacy",
+          "key": "3674432894",
+          "last_played_unix": null,
+          "launch": [
+            {
+              "type": "uri",
+              "value": {
+                "uri": "steam://rungameid/15781569111110189056"
+              }
+            },
+            {
+              "type": "exec",
+              "value": {
+                "args": [],
+                "cwd": "$FIXTURE/root/home/fixture/Games/Fixture Legacy",
+                "env": {},
+                "program": "$FIXTURE/root/home/fixture/Games/Fixture Legacy/legacy"
+              }
+            }
+          ],
+          "playtime_secs": null,
+          "runtime": {
+            "type": "native"
+          },
+          "size": null,
+          "source": "steam.shortcuts",
+          "state": {
+            "type": "installed"
+          },
+          "title": "Fixture Legacy",
+          "tracking": {
+            "exe_names": [
+              "legacy"
+            ],
+            "install_dir": "$FIXTURE/root/home/fixture/Games/Fixture Legacy",
+            "steam_app_id": null
+          },
+          "uninstall": null
+        }
+      ],
+      "primary": 0
+    }
+  ],
+  "launchers": [
+    {
+      "data_dir": "$FIXTURE/root/home/fixture/.local/share/Steam",
+      "found": true,
+      "kind": {
+        "type": "native"
+      },
+      "path": "$FIXTURE/root/home/fixture/.local/share/Steam",
+      "source": "steam",
+      "version": "1700000000"
+    },
+    {
+      "data_dir": "$FIXTURE/root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam",
+      "found": true,
+      "kind": {
+        "type": "flatpak",
+        "value": {
+          "app_id": "com.valvesoftware.Steam"
+        }
+      },
+      "path": "$FIXTURE/root/home/fixture/.var/app/com.valvesoftware.Steam/.local/share/Steam",
+      "source": "steam",
+      "version": null
+    },
+    {
+      "data_dir": "$FIXTURE/root/home/fixture/.config/heroic",
+      "found": true,
+      "kind": {
+        "type": "native"
+      },
+      "path": null,
+      "source": "heroic",
+      "version": null
+    },
+    {
+      "data_dir": "$FIXTURE/root/home/fixture/.var/app/com.heroicgameslauncher.hgl/config/heroic",
+      "found": true,
+      "kind": {
+        "type": "flatpak",
+        "value": {
+          "app_id": "com.heroicgameslauncher.hgl"
+        }
+      },
+      "path": null,
+      "source": "heroic",
+      "version": null
+    },
+    {
+      "data_dir": "$FIXTURE/root/home/fixture/.config/legendary",
+      "found": true,
+      "kind": {
+        "type": "native"
+      },
+      "path": null,
+      "source": "legendary",
+      "version": null
+    },
+    {
+      "data_dir": "$FIXTURE/root/home/fixture/.config/Rare",
+      "found": true,
+      "kind": {
+        "type": "native"
+      },
+      "path": null,
+      "source": "rare",
+      "version": null
+    },
+    {
+      "data_dir": "$FIXTURE/root/home/fixture/.local/share/lutris",
+      "found": true,
+      "kind": {
+        "type": "native"
+      },
+      "path": null,
+      "source": "lutris",
+      "version": null
+    },
+    {
+      "data_dir": "$FIXTURE/root/home/fixture/.var/app/net.lutris.Lutris/data/lutris",
+      "found": true,
+      "kind": {
+        "type": "flatpak",
+        "value": {
+          "app_id": "net.lutris.Lutris"
+        }
+      },
+      "path": null,
+      "source": "lutris",
+      "version": null
+    }
+  ],
+  "sources": [
+    {
+      "count": 4,
+      "duration_ms": 0,
+      "error": null,
+      "source": "steam",
+      "warnings": []
+    },
+    {
+      "count": 9,
+      "duration_ms": 0,
+      "error": null,
+      "source": "heroic",
+      "warnings": []
+    },
+    {
+      "count": 2,
+      "duration_ms": 0,
+      "error": null,
+      "source": "legendary",
+      "warnings": []
+    },
+    {
+      "count": 5,
+      "duration_ms": 0,
+      "error": null,
+      "source": "lutris",
+      "warnings": []
+    },
+    {
+      "count": 6,
+      "duration_ms": 0,
+      "error": null,
+      "source": "steam.shortcuts",
+      "warnings": []
+    },
+    {
+      "count": 1,
+      "duration_ms": 0,
+      "error": null,
+      "source": "flatpak",
+      "warnings": []
+    },
+    {
+      "count": 0,
+      "duration_ms": 0,
+      "error": null,
+      "source": "snap",
+      "warnings": []
+    },
+    {
+      "count": 5,
+      "duration_ms": 0,
+      "error": null,
+      "source": "desktop",
+      "warnings": []
+    }
+  ]
+}

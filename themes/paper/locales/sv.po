@@ -1,0 +1,12 @@
+# Machine-drafted Swedish; needs review by a native speaker (#220).
+msgid ""
+msgstr ""
+"Language: sv\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Paper"
+msgstr "Papper"
+
+msgid "A light, printed look: warm paper, ink-red accents, square corners, ruled lines and a serif display face. No glows, blur or grids."
+msgstr "En ljus, tryckt stil: varmt papper, bläckröda accenter, raka hörn, linjerade rader och ett typsnitt med seriffer i rubrikerna. Inget glöd, ingen oskärpa och inga rutnät."

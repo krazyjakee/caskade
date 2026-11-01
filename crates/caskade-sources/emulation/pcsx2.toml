@@ -1,0 +1,77 @@
+# SPDX-License-Identifier: MIT
+# Adapted from Playnite (c) 2020 Josef Nemec, commit 3e8abb241873e326e27c75b59dd0d2ea367698e3.
+# Source: source/Playnite/Emulation/Emulators/PCSX2/emulator.yaml
+# Windows rules/profiles ported with attribution; Linux/macOS rules by Caskade.
+# See ../THIRD-PARTY.md for the license and adaptation notes.
+
+
+id = "pcsx2"
+name = "PCSX2"
+website = "https://pcsx2.net/"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^pcsx2(?:-qt(?:x64(?:-avx2)?)?|x64(?:-avx2)?)?\\.exe$"
+locations = ["{ProgramFiles}/PCSX2", "{AppData}/PCSX2", "{UserHome}/AppData/Local/PCSX2", "{UserHome}/scoop/apps/pcsx2/current", "C:/ProgramData/chocolatey/lib/pcsx2/tools"]
+
+[detect.linux]
+executable = "^(?:pcsx2\\-qt|pcsx2)$"
+path = ["pcsx2-qt", "pcsx2"]
+flatpak = "net.pcsx2.PCSX2"
+appimage = "(?i)^PCSX2(?:[-_].*)?\\.AppImage$"
+locations = ["{UserHome}/Applications/PCSX2", "{UserHome}/Emulation/tools/pcsx2", "{UserHome}/Emulation/tools/launchers", "/opt/pcsx2"]
+
+[detect.macos]
+executable = "(?i)^(?:pcsx2\\-qt|PCSX2)$"
+bundle = "net.pcsx2.pcsx2"
+path = ["pcsx2-qt"]
+locations = ["/Applications/PCSX2.app/Contents/MacOS", "{UserHome}/Applications/PCSX2.app/Contents/MacOS"]
+
+# `data` is the emulator's settings folder, `bios` where it looks for BIOS
+# files (#122).
+[vars]
+data = "{UserHome}/Documents/PCSX2"
+bios = "{data}/bios"
+[vars.linux]
+data = "{XdgConfig}/PCSX2"
+[vars.linux.flatpak]
+data = "{UserHome}/.var/app/net.pcsx2.PCSX2/config/PCSX2"
+[vars.macos]
+data = "{AppSupport}/PCSX2"
+
+# One-click install (EMULATOR-SETUP-PLAN §2): GitHub releases, verified 2026-10-28.
+[install.windows]
+source = "github"
+repo = "PCSX2/pcsx2"
+asset = '^pcsx2-v[\d.]+-windows-x64-Qt\.7z$'
+[install.linux]
+source = "github"
+repo = "PCSX2/pcsx2"
+asset = '^pcsx2-v[\d.]+-linux-appimage-x64-Qt\.AppImage$'
+[install.macos]
+source = "github"
+repo = "PCSX2/pcsx2"
+asset = '^pcsx2-v[\d.]+-macos-Qt\.tar\.xz$'
+
+[display]
+fullscreen = ["-fullscreen"]
+windowed = ["-nofullscreen"]
+
+# Skip the setup wizard and use the BIOS folder Caskade fills.
+[[setup]]
+ini = "{data}/inis/PCSX2.ini"
+section = "UI"
+key = "SetupWizardIncomplete"
+value = "false"
+[[setup]]
+ini = "{data}/inis/PCSX2.ini"
+section = "Folders"
+key = "Bios"
+value = "{bios}"
+
+[[profile]]
+name = "Default"
+platforms = ["sony_playstation2"]
+extensions = ["iso", "bin", "mdf", "nrg", "img", "gz", "cso", "chd", "m3u"]
+args = ["-nogui", "-slowboot", "--", "{RomPath}"]
+requires = []

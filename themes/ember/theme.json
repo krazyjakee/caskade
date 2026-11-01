@@ -1,0 +1,9 @@
+{
+  "id": "dev.caskade.ember",
+  "name": "Ember",
+  "version": "1.0.0",
+  "description": "Nexus in warm light: ember-orange actions and amber highlights over the same dark glass.",
+  "author": "Caskade",
+  "extends": "caskade.default",
+  "modes": ["dark"]
+}

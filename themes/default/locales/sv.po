@@ -1,0 +1,9 @@
+# Machine-drafted Swedish; needs review by a native speaker (#220).
+msgid ""
+msgstr ""
+"Language: sv\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Caskade's dark sci-fi look: indigo and cyan accents, glass panels, HUD frames and a drifting grid."
+msgstr "Caskades mörka sci-fi-stil: indigo- och cyanaccenter, glaspaneler, HUD-ramar och ett svävande rutnät."

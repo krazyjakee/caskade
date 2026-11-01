@@ -1,0 +1,62 @@
+# SPDX-License-Identifier: MIT
+# Authored for Caskade from docs/research/emulator-sources.md (sources and
+# flags checked 2026-10-28).
+
+id = "mesen"
+name = "MesenCE"
+website = "https://github.com/nesdev-org/MesenCE"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^Mesen\\.exe$"
+locations = ["{ProgramFiles}/Mesen", "{UserHome}/AppData/Local/Mesen", "{UserHome}/scoop/apps/mesen/current"]
+
+[detect.linux]
+executable = "^Mesen$"
+appimage = "(?i)^Mesen(?:[-_].*)?\\.AppImage$"
+locations = ["{UserHome}/Applications/Mesen", "{UserHome}/Emulation/tools/mesen"]
+
+[detect.macos]
+executable = "^Mesen$"
+locations = ["/Applications/Mesen.app/Contents/MacOS", "{UserHome}/Applications/Mesen.app/Contents/MacOS"]
+
+# Mesen2 moved to nesdev-org/MesenCE. The macOS build is Apple Silicon's.
+[install.windows]
+source = "github"
+repo = "nesdev-org/MesenCE"
+asset = '^Mesen_[\d.]+_Windows\.zip$'
+[install.linux]
+source = "github"
+repo = "nesdev-org/MesenCE"
+asset = '^Mesen_[\d.]+_Linux_x64\.zip$'
+[install.macos]
+source = "github"
+repo = "nesdev-org/MesenCE"
+asset = '^Mesen_[\d.]+_macOS_ARM64_AppleSilicon\.zip$'
+
+[display]
+fullscreen = ["--fullscreen"]
+
+[[profile]]
+name = "NES"
+platforms = ["nintendo_nes"]
+extensions = ["nes", "fds", "unf", "unif", "zip", "7z"]
+args = ["{RomPath}"]
+
+[[profile]]
+name = "SNES"
+platforms = ["nintendo_snes"]
+extensions = ["sfc", "smc", "fig", "swc", "bs", "zip", "7z"]
+args = ["{RomPath}"]
+
+[[profile]]
+name = "Game Boy"
+platforms = ["nintendo_gb", "nintendo_gbc"]
+extensions = ["gb", "gbc", "zip", "7z"]
+args = ["{RomPath}"]
+
+[[profile]]
+name = "Master System"
+platforms = ["sega_mastersystem"]
+extensions = ["sms", "zip", "7z"]
+args = ["{RomPath}"]

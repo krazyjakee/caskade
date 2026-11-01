@@ -1,0 +1,52 @@
+# SPDX-License-Identifier: MIT
+# Adapted from Playnite (c) 2020 Josef Nemec, commit 3e8abb241873e326e27c75b59dd0d2ea367698e3.
+# Source: source/Playnite/Emulation/Emulators/PPSSPP/emulator.yaml
+# Windows rules/profiles ported with attribution; Linux/macOS rules by Caskade.
+# See ../THIRD-PARTY.md for the license and adaptation notes.
+
+
+id = "ppsspp"
+name = "PPSSPP"
+website = "https://www.ppsspp.org/"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^PPSSPPWindows(?:64)?\\.exe$"
+locations = ["{ProgramFiles}/PPSSPP", "{AppData}/PPSSPP", "{UserHome}/AppData/Local/PPSSPP", "{UserHome}/scoop/apps/ppsspp/current", "C:/ProgramData/chocolatey/lib/ppsspp/tools"]
+
+[detect.linux]
+executable = "^(?:PPSSPPSDL|ppsspp|PPSSPPQt)$"
+path = ["PPSSPPSDL", "ppsspp", "PPSSPPQt"]
+flatpak = "org.ppsspp.PPSSPP"
+appimage = "(?i)^PPSSPP(?:[-_].*)?\\.AppImage$"
+locations = ["{UserHome}/Applications/PPSSPP", "{UserHome}/Emulation/tools/ppsspp", "{UserHome}/Emulation/tools/launchers", "/opt/ppsspp"]
+
+[detect.macos]
+executable = "(?i)^(?:PPSSPPSDL|PPSSPP)$"
+bundle = "org.ppsspp.ppsspp"
+path = ["PPSSPPSDL"]
+locations = ["/Applications/PPSSPP.app/Contents/MacOS", "{UserHome}/Applications/PPSSPP.app/Contents/MacOS"]
+
+[install.windows]
+source = "github"
+repo = "hrydgard/ppsspp"
+asset = '^PPSSPP-v[\d.]+-Windows-x64\.zip$'
+[install.linux]
+source = "github"
+repo = "hrydgard/ppsspp"
+asset = '^PPSSPP-v[\d.]+-anylinux-x86_64\.AppImage$'
+[install.macos]
+source = "github"
+repo = "hrydgard/ppsspp"
+asset = '^PPSSPPSDL-macOS-v[\d.]+\.zip$'
+
+[display]
+fullscreen = ["--fullscreen"]
+windowed = ["--windowed"]
+
+[[profile]]
+name = "Default"
+platforms = ["sony_psp"]
+extensions = ["iso", "cso", "pbp", "chd"]
+args = ["--pause-menu-exit", "{RomPath}"]
+requires = []

@@ -1,0 +1,5 @@
+{
+  "$description": "Appearance → Density: Compact.",
+  "$extensions": { "dev.caskade.condition": { "selector": "[data-density=\"compact\"]" } },
+  "density": { "scale": { "$value": 0.85 } }
+}

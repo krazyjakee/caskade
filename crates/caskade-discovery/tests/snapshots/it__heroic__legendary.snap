@@ -1,0 +1,133 @@
+---
+source: crates/caskade-discovery/tests/heroic.rs
+expression: "support::relative_value(&games, &scenario.path).unwrap()"
+---
+[
+  {
+    "artwork": [],
+    "confidence": "certain",
+    "evidence": [
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/.config/legendary/installed.json"
+        }
+      }
+    ],
+    "icon": null,
+    "ids": [],
+    "install_dir": "$FIXTURE/root/home/fixture/Games/Heroic/Fixture Epic Quest",
+    "key": "FixtureEpicApp",
+    "last_played_unix": null,
+    "launch": [
+      {
+        "type": "exec",
+        "value": {
+          "args": [
+            "launch",
+            "FixtureEpicApp"
+          ],
+          "cwd": null,
+          "env": {},
+          "program": "legendary"
+        }
+      }
+    ],
+    "playtime_secs": null,
+    "runtime": {
+      "type": "windows",
+      "value": {
+        "prefix": null,
+        "runner": {
+          "kind": "wine",
+          "name": null,
+          "path": "$FIXTURE/root/usr/bin/wine"
+        }
+      }
+    },
+    "size": null,
+    "source": "legendary",
+    "state": {
+      "type": "installed"
+    },
+    "title": "Fixture Epic Quest",
+    "tracking": {
+      "exe_names": [
+        "FixtureEpic.exe"
+      ],
+      "install_dir": "$FIXTURE/root/home/fixture/Games/Heroic/Fixture Epic Quest",
+      "steam_app_id": null
+    },
+    "uninstall": null
+  },
+  {
+    "artwork": [],
+    "confidence": "certain",
+    "evidence": [
+      {
+        "type": "file",
+        "value": {
+          "path": "$FIXTURE/root/home/fixture/.config/legendary/installed.json"
+        }
+      }
+    ],
+    "icon": null,
+    "ids": [
+      {
+        "type": "epic",
+        "value": {
+          "app_name": "FixtureEpicTwo",
+          "catalog_item": "fixtureitem02",
+          "namespace": "fixturens02"
+        }
+      }
+    ],
+    "install_dir": "$FIXTURE/root/home/fixture/Games/Legendary/Fixture Epic Two",
+    "key": "FixtureEpicTwo",
+    "last_played_unix": null,
+    "launch": [
+      {
+        "type": "exec",
+        "value": {
+          "args": [
+            "launch",
+            "FixtureEpicTwo"
+          ],
+          "cwd": null,
+          "env": {},
+          "program": "legendary"
+        }
+      }
+    ],
+    "playtime_secs": null,
+    "runtime": {
+      "type": "windows",
+      "value": {
+        "prefix": {
+          "arch": null,
+          "owner": "legendary",
+          "path": "$FIXTURE/root/home/fixture/Games/Legendary/Prefix"
+        },
+        "runner": {
+          "kind": "wine",
+          "name": null,
+          "path": "$FIXTURE/root/usr/bin/wine"
+        }
+      }
+    },
+    "size": 1024,
+    "source": "legendary",
+    "state": {
+      "type": "installed"
+    },
+    "title": "Fixture Epic Two",
+    "tracking": {
+      "exe_names": [
+        "Two.exe"
+      ],
+      "install_dir": "$FIXTURE/root/home/fixture/Games/Legendary/Fixture Epic Two",
+      "steam_app_id": null
+    },
+    "uninstall": null
+  }
+]

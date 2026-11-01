@@ -1,0 +1,86 @@
+[package]
+name = "caskade-discovery-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+caskade-discovery = { path = "..", default-features = false, features = ["sqlite"] }
+tempfile = "=3.27.0"
+
+[workspace]
+members = ["."]
+
+[[bin]]
+name = "binary_vdf"
+path = "fuzz_targets/binary_vdf.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "lnk"
+path = "fuzz_targets/lnk.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "desktop"
+path = "fuzz_targets/desktop.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "text_vdf"
+path = "fuzz_targets/text_vdf.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "url"
+path = "fuzz_targets/url.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "plist"
+path = "fuzz_targets/plist.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "protobuf"
+path = "fuzz_targets/protobuf.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "sqlite"
+path = "fuzz_targets/sqlite.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "registry"
+path = "fuzz_targets/registry.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "epic"
+path = "fuzz_targets/epic.rs"
+test = false
+doc = false
+bench = false

@@ -1,0 +1,231 @@
+# SPDX-License-Identifier: MIT
+# Adapted from Playnite (c) 2020 Josef Nemec, commit 3e8abb241873e326e27c75b59dd0d2ea367698e3.
+# Source: source/Playnite/Emulation/Platforms.yaml
+# Windows rules/profiles ported with attribution; Linux/macOS rules by Caskade.
+# See ../THIRD-PARTY.md for the license and adaptation notes.
+
+
+[[platform]]
+id = "nintendo_nes"
+name = "Nintendo Entertainment System"
+short = "NES"
+extensions = ["nes", "unf", "unif", "fds", "zip", "7z"]
+ids = { igdb = 18, libretro = "Nintendo - Nintendo Entertainment System", playnite = "nintendo_nes", esde = "nes", hasheous = "Nintendo Entertainment System" }
+recommended = ["mesen", "retroarch:Mesen"]
+
+[[platform]]
+id = "nintendo_snes"
+name = "Super Nintendo Entertainment System"
+short = "SNES"
+extensions = ["sfc", "smc", "fig", "swc", "bs", "st", "zip", "7z"]
+ids = { igdb = 19, libretro = "Nintendo - Super Nintendo Entertainment System", playnite = "nintendo_super_nes", esde = "snes", hasheous = "Nintendo Super Nintendo Entertainment System" }
+recommended = ["mesen", "retroarch:Snes9x"]
+
+[[platform]]
+id = "nintendo_n64"
+name = "Nintendo 64"
+short = "N64"
+extensions = ["z64", "n64", "v64", "ndd", "zip", "7z"]
+ids = { igdb = 4, libretro = "Nintendo - Nintendo 64", playnite = "nintendo_64", esde = "n64", hasheous = "Nintendo 64" }
+recommended = ["rmg", "gopher64", "retroarch:Mupen64Plus-Next"]
+
+[[platform]]
+id = "nintendo_gb"
+name = "Nintendo Game Boy"
+short = "GB"
+extensions = ["gb", "dmg", "zip", "7z"]
+ids = { igdb = 33, libretro = "Nintendo - Game Boy", playnite = "nintendo_gameboy", esde = "gb", hasheous = "Nintendo Game Boy" }
+recommended = ["mgba", "retroarch:Gambatte"]
+bios = [{ file = "gb_bios.bin", md5 = "32fbbd84168d3482956eb3c5051637f5", required = false }]
+
+[[platform]]
+id = "nintendo_gbc"
+name = "Nintendo Game Boy Color"
+short = "GBC"
+extensions = ["gbc", "cgb", "sgb", "zip", "7z"]
+ids = { igdb = 22, libretro = "Nintendo - Game Boy Color", playnite = "nintendo_gameboycolor", esde = "gbc", hasheous = "Nintendo Game Boy Color" }
+recommended = ["mgba", "retroarch:Gambatte"]
+bios = [{ file = "gbc_bios.bin", md5 = "dbfce9db9deaa2567f6a84fde55f9680", required = false }]
+
+[[platform]]
+id = "nintendo_gba"
+name = "Nintendo Game Boy Advance"
+short = "GBA"
+extensions = ["gba", "agb", "mb", "zip", "7z"]
+ids = { igdb = 24, libretro = "Nintendo - Game Boy Advance", playnite = "nintendo_gameboyadvance", esde = "gba", hasheous = "Nintendo Game Boy Advance" }
+recommended = ["mgba", "retroarch:mGBA"]
+bios = [
+  { file = "gba_bios.bin", required = false, md5 = "a860e8c0b6d573d191e4ec7db1b1e4f6" },
+]
+
+[[platform]]
+id = "nintendo_ds"
+name = "Nintendo DS"
+short = "NDS"
+extensions = ["nds", "zip", "7z"]
+ids = { igdb = 20, libretro = "Nintendo - Nintendo DS", playnite = "nintendo_ds", esde = "nds", hasheous = "Nintendo DS" }
+recommended = ["melonds", "retroarch:DeSmuME"]
+bios = [
+  { file = "bios7.bin", required = false, md5 = "df692a80a5b1bc90728bc3dfc76cd948" },
+  { file = "bios9.bin", required = false, md5 = "a392174eb3e572fed6447e956bde4b25" },
+  { file = "firmware.bin", required = false },
+]
+
+[[platform]]
+id = "nintendo_gamecube"
+name = "Nintendo GameCube"
+short = "GC"
+extensions = ["gcm", "iso", "rvz", "ciso", "gcz", "dol", "elf", "m3u"]
+ids = { igdb = 21, libretro = "Nintendo - GameCube", playnite = "nintendo_gamecube", esde = "gc", hasheous = "Nintendo GameCube" }
+recommended = ["dolphin"]
+
+[[platform]]
+id = "nintendo_wii"
+name = "Nintendo Wii"
+short = "Wii"
+extensions = ["wbfs", "iso", "rvz", "wad", "gcz", "wia", "m3u"]
+ids = { igdb = 5, libretro = "Nintendo - Wii", playnite = "nintendo_wii", esde = "wii", hasheous = "Nintendo Wii" }
+recommended = ["dolphin"]
+
+[[platform]]
+id = "nintendo_wiiu"
+name = "Nintendo Wii U"
+short = "Wii U"
+extensions = ["wud", "wux", "wua", "rpx"]
+ids = { igdb = 41, libretro = "Nintendo - Wii U", playnite = "nintendo_wiiu", esde = "wiiu", hasheous = "Nintendo WiiU" }
+recommended = ["cemu"]
+
+[[platform]]
+id = "nintendo_switch"
+name = "Nintendo Switch"
+short = "Switch"
+extensions = ["xci", "nsp"]
+ids = { igdb = 130, libretro = "Nintendo - Nintendo Switch", playnite = "nintendo_switch", esde = "switch" }
+
+[[platform]]
+id = "sega_mastersystem"
+name = "Sega Master System"
+short = "SMS"
+extensions = ["sms", "sg"]
+ids = { igdb = 64, libretro = "Sega - Master System - Mark III", playnite = "sega_mastersystem", esde = "mastersystem", hasheous = "Sega Master System" }
+recommended = ["mesen", "ares", "retroarch:Genesis Plus GX"]
+
+[[platform]]
+id = "sega_genesis"
+name = "Sega Genesis"
+short = "MD"
+extensions = ["md", "gen", "smd", "bin"]
+ids = { igdb = 29, libretro = "Sega - Mega Drive - Genesis", playnite = "sega_genesis", esde = "megadrive", hasheous = "Sega Mega Drive _ Genesis" }
+recommended = ["ares", "retroarch:Genesis Plus GX"]
+
+[[platform]]
+id = "sega_saturn"
+name = "Sega Saturn"
+short = "Saturn"
+extensions = ["cue", "chd", "ccd", "m3u"]
+ids = { igdb = 32, libretro = "Sega - Saturn", playnite = "sega_saturn", esde = "saturn", hasheous = "Sega Saturn" }
+recommended = ["ymir", "retroarch:Beetle Saturn"]
+bios = [
+  { file = "sega_101.bin", required = true, md5 = "85ec9ca47d8f6807718151cbcca8b964", region = "japan" },
+  { file = "mpr-17933.bin", required = true, md5 = "3240872c70984b6cbfda1586cab68dbe", region = "usa" },
+]
+
+[[platform]]
+id = "sega_dreamcast"
+name = "Sega Dreamcast"
+short = "DC"
+extensions = ["gdi", "cdi", "chd", "cue", "m3u"]
+ids = { igdb = 23, libretro = "Sega - Dreamcast", playnite = "sega_dreamcast", esde = "dreamcast", hasheous = "Sega Dreamcast" }
+recommended = ["flycast", "retroarch:Flycast"]
+bios = [
+  { file = "dc/dc_boot.bin", required = false, md5 = "e10c53c2f8b90bab96ead2d368858623" },
+]
+
+[[platform]]
+id = "sony_playstation"
+name = "Sony PlayStation"
+short = "PS1"
+extensions = ["cue", "chd", "pbp", "m3u", "iso", "bin", "img"]
+ids = { igdb = 7, libretro = "Sony - PlayStation", playnite = "sony_playstation", esde = "psx", hasheous = "Sony PlayStation" }
+recommended = ["duckstation", "retroarch:Beetle PSX HW"]
+bios = [
+  { file = "scph5500.bin", required = false, md5 = "8dd7d5296a650fac7319bce665a6a53c", region = "japan" },
+  { file = "scph5501.bin", required = false, md5 = "490f666e1afb15b7362b406ed1cea246", region = "usa" },
+  { file = "scph5502.bin", required = false, md5 = "32736f17079d0b2b7024407c39bd3050", region = "europe" },
+]
+
+[[platform]]
+id = "sony_playstation2"
+name = "Sony PlayStation 2"
+short = "PS2"
+extensions = ["iso", "bin", "chd", "cso", "mdf", "nrg", "img", "gz", "m3u"]
+ids = { igdb = 8, libretro = "Sony - PlayStation 2", playnite = "sony_playstation2", esde = "ps2", hasheous = "Sony PlayStation 2" }
+recommended = ["pcsx2"]
+# Reference dumps, not an exhaustive set or a requirement for these revisions.
+# PCSX2 accepts the user's own valid BIOS under other filenames too.
+bios = [
+  { file = "ps2-0220j-20060210.bin", md5 = "5b1ba4bb914406fae75ab8e38901684d", region = "japan", required = false },
+  { file = "ps2-0220a-20060210.bin", md5 = "cb801b7920a7d536ba07b6534d2433ca", region = "usa", required = false },
+  { file = "ps2-0220e-20060210.bin", md5 = "af60e6d1a939019d55e5b330d24b1c25", region = "europe", required = false },
+]
+
+[[platform]]
+id = "sony_playstation3"
+name = "Sony PlayStation 3"
+short = "PS3"
+extensions = ["bin", "elf", "self"]
+ids = { igdb = 9, libretro = "Sony - PlayStation 3", playnite = "sony_playstation3", esde = "ps3", hasheous = "Sony Playstation 3" }
+recommended = ["rpcs3"]
+
+[[platform]]
+id = "sony_psp"
+name = "Sony PlayStation Portable"
+short = "PSP"
+extensions = ["iso", "cso", "chd", "pbp"]
+ids = { igdb = 38, libretro = "Sony - PlayStation Portable", playnite = "sony_psp", esde = "psp", hasheous = "Sony Playstation Portable" }
+recommended = ["ppsspp", "retroarch:PPSSPP"]
+
+[[platform]]
+id = "arcade"
+name = "Arcade"
+short = "Arcade"
+extensions = ["zip", "7z"]
+ids = { igdb = 52, libretro = "MAME", playnite = "arcade", esde = "arcade", hasheous = "Arcade" }
+recommended = ["mame", "retroarch:FinalBurn Neo"]
+
+[[platform]]
+id = "nintendo_3ds"
+name = "Nintendo 3DS"
+short = "3DS"
+extensions = ["3ds", "cci", "cxi", "3dsx", "app"]
+ids = { igdb = 37, libretro = "Nintendo - Nintendo 3DS", playnite = "nintendo_3ds", esde = "n3ds" }
+recommended = ["azahar"]
+
+[[platform]]
+id = "microsoft_xbox"
+name = "Microsoft Xbox"
+short = "Xbox"
+extensions = ["iso", "xiso"]
+ids = { igdb = 11, libretro = "Microsoft - XBOX", playnite = "xbox", esde = "xbox" }
+recommended = ["xemu"]
+# Dumped from the user's console: the MCPX boot ROM and a flash BIOS.
+bios = [
+  { file = "mcpx_1.0.bin", required = true },
+  { file = "Complex_4627.bin", required = true },
+]
+
+[[platform]]
+id = "microsoft_xbox360"
+name = "Microsoft Xbox 360"
+short = "X360"
+extensions = ["iso", "xex", "zar"]
+ids = { igdb = 12, playnite = "xbox360", esde = "xbox360" }
+recommended = ["xenia"]
+
+[[platform]]
+id = "sony_playstation4"
+name = "Sony PlayStation 4"
+short = "PS4"
+extensions = ["bin"]
+ids = { igdb = 48, playnite = "sony_playstation4", esde = "ps4" }
+recommended = ["shadps4"]

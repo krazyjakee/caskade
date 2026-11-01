@@ -1,0 +1,250 @@
+/*
+ * Layer order is part of the theming contract (docs/TECH-PLAN.md §5.2):
+ * themes beat component styles, and user CSS beats themes.
+ * Tailwind is imported into our own layers rather than its defaults.
+ */
+@layer cs.reset, cs.tokens, cs.base, cs.components, cs.plugins, cs.theme, cs.user;
+
+@import "tailwindcss/theme.css" layer(cs.tokens);
+@import "tailwindcss/preflight.css" layer(cs.reset);
+@import "tailwindcss/utilities.css" layer(cs.components);
+
+/* The token contract, compiled from DTCG JSON (packages/tokens, #137). */
+@import "@caskade/tokens/tokens.css" layer(cs.tokens);
+@import "./base.css" layer(cs.base);
+
+/* @caskade/ui is styled with the same utilities. */
+@source "../../../../packages/ui/src";
+
+/*
+ * Expose semantic tokens to Tailwind. `inline` makes utilities reference the
+ * --cs-* variables directly, so a theme that changes a token restyles every
+ * utility that uses it.
+ */
+@theme inline {
+  --color-surface-base: var(--cs-color-surface-base);
+  --color-surface-raised: var(--cs-color-surface-raised);
+  --color-surface-overlay: var(--cs-color-surface-overlay);
+  --color-surface-hover: var(--cs-color-surface-hover);
+  --color-border: var(--cs-color-border);
+  --color-border-strong: var(--cs-color-border-strong);
+  --color-fg: var(--cs-color-fg);
+  --color-fg-muted: var(--cs-color-fg-muted);
+  --color-fg-subtle: var(--cs-color-fg-subtle);
+  --color-accent: var(--cs-color-accent);
+  --color-accent-strong: var(--cs-color-accent-strong);
+  --color-accent-alt: var(--cs-color-accent-alt);
+  --color-glow: var(--cs-color-glow);
+  --color-accent-fg: var(--cs-color-accent-fg);
+  --color-status-installed: var(--cs-color-status-installed);
+  --color-status-available: var(--cs-color-status-available);
+  --color-status-emulated: var(--cs-color-status-emulated);
+  --color-status-missing: var(--cs-color-status-missing);
+  --color-warning: var(--cs-color-warning);
+  --color-danger: var(--cs-color-danger);
+
+  --radius-card: var(--cs-radius-card);
+  --radius-control: var(--cs-radius-control);
+  --radius-panel: var(--cs-radius-panel);
+
+  --font-sans: var(--cs-font-sans);
+  --font-display: var(--cs-font-display);
+  --font-mono: var(--cs-font-mono);
+
+  --spacing-sidebar: var(--cs-sidebar-width);
+  --spacing-topbar: var(--cs-topbar-height);
+
+  /* Appearance (#141): Tailwind's blur scale never exceeds the glass blur,
+     so "reduce effects" (glass blur 0) removes every blur utility; plain
+     transitions take the motion tokens; spacing follows the density. */
+  --blur-xs: min(4px, var(--cs-effect-glass-blur));
+  --blur-sm: min(8px, var(--cs-effect-glass-blur));
+  --blur: min(8px, var(--cs-effect-glass-blur));
+  --blur-md: min(12px, var(--cs-effect-glass-blur));
+  --blur-lg: min(16px, var(--cs-effect-glass-blur));
+  --blur-xl: min(24px, var(--cs-effect-glass-blur));
+  --blur-2xl: min(40px, var(--cs-effect-glass-blur));
+  --blur-3xl: min(64px, var(--cs-effect-glass-blur));
+  --default-transition-duration: var(--cs-motion-duration-fast);
+  --spacing: calc(0.25rem * var(--cs-density-scale));
+
+  /* Staggered by the element's --i index (0 when unset). */
+  --animate-enter: cs-enter var(--cs-motion-duration-slow) var(--cs-motion-ease-out)
+    calc(var(--i, 0) * var(--cs-motion-stagger)) backwards;
+  --animate-worker: cs-worker calc(var(--cs-motion-duration-slow) * 2) linear infinite;
+  /* First-run setup: things arriving, staggered by --i, and the running
+     task's progress sweep. */
+  --animate-rise: cs-rise calc(var(--cs-motion-duration-slow) * 1.6) var(--cs-motion-ease-out)
+    calc(var(--i, 0) * var(--cs-motion-stagger) * 4) backwards;
+  --animate-progress: cs-progress calc(var(--cs-motion-duration-slow) * 3) ease-in-out infinite;
+  /* A placeholder for something still loading. */
+  --animate-wait: cs-wait calc(var(--cs-motion-duration-slow) * 4) ease-in-out infinite;
+  /* A refused PIN. */
+  --animate-shake: cs-shake var(--cs-motion-duration-slow) var(--cs-motion-ease-out);
+}
+
+/* Cut-corner silhouette for primary actions and HUD tiles. */
+@utility chamfer {
+  clip-path: polygon(
+    var(--cs-chamfer) 0,
+    100% 0,
+    100% calc(100% - var(--cs-chamfer)),
+    calc(100% - var(--cs-chamfer)) 100%,
+    0 100%,
+    0 var(--cs-chamfer)
+  );
+}
+
+/*
+ * Focus (#161): one look for keyboard and pad focus, from the focus.ring.*
+ * tokens. A clear edge (an outline, so focus never moves layout or replaces a
+ * component's own shadows) and, where the tokens give them a blur, a glow
+ * fading inward from it and a soft halo outside. Desktop draws the edge just
+ * outside the element; console mode draws it inside (offset = minus the
+ * width), where a scrolling or clipping parent can't cut it. Reduce effects
+ * (glow strength 0) drops the glows, never the edge. Forced colours draw the
+ * edge in Highlight.
+ *
+ * - `focus-ring`: an element's own focus, behind a state variant:
+ *   `data-focus-visible:`, `group-data-focus-visible:` or `focus-visible:`.
+ *   Box shadows compose with Tailwind's shadow utilities, so a selected or
+ *   hovered glow stays.
+ * - `focus-ring-over`: cards whose artwork would paint over an outline. The
+ *   edge and inward glow go on an ::after above the content, always inside
+ *   and cut to the host's rounding. The host needs `relative` and no ::after
+ *   of its own.
+ * - `focus-ring-chamfer`: the same for a `chamfer` host: the edge is a frame
+ *   cut along the chamfered corners.
+ * - `focus-ring-outside`: small controls whose own border would hide an inner
+ *   edge (a slider thumb): the edge stays outside in every mode.
+ */
+@utility focus-ring {
+  outline: var(--cs-focus-ring-width) solid var(--cs-focus-ring-glow);
+  outline-offset: var(--cs-focus-ring-offset);
+  --tw-ring-offset-shadow:
+    inset 0 0 calc(var(--cs-focus-ring-inner) * var(--cs-effect-glow-strength))
+    color-mix(in oklab, var(--cs-focus-ring-glow) 45%, transparent),
+    0 0 calc(var(--cs-focus-ring-halo) * var(--cs-effect-glow-strength))
+    color-mix(in oklab, var(--cs-focus-ring-glow) 35%, transparent);
+  box-shadow:
+    var(--tw-inset-shadow, 0 0 #0000), var(--tw-inset-ring-shadow, 0 0 #0000),
+    var(--tw-ring-offset-shadow), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow, 0 0 #0000);
+
+  @media (forced-colors: active) {
+    outline-color: Highlight;
+  }
+}
+
+@utility focus-ring-outside {
+  @apply focus-ring;
+  outline-offset: 2px;
+}
+
+@utility focus-ring-over {
+  outline: none;
+  --tw-ring-offset-shadow: 0 0 calc(var(--cs-focus-ring-halo) * var(--cs-effect-glow-strength))
+    color-mix(in oklab, var(--cs-focus-ring-glow) 35%, transparent);
+  box-shadow:
+    var(--tw-inset-shadow, 0 0 #0000), var(--tw-inset-ring-shadow, 0 0 #0000),
+    var(--tw-ring-offset-shadow), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow, 0 0 #0000);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow:
+      inset 0 0 0 var(--cs-focus-ring-width) var(--cs-focus-ring-glow),
+      inset 0 0 calc(var(--cs-focus-ring-inner) * var(--cs-effect-glow-strength))
+      color-mix(in oklab, var(--cs-focus-ring-glow) 45%, transparent);
+  }
+
+  @media (forced-colors: active) {
+    outline: var(--cs-focus-ring-width) solid Highlight;
+    outline-offset: calc(var(--cs-focus-ring-width) * -1);
+  }
+}
+
+@utility focus-ring-chamfer {
+  outline: none;
+  --tw-ring-offset-shadow: inset 0 0
+    calc(var(--cs-focus-ring-inner) * var(--cs-effect-glow-strength))
+    color-mix(in oklab, var(--cs-focus-ring-glow) 45%, transparent);
+  box-shadow:
+    var(--tw-inset-shadow, 0 0 #0000), var(--tw-inset-ring-shadow, 0 0 #0000),
+    var(--tw-ring-offset-shadow), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow, 0 0 #0000);
+
+  /* A frame: the chamfer's outline, less the same shape inset by the ring
+     width (a 45° cut moves in by width × (√2 − 1) along each side). */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: var(--cs-focus-ring-glow);
+    clip-path: polygon(
+      evenodd,
+      var(--cs-chamfer) 0,
+      100% 0,
+      100% calc(100% - var(--cs-chamfer)),
+      calc(100% - var(--cs-chamfer)) 100%,
+      0 100%,
+      0 var(--cs-chamfer),
+      var(--cs-chamfer) 0,
+      calc(var(--cs-chamfer) + var(--cs-focus-ring-width) * 0.4142) var(--cs-focus-ring-width),
+      calc(100% - var(--cs-focus-ring-width)) var(--cs-focus-ring-width),
+      calc(100% - var(--cs-focus-ring-width))
+        calc(100% - var(--cs-chamfer) - var(--cs-focus-ring-width) * 0.4142),
+      calc(100% - var(--cs-chamfer) - var(--cs-focus-ring-width) * 0.4142)
+        calc(100% - var(--cs-focus-ring-width)),
+      var(--cs-focus-ring-width) calc(100% - var(--cs-focus-ring-width)),
+      var(--cs-focus-ring-width) calc(var(--cs-chamfer) + var(--cs-focus-ring-width) * 0.4142),
+      calc(var(--cs-chamfer) + var(--cs-focus-ring-width) * 0.4142) var(--cs-focus-ring-width)
+    );
+  }
+
+  @media (forced-colors: active) {
+    outline: var(--cs-focus-ring-width) solid Highlight;
+    outline-offset: calc(var(--cs-focus-ring-width) * -1);
+  }
+}
+
+/* Console mode only: list items whose desktop focus is their background. */
+@custom-variant console (&:where([data-mode="console"] *));
+
+/* Appearance → UI scale (#141) and the type scale (console mode raises it,
+   #148): rem-based sizes follow the root font size. */
+@layer cs.base {
+  html {
+    font-size: calc(100% * var(--cs-ui-scale) * var(--cs-type-scale));
+  }
+
+  /* The focus ring for anything without its own; a pad user needs it on
+     every focus stop. Components that style their focus override it. The
+     glows only go on controls: a dialog or list that takes focus itself
+     shows at most the edge. */
+  :focus-visible {
+    outline: var(--cs-focus-ring-width) solid var(--cs-focus-ring-glow);
+    outline-offset: var(--cs-focus-ring-offset);
+
+    @media (forced-colors: active) {
+      outline-color: Highlight;
+    }
+  }
+
+  :is(
+    a[href],
+    button,
+    summary,
+    [role="button"],
+    [role="link"],
+    [role="tab"],
+    [role="menuitem"],
+    [role="option"],
+    [role="row"],
+    [role="gridcell"]
+  ):focus-visible {
+    @apply focus-ring;
+  }
+}

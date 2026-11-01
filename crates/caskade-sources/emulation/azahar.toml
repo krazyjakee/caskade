@@ -1,0 +1,46 @@
+# SPDX-License-Identifier: MIT
+# Authored for Caskade from docs/research/emulator-sources.md (sources and
+# flags checked 2026-10-28).
+
+id = "azahar"
+name = "Azahar"
+website = "https://azahar-emu.org/"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^azahar\\.exe$"
+locations = ["{ProgramFiles}/Azahar", "{UserHome}/AppData/Local/Azahar"]
+
+[detect.linux]
+executable = "^azahar$"
+path = ["azahar"]
+flatpak = "org.azahar_emu.Azahar"
+appimage = "(?i)^azahar(?:[-_].*)?\\.AppImage$"
+
+[detect.macos]
+executable = "^Azahar$"
+bundle = "org.azahar-emu.azahar"
+locations = ["/Applications/Azahar.app/Contents/MacOS"]
+
+# Lime3DS merged into Azahar. Its AppImage's name has no version.
+[install.windows]
+source = "github"
+repo = "azahar-emu/azahar"
+asset = '^azahar-windows-msvc-[\d.]+\.zip$'
+[install.linux]
+source = "github"
+repo = "azahar-emu/azahar"
+asset = '^azahar\.AppImage$'
+[install.macos]
+source = "github"
+repo = "azahar-emu/azahar"
+asset = '^azahar-macos-universal-[\d.]+\.zip$'
+
+[display]
+fullscreen = ["--fullscreen"]
+
+[[profile]]
+name = "Nintendo 3DS"
+platforms = ["nintendo_3ds"]
+extensions = ["3ds", "cci", "cxi", "3dsx", "app", "elf", "axf"]
+args = ["{RomPath}"]

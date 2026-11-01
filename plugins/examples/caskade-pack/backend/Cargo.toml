@@ -1,0 +1,21 @@
+[package]
+name = "caskade-pack-plugin"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Example Caskade plugin: the .cpk game pack format and a download page resolver."
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wit-bindgen = { version = "0.63", default-features = false, features = ["macros", "realloc"] }
+# Outbound HTTP through wasi:http.
+wasi = "0.14"
+
+[profile.release]
+panic = "abort"
+opt-level = "s"
+
+# An example plugin, outside the Caskade workspace.
+[workspace]

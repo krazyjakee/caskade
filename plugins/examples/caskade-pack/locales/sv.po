@@ -1,0 +1,55 @@
+# Swedish translation of the Caskade Pack example plugin (#219).
+msgid ""
+msgstr "Project-Id-Version: dev.caskade.example.pack\nLanguage: sv\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: plugin.json
+msgid "Caskade Pack (example)"
+msgstr "Caskade-paket (exempel)"
+
+#: plugin.json
+msgid "Installs .cpk game packs and finds them on download pages."
+msgstr "Installerar .cpk-spelpaket och hittar dem på nedladdningssidor."
+
+#: plugin.json src/index.tsx
+msgid "About game packs"
+msgstr "Om spelpaket"
+
+#: plugin.json
+msgid "Game packs"
+msgstr "Spelpaket"
+
+#: plugin.json
+msgid "Prefer packs"
+msgstr "Föredra paket"
+
+#: plugin.json
+msgid "Rank a pack's own install plan above the built-in installers."
+msgstr "Placera paketets egen installationsplan före de inbyggda installerarna."
+
+#: src/index.tsx
+msgid "Caskade installs .cpk game packs: drop one on the library, or paste a link to its page on {host}."
+msgstr "Caskade installerar .cpk-spelpaket: släpp ett på biblioteket, eller klistra in en länk till dess sida på {host}."
+
+#: backend/src/lib.rs
+msgid "the pack ends in the middle of an entry"
+msgstr "paketet tar slut mitt i en post"
+
+#: backend/src/lib.rs
+msgid "a pack holds at most 4096 entries"
+msgstr "ett paket rymmer högst 4096 poster"
+
+#: backend/src/lib.rs
+msgid "an entry name isn't UTF-8"
+msgstr "ett postnamn är inte UTF-8"
+
+#: backend/src/lib.rs
+msgid "{path} runs past the end of the pack"
+msgstr "{path} går förbi slutet av paketet"
+
+#: backend/src/lib.rs
+msgid "the pack is empty"
+msgstr "paketet är tomt"
+
+#: backend/src/lib.rs
+msgid "a pack is a file of known size"
+msgstr "ett paket är en fil med känd storlek"

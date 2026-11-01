@@ -1,0 +1,190 @@
+---
+source: crates/caskade-sources/tests/emulation_definitions.rs
+expression: table
+---
+ares / Master System / folder
+  argv: ["--system", "Master System", "--no-file-prompt", "D:\\ROMs\\Sample Game (USA).rom"]
+ares / Master System / path
+  argv: ["--system", "Master System", "--no-file-prompt", "D:\\ROMs\\Sample Game (USA).rom"]
+ares / Mega Drive / folder
+  argv: ["--system", "Mega Drive", "--no-file-prompt", "D:\\ROMs\\Sample Game (USA).rom"]
+ares / Mega Drive / path
+  argv: ["--system", "Mega Drive", "--no-file-prompt", "D:\\ROMs\\Sample Game (USA).rom"]
+azahar / Nintendo 3DS / folder
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+azahar / Nintendo 3DS / path
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+cemu / Default / folder
+  argv: ["-g", "D:\\ROMs\\Sample Game (USA).rom"]
+cemu / Default / path
+  argv: ["-g", "D:\\ROMs\\Sample Game (USA).rom"]
+dolphin / Nintendo GameCube / folder
+  argv: ["--config=Dolphin.Analytics.PermissionAsked=True", "--exec=D:\\ROMs\\Sample Game (USA).rom", "--batch"]
+dolphin / Nintendo GameCube / path
+  argv: ["--config=Dolphin.Analytics.PermissionAsked=True", "--exec=D:\\ROMs\\Sample Game (USA).rom", "--batch"]
+dolphin / Nintendo Wii / folder
+  argv: ["--config=Dolphin.Analytics.PermissionAsked=True", "--exec=D:\\ROMs\\Sample Game (USA).rom", "--batch"]
+dolphin / Nintendo Wii / path
+  argv: ["--config=Dolphin.Analytics.PermissionAsked=True", "--exec=D:\\ROMs\\Sample Game (USA).rom", "--batch"]
+duckstation / Default / folder
+  argv: ["-batch", "--", "D:\\ROMs\\Sample Game (USA).rom"]
+duckstation / Default / path
+  argv: ["-batch", "--", "D:\\ROMs\\Sample Game (USA).rom"]
+flycast / Dreamcast / folder
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+flycast / Dreamcast / path
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+gopher64 / Nintendo 64 / folder
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+gopher64 / Nintendo 64 / path
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+mame / Arcade / folder
+  argv: ["-rompath", "D:\\ROMs", "-skip_gameinfo", "Sample Game (USA)"]
+mame / Arcade / path
+  argv: ["-rompath", "D:\\ROMs", "-skip_gameinfo", "Sample Game (USA)"]
+melonds / Default / folder
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+melonds / Default / path
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+mesen / NES / folder
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+mesen / NES / path
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+mesen / SNES / folder
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+mesen / SNES / path
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+mesen / Game Boy / folder
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+mesen / Game Boy / path
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+mesen / Master System / folder
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+mesen / Master System / path
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+mgba / Nintendo Game Boy / folder
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+mgba / Nintendo Game Boy / path
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+mgba / Nintendo Game Boy Color / folder
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+mgba / Nintendo Game Boy Color / path
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+mgba / Nintendo Game Boy Advance / folder
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+mgba / Nintendo Game Boy Advance / path
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+pcsx2 / Default / folder
+  argv: ["-nogui", "-slowboot", "--", "D:\\ROMs\\Sample Game (USA).rom"]
+pcsx2 / Default / path
+  argv: ["-nogui", "-slowboot", "--", "D:\\ROMs\\Sample Game (USA).rom"]
+ppsspp / Default / folder
+  argv: ["--pause-menu-exit", "D:\\ROMs\\Sample Game (USA).rom"]
+ppsspp / Default / path
+  argv: ["--pause-menu-exit", "D:\\ROMs\\Sample Game (USA).rom"]
+retroarch / Mesen / folder
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/mesen_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/mesen_libretro.dll"]
+retroarch / Mesen / path
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/mesen_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/mesen_libretro.dll"]
+retroarch / Snes9x / folder
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/snes9x_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/snes9x_libretro.dll"]
+retroarch / Snes9x / path
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/snes9x_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/snes9x_libretro.dll"]
+retroarch / Mupen64Plus-Next / folder
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/mupen64plus_next_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/mupen64plus_next_libretro.dll"]
+retroarch / Mupen64Plus-Next / path
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/mupen64plus_next_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/mupen64plus_next_libretro.dll"]
+retroarch / Gambatte / folder
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/gambatte_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/gambatte_libretro.dll"]
+retroarch / Gambatte / path
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/gambatte_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/gambatte_libretro.dll"]
+retroarch / mGBA / folder
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/mgba_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/mgba_libretro.dll"]
+retroarch / mGBA / path
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/mgba_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/mgba_libretro.dll"]
+retroarch / DeSmuME / folder
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/desmume_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/desmume_libretro.dll"]
+retroarch / DeSmuME / path
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/desmume_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/desmume_libretro.dll"]
+retroarch / Dolphin / folder
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/dolphin_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/dolphin_libretro.dll"]
+retroarch / Dolphin / path
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/dolphin_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/dolphin_libretro.dll"]
+retroarch / Genesis Plus GX / folder
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/genesis_plus_gx_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/genesis_plus_gx_libretro.dll"]
+retroarch / Genesis Plus GX / path
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/genesis_plus_gx_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/genesis_plus_gx_libretro.dll"]
+retroarch / Beetle Saturn / folder
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/mednafen_saturn_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/mednafen_saturn_libretro.dll"]
+retroarch / Beetle Saturn / path
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/mednafen_saturn_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/mednafen_saturn_libretro.dll"]
+retroarch / Flycast / folder
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/flycast_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/flycast_libretro.dll"]
+retroarch / Flycast / path
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/flycast_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/flycast_libretro.dll"]
+retroarch / Beetle PSX HW / folder
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/mednafen_psx_hw_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/mednafen_psx_hw_libretro.dll"]
+retroarch / Beetle PSX HW / path
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/mednafen_psx_hw_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/mednafen_psx_hw_libretro.dll"]
+retroarch / PPSSPP / folder
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/ppsspp_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/ppsspp_libretro.dll"]
+retroarch / PPSSPP / path
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/ppsspp_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/ppsspp_libretro.dll"]
+retroarch / FinalBurn Neo / folder
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/fbneo_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/fbneo_libretro.dll"]
+retroarch / FinalBurn Neo / path
+  argv: ["-L", "C:\\Emulators\\Test Emulator/cores/fbneo_libretro.dll", "D:\\ROMs\\Sample Game (USA).rom"]
+  requires: ["C:/Emulators/Test Emulator/cores/fbneo_libretro.dll"]
+rmg / Nintendo 64 / folder
+  argv: ["--nogui", "--quit-after-emulation", "D:\\ROMs\\Sample Game (USA).rom"]
+rmg / Nintendo 64 / path
+  argv: ["--nogui", "--quit-after-emulation", "D:\\ROMs\\Sample Game (USA).rom"]
+rpcs3 / Default / folder
+  argv: ["--no-gui", "D:\\ROMs\\Sample Game (USA).rom"]
+rpcs3 / Default / path
+  argv: ["--no-gui", "D:\\ROMs\\Sample Game (USA).rom"]
+ryujinx / Default / folder
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+ryujinx / Default / path
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+shadps4 / PlayStation 4 / folder
+  argv: ["-g", "D:\\ROMs\\Sample Game (USA).rom"]
+shadps4 / PlayStation 4 / path
+  argv: ["-g", "D:\\ROMs\\Sample Game (USA).rom"]
+xemu / Xbox / folder
+  argv: ["-dvd_path", "D:\\ROMs\\Sample Game (USA).rom"]
+xemu / Xbox / path
+  argv: ["-dvd_path", "D:\\ROMs\\Sample Game (USA).rom"]
+xenia / Xbox 360 / folder
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+xenia / Xbox 360 / path
+  argv: ["D:\\ROMs\\Sample Game (USA).rom"]
+ymir / Saturn / folder
+  argv: ["--profile", "C:\\Emulators\\Test Emulator/profile", "--disc", "D:\\ROMs\\Sample Game (USA).rom"]
+ymir / Saturn / path
+  argv: ["--profile", "C:\\Emulators\\Test Emulator/profile", "--disc", "D:\\ROMs\\Sample Game (USA).rom"]

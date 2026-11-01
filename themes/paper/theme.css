@@ -1,0 +1,589 @@
+/*
+ * Paper: a light, printed look written only against the public contract:
+ * declared --cs-* tokens (docs/theming/tokens.md) and anatomy selectors
+ * (docs/theming/anatomy.md). It doesn't extend caskade.default, so none of
+ * Nexus's grid, HUD corners, scanlines or glows are underneath; every rule
+ * here starts from the plain components.
+ *
+ * Square corners come from the radius tokens, and the hard offset shadows
+ * stand in for glows: a sheet of paper lying on another. The components'
+ * own glows (selected tabs, open fields, switches) become print: a raised
+ * slip with an ink-red rule for selection, an ink border for an open field,
+ * an offset shadow for hover. Focus is a crisp ink edge from the focus.ring
+ * tokens; glow strength 0 leaves it without glow (#161).
+ */
+
+/* ── Type: Source Serif 4 for --cs-font-display (OFL, assets/fonts/OFL.txt) ── */
+
+@font-face {
+  font-family: "Source Serif 4 Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 900;
+  src: url("assets/fonts/source-serif-4-latin-wght-normal.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Source Serif 4 Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 900;
+  src: url("assets/fonts/source-serif-4-latin-ext-wght-normal.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113,
+    U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ── Document: a light colour scheme for native controls and scrollbars ── */
+
+* {
+  color-scheme: light;
+  scrollbar-color: var(--cs-color-border-strong) transparent;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--cs-color-accent) 22%, transparent);
+  color: var(--cs-color-fg);
+}
+
+/* ── Backdrop: paper grain instead of a grid ── */
+
+[data-cs="backdrop"] {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("assets/grain.svg");
+  background-size: 240px 240px;
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+}
+
+/* ── Shell: ruled edges instead of glass ── */
+
+:is([data-cs="sidebar"], [data-cs="console-sidebar"]) {
+  background: color-mix(in oklab, var(--cs-color-surface-hover) 45%, transparent);
+  border-right: 1px solid var(--cs-color-border-strong);
+}
+
+:is([data-cs="sidebar"], [data-cs="console-sidebar"]) [data-part="brand"] {
+  border-bottom: 1px solid var(--cs-color-border-strong);
+}
+
+[data-cs="sidebar"] [data-part="divider"] {
+  border-top: 3px double var(--cs-color-border-strong);
+}
+
+:is([data-cs="topbar"], [data-cs="console-topbar"]) {
+  border-bottom: 1px solid var(--cs-color-border-strong);
+}
+
+:is([data-cs="status-bar"], [data-cs="hint-bar"]) {
+  background: var(--cs-color-surface-base);
+  border-top: 1px solid var(--cs-color-border-strong);
+}
+
+/* The active page: a raised slip with an ink-red margin rule. */
+[data-part="nav-item"][data-status="active"] {
+  background: var(--cs-color-surface-raised);
+  box-shadow:
+    inset 3px 0 0 var(--cs-color-accent),
+    0 0 0 1px var(--cs-color-border);
+  color: var(--cs-color-fg);
+  font-weight: 600;
+}
+
+[data-cs="settings-section"] [data-part="icon"] {
+  color: var(--cs-color-accent);
+}
+
+[data-part="nav-item"][data-status="active"] [data-part="icon"] {
+  color: var(--cs-color-accent);
+}
+
+/* Settings' sections (#155): an index down the margin, the open one a slip
+   with the same red rule. */
+[data-cs="settings-nav"] {
+  border-right: 1px solid var(--cs-color-border);
+}
+
+[data-cs="settings-nav"] [data-part="tab"][data-selected] {
+  border-color: var(--cs-color-border-strong);
+  background: var(--cs-color-surface-raised);
+  box-shadow: inset 3px 0 0 var(--cs-color-accent);
+  color: var(--cs-color-fg);
+  font-weight: 600;
+}
+
+[data-cs="settings-nav"] [data-part="tab"][data-selected] [data-part="icon"] {
+  color: var(--cs-color-accent);
+}
+
+/* ── Hero: a faded print with a halftone screen, text set on the paper ── */
+
+[data-cs="hero"] {
+  border-color: var(--cs-color-border-strong);
+  box-shadow: 6px 6px 0 var(--cs-color-border);
+}
+
+[data-cs="hero"] [data-part="glow"] {
+  display: none;
+}
+
+[data-cs="hero"] [data-part="shade"] {
+  background: linear-gradient(
+    90deg,
+    var(--cs-color-surface-raised) 35%,
+    color-mix(in oklab, var(--cs-color-surface-raised) 65%, transparent) 70%,
+    color-mix(in oklab, var(--cs-color-surface-raised) 40%, transparent)
+  );
+}
+
+[data-cs="hero"] [data-part="fx"] {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--cs-color-fg) 22%, transparent) 0.7px,
+    transparent 1.3px
+  );
+  background-size: 4px 4px;
+  mask-image: linear-gradient(90deg, transparent 35%, #000 85%);
+}
+
+[data-cs="hero"] [data-part="eyebrow"] {
+  color: var(--cs-color-accent);
+}
+
+[data-cs="hero"] [data-part="live-dot"] {
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--cs-color-accent);
+}
+
+[data-cs="hero"] [data-part="title"] {
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  text-transform: none;
+}
+
+[data-cs="hero"] [data-part="description"] {
+  font-family: var(--cs-font-display);
+  font-size: 1rem;
+}
+
+[data-cs="hero"] [data-part="primary-action"] {
+  box-shadow: 3px 3px 0 var(--cs-color-fg);
+  transition-property: translate, box-shadow;
+  transition-duration: var(--cs-motion-duration-fast);
+  transition-timing-function: var(--cs-motion-ease-out);
+}
+
+[data-cs="hero"] [data-part="primary-action"]:hover {
+  translate: -1px -1px;
+  box-shadow: 4px 4px 0 var(--cs-color-fg);
+}
+
+/* ── Cards: printed tiles that lift off the page ── */
+
+:is([data-cs="game-card"], [data-cs="collection-card"], [data-cs="platform-card"]) {
+  border-color: var(--cs-color-border-strong);
+  transition-property: translate, box-shadow, background-color;
+  transition-duration: var(--cs-motion-duration-base);
+  transition-timing-function: var(--cs-motion-ease-out);
+}
+
+/* The library's card is focused on a link inside its root, hence :has(). */
+:is([data-cs="game-card"], [data-cs="collection-card"], [data-cs="platform-card"]):is(
+  :hover,
+  :focus-visible,
+  :has(:focus-visible)
+) {
+  box-shadow: 4px 4px 0 var(--cs-color-fg);
+}
+
+[data-mode="console"]
+  :is([data-cs="game-card"], [data-cs="collection-card"], [data-cs="platform-card"]):is(
+    :hover,
+    :focus-visible,
+    :has(:focus-visible)
+  ) {
+  box-shadow: 6px 6px 0 var(--cs-color-fg);
+}
+
+/* Console focus doesn't lift: a shelf's scrolling edge would cut the top of
+   its focus ring (#161). */
+:is([data-cs="game-card"], [data-cs="collection-card"], [data-cs="platform-card"]):is(
+  :hover,
+  :not([data-mode="console"] *):focus-visible
+) {
+  translate: -2px -2px;
+}
+
+/* On artwork the ink edge carries a paper keyline inside it, so it reads on
+   a dark cover too. The cards draw their edge on an ::after (#161). */
+:is(
+  [data-cs="game-card"],
+  [data-cs="collection-card"],
+  [data-cs="platform-card"]
+):focus-visible::after,
+[data-cs="game-card"] :focus-visible::after {
+  box-shadow:
+    inset 0 0 0 var(--cs-focus-ring-width) var(--cs-focus-ring-glow),
+    inset 0 0 0 calc(var(--cs-focus-ring-width) + 2px) var(--cs-color-surface-overlay);
+}
+
+:is([data-cs="game-card"], [data-cs="collection-card"], [data-cs="platform-card"])
+  [data-part="art"] {
+  border-bottom: 1px solid var(--cs-color-border-strong);
+}
+
+:is([data-cs="game-card"], [data-cs="collection-card"], [data-cs="platform-card"])
+  [data-part="title"] {
+  font-family: var(--cs-font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+[data-cs="collection-card"] [data-part="count"] {
+  color: var(--cs-color-fg);
+  filter: none;
+}
+
+/* A platform's hardware sits on plain paper, not a red glow. */
+[data-cs="platform-card"] [data-part="art"] {
+  background-image: none;
+}
+
+[data-cs="platform-card"] [data-part="count"] {
+  border-color: var(--cs-color-border-strong);
+  background: var(--cs-color-surface-overlay);
+  color: var(--cs-color-fg);
+}
+
+/* Generated art is dark; wash it towards the paper. */
+[data-cs="game-art"][data-source="placeholder"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--cs-color-surface-base);
+  mix-blend-mode: screen;
+  opacity: 0.55;
+}
+
+/* A game without a cover (#199): an empty plate, hatched like a catalogue's. */
+[data-cs="game-art"][data-source="placeholder"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--cs-color-border) 0 1px,
+    transparent 1px 9px
+  );
+}
+
+/* The status is a rubber stamp: status-coloured ink on a paper label. */
+[data-cs="status-badge"] {
+  border: 1px solid currentColor;
+  border-radius: 0;
+  background: var(--cs-color-surface-overlay);
+  backdrop-filter: none;
+  font-size: 0.625rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+[data-cs="status-badge"][data-status="installed"] {
+  color: var(--cs-color-status-installed);
+}
+
+[data-cs="status-badge"][data-status="not-installed"] {
+  color: var(--cs-color-status-missing);
+}
+
+[data-cs="status-badge"][data-status="available"] {
+  color: var(--cs-color-status-available);
+}
+
+[data-cs="status-badge"][data-status="emulated"] {
+  color: var(--cs-color-status-emulated);
+}
+
+/* ── Shelves: newspaper section heads ── */
+
+:is([data-cs="shelf"], [data-cs="shelf-row"]) [data-part="header"] {
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid var(--cs-color-fg);
+}
+
+:is([data-cs="shelf"], [data-cs="shelf-row"]) [data-part="title"] {
+  font-size: 1.35rem;
+  letter-spacing: 0;
+}
+
+:is([data-cs="shelf"], [data-cs="shelf-row"]) :is([data-part="view-all"], [data-part="icon"]) {
+  color: var(--cs-color-accent);
+}
+
+/* ── Library list and letters ── */
+
+[data-cs="game-row"] [data-part="favorite"] {
+  fill: var(--cs-color-accent);
+  color: var(--cs-color-accent);
+}
+
+[data-cs="alphabet-bar"] [data-part="letter"][data-selected] {
+  color: var(--cs-color-accent);
+  font-weight: 700;
+}
+
+/* ── Panels and settings: sheets on the desk, ledger rows ── */
+
+:is([data-cs="panel"], [data-cs="settings-section"]) {
+  border-color: var(--cs-color-border-strong);
+  box-shadow: 4px 4px 0 var(--cs-color-border);
+}
+
+[data-cs="settings-section"] [data-part="header"] {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--cs-color-border-strong);
+}
+
+[data-cs="setting-row"] {
+  border-top-style: dashed;
+}
+
+/* ── About and Legal (#162): credits on cards, the documents on sheets ── */
+
+[data-cs="about"] [data-part="credit"] {
+  border-color: var(--cs-color-border-strong);
+  transition-property: translate, box-shadow, background-color;
+  transition-duration: var(--cs-motion-duration-base);
+  transition-timing-function: var(--cs-motion-ease-out);
+}
+
+[data-cs="about"] [data-part="credit"]:is(:hover, :focus-visible) {
+  border-color: var(--cs-color-border-strong);
+  background: var(--cs-color-surface-raised);
+  box-shadow: 4px 4px 0 var(--cs-color-fg);
+}
+
+[data-cs="about"] [data-part="credit"]:hover {
+  translate: -2px -2px;
+}
+
+[data-cs="about"] :is([data-part="details"], [data-part="legal-links"]),
+[data-cs="legal"] [data-part="document"] {
+  border-color: var(--cs-color-border-strong);
+  box-shadow: 4px 4px 0 var(--cs-color-border);
+}
+
+/* A long text reads in the serif, like the printed page; licence texts keep
+   their monospace. */
+[data-cs="legal"] [data-part="document"] {
+  font-family: var(--cs-font-display);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+/* ── Quick look (#196): a sheet beside the page ── */
+
+[data-cs="quick-look"] {
+  background: var(--cs-color-surface-raised);
+}
+
+[data-cs="quick-look"] [data-part="art"] {
+  border-bottom: 1px solid var(--cs-color-border-strong);
+}
+
+[data-cs="quick-look"] [data-part="title"] {
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+[data-cs="quick-look"] [data-part="facts"] {
+  padding-block: 0.75rem;
+  border-block: 1px solid var(--cs-color-border-strong);
+}
+
+[data-cs="quick-look"] [data-part="genres"] > * {
+  border-color: var(--cs-color-border-strong);
+  border-radius: 0;
+}
+
+[data-cs="quick-look"] [data-part="description"] {
+  font-family: var(--cs-font-display);
+  font-size: 1.0625rem;
+}
+
+/* ── Controls: square, flat, inked ── */
+
+[data-cs="button"][data-variant="primary"] {
+  background: var(--cs-color-accent);
+}
+
+[data-cs="button"][data-variant="primary"][data-hovered] {
+  background: var(--cs-color-accent-strong);
+  box-shadow: none;
+  filter: none;
+}
+
+[data-cs="button"][data-variant="secondary"] {
+  backdrop-filter: none;
+}
+
+[data-cs="button"][data-variant="secondary"][data-hovered] {
+  border-color: var(--cs-color-fg);
+}
+
+/* Disabled loses its ink as well as its strength, so a red primary doesn't
+   read as live. */
+[data-cs="button"][data-disabled] {
+  filter: grayscale(1);
+}
+
+/* In console mode the edge sits inside the button; on a filled one a paper
+   keyline keeps it apart from the red. */
+[data-mode="console"] [data-cs="button"][data-variant="primary"][data-focus-visible],
+[data-mode="console"] [data-cs="hero"] [data-part="primary-action"] :focus-visible {
+  box-shadow: inset 0 0 0 calc(var(--cs-focus-ring-width) + 2px) var(--cs-color-accent-fg);
+}
+
+[data-cs="store-links"] [data-part="store-link"] {
+  background: var(--cs-color-surface-overlay);
+  backdrop-filter: none;
+  transition-property: box-shadow, background-color, border-color;
+}
+
+[data-cs="store-links"] [data-part="store-link"]:hover {
+  border-color: var(--cs-color-border-strong);
+  box-shadow: 3px 3px 0 var(--cs-color-fg);
+}
+
+/* Fields are the whitest paper, inked when open. */
+:is(
+  [data-cs="text-field"] [data-part="control"],
+  [data-cs="select"] [data-part="trigger"],
+  [data-cs="search"] [data-part="control"]
+) {
+  border-color: var(--cs-color-border-strong);
+  background: var(--cs-color-surface-overlay);
+  backdrop-filter: none;
+}
+
+[data-cs="text-field"] [data-part="control"]:focus-within,
+[data-cs="select"] [data-part="trigger"][data-hovered],
+[data-cs="select"][data-open] [data-part="trigger"],
+[data-cs="search"] [data-part="control"][data-focus-within] {
+  border-color: var(--cs-color-fg);
+  box-shadow: none;
+}
+
+[data-cs="text-field"][data-invalid] [data-part="control"] {
+  border-color: var(--cs-color-danger);
+}
+
+[data-cs="search"] [data-part="shortcut"] {
+  border-radius: 0;
+}
+
+[data-cs="switch"] :is([data-part="track"], [data-part="thumb"]) {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+[data-cs="checkbox"] [data-part="box"] {
+  border-radius: 0;
+  background: var(--cs-color-surface-overlay);
+}
+
+[data-cs="checkbox"][data-hovered] [data-part="box"] {
+  border-color: var(--cs-color-fg);
+}
+
+[data-cs="checkbox"]:is([data-selected], [data-indeterminate]) [data-part="box"] {
+  border-color: var(--cs-color-accent);
+  background: var(--cs-color-accent);
+}
+
+[data-cs="segmented"] [data-part="segment"],
+[data-cs="select-popover"] [data-part="option"],
+[data-cs="search-popover"] [data-part="suggestion"],
+[data-cs="search-popover"] [data-part="see-all"],
+[data-cs="menu"] [data-part="item"] {
+  border-radius: 0;
+}
+
+/* The chosen segment: the same slip and red rule as the active page. */
+[data-cs="segmented"] [data-part="segment"][data-selected] {
+  background: var(--cs-color-surface-overlay);
+  box-shadow: inset 0 -3px 0 var(--cs-color-accent);
+  color: var(--cs-color-fg);
+}
+
+[data-cs="slider"] [data-part="fill"] {
+  border-radius: 0;
+  background: var(--cs-color-accent);
+}
+
+[data-cs="slider"] [data-part="thumb"] {
+  border-radius: 0;
+  border-color: var(--cs-color-fg);
+  background: var(--cs-color-surface-overlay);
+  box-shadow: none;
+}
+
+[data-cs="status-dot"] [data-part="dot"] {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ── Popovers and menus: a slip laid on the page ── */
+
+:is([data-cs="select-popover"], [data-cs="search-popover"], [data-cs="menu"]) {
+  box-shadow: 4px 4px 0 var(--cs-color-border-strong);
+}
+
+:is(
+  [data-cs="menu"] [data-part="item"][data-focused],
+  [data-cs="select-popover"] [data-part="option"][data-focused],
+  [data-cs="search-popover"] :is([data-part="suggestion"], [data-part="see-all"])[data-focused]
+) {
+  box-shadow: inset 3px 0 0 var(--cs-color-accent);
+}
+
+/* ── Console overlays: search, keyboard and folder picker ── */
+
+[data-cs="type-search"] {
+  border-color: var(--cs-color-fg);
+  box-shadow: 6px 6px 0 var(--cs-color-border-strong);
+}
+
+[data-cs="type-search"] [data-part="label"] {
+  color: var(--cs-color-accent);
+}
+
+[data-cs="osk"] [data-part="key"][data-focused] {
+  border-color: var(--cs-color-fg);
+  box-shadow: 3px 3px 0 var(--cs-color-fg);
+}
+
+[data-cs="osk"] [data-part="key"][data-selected] {
+  color: var(--cs-color-accent);
+}
+
+[data-cs="folder-browser"] [data-part="place"][data-status="active"] {
+  border-color: var(--cs-color-border-strong);
+  background: var(--cs-color-surface-raised);
+  box-shadow: inset 0 -3px 0 var(--cs-color-accent);
+}

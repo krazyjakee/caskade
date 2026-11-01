@@ -1,0 +1,133 @@
+{
+  "version": 29,
+  "apps": [
+    {
+      "app_id": 620,
+      "entries": [
+        {
+          "key": "appinfo",
+          "type": "object",
+          "value": [
+            {
+              "key": "appid",
+              "type": "string",
+              "value": "620"
+            },
+            {
+              "key": "common",
+              "type": "object",
+              "value": [
+                {
+                  "key": "name",
+                  "type": "string",
+                  "value": "Fixture Puzzle"
+                },
+                {
+                  "key": "type",
+                  "type": "string",
+                  "value": "Game"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "app_id": 1493710,
+      "entries": [
+        {
+          "key": "appinfo",
+          "type": "object",
+          "value": [
+            {
+              "key": "appid",
+              "type": "string",
+              "value": "1493710"
+            },
+            {
+              "key": "common",
+              "type": "object",
+              "value": [
+                {
+                  "key": "name",
+                  "type": "string",
+                  "value": "Proton Experimental"
+                },
+                {
+                  "key": "type",
+                  "type": "string",
+                  "value": "Tool"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "app_id": 2000010,
+      "entries": [
+        {
+          "key": "appinfo",
+          "type": "object",
+          "value": [
+            {
+              "key": "appid",
+              "type": "string",
+              "value": "2000010"
+            },
+            {
+              "key": "common",
+              "type": "object",
+              "value": [
+                {
+                  "key": "name",
+                  "type": "string",
+                  "value": "Fixture Windows Quest"
+                },
+                {
+                  "key": "type",
+                  "type": "string",
+                  "value": "Game"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "app_id": 2000020,
+      "entries": [
+        {
+          "key": "appinfo",
+          "type": "object",
+          "value": [
+            {
+              "key": "appid",
+              "type": "string",
+              "value": "2000020"
+            },
+            {
+              "key": "common",
+              "type": "object",
+              "value": [
+                {
+                  "key": "name",
+                  "type": "string",
+                  "value": "Fixture Downloading"
+                },
+                {
+                  "key": "type",
+                  "type": "string",
+                  "value": "Game"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

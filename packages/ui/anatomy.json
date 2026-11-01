@@ -1,0 +1,1248 @@
+{
+  "roots": {
+    "button": {
+      "parts": [
+        "icon"
+      ],
+      "states": {
+        "data-variant": [
+          "primary",
+          "secondary",
+          "ghost",
+          "danger"
+        ],
+        "data-size": [
+          "sm",
+          "md"
+        ]
+      },
+      "interaction": [
+        "data-hovered",
+        "data-pressed",
+        "data-focus-visible",
+        "data-disabled",
+        "data-focused",
+        "data-pending"
+      ]
+    },
+    "checkbox": {
+      "parts": [
+        "box",
+        "mark",
+        "label"
+      ],
+      "states": {},
+      "interaction": [
+        "data-hovered",
+        "data-pressed",
+        "data-focus-visible",
+        "data-disabled",
+        "data-selected",
+        "data-indeterminate",
+        "data-invalid",
+        "data-readonly"
+      ]
+    },
+    "segmented": {
+      "parts": [
+        "segment",
+        "icon"
+      ],
+      "states": {},
+      "interaction": [
+        "data-disabled",
+        "data-orientation"
+      ]
+    },
+    "select": {
+      "parts": [
+        "label",
+        "trigger",
+        "value",
+        "chevron"
+      ],
+      "states": {},
+      "interaction": [
+        "data-open",
+        "data-focused",
+        "data-focus-visible",
+        "data-disabled",
+        "data-invalid"
+      ]
+    },
+    "select-popover": {
+      "parts": [
+        "option",
+        "check"
+      ],
+      "states": {},
+      "interaction": [
+        "data-placement",
+        "data-entering",
+        "data-exiting"
+      ]
+    },
+    "menu": {
+      "parts": [
+        "list",
+        "item",
+        "icon",
+        "label",
+        "description",
+        "section",
+        "section-title",
+        "separator"
+      ],
+      "states": {},
+      "interaction": [
+        "data-placement",
+        "data-entering",
+        "data-exiting"
+      ]
+    },
+    "slider": {
+      "parts": [
+        "label",
+        "output",
+        "track",
+        "fill",
+        "thumb"
+      ],
+      "states": {},
+      "interaction": [
+        "data-disabled",
+        "data-orientation"
+      ]
+    },
+    "switch": {
+      "parts": [
+        "track",
+        "thumb",
+        "label"
+      ],
+      "states": {
+        "data-size": [
+          "sm",
+          "md"
+        ]
+      },
+      "interaction": [
+        "data-hovered",
+        "data-pressed",
+        "data-focus-visible",
+        "data-disabled",
+        "data-selected",
+        "data-readonly"
+      ]
+    },
+    "text-field": {
+      "parts": [
+        "label",
+        "control",
+        "icon",
+        "input",
+        "action",
+        "description",
+        "error"
+      ],
+      "states": {},
+      "interaction": [
+        "data-disabled",
+        "data-invalid",
+        "data-readonly",
+        "data-required"
+      ]
+    },
+    "settings-section": {
+      "parts": [
+        "header",
+        "icon",
+        "title",
+        "description",
+        "aside"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "setting-row": {
+      "parts": [
+        "icon",
+        "label",
+        "description",
+        "controls"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "status-dot": {
+      "parts": [
+        "dot",
+        "label"
+      ],
+      "states": {
+        "data-tone": [
+          "ok",
+          "off",
+          "warning",
+          "danger"
+        ]
+      },
+      "interaction": []
+    },
+    "pill": {
+      "parts": [
+        "icon",
+        "label"
+      ],
+      "states": {
+        "data-tone": [
+          "warning",
+          "danger",
+          "accent"
+        ]
+      },
+      "interaction": []
+    },
+    "game-art": {
+      "parts": [
+        "image"
+      ],
+      "states": {
+        "data-source": [
+          "image",
+          "placeholder"
+        ]
+      },
+      "interaction": []
+    },
+    "status-badge": {
+      "parts": [
+        "icon",
+        "label"
+      ],
+      "states": {
+        "data-status": [
+          "installed",
+          "not-installed",
+          "available",
+          "emulated"
+        ]
+      },
+      "interaction": []
+    },
+    "game-card": {
+      "parts": [
+        "art",
+        "badge",
+        "title",
+        "subtitle",
+        "meta",
+        "playtime",
+        "size",
+        "last-played",
+        "stores",
+        "owned",
+        "favorite",
+        "storage-availability",
+        "plugins",
+        "select"
+      ],
+      "states": {
+        "data-status": [
+          "installed",
+          "not-installed",
+          "available",
+          "emulated"
+        ],
+        "data-variant": [
+          "library",
+          "recent",
+          "store",
+          "web"
+        ],
+        "data-storage-status": [
+          "unavailable"
+        ],
+        "data-tile": [
+          "small",
+          "large",
+          "huge"
+        ],
+        "data-selected": [
+          "true"
+        ]
+      },
+      "interaction": []
+    },
+    "hero": {
+      "parts": [
+        "art",
+        "glow",
+        "shade",
+        "fx",
+        "content",
+        "eyebrow",
+        "live-dot",
+        "title",
+        "description",
+        "meta",
+        "actions",
+        "primary-action",
+        "badge",
+        "tags",
+        "website"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "shelf": {
+      "parts": [
+        "header",
+        "icon",
+        "title",
+        "subtitle",
+        "view-all",
+        "items"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "avatar": {
+      "parts": [
+        "image",
+        "initials"
+      ],
+      "states": {
+        "data-size": [
+          "sm",
+          "md",
+          "lg",
+          "xl"
+        ],
+        "data-source": [
+          "image",
+          "initials"
+        ]
+      },
+      "interaction": []
+    },
+    "error-notice": {
+      "parts": [
+        "icon",
+        "title",
+        "summary",
+        "hints",
+        "actions",
+        "details-toggle",
+        "details",
+        "reference"
+      ],
+      "states": {
+        "data-variant": [
+          "block",
+          "inline"
+        ],
+        "data-tone": [
+          "danger",
+          "warning"
+        ],
+        "data-expanded": [
+          "true",
+          "false"
+        ]
+      },
+      "interaction": []
+    },
+    "avatar-picker": {
+      "parts": [
+        "option",
+        "check"
+      ],
+      "states": {
+        "data-size": [
+          "md",
+          "lg",
+          "xl"
+        ]
+      },
+      "interaction": [
+        "data-disabled",
+        "data-orientation"
+      ]
+    },
+    "app-shell": {
+      "parts": [
+        "main"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "status-bar": {
+      "parts": [
+        "spinner",
+        "activity",
+        "version",
+        "update"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "backdrop": {
+      "parts": [],
+      "states": {},
+      "interaction": []
+    },
+    "onboarding": {
+      "parts": [
+        "titlebar",
+        "sound",
+        "skip",
+        "main",
+        "welcome",
+        "logo",
+        "start",
+        "question",
+        "card",
+        "choose",
+        "source",
+        "mode",
+        "language",
+        "next",
+        "progress",
+        "setup",
+        "covers",
+        "count",
+        "tasks",
+        "task"
+      ],
+      "states": {
+        "data-step": [
+          "welcome",
+          "language",
+          "folder",
+          "sources",
+          "mode",
+          "account",
+          "setup"
+        ]
+      },
+      "interaction": []
+    },
+    "sidebar": {
+      "parts": [
+        "brand",
+        "nav",
+        "nav-item",
+        "icon",
+        "label",
+        "divider",
+        "sub-nav",
+        "sub-item",
+        "count",
+        "plugin-nav"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "topbar": {
+      "parts": [
+        "actions",
+        "activity",
+        "job-count",
+        "notification-count",
+        "avatar",
+        "console"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "window-controls": {
+      "parts": [
+        "minimize",
+        "console",
+        "maximize",
+        "close"
+      ],
+      "states": {
+        "data-status": [
+          "restored",
+          "maximized"
+        ]
+      },
+      "interaction": []
+    },
+    "view-error": {
+      "parts": [
+        "title",
+        "message",
+        "actions"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "console-shell": {
+      "parts": [
+        "main"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "console-sidebar": {
+      "parts": [
+        "brand",
+        "nav",
+        "nav-item",
+        "icon",
+        "label",
+        "sub-nav",
+        "sub-item",
+        "count",
+        "plugin-nav",
+        "leave"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "console-topbar": {
+      "parts": [
+        "actions",
+        "activity",
+        "job-count",
+        "notification-count",
+        "avatar"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "notifications": {
+      "parts": [
+        "toolbar",
+        "filter",
+        "mark-all",
+        "empty",
+        "pages"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "notification": {
+      "parts": [
+        "indicator",
+        "meta",
+        "time",
+        "title",
+        "body",
+        "actions",
+        "members",
+        "member"
+      ],
+      "states": {
+        "data-status": [
+          "unread",
+          "read"
+        ],
+        "data-severity": [
+          "info",
+          "warning",
+          "error"
+        ],
+        "data-category": [
+          "gamesAdded",
+          "jobFailed",
+          "updatesAvailable",
+          "pluginDisabled",
+          "achievementsUnlocked"
+        ],
+        "data-resolved": [
+          "true"
+        ]
+      },
+      "interaction": []
+    },
+    "hint-bar": {
+      "parts": [
+        "hint",
+        "glyph",
+        "label",
+        "clock"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "game-curtain": {
+      "parts": [
+        "title",
+        "hint"
+      ],
+      "states": {
+        "data-state": [
+          "covered",
+          "open"
+        ]
+      },
+      "interaction": []
+    },
+    "shelf-row": {
+      "parts": [
+        "header",
+        "icon",
+        "title",
+        "pager",
+        "view-all",
+        "items"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "search": {
+      "parts": [
+        "control",
+        "icon",
+        "input",
+        "shortcut"
+      ],
+      "states": {},
+      "interaction": [
+        "data-open",
+        "data-disabled"
+      ]
+    },
+    "search-popover": {
+      "parts": [
+        "suggestion",
+        "see-all"
+      ],
+      "states": {},
+      "interaction": [
+        "data-placement",
+        "data-entering",
+        "data-exiting"
+      ]
+    },
+    "view": {
+      "parts": [],
+      "states": {},
+      "interaction": []
+    },
+    "settings-nav": {
+      "parts": [
+        "tab",
+        "icon",
+        "label"
+      ],
+      "states": {},
+      "interaction": [
+        "data-orientation"
+      ]
+    },
+    "about": {
+      "parts": [
+        "title",
+        "credits",
+        "credit",
+        "details",
+        "version",
+        "links",
+        "legal-links"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "legal": {
+      "parts": [
+        "back",
+        "title",
+        "nav",
+        "section-link",
+        "document"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "system-stats": {
+      "parts": [
+        "title",
+        "status",
+        "card",
+        "gauge",
+        "graph",
+        "unavailable",
+        "interface",
+        "volume",
+        "capacity"
+      ],
+      "states": {
+        "data-status": [
+          "loading",
+          "live",
+          "stale",
+          "error"
+        ]
+      },
+      "interaction": []
+    },
+    "panel": {
+      "parts": [],
+      "states": {},
+      "interaction": []
+    },
+    "collection-card": {
+      "parts": [
+        "art",
+        "badge",
+        "pin",
+        "count",
+        "title",
+        "subtitle",
+        "meta"
+      ],
+      "states": {
+        "data-kind": [
+          "smart",
+          "manual"
+        ]
+      },
+      "interaction": []
+    },
+    "platform-card": {
+      "parts": [
+        "art",
+        "title",
+        "subtitle",
+        "count",
+        "meta",
+        "playtime",
+        "last-played"
+      ],
+      "states": {
+        "data-art": [
+          "platform",
+          "generic"
+        ]
+      },
+      "interaction": []
+    },
+    "game-row": {
+      "parts": [
+        "icon",
+        "title",
+        "favorite",
+        "storage-availability",
+        "plugins",
+        "badge",
+        "last-played",
+        "playtime",
+        "size",
+        "actions",
+        "select"
+      ],
+      "states": {
+        "data-status": [
+          "installed",
+          "not-installed",
+          "emulated"
+        ],
+        "data-storage-status": [
+          "unavailable"
+        ],
+        "data-selected": [
+          "true"
+        ]
+      },
+      "interaction": []
+    },
+    "alphabet-bar": {
+      "parts": [
+        "letter"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "quick-look": {
+      "parts": [
+        "art",
+        "close",
+        "platform",
+        "title",
+        "actions",
+        "play",
+        "open",
+        "notice",
+        "facts",
+        "playtime",
+        "last-played",
+        "size",
+        "released",
+        "genres",
+        "description"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "game-editor": {
+      "parts": [
+        "title",
+        "tabs",
+        "tab",
+        "details",
+        "field",
+        "label",
+        "manual",
+        "reset",
+        "error",
+        "use-theirs",
+        "keep-mine",
+        "list",
+        "chip",
+        "remove",
+        "footer",
+        "status",
+        "choice",
+        "artwork",
+        "slot",
+        "preview",
+        "candidate",
+        "import",
+        "clear",
+        "cancel",
+        "save"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "manual-game": {
+      "parts": [
+        "target",
+        "summary",
+        "duplicates",
+        "duplicate",
+        "link",
+        "error",
+        "add"
+      ],
+      "states": {
+        "data-mode": [
+          "target",
+          "title"
+        ]
+      },
+      "interaction": []
+    },
+    "selection-bar": {
+      "parts": [
+        "count",
+        "select-loaded",
+        "select-all",
+        "clear",
+        "edit",
+        "refresh",
+        "done"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "games-refresh-start": {
+      "parts": [
+        "start"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "games-refresh": {
+      "parts": [
+        "title",
+        "mode",
+        "progress",
+        "counts",
+        "cancel",
+        "retry",
+        "continue"
+      ],
+      "states": {
+        "data-status": [
+          "running",
+          "done",
+          "cancelled"
+        ]
+      },
+      "interaction": []
+    },
+    "bulk-editor": {
+      "parts": [
+        "fields",
+        "field",
+        "list",
+        "chip",
+        "remove",
+        "results",
+        "summary",
+        "change",
+        "rejected",
+        "footer",
+        "status",
+        "cancel",
+        "apply"
+      ],
+      "states": {
+        "data-step": [
+          "edit",
+          "preview",
+          "done"
+        ]
+      },
+      "interaction": []
+    },
+    "game-editor-discard": {
+      "parts": [],
+      "states": {},
+      "interaction": []
+    },
+    "game-actions": {
+      "parts": [
+        "default",
+        "actions",
+        "action",
+        "form",
+        "locked",
+        "target-kind",
+        "path",
+        "list",
+        "env",
+        "remove",
+        "tracking",
+        "error",
+        "delete"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "scripts": {
+      "parts": [
+        "items",
+        "script",
+        "form",
+        "path",
+        "list",
+        "remove",
+        "error",
+        "delete",
+        "test",
+        "result",
+        "output",
+        "context",
+        "order",
+        "step"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "play-choice": {
+      "parts": [
+        "tools"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "tool-failed": {
+      "parts": [],
+      "states": {},
+      "interaction": []
+    },
+    "screenshot-viewer": {
+      "parts": [
+        "title",
+        "counter",
+        "close",
+        "stage",
+        "image",
+        "prev",
+        "next",
+        "strip",
+        "thumb"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "videos": {
+      "parts": [
+        "items",
+        "video",
+        "thumbnail",
+        "play",
+        "name"
+      ],
+      "states": {},
+      "interaction": [
+        "data-hovered",
+        "data-focus-visible",
+        "data-pressed"
+      ]
+    },
+    "osk": {
+      "parts": [
+        "preview",
+        "row",
+        "key"
+      ],
+      "states": {
+        "data-layer": [
+          "letters",
+          "symbols"
+        ],
+        "data-shift": [
+          "off",
+          "once",
+          "lock"
+        ]
+      },
+      "interaction": []
+    },
+    "type-search": {
+      "parts": [
+        "label",
+        "input",
+        "count",
+        "hints"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "folder-browser": {
+      "parts": [
+        "title",
+        "location",
+        "places",
+        "place",
+        "error",
+        "entries",
+        "up",
+        "entry",
+        "icon",
+        "name",
+        "empty",
+        "actions",
+        "select"
+      ],
+      "states": {
+        "data-kind": [
+          "folder",
+          "file"
+        ]
+      },
+      "interaction": []
+    },
+    "store-links": {
+      "parts": [
+        "store-link"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "account-picker": {
+      "parts": [
+        "titlebar",
+        "heading",
+        "accounts",
+        "account",
+        "avatar",
+        "name",
+        "lock",
+        "back"
+      ],
+      "states": {
+        "data-step": [
+          "accounts",
+          "pin"
+        ]
+      },
+      "interaction": []
+    },
+    "pin-pad": {
+      "parts": [
+        "title",
+        "field",
+        "keys",
+        "key",
+        "delete",
+        "submit",
+        "message"
+      ],
+      "states": {
+        "data-status": [
+          "ready",
+          "wrong",
+          "locked"
+        ]
+      },
+      "interaction": []
+    },
+    "account-menu": {
+      "parts": [
+        "avatar",
+        "name",
+        "role"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "account-list": {
+      "parts": [
+        "account",
+        "avatar",
+        "name",
+        "details",
+        "edit",
+        "delete"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "account-editor": {
+      "parts": [
+        "avatars",
+        "access"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "account-profile": {
+      "parts": [
+        "avatars",
+        "pin"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "addon-catalogue": {
+      "parts": [
+        "refresh",
+        "status",
+        "updates",
+        "update-preference",
+        "item",
+        "state",
+        "details"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "addon-details": {
+      "parts": [
+        "screenshots",
+        "screenshot",
+        "screenshot-missing",
+        "description",
+        "reasons",
+        "release",
+        "state",
+        "progress",
+        "outcome",
+        "remove-confirm",
+        "remove-confirmed",
+        "actions",
+        "remove",
+        "skip",
+        "apply",
+        "install"
+      ],
+      "states": {
+        "data-kind": [
+          "plugin",
+          "theme"
+        ],
+        "data-state": [
+          "available",
+          "installed",
+          "updateAvailable",
+          "incompatible"
+        ]
+      },
+      "interaction": []
+    },
+    "achievements": {
+      "parts": [
+        "refresh",
+        "cancel",
+        "sets",
+        "account",
+        "stale",
+        "wait",
+        "notice",
+        "reconnect",
+        "summary",
+        "filter",
+        "reveal-all",
+        "list",
+        "achievement",
+        "icon",
+        "details",
+        "hardcore",
+        "reveal"
+      ],
+      "states": {
+        "data-state": [
+          "loading",
+          "error",
+          "not_fetched",
+          "ready",
+          "no_achievements",
+          "unsupported",
+          "private",
+          "sign_in_needed"
+        ]
+      },
+      "interaction": []
+    },
+    "achievement-summary": {
+      "parts": [],
+      "states": {},
+      "interaction": []
+    }
+  },
+  "attributes": [
+    "data-art",
+    "data-category",
+    "data-color-scheme",
+    "data-cs",
+    "data-density",
+    "data-disabled",
+    "data-dragging",
+    "data-effects",
+    "data-entering",
+    "data-exiting",
+    "data-expanded",
+    "data-focus-visible",
+    "data-focus-within",
+    "data-focused",
+    "data-hovered",
+    "data-indeterminate",
+    "data-invalid",
+    "data-kind",
+    "data-layer",
+    "data-mode",
+    "data-motion",
+    "data-open",
+    "data-orientation",
+    "data-paint",
+    "data-part",
+    "data-pending",
+    "data-placement",
+    "data-pressed",
+    "data-readonly",
+    "data-required",
+    "data-resolved",
+    "data-selected",
+    "data-severity",
+    "data-shift",
+    "data-size",
+    "data-source",
+    "data-state",
+    "data-status",
+    "data-step",
+    "data-storage-status",
+    "data-store",
+    "data-tile",
+    "data-tone",
+    "data-variant"
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!docs",
+      "!pnpm-lock.yaml",
+      "!vendor",
+      "!crates",
+      "!xtask",
+      "!scripts",
+      "!.gitea",
+      "!apps/desktop/src-tauri/gen",
+      "!apps/desktop/src-tauri/icons",
+      "!**/storybook-static",
+      "!apps/desktop/src/api/bindings.ts",
+      "!packages/sdk/src/core.ts",
+      "!packages/tokens/tokens.css",
+      "!packages/tokens/manifest.json",
+      "!packages/ui/anatomy.json"
+    ]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended"
+    }
+  }
+}

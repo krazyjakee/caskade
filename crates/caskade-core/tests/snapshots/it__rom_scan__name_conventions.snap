@@ -1,0 +1,97 @@
+---
+source: crates/caskade-core/tests/rom_scan.rs
+assertion_line: 121
+expression: output
+---
+[
+  {
+    "title": "Final Fantasy VII",
+    "properties": [
+      "USA",
+      "Disc 2 of 3"
+    ],
+    "regions": [
+      "us"
+    ],
+    "part": {
+      "number": 2,
+      "label": "Disc 2"
+    }
+  },
+  {
+    "title": "Final Fantasy VII",
+    "properties": [
+      "USA",
+      "Disc 1"
+    ],
+    "regions": [
+      "us"
+    ],
+    "part": {
+      "number": 1,
+      "label": "Disc 1"
+    }
+  },
+  {
+    "title": "The Legend of Zelda",
+    "properties": [
+      "USA",
+      "Rev 1"
+    ],
+    "regions": [
+      "us"
+    ],
+    "part": null
+  },
+  {
+    "title": "Sonic the Hedgehog",
+    "properties": [
+      "Europe",
+      "!"
+    ],
+    "regions": [
+      "eu"
+    ],
+    "part": null
+  },
+  {
+    "title": "Example",
+    "properties": [
+      "Side B",
+      "Japan"
+    ],
+    "regions": [
+      "jp"
+    ],
+    "part": {
+      "number": 2,
+      "label": "Side B"
+    }
+  },
+  {
+    "title": "No suffix",
+    "properties": [],
+    "regions": [],
+    "part": null
+  },
+  {
+    "title": "Overflow",
+    "properties": [
+      "Disc 9999999999999999999999999"
+    ],
+    "regions": [],
+    "part": null
+  },
+  {
+    "title": "Game",
+    "properties": [
+      "USA, Europe",
+      "b1"
+    ],
+    "regions": [
+      "eu",
+      "us"
+    ],
+    "part": null
+  }
+]

@@ -1,0 +1,2083 @@
+---
+source: crates/caskade-installer/tests/plan_snapshots.rs
+expression: snapshots
+---
+{
+  "gog-zip": {
+    "coverage": "production archive listing and plan",
+    "plans": {
+      "candidates": [
+        {
+          "confidence": 1.0,
+          "fidelity": "exact",
+          "handler": "archive",
+          "requires": {
+            "est_disk_bytes": 820535,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        }
+      ],
+      "question": null,
+      "selected": 0
+    },
+    "probe": {
+      "children": [
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:0",
+          "path": "FixtureGame.exe",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 273408
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:1",
+          "path": "__redist/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:2",
+          "path": "__redist/DirectX/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:3",
+          "path": "__redist/DirectX/DXSETUP.exe",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 273408
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:4",
+          "path": "__redist/vcredist_x64.exe",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 273408
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:5",
+          "path": "goggame-1234567890.info",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 307
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:6",
+          "path": "steam_appid.txt",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 4
+        }
+      ],
+      "children_complete": true,
+      "facts": {
+        "probe.handler": "archive"
+      },
+      "format": "zip",
+      "id": "source:0",
+      "path": "bin/gog.zip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 428339
+    }
+  },
+  "humble-linux-tar": {
+    "coverage": "production archive listing and plan",
+    "plans": {
+      "candidates": [
+        {
+          "confidence": 1.0,
+          "fidelity": "exact",
+          "handler": "archive",
+          "requires": {
+            "est_disk_bytes": 304604,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        }
+      ],
+      "question": null,
+      "selected": 0
+    },
+    "probe": {
+      "children": [
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:0",
+          "path": "FixtureGame-1.0.0-linux-x86_64",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:1",
+          "path": "FixtureGame-1.0.0-linux-x86_64/FixtureGame.desktop",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 124
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:2",
+          "path": "FixtureGame-1.0.0-linux-x86_64/FixtureGame.x86_64",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 304328
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:3",
+          "path": "FixtureGame-1.0.0-linux-x86_64/data",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:4",
+          "path": "FixtureGame-1.0.0-linux-x86_64/data/readme ü.txt",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 48
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:5",
+          "path": "FixtureGame-1.0.0-linux-x86_64/start.sh",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 104
+        }
+      ],
+      "children_complete": true,
+      "facts": {},
+      "format": "gzip",
+      "id": "source:0",
+      "path": "bin/humble-linux.tar.gz",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 154077
+    }
+  },
+  "linux-tar": {
+    "coverage": "production archive listing and plan",
+    "plans": {
+      "candidates": [
+        {
+          "confidence": 1.0,
+          "fidelity": "exact",
+          "handler": "archive",
+          "requires": {
+            "est_disk_bytes": 304604,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        }
+      ],
+      "question": null,
+      "selected": 0
+    },
+    "probe": {
+      "children": [
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:0",
+          "path": "FixtureGame.desktop",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 124
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:1",
+          "path": "FixtureGame.x86_64",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 304328
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:2",
+          "path": "data",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:3",
+          "path": "data/readme ü.txt",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 48
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:4",
+          "path": "start.sh",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 104
+        }
+      ],
+      "children_complete": true,
+      "facts": {},
+      "format": "tar",
+      "id": "source:0",
+      "path": "bin/linux.tar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 309760
+    }
+  },
+  "linux-tar-bz2": {
+    "coverage": "production archive listing and plan",
+    "plans": {
+      "candidates": [
+        {
+          "confidence": 1.0,
+          "fidelity": "exact",
+          "handler": "archive",
+          "requires": {
+            "est_disk_bytes": 304604,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        }
+      ],
+      "question": null,
+      "selected": 0
+    },
+    "probe": {
+      "children": [
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:0",
+          "path": "FixtureGame.desktop",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 124
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:1",
+          "path": "FixtureGame.x86_64",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 304328
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:2",
+          "path": "data",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:3",
+          "path": "data/readme ü.txt",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 48
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:4",
+          "path": "start.sh",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 104
+        }
+      ],
+      "children_complete": true,
+      "facts": {},
+      "format": "bzip2",
+      "id": "source:0",
+      "path": "bin/linux.tar.bz2",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 148380
+    }
+  },
+  "linux-tar-xz": {
+    "coverage": "production archive listing and plan",
+    "plans": {
+      "candidates": [
+        {
+          "confidence": 1.0,
+          "fidelity": "exact",
+          "handler": "archive",
+          "requires": {
+            "est_disk_bytes": 304604,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        }
+      ],
+      "question": null,
+      "selected": 0
+    },
+    "probe": {
+      "children": [
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:0",
+          "path": "FixtureGame.desktop",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 124
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:1",
+          "path": "FixtureGame.x86_64",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 304328
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:2",
+          "path": "data",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:3",
+          "path": "data/readme ü.txt",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 48
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:4",
+          "path": "start.sh",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 104
+        }
+      ],
+      "children_complete": true,
+      "facts": {},
+      "format": "xz",
+      "id": "source:0",
+      "path": "bin/linux.tar.xz",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 130104
+    }
+  },
+  "linux-tar-zst": {
+    "coverage": "production archive listing and plan",
+    "plans": {
+      "candidates": [
+        {
+          "confidence": 1.0,
+          "fidelity": "exact",
+          "handler": "archive",
+          "requires": {
+            "est_disk_bytes": 304604,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        }
+      ],
+      "question": null,
+      "selected": 0
+    },
+    "probe": {
+      "children": [
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:0",
+          "path": "FixtureGame.desktop",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 124
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:1",
+          "path": "FixtureGame.x86_64",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 304328
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:2",
+          "path": "data",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:3",
+          "path": "data/readme ü.txt",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 48
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:4",
+          "path": "start.sh",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 104
+        }
+      ],
+      "children_complete": true,
+      "facts": {},
+      "format": "zstd",
+      "id": "source:0",
+      "path": "bin/linux.tar.zst",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 139812
+    }
+  },
+  "macos-app-tar-gz": {
+    "coverage": "production archive listing and plan",
+    "plans": {
+      "candidates": [
+        {
+          "confidence": 1.0,
+          "fidelity": "exact",
+          "handler": "archive",
+          "requires": {
+            "est_disk_bytes": 1088,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        }
+      ],
+      "question": null,
+      "selected": 0
+    },
+    "probe": {
+      "children": [
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:0",
+          "path": "FixtureGame.app",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:1",
+          "path": "FixtureGame.app/Contents",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:2",
+          "path": "FixtureGame.app/Contents/Frameworks",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:3",
+          "path": "FixtureGame.app/Contents/Frameworks/X.framework",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "symlink",
+            "archive.link_target": "Versions/Current/Resources",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:4",
+          "path": "FixtureGame.app/Contents/Frameworks/X.framework/Resources",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:5",
+          "path": "FixtureGame.app/Contents/Frameworks/X.framework/Versions",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:6",
+          "path": "FixtureGame.app/Contents/Frameworks/X.framework/Versions/A",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:7",
+          "path": "FixtureGame.app/Contents/Frameworks/X.framework/Versions/A/Resources",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:8",
+          "path": "FixtureGame.app/Contents/Frameworks/X.framework/Versions/A/Resources/Info.plist",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 139
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:9",
+          "path": "FixtureGame.app/Contents/Frameworks/X.framework/Versions/A/X",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 67
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "symlink",
+            "archive.link_target": "A",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:10",
+          "path": "FixtureGame.app/Contents/Frameworks/X.framework/Versions/Current",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "symlink",
+            "archive.link_target": "Versions/Current/X",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:11",
+          "path": "FixtureGame.app/Contents/Frameworks/X.framework/X",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:12",
+          "path": "FixtureGame.app/Contents/Info.plist",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 480
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:13",
+          "path": "FixtureGame.app/Contents/MacOS",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:14",
+          "path": "FixtureGame.app/Contents/MacOS/FixtureGame",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 402
+        }
+      ],
+      "children_complete": true,
+      "facts": {},
+      "format": "gzip",
+      "id": "source:0",
+      "path": "bin/macos-app.tar.gz",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 933
+    }
+  },
+  "macos-app-zip": {
+    "coverage": "production archive listing and plan",
+    "plans": {
+      "candidates": [
+        {
+          "confidence": 1.0,
+          "fidelity": "exact",
+          "handler": "archive",
+          "requires": {
+            "est_disk_bytes": 1133,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        }
+      ],
+      "question": null,
+      "selected": 0
+    },
+    "probe": {
+      "children": [
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:0",
+          "path": "FixtureGame.app/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:1",
+          "path": "FixtureGame.app/Contents/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:2",
+          "path": "FixtureGame.app/Contents/Frameworks/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:3",
+          "path": "FixtureGame.app/Contents/Frameworks/X.framework/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "symlink",
+            "archive.link_target": "Versions/Current/Resources",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:4",
+          "path": "FixtureGame.app/Contents/Frameworks/X.framework/Resources",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 26
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:5",
+          "path": "FixtureGame.app/Contents/Frameworks/X.framework/Versions/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:6",
+          "path": "FixtureGame.app/Contents/Frameworks/X.framework/Versions/A/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:7",
+          "path": "FixtureGame.app/Contents/Frameworks/X.framework/Versions/A/Resources/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:8",
+          "path": "FixtureGame.app/Contents/Frameworks/X.framework/Versions/A/Resources/Info.plist",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 139
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:9",
+          "path": "FixtureGame.app/Contents/Frameworks/X.framework/Versions/A/X",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 67
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "symlink",
+            "archive.link_target": "A",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:10",
+          "path": "FixtureGame.app/Contents/Frameworks/X.framework/Versions/Current",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 1
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "symlink",
+            "archive.link_target": "Versions/Current/X",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:11",
+          "path": "FixtureGame.app/Contents/Frameworks/X.framework/X",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 18
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:12",
+          "path": "FixtureGame.app/Contents/Info.plist",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 480
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:13",
+          "path": "FixtureGame.app/Contents/MacOS/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:14",
+          "path": "FixtureGame.app/Contents/MacOS/FixtureGame",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 402
+        }
+      ],
+      "children_complete": true,
+      "facts": {
+        "probe.handler": "archive"
+      },
+      "format": "zip",
+      "id": "source:0",
+      "path": "bin/macos-app.zip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 3382
+    }
+  },
+  "rar-multivolume-portable": {
+    "coverage": "unsupported format (no registered handler)",
+    "plans": {
+      "candidates": [],
+      "question": null,
+      "selected": null
+    },
+    "probe": {
+      "children": [],
+      "children_complete": false,
+      "facts": {},
+      "format": "rar",
+      "id": "source:0",
+      "path": "handmade/rar-multivolume-portable.part01.rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 380104
+    }
+  },
+  "unity-7z": {
+    "coverage": "production archive listing and plan",
+    "plans": {
+      "candidates": [
+        {
+          "confidence": 1.0,
+          "fidelity": "exact",
+          "handler": "archive",
+          "requires": {
+            "est_disk_bytes": 546881,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        }
+      ],
+      "question": null,
+      "selected": 0
+    },
+    "probe": {
+      "children": [
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:0",
+          "path": "FixtureGame_Data",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:1",
+          "path": "UnityPlayer.dll",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:2",
+          "path": "FixtureGame_Data/globalgamemanagers",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 65
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:3",
+          "path": "FixtureGame.exe",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 273408
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:4",
+          "path": "UnityCrashHandler64.exe",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 273408
+        }
+      ],
+      "children_complete": true,
+      "facts": {},
+      "format": "seven_zip",
+      "id": "source:0",
+      "path": "bin/unity.7z",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 118738
+    }
+  },
+  "unity-7z-multivolume": {
+    "coverage": "production archive listing and plan",
+    "plans": {
+      "candidates": [
+        {
+          "confidence": 1.0,
+          "fidelity": "exact",
+          "handler": "archive",
+          "requires": {
+            "est_disk_bytes": 546881,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        }
+      ],
+      "question": null,
+      "selected": 0
+    },
+    "probe": {
+      "children": [
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:0",
+          "path": "FixtureGame_Data",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:1",
+          "path": "UnityPlayer.dll",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:2",
+          "path": "FixtureGame_Data/globalgamemanagers",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 65
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:3",
+          "path": "FixtureGame.exe",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 273408
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:4",
+          "path": "UnityCrashHandler64.exe",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 273408
+        }
+      ],
+      "children_complete": true,
+      "facts": {},
+      "format": "seven_zip",
+      "id": "source:0",
+      "path": "bin/unity-multivolume.7z.001",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 118738
+    }
+  },
+  "unity-rar5": {
+    "coverage": "unsupported format (no registered handler)",
+    "plans": {
+      "candidates": [],
+      "question": null,
+      "selected": null
+    },
+    "probe": {
+      "children": [],
+      "children_complete": false,
+      "facts": {},
+      "format": "rar",
+      "id": "source:0",
+      "path": "handmade/unity-rar5.rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 252158
+    }
+  },
+  "unity-zip": {
+    "coverage": "production archive listing and plan",
+    "plans": {
+      "candidates": [
+        {
+          "confidence": 1.0,
+          "fidelity": "exact",
+          "handler": "archive",
+          "requires": {
+            "est_disk_bytes": 546881,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        }
+      ],
+      "question": null,
+      "selected": 0
+    },
+    "probe": {
+      "children": [
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:0",
+          "path": "FixtureGame.exe",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 273408
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:1",
+          "path": "FixtureGame_Data/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:2",
+          "path": "FixtureGame_Data/globalgamemanagers",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 65
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:3",
+          "path": "UnityCrashHandler64.exe",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 273408
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:4",
+          "path": "UnityPlayer.dll",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 0
+        }
+      ],
+      "children_complete": true,
+      "facts": {
+        "probe.handler": "archive"
+      },
+      "format": "zip",
+      "id": "source:0",
+      "path": "bin/unity.zip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 285572
+    }
+  },
+  "unreal-rar5": {
+    "coverage": "unsupported format (no registered handler)",
+    "plans": {
+      "candidates": [],
+      "question": null,
+      "selected": null
+    },
+    "probe": {
+      "children": [],
+      "children_complete": false,
+      "facts": {},
+      "format": "rar",
+      "id": "source:0",
+      "path": "handmade/unreal-rar5.rar",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 252430
+    }
+  },
+  "unreal-zip": {
+    "coverage": "production archive listing and plan",
+    "plans": {
+      "candidates": [
+        {
+          "confidence": 1.0,
+          "fidelity": "exact",
+          "handler": "archive",
+          "requires": {
+            "est_disk_bytes": 546873,
+            "executes_code": false,
+            "interactive": false,
+            "may_prompt_elevation": false,
+            "runtime": null
+          },
+          "steps": [
+            {
+              "type": "extract",
+              "value": {
+                "from": "source:0",
+                "select": [],
+                "strip": null,
+                "to": "."
+              }
+            }
+          ],
+          "strategy": "extract",
+          "warnings": []
+        }
+      ],
+      "question": null,
+      "selected": 0
+    },
+    "probe": {
+      "children": [
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:0",
+          "path": "Engine/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:1",
+          "path": "Engine/Binaries/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:2",
+          "path": "Engine/Binaries/Win64/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:3",
+          "path": "FixtureGame/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:4",
+          "path": "FixtureGame.exe",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 273408
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:5",
+          "path": "FixtureGame/Binaries/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:6",
+          "path": "FixtureGame/Binaries/Win64/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 493
+          },
+          "format": "unknown",
+          "id": "source:0:entry:7",
+          "path": "FixtureGame/Binaries/Win64/FixtureGame-Win64-Shipping.exe",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 273408
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:8",
+          "path": "FixtureGame/Content/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": false,
+          "facts": {
+            "archive.entry_kind": "directory",
+            "archive.mode": 493
+          },
+          "format": "directory",
+          "id": "source:0:entry:9",
+          "path": "FixtureGame/Content/Paks/",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "unknown",
+          "size": 0
+        },
+        {
+          "children": [],
+          "children_complete": true,
+          "facts": {
+            "archive.entry_kind": "file",
+            "archive.mode": 420
+          },
+          "format": "unknown",
+          "id": "source:0:entry:10",
+          "path": "FixtureGame/Content/Paks/FixtureGame.pak",
+          "platform": {
+            "type": "unknown"
+          },
+          "role": "data",
+          "size": 57
+        }
+      ],
+      "children_complete": true,
+      "facts": {
+        "probe.handler": "archive"
+      },
+      "format": "zip",
+      "id": "source:0",
+      "path": "bin/unreal.zip",
+      "platform": {
+        "type": "unknown"
+      },
+      "role": "unknown",
+      "size": 286326
+    }
+  }
+}

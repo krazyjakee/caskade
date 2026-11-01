@@ -1,0 +1,101 @@
+name: installer-pr
+# Base-branch workflow, guarded BEFORE checking out same-repository PR code.
+# No local reusable workflows (important on Gitea 1.22).
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [master]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: installer-pr-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+jobs:
+  installer:
+    if: >-
+      github.event_name != 'pull_request_target' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       github.event.pull_request.head.repo.fork == false)
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: caskade-linux
+            os: linux
+            shell: bash
+            python: python3
+          - runner: caskade-windows-x64
+            os: windows
+            shell: pwsh
+            python: python
+          - runner: caskade-macos
+            os: macos
+            shell: bash
+            python: python3
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    env:
+      CARGO_TERM_COLOR: always
+      INSTA_UPDATE: 'no'
+    steps:
+      - uses: https://github.com/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Record native toolchain
+        run: |
+          rustc -Vv
+          cargo nextest --version
+      - name: Formatting (installer only)
+        run: cargo fmt -p caskade-installer -- --check
+      - name: Build with every feature
+        run: cargo build -p caskade-installer --all-features --locked
+      - name: Strict Clippy with every feature
+        run: cargo clippy -p caskade-installer --all-targets --all-features --locked -- -D warnings
+      - name: T1-T6 and T9 fixture pass/fail
+        # Includes native_windows::t9_mini_installers_pass_and_malformed_inputs_fail_through_the_cli:
+        # six real Inno/NSIS/MSI successes, six malformed-input rejections, clean roots.
+        run: cargo nextest run -p caskade-installer --all-features --locked --profile ci
+      - name: Preserve the complete-suite report before the feature-contract run
+        if: always()
+        run: ${{ matrix.python }} -c "from pathlib import Path; import shutil; p=Path('target/nextest/ci/junit.xml'); p.exists() and shutil.copyfile(p,p.with_name('suite-junit.xml'))"
+      - name: Public documentation examples
+        run: cargo test -p caskade-installer --all-features --locked --doc
+      - name: Standalone CLI feature contract
+        run: cargo nextest run -p caskade-installer --no-default-features --features cli --locked --profile ci --test cli
+      - name: Read-only fixture staleness and size gates
+        run: cargo xtask fixtures check
+      - name: Fixture check contract regressions
+        run: cargo test -p xtask --locked
+      - name: Build genuine macOS-native fixture artifact
+        if: matrix.os == 'macos'
+        run: |
+          python3 xtask/macos-fixtures.py --artifact target/macos-fixture-artifact
+          python3 -c "from pathlib import Path; import os; p=Path('target/macos-fixture-artifact').resolve(); f=open(os.environ['GITHUB_ENV'],'a'); f.write('CASKADE_MACOS_FIXTURES='+str(p)+'\n'); f.close()"
+      - name: Native Windows and macOS sidecar / golden gates
+        if: matrix.os != 'linux'
+        env:
+          CASKADE_TEST_NATIVE: '1'
+        run: |
+          ${{ matrix.python }} scripts/7zz-download.py > sidecar.json
+          ${{ matrix.python }} -c "import json,os; d=json.load(open('sidecar.json')); f=open(os.environ['GITHUB_ENV'],'a'); f.write('CASKADE_7ZZ='+d['program']+'\n'); f.close()"
+      - name: T7 native Windows and macOS
+        if: matrix.os != 'linux'
+        env:
+          CASKADE_TEST_NATIVE: '1'
+        run: cargo nextest run -p caskade-installer --all-features --locked --profile native --run-ignored all
+      - name: Upload native OS test results
+        if: always()
+        uses: https://github.com/actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5
+        with:
+          name: installer-${{ matrix.os }}-${{ github.run_id }}
+          path: |
+            target/nextest/**/*junit.xml
+            target/native-windows/*.json
+            sidecar.json
+          retention-days: 14

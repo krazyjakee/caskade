@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:bal="http://schemas.microsoft.com/wix/BalExtension">
+  <Bundle Name="Caskade Burn Fixture" Version="1.0.0.0" Manufacturer="Caskade Fixtures" UpgradeCode="F71C4518-FE92-4D51-AD52-BCF31750B448">
+    <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.HyperlinkLicense">
+      <bal:WixStandardBootstrapperApplication LicenseUrl="" SuppressOptionsUI="yes" />
+    </BootstrapperApplicationRef>
+    <Variable Name="InstallFolder" bal:Overridable="yes" Persisted="yes" Type="string" Value="[LocalAppDataFolder]CaskadeBurnFixture" />
+    <Chain>
+      <MsiPackage Id="FixtureGame" SourceFile="$(var.Payload)" Compressed="yes" DisplayInternalUI="no" Vital="yes">
+        <MsiProperty Name="INSTALLDIR" Value="[InstallFolder]" />
+        <MsiProperty Name="TARGETDIR" Value="[InstallFolder]" />
+        <MsiProperty Name="NOSHORTCUTS" Value="1" />
+      </MsiPackage>
+    </Chain>
+  </Bundle>
+</Wix>

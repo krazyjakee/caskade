@@ -1,0 +1,59 @@
+{
+  "$description": "Component tier: sizes and shapes of particular components.",
+  "sidebar": {
+    "width": {
+      "$type": "dimension",
+      "$value": "15rem"
+    }
+  },
+  "topbar": {
+    "height": {
+      "$type": "dimension",
+      "$value": "4.5rem"
+    }
+  },
+  "card": {
+    "aspect": {
+      "$type": "keyword",
+      "$value": "16 / 10",
+      "$description": "Game card artwork ratio."
+    },
+    "width": {
+      "$type": "dimension",
+      "$value": "176px",
+      "$description": "Game card width in grids (Appearance → Card size)."
+    }
+  },
+  "hero": {
+    "height": {
+      "$type": "dimension",
+      "$value": "20rem"
+    }
+  },
+  "chamfer": {
+    "$type": "dimension",
+    "$value": "10px",
+    "$description": "Cut corner of chamfered actions and tiles."
+  },
+  "frame": {
+    "corner": {
+      "$type": "dimension",
+      "$value": "14px",
+      "$description": "HUD corner brackets."
+    }
+  },
+  "grid": {
+    "size": {
+      "$type": "dimension",
+      "$value": "48px",
+      "$description": "Backdrop grid cell."
+    }
+  },
+  "hintbar": {
+    "height": {
+      "$type": "dimension",
+      "$value": "3rem",
+      "$description": "Console mode's controller hint bar."
+    }
+  }
+}

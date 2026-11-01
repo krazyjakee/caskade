@@ -1,0 +1,18 @@
+[[actions]]
+name = "play"
+path = "game.sh"
+args = ["--name", "Fixture Itch Portable", "$(literal)"]
+platform = "linux"
+[[actions]]
+name = "play"
+path = "game.exe"
+args = ["/name", "Fixture Itch Portable"]
+platform = "windows"
+[[actions]]
+name = "play"
+path = "game.sh"
+args = ["--macos"]
+platform = "osx"
+[[actions]]
+name = "unsafe"
+path = "../../outside.exe"

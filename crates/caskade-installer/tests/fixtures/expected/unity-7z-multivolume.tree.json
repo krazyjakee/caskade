@@ -1,0 +1,36 @@
+[
+  {
+    "path": "FixtureGame.exe",
+    "kind": "file",
+    "size": 273408,
+    "sha256": "552ec0771276642c98698e69a0ac61205e35ecd7265cd95eff95a8b03c7c5e0b",
+    "executable": true
+  },
+  {
+    "path": "FixtureGame_Data",
+    "kind": "directory",
+    "size": 0,
+    "executable": false
+  },
+  {
+    "path": "FixtureGame_Data/globalgamemanagers",
+    "kind": "file",
+    "size": 65,
+    "sha256": "99edf3c6c3cc497b01fed6d166c922cbc423dd8b9e9e94364537b6b08153efe8",
+    "executable": false
+  },
+  {
+    "path": "UnityCrashHandler64.exe",
+    "kind": "file",
+    "size": 273408,
+    "sha256": "552ec0771276642c98698e69a0ac61205e35ecd7265cd95eff95a8b03c7c5e0b",
+    "executable": true
+  },
+  {
+    "path": "UnityPlayer.dll",
+    "kind": "file",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "executable": false
+  }
+]

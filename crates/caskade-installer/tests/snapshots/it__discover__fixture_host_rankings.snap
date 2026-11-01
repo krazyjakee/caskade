@@ -1,0 +1,546 @@
+---
+source: crates/caskade-installer/tests/discover.rs
+expression: snapshots
+---
+{
+  "gog/linux": {
+    "icon": null,
+    "ids": {
+      "gog": "1234567890",
+      "steam": "480"
+    },
+    "launch_targets": [
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame.exe",
+        "reason": "GOG playTasks",
+        "runtime": {
+          "type": "proton_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 1050.0,
+        "working_dir": "."
+      }
+    ],
+    "question": null,
+    "title": "Fixture Game",
+    "warnings": []
+  },
+  "gog/linux-exfat-root": {
+    "icon": null,
+    "ids": {
+      "gog": "1234567890",
+      "steam": "480"
+    },
+    "launch_targets": [
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame.exe",
+        "reason": "GOG playTasks",
+        "runtime": {
+          "type": "proton_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 1050.0,
+        "working_dir": "."
+      }
+    ],
+    "question": null,
+    "title": "Fixture Game",
+    "warnings": []
+  },
+  "gog/linux-no-umu": {
+    "icon": null,
+    "ids": {
+      "gog": "1234567890",
+      "steam": "480"
+    },
+    "launch_targets": [
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame.exe",
+        "reason": "GOG playTasks",
+        "runtime": {
+          "type": "proton_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 1050.0,
+        "working_dir": "."
+      }
+    ],
+    "question": null,
+    "title": "Fixture Game",
+    "warnings": [
+      {
+        "code": "missing_runtime",
+        "message": "The discovered target needs a runner that is not currently available",
+        "path": "FixtureGame.exe"
+      }
+    ]
+  },
+  "gog/macos": {
+    "icon": null,
+    "ids": {
+      "gog": "1234567890",
+      "steam": "480"
+    },
+    "launch_targets": [
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame.exe",
+        "reason": "GOG playTasks",
+        "runtime": {
+          "type": "wine_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 1050.0,
+        "working_dir": "."
+      }
+    ],
+    "question": null,
+    "title": "Fixture Game",
+    "warnings": []
+  },
+  "gog/macos-no-wine": {
+    "icon": null,
+    "ids": {
+      "gog": "1234567890",
+      "steam": "480"
+    },
+    "launch_targets": [
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame.exe",
+        "reason": "GOG playTasks",
+        "runtime": {
+          "type": "wine_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 1050.0,
+        "working_dir": "."
+      }
+    ],
+    "question": null,
+    "title": "Fixture Game",
+    "warnings": [
+      {
+        "code": "missing_runtime",
+        "message": "The discovered target needs a runner that is not currently available",
+        "path": "FixtureGame.exe"
+      }
+    ]
+  },
+  "gog/windows": {
+    "icon": null,
+    "ids": {
+      "gog": "1234567890",
+      "steam": "480"
+    },
+    "launch_targets": [
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame.exe",
+        "reason": "GOG playTasks",
+        "runtime": {
+          "type": "native"
+        },
+        "score": 1050.0,
+        "working_dir": "."
+      }
+    ],
+    "question": null,
+    "title": "Fixture Game",
+    "warnings": []
+  },
+  "unity/linux": {
+    "icon": null,
+    "ids": {},
+    "launch_targets": [
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame.exe",
+        "reason": "Unity executable with matching _Data directory",
+        "runtime": {
+          "type": "proton_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 220.56439208984375,
+        "working_dir": "."
+      }
+    ],
+    "question": null,
+    "title": "Fixture Game",
+    "warnings": []
+  },
+  "unity/linux-exfat-root": {
+    "icon": null,
+    "ids": {},
+    "launch_targets": [
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame.exe",
+        "reason": "Unity executable with matching _Data directory",
+        "runtime": {
+          "type": "proton_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 220.56439208984375,
+        "working_dir": "."
+      }
+    ],
+    "question": null,
+    "title": "Fixture Game",
+    "warnings": []
+  },
+  "unity/linux-no-umu": {
+    "icon": null,
+    "ids": {},
+    "launch_targets": [
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame.exe",
+        "reason": "Unity executable with matching _Data directory",
+        "runtime": {
+          "type": "proton_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 220.56439208984375,
+        "working_dir": "."
+      }
+    ],
+    "question": null,
+    "title": "Fixture Game",
+    "warnings": [
+      {
+        "code": "missing_runtime",
+        "message": "The discovered target needs a runner that is not currently available",
+        "path": "FixtureGame.exe"
+      }
+    ]
+  },
+  "unity/macos": {
+    "icon": null,
+    "ids": {},
+    "launch_targets": [
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame.exe",
+        "reason": "Unity executable with matching _Data directory",
+        "runtime": {
+          "type": "wine_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 220.56439208984375,
+        "working_dir": "."
+      }
+    ],
+    "question": null,
+    "title": "Fixture Game",
+    "warnings": []
+  },
+  "unity/macos-no-wine": {
+    "icon": null,
+    "ids": {},
+    "launch_targets": [
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame.exe",
+        "reason": "Unity executable with matching _Data directory",
+        "runtime": {
+          "type": "wine_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 220.56439208984375,
+        "working_dir": "."
+      }
+    ],
+    "question": null,
+    "title": "Fixture Game",
+    "warnings": [
+      {
+        "code": "missing_runtime",
+        "message": "The discovered target needs a runner that is not currently available",
+        "path": "FixtureGame.exe"
+      }
+    ]
+  },
+  "unity/windows": {
+    "icon": null,
+    "ids": {},
+    "launch_targets": [
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame.exe",
+        "reason": "Unity executable with matching _Data directory",
+        "runtime": {
+          "type": "native"
+        },
+        "score": 220.56439208984375,
+        "working_dir": "."
+      }
+    ],
+    "question": null,
+    "title": "Fixture Game",
+    "warnings": []
+  },
+  "unreal/linux": {
+    "icon": null,
+    "ids": {},
+    "launch_targets": [
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame.exe",
+        "reason": "Unreal root bootstrapper",
+        "runtime": {
+          "type": "proton_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 210.56439208984375,
+        "working_dir": "."
+      },
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame/Binaries/Win64/FixtureGame-Win64-Shipping.exe",
+        "reason": "Unreal shipping executable fallback",
+        "runtime": {
+          "type": "proton_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 76.56439971923828,
+        "working_dir": "FixtureGame/Binaries/Win64"
+      }
+    ],
+    "question": null,
+    "title": "Fixture Game",
+    "warnings": []
+  },
+  "unreal/linux-exfat-root": {
+    "icon": null,
+    "ids": {},
+    "launch_targets": [
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame.exe",
+        "reason": "Unreal root bootstrapper",
+        "runtime": {
+          "type": "proton_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 210.56439208984375,
+        "working_dir": "."
+      },
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame/Binaries/Win64/FixtureGame-Win64-Shipping.exe",
+        "reason": "Unreal shipping executable fallback",
+        "runtime": {
+          "type": "proton_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 76.56439971923828,
+        "working_dir": "FixtureGame/Binaries/Win64"
+      }
+    ],
+    "question": null,
+    "title": "Fixture Game",
+    "warnings": []
+  },
+  "unreal/linux-no-umu": {
+    "icon": null,
+    "ids": {},
+    "launch_targets": [
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame.exe",
+        "reason": "Unreal root bootstrapper",
+        "runtime": {
+          "type": "proton_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 210.56439208984375,
+        "working_dir": "."
+      },
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame/Binaries/Win64/FixtureGame-Win64-Shipping.exe",
+        "reason": "Unreal shipping executable fallback",
+        "runtime": {
+          "type": "proton_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 76.56439971923828,
+        "working_dir": "FixtureGame/Binaries/Win64"
+      }
+    ],
+    "question": null,
+    "title": "Fixture Game",
+    "warnings": [
+      {
+        "code": "missing_runtime",
+        "message": "The discovered target needs a runner that is not currently available",
+        "path": "FixtureGame.exe"
+      }
+    ]
+  },
+  "unreal/macos": {
+    "icon": null,
+    "ids": {},
+    "launch_targets": [
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame.exe",
+        "reason": "Unreal root bootstrapper",
+        "runtime": {
+          "type": "wine_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 210.56439208984375,
+        "working_dir": "."
+      },
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame/Binaries/Win64/FixtureGame-Win64-Shipping.exe",
+        "reason": "Unreal shipping executable fallback",
+        "runtime": {
+          "type": "wine_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 76.56439971923828,
+        "working_dir": "FixtureGame/Binaries/Win64"
+      }
+    ],
+    "question": null,
+    "title": "Fixture Game",
+    "warnings": []
+  },
+  "unreal/macos-no-wine": {
+    "icon": null,
+    "ids": {},
+    "launch_targets": [
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame.exe",
+        "reason": "Unreal root bootstrapper",
+        "runtime": {
+          "type": "wine_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 210.56439208984375,
+        "working_dir": "."
+      },
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame/Binaries/Win64/FixtureGame-Win64-Shipping.exe",
+        "reason": "Unreal shipping executable fallback",
+        "runtime": {
+          "type": "wine_prefix",
+          "value": {
+            "id": "main"
+          }
+        },
+        "score": 76.56439971923828,
+        "working_dir": "FixtureGame/Binaries/Win64"
+      }
+    ],
+    "question": null,
+    "title": "Fixture Game",
+    "warnings": [
+      {
+        "code": "missing_runtime",
+        "message": "The discovered target needs a runner that is not currently available",
+        "path": "FixtureGame.exe"
+      }
+    ]
+  },
+  "unreal/windows": {
+    "icon": null,
+    "ids": {},
+    "launch_targets": [
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame.exe",
+        "reason": "Unreal root bootstrapper",
+        "runtime": {
+          "type": "native"
+        },
+        "score": 210.56439208984375,
+        "working_dir": "."
+      },
+      {
+        "args": [],
+        "env": {},
+        "path": "FixtureGame/Binaries/Win64/FixtureGame-Win64-Shipping.exe",
+        "reason": "Unreal shipping executable fallback",
+        "runtime": {
+          "type": "native"
+        },
+        "score": 76.56439971923828,
+        "working_dir": "FixtureGame/Binaries/Win64"
+      }
+    ],
+    "question": null,
+    "title": "Fixture Game",
+    "warnings": []
+  }
+}

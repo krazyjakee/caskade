@@ -1,0 +1,18 @@
+{
+  "$description": "The OS asks for less motion, unless Appearance → Motion is Full.",
+  "$extensions": {
+    "dev.caskade.condition": {
+      "media": "(prefers-reduced-motion: reduce)",
+      "selector": ":root:not([data-motion=\"full\"])"
+    }
+  },
+  "motion": {
+    "duration": {
+      "fast": { "$value": "0ms" },
+      "base": { "$value": "0ms" },
+      "slow": { "$value": "0ms" }
+    },
+    "stagger": { "$value": "0ms" },
+    "ambient": { "$value": "paused" }
+  }
+}

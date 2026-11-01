@@ -1,0 +1,61 @@
+---
+source: crates/caskade-core/src/emulation/tests.rs
+expression: resolved_table(&catalog)
+---
+duckstation / Default
+  windows folder    argv: -batch ⏐ -fullscreen ⏐ -- ⏐ D:\ROMs\SNES\Chrono Trigger (USA).sfc
+                    cwd: D:\ROMs\SNES
+  windows path      argv: -batch ⏐ -fullscreen ⏐ -- ⏐ D:\ROMs\SNES\Chrono Trigger (USA).sfc
+                    cwd: D:\ROMs\SNES
+  linux   folder    argv: -batch ⏐ -fullscreen ⏐ -- ⏐ /home/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    cwd: /home/ada/ROMs/SNES
+  linux   path      argv: -batch ⏐ -fullscreen ⏐ -- ⏐ /home/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    cwd: /home/ada/ROMs/SNES
+  linux   flatpak   argv: -batch ⏐ -fullscreen ⏐ -- ⏐ /home/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    cwd: /home/ada/ROMs/SNES
+  linux   appimage  argv: -batch ⏐ -fullscreen ⏐ -- ⏐ /home/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    cwd: /home/ada/ROMs/SNES
+  macos   folder    argv: -batch ⏐ -fullscreen ⏐ -- ⏐ /Users/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    cwd: /Users/ada/ROMs/SNES
+  macos   path      argv: -batch ⏐ -fullscreen ⏐ -- ⏐ /Users/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    cwd: /Users/ada/ROMs/SNES
+  macos   bundle    argv: -batch ⏐ -fullscreen ⏐ -- ⏐ /Users/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    cwd: /Users/ada/ROMs/SNES
+retroarch / Snes9x
+  windows folder    argv: -L ⏐ C:\Program Files\RetroArch/cores/snes9x_libretro.dll ⏐ D:\ROMs\SNES\Chrono Trigger (USA).sfc
+                    requires: C:\Program Files\RetroArch/cores/snes9x_libretro.dll
+  windows path      argv: -L ⏐ C:\Program Files\RetroArch/cores/snes9x_libretro.dll ⏐ D:\ROMs\SNES\Chrono Trigger (USA).sfc
+                    requires: C:\Program Files\RetroArch/cores/snes9x_libretro.dll
+  linux   folder    argv: -L ⏐ /home/ada/.config/retroarch/cores/snes9x_libretro.so ⏐ /home/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    requires: /home/ada/.config/retroarch/cores/snes9x_libretro.so
+  linux   path      argv: -L ⏐ /home/ada/.config/retroarch/cores/snes9x_libretro.so ⏐ /home/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    requires: /home/ada/.config/retroarch/cores/snes9x_libretro.so
+  linux   flatpak   argv: -L ⏐ /home/ada/.var/app/org.libretro.RetroArch/config/retroarch/cores/snes9x_libretro.so ⏐ /home/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    requires: /home/ada/.var/app/org.libretro.RetroArch/config/retroarch/cores/snes9x_libretro.so
+  linux   appimage  argv: -L ⏐ /home/ada/.config/retroarch/cores/snes9x_libretro.so ⏐ /home/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    requires: /home/ada/.config/retroarch/cores/snes9x_libretro.so
+  macos   folder    argv: -L ⏐ /Users/ada/Library/Application Support/RetroArch/cores/snes9x_libretro.dylib ⏐ /Users/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    requires: /Users/ada/Library/Application Support/RetroArch/cores/snes9x_libretro.dylib
+  macos   path      argv: -L ⏐ /Users/ada/Library/Application Support/RetroArch/cores/snes9x_libretro.dylib ⏐ /Users/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    requires: /Users/ada/Library/Application Support/RetroArch/cores/snes9x_libretro.dylib
+  macos   bundle    argv: -L ⏐ /Users/ada/Library/Application Support/RetroArch/cores/snes9x_libretro.dylib ⏐ /Users/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    requires: /Users/ada/Library/Application Support/RetroArch/cores/snes9x_libretro.dylib
+retroarch / Beetle PSX HW
+  windows folder    argv: -L ⏐ C:\Program Files\RetroArch/cores/mednafen_psx_hw_libretro.dll ⏐ D:\ROMs\SNES\Chrono Trigger (USA).sfc
+                    requires: C:\Program Files\RetroArch/cores/mednafen_psx_hw_libretro.dll
+  windows path      argv: -L ⏐ C:\Program Files\RetroArch/cores/mednafen_psx_hw_libretro.dll ⏐ D:\ROMs\SNES\Chrono Trigger (USA).sfc
+                    requires: C:\Program Files\RetroArch/cores/mednafen_psx_hw_libretro.dll
+  linux   folder    argv: -L ⏐ /home/ada/.config/retroarch/cores/mednafen_psx_hw_libretro.so ⏐ /home/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    requires: /home/ada/.config/retroarch/cores/mednafen_psx_hw_libretro.so
+  linux   path      argv: -L ⏐ /home/ada/.config/retroarch/cores/mednafen_psx_hw_libretro.so ⏐ /home/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    requires: /home/ada/.config/retroarch/cores/mednafen_psx_hw_libretro.so
+  linux   flatpak   argv: -L ⏐ /home/ada/.var/app/org.libretro.RetroArch/config/retroarch/cores/mednafen_psx_hw_libretro.so ⏐ /home/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    requires: /home/ada/.var/app/org.libretro.RetroArch/config/retroarch/cores/mednafen_psx_hw_libretro.so
+  linux   appimage  argv: -L ⏐ /home/ada/.config/retroarch/cores/mednafen_psx_hw_libretro.so ⏐ /home/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    requires: /home/ada/.config/retroarch/cores/mednafen_psx_hw_libretro.so
+  macos   folder    argv: -L ⏐ /Users/ada/Library/Application Support/RetroArch/cores/mednafen_psx_hw_libretro.dylib ⏐ /Users/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    requires: /Users/ada/Library/Application Support/RetroArch/cores/mednafen_psx_hw_libretro.dylib
+  macos   path      argv: -L ⏐ /Users/ada/Library/Application Support/RetroArch/cores/mednafen_psx_hw_libretro.dylib ⏐ /Users/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    requires: /Users/ada/Library/Application Support/RetroArch/cores/mednafen_psx_hw_libretro.dylib
+  macos   bundle    argv: -L ⏐ /Users/ada/Library/Application Support/RetroArch/cores/mednafen_psx_hw_libretro.dylib ⏐ /Users/ada/ROMs/SNES/Chrono Trigger (USA).sfc
+                    requires: /Users/ada/Library/Application Support/RetroArch/cores/mednafen_psx_hw_libretro.dylib

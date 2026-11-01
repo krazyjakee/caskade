@@ -1,0 +1,31 @@
+schema_version = 1
+id = "steamlike-commonredist"
+title = "Fixture Game"
+layout = "unity"
+format = "zip"
+platform = "windows"
+input = "bin/windows/steamlike-commonredist/payload.zip"
+parts = ["bin/windows/steamlike-commonredist/payload.zip"]
+tree = "windows/steamlike-commonredist.tree.json"
+launch_target = "FixtureGame.exe"
+
+[windows]
+builder = "Python zipfile"
+version = "stdlib"
+features = []
+native_generated = []
+
+[host.windows]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

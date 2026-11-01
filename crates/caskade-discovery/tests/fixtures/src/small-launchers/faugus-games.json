@@ -1,0 +1,38 @@
+[
+  {
+    "gameid": "fixture-windows",
+    "title": "Faugus Fixture Windows",
+    "path": "/home/fixture/Faugus/Fixture/drive_c/game/game.exe",
+    "prefix": "/home/fixture/Faugus/Fixture",
+    "runner": "UMU-Proton-fixture",
+    "game_arguments": "--name \"Fixture Windows\"",
+    "playtime": 1800,
+    "last_played": "2023-11-14T22:13:20",
+    "launch_arguments": "MANGOHUD=1",
+    "pre_launch": "touch SHOULD_NOT_EXECUTE"
+  },
+  {
+    "gameid": "fixture-native",
+    "title": "Faugus Fixture Native",
+    "path": "/home/fixture/Games/Faugus Native/game",
+    "prefix": "",
+    "runner": "Linux-Native",
+    "game_arguments": "--test",
+    "playtime": 30
+  },
+  {
+    "gameid": "fixture-steam",
+    "title": "Faugus Steam Proxy",
+    "path": "steam://rungameid/620",
+    "runner": "Steam",
+    "game_arguments": ""
+  },
+  {
+    "gameid": "malformed",
+    "title": "Malformed record",
+    "path": [
+      "not",
+      "string"
+    ]
+  }
+]

@@ -1,0 +1,25 @@
+schema_version = 1
+id = "deb-absolute-path"
+title = "Caskade Fixture Game"
+layout = "linux-package"
+format = "deb"
+platform = "linux"
+input = "bin/packages/deb-absolute-path.deb"
+parts = ["bin/packages/deb-absolute-path.deb"]
+tree = "packages/deb-absolute-path.tree.json"
+launch_target = "opt/caskade-fixture/start.sh"
+
+[host.windows]
+outcome = "Unsupported"
+strategy = "Delegate"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Delegate"
+runtime = "Native"
+
+[host.macos]
+outcome = "Unsupported"
+strategy = "Delegate"
+runtime = "Native"

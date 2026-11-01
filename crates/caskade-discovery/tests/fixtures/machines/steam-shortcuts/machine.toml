@@ -1,0 +1,11 @@
+schema_version = 1
+os = "linux"
+now_unix_secs = 1700000000
+
+[env]
+"HOME" = "/home/fixture"
+
+[[volumes]]
+path = "/"
+kind = "fixed"
+case_sensitive = true

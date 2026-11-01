@@ -1,0 +1,17 @@
+[package]
+name = "caskade-jobs"
+version = "0.1.0"
+description = "Shared resource queue and background activity for Caskade services"
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+specta = { version = "=2.0.0-rc.26", features = ["derive"] }
+tokio = { version = "1", features = ["rt", "sync", "macros"] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "time"] }
+
+[lints]
+workspace = true

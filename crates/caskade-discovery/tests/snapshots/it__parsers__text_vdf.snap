@@ -1,0 +1,62 @@
+---
+source: crates/caskade-discovery/tests/parsers.rs
+expression: vdf
+---
+{
+  "value": {
+    "type": "object",
+    "value": [
+      [
+        "AppState",
+        {
+          "type": "object",
+          "value": [
+            [
+              "LastOwner",
+              {
+                "type": "string",
+                "value": "76561198000000000"
+              }
+            ],
+            [
+              "SizeOnDisk",
+              {
+                "type": "string",
+                "value": "1024"
+              }
+            ],
+            [
+              "StateFlags",
+              {
+                "type": "string",
+                "value": "4"
+              }
+            ],
+            [
+              "appid",
+              {
+                "type": "string",
+                "value": "620"
+              }
+            ],
+            [
+              "installdir",
+              {
+                "type": "string",
+                "value": "Fixture Puzzle"
+              }
+            ],
+            [
+              "name",
+              {
+                "type": "string",
+                "value": "Fixture Puzzle"
+              }
+            ]
+          ]
+        }
+      ]
+    ]
+  },
+  "warnings": []
+}

@@ -1,0 +1,6 @@
+# Applied case-insensitively to executable stems. Launchers stay as fallback
+# candidates; installer, crash-handler and redistributable programs are excluded.
+exclude_prefixes = ["unins", "uninstall", "setup", "install", "vcredist", "vc_redist", "dxsetup", "dotnet", "directx", "unitycrashhandler", "ue4prereq", "ueprereq"]
+exclude_contains = ["crashreport", "crashhandler", "crashpad", "crashsender"]
+exclude_directories = ["__redist", "_commonredist", "redist", "redistributables"]
+lower_contains = ["launcher", "config", "settings", "benchmark"]

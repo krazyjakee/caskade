@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Fixture Flatpak Standalone
+Exec=flatpak run org.caskade.FixtureGame
+Categories=Game;
+X-Flatpak=org.caskade.FixtureGame

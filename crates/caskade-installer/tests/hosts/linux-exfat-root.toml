@@ -1,0 +1,17 @@
+os = "linux"
+arch = "x86_64"
+seven_zip = "/usr/bin/7zz"
+proton_builds = ["/opt/UMU-Proton"]
+
+[[runners]]
+kind = "native"
+program = ""
+[[runners]]
+kind = "proton"
+program = "/usr/bin/umu-run"
+
+[filesystem]
+writable = true
+exec_bits = false
+symlinks = false
+case_sensitive = false

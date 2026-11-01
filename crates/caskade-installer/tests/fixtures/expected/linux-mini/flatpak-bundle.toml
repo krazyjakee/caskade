@@ -1,0 +1,22 @@
+schema_version = 1
+id = "flatpak-bundle"
+title = "Caskade Fixture Game"
+layout = "linux"
+format = "flatpak"
+platform = "linux"
+input = "bin/flatpak/flatpak-bundle.flatpak"
+parts = ["bin/flatpak/flatpak-bundle.flatpak"]
+tree = "flatpak/flatpak-bundle.tree.json"
+launch_target = "bin/fixture-game"
+[host.linux]
+outcome = "HandOff"
+strategy = "Delegate"
+runtime = "Native"
+[host.windows]
+outcome = "Unsupported"
+strategy = "None"
+runtime = "None"
+[host.macos]
+outcome = "Unsupported"
+strategy = "None"
+runtime = "None"

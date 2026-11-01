@@ -1,0 +1,10 @@
+{
+  "installed": [
+    {
+      "appName": "1207658940",
+      "platform": "windows",
+      "install_path": "/home/fixture/.var/app/com.heroicgameslauncher.hgl/data/Games/Fixture Flatpak GOG",
+      "executable": "game.exe"
+    }
+  ]
+}

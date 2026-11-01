@@ -1,0 +1,655 @@
+//! The Caskade desktop app: a thin Tauri 2 adapter over `caskade-core`
+//! (TECH-PLAN §2). Commands, events, windows and URI schemes live here;
+//! everything else is in the core. The webview gets no `fs` or `shell`
+//! plugin (TECH-PLAN §7).
+
+pub mod addon_tool;
+pub mod asset;
+pub mod background;
+pub mod bindings;
+pub mod commands;
+pub mod deep_link;
+pub mod dev_plugins;
+pub mod discovery;
+#[cfg(feature = "e2e")]
+pub mod e2e;
+pub mod error;
+pub mod events;
+pub mod game_focus;
+pub mod main_window;
+pub mod navigation;
+pub mod onboarding;
+pub mod permissions;
+pub mod plugin_scheme;
+pub mod recovery;
+pub mod theme_scheme;
+pub mod torrent_links;
+pub mod tray;
+pub mod video_player;
+pub mod web_player;
+pub mod webkit;
+pub mod window_state;
+
+use tracing_subscriber::EnvFilter;
+
+/// Builds and runs the app.
+pub fn run() {
+    let _ = tracing_subscriber::fmt()
+        .with_env_filter(
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
+        )
+        .try_init();
+    // Panics reach the log too, not only stderr.
+    background::log_panics();
+    // First, as it may restart the process.
+    webkit::prefer_gpu();
+    // The OS's language, until the Language setting (#213) picks one.
+    caskade_core::i18n::set_locale(caskade_core::i18n::SYSTEM);
+    // `caskade --web-game <url>`: a web game's window, not the app.
+    if let Some(options) = web_player::Options::from_args(std::env::args_os()) {
+        exit_window(web_player::run(options), "the game window couldn't open");
+    }
+    // `caskade --video <id>`: a game's video, not the app.
+    if let Some(options) = video_player::Options::from_args(std::env::args_os()) {
+        exit_window(video_player::run(options), "the video window couldn't open");
+    }
+    let specta = bindings::builder();
+    #[cfg(debug_assertions)]
+    if let Err(error) = bindings::export(&bindings::default_path()) {
+        tracing::warn!(%error, "could not refresh the TypeScript bindings");
+    }
+    let paths = caskade_core::AppPaths::standard()
+        .unwrap_or_else(|error| startup_failed("Caskade couldn't find its data folders", &error));
+    if let Err(error) = paths.create() {
+        startup_failed("Caskade couldn't create its data folders", &error);
+    }
+    // `caskade --restore <backup>` (#192): staged now, applied as the
+    // library opens.
+    if let Some(archive) = recovery::restore_arg(
+        &std::env::args().collect::<Vec<_>>(),
+        &std::env::current_dir().unwrap_or_default(),
+    ) && let Err(error) = tauri::async_runtime::block_on(recovery::stage(&paths, &archive))
+    {
+        startup_failed("Caskade couldn't restore the backup", &error);
+    }
+    let setup_paths = paths.clone();
+    // One cache, shared by every clone: without it no artwork shows;
+    // everything else works.
+    let artwork = caskade_core::artwork::ArtworkCache::new(paths.cache.join("artwork"))
+        .inspect_err(|error| tracing::error!(%error, "artwork cache unavailable"))
+        .ok();
+    theme_scheme::register(plugin_scheme::register(asset::register(
+        tauri::Builder::default(),
+        artwork.clone(),
+    )))
+    .plugin(tauri_plugin_single_instance::init(|app, args, cwd| {
+        // `caskade dev <folder>` while Caskade runs loads it here (#131).
+        if let Some(folder) = dev_plugins::folder_from_args(&args, std::path::Path::new(&cwd)) {
+            dev_plugins::load_in_background(app, folder);
+        }
+        // A magnet link or torrent file the OS opened with Caskade (#159).
+        if let Some(input) =
+            torrent_links::input_from_args(&args, std::path::Path::new(&cwd))
+        {
+            deep_link::queue_in_background(app, input);
+        }
+        main_window::raise(app);
+        // `caskade --console` while Caskade runs switches it (#148).
+        if commands::console::wants_console(&args)
+            && let Err(error) = commands::console::switch(app, true)
+        {
+            tracing::warn!(%error, "couldn't switch to console mode");
+        }
+    }))
+    .plugin(tauri_plugin_deep_link::init())
+    .plugin(window_state::plugin())
+    .plugin(tauri_plugin_dialog::init())
+    .plugin(tauri_plugin_updater::Builder::new().build())
+    .on_page_load(|webview, payload| {
+        if payload.event() == tauri::webview::PageLoadEvent::Finished {
+            webkit::mark_cpu_paint(webview);
+        }
+    })
+    // Every command checks the signed-in account's permissions (#205).
+    .invoke_handler(permissions::gate(specta.invoke_handler()))
+    .setup(move |app| {
+        use tauri::Manager;
+        specta.mount_events(app);
+        // The main window, with its navigation guard (CSK-14).
+        navigation::create_main_window(app.handle())?;
+        background::bridge(app.handle().clone());
+        let bus = caskade_core::bus::Bus::default();
+        events::bridge(app.handle().clone(), &bus);
+        app.manage(bus.clone());
+        // Gamepads for console mode (#146).
+        commands::input::setup(app.handle(), bus.clone());
+        // Settings → Statistics (#156): samples only while it is open.
+        commands::system_stats::setup(app.handle());
+        // The library store, then the launch service, which first
+        // re-attaches to games still running from a previous session.
+        // A restore staged before the restart is applied first (#192).
+        let store = match tauri::async_runtime::block_on(recovery::open_library(&setup_paths)) {
+            Ok(store) => store,
+            Err(error) => {
+                // Nothing works without the library: say so, then quit.
+                library_failed(app.handle(), &error, &setup_paths);
+                return Ok(());
+            }
+        };
+        // Local accounts (#202): a lone account without a PIN is signed
+        // in, so a library without accounts set up starts as before.
+        match tauri::async_runtime::block_on(caskade_core::accounts::AccountService::open(
+            store.clone(),
+            bus.clone(),
+        )) {
+            Ok(accounts) => {
+                app.manage(accounts);
+            }
+            Err(error) => {
+                library_failed(app.handle(), &error, &setup_paths);
+                return Ok(());
+            }
+        }
+        // Notifications (#198): game additions, failures and updates, kept
+        // in the library.
+        commands::notifications::setup(
+            app.handle(),
+            caskade_core::notifications::Notifications::new(store.clone()),
+            &bus,
+        );
+        // Plugin runners (#126) attach once the plugin host exists.
+        let plugin_runners = caskade_plugin_host::providers::PluginRunners::new();
+        let launch = caskade_core::launch::LaunchService::new(store.clone())
+            .with_bus(bus.clone())
+            .with_plugins(std::sync::Arc::new(plugin_runners.clone()))
+            // Age limits (#209): every launch asks the signed-in account.
+            .with_play_gate(std::sync::Arc::new(
+                app.state::<caskade_core::accounts::AccountService>()
+                    .inner()
+                    .clone(),
+            ));
+        match tauri::async_runtime::block_on(launch.recover()) {
+            Ok(recovered) => tracing::info!(recovered = recovered.len(), "launch service ready"),
+            Err(error) => tracing::error!(%error, "games from the last session not re-attached"),
+        }
+        let settings =
+            caskade_core::settings::SettingsService::with_bus(store.clone(), bus.clone());
+        if let Err(error) = settings.register_core(&setup_paths) {
+            tracing::error!(%error, "core settings unavailable");
+        }
+        // Console mode (#148): `--console`, gamescope or the setting.
+        commands::console::setup(
+            app.handle(),
+            commands::console::Startup::read(&std::env::args().collect::<Vec<_>>()),
+            &settings,
+        );
+        // The language (#213): the setting's, before the window loads.
+        commands::i18n::setup(app.handle(), &settings);
+        // The tray icon, and the close button hiding to it.
+        tray::setup(app.handle(), &settings);
+        // Caskade's own updates: checked in the background, installed
+        // when the user asks.
+        app.manage(commands::app_update::AppUpdater::<
+            tauri_plugin_updater::Update,
+        >::new(
+            app.package_info().version.to_string(),
+            commands::app_update::unavailable_reason(tauri::utils::platform::bundle_type()),
+            commands::app_update::ENDPOINT,
+        ));
+        background::supervise("app updates", {
+            let (app, settings) = (app.handle().clone(), settings.clone());
+            move || commands::app_update::watch(app.clone(), settings.clone())
+        });
+        window_state::save_on_change(app.handle());
+        window_state::show(app.handle());
+        let launch = launch.with_runner_resolver(std::sync::Arc::new(
+            caskade_core::install::InstallerRunnerResolver(settings.clone()),
+        ));
+        match caskade_core::storage::StorageService::new(
+            store.clone(),
+            settings.clone(),
+            launch.clone(),
+        ) {
+            Ok(storage) => {
+                let storage = storage.with_paths(setup_paths.clone());
+                // Disconnected drives keep their catalogue entries. Pending
+                // moves remain recoverable and are retried when their roots
+                // return.
+                if let Err(error) = tauri::async_runtime::block_on(storage.initialize()) {
+                    tracing::warn!(%error, "storage recovery deferred until its roots are available");
+                }
+                app.manage(storage);
+            }
+            Err(error) => tracing::error!(%error, "storage locations unavailable"),
+        }
+        // A library from before first-run setup existed doesn't go
+        // through it; a new one scans once setup is done.
+        if let Err(error) =
+            tauri::async_runtime::block_on(onboarding::settle_existing(&settings, &store))
+        {
+            tracing::warn!(%error, "first-run setup state unavailable");
+        }
+        // Installed-games discovery (#100). The discovery controller (#101)
+        // owns the initial scan, the schedule and the watch; setup only
+        // registers the sources and their settings.
+        if let Err(error) = caskade_sources::register_settings(&settings) {
+            tracing::error!(%error, "discovery settings unavailable");
+        }
+        let discovery = caskade_sources::register(
+            &bus,
+            store.clone(),
+            caskade_discovery::HostEnv::live(),
+            &caskade_discovery::Config::default(),
+        );
+        if let Err(error) = commands::install::setup(
+            app.handle(),
+            store.clone(),
+            bus.clone(),
+            &setup_paths,
+            settings.clone(),
+        ) {
+            tracing::error!(%error, "installs unavailable");
+        }
+        deep_link::listen(app.handle());
+        let mut controller =
+            discovery::DiscoveryController::new(discovery.clone(), settings.clone());
+        if let Some(source) = app.try_state::<caskade_sources::storage::StorageSource>() {
+            controller = controller.with_storage(source.inner().clone());
+        }
+        controller.bridge(app.handle().clone());
+        controller.start();
+        app.manage(controller);
+        app.manage(discovery);
+        // Embedded definitions are validated before constructing the service.
+        let emulation = caskade_core::emulation::EmulationService::new(
+            store.clone(),
+            bus.clone(),
+            caskade_sources::emulation::catalog().unwrap_or_else(|error| {
+                tracing::error!(%error, "shipped emulation definitions are invalid");
+                caskade_core::emulation::Catalog::default()
+            }),
+        )
+        .with_paths(&setup_paths);
+        // One-click emulator installs (EMULATOR-SETUP-PLAN §3), and
+        // their update checks, which follow `core.updates`.
+        let emulator_setup = caskade_core::emulation::EmulatorSetup::new(
+            store.clone(),
+            bus.clone(),
+            emulation.clone(),
+            &setup_paths,
+        );
+        emulator_setup.set_settings(settings.clone());
+        emulator_setup.set_launch(launch.clone());
+        background::supervise("emulator updates", {
+            let emulator_setup = emulator_setup.clone();
+            move || emulator_setup.watch()
+        });
+        app.manage(emulator_setup);
+        // Detection runs after every library scan (§5); results wait
+        // for review in Settings → Emulators.
+        background::supervise("emulator detection", {
+            let emulation = emulation.clone();
+            move || emulation.watch_library_scans()
+        });
+        // ROM scanners take part in every library update (#119).
+        background::supervise("ROM scanners", {
+            let roms = caskade_sources::RomsSource::new(emulation.scanners());
+            let bus = bus.clone();
+            move || roms.watch(&bus)
+        });
+        // Offline Hasheous dumps for the configured emulators' platforms
+        // and PC games, kept current in the background.
+        let hasheous = caskade_core::hasheous::Hasheous::new(setup_paths.cache.join("hasheous"));
+        // IGDB metadata from Caskade's metadata server, cached for good.
+        let igdb = caskade_core::igdb::Igdb::new(setup_paths.cache.join("igdb"));
+        // Artwork the user chooses or imports in the game editor (#175).
+        app.manage(commands::game_edit::EditArtwork(artwork.clone()));
+        // Games IGDB has no icon for get their executable's.
+        if let Some(artwork) = artwork.clone() {
+            let icons = caskade_core::icons::ExeIcons::new(store.clone(), bus.clone(), artwork);
+            background::supervise("executable icons", move || icons.watch());
+        }
+        // Web games play in the game window: this executable, started again.
+        let web_player = std::env::current_exe()
+            .inspect_err(|error| {
+                tracing::error!(%error, "web games can't start: Caskade's executable is unknown");
+            })
+            .ok()
+            .map(|program| {
+                let handle = app.handle().clone();
+                caskade_core::launch::WebPlayer::new(program, setup_paths.data.join("web"))
+                    .with_settings(settings.clone())
+                    // In desktop mode a web game opens over Caskade's window.
+                    .with_placement(move || main_window::placement(&handle))
+            });
+        // Add web game: the page's details and picture; Play offline.
+        let mut web = caskade_core::web::WebGames::new(store.clone()).with_bus(bus.clone());
+        if let Some(artwork) = artwork.clone() {
+            web = web.with_artwork(artwork);
+        }
+        if let Some(player) = web_player.clone() {
+            web = web.with_player(player);
+        }
+        app.manage(web);
+        // Library games matched to IGDB (RomM, Hasheous names, then
+        // store ids) and filled in from it, in the background.
+        let metadata = caskade_core::metadata::Metadata::new(
+            store.clone(),
+            bus.clone(),
+            igdb.clone(),
+            hasheous.clone(),
+            emulation.catalog(),
+            artwork.clone(),
+        );
+        // Both go online: they run once first-run setup is done, while
+        // `core.metadata.online` allows them.
+        onboarding::supervise_online(settings.clone(), {
+            let (hasheous, metadata) = (hasheous.clone(), metadata.clone());
+            let (bus, emulation, store) = (bus.clone(), emulation.clone(), store.clone());
+            move || {
+                vec![
+                    hasheous.watch(&bus, emulation.clone(), store.clone()),
+                    metadata.watch(),
+                ]
+            }
+        });
+        // Refreshing chosen games' details (#176): its status goes to Activity.
+        commands::game_edit::forward_refresh(app.handle(), &metadata);
+        app.manage(metadata);
+        app.manage(hasheous);
+        app.manage(igdb);
+        if let Some(install) = app
+            .try_state::<caskade_core::install::InstallService>()
+            .map(|install| install.inner().clone())
+        {
+            // Installed ROMs map to the catalogue's platforms (#120).
+            install.set_emulation(emulation.clone());
+            // Games installed from GitHub are followed for new releases,
+            // checked in the background and before they're played.
+            let tracker = caskade_core::updates::Tracker::builtin(store.clone());
+            install.set_tracker(tracker.clone());
+            let updates = caskade_core::updates::Updates::new(
+                store.clone(),
+                bus.clone(),
+                tracker,
+                install,
+                Some(settings.clone()),
+            );
+            background::supervise("game updates", {
+                let updates = updates.clone();
+                move || updates.watch()
+            });
+            app.manage(updates);
+        }
+        // Emulated games resolve through the emulation service (#121).
+        let launch = launch.with_emulators(
+            caskade_core::launch::EmulatorLaunches::new(store.clone(), emulation.clone())
+                .with_settings(settings.clone()),
+        );
+        let launch = match web_player {
+            Some(player) => launch.with_web_player(player),
+            None => launch,
+        };
+        game_focus::follow(app.handle().clone(), &bus, settings.clone());
+        // RomM servers (#1): their ROMs download into the cache at launch.
+        let launch = match commands::romm::setup(
+            app.handle(),
+            store.clone(),
+            bus.clone(),
+            &settings,
+            emulation.clone(),
+            &setup_paths,
+            artwork.clone(),
+        ) {
+            Ok(romm) => {
+                // Missing BIOS files come from RomM's firmware.
+                app.state::<caskade_core::emulation::EmulatorSetup>()
+                    .set_bios(std::sync::Arc::new(romm.clone()));
+                launch.with_preparer(std::sync::Arc::new(romm))
+            }
+            Err(error) => {
+                tracing::error!(%error, "RomM unavailable");
+                launch
+            }
+        };
+        app.manage(emulation);
+        // Plugins (#123): the folder is read at startup, but no plugin
+        // code runs until an enabled plugin is first used. Without a
+        // plugin host the app runs without plugins.
+        // Catalogue add-ons (#182): an install the app stopped in the middle
+        // of rolls back before plugins and themes load.
+        let addon_work = setup_paths.data.join("addons");
+        if let Err(error) = caskade_core::addons::package::recover(&addon_work) {
+            tracing::warn!(%error, "an interrupted add-on install wasn't rolled back");
+        }
+        app.manage(commands::addon_packages::AddonFolders {
+            plugins: setup_paths.data.join("plugins"),
+            themes: setup_paths.data.join("themes"),
+            work: addon_work,
+        });
+        app.manage(commands::addon_packages::AddonJobs::default());
+        app.manage(commands::video::VideoWindow::default());
+        let plugins = match start_plugins(app, &setup_paths, &store, &bus, &settings) {
+            Ok(plugins) => {
+                plugin_runners.attach(plugins.clone());
+                Some(plugins)
+            }
+            Err(error) => {
+                tracing::error!(%error, "plugins unavailable");
+                None
+            }
+        };
+        // Built-in, installed and plugin-bundled themes (#139), served by
+        // theme_scheme.
+        let themes = caskade_core::themes::ThemeService::new(setup_paths.data.join("themes"));
+        if let Some(plugins) = &plugins {
+            themes.set_plugin_folders(tauri::async_runtime::block_on(
+                commands::themes::plugin_folders(plugins),
+            ));
+        }
+        app.manage(themes);
+        // The add-on catalogue (#181): read from its cache, fetched on demand.
+        if let Some(catalogue) =
+            commands::addons::service(app.handle(), setup_paths.cache.join("addons"))
+        {
+            let media = artwork.clone().map(|cache| {
+                if commands::addons::local_origin(&catalogue) {
+                    cache.allowing_local_metadata()
+                } else {
+                    cache
+                }
+            });
+            app.manage(commands::addons::AddonMedia(media));
+            app.manage(catalogue);
+        }
+        app.manage(dev_plugins::DevPlugins::default());
+        // `caskade dev <folder>`: load and watch a plugin in place (#131).
+        let args: Vec<String> = std::env::args().collect();
+        if let Some(folder) =
+            dev_plugins::folder_from_args(&args, &std::env::current_dir().unwrap_or_default())
+        {
+            dev_plugins::load_in_background(app.handle(), folder);
+        }
+        // A plugin's settings changes reach its backend (#128).
+        if let Some(host) = plugins {
+            let settings = settings.clone();
+            let mut changes = settings.subscribe();
+            tauri::async_runtime::spawn(async move {
+                use tokio::sync::broadcast::error::RecvError;
+                loop {
+                    let changed = match changes.recv().await {
+                        Ok(changed) => changed,
+                        Err(RecvError::Lagged(_)) => continue,
+                        Err(RecvError::Closed) => break,
+                    };
+                    if let Err(error) =
+                        caskade_plugin_host::settings::deliver(&host, &settings, &changed).await
+                    {
+                        tracing::warn!(%error, "plugin settings.changed not delivered");
+                    }
+                }
+            });
+        }
+        // Backups (#191–#193): Settings → Backup, automatic backups, and
+        // how a restore before this start ended.
+        let backups = caskade_core::backup::Backups::new(store.clone(), setup_paths.clone());
+        backups.set_settings(settings.clone());
+        backups.set_last_restore(caskade_core::backup::restore::take_outcome(&setup_paths));
+        commands::backup::setup(app.handle(), backups);
+        // Store accounts (#164): what they own, reconciled with what
+        // discovery finds installed after every scan.
+        // Sign-ins (#165) live in the OS keychain, or for the session
+        // without one.
+        let store_accounts = caskade_core::store_accounts::StoreAccounts::with_secrets(
+            store.clone(),
+            bus.clone(),
+            std::sync::Arc::new(caskade_core::store_accounts::StoreKeychain),
+        );
+        store_accounts.set_settings(settings.clone());
+        // Stores whose libraries Caskade reads (#166–#168).
+        store_accounts.register_provider(std::sync::Arc::new(
+            caskade_core::store_accounts::steam::SteamProvider::new(),
+        ));
+        store_accounts.register_provider(std::sync::Arc::new(
+            caskade_core::store_accounts::gog::GogProvider::new(),
+        ));
+        store_accounts.register_provider(std::sync::Arc::new(
+            caskade_core::store_accounts::epic::EpicProvider::new(),
+        ));
+        // RetroAchievements (#189): connected like a store, without a library.
+        let retro = std::sync::Arc::new(
+            caskade_core::achievements::retroachievements::RetroAchievements::new(),
+        );
+        store_accounts.register_provider(retro.clone());
+        // Achievements (#185) of those accounts, read with their sign-ins.
+        let achievements = caskade_core::achievements::Achievements::new(
+            store.clone(),
+            bus.clone(),
+            std::sync::Arc::new(store_accounts.clone()),
+        );
+        achievements.set_settings(settings.clone());
+        achievements.register_provider(retro.clone());
+        achievements.register_provider(std::sync::Arc::new(
+            caskade_core::achievements::steam::SteamAchievements::new(),
+        ));
+        achievements.register_provider(std::sync::Arc::new(
+            caskade_core::achievements::gog::GogAchievements::new(),
+        ));
+        achievements.register_provider(std::sync::Arc::new(
+            caskade_core::achievements::epic::EpicAchievements::new(),
+        ));
+        achievements.register_linker(retro);
+        // Refresh on an achievements-only account fetches its achievements.
+        store_accounts.set_refresher(achievements.account_refresher());
+        commands::achievements::setup(app.handle(), achievements);
+        // Their icons (#190), through the artwork cache.
+        app.manage(commands::achievement_icons::AchievementIcons(artwork));
+        commands::store_accounts::setup(app.handle(), store_accounts);
+        app.manage(settings);
+        app.manage(store);
+        app.manage(launch);
+        Ok(())
+    })
+    .build(tauri::generate_context!())
+    .expect("error while building Caskade")
+    .run(tray::on_run_event);
+}
+
+/// Ends a window process (`--web-game`, `--video`) with its window's code.
+fn exit_window(outcome: Result<i32, String>, failed: &str) -> ! {
+    match outcome {
+        Ok(code) => std::process::exit(code),
+        Err(error) => {
+            tracing::error!(%error, "{failed}");
+            std::process::exit(1)
+        }
+    }
+}
+
+/// Ends the process before Tauri starts, when there is nowhere to keep the
+/// library.
+fn startup_failed(what: &str, error: &dyn std::fmt::Display) -> ! {
+    tracing::error!(%error, "{what}");
+    eprintln!("{what}: {error}");
+    std::process::exit(1)
+}
+
+/// The library store couldn't open: a dialog says why and offers to restore
+/// a backup (#192); otherwise closing it quits.
+fn library_failed<R: tauri::Runtime>(
+    app: &tauri::AppHandle<R>,
+    error: &dyn std::fmt::Display,
+    paths: &caskade_core::AppPaths,
+) {
+    use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
+    tracing::error!(%error, "library unavailable");
+    eprintln!("Caskade couldn't open its library: {error}");
+    let (handle, paths) = (app.clone(), paths.clone());
+    app.dialog()
+        .message(caskade_core::tr!(
+            "Caskade couldn't open its library.\n\n{error}\n\nYou can restore it from a backup, or start Caskade with --restore <backup file>.",
+            error = error
+        ))
+        .title("Caskade")
+        .kind(MessageDialogKind::Error)
+        .buttons(MessageDialogButtons::OkCancelCustom(
+            caskade_core::tr!("Restore from backup…"),
+            caskade_core::tr!("Quit"),
+        ))
+        .show(move |restore| {
+            if restore {
+                recovery::restore_from_dialog(&handle, paths);
+            } else {
+                handle.exit(1);
+            }
+        });
+}
+
+/// The plugin host (#123): reads the plugin folders and joins enabled
+/// backends to the hook bus (#125).
+fn start_plugins<R: tauri::Runtime>(
+    app: &tauri::App<R>,
+    paths: &caskade_core::AppPaths,
+    store: &caskade_core::db::LibraryStore,
+    bus: &caskade_core::bus::Bus,
+    settings: &caskade_core::settings::SettingsService,
+) -> Result<caskade_plugin_host::PluginHost, Box<dyn std::error::Error>> {
+    use tauri::Manager;
+    let folder = paths.data.join("plugins");
+    std::fs::create_dir_all(&folder)?;
+    let plugins = caskade_plugin_host::PluginHost::new(
+        caskade_plugin_host::PluginServices {
+            store: store.clone(),
+            bus: Some(bus.clone()),
+            settings: Some(settings.clone()),
+        },
+        caskade_plugin_host::HostOptions {
+            folders: vec![folder],
+            data: paths.data.join("plugin-data"),
+            limits: caskade_plugin_host::Limits::default(),
+        },
+    )?;
+    // Compiled backends are kept across starts, signed with a key in the
+    // database (#136); without it every start compiles.
+    if let Err(error) = tauri::async_runtime::block_on(
+        plugins.enable_component_cache(paths.cache.join("plugin-components")),
+    ) {
+        tracing::warn!(%error, "plugin component cache unavailable");
+    }
+    match tauri::async_runtime::block_on(plugins.discover()) {
+        Ok(found) => tracing::info!(plugins = found.len(), "plugins discovered"),
+        Err(error) => tracing::warn!(%error, "plugin discovery failed"),
+    }
+    // Plugin providers use the built-in code paths (#126).
+    plugins.register_providers(bus);
+    // Enabled backends join the hook bus (#125); none starts until its
+    // activation event, and the hooks follow enable/disable.
+    let hooks = caskade_plugin_host::PluginHooks::new(plugins.clone(), bus.clone());
+    tauri::async_runtime::spawn({
+        let hooks = hooks.clone();
+        async move { hooks.sync().await }
+    });
+    app.manage(hooks);
+    app.manage(plugins.clone());
+    Ok(plugins)
+}

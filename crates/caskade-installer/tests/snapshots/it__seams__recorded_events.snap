@@ -1,0 +1,36 @@
+---
+source: crates/caskade-installer/tests/seams.rs
+expression: sink.events()
+---
+[
+  {
+    "job_id": "job-1",
+    "phase": "download",
+    "step": 0,
+    "bytes": 10,
+    "total_bytes": 20,
+    "files": 1,
+    "eta_secs": 2,
+    "message": "progress"
+  },
+  {
+    "job_id": "job-1",
+    "phase": "install",
+    "step": 1,
+    "bytes": 10,
+    "total_bytes": 20,
+    "files": 1,
+    "eta_secs": 2,
+    "message": "progress"
+  },
+  {
+    "job_id": "job-1",
+    "phase": "move",
+    "step": 2,
+    "bytes": 10,
+    "total_bytes": 20,
+    "files": 1,
+    "eta_secs": 2,
+    "message": "progress"
+  }
+]

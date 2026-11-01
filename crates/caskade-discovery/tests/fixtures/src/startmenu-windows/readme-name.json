@@ -1,0 +1,7 @@
+{
+  "target": "C:\\Portable\\Portable Café\\game.exe",
+  "args": "--profile \"Café user\" \"&\"",
+  "working_dir": "C:\\Portable\\Portable Café\\saves",
+  "icon": "C:\\Portable\\Portable Café\\icon.ico",
+  "description": "Original portable game shortcut"
+}

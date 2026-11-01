@@ -1,0 +1,3 @@
+[Application]
+name=org.caskade.FixtureGame
+command=fixture

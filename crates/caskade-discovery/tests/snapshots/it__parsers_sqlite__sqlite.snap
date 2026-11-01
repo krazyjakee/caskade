@@ -1,0 +1,41 @@
+---
+source: crates/caskade-discovery/tests/parsers_sqlite.rs
+expression: result
+---
+{
+  "columns": [
+    "name",
+    "runner",
+    "directory"
+  ],
+  "rows": [
+    [
+      {
+        "type": "text",
+        "value": "Fixture Puzzle"
+      },
+      {
+        "type": "text",
+        "value": "linux"
+      },
+      {
+        "type": "text",
+        "value": "/home/fixture/Games/Fixture Puzzle"
+      }
+    ],
+    [
+      {
+        "type": "text",
+        "value": "Fixture Adventure"
+      },
+      {
+        "type": "text",
+        "value": "wine"
+      },
+      {
+        "type": "text",
+        "value": "/home/fixture/Games/Fixture Adventure"
+      }
+    ]
+  ]
+}

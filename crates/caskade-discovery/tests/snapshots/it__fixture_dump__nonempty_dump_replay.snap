@@ -1,0 +1,43 @@
+---
+source: crates/caskade-discovery/tests/fixture_dump.rs
+expression: before
+---
+[
+  {
+    "entries": [
+      {
+        "artwork": [],
+        "confidence": "certain",
+        "evidence": [],
+        "icon": null,
+        "ids": [
+          {
+            "type": "epic",
+            "value": {
+              "app_name": "FixtureEpic",
+              "catalog_item": "fixture-item",
+              "namespace": "fixture-namespace"
+            }
+          }
+        ],
+        "install_dir": "$HOME/Games/Fixture Adventure",
+        "key": "FixtureEpic",
+        "last_played_unix": null,
+        "launch": [],
+        "playtime_secs": null,
+        "runtime": {
+          "type": "native"
+        },
+        "size": null,
+        "source": "fixture.heroic",
+        "state": {
+          "type": "installed"
+        },
+        "title": "Fixture Adventure",
+        "tracking": null,
+        "uninstall": null
+      }
+    ],
+    "primary": 0
+  }
+]

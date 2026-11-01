@@ -1,0 +1,76 @@
+import { Button, SettingsSection, StatusDot, Switch } from "@caskade/ui";
+import { Trans, useLingui } from "@lingui/react/macro";
+import { Gamepad2, RotateCcw } from "lucide-react";
+import { launcherSources } from "../../mocks/settings";
+import { SettingsFeedback, SettingsLoading, useSettingsSection } from "./useSettings";
+
+export function LaunchersSettings() {
+  const { t } = useLingui();
+  const { settings, setSettings, saving, error, reload, reset } = useSettingsSection<{
+    enabled: Record<string, boolean>;
+  }>("core.launchers");
+  if (!settings) return <SettingsLoading error={error} reload={reload} />;
+  const launchers = launcherSources.map((launcher) => ({
+    ...launcher,
+    enabled: settings.enabled[launcher.id] ?? true,
+  }));
+
+  return (
+    <div data-settings="launchers" className="grid items-start gap-4 xl:grid-cols-2">
+      <div className="col-span-full">
+        <SettingsFeedback error={error} saving={saving} />
+      </div>
+      <SettingsSection
+        icon={Gamepad2}
+        title={t`Launcher Sources`}
+        description={t`Detect games from your installed launchers.`}
+      >
+        <ul className="mt-1 flex flex-col">
+          {launchers.map((launcher) => (
+            <li
+              key={launcher.id}
+              data-part="launcher"
+              data-status={launcher.status}
+              className="flex items-center gap-3 border-t border-border py-2 first:border-t-0"
+            >
+              <span
+                aria-hidden
+                className="grid size-6 shrink-0 place-items-center rounded-[5px] font-display text-xs font-bold text-white"
+                style={{
+                  background: `linear-gradient(135deg, hsl(${launcher.hue} 70% 55%), hsl(${launcher.hue} 70% 35%))`,
+                }}
+              >
+                {launcher.name[0]}
+              </span>
+              <span className="max-w-md min-w-0 flex-1 truncate text-sm">{launcher.name}</span>
+              <StatusDot tone={launcher.enabled ? "ok" : "off"}>
+                {launcher.enabled ? t`Enabled for scans` : t`Disabled for scans`}
+              </StatusDot>
+              <Switch
+                size="sm"
+                aria-label={launcher.name}
+                isSelected={launcher.enabled}
+                onChange={(enabled) =>
+                  setSettings((current) => ({
+                    ...current,
+                    enabled: { ...current.enabled, [launcher.id]: enabled },
+                  }))
+                }
+              />
+            </li>
+          ))}
+        </ul>
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={RotateCcw}
+          className="mt-2 w-full"
+          onPress={reset}
+          isDisabled={saving}
+        >
+          <Trans>Reset launcher preferences</Trans>
+        </Button>
+      </SettingsSection>
+    </div>
+  );
+}

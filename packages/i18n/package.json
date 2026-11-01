@@ -1,0 +1,41 @@
+{
+  "name": "@caskade/i18n",
+  "version": "0.1.0",
+  "description": "The webview's gettext pipeline: Lingui's runtime and macros, PO catalogs compiled at build time, the Vite plugin and the extraction scripts.",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./react": "./src/react.tsx",
+    "./vite": "./src/vite.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "extract": "node scripts/extract.ts",
+    "check": "node scripts/check.ts",
+    "compile": "node scripts/compile.ts"
+  },
+  "peerDependencies": {
+    "@lingui/core": "^6",
+    "@lingui/react": "^6",
+    "react": "^19"
+  },
+  "dependencies": {
+    "@lingui/cli": "^6.10.1",
+    "@lingui/conf": "^6.10.1",
+    "@lingui/format-po-gettext": "^6.10.1",
+    "@lingui/message-utils": "^6.10.1",
+    "@lingui/native-tools": "^0.1.6"
+  },
+  "devDependencies": {
+    "@lingui/core": "^6.10.1",
+    "@lingui/react": "^6.10.1",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.3.0",
+    "react": "^19.3.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  }
+}

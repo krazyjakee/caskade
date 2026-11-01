@@ -1,0 +1,11 @@
+node_modules/
+dist/
+target/
+*.tsbuildinfo
+.vite/
+.vitest/
+storybook-static/
+.env*.local
+apps/desktop/src-tauri/gen/
+__pycache__/
+*.pyc

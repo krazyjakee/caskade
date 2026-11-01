@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+rm -f /opt/caskade-fixture/maintainer-ran
+rmdir /opt/caskade-fixture 2>/dev/null || true

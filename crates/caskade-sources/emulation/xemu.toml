@@ -1,0 +1,54 @@
+# SPDX-License-Identifier: MIT
+# Authored for Caskade from docs/research/emulator-sources.md (sources and
+# flags checked 2026-10-28).
+
+id = "xemu"
+name = "xemu"
+website = "https://xemu.app/"
+tracking = { type = "default" }
+
+[detect.windows]
+executable = "(?i)^xemu\\.exe$"
+locations = ["{ProgramFiles}/xemu", "{UserHome}/scoop/apps/xemu/current"]
+
+[detect.linux]
+executable = "^xemu$"
+path = ["xemu"]
+flatpak = "app.xemu.xemu"
+appimage = "(?i)^xemu(?:[-_].*)?\\.AppImage$"
+
+[detect.macos]
+executable = "^xemu$"
+bundle = "app.xemu.xemu"
+locations = ["/Applications/xemu.app/Contents/MacOS"]
+
+[install.windows]
+source = "github"
+repo = "xemu-project/xemu"
+asset = '^xemu-[\d.]+-windows-x86_64\.zip$'
+[install.linux]
+source = "github"
+repo = "xemu-project/xemu"
+asset = '^xemu-[\d.]+-x86_64\.AppImage$'
+[install.macos]
+source = "github"
+repo = "xemu-project/xemu"
+asset = '^xemu-[\d.]+-macos-universal\.zip$'
+
+[display]
+fullscreen = ["-full-screen"]
+
+# xemu.toml next to the program makes a Windows install portable; the
+# welcome window is skipped.
+[[setup]]
+os = ["windows"]
+ini = "{EmulatorDir}/xemu.toml"
+section = "general"
+key = "show_welcome"
+value = "false"
+
+[[profile]]
+name = "Xbox"
+platforms = ["microsoft_xbox"]
+extensions = ["iso", "xiso"]
+args = ["-dvd_path", "{RomPath}"]

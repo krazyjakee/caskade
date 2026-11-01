@@ -1,0 +1,9 @@
+{
+  "DisplayName": "Library Alias",
+  "AppName": "LibraryAlias",
+  "MainGameAppName": "LibraryAlias",
+  "InstallLocation": "C:\\Program Files\\Epic Games\\Library Alias",
+  "LaunchExecutable": "game.exe",
+  "CatalogNamespace": "d2-original",
+  "CatalogItemId": "d2-library"
+}

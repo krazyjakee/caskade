@@ -1,0 +1,49 @@
+{
+  "$description": "Primitive tier: raw palette and type stacks. Semantic tokens alias these; themes rarely touch them.",
+  "font": {
+    "$type": "fontFamily",
+    "sans": {
+      "$value": [
+        "Inter Variable",
+        "ui-sans-serif",
+        "system-ui",
+        "-apple-system",
+        "Segoe UI",
+        "sans-serif"
+      ],
+      "$description": "Body text."
+    },
+    "display": {
+      "$value": [
+        "Oxanium Variable",
+        "Inter Variable",
+        "ui-sans-serif",
+        "system-ui",
+        "-apple-system",
+        "Segoe UI",
+        "sans-serif"
+      ],
+      "$description": "Headings, numbers and HUD labels."
+    },
+    "mono": {
+      "$value": ["JetBrains Mono Variable", "ui-monospace", "SF Mono", "monospace"],
+      "$description": "Data, paths and labels."
+    }
+  },
+  "color": {
+    "palette": {
+      "$type": "color",
+      "$description": "The Nexus palette.",
+      "indigo": { "$value": "#5b5ff7" },
+      "violet": { "$value": "#7a6cff" },
+      "cyan": { "$value": "#38d9f5" },
+      "white": { "$value": "#ffffff" },
+      "green": { "$value": "#22c55e" },
+      "orange": { "$value": "#f97316" },
+      "purple": { "$value": "#7c5cff" },
+      "slate": { "$value": "#64748b" },
+      "amber": { "$value": "#f5a524" },
+      "red": { "$value": "#f0475b" }
+    }
+  }
+}

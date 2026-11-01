@@ -1,0 +1,31 @@
+schema_version = 1
+id = "zip-sfx"
+title = "Fixture Game"
+layout = "unity"
+format = "zip-sfx"
+platform = "windows"
+input = "bin/windows/zip-sfx/zip-sfx.exe"
+parts = ["bin/windows/zip-sfx/zip-sfx.exe"]
+tree = "windows/zip-sfx.tree.json"
+launch_target = "FixtureGame.exe"
+
+[windows]
+builder = "mingw + Python zipfile"
+version = "13-posix / stdlib"
+features = ["powershell-dotnet-extractor"]
+native_generated = []
+
+[host.windows]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "Native"
+
+[host.linux]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "ProtonPrefix"
+
+[host.macos]
+outcome = "Installed"
+strategy = "Extract"
+runtime = "WinePrefix"

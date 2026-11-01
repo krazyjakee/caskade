@@ -1,0 +1,110 @@
+schema_version = 1
+
+[layouts.unity]
+platform = "windows"
+launch_target = "FixtureGame.exe"
+binaries = ["FixtureGame.exe", "UnityCrashHandler64.exe"]
+empty_directories = ["FixtureGame_Data"]
+
+[layouts.unreal]
+platform = "windows"
+launch_target = "FixtureGame.exe"
+binaries = ["FixtureGame.exe", "FixtureGame/Binaries/Win64/FixtureGame-Win64-Shipping.exe"]
+empty_directories = ["Engine/Binaries/Win64"]
+
+[layouts.gog]
+platform = "windows"
+launch_target = "FixtureGame.exe"
+binaries = ["FixtureGame.exe", "__redist/vcredist_x64.exe", "__redist/DirectX/DXSETUP.exe"]
+
+[layouts.linux]
+platform = "linux"
+launch_target = "start.sh"
+binaries = ["FixtureGame.x86_64"]
+executable_files = ["start.sh"]
+
+[layouts.macos]
+platform = "macos"
+launch_target = "FixtureGame.app/Contents/MacOS/FixtureGame"
+executable_files = ["FixtureGame.app/Contents/MacOS/FixtureGame"]
+
+[[layouts.macos.symlinks]]
+path = "FixtureGame.app/Contents/Frameworks/X.framework/Versions/Current"
+target = "A"
+[[layouts.macos.symlinks]]
+path = "FixtureGame.app/Contents/Frameworks/X.framework/X"
+target = "Versions/Current/X"
+[[layouts.macos.symlinks]]
+path = "FixtureGame.app/Contents/Frameworks/X.framework/Resources"
+target = "Versions/Current/Resources"
+
+[[fixtures]]
+id = "unity-zip"
+layout = "unity"
+format = "zip"
+output = "unity.zip"
+[[fixtures]]
+id = "unity-7z"
+layout = "unity"
+format = "7z"
+output = "unity.7z"
+[[fixtures]]
+id = "unity-7z-multivolume"
+layout = "unity"
+format = "7z-multivolume"
+output = "unity-multivolume.7z"
+[[fixtures]]
+id = "unreal-zip"
+layout = "unreal"
+format = "zip"
+output = "unreal.zip"
+[[fixtures]]
+id = "gog-zip"
+layout = "gog"
+format = "zip"
+output = "gog.zip"
+[[fixtures]]
+id = "linux-tar"
+layout = "linux"
+format = "tar"
+output = "linux.tar"
+[[fixtures]]
+id = "humble-linux-tar"
+layout = "linux"
+format = "tar.gz"
+output = "humble-linux.tar.gz"
+prefix = "FixtureGame-1.0.0-linux-x86_64"
+[[fixtures]]
+id = "linux-tar-bz2"
+layout = "linux"
+format = "tar.bz2"
+output = "linux.tar.bz2"
+[[fixtures]]
+id = "linux-tar-xz"
+layout = "linux"
+format = "tar.xz"
+output = "linux.tar.xz"
+[[fixtures]]
+id = "linux-tar-zst"
+layout = "linux"
+format = "tar.zst"
+output = "linux.tar.zst"
+[[fixtures]]
+id = "macos-app-zip"
+layout = "macos"
+format = "zip"
+output = "macos-app.zip"
+[[fixtures]]
+id = "macos-app-tar-gz"
+layout = "macos"
+format = "tar.gz"
+output = "macos-app.tar.gz"
+
+# Genuine archives made once with RAR; the generator reads their committed
+# golden trees and never rewrites either their payloads or expectations.
+[[handmade]]
+id = "unity-rar5"
+[[handmade]]
+id = "unreal-rar5"
+[[handmade]]
+id = "rar-multivolume-portable"

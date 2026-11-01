@@ -1,0 +1,5 @@
+name = "Caskade Itch Fixture"
+[[actions]]
+name = "play"
+path = "bin/FixtureGame.x86_64"
+args = []

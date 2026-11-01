@@ -1,0 +1,12 @@
+{
+  "FixtureEpic": {
+    "app_name": "FixtureEpic",
+    "title": "Fixture Adventure",
+    "install_path": "/home/fixture/Games/Fixture Adventure",
+    "executable": "game.exe",
+    "platform": "Windows",
+    "is_dlc": false,
+    "namespace": "fixture-namespace",
+    "catalog_item_id": "fixture-item"
+  }
+}

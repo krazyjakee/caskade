@@ -1,0 +1,14 @@
+os = "macos"
+arch = "aarch64"
+seven_zip = "/opt/homebrew/bin/7zz"
+proton_builds = []
+
+[[runners]]
+kind = "native"
+program = ""
+
+[filesystem]
+writable = true
+exec_bits = true
+symlinks = true
+case_sensitive = false

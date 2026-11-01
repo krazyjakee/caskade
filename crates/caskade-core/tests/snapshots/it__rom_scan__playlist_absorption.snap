@@ -1,0 +1,117 @@
+---
+source: crates/caskade-core/tests/rom_scan.rs
+assertion_line: 172
+expression: report
+---
+{
+  "games": [
+    {
+      "title": "Final Fantasy VII",
+      "platform": "sony_playstation",
+      "regions": [
+        "us"
+      ],
+      "properties": [
+        "USA"
+      ],
+      "roms": [
+        {
+          "location": {
+            "type": "scanner",
+            "scannerId": "fixture-scanner",
+            "path": "Final Fantasy VII (USA).m3u"
+          },
+          "name": null,
+          "size": 4
+        }
+      ],
+      "files": [
+        "Final Fantasy VII (USA) (Disc 1).cue",
+        "Final Fantasy VII (USA) (Disc 2).cue",
+        "Final Fantasy VII (USA).m3u",
+        "track 1.bin",
+        "track 2.bin"
+      ]
+    },
+    {
+      "title": "Example",
+      "platform": "sony_playstation",
+      "regions": [],
+      "properties": [],
+      "roms": [
+        {
+          "location": {
+            "type": "scanner",
+            "scannerId": "fixture-scanner",
+            "path": "Dreamcast/Example.gdi"
+          },
+          "name": null,
+          "size": 4
+        }
+      ],
+      "files": [
+        "Dreamcast/Example.gdi",
+        "Dreamcast/track01.bin",
+        "Dreamcast/track02.raw"
+      ]
+    },
+    {
+      "title": "Game",
+      "platform": "sony_playstation",
+      "regions": [],
+      "properties": [
+        "Disc 1"
+      ],
+      "roms": [
+        {
+          "location": {
+            "type": "scanner",
+            "scannerId": "fixture-scanner",
+            "path": "Other/Game (Disc 1).chd"
+          },
+          "name": "Disc 1",
+          "size": 4
+        }
+      ],
+      "files": [
+        "Other/Game (Disc 1).chd"
+      ]
+    },
+    {
+      "title": "Game",
+      "platform": "sony_playstation",
+      "regions": [],
+      "properties": [
+        "Disc 1",
+        "Disc 2"
+      ],
+      "roms": [
+        {
+          "location": {
+            "type": "scanner",
+            "scannerId": "fixture-scanner",
+            "path": "Separate/Game (Disc 1).chd"
+          },
+          "name": "Disc 1",
+          "size": 4
+        },
+        {
+          "location": {
+            "type": "scanner",
+            "scannerId": "fixture-scanner",
+            "path": "Separate/Game (Disc 2).CHD"
+          },
+          "name": "Disc 2",
+          "size": 4
+        }
+      ],
+      "files": [
+        "Separate/Game (Disc 1).chd",
+        "Separate/Game (Disc 2).CHD"
+      ]
+    }
+  ],
+  "warnings": [],
+  "enumerated": 11,
+  "skipped": 6
+}

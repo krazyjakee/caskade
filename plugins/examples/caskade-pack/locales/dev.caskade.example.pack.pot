@@ -1,0 +1,55 @@
+# Messages of the Caskade plugin dev.caskade.example.pack.
+msgid ""
+msgstr "Project-Id-Version: dev.caskade.example.pack\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\n"
+
+#: plugin.json
+msgid "Caskade Pack (example)"
+msgstr ""
+
+#: plugin.json
+msgid "Installs .cpk game packs and finds them on download pages."
+msgstr ""
+
+#: plugin.json src/index.tsx
+msgid "About game packs"
+msgstr ""
+
+#: plugin.json
+msgid "Game packs"
+msgstr ""
+
+#: plugin.json
+msgid "Prefer packs"
+msgstr ""
+
+#: plugin.json
+msgid "Rank a pack's own install plan above the built-in installers."
+msgstr ""
+
+#: src/index.tsx
+msgid "Caskade installs .cpk game packs: drop one on the library, or paste a link to its page on {host}."
+msgstr ""
+
+#: backend/src/lib.rs
+msgid "the pack ends in the middle of an entry"
+msgstr ""
+
+#: backend/src/lib.rs
+msgid "a pack holds at most 4096 entries"
+msgstr ""
+
+#: backend/src/lib.rs
+msgid "an entry name isn't UTF-8"
+msgstr ""
+
+#: backend/src/lib.rs
+msgid "{path} runs past the end of the pack"
+msgstr ""
+
+#: backend/src/lib.rs
+msgid "the pack is empty"
+msgstr ""
+
+#: backend/src/lib.rs
+msgid "a pack is a file of known size"
+msgstr ""

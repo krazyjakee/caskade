@@ -1,0 +1,14 @@
+os = "windows"
+arch = "x86_64"
+seven_zip = 'C:\Caskade\7zz.exe'
+proton_builds = []
+
+[[runners]]
+kind = "native"
+program = ""
+
+[filesystem]
+writable = true
+exec_bits = false
+symlinks = true
+case_sensitive = false

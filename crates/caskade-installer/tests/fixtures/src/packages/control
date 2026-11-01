@@ -1,0 +1,7 @@
+Package: @NAME@
+Version: 1.0.0
+Architecture: amd64
+Maintainer: Caskade fixture maintainers <fixtures@example.invalid>
+Description: Caskade fixture game for relocatable package extraction
+Section: games
+Priority: optional

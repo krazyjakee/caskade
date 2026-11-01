@@ -1,0 +1,4 @@
+Caskade original fixture licence
+
+You may copy and run this original test fixture for automated installer tests.
+This text is test data for an actual hdiutil software licence agreement.

@@ -1,0 +1,13 @@
+{
+  "$description": "Appearance → Motion: Reduced.",
+  "$extensions": { "dev.caskade.condition": { "selector": "[data-motion=\"reduced\"]" } },
+  "motion": {
+    "duration": {
+      "fast": { "$value": "0ms" },
+      "base": { "$value": "0ms" },
+      "slow": { "$value": "0ms" }
+    },
+    "stagger": { "$value": "0ms" },
+    "ambient": { "$value": "paused" }
+  }
+}

@@ -1,0 +1,10 @@
+schema_version = 1
+# Aliases reuse committed payloads and trees; there is no duplicated installer.
+[fixtures]
+gog-linux-mojosetup = "linux-shell/gog-linux-mojosetup.toml"
+humble-linux-tar = "humble-linux-tar.toml"
+itch-zip-with-manifest = "linux-mini/itch-zip-with-manifest.toml"
+appimage-indie = "appimage/appimage-indie.toml"
+deb-missing-dep = "packages/deb-missing-dep.toml"
+rpm-indie = "packages/rpm-self-contained.toml"
+flatpak-bundle = "flatpak/flatpak-bundle.toml"
