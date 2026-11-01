@@ -16,3 +16,6 @@ crates/caskade-discovery/tests/fixtures/machines/**/shortcuts.vdf binary
 crates/caskade-discovery/tests/fixtures/machines/**/.GamingRoot binary
 # Generated .reg blocks conventionally end with a blank separator line.
 crates/caskade-discovery/tests/fixtures/machines/**/registry/*.reg whitespace=-blank-at-eof
+
+# Catalogs are parsed and compared byte for byte; a Windows checkout must not turn them into CRLF.
+locales/** text eol=lf

@@ -6,7 +6,7 @@ import { setupI18n } from "@lingui/core";
 import { generateMessageId } from "@lingui/message-utils/generateMessageId";
 import { afterEach, beforeEach, expect, it } from "vitest";
 import { mergeCatalogs } from "./extract.ts";
-import { compileDomain, compilePoFile, completeness, pseudoLocale } from "./vite.ts";
+import { compileDomain, compilePoFile, completeness, pseudoLocale, readCatalog } from "./vite.ts";
 
 const plural = "{count, plural, one {# game} other {# games}}";
 const pluralComment = `#. js-lingui:${new URLSearchParams({ icu: plural, pluralize_on: "count" })}`;
@@ -165,4 +165,11 @@ it.skipIf(!hasGettext)("merges a template into the PO files, the same each time"
   mergeCatalogs(root);
   expect(readFileSync(po, "utf8")).toBe(merged);
   expect(readFileSync(join(root, "locales", "de", "app.po"), "utf8")).toBe(started);
+});
+
+it("reads a template checked out with Windows line endings", async () => {
+  const file = join(root, "crlf.pot");
+  const catalog = await readCatalog(file, template.replace(/\n/g, "\r\n"));
+  expect(Object.keys(catalog)).toEqual(Object.keys(await readCatalog(file, template)));
+  expect(Object.keys(catalog).length).toBeGreaterThan(0);
 });

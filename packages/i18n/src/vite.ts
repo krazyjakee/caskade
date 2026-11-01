@@ -96,11 +96,13 @@ export function linguiConfig(root = defaultRoot): LinguiConfigNormalized {
 }
 
 /** Reads a PO or POT file into Lingui's catalog shape. A template's Language
- * header is empty, and the gettext format needs one for its plural rules. */
+ * header is empty, and the gettext format needs one for its plural rules.
+ * Line endings are normalised first: a Windows checkout may have CRLF. */
 export async function readCatalog(
   file: string,
-  content = readFileSync(file, "utf8"),
+  raw = readFileSync(file, "utf8"),
 ): Promise<CatalogType> {
+  const content = raw.replace(/\r\n/g, "\n");
   const source = /^"Language: *[^\s\\"]/m.test(content)
     ? content
     : content
