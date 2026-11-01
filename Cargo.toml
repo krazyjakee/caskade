@@ -29,6 +29,29 @@ opt-level = 3
 [profile.dev.package.icu_collator]
 opt-level = 3
 
+# Installs decompress and hash every byte of a game: unoptimized, a 10 GB
+# Inno install took over 20 minutes in a dev build.
+[profile.dev.package.lzma-rust2]
+opt-level = 3
+
+[profile.dev.package.inno]
+opt-level = 3
+
+[profile.dev.package.sha2]
+opt-level = 3
+
+[profile.dev.package.sha1]
+opt-level = 3
+
+[profile.dev.package.md-5]
+opt-level = 3
+
+[profile.dev.package.crc32fast]
+opt-level = 3
+
+[profile.dev.package.miniz_oxide]
+opt-level = 3
+
 [workspace.lints.rust]
 unsafe_code = "forbid"
 

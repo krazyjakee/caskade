@@ -444,6 +444,10 @@ impl Executor {
                         return Err(safety::SafetyError::Collision(relative_dir.clone()).into());
                     }
                     attempt.journal.set_final_owned()?;
+                    // Windows refuses to rename a folder while a handle to it
+                    // is open (os error 32): give the steps' handle to the
+                    // staged tree up first. Nothing writes to it after this.
+                    context.dir = Arc::new(root.try_clone()?);
                     if let Err(error) = staging.rename(&request.job_id, root, &relative_dir) {
                         attempt.journal.release_final()?;
                         return Err(error.into());
