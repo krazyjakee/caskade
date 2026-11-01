@@ -686,6 +686,31 @@ expression: snapshots
           },
           {
             "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "exact",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": []
+          },
+          {
+            "handler": "msi",
             "strategy": "run_interactive",
             "confidence": 1.0,
             "fidelity": "native",
@@ -743,31 +768,6 @@ expression: snapshots
                 "path": null
               }
             ]
-          },
-          {
-            "handler": "msi",
-            "strategy": "extract",
-            "confidence": 1.0,
-            "fidelity": "exact",
-            "requires": {
-              "executes_code": false,
-              "runtime": null,
-              "may_prompt_elevation": false,
-              "interactive": false,
-              "est_disk_bytes": 546881
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "warnings": []
           }
         ],
         "selected": 0,
@@ -1458,6 +1458,31 @@ expression: snapshots
           },
           {
             "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "exact",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": []
+          },
+          {
+            "handler": "msi",
             "strategy": "run_interactive",
             "confidence": 1.0,
             "fidelity": "native",
@@ -1515,31 +1540,6 @@ expression: snapshots
                 "path": null
               }
             ]
-          },
-          {
-            "handler": "msi",
-            "strategy": "extract",
-            "confidence": 1.0,
-            "fidelity": "exact",
-            "requires": {
-              "executes_code": false,
-              "runtime": null,
-              "may_prompt_elevation": false,
-              "interactive": false,
-              "est_disk_bytes": 546881
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "warnings": []
           }
         ],
         "selected": 0,
@@ -2269,6 +2269,37 @@ expression: snapshots
           },
           {
             "handler": "msi",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "msi.partial",
+                "message": "Table extraction omits custom actions, external shortcuts and files outside the application directory",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "msi",
             "strategy": "run_interactive",
             "confidence": 1.0,
             "fidelity": "native",
@@ -2323,37 +2354,6 @@ expression: snapshots
               {
                 "code": "msi.preset",
                 "message": "Launch-at-finish suppression needs a package-specific recipe.",
-                "path": null
-              }
-            ]
-          },
-          {
-            "handler": "msi",
-            "strategy": "extract",
-            "confidence": 1.0,
-            "fidelity": "partial",
-            "requires": {
-              "executes_code": false,
-              "runtime": null,
-              "may_prompt_elevation": false,
-              "interactive": false,
-              "est_disk_bytes": 546881
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "warnings": [
-              {
-                "code": "msi.partial",
-                "message": "Table extraction omits custom actions, external shortcuts and files outside the application directory",
                 "path": null
               }
             ]

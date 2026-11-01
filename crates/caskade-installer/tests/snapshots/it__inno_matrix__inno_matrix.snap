@@ -691,6 +691,31 @@ expression: snapshot
           },
           {
             "confidence": 1.0,
+            "fidelity": "exact",
+            "handler": "inno",
+            "requires": {
+              "est_disk_bytes": 4920535,
+              "executes_code": false,
+              "interactive": false,
+              "may_prompt_elevation": false,
+              "runtime": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "strategy": "extract",
+            "warnings": []
+          },
+          {
+            "confidence": 1.0,
             "fidelity": "native",
             "handler": "inno",
             "requires": {
@@ -748,31 +773,6 @@ expression: snapshot
                 "path": null
               }
             ]
-          },
-          {
-            "confidence": 1.0,
-            "fidelity": "exact",
-            "handler": "inno",
-            "requires": {
-              "est_disk_bytes": 4920535,
-              "executes_code": false,
-              "interactive": false,
-              "may_prompt_elevation": false,
-              "runtime": null
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "strategy": "extract",
-            "warnings": []
           }
         ],
         "question": null,
@@ -1519,6 +1519,37 @@ expression: snapshot
           },
           {
             "confidence": 1.0,
+            "fidelity": "partial",
+            "handler": "inno",
+            "requires": {
+              "est_disk_bytes": 820535,
+              "executes_code": false,
+              "interactive": false,
+              "may_prompt_elevation": false,
+              "runtime": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "strategy": "extract",
+            "warnings": [
+              {
+                "code": "inno.partial",
+                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
+                "path": null
+              }
+            ]
+          },
+          {
+            "confidence": 1.0,
             "fidelity": "native",
             "handler": "inno",
             "requires": {
@@ -1573,37 +1604,6 @@ expression: snapshot
               {
                 "code": "inno.preset",
                 "message": "Launch-at-finish suppression needs a package-specific recipe.",
-                "path": null
-              }
-            ]
-          },
-          {
-            "confidence": 1.0,
-            "fidelity": "partial",
-            "handler": "inno",
-            "requires": {
-              "est_disk_bytes": 820535,
-              "executes_code": false,
-              "interactive": false,
-              "may_prompt_elevation": false,
-              "runtime": null
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "strategy": "extract",
-            "warnings": [
-              {
-                "code": "inno.partial",
-                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
                 "path": null
               }
             ]
@@ -2297,6 +2297,31 @@ expression: snapshot
           },
           {
             "confidence": 1.0,
+            "fidelity": "exact",
+            "handler": "inno",
+            "requires": {
+              "est_disk_bytes": 820535,
+              "executes_code": false,
+              "interactive": false,
+              "may_prompt_elevation": false,
+              "runtime": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "strategy": "extract",
+            "warnings": []
+          },
+          {
+            "confidence": 1.0,
             "fidelity": "native",
             "handler": "inno",
             "requires": {
@@ -2354,31 +2379,6 @@ expression: snapshot
                 "path": null
               }
             ]
-          },
-          {
-            "confidence": 1.0,
-            "fidelity": "exact",
-            "handler": "inno",
-            "requires": {
-              "est_disk_bytes": 820535,
-              "executes_code": false,
-              "interactive": false,
-              "may_prompt_elevation": false,
-              "runtime": null
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "strategy": "extract",
-            "warnings": []
           }
         ],
         "question": null,
@@ -3094,6 +3094,37 @@ expression: snapshot
           },
           {
             "confidence": 1.0,
+            "fidelity": "partial",
+            "handler": "inno",
+            "requires": {
+              "est_disk_bytes": 546881,
+              "executes_code": false,
+              "interactive": false,
+              "may_prompt_elevation": false,
+              "runtime": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "strategy": "extract",
+            "warnings": [
+              {
+                "code": "inno.partial",
+                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
+                "path": null
+              }
+            ]
+          },
+          {
+            "confidence": 1.0,
             "fidelity": "native",
             "handler": "inno",
             "requires": {
@@ -3148,37 +3179,6 @@ expression: snapshot
               {
                 "code": "inno.preset",
                 "message": "Launch-at-finish suppression needs a package-specific recipe.",
-                "path": null
-              }
-            ]
-          },
-          {
-            "confidence": 1.0,
-            "fidelity": "partial",
-            "handler": "inno",
-            "requires": {
-              "est_disk_bytes": 546881,
-              "executes_code": false,
-              "interactive": false,
-              "may_prompt_elevation": false,
-              "runtime": null
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "strategy": "extract",
-            "warnings": [
-              {
-                "code": "inno.partial",
-                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
                 "path": null
               }
             ]
@@ -3904,6 +3904,37 @@ expression: snapshot
           },
           {
             "confidence": 1.0,
+            "fidelity": "partial",
+            "handler": "inno",
+            "requires": {
+              "est_disk_bytes": 546881,
+              "executes_code": false,
+              "interactive": false,
+              "may_prompt_elevation": false,
+              "runtime": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "strategy": "extract",
+            "warnings": [
+              {
+                "code": "inno.partial",
+                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
+                "path": null
+              }
+            ]
+          },
+          {
+            "confidence": 1.0,
             "fidelity": "native",
             "handler": "inno",
             "requires": {
@@ -3958,37 +3989,6 @@ expression: snapshot
               {
                 "code": "inno.preset",
                 "message": "Launch-at-finish suppression needs a package-specific recipe.",
-                "path": null
-              }
-            ]
-          },
-          {
-            "confidence": 1.0,
-            "fidelity": "partial",
-            "handler": "inno",
-            "requires": {
-              "est_disk_bytes": 546881,
-              "executes_code": false,
-              "interactive": false,
-              "may_prompt_elevation": false,
-              "runtime": null
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "strategy": "extract",
-            "warnings": [
-              {
-                "code": "inno.partial",
-                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
                 "path": null
               }
             ]
@@ -4790,6 +4790,37 @@ expression: snapshot
           },
           {
             "confidence": 1.0,
+            "fidelity": "partial",
+            "handler": "inno",
+            "requires": {
+              "est_disk_bytes": 546881,
+              "executes_code": false,
+              "interactive": false,
+              "may_prompt_elevation": false,
+              "runtime": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "strategy": "extract",
+            "warnings": [
+              {
+                "code": "inno.partial",
+                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
+                "path": null
+              }
+            ]
+          },
+          {
+            "confidence": 1.0,
             "fidelity": "native",
             "handler": "inno",
             "requires": {
@@ -4844,37 +4875,6 @@ expression: snapshot
               {
                 "code": "inno.preset",
                 "message": "Launch-at-finish suppression needs a package-specific recipe.",
-                "path": null
-              }
-            ]
-          },
-          {
-            "confidence": 1.0,
-            "fidelity": "partial",
-            "handler": "inno",
-            "requires": {
-              "est_disk_bytes": 546881,
-              "executes_code": false,
-              "interactive": false,
-              "may_prompt_elevation": false,
-              "runtime": null
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "strategy": "extract",
-            "warnings": [
-              {
-                "code": "inno.partial",
-                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
                 "path": null
               }
             ]
@@ -5568,6 +5568,31 @@ expression: snapshot
           },
           {
             "confidence": 1.0,
+            "fidelity": "exact",
+            "handler": "inno",
+            "requires": {
+              "est_disk_bytes": 4646881,
+              "executes_code": false,
+              "interactive": false,
+              "may_prompt_elevation": false,
+              "runtime": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "strategy": "extract",
+            "warnings": []
+          },
+          {
+            "confidence": 1.0,
             "fidelity": "native",
             "handler": "inno",
             "requires": {
@@ -5625,31 +5650,6 @@ expression: snapshot
                 "path": null
               }
             ]
-          },
-          {
-            "confidence": 1.0,
-            "fidelity": "exact",
-            "handler": "inno",
-            "requires": {
-              "est_disk_bytes": 4646881,
-              "executes_code": false,
-              "interactive": false,
-              "may_prompt_elevation": false,
-              "runtime": null
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "strategy": "extract",
-            "warnings": []
           }
         ],
         "question": null,
@@ -6335,6 +6335,31 @@ expression: snapshot
           },
           {
             "confidence": 1.0,
+            "fidelity": "exact",
+            "handler": "inno",
+            "requires": {
+              "est_disk_bytes": 546881,
+              "executes_code": false,
+              "interactive": false,
+              "may_prompt_elevation": false,
+              "runtime": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "strategy": "extract",
+            "warnings": []
+          },
+          {
+            "confidence": 1.0,
             "fidelity": "native",
             "handler": "inno",
             "requires": {
@@ -6392,31 +6417,6 @@ expression: snapshot
                 "path": null
               }
             ]
-          },
-          {
-            "confidence": 1.0,
-            "fidelity": "exact",
-            "handler": "inno",
-            "requires": {
-              "est_disk_bytes": 546881,
-              "executes_code": false,
-              "interactive": false,
-              "may_prompt_elevation": false,
-              "runtime": null
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "strategy": "extract",
-            "warnings": []
           }
         ],
         "question": null,
@@ -7132,6 +7132,37 @@ expression: snapshot
           },
           {
             "confidence": 1.0,
+            "fidelity": "partial",
+            "handler": "inno",
+            "requires": {
+              "est_disk_bytes": 546881,
+              "executes_code": false,
+              "interactive": false,
+              "may_prompt_elevation": false,
+              "runtime": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "strategy": "extract",
+            "warnings": [
+              {
+                "code": "inno.partial",
+                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
+                "path": null
+              }
+            ]
+          },
+          {
+            "confidence": 1.0,
             "fidelity": "native",
             "handler": "inno",
             "requires": {
@@ -7186,37 +7217,6 @@ expression: snapshot
               {
                 "code": "inno.preset",
                 "message": "Launch-at-finish suppression needs a package-specific recipe.",
-                "path": null
-              }
-            ]
-          },
-          {
-            "confidence": 1.0,
-            "fidelity": "partial",
-            "handler": "inno",
-            "requires": {
-              "est_disk_bytes": 546881,
-              "executes_code": false,
-              "interactive": false,
-              "may_prompt_elevation": false,
-              "runtime": null
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "strategy": "extract",
-            "warnings": [
-              {
-                "code": "inno.partial",
-                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
                 "path": null
               }
             ]
@@ -7942,6 +7942,37 @@ expression: snapshot
           },
           {
             "confidence": 1.0,
+            "fidelity": "partial",
+            "handler": "inno",
+            "requires": {
+              "est_disk_bytes": 546881,
+              "executes_code": false,
+              "interactive": false,
+              "may_prompt_elevation": false,
+              "runtime": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "strategy": "extract",
+            "warnings": [
+              {
+                "code": "inno.partial",
+                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
+                "path": null
+              }
+            ]
+          },
+          {
+            "confidence": 1.0,
             "fidelity": "native",
             "handler": "inno",
             "requires": {
@@ -7996,37 +8027,6 @@ expression: snapshot
               {
                 "code": "inno.preset",
                 "message": "Launch-at-finish suppression needs a package-specific recipe.",
-                "path": null
-              }
-            ]
-          },
-          {
-            "confidence": 1.0,
-            "fidelity": "partial",
-            "handler": "inno",
-            "requires": {
-              "est_disk_bytes": 546881,
-              "executes_code": false,
-              "interactive": false,
-              "may_prompt_elevation": false,
-              "runtime": null
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "strategy": "extract",
-            "warnings": [
-              {
-                "code": "inno.partial",
-                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
                 "path": null
               }
             ]
@@ -8828,6 +8828,37 @@ expression: snapshot
           },
           {
             "confidence": 1.0,
+            "fidelity": "partial",
+            "handler": "inno",
+            "requires": {
+              "est_disk_bytes": 546881,
+              "executes_code": false,
+              "interactive": false,
+              "may_prompt_elevation": false,
+              "runtime": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "strategy": "extract",
+            "warnings": [
+              {
+                "code": "inno.partial",
+                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
+                "path": null
+              }
+            ]
+          },
+          {
+            "confidence": 1.0,
             "fidelity": "native",
             "handler": "inno",
             "requires": {
@@ -8882,37 +8913,6 @@ expression: snapshot
               {
                 "code": "inno.preset",
                 "message": "Launch-at-finish suppression needs a package-specific recipe.",
-                "path": null
-              }
-            ]
-          },
-          {
-            "confidence": 1.0,
-            "fidelity": "partial",
-            "handler": "inno",
-            "requires": {
-              "est_disk_bytes": 546881,
-              "executes_code": false,
-              "interactive": false,
-              "may_prompt_elevation": false,
-              "runtime": null
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "strategy": "extract",
-            "warnings": [
-              {
-                "code": "inno.partial",
-                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
                 "path": null
               }
             ]
@@ -9606,6 +9606,31 @@ expression: snapshot
           },
           {
             "confidence": 1.0,
+            "fidelity": "exact",
+            "handler": "inno",
+            "requires": {
+              "est_disk_bytes": 4646881,
+              "executes_code": false,
+              "interactive": false,
+              "may_prompt_elevation": false,
+              "runtime": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "strategy": "extract",
+            "warnings": []
+          },
+          {
+            "confidence": 1.0,
             "fidelity": "native",
             "handler": "inno",
             "requires": {
@@ -9663,31 +9688,6 @@ expression: snapshot
                 "path": null
               }
             ]
-          },
-          {
-            "confidence": 1.0,
-            "fidelity": "exact",
-            "handler": "inno",
-            "requires": {
-              "est_disk_bytes": 4646881,
-              "executes_code": false,
-              "interactive": false,
-              "may_prompt_elevation": false,
-              "runtime": null
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "strategy": "extract",
-            "warnings": []
           }
         ],
         "question": null,
@@ -10403,6 +10403,37 @@ expression: snapshot
           },
           {
             "confidence": 1.0,
+            "fidelity": "partial",
+            "handler": "inno",
+            "requires": {
+              "est_disk_bytes": 546881,
+              "executes_code": false,
+              "interactive": false,
+              "may_prompt_elevation": false,
+              "runtime": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "strategy": "extract",
+            "warnings": [
+              {
+                "code": "inno.partial",
+                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
+                "path": null
+              }
+            ]
+          },
+          {
+            "confidence": 1.0,
             "fidelity": "native",
             "handler": "inno",
             "requires": {
@@ -10457,37 +10488,6 @@ expression: snapshot
               {
                 "code": "inno.preset",
                 "message": "Launch-at-finish suppression needs a package-specific recipe.",
-                "path": null
-              }
-            ]
-          },
-          {
-            "confidence": 1.0,
-            "fidelity": "partial",
-            "handler": "inno",
-            "requires": {
-              "est_disk_bytes": 546881,
-              "executes_code": false,
-              "interactive": false,
-              "may_prompt_elevation": false,
-              "runtime": null
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "strategy": "extract",
-            "warnings": [
-              {
-                "code": "inno.partial",
-                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
                 "path": null
               }
             ]
@@ -11213,6 +11213,37 @@ expression: snapshot
           },
           {
             "confidence": 1.0,
+            "fidelity": "partial",
+            "handler": "inno",
+            "requires": {
+              "est_disk_bytes": 546881,
+              "executes_code": false,
+              "interactive": false,
+              "may_prompt_elevation": false,
+              "runtime": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "strategy": "extract",
+            "warnings": [
+              {
+                "code": "inno.partial",
+                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
+                "path": null
+              }
+            ]
+          },
+          {
+            "confidence": 1.0,
             "fidelity": "native",
             "handler": "inno",
             "requires": {
@@ -11267,37 +11298,6 @@ expression: snapshot
               {
                 "code": "inno.preset",
                 "message": "Launch-at-finish suppression needs a package-specific recipe.",
-                "path": null
-              }
-            ]
-          },
-          {
-            "confidence": 1.0,
-            "fidelity": "partial",
-            "handler": "inno",
-            "requires": {
-              "est_disk_bytes": 546881,
-              "executes_code": false,
-              "interactive": false,
-              "may_prompt_elevation": false,
-              "runtime": null
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "strategy": "extract",
-            "warnings": [
-              {
-                "code": "inno.partial",
-                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
                 "path": null
               }
             ]
@@ -12111,6 +12111,37 @@ expression: snapshot
           },
           {
             "confidence": 1.0,
+            "fidelity": "partial",
+            "handler": "inno",
+            "requires": {
+              "est_disk_bytes": 546881,
+              "executes_code": false,
+              "interactive": false,
+              "may_prompt_elevation": false,
+              "runtime": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "strategy": "extract",
+            "warnings": [
+              {
+                "code": "inno.partial",
+                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
+                "path": null
+              }
+            ]
+          },
+          {
+            "confidence": 1.0,
             "fidelity": "native",
             "handler": "inno",
             "requires": {
@@ -12165,37 +12196,6 @@ expression: snapshot
               {
                 "code": "inno.preset",
                 "message": "Launch-at-finish suppression needs a package-specific recipe.",
-                "path": null
-              }
-            ]
-          },
-          {
-            "confidence": 1.0,
-            "fidelity": "partial",
-            "handler": "inno",
-            "requires": {
-              "est_disk_bytes": 546881,
-              "executes_code": false,
-              "interactive": false,
-              "may_prompt_elevation": false,
-              "runtime": null
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "strategy": "extract",
-            "warnings": [
-              {
-                "code": "inno.partial",
-                "message": "Static extraction does not execute Code, Registry, INI or custom install actions",
                 "path": null
               }
             ]

@@ -722,6 +722,37 @@ expression: snapshots
           },
           {
             "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
             "strategy": "run_interactive",
             "confidence": 1.0,
             "fidelity": "native",
@@ -778,37 +809,6 @@ expression: snapshots
               {
                 "code": "nsis.preset",
                 "message": "Launch-at-finish suppression needs a package-specific recipe.",
-                "path": null
-              }
-            ]
-          },
-          {
-            "handler": "nsis",
-            "strategy": "extract",
-            "confidence": 1.0,
-            "fidelity": "partial",
-            "requires": {
-              "executes_code": false,
-              "runtime": null,
-              "may_prompt_elevation": false,
-              "interactive": false,
-              "est_disk_bytes": 546881
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "warnings": [
-              {
-                "code": "nsis.partial",
-                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
                 "path": null
               }
             ]
@@ -1538,6 +1538,37 @@ expression: snapshots
           },
           {
             "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
             "strategy": "run_interactive",
             "confidence": 1.0,
             "fidelity": "native",
@@ -1594,37 +1625,6 @@ expression: snapshots
               {
                 "code": "nsis.preset",
                 "message": "Launch-at-finish suppression needs a package-specific recipe.",
-                "path": null
-              }
-            ]
-          },
-          {
-            "handler": "nsis",
-            "strategy": "extract",
-            "confidence": 1.0,
-            "fidelity": "partial",
-            "requires": {
-              "executes_code": false,
-              "runtime": null,
-              "may_prompt_elevation": false,
-              "interactive": false,
-              "est_disk_bytes": null
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "warnings": [
-              {
-                "code": "nsis.partial",
-                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
                 "path": null
               }
             ]
@@ -2354,6 +2354,37 @@ expression: snapshots
           },
           {
             "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
             "strategy": "run_interactive",
             "confidence": 1.0,
             "fidelity": "native",
@@ -2410,37 +2441,6 @@ expression: snapshots
               {
                 "code": "nsis.preset",
                 "message": "Launch-at-finish suppression needs a package-specific recipe.",
-                "path": null
-              }
-            ]
-          },
-          {
-            "handler": "nsis",
-            "strategy": "extract",
-            "confidence": 1.0,
-            "fidelity": "partial",
-            "requires": {
-              "executes_code": false,
-              "runtime": null,
-              "may_prompt_elevation": false,
-              "interactive": false,
-              "est_disk_bytes": 546881
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "warnings": [
-              {
-                "code": "nsis.partial",
-                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
                 "path": null
               }
             ]
@@ -3170,6 +3170,37 @@ expression: snapshots
           },
           {
             "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
             "strategy": "run_interactive",
             "confidence": 1.0,
             "fidelity": "native",
@@ -3226,37 +3257,6 @@ expression: snapshots
               {
                 "code": "nsis.preset",
                 "message": "Launch-at-finish suppression needs a package-specific recipe.",
-                "path": null
-              }
-            ]
-          },
-          {
-            "handler": "nsis",
-            "strategy": "extract",
-            "confidence": 1.0,
-            "fidelity": "partial",
-            "requires": {
-              "executes_code": false,
-              "runtime": null,
-              "may_prompt_elevation": false,
-              "interactive": false,
-              "est_disk_bytes": null
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "warnings": [
-              {
-                "code": "nsis.partial",
-                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
                 "path": null
               }
             ]
@@ -3986,6 +3986,37 @@ expression: snapshots
           },
           {
             "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": 546881
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
             "strategy": "run_interactive",
             "confidence": 1.0,
             "fidelity": "native",
@@ -4042,37 +4073,6 @@ expression: snapshots
               {
                 "code": "nsis.preset",
                 "message": "Launch-at-finish suppression needs a package-specific recipe.",
-                "path": null
-              }
-            ]
-          },
-          {
-            "handler": "nsis",
-            "strategy": "extract",
-            "confidence": 1.0,
-            "fidelity": "partial",
-            "requires": {
-              "executes_code": false,
-              "runtime": null,
-              "may_prompt_elevation": false,
-              "interactive": false,
-              "est_disk_bytes": 546881
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "warnings": [
-              {
-                "code": "nsis.partial",
-                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
                 "path": null
               }
             ]
@@ -4802,6 +4802,37 @@ expression: snapshots
           },
           {
             "handler": "nsis",
+            "strategy": "extract",
+            "confidence": 1.0,
+            "fidelity": "partial",
+            "requires": {
+              "executes_code": false,
+              "runtime": null,
+              "may_prompt_elevation": false,
+              "interactive": false,
+              "est_disk_bytes": null
+            },
+            "steps": [
+              {
+                "type": "extract",
+                "value": {
+                  "from": "source:0",
+                  "select": [],
+                  "strip": null,
+                  "to": "."
+                }
+              }
+            ],
+            "warnings": [
+              {
+                "code": "nsis.partial",
+                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
+                "path": null
+              }
+            ]
+          },
+          {
+            "handler": "nsis",
             "strategy": "run_interactive",
             "confidence": 1.0,
             "fidelity": "native",
@@ -4858,37 +4889,6 @@ expression: snapshots
               {
                 "code": "nsis.preset",
                 "message": "Launch-at-finish suppression needs a package-specific recipe.",
-                "path": null
-              }
-            ]
-          },
-          {
-            "handler": "nsis",
-            "strategy": "extract",
-            "confidence": 1.0,
-            "fidelity": "partial",
-            "requires": {
-              "executes_code": false,
-              "runtime": null,
-              "may_prompt_elevation": false,
-              "interactive": false,
-              "est_disk_bytes": null
-            },
-            "steps": [
-              {
-                "type": "extract",
-                "value": {
-                  "from": "source:0",
-                  "select": [],
-                  "strip": null,
-                  "to": "."
-                }
-              }
-            ],
-            "warnings": [
-              {
-                "code": "nsis.partial",
-                "message": "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted",
                 "path": null
               }
             ]
