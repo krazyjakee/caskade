@@ -18,19 +18,25 @@ fn app() -> tauri::App<MockRuntime> {
         caskade_desktop::events::LibraryChanged,
         caskade_desktop::events::SettingsChanged,
     ]);
-    let app = mock_builder().build(mock_context(noop_assets())).expect("mock app");
+    let app = mock_builder()
+        .build(mock_context(noop_assets()))
+        .expect("mock app");
     specta.mount_events(&app);
     app
 }
 
-fn record(app: &tauri::App<MockRuntime>, names: &[&'static str]) -> Arc<Mutex<Vec<(String, serde_json::Value)>>> {
+fn record(
+    app: &tauri::App<MockRuntime>,
+    names: &[&'static str],
+) -> Arc<Mutex<Vec<(String, serde_json::Value)>>> {
     let seen = Arc::new(Mutex::new(Vec::new()));
     for &name in names {
         let seen = seen.clone();
         app.listen(name, move |event| {
-            seen.lock()
-                .unwrap()
-                .push((name.to_string(), serde_json::from_str(event.payload()).unwrap()));
+            seen.lock().unwrap().push((
+                name.to_string(),
+                serde_json::from_str(event.payload()).unwrap(),
+            ));
         });
     }
     seen
@@ -39,7 +45,15 @@ fn record(app: &tauri::App<MockRuntime>, names: &[&'static str]) -> Arc<Mutex<Ve
 #[test]
 fn bus_events_are_forwarded_with_typed_names() {
     let app = app();
-    let seen = record(&app, &["game-started", "game-exited", "library-changed", "settings-changed"]);
+    let seen = record(
+        &app,
+        &[
+            "game-started",
+            "game-exited",
+            "library-changed",
+            "settings-changed",
+        ],
+    );
     let bus = Bus::default();
     caskade_desktop::events::bridge(app.handle().clone(), &bus);
     let session = GameSession {
@@ -52,7 +66,9 @@ fn bus_events_are_forwarded_with_typed_names() {
     };
     tauri::async_runtime::block_on(async {
         bus.emit(Event::GameStarted(session.clone()));
-        bus.emit(Event::LibraryGameAdded { game_id: "g1".into() });
+        bus.emit(Event::LibraryGameAdded {
+            game_id: "g1".into(),
+        });
         bus.emit(Event::LibraryScanCompleted { sources: vec![] });
         bus.emit(Event::SettingsChanged {
             namespace: "library".into(),
@@ -129,7 +145,9 @@ fn a_burst_of_library_events_reaches_the_webview_as_two() {
         ]
     );
     // A quiet period has passed: the next event goes out at once.
-    bus.emit(Event::LibraryGameRemoved { game_id: "g7".into() });
+    bus.emit(Event::LibraryGameRemoved {
+        game_id: "g7".into(),
+    });
     wait_for(&seen, 3);
     assert_eq!(
         seen.lock().unwrap()[2].1,
