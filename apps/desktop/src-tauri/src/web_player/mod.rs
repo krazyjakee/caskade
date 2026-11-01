@@ -124,7 +124,6 @@ enum UserEvent {
     #[cfg_attr(not(any(target_os = "linux", windows)), allow(dead_code))]
     Stop,
     /// The page's renderer failed: load it again (#3).
-    #[cfg(windows)]
     Reload,
 }
 
@@ -333,13 +332,11 @@ pub fn run(options: Options) -> Result<i32, String> {
     );
     load(&webview, &start).map_err(|error| error.to_string())?;
     // A webview that lost its processes would stay white (#3).
-    #[cfg(windows)]
     {
         use crate::webview_recovery::{Policy, Step as Recover, failure_of, log};
-        use wry::WebViewExtWindows;
         let fails = event_loop.create_proxy();
         let policy = std::cell::RefCell::new(Policy::default());
-        let watched = caskade_webview2::watch(&webview.webview(), move |failed| {
+        let watched = crate::webview_recovery::watch_player(&webview, move |failed| {
             log("game window", &failed);
             let event = match policy
                 .borrow_mut()
@@ -425,7 +422,6 @@ pub fn run(options: Options) -> Result<i32, String> {
                 let title = title.trim();
                 window.set_title(if title.is_empty() { "Caskade" } else { title });
             }
-            #[cfg(windows)]
             Event::UserEvent(UserEvent::Reload) => {
                 tracing::warn!("reloading the game window's page");
                 if let Err(error) = webview.reload() {

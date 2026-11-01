@@ -62,4 +62,6 @@ pub struct ProcessFailure {
     pub exit_code: Option<i32>,
     /// The failed process's description, where WebView2 gives one.
     pub process: Option<String>,
+    /// Last source, including history API routes. Never log it: it may contain tokens.
+    pub url: Option<String>,
 }

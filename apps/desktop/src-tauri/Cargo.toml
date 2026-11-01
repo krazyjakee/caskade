@@ -35,6 +35,7 @@ path = "src/bin/catalogue.rs"
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
+tracing-appender = "0.2"
 caskade-core = { path = "../../../crates/caskade-core" }
 caskade-sources = { path = "../../../crates/caskade-sources" }
 caskade-discovery = { path = "../../../crates/caskade-discovery" }

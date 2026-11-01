@@ -16,6 +16,7 @@ pub mod e2e;
 pub mod error;
 pub mod events;
 pub mod game_focus;
+pub mod logging;
 pub mod main_window;
 pub mod navigation;
 pub mod onboarding;
@@ -31,15 +32,9 @@ pub mod webkit;
 pub mod webview_recovery;
 pub mod window_state;
 
-use tracing_subscriber::EnvFilter;
-
 /// Builds and runs the app.
 pub fn run() {
-    let _ = tracing_subscriber::fmt()
-        .with_env_filter(
-            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
-        )
-        .try_init();
+    logging::init();
     // Panics reach the log too, not only stderr.
     background::log_panics();
     // First, as it may restart the process.

@@ -1,6 +1,7 @@
 //! The COM side: subscribing to `ProcessFailed` and reading its arguments.
 
 use crate::{Kind, ProcessFailure};
+use std::{cell::RefCell, rc::Rc};
 use webview2_com::Microsoft::Web::WebView2::Win32::{
     COREWEBVIEW2_PROCESS_FAILED_KIND, COREWEBVIEW2_PROCESS_FAILED_KIND_BROWSER_PROCESS_EXITED,
     COREWEBVIEW2_PROCESS_FAILED_KIND_FRAME_RENDER_PROCESS_EXITED,
@@ -15,7 +16,7 @@ use webview2_com::Microsoft::Web::WebView2::Win32::{
     ICoreWebView2, ICoreWebView2Controller, ICoreWebView2ProcessFailedEventArgs,
     ICoreWebView2ProcessFailedEventArgs2,
 };
-use webview2_com::{ProcessFailedEventHandler, take_pwstr};
+use webview2_com::{ProcessFailedEventHandler, SourceChangedEventHandler, take_pwstr};
 use windows_core::{Interface, PWSTR};
 
 /// Calls `on_failure` on the webview's thread for each of its processes
@@ -25,9 +26,21 @@ pub fn watch(
     webview: &ICoreWebView2,
     on_failure: impl Fn(ProcessFailure) + 'static,
 ) -> windows_core::Result<()> {
+    let url = Rc::new(RefCell::new(source(webview)));
+    let latest = Rc::clone(&url);
+    let changed = SourceChangedEventHandler::create(Box::new(move |sender, _| {
+        if let Some(sender) = sender
+            && let Some(url) = source(&sender)
+        {
+            *latest.borrow_mut() = Some(url);
+        }
+        Ok(())
+    }));
     let handler = ProcessFailedEventHandler::create(Box::new(move |_, args| {
         if let Some(args) = args {
-            on_failure(failure(&args));
+            let mut failed = failure(&args);
+            failed.url = url.borrow().clone();
+            on_failure(failed);
         }
         Ok(())
     }));
@@ -36,6 +49,7 @@ pub fn watch(
     // WebView2 keeps its own reference to the handler.
     #[allow(unsafe_code)]
     unsafe {
+        webview.add_SourceChanged(&changed, &mut token)?;
         webview.add_ProcessFailed(&handler, &mut token)
     }
 }
@@ -62,6 +76,7 @@ fn failure(args: &ICoreWebView2ProcessFailedEventArgs) -> ProcessFailure {
         reason: "unknown",
         exit_code: None,
         process: None,
+        url: None,
     };
     // Runtimes before 1.0.992 give no details.
     let Ok(details) = args.cast::<ICoreWebView2ProcessFailedEventArgs2>() else {
@@ -135,4 +150,13 @@ mod tests {
         );
         assert_eq!(kind_of(COREWEBVIEW2_PROCESS_FAILED_KIND(99)), Kind::Other);
     }
+}
+
+fn source(webview: &ICoreWebView2) -> Option<String> {
+    let mut value = PWSTR::null();
+    // SAFETY: live interface on its UI thread and an initialized out
+    // parameter. take_pwstr consumes and frees the COM-allocated string.
+    #[allow(unsafe_code)]
+    unsafe { webview.Source(&mut value) }.ok()?;
+    Some(take_pwstr(value)).filter(|url| !url.is_empty() && url != "about:blank")
 }

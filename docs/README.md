@@ -7,6 +7,7 @@
 - [Game streaming](STREAMING-PLAN.md) (planned): streaming games between a household's devices through Sunshine and Moonlight, installed, configured and driven by Caskade without showing either.
 - [Background jobs](background-jobs.md)
 - [Errors and recovery](errors.md): the structured error shown across the app, the self-healing policy, guidelines for writing errors, and the audit inventory with its follow-ups.
+- [Webview recovery and diagnostics](webview-recovery.md): native process failure handling, rolling logs and Windows/Linux verification.
 - [Notifications](notifications.md): the feed in Activity, its read state, hourly batches of new games, and the event/category matrix.
 - [System statistics](system-stats.md): Settings → Statistics, what it samples and when, and which metrics each OS has.
 - [Local accounts](accounts.md): roles, the rules the core enforces, and why the PIN is a household lock, not data protection.

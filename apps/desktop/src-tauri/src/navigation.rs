@@ -19,7 +19,20 @@ pub fn create_main_window<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Webvi
         .cloned()
         .unwrap_or_default();
     let dev_url = app.config().build.dev_url.clone();
-    WebviewWindowBuilder::from_config(app, &config)?
+    let builder = WebviewWindowBuilder::from_config(app, &config)?;
+    let builder = match crate::webview_recovery::take_route() {
+        Some(route) => {
+            // Restore through a relative navigation in the bundled origin;
+            // never load an external origin from the recovery file.
+            let script = format!(
+                "if (!sessionStorage.getItem('caskade.recovered')) {{ sessionStorage.setItem('caskade.recovered', '1'); location.replace({}); }}",
+                serde_json::to_string(&route).unwrap()
+            );
+            builder.initialization_script(script)
+        }
+        None => builder,
+    };
+    builder
         .on_navigation(move |url| {
             let allowed = app_page(url, dev_url.as_ref());
             if !allowed {

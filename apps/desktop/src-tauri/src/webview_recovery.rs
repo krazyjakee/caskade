@@ -16,10 +16,10 @@
 //! The game and video windows (`web_player`, `video_player`) follow the
 //! same [`Policy`], reloading or closing themselves.
 //!
-//! Only Windows reports these failures so far (`caskade-webview2`).
+//! WebView2 reports failures on Windows; WebKitGTK reports content-process termination on Linux.
 
 // Elsewhere nothing reports a failure, so recovery never runs.
-#![cfg_attr(not(windows), allow(dead_code))]
+#![cfg_attr(not(any(windows, target_os = "linux")), allow(dead_code))]
 
 use std::path::PathBuf;
 use std::sync::Mutex;
@@ -128,8 +128,7 @@ impl Restarts {
             return false;
         }
         recent.push(now);
-        self.write(&recent);
-        true
+        self.write(&recent)
     }
 
     /// Records a restart the user asked for: it always goes ahead.
@@ -140,14 +139,16 @@ impl Restarts {
             now,
         );
         recent.push(now);
-        self.write(&recent);
+        let _ = self.write(&recent);
     }
 
-    fn write(&self, times: &[u64]) {
+    fn write(&self, times: &[u64]) -> bool {
         let text: String = times.iter().map(|at| format!("{at}\n")).collect();
         if let Err(error) = std::fs::write(&self.file, text) {
             tracing::warn!(%error, "couldn't record the webview restart");
+            return false;
         }
+        true
     }
 }
 
@@ -172,6 +173,8 @@ struct Recovery {
     restarts: Restarts,
     /// The give-up dialog is open.
     asking: AtomicBool,
+    restarting: AtomicBool,
+    route: Mutex<Option<String>>,
 }
 
 /// Watches the main window's webview and brings it back when its
@@ -181,6 +184,8 @@ pub fn watch<R: Runtime>(window: &WebviewWindow<R>, restarts: PathBuf) {
         policy: Mutex::default(),
         restarts: Restarts::new(restarts),
         asking: AtomicBool::new(false),
+        restarting: AtomicBool::new(false),
+        route: Mutex::new(None),
     });
     #[cfg(windows)]
     {
@@ -193,7 +198,7 @@ pub fn watch<R: Runtime>(window: &WebviewWindow<R>, restarts: PathBuf) {
                     // loop, and the dialog blocks.
                     let app = app.clone();
                     let failure = failure_of(failed.kind);
-                    std::thread::spawn(move || recover(&app, failure));
+                    std::thread::spawn(move || recover(&app, failure, failed.url));
                 });
             if let Err(error) = result {
                 tracing::warn!(%error, "can't watch the webview's processes");
@@ -203,10 +208,32 @@ pub fn watch<R: Runtime>(window: &WebviewWindow<R>, restarts: PathBuf) {
             tracing::warn!(%error, "can't watch the webview's processes");
         }
     }
+    #[cfg(target_os = "linux")]
+    {
+        let app = window.app_handle().clone();
+        if let Err(error) = window.with_webview(move |platform| {
+            attach_webkit(&platform.inner(), move |failed| {
+                log("main window", &failed);
+                let app = app.clone();
+                std::thread::spawn(move || recover(&app, Failure::RendererExited, failed.url));
+            });
+        }) {
+            tracing::warn!(%error, "can't watch WebKit's web process");
+        }
+    }
 }
 
-fn recover<R: Runtime>(app: &AppHandle<R>, failure: Failure) {
+fn recover<R: Runtime>(app: &AppHandle<R>, failure: Failure, url: Option<String>) {
     let state = app.state::<Recovery>();
+    if state.asking.load(Ordering::Relaxed) || state.restarting.load(Ordering::Relaxed) {
+        return;
+    }
+    if let Some(url) = url.and_then(|url| route(&url)) {
+        *state
+            .route
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner) = Some(url);
+    }
     let step = state
         .policy
         .lock()
@@ -227,9 +254,23 @@ fn recover<R: Runtime>(app: &AppHandle<R>, failure: Failure) {
 }
 
 fn restart_or_ask<R: Runtime>(app: &AppHandle<R>, state: &Recovery) {
+    if state.restarting.swap(true, Ordering::Relaxed) {
+        return;
+    }
+    if let Some(route) = state
+        .route
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+        .as_ref()
+        && let Some(path) = route_path()
+        && let Err(error) = std::fs::write(path, route)
+    {
+        tracing::warn!(%error, "couldn't keep the route for webview recovery");
+    }
     if state.restarts.claim(SystemTime::now()) {
         tracing::warn!("restarting Caskade to bring its window back");
-        app.restart();
+        restart(app);
+        return;
     }
     if state.asking.swap(true, Ordering::Relaxed) {
         return;
@@ -242,9 +283,13 @@ fn restart_or_ask<R: Runtime>(app: &AppHandle<R>, state: &Recovery) {
 fn ask<R: Runtime>(app: &AppHandle<R>, restarts: Restarts) {
     use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
     let handle = app.clone();
+    let logs = caskade_core::AppPaths::standard()
+        .map(|paths| paths.logs.display().to_string())
+        .unwrap_or_else(|_| "logs".into());
     app.dialog()
         .message(caskade_core::tr!(
-            "Caskade's window stopped working and couldn't be brought back on its own."
+            "Caskade's window stopped working and couldn't be brought back on its own. Restart Caskade to try again, or quit.\n\nDiagnostic logs: {logs}",
+            logs = logs
         ))
         .title("Caskade")
         .kind(MessageDialogKind::Error)
@@ -252,12 +297,13 @@ fn ask<R: Runtime>(app: &AppHandle<R>, restarts: Restarts) {
             caskade_core::tr!("Restart Caskade"),
             caskade_core::tr!("Quit"),
         ))
-        .show(move |restart| {
-            if restart {
+        .show(move |again| {
+            if again {
                 restarts.record(SystemTime::now());
-                handle.restart();
+                restart(&handle);
+            } else {
+                handle.exit(1);
             }
-            handle.exit(1);
         });
 }
 
@@ -278,6 +324,7 @@ pub fn failure_of(kind: caskade_webview2::Kind) -> Failure {
 pub fn log(window: &str, failure: &caskade_webview2::ProcessFailure) {
     tracing::error!(
         window,
+        pid = std::process::id(),
         kind = failure.kind.as_str(),
         reason = failure.reason,
         exit_code = failure.exit_code,
@@ -286,12 +333,107 @@ pub fn log(window: &str, failure: &caskade_webview2::ProcessFailure) {
     );
 }
 
+fn route_path() -> Option<PathBuf> {
+    caskade_core::AppPaths::standard()
+        .ok()
+        .map(|paths| paths.cache.join("webview-route"))
+}
+fn route(url: &str) -> Option<String> {
+    let url = url::Url::parse(url).ok()?;
+    if !matches!(url.scheme(), "http" | "https" | "tauri")
+        || !url.path().starts_with('/')
+        || url.path().starts_with("//")
+        || url.path().contains('\\')
+    {
+        return None;
+    }
+    Some(format!(
+        "{}{}{}",
+        url.path(),
+        url.query().map(|q| format!("?{q}")).unwrap_or_default(),
+        url.fragment().map(|f| format!("#{f}")).unwrap_or_default()
+    ))
+}
+pub fn take_route() -> Option<String> {
+    let path = route_path()?;
+    let saved = std::fs::read_to_string(&path).ok()?;
+    let _ = std::fs::remove_file(path);
+    // Validate as a relative path in an inert origin, including backslashes.
+    let parsed = url::Url::parse(&format!("tauri://localhost{saved}")).ok()?;
+    if parsed.host_str() != Some("localhost") {
+        return None;
+    }
+    route(parsed.as_str())
+}
+fn restart<R: Runtime>(app: &AppHandle<R>) {
+    let handle = app.clone();
+    let _ = app.run_on_main_thread(move || {
+        use tauri_plugin_window_state::AppHandleExt;
+        if !crate::commands::console::is_on(&handle)
+            && let Err(error) = handle.save_window_state(crate::window_state::flags())
+        {
+            tracing::warn!(%error, "couldn't save window before webview recovery");
+        }
+        handle.request_restart();
+    });
+}
+#[cfg(target_os = "linux")]
+fn attach_webkit(
+    view: &webkit2gtk::WebView,
+    notify: impl Fn(caskade_webview2::ProcessFailure) + 'static,
+) {
+    use webkit2gtk::WebViewExt;
+    view.connect_web_process_terminated(move |view, reason| {
+        notify(caskade_webview2::ProcessFailure {
+            kind: caskade_webview2::Kind::RendererExited,
+            reason: "WebKit web process terminated",
+            exit_code: None,
+            process: Some(format!("{reason:?}")),
+            url: view.uri().map(|uri| uri.to_string()),
+        });
+    });
+}
+pub fn watch_player(
+    view: &wry::WebView,
+    notify: impl Fn(caskade_webview2::ProcessFailure) + 'static,
+) -> Result<(), String> {
+    #[cfg(windows)]
+    {
+        use wry::WebViewExtWindows;
+        caskade_webview2::watch(&view.webview(), notify).map_err(|error| error.to_string())?;
+    }
+    #[cfg(target_os = "linux")]
+    {
+        use wry::WebViewExtUnix;
+        attach_webkit(&view.webview(), notify);
+    }
+    #[cfg(not(any(windows, target_os = "linux")))]
+    let _ = (view, notify);
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     fn at(start: Instant, seconds: u64) -> Instant {
         start + Duration::from_secs(seconds)
+    }
+
+    #[test]
+    fn an_unwritable_budget_stops_automatic_restarts() {
+        let dir = tempfile::tempdir().unwrap();
+        assert!(!Restarts::new(dir.path().to_path_buf()).claim(SystemTime::now()));
+    }
+
+    #[test]
+    fn recovery_routes_keep_query_and_fragment_and_stay_local() {
+        assert_eq!(
+            route("http://tauri.localhost/library?filter=installed#x"),
+            Some("/library?filter=installed#x".into())
+        );
+        assert_eq!(route("javascript:alert(1)"), None);
+        assert_eq!(route("tauri://localhost//external.example/path"), None);
     }
 
     #[test]
