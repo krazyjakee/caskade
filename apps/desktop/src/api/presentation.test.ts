@@ -1,5 +1,5 @@
 import { i18n } from "@caskade/i18n";
-import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   compareTitles,
   findFolded,
@@ -139,4 +139,23 @@ it("names library sources and install states for people", () => {
   expect(formatSource("newstore")).toBe("Newstore");
   expect(formatInstallState("installed")).toBe("Installed");
   expect(formatInstallState("partial")).toBe("Partly installed");
+});
+
+describe("filesystem path display", () => {
+  it("formats verbatim drive and UNC paths without changing device namespaces", async () => {
+    const { formatPath } = await import("./presentation");
+    expect(formatPath(String.raw`\\?\C:\Users\player\Games`)).toBe(
+      String.raw`C:\Users\player\Games`,
+    );
+    expect(formatPath(String.raw`\\?\UNC\server\share\Games`)).toBe(
+      String.raw`\\server\share\Games`,
+    );
+    for (const path of [
+      "\\\\?\\Volume{guid}\\",
+      String.raw`\\.\PhysicalDrive0`,
+      "/games",
+      String.raw`C:\Games`,
+    ])
+      expect(formatPath(path)).toBe(path);
+  });
 });

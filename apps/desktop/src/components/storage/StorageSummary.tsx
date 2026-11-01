@@ -3,6 +3,7 @@ import { msg } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
 import type { RootStatus } from "../../api/bindings";
+import { formatPath } from "../../api/presentation";
 import { useStorageApi } from "../../api/StorageProvider";
 
 const statusLabels: Record<RootStatus, MessageDescriptor> = {
@@ -27,7 +28,7 @@ export function StorageSummary() {
       {roots.isError
         ? t`Locations unavailable`
         : current
-          ? `${current.root.path} · ${t(statusLabels[current.status])}`
+          ? `${formatPath(current.root.path)} · ${t(statusLabels[current.status])}`
           : roots.isPending && api
             ? t`Checking locations…`
             : t`No default location configured`}

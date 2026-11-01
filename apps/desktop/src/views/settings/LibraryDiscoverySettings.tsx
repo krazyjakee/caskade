@@ -13,6 +13,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { Folder, RefreshCw, ScanSearch } from "lucide-react";
 import { useState } from "react";
 import { type DiscoveryPreferences, scanning } from "../../api/discovery";
+import { formatPath } from "../../api/presentation";
 import { useDiscovery } from "./discovery/DiscoveryProvider";
 import { HiddenGames } from "./discovery/HiddenGames";
 import { ReviewList } from "./discovery/ReviewList";
@@ -239,7 +240,7 @@ export function LibraryDiscoverySettings() {
                         key={`${launcher.path}:${launcher.version}`}
                         className="mt-1 break-all font-mono text-xs text-fg-subtle"
                       >
-                        {launcher.path ?? t`Location unknown`}
+                        {launcher.path ? formatPath(launcher.path) : t`Location unknown`}
                         {launcher.version ? ` · ${launcher.version}` : ""}
                       </p>
                     ))}

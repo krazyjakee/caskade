@@ -18,6 +18,7 @@ import {
 import { type ReactNode, useRef, useState } from "react";
 import { Button as AriaButton, Radio, RadioGroup } from "react-aria-components";
 import { commands } from "../api/bindings";
+import { formatPath } from "../api/presentation";
 import { errorMessage } from "../api/reply";
 import type { RommAuth, RommConnection } from "../api/romm";
 import { useStorageApi } from "../api/StorageProvider";
@@ -104,8 +105,8 @@ export function FolderStep({ onNext }: { onNext(): void }) {
         <div className="min-w-0 flex-1">
           {current ? (
             <>
-              <p className="truncate font-mono text-sm" title={current.root.path}>
-                {current.root.path}
+              <p className="truncate font-mono text-sm" title={formatPath(current.root.path)}>
+                {formatPath(current.root.path)}
               </p>
               {free !== null && (
                 <>
@@ -276,8 +277,11 @@ export function SourcesStep({
               {folder ? t`Change folder` : t`Choose folder`}
             </AriaButton>
             {folder && (
-              <span className="min-w-0 truncate font-mono text-sm text-fg-muted" title={folder}>
-                {folder}
+              <span
+                className="min-w-0 truncate font-mono text-sm text-fg-muted"
+                title={formatPath(folder)}
+              >
+                {formatPath(folder)}
               </span>
             )}
           </div>

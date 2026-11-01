@@ -10,6 +10,7 @@ import {
   useSetGameEmulation,
   useSplitArgs,
 } from "../../api/gameEmulation";
+import { formatPath } from "../../api/presentation";
 
 /** Whether an emulated entry can start (asking at launch counts). */
 export function canStart(game: GameEmulation | undefined) {
@@ -222,7 +223,9 @@ export function EmulatedEntry({ entryId }: { entryId: string }) {
                           ? t({ message: "Present", comment: "A file's state" })
                           : t({ message: "Missing", comment: "A file's state" }))}
                     </StatusDot>
-                    <span className="break-all font-mono text-xs text-fg-subtle">{disc.path}</span>
+                    <span className="break-all font-mono text-xs text-fg-subtle">
+                      {formatPath(disc.path)}
+                    </span>
                   </li>
                 ))}
               </ul>

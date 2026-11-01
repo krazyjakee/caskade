@@ -9,6 +9,7 @@ import { ArrowUp, File, Folder, HardDrive, Home } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button as AriaButton, Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import type { BrowseApi, DirEntry, DirListing, Place } from "../../api/browse";
+import { formatPath } from "../../api/presentation";
 import { errorMessage } from "../../api/reply";
 import { useInputAction } from "../../input";
 
@@ -204,7 +205,7 @@ export function FolderBrowser({
               {request.title}
             </Heading>
             <p data-part="location" className="mt-1 break-all font-mono text-base text-fg-muted">
-              {listing?.path ?? "…"}
+              {listing ? formatPath(listing.path) : "…"}
             </p>
           </div>
           {places.length > 0 && (

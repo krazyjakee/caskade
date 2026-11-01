@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FolderPlus, HardDrive, RefreshCw, Star, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Button as AriaButton } from "react-aria-components";
+import { formatPath } from "../../api/presentation";
 import { CommandFailure, toFailure } from "../../api/reply";
 import { formatBytes, type RootStatus, type RootSummary, type StorageApi } from "../../api/storage";
 import { useActionMenus } from "../../components/ActionMenu";
@@ -145,7 +146,7 @@ export function StoragePanel({ api }: { api: StorageApi }) {
             // nowrap would squash the card into one overflowing line.
             <AriaButton
               key={root.root.id}
-              {...menus.target(root.root.label ?? root.root.path, [
+              {...menus.target(root.root.label ?? formatPath(root.root.path), [
                 {
                   id: "default",
                   label: t({ message: "Make default", context: "storage location" }),
@@ -186,7 +187,9 @@ export function StoragePanel({ api }: { api: StorageApi }) {
                     : statusLabel(root.status)}
                 </span>
               </div>
-              <p className="mt-1 break-all font-mono text-xs text-fg-muted">{root.root.path}</p>
+              <p className="mt-1 break-all font-mono text-xs text-fg-muted">
+                {formatPath(root.root.path)}
+              </p>
               <Capacity root={root} />
               <p className="mt-2 text-xs text-fg-muted">
                 {t({
@@ -288,7 +291,7 @@ export function StoragePanel({ api }: { api: StorageApi }) {
       {active && (
         <SettingsSection
           title={active.root.label ?? t`Selected location`}
-          description={active.root.path}
+          description={formatPath(active.root.path)}
         >
           <RootEditor
             key={active.root.id}
@@ -355,7 +358,7 @@ export function StoragePanel({ api }: { api: StorageApi }) {
                     options={destinations.map((root) => ({
                       id: root.root.id,
                       label: t({
-                        message: `${{ location: root.root.label ?? root.root.path }} · ${{
+                        message: `${{ location: root.root.label ?? formatPath(root.root.path) }} · ${{
                           free: formatBytes(root.capabilities.freeBytes),
                         }} free`,
                         comment: "A storage location to move games to, and its free space",

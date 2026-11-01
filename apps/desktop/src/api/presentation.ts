@@ -338,3 +338,12 @@ export function platformLine(platform: string) {
   const [first, ...more] = nonPcPlatforms(platform).split(" · ");
   return more.length > 0 ? `${first} +${more.length}` : (first ?? "");
 }
+
+/** A filesystem path for display only. Keep the original for IPC, picker
+ * defaults and identity. Only DOS drive and UNC verbatim paths have a
+ * conventional equivalent; volume GUID and device namespaces do not. */
+export function formatPath(path: string): string {
+  if (/^\\\\\?\\[a-z]:\\/i.test(path)) return path.slice(4);
+  if (path.slice(0, 8).toUpperCase() === "\\\\?\\UNC\\") return `\\\\${path.slice(8)}`;
+  return path;
+}

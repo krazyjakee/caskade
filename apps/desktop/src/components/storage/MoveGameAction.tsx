@@ -3,6 +3,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+import { formatPath } from "../../api/presentation";
 import { useStorageApi } from "../../api/StorageProvider";
 import type { StorageApi } from "../../api/storage";
 import { formatBytes, rootBlockReason } from "../../api/storage";
@@ -111,7 +112,7 @@ export function MoveGameDialog({
                   label={t`Installation`}
                   options={candidates.map(({ root, game }) => ({
                     id: game.entryId,
-                    label: `${root.root.label ?? root.root.path} · ${game.relativeDir}`,
+                    label: `${root.root.label ?? formatPath(root.root.path)} · ${game.relativeDir}`,
                   }))}
                   value={selected?.game.entryId ?? ""}
                   onChange={setEntry}
@@ -126,7 +127,7 @@ export function MoveGameDialog({
                 label={t`Destination`}
                 options={targets.map((root) => ({
                   id: root.root.id,
-                  label: t`${{ location: root.root.label ?? root.root.path }} · ${{ free: formatBytes(root.capabilities.freeBytes) }} free`,
+                  label: t`${{ location: root.root.label ?? formatPath(root.root.path) }} · ${{ free: formatBytes(root.capabilities.freeBytes) }} free`,
                 }))}
                 value={destination?.root.id ?? ""}
                 onChange={setTarget}

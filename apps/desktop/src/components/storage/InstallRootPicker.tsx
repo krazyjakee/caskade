@@ -3,6 +3,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Label, Radio, RadioGroup } from "react-aria-components";
+import { formatPath } from "../../api/presentation";
 import {
   formatBytes,
   initialInstallRoot,
@@ -115,12 +116,14 @@ export function InstallRootPicker({
               className="flex cursor-pointer flex-col gap-1 rounded-control border border-border p-3 data-selected:border-accent-alt data-disabled:opacity-50"
             >
               <span className="font-medium">
-                {root.root.label ?? root.root.path}
+                {root.root.label ?? formatPath(root.root.path)}
                 {root.root.isDefault
                   ? ` · ${t({ message: "Default", context: "storage location" })}`
                   : ""}
               </span>
-              <span className="break-all font-mono text-xs text-fg-muted">{root.root.path}</span>
+              <span className="break-all font-mono text-xs text-fg-muted">
+                {formatPath(root.root.path)}
+              </span>
               <span className="text-sm">
                 {t`${{ free: formatBytes(root.capabilities.freeBytes) }} free`}
                 {reason ? ` · ${reason}` : ""}

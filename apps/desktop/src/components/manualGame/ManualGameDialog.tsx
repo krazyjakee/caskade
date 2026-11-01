@@ -15,6 +15,7 @@ import {
   useAddManualGame,
   useManualGamesApi,
 } from "../../api/manualGames";
+import { formatPath } from "../../api/presentation";
 import { errorMessage } from "../../api/reply";
 import { useDropZone } from "../../drop/DropProvider";
 import { usePathPicker } from "../pathBrowser/PathPicker";
@@ -261,7 +262,7 @@ function TargetSummary({ target }: { target: ManualTarget }) {
       {launch.type === "executable" ? (
         <>
           <dt className="text-fg-muted">{t`Program`}</dt>
-          <dd className="font-mono break-all">{launch.path}</dd>
+          <dd className="font-mono break-all">{formatPath(launch.path)}</dd>
           {launch.args.length > 0 && (
             <>
               <dt className="text-fg-muted">{t`Arguments`}</dt>

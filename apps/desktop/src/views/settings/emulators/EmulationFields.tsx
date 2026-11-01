@@ -3,6 +3,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { useMutation } from "@tanstack/react-query";
 import { FolderOpen } from "lucide-react";
 import type { ArgvPreview, BiosStatus } from "../../../api/emulation";
+import { formatPath } from "../../../api/presentation";
 import { usePathPicker } from "../../../components/pathBrowser/PathPicker";
 import { useDropZone } from "../../../drop/DropProvider";
 import { useEmulationApi } from "./EmulationProvider";
@@ -37,7 +38,7 @@ export function PathField({
     <div ref={drop.ref}>
       <TextField
         label={label}
-        value={value}
+        value={formatPath(value)}
         onChange={onChange}
         mono
         action={
