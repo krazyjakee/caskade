@@ -1,0 +1,36 @@
+[package]
+name = "caskade-sync"
+version = "0.1.0"
+description = "Connections, identity and pairing between a household's Caskade devices"
+edition.workspace = true
+rust-version.workspace = true
+autotests = false
+
+[dependencies]
+async-trait = "0.1"
+# The set wobu proved together (docs/sync.md); 0.103.1 is the patch release
+# of the yanked 0.103.0. Cargo.lock also holds iroh-base, iroh-relay,
+# iroh-dns and noq at the versions iroh 1.0.3 shipped with.
+iroh = "=1.0.3"
+iroh-blobs = { version = "=0.103.1", default-features = false, features = ["fs-store"] }
+iroh-tickets = "=1.0.0"
+keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service", "crypto-rust"] }
+rand = "0.10"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+subtle = "2.6"
+thiserror = "2"
+tokio = { version = "1", features = ["rt", "time", "macros", "sync"] }
+tracing = "0.1"
+
+[dev-dependencies]
+iroh = "=1.0.3"
+iroh-blobs = { version = "=0.103.1", default-features = false, features = ["fs-store"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time"] }
+
+[[test]]
+name = "it"
+path = "tests/main.rs"
+
+[lints]
+workspace = true

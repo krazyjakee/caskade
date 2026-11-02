@@ -5,6 +5,7 @@
 - [Emulation design](EMULATION-PLAN.md): definitions, scanning and launch behavior, plus pending plugin definitions and ROM importers (E5).
 - [Web games](WEB-GAMES-PLAN.md): the Library's Web tab, Add web game, the game window, the mosaic, and the planned offline bundles (guided capture).
 - [Game streaming](STREAMING-PLAN.md) (planned): streaming games between a household's devices through Sunshine and Moonlight, installed, configured and driven by Caskade without showing either.
+- [Device connections and pairing](sync.md): the `caskade-sync` crate, the device key in the OS keychain, the opening and its one refusal, and how to check them.
 - [Background jobs](background-jobs.md)
 - [Errors and recovery](errors.md): the structured error shown across the app, the self-healing policy, guidelines for writing errors, and the audit inventory with its follow-ups.
 - [Webview recovery and diagnostics](webview-recovery.md): native process failure handling, rolling logs and Windows/Linux verification.
