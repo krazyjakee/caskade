@@ -167,17 +167,21 @@ it("adds, tests and saves a game's script with a pad", async () => {
   await walk("nav.down", "Edit details");
   app.pad.press("confirm");
   const dialog = await screen.findByRole("dialog", { name: /^Edit / });
-  // RB along the editor's tabs to Scripts.
-  for (let i = 0; i < 4; i++) {
-    if (
-      within(dialog)
-        .getByRole("tab", { name: /Scripts/ })
-        .getAttribute("aria-selected") === "true"
-    )
-      break;
+  // RB along the editor's tabs to Scripts, one tab at a time: each press
+  // waits for the tab it moved to, so a slow render never overshoots.
+  const selected = () =>
+    within(dialog)
+      .getAllByRole("tab")
+      .find((tab) => tab.getAttribute("aria-selected") === "true")
+      ?.textContent?.trim();
+  // A press before the editor's tab bindings are in place does nothing:
+  // press again.
+  for (let i = 0; i < 20 && !/Scripts/.test(selected() ?? ""); i++) {
+    const before = selected();
     app.pad.press("tab.next");
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await waitFor(() => expect(selected()).not.toBe(before), { timeout: 250 }).catch(() => {});
   }
+  expect(selected()).toMatch(/Scripts/);
   const tab = within(dialog)
     .getAllByRole("tabpanel")
     .find((panel) => panel.querySelector('[data-cs="scripts"]')) as HTMLElement;
