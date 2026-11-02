@@ -9662,6 +9662,10 @@ msgstr ""
 msgid "This plugin view isn't available."
 msgstr ""
 
+#: apps/desktop/src/views/game/GameView.tsx
+msgid "This release is being updated. Play is available again when the update finishes."
+msgstr ""
+
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "This scanner's profile"
 msgstr ""

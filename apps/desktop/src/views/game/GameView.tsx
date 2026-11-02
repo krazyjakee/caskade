@@ -347,6 +347,13 @@ export function GameView({
                 label={playLabel}
               />
             )}
+            {!running && chosen?.state === "updating" && (
+              <p role="status" className="text-sm text-fg-muted">
+                <Trans>
+                  This release is being updated. Play is available again when the update finishes.
+                </Trans>
+              </p>
+            )}
             {several && chosen && (
               <Select
                 label={t({

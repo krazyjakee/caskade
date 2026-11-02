@@ -44,6 +44,7 @@ type EntryRecord = {
   launch: { type: string; url?: string } | null;
 };
 /** Structural projections are checked against generated DTOs by native.ts. */
+const INSTALLED_STATES = new Set(["installed", "updating", "broken"]);
 function date(ms: number | null): string | null {
   if (ms === null) return null;
   const value = new Date(ms);
@@ -92,7 +93,9 @@ export function mapDetails(
     ...mapSummary(
       {
         ...record.game,
-        installed: record.entries.some((entry) => entry.state.type === "installed"),
+        // As the core counts a game installed (`db/query.rs` `INSTALLED`):
+        // a release being updated or with broken files is still on disk.
+        installed: record.entries.some((entry) => INSTALLED_STATES.has(entry.state.type)),
         cover: artwork ?? null,
         icon: record.artwork.find((art) => art.kind === "icon") ?? null,
         playtimeMs: record.playtimeMs,

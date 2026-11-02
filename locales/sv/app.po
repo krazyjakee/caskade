@@ -9778,6 +9778,10 @@ msgstr ""
 msgid "This plugin view isn't available."
 msgstr "Den här tilläggsvyn är inte tillgänglig."
 
+#: apps/desktop/src/views/game/GameView.tsx
+msgid "This release is being updated. Play is available again when the update finishes."
+msgstr ""
+
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "This scanner's profile"
 msgstr "Den här skannerns profil"

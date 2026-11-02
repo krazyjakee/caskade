@@ -156,3 +156,35 @@ it("gives a web game its page as its website, offline copy or not", () => {
   expect(details({ type: "web", url: page }).website).toBe(page);
   expect(details({ type: "executable" }).website).toBeNull();
 });
+
+it("counts a game installed while its release updates, as the library does, without letting it launch", () => {
+  const details = mapDetails(
+    {
+      game: {
+        id: "g",
+        title: "Counter-Strike 2",
+        genres: [],
+        platforms: [],
+        favorite: false,
+        tags: [],
+        description: "",
+      },
+      artwork: [],
+      playtimeMs: 0,
+      lastPlayedAtMs: null,
+      entries: [
+        {
+          id: "steam",
+          sourceId: "steam",
+          state: { type: "updating" },
+          size: null,
+          location: { type: "external", path: "/steamapps/common/Counter-Strike Global Offensive" },
+          launch: { type: "uri" },
+        },
+      ],
+    },
+    (path) => path,
+  );
+  expect(details.status).toBe("installed");
+  expect(details.entries[0]?.canLaunch).toBe(false);
+});
