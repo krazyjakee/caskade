@@ -1,7 +1,8 @@
 import { type SettingsTab, settingsTabs } from "../SettingsView";
 
 /** The Settings tab the user was last on. A link to `/settings` that doesn't
- * name a tab comes back to it, across restarts. */
+ * name a tab comes back to it while the app runs (page reloads included, such
+ * as webview recovery's); a new start opens General. */
 const KEY = "caskade.settings.tab";
 const defaultSettingsTab: SettingsTab = "general";
 
@@ -16,7 +17,7 @@ export function resolveSettingsTab(search: Record<string, unknown>): SettingsTab
 
 export function rememberedSettingsTab(): SettingsTab {
   try {
-    return pickTab(localStorage.getItem(KEY)) ?? defaultSettingsTab;
+    return pickTab(sessionStorage.getItem(KEY)) ?? defaultSettingsTab;
   } catch {
     // Unavailable storage: the default.
     return defaultSettingsTab;
@@ -25,8 +26,15 @@ export function rememberedSettingsTab(): SettingsTab {
 
 export function rememberSettingsTab(tab: SettingsTab) {
   try {
-    localStorage.setItem(KEY, tab);
+    sessionStorage.setItem(KEY, tab);
   } catch {
     // Storage full or disabled: the tab still works, it just isn't kept.
   }
+}
+
+// Earlier versions kept the tab across restarts.
+try {
+  localStorage.removeItem(KEY);
+} catch {
+  // Unavailable storage: nothing was kept.
 }

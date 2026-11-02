@@ -7,6 +7,7 @@ beforeEach(() => {
   i18n.loadAndActivate({ locale: sourceLocale, messages: {} });
   // Remembered view state (the library's filter, sort and layout, the settings tab) is per test.
   localStorage.clear();
+  sessionStorage.clear();
   // Router scroll restoration is a browser concern; jsdom has no layout/scroll.
   vi.spyOn(window, "scrollTo").mockImplementation(() => {});
   // Shelves measure their containers; jsdom has no layout to observe.
