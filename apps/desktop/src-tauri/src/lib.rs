@@ -612,7 +612,10 @@ pub fn run() {
                 std::sync::Arc::new(caskade_core::devices::Keychain),
             );
             devices.set_settings(settings.clone());
-            commands::sync::setup(app.handle(), devices);
+            // Library sync with paired devices (#228–#230), in the background.
+            let sync = caskade_core::sync::SyncService::new(store.clone(), devices.clone());
+            sync.set_settings(settings.clone());
+            commands::sync::setup(app.handle(), devices, sync);
         }
         app.manage(settings);
         app.manage(store);

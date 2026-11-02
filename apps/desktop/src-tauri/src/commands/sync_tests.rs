@@ -54,11 +54,12 @@ fn devices_pair_by_link_and_by_an_opened_link_over_ipc() {
     let store = block_on(LibraryStore::in_memory()).unwrap();
     let accounts = block_on(AccountService::open(store.clone(), Bus::default())).unwrap();
     let devices = Devices::with_reach(
-        store,
+        store.clone(),
         accounts.clone(),
         Arc::new(MemoryKeyStore::default()),
         Reach::loopback(),
     );
+    let sync = SyncService::new(store, devices.clone());
     let specta = tauri_specta::Builder::<tauri::test::MockRuntime>::new()
         .commands(tauri_specta::collect_commands![
             devices_status,
@@ -98,7 +99,7 @@ fn devices_pair_by_link_and_by_an_opened_link_over_ipc() {
                 .push(serde_json::from_str(event.payload()).unwrap());
         });
     }
-    setup(app.handle(), devices);
+    setup(app.handle(), devices, sync);
     let window = tauri::WebviewWindowBuilder::new(&app, "main", Default::default())
         .build()
         .unwrap();
@@ -220,4 +221,105 @@ fn devices_pair_by_link_and_by_an_opened_link_over_ipc() {
         1,
         "still paired with the TV"
     );
+}
+
+/// A second device with library sync running, core only.
+fn other_device_syncing() -> (Devices, LibraryStore, SyncService) {
+    block_on(async {
+        let store = LibraryStore::in_memory().await.unwrap();
+        let accounts = AccountService::open(store.clone(), Bus::default())
+            .await
+            .unwrap();
+        let devices = Devices::with_reach(
+            store.clone(),
+            accounts,
+            Arc::new(MemoryKeyStore::default()),
+            Reach::loopback(),
+        );
+        devices.start();
+        let sync = SyncService::new(store.clone(), devices.clone());
+        sync.start();
+        (devices, store, sync)
+    })
+}
+
+#[test]
+fn sync_status_reaches_the_webview() {
+    let store = block_on(LibraryStore::in_memory()).unwrap();
+    let accounts = block_on(AccountService::open(store.clone(), Bus::default())).unwrap();
+    let devices = Devices::with_reach(
+        store.clone(),
+        accounts,
+        Arc::new(MemoryKeyStore::default()),
+        Reach::loopback(),
+    );
+    let sync = SyncService::new(store.clone(), devices.clone());
+    let specta = tauri_specta::Builder::<tauri::test::MockRuntime>::new()
+        .commands(tauri_specta::collect_commands![
+            devices_status,
+            devices_pairing_link,
+            devices_sync_now,
+        ])
+        .events(tauri_specta::collect_events![DevicesChanged]);
+    let app = mock_builder()
+        .invoke_handler(specta.invoke_handler())
+        .build(mock_context(noop_assets()))
+        .unwrap();
+    specta.mount_events(&app);
+    let changes = Arc::new(Mutex::new(Vec::<Value>::new()));
+    {
+        let changes = changes.clone();
+        app.listen(DevicesChanged::NAME, move |event| {
+            changes
+                .lock()
+                .unwrap()
+                .push(serde_json::from_str(event.payload()).unwrap());
+        });
+    }
+    setup(app.handle(), devices, sync);
+    let window = tauri::WebviewWindowBuilder::new(&app, "main", Default::default())
+        .build()
+        .unwrap();
+    until("the endpoint starts", || {
+        invoke(&window, "devices_status", json!({})).unwrap()["thisDevice"]["listening"] == true
+    });
+
+    // A paired device with a game this one doesn't have.
+    let (tv, tv_store, _tv_sync) = other_device_syncing();
+    until("the TV starts", || {
+        block_on(tv.status()).this_device.listening
+    });
+    block_on(tv_store.upsert_game(&caskade_core::model::Game::new("Celeste"))).unwrap();
+    let link = invoke(&window, "devices_pairing_link", json!({})).unwrap();
+    block_on(tv.accept_pairing_link(link["url"].as_str().unwrap())).unwrap();
+    let tv_id = block_on(tv.status()).this_device.id.unwrap();
+
+    invoke(&window, "devices_sync_now", json!({"deviceId": tv_id})).unwrap();
+    // The webview hears the sync run and finish, and the game arrives.
+    until("a finished sync in DevicesChanged", || {
+        changes.lock().unwrap().iter().any(|status| {
+            status["devices"].as_array().is_some_and(|devices| {
+                devices.iter().any(|d| {
+                    d["id"] == json!(tv_id) && d["lastSyncMs"].is_number() && d["syncing"] == false
+                })
+            })
+        })
+    });
+    let saw_syncing = changes.lock().unwrap().iter().any(|status| {
+        status["devices"].as_array().is_some_and(|devices| {
+            devices
+                .iter()
+                .any(|d| d["id"] == json!(tv_id) && d["syncing"] == true)
+        })
+    });
+    assert!(saw_syncing, "the webview saw it syncing");
+    until("the TV's game arrives", || {
+        block_on(store.sync_snapshot())
+            .unwrap()
+            .games
+            .iter()
+            .any(|id| block_on(store.game(id)).unwrap().unwrap().title == "Celeste")
+    });
+    let status = invoke(&window, "devices_status", json!({})).unwrap();
+    assert_eq!(status["devices"][0]["syncError"], Value::Null);
 }

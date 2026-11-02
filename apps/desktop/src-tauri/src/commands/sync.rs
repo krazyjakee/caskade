@@ -16,6 +16,7 @@ use caskade_core::devices::{
     DeviceKind, Devices, DevicesStatus, PairedDevice, Pairing, PairingLinkInfo, PairingLinkTarget,
     inspect_link,
 };
+use caskade_core::sync::SyncService;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use tauri::{AppHandle, Manager, Runtime, State};
@@ -47,9 +48,10 @@ impl OpenedPairingLink {
     }
 }
 
-/// Starts the devices service (identity, endpoint, pairing) and forwards
-/// its changes to the webview.
-pub fn setup<R: Runtime>(app: &AppHandle<R>, devices: Devices) {
+/// Starts the devices service (identity, endpoint, pairing) and library sync
+/// (#230), and forwards their changes to the webview: each device's sync
+/// state (syncing, last sync, the last failure) is in `DevicesChanged`.
+pub fn setup<R: Runtime>(app: &AppHandle<R>, devices: Devices, sync: SyncService) {
     let mut changes = devices.subscribe();
     let handle = app.clone();
     let watched = devices.clone();
@@ -66,7 +68,12 @@ pub fn setup<R: Runtime>(app: &AppHandle<R>, devices: Devices) {
         let devices = devices.clone();
         move || devices.start()
     });
+    crate::background::supervise("library sync", {
+        let sync = sync.clone();
+        move || sync.start()
+    });
     app.manage(devices);
+    app.manage(sync);
     app.manage(OpenedPairingLink::default());
 }
 
@@ -217,6 +224,18 @@ pub async fn devices_forget(
     device_id: String,
 ) -> Result<(), CommandError> {
     devices.forget(&device_id).await.map_err(report)
+}
+
+/// Syncs with a paired device now, instead of at the next poll. The result
+/// shows in `DevicesChanged`.
+#[tauri::command]
+#[specta::specta]
+pub async fn devices_sync_now(
+    sync: State<'_, SyncService>,
+    device_id: String,
+) -> Result<(), CommandError> {
+    sync.sync_now(&device_id);
+    Ok(())
 }
 
 /// Makes a new identity after the keychain lost the old one: paired devices

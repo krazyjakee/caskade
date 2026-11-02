@@ -247,6 +247,7 @@ pub fn builder() -> Builder<tauri::Wry> {
             crate::commands::sync::devices_forget,
             crate::commands::sync::devices_create_identity,
             crate::commands::sync::devices_retry_identity,
+            crate::commands::sync::devices_sync_now,
             crate::commands::backup::backup_status,
             crate::commands::backup::backup_plan,
             crate::commands::backup::backup_start,

@@ -694,6 +694,11 @@ export const commands = {
 	devicesCreateIdentity: () => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_create_identity")),
 	/**  Reads the keychain again after it didn't answer. */
 	devicesRetryIdentity: () => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_retry_identity")),
+	/**
+	 *  Syncs with a paired device now, instead of at the next poll. The result
+	 *  shows in `DevicesChanged`.
+	 */
+	devicesSyncNow: (deviceId: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_sync_now", { deviceId })),
 	backupStatus: () => typedError<BackupStatus_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("backup_status")),
 	/**
 	 *  What a backup to `destination` (the settings' folder when `None`) with
@@ -5785,6 +5790,10 @@ export type PairedDevice_Deserialize = {
 	addresses: string[],
 	lastSyncMs?: number | null,
 	pairedAtMs: number,
+	/**  Library sync with it is running now. */
+	syncing: boolean,
+	/**  Why the last sync failed, if it did. */
+	syncError?: string | null,
 };
 
 /**  A device paired with this one. Its grants stay in the core. */
@@ -5798,6 +5807,10 @@ export type PairedDevice_Serialize = {
 	addresses: string[],
 	lastSyncMs: number | null,
 	pairedAtMs: number,
+	/**  Library sync with it is running now. */
+	syncing: boolean,
+	/**  Why the last sync failed, if it did. */
+	syncError: string | null,
 };
 
 /**  A code pairing: both devices show `code`, and both users confirm. */

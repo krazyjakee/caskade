@@ -128,6 +128,16 @@ impl LibraryStore {
         )
     }
 
+    /// Records when library sync with a device last finished.
+    pub async fn set_paired_device_synced(&self, endpoint_id: &str, at_ms: i64) -> Result<()> {
+        sqlx::query("UPDATE paired_devices SET last_sync_ms=? WHERE endpoint_id=?")
+            .bind(at_ms)
+            .bind(endpoint_id)
+            .execute(&self.pool)
+            .await?;
+        Ok(())
+    }
+
     /// Records where a paired device was reached.
     pub async fn set_paired_device_addresses(
         &self,

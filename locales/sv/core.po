@@ -3661,6 +3661,18 @@ msgstr ""
 msgid "the streaming host didn't start"
 msgstr ""
 
+#: crates/caskade-core/src/sync/exchange.rs
+msgid "the connection to the other device failed"
+msgstr ""
+
+#: crates/caskade-core/src/sync/exchange.rs
+msgid "the other device sent something out of turn"
+msgstr ""
+
+#: crates/caskade-core/src/sync/exchange.rs
+msgid "the other device didn't finish"
+msgstr ""
+
 #: crates/caskade-core/src/system_stats/aggregate.rs
 msgctxt "disk name"
 msgid "System"

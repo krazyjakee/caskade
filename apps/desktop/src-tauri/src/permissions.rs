@@ -297,7 +297,10 @@ pub fn access(command: &str) -> Option<Access> {
         "streaming_set_hosting" => Admin,
         // Paired devices (#226): reading them needs an account; every change
         // is an admin's (pairing hands another device the library).
-        "devices_status" | "devices_opened_link" | "devices_dismiss_opened_link" => SignedIn,
+        "devices_status"
+        | "devices_opened_link"
+        | "devices_dismiss_opened_link"
+        | "devices_sync_now" => SignedIn,
         "devices_rename"
         | "devices_set_kind"
         | "devices_pair_nearby"

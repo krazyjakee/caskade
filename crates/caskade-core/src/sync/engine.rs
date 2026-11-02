@@ -62,17 +62,27 @@ enum Mapped {
     Wait,
 }
 
-/// Capture order: what others depend on first.
-fn rank(change: &Change) -> (u8, bool, bool) {
-    let entity = match change.entity {
+/// Capture order: what others depend on first (accounts, then games and
+/// their identities, then what refers to them), and each row's changes
+/// together, its existence and identity first, so a page boundary splits
+/// at most one row.
+fn entity_rank(entity: Entity) -> u8 {
+    match entity {
         Entity::Account => 0,
         Entity::Game => 1,
         Entity::KeptApart | Entity::IgdbMatch | Entity::ArtworkChoice => 2,
         Entity::Collection => 3,
         Entity::Member | Entity::Approval => 4,
         Entity::Session => 5,
-    };
-    (entity, change.field != "identity", change.field != EXISTS)
+    }
+}
+
+fn field_rank(field: &str) -> u8 {
+    match field {
+        EXISTS => 0,
+        "identity" => 1,
+        _ => 2,
+    }
 }
 
 impl SyncEngine {
@@ -185,9 +195,10 @@ impl SyncEngine {
             changes.push(self.draft(*entity, key, field, None));
         }
         changes.sort_by(|a, b| {
-            rank(a)
-                .cmp(&rank(b))
+            entity_rank(a.entity)
+                .cmp(&entity_rank(b.entity))
                 .then_with(|| a.key.cmp(&b.key))
+                .then_with(|| field_rank(&a.field).cmp(&field_rank(&b.field)))
                 .then_with(|| a.field.cmp(&b.field))
         });
         let now = self.now();

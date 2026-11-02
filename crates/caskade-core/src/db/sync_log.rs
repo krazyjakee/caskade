@@ -324,6 +324,25 @@ impl LibraryStore {
         Ok(value.and_then(|text| serde_json::from_str(&text).ok()))
     }
 
+    /// What SQLite's integrity and foreign key checks report: empty when the
+    /// library is sound.
+    pub async fn sync_integrity(&self) -> Result<Vec<String>> {
+        let mut problems: Vec<String> = sqlx::query_scalar::<_, String>("PRAGMA integrity_check")
+            .fetch_all(&self.pool)
+            .await?
+            .into_iter()
+            .filter(|line| line != "ok")
+            .collect();
+        let foreign: Vec<(String, Option<i64>, String, i64)> =
+            sqlx::query_as("PRAGMA foreign_key_check")
+                .fetch_all(&self.pool)
+                .await?;
+        problems.extend(foreign.into_iter().map(|(table, row, parent, _)| {
+            format!("{table} row {row:?} refers to a missing {parent}")
+        }));
+        Ok(problems)
+    }
+
     /// How many changes the log holds.
     pub async fn sync_log_len(&self) -> Result<i64> {
         Ok(sqlx::query_scalar("SELECT count(*) FROM sync_changes")

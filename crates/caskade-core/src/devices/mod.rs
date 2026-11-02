@@ -140,6 +140,10 @@ pub struct PairedDevice {
     pub addresses: Vec<String>,
     pub last_sync_ms: Option<i64>,
     pub paired_at_ms: i64,
+    /// Library sync with it is running now.
+    pub syncing: bool,
+    /// Why the last sync failed, if it did.
+    pub sync_error: Option<String>,
 }
 
 /// A Caskade device on this network that isn't paired.
@@ -247,6 +251,21 @@ struct Inner {
     revision: watch::Sender<u64>,
     /// One bind at a time.
     binding: tokio::sync::Mutex<()>,
+    /// Where library sync (#230) takes `sync` sessions.
+    sync_handler: OnceLock<Arc<dyn Sessions>>,
+    /// Each device's sync, as library sync reports it.
+    sync: Mutex<HashMap<String, DeviceSync>>,
+    /// Paired devices that came into reach (found on this network).
+    reachable: tokio::sync::broadcast::Sender<String>,
+}
+
+/// How library sync with a device is going (#230).
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct DeviceSync {
+    pub syncing: bool,
+    /// Why the last exchange failed; never a toast: a device out of reach is
+    /// a normal state.
+    pub error: Option<String>,
 }
 
 struct State {
@@ -256,6 +275,8 @@ struct State {
     pairing: Option<ActivePairing>,
     /// Forwards the endpoint's link and nearby changes; aborted on rebind.
     forwarders: Vec<Forwarder>,
+    /// Never use relays and the port the endpoint was bound with.
+    bound_with: Option<(bool, Option<u16>)>,
 }
 
 struct ActivePairing {
@@ -314,9 +335,13 @@ impl Devices {
                     endpoint: None,
                     pairing: None,
                     forwarders: Vec::new(),
+                    bound_with: None,
                 }),
                 revision: watch::channel(0).0,
                 binding: tokio::sync::Mutex::new(()),
+                sync_handler: OnceLock::new(),
+                sync: Mutex::default(),
+                reachable: tokio::sync::broadcast::channel(32).0,
             }),
         }
     }
@@ -350,8 +375,14 @@ impl Devices {
                             None => std::future::pending().await,
                         }
                     } => {
+                        // Only the connection options rebind: category
+                        // choices share the section.
                         if changed.is_some_and(|changed| changed.namespace == NAMESPACE) {
-                            inner.bind().await;
+                            let settings = inner.settings().await;
+                            let wanted = Some((settings.never_relay, settings.port));
+                            if inner.lock().bound_with != wanted {
+                                inner.bind().await;
+                            }
                         }
                     }
                     _ = retry.tick() => inner.tell_forgotten().await,
@@ -494,6 +525,7 @@ impl Devices {
         if !forgotten {
             return Err(crate::db::missing("paired device", device_id));
         }
+        self.inner.store.delete_sync_peer(device_id).await?;
         self.inner.changed();
         let inner = self.inner.clone();
         tokio::spawn(async move { inner.tell_forgotten().await });
@@ -560,6 +592,56 @@ impl Devices {
         Ok(session)
     }
 
+    /// Where `sync` sessions from paired devices go: library sync (#230).
+    pub fn set_sync_handler(&self, handler: Arc<dyn Sessions>) {
+        let _ = self.inner.sync_handler.set(handler);
+    }
+
+    /// Records how sync with a device is going, for the status.
+    pub fn set_sync_state(&self, device_id: &str, sync: DeviceSync) {
+        let changed = {
+            let mut states = self.inner.sync.lock().unwrap_or_else(|e| e.into_inner());
+            states.insert(device_id.to_owned(), sync.clone()) != Some(sync)
+        };
+        if changed {
+            self.inner.changed();
+        }
+    }
+
+    /// Records a finished sync with a device.
+    pub async fn record_sync(&self, device_id: &str, at_ms: i64) -> Result<()> {
+        self.inner.store.set_paired_device_synced(device_id, at_ms).await?;
+        self.inner.changed();
+        Ok(())
+    }
+
+    /// Paired devices that came into reach on this network, by id.
+    pub fn reachable(&self) -> tokio::sync::broadcast::Receiver<String> {
+        self.inner.reachable.subscribe()
+    }
+
+    /// This device's endpoint id while the endpoint runs.
+    pub fn listening_id(&self) -> Option<String> {
+        self.inner
+            .lock()
+            .endpoint
+            .as_ref()
+            .map(|endpoint| endpoint.id().to_string())
+    }
+
+    /// The paired devices (not forgotten), by id.
+    pub async fn paired_ids(&self) -> Result<Vec<String>> {
+        Ok(self
+            .inner
+            .store
+            .paired_devices()
+            .await?
+            .into_iter()
+            .filter(|device| device.forgotten_at_ms.is_none())
+            .map(|device| device.endpoint_id)
+            .collect())
+    }
+
     fn admin(&self) -> Result<()> {
         self.inner.accounts.require(Permission::Admin)
     }
@@ -572,6 +654,10 @@ impl Inner {
 
     fn changed(&self) {
         self.revision.send_modify(|revision| *revision += 1);
+    }
+
+    fn sync_states(&self) -> HashMap<String, DeviceSync> {
+        self.sync.lock().unwrap_or_else(|e| e.into_inner()).clone()
     }
 
     fn endpoint(&self) -> Result<SyncEndpoint> {
@@ -698,6 +784,7 @@ impl Inner {
             return;
         };
         let settings = self.settings().await;
+        self.lock().bound_with = Some((settings.never_relay, settings.port));
         let reach = self
             .reach
             .clone()
@@ -740,10 +827,16 @@ impl Inner {
             let mut nearby = lan.subscribe();
             let weak = Arc::downgrade(self);
             forwarders.push(Forwarder(tokio::spawn(async move {
-                while let Ok(_) | Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) =
-                    nearby.recv().await
-                {
+                loop {
+                    let found = match nearby.recv().await {
+                        Ok(caskade_sync::NearbyChanged::Found(found)) => Some(found.id),
+                        Ok(_) | Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => None,
+                        Err(_) => break,
+                    };
                     let Some(inner) = weak.upgrade() else { break };
+                    if let Some(found) = found {
+                        let _ = inner.reachable.send(found.to_string());
+                    }
                     inner.changed();
                     inner.tell_forgotten().await;
                 }
@@ -767,7 +860,7 @@ impl Inner {
         let devices: Vec<PairedDevice> = paired
             .iter()
             .filter(|device| device.forgotten_at_ms.is_none())
-            .map(|device| view(device, endpoint.as_ref()))
+            .map(|device| view(device, endpoint.as_ref(), &self.sync_states()))
             .collect();
         let nearby = endpoint
             .as_ref()
@@ -821,7 +914,7 @@ impl Inner {
             .ok()?
             .iter()
             .find(|device| device.endpoint_id == id && device.forgotten_at_ms.is_none())
-            .map(|device| view(device, endpoint.as_ref()))
+            .map(|device| view(device, endpoint.as_ref(), &self.sync_states()))
     }
 
     fn pairing(&self) -> Option<Pairing> {
@@ -1018,13 +1111,22 @@ impl Sessions for Handler {
                 session.end().await;
                 inner.forgotten_by(peer).await;
             }
-            // Library sync comes with #230; copies with #233.
+            Purpose::Sync => match inner.sync_handler.get() {
+                Some(handler) => handler.opened(session).await,
+                None => session.end().await,
+            },
+            // Copies come with #233.
             _ => session.end().await,
         }
     }
 }
 
-fn view(device: &PairedDeviceRecord, endpoint: Option<&SyncEndpoint>) -> PairedDevice {
+fn view(
+    device: &PairedDeviceRecord,
+    endpoint: Option<&SyncEndpoint>,
+    sync: &HashMap<String, DeviceSync>,
+) -> PairedDevice {
+    let state = sync.get(&device.endpoint_id).cloned().unwrap_or_default();
     let link = device
         .endpoint_id
         .parse::<EndpointId>()
@@ -1047,6 +1149,8 @@ fn view(device: &PairedDeviceRecord, endpoint: Option<&SyncEndpoint>) -> PairedD
             .collect(),
         last_sync_ms: device.last_sync_ms,
         paired_at_ms: device.paired_at_ms,
+        syncing: state.syncing,
+        sync_error: state.error,
     }
 }
 

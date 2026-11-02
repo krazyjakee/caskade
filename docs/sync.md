@@ -399,6 +399,68 @@ other devices said they have (`sync_peers`). A restored library carries on
 from its own clocks; on its next connection it receives everything it lacks,
 its own later changes included, and nothing it restored is stamped as new.
 
+## Syncing in the background
+
+`caskade_core::sync::SyncService` (#230, `net` feature) keeps paired devices in
+step on its own. The app starts it beside `Devices`, which hands it the `sync`
+sessions paired devices open.
+
+### The exchange
+
+On a `sync` connection (the opening checked the grant), both sides run the
+same exchange (`sync::exchange`):
+
+```text
+Hello { seen }      ◀─▶  Hello { seen }      what each has: its version vector
+Page { changes } …  ◀─▶  Page { changes } …  what the other hasn't seen, 200 per page
+Done                ◀─▶  Done
+Ack { seen }        ◀─▶  Ack { seen }        what each has after applying
+```
+
+Both directions run at once. Each page is imported and applied before the next
+is read, one transaction per change, and a capture keeps each row's changes
+together (existence first), so a page boundary splits at most one row. A
+connection that drops mid-exchange leaves both libraries consistent: every
+change applied entirely or not at all, and the version vector says exactly
+what arrived. The next exchange starts from there. `Ack` ends the exchange only
+when both sides have applied everything, and is what compaction counts on
+(`sync_peers`). Lines are read with an 8 MiB bound.
+
+Categories set to This device only aren't sent. One turned back on is sent to
+each device again in full on the next exchange. The receiver takes what it
+lacks and ignores the rest, and the changes that waited here apply at once.
+
+### When it runs
+
+- Every 2 seconds it captures this device's changes, and exchanges with every
+  paired device when there are any, so a change reaches a device on the same
+  network within seconds.
+- It also exchanges when a paired device is found on this network (mDNS), and
+  whenever a paired device connects.
+- Otherwise it polls each device a minute after a sync, backing off from 30
+  seconds to 5 minutes while one can't be reached.
+- The log is compacted every 10 minutes.
+
+When both devices dial at once, both exchanges run; that's safe, because every
+change applies in its own transaction. An unreachable device is a normal state,
+never a toast. Each device's state (`syncing`, `lastSyncMs`, `syncError`) is in
+`DevicesStatus` and reaches the webview as `DevicesChanged`.
+`devices_sync_now` syncs with one device at once. Sync runs on background
+tasks with short transactions, so the library and game launches aren't held
+up.
+
+### Not carried yet
+
+These are declared synced by the policy but don't travel yet:
+- hand-made achievement links;
+- launch actions and game scripts (optional categories);
+- RomM servers and add-ons;
+- the appearance and accounts settings;
+- the files of user-imported artwork (iroh-blobs).
+
+Each device's own default admin account appears on the other devices as a
+second "Player" account.
+
 ## Lifetime
 
 `SyncEndpoint::bind` runs on the caller's tokio runtime; the crate creates
@@ -473,4 +535,4 @@ Results:
 
 | Date | Machines | Steps passed | Notes |
 | --- | --- | --- | --- |
-| — | — | — | Not run yet: needs two machines (#225, #226) and library sync (#230). |
+| — | — | — | Not run yet: needs two machines. Library sync (#230) is in place. |
