@@ -93,7 +93,10 @@ accounts without a limit are never asked.
   "Admin PIN needed".
 - Normal Library browsing and its filters omit games that need approval,
   including unrated games when the account requires it. Counts, platform
-  lists, paging, the alphabet bar and Select all follow that same rule.
+  lists, paging, the alphabet bar and Select all follow that same rule, as
+  do the account's collections: their pages and their cards' counts,
+  covers and play time (a smart collection that searches by title shows
+  them locked, as search does).
   Search suggestions and Library search results still include them, with
   a lock and **Admin PIN needed**. Searching or opening a game grants no
   permission to play. These rules never change the shared hidden setting.
@@ -114,6 +117,10 @@ accounts without a limit are never asked.
   Other games, other accounts and the account's overall age limit stay as
   they were. Deleting the account or game deletes its exceptions; backups
   include them with the rest of the account data.
+- When two games merge into one, an account's exception covers the merged
+  game only if each of the two was approved or playable for that account
+  without a PIN, so a merge never approves a release the admin didn't
+  approve. A release separated from a game starts without one.
 
 ## The PIN is a household lock
 

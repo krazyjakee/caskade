@@ -176,6 +176,8 @@ pub fn access(command: &str) -> Option<Access> {
         | "launch_game"
         | "launch_game_with"
         | "game_tool_run"
+        // A trailer starts the video window, a process of its own.
+        | "video_play"
         | "launch_cancel"
         | "lifecycle_script_test_cancel"
         | "game_achievements_refresh"

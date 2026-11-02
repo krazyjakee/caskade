@@ -24,6 +24,9 @@ const EMULATED: &str =
     "EXISTS(SELECT 1 FROM game_entries e WHERE e.game_id=g.id AND e.launch_kind='emulator')";
 const WEB: &str =
     "EXISTS(SELECT 1 FROM game_entries e WHERE e.game_id=g.id AND e.launch_kind='web')";
+/// Game `g` needs an admin PIN for account `ac` (#209): the core play gate's
+/// rule, before approvals. Standard accounts with an age limit only.
+pub(super) const AGE_HELD: &str = "(ac.role='standard' AND ac.max_age IS NOT NULL AND (g.min_age>ac.max_age OR (g.min_age IS NULL AND ac.unrated_needs_pin)))";
 /// Not a web game alone: web games show in the Web tab only, and a game
 /// that also has another release shows in the others too.
 const NOT_WEB_ONLY: &str = "(NOT EXISTS(SELECT 1 FROM game_entries e WHERE e.game_id=g.id AND e.launch_kind='web') OR EXISTS(SELECT 1 FROM game_entries e WHERE e.game_id=g.id AND e.launch_kind IS NOT 'web'))";
@@ -81,20 +84,22 @@ impl LibraryStore {
             .get_collection(account, id)
             .await?
             .ok_or_else(|| missing("collection", id))?;
-        self.collection_page(&collection, offset, limit).await
+        self.collection_page(&collection, account, offset, limit)
+            .await
     }
     /// Every collection of `account`'s as its card shows it: pinned ones
     /// first, then by name.
     pub async fn collection_summaries(&self, account: &str) -> Result<Vec<CollectionSummary>> {
         let mut out = Vec::new();
         for collection in self.collection_list(account).await? {
-            let page = self.collection_page(&collection, 0, 4).await?;
+            let page = self.collection_page(&collection, account, 0, 4).await?;
             let (request, members) = collection_query(&collection, 0, 0);
             let mut playtime = QueryBuilder::<Sqlite>::new("SELECT coalesce(sum(");
             playtime
                 .push(PLAYTIME)
                 .push("),0) FROM games g WHERE g.hidden=0");
             filters(&mut playtime, &request, members, false);
+            age_visibility(&mut playtime, &request, Some(account));
             let playtime_ms: i64 = playtime.build_query_scalar().fetch_one(&self.pool).await?;
             out.push(CollectionSummary {
                 id: collection.id,
@@ -114,14 +119,18 @@ impl LibraryStore {
         }
         Ok(out)
     }
+    /// A collection is its account's, so it browses as the Library does for
+    /// that account: games held back by age limits show only where a smart
+    /// collection searches by title, locked.
     async fn collection_page(
         &self,
         collection: &Collection,
+        account: &str,
         offset: u32,
         limit: u32,
     ) -> Result<GamePage> {
         let (request, members) = collection_query(collection, offset, limit);
-        self.list_with_collection(&request, members, false, None)
+        self.list_with_collection(&request, members, false, Some(account))
             .await
     }
     async fn list_with_collection(
@@ -434,9 +443,12 @@ fn age_blocked(query: &mut QueryBuilder<Sqlite>, account: Option<&str>) {
         query.push("0");
         return;
     };
-    query.push("EXISTS(SELECT 1 FROM accounts ac WHERE ac.id=")
+    query
+        .push("EXISTS(SELECT 1 FROM accounts ac WHERE ac.id=")
         .push_bind(account.to_owned())
-        .push(" AND ac.role='standard' AND ac.max_age IS NOT NULL AND (g.min_age>ac.max_age OR (g.min_age IS NULL AND ac.unrated_needs_pin)) AND NOT EXISTS(SELECT 1 FROM account_game_approvals ap WHERE ap.account_id=ac.id AND ap.game_id=g.id))");
+        .push(" AND ")
+        .push(AGE_HELD)
+        .push(" AND NOT EXISTS(SELECT 1 FROM account_game_approvals ap WHERE ap.account_id=ac.id AND ap.game_id=g.id))");
 }
 
 fn age_visibility(query: &mut QueryBuilder<Sqlite>, request: &ListGames, account: Option<&str>) {

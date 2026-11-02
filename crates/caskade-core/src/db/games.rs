@@ -330,6 +330,7 @@ pub(super) async fn merge_in(
         .bind(keep)
         .execute(&mut **tx)
         .await?;
+    merge_age_approvals(tx, keep, remove).await?;
     super::igdb::merge_age_ratings(tx, keep, remove).await?;
     // Reported play time of releases now in one game counts once (#169).
     super::playtime::recount(tx, keep).await?;
@@ -338,6 +339,32 @@ pub(super) async fn merge_in(
         .execute(&mut **tx)
         .await?;
     Ok(target)
+}
+/// An account's permanent age approval (#269) covers the merged game only
+/// where it covered, or wasn't needed for, each of the two: the merge never
+/// approves a release the admin didn't. Runs before the ratings merge, on
+/// each game's own minimum age.
+async fn merge_age_approvals(
+    tx: &mut Transaction<'_, Sqlite>,
+    keep: &str,
+    remove: &str,
+) -> Result<()> {
+    use super::query::AGE_HELD;
+    sqlx::query(sqlx::AssertSqlSafe(format!(
+        "DELETE FROM account_game_approvals WHERE game_id=?1 AND account_id IN (SELECT ac.id FROM accounts ac JOIN games g ON g.id=?2 WHERE {AGE_HELD} AND NOT EXISTS(SELECT 1 FROM account_game_approvals d WHERE d.account_id=ac.id AND d.game_id=?2))"
+    )))
+    .bind(keep)
+    .bind(remove)
+    .execute(&mut **tx)
+    .await?;
+    sqlx::query(sqlx::AssertSqlSafe(format!(
+        "INSERT OR IGNORE INTO account_game_approvals(account_id,game_id) SELECT ap.account_id,?1 FROM account_game_approvals ap JOIN accounts ac ON ac.id=ap.account_id JOIN games g ON g.id=?1 WHERE ap.game_id=?2 AND NOT {AGE_HELD}"
+    )))
+    .bind(keep)
+    .bind(remove)
+    .execute(&mut **tx)
+    .await?;
+    Ok(())
 }
 pub(super) async fn load_game(tx: &mut Transaction<'_, Sqlite>, id: &str) -> Result<Game> {
     decode(

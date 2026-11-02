@@ -455,3 +455,123 @@ async fn browsing_counts_pages_and_search_follow_the_accounts_persistent_excepti
         3
     );
 }
+
+#[tokio::test]
+async fn collections_browse_like_the_library_for_their_account() {
+    use crate::model::{CollectionKind, ListGames, SaveCollection};
+    let s = setup().await;
+    let store = &s.accounts.store;
+    let save = |name: &str, kind| SaveCollection {
+        id: None,
+        name: name.into(),
+        description: String::new(),
+        kind,
+    };
+    let titles =
+        |page: crate::model::GamePage| page.items.into_iter().map(|g| g.title).collect::<Vec<_>>();
+    let manual = store
+        .save_collection(&s.strict, &save("Mine", CollectionKind::Manual))
+        .await
+        .unwrap();
+    store
+        .add_to_collection(
+            &s.strict,
+            &manual.id,
+            &[s.adult.clone(), s.family.clone(), s.unrated.clone()],
+        )
+        .await
+        .unwrap();
+    let searched = store
+        .save_collection(
+            &s.strict,
+            &save(
+                "Grown",
+                CollectionKind::Smart {
+                    query: ListGames {
+                        query: Some("Grown".into()),
+                        ..Default::default()
+                    },
+                },
+            ),
+        )
+        .await
+        .unwrap();
+    assert_eq!(
+        titles(
+            store
+                .collection_games(&s.strict, &manual.id, 0, 10)
+                .await
+                .unwrap()
+        ),
+        ["Family Game"]
+    );
+    let summaries = store.collection_summaries(&s.strict).await.unwrap();
+    let mine = summaries.iter().find(|c| c.id == manual.id).unwrap();
+    assert_eq!(mine.games, 1);
+    // A smart collection searching by title finds it, locked, as search does.
+    let found = store
+        .collection_games(&s.strict, &searched.id, 0, 10)
+        .await
+        .unwrap();
+    assert_eq!(found.total, 1);
+    assert!(found.items[0].admin_pin_needed);
+    s.accounts.sign_in(&s.strict, None).await.unwrap();
+    s.accounts
+        .approve_play_for(&s.strict, &s.adult, ADMIN_PIN.into(), true)
+        .await
+        .unwrap();
+    assert_eq!(
+        titles(
+            store
+                .collection_games(&s.strict, &manual.id, 0, 10)
+                .await
+                .unwrap()
+        ),
+        ["Family Game", "Grown-up Game"]
+    );
+}
+
+#[tokio::test]
+async fn a_merge_keeps_an_approval_only_where_it_covered_both_games() {
+    let s = setup().await;
+    let store = &s.accounts.store;
+    let approved = |account: &str, game: &str| {
+        let (account, game) = (account.to_owned(), game.to_owned());
+        async move { store.game_age_approved(&account, &game).await.unwrap() }
+    };
+    s.accounts.sign_in(&s.strict, None).await.unwrap();
+    let mature = game(store, "Grown-up Game II", Some("16")).await;
+    for game in [&s.adult, &s.unrated] {
+        s.accounts
+            .approve_play_for(&s.strict, game, ADMIN_PIN.into(), true)
+            .await
+            .unwrap();
+    }
+    s.accounts.sign_in(&s.kid, None).await.unwrap();
+    s.accounts
+        .approve_play_for(&s.kid, &s.adult, ADMIN_PIN.into(), true)
+        .await
+        .unwrap();
+    // Strict approved both: the merged game stays approved.
+    store.merge_games(&s.adult, &s.unrated).await.unwrap();
+    assert!(approved(&s.strict, &s.adult).await);
+    // Kid plays the unrated donor freely and approved the kept game.
+    assert!(approved(&s.kid, &s.adult).await);
+    // Nobody approved the PEGI 16 donor: no account keeps its approval.
+    store.merge_games(&s.adult, &mature).await.unwrap();
+    assert!(!approved(&s.strict, &s.adult).await);
+    assert!(!approved(&s.kid, &s.adult).await);
+    assert!(restricted(s.accounts.admit(&s.adult).await));
+    // A donor's approval joins a kept game the account plays anyway, and
+    // stays there once the merge raised its rating.
+    s.accounts
+        .approve_play_for(&s.kid, &s.adult, ADMIN_PIN.into(), true)
+        .await
+        .unwrap();
+    store.merge_games(&s.family, &s.adult).await.unwrap();
+    assert!(approved(&s.kid, &s.family).await);
+    assert!(!approved(&s.strict, &s.family).await);
+    s.accounts.admit(&s.family).await.unwrap();
+    s.accounts.sign_in(&s.strict, None).await.unwrap();
+    assert!(restricted(s.accounts.admit(&s.family).await));
+}
