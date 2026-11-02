@@ -176,6 +176,42 @@ fn flatten(dir: &Path) -> Result<()> {
     }
 }
 
+/// Unpacks an AppImage into the empty folder `into` with its own
+/// `--appimage-extract` (no FUSE needed), so its program runs directly.
+pub(crate) fn extract_appimage(file: &Path, into: &Path) -> Result<()> {
+    let work = into.with_extension("extracting");
+    let _ = fs::remove_dir_all(&work);
+    fs::create_dir_all(&work)?;
+    executable(file)?;
+    let status = std::process::Command::new(file)
+        .arg("--appimage-extract")
+        .current_dir(&work)
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .status()
+        .map_err(|error| {
+            invalid(crate::tr!(
+                "couldn't unpack {archive}: {error}",
+                archive = file.display().to_string(),
+                error = error.to_string()
+            ))
+        })?;
+    let root = work.join("squashfs-root");
+    if !status.success() || !root.is_dir() {
+        let _ = fs::remove_dir_all(&work);
+        return Err(invalid(crate::tr!(
+            "couldn't unpack {archive}: {error}",
+            archive = file.display().to_string(),
+            error = status.to_string()
+        )));
+    }
+    let _ = fs::remove_dir_all(into);
+    fs::rename(&root, into)?;
+    fs::remove_dir_all(&work)?;
+    Ok(())
+}
+
 /// Every file under `dir`, relative, skipping Caskade's own folder.
 pub(crate) fn files(dir: &Path) -> Result<Vec<PathBuf>> {
     let mut found = Vec::new();

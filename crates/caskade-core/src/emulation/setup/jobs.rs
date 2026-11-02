@@ -400,6 +400,7 @@ impl EmulatorSetup {
             old_version: old_version.to_owned(),
             name: definition.name.clone(),
             missing,
+            extract_appimage: false,
             cancel: cancel.clone(),
         })
         .await

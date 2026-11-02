@@ -323,6 +323,14 @@ export const commands = {
 	 *  can't load; the page draws its own then.
 	 */
 	gameAchievementIcon: (gameId: string, storeAccountId: string, productId: string, achievementId: string, locked: boolean) => typedError<CachedArtwork | null, ErrorReport_Serialize>(__TAURI_INVOKE("game_achievement_icon", { gameId, storeAccountId, productId, achievementId, locked })),
+	/**  The host's state: off, setting up, starting, ready or needing attention. */
+	streamingHostStatus: () => __TAURI_INVOKE<HostStatus_Serialize>("streaming_host_status"),
+	/**
+	 *  Lets other devices stream games from this one, or stops it. Switching on
+	 *  downloads and sets up the host with one administrator prompt; switching
+	 *  off removes it with one. A dismissed prompt changes nothing.
+	 */
+	streamingSetHosting: (on: boolean) => typedError<HostOutcome, ErrorReport_Serialize>(__TAURI_INVOKE("streaming_set_hosting", { on })),
 	storageList: () => typedError<RootSummary_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("storage_list")),
 	storageAdd: (path: string, label: string | null) => typedError<RootSummary_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("storage_add", { path, label })),
 	storageEdit: (id: string, label: string | null, folderTemplate: string) => typedError<RootSummary_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("storage_edit", { id, label, folderTemplate })),
@@ -4168,6 +4176,42 @@ export type HardcoreUnlock_Serialize = {
 
 /**  Emitted after every `hello` command. */
 export type Hello = Greeting;
+
+/**  How switching hosting on or off ended. */
+export type HostOutcome = "on" | "off" | 
+/**  The administrator prompt was dismissed: nothing changed. */
+"cancelled" | 
+/**  The OS refused the prompt: nothing changed. */
+"refused";
+
+/**  Where hosting is. */
+export type HostState = "off" | 
+/**  Downloading and setting up. */
+"settingUp" | 
+/**  Started, not answering yet. */
+"starting" | "ready" | 
+/**  It crashed too often, didn't start or refused Caskade's sign-in. */
+"needsAttention" | 
+/**  This system can't host (macOS in this milestone). */
+"unsupported";
+
+export type HostStatus = HostStatus_Serialize | HostStatus_Deserialize;
+
+export type HostStatus_Deserialize = {
+	state: HostState,
+	/**  The host program's version, once it answered. */
+	version?: string | null,
+	/**  Why it needs attention, for people. */
+	problem?: string | null,
+};
+
+export type HostStatus_Serialize = {
+	state: HostState,
+	/**  The host program's version, once it answered. */
+	version: string | null,
+	/**  Why it needs attention, for people. */
+	problem: string | null,
+};
 
 /**  Where this device's identity stands. */
 export type IdentityStatus = 

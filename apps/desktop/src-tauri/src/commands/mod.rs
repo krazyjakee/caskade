@@ -34,6 +34,7 @@ pub mod romm;
 pub mod scripts;
 pub mod settings;
 pub mod storage;
+pub mod streaming;
 pub mod store_accounts;
 pub mod sync;
 pub mod system_stats;

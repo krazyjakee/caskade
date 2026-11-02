@@ -29,6 +29,9 @@ pub(crate) struct Release {
     pub name: String,
     /// The error when the release holds nothing the rules find.
     pub missing: String,
+    /// An AppImage release is unpacked (`--appimage-extract`) rather than
+    /// installed as one file ([`super::ToolDefinition::extract`]).
+    pub extract_appimage: bool,
     pub cancel: CancellationToken,
 }
 
@@ -52,11 +55,19 @@ fn swap_in(release: Release) -> Result<EmulatorInstall> {
         old_version,
         name,
         missing,
+        extract_appimage,
         cancel,
     } = release;
     let _ = std::fs::remove_dir_all(&staging);
     let unpacked = (|| {
-        unpack::unpack(&file, &staging)?;
+        let appimage = file
+            .file_name()
+            .is_some_and(|name| name.to_string_lossy().to_lowercase().ends_with(".appimage"));
+        if extract_appimage && appimage {
+            unpack::extract_appimage(&file, &staging)?;
+        } else {
+            unpack::unpack(&file, &staging)?;
+        }
         let install = unpack::locate(&staging, &rules, os).ok_or_else(|| {
             let listing = unpack::files(&staging)
                 .unwrap_or_default()

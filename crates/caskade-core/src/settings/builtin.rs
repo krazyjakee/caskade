@@ -308,6 +308,17 @@ impl Default for AppUpdateSettings {
     }
 }
 
+/// Game streaming (STREAMING-PLAN §8.5): whether other devices may stream
+/// games from this one. Hosting is switched on and off through the
+/// streaming commands, which install and set up the host first.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StreamingSettings {
+    #[schemars(title = "Let other devices stream games from this one")]
+    /// Other devices on the local network can play this device's games.
+    pub hosting: bool,
+}
+
 /// First-run setup: whether it has been done, and its sounds.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -441,6 +452,10 @@ impl SettingsService {
         )?)?;
         self.register(SectionDefinition::typed::<AppUpdateSettings>(
             "core.appUpdates",
+            1,
+        )?)?;
+        self.register(SectionDefinition::typed::<StreamingSettings>(
+            "core.streaming",
             1,
         )?)?;
         self.register(SectionDefinition::typed::<OnboardingSettings>(

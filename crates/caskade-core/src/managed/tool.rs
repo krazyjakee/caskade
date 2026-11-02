@@ -24,6 +24,10 @@ pub struct ToolDefinition {
     /// How to find it, on each OS: in its own folder after an install.
     #[serde(default)]
     pub detect: Detect,
+    /// An AppImage release is unpacked and its program run directly: no
+    /// FUSE, and none of the AppImage's own start-up script.
+    #[serde(default)]
+    pub extract: bool,
     #[serde(default)]
     pub install: ToolInstall,
 }

@@ -6,6 +6,9 @@
 id = "sunshine"
 name = "Sunshine"
 dir = "streaming/host"
+# Unpacked at install: the program runs directly, without FUSE or the
+# AppImage's start-up script (which writes ~/.config/sunshine).
+extract = true
 
 [detect.windows]
 executable = "(?i)^sunshine\\.exe$"

@@ -324,6 +324,16 @@ pub fn run() {
                     let tools = tools.clone();
                     move || tools.watch()
                 });
+                // The streaming host (#257): runs with Caskade when hosting is on.
+                commands::streaming::setup(
+                    app.handle(),
+                    caskade_core::streaming::StreamingHost::new(
+                        tools.clone(),
+                        caskade_core::elevation::Elevation::new(&setup_paths),
+                        settings.clone(),
+                        &setup_paths,
+                    ),
+                );
                 app.manage(tools);
             }
             Err(error) => tracing::error!(%error, "shipped tool definitions are invalid"),
@@ -617,7 +627,16 @@ pub fn run() {
     })
     .build(tauri::generate_context!())
     .expect("error while building Caskade")
-    .run(tray::on_run_event);
+    .run(run_event);
+}
+
+/// The app's run events: the streaming host stops when Caskade exits
+/// (#257), then the tray's own handling.
+pub fn run_event<R: tauri::Runtime>(app: &tauri::AppHandle<R>, event: tauri::RunEvent) {
+    if let tauri::RunEvent::Exit = event {
+        commands::streaming::on_exit(app);
+    }
+    tray::on_run_event(app, event);
 }
 
 /// Ends a window process (`--web-game`, `--video`) with its window's code.

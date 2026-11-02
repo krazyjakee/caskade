@@ -45,11 +45,14 @@ for step in "$@"; do
       mkdir -p "${rules%/*}" || fail "couldn't make the rules folder"
       cat > "$rules.tmp" <<'RULES' && mv -f "$rules.tmp" "$rules" || fail "couldn't write the udev rules"
 # Caskade game streaming: lets the streaming host create virtual input
-# devices. Added and removed by Caskade.
+# devices (Sunshine's own rules as of v2026.914). Added and removed by Caskade.
 KERNEL=="uinput", SUBSYSTEM=="misc", OPTIONS+="static_node=uinput", GROUP="input", MODE="0660", TAG+="uaccess"
 KERNEL=="uhid", GROUP="input", MODE="0660", TAG+="uaccess"
-KERNEL=="hidraw*", ATTRS{name}=="Sunshine*", GROUP="input", MODE="0660", TAG+="uaccess"
-SUBSYSTEMS=="input", ATTRS{name}=="Sunshine*", GROUP="input", MODE="0660", TAG+="uaccess"
+SUBSYSTEM=="hidraw", KERNEL=="hidraw*", IMPORT{parent}="HID_*"
+SUBSYSTEM=="hidraw", KERNEL=="hidraw*", ENV{HID_PHYS}=="libvirtualhid/uhid/*", GROUP="input", MODE="0660", TAG+="uaccess"
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{phys}=="libvirtualhid/uhid/*", GROUP="input", MODE="0660", TAG+="uaccess"
+SUBSYSTEM=="hidraw", KERNEL=="hidraw*", ENV{HID_NAME}=="Sunshine (libvirtualhid)*", GROUP="input", MODE="0660", TAG+="uaccess"
+SUBSYSTEMS=="input", ATTRS{name}=="Sunshine (libvirtualhid)*", GROUP="input", MODE="0660", TAG+="uaccess"
 RULES
       reload=1 ;;
     remove-rules) rm -f "$rules" || fail "couldn't remove the udev rules"; reload=1 ;;
@@ -127,7 +130,9 @@ impl Runner for LinuxRunner {
             // A module built into the kernel shows here too, and is never
             // loaded or unloaded.
             Change::UhidLoaded => Path::new("/sys/module/uhid").exists(),
-            Change::Service | Change::FirewallTcp | Change::FirewallUdp => false,
+            Change::HostProgram | Change::Service | Change::FirewallTcp | Change::FirewallUdp => {
+                false
+            }
         }
     }
 

@@ -46,7 +46,9 @@ impl Runner for Fake {
 fn elevation(os: OperatingSystem) -> (Elevation, Arc<Fake>, tempfile::TempDir) {
     let temp = tempfile::tempdir().unwrap();
     let fake = Arc::new(Fake::default());
-    let elevation = Elevation::with_runner(fake.clone(), os, &AppPaths::under(temp.path()));
+    let paths = AppPaths::under(temp.path());
+    std::fs::create_dir_all(paths.data.join("streaming/host")).unwrap();
+    let elevation = Elevation::with_runner(fake.clone(), os, &paths);
     (elevation, fake, temp)
 }
 
@@ -149,8 +151,16 @@ async fn the_undo_spares_what_someone_else_added_and_survives_a_cancel() {
     fake.present.lock().unwrap().insert(Change::FirewallTcp);
     assert_eq!(
         elevation.apply(Plan::StreamingHost).await.unwrap(),
-        Outcome::Done(set(&[Change::Service, Change::FirewallUdp]))
+        Outcome::Done(set(&[
+            Change::HostProgram,
+            Change::Service,
+            Change::FirewallUdp
+        ]))
     );
+    // Copying the host program carries the staged manifest's hash.
+    let first = fake.requests.lock().unwrap()[0].clone();
+    assert_eq!(first.steps[0], Step::Add(Change::HostProgram));
+    assert_eq!(first.manifest.as_deref().map(str::len), Some(64));
     // A cancelled undo keeps the record for next time.
     *fake.answer.lock().unwrap() = Some(Prompt::Cancelled);
     assert_eq!(
@@ -159,7 +169,7 @@ async fn the_undo_spares_what_someone_else_added_and_survives_a_cancel() {
     );
     assert_eq!(
         elevation.record(Plan::StreamingHost).unwrap().added,
-        set(&[Change::Service, Change::FirewallUdp])
+        set(&[Change::HostProgram, Change::Service, Change::FirewallUdp])
     );
     *fake.answer.lock().unwrap() = None;
     elevation.undo(Plan::StreamingHost).await.unwrap();
@@ -168,9 +178,11 @@ async fn the_undo_spares_what_someone_else_added_and_survives_a_cancel() {
         last.steps,
         [
             Step::Remove(Change::FirewallUdp),
-            Step::Remove(Change::Service)
+            Step::Remove(Change::Service),
+            Step::Remove(Change::HostProgram)
         ]
     );
+    assert_eq!(last.manifest, None);
     assert_eq!(*fake.present.lock().unwrap(), set(&[Change::FirewallTcp]));
 }
 
@@ -195,6 +207,7 @@ fn the_linux_command_is_constants_and_step_names() {
             Step::Add(Change::UhidLoaded),
         ],
         host_dir: "/home/u/.local/share/x/streaming/host".into(),
+        manifest: None,
     };
     let argv = linux::command(&request).unwrap();
     assert_eq!(
@@ -215,6 +228,7 @@ fn the_linux_command_is_constants_and_step_names() {
     let wrong = Request {
         steps: vec![Step::Add(Change::Service)],
         host_dir: "/x".into(),
+        manifest: None,
     };
     assert!(linux::command(&wrong).is_err());
     assert_eq!(linux::prompt(Some(0), "").unwrap(), Prompt::Done);
@@ -339,35 +353,70 @@ mod script {
     }
 }
 
-#[test]
-fn the_windows_elevated_side_takes_names_and_rolls_back() {
+/// A staged host (`<data>/streaming/host`) and the administrator-only
+/// target it is copied to.
+fn staged() -> (tempfile::TempDir, std::path::PathBuf, std::path::PathBuf) {
     let temp = tempfile::tempdir().unwrap();
     let host = temp.path().join("data").join("streaming").join("host");
     std::fs::create_dir_all(host.join("tools")).unwrap();
-    std::fs::write(host.join("sunshine.exe"), "").unwrap();
-    std::fs::write(host.join("tools").join("sunshinesvc.exe"), "").unwrap();
-    let args = |steps: &[&str], host: &Path| {
-        let mut args = vec!["caskade.exe".to_owned(), windows::ELEVATED_ARG.to_owned()];
-        args.extend(steps.iter().map(|step| (*step).to_owned()));
-        args.push("--host".into());
-        args.push(host.to_string_lossy().into_owned());
-        args
-    };
+    std::fs::create_dir_all(host.join("config")).unwrap();
+    std::fs::write(host.join("sunshine.exe"), "host").unwrap();
+    std::fs::write(host.join("tools").join("sunshinesvc.exe"), "svc").unwrap();
+    std::fs::write(
+        host.join("config").join("sunshine.conf"),
+        "sunshine_name = Den",
+    )
+    .unwrap();
+    let target = temp
+        .path()
+        .join("pf")
+        .join("Caskade")
+        .join("Streaming")
+        .join("host");
+    (temp, host, target)
+}
 
+fn elevated(steps: &[&str], host: &Path, manifest: Option<&str>) -> Vec<String> {
+    let mut args = vec!["caskade.exe".to_owned(), windows::ELEVATED_ARG.to_owned()];
+    args.extend(steps.iter().map(|step| (*step).to_owned()));
+    args.push("--host".into());
+    args.push(host.to_string_lossy().into_owned());
+    if let Some(manifest) = manifest {
+        args.push("--manifest".into());
+        args.push(manifest.to_owned());
+    }
+    args
+}
+
+#[test]
+fn the_windows_host_is_copied_checked_and_pointed_at_from_program_files() {
+    let (_temp, host, target) = staged();
+    let manifest = windows::write_manifest(&host).unwrap();
+    let all = [
+        "add-host",
+        "add-service",
+        "add-firewall-tcp",
+        "add-firewall-udp",
+    ];
     let mut ran = Vec::new();
     let code = windows::perform_with(
-        &args(
-            &["add-service", "add-firewall-tcp", "add-firewall-udp"],
-            &host,
-        ),
+        &elevated(&all, &host, Some(&manifest)),
+        &target,
         &mut |program, args| {
             ran.push(format!("{program} {}", args.join(" ")));
             true
         },
     );
     assert_eq!(code, 0);
+    // The program and its configuration, as staged; not Caskade's records.
+    assert_eq!(read(&target.join("sunshine.exe")), "host");
+    assert_eq!(
+        read(&target.join("config").join("sunshine.conf")),
+        "sunshine_name = Den"
+    );
+    assert!(!target.join(".caskade").exists());
     assert_eq!(ran.len(), 4, "{ran:#?}");
-    let svc = host.join("tools").join("sunshinesvc.exe");
+    let svc = target.join("tools").join("sunshinesvc.exe");
     assert!(ran[0].starts_with(&format!(
         "sc.exe create CaskadeStreaming binPath= \"{}\" start= demand",
         svc.display()
@@ -382,16 +431,85 @@ fn the_windows_elevated_side_takes_names_and_rolls_back() {
             && ran[2].contains("localport=47984,47989,48010")
     );
     assert!(ran[3].contains("protocol=UDP") && ran[3].contains("localport=47998-48000"));
-    let exe = host.join("sunshine.exe");
-    assert!(ran[2].contains(&format!("program={}", exe.display())));
+    // Everything points at the administrator-only copy, nothing at staging.
+    assert!(ran[2].contains(&format!(
+        "program={}",
+        target.join("sunshine.exe").display()
+    )));
+    assert!(
+        !ran.iter()
+            .any(|line| line.contains(&*host.to_string_lossy()))
+    );
 
-    // The UDP rule fails: the service and TCP rule are undone.
+    // Undone: the rules, the service, then the folder (and its empty parents).
     let mut ran = Vec::new();
-    let code = windows::perform_with(
-        &args(
-            &["add-service", "add-firewall-tcp", "add-firewall-udp"],
-            &host,
+    let undo = [
+        "remove-firewall-udp",
+        "remove-firewall-tcp",
+        "remove-service",
+        "remove-host",
+    ];
+    assert_eq!(
+        windows::perform_with(
+            &elevated(&undo, &host, None),
+            &target,
+            &mut |program, args| {
+                ran.push(format!("{program} {}", args.join(" ")));
+                true
+            }
         ),
+        0
+    );
+    assert_eq!(ran.len(), 4);
+    assert!(!target.exists() && !target.parent().unwrap().exists());
+    assert!(host.join("sunshine.exe").exists(), "staging stays");
+}
+
+#[test]
+fn a_changed_file_or_manifest_is_refused_and_a_failure_undoes_everything() {
+    let (_temp, host, target) = staged();
+    let manifest = windows::write_manifest(&host).unwrap();
+    let never = &mut |_: &str, _: &[String]| -> bool { panic!("nothing runs") };
+    // A staged file changed after Caskade checked it.
+    std::fs::write(host.join("sunshine.exe"), "swapped").unwrap();
+    assert_eq!(
+        windows::perform_with(
+            &elevated(&["add-host"], &host, Some(&manifest)),
+            &target,
+            never
+        ),
+        1
+    );
+    assert!(!target.exists() && !target.with_extension("new").exists());
+    // A manifest that isn't the one Caskade wrote.
+    let manifest = windows::write_manifest(&host).unwrap();
+    let other = "0".repeat(64);
+    assert_eq!(
+        windows::perform_with(
+            &elevated(&["add-host"], &host, Some(&other)),
+            &target,
+            never
+        ),
+        1
+    );
+    assert!(!target.exists());
+    // The service and rules can't point at a missing copy.
+    assert_eq!(
+        windows::perform_with(&elevated(&["add-service"], &host, None), &target, never),
+        1
+    );
+
+    // The UDP rule fails: the TCP rule, the service and the copy go.
+    let mut ran = Vec::new();
+    let all = [
+        "add-host",
+        "add-service",
+        "add-firewall-tcp",
+        "add-firewall-udp",
+    ];
+    let code = windows::perform_with(
+        &elevated(&all, &host, Some(&manifest)),
+        &target,
         &mut |program, args| {
             let line = format!("{program} {}", args.join(" "));
             let ok = !line.contains("(UDP)");
@@ -407,24 +525,52 @@ fn the_windows_elevated_side_takes_names_and_rolls_back() {
     );
     assert!(undone[1].ends_with("stop CaskadeStreaming"));
     assert!(undone[2].ends_with("delete CaskadeStreaming"));
+    assert!(!target.exists());
 
-    // Unknown steps, and hosts that aren't Caskade's, run nothing.
+    // Unknown steps, foreign staging folders and missing manifests run nothing.
     for wrong in [
-        args(&["add-service", "cmd /c evil"], &host),
-        args(&["add-service"], &temp.path().join("elsewhere")),
-        args(&["add-service"], &host.join("..").join("host")),
+        elevated(&["add-service", "cmd /c evil"], &host, None),
+        elevated(&["add-host"], &host, None),
+        elevated(&["add-host"], &host, Some("not-a-hash")),
+        elevated(
+            &["add-host"],
+            &host.parent().unwrap().join("elsewhere"),
+            Some(&manifest),
+        ),
         vec!["caskade.exe".into(), windows::ELEVATED_ARG.into()],
     ] {
-        let code = windows::perform_with(&wrong, &mut |_, _| panic!("ran {wrong:?}"));
-        assert_eq!(code, 64);
+        let code = windows::perform_with(&wrong, &target, &mut |_, _| panic!("ran {wrong:?}"));
+        assert_eq!(code, 64, "{wrong:?}");
     }
+}
+
+#[test]
+fn program_files_comes_from_the_registry_answer() {
+    let answer = "\r\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\r\n    ProgramFilesDir    REG_SZ    C:\\Program Files\r\n\r\n";
+    #[cfg(windows)]
+    assert_eq!(
+        windows::program_files(answer),
+        Some(r"C:\Program Files".into())
+    );
+    // Elsewhere a Windows path isn't absolute; only the parsing is shared.
+    #[cfg(not(windows))]
+    assert_eq!(windows::program_files(answer), None);
+    assert_eq!(
+        windows::program_files("ProgramFilesDir REG_SZ relative"),
+        None
+    );
+}
+
+fn read(path: &Path) -> String {
+    std::fs::read_to_string(path).unwrap()
 }
 
 #[test]
 fn the_windows_launcher_passes_names_and_caskades_own_paths() {
     let request = Request {
-        steps: vec![Step::Add(Change::Service), Step::Add(Change::FirewallTcp)],
+        steps: vec![Step::Add(Change::HostProgram), Step::Add(Change::Service)],
         host_dir: r"C:\Users\Ada O'Neil\AppData\Local\caskade\data\streaming\host".into(),
+        manifest: Some("ab".repeat(32)),
     };
     let argv =
         windows::launcher(Path::new(r"C:\Program Files\Caskade\caskade.exe"), &request).unwrap();
@@ -433,7 +579,7 @@ fn the_windows_launcher_passes_names_and_caskades_own_paths() {
     assert!(script.contains("-FilePath 'C:\\Program Files\\Caskade\\caskade.exe'"));
     assert!(script.contains("-Verb RunAs -Wait -PassThru"));
     assert!(script.contains(
-        r#"-ArgumentList '--elevated add-service add-firewall-tcp --host "C:\Users\Ada O''Neil\AppData\Local\caskade\data\streaming\host"'"#
+        r#"-ArgumentList '--elevated add-host add-service --host "C:\Users\Ada O''Neil\AppData\Local\caskade\data\streaming\host" --manifest abababababababababababababababababababababababababababababababab'"#
     ));
     assert!(script.contains("catch { exit 1223 }"));
     assert_eq!(windows::prompt(Some(1223)).unwrap(), Prompt::Cancelled);

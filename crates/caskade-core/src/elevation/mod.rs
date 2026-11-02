@@ -50,9 +50,12 @@ impl Plan {
             (Self::StreamingHost, Linux) => {
                 &[Change::UdevRules, Change::ModulesLoad, Change::UhidLoaded]
             }
-            (Self::StreamingHost, Windows) => {
-                &[Change::Service, Change::FirewallTcp, Change::FirewallUdp]
-            }
+            (Self::StreamingHost, Windows) => &[
+                Change::HostProgram,
+                Change::Service,
+                Change::FirewallTcp,
+                Change::FirewallUdp,
+            ],
             (Self::StreamingHost, Macos) => &[],
         }
     }
@@ -71,6 +74,9 @@ pub enum Change {
     ModulesLoad,
     /// Linux: the uhid module, loaded now.
     UhidLoaded,
+    /// Windows: the host program and its configuration, copied from
+    /// staging into `%ProgramFiles%\Caskade\Streaming\host` and checked.
+    HostProgram,
     /// Windows: the on-demand `CaskadeStreaming` service the interactive
     /// user may start and stop.
     Service,
@@ -92,7 +98,11 @@ pub enum Step {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Request {
     pub steps: Vec<Step>,
+    /// Where Caskade staged the host program (`<data>/streaming/host`).
     pub host_dir: PathBuf,
+    /// The SHA-256 of the staged host's manifest, when the host program
+    /// is copied ([`windows::write_manifest`]).
+    pub manifest: Option<String>,
 }
 
 /// How a prompt ended.
@@ -242,9 +252,15 @@ impl Elevation {
         if missing.is_empty() {
             return Ok(Outcome::NothingToDo);
         }
+        let manifest = if missing.contains(&Change::HostProgram) {
+            Some(windows::write_manifest(&self.host_dir)?)
+        } else {
+            None
+        };
         let request = Request {
             steps: missing.iter().copied().map(Step::Add).collect(),
             host_dir: self.host_dir.clone(),
+            manifest,
         };
         match self.runner.run(&request)? {
             Prompt::Cancelled => return Ok(Outcome::Cancelled),
@@ -290,6 +306,7 @@ impl Elevation {
         let request = Request {
             steps: present.iter().copied().map(Step::Remove).collect(),
             host_dir: self.host_dir.clone(),
+            manifest: None,
         };
         match self.runner.run(&request)? {
             Prompt::Cancelled => return Ok(Outcome::Cancelled),

@@ -2823,6 +2823,7 @@ msgstr ""
 
 #: crates/caskade-core/src/romm/secrets.rs
 #: crates/caskade-core/src/store_accounts/secrets.rs
+#: crates/caskade-core/src/streaming/secrets.rs
 msgid "system keychain: {error}"
 msgstr ""
 
@@ -3064,6 +3065,16 @@ msgstr ""
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Download Hasheous' game databases and match games to IGDB in the background, for covers, descriptions and genres."
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Let other devices stream games from this one"
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Other devices on the local network can play this device's games."
 msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
@@ -3610,6 +3621,42 @@ msgstr ""
 
 #: crates/caskade-core/src/store_accounts/steam.rs
 msgid "Steam has no profile with that SteamID"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/api.rs
+msgid "the streaming host's certificate is unreadable: {error}"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/api.rs
+msgid "the streaming host refused Caskade's sign-in"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/api.rs
+msgid "the streaming host answered {status}"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/api.rs
+msgid "the streaming host didn't say its version"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/host/mod.rs
+msgid "Streaming isn't working on this device"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/host/mod.rs
+msgid "this system's streaming host can't be run by Caskade yet"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/host/mod.rs
+msgid "the streaming host's sign-in couldn't be set"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/host/mod.rs
+msgid "this device can't host game streams"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/host/process.rs
+msgid "the streaming host didn't start"
 msgstr ""
 
 #: crates/caskade-core/src/system_stats/aggregate.rs

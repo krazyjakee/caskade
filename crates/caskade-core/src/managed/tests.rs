@@ -329,3 +329,47 @@ fn removal_spares_what_the_release_didnt_ship() {
     assert_eq!(unpack::remove_shipped(&dir).unwrap(), 0);
     assert!(dir.join("settings.conf").exists());
 }
+
+/// A tool that asks for it gets its AppImage unpacked (`--appimage-extract`),
+/// and its program is found inside.
+#[tokio::test]
+async fn an_appimage_tool_is_unpacked_and_found_inside() {
+    let temp = tempfile::tempdir().unwrap();
+    let image = temp.path().join("Viewer-1.0-x86_64.AppImage");
+    std::fs::write(
+        &image,
+        "#!/bin/sh\n[ \"$1\" = --appimage-extract ] || exit 9\nmkdir -p squashfs-root/usr/bin\nprintf run > squashfs-root/usr/bin/viewer\nprintf x > squashfs-root/AppRun\n",
+    )
+    .unwrap();
+    let rules = crate::emulation::DetectRules {
+        executable: Some("^viewer$".into()),
+        ..Default::default()
+    };
+    let target = temp.path().join("data/streaming/client");
+    let release = |extract_appimage| Release {
+        file: image.clone(),
+        staging: temp.path().join("data/.staging"),
+        aside: temp.path().join("data/.old"),
+        target: target.clone(),
+        rules: rules.clone(),
+        os: OperatingSystem::Linux,
+        old_version: "previous".into(),
+        name: "Viewer".into(),
+        missing: "missing".into(),
+        extract_appimage,
+        cancel: CancellationToken::new(),
+    };
+    let install = install_release(release(true)).await.unwrap();
+    assert_eq!(
+        install,
+        EmulatorInstall::Folder {
+            dir: target.join("usr/bin"),
+            executable: "viewer".into(),
+        }
+    );
+    assert_eq!(read(&target.join("usr/bin/viewer")), "run");
+    assert!(!target.join("Viewer-1.0-x86_64.AppImage").exists());
+    // Without asking, the AppImage itself is the install.
+    let install = install_release(release(false)).await.unwrap();
+    assert!(matches!(install, EmulatorInstall::AppImage { .. }));
+}

@@ -63,6 +63,12 @@ impl Tray {
             && !console
     }
 
+    /// Tests: as if the icon were up.
+    #[cfg(all(test, target_os = "linux"))]
+    pub(crate) fn set_shown(&self, shown: bool) {
+        self.shown.store(shown, Ordering::Relaxed);
+    }
+
     /// Lets the next close of the main window quit.
     pub fn quit(&self) {
         self.quitting.store(true, Ordering::Relaxed);

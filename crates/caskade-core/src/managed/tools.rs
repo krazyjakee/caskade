@@ -308,6 +308,7 @@ impl ManagedTools {
                 .unwrap_or_else(|| "previous".into()),
             name: definition.name.clone(),
             missing,
+            extract_appimage: definition.extract,
             cancel: cancel.clone(),
         })
         .await;

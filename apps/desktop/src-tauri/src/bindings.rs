@@ -117,6 +117,8 @@ pub fn builder() -> Builder<tauri::Wry> {
             crate::commands::achievements::game_achievement_link_set,
             crate::commands::achievements::game_achievement_link_clear,
             crate::commands::achievement_icons::game_achievement_icon,
+            crate::commands::streaming::streaming_host_status,
+            crate::commands::streaming::streaming_set_hosting,
             crate::commands::storage::storage_list,
             crate::commands::storage::storage_add,
             crate::commands::storage::storage_edit,
