@@ -245,6 +245,13 @@ impl StreamingHost {
             .hosting
     }
 
+    /// The host runs in a Flatpak sandbox (a user's own Flatpak Sunshine),
+    /// so its apps' commands leave it with `flatpak-spawn --host`.
+    pub fn host_is_flatpak(&self) -> bool {
+        (self.inner.existing)()
+            .is_some_and(|existing| existing.found == [crate::streaming::existing::Found::Flatpak])
+    }
+
     /// Whether hosting goes through a user's own host (#258).
     #[cfg(feature = "net")]
     async fn existing_mode(&self) -> bool {
@@ -422,7 +429,10 @@ impl StreamingHost {
         if self.existing_mode().await {
             // Only Caskade's apps go; the host and its other apps stay.
             let api = self.api().await?;
-            let caskade = std::env::current_exe()?;
+            let caskade = crate::streaming::publish::Caskade {
+                program: std::env::current_exe()?,
+                flatpak_host: self.host_is_flatpak(),
+            };
             crate::streaming::publish::withdraw(&api, &caskade).await?;
             self.set_mode(false, false).await?;
             self.set_status(HostState::Off, None, None);

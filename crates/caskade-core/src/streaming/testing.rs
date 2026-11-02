@@ -55,3 +55,42 @@ pub async fn tls_front(upstream: SocketAddr, cert: &Cert) -> SocketAddr {
     });
     address
 }
+
+/// Sunshine's app list, kept as the real one does: added at the end, then
+/// sorted by name; deleted by index.
+#[cfg(unix)]
+#[derive(Clone, Default)]
+pub struct Apps(pub Arc<std::sync::Mutex<Vec<serde_json::Value>>>);
+
+#[cfg(unix)]
+impl wiremock::Respond for Apps {
+    fn respond(&self, request: &wiremock::Request) -> wiremock::ResponseTemplate {
+        let mut apps = crate::lock(&self.0);
+        match request.method.as_str() {
+            "GET" => wiremock::ResponseTemplate::new(200)
+                .set_body_json(serde_json::json!({ "env": {}, "apps": *apps })),
+            "POST" => {
+                let mut app: serde_json::Value = serde_json::from_slice(&request.body).unwrap();
+                app.as_object_mut().unwrap().remove("index");
+                apps.push(app);
+                apps.sort_by(|a, b| a["name"].as_str().cmp(&b["name"].as_str()));
+                wiremock::ResponseTemplate::new(200)
+                    .set_body_json(serde_json::json!({ "status": true }))
+            }
+            "DELETE" => {
+                let index: usize = request
+                    .url
+                    .path()
+                    .rsplit('/')
+                    .next()
+                    .unwrap()
+                    .parse()
+                    .unwrap();
+                apps.remove(index);
+                wiremock::ResponseTemplate::new(200)
+                    .set_body_json(serde_json::json!({ "status": true }))
+            }
+            _ => wiremock::ResponseTemplate::new(405),
+        }
+    }
+}

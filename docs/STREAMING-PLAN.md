@@ -1,6 +1,6 @@
 # Caskade — Game Streaming Plan
 
-Status: in progress; built: the managed-tool layer (§3.1, #254), `caskade --launch` (§8.1, #256), the elevation helper (§8.4, #255), the host (§4.1–4.2, #257), the client's install and state (§5.1–5.2, #261) finding hosts with their games in the library (§6.1, §8.2, #262) and using a user's own Sunshine (§3.4, #258); issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
+Status: in progress; built: the managed-tool layer (§3.1, #254), `caskade --launch` (§8.1, #256), the elevation helper (§8.4, #255), the host (§4.1–4.2, #257), the client's install and state (§5.1–5.2, #261) finding hosts with their games in the library (§6.1, §8.2, #262) using a user's own Sunshine (§3.4, #258) and publishing the library's games (§4.3, #259); issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
 
 How Caskade lets a household play a game installed on one device from another, streamed over the local network. Caskade installs, configures, updates and drives two separate open-source programs: Sunshine on the device that runs the game (the host) and Moonlight on the device that shows it (the client). Users never see their names, windows or settings: they switch hosting on, pair a device once, and choose Stream from Living room. It follows the conventions in `TECH-PLAN.md`; the managed installs build on the emulator setup (`crates/caskade-sources/emulation/README.md`).
 
@@ -113,6 +113,16 @@ Caskade writes the whole configuration before the first start and owns it from t
 - An app's command is `caskade --launch <game id>` (§8.1): it hands the game to the running Caskade, which launches it through the pipeline, and stays alive until the session ends, so Sunshine's own idea of when the stream ends (`auto-detach: false`, `wait-all`) matches the game's. Ending the stream (Sunshine sends WM_CLOSE on Windows, SIGTERM on POSIX) stops the game the way Caskade's Stop does.
 - `SUNSHINE_CLIENT_WIDTH`, `_HEIGHT`, `_FPS` and `_HDR` reach the launch, so an emulator's display flags and console mode can follow the client.
 - `POST /api/apps` re-sorts the list by name: Caskade reads it back before using an index.
+
+#### Built (#259)
+
+`caskade_core::streaming::publish::Publisher`, watched while Caskade runs:
+
+- **Offers:** every installed game with a release Caskade starts itself (not a plugin's, not hidden) that the host's signed-in account may play (#209). Each app runs `"<caskade>" --launch <game id>`, with `auto-detach` off and `wait-all` on. Its cover goes to `<data>/streaming/covers/<game id>.png`, 600×800.
+- **The console app:** one more app, "Caskade", runs `"<caskade>" --console` as a detached command.
+- **Flatpak hosts:** on a user's own Flatpak Sunshine, commands leave its sandbox through `flatpak-spawn --host`.
+- **Batching:** library, install, uninstall and account events mark the list dirty, and one sync goes 2 s after the first. A host that comes up gets its list at once. Nothing is sent while the host isn't Ready.
+- **Ownership:** `sync` removes Caskade's apps that are no longer offered or have been renamed (rereading indexes after each deletion), then adds the missing ones. An app is Caskade's when its command, or the console app's detached command, runs this Caskade; nothing else is touched. The same sync serves a user's own Sunshine (#258).
 
 ### 4.4 Display
 
@@ -277,6 +287,7 @@ Each item names its issue; record the date and result here.
 - [ ] #261 per OS: the first Stream from a device installs the client under "Getting streaming ready", then streams. A Moonlight the user installed keeps its hosts and settings afterwards. No warning toast, overlay or Discord presence names Moonlight during or after the stream. Flatpak: `flatpak run --cwd=` keeps the state in `~/.var/app/com.moonlight_stream.Moonlight/caskade`.
 - [ ] #262: a host on the LAN appears in `streaming_hosts` within seconds, and shows unreachable after it leaves the network. After pairing (#263), its games show as "Stream from <device>" on the matching library games.
 - [ ] #258 per OS: with Sunshine installed the usual way, switching hosting on offers to use it, and the right password works, a wrong one doesn't. Caskade's games appear in its apps beside the user's; switching off removes only Caskade's.
+- [ ] #259 per OS: a client lists the host's games with their covers, plus "Caskade". Starting one plays it on the host with a session there, and quitting the stream stops it. Installing, uninstalling, hiding or renaming a game changes the client's list after a refresh.
 - [ ] #256 Windows: with Caskade running, `caskade.exe --launch <game id>` starts the game; `taskkill /PID <caller>` (WM_CLOSE, without `/F`), or ending a Sunshine stream, quits the game and ends its session, and the caller exits 5.
 
 ### Testing

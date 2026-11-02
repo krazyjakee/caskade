@@ -78,9 +78,33 @@ pub fn watch_hosts<R: Runtime>(app: &AppHandle<R>, hosts: StreamHosts) {
     crate::background::supervise("streaming hosts", move || hosts.watch());
 }
 
-/// Runs the host at start when hosting is on.
-pub fn setup<R: Runtime>(app: &AppHandle<R>, host: StreamingHost) {
+/// Runs the host at start when hosting is on, and keeps the library's
+/// games on it (#259) as the library and the signed-in account change.
+pub fn setup<R: Runtime>(
+    app: &AppHandle<R>,
+    host: StreamingHost,
+    store: caskade_core::db::LibraryStore,
+    bus: &caskade_core::bus::Bus,
+    artwork: Option<caskade_core::artwork::ArtworkCache>,
+    paths: &caskade_core::AppPaths,
+) {
     app.manage(host.clone());
+    let accounts = app
+        .try_state::<caskade_core::accounts::AccountService>()
+        .map(|accounts| accounts.inner().clone());
+    match caskade_core::streaming::publish::Publisher::new(
+        store,
+        std::sync::Arc::new(host.clone()),
+        accounts,
+        artwork,
+        paths,
+    ) {
+        Ok(publisher) => {
+            let bus = bus.clone();
+            crate::background::supervise("streaming games", move || publisher.watch(&bus));
+        }
+        Err(error) => tracing::warn!(%error, "games won't be offered for streaming"),
+    }
     tauri::async_runtime::spawn(async move { host.start().await });
 }
 

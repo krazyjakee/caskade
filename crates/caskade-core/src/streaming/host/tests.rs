@@ -9,7 +9,7 @@ use crate::{
     db::LibraryStore,
     elevation::{Change, Prompt, Request, Runner, Step},
     managed::{Hosts, ToolCatalog, ToolDefinition},
-    streaming::testing::{cert, tls_front},
+    streaming::testing::{Apps, cert, tls_front},
     updates::GitHub,
 };
 use std::{collections::BTreeSet, io::Write};
@@ -421,41 +421,6 @@ fn a_host_left_running_by_a_crash_is_stopped_at_the_next_start() {
 
 use std::os::unix::process::CommandExt;
 
-/// Sunshine's app list, kept as the real one does: added at the end, then
-/// sorted by name; deleted by index.
-#[derive(Clone, Default)]
-struct Apps(Arc<Mutex<Vec<serde_json::Value>>>);
-
-impl wiremock::Respond for Apps {
-    fn respond(&self, request: &wiremock::Request) -> ResponseTemplate {
-        let mut apps = crate::lock(&self.0);
-        match request.method.as_str() {
-            "GET" => ResponseTemplate::new(200)
-                .set_body_json(serde_json::json!({ "env": {}, "apps": *apps })),
-            "POST" => {
-                let mut app: serde_json::Value = serde_json::from_slice(&request.body).unwrap();
-                app.as_object_mut().unwrap().remove("index");
-                apps.push(app);
-                apps.sort_by(|a, b| a["name"].as_str().cmp(&b["name"].as_str()));
-                ResponseTemplate::new(200).set_body_json(serde_json::json!({ "status": true }))
-            }
-            "DELETE" => {
-                let index: usize = request
-                    .url
-                    .path()
-                    .rsplit('/')
-                    .next()
-                    .unwrap()
-                    .parse()
-                    .unwrap();
-                apps.remove(index);
-                ResponseTemplate::new(200).set_body_json(serde_json::json!({ "status": true }))
-            }
-            _ => ResponseTemplate::new(405),
-        }
-    }
-}
-
 #[tokio::test(flavor = "multi_thread")]
 async fn a_users_own_host_is_used_with_consent_and_only_caskades_apps_change() {
     use crate::streaming::{
@@ -543,11 +508,15 @@ async fn a_users_own_host_is_used_with_consent_and_only_caskades_apps_change() {
     assert_eq!(f.secrets.existing().await.unwrap(), Some(user));
 
     // Caskade's games go in beside theirs.
-    let caskade = std::env::current_exe().unwrap();
+    let caskade = publish::Caskade {
+        program: std::env::current_exe().unwrap(),
+        flatpak_host: false,
+    };
     let api = host.api().await.unwrap();
-    let offers = [Offer {
+    let offers = [Offer::Game {
         title: "Hades".into(),
         game_id: "g1".into(),
+        image: None,
     }];
     let published = publish::sync(&api, &caskade, &offers).await.unwrap();
     assert_eq!(
@@ -567,10 +536,7 @@ async fn a_users_own_host_is_used_with_consent_and_only_caskades_apps_change() {
         .map(|app| app["name"].as_str().unwrap().to_owned())
         .collect();
     assert_eq!(names, ["Desktop", "Hades"]);
-    assert_eq!(
-        crate::lock(&apps.0)[1]["cmd"],
-        publish::launch_command(&caskade, "g1")
-    );
+    assert_eq!(crate::lock(&apps.0)[1]["cmd"], caskade.launch_command("g1"));
 
     // Hosting off: only Caskade's app goes; theirs, and their host, stay.
     assert_eq!(host.disable().await.unwrap(), HostOutcome::Off);
@@ -585,20 +551,42 @@ async fn a_users_own_host_is_used_with_consent_and_only_caskades_apps_change() {
 
 #[test]
 fn caskades_apps_are_told_by_their_command() {
-    use crate::streaming::{api::App, publish};
-    let caskade = std::path::Path::new("/opt/Caskade Games/caskade");
-    let ours = App::command("Hades", &publish::launch_command(caskade, "g1"));
+    use crate::streaming::{
+        api::App,
+        publish::{Caskade, Offer},
+    };
+    let caskade = Caskade {
+        program: "/opt/Caskade Games/caskade".into(),
+        flatpak_host: false,
+    };
+    let ours = caskade.app(&Offer::Game {
+        title: "Hades".into(),
+        game_id: "g1".into(),
+        image: None,
+    });
     assert_eq!(
         ours.cmd.as_deref(),
         Some("\"/opt/Caskade Games/caskade\" --launch g1")
     );
-    assert_eq!(publish::caskade_game(&ours, caskade).as_deref(), Some("g1"));
+    assert!(matches!(caskade.owns(&ours), Some(Offer::Game { game_id, .. }) if game_id == "g1"));
+    let console = caskade.app(&Offer::Console);
+    assert_eq!(console.cmd, None);
+    assert_eq!(caskade.owns(&console), Some(Offer::Console));
     let theirs = App::command("Steam", "setsid steam steam://open/bigpicture");
-    assert_eq!(publish::caskade_game(&theirs, caskade), None);
+    assert_eq!(caskade.owns(&theirs), None);
     // Another Caskade's (another install) isn't this one's.
-    let other = App::command(
-        "Hades",
-        &publish::launch_command(std::path::Path::new("/usr/bin/caskade"), "g1"),
+    let other = Caskade {
+        program: "/usr/bin/caskade".into(),
+        flatpak_host: false,
+    };
+    assert_eq!(caskade.owns(&other.app(&Offer::Console)), None);
+    // A Flatpak host's commands leave its sandbox.
+    let flatpak = Caskade {
+        flatpak_host: true,
+        ..caskade
+    };
+    assert_eq!(
+        flatpak.launch_command("g1"),
+        "flatpak-spawn --host \"/opt/Caskade Games/caskade\" --launch g1"
     );
-    assert_eq!(publish::caskade_game(&other, caskade), None);
 }

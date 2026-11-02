@@ -66,6 +66,25 @@ it("marks a favourite and opens the folder from a game's menu", async () => {
   await waitFor(() => expect(reveal).toHaveBeenCalledWith("managed"));
 });
 
+it("shows a folder two entries share once", async () => {
+  const list = games();
+  const [first] = list;
+  if (!first) throw new Error("fixture missing");
+  const shared = { state: "installed", canLaunch: true, emulated: false } as const;
+  first.entries = [
+    { ...shared, id: "lutris", source: "lutris", location: "/steam/common/Fixture" },
+    { ...shared, id: "steam", source: "steam", location: "/steam/common/Fixture" },
+  ];
+  const app = renderApp("/games/fixture-0", { games: list });
+  const reveal = vi.spyOn(app.library, "revealEntry");
+  rightClick(await screen.findByRole("heading", { level: 1, name: "Fixture Game 0001" }));
+  const folders = within(await menu()).getAllByRole("menuitem", { name: /Show in folder/ });
+  expect(folders).toHaveLength(1);
+  expect(folders[0]?.textContent).toBe("Show in folder");
+  fireEvent.click(folders[0] as Element);
+  await waitFor(() => expect(reveal).toHaveBeenCalledWith("lutris"));
+});
+
 it("scopes an entry's menu to the entry, and asks before uninstalling it", async () => {
   const uninstall = vi.fn(async () => {});
   renderApp("/games/fixture-0", { games: games(), storage: { ...emptyStorage, uninstall } });

@@ -324,7 +324,8 @@ pub fn run() {
                     let tools = tools.clone();
                     move || tools.watch()
                 });
-                // The streaming host (#257): runs with Caskade when hosting is on.
+                // The streaming host (#257): runs with Caskade when hosting
+                // is on, and offers the library's games (#259).
                 commands::streaming::setup(
                     app.handle(),
                     caskade_core::streaming::StreamingHost::new(
@@ -333,6 +334,10 @@ pub fn run() {
                         settings.clone(),
                         &setup_paths,
                     ),
+                    store.clone(),
+                    &bus,
+                    artwork.clone(),
+                    &setup_paths,
                 );
                 // Devices to stream from (#262), through Caskade's own client.
                 match caskade_core::streaming::hosts::StreamHosts::new(

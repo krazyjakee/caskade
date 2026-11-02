@@ -99,7 +99,13 @@ export function GameMenu({
     (session) => session.endedAt === null && (!scoped || session.entryId === target.entryId),
   );
   const playable = playableEntry(entries, unavailable, game?.defaultEntryId);
-  const located = entries.filter((entry) => entry.location !== null);
+  // One per folder: launchers can list one install twice (Lutris imports
+  // Steam's games, for one).
+  const located = entries.filter(
+    (entry, index) =>
+      entry.location !== null &&
+      entries.findIndex((other) => other.location === entry.location) === index,
+  );
   const managed = entries.filter((entry) => entry.source === MANAGED);
   const installed = managed.filter((entry) => entry.state === "installed");
   // A web game plays online, or from its offline copy (a location).
