@@ -1,0 +1,144 @@
+"""Regression checks for the PR gate, including real Git merge-base diffs."""
+import importlib.util
+import contextlib
+import io
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import unittest
+from unittest.mock import patch
+
+SPEC = importlib.util.spec_from_file_location("ci_scope", Path(__file__).with_name("ci-scope.py"))
+ci = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(ci)
+
+
+class ScopeTests(unittest.TestCase):
+    def test_cli_emits_boolean_outputs_used_by_workflow_conditions(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "output"
+            event = Path(temporary) / "event.json"
+            event.write_text("{}")
+            environment = {"GITHUB_OUTPUT": str(output), "GITHUB_EVENT_PATH": str(event),
+                           "GITHUB_EVENT_NAME": "push"}
+            with patch.dict(os.environ, environment), patch.object(sys, "argv", ["ci-scope.py"]), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                ci.main()
+            values = dict(line.split("=", 1) for line in output.read_text().splitlines())
+            self.assertEqual(set(values), set(ci.FIELDS))
+            self.assertEqual(values["bundle"], "false")
+            self.assertTrue(all(value in ("true", "false") for value in values.values()))
+
+    def test_prose_skips_heavy_jobs(self):
+        self.assertFalse(any(ci.scope(["README.md", "docs/TECH-PLAN.md"]).values()))
+
+    def test_frontend_change_does_not_select_native_rust_suites(self):
+        scope = ci.scope(["apps/desktop/src/views/LibraryView.tsx"])
+        self.assertTrue(scope["app"] and scope["frontend"] and scope["catalogs"])
+        self.assertFalse(scope["rust"] or scope["installer"] or scope["discovery"] or scope["e2e"])
+
+    def test_installer_change_reaches_discovery_transitively(self):
+        scope = ci.scope(["crates/caskade-installer/src/lib.rs"])
+        self.assertTrue(scope["installer"] and scope["discovery"] and scope["rust"])
+
+    def test_shared_jobs_change_reaches_both_libraries(self):
+        scope = ci.scope(["crates/caskade-jobs/src/lib.rs"])
+        self.assertTrue(scope["installer"] and scope["discovery"])
+
+    def test_core_does_not_rebuild_standalone_libraries(self):
+        scope = ci.scope(["crates/caskade-core/src/lib.rs"])
+        self.assertTrue(scope["rust"] and scope["cross"])
+        self.assertFalse(scope["installer"] or scope["discovery"])
+
+    def test_embedded_contracts_and_catalogs_need_rust_checks(self):
+        for path in ["packages/ui/anatomy.json", "packages/tokens/tokens/sets/base.json",
+                     "locales/fr/core.po", "docs/legal/privacy.md", "wit/caskade-plugin.wit",
+                     "docs/errors.md"]:
+            with self.subTest(path=path):
+                self.assertTrue(ci.scope([path])["rust"])
+
+    def test_generated_documentation_still_runs_its_freshness_checks(self):
+        for path in ["docs/theming/anatomy.md", "docs/theming/tokens.md"]:
+            with self.subTest(path=path):
+                self.assertTrue(ci.scope([path])["frontend"])
+
+    def test_unknown_build_inputs_and_new_crates_select_every_suite(self):
+        for path in ["Cargo.lock", "Cargo.toml", "vendor/inno-0.7.1/src/lib.rs",
+                     "scripts/ci-scope.py", ".gitea/workflows/app.yml",
+                     "crates/new-crate/src/lib.rs", "docs/plugins/plugin.schema.json"]:
+            with self.subTest(path=path):
+                self.assertTrue(all(ci.scope([path]).values()))
+
+    def test_master_keeps_full_checks_without_packaging(self):
+        scope = ci.select("push", {})
+        self.assertTrue(all(value for key, value in scope.items() if key != "bundle"))
+        self.assertFalse(scope["bundle"])
+
+    def test_nightly_and_explicit_manual_bundle(self):
+        self.assertTrue(ci.select("schedule", {})["bundle"])
+        for value in [True, "true"]:
+            self.assertTrue(ci.select("workflow_dispatch", {"inputs": {"bundle": value}})["bundle"])
+        self.assertFalse(ci.select("workflow_dispatch", {"inputs": {"bundle": "false"}})["bundle"])
+
+    def test_missing_pr_history_runs_full_checks_instead_of_skipping(self):
+        scope = ci.select("pull_request_target", {})
+        self.assertTrue(scope["rust"] and scope["installer"] and scope["discovery"])
+        self.assertFalse(scope["bundle"])
+
+    def test_labels_allow_e2e_or_bundle_for_an_otherwise_unaffected_pr(self):
+        for label in ["run-e2e", "run-bundle"]:
+            with self.subTest(label=label), patch.object(ci, "changed_paths", return_value=["docs/README.md"]):
+                scope = ci.select("pull_request_target", {"pull_request": {"labels": [{"name": label}]}})
+                self.assertTrue(scope["app"] and scope["rust"] and scope["e2e"])
+                self.assertEqual(scope["bundle"], label == "run-bundle")
+
+    def test_dependency_graph_includes_target_build_dev_and_workspace_dependencies(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "Cargo.toml").write_text('[workspace]\nmembers=["crates/*"]\n'
+                                             '[workspace.dependencies]\nshared={path="crates/shared"}\n')
+            for name in ["shared", "build", "dev", "platform", "consumer"]:
+                directory = root / "crates" / name
+                directory.mkdir(parents=True)
+                (directory / "Cargo.toml").write_text(f'[package]\nname="{name}"\nversion="0.1.0"\n')
+            with (root / "crates/consumer/Cargo.toml").open("a") as stream:
+                stream.write('[dependencies]\nshared={workspace=true}\n'
+                             '[build-dependencies]\nbuild={path="../build"}\n'
+                             '[dev-dependencies]\ndev={path="../dev"}\n'
+                             '[target.\'cfg(windows)\'.dependencies]\nplatform={path="../platform"}\n')
+            _, graph = ci.package_graph(root)
+            self.assertEqual(graph["consumer"], {"shared", "build", "dev", "platform"})
+
+    def test_real_diff_preserves_deleted_and_renamed_inputs_and_skips_superseded_heads(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+
+            def git(*args):
+                return subprocess.check_output(["git", *args], cwd=root, text=True).strip()
+
+            git("init", "-q")
+            git("config", "user.email", "test@example.invalid")
+            git("config", "user.name", "CI scope test")
+            (root / "old.rs").write_text("source")
+            git("add", "old.rs")
+            git("commit", "-qm", "initial")
+            base = git("rev-parse", "HEAD")
+            git("mv", "old.rs", "renamed.rs")
+            git("commit", "-qm", "rename")
+            head = git("rev-parse", "HEAD")
+            event = {"pull_request": {"base": {"sha": base}, "head": {"sha": head}}}
+            self.assertEqual(set(ci.changed_paths(root, event)), {"old.rs", "renamed.rs"})
+            # The base advanced to the same tree independently. A direct
+            # base/head diff would be empty and incorrectly skip the PR.
+            advanced = git("commit-tree", head + "^{tree}", "-p", base, "-m", "base advanced")
+            event["pull_request"]["base"]["sha"] = advanced
+            self.assertEqual(set(ci.changed_paths(root, event)), {"old.rs", "renamed.rs"})
+            git("update-ref", "refs/remotes/origin/pr-head", head)
+            event["pull_request"]["head"] = {"ref": "pr-head", "sha": base}
+            self.assertFalse(any(ci.select("pull_request_target", event, root).values()))
+
+
+if __name__ == "__main__":
+    unittest.main()

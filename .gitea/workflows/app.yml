@@ -7,18 +7,52 @@ on:
     types: [opened, synchronize, reopened, labeled]
   push:
     branches: [master]
+  schedule:
+    - cron: '17 4 * * *'
   workflow_dispatch:
+    inputs:
+      bundle:
+        description: Build deb and AppImage bundles as well as running checks
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
   group: app-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: false
+  # Forgejo 14+ honors this; ci-scope also skips queued obsolete PR heads on 12.
+  cancel-in-progress: ${{ github.event_name == 'pull_request_target' }}
 jobs:
-  linux:
+  changes:
     if: >-
       github.event_name != 'pull_request_target' ||
       (github.event.pull_request.head.repo.full_name == github.repository &&
        github.event.pull_request.head.repo.fork == false)
+    runs-on: caskade-linux
+    outputs:
+      app: ${{ steps.scope.outputs.app }}
+      frontend: ${{ steps.scope.outputs.frontend }}
+      rust: ${{ steps.scope.outputs.rust }}
+      catalogs: ${{ steps.scope.outputs.catalogs }}
+      e2e: ${{ steps.scope.outputs.e2e }}
+      cross: ${{ steps.scope.outputs.cross }}
+      bundle: ${{ steps.scope.outputs.bundle }}
+    steps:
+      # The selector is trusted base code. Full history supplies a true PR
+      # merge-base diff, including deleted/renamed paths and current head refs.
+      - uses: https://github.com/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
+          fetch-depth: ${{ github.event_name == 'pull_request_target' && '0' || '1' }}
+          persist-credentials: false
+      - id: scope
+        run: python3 scripts/ci-scope.py
+  linux:
+    needs: changes
+    if: >-
+      needs.changes.outputs.app == 'true' &&
+      (github.event_name != 'pull_request_target' ||
+       (github.event.pull_request.head.repo.full_name == github.repository &&
+        github.event.pull_request.head.repo.fork == false))
     runs-on: caskade-linux
     timeout-minutes: 90
     env:
@@ -34,15 +68,30 @@ jobs:
           node --version
           pnpm --version
       - name: WebAssembly target for the plugin host's test guests
+        if: needs.changes.outputs.rust == 'true'
         run: rustup target add wasm32-wasip2
+      - name: CI scope regression checks
+        run: python3 -m unittest discover -s scripts -p test_ci_scope.py
+      - name: Locate Cargo artifacts (honors runner and project configuration)
+        if: needs.changes.outputs.rust == 'true'
+        id: cargo_target
+        run: |
+          python3 - <<'PYTHON'
+          import json, os, subprocess
+          metadata = json.loads(subprocess.check_output(['cargo', 'metadata', '--no-deps', '--format-version=1', '--locked']))
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('directory=' + metadata['target_directory'] + '\n')
+          PYTHON
       - name: Install JS dependencies
         run: pnpm install --frozen-lockfile
       # Known vulnerabilities in Rust and JS dependencies (#157).
-      - name: Dependency advisories
+      - name: Rust dependency advisories
+        if: needs.changes.outputs.rust == 'true'
         run: |
           command -v cargo-audit >/dev/null || cargo install cargo-audit --locked
           cargo audit
-          pnpm audit --prod
+      - name: JS dependency advisories
+        run: pnpm audit --prod
       - name: Typecheck
         run: pnpm typecheck
       - name: Lint (Biome)
@@ -53,54 +102,95 @@ jobs:
       # msgfmt rejects or a translation that drops a placeholder or tag,
       # then prints each language's completion. The runner needs gettext
       # (msgfmt).
-      - name: Translation catalogs
-        run: |
-          cargo run -q -p caskade-i18n --features extract --bin caskade-i18n --locked -- extract --check
-          pnpm i18n:check
+      - name: Rust translation catalogs
+        if: needs.changes.outputs.rust == 'true' && needs.changes.outputs.catalogs == 'true'
+        run: cargo run -q -p caskade-i18n --features extract --bin caskade-i18n --locked -- extract --check
+      - name: UI translation catalogs
+        if: needs.changes.outputs.catalogs == 'true'
+        run: pnpm i18n:check
       - name: Prepare SHA-pinned 7-Zip sidecars (native and Windows cross checks)
+        if: needs.changes.outputs.rust == 'true'
         run: |
           python3 scripts/tauri-sidecar.py
           python3 scripts/tauri-sidecar.py --target x86_64-pc-windows-gnu
       - name: Format app crates
+        if: needs.changes.outputs.rust == 'true'
         run: cargo fmt -p caskade-core -p caskade-desktop -p caskade-plugin-host -p caskade-input --check
       - name: Strict Clippy (workspace)
+        if: needs.changes.outputs.rust == 'true'
         run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - name: Emulation fixtures, definitions and source tests (no real emulator or ROM data)
+        if: needs.changes.outputs.rust == 'true'
         run: python3 scripts/app-ci.py emulation
-      - name: Core and adapter tests (includes the bindings-are-current check)
-        run: cargo test -p caskade-core -p caskade-desktop --locked
-      # gilrs reads pads through libudev: the runner needs libudev-dev (#146).
-      - name: Gamepad input (console mode)
-        run: cargo test -p caskade-input --locked
       - name: Example plugins (#133)
+        if: needs.changes.outputs.rust == 'true'
         run: node plugins/examples/build.mjs gamemode howlongtobeat playtime-stats
-      - name: Plugin host tests (builds a wasm32-wasip2 test guest; manifest schema check)
-        run: cargo test -p caskade-plugin-host --locked
-      # Theme sandbox rules (no scripts, remote imports or class selectors)
-      # and the component cache's rejection of foreign entries live here.
-      - name: Theme packages, component cache, jobs and plugin SDK
-        run: cargo test -p caskade-theme -p caskade-component-cache -p caskade-jobs -p caskade-plugin-sdk --locked
+      # One selection unifies dependency features once rather than rebuilding
+      # common crates for five different package selections. Includes the
+      # bindings, emulation, plugin guest/schema, gamepad and theme checks.
+      - name: Rust app suites
+        if: needs.changes.outputs.rust == 'true'
+        run: >-
+          cargo test -p caskade-core -p caskade-desktop -p caskade-input
+          -p caskade-plugin-host -p caskade-theme -p caskade-component-cache
+          -p caskade-jobs -p caskade-plugin-sdk --locked --timings
       # The M5 exit (#153): the built app in console mode, driven by a pad
       # only, under Xvfb. The `e2e` feature embeds the built UI. The runner
       # needs xvfb (xvfb-run, xauth) and dbus-run-session.
       - name: Console mode end to end (pad only)
+        if: needs.changes.outputs.e2e == 'true'
         run: |
           pnpm --filter @caskade/desktop build
           cargo clippy -p caskade-desktop --features e2e --all-targets --locked -- -D warnings
           xvfb-run -a -s "-screen 0 1600x1000x24" dbus-run-session -- cargo test -p caskade-desktop --features e2e --locked --test it console_e2e:: -- --ignored
       - name: Windows GNU cross Clippy
+        if: needs.changes.outputs.cross == 'true'
         run: cargo clippy -p caskade-core -p caskade-desktop -p caskade-plugin-host -p caskade-input --all-targets --locked --target x86_64-pc-windows-gnu -- -D warnings
       # The tray icon: the Tauri CLI finds libayatana-appindicator3 through
       # pkg-config, so the runner needs libayatana-appindicator3-dev.
       - name: Debug app bundle
+        if: needs.changes.outputs.bundle == 'true'
+        id: bundle
         run: pnpm tauri build --debug
-      - name: Upload bundles
-        if: always()
+      - name: Upload fixtures and build timings
+        if: always() && steps.cargo_target.outputs.directory != ''
         uses: https://github.com/actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5
         with:
           name: app-linux-${{ github.run_id }}
           path: |
-            ${{ env.CARGO_TARGET_DIR || 'target' }}/debug/bundle/deb/*.deb
-            ${{ env.CARGO_TARGET_DIR || 'target' }}/debug/bundle/appimage/*.AppImage
+            ${{ steps.cargo_target.outputs.directory }}/cargo-timings/cargo-timing.html
             target/emulation-fixtures-report.json
           if-no-files-found: ignore
+      # Persistent runners may still hold yesterday's bundles. Upload them
+      # only when this run successfully built them.
+      - name: Upload bundles
+        if: always() && steps.bundle.outcome == 'success'
+        uses: https://github.com/actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5
+        with:
+          name: app-linux-bundles-${{ github.run_id }}
+          path: |
+            ${{ steps.cargo_target.outputs.directory }}/debug/bundle/deb/*.deb
+            ${{ steps.cargo_target.outputs.directory }}/debug/bundle/appimage/*.AppImage
+          if-no-files-found: error
+  result:
+    name: app result
+    needs: [changes, linux]
+    if: >-
+      always() && (github.event_name != 'pull_request_target' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       github.event.pull_request.head.repo.fork == false))
+    runs-on: caskade-linux
+    steps:
+      - name: All selected checks passed (including an unaffected PR)
+        env:
+          SCOPE_RESULT: ${{ needs.changes.result }}
+          CHECK_RESULT: ${{ needs.linux.result }}
+          SELECTED: ${{ needs.changes.outputs.app }}
+        run: |
+          python3 - <<'PYTHON'
+          import os
+          assert os.environ['SCOPE_RESULT'] == 'success', 'scope selection failed'
+          assert os.environ['SELECTED'] in ('true', 'false'), 'scope output is missing'
+          expected = 'success' if os.environ['SELECTED'] == 'true' else 'skipped'
+          assert os.environ['CHECK_RESULT'] == expected, 'app checks did not pass'
+          PYTHON

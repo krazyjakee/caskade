@@ -126,6 +126,15 @@ fn reason_name(reason: COREWEBVIEW2_PROCESS_FAILED_REASON) -> &'static str {
     }
 }
 
+fn source(webview: &ICoreWebView2) -> Option<String> {
+    let mut value = PWSTR::null();
+    // SAFETY: live interface on its UI thread and an initialized out
+    // parameter. take_pwstr consumes and frees the COM-allocated string.
+    #[allow(unsafe_code)]
+    unsafe { webview.Source(&mut value) }.ok()?;
+    Some(take_pwstr(value)).filter(|url| !url.is_empty() && url != "about:blank")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -150,13 +159,4 @@ mod tests {
         );
         assert_eq!(kind_of(COREWEBVIEW2_PROCESS_FAILED_KIND(99)), Kind::Other);
     }
-}
-
-fn source(webview: &ICoreWebView2) -> Option<String> {
-    let mut value = PWSTR::null();
-    // SAFETY: live interface on its UI thread and an initialized out
-    // parameter. take_pwstr consumes and frees the COM-allocated string.
-    #[allow(unsafe_code)]
-    unsafe { webview.Source(&mut value) }.ok()?;
-    Some(take_pwstr(value)).filter(|url| !url.is_empty() && url != "about:blank")
 }

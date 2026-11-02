@@ -62,7 +62,9 @@ def emulation():
     artifact.parent.mkdir(parents=True, exist_ok=True)
     artifact.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     cargo(["test", "-p", "caskade-emulation-fixtures", "--locked"], env=environment)
-    cargo(["test", "-p", "caskade-core", "--lib", "--locked", "emulation::"], env=environment)
+    # The workflow's combined Rust app suite runs every core test, including
+    # emulation. Running that subset here too compiled a different feature
+    # selection and executed the same tests twice.
     # Includes shipped-definition validation, detection and scanner tests as
     # their owners land them; never a filter that silently skips new modules.
     cargo(["test", "-p", "caskade-sources", "--locked"], env=environment)

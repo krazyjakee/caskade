@@ -22,6 +22,7 @@
 
 ## Implementation guides and verification
 
+- [Build performance and CI scope](build-performance.md): incremental build settings, PR checks, nightly/opt-in packaging and timing reports.
 - [Installer library and CLI](../crates/caskade-installer/README.md), [fixtures](../crates/caskade-installer/tests/fixtures/README.md), and [CI](../crates/caskade-installer/docs/ci.md)
 - [Discovery CI](../crates/caskade-discovery/docs/ci.md), [hardening](../crates/caskade-discovery/tests/HARDENING.md), and [third-party notices](../crates/caskade-discovery/THIRD-PARTY.md)
 - [Emulation catalogue and managed setup](../crates/caskade-sources/emulation/README.md)
@@ -33,6 +34,7 @@
 
 ## Research still used by the implementation
 
+- [Blaze and Rust build performance](research/rust-build-performance.md): tested Blaze releases, compatibility gaps, and prioritized alternatives for local compilation and CI.
 - [Emulator sources](research/emulator-sources.md): download sources, asset patterns, first-run flags and BIOS requirements.
 - [JavaScript backend spike](research/js-backend-spike.md): measurements behind the Rust-only backend contract for plugin API 0.1, with a reproducible guest and build script.
 - [Web game capture spike](research/web-capture-spike.md): why offline web games go through a MITM proxy in the game window, and what `SharedArrayBuffer` and cross-origin isolation need on WebKitGTK, with a reproducible spike.

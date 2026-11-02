@@ -15,13 +15,32 @@ permissions:
   contents: read
 concurrency:
   group: discovery-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: false
+  # Forgejo 14+ honors this; ci-scope also skips queued obsolete PR heads on 12.
+  cancel-in-progress: ${{ github.event_name == 'pull_request_target' }}
 jobs:
-  check:
+  changes:
     if: >-
       github.event_name != 'pull_request_target' ||
       (github.event.pull_request.head.repo.full_name == github.repository &&
        github.event.pull_request.head.repo.fork == false)
+    runs-on: caskade-linux
+    outputs:
+      discovery: ${{ steps.scope.outputs.discovery }}
+    steps:
+      - uses: https://github.com/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
+          fetch-depth: ${{ github.event_name == 'pull_request_target' && '0' || '1' }}
+          persist-credentials: false
+      - id: scope
+        run: python3 scripts/ci-scope.py
+  check:
+    needs: changes
+    if: >-
+      needs.changes.outputs.discovery == 'true' &&
+      (github.event_name != 'pull_request_target' ||
+       (github.event.pull_request.head.repo.full_name == github.repository &&
+        github.event.pull_request.head.repo.fork == false))
     strategy:
       fail-fast: false
       matrix:
@@ -80,6 +99,28 @@ jobs:
           name: discovery-${{ matrix.os }}-${{ github.run_id }}
           path: target/nextest/discovery-ci/junit.xml
           retention-days: 14
+  result:
+    name: discovery result
+    needs: [changes, check]
+    if: >-
+      always() && (github.event_name != 'pull_request_target' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       github.event.pull_request.head.repo.fork == false))
+    runs-on: caskade-linux
+    steps:
+      - name: All selected discovery checks passed
+        env:
+          SCOPE_RESULT: ${{ needs.changes.result }}
+          CHECK_RESULT: ${{ needs.check.result }}
+          SELECTED: ${{ needs.changes.outputs.discovery }}
+        run: |
+          python3 - <<'PYTHON'
+          import os
+          assert os.environ['SCOPE_RESULT'] == 'success', 'scope selection failed'
+          assert os.environ['SELECTED'] in ('true', 'false'), 'scope output is missing'
+          expected = 'success' if os.environ['SELECTED'] == 'true' else 'skipped'
+          assert os.environ['CHECK_RESULT'] == expected, 'discovery checks did not pass'
+          PYTHON
   live:
     # Opt in explicitly; labels never override the fork prohibition.
     if: >-

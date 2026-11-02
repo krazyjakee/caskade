@@ -22,6 +22,10 @@ build:
 build-app:
     flock /tmp/caskade-heavy.lock pnpm tauri build --debug
 
+# Build desktop binaries and write Cargo's HTML timing report (no cache cleaning)
+build-timings *args:
+    flock /tmp/caskade-heavy.lock cargo build -p caskade-desktop --bins --timings {{args}}
+
 # Scaffold a plugin: just plugin-new my-plugin [--id dev.me.hello] [--no-backend] …
 plugin-new *args:
     node packages/create-plugin/index.mjs --sdk {{justfile_directory()}} {{args}}

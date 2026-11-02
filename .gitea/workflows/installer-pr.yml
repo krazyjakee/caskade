@@ -11,13 +11,32 @@ permissions:
   contents: read
 concurrency:
   group: installer-pr-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: false
+  # Forgejo 14+ honors this; ci-scope also skips queued obsolete PR heads on 12.
+  cancel-in-progress: ${{ github.event_name == 'pull_request_target' }}
 jobs:
-  installer:
+  changes:
     if: >-
       github.event_name != 'pull_request_target' ||
       (github.event.pull_request.head.repo.full_name == github.repository &&
        github.event.pull_request.head.repo.fork == false)
+    runs-on: caskade-linux
+    outputs:
+      installer: ${{ steps.scope.outputs.installer }}
+    steps:
+      - uses: https://github.com/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
+          fetch-depth: ${{ github.event_name == 'pull_request_target' && '0' || '1' }}
+          persist-credentials: false
+      - id: scope
+        run: python3 scripts/ci-scope.py
+  installer:
+    needs: changes
+    if: >-
+      needs.changes.outputs.installer == 'true' &&
+      (github.event_name != 'pull_request_target' ||
+       (github.event.pull_request.head.repo.full_name == github.repository &&
+        github.event.pull_request.head.repo.fork == false))
     strategy:
       fail-fast: false
       matrix:
@@ -99,3 +118,25 @@ jobs:
             target/native-windows/*.json
             sidecar.json
           retention-days: 14
+  result:
+    name: installer result
+    needs: [changes, installer]
+    if: >-
+      always() && (github.event_name != 'pull_request_target' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       github.event.pull_request.head.repo.fork == false))
+    runs-on: caskade-linux
+    steps:
+      - name: All selected installer checks passed
+        env:
+          SCOPE_RESULT: ${{ needs.changes.result }}
+          CHECK_RESULT: ${{ needs.installer.result }}
+          SELECTED: ${{ needs.changes.outputs.installer }}
+        run: |
+          python3 - <<'PYTHON'
+          import os
+          assert os.environ['SCOPE_RESULT'] == 'success', 'scope selection failed'
+          assert os.environ['SELECTED'] in ('true', 'false'), 'scope output is missing'
+          expected = 'success' if os.environ['SELECTED'] == 'true' else 'skipped'
+          assert os.environ['CHECK_RESULT'] == expected, 'installer checks did not pass'
+          PYTHON

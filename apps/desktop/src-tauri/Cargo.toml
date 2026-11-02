@@ -1,6 +1,6 @@
 [package]
 name = "caskade-desktop"
-version = "0.1.0"
+version = "0.1.1"
 description = "Caskade desktop app: the Tauri adapter over caskade-core"
 edition.workspace = true
 rust-version.workspace = true
@@ -15,7 +15,9 @@ e2e = ["tauri/custom-protocol"]
 
 [lib]
 name = "caskade_desktop"
-crate-type = ["staticlib", "cdylib", "rlib"]
+# Desktop binaries and integration tests consume this as Rust. The mobile
+# template's static/shared libraries add an archive and link we never use.
+crate-type = ["rlib"]
 
 [[bin]]
 name = "caskade"
