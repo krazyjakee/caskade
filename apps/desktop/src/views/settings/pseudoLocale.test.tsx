@@ -25,6 +25,12 @@ const locale = pseudoLocale ?? "en-XA";
 
 /** Names, brands and fixture text: data, not interface. */
 const data = [
+  // Devices (#231): their names, operating systems and addresses.
+  /Den-PC|Steam Deck|Office laptop|Work PC|Living room|Kids' PC/g,
+  /Linux|Windows|macOS/g,
+  /\d+\.\d+\.\d+\.\d+:\d+/g,
+  // Dates and times, which the pseudo-locale formats as English.
+  /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2}, \d{4}, \d{1,2}:\d{2}\s?[AP]M/g,
   /Caskade/g,
   /CASKADE/g,
   /IGDB/g,
@@ -155,6 +161,7 @@ it.each([
   ["installer", '[data-settings="core.installer"]'],
   ["plugins", '[data-part="plugin"][data-status="needs_consent"]'],
   ["accounts", '[data-settings="accounts"] [data-part="account"]'],
+  ["devices", '[data-cs="paired-device"]'],
   ["profile", '[data-settings="profile"]'],
   ["about", '[data-cs="about"]'],
 ])("shows the %s tab in the pseudo-locale", async (tab, ready) => {

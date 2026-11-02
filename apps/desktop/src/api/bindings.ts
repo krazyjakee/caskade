@@ -8597,6 +8597,12 @@ export type ThisDevice_Deserialize = {
 	os: DeviceOs,
 	/**  Addresses on this network other devices reach it at. */
 	lanAddresses: string[],
+	/**
+	 *  Whether the internet can be reached (a relay answers); `None` when
+	 *  it can't be told (Never use relays is on, or the endpoint isn't up).
+	 *  Devices on this network sync without it.
+	 */
+	internet?: boolean | null,
 	neverRelay: boolean,
 	port?: number | null,
 	identity: IdentityStatus,
@@ -8612,6 +8618,12 @@ export type ThisDevice_Serialize = {
 	os: DeviceOs,
 	/**  Addresses on this network other devices reach it at. */
 	lanAddresses: string[],
+	/**
+	 *  Whether the internet can be reached (a relay answers); `None` when
+	 *  it can't be told (Never use relays is on, or the endpoint isn't up).
+	 *  Devices on this network sync without it.
+	 */
+	internet: boolean | null,
 	neverRelay: boolean,
 	port: number | null,
 	identity: IdentityStatus,

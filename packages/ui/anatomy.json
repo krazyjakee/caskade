@@ -382,7 +382,8 @@
         "spinner",
         "activity",
         "version",
-        "update"
+        "update",
+        "sync"
       ],
       "states": {},
       "interaction": []
@@ -1053,6 +1054,64 @@
     "store-links": {
       "parts": [
         "store-link"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "peer-link": {
+      "parts": [],
+      "states": {
+        "data-status": [
+          "lan",
+          "direct",
+          "relay",
+          "offline"
+        ]
+      },
+      "interaction": []
+    },
+    "paired-device": {
+      "parts": [
+        "sync",
+        "sync-error"
+      ],
+      "states": {
+        "data-status": [
+          "lan",
+          "direct",
+          "relay",
+          "offline"
+        ]
+      },
+      "interaction": []
+    },
+    "transfer": {
+      "parts": [],
+      "states": {
+        "data-status": [
+          "running",
+          "waitingDirect",
+          "done",
+          "failed"
+        ]
+      },
+      "interaction": []
+    },
+    "share": {
+      "parts": [],
+      "states": {
+        "data-status": [
+          "open",
+          "expiring"
+        ]
+      },
+      "interaction": []
+    },
+    "pair-device": {
+      "parts": [
+        "state",
+        "code",
+        "link"
       ],
       "states": {},
       "interaction": []

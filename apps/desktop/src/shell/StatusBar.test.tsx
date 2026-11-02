@@ -26,6 +26,7 @@ vi.mock("../views/activity/ActivityProvider", () => ({
 }));
 // Rendered and tested on its own: it needs the router and the query client.
 vi.mock("./AppUpdateLink", () => ({ AppUpdateLink: () => null }));
+vi.mock("./SyncStatusLink", () => ({ SyncStatusLink: () => null }));
 
 import { events } from "../api/bindings";
 import { StatusBar } from "./StatusBar";

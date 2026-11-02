@@ -90,6 +90,11 @@ variant of the component, such as the library's card.
 - [`type-search`](#type-search): Search from a keyboard, RetroArch style: a centred overlay with the text being typed and how many games match, opened by typing anywhere outside a text field or by `/`.
 - [`folder-browser`](#folder-browser): Console mode's file and folder picker, in place of the native dialogs a controller can't drive. A opens a folder or picks a file, B cancels, LB/RB go to the previous and next place, LT/RT page through the folder, Start picks the folder shown. `data-kind` is what it picks.
 - [`store-links`](#store-links): Links to the stores that sell a game.
+- [`peer-link`](#peer-link): How another device is reached (#225, #231): an icon and a word. `data-status` is `lan` (on this network), `direct` (over the internet), `relay` (through a relay) or `offline`.
+- [`paired-device`](#paired-device): A device paired with this one: its icon, name, how it is reached, its last sync, Sync now and (for an admin) Forget. `data-status` is how it is reached.
+- [`transfer`](#transfer): A game copied between two of the user's devices (#233): its title, the other device, how it is reached and its progress. `data-status` is `running`, `waitingDirect` (game files wait for a direct path), `done` or `failed`.
+- [`share`](#share): A game shared once with someone else (#246): its title, size, how many received it and until when. `data-status` is `open` (no expiry) or `expiring`.
+- [`pair-device`](#pair-device): Pairing over any view (#226, #231): the code both devices show, for a pairing this device or the other one started; or a `caskade://pair` link opened from outside, waiting for an admin.
 - [`account-picker`](#account-picker): Who is playing: the accounts to sign in as, at start and after Switch account, and the PIN pad for a locked one. `data-step` is `accounts` or `pin`.
 - [`pin-pad`](#pin-pad): PIN entry: a field for keys and a number pad for a controller (A types a digit, B deletes, Start confirms). A wrong PIN shakes the field and clears it; after too many, `locked` counts the wait down.
 - [`account-menu`](#account-menu): The head of the menu the topbar's avatar opens: who is signed in. Its actions are the `menu`'s items.
@@ -512,6 +517,7 @@ Root: `[data-cs="status-bar"]`
 | `activity` | `[data-cs="status-bar"] [data-part="activity"]` | A concise description of current work or queue status. |
 | `version` | `[data-cs="status-bar"] [data-part="version"]` | The application version. |
 | `update` | `[data-cs="status-bar"] [data-part="update"]` | A link to Settings → General once a check finds a new Caskade version; `data-status` is `available`, or `ready` once it is installed and waits for a restart. |
+| `sync` | `[data-cs="status-bar"] [data-part="sync"]` | With paired devices (#231): how many are in reach and the best way one is reached (a `peer-link`), linked to Settings → Devices; `data-status` is `lan`, `direct`, `relay`, `offline` or `syncing`. |
 
 ## `backdrop`
 
@@ -1320,6 +1326,69 @@ Root: `[data-cs="store-links"]`
 | Part | Selector | What it is |
 | --- | --- | --- |
 | `store-link` | `[data-cs="store-links"] [data-part="store-link"]` | One store; `data-store` names it. |
+
+## `peer-link`
+
+How another device is reached (#225, #231): an icon and a word. `data-status` is `lan` (on this network), `direct` (over the internet), `relay` (through a relay) or `offline`. Rendered by LinkBadge (app).
+
+Root: `[data-cs="peer-link"]`
+
+State on the root:
+
+- `data-status`: `lan`, `direct`, `relay`, `offline`
+
+## `paired-device`
+
+A device paired with this one: its icon, name, how it is reached, its last sync, Sync now and (for an admin) Forget. `data-status` is how it is reached. Rendered by DeviceRow in Settings → Devices (app).
+
+Root: `[data-cs="paired-device"]`
+
+| Part | Selector | What it is |
+| --- | --- | --- |
+| `sync` | `[data-cs="paired-device"] [data-part="sync"]` | Its OS and the last sync, or that it is syncing now. |
+| `sync-error` | `[data-cs="paired-device"] [data-part="sync-error"]` | Shown when the last sync didn't reach it. |
+
+State on the root:
+
+- `data-status`: `lan`, `direct`, `relay`, `offline`
+
+Contains: [`peer-link`](#peer-link), [`button`](#button)
+
+## `transfer`
+
+A game copied between two of the user's devices (#233): its title, the other device, how it is reached and its progress. `data-status` is `running`, `waitingDirect` (game files wait for a direct path), `done` or `failed`. Rendered by CopiesAndShares in Settings → Devices (app).
+
+Root: `[data-cs="transfer"]`
+
+State on the root:
+
+- `data-status`: `running`, `waitingDirect`, `done`, `failed`
+
+Contains: [`peer-link`](#peer-link)
+
+## `share`
+
+A game shared once with someone else (#246): its title, size, how many received it and until when. `data-status` is `open` (no expiry) or `expiring`. Rendered by CopiesAndShares in Settings → Devices (app).
+
+Root: `[data-cs="share"]`
+
+State on the root:
+
+- `data-status`: `open`, `expiring`
+
+## `pair-device`
+
+Pairing over any view (#226, #231): the code both devices show, for a pairing this device or the other one started; or a `caskade://pair` link opened from outside, waiting for an admin. Rendered by PairingHost (app).
+
+Root: `[data-cs="pair-device"]`
+
+| Part | Selector | What it is |
+| --- | --- | --- |
+| `state` | `[data-cs="pair-device"] [data-part="state"]` | A code pairing; `data-status` is `waiting`, `paired`, `cancelled` or `failed`. |
+| `code` | `[data-cs="pair-device"] [data-part="code"]` | The six-digit code, split in two; larger in console mode. |
+| `link` | `[data-cs="pair-device"] [data-part="link"]` | An opened pairing link; `data-status` is `valid` or `expired`. |
+
+Contains: [`button`](#button)
 
 ## `account-picker`
 

@@ -72,6 +72,24 @@ export function coreSettingsDefaults(): Record<string, Record<string, unknown>> 
     },
     "core.accounts": { ratingBoard: "pegi" },
     "core.achievements": { enabled: true, background: true, notifyUnlocks: true },
+    "core.sync": {
+      categories: {
+        library: "sync",
+        artwork: "sync",
+        achievementLinks: "sync",
+        playSessions: "sync",
+        saves: "sync",
+        accounts: "sync",
+        appearance: "sync",
+        rommServers: "sync",
+        launchActions: "thisDeviceOnly",
+        gameScripts: "thisDeviceOnly",
+        preferredEmulators: "thisDeviceOnly",
+        addons: "thisDeviceOnly",
+      },
+      neverRelay: false,
+      port: null,
+    },
   };
 }
 

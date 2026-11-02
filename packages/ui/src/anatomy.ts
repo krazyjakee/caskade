@@ -368,6 +368,7 @@ export const anatomy = {
       version: "The application version.",
       update:
         "A link to Settings → General once a check finds a new Caskade version; `data-status` is `available`, or `ready` once it is installed and waits for a restart.",
+      sync: "With paired devices (#231): how many are in reach and the best way one is reached (a `peer-link`), linked to Settings → Devices; `data-status` is `lan`, `direct`, `relay`, `offline` or `syncing`.",
     },
     states: {},
     interaction: [],
@@ -1163,6 +1164,61 @@ export const anatomy = {
     parts: { "store-link": "One store; `data-store` names it." },
     states: {},
     interaction: [],
+  },
+  "peer-link": {
+    rendered: "LinkBadge (app)",
+    source: "app",
+    description:
+      "How another device is reached (#225, #231): an icon and a word. `data-status` is `lan` (on this network), `direct` (over the internet), `relay` (through a relay) or `offline`.",
+    parts: {},
+    states: { "data-status": ["lan", "direct", "relay", "offline"] },
+    interaction: [],
+  },
+  "paired-device": {
+    rendered: "DeviceRow in Settings → Devices (app)",
+    source: "app",
+    description:
+      "A device paired with this one: its icon, name, how it is reached, its last sync, Sync now and (for an admin) Forget. `data-status` is how it is reached.",
+    parts: {
+      sync: "Its OS and the last sync, or that it is syncing now.",
+      "sync-error": "Shown when the last sync didn't reach it.",
+    },
+    states: { "data-status": ["lan", "direct", "relay", "offline"] },
+    interaction: [],
+    contains: ["peer-link", "button"],
+  },
+  transfer: {
+    rendered: "CopiesAndShares in Settings → Devices (app)",
+    source: "app",
+    description:
+      "A game copied between two of the user's devices (#233): its title, the other device, how it is reached and its progress. `data-status` is `running`, `waitingDirect` (game files wait for a direct path), `done` or `failed`.",
+    parts: {},
+    states: { "data-status": ["running", "waitingDirect", "done", "failed"] },
+    interaction: [],
+    contains: ["peer-link"],
+  },
+  share: {
+    rendered: "CopiesAndShares in Settings → Devices (app)",
+    source: "app",
+    description:
+      "A game shared once with someone else (#246): its title, size, how many received it and until when. `data-status` is `open` (no expiry) or `expiring`.",
+    parts: {},
+    states: { "data-status": ["open", "expiring"] },
+    interaction: [],
+  },
+  "pair-device": {
+    rendered: "PairingHost (app)",
+    source: "app",
+    description:
+      "Pairing over any view (#226, #231): the code both devices show, for a pairing this device or the other one started; or a `caskade://pair` link opened from outside, waiting for an admin.",
+    parts: {
+      state: "A code pairing; `data-status` is `waiting`, `paired`, `cancelled` or `failed`.",
+      code: "The six-digit code, split in two; larger in console mode.",
+      link: "An opened pairing link; `data-status` is `valid` or `expired`.",
+    },
+    states: {},
+    interaction: [],
+    contains: ["button"],
   },
   "account-picker": {
     rendered: "AccountPicker (app)",

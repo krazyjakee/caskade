@@ -372,6 +372,13 @@ msgstr[1] ""
 msgid "{controller} is connected."
 msgstr ""
 
+#. js-lingui:icu=%7Bcount%2C+plural%2C+one+%7B%23+device+in+reach%7D+other+%7B%23+devices+in+reach%7D%7D&pluralize_on=count
+#: apps/desktop/src/shell/SyncStatusLink.tsx
+msgid "# device in reach"
+msgid_plural "# devices in reach"
+msgstr[0] ""
+msgstr[1] ""
+
 #. js-lingui:icu=%7Bcount%2C+plural%2C+one+%7B%23+game+selected%7D+other+%7B%23+games+selected%7D%7D&pluralize_on=count
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
 msgid "# game selected"
@@ -412,6 +419,10 @@ msgstr ""
 #. The running task, then how many wait after it
 #: apps/desktop/src/shell/StatusBar.tsx
 msgid "{description} · {queued} queued"
+msgstr ""
+
+#: apps/desktop/src/components/sync/common.tsx
+msgid "{done} of {total} · {speed}/s"
 msgstr ""
 
 #. A game's total playtime: 3.5h played
@@ -615,8 +626,16 @@ msgstr ""
 msgid "{name} shown now"
 msgstr ""
 
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "{name} shows a code too. Pair only if it is the same as this one."
+msgstr ""
+
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgid "{name} usage"
+msgstr ""
+
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "{name} wants to pair"
 msgstr ""
 
 #: apps/desktop/src/shell/accounts/AccountMenu.tsx
@@ -655,6 +674,18 @@ msgstr ""
 #. The screenshot shown, of how many
 #: apps/desktop/src/views/game/Screenshots.tsx
 msgid "{number} / {count}"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "{os} · Not synced yet"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "{os} · Synced {last}"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "{os} · Syncing…"
 msgstr ""
 
 #. placeholder {0}: formatDateTime(new Date(synced))
@@ -772,6 +803,14 @@ msgstr ""
 msgid "{seconds} s"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
+msgid "{size} · received by {count}"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
+msgid "{size} · received by {count} · until {expires}"
+msgstr ""
+
 #. A size and its unit: 1.5 GiB
 #: apps/desktop/src/api/presentation.ts
 msgid "{size} {unit}"
@@ -815,6 +854,10 @@ msgstr ""
 msgid "{title} didn't start"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
+msgid "{title} from {device}"
+msgstr ""
+
 #: apps/desktop/src/plugins/PluginViews.tsx
 msgid "{title} isn't available in console mode."
 msgstr ""
@@ -825,6 +868,10 @@ msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
 msgid "{title} progress"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
+msgid "{title} to {device}"
 msgstr ""
 
 #. {title} is the game's title
@@ -1081,6 +1128,10 @@ msgstr ""
 msgid "A notification for achievements unlocked since the last refresh. The first refresh of a game brings its history in without notifications."
 msgstr ""
 
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "A pairing link was opened. Pairing hands the device that made it (it starts with {device}) your library and accounts. The link works until {until}."
+msgstr ""
+
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 msgid "A path, a .desktop, .lnk or .url shortcut, or a URI like steam://rungameid/620. Or drop a file here."
 msgstr ""
@@ -1192,6 +1243,14 @@ msgstr ""
 #: apps/desktop/src/views/SettingsView.tsx
 msgctxt "settings tab"
 msgid "Accounts"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Accounts and PINs"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Achievement links you made"
 msgstr ""
 
 #. A notification's category
@@ -1666,6 +1725,10 @@ msgstr ""
 #: apps/desktop/src/api/emulation.ts
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "App bundle"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Appearance"
 msgstr ""
 
 #: apps/desktop/src/views/SettingsView.tsx
@@ -2219,6 +2282,10 @@ msgstr ""
 msgid "Caskade keeps a copy of the game. You'll play it for a minute so it can see what the game needs."
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Caskade on this network shows here. Both devices show a code: pair when they match."
+msgstr ""
+
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 msgctxt "RomM platform column"
 msgid "Caskade platform"
@@ -2297,6 +2364,10 @@ msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
 msgid "Changed: {path}"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Changes made on any device reach the others when they next connect. Where two devices changed the same thing, the later change wins. This device only stops this device sending and taking it in."
 msgstr ""
 
 #. Tests the RomM server
@@ -2523,6 +2594,7 @@ msgstr ""
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
+#: apps/desktop/src/components/sync/PairingHost.tsx
 #: apps/desktop/src/views/game/Screenshots.tsx
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
@@ -2691,6 +2763,10 @@ msgstr ""
 msgid "Connected · v{version}"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Connected to the internet."
+msgstr ""
+
 #. A RomM server's status
 #. A RomM server's status
 #: apps/desktop/src/onboarding/run.ts
@@ -2709,6 +2785,10 @@ msgstr ""
 #: apps/desktop/src/shell/console/ModeToggle.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Console mode"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Console mode, window and start-up choices"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
@@ -2735,6 +2815,14 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Controls manual scans, scheduled refresh and folder watching."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
+msgid "Copies and shares"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Copy a pairing link"
 msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
@@ -2845,6 +2933,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Covers and images you chose or imported, and web games' pictures."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Covers and images you chose or imported."
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
@@ -3054,6 +3146,11 @@ msgctxt "collection"
 msgid "Description"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgctxt "device kind"
+msgid "Desktop"
+msgstr ""
+
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgctxt "mode"
@@ -3122,6 +3219,31 @@ msgstr ""
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
 msgctxt "theme source"
 msgid "Dev folder"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Device name"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Device not here? Guest Wi‑Fi and some routers keep devices apart, and devices elsewhere never show. Pair with a link instead: copy it here and paste it on the other device. It works once, for ten minutes."
+msgstr ""
+
+#: apps/desktop/src/views/SettingsView.tsx
+msgctxt "settings tab"
+msgid "Devices"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Devices connect only directly: on this network, or over the internet where the routers allow it. Some devices away from home may then not connect."
+msgstr ""
+
+#: apps/desktop/src/shell/SyncStatusLink.tsx
+msgid "Devices out of reach"
+msgstr ""
+
+#: apps/desktop/src/shell/SyncStatusLink.tsx
+msgid "Devices: open Settings → Devices"
 msgstr ""
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
@@ -3204,6 +3326,7 @@ msgstr ""
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/desktop/src/components/sync/PairingHost.tsx
 msgid "Done"
 msgstr ""
 
@@ -3220,6 +3343,10 @@ msgstr ""
 #: apps/desktop/src/views/CollectionView.tsx
 #: apps/desktop/src/views/library/LibraryView.tsx
 msgid "Done selecting"
+msgstr ""
+
+#: apps/desktop/src/components/sync/common.tsx
+msgid "Done: {total}"
 msgstr ""
 
 #. The stage a failed install stopped at
@@ -3255,6 +3382,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Downloaded artwork"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Downloaded metadata and images"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
@@ -3490,6 +3621,10 @@ msgctxt "emulation section"
 msgid "Emulators"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Emulators and their profiles"
+msgstr ""
+
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "emulators Caskade installed"
 msgstr ""
@@ -3604,6 +3739,10 @@ msgstr ""
 #. How often a RomM server syncs
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 msgid "Every hour"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Every session from every device, so play time adds up wherever you play."
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
@@ -3785,6 +3924,10 @@ msgstr ""
 msgid "For new games only"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Forget {name}"
+msgstr ""
+
 #. A BIOS file's state
 #. A BIOS file's state
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
@@ -3855,6 +3998,10 @@ msgstr ""
 msgid "Game details refreshed"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Game details you changed, favourites, hidden games, collections, matches you set and games you kept apart."
+msgstr ""
+
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 msgid "Game details, artwork and matches come from the Internet Game Database."
 msgstr ""
@@ -3879,6 +4026,14 @@ msgstr ""
 
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
 msgid "Game pages show the achievements of connected accounts. Caskade only reads them; nothing is unlocked or changed at a store."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Game saves, with every version kept."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Game scripts"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
@@ -3930,6 +4085,10 @@ msgstr ""
 msgid "Games ask which emulator to use."
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
+msgid "Games copied between your devices, and games you shared. Both computers need Caskade open until a game arrives."
+msgstr ""
+
 #: apps/desktop/src/onboarding/SetupStep.tsx
 msgid "Games found so far are ready to play. More may appear while discovery continues in the background."
 msgstr ""
@@ -3978,6 +4137,10 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "Games you install with Caskade are kept here. You can add more places later."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Games you linked to their achievements by hand."
 msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
@@ -4067,6 +4230,11 @@ msgstr ""
 
 #: apps/desktop/src/views/CollectionsView.tsx
 msgid "Hand-pick games into lists, or save a filter as a smart collection that keeps itself up to date."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgctxt "device kind"
+msgid "Handheld"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
@@ -4588,6 +4756,10 @@ msgstr ""
 msgid "Interface scale"
 msgstr ""
 
+#: apps/desktop/src/components/sync/common.tsx
+msgid "Internet, direct"
+msgstr ""
+
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgctxt "plugin status"
 msgid "Invalid"
@@ -4644,6 +4816,10 @@ msgstr ""
 msgid "It leaves your library: the offline copy and the progress saved in the game window are deleted, with its play sessions. Add its page again to play it again."
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "It stops syncing with this device. Nothing is deleted on either device, and what synced stays."
+msgstr ""
+
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "It was made by an older Caskade: its library is updated as it's restored."
 msgstr ""
@@ -4695,6 +4871,7 @@ msgid "Jump to letter"
 msgstr ""
 
 #. Cancels uninstalling a plugin
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Keep"
 msgstr ""
@@ -4744,6 +4921,10 @@ msgctxt "byte unit"
 msgid "KiB"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Kind"
+msgstr ""
+
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 msgid "Kind of collection"
 msgstr ""
@@ -4765,6 +4946,11 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Language & Region"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgctxt "device kind"
+msgid "Laptop"
 msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
@@ -4802,7 +4988,12 @@ msgctxt "RomM server column"
 msgid "Last sync"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Last try didn't reach it. It syncs when it's back."
+msgstr ""
+
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 msgid "Launch actions"
 msgstr ""
 
@@ -4869,6 +5060,7 @@ msgstr ""
 #: apps/desktop/src/views/game/origin.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Library"
 msgstr ""
@@ -5084,6 +5276,10 @@ msgstr ""
 msgid "Loading…"
 msgstr ""
 
+#: apps/desktop/src/components/sync/common.tsx
+msgid "Local network"
+msgstr ""
+
 #: apps/desktop/src/views/activity/JobRecovery.tsx
 msgid "Locate the installer"
 msgstr ""
@@ -5165,6 +5361,10 @@ msgstr ""
 msgid "Look inside archives"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Looking for Caskade on this network…"
+msgstr ""
+
 #: apps/desktop/src/onboarding/run.ts
 msgid "Looking for installed emulators…"
 msgstr ""
@@ -5191,6 +5391,14 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
 msgid "Magnet links and torrent files"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Make a new key"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Make a new key…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
@@ -5531,6 +5739,14 @@ msgstr ""
 msgid "Never remove favourites"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Never synced"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Never use relays"
+msgstr ""
+
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
 msgid "New collection"
@@ -5661,6 +5877,10 @@ msgstr ""
 msgid "No description yet."
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "No devices paired yet."
+msgstr ""
+
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgid "No drives found."
 msgstr ""
@@ -5715,6 +5935,10 @@ msgstr ""
 
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 msgid "No IGDB games match “{searched}”."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "No internet: devices on this network still sync."
 msgstr ""
 
 #: apps/desktop/src/views/activity/ActivityView.tsx
@@ -5979,8 +6203,14 @@ msgstr ""
 msgid "Not needed"
 msgstr ""
 
+#: apps/desktop/src/components/sync/PairingHost.tsx
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Not now"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Not on a local network."
 msgstr ""
 
 #: apps/desktop/src/views/game/IgdbPanel.tsx
@@ -6059,6 +6289,10 @@ msgstr ""
 msgid "Nothing unlocked yet."
 msgstr ""
 
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "Nothing was paired. Start again from either device."
+msgstr ""
+
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 msgid "Nothing was saved. Check the marked fields."
 msgstr ""
@@ -6117,6 +6351,10 @@ msgstr ""
 msgid "Offer this update again"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Offers to install the same ones. Plugins still ask for their permissions on each device."
+msgstr ""
+
 #. A link to a game's website
 #. A link to a game's website
 #: apps/desktop/src/views/game/GameView.tsx
@@ -6128,6 +6366,10 @@ msgstr ""
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgctxt "storage location status"
 msgid "offline"
+msgstr ""
+
+#: apps/desktop/src/components/sync/common.tsx
+msgid "Offline"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
@@ -6167,6 +6409,10 @@ msgstr ""
 msgid "On every refresh"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "On this network at {addresses}."
+msgstr ""
+
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
 msgid "On-screen keyboard"
 msgstr ""
@@ -6179,6 +6425,18 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Online lookups, and the setup Caskade starts with."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Only an admin can pair devices, forget them or change what syncs."
+msgstr ""
+
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "Only an admin can pair devices."
+msgstr ""
+
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "Only an admin can pair devices. Ask one to confirm here."
 msgstr ""
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
@@ -6371,6 +6629,65 @@ msgstr ""
 msgid "Page up"
 msgstr ""
 
+#: apps/desktop/src/components/sync/PairingHost.tsx
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Pair"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Pair a device"
+msgstr ""
+
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "Pair with {name}"
+msgstr ""
+
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "Pair with {name}?"
+msgstr ""
+
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "Pair with the device from this link"
+msgstr ""
+
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "Pair with the device from this link?"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Pair…"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Paired devices keep your library, play history and collections in step. Each keeps its own games, folders and emulators."
+msgstr ""
+
+#. placeholder {0}: accept.data.name
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "Paired with {0}"
+msgstr ""
+
+#. placeholder {0}: accept.data.name
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Paired with {0}."
+msgstr ""
+
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "Paired with {name}"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Pairing link copied"
+msgstr ""
+
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "Pairing with {name} didn't finish"
+msgstr ""
+
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "Pairing with {name} was cancelled"
+msgstr ""
+
 #: apps/desktop/src/api/presentation.ts
 msgctxt "release state"
 msgid "Partly installed"
@@ -6395,6 +6712,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
 msgid "Paste a magnet link anywhere in Caskade, drop a .torrent file on it, or use Add game. Nothing downloads until you confirm, and nothing is seeded afterwards."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Paste a pairing link from another device"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
@@ -6536,12 +6857,20 @@ msgstr ""
 msgid "Play {name}"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Play and utility actions you added. Their programs must be at the same place on each device."
+msgstr ""
+
 #: apps/desktop/src/views/settings/EmulatorSettings.tsx
 msgid "Play emulated games fullscreen in desktop mode too. Console mode always does."
 msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
 msgid "Play from your library"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Play history"
 msgstr ""
 
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
@@ -6684,6 +7013,10 @@ msgctxt "settings tab"
 msgid "Plugins"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Plugins and themes"
+msgstr ""
+
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 msgid "Plugins settings"
 msgstr ""
@@ -6713,6 +7046,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/InstallerSettings.tsx
 msgid "Preferences apply to the next install job. Jobs already running keep their current settings."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Preferred emulators"
 msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
@@ -7531,6 +7868,10 @@ msgstr ""
 msgid "ROM folder"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "ROM folders"
+msgstr ""
+
 #: apps/desktop/src/api/presentation.ts
 msgctxt "library source"
 msgid "ROM folders"
@@ -7560,6 +7901,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 msgid "RomM Server"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "RomM servers"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
@@ -7770,6 +8115,7 @@ msgid "Saved scans that turn ROM folders into games. Multi-disc games and playli
 msgstr ""
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 msgid "Saves"
 msgstr ""
 
@@ -7905,6 +8251,10 @@ msgstr ""
 #: apps/desktop/src/views/SettingsView.tsx
 msgctxt "settings tab"
 msgid "Scripts"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Scripts that run with one game. They arrive turned off on other devices."
 msgstr ""
 
 #: apps/desktop/src/views/settings/about/LegalView.tsx
@@ -8071,6 +8421,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 msgid "Server address"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Servers and what they import. Each device signs in with its own password."
 msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
@@ -8574,6 +8928,10 @@ msgstr ""
 msgid "Stop waiting"
 msgstr ""
 
+#: apps/desktop/src/components/sync/common.tsx
+msgid "Stopped"
+msgstr ""
+
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "Stopped by a signal"
 msgstr ""
@@ -8591,6 +8949,10 @@ msgstr ""
 #: apps/desktop/src/views/SettingsView.tsx
 msgctxt "settings tab"
 msgid "Storage"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Storage folders"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
@@ -8652,6 +9014,10 @@ msgctxt "settings tab"
 msgid "Store accounts"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Store sign-ins (connect each device)"
+msgstr ""
+
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
 msgid "Submitting…"
 msgstr ""
@@ -8670,6 +9036,11 @@ msgctxt "on-screen keyboard"
 msgid "Symbols"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgctxt "sync choice"
+msgid "Sync"
+msgstr ""
+
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 msgid "Sync {server}"
 msgstr ""
@@ -8678,6 +9049,11 @@ msgstr ""
 msgid "Sync in the background"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Sync is waiting for the system keychain"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 msgid "Sync now"
 msgstr ""
@@ -8823,8 +9199,16 @@ msgstr ""
 msgid "The collection goes. Its games stay in your library."
 msgstr ""
 
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "The devices lost each other, or nobody confirmed in time. Nothing was paired."
+msgstr ""
+
 #: apps/desktop/src/components/gameMenu/RemoveGameDialog.tsx
 msgid "The files Caskade installed for it are deleted, then it leaves your library with its play sessions. Files it didn't install stay where they are. The uninstall shows in Activity."
+msgstr ""
+
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "The first sync starts now. Your library, play history and collections show on both devices; each keeps its own games and settings."
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
@@ -8849,6 +9233,14 @@ msgstr ""
 
 #: apps/desktop/src/api/emulatorSetup.ts
 msgid "The install failed"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "The keychain didn't answer. Unlock it, then try again. Everything else works meanwhile."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "The keychain no longer holds the key your other devices know this one by. A new key makes this a new device to them: pair each of them again afterwards."
 msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
@@ -8984,6 +9376,10 @@ msgstr ""
 msgid "Theme folder"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Theme, accent and layout."
+msgstr ""
+
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Themes"
@@ -8995,6 +9391,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "There isn't enough free space in this folder for a backup."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "These belong to each device's own drives and hardware."
 msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
@@ -9009,6 +9409,18 @@ msgstr ""
 msgid "These source records are excluded from later discovery scans."
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "These stay on each device until you choose to sync them."
+msgstr ""
+
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "They don't match"
+msgstr ""
+
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "They match: pair"
+msgstr ""
+
 #: apps/desktop/src/views/CollectionView.tsx
 msgid "This collection doesn't exist any more."
 msgstr ""
@@ -9019,6 +9431,18 @@ msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
 msgid "This collection is empty. Add games here, or from a game's menu."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "This device"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "This device only"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "This device's sync key is gone"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
@@ -9067,6 +9491,10 @@ msgstr ""
 msgid "This needs you: choose what to do next."
 msgstr ""
 
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "This pairing link has expired. Make a new one on the other device (it starts with {device})."
+msgstr ""
+
 #: apps/desktop/src/plugins/PluginViews.tsx
 msgid "This plugin view isn't available."
 msgstr ""
@@ -9093,6 +9521,10 @@ msgstr ""
 
 #: apps/desktop/src/shell/ErrorFallback.tsx
 msgid "This view couldn't be shown"
+msgstr ""
+
+#: apps/desktop/src/components/sync/common.tsx
+msgid "Through a relay"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
@@ -9179,6 +9611,10 @@ msgstr ""
 msgid "Tracking folder"
 msgstr ""
 
+#: apps/desktop/src/components/sync/common.tsx
+msgid "Transfer progress"
+msgstr ""
+
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/components/FailureNotice.tsx
@@ -9193,6 +9629,7 @@ msgstr ""
 #: apps/desktop/src/views/CollectionsView.tsx
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
@@ -9226,6 +9663,11 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgid "Turn these down on slower machines."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgctxt "device kind"
+msgid "TV"
 msgstr ""
 
 #. Hint bar: type the focused key
@@ -9537,6 +9979,10 @@ msgstr ""
 msgid "Using your chosen locations."
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Usually different on each device"
+msgstr ""
+
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "Values it saw"
 msgstr ""
@@ -9623,6 +10069,14 @@ msgstr ""
 #. placeholder {0}: state.launcher
 #: apps/desktop/src/views/game/OwnedReleases.tsx
 msgid "Waiting for {0} to finish installing it."
+msgstr ""
+
+#: apps/desktop/src/components/sync/PairingHost.tsx
+msgid "Waiting for {name} to confirm…"
+msgstr ""
+
+#: apps/desktop/src/components/sync/common.tsx
+msgid "Waiting for a direct connection. Game files don't go through relays."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
@@ -9732,6 +10186,10 @@ msgstr ""
 msgid "What should Caskade look for?"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "What syncs"
+msgstr ""
+
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "What to back up"
 msgstr ""
@@ -9766,6 +10224,10 @@ msgstr ""
 msgid "Where Caskade installs games and keeps its data."
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Where games are installed"
+msgstr ""
+
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "Where should new games go?"
 msgstr ""
@@ -9782,12 +10244,20 @@ msgstr ""
 msgid "Where to keep the game"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Which emulator each platform uses, where the other device has it."
+msgstr ""
+
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 msgid "Which programs are the game"
 msgstr ""
 
 #: apps/desktop/src/onboarding/AccountStep.tsx
 msgid "Who are you?"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Who plays here, their age limits and PINs. Wrong PIN attempts are counted on each device."
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
@@ -9916,6 +10386,7 @@ msgid "Your account has a PIN. Type a new one to change it."
 msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 msgid "Your artwork"
 msgstr ""
 
@@ -9929,6 +10400,10 @@ msgstr ""
 
 #: apps/desktop/src/views/CollectionsView.tsx
 msgid "Your Collections"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Your devices"
 msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
@@ -9945,6 +10420,10 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/AddGamesDialog.tsx
 msgid "Your library has no games yet."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Your other devices know it by this name. Devices on the same network find each other and sync without the internet."
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx

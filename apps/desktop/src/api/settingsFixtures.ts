@@ -270,6 +270,28 @@ const sections: {
   },
   { namespace: "core.accounts", version: 1, defaults: { ratingBoard: "pegi" } },
   {
+    namespace: "core.sync",
+    version: 1,
+    defaults: {
+      categories: {
+        library: "sync",
+        artwork: "sync",
+        achievementLinks: "sync",
+        playSessions: "sync",
+        saves: "sync",
+        accounts: "sync",
+        appearance: "sync",
+        rommServers: "sync",
+        launchActions: "thisDeviceOnly",
+        gameScripts: "thisDeviceOnly",
+        preferredEmulators: "thisDeviceOnly",
+        addons: "thisDeviceOnly",
+      },
+      neverRelay: false,
+      port: null,
+    },
+  },
+  {
     namespace: "core.achievements",
     version: 1,
     defaults: { enabled: true, background: true, notifyUnlocks: true },

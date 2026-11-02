@@ -58,7 +58,7 @@ it("shows an admin Accounts and My profile, and a standard account only what it 
 
   renderApp("/settings?tab=appearance", { accounts: family, activeAccount: "kid" });
   await screen.findByRole("tab", { name: "Appearance", selected: true });
-  expect(sections()).toEqual(["Appearance", "My profile", "Statistics", "About"]);
+  expect(sections()).toEqual(["Appearance", "Devices", "My profile", "Statistics", "About"]);
 });
 
 it("asks an admin for a hidden tab's link", async () => {

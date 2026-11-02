@@ -281,6 +281,41 @@ fn each_group_is_allowed_for_admins_refused_without_it_and_allowed_once_granted(
     }
     forbidden(call("settings_set", set("core.general")));
 
+    // Pairing, forgetting and what syncs (#231): an admin's alone, even for
+    // an account given every settings section and installs.
+    grant(
+        &accounts,
+        &admin,
+        &kid,
+        Permissions {
+            settings: groups
+                .iter()
+                .map(|(section, _)| (*section).to_owned())
+                .collect(),
+            install: true,
+        },
+    );
+    forbidden(call("settings_set", set("core.sync")));
+    forbidden(call("settings_reset", set("core.sync")));
+    for command in [
+        "devices_pair_nearby",
+        "devices_confirm_pairing",
+        "devices_cancel_pairing",
+        "devices_pairing_link",
+        "devices_accept_pairing_link",
+        "devices_accept_opened_link",
+        "devices_forget",
+        "devices_rename",
+        "devices_set_kind",
+        "devices_create_identity",
+    ] {
+        forbidden(call(command, json!({})));
+    }
+    // Seeing them and syncing now are everyone's.
+    for command in ["devices_status", "devices_sync_now", "devices_opened_link"] {
+        assert_eq!(call(command, json!({})), Ok(ran.clone()), "{command}");
+    }
+
     // Signed out: only reads and signing in.
     accounts.sign_out();
     for (command, body) in groups

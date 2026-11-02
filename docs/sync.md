@@ -467,6 +467,41 @@ These are declared synced by the policy but don't travel yet:
 Each device's own default admin account appears on the other devices as a
 second "Player" account.
 
+## Settings → Devices
+
+`views/settings/devices/` (#231), over `api/sync.ts` (the native API on the
+`devices_*` commands and `DevicesChanged`; `api/syncFixtures.ts` for the
+browser preview and tests):
+
+- **This device:** its name and kind, its addresses on this network, whether
+  the internet answers (a relay is connected; unknown with Never use relays
+  on), and Never use relays (`core.sync.neverRelay`).
+- **Your devices:** each paired device with how it is reached (`peer-link`),
+  its last sync, or that the last try didn't reach it (never a toast), Sync
+  now and Forget.
+- **Pair a device:** nearby Caskade, a pairing link to copy, and a pasted one.
+- **What syncs:** #227's categories (`core.sync.categories`), synced and
+  optional, plus what never syncs.
+- **Copies and shares:** shows nothing until #233 and #246 exist, and no
+  buttons.
+
+Every account sees the tab. Only an admin's controls are enabled, and the core
+refuses anyone else whatever the webview shows: the devices commands and
+`core.sync` are admin-only in `permissions.rs` and `Permission::for_namespace`.
+
+Pairing dialogs come from `components/sync/PairingHost.tsx` in the shell, over
+any view:
+- a code pairing started on either device (`pair-device`, its code larger in
+  console mode);
+- a `caskade://pair` link opened from outside, which pairs only when an admin
+  presses Pair.
+
+The status bar's `sync` part shows how many paired devices are in reach and
+the best link, and opens Settings → Devices.
+
+Waking a device (#234), copying a game here (#233), playing on another device
+(#234) and shares (#246, #247) aren't shown: they come with their issues.
+
 ## Lifetime
 
 `SyncEndpoint::bind` runs on the caller's tokio runtime; the crate creates

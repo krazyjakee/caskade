@@ -8,6 +8,7 @@ import {
   RouterProvider,
 } from "@tanstack/react-router";
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { type AchievementSet, AchievementsProvider } from "./api/achievements";
 import {
@@ -34,6 +35,8 @@ import {
 import { createLibraryQueryClient, LibraryProvider } from "./api/provider";
 import { StorageProvider } from "./api/StorageProvider";
 import type { RootSummary, StorageApi } from "./api/storage";
+import { SyncProvider, type Transfer } from "./api/sync";
+import { createSyncFixtureApi } from "./api/syncFixtures";
 import { fixtureStatsState } from "./api/systemStatsFixtures";
 import type { CollectionSummary } from "./api/types";
 import { CollectionCard } from "./components/CollectionCard";
@@ -842,6 +845,59 @@ describe("the shell's catalogued anatomy, and the app-only parts of shared compo
     fireEvent.click(within(panel).getByRole("button", { name: "Save script" }));
     await within(panel).findByRole("alert");
     expect(survey(seen, "scripts")).toEqual([]);
+  });
+
+  it("renders Settings → Devices, its pairing dialogs and the status bar's devices", async () => {
+    const sync = createSyncFixtureApi();
+    const now = Date.now();
+    const transfer = (state: Transfer["state"], index: number): Transfer => ({
+      id: `t${index}`,
+      title: "Hades",
+      deviceName: "Steam Deck",
+      direction: index % 2 === 0 ? "incoming" : "outgoing",
+      doneBytes: 1_000_000,
+      totalBytes: 4_000_000,
+      bytesPerSecond: 500_000,
+      link: "lan",
+      state,
+    });
+    sync.setTransfers((["running", "waitingDirect", "done", "failed"] as const).map(transfer), [
+      {
+        id: "s1",
+        title: "Celeste",
+        createdAtMs: now,
+        expiresAtMs: null,
+        sizeBytes: 1e9,
+        recipients: 1,
+      },
+      {
+        id: "s2",
+        title: "Hades",
+        createdAtMs: now,
+        expiresAtMs: now + 86_400_000,
+        sizeBytes: 2e9,
+        recipients: 0,
+      },
+    ]);
+    const names = ["peer-link", "paired-device", "transfer", "share", "status-bar", "pair-device"];
+    const check = () => names.flatMap((name) => survey(seen, name));
+    renderWholeApp("/settings?tab=devices", {
+      wrap: (children: ReactNode) => <SyncProvider api={sync}>{children}</SyncProvider>,
+    });
+    await screen.findByText("Celeste");
+    await waitFor(() =>
+      expect(document.querySelector('[data-cs="status-bar"] [data-part="sync"]')).toBeTruthy(),
+    );
+    expect(check()).toEqual([]);
+    // A pairing's code, then a link opened from outside.
+    fireEvent.click(await screen.findByRole("button", { name: "Pair…" }));
+    await screen.findByRole("dialog");
+    expect(check()).toEqual([]);
+    fireEvent.click(screen.getByRole("button", { name: "They don't match" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    sync.openLink({ deviceId: "7".repeat(64), expiresAtMs: now + 60_000, expired: false });
+    await screen.findByRole("dialog");
+    expect(check()).toEqual([]);
   });
 
   it("renders a release's save locations, its warnings and a refused save", async () => {

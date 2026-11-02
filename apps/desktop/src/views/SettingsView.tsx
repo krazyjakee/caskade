@@ -7,6 +7,7 @@ import {
   Gamepad2,
   HardDrive,
   Info,
+  MonitorSmartphone,
   PackageOpen,
   Palette,
   Puzzle,
@@ -27,6 +28,7 @@ import { AboutSettings } from "./settings/about/AboutSettings";
 import { AccountsSettings } from "./settings/accounts/AccountsSettings";
 import { ProfileSettings } from "./settings/accounts/ProfileSettings";
 import { BackupSettings } from "./settings/backup/BackupSettings";
+import { DevicesSettings } from "./settings/devices/DevicesSettings";
 import { EmulatorSettings } from "./settings/EmulatorSettings";
 import { GeneralSettings } from "./settings/GeneralSettings";
 import { InstallerSettings } from "./settings/InstallerSettings";
@@ -80,6 +82,13 @@ export const settingsTabs = [
     label: msg({ message: "Store accounts", context: "settings tab" }),
     icon: Store,
   },
+  // Paired devices and what syncs (#231): every account sees them; only an
+  // admin changes them.
+  {
+    id: "devices",
+    label: msg({ message: "Devices", context: "settings tab" }),
+    icon: MonitorSmartphone,
+  },
   // Admins only (#193): a backup holds every account's data.
   {
     id: "backup",
@@ -119,6 +128,7 @@ const panels: Record<SettingsTab, () => ReactNode> = {
   ),
   plugins: PluginsSettings,
   stores: StoreAccountsSettings,
+  devices: DevicesSettings,
   backup: BackupSettings,
   accounts: AccountsSettings,
   profile: ProfileSettings,
@@ -145,6 +155,8 @@ function useEditable() {
     id === "statistics" ||
     // Every account changes its own name, avatar and PIN (#208).
     id === "profile" ||
+    // Every account sees its devices; the panel leaves changes to admins.
+    id === "devices" ||
     account === undefined ||
     account?.role === "admin" ||
     (account?.permissions.settings.includes(id) ?? false);

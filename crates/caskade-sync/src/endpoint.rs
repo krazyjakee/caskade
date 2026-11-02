@@ -400,6 +400,26 @@ impl SyncEndpoint {
         }
     }
 
+    /// Whether this device reaches the internet, as far as it can tell: a
+    /// relay answers. `None` with Never use relays on (nothing to ask).
+    pub fn internet(&self) -> Option<bool> {
+        if !self.relays_allowed {
+            return None;
+        }
+        let status = self.endpoint().home_relay_status().get();
+        Some(status.iter().any(|relay| relay.is_connected()))
+    }
+
+    /// Resolves when a relay connection comes or goes (so
+    /// [`SyncEndpoint::internet`] may have changed), or never once the
+    /// endpoint is gone.
+    pub async fn internet_changed(&self) {
+        let mut status = self.endpoint().home_relay_status();
+        if status.updated().await.is_err() {
+            std::future::pending::<()>().await;
+        }
+    }
+
     /// Whether this endpoint may use relays (Never use relays is off).
     pub fn relays_allowed(&self) -> bool {
         self.relays_allowed

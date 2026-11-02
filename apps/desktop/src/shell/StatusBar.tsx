@@ -3,6 +3,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { LoaderCircle } from "lucide-react";
 import { useJobs } from "../views/activity/ActivityProvider";
 import { AppUpdateLink } from "./AppUpdateLink";
+import { SyncStatusLink } from "./SyncStatusLink";
 import { useBackgroundStatus } from "./useBackgroundStatus";
 
 export function StatusBar() {
@@ -88,6 +89,7 @@ export function StatusBar() {
           {label}
         </span>
       </output>
+      <SyncStatusLink />
       <AppUpdateLink />
       <span data-part="version" className="shrink-0 font-mono text-fg-subtle">
         <Trans>Caskade v{version}</Trans>

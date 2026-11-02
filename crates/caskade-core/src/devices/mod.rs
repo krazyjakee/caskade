@@ -120,6 +120,10 @@ pub struct ThisDevice {
     pub os: DeviceOs,
     /// Addresses on this network other devices reach it at.
     pub lan_addresses: Vec<String>,
+    /// Whether the internet can be reached (a relay answers); `None` when
+    /// it can't be told (Never use relays is on, or the endpoint isn't up).
+    /// Devices on this network sync without it.
+    pub internet: Option<bool>,
     pub never_relay: bool,
     pub port: Option<u16>,
     pub identity: IdentityStatus,
@@ -823,6 +827,16 @@ impl Inner {
                 inner.changed();
             }
         })));
+        // Relay connections coming and going: the internet came or went.
+        let relays = endpoint.clone();
+        let weak = Arc::downgrade(self);
+        forwarders.push(Forwarder(tokio::spawn(async move {
+            loop {
+                relays.internet_changed().await;
+                let Some(inner) = weak.upgrade() else { break };
+                inner.changed();
+            }
+        })));
         if let Some(lan) = endpoint.lan() {
             let mut nearby = lan.subscribe();
             let weak = Arc::downgrade(self);
@@ -895,6 +909,7 @@ impl Inner {
                 kind: record.kind,
                 os: caskade_sync::DeviceOs::current().into(),
                 lan_addresses,
+                internet: endpoint.as_ref().and_then(SyncEndpoint::internet),
                 never_relay: settings.never_relay,
                 port: settings.port,
                 identity,
