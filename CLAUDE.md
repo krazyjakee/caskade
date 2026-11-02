@@ -27,6 +27,7 @@ Start with `docs/README.md` for the documentation index:
 - `crates/caskade-sources/emulation/README.md` — shipped emulator definitions, install sources, managed setup and validation.
 - `docs/plugins/`, `docs/theming/` and `docs/background-jobs.md` — implemented contracts and services.
 - `docs/RELEASING.md` — cutting a release: the GitHub mirror, the updater signing secrets, version bumps, the tag-built draft release (`.github/workflows/release.yml`, GitHub Actions only) and testing an update before publishing it.
+- `caskade_core::ludusavi::Ludusavi` caches the save manifest and SQLite indexes under `<cache>/ludusavi/`, looks up titles/aliases and Steam/GOG ids offline, and refreshes daily with ETags while online; `core.saves.manifestUrl` overrides its source. No manifest ships with the app.
 - `docs/research/emulator-sources.md` — source provenance, verified asset names, first-run flags, BIOS requirements and RomM firmware API details.
 - `docs/research/js-backend-spike.md` — #132 measurements supporting Rust-only plugin backends for 0.1; its guest and build script remain reproducible.
 

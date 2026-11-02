@@ -156,7 +156,7 @@ async fn registered_schemas_reject_unknown_values_limits_and_unsupported_section
     service
         .register_core(&crate::AppPaths::under(std::path::Path::new("fixture")))
         .unwrap();
-    assert_eq!(service.sections().unwrap().len(), 13);
+    assert_eq!(service.sections().unwrap().len(), 14);
     assert_eq!(
         service.get("core.appUpdates").await.unwrap().value,
         json!({"check": true})

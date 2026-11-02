@@ -24,10 +24,14 @@ it.each(["desktop", "console"] as const)(
     expect(links.map((link) => link.getAttribute("href"))).toEqual([
       "https://www.igdb.com/",
       "https://hasheous.org/",
+      "https://github.com/mtkennerly/ludusavi-manifest",
+      "https://www.pcgamingwiki.com/",
     ]);
     expect(links.map((link) => link.getAttribute("aria-label"))).toEqual([
       "Game metadata by IGDB (igdb.com)",
       "Game identification by Hasheous (hasheous.org)",
+      "Save locations by Ludusavi manifest (github.com/mtkennerly/ludusavi-manifest)",
+      "Save location data by PCGamingWiki (pcgamingwiki.com)",
     ]);
     // The same weight: one style for both.
     expect(links[0]?.className).toBe(links[1]?.className);

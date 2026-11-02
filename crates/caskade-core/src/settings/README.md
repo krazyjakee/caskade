@@ -5,7 +5,8 @@ JSON Schema and validated defaults. `typed<T>` generates the schema through
 schemars. `register_core(paths)` registers `core.general`, `core.appearance`,
 `core.launchers`, `core.discovery`, `core.storage`, `core.updates`, the
 installer scaffold, `core.onboarding` (first-run setup: done or not, sounds),
-`core.metadata` (`online`: background Hasheous and IGDB lookups),
+`core.metadata` (`online`: background Hasheous, IGDB and Ludusavi downloads),
+`core.saves` (`manifestUrl`: the Ludusavi manifest source),
 `core.appUpdates` (`check`: Caskade looks for new versions of itself) and
 `core.accounts` (`ratingBoard`: the age rating board games show and age
 limits are picked in; admins only).

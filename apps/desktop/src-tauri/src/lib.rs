@@ -298,6 +298,7 @@ pub fn run() {
         // Offline Hasheous dumps for the configured emulators' platforms
         // and PC games, kept current in the background.
         let hasheous = caskade_core::hasheous::Hasheous::new(setup_paths.cache.join("hasheous"));
+        let ludusavi = caskade_core::ludusavi::Ludusavi::new(setup_paths.cache.join("ludusavi"));
         // IGDB metadata from Caskade's metadata server, cached for good.
         let igdb = caskade_core::igdb::Igdb::new(setup_paths.cache.join("igdb"));
         // Artwork the user chooses or imports in the game editor (#175).
@@ -339,14 +340,16 @@ pub fn run() {
             emulation.catalog(),
             artwork.clone(),
         );
-        // Both go online: they run once first-run setup is done, while
+        // These go online: they run once first-run setup is done, while
         // `core.metadata.online` allows them.
         onboarding::supervise_online(settings.clone(), {
             let (hasheous, metadata) = (hasheous.clone(), metadata.clone());
+            let (ludusavi, settings) = (ludusavi.clone(), settings.clone());
             let (bus, emulation, store) = (bus.clone(), emulation.clone(), store.clone());
             move || {
                 vec![
                     hasheous.watch(&bus, emulation.clone(), store.clone()),
+                    ludusavi.watch_settings(settings.clone()),
                     metadata.watch(),
                 ]
             }
@@ -355,6 +358,7 @@ pub fn run() {
         commands::game_edit::forward_refresh(app.handle(), &metadata);
         app.manage(metadata);
         app.manage(hasheous);
+        app.manage(ludusavi);
         app.manage(igdb);
         if let Some(install) = app
             .try_state::<caskade_core::install::InstallService>()

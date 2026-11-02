@@ -79,6 +79,12 @@ fn marked() -> Vec<crate::i18n::Message> {
             "settings",
             "Download Hasheous' game databases and match games to IGDB in the background, for covers, descriptions and genres."
         ),
+        // core.saves
+        msgp!("settings", "Save manifest URL"),
+        msgp!(
+            "settings",
+            "Download save-location definitions from this URL."
+        ),
         // core.accounts
         msgp!("settings", "Rating board"),
         // core.installer

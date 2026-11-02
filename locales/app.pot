@@ -7645,8 +7645,22 @@ msgstr ""
 msgid "Save emulator"
 msgstr ""
 
+#: apps/desktop/src/views/settings/about/AboutPage.tsx
+msgid "Save file and registry locations come from the Ludusavi manifest, an MIT-licensed project."
+msgstr ""
+
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Save location"
+msgstr ""
+
+#: apps/desktop/src/views/settings/about/AboutPage.tsx
+msgctxt "credit"
+msgid "Save location data"
+msgstr ""
+
+#: apps/desktop/src/views/settings/about/AboutPage.tsx
+msgctxt "credit"
+msgid "Save locations"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
@@ -8773,6 +8787,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 msgid "The least recently played games are removed first. 0 is no limit."
+msgstr ""
+
+#: apps/desktop/src/views/settings/about/AboutPage.tsx
+msgid "The Ludusavi manifest includes data compiled from PCGamingWiki, licensed under CC BY-NC-SA 3.0."
 msgstr ""
 
 #: apps/desktop/src/views/store/StoreGameView.tsx

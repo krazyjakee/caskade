@@ -10,7 +10,7 @@ mod tests;
 pub use builtin::{
     AccountsSettings, AppUpdateSettings, AppearanceSettings, ConsoleSettings, DeepScanSettings,
     DiscoveryExclusion, DiscoverySettings, EmulationSettings, GeneralSettings, LauncherSettings,
-    MetadataSettings, OnboardingSettings, StorageSettings, UpdateSettings,
+    MetadataSettings, OnboardingSettings, SavesSettings, StorageSettings, UpdateSettings,
 };
 pub use registry::{SectionDefinition, SettingsSection};
 pub use service::{SettingsChanged, SettingsService, SettingsSnapshot};

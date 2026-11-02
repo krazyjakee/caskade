@@ -1,0 +1,39 @@
+'Example: Game':
+  files:
+    <home>/.local/share/example/*.sav:
+      tags: [save, future-tag]
+      when:
+        - os: linux
+          store: steam
+        - os: future-os
+          store: future-store
+          futureConstraint: true
+  registry:
+    HKEY_CURRENT_USER/Software/Example:
+      tags: [config]
+      when:
+        - store: gog
+  steam:
+    id: 123
+  gog:
+    id: 1000000001
+  id:
+    steamExtra: [456]
+    gogExtra: [1000000002]
+    futureId: extra
+  futureField: {retained: true}
+Example Alias:
+  alias: 'Example: Game'
+  steam: {id: 999}
+Alias Chain:
+  alias: Example Alias
+Other Game:
+  files:
+    <winAppData>/Other/save.dat: {}
+  steam: {id: 789}
+Missing Alias:
+  alias: No Such Game
+Cycle One:
+  alias: Cycle Two
+Cycle Two:
+  alias: Cycle One

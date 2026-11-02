@@ -31,6 +31,20 @@ const credits = [
     role: msg({ message: "Game identification", context: "credit" }),
     description: msg`Hashes and titles that identify games and ROMs come from Hasheous.`,
   },
+  {
+    name: "Ludusavi manifest",
+    host: "github.com/mtkennerly/ludusavi-manifest",
+    href: "https://github.com/mtkennerly/ludusavi-manifest",
+    role: msg({ message: "Save locations", context: "credit" }),
+    description: msg`Save file and registry locations come from the Ludusavi manifest, an MIT-licensed project.`,
+  },
+  {
+    name: "PCGamingWiki",
+    host: "pcgamingwiki.com",
+    href: "https://www.pcgamingwiki.com/",
+    role: msg({ message: "Save location data", context: "credit" }),
+    description: msg`The Ludusavi manifest includes data compiled from PCGamingWiki, licensed under CC BY-NC-SA 3.0.`,
+  },
 ];
 
 const projectLinks = [

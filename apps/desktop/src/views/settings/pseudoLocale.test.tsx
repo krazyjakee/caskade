@@ -31,6 +31,8 @@ const data = [
   /Hasheous/g,
   /igdb\.com/g,
   /hasheous\.org/g,
+  /github\.com\/mtkennerly\/ludusavi-manifest/g,
+  /Ludusavi manifest|PCGamingWiki|pcgamingwiki\.com/g,
   // Launchers and rating boards.
   /Steam|Heroic|Lutris|Epic Games|GOG Galaxy|EA App|Ubisoft Connect|Battle\.net|itch\.io|Amazon Games/g,
   /PEGI|ESRB/g,

@@ -342,6 +342,26 @@ impl Default for MetadataSettings {
     }
 }
 
+/// The downloaded save-location manifest (`crate::ludusavi`).
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SavesSettings {
+    #[schemars(
+        title = "Save manifest URL",
+        regex(pattern = r"^https?://[^\s]+$"),
+        length(max = 4096)
+    )]
+    /// Download save-location definitions from this URL.
+    pub manifest_url: String,
+}
+impl Default for SavesSettings {
+    fn default() -> Self {
+        Self {
+            manifest_url: crate::ludusavi::MANIFEST_URL.into(),
+        }
+    }
+}
+
 /// Choices for every account (#208), which only an admin changes: no
 /// Settings section owns `core.accounts` (`accounts::Permission`).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
@@ -431,6 +451,7 @@ impl SettingsService {
             "core.metadata",
             1,
         )?)?;
+        self.register(SectionDefinition::typed::<SavesSettings>("core.saves", 1)?)?;
         self.register(SectionDefinition::typed::<AccountsSettings>(
             "core.accounts",
             1,

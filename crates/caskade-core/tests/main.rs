@@ -4,6 +4,8 @@
 mod i18n;
 mod installer_settings;
 #[cfg(feature = "net")]
+mod ludusavi;
+#[cfg(feature = "net")]
 mod milestone_editing;
 mod rom_scan;
 #[cfg(feature = "net")]
