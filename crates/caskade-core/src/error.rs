@@ -327,6 +327,13 @@ fn classify(error: &(dyn std::error::Error + 'static)) -> Option<Found> {
                 ),
                 L::Refused(_) => found(Refused, Summary::Own),
                 L::NeedsChoice(_) | L::AgeRestricted(_) => found(Invalid, Summary::Own),
+                L::HostBusy(busy) => found(
+                    Conflict,
+                    Summary::Text(crate::tr!(
+                        "{device} is playing another game.",
+                        device = busy.device
+                    )),
+                ),
                 L::Unsupported(runner) => found(
                     Invalid,
                     Summary::Text(crate::tr!(

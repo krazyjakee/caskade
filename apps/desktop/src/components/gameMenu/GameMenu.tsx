@@ -28,6 +28,7 @@ import {
 } from "../../api/hooks";
 import { useLibraryApi } from "../../api/provider";
 import { useStorageApi, useUnavailableStorageEntries } from "../../api/StorageProvider";
+import { streamReleaseName, useStreamHosts } from "../../api/streaming";
 import type { GameEntry } from "../../api/types";
 import { useGameActionContributions } from "../../plugins/GameSlots";
 import { useMode } from "../../shell/console/mode";
@@ -91,6 +92,10 @@ export function GameMenu({
   const plugins = useGameActionContributions();
   // Releases' play actions and tools (#178).
   const releases = useGameActions(target.gameId).data ?? [];
+  // Releases streamed from other devices (#264), by the device's name.
+  const hosts = useStreamHosts().data ?? [];
+  const streamName = (entry?: GameEntry) =>
+    entry ? streamReleaseName(entry.source, hosts) : undefined;
   const scoped = target.entryId !== undefined;
   const entries: GameEntry[] = (game?.entries ?? []).filter(
     (entry) => !scoped || entry.id === target.entryId,
@@ -146,7 +151,9 @@ export function GameMenu({
             shouldCloseOnSelect={false}
             onAction={() => stop.mutate(running.id, { onSuccess: onClose })}
           >
-            {t({ message: "Stop", context: "game action" })}
+            {streamName(entries.find((entry) => entry.id === running.entryId))
+              ? t({ message: "End stream", context: "game action" })
+              : t({ message: "Stop", context: "game action" })}
           </MenuItem>
         ) : (
           <MenuItem
@@ -164,9 +171,22 @@ export function GameMenu({
             }
             onAction={() => onDialog({ type: "play", entryId: playable?.id ?? target.entryId })}
           >
-            {t({ message: "Play", context: "game action" })}
+            {streamName(playable) ?? t({ message: "Play", context: "game action" })}
           </MenuItem>
         )}
+        {!running &&
+          entries
+            .filter((entry) => entry.id !== playable?.id && streamName(entry) && entry.canLaunch)
+            .map((entry) => (
+              <MenuItem
+                key={`stream:${entry.id}`}
+                id={`stream:${entry.id}`}
+                icon={Play}
+                onAction={() => onDialog({ type: "play", entryId: entry.id })}
+              >
+                {streamName(entry)}
+              </MenuItem>
+            ))}
         {!running &&
           playable &&
           playActions.length > 1 &&

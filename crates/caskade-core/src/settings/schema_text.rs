@@ -90,11 +90,25 @@ fn marked() -> Vec<crate::i18n::Message> {
             "settings",
             "Devices to stream from that aren't found on the network by themselves."
         ),
-        msgp!("settings", "Use the streaming already set up on this device"),
+        msgp!(
+            "settings",
+            "Use the streaming already set up on this device"
+        ),
         msgp!(
             "settings",
             "Host through the streaming program someone already installed here, changing only Caskade's games in it."
         ),
+        msgp!("settings", "Stream quality"),
+        msgp!(
+            "settings",
+            "How games streamed from other devices look; each part left empty is chosen automatically."
+        ),
+        msgp!("settings", "Resolution"),
+        msgp!("settings", "Width and height in pixels, like 1920x1080."),
+        msgp!("settings", "Frame rate"),
+        msgp!("settings", "Frames per second."),
+        msgp!("settings", "Bitrate"),
+        msgp!("settings", "Kilobits per second."),
         // core.saves
         msgp!("settings", "Save manifest URL"),
         msgp!(

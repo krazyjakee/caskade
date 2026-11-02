@@ -139,8 +139,17 @@ function useReleaseNames(entries: readonly GameEntry[]) {
 }
 
 /** Ends the running game (#150): the pad's way out of a game it came back
- * from with guide. */
-function StopButton({ sessionId, ref }: { sessionId: string; ref?: Ref<HTMLButtonElement> }) {
+ * from with guide. A stream (#264) ends, and its game stops on the other
+ * device. */
+function StopButton({
+  sessionId,
+  ref,
+  stream = false,
+}: {
+  sessionId: string;
+  ref?: Ref<HTMLButtonElement>;
+  stream?: boolean;
+}) {
   const { t } = useLingui();
   const stop = useStopGame();
   return (
@@ -149,7 +158,11 @@ function StopButton({ sessionId, ref }: { sessionId: string; ref?: Ref<HTMLButto
         data-part="playing"
         className="font-mono text-xs tracking-widest text-accent-alt uppercase"
       >
-        <Trans comment="The game is running">Playing</Trans>
+        {stream ? (
+          <Trans comment="The game is streaming from another device">Streaming</Trans>
+        ) : (
+          <Trans comment="The game is running">Playing</Trans>
+        )}
       </span>
       <Button
         ref={ref}
@@ -161,7 +174,9 @@ function StopButton({ sessionId, ref }: { sessionId: string; ref?: Ref<HTMLButto
         <Square className="size-5" />
         {stop.isPending
           ? t`Stopping…`
-          : t({ message: "Stop", comment: "Button: ends the running game" })}
+          : stream
+            ? t({ message: "End stream", comment: "Button: ends a stream from another device" })
+            : t({ message: "Stop", comment: "Button: ends the running game" })}
       </Button>
       {stop.isError && (
         <p role="alert" className="text-xs text-danger">
@@ -258,6 +273,12 @@ export function GameView({
         ? t`Checking…`
         : t({ message: "Play", comment: "Button: starts the game" });
   const launchable = (entry: GameEntry) => entry.canLaunch && !unavailable.has(entry.id);
+  // A release another device streams (#264) is played by its name there.
+  const streamed = (entry?: GameEntry) => Boolean(entry?.source.startsWith("stream:"));
+  const labelFor = (entry: GameEntry | undefined, own: string | undefined) =>
+    streamed(entry) && !running && !launch.isPending && !updates.checking
+      ? (own ?? t({ message: "Stream", comment: "Button: streams the game from another device" }))
+      : playLabel;
   /** A release in the Release picker, with why it can't start. */
   const releaseLabel = (entry: GameEntry) => {
     const name = names.get(entry.id) ?? formatSource(entry.source);
@@ -336,7 +357,11 @@ export function GameView({
           </div>
           <div data-part="actions" className="flex w-full flex-col gap-3 sm:w-80">
             {running ? (
-              <StopButton sessionId={running.id} ref={first} />
+              <StopButton
+                sessionId={running.id}
+                ref={first}
+                stream={streamed(game.entries.find((entry) => entry.id === running.entryId))}
+              />
             ) : (
               <PlayButton
                 ref={first}
@@ -346,7 +371,7 @@ export function GameView({
                 emulated={chosen?.emulated ?? false}
                 isDisabled={!chosen || !launchable(chosen) || busy}
                 onPress={() => chosen && updates.play(chosen.id)}
-                label={playLabel}
+                label={labelFor(chosen, chosen && names.get(chosen.id))}
               />
             )}
             {!running && chosen?.state === "updating" && (
@@ -482,7 +507,7 @@ export function GameView({
                           emulated={entry.emulated}
                           isDisabled={!launchable(entry) || busy}
                           onPress={() => updates.play(entry.id)}
-                          label={playLabel}
+                          label={labelFor(entry, undefined)}
                         />
                       ))}
                   </div>

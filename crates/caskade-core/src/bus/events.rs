@@ -106,6 +106,13 @@ pub enum Event {
     /// The streaming hosts this device can stream from changed
     /// (`crate::streaming::hosts`).
     StreamHostsChanged,
+    /// A stream from another device is about to start (#264): its client's
+    /// windows may show before `game.started`, or `game.exited` if it
+    /// doesn't start.
+    StreamStarting {
+        game_id: String,
+        session_id: String,
+    },
     /// An event a backend plugin emitted (`host.emit`); `payload` is JSON.
     PluginEvent {
         plugin: String,
@@ -187,6 +194,7 @@ impl Event {
             Self::EmulationDetectChanged(_) => "emulation.detect.changed",
             Self::ToolsChanged => "tools.changed",
             Self::StreamHostsChanged => "streaming.hosts.changed",
+            Self::StreamStarting { .. } => "stream.starting",
             Self::PluginEvent { .. } => "plugin.event",
             Self::PluginDisabled { .. } => "plugin.disabled",
             Self::PluginsChanged { .. } => "plugins.changed",

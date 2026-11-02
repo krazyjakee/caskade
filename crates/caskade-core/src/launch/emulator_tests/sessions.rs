@@ -113,6 +113,7 @@ async fn ps1_multi_disc_game_launches_through_flatpak_retroarch_with_playtime() 
                 action: None,
                 profile: None,
                 disc: Some(1),
+                ..Default::default()
             },
         )
         .await

@@ -43,6 +43,13 @@ pub enum LaunchSpec {
     Web {
         url: String,
     },
+    /// A game another device offers for streaming (STREAMING-PLAN §8.2):
+    /// the host's id and the app's name there, played through Caskade's
+    /// streaming client.
+    Stream {
+        host: String,
+        app: String,
+    },
 }
 impl From<caskade_discovery::LaunchTarget> for LaunchSpec {
     fn from(target: caskade_discovery::LaunchTarget) -> Self {

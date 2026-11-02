@@ -325,6 +325,32 @@ pub struct StreamingSettings {
     #[schemars(title = "Use the streaming already set up on this device")]
     /// Host through the streaming program someone already installed here, changing only Caskade's games in it.
     pub existing: bool,
+    #[serde(default)]
+    #[schemars(title = "Stream quality")]
+    /// How games streamed from other devices look; each part left empty is chosen automatically.
+    pub quality: StreamQuality,
+}
+
+/// Stream quality (#264): each part `None` is the client's automatic
+/// choice.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct StreamQuality {
+    #[serde(default)]
+    #[schemars(
+        title = "Resolution",
+        regex(pattern = r"^[1-9][0-9]{2,4}x[1-9][0-9]{2,4}$")
+    )]
+    /// Width and height in pixels, like 1920x1080.
+    pub resolution: Option<String>,
+    #[serde(default)]
+    #[schemars(title = "Frame rate", range(min = 10, max = 240))]
+    /// Frames per second.
+    pub fps: Option<u32>,
+    #[serde(default)]
+    #[schemars(title = "Bitrate", range(min = 500, max = 500000))]
+    /// Kilobits per second.
+    pub bitrate_kbps: Option<u32>,
 }
 
 /// First-run setup: whether it has been done, and its sounds.

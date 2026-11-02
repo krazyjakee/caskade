@@ -351,4 +351,4 @@ fn write_atomically(path: &Path, text: &str) -> Result<()> {
 }
 
 #[cfg(all(test, unix, feature = "net"))]
-mod tests;
+pub(super) mod tests;

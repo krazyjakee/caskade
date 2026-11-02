@@ -40,6 +40,7 @@ async fn flatpak_retroarch_shares_an_unseen_rom_folder_and_tracks_by_process_nam
         action: None,
         profile: None,
         disc: Some(1),
+        ..Default::default()
     };
     let prepared = setup.launches.resolve(&entry, &choice).await.unwrap();
     assert_eq!(
@@ -186,6 +187,7 @@ async fn ask_targets_offer_compatible_profiles_and_resume_with_the_answer() {
                 profile_id: "other".into(),
             }),
             disc: None,
+            ..Default::default()
         };
         assert!(matches!(
             setup.launches.resolve(&entry, &wrong).await,
@@ -195,6 +197,7 @@ async fn ask_targets_offer_compatible_profiles_and_resume_with_the_answer() {
             action: None,
             profile: Some(psx()),
             disc: None,
+            ..Default::default()
         };
         let prepared = setup.launches.resolve(&entry, &answer).await.unwrap();
         assert_eq!(prepared.command.args.last().unwrap(), &text(&roms[0]));

@@ -15,6 +15,9 @@ impl LaunchService {
     /// Asks the session's game processes to quit, and ends any still
     /// running after `grace`. Returns how many were running.
     pub async fn stop(&self, session_id: &str, grace: Duration) -> Result<usize> {
+        if let Some(count) = self.stop_stream(session_id).await {
+            return Ok(count);
+        }
         let session = self
             .repository
             .in_flight()

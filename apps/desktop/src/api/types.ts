@@ -124,6 +124,16 @@ export interface LaunchChoice {
   disc?: number | null;
   /** The play action to start (#177); none is the release's default. */
   action?: string | null;
+  /** Stop the game the streaming device plays first, once Play asked
+   * (#264). */
+  stopHost?: boolean;
+}
+/** The device to stream from is playing another game (#264). */
+export interface HostBusy {
+  entryId: string;
+  device: string;
+  /** The game it plays, when the device says. */
+  playing?: string | null;
 }
 /** What a launch needs first; a list is empty when that part is decided. */
 export interface LaunchPrompt {
@@ -156,7 +166,9 @@ export type LaunchResult =
   | { type: "started"; ticket: LaunchTicket }
   | { type: "choose"; prompt: LaunchPrompt }
   /** Launch again once `approvePlay` matched an admin's PIN. */
-  | { type: "age_restricted"; restriction: AgeRestriction };
+  | { type: "age_restricted"; restriction: AgeRestriction }
+  /** Launch again with `stopHost` once the user said so. */
+  | { type: "host_busy"; busy: HostBusy };
 /** A list picked by hand, or a smart collection: a saved library query
  * whose games follow the library. */
 export type CollectionKind = { type: "manual" } | { type: "smart"; query: LibraryQuery };

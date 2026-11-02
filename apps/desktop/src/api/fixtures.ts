@@ -10,6 +10,7 @@ import type {
   CollectionKind,
   CollectionsApi,
   GameDetails,
+  HostBusy,
   LaunchPrompt,
   LibraryApi,
   LibraryEvent,
@@ -103,8 +104,11 @@ export function createFixtureApi(
   actions: ReturnType<typeof createFixtureActions>;
   scripts: ReturnType<typeof createFixtureScripts>;
   saves: ReturnType<typeof createFixtureSaves>;
+  /** Streamed releases whose device plays another game (#264), by entry. */
+  busyHosts: Map<string, Omit<HostBusy, "entryId">>;
 } {
   const records = structuredClone(games);
+  const busyHosts = new Map<string, Omit<HostBusy, "entryId">>();
   const hidden = new Set<string>();
   const visible = () => records.filter((g) => !hidden.has(g.id));
   const sessions: PlaySession[] = [];
@@ -183,6 +187,7 @@ export function createFixtureApi(
   const actions = createFixtureActions(records);
   return {
     actions,
+    busyHosts,
     saves: createFixtureSaves(),
     scripts: createFixtureScripts((id) => records.find((game) => game.id === id)?.title),
     collections,
@@ -336,6 +341,10 @@ export function createFixtureApi(
       );
     },
     async launchGame(entryId, choice) {
+      // A busy device asks before its game is stopped.
+      const busy = busyHosts.get(entryId);
+      if (busy && !choice?.stopHost) return { type: "host_busy", busy: { entryId, ...busy } };
+      busyHosts.delete(entryId);
       // Ask-at-launch's action question comes before any other.
       const asks = actions.prompt(entryId, choice?.action);
       if (asks) return { type: "choose", prompt: asks };

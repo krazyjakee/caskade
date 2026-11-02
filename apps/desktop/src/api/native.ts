@@ -153,6 +153,7 @@ export function createNativeApi(): LibraryApi {
                 profile: choice.profile ?? null,
                 disc: choice.disc ?? null,
                 action: choice.action ?? null,
+                stopHost: choice.stopHost ?? false,
               }
             : null,
         ),

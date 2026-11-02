@@ -2,7 +2,7 @@
 use crate::error::{CommandError, report};
 use caskade_core::{
     accounts::{AccountService, AgeRestriction, PinCheck},
-    launch::{LaunchChoice, LaunchError, LaunchPrompt, LaunchService, LaunchTicket},
+    launch::{HostBusy, LaunchChoice, LaunchError, LaunchPrompt, LaunchService, LaunchTicket},
 };
 use serde::Serialize;
 use specta::Type;
@@ -10,13 +10,15 @@ use specta::Type;
 /// A launch either started or needs the user's answer first (ask-at-launch,
 /// disc picker); answer by calling `launch_game_with` again with a choice.
 /// An age limit holds it back until `game_age_approve` takes an admin's
-/// PIN for it (#209).
+/// PIN for it (#209). A device streaming another game asks before it is
+/// stopped (#264): answer with `stopHost`.
 #[derive(Debug, Clone, Serialize, Type)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum LaunchOutcome {
     Started { ticket: LaunchTicket },
     Choose { prompt: LaunchPrompt },
     AgeRestricted { restriction: AgeRestriction },
+    HostBusy { busy: HostBusy },
 }
 
 #[tauri::command]
@@ -52,6 +54,7 @@ pub async fn launch_game_with(
         Err(LaunchError::AgeRestricted(restriction)) => Ok(LaunchOutcome::AgeRestricted {
             restriction: *restriction,
         }),
+        Err(LaunchError::HostBusy(busy)) => Ok(LaunchOutcome::HostBusy { busy: *busy }),
         Err(error) => Err(report(error)),
     }
 }

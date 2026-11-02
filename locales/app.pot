@@ -425,6 +425,26 @@ msgstr ""
 msgid "{description} · {queued} queued"
 msgstr ""
 
+#. {device} is another device's name; {playing} and {title} are games
+#: apps/desktop/src/components/streaming/StopHostDialog.tsx
+msgid "{device} is playing {playing}. Stop it and stream {title}?"
+msgstr ""
+
+#. {device} is another device's name; {playing} is a game
+#: apps/desktop/src/components/streaming/StopHostDialog.tsx
+msgid "{device} is playing {playing}. Stop it and stream this game?"
+msgstr ""
+
+#. {device} is another device's name; {title} is a game
+#: apps/desktop/src/components/streaming/StopHostDialog.tsx
+msgid "{device} is playing another game. Stop it and stream {title}?"
+msgstr ""
+
+#. {device} is another device's name
+#: apps/desktop/src/components/streaming/StopHostDialog.tsx
+msgid "{device} is playing another game. Stop it and stream this game?"
+msgstr ""
+
 #: apps/desktop/src/components/sync/common.tsx
 msgid "{done} of {total} · {speed}/s"
 msgstr ""
@@ -2156,6 +2176,7 @@ msgstr ""
 #: apps/desktop/src/components/saves/SaveConflictDialog.tsx
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/desktop/src/components/streaming/StopHostDialog.tsx
 #: apps/desktop/src/views/activity/AddGame.tsx
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
@@ -3716,6 +3737,21 @@ msgstr ""
 msgid "Enabled for scans"
 msgstr ""
 
+#. Button: ends a stream from another device
+#: apps/desktop/src/input/GuideMenu.tsx
+#: apps/desktop/src/views/game/GameView.tsx
+msgid "End stream"
+msgstr ""
+
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+msgctxt "game action"
+msgid "End stream"
+msgstr ""
+
+#: apps/desktop/src/input/GuideMenu.tsx
+msgid "End the stream? The game stops on the other device, and progress it hasn't saved is lost."
+msgstr ""
+
 #: apps/desktop/src/shell/console/glyphs.ts
 msgctxt "keyboard key"
 msgid "Enter"
@@ -4853,6 +4889,11 @@ msgstr ""
 #. Follows the running game's title, shown as a heading above
 #: apps/desktop/src/input/GuideMenu.tsx
 msgid "is running."
+msgstr ""
+
+#. Follows the streamed game's title, shown as a heading above
+#: apps/desktop/src/input/GuideMenu.tsx
+msgid "is streaming from another device."
 msgstr ""
 
 #. Heading over what a plugin contributes
@@ -7293,6 +7334,10 @@ msgstr ""
 msgid "Progress"
 msgstr ""
 
+#: apps/desktop/src/components/streaming/StopHostDialog.tsx
+msgid "Progress it hasn't saved is lost."
+msgstr ""
+
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 msgid "Project page"
 msgstr ""
@@ -8986,6 +9031,7 @@ msgstr ""
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
 #: apps/desktop/src/components/saves/SaveConflictDialog.tsx
+#: apps/desktop/src/components/streaming/StopHostDialog.tsx
 #: apps/desktop/src/shell/console/GameCurtain.tsx
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
@@ -9084,6 +9130,10 @@ msgstr ""
 msgid "Stop {title}"
 msgstr ""
 
+#: apps/desktop/src/components/streaming/StopHostDialog.tsx
+msgid "Stop and stream"
+msgstr ""
+
 #: apps/desktop/src/input/GuideMenu.tsx
 msgid "Stop game"
 msgstr ""
@@ -9094,6 +9144,10 @@ msgstr ""
 
 #: apps/desktop/src/input/GuideMenu.tsx
 msgid "Stop the game? Progress it hasn't saved is lost."
+msgstr ""
+
+#: apps/desktop/src/components/streaming/StopHostDialog.tsx
+msgid "Stop the other game?"
 msgstr ""
 
 #: apps/desktop/src/views/game/OwnedReleases.tsx
@@ -9190,6 +9244,11 @@ msgstr ""
 msgid "Store sign-ins (connect each device)"
 msgstr ""
 
+#. Button: streams the game from another device
+#: apps/desktop/src/views/game/GameView.tsx
+msgid "Stream"
+msgstr ""
+
 #. {device} is another device's name
 #: apps/desktop/src/api/streaming.ts
 msgid "Stream from {device}"
@@ -9197,6 +9256,11 @@ msgstr ""
 
 #: apps/desktop/src/api/streaming.ts
 msgid "Stream from another device"
+msgstr ""
+
+#. The game is streaming from another device
+#: apps/desktop/src/views/game/GameView.tsx
+msgid "Streaming"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts

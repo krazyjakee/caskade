@@ -16,6 +16,7 @@ mod runners;
 pub use runners::{RunnerPaths, RunnerResolver};
 mod service;
 mod stop;
+mod stream;
 mod web;
 pub use command::{EmulationLaunch, LaunchCommand, managed_path, uri_command};
 pub use events::{LaunchEvent, LaunchTicket, SessionStatus};
@@ -23,6 +24,7 @@ pub use hooks::LaunchPreparer;
 pub use hooks::{LaunchHooks, NoHooks, NoPluginRunner, PlayGate, PluginRunner};
 pub use resolve::{PreparedLaunch, resolve, resolve_with_runners};
 pub use service::{GameLease, LaunchConfig, LaunchHandle, LaunchService};
+pub use stream::{ClientLine, HostBusy, StreamLauncher, StreamStart};
 pub use web::{
     BUNDLE_ARG, CAPTURE_ARG, DATA_DIR_ARG, FULLSCREEN_ARG, GEOMETRY_ARG, SIZE_ARG, WEB_GAME_ARG,
     WebPlayer, WindowPlacement,
@@ -48,6 +50,10 @@ pub enum LaunchError {
     /// admin's PIN approves this launch ([`PlayGate`]).
     #[error("{0}")]
     AgeRestricted(Box<crate::accounts::AgeRestriction>),
+    /// The streaming device plays another game: Play asks before stopping
+    /// it (#264).
+    #[error("{device} is playing another game", device = .0.device)]
+    HostBusy(Box<HostBusy>),
     #[error("no runner registered for {0}")]
     Unsupported(String),
     #[error("game process did not appear before the launch deadline")]
@@ -90,3 +96,6 @@ mod actions_launch_tests;
 
 #[cfg(all(test, target_os = "linux"))]
 mod scripts_launch_tests;
+
+#[cfg(all(test, target_os = "linux"))]
+mod stream_tests;

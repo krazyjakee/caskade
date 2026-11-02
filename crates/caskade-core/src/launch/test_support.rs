@@ -69,6 +69,21 @@ impl SessionRepository for MemoryStore {
 pub struct Events(pub Mutex<Vec<(String, LaunchEvent)>>);
 #[async_trait]
 impl LaunchHooks for Events {
+    async fn stream_starting(&self, launch: &LaunchTicket) {
+        self.0.lock().unwrap().push((
+            "stream.starting".into(),
+            LaunchEvent {
+                command: None,
+                game_id: launch.game_id.clone(),
+                entry_id: launch.entry_id.clone(),
+                session_id: launch.session_id.clone(),
+                started_at_ms: 0,
+                ended_at_ms: None,
+                duration_ms: 0,
+                status: SessionStatus::Running,
+            },
+        ));
+    }
     async fn started(&self, event: &LaunchEvent) {
         self.0
             .lock()

@@ -39,6 +39,12 @@ impl LaunchHooks for Bus {
             }
         }
     }
+    async fn stream_starting(&self, launch: &LaunchTicket) {
+        self.emit(Event::StreamStarting {
+            game_id: launch.game_id.clone(),
+            session_id: launch.session_id.clone(),
+        });
+    }
     async fn started(&self, event: &LaunchEvent) {
         self.emit(Event::GameStarted(session(event)));
     }

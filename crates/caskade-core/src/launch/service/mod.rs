@@ -72,7 +72,7 @@ impl LaunchConfig {
 /// Dropping a handle leaves the game and its background tracker running.
 pub struct LaunchHandle {
     pub ticket: LaunchTicket,
-    completed: oneshot::Receiver<Result<(PlaySession, SessionStatus)>>,
+    pub(super) completed: oneshot::Receiver<Result<(PlaySession, SessionStatus)>>,
 }
 impl LaunchHandle {
     pub async fn wait(self) -> Result<PlaySession> {
@@ -90,7 +90,7 @@ impl LaunchHandle {
 pub struct LaunchService {
     pub(super) repository: Arc<dyn SessionRepository>,
     monitor: ProcessMonitor,
-    hooks: Arc<dyn LaunchHooks>,
+    pub(super) hooks: Arc<dyn LaunchHooks>,
     plugins: Arc<dyn PluginRunner>,
     aliases: Option<AliasStore>,
     runners: RunnerPaths,
@@ -106,6 +106,10 @@ pub struct LaunchService {
     starting: Arc<Mutex<BTreeMap<String, CancellationToken>>>,
     /// Sessions [`Self::stop`] ended, until [`Self::take_stopped`] asks.
     pub(super) stopped: Arc<Mutex<std::collections::BTreeSet<String>>>,
+    /// Streams releases from other devices (#264), once the client exists.
+    pub(super) streamer: Arc<std::sync::OnceLock<Arc<dyn super::StreamLauncher>>>,
+    /// The streams running now; never stored.
+    pub(super) streams: super::stream::Streams,
 }
 impl LaunchService {
     pub fn new(store: crate::db::LibraryStore) -> Self {
@@ -130,6 +134,8 @@ impl LaunchService {
             script_runner: ScriptRunner::default(),
             starting: Arc::default(),
             stopped: Arc::default(),
+            streamer: Arc::default(),
+            streams: Arc::default(),
         }
     }
     pub fn with_bus(self, bus: crate::bus::Bus) -> Self {
@@ -218,14 +224,17 @@ impl LaunchService {
         })
     }
 
+    /// The games running now, streams (#264) included.
     pub async fn running_sessions(&self) -> Result<Vec<LaunchTicket>> {
-        Ok(self
+        let mut running: Vec<LaunchTicket> = self
             .repository
             .in_flight()
             .await?
             .iter()
             .map(ticket)
-            .collect())
+            .collect();
+        running.extend(self.stream_tickets());
+        Ok(running)
     }
 
     /// Stop observation for app shutdown, preserving in-flight sessions and
@@ -287,6 +296,11 @@ impl LaunchService {
             preparer.prepare(entry_id).await?;
         }
         let entry = self.entry(entry_id).await?;
+        // A release another device offers streams from it (#264): its own
+        // launch, never an added action.
+        if let Some((host, app)) = super::stream::target(&entry) {
+            return self.stream(&entry, host, app, choice).await;
+        }
         // The action is chosen before anything is reserved, so a missing or
         // invalid one leaves no session behind (#177).
         let action = self.action(&entry, choice).await?;
@@ -557,7 +571,7 @@ impl LaunchService {
 pub struct GameLease {
     game: String,
     running: Arc<Mutex<BTreeMap<String, CancellationToken>>>,
-    cancel: CancellationToken,
+    pub(super) cancel: CancellationToken,
 }
 impl Drop for GameLease {
     fn drop(&mut self) {
@@ -592,7 +606,7 @@ fn spawn(command: &LaunchCommand) -> Result<Child> {
     })
 }
 
-fn ticket(s: &PlaySession) -> LaunchTicket {
+pub(super) fn ticket(s: &PlaySession) -> LaunchTicket {
     LaunchTicket {
         game_id: s.game_id.clone(),
         entry_id: s.entry_id.clone(),
@@ -616,6 +630,6 @@ fn event(s: &PlaySession, status: SessionStatus) -> LaunchEvent {
         status,
     }
 }
-fn millis(d: Duration) -> u64 {
+pub(super) fn millis(d: Duration) -> u64 {
     d.as_millis().min(u64::MAX as u128) as u64
 }

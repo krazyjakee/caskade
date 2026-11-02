@@ -4277,6 +4277,36 @@ export type HardcoreUnlock_Serialize = {
 /**  Emitted after every `hello` command. */
 export type Hello = Greeting;
 
+/**
+ *  The device is playing another game: Play asks before stopping it, then
+ *  launches again with [`LaunchChoice::stop_host`].
+ */
+export type HostBusy = HostBusy_Serialize | HostBusy_Deserialize;
+
+/**
+ *  The device is playing another game: Play asks before stopping it, then
+ *  launches again with [`LaunchChoice::stop_host`].
+ */
+export type HostBusy_Deserialize = {
+	entryId: string,
+	/**  The device's name. */
+	device: string,
+	/**  The game it plays, when the device says. */
+	playing?: string | null,
+};
+
+/**
+ *  The device is playing another game: Play asks before stopping it, then
+ *  launches again with [`LaunchChoice::stop_host`].
+ */
+export type HostBusy_Serialize = {
+	entryId: string,
+	/**  The device's name. */
+	device: string,
+	/**  The game it plays, when the device says. */
+	playing: string | null,
+};
+
 /**  How switching hosting on or off ended. */
 export type HostOutcome = "on" | "off" | 
 /**  The administrator prompt was dismissed: nothing changed. */
@@ -5061,6 +5091,11 @@ export type LaunchChoice_Deserialize = {
 	disc?: number | null,
 	/**  The play action to start (#177); `None` is the release's default. */
 	action?: string | null,
+	/**
+	 *  Stop the game the streaming device is playing first, once Play
+	 *  asked ([`super::HostBusy`], #264).
+	 */
+	stopHost?: boolean,
 };
 
 /**  The user's answers when a launch asked for them. */
@@ -5071,13 +5106,19 @@ export type LaunchChoice_Serialize = {
 	disc: number | null,
 	/**  The play action to start (#177); `None` is the release's default. */
 	action: string | null,
+	/**
+	 *  Stop the game the streaming device is playing first, once Play
+	 *  asked ([`super::HostBusy`], #264).
+	 */
+	stopHost: boolean,
 };
 
 /**
  *  A launch either started or needs the user's answer first (ask-at-launch,
  *  disc picker); answer by calling `launch_game_with` again with a choice.
  *  An age limit holds it back until `game_age_approve` takes an admin's
- *  PIN for it (#209).
+ *  PIN for it (#209). A device streaming another game asks before it is
+ *  stopped (#264): answer with `stopHost`.
  */
 export type LaunchOutcome = LaunchOutcome_Serialize | LaunchOutcome_Deserialize;
 
@@ -5085,17 +5126,19 @@ export type LaunchOutcome = LaunchOutcome_Serialize | LaunchOutcome_Deserialize;
  *  A launch either started or needs the user's answer first (ask-at-launch,
  *  disc picker); answer by calling `launch_game_with` again with a choice.
  *  An age limit holds it back until `game_age_approve` takes an admin's
- *  PIN for it (#209).
+ *  PIN for it (#209). A device streaming another game asks before it is
+ *  stopped (#264): answer with `stopHost`.
  */
-export type LaunchOutcome_Deserialize = { type: "started"; ticket: LaunchTicket } | { type: "choose"; prompt: LaunchPrompt_Deserialize } | { type: "age_restricted"; restriction: AgeRestriction_Deserialize };
+export type LaunchOutcome_Deserialize = { type: "started"; ticket: LaunchTicket } | { type: "choose"; prompt: LaunchPrompt_Deserialize } | { type: "age_restricted"; restriction: AgeRestriction_Deserialize } | { type: "host_busy"; busy: HostBusy_Deserialize };
 
 /**
  *  A launch either started or needs the user's answer first (ask-at-launch,
  *  disc picker); answer by calling `launch_game_with` again with a choice.
  *  An age limit holds it back until `game_age_approve` takes an admin's
- *  PIN for it (#209).
+ *  PIN for it (#209). A device streaming another game asks before it is
+ *  stopped (#264): answer with `stopHost`.
  */
-export type LaunchOutcome_Serialize = { type: "started"; ticket: LaunchTicket } | { type: "choose"; prompt: LaunchPrompt_Serialize } | { type: "age_restricted"; restriction: AgeRestriction_Serialize };
+export type LaunchOutcome_Serialize = { type: "started"; ticket: LaunchTicket } | { type: "choose"; prompt: LaunchPrompt_Serialize } | { type: "age_restricted"; restriction: AgeRestriction_Serialize } | { type: "host_busy"; busy: HostBusy_Serialize };
 
 /**
  *  What a launch needs to know before it can start. A list is empty when
@@ -5149,7 +5192,13 @@ export type LaunchSpec_Deserialize = { type: "uri"; uri: string } | { type: "exe
  *  A web game (WEB-GAMES-PLAN §2): its page, `http` or `https`, played
  *  in Caskade's game window.
  */
-{ type: "web"; url: string };
+{ type: "web"; url: string } | 
+/**
+ *  A game another device offers for streaming (STREAMING-PLAN §8.2):
+ *  the host's id and the app's name there, played through Caskade's
+ *  streaming client.
+ */
+{ type: "stream"; host: string; app: string };
 
 export type LaunchSpec_Serialize = { type: "uri"; uri: string } | { type: "executable"; path: string; args: string[]; cwd: string | null; env: { [key in string]: string } } | 
 /**  Retain discovery's structured target rather than inventing a shell command. */
@@ -5163,7 +5212,13 @@ export type LaunchSpec_Serialize = { type: "uri"; uri: string } | { type: "execu
  *  A web game (WEB-GAMES-PLAN §2): its page, `http` or `https`, played
  *  in Caskade's game window.
  */
-{ type: "web"; url: string };
+{ type: "web"; url: string } | 
+/**
+ *  A game another device offers for streaming (STREAMING-PLAN §8.2):
+ *  the host's id and the app's name there, played through Caskade's
+ *  streaming client.
+ */
+{ type: "stream"; host: string; app: string };
 
 /**  A discovered executable and the data needed to launch it. */
 export type LaunchTarget = {

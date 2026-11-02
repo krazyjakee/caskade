@@ -520,6 +520,7 @@ pub(super) async fn save_entry(conn: &mut SqliteConnection, entry: &GameEntry) -
         LaunchSpec::Emulator { .. } => "emulator",
         LaunchSpec::Plugin { .. } => "plugin",
         LaunchSpec::Web { .. } => "web",
+        LaunchSpec::Stream { .. } => "stream",
     });
     sqlx::query("INSERT INTO game_entries(id,game_id,source_id,external_id,state_kind,location_kind,root_id,rel_dir,external_path,launch_kind,size,record_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET game_id=excluded.game_id,source_id=excluded.source_id,external_id=excluded.external_id,state_kind=excluded.state_kind,location_kind=excluded.location_kind,root_id=excluded.root_id,rel_dir=excluded.rel_dir,external_path=excluded.external_path,launch_kind=excluded.launch_kind,size=excluded.size,record_json=excluded.record_json")
         .bind(&entry.id).bind(&entry.game_id).bind(entry.source_id.as_str()).bind(&entry.external_id).bind(state).bind(kind).bind(root).bind(relative).bind(external).bind(launch).bind(entry.size.map(v::integer).transpose()?).bind(v::json(entry)?).execute(conn).await?;

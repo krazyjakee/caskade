@@ -8,6 +8,11 @@
 //! A web game in desktop mode opens over Caskade's window
 //! (WEB-GAMES-PLAN §3), so Caskade stays where it is, under it.
 //!
+//! A stream from another device (#264) shows its client's own window
+//! before the stream's: Caskade's window stays on top of it until the
+//! stream is up, then gets out of the way in either mode, since the
+//! stream's window is already there underneath.
+//!
 //! Hiding needs the tray icon to come back from: without one (GNOME without
 //! the AppIndicator extension, no libappindicator), the window minimizes
 //! instead.
@@ -45,6 +50,16 @@ pub fn making(console: bool, web: bool, on_launch: &str, tray_shown: bool) -> Ma
     }
 }
 
+/// What to do with the main window once a stream is up: its window is
+/// beneath Caskade's, so Caskade always goes, to the tray when that's the
+/// setting outside console mode.
+pub fn making_for_stream(console: bool, on_launch: &str, tray_shown: bool) -> Making {
+    match making(console, false, on_launch, tray_shown) {
+        Making::Hide => Making::Hide,
+        _ => Making::Minimize,
+    }
+}
+
 /// Replaces the sessions followed with the ones running now, after missed
 /// events. True when none is left: the window should come back.
 fn reconcile(running: &mut BTreeSet<String>, now: impl IntoIterator<Item = String>) -> bool {
@@ -60,22 +75,45 @@ pub fn follow<R: Runtime>(app: AppHandle<R>, bus: &Bus, settings: SettingsServic
         let mut running = BTreeSet::new();
         // Caskade made way for a game, and takes focus back after it.
         let mut moved = false;
+        // Streams starting, whose client's window Caskade covers.
+        let mut covering = BTreeSet::new();
         loop {
             match stream.recv().await {
+                Ok(Event::StreamStarting { session_id, .. }) => {
+                    let Some(window) = app.get_webview_window("main") else {
+                        continue;
+                    };
+                    match window.set_always_on_top(true) {
+                        Ok(()) => {
+                            covering.insert(session_id);
+                        }
+                        Err(error) => tracing::warn!(%error, "couldn't cover the stream's start"),
+                    }
+                }
                 Ok(Event::GameStarted(session)) => {
+                    let streamed = covering.remove(&session.session_id);
                     running.insert(session.session_id);
                     let Some(window) = app.get_webview_window("main") else {
                         continue;
                     };
+                    if streamed && let Err(error) = window.set_always_on_top(false) {
+                        tracing::warn!(%error, "Caskade's window stays on top");
+                    }
                     let tray_shown = app
                         .try_state::<crate::tray::Tray>()
                         .is_some_and(|tray| tray.shown());
-                    let way = making(
-                        settings.flag("core.console", "active").await,
-                        web_game(&app, &session.entry_id).await,
-                        &on_launch(&settings).await,
-                        tray_shown,
-                    );
+                    let console = settings.flag("core.console", "active").await;
+                    let on_launch = on_launch(&settings).await;
+                    let way = if streamed {
+                        making_for_stream(console, &on_launch, tray_shown)
+                    } else {
+                        making(
+                            console,
+                            web_game(&app, &session.entry_id).await,
+                            &on_launch,
+                            tray_shown,
+                        )
+                    };
                     let done = match way {
                         Making::Stay => continue,
                         Making::Fade => Ok(()),
@@ -88,6 +126,13 @@ pub fn follow<R: Runtime>(app: AppHandle<R>, bus: &Bus, settings: SettingsServic
                     }
                 }
                 Ok(Event::GameExited(session)) => {
+                    // A stream that didn't start: its client is gone.
+                    if covering.remove(&session.session_id)
+                        && let Some(window) = app.get_webview_window("main")
+                        && let Err(error) = window.set_always_on_top(false)
+                    {
+                        tracing::warn!(%error, "Caskade's window stays on top");
+                    }
                     if running.remove(&session.session_id) && running.is_empty() && moved {
                         moved = false;
                         crate::main_window::raise(&app);
@@ -163,6 +208,16 @@ mod tests {
         assert_eq!(making(false, true, "minimize", true), Making::Stay);
         assert_eq!(making(false, true, "tray", true), Making::Stay);
         assert_eq!(making(true, true, "minimize", true), Making::Fade);
+    }
+
+    #[test]
+    fn a_stream_always_makes_way_for_its_window() {
+        assert_eq!(making_for_stream(true, "stay", true), Making::Minimize);
+        assert_eq!(making_for_stream(false, "stay", true), Making::Minimize);
+        assert_eq!(making_for_stream(false, "minimize", true), Making::Minimize);
+        assert_eq!(making_for_stream(false, "tray", true), Making::Hide);
+        assert_eq!(making_for_stream(false, "tray", false), Making::Minimize);
+        assert_eq!(making_for_stream(true, "tray", true), Making::Minimize);
     }
 
     #[test]

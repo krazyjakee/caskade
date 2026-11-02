@@ -97,9 +97,15 @@ pub(crate) fn pinned_tls(
         .dangerous()
         .with_custom_certificate_verifier(Arc::new(Pinned { cert, provider }));
     Ok(match client {
-        Some((cert, key)) => builder
-            .with_client_auth_cert(vec![cert], key)
-            .map_err(|error| Error::Invalid(error.to_string()))?,
+        Some((cert, key)) => {
+            let mut config = builder
+                .with_client_auth_cert(vec![cert], key)
+                .map_err(|error| Error::Invalid(error.to_string()))?;
+            // The host's GameStream port ends a resumed TLS 1.3 session
+            // with an internal error: every connection starts afresh.
+            config.resumption = rustls::client::Resumption::disabled();
+            config
+        }
         None => builder.with_no_client_auth(),
     })
 }

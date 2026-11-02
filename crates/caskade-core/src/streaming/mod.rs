@@ -8,6 +8,8 @@
 pub mod api;
 pub mod client;
 pub mod existing;
+#[cfg(feature = "net")]
+pub mod gamestream;
 pub mod host;
 #[cfg(feature = "net")]
 pub mod hosts;
@@ -15,6 +17,8 @@ pub mod hosts;
 pub mod mdns;
 #[cfg(feature = "net")]
 pub mod pairing;
+#[cfg(feature = "net")]
+pub mod play;
 #[cfg(feature = "net")]
 pub mod publish;
 pub mod secrets;

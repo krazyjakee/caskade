@@ -65,6 +65,14 @@ fn zip(entries: &[(&str, &str)]) -> Vec<u8> {
 }
 
 async fn client(wayland: bool) -> (tempfile::TempDir, StreamingClient, MockServer) {
+    client_with(wayland, MOONLIGHT).await
+}
+
+/// A client installed from a fake release whose Moonlight is `moonlight`.
+pub(in crate::streaming) async fn client_with(
+    wayland: bool,
+    moonlight: &str,
+) -> (tempfile::TempDir, StreamingClient, MockServer) {
     let temp = tempfile::tempdir().unwrap();
     let github = MockServer::start().await;
     Mock::given(method("HEAD"))
@@ -88,7 +96,7 @@ async fn client(wayland: bool) -> (tempfile::TempDir, StreamingClient, MockServe
         ))
         .respond_with(ResponseTemplate::new(200).set_body_bytes(zip(&[
             ("client/AppRun", APP_RUN),
-            ("client/usr/bin/moonlight", MOONLIGHT),
+            ("client/usr/bin/moonlight", moonlight),
         ])))
         .mount(&github)
         .await;

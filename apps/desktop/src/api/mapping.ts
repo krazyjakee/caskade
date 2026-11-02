@@ -133,7 +133,11 @@ export function mapDetails(
             ? `Storage root ${entry.location.rootId} · ${entry.location.relDir}`
             : null,
       canLaunch:
-        entry.state.type === "installed" && entry.launch !== null && entry.launch.type !== "plugin",
+        // Streamed from another device (#264): nothing is installed here.
+        entry.launch?.type === "stream" ||
+        (entry.state.type === "installed" &&
+          entry.launch !== null &&
+          entry.launch.type !== "plugin"),
       emulated: entry.launch?.type === "emulator",
     })),
   };

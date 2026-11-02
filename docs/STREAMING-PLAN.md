@@ -1,6 +1,6 @@
 # Caskade — Game Streaming Plan
 
-Status: in progress; built: the managed-tool layer (§3.1, #254), `caskade --launch` (§8.1, #256), the elevation helper (§8.4, #255), the host (§4.1–4.2, #257), the client's install and state (§5.1–5.2, #261) finding hosts with their games in the library (§6.1, §8.2, #262) using a user's own Sunshine (§3.4, #258) publishing the library's games (§4.3, #259) and pairing with a code (§6.2, #263); issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
+Status: in progress; built: the managed-tool layer (§3.1, #254), `caskade --launch` (§8.1, #256), the elevation helper (§8.4, #255), the host (§4.1–4.2, #257), the client's install and state (§5.1–5.2, #261) finding hosts with their games in the library (§6.1, §8.2, #262) using a user's own Sunshine (§3.4, #258) publishing the library's games (§4.3, #259), pairing with a code (§6.2, #263) and streaming a game from Play (§5.3, §8.2–8.3, #264); issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
 
 How Caskade lets a household play a game installed on one device from another, streamed over the local network. Caskade installs, configures, updates and drives two separate open-source programs: Sunshine on the device that runs the game (the host) and Moonlight on the device that shows it (the client). Users never see their names, windows or settings: they switch hosting on, pair a device once, and choose Stream from Living room. It follows the conventions in `TECH-PLAN.md`; the managed installs build on the emulator setup (`crates/caskade-sources/emulation/README.md`).
 
@@ -251,6 +251,50 @@ Built (#256, `apps/desktop/src-tauri/src/launch_cli/`). `caskade --launch <game 
 
 Moonlight reads pads only while its window has focus but grabs none, so Caskade's input service still sees every press. While a stream window has focus Caskade ignores pad actions, except the guide button, which shows Caskade's quick menu with End stream. Moonlight's own quit combo (Start+Select+L1+R1) stays as a fallback.
 
+#### Built (#264): Play streams, Caskade checks first
+
+- **The release.** Each host app is a release with `LaunchSpec::Stream { host, app }`: the host's id and the app's name there. `LibraryStore::sync_stream_apps` sets it on new releases and on releases from before #264. The webview counts a stream release as launchable, though nothing is installed. Users can't add stream actions, and an added action never replaces a stream release's own launch.
+- **The launch.** `LaunchService::start` sends a stream release to `launch/stream.rs` before any action, runner or session:
+  - The play gate has already asked for the client account's age limit.
+  - The game's lease is taken, and one stream runs at a time.
+  - The `StreamLauncher` (`caskade_core::streaming::play::Streams`) prepares the stream (below).
+  - Moonlight starts in its own process group, with stderr read line by line.
+  - Moonlight's exit code says nothing, so its lines decide. `Launch response:` (or `Resume response:`) means the host answered. Three quiet seconds after that, the stream counts as up. A `Qt Critical:`/`Qt Fatal:` line before then, an exit, or 60 s without an answer ends Moonlight. The launch then fails with Caskade's words.
+  - Once up, the stream is followed like a session (`running_sessions`, `running_streams`, which `list_sessions` puts first, Stop, the guide menu), but nothing is stored. It emits `game.started` and `game.exited`, never `launch.after`, so no saves are captured and no playtime counts here. The host's own `caskade --launch` records the session.
+- **The checks** (`Streams::prepare`), against the host itself (`streaming::gamestream::HostLink`):
+  - **Pairing record.** The host must be in Caskade's client state, with its certificate.
+  - **Reachability.** It must answer plain `/serverinfo` where it was last found or recorded. If it doesn't and its MAC is known, Caskade sends Wake-on-LAN magic packets (broadcast and its addresses, ports 7, 9, 47998–48000, 48010) and waits up to 45 s.
+  - **HTTPS as the paired client.** Caskade uses Moonlight's certificate and pins the host's. The host must still know this device: `PairStatus`, and a refused certificate counts as forgotten.
+  - **The game.** The host must still offer it (`/applist`, by name, case aside).
+  - **Busy host.** If the host is playing another game, Play asks: `LaunchError::HostBusy` becomes `LaunchOutcome::HostBusy`. Answered with `LaunchChoice.stopHost`, Caskade sends `/cancel` and waits for the host to be free.
+  - **Moonlight's arguments.** `stream <address> <app> --display-mode fullscreen --no-quit-after`, plus `core.streaming.quality` (resolution, fps, bitrate).
+  - **TLS sessions.** Sunshine answers a resumed TLS 1.3 session with an internal-error alert, so the pinned client config turns resumption off.
+- **Moonlight's lines, in Caskade's words:**
+  - "Failed to find application" → "<device> no longer offers <game>."
+  - "has not been paired" → "<device> no longer knows this device. Pair them again in Settings → Streaming."
+  - "Failed to start the specified application" → "<device> couldn't start <game>."
+  - Anything else → "Streaming from <device> failed."
+- **Ending.**
+  - The host's game ending ends the stream: Moonlight exits within 2 s.
+  - End stream (the game page, the game menu, the guide menu) sends `/cancel` first; the stream then ends and Moonlight exits by itself. Then Moonlight gets SIGTERM to its group (so it saves its settings), then SIGKILL after 5 s; on Windows it is ended.
+  - However a stream ends, the game stops on the host if it is still this stream's game. Moonlight's `--quit-after` does nothing on SIGTERM.
+  - Caskade exiting kills Moonlight (`kill_on_drop`).
+- **Moonlight's windows.**
+  - Before the stream, Moonlight shows its main Qt window, 1280×600, for about 2 s. With `-qwindowgeometry 1x1+<x>+<y>` (Qt's own option), it shows as one pixel in the middle of Caskade's window instead. Negative X offsets count from the far edge, so a middle left of or above the main screen gets the size only.
+  - `stream.starting` (`LaunchHooks::stream_starting`) keeps Caskade's window always on top until `game.started`, or `game.exited` for a stream that didn't start. Caskade's window then minimizes, or hides to the tray, in both modes, uncovering the stream's window beneath it (`game_focus::making_for_stream`).
+  - Nothing shows after the stream.
+- **UI.**
+  - The game page's Play button is "Stream from <device>" for a stream release, and the release rows say "Stream". While streaming the page shows "Streaming" and "End stream".
+  - The game menu names its Play item "Stream from <device>" when that is what Play starts. It adds an item per other device, and its Stop becomes "End stream".
+  - The guide menu says "is streaming from another device." and offers End stream.
+  - `StopHostDialog` asks "<device> is playing <game>. Stop it and stream <title>?".
+  - Stream releases skip Play's update offer, the played-elsewhere warning and the saves check: those belong to the host.
+- **Tests.**
+  - `launch::stream_tests`: a fake client script and a fake `StreamLauncher` cover success, End stream, the host's game ending, an error before and while settling, an exit, a timeout, a busy host and a second stream. They check that no session is stored and no client process is left.
+  - `streaming::play::tests`: a wiremock host behind a TLS front covers the arguments with quality, a forgotten device, a missing game, the busy question and `/cancel`, `finish` stopping only its own game, Wake-on-LAN to a local socket, and the stderr mapping.
+  - `test/streamFlows.test.tsx`: the game page, the menu, a pad in console mode, the busy question and the guide menu.
+  - `caskade-sources` `streaming::live_linux_streaming_plays_from_the_host` (ignored, Xvfb): the real host and client pair natively and stream through the pipeline. It checks that the host is busy, End stream frees it, and no client is left (no process in the state folder). Only the stream's window and the one-pixel start window are ever mapped. A missing game, a forgotten device and a host that's gone each fail in Caskade's words.
+
 ### 8.4 Elevation
 
 Caskade never elevates today (`caskade-installer` only delegates package installs to `pkexec` and `osascript`). Hosting needs one administrator step per OS, for a fixed, auditable list of actions with an undo:
@@ -304,6 +348,7 @@ Each item names its issue; record the date and result here.
 - [ ] #258 per OS: with Sunshine installed the usual way, switching hosting on offers to use it, and the right password works, a wrong one doesn't. Caskade's games appear in its apps beside the user's; switching off removes only Caskade's.
 - [ ] #259 per OS: a client lists the host's games with their covers, plus "Caskade". Starting one plays it on the host with a session there, and quitting the stream stops it. Installing, uninstalling, hiding or renaming a game changes the client's list after a refresh.
 - [ ] #263 per OS pair: Pair with a device shows a code; entering it on the host's Caskade pairs with no window from either program. A wrong code says so and can be tried again; an unanswered request disappears from the host after five minutes.
+- [ ] #264 per OS pair, the Steam Deck as a client included: Stream from <device> on the game page, the Play button and the game menu starts the stream with no Moonlight window in sight before or after (Cinnamon, GNOME, KDE, Windows, macOS, gamescope). The pad plays the game; guide brings up the quick menu and End stream returns to Caskade with the game stopped on the host. A host asleep wakes; one switched off, one that forgot this device and a game it no longer offers each show Caskade's error with no Moonlight process left. The host's playtime grows and the client's doesn't.
 - [ ] #256 Windows: with Caskade running, `caskade.exe --launch <game id>` starts the game; `taskkill /PID <caller>` (WM_CLOSE, without `/F`), or ending a Sunshine stream, quits the game and ends its session, and the caller exits 5.
 
 ### Testing

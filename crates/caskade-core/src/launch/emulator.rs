@@ -31,6 +31,10 @@ pub struct LaunchChoice {
     /// The play action to start (#177); `None` is the release's default.
     #[serde(default)]
     pub action: Option<String>,
+    /// Stop the game the streaming device is playing first, once Play
+    /// asked ([`super::HostBusy`], #264).
+    #[serde(default)]
+    pub stop_host: bool,
 }
 
 /// What a launch needs to know before it can start. A list is empty when

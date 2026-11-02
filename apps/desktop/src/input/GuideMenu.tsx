@@ -1,6 +1,7 @@
 /** The guide quick menu (#149): pressing a pad's guide button raises Caskade
  * (in Rust); while a game runs, this menu then offers going back to it,
- * stopping it, or its details. */
+ * stopping it, or its details. A stream from another device (#264) ends
+ * instead, and its game stops there. */
 import { Button } from "@caskade/ui";
 import { t as translate } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
@@ -15,6 +16,8 @@ export interface RunningGame {
   sessionId: string;
   gameId: string;
   title: string;
+  /** Streamed from another device. */
+  stream?: boolean;
 }
 
 export interface GuideApi {
@@ -37,6 +40,11 @@ export const nativeGuideApi: GuideApi = {
           sessionId: ticket.sessionId,
           gameId: ticket.gameId,
           title: game?.game.title ?? translate`Your game`,
+          stream: Boolean(
+            game?.entries
+              .find((entry) => entry.id === ticket.entryId)
+              ?.sourceId.startsWith("stream:"),
+          ),
         };
       }),
     );
@@ -116,11 +124,18 @@ export function GuideMenu({
           </Heading>
           <p className="mt-1 text-sm text-fg-muted">
             {confirming
-              ? t`Stop the game? Progress it hasn't saved is lost.`
-              : t({
-                  message: "is running.",
-                  comment: "Follows the running game's title, shown as a heading above",
-                })}
+              ? game.stream
+                ? t`End the stream? The game stops on the other device, and progress it hasn't saved is lost.`
+                : t`Stop the game? Progress it hasn't saved is lost.`
+              : game.stream
+                ? t({
+                    message: "is streaming from another device.",
+                    comment: "Follows the streamed game's title, shown as a heading above",
+                  })
+                : t({
+                    message: "is running.",
+                    comment: "Follows the running game's title, shown as a heading above",
+                  })}
           </p>
           {error && (
             <p role="alert" className="mt-3 text-sm text-danger">
@@ -137,7 +152,11 @@ export function GuideMenu({
                   isDisabled={busy}
                   onPress={() => act(() => api.stop(game.sessionId))}
                 >
-                  <Trans>Stop {{ title: game.title }}</Trans>
+                  {game.stream ? (
+                    <Trans>End stream</Trans>
+                  ) : (
+                    <Trans>Stop {{ title: game.title }}</Trans>
+                  )}
                 </Button>
                 <Button key="keep" isDisabled={busy} onPress={() => setConfirming(false)}>
                   <Trans>Keep playing</Trans>
@@ -155,7 +174,7 @@ export function GuideMenu({
                   <Trans>Return to game</Trans>
                 </Button>
                 <Button key="ask" isDisabled={busy} onPress={() => setConfirming(true)}>
-                  <Trans>Stop game</Trans>
+                  {game.stream ? <Trans>End stream</Trans> : <Trans>Stop game</Trans>}
                 </Button>
                 <Button
                   variant="ghost"

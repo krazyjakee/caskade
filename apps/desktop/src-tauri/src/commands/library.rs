@@ -108,14 +108,19 @@ pub async fn library_stats(
 #[specta::specta]
 pub async fn list_sessions(
     store: State<'_, LibraryStore>,
+    launch: State<'_, caskade_core::launch::LaunchService>,
     game_id: Option<String>,
     limit: u32,
 ) -> Result<Vec<PlaySession>, CommandError> {
-    match game_id {
-        Some(id) => store.sessions_for_game(&id, limit).await,
+    let stored = match &game_id {
+        Some(id) => store.sessions_for_game(id, limit).await,
         None => store.recent_sessions(limit).await,
     }
-    .map_err(report)
+    .map_err(report)?;
+    // Streams running now (#264): followed like sessions, never stored.
+    let mut sessions = launch.running_streams(game_id.as_deref());
+    sessions.extend(stored);
+    Ok(sessions)
 }
 
 /// Hides a game from the library, or shows it again. A hidden game stays

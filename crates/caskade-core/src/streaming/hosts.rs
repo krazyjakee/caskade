@@ -116,9 +116,57 @@ pub struct PairedHost {
     pub id: String,
     pub name: String,
     pub address: Option<String>,
+    /// Every address it was reached at: typed, then on the local network.
+    pub addresses: Vec<String>,
     /// Its MAC is known: it can be woken.
     pub wakeable: bool,
+    /// Its MAC, for Wake-on-LAN.
+    pub mac: Option<[u8; 6]>,
+    /// Its certificate, as pairing recorded it.
+    pub server_cert_pem: Option<String>,
     pub apps: Vec<StreamApp>,
+}
+
+/// A Qt settings `@ByteArray(...)` value as bytes: `\xNN` escapes (as
+/// many hex digits as follow) and the usual letters undone.
+pub fn qt_raw_bytes(value: &str) -> Option<Vec<u8>> {
+    let inner = value
+        .trim_matches('"')
+        .strip_prefix("@ByteArray(")?
+        .strip_suffix(')')?;
+    let mut out = Vec::new();
+    let mut chars = inner.chars().peekable();
+    while let Some(c) = chars.next() {
+        if c != '\\' {
+            let mut buffer = [0u8; 4];
+            out.extend_from_slice(c.encode_utf8(&mut buffer).as_bytes());
+            continue;
+        }
+        match chars.next() {
+            Some('x') => {
+                let mut value: u32 = 0;
+                while let Some(digit) = chars.peek().and_then(|c| c.to_digit(16)) {
+                    value = value.saturating_mul(16).saturating_add(digit);
+                    chars.next();
+                }
+                out.push(u8::try_from(value).ok()?);
+            }
+            Some('n') => out.push(b'\n'),
+            Some('r') => out.push(b'\r'),
+            Some('t') => out.push(b'\t'),
+            Some('0') => out.push(0),
+            Some('a') => out.push(7),
+            Some('b') => out.push(8),
+            Some('f') => out.push(12),
+            Some('v') => out.push(11),
+            Some(other) => {
+                let mut buffer = [0u8; 4];
+                out.extend_from_slice(other.encode_utf8(&mut buffer).as_bytes());
+            }
+            None => out.push(b'\\'),
+        }
+    }
+    Some(out)
 }
 
 /// The paired hosts in a client state file (Qt settings: `N\key=value`).
@@ -143,10 +191,19 @@ pub fn paired_hosts(settings: &str) -> Vec<PairedHost> {
         match parts[1..] {
             ["uuid"] => entry.id = value.to_owned(),
             ["hostname"] => entry.name = value.to_owned(),
-            ["manualaddress" | "localaddress"] if !value.is_empty() && entry.address.is_none() => {
-                entry.address = Some(value.to_owned());
+            ["manualaddress" | "localaddress"] if !value.is_empty() => {
+                if entry.address.is_none() {
+                    entry.address = Some(value.to_owned());
+                }
+                if !entry.addresses.iter().any(|known| known == value) {
+                    entry.addresses.push(value.to_owned());
+                }
             }
-            ["mac"] => entry.wakeable = value != "@ByteArray()" && !value.is_empty(),
+            ["mac"] => {
+                entry.mac = qt_raw_bytes(value).and_then(|bytes| bytes.try_into().ok());
+                entry.wakeable = entry.mac.is_some();
+            }
+            ["srvcert"] => entry.server_cert_pem = super::pairing::qt_bytes(value),
             ["apps", app, field] => {
                 let Ok(app) = app.parse::<u32>() else {
                     continue;

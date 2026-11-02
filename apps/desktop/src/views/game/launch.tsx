@@ -1,8 +1,9 @@
 import { useRef, useState } from "react";
-import { useLaunchGame } from "../../api/hooks";
+import { useGame, useLaunchGame } from "../../api/hooks";
 import { useLibraryApi } from "../../api/provider";
-import type { AgeRestriction, LaunchChoice, LaunchPrompt } from "../../api/types";
+import type { AgeRestriction, HostBusy, LaunchChoice, LaunchPrompt } from "../../api/types";
 import { LaunchChoiceDialog } from "../../components/LaunchChoiceDialog";
+import { StopHostDialog } from "../../components/streaming/StopHostDialog";
 import { AgeGateDialog } from "./AgeGate";
 import { usePlayWhilePlayingElsewhere } from "./PlayingElsewhere";
 import { usePlayWithSaves } from "./SavesBeforePlay";
@@ -14,8 +15,10 @@ import { usePlayWithUpdates } from "./UpdateBeforePlay";
  * another device (#240), then the saves (a newer one from another device,
  * or which to use when both played, #239), then the launch, then the action,
  * profile or disc question when the launch asks one. A play action chosen
- * up front (#178), or in the question, goes with every later answer.
- * Render `dialogs`. */
+ * up front (#178), or in the question, goes with every later answer. A
+ * release streamed from another device (#264) skips the update, the
+ * warning and the saves, which are that device's; it may ask to stop the
+ * game that device plays. Render `dialogs`. */
 export function useGameLaunch(gameId: string) {
   const api = useLibraryApi();
   const launch = useLaunchGame();
@@ -23,6 +26,12 @@ export function useGameLaunch(gameId: string) {
   // The PIN pad, and what to do once an admin's PIN approved the launch.
   const [gate, setGate] = useState<{ restriction: AgeRestriction; next: () => void } | null>(null);
   const [gating, setGating] = useState(false);
+  // The streaming device plays another game, and what to do once the
+  // user says to stop it.
+  const [hostBusy, setHostBusy] = useState<{ busy: HostBusy; next: () => void } | null>(null);
+  const game = useGame(gameId);
+  const streamed = (entryId: string) =>
+    game.data?.entries.some((entry) => entry.id === entryId && entry.source.startsWith("stream:"));
   // The play action this launch starts, once chosen.
   const action = useRef<string | null>(null);
   const start = (entryId: string, choice?: LaunchChoice): void => {
@@ -37,6 +46,11 @@ export function useGameLaunch(gameId: string) {
           // check): ask, then launch again.
           if (result.type === "age_restricted")
             setGate({ restriction: result.restriction, next: () => start(entryId, choice) });
+          setHostBusy(
+            result.type === "host_busy"
+              ? { busy: result.busy, next: () => start(entryId, { ...choice, stopHost: true }) }
+              : null,
+          );
         },
       },
     );
@@ -44,10 +58,11 @@ export function useGameLaunch(gameId: string) {
   const saves = usePlayWithSaves((entryId) => start(entryId));
   const elsewhere = usePlayWhilePlayingElsewhere(gameId, (entryId) => saves.play(entryId));
   const updates = usePlayWithUpdates(gameId, (entryId) => elsewhere.play(entryId));
+  const proceed = (entryId: string) => (streamed(entryId) ? start(entryId) : updates.play(entryId));
   const play = (entryId: string, playAction?: string) => {
     action.current = playAction ?? null;
     if (!api.ageRestriction) {
-      updates.play(entryId);
+      proceed(entryId);
       return;
     }
     setGating(true);
@@ -55,11 +70,9 @@ export function useGameLaunch(gameId: string) {
       .ageRestriction(gameId)
       .then(
         (restriction) =>
-          restriction
-            ? setGate({ restriction, next: () => updates.play(entryId) })
-            : updates.play(entryId),
+          restriction ? setGate({ restriction, next: () => proceed(entryId) }) : proceed(entryId),
         // The launch is checked anyway.
-        () => updates.play(entryId),
+        () => proceed(entryId),
       )
       .finally(() => setGating(false));
   };
@@ -88,6 +101,19 @@ export function useGameLaunch(gameId: string) {
           choose={(choice) => start(prompt.entryId, choice)}
         />
       )}
+      {hostBusy && (
+        <StopHostDialog
+          busy={hostBusy.busy}
+          title={game.data?.title}
+          launching={launch.isPending}
+          error={launch.isError ? launch.error.message : undefined}
+          close={() => {
+            setHostBusy(null);
+            launch.reset();
+          }}
+          confirm={hostBusy.next}
+        />
+      )}
       {updates.dialog}
       {elsewhere.dialog}
       {saves.dialog}
@@ -101,7 +127,7 @@ export function useGameLaunch(gameId: string) {
     launch,
     /** A PIN, profile or disc question is open; its dialog shows the
      * launch's error. */
-    asking: prompt !== null || gate !== null,
+    asking: prompt !== null || gate !== null || hostBusy !== null,
     dialogs,
   };
 }

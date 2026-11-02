@@ -1390,6 +1390,10 @@ msgid "The launch was cancelled."
 msgstr ""
 
 #: crates/caskade-core/src/error.rs
+msgid "{device} is playing another game."
+msgstr ""
+
+#: crates/caskade-core/src/error.rs
 msgid "Caskade has nothing that can start this game ({runner})."
 msgstr ""
 
@@ -2057,11 +2061,19 @@ msgid "an emulator action needs the game's ROMs"
 msgstr ""
 
 #: crates/caskade-core/src/launch/actions.rs
+msgid "an action can't stream a game: streamed games come from the device that offers them"
+msgstr ""
+
+#: crates/caskade-core/src/launch/actions.rs
 msgid "an emulator action is tracked as its emulator profile says; keep Automatic"
 msgstr ""
 
 #: crates/caskade-core/src/launch/actions.rs
 msgid "a web game is tracked by its game window; keep Automatic"
+msgstr ""
+
+#: crates/caskade-core/src/launch/actions.rs
+msgid "a streamed game is followed by its stream; keep Automatic"
 msgstr ""
 
 #: crates/caskade-core/src/launch/actions.rs
@@ -2301,6 +2313,22 @@ msgstr ""
 
 #: crates/caskade-core/src/launch/stop.rs
 msgid "the game's processes aren't known yet"
+msgstr ""
+
+#: crates/caskade-core/src/launch/stream.rs
+msgid "Another game is streaming. End that stream first."
+msgstr ""
+
+#: crates/caskade-core/src/launch/stream.rs
+msgid "couldn't start streaming: {error}"
+msgstr ""
+
+#: crates/caskade-core/src/launch/stream.rs
+msgid "The stream didn't start within {seconds} s."
+msgstr ""
+
+#: crates/caskade-core/src/launch/stream.rs
+msgid "The stream ended before it started."
 msgstr ""
 
 #: crates/caskade-core/src/managed/download.rs
@@ -3129,6 +3157,46 @@ msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
+msgid "Stream quality"
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "How games streamed from other devices look; each part left empty is chosen automatically."
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Resolution"
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Width and height in pixels, like 1920x1080."
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Frame rate"
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Frames per second."
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Bitrate"
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Kilobits per second."
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
 msgid "Save manifest URL"
 msgstr ""
 
@@ -3711,6 +3779,18 @@ msgstr ""
 msgid "{address} isn't answering"
 msgstr ""
 
+#: crates/caskade-core/src/streaming/gamestream.rs
+msgid "the device didn't stop its game"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/gamestream.rs
+msgid "the device no longer knows this one"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/gamestream.rs
+msgid "the wake-up message couldn't be sent"
+msgstr ""
+
 #: crates/caskade-core/src/streaming/host/mod.rs
 msgid "Streaming isn't working on this device"
 msgstr ""
@@ -3749,6 +3829,50 @@ msgstr ""
 
 #: crates/caskade-core/src/streaming/pairing.rs
 msgid "the device that answered isn't the one asked to pair"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/play.rs
+msgid "{device} no longer knows this device. Pair them again in Settings → Streaming."
+msgstr ""
+
+#: crates/caskade-core/src/streaming/play.rs
+msgid "{device} no longer offers {game}."
+msgstr ""
+
+#: crates/caskade-core/src/streaming/play.rs
+msgid "{device} isn't answering. Check that it's switched on and on this network."
+msgstr ""
+
+#: crates/caskade-core/src/streaming/play.rs
+msgid "{device} didn't wake up. Check that it's plugged in and on this network."
+msgstr ""
+
+#: crates/caskade-core/src/streaming/play.rs
+msgid "The other device"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/play.rs
+msgid "{device} couldn't start {game}."
+msgstr ""
+
+#: crates/caskade-core/src/streaming/play.rs
+msgid "{device} is playing a game another device started. Stop it there first."
+msgstr ""
+
+#: crates/caskade-core/src/streaming/play.rs
+msgid "Streaming from {device} failed."
+msgstr ""
+
+#: crates/caskade-core/src/streaming/play.rs
+msgid "Streaming is busy with another device. Try again in a moment."
+msgstr ""
+
+#: crates/caskade-core/src/streaming/play.rs
+msgid "{device} stopped answering. Try again in a moment."
+msgstr ""
+
+#: crates/caskade-core/src/streaming/play.rs
+msgid "{device} didn't stop its game. Try again in a moment."
 msgstr ""
 
 #: crates/caskade-core/src/sync/blobs.rs

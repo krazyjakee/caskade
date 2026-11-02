@@ -191,6 +191,9 @@ pub async fn resolve_with_runners(
             LaunchSpec::Web { .. } => {
                 return Err(LaunchError::Unsupported("web games".into()));
             }
+            LaunchSpec::Stream { .. } => {
+                return Err(LaunchError::Unsupported("streamed games".into()));
+            }
             LaunchSpec::Plugin { .. } => unreachable!("handled before blocking work"),
         };
         let excluded_program = (!direct).then(|| command.program.clone());

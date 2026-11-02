@@ -347,7 +347,19 @@ pub fn run() {
                     settings.clone(),
                     client.clone(),
                 ) {
-                    Ok(hosts) => commands::streaming::watch_hosts(app.handle(), hosts, client),
+                    Ok(hosts) => {
+                        // Play streams from them (#264).
+                        let handle = app.handle().clone();
+                        launch.set_streamer(std::sync::Arc::new(
+                            caskade_core::streaming::play::Streams::new(
+                                client.clone(),
+                                Some(hosts.clone()),
+                                settings.clone(),
+                            )
+                            .with_placement(move || main_window::placement(&handle)),
+                        ));
+                        commands::streaming::watch_hosts(app.handle(), hosts, client)
+                    }
                     Err(error) => tracing::error!(%error, "streaming hosts unavailable"),
                 }
                 app.manage(tools);

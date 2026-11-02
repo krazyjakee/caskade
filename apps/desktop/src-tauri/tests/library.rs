@@ -47,6 +47,7 @@ fn real_library_commands_filter_search_page_and_read_sessions() {
             .unwrap(),
         )
         .manage(store.clone())
+        .manage(caskade_core::launch::LaunchService::new(store.clone()))
         .invoke_handler(specta.invoke_handler())
         .build(mock_context(noop_assets()))
         .unwrap();

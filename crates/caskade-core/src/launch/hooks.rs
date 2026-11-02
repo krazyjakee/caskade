@@ -9,6 +9,8 @@ pub trait LaunchHooks: Send + Sync {
     async fn before(&self, _launch: &LaunchTicket, _command: &mut LaunchCommand) -> Result<bool> {
         Ok(true)
     }
+    /// A stream's client is about to start (#264).
+    async fn stream_starting(&self, _launch: &LaunchTicket) {}
     async fn started(&self, _event: &LaunchEvent) {}
     async fn exited(&self, _event: &LaunchEvent) {}
     async fn after(&self, _event: &LaunchEvent) {}

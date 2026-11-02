@@ -345,3 +345,314 @@ async fn live_linux_pairing_needs_no_window() {
     );
     host.shutdown();
 }
+
+/// Every process whose working directory is `dir`: the client runs in its
+/// state folder, so none left there means no client left behind.
+#[cfg(all(feature = "live-tests", target_os = "linux"))]
+fn running_in(dir: &std::path::Path) -> Vec<u32> {
+    let dir = std::fs::canonicalize(dir).unwrap_or_else(|_| dir.to_owned());
+    std::fs::read_dir("/proc")
+        .unwrap()
+        .filter_map(|entry| {
+            let pid: u32 = entry.ok()?.file_name().to_str()?.parse().ok()?;
+            (std::fs::read_link(format!("/proc/{pid}/cwd")).ok()? == dir).then_some(pid)
+        })
+        .collect()
+}
+
+/// The names of the windows shown on the test's display (`xwininfo`), as
+/// `name WxH`.
+#[cfg(all(feature = "live-tests", target_os = "linux"))]
+fn visible_windows() -> Vec<String> {
+    let Ok(tree) = std::process::Command::new("xwininfo")
+        .args(["-root", "-children"])
+        .output()
+    else {
+        return Vec::new();
+    };
+    String::from_utf8_lossy(&tree.stdout)
+        .lines()
+        .filter_map(|line| {
+            let line = line.trim();
+            let (id, rest) = line.split_once(' ')?;
+            id.starts_with("0x").then_some(())?;
+            let info = std::process::Command::new("xwininfo")
+                .args(["-id", id])
+                .output()
+                .ok()?;
+            let info = String::from_utf8_lossy(&info.stdout);
+            info.contains("Map State: IsViewable").then_some(())?;
+            let name = rest.split('"').nth(1).unwrap_or("(no name)");
+            let size = rest
+                .split_whitespace()
+                .find(|part| part.contains('x') && part.contains('+'))?;
+            Some(format!("{name} {}", size.split('+').next().unwrap_or(size)))
+        })
+        .collect()
+}
+
+/// #264: Play streams a game from the real host through the launch
+/// pipeline. The host checks come first; the client shows only its stream
+/// window; ending the stream stops the game on the host and leaves no
+/// client; a game the host doesn't offer and a host that's gone fail in
+/// Caskade's words, with no client left. Nothing is stored on the client.
+/// Run under Xvfb (`xvfb-run -a -s "-screen 0 1280x720x24"`).
+#[cfg(all(feature = "live-tests", target_os = "linux"))]
+#[tokio::test(flavor = "multi_thread")]
+#[ignore = "downloads and runs the real streaming host and client"]
+async fn live_linux_streaming_plays_from_the_host() {
+    use caskade_core::{
+        AppPaths,
+        bus::Bus,
+        db::{LibraryStore, StreamApp},
+        elevation::{Change, Elevation, Prompt, Request, Runner},
+        emulation::OperatingSystem,
+        launch::{LaunchError, LaunchService, SessionStatus},
+        managed::{CancellationToken, ManagedTools},
+        model::LaunchSpec,
+        settings::SettingsService,
+        streaming::{
+            HostState, StreamingClient, StreamingHost,
+            api::App,
+            client::{SETTINGS_DIR, SETTINGS_FILE},
+            host::{Parts, Timing, process::ChildRunner},
+            hosts::{ask_server_info, paired_hosts},
+            pairing::Paired,
+            play::Streams,
+            secrets::HostSecrets,
+        },
+    };
+    use std::{
+        sync::{Arc, Mutex},
+        time::{Duration, Instant},
+    };
+
+    struct Allowed;
+    impl Runner for Allowed {
+        fn present(&self, _: Change) -> bool {
+            false
+        }
+        fn run(&self, _: &Request) -> caskade_core::Result<Prompt> {
+            Ok(Prompt::Done)
+        }
+    }
+    let temp = tempfile::tempdir().unwrap();
+    let paths = AppPaths::under(temp.path());
+    let store = LibraryStore::in_memory().await.unwrap();
+    let settings = SettingsService::new(store.clone());
+    settings.register_core(&paths).unwrap();
+    let tools = ManagedTools::new(
+        store.clone(),
+        Bus::default(),
+        caskade_sources::tools::catalog().unwrap(),
+        &paths,
+    );
+    let host = StreamingHost::with(
+        tools.clone(),
+        Elevation::with_runner(Arc::new(Allowed), OperatingSystem::Linux, &paths),
+        settings.clone(),
+        Parts {
+            existing: Arc::new(|| None),
+            os: OperatingSystem::Linux,
+            runner: Arc::new(ChildRunner::new(paths.data.join("streaming/run.json"))),
+            secrets: HostSecrets::memory(),
+            timing: Timing::default(),
+            api_base: caskade_core::streaming::api::LOCAL.parse().unwrap(),
+        },
+    );
+    host.set_device_name("Caskade streaming test");
+    host.enable().await.unwrap();
+    while host.status().state != HostState::Ready {
+        assert_ne!(host.status().state, HostState::NeedsAttention);
+        tokio::time::sleep(Duration::from_millis(250)).await;
+    }
+    let api = host.api().await.unwrap();
+    // The host's apps run absolute programs, as Caskade's own do.
+    api.add_app(&App::command("Live Game", "/bin/sleep 600"))
+        .await
+        .unwrap();
+    let client = StreamingClient::new(tools);
+    let pairing = tokio::spawn({
+        let client = client.clone();
+        async move {
+            client
+                .pair(
+                    "127.0.0.1",
+                    "4831",
+                    Duration::from_secs(60),
+                    &CancellationToken::new(),
+                )
+                .await
+        }
+    });
+    let request = loop {
+        if let Some(request) = host.pair_requests().await.ok().and_then(|mut r| r.pop()) {
+            break request;
+        }
+        tokio::time::sleep(Duration::from_millis(200)).await;
+    };
+    host.accept_pairing(&request.id, "4831", "Living room")
+        .await
+        .unwrap();
+    assert!(matches!(
+        pairing.await.unwrap().unwrap(),
+        Paired::Paired { .. }
+    ));
+    let state = client.state().await.unwrap().unwrap();
+    let text = std::fs::read_to_string(state.join(SETTINGS_DIR).join(SETTINGS_FILE)).unwrap();
+    let host_id = paired_hosts(&text)
+        .into_iter()
+        .find(|h| h.name == "Caskade streaming test")
+        .unwrap()
+        .id;
+
+    // The host's game, and one it doesn't offer, as the library has them.
+    let apps = [
+        StreamApp {
+            id: "1".into(),
+            name: "Live Game".into(),
+        },
+        StreamApp {
+            id: "2".into(),
+            name: "Gone Game".into(),
+        },
+    ];
+    store.sync_stream_apps(&host_id, &apps).await.unwrap();
+    let entry = |name: &'static str| {
+        let store = store.clone();
+        async move {
+            let games = store.list_games(&Default::default()).await.unwrap();
+            let game = games.items.iter().find(|g| g.title == name).unwrap();
+            let entry = store.entries_for_game(&game.id).await.unwrap().remove(0);
+            assert!(matches!(entry.launch, Some(LaunchSpec::Stream { .. })));
+            entry
+        }
+    };
+    let live = entry("Live Game").await;
+    let gone = entry("Gone Game").await;
+
+    let launch = LaunchService::new(store.clone());
+    // Caskade's window fills the screen, as in console mode.
+    launch.set_streamer(Arc::new(
+        Streams::new(client.clone(), None, settings).with_placement(|| {
+            Some(caskade_core::launch::WindowPlacement {
+                x: 0,
+                y: 0,
+                width: 1280,
+                height: 720,
+            })
+        }),
+    ));
+    let busy = || async {
+        ask_server_info("127.0.0.1", 47989)
+            .await
+            .is_some_and(|info| info.busy)
+    };
+
+    // Windows seen while the stream starts, plays and ends.
+    let seen = Arc::new(Mutex::new(Vec::<(Duration, Vec<String>)>::new()));
+    let watching = Arc::new(std::sync::atomic::AtomicBool::new(true));
+    let start = Instant::now();
+    let sampler = std::thread::spawn({
+        let (seen, watching) = (seen.clone(), watching.clone());
+        move || {
+            while watching.load(std::sync::atomic::Ordering::SeqCst) {
+                let windows = visible_windows();
+                seen.lock().unwrap().push((start.elapsed(), windows));
+                std::thread::sleep(Duration::from_millis(100));
+            }
+        }
+    });
+
+    let handle = launch.launch(&live.id).await.unwrap();
+    let streaming_at = start.elapsed();
+    println!("streaming after {streaming_at:?}");
+    assert!(busy().await, "the host plays the game");
+    assert_eq!(launch.running_streams(None).len(), 1);
+    tokio::time::sleep(Duration::from_secs(5)).await;
+    assert!(!running_in(&state).is_empty(), "the client streams");
+    let streaming = visible_windows();
+    println!("windows while streaming: {streaming:?}");
+    assert!(
+        streaming
+            .iter()
+            .any(|name| name.starts_with("Caskade streaming test - Moonlight")),
+        "the stream shows: {streaming:?}"
+    );
+    // End stream: the host's game stops and no client is left.
+    assert_eq!(
+        launch
+            .stop(&handle.ticket.session_id, Duration::from_secs(5))
+            .await
+            .unwrap(),
+        1
+    );
+    let (_, status) = handle.wait_status().await.unwrap();
+    assert_eq!(status, SessionStatus::Exited);
+    let deadline = Instant::now() + Duration::from_secs(10);
+    while busy().await && Instant::now() < deadline {
+        tokio::time::sleep(Duration::from_millis(250)).await;
+    }
+    assert!(!busy().await, "the game stopped on the host");
+    assert!(running_in(&state).is_empty(), "no client is left");
+    tokio::time::sleep(Duration::from_secs(1)).await;
+    watching.store(false, std::sync::atomic::Ordering::SeqCst);
+    sampler.join().unwrap();
+    let seen = seen.lock().unwrap().clone();
+    let windows: std::collections::BTreeSet<&String> =
+        seen.iter().flat_map(|(_, names)| names).collect();
+    println!("windows seen: {windows:?}");
+
+    // Only the stream's own window shows: the client's start window is
+    // one pixel (under Caskade's), and none is left after.
+    assert!(
+        windows.iter().all(|name| {
+            name.starts_with("Caskade streaming test - Moonlight") || name.ends_with(" 1x1")
+        }),
+        "{windows:?}"
+    );
+    assert!(seen.last().unwrap().1.is_empty(), "{:?}", seen.last());
+    assert!(
+        store
+            .sessions_for_game(&live.game_id, 10)
+            .await
+            .unwrap()
+            .is_empty(),
+        "playtime is the host's"
+    );
+
+    // A game the host doesn't offer.
+    let Err(LaunchError::Refused(text)) = launch.launch(&gone.id).await else {
+        panic!("a game the host doesn't offer can't stream");
+    };
+    assert_eq!(text, "Caskade streaming test no longer offers Gone Game.");
+    assert!(running_in(&state).is_empty());
+
+    // The host forgot this device.
+    let device = host
+        .paired_devices()
+        .await
+        .unwrap()
+        .into_iter()
+        .find(|device| device.name == "Living room")
+        .unwrap();
+    host.unpair(&device.uuid).await.unwrap();
+    let Err(LaunchError::Refused(text)) = launch.launch(&live.id).await else {
+        panic!("a host that forgot this device can't stream");
+    };
+    assert_eq!(
+        text,
+        "Caskade streaming test no longer knows this device. Pair them again in Settings → Streaming."
+    );
+    assert!(running_in(&state).is_empty());
+
+    // The host gone.
+    host.shutdown();
+    tokio::time::sleep(Duration::from_secs(2)).await;
+    let Err(LaunchError::Refused(text)) = launch.launch(&live.id).await else {
+        panic!("a host that's gone can't stream");
+    };
+    println!("host gone: {text}");
+    assert!(text.contains("isn't answering"), "{text}");
+    assert!(running_in(&state).is_empty());
+}

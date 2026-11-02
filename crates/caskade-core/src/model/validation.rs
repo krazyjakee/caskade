@@ -318,6 +318,10 @@ fn normalize_launch(spec: &mut LaunchSpec, managed: bool) -> Result<()> {
             text(url, "web game URL", false, 16384)?;
             *url = crate::web::page_url(url)?.into();
         }
+        LaunchSpec::Stream { host, app } => {
+            text(host, "streaming device", false, 256)?;
+            text(app, "streamed game", false, 1024)?;
+        }
     }
     Ok(())
 }

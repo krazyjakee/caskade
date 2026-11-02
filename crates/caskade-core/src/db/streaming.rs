@@ -9,7 +9,7 @@ use super::{
 };
 use crate::{
     Result,
-    model::{Game, GameEntry, InstallState, SourceId},
+    model::{Game, GameEntry, InstallState, LaunchSpec, SourceId},
 };
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -34,6 +34,14 @@ pub struct StreamSync {
     pub updated: Vec<String>,
     /// Streaming-only games deleted with their last release.
     pub removed: Vec<String>,
+}
+
+/// How a host's app launches: streamed, by its name there.
+fn stream_launch(host_id: &str, app: &StreamApp) -> LaunchSpec {
+    LaunchSpec::Stream {
+        host: host_id.to_owned(),
+        app: app.name.clone(),
+    }
 }
 
 /// A title as a key: case, accents' composition and punctuation aside.
@@ -61,10 +69,28 @@ impl LibraryStore {
                 .bind(source.as_str())
                 .fetch_all(&mut *tx)
                 .await?;
-        let wanted: BTreeSet<&str> = apps.iter().map(|app| app.id.as_str()).collect();
         let mut sync = StreamSync::default();
         for (entry_id, game_id, external_id) in &known {
-            if wanted.contains(external_id.as_str()) {
+            if let Some(app) = apps.iter().find(|app| app.id == *external_id) {
+                // Each release streams its app by name (#264); releases
+                // from before that, or an app renamed in place, catch up.
+                let launch = serde_json::to_string(&stream_launch(host_id, app))?;
+                let changed = sqlx::query(
+                    "UPDATE game_entries SET launch_kind='stream',\
+                     record_json=json_set(record_json,'$.launch',json(?)) \
+                     WHERE id=? AND json(coalesce(json_extract(record_json,'$.launch'),'null')) \
+                     IS NOT json(?)",
+                )
+                .bind(&launch)
+                .bind(entry_id)
+                .bind(&launch)
+                .execute(&mut *tx)
+                .await?
+                .rows_affected()
+                    > 0;
+                if changed {
+                    sync.updated.push(game_id.clone());
+                }
                 continue;
             }
             sqlx::query("DELETE FROM game_entries WHERE id=?")
@@ -120,6 +146,7 @@ impl LibraryStore {
                 };
                 let mut entry = GameEntry::new(&game_id, source.clone(), &app.id);
                 entry.state = InstallState::Partial;
+                entry.launch = Some(stream_launch(host_id, app));
                 save_entry(&mut tx, &entry.normalized()?).await?;
             }
         }

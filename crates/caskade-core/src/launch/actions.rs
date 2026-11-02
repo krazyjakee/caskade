@@ -198,6 +198,12 @@ pub fn validate_target(entry: &GameEntry, target: &LaunchSpec) -> Result<()> {
             }
         }
         LaunchSpec::Plugin { .. } | LaunchSpec::Web { .. } => {}
+        // Streamed games come from the device that offers them.
+        LaunchSpec::Stream { .. } => {
+            return Err(LaunchError::Invalid(crate::tr!(
+                "an action can't stream a game: streamed games come from the device that offers them"
+            )));
+        }
     }
     Ok(())
 }
@@ -221,6 +227,11 @@ pub fn validate_tracking(entry: &GameEntry, action: &GameAction) -> Result<()> {
         (LaunchSpec::Web { .. }, _) => {
             return unsupported(crate::tr!(
                 "a web game is tracked by its game window; keep Automatic"
+            ));
+        }
+        (LaunchSpec::Stream { .. }, _) => {
+            return unsupported(crate::tr!(
+                "a streamed game is followed by its stream; keep Automatic"
             ));
         }
         (LaunchSpec::Uri { .. }, TrackingMode::OriginalProcess | TrackingMode::ProcessTree) => {

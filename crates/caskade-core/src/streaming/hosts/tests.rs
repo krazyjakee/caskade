@@ -64,12 +64,42 @@ fn paired_hosts_and_their_apps_come_from_the_clients_state() {
     assert_eq!(den.name, "Den");
     assert_eq!(den.address.as_deref(), Some("127.0.0.1"));
     assert!(den.wakeable);
+    assert_eq!(den.mac, Some([0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc]));
     let names: Vec<&str> = den.apps.iter().map(|app| app.name.as_str()).collect();
     assert_eq!(names, ["Hades", "Celeste"]);
     assert!(
         !paired_hosts(&PAIRED.replace(r"@ByteArray(\x12\x34\x56\x78\x9a\xbc)", "@ByteArray()"))[0]
             .wakeable
     );
+}
+
+#[test]
+fn qt_byte_arrays_read_as_bytes() {
+    // Moonlight's record of a real host's MAC: a tab among the escapes.
+    assert_eq!(
+        qt_raw_bytes(r"@ByteArray(\xa4\xb1\xc1\t\xdb\x98)"),
+        Some(vec![0xa4, 0xb1, 0xc1, 0x09, 0xdb, 0x98])
+    );
+    // A hex escape runs to the next non-hex character.
+    assert_eq!(
+        qt_raw_bytes(r#""@ByteArray(\x1A\0z)""#),
+        Some(vec![0x1a, 0, b'z'])
+    );
+    assert_eq!(qt_raw_bytes("@ByteArray()"), Some(vec![]));
+    assert_eq!(qt_raw_bytes("plain"), None);
+    let record = add_srvcert(PAIRED);
+    assert_eq!(
+        paired_hosts(&record)[0].server_cert_pem.as_deref(),
+        Some("-----BEGIN CERTIFICATE-----\nAB\n-----END CERTIFICATE-----\n")
+    );
+}
+
+/// [`PAIRED`] with a host certificate as Moonlight writes it.
+fn add_srvcert(text: &str) -> String {
+    text.replace(
+        "1\\uuid=",
+        "1\\srvcert=@ByteArray(-----BEGIN CERTIFICATE-----\\nAB\\n-----END CERTIFICATE-----\\n)\n1\\uuid=",
+    )
 }
 
 /// An mDNS answer for host `instance` at `address`, HTTP on `port`.
@@ -261,7 +291,12 @@ async fn a_paired_hosts_games_join_the_library_and_leave_with_it() {
     );
     assert_eq!(entries[0].external_id, "1285314453");
     assert_eq!(entries[0].state, crate::model::InstallState::Partial);
-    assert!(entries[0].launch.is_none());
+    // It streams the host's app by name (#264).
+    let launch = Some(crate::model::LaunchSpec::Stream {
+        host: "A466B6A4-3EC7-8C2E-629E-021AC1F5E209".into(),
+        app: "Hades".into(),
+    });
+    assert_eq!(entries[0].launch, launch);
     let all = f.store.list_games(&Default::default()).await.unwrap();
     let titles: Vec<&str> = all.items.iter().map(|game| game.title.as_str()).collect();
     assert!(titles.contains(&"Celeste"), "{titles:?}");
@@ -276,6 +311,22 @@ async fn a_paired_hosts_games_join_the_library_and_leave_with_it() {
         .await
         .unwrap();
     assert_eq!(again, crate::db::StreamSync::default());
+
+    // A release from before streaming launches catches up.
+    let mut old = entries[0].clone();
+    old.launch = None;
+    f.store.upsert_entry(&old).await.unwrap();
+    let caught_up = f
+        .store
+        .sync_stream_apps(
+            "A466B6A4-3EC7-8C2E-629E-021AC1F5E209",
+            &paired_hosts(PAIRED)[0].apps,
+        )
+        .await
+        .unwrap();
+    assert_eq!(caught_up.updated, std::slice::from_ref(&hades.id));
+    let entry = f.store.get_entry(&old.id).await.unwrap().unwrap();
+    assert_eq!(entry.launch, launch);
 
     // The host stops offering both: Celeste's streaming-only game goes; the
     // library's Hades stays with its own release.
