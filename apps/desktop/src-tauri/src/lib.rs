@@ -340,13 +340,14 @@ pub fn run() {
                     &setup_paths,
                 );
                 // Devices to stream from (#262), through Caskade's own client.
+                let client = caskade_core::streaming::StreamingClient::new(tools.clone());
                 match caskade_core::streaming::hosts::StreamHosts::new(
                     store.clone(),
                     bus.clone(),
                     settings.clone(),
-                    caskade_core::streaming::StreamingClient::new(tools.clone()),
+                    client.clone(),
                 ) {
-                    Ok(hosts) => commands::streaming::watch_hosts(app.handle(), hosts),
+                    Ok(hosts) => commands::streaming::watch_hosts(app.handle(), hosts, client),
                     Err(error) => tracing::error!(%error, "streaming hosts unavailable"),
                 }
                 app.manage(tools);

@@ -208,3 +208,140 @@ async fn live_linux_client_keeps_its_own_state() {
         assert!(ours.contains(quiet), "{quiet}");
     }
 }
+
+/// The real client pairs with the real host natively (#263): Caskade's
+/// own exchange with Moonlight's identity, the code accepted through the
+/// host's API, no window of Moonlight's. Moonlight then lists the host's
+/// apps from the record Caskade wrote, so it counts the host as paired. A
+/// wrong code and a declined request pair nothing. Run under Xvfb.
+#[cfg(all(feature = "live-tests", target_os = "linux"))]
+#[tokio::test(flavor = "multi_thread")]
+#[ignore = "downloads and runs the real streaming host and client"]
+async fn live_linux_pairing_needs_no_window() {
+    use caskade_core::{
+        AppPaths,
+        bus::Bus,
+        db::LibraryStore,
+        elevation::{Change, Elevation, Prompt, Request, Runner},
+        emulation::OperatingSystem,
+        managed::{CancellationToken, ManagedTools},
+        settings::SettingsService,
+        streaming::{
+            HostState, StreamingClient, StreamingHost,
+            api::App,
+            client::{SETTINGS_DIR, SETTINGS_FILE},
+            host::{Parts, Timing, process::ChildRunner},
+            hosts::paired_hosts,
+            pairing::Paired,
+            secrets::HostSecrets,
+        },
+    };
+    use std::{sync::Arc, time::Duration};
+
+    struct Allowed;
+    impl Runner for Allowed {
+        fn present(&self, _: Change) -> bool {
+            false
+        }
+        fn run(&self, _: &Request) -> caskade_core::Result<Prompt> {
+            Ok(Prompt::Done)
+        }
+    }
+    let temp = tempfile::tempdir().unwrap();
+    let paths = AppPaths::under(temp.path());
+    let store = LibraryStore::in_memory().await.unwrap();
+    let settings = SettingsService::new(store.clone());
+    settings.register_core(&paths).unwrap();
+    let tools = ManagedTools::new(
+        store,
+        Bus::default(),
+        caskade_sources::tools::catalog().unwrap(),
+        &paths,
+    );
+    let host = StreamingHost::with(
+        tools.clone(),
+        Elevation::with_runner(Arc::new(Allowed), OperatingSystem::Linux, &paths),
+        settings,
+        Parts {
+            existing: Arc::new(|| None),
+            os: OperatingSystem::Linux,
+            runner: Arc::new(ChildRunner::new(paths.data.join("streaming/run.json"))),
+            secrets: HostSecrets::memory(),
+            timing: Timing::default(),
+            api_base: caskade_core::streaming::api::LOCAL.parse().unwrap(),
+        },
+    );
+    host.set_device_name("Caskade pairing test");
+    host.enable().await.unwrap();
+    while host.status().state != HostState::Ready {
+        assert_ne!(host.status().state, HostState::NeedsAttention);
+        tokio::time::sleep(Duration::from_millis(250)).await;
+    }
+    let api = host.api().await.unwrap();
+    api.add_app(&App::command("Live Game", "true"))
+        .await
+        .unwrap();
+    let client = StreamingClient::new(tools);
+
+    // Pairs, accepting `accept` on the host for a client showing `code`.
+    let attempt = |code: &'static str, accept: Option<&'static str>| {
+        let (client, host) = (client.clone(), host.clone());
+        async move {
+            let pairing = tokio::spawn({
+                let client = client.clone();
+                async move {
+                    client
+                        .pair(
+                            "127.0.0.1",
+                            code,
+                            Duration::from_secs(60),
+                            &CancellationToken::new(),
+                        )
+                        .await
+                }
+            });
+            let request = loop {
+                if let Some(request) = host.pair_requests().await.ok().and_then(|mut r| r.pop()) {
+                    break request;
+                }
+                tokio::time::sleep(Duration::from_millis(200)).await;
+            };
+            match accept {
+                Some(pin) => host
+                    .accept_pairing(&request.id, pin, "Living room")
+                    .await
+                    .unwrap(),
+                None => host.decline_pairing(&request.id).await.unwrap(),
+            }
+            pairing.await.unwrap().unwrap()
+        }
+    };
+    assert_eq!(attempt("1111", Some("2222")).await, Paired::WrongCode);
+    assert_eq!(attempt("3333", None).await, Paired::Declined);
+    assert!(matches!(
+        attempt("4831", Some("4831")).await,
+        Paired::Paired { .. }
+    ));
+    let devices = host.paired_devices().await.unwrap();
+    println!("host's paired devices: {devices:?}");
+    assert!(devices.iter().any(|device| device.name == "Living room"));
+
+    // Moonlight lists the paired host's apps from Caskade's record.
+    client.list("127.0.0.1").await.unwrap();
+    let state = client.state().await.unwrap().unwrap();
+    let text = std::fs::read_to_string(state.join(SETTINGS_DIR).join(SETTINGS_FILE)).unwrap();
+    let hosts = paired_hosts(&text);
+    println!(
+        "client's hosts: {:?}",
+        hosts.iter().map(|h| (&h.name, &h.apps)).collect::<Vec<_>>()
+    );
+    let paired = hosts
+        .iter()
+        .find(|h| h.name == "Caskade pairing test")
+        .unwrap();
+    assert!(
+        paired.apps.iter().any(|app| app.name == "Live Game"),
+        "{hosts:?}"
+    );
+    host.shutdown();
+}

@@ -52,10 +52,16 @@ pub enum Entity {
     /// device, session, time, parents and the hash of its file list. Its
     /// files travel as blobs (`sync::blobs`). Key: version id.
     SaveVersion,
+    /// A `core.appearance` field the user changed from its default (#273).
+    /// Key: the namespace; field: the setting's.
+    Appearance,
+    /// `core.accounts`' rating board, when not the default. Key: the
+    /// namespace; field: the setting's.
+    AccountSettings,
 }
 
 impl Entity {
-    pub const ALL: [Self; 11] = [
+    pub const ALL: [Self; 13] = [
         Self::Game,
         Self::KeptApart,
         Self::IgdbMatch,
@@ -67,6 +73,8 @@ impl Entity {
         Self::Approval,
         Self::RommServer,
         Self::SaveVersion,
+        Self::Appearance,
+        Self::AccountSettings,
     ];
 
     pub fn as_str(self) -> &'static str {
@@ -82,6 +90,8 @@ impl Entity {
             Self::Approval => "approval",
             Self::RommServer => "rommServer",
             Self::SaveVersion => "saveVersion",
+            Self::Appearance => "appearance",
+            Self::AccountSettings => "accountSettings",
         }
     }
 
@@ -100,6 +110,8 @@ impl Entity {
             Self::Account | Self::Approval => Category::Accounts,
             Self::RommServer => Category::RommServers,
             Self::SaveVersion => Category::Saves,
+            Self::Appearance => Category::Appearance,
+            Self::AccountSettings => Category::Accounts,
         }
     }
 
@@ -112,13 +124,37 @@ impl Entity {
             | Self::Session
             | Self::Account
             | Self::RommServer
-            | Self::SaveVersion => &[],
+            | Self::SaveVersion
+            | Self::Appearance
+            | Self::AccountSettings => &[],
         }
     }
 
     /// Whether rows exist as such ([`EXISTS`]), so a tombstone deletes one.
     pub fn has_rows(self) -> bool {
-        !matches!(self, Self::Game | Self::IgdbMatch)
+        !matches!(
+            self,
+            Self::Game | Self::IgdbMatch | Self::Appearance | Self::AccountSettings
+        )
+    }
+
+    /// The `policy` rules (tables, settings, resources) it carries.
+    pub fn carries(self) -> &'static [&'static str] {
+        match self {
+            Self::Game => &["games"],
+            Self::KeptApart => &["kept_apart"],
+            Self::IgdbMatch => &["igdb_matches"],
+            Self::ArtworkChoice => &["artwork_choices"],
+            Self::Collection => &["collections"],
+            Self::Member => &["collection_members"],
+            Self::Session => &["play_sessions"],
+            Self::Account => &["accounts"],
+            Self::Approval => &["account_game_approvals"],
+            Self::RommServer => &["core.romm"],
+            Self::SaveVersion => &["save_versions"],
+            Self::Appearance => &["core.appearance"],
+            Self::AccountSettings => &["core.accounts"],
+        }
     }
 }
 
@@ -162,6 +198,63 @@ mod tests {
     fn entities_round_trip_their_names() {
         for entity in Entity::ALL {
             assert_eq!(Entity::parse(entity.as_str()), Some(entity));
+        }
+    }
+
+    /// Rules carried as files beside the log rather than as an entity.
+    const BLOBS: &[&str] = &["save_blobs"];
+    /// Rules #273 hasn't carried yet; empty when it closes.
+    const NOT_YET: &[&str] = &[
+        "artwork",
+        "achievement_links",
+        "game_actions",
+        "entry_action_settings",
+        "lifecycle_scripts",
+        "plugins",
+        "addons.records",
+        "preferred_emulators",
+        "installed_addons",
+    ];
+
+    #[test]
+    fn every_synced_or_optional_rule_has_an_entity() {
+        use super::super::policy::{RESOURCES, SETTINGS, TABLES};
+        let carried: Vec<&str> = Entity::ALL
+            .into_iter()
+            .flat_map(|entity| entity.carries().iter().copied())
+            .chain(BLOBS.iter().copied())
+            .collect();
+        for rule in TABLES.iter().chain(SETTINGS).chain(RESOURCES) {
+            let Some(category) = rule.category else {
+                continue;
+            };
+            if NOT_YET.contains(&rule.name) {
+                assert!(
+                    !carried.contains(&rule.name),
+                    "{} is carried now",
+                    rule.name
+                );
+                continue;
+            }
+            assert!(
+                carried.contains(&rule.name),
+                "{} ({category:?}) syncs, and no entity carries it",
+                rule.name
+            );
+            let entities: Vec<Entity> = Entity::ALL
+                .into_iter()
+                .filter(|entity| entity.carries().contains(&rule.name))
+                .collect();
+            for entity in entities {
+                assert_eq!(entity.category(), category, "{} as {entity:?}", rule.name);
+            }
+        }
+        // Nothing carries a rule that doesn't exist, or one kept local.
+        for name in carried {
+            let rule = super::super::policy::table(name)
+                .or_else(|| super::super::policy::setting(name))
+                .or_else(|| super::super::policy::resource(name));
+            assert!(rule.is_some_and(|rule| rule.category.is_some()), "{name}");
         }
     }
 

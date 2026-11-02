@@ -9,6 +9,7 @@ pub mod exchange;
 pub mod policy;
 #[cfg(feature = "net")]
 pub mod service;
+pub mod settings;
 
 pub use engine::SyncEngine;
 #[cfg(feature = "net")]

@@ -306,6 +306,8 @@ portable forms of what `sync::policy` declares synced:
 | `approval` | account\|game | `""` | Accounts |
 | `rommServer` | server id | `""`: its shared definition, as the policy projects `core.romm` | RommServers |
 | `saveVersion` | version (UUIDv7) | `""`: game, account, device, session, time, size, file count, parents and the hash of its file list | Saves |
+| `appearance` | `core.appearance` | each field changed from its default (`theme`, `density`, …) | Appearance |
+| `accountSettings` | `core.accounts` | `ratingBoard`, when not the default | Accounts |
 
 A game's user values are what `overrides_json` marks as the user's, read from
 the shown record: the policy's `Receive::GameEdits` contract. Automatic
@@ -321,6 +323,17 @@ device that gets a new server has no secret for it, so it asks for its own
 through `RommService::remove_server`, with its downloaded ROMs. Sessions are a union: one is never deleted by sync, and a
 session whose game has no entry here gets an unlaunchable `sync:sessions`
 entry.
+
+Settings travel field by field (`sync::settings`), and only fields set away
+from their defaults: a device set up later would otherwise replace the
+household's choices with its own newer defaults. A field set back to its
+default leaves the snapshot, and its tombstone sets it back to the default on
+the other devices. They're applied through `SettingsService`, so validation
+and change events run; a value this device's schema refuses is left out.
+
+`sync::change`'s test `every_synced_or_optional_rule_has_an_entity` fails
+when a policy rule with a synced or optional category has nothing carrying
+it (`Entity::carries`, or a blob kind).
 
 ### Clocks
 
@@ -462,7 +475,6 @@ These are declared synced by the policy but don't travel yet:
 - hand-made achievement links;
 - launch actions and game scripts (optional categories);
 - add-ons;
-- the appearance and accounts settings;
 - the files of user-imported artwork (#273, over `sync::blobs` as save files are).
 
 Each device's own default admin account appears on the other devices as a

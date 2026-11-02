@@ -81,6 +81,59 @@ impl ServerCertVerifier for Pinned {
     }
 }
 
+/// TLS that trusts only `cert`, presenting `client` (a certificate and its
+/// key) when given.
+pub(crate) fn pinned_tls(
+    cert: CertificateDer<'static>,
+    client: Option<(
+        CertificateDer<'static>,
+        rustls::pki_types::PrivateKeyDer<'static>,
+    )>,
+) -> Result<rustls::ClientConfig> {
+    let provider = Arc::new(rustls::crypto::ring::default_provider());
+    let builder = rustls::ClientConfig::builder_with_provider(provider.clone())
+        .with_safe_default_protocol_versions()
+        .map_err(|error| Error::Invalid(error.to_string()))?
+        .dangerous()
+        .with_custom_certificate_verifier(Arc::new(Pinned { cert, provider }));
+    Ok(match client {
+        Some((cert, key)) => builder
+            .with_client_auth_cert(vec![cert], key)
+            .map_err(|error| Error::Invalid(error.to_string()))?,
+        None => builder.with_no_client_auth(),
+    })
+}
+
+/// A device waiting to pair, as the host lists it.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[serde(rename_all = "camelCase")]
+pub struct PairRequest {
+    pub id: String,
+    /// What the device calls itself.
+    pub name: String,
+    pub address: String,
+}
+
+/// A device the host paired with.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[serde(rename_all = "camelCase")]
+pub struct PairedClient {
+    pub uuid: String,
+    pub name: String,
+}
+
+#[derive(Deserialize)]
+struct Pairings {
+    #[serde(default)]
+    pairings: Vec<PairRequest>,
+}
+
+#[derive(Deserialize)]
+struct Clients {
+    #[serde(default)]
+    named_certs: Vec<PairedClient>,
+}
+
 /// An app as the host lists it. Fields Caskade doesn't use stay as they
 /// were (`rest`), so another app read and listed is never changed.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -146,13 +199,7 @@ fn net(error: reqwest::Error) -> Error {
 impl HostApi {
     /// A client for `base` that trusts only `cert` (DER).
     pub fn new(base: Url, credentials: Credentials, cert: CertificateDer<'static>) -> Result<Self> {
-        let provider = Arc::new(rustls::crypto::ring::default_provider());
-        let tls = rustls::ClientConfig::builder_with_provider(provider.clone())
-            .with_safe_default_protocol_versions()
-            .map_err(|error| Error::Invalid(error.to_string()))?
-            .dangerous()
-            .with_custom_certificate_verifier(Arc::new(Pinned { cert, provider }))
-            .with_no_client_auth();
+        let tls = pinned_tls(cert, None)?;
         let client = reqwest::Client::builder()
             .use_preconfigured_tls(tls)
             .connect_timeout(Duration::from_secs(5))
@@ -236,6 +283,55 @@ impl HostApi {
         )
         .await?;
         Ok(())
+    }
+
+    /// Devices waiting to pair (Sunshine 2026.906 and later): they expire
+    /// after five minutes.
+    pub async fn pair_requests(&self) -> Result<Vec<PairRequest>> {
+        Ok(self.json::<Pairings>("api/pin").await?.pairings)
+    }
+
+    async fn post_json(&self, path: &str, body: serde_json::Value) -> Result<()> {
+        self.send(
+            self.client
+                .post(self.url(path)?)
+                .header(reqwest::header::CONTENT_TYPE, "application/json")
+                .body(serde_json::to_vec(&body)?),
+        )
+        .await?;
+        Ok(())
+    }
+
+    /// Enters the code a device shows, for request `id`, naming the device.
+    pub async fn accept_pairing(&self, id: &str, pin: &str, name: &str) -> Result<()> {
+        self.post_json(
+            "api/pin",
+            serde_json::json!({ "pairing_id": id, "pin": pin, "name": name }),
+        )
+        .await
+    }
+
+    pub async fn decline_pairing(&self, id: &str) -> Result<()> {
+        self.send(
+            self.client
+                .delete(self.url("api/pin")?)
+                .header(reqwest::header::CONTENT_TYPE, "application/json")
+                .body(serde_json::to_vec(
+                    &serde_json::json!({ "pairing_id": id }),
+                )?),
+        )
+        .await?;
+        Ok(())
+    }
+
+    /// The devices paired with the host.
+    pub async fn paired_clients(&self) -> Result<Vec<PairedClient>> {
+        Ok(self.json::<Clients>("api/clients/list").await?.named_certs)
+    }
+
+    pub async fn unpair(&self, uuid: &str) -> Result<()> {
+        self.post_json("api/clients/unpair", serde_json::json!({ "uuid": uuid }))
+            .await
     }
 
     pub async fn delete_app(&self, index: usize) -> Result<()> {

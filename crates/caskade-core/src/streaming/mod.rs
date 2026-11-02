@@ -14,6 +14,8 @@ pub mod hosts;
 #[cfg(feature = "net")]
 pub mod mdns;
 #[cfg(feature = "net")]
+pub mod pairing;
+#[cfg(feature = "net")]
 pub mod publish;
 pub mod secrets;
 #[cfg(all(test, feature = "net"))]

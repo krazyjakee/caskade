@@ -3709,6 +3709,10 @@ msgstr ""
 msgid "streaming couldn't be set up"
 msgstr ""
 
+#: crates/caskade-core/src/streaming/client.rs
+msgid "{address} isn't answering"
+msgstr ""
+
 #: crates/caskade-core/src/streaming/host/mod.rs
 msgid "Streaming isn't working on this device"
 msgstr ""
@@ -3733,6 +3737,10 @@ msgstr ""
 msgid "That user name and password didn't work"
 msgstr ""
 
+#: crates/caskade-core/src/streaming/host/mod.rs
+msgid "The code is four digits"
+msgstr ""
+
 #: crates/caskade-core/src/streaming/host/process.rs
 msgid "the streaming host didn't start"
 msgstr ""
@@ -3741,15 +3749,19 @@ msgstr ""
 msgid "{address} isn't a device's address"
 msgstr ""
 
-#: crates/caskade-core/src/sync/blobs.rs
-#: crates/caskade-core/src/sync/exchange.rs
-msgid "the connection to the other device failed"
+#: crates/caskade-core/src/streaming/pairing.rs
+msgid "the device that answered isn't the one asked to pair"
 msgstr ""
 
 #: crates/caskade-core/src/sync/blobs.rs
 #: crates/caskade-core/src/sync/exchange.rs
+msgid "the connection to the other device failed"
+msgstr "anslutningen till den andra enheten misslyckades"
+
+#: crates/caskade-core/src/sync/blobs.rs
+#: crates/caskade-core/src/sync/exchange.rs
 msgid "the other device sent something out of turn"
-msgstr ""
+msgstr "den andra enheten skickade något i fel ordning"
 
 #: crates/caskade-core/src/sync/exchange.rs
 msgid "the other device didn't finish"
@@ -4137,6 +4149,22 @@ msgstr "Välj lagringsplats för spel"
 #: apps/desktop/src-tauri/src/commands/storage.rs
 msgid "The folder chooser closed without an answer."
 msgstr "Mappväljaren stängdes utan svar."
+
+#: apps/desktop/src-tauri/src/commands/streaming.rs
+msgid "The code entered on {device} didn't match. Try again with a new code."
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/streaming.rs
+msgid "{device} declined."
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/streaming.rs
+msgid "Nobody entered the code on {device} in time. Try again."
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/streaming.rs
+msgid "that device isn't on the network"
+msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/sync.rs
 msgid "no pairing link is waiting"

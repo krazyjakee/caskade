@@ -1,6 +1,6 @@
 # Caskade — Game Streaming Plan
 
-Status: in progress; built: the managed-tool layer (§3.1, #254), `caskade --launch` (§8.1, #256), the elevation helper (§8.4, #255), the host (§4.1–4.2, #257), the client's install and state (§5.1–5.2, #261) finding hosts with their games in the library (§6.1, §8.2, #262) using a user's own Sunshine (§3.4, #258) and publishing the library's games (§4.3, #259); issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
+Status: in progress; built: the managed-tool layer (§3.1, #254), `caskade --launch` (§8.1, #256), the elevation helper (§8.4, #255), the host (§4.1–4.2, #257), the client's install and state (§5.1–5.2, #261) finding hosts with their games in the library (§6.1, §8.2, #262) using a user's own Sunshine (§3.4, #258) publishing the library's games (§4.3, #259) and pairing with a code (§6.2, #263); issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
 
 How Caskade lets a household play a game installed on one device from another, streamed over the local network. Caskade installs, configures, updates and drives two separate open-source programs: Sunshine on the device that runs the game (the host) and Moonlight on the device that shows it (the client). Users never see their names, windows or settings: they switch hosting on, pair a device once, and choose Stream from Living room. It follows the conventions in `TECH-PLAN.md`; the managed installs build on the emulator setup (`crates/caskade-sources/emulation/README.md`).
 
@@ -200,6 +200,21 @@ Moonlight's command line was not built to be invisible; each case has a workarou
 
 Only admins pair on the host. A client account needs no special permission.
 
+#### Built (#263): no Moonlight window at all
+
+Moonlight's `pair` opens a window (its AppImage has only Qt's `xcb` platform, so no offscreen mode), so Caskade pairs over the GameStream protocol itself (`streaming::pairing`), with the identity Moonlight keeps in Caskade's client state:
+
+- **Identity:** Moonlight's certificate, key and unique id from `[General]`. When there is none yet, a `list` of an address nobody answers makes one; that run opens no window (only Qt's invisible selection owner), and SIGTERM saves it.
+- **The exchange:** `getservercert` (a salt and the client certificate; answered once an admin entered the code on the host), `clientchallenge`, `serverchallengeresp`, `clientpairingsecret` and `pairchallenge` over HTTPS with the client certificate. AES-128-ECB keyed by `SHA-256(salt ‖ code)`; each side signs a secret with its key (RSA, SHA-256).
+- **Outcomes:** a hash mismatch is a wrong code (the host is told `unpair`); a 400 is a declined request; no answer within five minutes is an expired one. Each stage gets a new connection, because the host closes idle ones.
+- **Recording the host:** the host goes into Caskade's client state as Moonlight records it (`[hosts]`: uuid, name, address, `srvcert`). The real Moonlight then lists that host's apps, which it does only for a paired host.
+- **On the host:** `GET /api/pin` lists waiting requests (`id`, `name`, `address`), `POST /api/pin {pairing_id, pin, name}` enters the code, `DELETE /api/pin {pairing_id}` declines, and `/api/clients/list` and `/api/clients/unpair {uuid}` list and remove devices.
+- **Commands:**
+  - `streaming_pair_with` (signed in) answers the code at once ("Enter 4831 on Den"), and `StreamingPairingFinished` follows with the outcome and Caskade's message.
+  - `streaming_pair_requests`, `streaming_accept_pairing`, `streaming_decline_pairing`, `streaming_paired_devices` and `streaming_unpair` serve the host; accepting, declining and unpairing are admins only.
+  - `streaming_forget_host` forgets a paired device on this one.
+- Checked live on 2026-11-02 between the real Sunshine 2026.914 and moonlight-qt 6.2.0's identity: a wrong code, a declined request, then a pairing that the host lists and from which Moonlight lists the apps.
+
 ### 6.3 Pairing through sync
 
 Once devices are paired through sync (#226) and exchange changes (#230), the client sends its code to the host over `caskade/sync/1` and the host submits it unprompted: paired devices stream with no code. Sync's view of other devices' installed copies (#232) then names exactly which game each app is (§8.2).
@@ -288,6 +303,7 @@ Each item names its issue; record the date and result here.
 - [ ] #262: a host on the LAN appears in `streaming_hosts` within seconds, and shows unreachable after it leaves the network. After pairing (#263), its games show as "Stream from <device>" on the matching library games.
 - [ ] #258 per OS: with Sunshine installed the usual way, switching hosting on offers to use it, and the right password works, a wrong one doesn't. Caskade's games appear in its apps beside the user's; switching off removes only Caskade's.
 - [ ] #259 per OS: a client lists the host's games with their covers, plus "Caskade". Starting one plays it on the host with a session there, and quitting the stream stops it. Installing, uninstalling, hiding or renaming a game changes the client's list after a refresh.
+- [ ] #263 per OS pair: Pair with a device shows a code; entering it on the host's Caskade pairs with no window from either program. A wrong code says so and can be tried again; an unanswered request disappears from the host after five minutes.
 - [ ] #256 Windows: with Caskade running, `caskade.exe --launch <game id>` starts the game; `taskkill /PID <caller>` (WM_CLOSE, without `/F`), or ending a Sunshine stream, quits the game and ends its session, and the caller exits 5.
 
 ### Testing

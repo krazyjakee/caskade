@@ -91,6 +91,25 @@ pub fn server_info(xml: &str) -> Option<ServerInfo> {
     })
 }
 
+/// Asks the host at `address` its `/serverinfo`, with a short timeout.
+pub async fn ask_server_info(address: &str, port: u16) -> Option<ServerInfo> {
+    let host = match address.parse::<IpAddr>() {
+        Ok(IpAddr::V6(ip)) => format!("[{ip}]"),
+        _ => address.to_owned(),
+    };
+    let url = format!(
+        "http://{host}:{port}/serverinfo?uniqueid=0123456789ABCDEF&uuid={}",
+        uuid::Uuid::new_v4().simple()
+    );
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(3))
+        .no_proxy()
+        .build()
+        .ok()?;
+    let body = client.get(url).send().await.ok()?.text().await.ok()?;
+    server_info(&body)
+}
+
 /// A host the client paired with, from its state file's `[hosts]`.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct PairedHost {
@@ -516,10 +535,14 @@ impl StreamingClient {
         }
     }
 
-    /// Fetches a paired host's app list into the client's state:
+    /// Fetches a paired host's app list into the client's state (skipped
+    /// while Moonlight runs for something else):
     /// `moonlight list <host> --csv`, asked to quit (so it saves) after at
     /// most 20 s, since it may wait on a game's box art for good.
     pub async fn list(&self, address: &str) -> Result<()> {
+        let Ok(_busy) = self.busy.try_lock() else {
+            return Ok(());
+        };
         let Some(install) = self.installed().await? else {
             return Ok(());
         };

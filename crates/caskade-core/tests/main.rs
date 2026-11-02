@@ -16,6 +16,7 @@ mod save_versions;
 mod romm;
 #[cfg(feature = "net")]
 mod devices;
+mod sync_carried;
 mod sync_games;
 mod sync_log;
 mod sync_romm;

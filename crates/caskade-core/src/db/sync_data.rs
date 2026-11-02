@@ -737,8 +737,8 @@ async fn write(
         }
         Entity::Session => session(conn, target, value).await,
         Entity::SaveVersion => crate::saves::versions::sync_apply(conn, target, value).await,
-        // A setting: the engine applies it through `SettingsService`.
-        Entity::RommServer => Ok(true),
+        // Settings: the engine applies them through `SettingsService`.
+        Entity::RommServer | Entity::Appearance | Entity::AccountSettings => Ok(true),
         Entity::Account => account(conn, target, field, value).await,
         Entity::Approval => {
             let [account, game] = parts[..] else {

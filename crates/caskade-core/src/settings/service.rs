@@ -133,6 +133,12 @@ impl SettingsService {
         Ok(self.read(&section).await?.1)
     }
 
+    /// `namespace`'s defaults, without its schema's translated text.
+    pub fn defaults(&self, namespace: &str) -> Option<Value> {
+        let section = self.section(namespace).ok()?;
+        Some(section.definition.descriptor.defaults.clone())
+    }
+
     /// `namespace`'s value as `T`; the default when it can't be read.
     pub async fn read_or_default<T: serde::de::DeserializeOwned + Default>(
         &self,

@@ -361,6 +361,25 @@ export const commands = {
 	 *  networks where it isn't found by itself, and looks for it at once.
 	 */
 	streamingAddHost: (address: string) => typedError<StreamHost_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("streaming_add_host", { address })),
+	/**
+	 *  Devices waiting to pair with this host; a request expires after five
+	 *  minutes and is gone from the list.
+	 */
+	streamingPairRequests: () => typedError<PairRequest[], ErrorReport_Serialize>(__TAURI_INVOKE("streaming_pair_requests")),
+	/**  Enters the code a device shows on this host, naming the device. */
+	streamingAcceptPairing: (id: string, code: string, name: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("streaming_accept_pairing", { id, code, name })),
+	streamingDeclinePairing: (id: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("streaming_decline_pairing", { id })),
+	/**  The devices paired with this host. */
+	streamingPairedDevices: () => typedError<PairedClient[], ErrorReport_Serialize>(__TAURI_INVOKE("streaming_paired_devices")),
+	/**  Removes a device's pairing with this host. */
+	streamingUnpair: (uuid: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("streaming_unpair", { uuid })),
+	/**
+	 *  Pairs this device with host `host_id`: the answer is the code to enter
+	 *  on the host; `StreamingPairingFinished` follows.
+	 */
+	streamingPairWith: (hostId: string) => typedError<PairingStarted, ErrorReport_Serialize>(__TAURI_INVOKE("streaming_pair_with", { hostId })),
+	/**  Forgets a paired device on this device. */
+	streamingForgetHost: (hostId: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("streaming_forget_host", { hostId })),
 	storageList: () => typedError<RootSummary_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("storage_list")),
 	storageAdd: (path: string, label: string | null) => typedError<RootSummary_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("storage_add", { path, label })),
 	storageEdit: (id: string, label: string | null, folderTemplate: string) => typedError<RootSummary_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("storage_edit", { id, label, folderTemplate })),
@@ -872,6 +891,7 @@ export const events = {
 	rommDownloadChanged: makeEvent<RommDownloadChanged_Serialize, RommDownloadChanged_Deserialize>("romm-download-changed"),
 	settingsChanged: makeEvent<SettingsChanged, SettingsChanged>("settings-changed"),
 	storeAccountsChanged: makeEvent<StoreAccountsChanged, StoreAccountsChanged>("store-accounts-changed"),
+	streamingPairingFinished: makeEvent<StreamingPairingFinished_Serialize, StreamingPairingFinished_Deserialize>("streaming-pairing-finished"),
 	systemStatsSampled: makeEvent<SystemStatsSampled_Serialize, SystemStatsSampled_Deserialize>("system-stats-sampled"),
 	themeReloaded: makeEvent<ThemeReloaded_Serialize, ThemeReloaded_Deserialize>("theme-reloaded"),
 };
@@ -5852,6 +5872,20 @@ export type PadInfo = {
 	active: boolean,
 };
 
+/**  A device waiting to pair, as the host lists it. */
+export type PairRequest = {
+	id: string,
+	/**  What the device calls itself. */
+	name: string,
+	address: string,
+};
+
+/**  A device the host paired with. */
+export type PairedClient = {
+	uuid: string,
+	name: string,
+};
+
 /**  A device paired with this one. Its grants stay in the core. */
 export type PairedDevice = PairedDevice_Serialize | PairedDevice_Deserialize;
 
@@ -5921,6 +5955,16 @@ export type PairingLinkTarget = {
 	deviceId: string,
 	expiresAtMs: number,
 	expired: boolean,
+};
+
+/**  How a pairing ended. */
+export type PairingOutcome = "paired" | "wrongCode" | "declined" | "expired" | "failed";
+
+/**  A pairing under way: the code to enter on the host. */
+export type PairingStarted = {
+	hostId: string,
+	hostName: string,
+	code: string,
 };
 
 export type PairingState = 
@@ -8584,6 +8628,23 @@ export type StreamHost_Serialize = {
 	paired: boolean,
 	/**  The games it offers this device. */
 	games: number,
+};
+
+/**  `streaming_pair_with` ended; `message` says why in Caskade's words. */
+export type StreamingPairingFinished = StreamingPairingFinished_Serialize | StreamingPairingFinished_Deserialize;
+
+/**  `streaming_pair_with` ended; `message` says why in Caskade's words. */
+export type StreamingPairingFinished_Deserialize = {
+	hostId: string,
+	outcome: PairingOutcome,
+	message?: string | null,
+};
+
+/**  `streaming_pair_with` ended; `message` says why in Caskade's words. */
+export type StreamingPairingFinished_Serialize = {
+	hostId: string,
+	outcome: PairingOutcome,
+	message: string | null,
 };
 
 /**  One reading of the whole machine. */

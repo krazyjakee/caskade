@@ -126,6 +126,13 @@ pub fn builder() -> Builder<tauri::Wry> {
             crate::commands::streaming::streaming_use_existing,
             crate::commands::streaming::streaming_hosts,
             crate::commands::streaming::streaming_add_host,
+            crate::commands::streaming::streaming_pair_requests,
+            crate::commands::streaming::streaming_accept_pairing,
+            crate::commands::streaming::streaming_decline_pairing,
+            crate::commands::streaming::streaming_paired_devices,
+            crate::commands::streaming::streaming_unpair,
+            crate::commands::streaming::streaming_pair_with::<tauri::Wry>,
+            crate::commands::streaming::streaming_forget_host,
             crate::commands::storage::storage_list,
             crate::commands::storage::storage_add,
             crate::commands::storage::storage_edit,
@@ -291,6 +298,7 @@ pub fn builder() -> Builder<tauri::Wry> {
         ])
         .events(collect_events![
             crate::discovery::DiscoveryChanged,
+            crate::commands::streaming::StreamingPairingFinished,
             crate::events::JobChanged,
             crate::commands::input::InputActionEvent,
             crate::commands::console::ConsoleModeEvent,

@@ -15,6 +15,8 @@ use crate::{
     emulation::EmulatorInstall,
     managed::{CancellationToken, ManagedTools},
 };
+#[cfg(feature = "net")]
+use std::time::Duration;
 use std::{
     ffi::OsString,
     path::{Path, PathBuf},
@@ -118,6 +120,10 @@ pub struct StreamingClient {
     tools: ManagedTools,
     home: Option<PathBuf>,
     flatpak: PathBuf,
+    /// One Moonlight at a time: it writes its state file when it quits,
+    /// over any change made meanwhile.
+    #[cfg(feature = "net")]
+    pub(crate) busy: std::sync::Arc<tokio::sync::Mutex<()>>,
 }
 
 impl StreamingClient {
@@ -126,6 +132,8 @@ impl StreamingClient {
             tools,
             home: std::env::var_os("HOME").map(PathBuf::from),
             flatpak: "flatpak".into(),
+            #[cfg(feature = "net")]
+            busy: std::sync::Arc::default(),
         }
     }
 
@@ -212,6 +220,134 @@ impl StreamingClient {
         crate::managed::outside_own_appimage(&mut command);
         Ok(command)
     }
+}
+
+#[cfg(feature = "net")]
+impl StreamingClient {
+    fn settings_file(state: &Path) -> PathBuf {
+        state.join(SETTINGS_DIR).join(SETTINGS_FILE)
+    }
+
+    /// Moonlight's identity in Caskade's state, made the first time by a
+    /// run that opens no window (`list` of an address nobody answers,
+    /// asked to quit, so it saves).
+    pub async fn identity(&self, client: &Client) -> Result<super::pairing::Identity> {
+        let read = || {
+            std::fs::read_to_string(Self::settings_file(&client.state))
+                .ok()
+                .and_then(|text| super::pairing::Identity::from_settings(&text))
+        };
+        if let Some(identity) = read() {
+            return Ok(identity);
+        }
+        // TEST-NET-1: never a host.
+        self.run_and_quit(
+            client,
+            &["list".into(), "192.0.2.1".into(), "--csv".into()],
+            Duration::from_secs(4),
+        )
+        .await?;
+        read().ok_or_else(|| Error::Invalid(crate::tr!("streaming couldn't be set up")))
+    }
+
+    /// Runs Moonlight with `args`, asks it to quit after `after` (so it
+    /// saves its state) and waits for it.
+    pub(crate) async fn run_and_quit(
+        &self,
+        client: &Client,
+        args: &[OsString],
+        after: Duration,
+    ) -> Result<()> {
+        let mut command = tokio::process::Command::from(self.command(client, args)?);
+        command
+            .stdin(std::process::Stdio::null())
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .kill_on_drop(true);
+        let mut child = command.spawn()?;
+        if tokio::time::timeout(after, child.wait()).await.is_err() {
+            if let Some(pid) = child.id() {
+                let _ = tokio::process::Command::new("kill")
+                    .args(["-TERM", &pid.to_string()])
+                    .status()
+                    .await;
+            }
+            if tokio::time::timeout(Duration::from_secs(5), child.wait())
+                .await
+                .is_err()
+            {
+                let _ = child.kill().await;
+            }
+        }
+        Ok(())
+    }
+
+    /// Pairs with the host at `address` using `pin`, which someone enters
+    /// on the host: no window of Moonlight's opens. A paired host is
+    /// recorded in Caskade's client state as Moonlight records it.
+    pub async fn pair(
+        &self,
+        address: &str,
+        pin: &str,
+        wait: Duration,
+        cancel: &CancellationToken,
+    ) -> Result<super::pairing::Paired> {
+        let _busy = self.busy.lock().await;
+        let client = self.ensure(cancel).await?;
+        let identity = self.identity(&client).await?;
+        let info = super::hosts::ask_server_info(address, super::hosts::HTTP_PORT)
+            .await
+            .ok_or_else(|| {
+                Error::Invalid(crate::tr!("{address} isn't answering", address = address))
+            })?;
+        let endpoint = super::pairing::Endpoint::new(address)?;
+        let paired = super::pairing::Pairing {
+            endpoint: &endpoint,
+            identity: &identity,
+            pin,
+            wait,
+        }
+        .run()
+        .await?;
+        if let super::pairing::Paired::Paired { server_cert_pem } = &paired {
+            let file = Self::settings_file(&client.state);
+            let text = std::fs::read_to_string(&file).unwrap_or_default();
+            let updated = super::pairing::add_host(
+                &text,
+                &super::pairing::HostRecord {
+                    uuid: info.id,
+                    name: info.name,
+                    address: address.to_owned(),
+                    server_cert_pem: server_cert_pem.clone(),
+                },
+            );
+            write_atomically(&file, &updated)?;
+        }
+        Ok(paired)
+    }
+
+    /// Forgets a paired host on this device.
+    pub async fn forget(&self, host_id: &str) -> Result<()> {
+        let _busy = self.busy.lock().await;
+        let Some(install) = self.installed().await? else {
+            return Ok(());
+        };
+        let file = Self::settings_file(&self.state_dir(&install)?);
+        let Ok(text) = std::fs::read_to_string(&file) else {
+            return Ok(());
+        };
+        write_atomically(&file, &super::pairing::forget_host(&text, host_id))
+    }
+}
+
+#[cfg(feature = "net")]
+fn write_atomically(path: &Path, text: &str) -> Result<()> {
+    let mut part = path.as_os_str().to_owned();
+    part.push(".part");
+    let part = PathBuf::from(part);
+    std::fs::write(&part, text)?;
+    std::fs::rename(&part, path)?;
+    Ok(())
 }
 
 #[cfg(all(test, unix, feature = "net"))]

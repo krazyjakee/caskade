@@ -649,6 +649,38 @@ impl StreamingHost {
         self.set_status(HostState::Off, None, None);
     }
 
+    /// Devices waiting to pair (#263); expired ones are gone from the list.
+    #[cfg(feature = "net")]
+    pub async fn pair_requests(&self) -> Result<Vec<crate::streaming::api::PairRequest>> {
+        self.api().await?.pair_requests().await
+    }
+
+    /// Enters the code device `id` shows, naming it `name`.
+    #[cfg(feature = "net")]
+    pub async fn accept_pairing(&self, id: &str, pin: &str, name: &str) -> Result<()> {
+        let pin = pin.trim();
+        if pin.len() != 4 || !pin.bytes().all(|b| b.is_ascii_digit()) {
+            return Err(Error::Invalid(crate::tr!("The code is four digits")));
+        }
+        self.api().await?.accept_pairing(id, pin, name.trim()).await
+    }
+
+    #[cfg(feature = "net")]
+    pub async fn decline_pairing(&self, id: &str) -> Result<()> {
+        self.api().await?.decline_pairing(id).await
+    }
+
+    /// The devices paired with this host.
+    #[cfg(feature = "net")]
+    pub async fn paired_devices(&self) -> Result<Vec<crate::streaming::api::PairedClient>> {
+        self.api().await?.paired_clients().await
+    }
+
+    #[cfg(feature = "net")]
+    pub async fn unpair(&self, uuid: &str) -> Result<()> {
+        self.api().await?.unpair(uuid).await
+    }
+
     /// The running host's API (publishing games, pairing).
     #[cfg(feature = "net")]
     pub async fn api(&self) -> Result<crate::streaming::api::HostApi> {

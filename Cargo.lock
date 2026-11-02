@@ -1132,6 +1132,7 @@ dependencies = [
 name = "caskade-core"
 version = "0.1.0"
 dependencies = [
+ "aes",
  "argon2",
  "async-trait",
  "base64 0.22.1",
@@ -1163,6 +1164,7 @@ dependencies = [
  "rcgen",
  "regex",
  "reqwest 0.12.28",
+ "ring",
  "rustls",
  "schemars 1.2.3",
  "scraper",
@@ -1187,6 +1189,7 @@ dependencies = [
  "url",
  "uuid",
  "wiremock",
+ "x509-parser",
  "zip",
 ]
 

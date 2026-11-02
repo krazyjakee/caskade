@@ -10,6 +10,21 @@ pub struct Cert {
     key: Vec<u8>,
 }
 
+impl Cert {
+    /// A certificate and its PKCS#8 key, from PEM.
+    pub fn from_pem(cert_pem: &str, key_pem: &str) -> Self {
+        use rustls::pki_types::pem::PemObject;
+        Self {
+            der: CertificateDer::from_pem_slice(cert_pem.as_bytes()).unwrap(),
+            pem: cert_pem.to_owned(),
+            key: rustls::pki_types::PrivatePkcs8KeyDer::from_pem_slice(key_pem.as_bytes())
+                .unwrap()
+                .secret_pkcs8_der()
+                .to_vec(),
+        }
+    }
+}
+
 /// A self-signed certificate like the host's own.
 pub fn cert() -> Cert {
     let made =

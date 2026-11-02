@@ -82,6 +82,7 @@ fn entity_rank(entity: Entity) -> u8 {
         Entity::Session => 5,
         Entity::RommServer => 6,
         Entity::SaveVersion => 7,
+        Entity::Appearance | Entity::AccountSettings => 8,
     }
 }
 
@@ -335,6 +336,26 @@ impl SyncEngine {
                         self.store.sync_mark_applied(change, Some(&target)).await?;
                         progress = true;
                     }
+                    Mapped::To(target, value)
+                        if super::settings::namespace(change.entity).is_some() =>
+                    {
+                        let Some(settings) = self.settings.get() else {
+                            continue;
+                        };
+                        if super::settings::apply(settings, &self.store, change, value.clone())
+                            .await?
+                        {
+                            state.fields.insert(
+                                (change.entity, target, change.field.clone()),
+                                FieldState {
+                                    value,
+                                    stamp: change.stamp(),
+                                },
+                            );
+                            applied += 1;
+                        }
+                        progress = true;
+                    }
                     Mapped::To(target, value) if change.entity == Entity::RommServer => {
                         if self.apply_romm(change, &target, value.clone()).await? {
                             state.fields.insert(
@@ -535,13 +556,15 @@ impl SyncEngine {
         Ok(Some(game))
     }
 
-    /// Synced settings' fields: each RomM server's shared definition, as
-    /// `policy` projects `core.romm` (no secrets, no cache, no emulator or
-    /// profile choices).
+    /// Synced settings' fields: appearance and the rating board where they
+    /// aren't the defaults (`sync::settings`), and each RomM server's shared
+    /// definition, as `policy` projects `core.romm` (no secrets, no cache, no
+    /// emulator or profile choices).
     async fn settings_snapshot(&self, values: &mut HashMap<crate::db::FieldKey, Value>) {
         let Some(settings) = self.settings.get() else {
             return;
         };
+        super::settings::snapshot(settings, values).await;
         let Ok(romm) = settings.get(crate::romm::NAMESPACE).await else {
             return;
         };
