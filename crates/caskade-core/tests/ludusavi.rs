@@ -531,3 +531,44 @@ async fn live_manifest_download_and_offline_restart() {
     assert_eq!(offline.refresh(false).await.unwrap(), Refresh::Offline);
     assert!(!offline.by_id(StoreId::Steam(400)).await.unwrap().is_empty());
 }
+
+#[tokio::test]
+async fn update_now_checks_a_fresh_manifest_again_and_status_says_when() {
+    let server = MockServer::start().await;
+    serve(&server, MANIFEST, "\"v1\"").await;
+    let dir = tempfile::tempdir().unwrap();
+    let manifest = service(dir.path(), &server);
+    let none = manifest.status().await.unwrap();
+    assert!(!none.available);
+    assert_eq!(none.checked_at_ms, None);
+    manifest.refresh(true).await.unwrap();
+    let first = manifest.status().await.unwrap();
+    assert!(first.available);
+    let checked = first.checked_at_ms.unwrap();
+    assert!(checked > 0);
+    // Checked less than a day ago, so only Update now asks again.
+    assert_eq!(manifest.refresh(true).await.unwrap(), Refresh::Fresh);
+    server.verify().await;
+    server.reset().await;
+    Mock::given(method("GET"))
+        .and(header("if-none-match", "\"v1\""))
+        .respond_with(ResponseTemplate::new(304))
+        .expect(1)
+        .mount(&server)
+        .await;
+    assert_eq!(manifest.update_now().await.unwrap(), Refresh::Unchanged);
+    assert!(manifest.status().await.unwrap().checked_at_ms.unwrap() >= checked);
+    // A failed check keeps the manifest.
+    server.reset().await;
+    Mock::given(method("GET"))
+        .respond_with(ResponseTemplate::new(503))
+        .mount(&server)
+        .await;
+    assert!(manifest.update_now().await.is_err());
+    assert!(manifest.status().await.unwrap().available);
+    assert_eq!(example(&manifest).await.title, "Example: Game");
+    // Another source shares the cache.
+    let other = manifest.for_url("http://127.0.0.1:9/manifest.yaml");
+    assert!(other.status().await.unwrap().available);
+    server.verify().await;
+}

@@ -1,28 +1,38 @@
 /** Save locations belong to one release on this device (#238). */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import {
   type BeforePlay_Serialize as BeforePlay,
   commands,
+  events,
   type LocationSpec,
+  type ManifestStatus_Serialize as ManifestStatus,
   type SaveCheck_Serialize as SaveCheck,
+  type SaveHistory_Serialize as SaveHistory,
   type SaveMatch,
   type SavePreferences,
   type SaveLocationsState as SaveState,
   type SaveVersion_Serialize as SaveVersion,
   type VersionReason,
+  type VersionState_Serialize as VersionState,
 } from "./bindings";
 import { useOptionalLibraryApi } from "./provider";
 import { unwrap } from "./reply";
+import { effectSubscription } from "./subscription";
+import { useProvidedSyncApi } from "./sync";
 
 export type {
   BeforePlay,
   LocationSpec,
+  ManifestStatus,
   SaveCheck,
+  SaveHistory,
   SaveMatch,
   SavePreferences,
   SaveState,
   SaveVersion,
   VersionReason,
+  VersionState,
 };
 export interface SavesApi {
   state(entryId: string): Promise<SaveState>;
@@ -33,6 +43,18 @@ export interface SavesApi {
   beforePlay(entryId: string): Promise<BeforePlay>;
   /** Settles a conflict: the chosen version's files go in place. */
   choose(entryId: string, versionId: string): Promise<SaveVersion>;
+  /** A game's save versions (#241), newest first. */
+  history(gameId: string): Promise<SaveHistory>;
+  /** Puts an older version in place; the save there now is kept first. */
+  restore(entryId: string, versionId: string): Promise<SaveVersion>;
+  /** Shows one of the release's save locations in the file manager. */
+  reveal(entryId: string, location: number): Promise<void>;
+  /** Whether the save manifest is cached, and when it was last checked. */
+  manifestStatus(): Promise<ManifestStatus>;
+  /** Checks the manifest's source now. */
+  manifestUpdate(): Promise<ManifestStatus>;
+  /** Calls `listener` with a game whose versions changed here. */
+  subscribe(listener: (gameId: string) => void): () => void;
 }
 export const nativeSaves: SavesApi = {
   state: (entryId) => unwrap(commands.gameSavesState(entryId)),
@@ -40,6 +62,14 @@ export const nativeSaves: SavesApi = {
     unwrap(commands.gameSavesEdit(entryId, preferences, revision)),
   beforePlay: (entryId) => unwrap(commands.gameSavesBeforePlay(entryId)),
   choose: (entryId, versionId) => unwrap(commands.gameSavesChoose(entryId, versionId)),
+  history: (gameId) => unwrap(commands.gameSaveHistory(gameId)),
+  restore: (entryId, versionId) => unwrap(commands.gameSavesRestore(entryId, versionId)),
+  reveal: (entryId, location) =>
+    unwrap(commands.gameSavesReveal(entryId, location)).then(() => undefined),
+  manifestStatus: () => unwrap(commands.savesManifestStatus()),
+  manifestUpdate: () => unwrap(commands.savesManifestUpdate()),
+  subscribe: (listener) =>
+    effectSubscription(events.saveVersionsChanged.listen, ({ payload }) => listener(payload)),
 };
 const key = (entryId: string) => ["save-locations", entryId] as const;
 export function useSaveLocations(entryId: string | undefined) {
@@ -64,4 +94,73 @@ export function useSaveLocations(entryId: string | undefined) {
     },
   });
   return { query, edit, available: Boolean(api) };
+}
+
+const historyKey = (gameId: string) => ["save-versions", gameId] as const;
+
+/** A game's save versions, refreshed when they change here or a sync with
+ * another device brings some. */
+export function useSaveHistory(gameId: string) {
+  const api = useOptionalLibraryApi()?.saves;
+  const client = useQueryClient();
+  const sync = useProvidedSyncApi();
+  useEffect(() => {
+    if (!api) return;
+    return api.subscribe((changed) => {
+      if (changed === gameId) void client.invalidateQueries({ queryKey: historyKey(gameId) });
+    });
+  }, [api, client, gameId]);
+  // A sync with another device may have brought versions.
+  useEffect(() => {
+    if (!api || !sync) return;
+    return sync.subscribe(() => void client.invalidateQueries({ queryKey: historyKey(gameId) }));
+  }, [api, sync, client, gameId]);
+  const query = useQuery({
+    queryKey: historyKey(gameId),
+    queryFn: () => {
+      if (!api) throw new Error("Saves are unavailable");
+      return api.history(gameId);
+    },
+    enabled: Boolean(api),
+  });
+  const settled = () => client.invalidateQueries({ queryKey: historyKey(gameId) });
+  const restore = useMutation({
+    mutationFn: ({ entryId, versionId }: { entryId: string; versionId: string }) => {
+      if (!api) throw new Error("Saves are unavailable");
+      return api.restore(entryId, versionId);
+    },
+    onSettled: settled,
+  });
+  const choose = useMutation({
+    mutationFn: ({ entryId, versionId }: { entryId: string; versionId: string }) => {
+      if (!api) throw new Error("Saves are unavailable");
+      return api.choose(entryId, versionId);
+    },
+    onSettled: settled,
+  });
+  return { query, restore, choose, available: Boolean(api) };
+}
+
+const manifestKey = ["save-manifest"] as const;
+
+/** The save manifest's state, and Update now. */
+export function useSaveManifest() {
+  const api = useOptionalLibraryApi()?.saves;
+  const client = useQueryClient();
+  const status = useQuery({
+    queryKey: manifestKey,
+    queryFn: () => {
+      if (!api) throw new Error("Saves are unavailable");
+      return api.manifestStatus();
+    },
+    enabled: Boolean(api),
+  });
+  const update = useMutation({
+    mutationFn: () => {
+      if (!api) throw new Error("Saves are unavailable");
+      return api.manifestUpdate();
+    },
+    onSuccess: (next) => client.setQueryData(manifestKey, next),
+  });
+  return { status, update, available: Boolean(api) };
 }

@@ -4132,6 +4132,10 @@ msgstr ""
 msgid "the password or token is too long"
 msgstr ""
 
+#: apps/desktop/src-tauri/src/commands/saves.rs
+msgid "That save location isn't on this device."
+msgstr ""
+
 #: apps/desktop/src-tauri/src/commands/scripts.rs
 msgid "the script belongs to another scope"
 msgstr ""

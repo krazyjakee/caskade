@@ -35,6 +35,16 @@ pub enum Refresh {
     Updated { games: u32 },
 }
 
+/// The cached manifest, as Settings → Devices shows it (#241).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[serde(rename_all = "camelCase")]
+pub struct ManifestStatus {
+    /// A manifest is cached here and in use.
+    pub available: bool,
+    /// When it was last checked against its source, new or not.
+    pub checked_at_ms: Option<i64>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct Cached {
     generation: String,
@@ -73,6 +83,35 @@ impl Ludusavi {
                 refresh: Mutex::new(()),
             }),
         }
+    }
+
+    /// The same cache, downloading from `url`: itself when the source is
+    /// the same.
+    pub fn for_url(&self, url: &str) -> Self {
+        if url == self.inner.url {
+            self.clone()
+        } else {
+            Self::with_url(self.inner.dir.clone(), url)
+        }
+    }
+
+    /// Whether a manifest is cached, and when it was last checked.
+    pub async fn status(&self) -> Result<ManifestStatus> {
+        let cached = self.cached().await?;
+        let available = match &cached {
+            Some(cached) => {
+                tokio::fs::try_exists(self.inner.dir.join(&cached.generation).join("index.sqlite"))
+                    .await?
+            }
+            None => false,
+        };
+        Ok(ManifestStatus {
+            available,
+            checked_at_ms: cached
+                .filter(|cached| cached.checked > 0)
+                .and_then(|cached| i64::try_from(cached.checked).ok())
+                .map(|seconds| seconds.saturating_mul(1000)),
+        })
     }
 
     async fn catalog(&self) -> Result<&SqlitePool> {
@@ -199,10 +238,19 @@ impl Ludusavi {
             return Ok(Refresh::Offline);
         }
         let _refresh = self.inner.refresh.lock().await;
-        self.refresh_at(crate::now_ms().max(0) as u64 / 1000).await
+        self.refresh_at(crate::now_ms().max(0) as u64 / 1000, false)
+            .await
     }
 
-    async fn refresh_at(&self, now: u64) -> Result<Refresh> {
+    /// Checks the source now, however recently it was checked (Update now):
+    /// a newer manifest replaces the cached one, and a failure keeps it.
+    pub async fn update_now(&self) -> Result<Refresh> {
+        let _refresh = self.inner.refresh.lock().await;
+        self.refresh_at(crate::now_ms().max(0) as u64 / 1000, true)
+            .await
+    }
+
+    async fn refresh_at(&self, now: u64, force: bool) -> Result<Refresh> {
         let cached = self.cached().await?;
         let usable = match &cached {
             Some(cached) => {
@@ -214,7 +262,8 @@ impl Ludusavi {
         let same_source = cached
             .as_ref()
             .is_some_and(|cached| cached.url == self.inner.url);
-        if usable
+        if !force
+            && usable
             && same_source
             && cached
                 .as_ref()

@@ -682,6 +682,7 @@ pub fn run() {
             save_versions.set_device(move || engine.engine().map(|e| e.device().to_owned()));
             commands::sync::setup(app.handle(), devices, sync);
         }
+        commands::saves::forward_changes(app.handle(), &save_versions);
         app.manage(save_versions);
         app.manage(settings);
         app.manage(store);

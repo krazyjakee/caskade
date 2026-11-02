@@ -116,6 +116,10 @@ pub fn access(command: &str) -> Option<Access> {
         | "game_igdb"
         | "game_edit_state"
         | "game_saves_state"
+        // A game's save versions (#241) and the save manifest's state.
+        | "game_save_history"
+        | "saves_manifest_status"
+        | "saves_manifest_update"
         // The add-on catalogue (#181): reading it, and fetching it again.
         | "addons_catalogue"
         | "addons_catalogue_refresh"
@@ -180,6 +184,9 @@ pub fn access(command: &str) -> Option<Access> {
         // the player's own save files, like playing does.
         | "game_saves_before_play"
         | "game_saves_choose"
+        // Restoring an older save (#241) and showing where saves live.
+        | "game_saves_restore"
+        | "game_saves_reveal"
         | "game_tool_run"
         // A trailer starts the video window, a process of its own.
         | "video_play"

@@ -420,6 +420,10 @@ msgstr ""
 msgid "{count} configured"
 msgstr "{count} konfigurerade"
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "{count} versions"
+msgstr "{count} versioner"
+
 #. The running task, then how many wait after it
 #: apps/desktop/src/shell/StatusBar.tsx
 msgid "{description} · {queued} queued"
@@ -510,6 +514,10 @@ msgstr "{imported} importerade"
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 msgid "{installedVersion} · up to date"
 msgstr "{installedVersion} · uppdaterad"
+
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "{keep} versions"
+msgstr "{keep} versioner"
 
 #. js-lingui:icu=%7Bkept%2C+plural%2C+one+%7B%23+game+stays%2C+because+it%27s+installed%2C+added+another+way+or+owned+by+another+account.%7D+other+%7B%23+games+stay%2C+because+they%27re+installed%2C+added+another+way+or+owned+by+another+account.%7D%7D&pluralize_on=kept
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
@@ -1195,6 +1203,10 @@ msgstr "En titel, eller numret som anges som IGDB ID på spelets sida på igdb.c
 msgid "A tool runs from the game's menu. It counts no playtime and doesn't change when the game was last played."
 msgstr "Ett verktyg körs från spelets meny. Det räknar ingen speltid och ändrar inte när spelet senast spelades."
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "A version of a game's saves is kept each time you finish playing, and the newest goes to your other devices, so you can carry on where you left off."
+msgstr "En version av spelets sparfiler behålls varje gång du slutar spela, och den nyaste skickas till dina andra enheter, så att du kan fortsätta där du slutade."
+
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgid "a while ago"
 msgstr "för ett tag sedan"
@@ -1562,6 +1574,11 @@ msgstr "När ett spel avslutas, och då och då för spel som spelats nyligen."
 msgid "After exit"
 msgstr "Efter avslut"
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgctxt "save version"
+msgid "After playing"
+msgstr "Efter spelande"
+
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgctxt "script phase"
 msgid "After the game exits"
@@ -1711,6 +1728,11 @@ msgstr "Animationer"
 #: apps/desktop/src/views/StoreView.tsx
 msgid "Announced releases without a date yet."
 msgstr "Utannonserade utgåvor som ännu saknar datum."
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgctxt "save version"
+msgid "Another account"
+msgstr "Ett annat konto"
 
 #: apps/desktop/src/components/saves/devices.ts
 msgctxt "save version"
@@ -2009,6 +2031,11 @@ msgstr "Säkerhetskopia att återställa"
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Backups never hold passwords or sign-ins, web games' browser data, logs, caches, or your games and their saves. Back up saves with the games or their launchers."
 msgstr "Säkerhetskopior innehåller aldrig lösenord eller inloggningar, webbspels webbläsardata, loggar, cacheminnen eller dina spel och deras sparfiler. Säkerhetskopiera sparfiler med spelen eller deras startprogram."
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgctxt "save version"
+msgid "Before a restore"
+msgstr "Före en återställning"
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
 msgid "Before launch"
@@ -2389,6 +2416,11 @@ msgstr "Ändra det här avsnittet i Inställningar."
 msgid "Changed elsewhere since you opened the editor; it is now “{0}”."
 msgstr "Ändrades någon annanstans sedan du öppnade redigeraren; nu är det ”{0}”."
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgctxt "save version"
+msgid "Changed outside Caskade"
+msgstr "Ändrad utanför Caskade"
+
 #: apps/desktop/src/views/activity/JobCard.tsx
 msgid "Changed: {path}"
 msgstr "Ändrad: {path}"
@@ -2537,6 +2569,10 @@ msgstr "Välj en profil"
 msgid "Choose a save folder"
 msgstr "Välj en mapp för säkerhetskopior"
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Choose a save…"
+msgstr "Välj en sparfil…"
+
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
 msgid "Choose an option"
 msgstr "Välj ett alternativ"
@@ -2607,6 +2643,11 @@ msgstr "Välj din spelmapp, vad som ska letas efter och hur du spelar, på nytt.
 #: apps/desktop/src/onboarding/LanguageStep.tsx
 msgid "Choose your language"
 msgstr "Välj språk"
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgctxt "save version"
+msgid "Chosen between devices"
+msgstr "Vald mellan enheter"
 
 #. How the game's IGDB match was made
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
@@ -3976,6 +4017,10 @@ msgstr "Mall för mappnamn"
 msgid "For a server on your home network without a public certificate."
 msgstr "För en server i ditt hemnätverk utan ett offentligt certifikat."
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "For each game. The newest stay, and so does any save that isn't settled between devices yet."
+msgstr "För varje spel. De nyaste stannar kvar, och så gör alla sparfiler som enheterna inte har enats om än."
+
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 msgid "For every account. Age limits are set on each account."
 msgstr "För alla konton. Åldersgränser ställs in för varje konto."
@@ -4561,6 +4606,11 @@ msgstr "Pågår"
 msgid "In use"
 msgstr "Används"
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgctxt "save version"
+msgid "In use"
+msgstr "Används"
+
 #. A store game the library has but isn't installed
 #: apps/desktop/src/views/store/StoreGameView.tsx
 msgid "In your library"
@@ -4890,6 +4940,10 @@ msgstr "Den gjordes av en äldre Caskade: dess bibliotek uppdateras när det åt
 msgid "It was made on another operating system: games and storage locations whose folders aren't on this computer show as missing until you find them again."
 msgstr "Den gjordes på ett annat operativsystem: spel och lagringsplatser vars mappar inte finns på den här datorn visas som saknade tills du hittar dem igen."
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "It's checked once a day while online."
+msgstr "Den kontrolleras en gång om dagen när du är uppkopplad."
+
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
 msgid "Its installed files are deleted from {location}, with the play sessions recorded for this install. The game stays in your library. The uninstall shows in Activity."
 msgstr "De installerade filerna raderas från {location}, tillsammans med de spelsessioner som registrerats för den här installationen. Spelet finns kvar i ditt bibliotek. Avinstallationen visas i Aktivitet."
@@ -5018,6 +5072,10 @@ msgstr ""
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Last backed up automatically {time} ({size}), checked."
 msgstr "Senast säkerhetskopierat automatiskt {time} ({size}), kontrollerat."
+
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Last checked {when}. It's checked once a day while online."
+msgstr "Senast kontrollerad {when}. Den kontrolleras en gång om dagen när du är uppkopplad."
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Last opened view"
@@ -6118,6 +6176,10 @@ msgstr "Inga ROM:ar matchade den här skannerns profil."
 msgid "No save files or folders. Add them here, or drop them on this tab."
 msgstr ""
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "No saves kept yet. A version is kept each time you finish playing."
+msgstr "Inga sparfiler har behållits än. En version behålls varje gång du slutar spela."
+
 #: apps/desktop/src/views/game/Screenshots.tsx
 msgid "No screenshots"
 msgstr "Inga skärmbilder"
@@ -6230,6 +6292,10 @@ msgstr "Inte kontrollerat än."
 msgid "Not compatible"
 msgstr "Inte kompatibel"
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Not downloaded yet. It downloads once the internet can be reached; saves in folders you set and emulator saves work meanwhile."
+msgstr "Inte nedladdad än. Den laddas ned när internet kan nås; sparfiler i mappar du har angett och emulatorernas sparfiler fungerar under tiden."
+
 #: apps/desktop/src/api/storage.ts
 msgid "Not enough free space"
 msgstr "Inte tillräckligt med ledigt utrymme"
@@ -6293,6 +6359,10 @@ msgstr ""
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 msgid "Not on IGDB"
 msgstr "Inte på IGDB"
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Not on this device yet"
+msgstr "Inte på den här enheten än"
 
 #. A game's playtime, before any
 #: apps/desktop/src/api/presentation.ts
@@ -6415,6 +6485,10 @@ msgstr "Av"
 msgctxt "plugin status"
 msgid "Off"
 msgstr "Av"
+
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Off keeps every version on this device only."
+msgstr "Av behåller alla versioner bara på den här enheten."
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
 msgid "Offer Caskade for them"
@@ -7867,6 +7941,7 @@ msgstr "Starta om för Caskade v{version}"
 msgid "Restart now"
 msgstr "Starta om nu"
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Restore"
 msgstr "Återställ"
@@ -7880,14 +7955,27 @@ msgstr "Återställ"
 msgid "Restore and restart"
 msgstr "Återställ och starta om"
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgctxt "save version"
+msgid "Restored"
+msgstr "Återställd"
+
 #. placeholder {0}: outcome.journal.archive
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Restored from {0}."
 msgstr "Återställt från {0}."
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Restored. The save that was in use is kept as a version."
+msgstr "Återställd. Sparfilen som användes behålls som en version."
+
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Restoring replaces this library and its settings with the backup's, then restarts Caskade. Nothing is merged, and your games' files aren't touched."
 msgstr "Återställning ersätter detta bibliotek och dess inställningar med säkerhetskopians och startar sedan om Caskade. Inget slås ihop, och dina spels filer rörs inte."
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Restoring waits until the game has closed."
+msgstr "Återställningen väntar tills spelet har stängts."
 
 #. Hint bar: go down to the search results
 #: apps/desktop/src/shell/TypeSearch.tsx
@@ -8197,6 +8285,10 @@ msgstr "Samlingar är inte tillgängliga här."
 msgid "Save locations from {title}."
 msgstr "Spara plats"
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Save locations list"
+msgstr "Lista över sparplatser"
+
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #, fuzzy
 #| msgid "Save location"
@@ -8237,11 +8329,15 @@ msgstr "Sparade skanningar som gör ROM-mappar till spel. Spel med flera skivor 
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/components/saves/SaveConflictDialog.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
-#, fuzzy
-#| msgid "Save"
 msgid "Saves"
-msgstr "Spara"
+msgstr "Sparfiler"
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Saves stay on this device: syncing them is off in Settings → Devices."
+msgstr "Sparfilerna stannar på den här enheten: synkning av dem är avstängd i Inställningar → Enheter."
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "Saving a different specification removes its old built-in profiles. Custom profiles are kept."
@@ -8670,9 +8766,14 @@ msgid "Show games"
 msgstr "Visa spel"
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Show in folder"
 msgstr "Visa i mapp"
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Show in folder: {path}"
+msgstr "Visa i mapp: {path}"
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
 msgid "Show none"
@@ -9220,6 +9321,10 @@ msgstr "Synka nu"
 msgid "Sync on startup"
 msgstr "Synka vid start"
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Sync saves"
+msgstr "Synka sparfiler"
+
 #. A RomM server's status
 #. A RomM server's status
 #: apps/desktop/src/onboarding/run.ts
@@ -9641,6 +9746,10 @@ msgstr "Spelet finns inte längre i biblioteket."
 msgid "This game needs symbolic links"
 msgstr "Det här spelet behöver symboliska länkar"
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "This game was played on more than one device since they last shared saves. Choose which save to play with; the other is kept."
+msgstr "Spelet har spelats på mer än en enhet sedan de senast delade sparfiler. Välj vilken sparfil du vill spela med; den andra behålls."
+
 #: apps/desktop/src/components/saves/SaveConflictDialog.tsx
 msgid "This game was played on more than one device since they last shared saves. The save you don't choose is kept as a version."
 msgstr "Spelet har spelats på mer än en enhet sedan de senast delade sparfiler. Sparfilen du inte väljer behålls som en version."
@@ -10030,6 +10139,10 @@ msgstr "Nedladdning av uppdatering"
 msgid "Update failed: {error}"
 msgstr "Uppdateringen misslyckades: {error}"
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Update now"
+msgstr "Uppdatera nu"
+
 #. placeholder {0}: release.version
 #. placeholder {0}: release?.version ?? ""
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
@@ -10089,6 +10202,10 @@ msgstr "Uppdaterar förhandsvisning…"
 msgid "Updating the library…"
 msgstr "Uppdaterar biblioteket…"
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Updating…"
+msgstr "Uppdaterar…"
+
 #: apps/desktop/src/appearance/userCss.ts
 msgid "url({url}) is refused: custom CSS can't load anything from other origins."
 msgstr "url({url}) nekas: anpassad CSS kan inte läsa in något från andra ursprung."
@@ -10116,6 +10233,10 @@ msgstr "Använd {title}"
 #: apps/desktop/src/components/gameEditor/fields.tsx
 msgid "Use theirs"
 msgstr "Använd deras"
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Use this save"
+msgstr "Använd den här sparfilen"
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
@@ -10204,6 +10325,10 @@ msgstr "Version {version} är tillgänglig."
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 msgid "Version {version} is installed. Restart Caskade to use it."
 msgstr "Version {version} är installerad. Starta om Caskade för att använda den."
+
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Versions to keep"
+msgstr "Versioner att behålla"
 
 #. A link to a game's video page
 #: apps/desktop/src/views/store/StoreGameView.tsx
@@ -10412,6 +10537,10 @@ msgstr "De valda spelen avinstallerades."
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "Where should new games go?"
 msgstr "Var ska nya spel hamna?"
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Where they are on this device"
+msgstr "Var de finns på den här enheten"
 
 #: apps/desktop/src/views/store/StoreGameView.tsx
 msgid "Where to buy"
@@ -10670,9 +10799,6 @@ msgstr "ÅÅÅÅ-MM-DD, eller tomt för inget"
 
 #~ msgid "Move selected"
 #~ msgstr "Flytta markerade"
-
-#~ msgid "Selected games were uninstalled."
-#~ msgstr "De valda spelen avinstallerades."
 
 #~ msgid "Unavailable — storage disconnected"
 #~ msgstr "Inte tillgänglig — lagringen är frånkopplad"

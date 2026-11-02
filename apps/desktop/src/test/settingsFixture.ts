@@ -72,6 +72,11 @@ export function coreSettingsDefaults(): Record<string, Record<string, unknown>> 
     },
     "core.accounts": { ratingBoard: "pegi" },
     "core.achievements": { enabled: true, background: true, notifyUnlocks: true },
+    "core.saves": {
+      manifestUrl:
+        "https://raw.githubusercontent.com/mtkennerly/ludusavi-manifest/master/data/manifest.yaml",
+      keep: 20,
+    },
     "core.sync": {
       categories: {
         library: "sync",

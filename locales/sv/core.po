@@ -4134,6 +4134,10 @@ msgstr "okänd ROM-skanning {id}"
 msgid "the password or token is too long"
 msgstr "lösenordet eller token är för lång"
 
+#: apps/desktop/src-tauri/src/commands/saves.rs
+msgid "That save location isn't on this device."
+msgstr "Den sparplatsen finns inte på den här enheten."
+
 #: apps/desktop/src-tauri/src/commands/scripts.rs
 msgid "the script belongs to another scope"
 msgstr "skriptet hör till en annan omfattning"

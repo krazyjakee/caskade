@@ -34,6 +34,7 @@ import { DeviceIcon, LinkBadge, osNames } from "../../../components/sync/common"
 import { useSettingsSection } from "../useSettings";
 import { useDeviceAdmin } from "./admin";
 import { CopiesAndShares } from "./CopiesAndShares";
+import { SavesSection } from "./SavesSection";
 import { SyncChoices, type SyncSettingsValue } from "./SyncChoices";
 
 export function DevicesSettings() {
@@ -50,6 +51,7 @@ export function DevicesSettings() {
       <PairedSection />
       {admin && <NearbySection />}
       <SyncChoices />
+      <SavesSection />
       <CopiesAndShares />
     </div>
   );

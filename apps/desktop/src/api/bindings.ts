@@ -109,6 +109,22 @@ export const commands = {
 	 *  the chosen version's files go in place, and the others stay as versions.
 	 */
 	gameSavesChoose: (entryId: string, versionId: string) => typedError<SaveVersion_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_saves_choose", { entryId, versionId })),
+	/**  A game's save versions for its Saves panel (#241), newest first. */
+	gameSaveHistory: (gameId: string) => typedError<SaveHistory_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_save_history", { gameId })),
+	/**
+	 *  Puts an older version's files in place for the release (#241); the save
+	 *  there now is kept as a version first.
+	 */
+	gameSavesRestore: (entryId: string, versionId: string) => typedError<SaveVersion_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_saves_restore", { entryId, versionId })),
+	/**
+	 *  Shows one of the release's save locations (by its place in the list)
+	 *  in the file manager. Takes the entry, never a path.
+	 */
+	gameSavesReveal: (entryId: string, location: number) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("game_saves_reveal", { entryId, location })),
+	/**  Whether the Ludusavi manifest is cached, and when it was last checked. */
+	savesManifestStatus: () => typedError<ManifestStatus_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("saves_manifest_status")),
+	/**  Checks the manifest's source now (Update now), from the configured URL. */
+	savesManifestUpdate: () => typedError<ManifestStatus_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("saves_manifest_update")),
 	/**
 	 *  The game's cover, background and icon as the editor shows them: who
 	 *  chose each, what shows, and the automatic images to choose from. `null`
@@ -889,6 +905,7 @@ export const events = {
 	pluginReloaded: makeEvent<PluginReloaded_Serialize, PluginReloaded_Deserialize>("plugin-reloaded"),
 	pluginsChanged: makeEvent<PluginsChanged, PluginsChanged>("plugins-changed"),
 	rommDownloadChanged: makeEvent<RommDownloadChanged_Serialize, RommDownloadChanged_Deserialize>("romm-download-changed"),
+	saveVersionsChanged: makeEvent<SaveVersionsChanged, SaveVersionsChanged>("save-versions-changed"),
 	settingsChanged: makeEvent<SettingsChanged, SettingsChanged>("settings-changed"),
 	storeAccountsChanged: makeEvent<StoreAccountsChanged, StoreAccountsChanged>("store-accounts-changed"),
 	streamingPairingFinished: makeEvent<StreamingPairingFinished_Serialize, StreamingPairingFinished_Deserialize>("streaming-pairing-finished"),
@@ -5424,6 +5441,25 @@ export type ManifestError = {
 	message: string,
 };
 
+/**  The cached manifest, as Settings → Devices shows it (#241). */
+export type ManifestStatus = ManifestStatus_Serialize | ManifestStatus_Deserialize;
+
+/**  The cached manifest, as Settings → Devices shows it (#241). */
+export type ManifestStatus_Deserialize = {
+	/**  A manifest is cached here and in use. */
+	available: boolean,
+	/**  When it was last checked against its source, new or not. */
+	checkedAtMs?: number | null,
+};
+
+/**  The cached manifest, as Settings → Devices shows it (#241). */
+export type ManifestStatus_Serialize = {
+	/**  A manifest is cached here and in use. */
+	available: boolean,
+	/**  When it was last checked against its source, new or not. */
+	checkedAtMs: number | null,
+};
+
 /**  A game to add by hand. */
 export type ManualGame = ManualGame_Serialize | ManualGame_Deserialize;
 
@@ -7439,6 +7475,39 @@ export type SaveCollection_Serialize = {
 	kind: CollectionKind_Serialize,
 };
 
+/**  A game's versions, as its Saves panel shows them. */
+export type SaveHistory = SaveHistory_Serialize | SaveHistory_Deserialize;
+
+/**  A game's versions, as its Saves panel shows them. */
+export type SaveHistory_Deserialize = {
+	/**  The account playing now; empty when none is signed in. */
+	accountId: string,
+	/**  Every account's versions, newest first. */
+	versions: VersionState_Deserialize[],
+	/**
+	 *  The account's versions both devices made since they last agreed,
+	 *  when there's more than one: the next Play asks which to use.
+	 */
+	conflict: string[],
+	/**  Whether Saves sync with other devices here. */
+	syncing: boolean,
+};
+
+/**  A game's versions, as its Saves panel shows them. */
+export type SaveHistory_Serialize = {
+	/**  The account playing now; empty when none is signed in. */
+	accountId: string,
+	/**  Every account's versions, newest first. */
+	versions: VersionState_Serialize[],
+	/**
+	 *  The account's versions both devices made since they last agreed,
+	 *  when there's more than one: the next Play asks which to use.
+	 */
+	conflict: string[],
+	/**  Whether Saves sync with other devices here. */
+	syncing: boolean,
+};
+
 /**  The editor needs locations and counts, not saved file or registry contents. */
 export type SaveLocationView = {
 	spec: LocationSpec,
@@ -7530,6 +7599,9 @@ export type SaveVersion_Serialize = {
 	/**  Made on this device. */
 	local: boolean,
 };
+
+/**  Game ids whose save versions changed here (#241). */
+export type SaveVersionsChanged = string;
 
 /**  A running or finished scan; every change is `emulation.scan.changed`. */
 export type ScanJob = ScanJob_Serialize | ScanJob_Deserialize;
@@ -9036,6 +9108,27 @@ export type VersionReason =
 "restored" | 
 /**  The user chose between versions both devices made. */
 "chosen";
+
+/**  One version in a game's history. */
+export type VersionState = VersionState_Serialize | VersionState_Deserialize;
+
+/**  One version in a game's history. */
+export type VersionState_Deserialize = {
+	version: SaveVersion_Deserialize,
+	/**  This device's save files are this version, for the account playing. */
+	current: boolean,
+	/**  Every file of it is on this device, so it can be restored. */
+	complete: boolean,
+};
+
+/**  One version in a game's history. */
+export type VersionState_Serialize = {
+	version: SaveVersion_Serialize,
+	/**  This device's save files are this version, for the account playing. */
+	current: boolean,
+	/**  Every file of it is on this device, so it can be restored. */
+	complete: boolean,
+};
 
 export type View = View_Serialize | View_Deserialize;
 

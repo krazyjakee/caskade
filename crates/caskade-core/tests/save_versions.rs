@@ -235,3 +235,72 @@ async fn the_end_of_a_session_keeps_a_version_and_a_session_that_never_started_d
     assert_eq!(kept[0].reason, VersionReason::Session);
     assert_eq!(kept[0].account_id, "player");
 }
+
+#[tokio::test]
+async fn the_history_marks_the_save_in_place_and_restoring_is_announced() {
+    let device = device().await;
+    let (versions, entry) = (&device.versions, &device.entry.id);
+    let game = &device.entry.game_id;
+    let mut changes = versions.changes();
+    assert!(versions.history(game).await.unwrap().versions.is_empty());
+
+    write(device.folder.join("slot.sav"), "one");
+    let first = versions
+        .capture(entry, None, VersionReason::Session)
+        .await
+        .unwrap()
+        .unwrap();
+    write(device.folder.join("slot.sav"), "two");
+    let second = versions
+        .capture(entry, None, VersionReason::Session)
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(changes.recv().await.unwrap(), *game);
+    assert_eq!(changes.recv().await.unwrap(), *game);
+
+    let history = versions.history(game).await.unwrap();
+    assert_eq!(history.account_id, "player");
+    assert!(history.conflict.is_empty());
+    assert!(history.syncing);
+    let shown: Vec<(&str, bool, bool)> = history
+        .versions
+        .iter()
+        .map(|each| (each.version.id.as_str(), each.current, each.complete))
+        .collect();
+    assert_eq!(
+        shown,
+        [
+            (second.id.as_str(), true, true),
+            (first.id.as_str(), false, true)
+        ]
+    );
+
+    // Restoring the first puts it in place as a new version, keeps the
+    // second, and says so.
+    let restored = versions.restore(entry, &first.id).await.unwrap();
+    assert_eq!(restored.reason, VersionReason::Restored);
+    assert_eq!(
+        fs::read_to_string(device.folder.join("slot.sav")).unwrap(),
+        "one"
+    );
+    assert_eq!(changes.recv().await.unwrap(), *game);
+    let history = versions.history(game).await.unwrap();
+    assert_eq!(history.versions.len(), 3);
+    assert!(history.versions[0].current);
+    assert_eq!(history.versions[0].version.id, restored.id);
+    assert!(
+        history
+            .versions
+            .iter()
+            .any(|each| each.version.id == second.id)
+    );
+    // Playing on from it keeps the history going.
+    write(device.folder.join("slot.sav"), "one, then more");
+    let next = versions
+        .capture(entry, None, VersionReason::Session)
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(next.parents, vec![restored.id]);
+}

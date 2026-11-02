@@ -45,6 +45,7 @@ import { useGameLaunch } from "./launch";
 import { OwnedReleases } from "./OwnedReleases";
 import { useReplaceGame } from "./origin";
 import { PlaytimeSources } from "./PlaytimeSources";
+import { SavesPanel } from "./SavesPanel";
 import { Screenshots } from "./Screenshots";
 import { SeparateEntry } from "./SeparateEntry";
 import { GameVideos } from "./Videos";
@@ -485,6 +486,7 @@ export function GameView({
         </div>
         {updates.dialogs}
       </section>
+      <SavesPanel gameId={game.id} entryId={chosen?.id} running={Boolean(running)} />
       <GameAchievements gameId={game.id} />
       <PluginGameDetails gameId={game.id} />
       <section className="mt-8" aria-labelledby="sessions-heading">

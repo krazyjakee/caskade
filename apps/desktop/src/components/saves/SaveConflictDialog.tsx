@@ -18,18 +18,22 @@ const option =
   "block cursor-pointer rounded-control border border-border p-3 outline-none data-selected:border-accent-alt data-selected:bg-accent/10 data-focus-visible:focus-ring data-disabled:cursor-default data-disabled:opacity-50";
 
 /** Both devices played since they last agreed (#239): which save to play
- * with. The others stay as versions. Newest first; this device's own is
- * chosen to begin with. */
+ * with, at Play or from the game's Saves panel (#241). The others stay as
+ * versions. Newest first; this device's own is chosen to begin with, and a
+ * pad starts on the newest. */
 export function SaveConflictDialog({
   versions,
   busy,
   error,
+  action,
   close,
   choose,
 }: {
   versions: SaveVersion[];
   busy: boolean;
   error?: string;
+  /** The confirming button's label; Play's question plays with the save. */
+  action?: string;
   close: () => void;
   choose: (versionId: string) => void;
 }) {
@@ -71,7 +75,6 @@ export function SaveConflictDialog({
                 key={version.id}
                 value={version.id}
                 data-spatial="focusable"
-                data-focus-default={version.id === chosen ? "" : undefined}
                 className={option}
               >
                 <span className="text-sm font-medium">{deviceName(version)}</span>
@@ -96,7 +99,7 @@ export function SaveConflictDialog({
               isDisabled={chosen === null || busy}
               onPress={() => chosen && choose(chosen)}
             >
-              {busy ? t`Starting…` : t`Play with this save`}
+              {action ?? (busy ? t`Starting…` : t`Play with this save`)}
             </Button>
           </div>
         </Dialog>

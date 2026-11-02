@@ -416,6 +416,10 @@ msgstr ""
 msgid "{count} configured"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "{count} versions"
+msgstr ""
+
 #. The running task, then how many wait after it
 #: apps/desktop/src/shell/StatusBar.tsx
 msgid "{description} · {queued} queued"
@@ -503,6 +507,10 @@ msgstr ""
 #. {installedVersion} is a version, e.g. v1.2
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 msgid "{installedVersion} · up to date"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "{keep} versions"
 msgstr ""
 
 #. js-lingui:icu=%7Bkept%2C+plural%2C+one+%7B%23+game+stays%2C+because+it%27s+installed%2C+added+another+way+or+owned+by+another+account.%7D+other+%7B%23+games+stay%2C+because+they%27re+installed%2C+added+another+way+or+owned+by+another+account.%7D%7D&pluralize_on=kept
@@ -1186,6 +1194,10 @@ msgstr ""
 msgid "A tool runs from the game's menu. It counts no playtime and doesn't change when the game was last played."
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "A version of a game's saves is kept each time you finish playing, and the newest goes to your other devices, so you can carry on where you left off."
+msgstr ""
+
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgid "a while ago"
 msgstr ""
@@ -1547,6 +1559,11 @@ msgstr ""
 msgid "After exit"
 msgstr ""
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgctxt "save version"
+msgid "After playing"
+msgstr ""
+
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgctxt "script phase"
 msgid "After the game exits"
@@ -1695,6 +1712,11 @@ msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
 msgid "Announced releases without a date yet."
+msgstr ""
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgctxt "save version"
+msgid "Another account"
 msgstr ""
 
 #: apps/desktop/src/components/saves/devices.ts
@@ -1991,6 +2013,11 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Backups never hold passwords or sign-ins, web games' browser data, logs, caches, or your games and their saves. Back up saves with the games or their launchers."
+msgstr ""
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgctxt "save version"
+msgid "Before a restore"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
@@ -2372,6 +2399,11 @@ msgstr ""
 msgid "Changed elsewhere since you opened the editor; it is now “{0}”."
 msgstr ""
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgctxt "save version"
+msgid "Changed outside Caskade"
+msgstr ""
+
 #: apps/desktop/src/views/activity/JobCard.tsx
 msgid "Changed: {path}"
 msgstr ""
@@ -2516,6 +2548,10 @@ msgstr ""
 msgid "Choose a save folder"
 msgstr ""
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Choose a save…"
+msgstr ""
+
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
 msgid "Choose an option"
 msgstr ""
@@ -2585,6 +2621,11 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/LanguageStep.tsx
 msgid "Choose your language"
+msgstr ""
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgctxt "save version"
+msgid "Chosen between devices"
 msgstr ""
 
 #. How the game's IGDB match was made
@@ -3931,6 +3972,10 @@ msgstr ""
 msgid "For a server on your home network without a public certificate."
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "For each game. The newest stay, and so does any save that isn't settled between devices yet."
+msgstr ""
+
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 msgid "For every account. Age limits are set on each account."
 msgstr ""
@@ -4514,6 +4559,11 @@ msgstr ""
 msgid "In use"
 msgstr ""
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgctxt "save version"
+msgid "In use"
+msgstr ""
+
 #. A store game the library has but isn't installed
 #: apps/desktop/src/views/store/StoreGameView.tsx
 msgid "In your library"
@@ -4843,6 +4893,10 @@ msgstr ""
 msgid "It was made on another operating system: games and storage locations whose folders aren't on this computer show as missing until you find them again."
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "It's checked once a day while online."
+msgstr ""
+
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
 msgid "Its installed files are deleted from {location}, with the play sessions recorded for this install. The game stays in your library. The uninstall shows in Activity."
 msgstr ""
@@ -4970,6 +5024,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Last backed up automatically {time} ({size}), checked."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Last checked {when}. It's checked once a day while online."
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
@@ -6060,6 +6118,10 @@ msgstr ""
 msgid "No save files or folders. Add them here, or drop them on this tab."
 msgstr ""
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "No saves kept yet. A version is kept each time you finish playing."
+msgstr ""
+
 #: apps/desktop/src/views/game/Screenshots.tsx
 msgid "No screenshots"
 msgstr ""
@@ -6172,6 +6234,10 @@ msgstr ""
 msgid "Not compatible"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Not downloaded yet. It downloads once the internet can be reached; saves in folders you set and emulator saves work meanwhile."
+msgstr ""
+
 #: apps/desktop/src/api/storage.ts
 msgid "Not enough free space"
 msgstr ""
@@ -6234,6 +6300,10 @@ msgstr ""
 
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 msgid "Not on IGDB"
+msgstr ""
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Not on this device yet"
 msgstr ""
 
 #. A game's playtime, before any
@@ -6356,6 +6426,10 @@ msgstr ""
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgctxt "plugin status"
 msgid "Off"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Off keeps every version on this device only."
 msgstr ""
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
@@ -7784,6 +7858,7 @@ msgstr ""
 msgid "Restart now"
 msgstr ""
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Restore"
 msgstr ""
@@ -7798,13 +7873,26 @@ msgstr ""
 msgid "Restore and restart"
 msgstr ""
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgctxt "save version"
+msgid "Restored"
+msgstr ""
+
 #. placeholder {0}: outcome.journal.archive
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Restored from {0}."
 msgstr ""
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Restored. The save that was in use is kept as a version."
+msgstr ""
+
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Restoring replaces this library and its settings with the backup's, then restarts Caskade. Nothing is merged, and your games' files aren't touched."
+msgstr ""
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Restoring waits until the game has closed."
 msgstr ""
 
 #. Hint bar: go down to the search results
@@ -8101,6 +8189,10 @@ msgstr ""
 msgid "Save locations from {title}."
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Save locations list"
+msgstr ""
+
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
 msgid "Save locations saved."
 msgstr ""
@@ -8139,8 +8231,14 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/components/saves/SaveConflictDialog.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 msgid "Saves"
+msgstr ""
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Saves stay on this device: syncing them is off in Settings → Devices."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
@@ -8567,8 +8665,13 @@ msgid "Show games"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Show in folder"
+msgstr ""
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Show in folder: {path}"
 msgstr ""
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
@@ -9110,6 +9213,10 @@ msgstr ""
 msgid "Sync on startup"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Sync saves"
+msgstr ""
+
 #. A RomM server's status
 #. A RomM server's status
 #: apps/desktop/src/onboarding/run.ts
@@ -9523,6 +9630,10 @@ msgstr ""
 msgid "This game needs symbolic links"
 msgstr ""
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "This game was played on more than one device since they last shared saves. Choose which save to play with; the other is kept."
+msgstr ""
+
 #: apps/desktop/src/components/saves/SaveConflictDialog.tsx
 msgid "This game was played on more than one device since they last shared saves. The save you don't choose is kept as a version."
 msgstr ""
@@ -9910,6 +10021,10 @@ msgstr ""
 msgid "Update failed: {error}"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Update now"
+msgstr ""
+
 #. placeholder {0}: release.version
 #. placeholder {0}: release?.version ?? ""
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
@@ -9969,6 +10084,10 @@ msgstr ""
 msgid "Updating the library…"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Updating…"
+msgstr ""
+
 #: apps/desktop/src/appearance/userCss.ts
 msgid "url({url}) is refused: custom CSS can't load anything from other origins."
 msgstr ""
@@ -9995,6 +10114,10 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/fields.tsx
 msgid "Use theirs"
+msgstr ""
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Use this save"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
@@ -10081,6 +10204,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 msgid "Version {version} is installed. Restart Caskade to use it."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Versions to keep"
 msgstr ""
 
 #. A link to a game's video page
@@ -10282,6 +10409,10 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "Where should new games go?"
+msgstr ""
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Where they are on this device"
 msgstr ""
 
 #: apps/desktop/src/views/store/StoreGameView.tsx

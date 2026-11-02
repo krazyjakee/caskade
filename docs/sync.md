@@ -549,6 +549,30 @@ Save files ride the sync session, so they go through a relay only when relays
 are allowed and nothing direct works; Never use relays keeps them direct. Game
 files never go through a relay.
 
+### On the game page and in Settings
+
+- **Saves panel** (#241, `views/game/SavesPanel.tsx`, below Play from your
+  library): every version, newest first, with its time, the device and
+  account that made it, why it was made and its size. The version this
+  device's files match is marked In use; one whose files haven't arrived
+  can't be restored yet. **Restore** (`game_saves_restore`) puts an older
+  version in place for the release Play starts: what's there is kept as a
+  version first, the restored copy becomes a new version, and playing carries
+  on from it. Restoring waits until the game has closed. **Show in folder**
+  (`game_saves_reveal`, desktop mode only; it takes the entry and the
+  location's place in the list, never a path) opens each save location here.
+  When both devices played, **Choose a save…** asks the same question Play
+  does.
+- **Settings → Devices → Saves** (`views/settings/devices/SavesSection.tsx`):
+  Sync saves (the Saves category of `core.sync`), Versions to keep
+  (`core.saves.keep`), and the save-locations manifest's last check with
+  **Update now** (`saves_manifest_status`, `saves_manifest_update`:
+  `Ludusavi::update_now` checks the configured source whatever the daily
+  check said, and a failure keeps the cached manifest).
+- The panel follows `SaveVersionsChanged` (versions made or restored here)
+  and `DevicesChanged` (a sync brought some). Everything is reachable with a
+  pad in console mode (`test/saveFlows.test.tsx`).
+
 ### Limits
 
 - Registry-based saves (the manifest's `registry` entries) aren't kept as

@@ -129,6 +129,32 @@ impl Manifest {
     }
 }
 
+/// A game's versions, as its Saves panel shows them.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct SaveHistory {
+    /// The account playing now; empty when none is signed in.
+    pub account_id: String,
+    /// Every account's versions, newest first.
+    pub versions: Vec<VersionState>,
+    /// The account's versions both devices made since they last agreed,
+    /// when there's more than one: the next Play asks which to use.
+    pub conflict: Vec<String>,
+    /// Whether Saves sync with other devices here.
+    pub syncing: bool,
+}
+
+/// One version in a game's history.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct VersionState {
+    pub version: SaveVersion,
+    /// This device's save files are this version, for the account playing.
+    pub current: bool,
+    /// Every file of it is on this device, so it can be restored.
+    pub complete: bool,
+}
+
 /// What happened before a launch.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(
@@ -187,6 +213,8 @@ struct Inner {
     remote: OnceLock<Arc<dyn RemoteSaves>>,
     locks: std::sync::Mutex<HashMap<String, Arc<tokio::sync::Mutex<()>>>>,
     wait: RwLock<Duration>,
+    /// Games whose versions or current save changed here.
+    changed: tokio::sync::broadcast::Sender<String>,
 }
 
 impl SaveVersions {
@@ -202,6 +230,7 @@ impl SaveVersions {
                 remote: OnceLock::new(),
                 locks: std::sync::Mutex::default(),
                 wait: RwLock::new(WAIT),
+                changed: tokio::sync::broadcast::channel(64).0,
             }),
         }
     }
@@ -235,6 +264,16 @@ impl SaveVersions {
         *self.inner.wait.write().unwrap_or_else(|e| e.into_inner()) = wait;
     }
 
+    /// Game ids, as their versions or the save in place change here
+    /// (versions from other devices arrive through sync instead).
+    pub fn changes(&self) -> tokio::sync::broadcast::Receiver<String> {
+        self.inner.changed.subscribe()
+    }
+
+    fn announce(&self, game_id: &str) {
+        let _ = self.inner.changed.send(game_id.to_owned());
+    }
+
     /// Makes a version after every play session (`launch.after`).
     pub fn attach(&self, bus: &Bus) {
         bus.intercept::<LaunchAfter>("caskade.saves", 0, Arc::new(AfterSession(self.clone())));
@@ -242,6 +281,11 @@ impl SaveVersions {
 
     pub fn store(&self) -> &LibraryStore {
         &self.inner.saves.store
+    }
+
+    /// Where the releases' saves are on this device.
+    pub fn saves(&self) -> &Saves {
+        &self.inner.saves
     }
 
     pub fn blobs(&self) -> &BlobStore {
@@ -437,6 +481,7 @@ impl SaveVersions {
             .set_save_head(game_id, &account, &version.id, &content)
             .await?;
         self.prune(game_id).await?;
+        self.announce(game_id);
         Ok(Some(version))
     }
 
@@ -567,6 +612,7 @@ impl SaveVersions {
         self.store()
             .set_save_head(game_id, account, &version.id, &disk.hash())
             .await?;
+        self.announce(game_id);
         Ok(warnings)
     }
 
@@ -634,9 +680,46 @@ impl SaveVersions {
             .await
     }
 
+    /// Puts an older version's files in place (#241): what's there now is
+    /// kept as a version first, so nothing is lost.
+    pub async fn restore(&self, entry_id: &str, version_id: &str) -> Result<SaveVersion> {
+        self.use_version(entry_id, version_id, VersionReason::Restored)
+            .await
+    }
+
     /// A game's versions, newest first.
     pub async fn versions(&self, game_id: &str) -> Result<Vec<SaveVersion>> {
         self.store().save_versions(game_id, None).await
+    }
+
+    /// A game's versions for its Saves panel (#241): every account's, newest
+    /// first, with the one this device's files match for the account playing
+    /// now, and whether each one's files are here.
+    pub async fn history(&self, game_id: &str) -> Result<SaveHistory> {
+        let account = self.account();
+        let head = self.store().save_head(game_id, &account).await?;
+        let tips = self.tips(game_id, &account).await?;
+        let conflict = if tips.len() > 1 {
+            tips.into_iter().map(|tip| tip.id).collect()
+        } else {
+            Vec::new()
+        };
+        let versions = self
+            .versions(game_id)
+            .await?
+            .into_iter()
+            .map(|version| VersionState {
+                current: head.as_ref().is_some_and(|(id, _)| *id == version.id),
+                complete: self.complete(&version),
+                version,
+            })
+            .collect();
+        Ok(SaveHistory {
+            account_id: account,
+            versions,
+            conflict,
+            syncing: self.syncing().await,
+        })
     }
 
     /// Keeps the newest versions of a game, every tip and every head, and
