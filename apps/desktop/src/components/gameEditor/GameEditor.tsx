@@ -29,10 +29,11 @@ import { ActionsTab } from "./ActionsTab";
 import { ArtworkTab } from "./ArtworkTab";
 import { DetailsTab } from "./DetailsTab";
 import { type Draft, isDirty, prune, toEdit } from "./draft";
+import { SavesTab } from "./SavesTab";
 import { ScriptsTab } from "./ScriptsTab";
 
-type TabId = "details" | "artwork" | "actions" | "scripts";
-const TABS: TabId[] = ["details", "artwork", "actions", "scripts"];
+type TabId = "details" | "artwork" | "actions" | "scripts" | "saves";
+const TABS: TabId[] = ["details", "artwork", "actions", "scripts", "saves"];
 
 export function GameEditor({
   gameId,
@@ -111,6 +112,7 @@ export function GameEditor({
     artwork: t`Artwork`,
     actions: t`Actions`,
     scripts: t`Scripts`,
+    saves: t`Saves`,
   };
   return (
     <ModalOverlay
@@ -211,6 +213,11 @@ export function GameEditor({
                     details={details}
                     onDirtyChange={tabDirty("scripts")}
                   />
+                )}
+              </TabPanel>
+              <TabPanel id="saves" shouldForceMount className="data-inert:hidden">
+                {details && (
+                  <SavesTab gameId={gameId} details={details} onDirtyChange={tabDirty("saves")} />
                 )}
               </TabPanel>
             </div>

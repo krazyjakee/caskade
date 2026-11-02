@@ -115,6 +115,7 @@ pub fn access(command: &str) -> Option<Access> {
         | "game_age_check"
         | "game_igdb"
         | "game_edit_state"
+        | "game_saves_state"
         // The add-on catalogue (#181): reading it, and fetching it again.
         | "addons_catalogue"
         | "addons_catalogue_refresh"
@@ -193,6 +194,7 @@ pub fn access(command: &str) -> Option<Access> {
         | "game_separate_entry"
         // Game edits (#171): the library's details, like the IGDB match.
         | "game_edit"
+        | "game_saves_edit"
         | "game_artwork_set"
         | "games_bulk_edit"
         | "games_refresh_start"

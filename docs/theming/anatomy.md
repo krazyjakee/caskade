@@ -80,6 +80,7 @@ variant of the component, such as the library's card.
 - [`bulk-editor`](#bulk-editor): One edit on the chosen games: the fields to change, a preview of what changes in which game, and what saved.
 - [`game-editor-discard`](#game-editor-discard): Asks before an editor with unsaved changes closes: Keep editing or Discard.
 - [`game-actions`](#game-actions): The game editor's Actions tab (#178): a release's launch actions, its own launch first, with the form for the one chosen and what Play starts.
+- [`game-saves`](#game-saves): The game editor's Saves tab (#238): one release's save locations on this device, automatic or the user's own, and the manifest game it matches. Files and folders dropped on it are added.
 - [`scripts`](#scripts): One scope's lifecycle scripts (#180), in Settings → Scripts, an emulator profile and the game editor: the scripts, the chosen one's form, its test and the order a launch runs every scope's scripts in.
 - [`play-choice`](#play-choice): On a game's page, under Play: which of the release's play actions Play starts, and its tools (#178).
 - [`tool-failed`](#tool-failed): Says why a game's tool didn't start.
@@ -1149,6 +1150,29 @@ Root: `[data-cs="game-actions"]`
 | `delete` | `[data-cs="game-actions"] [data-part="delete"]` | Deletes the action; pressed once more to confirm (a `button`). |
 
 Contains: [`button`](#button), [`select`](#select), [`segmented`](#segmented), [`text-field`](#text-field)
+
+## `game-saves`
+
+The game editor's Saves tab (#238): one release's save locations on this device, automatic or the user's own, and the manifest game it matches. Files and folders dropped on it are added. Rendered by SavesTab (app).
+
+Root: `[data-cs="game-saves"]`
+
+| Part | Selector | What it is |
+| --- | --- | --- |
+| `match` | `[data-cs="game-saves"] [data-part="match"]` | What the locations come from; `data-match` is `unknown`, `matched` or `ambiguous`. |
+| `mode` | `[data-cs="game-saves"] [data-part="mode"]` | Says whether the automatic locations or the user's own are in use. |
+| `locations` | `[data-cs="game-saves"] [data-part="locations"]` | The save locations (a list). |
+| `location` | `[data-cs="game-saves"] [data-part="location"]` | One location; `data-kind` is `file`, `folder` or `registry`, with its file count. |
+| `path` | `[data-cs="game-saves"] [data-part="path"]` | A location's path or registry key. |
+| `empty` | `[data-cs="game-saves"] [data-part="empty"]` | Shown when the release has no save locations. |
+| `warnings` | `[data-cs="game-saves"] [data-part="warnings"]` | What couldn't be resolved on this device. |
+| `error` | `[data-cs="game-saves"] [data-part="error"]` | Why the locations couldn't load or the last save was refused. |
+
+State on the root:
+
+- `data-choice`: `automatic`, `chosen`
+
+Contains: [`button`](#button), [`select`](#select), [`text-field`](#text-field)
 
 ## `scripts`
 

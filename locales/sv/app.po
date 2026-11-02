@@ -387,6 +387,16 @@ msgid_plural "# packages"
 msgstr[0] "# paket"
 msgstr[1] "# paket"
 
+#. js-lingui:icu=%7Bcount%2C+plural%2C+one+%7B%23+save+file%7D+other+%7B%23+save+files%7D%7D&pluralize_on=count
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#, fuzzy
+#| msgid "# file"
+#| msgid_plural "# files"
+msgid "# save file"
+msgid_plural "# save files"
+msgstr[0] "# fil"
+msgstr[1] "# filer"
+
 #. js-lingui:icu=%7Bcount%2C+plural%2C+one+%7BEdit+%23+game%7D+other+%7BEdit+%23+games%7D%7D&pluralize_on=count
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "Edit # game"
@@ -1319,6 +1329,13 @@ msgstr "Lägg till emulator"
 msgid "Add environment variable"
 msgstr "Lägg till miljövariabel"
 
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#, fuzzy
+#| msgid "Add folder"
+msgid "Add file"
+msgstr "Lägg till mapp"
+
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Add folder"
 msgstr "Lägg till mapp"
@@ -2413,6 +2430,18 @@ msgstr "Välj en ny PIN för {name}"
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "Choose a profile"
 msgstr "Välj en profil"
+
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#, fuzzy
+#| msgid "Choose a profile"
+msgid "Choose a save file"
+msgstr "Välj en profil"
+
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#, fuzzy
+#| msgid "Choose a backup folder"
+msgid "Choose a save folder"
+msgstr "Välj en mapp för säkerhetskopior"
 
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
 msgid "Choose an option"
@@ -3672,6 +3701,12 @@ msgstr "Favoriter"
 msgid "Fetch artwork and game info online"
 msgstr "Hämta bilder och spelinformation på nätet"
 
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#, fuzzy
+#| msgid "Files"
+msgid "File"
+msgstr "Filer"
+
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
 msgid "File types"
 msgstr "Filtyper"
@@ -3704,6 +3739,12 @@ msgstr "Filer som dina tillägg sparar."
 msgid "Find ROMs inside zip and 7z files the profile can't open directly."
 msgstr "Hitta ROM-filer i zip- och 7z-filer som profilen inte kan öppna direkt."
 
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#, fuzzy
+#| msgid "Checking storage locations…"
+msgid "Finding save locations…"
+msgstr "Kontrollerar lagringsplatser…"
+
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgctxt "script test result"
 msgid "Finished"
@@ -3734,6 +3775,7 @@ msgstr "Flatpak håller den uppdaterad."
 #. ROM scanners table column
 #: apps/desktop/src/api/emulation.ts
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
@@ -4816,6 +4858,10 @@ msgctxt "RomM platform column"
 msgid "Launches with"
 msgstr "Startas med"
 
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+msgid "Leave blank to match automatically. A name from the Ludusavi manifest sets the match by hand."
+msgstr ""
+
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "Leave out of library updates"
 msgstr "Uteslut från biblioteksuppdateringar"
@@ -5185,6 +5231,10 @@ msgstr "Hantera…"
 msgid "Managed copy unavailable"
 msgstr "Den hanterade kopian är inte tillgänglig"
 
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+msgid "Manifest game name"
+msgstr ""
+
 #: apps/desktop/src/components/CollectionCard.tsx
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 msgctxt "collection kind"
@@ -5356,6 +5406,10 @@ msgstr "Bevaka metadatasökvägar, även platser för startprogram som installer
 #: apps/desktop/src/views/CollectionView.tsx
 msgid "More"
 msgstr "Mer"
+
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+msgid "More than one manifest game matches: {titles}. Enter the right one's name below."
+msgstr ""
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgid "More themes in the plugin and theme catalogue"
@@ -5592,6 +5646,10 @@ msgstr "Nästa flik"
 msgid "No {name} account is connected."
 msgstr "Inget {name}-konto är anslutet."
 
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+msgid "No automatic save locations are known for this release. Add its save folders or files below, or set the manifest game it matches."
+msgstr ""
+
 #. After a RomM sync's counts: RomM platforms, by slug, that match none of Caskade's
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 msgid "no Caskade platform for {platforms}"
@@ -5772,6 +5830,10 @@ msgstr "Ingen RomM-server har dem."
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
 msgid "No ROMs matched this scanner's profile."
 msgstr "Inga ROM:ar matchade den här skannerns profil."
+
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+msgid "No save files or folders. Add them here, or drop them on this tab."
+msgstr ""
 
 #: apps/desktop/src/views/game/Screenshots.tsx
 msgid "No screenshots"
@@ -7042,6 +7104,10 @@ msgstr "Regioner, t.ex. usa"
 msgid "Regions: {regions}"
 msgstr "Regioner: {regions}"
 
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+msgid "Registry key"
+msgstr ""
+
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 msgctxt "emulator"
 msgid "Reinstall"
@@ -7054,6 +7120,7 @@ msgstr "Installera om {name}"
 #. Picks which of the game's releases Play starts
 #. Picks which release's actions to edit
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #: apps/desktop/src/views/game/GameView.tsx
 msgid "Release"
 msgstr "Utgåva"
@@ -7140,6 +7207,8 @@ msgid "Remove"
 msgstr "Ta bort"
 
 #. placeholder {0}: plugin.name
+#. placeholder {0}: spec.path
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Remove {0}"
 msgstr "Ta bort {0}"
@@ -7329,6 +7398,7 @@ msgstr "Återställ installationsinställningar"
 msgid "Reset launcher preferences"
 msgstr "Återställ inställningar för startprogram"
 
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "Reset to automatic"
 msgstr "Återställ till automatiskt"
@@ -7432,6 +7502,7 @@ msgid "Reveal"
 msgstr "Visa"
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
 msgid "Revert"
@@ -7659,11 +7730,35 @@ msgctxt "credit"
 msgid "Save location data"
 msgstr "Spara plats"
 
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#, fuzzy
+#| msgid "Save location"
+msgid "Save locations"
+msgstr "Spara plats"
+
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 #, fuzzy
 #| msgid "Save location"
 msgctxt "credit"
 msgid "Save locations"
+msgstr "Spara plats"
+
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#, fuzzy
+#| msgid "Collections aren't available here."
+msgid "Save locations are unavailable here."
+msgstr "Samlingar är inte tillgängliga här."
+
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#, fuzzy
+#| msgid "Save location"
+msgid "Save locations from {title}."
+msgstr "Spara plats"
+
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#, fuzzy
+#| msgid "Save location"
+msgid "Save locations saved."
 msgstr "Spara plats"
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
@@ -7698,6 +7793,12 @@ msgstr "Sparad i nyckelringen"
 msgid "Saved scans that turn ROM folders into games. Multi-disc games and playlists import as one game."
 msgstr "Sparade skanningar som gör ROM-mappar till spel. Spel med flera skivor och spellistor importeras som ett spel."
 
+#: apps/desktop/src/components/gameEditor/GameEditor.tsx
+#, fuzzy
+#| msgid "Save"
+msgid "Saves"
+msgstr "Spara"
+
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "Saving a different specification removes its old built-in profiles. Custom profiles are kept."
 msgstr "Om du sparar en annan specifikation tas dess gamla inbyggda profiler bort. Anpassade profiler behålls."
@@ -7713,6 +7814,7 @@ msgstr ""
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
@@ -8964,6 +9066,12 @@ msgctxt "script scope"
 msgid "This game"
 msgstr "Det här spelet"
 
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#, fuzzy
+#| msgid "This collection has no games."
+msgid "This game has no releases."
+msgstr "Den här samlingen har inga spel."
+
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 msgid "This game is no longer in the library."
@@ -9451,6 +9559,16 @@ msgstr "Användarnamn"
 msgid "Username & password"
 msgstr "Användarnamn och lösenord"
 
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#, fuzzy
+#| msgid "Checking storage locations…"
+msgid "Using automatic locations."
+msgstr "Kontrollerar lagringsplatser…"
+
+#: apps/desktop/src/components/gameEditor/SavesTab.tsx
+msgid "Using your chosen locations."
+msgstr ""
+
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "Values it saw"
 msgstr "Värden det såg"
@@ -9897,6 +10015,16 @@ msgstr "ÅÅÅÅ-MM-DD"
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "YYYY-MM-DD, or empty for none"
 msgstr "ÅÅÅÅ-MM-DD, eller tomt för inget"
+
+#, fuzzy
+#~| msgid "{emulator} · {profile} (missing files)"
+#~ msgid "{0} · {files} files"
+#~ msgstr "{emulator} · {profile} (filer saknas)"
+
+#, fuzzy
+#~| msgid "{0} · {1}"
+#~ msgid "{0} · 1 file"
+#~ msgstr "{0} · {1}"
 
 #~ msgid "Anything that didn't work can be set up in Settings."
 #~ msgstr "Det som inte fungerade kan du ställa in i Inställningar."

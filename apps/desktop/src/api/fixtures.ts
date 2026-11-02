@@ -4,6 +4,7 @@ import { createFixtureActions } from "./actionsFixtures";
 import { createFixtureGameEdits } from "./gameEditFixtures";
 import { createFixtureManualGames } from "./manualGamesFixtures";
 import { compareTitles, foldSearch, titleLetter } from "./presentation";
+import { createFixtureSaves } from "./savesFixtures";
 import { createFixtureScripts } from "./scriptsFixtures";
 import type {
   CollectionKind,
@@ -101,6 +102,7 @@ export function createFixtureApi(
   edits: ReturnType<typeof createFixtureGameEdits>;
   actions: ReturnType<typeof createFixtureActions>;
   scripts: ReturnType<typeof createFixtureScripts>;
+  saves: ReturnType<typeof createFixtureSaves>;
 } {
   const records = structuredClone(games);
   const hidden = new Set<string>();
@@ -181,6 +183,7 @@ export function createFixtureApi(
   const actions = createFixtureActions(records);
   return {
     actions,
+    saves: createFixtureSaves(),
     scripts: createFixtureScripts((id) => records.find((game) => game.id === id)?.title),
     collections,
     accounts: createAccountsFixtureApi(defaultFixtureAccounts, emit),

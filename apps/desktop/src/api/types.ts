@@ -4,6 +4,7 @@ import type { ActionsApi } from "./actions";
 import type { GameEditApi } from "./gameEdit";
 import type { IgdbAgeRating } from "./igdb";
 import type { ManualGamesApi } from "./manualGames";
+import type { SavesApi } from "./saves";
 import type { ScriptsApi } from "./scripts";
 
 export type LibraryFilter =
@@ -209,6 +210,8 @@ export interface LibraryApi {
   manual?: ManualGamesApi;
   /** Releases' launch actions (#177, #178), where the library has them. */
   actions?: ActionsApi;
+  /** Save locations for each release on this device (#238). */
+  saves?: SavesApi;
   /** Lifecycle scripts (#179, #180), where the library has them. */
   scripts?: ScriptsApi;
   listGames(query: LibraryQuery & { offset: number; limit: number }): Promise<GamePage>;

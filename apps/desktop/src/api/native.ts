@@ -14,6 +14,7 @@ import {
   mapSummary,
 } from "./mapping";
 import { unwrap } from "./reply";
+import { nativeSaves } from "./saves";
 import { nativeScripts } from "./scripts";
 import type { CollectionsApi, LibraryApi } from "./types";
 
@@ -32,6 +33,7 @@ export function createNativeApi(): LibraryApi {
     manual: nativeManualGames,
     actions: nativeActions,
     scripts: nativeScripts,
+    saves: nativeSaves,
     async listGames(input) {
       native();
       const page = await unwrap(

@@ -1003,6 +1003,25 @@ export const anatomy = {
     interaction: [],
     contains: ["button", "select", "segmented", "text-field"],
   },
+  "game-saves": {
+    rendered: "SavesTab (app)",
+    source: "app",
+    description:
+      "The game editor's Saves tab (#238): one release's save locations on this device, automatic or the user's own, and the manifest game it matches. Files and folders dropped on it are added.",
+    parts: {
+      match: "What the locations come from; `data-match` is `unknown`, `matched` or `ambiguous`.",
+      mode: "Says whether the automatic locations or the user's own are in use.",
+      locations: "The save locations (a list).",
+      location: "One location; `data-kind` is `file`, `folder` or `registry`, with its file count.",
+      path: "A location's path or registry key.",
+      empty: "Shown when the release has no save locations.",
+      warnings: "What couldn't be resolved on this device.",
+      error: "Why the locations couldn't load or the last save was refused.",
+    },
+    states: { "data-choice": ["automatic", "chosen"] },
+    interaction: [],
+    contains: ["button", "select", "text-field"],
+  },
   scripts: {
     rendered: "ScriptsPanel (app)",
     source: "app",

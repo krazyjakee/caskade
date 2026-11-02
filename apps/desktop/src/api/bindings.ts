@@ -96,6 +96,8 @@ export const commands = {
 	 *  editor loaded it: a field changed since is a conflict, not overwritten.
 	 */
 	gameEdit: (gameId: string, edit: GameEdit_Deserialize, base: Game_Deserialize | null) => typedError<GameEditOutcome_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_edit", { gameId, edit, base })),
+	gameSavesState: (entryId: string) => typedError<SaveLocationsState_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_saves_state", { entryId })),
+	gameSavesEdit: (entryId: string, preferences: SavePreferences_Deserialize, revision: number) => typedError<SaveLocationsState_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_saves_edit", { entryId, preferences, revision })),
 	/**
 	 *  The game's cover, background and icon as the editor shows them: who
 	 *  chose each, what shows, and the automatic images to choose from. `null`
@@ -5269,6 +5271,13 @@ export type LocaleInfo = {
 	available: string[],
 };
 
+export type LocationKind = "file" | "folder" | "registry";
+
+export type LocationSpec = {
+	kind: LocationKind,
+	path: string,
+};
+
 /**  An emulator Caskade installed, as stored. */
 export type ManagedEmulator = ManagedEmulator_Serialize | ManagedEmulator_Deserialize;
 
@@ -5397,6 +5406,8 @@ export type ManualTarget_Serialize = {
 	 */
 	windows: boolean,
 };
+
+export type MatchMethod = "manual" | "steam" | "gog" | "title" | "alias" | "secondary" | "emulator";
 
 /**  How a game got its IGDB id. */
 export type MatchSource = 
@@ -7276,6 +7287,53 @@ export type SaveCollection_Serialize = {
 	name: string,
 	description: string,
 	kind: CollectionKind_Serialize,
+};
+
+/**  The editor needs locations and counts, not saved file or registry contents. */
+export type SaveLocationView = {
+	spec: LocationSpec,
+	tags: string[],
+	fileCount: number,
+};
+
+export type SaveLocationsState = SaveLocationsState_Serialize | SaveLocationsState_Deserialize;
+
+export type SaveLocationsState_Deserialize = {
+	entryId: string,
+	revision: number,
+	preferences: SavePreferences_Deserialize,
+	matched: SaveMatch,
+	automatic: SaveLocationView[],
+	locations: SaveLocationView[],
+	warnings: string[],
+};
+
+export type SaveLocationsState_Serialize = {
+	entryId: string,
+	revision: number,
+	preferences: SavePreferences_Serialize,
+	matched: SaveMatch,
+	automatic: SaveLocationView[],
+	locations: SaveLocationView[],
+	warnings: string[],
+};
+
+export type SaveMatch = { type: "unknown" } | { type: "matched"; title: string; method: MatchMethod } | { type: "ambiguous"; titles: string[] };
+
+export type SavePreferences = SavePreferences_Serialize | SavePreferences_Deserialize;
+
+export type SavePreferences_Deserialize = {
+	/**  None follows automatic Steam → GOG → title/alias matching. */
+	manifestTitle?: string | null,
+	/**  None follows automatic locations; an empty list explicitly removes all. */
+	locations?: LocationSpec[] | null,
+};
+
+export type SavePreferences_Serialize = {
+	/**  None follows automatic Steam → GOG → title/alias matching. */
+	manifestTitle: string | null,
+	/**  None follows automatic locations; an empty list explicitly removes all. */
+	locations: LocationSpec[] | null,
 };
 
 /**  A running or finished scan; every change is `emulation.scan.changed`. */

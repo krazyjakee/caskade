@@ -844,6 +844,32 @@ describe("the shell's catalogued anatomy, and the app-only parts of shared compo
     expect(survey(seen, "scripts")).toEqual([]);
   });
 
+  it("renders a release's save locations, its warnings and a refused save", async () => {
+    const { api } = renderApp(`/games/${first.id}`);
+    const entryId = first.entries[0]?.id ?? "";
+    api.saves.seed({
+      entryId,
+      revision: 0,
+      preferences: { manifestTitle: null, locations: null },
+      matched: { type: "matched", title: first.title, method: "steam" },
+      automatic: [{ spec: { kind: "folder", path: "/saves/fixture" }, tags: [], fileCount: 1 }],
+      locations: [{ spec: { kind: "folder", path: "/saves/fixture" }, tags: [], fileCount: 1 }],
+      warnings: ["This release is not installed on this device."],
+    });
+    fireEvent.click(await screen.findByRole("button", { name: "Edit details" }));
+    const dialog = await screen.findByRole("dialog", { name: /^Edit / });
+    fireEvent.click(within(dialog).getByRole("tab", { name: /Saves/ }));
+    const tab = dialog.querySelector('[data-cs="game-saves"]') as HTMLElement;
+    await within(tab).findByText("/saves/fixture");
+    expect(survey(seen, "game-saves")).toEqual([]);
+    // No locations chosen, and a save another editor got to first.
+    fireEvent.click(within(tab).getByRole("button", { name: "Remove /saves/fixture" }));
+    await api.saves.edit(entryId, { manifestTitle: null, locations: null }, 0);
+    fireEvent.click(within(tab).getByRole("button", { name: "Save locations" }));
+    await within(tab).findByRole("alert");
+    expect(survey(seen, "game-saves")).toEqual([]);
+  });
+
   it("renders selection mode and the bulk editor's steps", async () => {
     fakeViewport();
     onTestFinished(() => {

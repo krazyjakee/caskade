@@ -132,6 +132,8 @@ It lives in the host, so a virtualized card can unmount. In desktop mode it is a
 
 **Actions** and **Scripts** belong to the launch actions work (#178, #180). Each is a component with `GameEditorTabProps` (`types.ts`), loads and saves on its own, and reports unsaved work through `onDirtyChange`.
 
+**Saves** (`SavesTab.tsx`, #238) shows one release's save locations on this device, with a release picker when the game has several. They come from `caskade_core::saves::Saves`: the Ludusavi manifest match for PC games, or the emulator definition's `[saves]` table for emulated releases. Each location shows its kind and how many save files the core found there. A release the manifest doesn't know says so and has no locations. The user can add a folder or a file (with the picker, or by dropping it on the tab), remove one, set the manifest game by name, or reset to automatic. Save sends the release's `SavePreferences` with the revision the edit started from through `game_saves_edit`. A change made elsewhere in the meantime is refused, and the draft is kept. The state comes from `game_saves_state` (`commands/saves.rs`). It carries file counts, not file lists or registry values. The webview reaches both through `LibraryApi.saves` (`api/saves.ts`, fixtures in `savesFixtures.ts`). Choices are per device and never sync.
+
 Every tab stays mounted, so switching tabs keeps unsaved work. Closing with unsaved work in any tab asks first: Keep editing, or Discard.
 
 ### Gamepad

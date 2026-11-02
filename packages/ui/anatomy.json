@@ -916,6 +916,25 @@
       "states": {},
       "interaction": []
     },
+    "game-saves": {
+      "parts": [
+        "match",
+        "mode",
+        "locations",
+        "location",
+        "path",
+        "empty",
+        "warnings",
+        "error"
+      ],
+      "states": {
+        "data-choice": [
+          "automatic",
+          "chosen"
+        ]
+      },
+      "interaction": []
+    },
     "scripts": {
       "parts": [
         "items",
@@ -1202,6 +1221,7 @@
   "attributes": [
     "data-art",
     "data-category",
+    "data-choice",
     "data-color-scheme",
     "data-cs",
     "data-density",
