@@ -1,10 +1,11 @@
 use crate::{DiscoveryService, Error, Result};
 use caskade_core::{
     bus::{Event, LibraryImport, Outcome, SourceCount},
+    db::SourceRemoval,
     model::*,
 };
 use caskade_discovery::{
-    Cancel, Confidence, DetectedGame, GameGroup, ScanDelta, ScanReport, SourceReport, uri,
+    Cancel, Confidence, Config, DetectedGame, GameGroup, ScanDelta, ScanReport, SourceReport, uri,
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -66,7 +67,8 @@ impl DiscoveryService {
             .import_groups(&report.groups, &report.sources, options, cancel)
             .await?;
         // Only successful, scanned sources are authoritative about absence.
-        // Failed, timed-out or disabled sources retain their previous entries.
+        // Failed or timed-out sources retain their previous entries; turned
+        // off ones lose them through `remove_unscanned`.
         let seen = keys(&report.groups);
         for source in report.sources.iter().filter(|s| s.error.is_none()) {
             for entry in self
@@ -248,6 +250,29 @@ impl DiscoveryService {
             }
         }
         Ok(outcome)
+    }
+
+    /// Takes out of the library what the sources `config` leaves out found:
+    /// a launcher the user turned off takes its games with it. Games another
+    /// source also found stay, with their plays (`remove_source_entries`).
+    pub async fn remove_unscanned(&self, config: &Config, cancel: &Cancel) -> Result<()> {
+        let _guard = self.imports.lock().await;
+        for source in &self.sources {
+            let id = source.id();
+            if config.sources.includes(&id) {
+                continue;
+            }
+            check(cancel)?;
+            for change in self.store.remove_source_entries(id.as_str()).await? {
+                self.bus
+                    .emit_and_wait(match change {
+                        SourceRemoval::Updated(game_id) => Event::LibraryGameUpdated { game_id },
+                        SourceRemoval::Removed(game_id) => Event::LibraryGameRemoved { game_id },
+                    })
+                    .await;
+            }
+        }
+        Ok(())
     }
 
     async fn mark_absent(&self, mut entry: GameEntry) -> Result<()> {

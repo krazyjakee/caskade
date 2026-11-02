@@ -4,10 +4,8 @@ use super::{
     LibraryStore, decode,
     games::{merge_in, save_entry, save_game},
 };
-use crate::{
-    Error, Result,
-    model::*,
-};
+use crate::{Error, Result, model::*};
+use sqlx::{Sqlite, Transaction};
 use std::collections::BTreeSet;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -16,6 +14,22 @@ pub struct ImportedGroup {
     pub created: bool,
     pub entry_ids: Vec<String>,
     pub seeded_history: bool,
+}
+
+/// What happened to a game when a source's entries left the library.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SourceRemoval {
+    /// It lost entries and keeps others.
+    Updated(String),
+    /// Nothing else was left of it.
+    Removed(String),
+}
+impl SourceRemoval {
+    pub fn game_id(&self) -> &str {
+        match self {
+            Self::Updated(id) | Self::Removed(id) => id,
+        }
+    }
 }
 
 impl LibraryStore {
@@ -182,22 +196,7 @@ impl LibraryStore {
                 continue;
             }
             // Both rows belong to `game_id` now, so the composite FK holds.
-            sqlx::query("UPDATE play_sessions SET entry_id=? WHERE entry_id=?")
-                .bind(&entry_ids[0])
-                .bind(&id)
-                .execute(&mut *tx)
-                .await?;
-            // The user's launch actions (#177) follow the release too.
-            sqlx::query("UPDATE game_actions SET entry_id=?1,record_json=json_set(record_json,'$.entryId',?1) WHERE entry_id=?2")
-                .bind(&entry_ids[0])
-                .bind(&id)
-                .execute(&mut *tx)
-                .await?;
-            sqlx::query("UPDATE OR IGNORE entry_action_settings SET entry_id=? WHERE entry_id=?")
-                .bind(&entry_ids[0])
-                .bind(&id)
-                .execute(&mut *tx)
-                .await?;
+            hand_over(&mut tx, &id, &entry_ids[0]).await?;
             sqlx::query("DELETE FROM game_entries WHERE id=?")
                 .bind(&id)
                 .execute(&mut *tx)
@@ -245,6 +244,74 @@ impl LibraryStore {
         })
     }
 
+    /// Takes `source`'s entries out of the library, for a source the user
+    /// turned off. Each entry's plays, launch actions and achievement links
+    /// move to another entry of its game first; a game with nothing else
+    /// left goes with it. Caskade's own installs and running games stay.
+    pub async fn remove_source_entries(&self, source: &str) -> Result<Vec<SourceRemoval>> {
+        let mut tx = self.pool.begin().await?;
+        let entries = sqlx::query_scalar::<_, String>(
+            "SELECT record_json FROM game_entries WHERE source_id=? ORDER BY external_id,id",
+        )
+        .bind(source)
+        .fetch_all(&mut *tx)
+        .await?
+        .into_iter()
+        .map(decode::<GameEntry>)
+        .collect::<Result<Vec<_>>>()?;
+        let mut changes: Vec<SourceRemoval> = Vec::new();
+        for entry in entries {
+            if matches!(entry.location, Some(InstallLocation::Managed { .. })) {
+                continue;
+            }
+            let running: bool = sqlx::query_scalar(
+                "SELECT EXISTS(SELECT 1 FROM play_sessions WHERE game_id=? AND ended_at_ms IS NULL)",
+            )
+            .bind(&entry.game_id)
+            .fetch_one(&mut *tx)
+            .await?;
+            if running {
+                continue;
+            }
+            let heir: Option<String> = sqlx::query_scalar(
+                "SELECT id FROM game_entries WHERE game_id=? AND source_id<>? ORDER BY state_kind='installed' DESC,id LIMIT 1",
+            )
+            .bind(&entry.game_id)
+            .bind(source)
+            .fetch_optional(&mut *tx)
+            .await?;
+            let change = match heir {
+                Some(heir) => {
+                    hand_over(&mut tx, &entry.id, &heir).await?;
+                    sqlx::query("DELETE FROM game_entries WHERE id=?")
+                        .bind(&entry.id)
+                        .execute(&mut *tx)
+                        .await?;
+                    if let Some((mut game, overrides)) =
+                        super::game_edit::load_layers(&mut tx, &entry.game_id).await?
+                        && game.default_entry.as_deref() == Some(entry.id.as_str())
+                    {
+                        game.default_entry = None;
+                        super::games::write_game(&mut tx, &game, Some(&overrides)).await?;
+                    }
+                    SourceRemoval::Updated(entry.game_id)
+                }
+                None => {
+                    sqlx::query("DELETE FROM games WHERE id=?")
+                        .bind(&entry.game_id)
+                        .execute(&mut *tx)
+                        .await?;
+                    SourceRemoval::Removed(entry.game_id)
+                }
+            };
+            // A game left with no entries replaces its earlier update.
+            changes.retain(|c| c.game_id() != change.game_id());
+            changes.push(change);
+        }
+        tx.commit().await?;
+        Ok(changes)
+    }
+
     pub async fn entries_for_source(&self, source: &str) -> Result<Vec<GameEntry>> {
         sqlx::query_scalar::<_, String>(
             "SELECT record_json FROM game_entries WHERE source_id=? ORDER BY external_id,id",
@@ -256,4 +323,30 @@ impl LibraryStore {
         .map(decode)
         .collect()
     }
+}
+
+/// Moves what belongs to entry `from` (plays, the user's launch actions
+/// (#177) and achievement links) to `to`, another entry of the same game.
+async fn hand_over(tx: &mut Transaction<'_, Sqlite>, from: &str, to: &str) -> Result<()> {
+    sqlx::query("UPDATE play_sessions SET entry_id=? WHERE entry_id=?")
+        .bind(to)
+        .bind(from)
+        .execute(&mut **tx)
+        .await?;
+    sqlx::query("UPDATE game_actions SET entry_id=?1,record_json=json_set(record_json,'$.entryId',?1) WHERE entry_id=?2")
+        .bind(to)
+        .bind(from)
+        .execute(&mut **tx)
+        .await?;
+    sqlx::query("UPDATE OR IGNORE entry_action_settings SET entry_id=? WHERE entry_id=?")
+        .bind(to)
+        .bind(from)
+        .execute(&mut **tx)
+        .await?;
+    sqlx::query("UPDATE OR IGNORE achievement_links SET entry_id=? WHERE entry_id=?")
+        .bind(to)
+        .bind(from)
+        .execute(&mut **tx)
+        .await?;
+    Ok(())
 }

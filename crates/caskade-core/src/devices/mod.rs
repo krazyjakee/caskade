@@ -30,8 +30,8 @@ use async_trait::async_trait;
 use caskade_sync::pairing::{accept_link, pair_with_link};
 use caskade_sync::{
     CodePairing, Config, DeviceInfo, EndpointAddr, EndpointId, Grant, Identity, KeyStore,
-    LINK_LIFETIME, Loaded, Lost, Paired, PairingLink, Purpose, Session, Sessions, SyncEndpoint,
-    TransportAddr,
+    LINK_LIFETIME, Link, Loaded, Lost, Paired, PairingLink, Purpose, Session, Sessions,
+    SyncEndpoint, TransportAddr,
 };
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -65,6 +65,10 @@ const LINK_ADDR_WAIT: Duration = Duration::from_secs(2);
 
 /// How often forgotten devices not told yet are tried again.
 const FORGET_RETRY: Duration = Duration::from_secs(5 * 60);
+/// How long a paired device with no open connection keeps the link of its
+/// last exchange: library sync reaches each one every minute, so three
+/// minutes without a failure means it's still in reach.
+const LAST_LINK_FOR_MS: i64 = 3 * 60 * 1000;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
@@ -614,7 +618,10 @@ impl Devices {
 
     /// Records a finished sync with a device.
     pub async fn record_sync(&self, device_id: &str, at_ms: i64) -> Result<()> {
-        self.inner.store.set_paired_device_synced(device_id, at_ms).await?;
+        self.inner
+            .store
+            .set_paired_device_synced(device_id, at_ms)
+            .await?;
         self.inner.changed();
         Ok(())
     }
@@ -828,11 +835,10 @@ impl Inner {
             }
         })));
         // Relay connections coming and going: the internet came or went.
-        let relays = endpoint.clone();
+        let mut relays = endpoint.internet_changes();
         let weak = Arc::downgrade(self);
         forwarders.push(Forwarder(tokio::spawn(async move {
-            loop {
-                relays.internet_changed().await;
+            while relays.next().await {
                 let Some(inner) = weak.upgrade() else { break };
                 inner.changed();
             }
@@ -871,10 +877,11 @@ impl Inner {
             )
         };
         let paired = self.store.paired_devices().await.unwrap_or_default();
+        let sync = self.sync_states();
         let devices: Vec<PairedDevice> = paired
             .iter()
             .filter(|device| device.forgotten_at_ms.is_none())
-            .map(|device| view(device, endpoint.as_ref(), &self.sync_states()))
+            .map(|device| view(device, endpoint.as_ref(), &sync))
             .collect();
         let nearby = endpoint
             .as_ref()
@@ -1148,7 +1155,7 @@ fn view(
         .ok()
         .zip(endpoint)
         .map_or(DeviceLink::Offline, |(peer, endpoint)| {
-            endpoint.link(peer).into()
+            link_of(peer, endpoint, device.last_sync_ms, &state)
         });
     PairedDevice {
         id: device.endpoint_id.clone(),
@@ -1166,6 +1173,32 @@ fn view(
         paired_at_ms: device.paired_at_ms,
         syncing: state.syncing,
         sync_error: state.error,
+    }
+}
+
+/// How a paired device is reached: its open connection's link; with none
+/// open, `lan` while it announces itself on this network, or the link of
+/// its last exchange while that went through less than
+/// [`LAST_LINK_FOR_MS`] ago and nothing has failed since. Connections
+/// close between syncs, so an open one alone would call every device
+/// offline most of the time.
+fn link_of(
+    peer: EndpointId,
+    endpoint: &SyncEndpoint,
+    last_sync_ms: Option<i64>,
+    state: &DeviceSync,
+) -> DeviceLink {
+    let open = endpoint.link(peer);
+    if open != Link::Offline {
+        return open.into();
+    }
+    if endpoint.nearby().iter().any(|nearby| nearby.id == peer) {
+        return DeviceLink::Lan;
+    }
+    let recent = last_sync_ms.is_some_and(|at| now_ms().saturating_sub(at) < LAST_LINK_FOR_MS);
+    match endpoint.last_link(peer) {
+        Some(link) if recent && state.error.is_none() => link.into(),
+        _ => DeviceLink::Offline,
     }
 }
 

@@ -23,7 +23,7 @@ export function LaunchersSettings() {
       <SettingsSection
         icon={Gamepad2}
         title={t`Launcher Sources`}
-        description={t`Detect games from your installed launchers.`}
+        description={t`Detect games from your installed launchers. Turning one off removes the games only it found at the next scan.`}
       >
         <ul className="mt-1 flex flex-col">
           {launchers.map((launcher) => (

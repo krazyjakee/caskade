@@ -89,6 +89,8 @@ pub struct Links {
     events: broadcast::Sender<LinkChanged>,
     /// Addresses devices announced on this network over mDNS.
     announced: Arc<Mutex<HashSet<IpAddr>>>,
+    /// Each device's last link while it had an open connection.
+    last: Arc<Mutex<HashMap<EndpointId, Link>>>,
     /// This device's endpoint, for its own addresses.
     own: Option<Endpoint>,
 }
@@ -99,6 +101,7 @@ impl Default for Links {
             inner: Arc::default(),
             events: broadcast::channel(64).0,
             announced: Arc::default(),
+            last: Arc::default(),
             own: None,
         }
     }
@@ -156,6 +159,13 @@ impl Links {
     pub fn get(&self, peer: EndpointId) -> Link {
         let inner = self.inner.lock().unwrap_or_else(|e| e.into_inner());
         best(inner.get(&peer))
+    }
+
+    /// The best link `peer` had the last time it had an open connection,
+    /// whether or not one is open now.
+    pub fn last(&self, peer: EndpointId) -> Option<Link> {
+        let last = self.last.lock().unwrap_or_else(|e| e.into_inner());
+        last.get(&peer).copied()
     }
 
     /// Every device with an open connection and its best link.
@@ -218,6 +228,10 @@ impl Links {
             }
             (before, after)
         };
+        if after != Link::Offline {
+            let mut last = self.last.lock().unwrap_or_else(|e| e.into_inner());
+            last.insert(peer, after);
+        }
         if before != after {
             let _ = self.events.send(LinkChanged { peer, link: after });
         }
@@ -296,5 +310,8 @@ mod tests {
             .collect();
         assert_eq!(seen, [Link::Relay, Link::Lan, Link::Relay, Link::Offline]);
         assert!(links.all().is_empty());
+        // The last link it had open stays known once it closed.
+        assert_eq!(links.last(peer), Some(Link::Relay));
+        assert_eq!(links.last(iroh::SecretKey::generate().public()), None);
     }
 }

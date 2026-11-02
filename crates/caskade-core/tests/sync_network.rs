@@ -10,7 +10,7 @@ use std::time::{Duration, Instant};
 use caskade_core::accounts::AccountService;
 use caskade_core::bus::Bus;
 use caskade_core::db::LibraryStore;
-use caskade_core::devices::{ConnectionPurpose, Devices, MemoryKeyStore, Reach};
+use caskade_core::devices::{ConnectionPurpose, DeviceLink, Devices, MemoryKeyStore, Reach};
 use caskade_core::model::{
     CollectionKind, ExternalId, Game, GameEdit, GameEntry, PlaySession, SaveCollection, TextEdit,
 };
@@ -184,6 +184,12 @@ async fn an_edit_a_collection_and_a_session_arrive_within_seconds() {
             .any(|d| d.id == desk_id && d.last_sync_ms.is_some())
     })
     .await;
+    // The exchange's connection closes, and the Desk still shows as reached
+    // the way that exchange reached it, not offline.
+    tokio::time::sleep(Duration::from_secs(1)).await;
+    let seen = tv.devices.status().await.devices;
+    let seen = seen.iter().find(|d| d.id == desk_id).unwrap();
+    assert_eq!(seen.link, DeviceLink::Lan);
 
     let started = Instant::now();
     let game = hades(&desk).await;

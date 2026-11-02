@@ -263,6 +263,13 @@ impl DiscoveryController {
                     .import_report(&scan, &options, &cancel)
                     .await
                     .map_err(|e| e.to_string())?;
+                // Launchers turned off take their games with them.
+                controller
+                    .0
+                    .service
+                    .remove_unscanned(&config, &cancel)
+                    .await
+                    .map_err(|e| e.to_string())?;
                 controller.authorize_reviews(import, &cancel).await
             }
             .await;

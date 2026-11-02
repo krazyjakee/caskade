@@ -63,7 +63,9 @@ pub mod opening;
 pub mod pairing;
 
 pub use device::{DeviceInfo, DeviceKind, DeviceOs};
-pub use endpoint::{Admission, Config, Ip, Reach, Relays, Session, Sessions, SyncEndpoint};
+pub use endpoint::{
+    Admission, Config, InternetChanges, Ip, Reach, Relays, Session, Sessions, SyncEndpoint,
+};
 pub use error::{Error, Result};
 pub use frame::{FrameReader, FrameWriter};
 pub use grant::Grant;

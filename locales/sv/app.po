@@ -3246,8 +3246,8 @@ msgid "Detect emulators"
 msgstr "Hitta emulatorer"
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
-msgid "Detect games from your installed launchers."
-msgstr "Hitta spel från dina installerade startprogram."
+msgid "Detect games from your installed launchers. Turning one off removes the games only it found at the next scan."
+msgstr "Hitta spel från dina installerade startprogram. Stänger du av ett tas spelen som bara det hittade bort vid nästa genomsökning."
 
 #. A launcher was found on this device
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx

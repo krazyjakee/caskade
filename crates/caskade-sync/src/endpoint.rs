@@ -2,12 +2,14 @@
 
 use std::fmt;
 use std::net::{Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
+use std::pin::Pin;
 use std::sync::Arc;
 use std::time::Duration;
 
 use iroh::Watcher as _;
 
 use async_trait::async_trait;
+use futures_util::{Stream, StreamExt as _};
 use iroh::endpoint::{Connection, VarInt, presets};
 use iroh::protocol::{AcceptError, ProtocolHandler, Router};
 use iroh::{Endpoint, EndpointAddr, EndpointId, RelayMode};
@@ -410,14 +412,13 @@ impl SyncEndpoint {
         Some(status.iter().any(|relay| relay.is_connected()))
     }
 
-    /// Resolves when a relay connection comes or goes (so
-    /// [`SyncEndpoint::internet`] may have changed), or never once the
-    /// endpoint is gone.
-    pub async fn internet_changed(&self) {
-        let mut status = self.endpoint().home_relay_status();
-        if status.updated().await.is_err() {
-            std::future::pending::<()>().await;
-        }
+    /// Relay connections coming and going (so [`SyncEndpoint::internet`]
+    /// may have changed). One watcher for the whole loop: iroh hands out
+    /// clones of a stored watcher, and a fresh clone reports every change
+    /// since that watcher was made, so asking anew each time never waits.
+    pub fn internet_changes(&self) -> InternetChanges {
+        let updates = self.endpoint().home_relay_status().stream_updates_only();
+        InternetChanges(Box::pin(updates.map(|_| ())))
     }
 
     /// Whether this endpoint may use relays (Never use relays is off).
@@ -433,6 +434,12 @@ impl SyncEndpoint {
     /// The link state of one device: [`Link::Offline`] with no connection.
     pub fn link(&self, peer: EndpointId) -> Link {
         self.links.get(peer)
+    }
+
+    /// The link `peer` had over its last open connection, if it ever had
+    /// one since this endpoint started.
+    pub fn last_link(&self, peer: EndpointId) -> Option<Link> {
+        self.links.last(peer)
     }
 
     /// Local network discovery, when it's on and the network allows it.
@@ -541,5 +548,16 @@ impl ProtocolHandler for Inbound {
         };
         self.sessions.opened(session).await;
         Ok(())
+    }
+}
+
+/// Relay connections coming and going, from
+/// [`SyncEndpoint::internet_changes`].
+pub struct InternetChanges(Pin<Box<dyn Stream<Item = ()> + Send>>);
+
+impl InternetChanges {
+    /// Waits for the next change; `false` once the endpoint is gone.
+    pub async fn next(&mut self) -> bool {
+        self.0.next().await.is_some()
     }
 }

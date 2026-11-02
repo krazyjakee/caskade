@@ -55,6 +55,7 @@ impl DiscoveryService {
         let mut scan = self.discover(config, cancel).await?;
         self.add_plugin_games(&mut scan, config).await?;
         let import = self.import_report(&scan, options, cancel).await?;
+        self.remove_unscanned(config, cancel).await?;
         Ok(ScanOutcome { scan, import })
     }
     /// Read-only discovery using this service's injected environment and sources.

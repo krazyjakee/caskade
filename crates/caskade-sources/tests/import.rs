@@ -338,6 +338,72 @@ async fn invalid_group_rolls_back_without_orphans_and_later_groups_still_import(
 }
 
 #[tokio::test]
+async fn a_launcher_turned_off_takes_its_games_and_leaves_their_plays() {
+    let store = LibraryStore::in_memory().await.unwrap();
+    let service = service(&store, &Bus::default());
+    let outcome = service
+        .import_report(
+            &report(vec![
+                group(vec![
+                    detected("steam", "1", "Shared"),
+                    detected("lutris", "2", "Shared"),
+                ]),
+                group(vec![detected("lutris", "3", "Lutris only")]),
+                group(vec![detected("lutris", "4", "Running")]),
+            ]),
+            &ImportOptions::default(),
+            &Cancel::new(),
+        )
+        .await
+        .unwrap();
+    let [shared, only, running] = [0, 1, 2].map(|i| outcome.imported[i].game_id.clone());
+    let lutris = store.entry_by_source("lutris", "2").await.unwrap().unwrap();
+    store
+        .set_game_default_entry(&shared, Some(&lutris.id))
+        .await
+        .unwrap();
+    let mut played = PlaySession::new(&shared, &lutris.id, 1000);
+    played.ended_at_ms = Some(2000);
+    played.duration_ms = 1000;
+    store.upsert_session(&played).await.unwrap();
+    let entry = store.entry_by_source("lutris", "4").await.unwrap().unwrap();
+    store
+        .start_session(&PlaySession::new(&running, &entry.id, 1000))
+        .await
+        .unwrap();
+
+    let config = caskade_discovery::Config {
+        sources: caskade_discovery::SourceSelection::AllExcept(
+            [SourceId::new("lutris")].into_iter().collect(),
+        ),
+        ..Default::default()
+    };
+    service
+        .remove_unscanned(&config, &Cancel::new())
+        .await
+        .unwrap();
+
+    let entries = store.entries_for_game(&shared).await.unwrap();
+    assert_eq!(
+        entries
+            .iter()
+            .map(|e| e.source_id.as_str())
+            .collect::<Vec<_>>(),
+        ["steam"]
+    );
+    let sessions = store.sessions_for_game(&shared, 10).await.unwrap();
+    assert_eq!(sessions[0].id, played.id);
+    assert_eq!(sessions[0].entry_id, entries[0].id);
+    assert_eq!(
+        store.game(&shared).await.unwrap().unwrap().default_entry,
+        None
+    );
+    assert!(store.game(&only).await.unwrap().is_none());
+    // A running game keeps its entry until a later scan.
+    assert_eq!(store.entries_for_game(&running).await.unwrap().len(), 1);
+}
+
+#[tokio::test]
 async fn newly_shared_group_merges_previously_separate_games_and_keeps_history() {
     let store = LibraryStore::in_memory().await.unwrap();
     let service = service(&store, &Bus::default());

@@ -27,7 +27,7 @@ mod managed_tools;
 mod streaming;
 pub use streaming::{StreamApp, StreamSync, stream_source};
 mod manual;
-pub use imports::ImportedGroup;
+pub use imports::{ImportedGroup, SourceRemoval};
 mod notifications;
 pub use notifications::Ingested;
 mod query;
