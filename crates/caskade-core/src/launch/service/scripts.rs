@@ -185,6 +185,7 @@ pub(super) async fn profile_hook(
         .map(|name| name.to_string_lossy().into_owned())
         .unwrap_or_default();
     let mut command = tokio::process::Command::new(program);
+    crate::managed::outside_own_appimage(command.as_std_mut());
     command
         .args(args)
         .stdin(Stdio::null())

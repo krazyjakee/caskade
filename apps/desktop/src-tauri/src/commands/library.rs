@@ -198,19 +198,19 @@ pub(super) fn open_file_manager(
     args: impl IntoIterator<Item = impl AsRef<std::ffi::OsStr>>,
     folder: &std::path::Path,
 ) -> Result<(), CommandError> {
-    let mut child = std::process::Command::new(FILE_MANAGER)
-        .args(args)
-        .spawn()
-        .map_err(|error| {
-            // Name what couldn't be shown, keep the OS's reason as detail.
-            let mut failure = CommandError::from_error(&error);
-            failure.summary = caskade_core::tr!(
-                "Couldn't open the file manager ({opener}) to show “{folder}”.",
-                opener = FILE_MANAGER,
-                folder = folder.display()
-            );
-            crate::error::logged(failure)
-        })?;
+    let mut manager = std::process::Command::new(FILE_MANAGER);
+    // Not inside Caskade's AppImage (#274).
+    caskade_core::managed::outside_own_appimage(&mut manager);
+    let mut child = manager.args(args).spawn().map_err(|error| {
+        // Name what couldn't be shown, keep the OS's reason as detail.
+        let mut failure = CommandError::from_error(&error);
+        failure.summary = caskade_core::tr!(
+            "Couldn't open the file manager ({opener}) to show “{folder}”.",
+            opener = FILE_MANAGER,
+            folder = folder.display()
+        );
+        crate::error::logged(failure)
+    })?;
     // Reaped off the async runtime; the file manager outlives it.
     std::thread::spawn(move || child.wait());
     Ok(())

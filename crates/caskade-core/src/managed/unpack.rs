@@ -183,7 +183,9 @@ pub(crate) fn extract_appimage(file: &Path, into: &Path) -> Result<()> {
     let _ = fs::remove_dir_all(&work);
     fs::create_dir_all(&work)?;
     executable(file)?;
-    let status = std::process::Command::new(file)
+    let mut extract = std::process::Command::new(file);
+    super::outside_own_appimage(&mut extract);
+    let status = extract
         .arg("--appimage-extract")
         .current_dir(&work)
         .stdin(std::process::Stdio::null())

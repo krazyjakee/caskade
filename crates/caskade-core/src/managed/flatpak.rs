@@ -12,6 +12,7 @@ async fn run(
     failed: impl FnOnce(String) -> String,
 ) -> Result<()> {
     let mut command = tokio::process::Command::new(program);
+    super::outside_own_appimage(command.as_std_mut());
     command
         .args(args)
         .kill_on_drop(true)

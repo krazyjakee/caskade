@@ -9,11 +9,13 @@ use specta::Type;
 pub use crate::types::RuntimeSpec;
 
 pub mod alias;
+pub mod appimage;
 mod native;
 pub mod proton;
 pub mod registry;
 pub mod umu;
 mod watch;
+pub use appimage::outside_appimage;
 pub use native::NativeRuntime;
 pub use watch::{OutOfRootWatcher, default_watch_roots};
 

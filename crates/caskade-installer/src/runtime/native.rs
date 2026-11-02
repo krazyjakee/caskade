@@ -118,14 +118,14 @@ impl NativeRuntime {
         }
         #[cfg(not(windows))]
         builder.args(&command.args);
-        builder
-            .envs(&command.env)
-            .current_dir(&command.cwd)
-            .stdin(if input.is_some() {
-                Stdio::piped()
-            } else {
-                Stdio::null()
-            });
+        builder.envs(&command.env);
+        // Not inside the AppImage this host may run from (#274).
+        super::outside_appimage(&mut builder);
+        builder.current_dir(&command.cwd).stdin(if input.is_some() {
+            Stdio::piped()
+        } else {
+            Stdio::null()
+        });
         #[cfg(unix)]
         std::os::unix::process::CommandExt::process_group(&mut builder, 0);
         #[cfg(windows)]

@@ -94,6 +94,8 @@ impl ScriptExecutor for ProcessExecutor {
             ));
         }
         let mut command = tokio::process::Command::new(&program);
+        // Not inside Caskade's AppImage (#274).
+        crate::managed::outside_own_appimage(command.as_std_mut());
         #[cfg(windows)]
         if request.verbatim_args {
             for arg in &request.args {

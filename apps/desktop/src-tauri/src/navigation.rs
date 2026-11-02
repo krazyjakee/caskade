@@ -83,6 +83,8 @@ fn open_in_browser(url: &Url) {
     } else {
         std::process::Command::new("xdg-open")
     };
+    // The browser starts outside Caskade's AppImage (#274).
+    caskade_core::managed::outside_own_appimage(&mut command);
     if let Err(error) = command.arg(url.as_str()).spawn() {
         tracing::warn!(%error, "couldn't open the page in the browser");
     }

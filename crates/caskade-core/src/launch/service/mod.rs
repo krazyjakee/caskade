@@ -585,6 +585,8 @@ impl Drop for GameLease {
 /// "No such file or directory" doesn't say what was missing (#160).
 fn spawn(command: &LaunchCommand) -> Result<Child> {
     let mut process = tokio::process::Command::new(&command.program);
+    // Not inside Caskade's AppImage (#274).
+    crate::managed::outside_own_appimage(process.as_std_mut());
     process
         .args(&command.args)
         .envs(&command.env)

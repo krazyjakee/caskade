@@ -271,6 +271,7 @@ const SMI_RETRY: Duration = Duration::from_secs(30);
 impl NvidiaSmi {
     fn start() -> std::io::Result<Self> {
         let mut command = Command::new("nvidia-smi");
+        crate::managed::outside_own_appimage(&mut command);
         command
             .args([
                 "--query-gpu=index,pci.bus_id,name,utilization.gpu,memory.used,memory.total",

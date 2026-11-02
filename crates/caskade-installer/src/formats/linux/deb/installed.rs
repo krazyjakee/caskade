@@ -39,7 +39,9 @@ pub fn installed_files(host: &HostCaps, format: Format, name: &str) -> Result<Ve
         .managers
         .get(query)
         .ok_or_else(|| PackageError::Unsupported(format!("{query} is not configured")))?;
-    let output = Command::new(program)
+    let mut command = Command::new(program);
+    crate::runtime::outside_appimage(&mut command);
+    let output = command
         .args([list, "--", name])
         .stdin(Stdio::null())
         .output()?;

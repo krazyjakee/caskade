@@ -213,9 +213,16 @@ mod linux {
 
     pub struct Xdg;
 
+    /// A desktop tool, run outside Caskade's AppImage (#274).
+    fn tool(program: &str) -> Command {
+        let mut command = Command::new(program);
+        caskade_core::managed::outside_own_appimage(&mut command);
+        command
+    }
+
     impl Mime for Xdg {
         fn default_app(&self, mime: &str) -> Option<String> {
-            let output = Command::new("xdg-mime")
+            let output = tool("xdg-mime")
                 .args(["query", "default", mime])
                 .output()
                 .ok()?;
@@ -225,9 +232,7 @@ mod linux {
         }
 
         fn set_default(&self, file: &str, mime: &str) -> io::Result<()> {
-            let status = Command::new("xdg-mime")
-                .args(["default", file, mime])
-                .status()?;
+            let status = tool("xdg-mime").args(["default", file, mime]).status()?;
             if status.success() {
                 Ok(())
             } else {
@@ -237,10 +242,7 @@ mod linux {
 
         fn refresh(&self, applications: &Path) {
             // Without it, xdg-mime still writes the defaults.
-            if let Err(error) = Command::new("update-desktop-database")
-                .arg(applications)
-                .status()
-            {
+            if let Err(error) = tool("update-desktop-database").arg(applications).status() {
                 tracing::debug!(%error, "update-desktop-database didn't run");
             }
         }

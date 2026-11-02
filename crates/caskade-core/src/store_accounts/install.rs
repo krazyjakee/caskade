@@ -252,15 +252,15 @@ pub fn system_opener() -> Opener {
     std::sync::Arc::new(|uri: &str| {
         let command =
             crate::launch::uri_command(uri).map_err(|error| Error::Invalid(error.to_string()))?;
-        let mut child = std::process::Command::new(&command.program)
-            .args(&command.args)
-            .spawn()
-            .map_err(|error| {
-                Error::Io(std::io::Error::new(
-                    error.kind(),
-                    crate::tr!("the launcher couldn't be opened: {error}", error = error),
-                ))
-            })?;
+        let mut opener = std::process::Command::new(&command.program);
+        // The launcher starts outside Caskade's AppImage (#274).
+        crate::managed::outside_own_appimage(&mut opener);
+        let mut child = opener.args(&command.args).spawn().map_err(|error| {
+            Error::Io(std::io::Error::new(
+                error.kind(),
+                crate::tr!("the launcher couldn't be opened: {error}", error = error),
+            ))
+        })?;
         // Reaped off the caller's thread; the launcher outlives it.
         std::thread::spawn(move || child.wait());
         Ok(())

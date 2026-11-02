@@ -72,6 +72,7 @@ impl SevenZip {
     ) -> Result<Vec<u8>> {
         control.checkpoint(0)?;
         let mut command = Command::new(&self.program);
+        crate::runtime::outside_appimage(&mut command);
         // A single queued extraction must not start one decoder per host CPU.
         // Leave a core available where possible, and use at most two threads.
         let threads = thread::available_parallelism()
