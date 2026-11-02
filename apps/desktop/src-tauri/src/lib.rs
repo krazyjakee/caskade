@@ -615,6 +615,19 @@ pub fn run() {
             // Library sync with paired devices (#228–#230), in the background.
             let sync = caskade_core::sync::SyncService::new(store.clone(), devices.clone());
             sync.set_settings(settings.clone());
+            // A RomM server removed on another device: its ROMs and games go
+            // here too, through RomM's own removal.
+            if let Some(romm) = app.try_state::<caskade_core::romm::RommService>() {
+                let romm = romm.inner().clone();
+                sync.on_romm_removed(move |id| {
+                    let romm = romm.clone();
+                    tauri::async_runtime::spawn(async move {
+                        if let Err(error) = romm.remove_server(&id).await {
+                            tracing::warn!(%error, "a RomM server removed elsewhere wasn't cleaned up");
+                        }
+                    });
+                });
+            }
             commands::sync::setup(app.handle(), devices, sync);
         }
         app.manage(settings);

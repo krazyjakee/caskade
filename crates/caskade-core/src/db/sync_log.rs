@@ -128,6 +128,40 @@ pub(super) async fn mark_applied(
 }
 
 impl LibraryStore {
+    /// A field's winning value here.
+    pub async fn sync_field(
+        &self,
+        entity: Entity,
+        key: &str,
+        name: &str,
+    ) -> Result<Option<FieldState>> {
+        let mut conn = self.pool.acquire().await?;
+        field(&mut conn, entity, key, name).await
+    }
+
+    /// Records a change applied outside the library's tables (a setting), as
+    /// its field's winner.
+    pub async fn sync_record_applied(
+        &self,
+        change: &Change,
+        target: &str,
+        value: Option<Value>,
+    ) -> Result<()> {
+        let mut tx = self.pool.begin().await?;
+        set_field(
+            &mut tx,
+            (&change.entity, target, &change.field),
+            &FieldState {
+                value,
+                stamp: change.stamp(),
+            },
+        )
+        .await?;
+        mark_applied(&mut tx, change, Some(target)).await?;
+        tx.commit().await?;
+        Ok(())
+    }
+
     /// This device's version vector.
     pub async fn sync_seen(&self) -> Result<Seen> {
         let rows =

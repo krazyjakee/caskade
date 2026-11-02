@@ -733,6 +733,8 @@ async fn write(
             Ok(true)
         }
         Entity::Session => session(conn, target, value).await,
+        // A setting: the engine applies it through `SettingsService`.
+        Entity::RommServer => Ok(true),
         Entity::Account => account(conn, target, field, value).await,
         Entity::Approval => {
             let [account, game] = parts[..] else {

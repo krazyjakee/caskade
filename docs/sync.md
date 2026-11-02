@@ -304,6 +304,7 @@ portable forms of what `sync::policy` declares synced:
 | `session` | session (UUIDv7) | `""`: game, start, end and duration, once finished | PlaySessions |
 | `account` | account | `""`, `name`, `avatar`, `role`, `pinHash`, `permissions`, `maxAge`, `unratedNeedsPin`, `createdAt` | Accounts |
 | `approval` | account\|game | `""` | Accounts |
+| `rommServer` | server id | `""`: its shared definition, as the policy projects `core.romm` | RommServers |
 
 A game's user values are what `overrides_json` marks as the user's, read from
 the shown record: the policy's `Receive::GameEdits` contract. Automatic
@@ -311,7 +312,12 @@ metadata never enters the log, and applying a user value puts it on top of
 the automatic one (a reset brings the automatic value back), so refreshes keep
 working beneath it. Lists are sets: each item is a field of its own, so two
 devices adding tags concurrently keep both. The PIN throttle and the active
-account never sync. Sessions are a union: one is never deleted by sync, and a
+account never sync. A RomM server's definition travels without its password
+or token: it's applied to `core.romm` through `SettingsService`, keeping each
+device's own emulator and profile per platform, sync schedule and cache. A
+device that gets a new server has no secret for it, so it asks for its own
+(`ServerStatus::has_secret`). A server removed on another device goes here
+through `RommService::remove_server`, with its downloaded ROMs. Sessions are a union: one is never deleted by sync, and a
 session whose game has no entry here gets an unlaunchable `sync:sessions`
 entry.
 
@@ -454,7 +460,7 @@ up.
 These are declared synced by the policy but don't travel yet:
 - hand-made achievement links;
 - launch actions and game scripts (optional categories);
-- RomM servers and add-ons;
+- add-ons;
 - the appearance and accounts settings;
 - the files of user-imported artwork (iroh-blobs).
 

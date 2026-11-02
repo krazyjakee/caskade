@@ -48,6 +48,8 @@ struct Inner {
     store: LibraryStore,
     devices: Devices,
     settings: OnceLock<SettingsService>,
+    /// Handed to each engine: a RomM server another device removed.
+    romm_removed: OnceLock<Arc<dyn Fn(String) + Send + Sync>>,
     /// The engine for this device's current identity.
     engine: RwLock<Option<Arc<SyncEngine>>>,
     /// Devices an exchange is running with.
@@ -68,6 +70,7 @@ impl SyncService {
                 store,
                 devices: devices.clone(),
                 settings: OnceLock::new(),
+                romm_removed: OnceLock::new(),
                 engine: RwLock::default(),
                 busy: Mutex::default(),
                 due,
@@ -82,6 +85,12 @@ impl SyncService {
     /// Reads the category choices (`core.sync.categories`) from `settings`.
     pub fn set_settings(&self, settings: SettingsService) {
         let _ = self.inner.settings.set(settings);
+    }
+
+    /// What to do when another device removed a RomM server (the app
+    /// removes its downloaded ROMs through `RommService::remove_server`).
+    pub fn on_romm_removed(&self, removed: impl Fn(String) + Send + Sync + 'static) {
+        let _ = self.inner.romm_removed.set(Arc::new(removed));
     }
 
     /// The engine, once this device's identity is ready.
@@ -116,6 +125,9 @@ impl Inner {
         let engine = Arc::new(SyncEngine::new(self.store.clone(), device));
         if let Some(settings) = self.settings.get() {
             engine.set_settings(settings.clone());
+        }
+        if let Some(removed) = self.romm_removed.get().cloned() {
+            engine.on_romm_removed(move |id| removed(id));
         }
         *self.engine.write().unwrap_or_else(|e| e.into_inner()) = Some(engine.clone());
         Some(engine)

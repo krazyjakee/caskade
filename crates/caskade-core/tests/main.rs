@@ -15,6 +15,7 @@ mod romm;
 mod devices;
 mod sync_games;
 mod sync_log;
+mod sync_romm;
 #[cfg(feature = "net")]
 mod sync_network;
 mod sync_policy;

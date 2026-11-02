@@ -40,6 +40,9 @@ pub struct SyncEngine {
     device: String,
     settings: std::sync::OnceLock<SettingsService>,
     state: Mutex<State>,
+    /// Called with a RomM server's id when another device removed it, to
+    /// remove its downloaded ROMs here (the policy's `Receive::RommServer`).
+    romm_removed: std::sync::OnceLock<std::sync::Arc<dyn Fn(String) + Send + Sync>>,
     /// The wall clock: tests set one that's wrong.
     time: std::sync::RwLock<std::sync::Arc<dyn Fn() -> i64 + Send + Sync>>,
 }
@@ -74,6 +77,7 @@ fn entity_rank(entity: Entity) -> u8 {
         Entity::Collection => 3,
         Entity::Member | Entity::Approval => 4,
         Entity::Session => 5,
+        Entity::RommServer => 6,
     }
 }
 
@@ -93,8 +97,15 @@ impl SyncEngine {
             device: device.into(),
             settings: std::sync::OnceLock::new(),
             state: Mutex::default(),
+            romm_removed: std::sync::OnceLock::new(),
             time: std::sync::RwLock::new(std::sync::Arc::new(now_ms)),
         }
+    }
+
+    /// What to do when another device removed a RomM server: the app removes
+    /// its downloaded ROMs and library games through `RommService`.
+    pub fn on_romm_removed(&self, removed: impl Fn(String) + Send + Sync + 'static) {
+        let _ = self.romm_removed.set(std::sync::Arc::new(removed));
     }
 
     /// Replaces the wall clock this device reads (tests: a clock set wrong).
@@ -149,7 +160,8 @@ impl SyncEngine {
     pub async fn capture(&self) -> Result<usize> {
         let mut state = self.state.lock().await;
         self.load(&mut state).await?;
-        let snapshot = self.store.sync_snapshot().await?;
+        let mut snapshot = self.store.sync_snapshot().await?;
+        self.settings_snapshot(&mut snapshot.values).await;
         let mut changes = Vec::new();
         for ((entity, key, field), value) in &snapshot.values {
             let current = state
@@ -301,6 +313,19 @@ impl SyncEngine {
                     Mapped::Wait => {}
                     Mapped::Done(target) => {
                         self.store.sync_mark_applied(change, Some(&target)).await?;
+                        progress = true;
+                    }
+                    Mapped::To(target, value) if change.entity == Entity::RommServer => {
+                        if self.apply_romm(change, &target, value.clone()).await? {
+                            state.fields.insert(
+                                (change.entity, target, change.field.clone()),
+                                FieldState {
+                                    value,
+                                    stamp: change.stamp(),
+                                },
+                            );
+                            applied += 1;
+                        }
                         progress = true;
                     }
                     Mapped::To(target, value) => {
@@ -490,6 +515,124 @@ impl SyncEngine {
         Ok(Some(game))
     }
 
+    /// Synced settings' fields: each RomM server's shared definition, as
+    /// `policy` projects `core.romm` (no secrets, no cache, no emulator or
+    /// profile choices).
+    async fn settings_snapshot(&self, values: &mut HashMap<crate::db::FieldKey, Value>) {
+        let Some(settings) = self.settings.get() else {
+            return;
+        };
+        let Ok(romm) = settings.get(crate::romm::NAMESPACE).await else {
+            return;
+        };
+        let Some(rule) = super::policy::setting(crate::romm::NAMESPACE) else {
+            return;
+        };
+        let everything = SyncSettings {
+            categories: Category::ALL
+                .into_iter()
+                .map(|category| (category, super::policy::CategoryState::Sync))
+                .collect(),
+            ..SyncSettings::default()
+        };
+        let Some(projected) = rule.project(&romm.value, &everything) else {
+            return;
+        };
+        for server in projected
+            .get("servers")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+        {
+            if let Some(id) = server.get("id").and_then(Value::as_str) {
+                values.insert(
+                    (Entity::RommServer, id.to_owned(), EXISTS.to_owned()),
+                    server.clone(),
+                );
+            }
+        }
+    }
+
+    /// Applies a RomM server's definition to `core.romm` here, keeping this
+    /// device's own choices for it (cache, emulator and profile per platform,
+    /// sync schedule). A new server arrives without a password: this device
+    /// asks for its own. `true` when written; a superseded change, or one
+    /// this device can't hold, is marked applied without a write.
+    async fn apply_romm(
+        &self,
+        change: &Change,
+        target: &str,
+        value: Option<Value>,
+    ) -> Result<bool> {
+        let Some(settings) = self.settings.get() else {
+            return Ok(false);
+        };
+        if let Some(current) = self
+            .store
+            .sync_field(change.entity, target, &change.field)
+            .await?
+            && current.stamp >= change.stamp()
+        {
+            self.store.sync_mark_applied(change, Some(target)).await?;
+            return Ok(false);
+        }
+        let Ok(snapshot) = settings.get(crate::romm::NAMESPACE).await else {
+            return Ok(false);
+        };
+        let mut section = snapshot.value;
+        let mut servers: Vec<Value> = section
+            .get("servers")
+            .and_then(Value::as_array)
+            .cloned()
+            .unwrap_or_default();
+        let existing = servers
+            .iter()
+            .position(|server| server.get("id").and_then(Value::as_str) == Some(target));
+        match &value {
+            Some(incoming) => {
+                let mut server = match existing {
+                    Some(index) => servers[index].clone(),
+                    None => {
+                        serde_json::to_value(crate::romm::RommServerConfig::new(target, "", ""))?
+                    }
+                };
+                for (key, field) in incoming.as_object().into_iter().flatten() {
+                    if key == "platforms" {
+                        server[key.as_str()] = merge_platforms(server.get(key), field);
+                    } else {
+                        server[key.as_str()] = field.clone();
+                    }
+                }
+                match existing {
+                    Some(index) => servers[index] = server,
+                    None => servers.push(server),
+                }
+            }
+            None => {
+                if let Some(index) = existing {
+                    servers.remove(index);
+                }
+            }
+        }
+        section["servers"] = Value::Array(servers);
+        if let Err(error) = settings.set(crate::romm::NAMESPACE, section, None).await {
+            // A definition this device can't hold: keep its own.
+            tracing::warn!(%error, "a RomM server from another device wasn't applied");
+            self.store.sync_mark_applied(change, Some(target)).await?;
+            return Ok(false);
+        }
+        self.store
+            .sync_record_applied(change, target, value.clone())
+            .await?;
+        if value.is_none()
+            && existing.is_some()
+            && let Some(removed) = self.romm_removed.get()
+        {
+            removed(target.to_owned());
+        }
+        Ok(true)
+    }
+
     /// The field's winner here, for tests and status.
     pub async fn winner(&self, entity: Entity, key: &str, field: &str) -> Option<Stamp> {
         let state = self.state.lock().await;
@@ -498,4 +641,28 @@ impl SyncEngine {
             .get(&(entity, key.to_owned(), field.to_owned()))
             .map(|state| state.stamp.clone())
     }
+}
+
+/// A server's platform mappings from another device, each keeping this
+/// device's emulator and profile for it.
+fn merge_platforms(local: Option<&Value>, incoming: &Value) -> Value {
+    let local: Vec<Value> = local.and_then(Value::as_array).cloned().unwrap_or_default();
+    let merged = incoming
+        .as_array()
+        .into_iter()
+        .flatten()
+        .map(|platform| {
+            let slug = platform.get("slug");
+            let mut item = local
+                .iter()
+                .find(|mine| mine.get("slug") == slug)
+                .cloned()
+                .unwrap_or_else(|| serde_json::json!({ "emulatorId": null, "profileId": null }));
+            for (key, field) in platform.as_object().into_iter().flatten() {
+                item[key.as_str()] = field.clone();
+            }
+            item
+        })
+        .collect();
+    Value::Array(merged)
 }

@@ -45,10 +45,13 @@ pub enum Entity {
     Account,
     /// A permanent age exception. Key: account|game.
     Approval,
+    /// A RomM server's shared definition (`core.romm`), never its password
+    /// or token: each device keeps its own in its keychain. Key: server id.
+    RommServer,
 }
 
 impl Entity {
-    pub const ALL: [Self; 9] = [
+    pub const ALL: [Self; 10] = [
         Self::Game,
         Self::KeptApart,
         Self::IgdbMatch,
@@ -58,6 +61,7 @@ impl Entity {
         Self::Session,
         Self::Account,
         Self::Approval,
+        Self::RommServer,
     ];
 
     pub fn as_str(self) -> &'static str {
@@ -71,6 +75,7 @@ impl Entity {
             Self::Session => "session",
             Self::Account => "account",
             Self::Approval => "approval",
+            Self::RommServer => "rommServer",
         }
     }
 
@@ -87,6 +92,7 @@ impl Entity {
             Self::ArtworkChoice => Category::Artwork,
             Self::Session => Category::PlaySessions,
             Self::Account | Self::Approval => Category::Accounts,
+            Self::RommServer => Category::RommServers,
         }
     }
 
@@ -95,7 +101,7 @@ impl Entity {
         match self {
             Self::Game | Self::KeptApart | Self::IgdbMatch | Self::ArtworkChoice => &[0],
             Self::Member | Self::Approval => &[1],
-            Self::Collection | Self::Session | Self::Account => &[],
+            Self::Collection | Self::Session | Self::Account | Self::RommServer => &[],
         }
     }
 
