@@ -348,6 +348,9 @@ impl LibraryStore {
             );
         }
 
+        // The user's own artwork (#273).
+        super::sync_artwork::snapshot(&mut conn, &mut snapshot.values).await?;
+
         // Save versions made here (#239).
         crate::saves::versions::sync_snapshot(&mut conn, &mut snapshot.values).await?;
         Ok(snapshot)
@@ -739,6 +742,8 @@ async fn write(
         Entity::SaveVersion => crate::saves::versions::sync_apply(conn, target, value).await,
         // Settings: the engine applies them through `SettingsService`.
         Entity::RommServer | Entity::Appearance | Entity::AccountSettings => Ok(true),
+        // Applied by the engine once its file is here (`sync_apply_artwork`).
+        Entity::Artwork => Ok(false),
         Entity::Account => account(conn, target, field, value).await,
         Entity::Approval => {
             let [account, game] = parts[..] else {

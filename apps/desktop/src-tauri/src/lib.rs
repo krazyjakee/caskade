@@ -641,7 +641,7 @@ pub fn run() {
         store_accounts.set_refresher(achievements.account_refresher());
         commands::achievements::setup(app.handle(), achievements);
         // Their icons (#190), through the artwork cache.
-        app.manage(commands::achievement_icons::AchievementIcons(artwork));
+        app.manage(commands::achievement_icons::AchievementIcons(artwork.clone()));
         commands::store_accounts::setup(app.handle(), store_accounts);
         // Paired devices (#224–#226): the device key from the keychain (off
         // this thread: a locked keychain holds only sync), the endpoint and
@@ -674,6 +674,10 @@ pub fn run() {
             sync.register_blobs(std::sync::Arc::new(
                 caskade_core::saves::versions::SaveBlobs(save_versions.clone()),
             ));
+            // The user's own artwork travels with its files (#273).
+            if let Some(cache) = artwork {
+                sync.set_artwork_cache(cache);
+            }
             save_versions.set_remote(caskade_core::saves::versions::SyncRefresh::new(
                 sync.clone(),
                 devices.clone(),

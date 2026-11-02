@@ -43,6 +43,9 @@ pub struct SyncEngine {
     /// Called with a RomM server's id when another device removed it, to
     /// remove its downloaded ROMs here (the policy's `Receive::RommServer`).
     romm_removed: std::sync::OnceLock<std::sync::Arc<dyn Fn(String) + Send + Sync>>,
+    /// Where artwork files are: an `artwork` change applies once its file
+    /// is here (#273).
+    artwork: std::sync::OnceLock<crate::artwork::ArtworkCache>,
     /// The wall clock: tests set one that's wrong.
     time: std::sync::RwLock<std::sync::Arc<dyn Fn() -> i64 + Send + Sync>>,
     /// Files that travel after the changes (save files, #239).
@@ -76,7 +79,7 @@ fn entity_rank(entity: Entity) -> u8 {
     match entity {
         Entity::Account => 0,
         Entity::Game => 1,
-        Entity::KeptApart | Entity::IgdbMatch | Entity::ArtworkChoice => 2,
+        Entity::KeptApart | Entity::IgdbMatch | Entity::ArtworkChoice | Entity::Artwork => 2,
         Entity::Collection => 3,
         Entity::Member | Entity::Approval => 4,
         Entity::Session => 5,
@@ -103,6 +106,7 @@ impl SyncEngine {
             settings: std::sync::OnceLock::new(),
             state: Mutex::default(),
             romm_removed: std::sync::OnceLock::new(),
+            artwork: std::sync::OnceLock::new(),
             time: std::sync::RwLock::new(std::sync::Arc::new(now_ms)),
             #[cfg(feature = "net")]
             blobs: super::blobs::Registry::default(),
@@ -113,6 +117,11 @@ impl SyncEngine {
     #[cfg(feature = "net")]
     pub fn blobs(&self) -> &super::blobs::Registry {
         &self.blobs
+    }
+
+    /// The artwork cache, where `artwork` changes' files arrive.
+    pub fn set_artwork_cache(&self, cache: crate::artwork::ArtworkCache) {
+        let _ = self.artwork.set(cache);
     }
 
     /// Exchanges `blobs`' kinds, shared with other engines (a new identity
@@ -355,6 +364,44 @@ impl SyncEngine {
                             applied += 1;
                         }
                         progress = true;
+                    }
+                    Mapped::To(target, value) if change.entity == Entity::Artwork => {
+                        // Its file first: until it's here, the change waits.
+                        let cached = match value
+                            .as_ref()
+                            .and_then(crate::db::SyncedArtwork::from_value)
+                        {
+                            Some(synced) => {
+                                match self
+                                    .artwork
+                                    .get()
+                                    .and_then(|cache| cache.cached(&synced.hash).ok().flatten())
+                                {
+                                    Some(cached) => Some(cached),
+                                    None => continue,
+                                }
+                            }
+                            None => None,
+                        };
+                        match self
+                            .store
+                            .sync_apply_artwork(change, &target, value.clone(), cached)
+                            .await?
+                        {
+                            Applied::Wait => {}
+                            Applied::Superseded => progress = true,
+                            Applied::Written => {
+                                state.fields.insert(
+                                    (change.entity, target, change.field.clone()),
+                                    FieldState {
+                                        value,
+                                        stamp: change.stamp(),
+                                    },
+                                );
+                                applied += 1;
+                                progress = true;
+                            }
+                        }
                     }
                     Mapped::To(target, value) if change.entity == Entity::RommServer => {
                         if self.apply_romm(change, &target, value.clone()).await? {

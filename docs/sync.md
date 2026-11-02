@@ -306,6 +306,7 @@ portable forms of what `sync::policy` declares synced:
 | `approval` | account\|game | `""` | Accounts |
 | `rommServer` | server id | `""`: its shared definition, as the policy projects `core.romm` | RommServers |
 | `saveVersion` | version (UUIDv7) | `""`: game, account, device, session, time, size, file count, parents and the hash of its file list | Saves |
+| `artwork` | game\|artwork id | `""`: the user's own image's kind, content hash and size; its file follows as a blob | Artwork |
 | `appearance` | `core.appearance` | each field changed from its default (`theme`, `density`, …) | Appearance |
 | `accountSettings` | `core.accounts` | `ratingBoard`, when not the default | Accounts |
 
@@ -323,6 +324,17 @@ device that gets a new server has no secret for it, so it asks for its own
 through `RommService::remove_server`, with its downloaded ROMs. Sessions are a union: one is never deleted by sync, and a
 session whose game has no entry here gets an unlaunchable `sync:sessions`
 entry.
+
+The user's own artwork (`user`-source rows: an imported image, or an
+automatic one they chose) travels as `artwork` changes, and its file as an
+`artwork` blob after the changes (`sync::artwork`, over `sync::blobs`). The
+change waits until its file is in the cache here, so a game never shows an
+image that isn't there; the blobs that arrived are applied at the end of the
+exchange. A device serves only files its own user artwork uses: its cache's
+full-size image, which the receiver decodes within the import limits and keeps
+under the same hash (`ArtworkCache::import_received`; it can't be checked
+against the hash, which is the original file's). Artwork may go through a
+relay, as save files may.
 
 Settings travel field by field (`sync::settings`), and only fields set away
 from their defaults: a device set up later would otherwise replace the
@@ -474,8 +486,7 @@ up.
 These are declared synced by the policy but don't travel yet:
 - hand-made achievement links;
 - launch actions and game scripts (optional categories);
-- add-ons;
-- the files of user-imported artwork (#273, over `sync::blobs` as save files are).
+- add-ons.
 
 Each device's own default admin account appears on the other devices as a
 second "Player" account.

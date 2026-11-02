@@ -8,11 +8,13 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use caskade_core::accounts::AccountService;
+use caskade_core::artwork::ArtworkCache;
 use caskade_core::bus::Bus;
 use caskade_core::db::LibraryStore;
 use caskade_core::devices::{ConnectionPurpose, DeviceLink, Devices, MemoryKeyStore, Reach};
 use caskade_core::model::{
-    CollectionKind, ExternalId, Game, GameEdit, GameEntry, PlaySession, SaveCollection, TextEdit,
+    ArtworkKind, CollectionKind, ExternalId, Game, GameEdit, GameEntry, PlaySession,
+    SaveCollection, TextEdit,
 };
 use caskade_core::paths::AppPaths;
 use caskade_core::settings::SettingsService;
@@ -22,6 +24,7 @@ use serde_json::json;
 
 struct Core {
     store: LibraryStore,
+    artwork: ArtworkCache,
     devices: Devices,
     settings: SettingsService,
     account: String,
@@ -37,6 +40,7 @@ impl Core {
     fn sync(&self) -> SyncService {
         let service = SyncService::new(self.store.clone(), self.devices.clone());
         service.set_settings(self.settings.clone());
+        service.set_artwork_cache(self.artwork.clone());
         service.start();
         service
     }
@@ -62,6 +66,7 @@ async fn core(name: &str) -> Core {
     devices.set_settings(settings.clone());
     devices.start();
     let core = Core {
+        artwork: ArtworkCache::new(dir.path().join("artwork")).unwrap(),
         store,
         devices,
         settings,
@@ -419,5 +424,60 @@ async fn this_device_only_stops_sending_and_applying_until_turned_back_on() {
                 && desk.store.game(&desk_game).await.unwrap().unwrap().favorite
         },
     )
+    .await;
+}
+
+/// A user cover on `core`'s game, as Hades shows it.
+async fn user_cover(core: &Core, game: &str) -> Option<String> {
+    core.store
+        .shown_artwork(game)
+        .await
+        .unwrap()
+        .into_iter()
+        .find(|art| art.kind == ArtworkKind::Cover && art.source == "user")
+        .map(|art| art.content_hash)
+}
+
+#[tokio::test]
+async fn an_imported_cover_shows_on_the_other_device_with_its_file() {
+    let desk = core("Desk").await;
+    let tv = core("TV").await;
+    pair(&desk, &tv).await;
+    let (_desk_sync, _tv_sync) = (desk.sync(), tv.sync());
+    let desk_game = hades(&desk).await;
+    let tv_game = hades(&tv).await;
+
+    // A cover imported on the Desk, from a file only the Desk has.
+    let image = image::RgbImage::from_fn(300, 400, |x, y| image::Rgb([x as u8, y as u8, 128]));
+    let mut png = Vec::new();
+    image::DynamicImage::ImageRgb8(image)
+        .write_to(&mut std::io::Cursor::new(&mut png), image::ImageFormat::Png)
+        .unwrap();
+    let file = desk._dir.path().join("cover.png");
+    std::fs::write(&file, png).unwrap();
+    let imported = desk
+        .store
+        .import_user_artwork(&desk.artwork, &desk_game, ArtworkKind::Cover, &file)
+        .await
+        .unwrap();
+
+    within("the cover shows on the TV", 30, || async {
+        user_cover(&tv, &tv_game).await.as_deref() == Some(imported.content_hash.as_str())
+    })
+    .await;
+    // Its file came over the connection and is in the TV's cache, thumbnails
+    // and all.
+    let cached = tv.artwork.cached(&imported.content_hash).unwrap().unwrap();
+    assert_eq!((cached.width, cached.height), (300, 400));
+    assert!(!cached.thumbnails.is_empty());
+
+    // Back to automatic on the Desk: the TV's goes too.
+    desk.store
+        .reset_artwork(&desk_game, ArtworkKind::Cover)
+        .await
+        .unwrap();
+    within("the cover goes from the TV", 30, || async {
+        user_cover(&tv, &tv_game).await.is_none()
+    })
     .await;
 }

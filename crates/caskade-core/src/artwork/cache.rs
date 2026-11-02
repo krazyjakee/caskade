@@ -68,7 +68,50 @@ impl ArtworkCache {
         if bytes.is_empty() || bytes.len() > MAX_INPUT_BYTES {
             return Err(ArtworkError::Limit("empty or oversized encoded artwork"));
         }
-        let hash = digest(bytes);
+        self.import_sync_as(&digest(bytes), bytes)
+    }
+
+    /// Keeps another device's copy of artwork `hash` (#273): the image its
+    /// cache holds, which is re-encoded, so it can't be checked against
+    /// `hash` (the original's). It's decoded within the same limits as an
+    /// import, and arrives only from a paired device over its granted
+    /// session.
+    pub async fn import_received(&self, hash: String, bytes: Vec<u8>) -> Result<CachedArtwork> {
+        if !super::valid_hash(&hash) {
+            return Err(ArtworkError::Invalid("artwork hash"));
+        }
+        if bytes.is_empty() || bytes.len() > MAX_INPUT_BYTES {
+            return Err(ArtworkError::Limit("empty or oversized encoded artwork"));
+        }
+        let cache = self.clone();
+        caskade_jobs::blocking(crate::tr!("Preparing artwork"), move || {
+            cache.import_sync_as(&hash, &bytes)
+        })
+        .await
+        .map_err(|_| ArtworkError::Worker)?
+    }
+
+    /// Artwork `hash` as the cache keeps it, if it does.
+    pub fn cached(&self, hash: &str) -> Result<Option<CachedArtwork>> {
+        self.lookup(hash)
+    }
+
+    /// Up to `len` bytes of artwork `hash`'s full-size image from `offset`,
+    /// fewer only at its end: what another device receives (#273).
+    pub fn read_original(&self, hash: &str, offset: u64, len: usize) -> Result<Vec<u8>> {
+        use std::io::{Seek, SeekFrom};
+        let Some(artwork) = self.lookup(hash)? else {
+            return Err(ArtworkError::Invalid("artwork not cached"));
+        };
+        let mut file = self.dir.open(&artwork.cached_path)?.into_std();
+        file.seek(SeekFrom::Start(offset))?;
+        let mut bytes = Vec::with_capacity(len.min(MAX_INPUT_BYTES));
+        file.take(len as u64).read_to_end(&mut bytes)?;
+        Ok(bytes)
+    }
+
+    fn import_sync_as(&self, hash: &str, bytes: &[u8]) -> Result<CachedArtwork> {
+        let hash = hash.to_owned();
         self.dir.create_dir_all(&hash)?;
         let directory = self.dir.open_dir(&hash)?;
         // OS locks serialize independent service instances and processes too.

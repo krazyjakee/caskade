@@ -52,6 +52,9 @@ pub enum Entity {
     /// device, session, time, parents and the hash of its file list. Its
     /// files travel as blobs (`sync::blobs`). Key: version id.
     SaveVersion,
+    /// The user's own artwork: an imported image, or an automatic one they
+    /// chose, its file following as a blob (#273). Key: game|artwork id.
+    Artwork,
     /// A `core.appearance` field the user changed from its default (#273).
     /// Key: the namespace; field: the setting's.
     Appearance,
@@ -61,7 +64,7 @@ pub enum Entity {
 }
 
 impl Entity {
-    pub const ALL: [Self; 13] = [
+    pub const ALL: [Self; 14] = [
         Self::Game,
         Self::KeptApart,
         Self::IgdbMatch,
@@ -73,6 +76,7 @@ impl Entity {
         Self::Approval,
         Self::RommServer,
         Self::SaveVersion,
+        Self::Artwork,
         Self::Appearance,
         Self::AccountSettings,
     ];
@@ -90,6 +94,7 @@ impl Entity {
             Self::Approval => "approval",
             Self::RommServer => "rommServer",
             Self::SaveVersion => "saveVersion",
+            Self::Artwork => "artwork",
             Self::Appearance => "appearance",
             Self::AccountSettings => "accountSettings",
         }
@@ -105,7 +110,7 @@ impl Entity {
             Self::Game | Self::KeptApart | Self::IgdbMatch | Self::Collection | Self::Member => {
                 Category::Library
             }
-            Self::ArtworkChoice => Category::Artwork,
+            Self::ArtworkChoice | Self::Artwork => Category::Artwork,
             Self::Session => Category::PlaySessions,
             Self::Account | Self::Approval => Category::Accounts,
             Self::RommServer => Category::RommServers,
@@ -118,7 +123,11 @@ impl Entity {
     /// Which parts of its key are games, which differ per device.
     pub fn game_parts(self) -> &'static [usize] {
         match self {
-            Self::Game | Self::KeptApart | Self::IgdbMatch | Self::ArtworkChoice => &[0],
+            Self::Game
+            | Self::KeptApart
+            | Self::IgdbMatch
+            | Self::ArtworkChoice
+            | Self::Artwork => &[0],
             Self::Member | Self::Approval => &[1],
             Self::Collection
             | Self::Session
@@ -152,6 +161,7 @@ impl Entity {
             Self::Approval => &["account_game_approvals"],
             Self::RommServer => &["core.romm"],
             Self::SaveVersion => &["save_versions"],
+            Self::Artwork => &["artwork"],
             Self::Appearance => &["core.appearance"],
             Self::AccountSettings => &["core.accounts"],
         }
@@ -205,7 +215,6 @@ mod tests {
     const BLOBS: &[&str] = &["save_blobs"];
     /// Rules #273 hasn't carried yet; empty when it closes.
     const NOT_YET: &[&str] = &[
-        "artwork",
         "achievement_links",
         "game_actions",
         "entry_action_settings",

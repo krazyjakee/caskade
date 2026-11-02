@@ -1,5 +1,7 @@
 //! Core-side declarations consumed by the device change exchange.
 #[cfg(feature = "net")]
+pub mod artwork;
+#[cfg(feature = "net")]
 pub mod blobs;
 pub mod change;
 pub mod clock;
