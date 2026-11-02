@@ -35,6 +35,7 @@ pub mod scripts;
 pub mod settings;
 pub mod storage;
 pub mod store_accounts;
+pub mod sync;
 pub mod system_stats;
 #[cfg(test)]
 pub(crate) mod test_ipc;

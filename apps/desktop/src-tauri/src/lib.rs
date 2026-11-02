@@ -580,6 +580,18 @@ pub fn run() {
         // Their icons (#190), through the artwork cache.
         app.manage(commands::achievement_icons::AchievementIcons(artwork));
         commands::store_accounts::setup(app.handle(), store_accounts);
+        // Paired devices (#224–#226): the device key from the keychain (off
+        // this thread: a locked keychain holds only sync), the endpoint and
+        // pairing.
+        if let Some(accounts) = app.try_state::<caskade_core::accounts::AccountService>() {
+            let devices = caskade_core::devices::Devices::new(
+                store.clone(),
+                accounts.inner().clone(),
+                std::sync::Arc::new(caskade_core::devices::Keychain),
+            );
+            devices.set_settings(settings.clone());
+            commands::sync::setup(app.handle(), devices);
+        }
         app.manage(settings);
         app.manage(store);
         app.manage(launch);

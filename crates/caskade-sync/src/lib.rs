@@ -58,7 +58,9 @@ pub mod grant;
 pub mod identity;
 pub mod lan;
 pub mod link;
+pub mod link_ticket;
 pub mod opening;
+pub mod pairing;
 
 pub use device::{DeviceInfo, DeviceKind, DeviceOs};
 pub use endpoint::{Admission, Config, Ip, Reach, Relays, Session, Sessions, SyncEndpoint};
@@ -66,10 +68,12 @@ pub use error::{Error, Result};
 pub use frame::{FrameReader, FrameWriter};
 pub use grant::Grant;
 pub use identity::{Identity, KEYCHAIN_SERVICE, KeyStore, Keychain, Loaded, Lost, MemoryKeyStore};
-pub use iroh::{EndpointAddr, EndpointId};
+pub use iroh::{EndpointAddr, EndpointId, TransportAddr};
 pub use lan::{Lan, Nearby, NearbyChanged};
 pub use link::{Link, LinkChanged, Links};
+pub use link_ticket::{LINK_LIFETIME, PairingLink};
 pub use opening::{Purpose, REFUSAL};
+pub use pairing::{CodePairing, Paired};
 
 /// The ALPN Caskade's devices speak. It names the protocol and its version:
 /// TLS negotiates it before any byte of the opening, so the opening carries no

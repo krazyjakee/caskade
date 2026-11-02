@@ -10,4 +10,6 @@ mod milestone_editing;
 mod rom_scan;
 #[cfg(feature = "net")]
 mod romm;
+#[cfg(feature = "net")]
+mod devices;
 mod sync_policy;

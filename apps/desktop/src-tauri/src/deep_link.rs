@@ -106,6 +106,13 @@ pub async fn queue<R: Runtime>(
 pub fn open_in_background<R: Runtime>(app: &tauri::AppHandle<R>, links: Vec<Url>) {
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
+        let (pairs, links): (Vec<_>, Vec<_>) = links
+            .into_iter()
+            .partition(crate::commands::sync::is_pair_link);
+        // Pairing links (#226) wait for an admin in the app.
+        for link in pairs {
+            crate::commands::sync::open_pair_link(&app, &link);
+        }
         let (callbacks, installs): (Vec<_>, Vec<_>) = links
             .into_iter()
             .partition(crate::commands::store_accounts::is_callback);

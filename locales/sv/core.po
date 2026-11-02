@@ -768,6 +768,58 @@ msgstr "ett butikskonto behöver en leverantör"
 msgid "a store account needs its id at the provider"
 msgstr "ett butikskonto behöver sitt id hos leverantören"
 
+#: crates/caskade-core/src/devices/mod.rs
+msgid "another pairing is in progress"
+msgstr ""
+
+#: crates/caskade-core/src/devices/mod.rs
+msgid "pairing was cancelled"
+msgstr ""
+
+#: crates/caskade-core/src/devices/mod.rs
+msgid "that pairing link is this device's own"
+msgstr ""
+
+#: crates/caskade-core/src/devices/mod.rs
+msgid "the system keychain is unavailable"
+msgstr ""
+
+#: crates/caskade-core/src/devices/mod.rs
+msgid "the other device refused the connection"
+msgstr ""
+
+#: crates/caskade-core/src/devices/mod.rs
+msgid "couldn't reach the other device"
+msgstr ""
+
+#: crates/caskade-core/src/devices/mod.rs
+msgid "sync isn't ready on this device yet"
+msgstr ""
+
+#: crates/caskade-core/src/devices/mod.rs
+msgid "no pairing with that device"
+msgstr ""
+
+#: crates/caskade-core/src/devices/mod.rs
+msgid "that isn't a Caskade pairing link"
+msgstr ""
+
+#: crates/caskade-core/src/devices/mod.rs
+msgid "this pairing link has expired; make a new one on the other device"
+msgstr ""
+
+#: crates/caskade-core/src/devices/mod.rs
+msgid "this pairing link was already used or has expired; make a new one on the other device"
+msgstr ""
+
+#: crates/caskade-core/src/devices/mod.rs
+msgid "the other device isn't accepting a pairing right now"
+msgstr ""
+
+#: crates/caskade-core/src/devices/mod.rs
+msgid "that isn't a device id"
+msgstr ""
+
 #: crates/caskade-core/src/emulation/catalog.rs
 msgid "the ROM file name {file} starts with `-`, which the emulator would read as an option; rename the file"
 msgstr "ROM-filnamnet {file} börjar med `-`, vilket emulatorn skulle läsa som ett alternativ; byt namn på filen"
@@ -2940,6 +2992,26 @@ msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
+msgid "Never use relays"
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Connect to other devices only directly. A device only a relay could reach shows as offline."
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Listening port"
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "A fixed UDP port for firewall rules; empty lets the system choose."
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
 msgid "Rating board"
 msgstr "Klassificeringsorgan"
 
@@ -3816,6 +3888,10 @@ msgstr "Välj lagringsplats för spel"
 #: apps/desktop/src-tauri/src/commands/storage.rs
 msgid "The folder chooser closed without an answer."
 msgstr "Mappväljaren stängdes utan svar."
+
+#: apps/desktop/src-tauri/src/commands/sync.rs
+msgid "no pairing link is waiting"
+msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/themes.rs
 msgid "Safe mode: Caskade started with the default theme and without your custom CSS."

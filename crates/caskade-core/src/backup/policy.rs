@@ -10,6 +10,10 @@ pub const EXCLUDED_TABLES: &[(&str, &str)] = &[
         "daily IGDB Visits scores, fetched again after restoring",
     ),
     (
+        "paired_devices",
+        "pairings hold the grants each device presents (credentials); devices pair again after a restore",
+    ),
+    (
         "icon_checks",
         "which executables were read for icons: a restore without the icons must read them again",
     ),
@@ -21,6 +25,10 @@ pub const EXCLUDED_SETTINGS: &[(&str, &str)] = &[
     (
         "plugins.component-cache-key",
         "signs the compiled-plugin cache, which isn't backed up",
+    ),
+    (
+        "sync.device",
+        "this device's endpoint id and name, which a restore on another machine mustn't take over",
     ),
     (
         "storage.move.",

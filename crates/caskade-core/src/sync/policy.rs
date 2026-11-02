@@ -91,6 +91,14 @@ pub struct SyncSettings {
     #[schemars(title = "What syncs")]
     /// Choose Sync or This device only for each category.
     pub categories: BTreeMap<Category, CategoryState>,
+    #[schemars(title = "Never use relays")]
+    /// Connect to other devices only directly. A device only a relay could reach shows as offline.
+    #[serde(default)]
+    pub never_relay: bool,
+    #[schemars(title = "Listening port", range(min = 1, max = 65535))]
+    /// A fixed UDP port for firewall rules; empty lets the system choose.
+    #[serde(default)]
+    pub port: Option<u16>,
 }
 
 impl Default for SyncSettings {
@@ -100,6 +108,8 @@ impl Default for SyncSettings {
                 .into_iter()
                 .map(|category| (category, category.default_state()))
                 .collect(),
+            never_relay: false,
+            port: None,
         }
     }
 }
@@ -521,6 +531,10 @@ pub const TABLES: &[Rule] = &[
         "RomM inventory and downloaded ROM paths are per device",
     ),
     local(
+        "managed_tools",
+        "managed helper program installations, executable paths and update state belong to this device",
+    ),
+    local(
         "remote_playtime",
         "each device reads its own stores and launchers",
     ),
@@ -545,6 +559,10 @@ pub const TABLES: &[Rule] = &[
         "installed release/update state belongs to this device",
     ),
     local("icon_checks", "executable icon checks are a local cache"),
+    local(
+        "paired_devices",
+        "each device keeps its own pairings and the grants each side presents (credentials)",
+    ),
     local("igdb_popularity", "IGDB popularity is a refetchable cache"),
     local("game_additions", "notification import journal is local"),
     local("notification_revision", "notification revisions are local"),
@@ -690,6 +708,10 @@ pub const SETTINGS: &[Rule] = &[
     local(
         "storage.move.",
         "move intents refer to this device's folders and drives",
+    ),
+    local(
+        "sync.device",
+        "this device's endpoint id, name and kind belong to it; peers learn them while pairing",
     ),
     local(
         "backup.state",

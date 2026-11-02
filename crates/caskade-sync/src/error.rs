@@ -57,6 +57,21 @@ pub enum Error {
     #[error("the system keychain is unavailable")]
     Keychain,
 
+    /// Pairing ended because someone cancelled it, on either device.
+    #[error("pairing was cancelled")]
+    Cancelled,
+
+    /// The pairing link has expired.
+    #[error("this pairing link has expired; make a new one on the other device")]
+    LinkExpired,
+
+    /// The device refused the pairing link: it was used already, it expired,
+    /// or the device no longer offers it (the refusal doesn't say which).
+    #[error(
+        "this pairing link was already used or has expired; make a new one on the other device"
+    )]
+    LinkRefused,
+
     /// The text isn't a Caskade pairing link.
     #[error("that isn't a Caskade pairing link")]
     NotALink,

@@ -291,6 +291,20 @@ pub fn access(command: &str) -> Option<Access> {
         | "manual_game_add" => Install,
         "job_answer" | "job_retry" | "job_recover" => Job,
         "backup_status" | "backup_plan" => Open,
+        // Paired devices (#226): reading them needs an account; every change
+        // is an admin's (pairing hands another device the library).
+        "devices_status" | "devices_opened_link" | "devices_dismiss_opened_link" => SignedIn,
+        "devices_rename"
+        | "devices_set_kind"
+        | "devices_pair_nearby"
+        | "devices_confirm_pairing"
+        | "devices_cancel_pairing"
+        | "devices_pairing_link"
+        | "devices_accept_pairing_link"
+        | "devices_accept_opened_link"
+        | "devices_forget"
+        | "devices_create_identity"
+        | "devices_retry_identity" => Admin,
         // Store accounts (#164): reads, a refresh for whoever is signed
         // in, and the account changes for admins.
         "store_providers"

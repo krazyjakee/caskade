@@ -50,7 +50,9 @@ mod letter_tests;
 #[cfg(test)]
 mod platform_tests;
 mod playtime;
+mod paired_devices;
 mod popularity;
+pub use paired_devices::PairedDeviceRecord;
 pub use playtime::{PlaytimeBreakdown, PlaytimeImport, RemoteTotal, ReportedPlaytime};
 mod sessions;
 mod store_accounts;

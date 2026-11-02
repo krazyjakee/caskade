@@ -11,7 +11,7 @@ rust-version.workspace = true
 autotests = false
 [features]
 default = ["net"]
-net = ["dep:reqwest", "dep:flate2", "dep:scraper", "caskade-installer/fetch", "caskade-installer/torrent"]
+net = ["dep:caskade-sync", "dep:reqwest", "dep:flate2", "dep:scraper", "caskade-installer/fetch", "caskade-installer/torrent"]
 
 [dependencies]
 caskade-jobs = { path = "../caskade-jobs" }
@@ -22,6 +22,8 @@ caskade-discovery = { path = "../caskade-discovery", default-features = false, f
 caskade-installer = { path = "../caskade-installer", default-features = false, features = ["windows-formats", "linux-formats", "macos-formats", "disc"] }
 # Theme packages (#139): format, lint and compiler.
 caskade-theme = { path = "../caskade-theme" }
+# Device connections and pairing (#224–#226, `devices`), with `net`.
+caskade-sync = { path = "../caskade-sync", optional = true }
 # Dev themes (#140) are watched like dev plugins (#131); same pin.
 notify = { version = "8", default-features = false, features = ["macos_kqueue"] }
 thiserror = "2"
@@ -87,6 +89,7 @@ minisign-verify = "=0.3.0"
 semver = { version = "1", features = ["serde"] }
 
 [dev-dependencies]
+caskade-sync = { path = "../caskade-sync" }
 caskade-emulation-fixtures = { path = "../caskade-emulation-fixtures" }
 # The stale-template test runs extraction (tests/i18n.rs).
 caskade-i18n = { path = "../caskade-i18n", features = ["extract"] }

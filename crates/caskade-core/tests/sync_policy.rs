@@ -264,6 +264,7 @@ fn all_categories() -> SyncSettings {
             .into_iter()
             .map(|category| (category, CategoryState::Sync))
             .collect(),
+        ..SyncSettings::default()
     }
 }
 

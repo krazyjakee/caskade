@@ -16,6 +16,8 @@ pub mod browse;
 pub mod bus;
 mod cache_db;
 pub mod db;
+#[cfg(feature = "net")]
+pub mod devices;
 pub mod emulation;
 pub mod error;
 pub mod hasheous;

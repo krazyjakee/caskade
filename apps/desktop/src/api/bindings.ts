@@ -652,6 +652,40 @@ export const commands = {
 	torrentLinksSet: (open: boolean) => typedError<TorrentLinks, string>(__TAURI_INVOKE("torrent_links_set", { open })),
 	/**  Windows: opens Default apps at Caskade's page. */
 	torrentLinksChoose: () => typedError<null, string>(__TAURI_INVOKE("torrent_links_choose")),
+	devicesStatus: () => typedError<DevicesStatus_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("devices_status")),
+	/**  Renames this device; an empty name goes back to the host name. */
+	devicesRename: (name: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_rename", { name })),
+	devicesSetKind: (kind: DeviceKind) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_set_kind", { kind })),
+	/**  Starts pairing with a nearby device: both devices show the code. */
+	devicesPairNearby: (deviceId: string) => typedError<Pairing, ErrorReport_Serialize>(__TAURI_INVOKE("devices_pair_nearby", { deviceId })),
+	/**  This user confirms the codes match. */
+	devicesConfirmPairing: (deviceId: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_confirm_pairing", { deviceId })),
+	/**  Cancels a pairing, or dismisses a finished one. */
+	devicesCancelPairing: (deviceId: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_cancel_pairing", { deviceId })),
+	/**
+	 *  A link that pairs another device with this one from anywhere: once, for
+	 *  ten minutes.
+	 */
+	devicesPairingLink: () => typedError<PairingLinkInfo, ErrorReport_Serialize>(__TAURI_INVOKE("devices_pairing_link")),
+	/**  Pairs with the device a pasted pairing link names. */
+	devicesAcceptPairingLink: (link: string) => typedError<PairedDevice_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("devices_accept_pairing_link", { link })),
+	/**  The pairing link opened from outside, if one waits. */
+	devicesOpenedLink: () => typedError<PairingLinkTarget | null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_opened_link")),
+	/**  Pairs with the device the opened link names. */
+	devicesAcceptOpenedLink: () => typedError<PairedDevice_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("devices_accept_opened_link")),
+	devicesDismissOpenedLink: () => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_dismiss_opened_link")),
+	/**
+	 *  Forgets a paired device; it's refused from now on and told when it can
+	 *  be reached. Nothing synced is deleted.
+	 */
+	devicesForget: (deviceId: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_forget", { deviceId })),
+	/**
+	 *  Makes a new identity after the keychain lost the old one: paired devices
+	 *  must pair again. Only after the user agreed.
+	 */
+	devicesCreateIdentity: () => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_create_identity")),
+	/**  Reads the keychain again after it didn't answer. */
+	devicesRetryIdentity: () => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_retry_identity")),
 	backupStatus: () => typedError<BackupStatus_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("backup_status")),
 	/**
 	 *  What a backup to `destination` (the settings' folder when `None`) with
@@ -770,6 +804,7 @@ export const events = {
 	backgroundChanged: makeEvent<BackgroundChanged, BackgroundChanged>("background-changed"),
 	backupChanged: makeEvent<BackupChanged_Serialize, BackupChanged_Deserialize>("backup-changed"),
 	consoleModeEvent: makeEvent<ConsoleModeEvent, ConsoleModeEvent>("console-mode-event"),
+	devicesChanged: makeEvent<DevicesChanged_Serialize, DevicesChanged_Deserialize>("devices-changed"),
 	discoveryChanged: makeEvent<DiscoveryChanged_Serialize, DiscoveryChanged_Deserialize>("discovery-changed"),
 	emulationChanged: makeEvent<EmulationChanged, EmulationChanged>("emulation-changed"),
 	emulationDetectChanged: makeEvent<EmulationDetectChanged_Serialize, EmulationDetectChanged_Deserialize>("emulation-detect-changed"),
@@ -787,6 +822,7 @@ export const events = {
 	lifecycleScriptsRan: makeEvent<LifecycleScriptsRan_Serialize, LifecycleScriptsRan_Deserialize>("lifecycle-scripts-ran"),
 	localeChanged: makeEvent<LocaleChanged, LocaleChanged>("locale-changed"),
 	notificationsChanged: makeEvent<NotificationsChanged, NotificationsChanged>("notifications-changed"),
+	pairingLinkOpened: makeEvent<PairingLinkOpened, PairingLinkOpened>("pairing-link-opened"),
 	pluginDisabled: makeEvent<PluginDisabled, PluginDisabled>("plugin-disabled"),
 	pluginReloaded: makeEvent<PluginReloaded_Serialize, PluginReloaded_Deserialize>("plugin-reloaded"),
 	pluginsChanged: makeEvent<PluginsChanged, PluginsChanged>("plugins-changed"),
@@ -2734,6 +2770,41 @@ export type DetectedProfile = {
 	available: boolean,
 };
 
+export type DeviceKind = "desktop" | "laptop" | "handheld" | "tv";
+
+/**  How a device is reached right now. */
+export type DeviceLink = "lan" | "direct" | "relay" | "offline";
+
+export type DeviceOs = "linux" | "windows" | "mac";
+
+/**  Devices changed: a pairing, a link state, a nearby device, a rename. */
+export type DevicesChanged = DevicesChanged_Serialize | DevicesChanged_Deserialize;
+
+/**  Devices changed: a pairing, a link state, a nearby device, a rename. */
+export type DevicesChanged_Deserialize = DevicesStatus_Deserialize;
+
+/**  Devices changed: a pairing, a link state, a nearby device, a rename. */
+export type DevicesChanged_Serialize = DevicesStatus_Serialize;
+
+/**  Everything Settings → Devices shows. */
+export type DevicesStatus = DevicesStatus_Serialize | DevicesStatus_Deserialize;
+
+/**  Everything Settings → Devices shows. */
+export type DevicesStatus_Deserialize = {
+	thisDevice: ThisDevice_Deserialize,
+	devices: PairedDevice_Deserialize[],
+	nearby: NearbyDevice[],
+	pairing?: Pairing | null,
+};
+
+/**  Everything Settings → Devices shows. */
+export type DevicesStatus_Serialize = {
+	thisDevice: ThisDevice_Serialize,
+	devices: PairedDevice_Serialize[],
+	nearby: NearbyDevice[],
+	pairing: Pairing | null,
+};
+
 export type DirEntry = {
 	name: string,
 	path: string,
@@ -4098,6 +4169,20 @@ export type HardcoreUnlock_Serialize = {
 /**  Emitted after every `hello` command. */
 export type Hello = Greeting;
 
+/**  Where this device's identity stands. */
+export type IdentityStatus = 
+/**  Being read from the keychain. */
+"starting" | "ready" | 
+/**
+ *  The keychain lost this device's key. A new identity needs asking:
+ *  paired devices must pair again.
+ */
+"missing" | 
+/**  The keychain entry isn't a key; the same choice as `missing`. */
+"unreadable" | 
+/**  The keychain didn't answer; sync waits. */
+"keychainUnavailable";
+
 /**
  *  One board's rating: `board` is `pegi`, `esrb`, `usk`, `cero`, `acb`,
  *  `grac`, `classind` or a board IGDB adds later; `rating` its label
@@ -5341,6 +5426,15 @@ export type MissingPlatform_Serialize = {
 	recommended: Recommendation | null,
 };
 
+/**  A Caskade device on this network that isn't paired. */
+export type NearbyDevice = {
+	id: string,
+	name: string,
+	kind: DeviceKind,
+	os: DeviceOs,
+	addresses: string[],
+};
+
 export type NetworkSample = NetworkSample_Serialize | NetworkSample_Deserialize;
 
 export type NetworkSample_Deserialize = {
@@ -5632,6 +5726,77 @@ export type PadInfo = {
 	/**  The pad used last. */
 	active: boolean,
 };
+
+/**  A device paired with this one. Its grants stay in the core. */
+export type PairedDevice = PairedDevice_Serialize | PairedDevice_Deserialize;
+
+/**  A device paired with this one. Its grants stay in the core. */
+export type PairedDevice_Deserialize = {
+	id: string,
+	name: string,
+	kind: DeviceKind,
+	os: DeviceOs,
+	link: DeviceLink,
+	/**  Where it was last reached. */
+	addresses: string[],
+	lastSyncMs?: number | null,
+	pairedAtMs: number,
+};
+
+/**  A device paired with this one. Its grants stay in the core. */
+export type PairedDevice_Serialize = {
+	id: string,
+	name: string,
+	kind: DeviceKind,
+	os: DeviceOs,
+	link: DeviceLink,
+	/**  Where it was last reached. */
+	addresses: string[],
+	lastSyncMs: number | null,
+	pairedAtMs: number,
+};
+
+/**  A code pairing: both devices show `code`, and both users confirm. */
+export type Pairing = {
+	deviceId: string,
+	name: string,
+	kind: DeviceKind,
+	os: DeviceOs,
+	code: string,
+	/**  The other device started it. */
+	incoming: boolean,
+	/**  This device's user confirmed. */
+	confirmed: boolean,
+	state: PairingState,
+};
+
+/**  A pairing link to show or copy. It works once, until `expires_at_ms`. */
+export type PairingLinkInfo = {
+	url: string,
+	expiresAtMs: number,
+};
+
+/**  A `caskade://pair` link was opened; Settings → Devices asks an admin. */
+export type PairingLinkOpened = PairingLinkTarget;
+
+/**
+ *  A pairing link opened from outside the app (a `caskade://pair` link),
+ *  shown for an admin to accept. The link itself stays in the app.
+ */
+export type PairingLinkTarget = {
+	/**  The device it pairs with. */
+	deviceId: string,
+	expiresAtMs: number,
+	expired: boolean,
+};
+
+export type PairingState = 
+/**  Codes on screen, waiting for one or both users. */
+"waiting" | "paired" | 
+/**  Cancelled on either device; nothing was stored. */
+"cancelled" | 
+/**  The connection failed or timed out; nothing was stored. */
+"failed";
 
 /**  What the plugin asks for; granted by the user (#124 enforces). */
 export type Permissions = Permissions_Serialize | Permissions_Deserialize;
@@ -8306,6 +8471,38 @@ export type ThemeReloaded_Serialize = {
 export type ThemeSource = "builtin" | "user" | "plugin" | 
 /**  A folder loaded in place in dev mode, watched for changes. */
 "dev";
+
+export type ThisDevice = ThisDevice_Serialize | ThisDevice_Deserialize;
+
+export type ThisDevice_Deserialize = {
+	/**  Its endpoint id, once the identity is ready. */
+	id?: string | null,
+	name: string,
+	kind: DeviceKind,
+	os: DeviceOs,
+	/**  Addresses on this network other devices reach it at. */
+	lanAddresses: string[],
+	neverRelay: boolean,
+	port?: number | null,
+	identity: IdentityStatus,
+	/**  The endpoint is running: other devices can reach this one. */
+	listening: boolean,
+};
+
+export type ThisDevice_Serialize = {
+	/**  Its endpoint id, once the identity is ready. */
+	id: string | null,
+	name: string,
+	kind: DeviceKind,
+	os: DeviceOs,
+	/**  Addresses on this network other devices reach it at. */
+	lanAddresses: string[],
+	neverRelay: boolean,
+	port: number | null,
+	identity: IdentityStatus,
+	/**  The endpoint is running: other devices can reach this one. */
+	listening: boolean,
+};
 
 /**
  *  The first game whose title starts with `letter` (`#` for anything but

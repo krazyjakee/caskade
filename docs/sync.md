@@ -175,6 +175,109 @@ started through a relay switching to a direct path once holepunching succeeds.
 Relays carry data at roughly 1 MB/s (wobu measured 512 KiB in 504 ms against
 22 ms direct), which is why game files require a direct path (#233).
 
+## Pairing and devices
+
+`caskade_core::devices::Devices` (only with the core's `net` feature) keeps
+this device and the devices paired with it. Commands are in
+`src-tauri/src/commands/sync.rs` (`devices_*`); the status reaches the webview
+as `DevicesChanged`. Settings → Devices itself is #231.
+
+### This device
+
+Its endpoint id, name and kind are in the settings table under `sync.device`
+(not a section). The name defaults to the host name. Name and kind go into
+the mDNS announcement and are exchanged while pairing. `core.sync` holds Never
+use relays (`neverRelay`) and the listening port (`port`) next to #227's
+category choices; changing either rebinds the endpoint. The app starts the
+service in the background (`Devices::start`): the identity loads off the main
+thread, so a locked keychain holds only sync. `IdentityStatus` reports
+`missing` or `unreadable` when the key is gone after first use, and
+`devices_create_identity` makes a new one once the user agrees.
+
+### Pairing by code
+
+On the local network, one device starts a pairing with a nearby one
+(`devices_pair_nearby`). Both show a 6-digit code, and the pairing completes
+only when both users confirm (`devices_confirm_pairing`). The code is SHA-256
+over both endpoint ids and a fresh 32-byte nonce from each side, reduced to six
+digits. The dialler commits to its nonce (a SHA-256 commitment) before it sees
+the other's, so a device in the middle can't choose nonces to make two
+pairings show the same code: it would show each side a different one, except
+by a one-in-a-million chance per attempt.
+
+```text
+dialler                                   acceptor
+  Commit { sha256(nonce_d), device } ──▶
+                                      ◀── Nonce { nonce_a, device }
+  Reveal { nonce_d }                 ──▶   (checks the commitment)
+  both show the code
+  Confirm { grant } or Cancel        ◀─▶   Confirm { grant } or Cancel
+```
+
+A device takes one code pairing at a time: while one is in progress, the
+admission refuses every other pairing without a grant, so a third device
+can't join it. A cancel on either side, a mismatch, a two-minute timeout or a
+dropped connection ends it with nothing stored.
+
+### Pairing links
+
+`devices_pairing_link` mints `caskade://pair?t=<ticket>`. The ticket is an
+iroh ticket (kind `caskadepair`) holding this device's address (local
+addresses, plus the relay once there is one), a single-use 32-byte pairing
+grant and its expiry. A link works once, for ten minutes. The minting device
+keeps the grant in memory and spends it in the opening, whether the pairing
+then completes or not. A restart invalidates links not used yet.
+
+The receiving device refuses a link that says it has expired without
+dialling ("this pairing link has expired"). A used link, or one whose expiry
+the minting device has passed, gets the opening's one refusal, which the
+receiving device reports as "this pairing link was already used or has
+expired; make a new one on the other device".
+
+A pasted link goes to `devices_accept_pairing_link`. A `caskade://pair` link
+opened from outside (`deep_link.rs`) doesn't pair by itself, because any web
+page can open one. The adapter holds it, announces `PairingLinkOpened` (with
+the device id and expiry, not the link), and pairs only when an admin calls
+`devices_accept_opened_link`.
+
+### Grants and admission
+
+Each side generates the grant the other presents when it dials this one, and
+receives the one it presents in return. `paired_devices` (migration 0031)
+keeps both, with the device's name, kind, OS, last addresses, Wake-on-LAN MAC
+addresses (#234), last sync time and when it was paired. Grants are
+credentials: the table is local in the sync policy (#227), left out of backups
+(`backup::policy`), and no grant or key is in anything sent to the webview.
+
+The admission (`devices/gate.rs`) is in memory:
+
+| Purpose | Admitted when |
+| --- | --- |
+| `sync`, `copy`, `forget` | The device is paired and presents its own grant |
+| `pair` with a grant | The grant is a pairing link offered here, unused and unexpired (spent now) |
+| `pair` without a grant | No other code pairing is in progress |
+| `share` | Never yet (#246) |
+
+`Devices::connect(device_id, purpose)` opens a connection to a paired device
+with its grant: what library sync (#230) and copies (#233) start from.
+
+### Forgetting
+
+`devices_forget` drops the device's grant at once, so its connections are
+refused from then on, and tells it with a `forget` connection, which makes
+it drop this one too. A device that can't be reached stays in the table,
+marked forgotten and refused, and is told when it can be: as soon as it tries
+to connect, when it appears nearby, or every five minutes. Nothing synced is
+deleted. A forgotten device reconnects only by pairing again.
+
+### Admins only
+
+Pairing hands another device every account and the library. So pairing,
+confirming, cancelling, minting or accepting links, forgetting, renaming this
+device and making a new identity are admin-only in the core
+(`AccountService::require(Permission::Admin)`), and in the adapter's
+permission table too. Reading the status needs a signed-in account.
+
 ## Lifetime
 
 `SyncEndpoint::bind` runs on the caller's tokio runtime; the crate creates
@@ -201,6 +304,21 @@ endpoint for the process lifetime and calls `SyncEndpoint::shutdown` at exit.
   each other, read each other's name, kind and OS, dial by id alone, and see
   a rename. Set `CASKADE_TEST_NO_MULTICAST=1` where the platform has no
   multicast.
+- Pairing, in the crate (`tests/pairing.rs`): codes match and need both
+  confirmations, a cancel on either side ends both, a third device is refused
+  while a pairing is in progress, a link works once, and expired links are
+  refused (by the link itself, and by the minting device's own record).
+- The core (`cargo test -p caskade-core --test it devices::`): pairing by link
+  both ways and once only; pairing by code over mDNS with no relay and no
+  internet lookup, needing both confirmations, and a cancel storing nothing; a
+  forgotten device refused until it pairs again, including one forgotten
+  while away and told when it knocks; the admin rule for every change; a lost
+  key asking before a new identity; no key or grant in the settings record
+  or the status.
+- The adapter (`cargo test -p caskade-desktop --lib commands::sync::`): the
+  commands and `DevicesChanged` on Tauri's mock runtime, a `caskade://pair`
+  link held for an admin rather than pairing, and every change refused for a
+  standard account.
 - Lint: `flock /tmp/caskade-heavy.lock cargo clippy -p caskade-sync
   --all-targets -- -D warnings`, and the same with
   `--target x86_64-pc-windows-gnu`.

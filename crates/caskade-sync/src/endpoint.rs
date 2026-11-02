@@ -220,6 +220,7 @@ pub trait Sessions: Send + Sync + 'static {
 /// one JSON line each.
 #[derive(Debug)]
 pub struct Session {
+    local: EndpointId,
     purpose: Purpose,
     grant: Option<Grant>,
     connection: Connection,
@@ -247,6 +248,22 @@ impl Session {
         &self.connection
     }
 
+    /// This device's endpoint id.
+    pub fn local_id(&self) -> EndpointId {
+        self.local
+    }
+
+    /// Whether this side dialled the connection.
+    pub fn is_dialler(&self) -> bool {
+        self.connection.side() == iroh::endpoint::Side::Client
+    }
+
+    /// Both halves of the stream at once, for reading and writing
+    /// concurrently.
+    pub fn split(&mut self) -> (&mut FrameWriter, &mut FrameReader) {
+        (&mut self.writer, &mut self.reader)
+    }
+
     pub fn writer(&mut self) -> &mut FrameWriter {
         &mut self.writer
     }
@@ -267,7 +284,19 @@ impl Session {
         )
     }
 
-    /// Ends the session normally.
+    /// Ends the session normally once the peer has everything written: the
+    /// stream is finished and its data acknowledged (waiting at most 2 s),
+    /// then the connection closes. A plain [`Session::close`] can discard a
+    /// last message still in flight.
+    pub async fn end(self) {
+        let Self {
+            writer, connection, ..
+        } = self;
+        let _ = tokio::time::timeout(Duration::from_secs(2), writer.finish()).await;
+        connection.close(VarInt::from_u32(close::DONE), b"done");
+    }
+
+    /// Ends the session normally, at once.
     pub fn close(self) {
         self.connection
             .close(VarInt::from_u32(close::DONE), b"done");
@@ -313,9 +342,11 @@ impl SyncEndpoint {
             None => None,
         };
         let open_timeout = config.open_timeout;
+        let local = endpoint.id();
         let mut builder = Router::builder(endpoint).accept(
             ALPN,
             Inbound {
+                local,
                 admission,
                 sessions,
                 open_timeout,
@@ -421,6 +452,7 @@ impl SyncEndpoint {
         let exchange = opening::offer(&connection, purpose, grant.as_ref());
         match opening::within(self.open_timeout, exchange).await {
             Ok((writer, reader)) => Ok(Session {
+                local: self.id(),
                 purpose,
                 grant,
                 connection,
@@ -448,6 +480,7 @@ impl SyncEndpoint {
 
 /// The accept side of `caskade/sync/1`.
 struct Inbound {
+    local: EndpointId,
     admission: Arc<dyn Admission>,
     sessions: Arc<dyn Sessions>,
     open_timeout: Duration,
@@ -479,6 +512,7 @@ impl ProtocolHandler for Inbound {
         };
         self.links.track(&connection);
         let session = Session {
+            local: self.local,
             purpose: received.purpose,
             grant: received.grant,
             connection,

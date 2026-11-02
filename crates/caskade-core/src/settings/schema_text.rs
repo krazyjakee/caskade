@@ -93,6 +93,16 @@ fn marked() -> Vec<crate::i18n::Message> {
         ),
         msgp!("settings", "Sync"),
         msgp!("settings", "This device only"),
+        msgp!("settings", "Never use relays"),
+        msgp!(
+            "settings",
+            "Connect to other devices only directly. A device only a relay could reach shows as offline."
+        ),
+        msgp!("settings", "Listening port"),
+        msgp!(
+            "settings",
+            "A fixed UDP port for firewall rules; empty lets the system choose."
+        ),
         // core.accounts
         msgp!("settings", "Rating board"),
         // core.installer
