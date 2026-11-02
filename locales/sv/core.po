@@ -3200,12 +3200,12 @@ msgstr ""
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Save manifest URL"
-msgstr ""
+msgstr "URL för sparmanifest"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Download save-location definitions from this URL."
-msgstr ""
+msgstr "Ladda ned definitioner av sparplatser från den här URL:en."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
@@ -3220,42 +3220,52 @@ msgstr "Versioner som behålls per spel; de nyaste stannar kvar."
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "What syncs"
-msgstr ""
+msgstr "Vad som synkas"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Choose Sync or This device only for each category."
-msgstr ""
+msgstr "Välj Synka eller Bara den här enheten för varje kategori."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Sync"
-msgstr ""
+msgstr "Synka"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "This device only"
-msgstr ""
+msgstr "Bara den här enheten"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Never use relays"
-msgstr ""
+msgstr "Använd aldrig reläer"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Connect to other devices only directly. A device only a relay could reach shows as offline."
-msgstr ""
+msgstr "Anslut bara direkt till andra enheter. En enhet som bara ett relä kan nå visas som frånkopplad."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Listening port"
-msgstr ""
+msgstr "Lyssningsport"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "A fixed UDP port for firewall rules; empty lets the system choose."
-msgstr ""
+msgstr "En fast UDP-port för brandväggsregler; tomt låter systemet välja."
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Settings kept on this device"
+msgstr "Inställningar som behålls på den här enheten"
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Settings sections that stay on this device while their category syncs."
+msgstr "Inställningsavsnitt som stannar på den här enheten medan deras kategori synkas."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"

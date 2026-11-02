@@ -15,6 +15,7 @@ import {
   boardName,
   DEFAULT_BOARD,
 } from "../../../components/AgeRatingLabel";
+import { SectionSync } from "../devices/SectionSync";
 import { useSettingsSection } from "../useSettings";
 import { AccountEditor } from "./AccountEditor";
 import { ageLimitLabel } from "./ageLimits";
@@ -190,6 +191,7 @@ export function AccountsSettings() {
             {sentence(ratings.error)}
           </p>
         )}
+        <SectionSync namespace="core.accounts" />
       </SettingsSection>
       {editing?.type === "add" && <AccountEditor activeId={activeId} close={close} />}
       {editing?.type === "edit" && target && (

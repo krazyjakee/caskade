@@ -230,7 +230,7 @@ impl SyncEngine {
             state.on = Some(
                 Category::ALL
                     .into_iter()
-                    .filter(|category| categories.allows(*category))
+                    .filter(|category| categories.allows_whole(*category))
                     .collect(),
             );
         }
@@ -360,7 +360,7 @@ impl SyncEngine {
         let categories = self.categories().await;
         Entity::ALL
             .into_iter()
-            .filter(|entity| !categories.allows(entity.category()))
+            .filter(|entity| !categories.allows_entity(*entity))
             .collect()
     }
 
@@ -370,7 +370,7 @@ impl SyncEngine {
         let categories = self.categories().await;
         let on: BTreeSet<Category> = Category::ALL
             .into_iter()
-            .filter(|category| categories.allows(*category))
+            .filter(|category| categories.allows_whole(*category))
             .collect();
         let mut state = self.state.lock().await;
         let turned = match &state.on {
@@ -406,7 +406,7 @@ impl SyncEngine {
             let pending = self.store.sync_pending(1_000_000).await?;
             let mut progress = false;
             for change in &pending {
-                if !categories.allows(change.entity.category()) {
+                if !categories.allows_entity(change.entity) {
                     continue;
                 }
                 state.clock.observe(change.clock);

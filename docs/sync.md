@@ -496,6 +496,32 @@ Categories set to This device only aren't sent. One turned back on is sent to
 each device again in full on the next exchange. The receiver takes what it
 lacks and ignores the rest, and the changes that waited here apply at once.
 
+A synced settings section can also be This device only on its own while its
+category syncs (#244, `core.sync.sections`): Appearance (`core.appearance`),
+the rating board (`core.accounts`) and RomM servers (`core.romm`), each from a
+Same on your other devices switch in the section itself
+(`views/settings/devices/SectionSync.tsx`, admins only, shown once a device is
+paired). The engine gates each change by `SyncSettings::allows_entity`: the
+section's entity is held back and waits as an off category's would, and the
+rest of its category keeps syncing. Turning the section back on counts its
+category as turned on (`allows_whole`), so it's replayed in full. The
+interface scale (`uiScale`) never syncs: it suits each screen.
+
+### Kinds of device
+
+`caskade_core::device_type` (#244) tells a desktop, laptop, handheld or TV
+apart: Linux's DMI names known handhelds (Steam Deck, ROG Ally, Legion Go,
+AYANEO, …) and laptop chassis, and a session inside gamescope is a handheld
+with a battery or a TV without one. Anything else is a desktop. A device's
+record starts with what was detected, and Settings → Devices changes it.
+
+A new install (first-run setup never saved, no games) starts with its kind's
+first settings, written only into sections never saved: a handheld or a TV
+starts in console mode (`core.console.active`), with emulators fullscreen in
+desktop mode too (`core.emulation.desktopFullscreen`) and a larger interface
+(`uiScale` 115 or 125). A desktop or laptop keeps the defaults. An existing
+library never changes.
+
 ### When it runs
 
 - Every 2 seconds it captures this device's changes, and exchanges with every

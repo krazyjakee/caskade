@@ -23,6 +23,7 @@ import { DEFAULT_THEME } from "../../themes/api";
 import { useActiveTheme } from "../../themes/apply";
 import { CustomCssEditor } from "./appearance/CustomCssEditor";
 import { ThemePicker } from "./appearance/ThemePicker";
+import { SectionSync } from "./devices/SectionSync";
 import { SettingsFeedback, SettingsLoading, useSettingsSection } from "./useSettings";
 
 const densities = [
@@ -187,6 +188,8 @@ export function AppearanceSettings() {
         >
           <AccentPicker value={settings.accent ?? null} onChange={(v) => set("accent", v)} />
         </SettingRow>
+        {/* The interface scale suits each screen and always stays here. */}
+        <SectionSync namespace="core.appearance" />
       </SettingsSection>
 
       <SettingsSection

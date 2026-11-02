@@ -31,6 +31,30 @@ fn settings(start: &str, active: bool) -> ConsoleSettings {
     }
 }
 
+/// #244: a new handheld or TV starts in console mode, as the first
+/// settings by kind of device leave it; a new desktop doesn't.
+#[test]
+fn a_new_handheld_starts_in_console_mode_and_a_desktop_doesnt() {
+    use caskade_core::device_type::{DeviceType, settle_new_device};
+    let first_mode = |kind: DeviceType| {
+        tauri::async_runtime::block_on(async {
+            let temp = tempfile::tempdir().unwrap();
+            let store = LibraryStore::in_memory().await.unwrap();
+            let service = SettingsService::new(store.clone());
+            service
+                .register_core(&caskade_core::paths::AppPaths::under(temp.path()))
+                .unwrap();
+            settle_new_device(&service, &store, kind).await.unwrap();
+            let preferences: ConsoleSettings = service.read_or_default(SETTINGS).await;
+            Startup::from(&["caskade".to_owned()], env(&[])).console(&preferences)
+        })
+    };
+    assert!(first_mode(DeviceType::Handheld));
+    assert!(first_mode(DeviceType::Tv));
+    assert!(!first_mode(DeviceType::Desktop));
+    assert!(!first_mode(DeviceType::Laptop));
+}
+
 #[test]
 fn the_flag_then_the_environment_then_the_setting_decide_the_first_mode() {
     let args = |extra: &[&str]| {

@@ -200,6 +200,19 @@ pub fn run() {
         if let Err(error) = settings.register_core(&setup_paths) {
             tracing::error!(%error, "core settings unavailable");
         }
+        // A new device starts as its kind suits (#244): a handheld or a TV
+        // in console mode, with emulators fullscreen and a larger interface.
+        match tauri::async_runtime::block_on(caskade_core::device_type::settle_new_device(
+            &settings,
+            &store,
+            caskade_core::device_type::detected(),
+        )) {
+            Ok(written) if !written.is_empty() => {
+                tracing::info!(?written, "first settings for this kind of device")
+            }
+            Ok(_) => {}
+            Err(error) => tracing::warn!(%error, "first settings by device kind unavailable"),
+        }
         // Console mode (#148): `--console`, gamescope or the setting.
         commands::console::setup(
             app.handle(),

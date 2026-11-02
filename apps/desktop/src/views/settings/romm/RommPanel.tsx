@@ -16,6 +16,7 @@ import {
 } from "../../../api/romm";
 import { formatBytes } from "../../../api/storage";
 import { useActionMenus } from "../../../components/ActionMenu";
+import { SectionSync } from "../devices/SectionSync";
 import { useEmulation } from "../emulators/EmulationProvider";
 import { CacheSection } from "./CacheSection";
 import { ServerEditor } from "./ServerEditor";
@@ -350,6 +351,7 @@ export function RommPanel() {
             the rest show as unavailable until the server is back.
           </Trans>
         </p>
+        <SectionSync namespace="core.romm" />
       </SettingsSection>
 
       {selected && (

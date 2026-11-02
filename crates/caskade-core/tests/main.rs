@@ -2,6 +2,7 @@
 //! of once per file. Run one file's tests with `cargo test --test it <file>::`.
 
 mod appimage_env;
+mod device_defaults;
 mod i18n;
 mod installer_settings;
 #[cfg(feature = "net")]
@@ -22,6 +23,7 @@ mod devices;
 mod sync_carried;
 mod sync_games;
 mod sync_log;
+mod sync_sections;
 mod sync_romm;
 #[cfg(feature = "net")]
 mod sync_network;

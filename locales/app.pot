@@ -2526,6 +2526,10 @@ msgstr ""
 msgid "Changed: {path}"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SectionSync.tsx
+msgid "Changes here reach your other devices."
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 msgid "Changes made on any device reach the others when they next connect. Where two devices changed the same thing, the later change wins. This device only stops this device sending and taking it in."
 msgstr ""
@@ -5180,6 +5184,10 @@ msgstr ""
 msgid "Keeps your CSS but stops applying it, to recover from a broken look."
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SectionSync.tsx
+msgid "Kept on this device. Changes here stay here, and other devices' don't arrive."
+msgstr ""
+
 #: apps/desktop/src/api/presentation.ts
 msgctxt "byte unit"
 msgid "KiB"
@@ -6545,6 +6553,10 @@ msgstr ""
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "Not saved"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SectionSync.tsx
+msgid "Not synced: this kind of setting is This device only in Settings → Devices."
 msgstr ""
 
 #. A RomM server's status: its connection hasn't been tried
@@ -8457,6 +8469,10 @@ msgstr ""
 
 #: apps/desktop/src/themes/api.ts
 msgid "Safe mode: Caskade started with the default theme and without your custom CSS."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SectionSync.tsx
+msgid "Same on your other devices"
 msgstr ""
 
 #. placeholder {0}: preview.sampleRom

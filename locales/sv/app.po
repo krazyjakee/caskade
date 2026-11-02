@@ -2555,6 +2555,10 @@ msgstr "Ändrad utanför Caskade"
 msgid "Changed: {path}"
 msgstr "Ändrad: {path}"
 
+#: apps/desktop/src/views/settings/devices/SectionSync.tsx
+msgid "Changes here reach your other devices."
+msgstr "Ändringar här når dina andra enheter."
+
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 msgid "Changes made on any device reach the others when they next connect. Where two devices changed the same thing, the later change wins. This device only stops this device sending and taking it in."
 msgstr ""
@@ -5250,6 +5254,10 @@ msgstr "Håll isär"
 msgid "Keeps your CSS but stops applying it, to recover from a broken look."
 msgstr "Behåller din CSS men slutar tillämpa den, så att du kan återställa ett trasigt utseende."
 
+#: apps/desktop/src/views/settings/devices/SectionSync.tsx
+msgid "Kept on this device. Changes here stay here, and other devices' don't arrive."
+msgstr "Behålls på den här enheten. Ändringar här stannar här, och andra enheters kommer inte hit."
+
 #: apps/desktop/src/api/presentation.ts
 msgctxt "byte unit"
 msgid "KiB"
@@ -6634,6 +6642,10 @@ msgstr "Inte uppdaterat ännu."
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "Not saved"
 msgstr "Inte sparat"
+
+#: apps/desktop/src/views/settings/devices/SectionSync.tsx
+msgid "Not synced: this kind of setting is This device only in Settings → Devices."
+msgstr "Synkas inte: den här typen av inställning är Bara den här enheten i Inställningar → Enheter."
 
 #. A RomM server's status: its connection hasn't been tried
 #. A RomM server's status: its connection hasn't been tried
@@ -8590,6 +8602,10 @@ msgstr "Felsäkert läge är på: din anpassade CSS används inte förrän Caska
 #: apps/desktop/src/themes/api.ts
 msgid "Safe mode: Caskade started with the default theme and without your custom CSS."
 msgstr "Felsäkert läge: Caskade startade med standardtemat och utan din anpassade CSS."
+
+#: apps/desktop/src/views/settings/devices/SectionSync.tsx
+msgid "Same on your other devices"
+msgstr "Samma på dina andra enheter"
 
 #. placeholder {0}: preview.sampleRom
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
@@ -11306,8 +11322,3 @@ msgstr "ÅÅÅÅ-MM-DD, eller tomt för inget"
 
 #~ msgid "No launch entries are available."
 #~ msgstr "Det finns inga poster att starta."
-
-#, fuzzy
-#~| msgid "{0} · {1}"
-#~ msgid "{0} · 1 file"
-#~ msgstr "{0} · {1}"

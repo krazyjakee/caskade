@@ -7,6 +7,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::BTreeMap;
 
+use super::change::Entity;
+
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema,
 )]
@@ -99,7 +101,19 @@ pub struct SyncSettings {
     /// A fixed UDP port for firewall rules; empty lets the system choose.
     #[serde(default)]
     pub port: Option<u16>,
+    #[schemars(title = "Settings kept on this device")]
+    /// Settings sections that stay on this device while their category syncs.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub sections: BTreeMap<String, CategoryState>,
 }
+
+/// Settings sections that can be This device only on their own (#244),
+/// with the entity that carries each and its category.
+pub const SECTIONS: [(&str, Entity, Category); 3] = [
+    ("core.appearance", Entity::Appearance, Category::Appearance),
+    ("core.accounts", Entity::AccountSettings, Category::Accounts),
+    ("core.romm", Entity::RommServer, Category::RommServers),
+];
 
 impl Default for SyncSettings {
     fn default() -> Self {
@@ -110,6 +124,7 @@ impl Default for SyncSettings {
                 .collect(),
             never_relay: false,
             port: None,
+            sections: BTreeMap::new(),
         }
     }
 }
@@ -125,6 +140,40 @@ impl SyncSettings {
     /// Both directions use the same gate; transport implementation is #228/#230.
     pub fn allows(&self, category: Category) -> bool {
         self.state(category) == CategoryState::Sync
+    }
+
+    /// A settings section's own choice (#244): Sync unless it was made This
+    /// device only; an unknown section always syncs with its category.
+    pub fn section(&self, namespace: &str) -> CategoryState {
+        match self.sections.get(namespace) {
+            Some(CategoryState::ThisDeviceOnly)
+                if SECTIONS.iter().any(|(name, _, _)| *name == namespace) =>
+            {
+                CategoryState::ThisDeviceOnly
+            }
+            _ => CategoryState::Sync,
+        }
+    }
+
+    /// Whether `entity`'s changes are sent and taken in: its category syncs
+    /// and, for a settings section, the section isn't This device only.
+    pub fn allows_entity(&self, entity: Entity) -> bool {
+        self.allows(entity.category())
+            && SECTIONS
+                .iter()
+                .filter(|(_, carrier, _)| *carrier == entity)
+                .all(|(name, _, _)| self.section(name) == CategoryState::Sync)
+    }
+
+    /// Whether all of `category` syncs: on, with none of its sections kept
+    /// here. A section turned back on turns its category "on" again here,
+    /// so it's sent to each device in full.
+    pub fn allows_whole(&self, category: Category) -> bool {
+        self.allows(category)
+            && SECTIONS
+                .iter()
+                .filter(|(_, _, owner)| *owner == category)
+                .all(|(name, _, _)| self.section(name) == CategoryState::Sync)
     }
 }
 
@@ -642,12 +691,11 @@ pub const SETTINGS: &[Rule] = &[
     shared(
         "core.appearance",
         Category::Appearance,
-        "appearance choices follow the user; installed theme files stay local",
+        "appearance choices follow the user; the UI scale (it suits each screen) and installed theme files stay local",
         &[
             "theme",
             "density",
             "cardSize",
-            "uiScale",
             "showArtTitles",
             "motion",
             "reduceEffects",

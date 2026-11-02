@@ -683,7 +683,11 @@ impl Inner {
     async fn record(&self) -> DeviceRecord {
         match self.store.get_setting(DEVICE_KEY).await {
             Ok(Some(value)) => serde_json::from_value(value).unwrap_or_default(),
-            _ => DeviceRecord::default(),
+            // Until the user names its kind, what it looks like (#244).
+            _ => DeviceRecord {
+                kind: crate::device_type::detected().into(),
+                ..DeviceRecord::default()
+            },
         }
     }
 

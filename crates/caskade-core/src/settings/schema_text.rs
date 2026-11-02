@@ -135,6 +135,11 @@ fn marked() -> Vec<crate::i18n::Message> {
             "settings",
             "A fixed UDP port for firewall rules; empty lets the system choose."
         ),
+        msgp!("settings", "Settings kept on this device"),
+        msgp!(
+            "settings",
+            "Settings sections that stay on this device while their category syncs."
+        ),
         // core.accounts
         msgp!("settings", "Rating board"),
         // core.installer
