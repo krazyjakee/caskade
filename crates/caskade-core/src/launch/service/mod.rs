@@ -72,10 +72,14 @@ impl LaunchConfig {
 /// Dropping a handle leaves the game and its background tracker running.
 pub struct LaunchHandle {
     pub ticket: LaunchTicket,
-    completed: oneshot::Receiver<Result<PlaySession>>,
+    completed: oneshot::Receiver<Result<(PlaySession, SessionStatus)>>,
 }
 impl LaunchHandle {
     pub async fn wait(self) -> Result<PlaySession> {
+        self.wait_status().await.map(|(session, _)| session)
+    }
+    /// The ended session, and whether the game exited or crashed.
+    pub async fn wait_status(self) -> Result<(PlaySession, SessionStatus)> {
         self.completed
             .await
             .map_err(|_| LaunchError::Store("session worker stopped".into()))?
@@ -100,6 +104,8 @@ pub struct LaunchService {
     running: Arc<Mutex<BTreeMap<String, CancellationToken>>>,
     script_runner: ScriptRunner,
     starting: Arc<Mutex<BTreeMap<String, CancellationToken>>>,
+    /// Sessions [`Self::stop`] ended, until [`Self::take_stopped`] asks.
+    pub(super) stopped: Arc<Mutex<std::collections::BTreeSet<String>>>,
 }
 impl LaunchService {
     pub fn new(store: crate::db::LibraryStore) -> Self {
@@ -123,6 +129,7 @@ impl LaunchService {
             running: Arc::default(),
             script_runner: ScriptRunner::default(),
             starting: Arc::default(),
+            stopped: Arc::default(),
         }
     }
     pub fn with_bus(self, bus: crate::bus::Bus) -> Self {
@@ -239,12 +246,26 @@ impl LaunchService {
     /// The play gate is asked first, before any download or runner, and
     /// hears when the game started.
     pub async fn launch_with(&self, entry_id: &str, choice: &LaunchChoice) -> Result<LaunchHandle> {
+        self.launch_with_env(entry_id, choice, &BTreeMap::new())
+            .await
+    }
+
+    /// [`Self::launch_with`] for a program that asked Caskade for the launch
+    /// (`caskade --launch`, #256): `env` joins the game's environment, after
+    /// the target's own and before plugins' `launch.before` hooks. The
+    /// webview never supplies it.
+    pub async fn launch_with_env(
+        &self,
+        entry_id: &str,
+        choice: &LaunchChoice,
+        env: &BTreeMap<String, String>,
+    ) -> Result<LaunchHandle> {
         let Some(gate) = &self.gate else {
-            return self.start(entry_id, choice).await;
+            return self.start(entry_id, choice, env).await;
         };
         let game_id = self.entry(entry_id).await?.game_id;
         gate.admit(&game_id).await?;
-        let handle = self.start(entry_id, choice).await?;
+        let handle = self.start(entry_id, choice, env).await?;
         gate.started(&game_id);
         Ok(handle)
     }
@@ -256,7 +277,12 @@ impl LaunchService {
             .ok_or_else(|| LaunchError::Invalid(crate::tr!("entry not found")))
     }
 
-    async fn start(&self, entry_id: &str, choice: &LaunchChoice) -> Result<LaunchHandle> {
+    async fn start(
+        &self,
+        entry_id: &str,
+        choice: &LaunchChoice,
+        env: &BTreeMap<String, String>,
+    ) -> Result<LaunchHandle> {
         if let Some(preparer) = &self.preparer {
             preparer.prepare(entry_id).await?;
         }
@@ -268,6 +294,10 @@ impl LaunchService {
         let mut prepared = self
             .resolve_entry(&actions::apply(&entry, &action), choice, &lease.cancel)
             .await?;
+        prepared
+            .command
+            .env
+            .extend(env.iter().map(|(key, value)| (key.clone(), value.clone())));
         let install_dir = prepared.target.real_dir.clone();
         actions::track(&mut prepared, &action.tracking);
         let mut session = PlaySession::new(&entry.game_id, &entry.id, now_ms());

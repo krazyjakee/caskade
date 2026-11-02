@@ -63,7 +63,7 @@ specta-typescript = "=0.0.13"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tracing = "0.1"
-tokio = { version = "1", features = ["rt", "rt-multi-thread", "sync", "net", "fs"] }
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "sync", "net", "fs", "io-util", "time", "macros"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 # The game window for web games (`web_player.rs`): the tao and wry Tauri
 # already builds, with the same features.

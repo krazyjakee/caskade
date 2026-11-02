@@ -3891,6 +3891,46 @@ msgstr "Lagring {root}: {error}"
 msgid "Storage {root} / {folder} requires a decision"
 msgstr "Lagring {root} / {folder} kräver ett beslut"
 
+#: apps/desktop/src-tauri/src/launch_cli/mod.rs
+msgid "Caskade couldn't start: {error}"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/launch_cli/mod.rs
+msgid "Caskade couldn't start"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/launch_cli/mod.rs
+msgid "Caskade didn't start in time"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/launch_cli/mod.rs
+msgid "Caskade closed"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/launch_cli/mod.rs
+msgid "the launch request was incomplete"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/launch_cli/server.rs
+msgid "the library isn't open"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/launch_cli/server.rs
+msgid "no game {id} in the library"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/launch_cli/server.rs
+msgid "{game} has no release {id}"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/launch_cli/server.rs
+msgid "{game} has no release to play on this device"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/launch_cli/server.rs
+msgid "{game} asks what to start; choose in Caskade, or name an action with --action"
+msgstr ""
+
 #: apps/desktop/src-tauri/src/lib.rs
 msgid ""
 "Caskade couldn't open its library.\n"

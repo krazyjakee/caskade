@@ -80,7 +80,7 @@ impl LaunchService {
         }
     }
 
-    async fn watch(&self, watch: Watch) -> Result<PlaySession> {
+    async fn watch(&self, watch: Watch) -> Result<(PlaySession, SessionStatus)> {
         let Watch {
             mut session,
             mut state,
@@ -193,7 +193,7 @@ impl LaunchService {
                     };
                     self.repository.finish(&session).await?;
                     self.ended(&session, status, false).await;
-                    return Ok(session);
+                    return Ok((session, status));
                 }
             } else if requested.elapsed() >= self.config.launch_timeout {
                 session.ended_at_ms = Some(now_ms());

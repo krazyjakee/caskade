@@ -1,6 +1,6 @@
 # Caskade — Game Streaming Plan
 
-Status: planned, nothing built; issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
+Status: planned; `caskade --launch` (§8.1, #256) is built; issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
 
 How Caskade lets a household play a game installed on one device from another, streamed over the local network. Caskade installs, configures, updates and drives two separate open-source programs: Sunshine on the device that runs the game (the host) and Moonlight on the device that shows it (the client). Users never see their names, windows or settings: they switch hosting on, pair a device once, and choose Stream from Living room. It follows the conventions in `TECH-PLAN.md`; the managed installs build on the emulator setup (`crates/caskade-sources/emulation/README.md`).
 
@@ -162,7 +162,14 @@ Once devices are paired through sync (#226) and exchange changes (#230), the cli
 
 ### 8.1 Starting a game from outside
 
-There is no way yet for another program to start a game through Caskade: the single-instance handler only takes `dev <folder>`, torrent and magnet files and `--console`, and deep links only `caskade://install`. `caskade --launch <game id>` forwards to the running instance (or starts one), goes through `PlayGate` and the active account's permissions like any Play, and stays alive until the session ends. It is useful beyond streaming: desktop shortcuts and other launchers.
+Built (#256, `apps/desktop/src-tauri/src/launch_cli/`). `caskade --launch <game id> [--entry <id>] [--action <id>]` hands the launch to the running Caskade, or starts one, goes through `PlayGate` and needs someone signed in like any Play, and stays alive until the session ends. It is useful beyond streaming: desktop shortcuts and other launchers.
+
+- **Forwarding.** The single-instance plugin ends a second process at once and sends nothing back, so the caller talks to the running Caskade over a channel of its own: a Unix socket at `<cache>/run/launch.sock` (folder `0700`, socket `0600`), or on Windows a named pipe named from the cache path that refuses remote clients. With no answer, the caller starts Caskade detached (its own process group; out of the caller's job on Windows where the job allows) and waits up to 90 s for it.
+- **The release.** `--entry` names one; otherwise the game's default release when it can launch, else its first installed one Caskade starts itself (as Play picks).
+- **Lifetime and exit codes.** Caskade answers `started` and then `ended`, one JSON line each; the caller exits 0 when the game exited, 1 when it crashed, 3 when refused, 4 when it couldn't start or Caskade couldn't be reached, 5 when Caskade's Stop ended it, and 2 for a wrong command line. Ending the caller closes the channel, and Caskade then stops the game as Stop does: SIGTERM (or any end) on POSIX, and on Windows WM_CLOSE to the caller's hidden window, which is what Sunshine sends.
+- **Refusals don't prompt.** An age limit, nobody signed in, the game already running, or a release that would ask which action or profile ends the caller with the reason on stderr (decided 2026-11-02: nobody may be in front of the host to type an admin PIN). An admin's permanent approval (#269) lets a game through.
+- **Display.** `SUNSHINE_CLIENT_WIDTH`, `_HEIGHT`, `_FPS` (digits) and `_HDR` (`true`/`false`) reach the game's environment; nothing else from the caller's environment does.
+- **Still to check by hand:** a Windows caller ended by WM_CLOSE (Sunshine's stream end) stops the game.
 
 ### 8.2 Streamed releases in the library
 

@@ -16,6 +16,7 @@ pub mod e2e;
 pub mod error;
 pub mod events;
 pub mod game_focus;
+pub mod launch_cli;
 pub mod logging;
 pub mod main_window;
 pub mod navigation;
@@ -34,6 +35,18 @@ pub mod window_state;
 
 /// Builds and runs the app.
 pub fn run() {
+    // `caskade --launch <game>` (#256): hand the launch to the running
+    // Caskade and wait for the game, not the app. Before logging: the
+    // caller isn't Caskade starting, and the app logs the launch itself.
+    if let Some(request) = launch_cli::from_args(std::env::args()) {
+        match request {
+            Ok(request) => launch_cli::main(request),
+            Err(usage) => {
+                eprintln!("{usage}");
+                std::process::exit(launch_cli::code::USAGE);
+            }
+        }
+    }
     logging::init();
     // Panics reach the log too, not only stderr.
     background::log_panics();
@@ -550,6 +563,12 @@ pub fn run() {
         app.manage(settings);
         app.manage(store);
         app.manage(launch);
+        // `caskade --launch` from other programs (#256), once the library
+        // and the launch service are there to take them.
+        launch_cli::server::listen(
+            app.handle(),
+            launch_cli::Endpoint::for_paths(&setup_paths),
+        );
         Ok(())
     })
     .build(tauri::generate_context!())

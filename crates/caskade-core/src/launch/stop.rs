@@ -37,9 +37,17 @@ impl LaunchService {
                 "the game's processes aren't known yet"
             )));
         }
+        crate::lock(&self.stopped).insert(session.id);
         tokio::task::spawn_blocking(move || terminate(&processes, grace))
             .await
             .map_err(|error| LaunchError::Invalid(error.to_string()))
+    }
+
+    /// Whether [`Self::stop`] ended `session_id`, forgetting it: how the
+    /// program that asked for the launch tells a Stop from the game's own
+    /// exit (`caskade --launch`, #256).
+    pub fn take_stopped(&self, session_id: &str) -> bool {
+        crate::lock(&self.stopped).remove(session_id)
     }
 }
 

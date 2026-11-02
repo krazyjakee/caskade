@@ -378,7 +378,8 @@ pub fn require<R: Runtime>(app: &impl Manager<R>, permission: Permission) -> Res
         .map_err(|error| error.to_string())
 }
 
-fn signed_in<R: Runtime>(app: &impl Manager<R>) -> Result<(), String> {
+/// Whether someone is signed in; the reason, for people, when not.
+pub(crate) fn signed_in<R: Runtime>(app: &impl Manager<R>) -> Result<(), String> {
     accounts(app)?
         .signed_in()
         .map(|_| ())
