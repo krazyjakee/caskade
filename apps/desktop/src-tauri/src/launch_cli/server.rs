@@ -189,6 +189,15 @@ async fn start<R: Runtime>(
         ..Default::default()
     };
     let env = client_env(request.env.clone());
+    // A newer save from another device goes in place first, as Play does
+    // (#239). Nobody may be there to answer which save to use, so both
+    // devices' saves stay as they are until Play asks; a failed check never
+    // stops the launch.
+    if let Some(versions) = app.try_state::<caskade_core::saves::versions::SaveVersions>()
+        && let Err(error) = versions.before_play(&entry.id).await
+    {
+        tracing::warn!(%error, "the game's saves weren't checked before the launch");
+    }
     match launches.launch_with_env(&entry.id, &choice, &env).await {
         Ok(handle) => Ok((launches.inner().clone(), game.title, handle)),
         // Nobody may be at the device to type an admin PIN: refuse plainly.

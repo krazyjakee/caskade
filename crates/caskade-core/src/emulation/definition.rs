@@ -130,6 +130,46 @@ impl EmulatorDefinition {
             states: expand(&self.saves.states)?,
         })
     }
+
+    /// The folders saves may sit under for this install, by name: the
+    /// definition's variables (`{save_data}`) and the built-in folders
+    /// (`{RomDir}`, `{EmulatorDir}`, …), each with its path here. Save
+    /// versions are stored relative to them (#239), so they restore under
+    /// the same names on another device. Values that aren't absolute paths
+    /// are left out.
+    pub fn save_roots(
+        &self,
+        os: OperatingSystem,
+        kind: InstallKind,
+        context: &super::VarContext,
+    ) -> Vec<(String, String)> {
+        let expander = super::vars::Expander {
+            vars: &self.vars,
+            os,
+            kind,
+            context,
+        };
+        let builtins = [
+            "RomDir",
+            "EmulatorDir",
+            "UserHome",
+            "XdgConfig",
+            "AppData",
+            "AppSupport",
+        ];
+        self.vars
+            .names(os, kind)
+            .into_iter()
+            .chain(builtins)
+            .filter_map(|name| {
+                let template = format!("{{{name}}}");
+                let path = expander.expand(&template).ok()?.replace('\\', "/");
+                let absolute = path.starts_with('/')
+                    || (path.as_bytes().get(1) == Some(&b':') && path.len() > 2);
+                absolute.then_some((template, path))
+            })
+            .collect()
+    }
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]

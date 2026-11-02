@@ -347,6 +347,9 @@ impl LibraryStore {
                 json!(true),
             );
         }
+
+        // Save versions made here (#239).
+        crate::saves::versions::sync_snapshot(&mut conn, &mut snapshot.values).await?;
         Ok(snapshot)
     }
 
@@ -733,6 +736,7 @@ async fn write(
             Ok(true)
         }
         Entity::Session => session(conn, target, value).await,
+        Entity::SaveVersion => crate::saves::versions::sync_apply(conn, target, value).await,
         // A setting: the engine applies it through `SettingsService`.
         Entity::RommServer => Ok(true),
         Entity::Account => account(conn, target, field, value).await,

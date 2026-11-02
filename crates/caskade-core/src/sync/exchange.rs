@@ -16,6 +16,8 @@
 //!
 //! A category that is This device only here isn't sent; one turned back on is
 //! sent in full once (the device takes what it lacks and ignores the rest).
+//!
+//! After both `Ack`s, the files the changes name follow (`sync::blobs`).
 
 use std::collections::HashSet;
 
@@ -195,6 +197,8 @@ pub async fn exchange(
     };
     engine.store().set_sync_peer_seen(peer, &theirs).await?;
     engine.store().set_sync_peer_replay(peer, &[]).await?;
+    // Then the files the changes name (#239).
+    super::blobs::exchange(engine, writer, reader).await?;
     Ok(Exchanged { sent, received })
 }
 

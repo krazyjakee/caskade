@@ -220,7 +220,12 @@ fn category_defaults_and_both_direction_gates_are_explicit() {
         .insert(Category::Library, CategoryState::Sync);
     assert_eq!(rule.project(&row, &settings), Some(row));
     assert_eq!(
-        policy::resource("save_versions").unwrap().category,
+        policy::table("save_versions").unwrap().category,
+        Some(Category::Saves)
+    );
+    assert_eq!(policy::table("save_heads").unwrap().category, None);
+    assert_eq!(
+        policy::resource("save_blobs").unwrap().category,
         Some(Category::Saves)
     );
     assert_eq!(
@@ -459,6 +464,10 @@ fn synced_fields_of_fixture_rows_never_include_paths_executables_or_credentials(
             json!({"id":"s","scope":"game","game_id":"g","record_json":{"enabled":true,"command":{"type":"shell","shell":"sh","script":"echo ready","program":"/bin/sh"},"cwd":"/home/local"}}),
         ),
         (
+            "save_versions",
+            json!({"id":"v","game_id":"g","account_id":"a","device_id":"d","session_id":"s","created_at_ms":1,"content_hash":"sha256:00","size_bytes":3,"file_count":1,"parents_json":["p"],"reason":"session","local":1,"save_path":"C:\\Users\\me\\Documents\\slot.sav"}),
+        ),
+        (
             "plugins",
             json!({"id":"dev.example.stats","enabled":true,"grants_json":{"fs":["/home/local"],"password":"fixture-secret"}}),
         ),
@@ -512,10 +521,10 @@ fn synced_fields_of_fixture_rows_never_include_paths_executables_or_credentials(
         );
     }
     assert_portable(
-        &policy::resource("save_versions")
+        &policy::resource("save_blobs")
             .unwrap()
             .project(
-                &json!({"id":"v","gameId":"g","contentHash":"abc","localPath":"/home/local/save"}),
+                &json!({"hash":"sha256:00","bytes":3,"localPath":"/home/local/save"}),
                 &settings,
             )
             .unwrap(),

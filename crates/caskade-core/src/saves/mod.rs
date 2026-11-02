@@ -7,6 +7,7 @@ mod files;
 mod registry;
 mod service;
 mod store;
+pub mod versions;
 
 pub use context::{Context, expand};
 pub use files::{expand_glob, scan_path};

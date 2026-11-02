@@ -176,6 +176,10 @@ pub fn access(command: &str) -> Option<Access> {
         | "verify_game"
         | "launch_game"
         | "launch_game_with"
+        // Saves before a launch and a conflict's choice (#239): they write
+        // the player's own save files, like playing does.
+        | "game_saves_before_play"
+        | "game_saves_choose"
         | "game_tool_run"
         // A trailer starts the video window, a process of its own.
         | "video_play"

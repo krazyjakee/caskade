@@ -94,6 +94,18 @@ pub(super) async fn plan(saves: &Saves, entry: &GameEntry, game: &Game) -> Resul
     }))
 }
 
+/// The emulator's named folders here: its definition's variables and the
+/// built-in folders, for the release's first ROM.
+pub(super) fn roots(plan: &Plan) -> super::versions::Roots {
+    let mut roots = super::versions::Roots::new(plan.os == OperatingSystem::Linux);
+    if let Some(context) = plan.contexts.first() {
+        for (name, path) in plan.definition.save_roots(plan.os, plan.kind, context) {
+            roots.insert(name, path);
+        }
+    }
+    roots
+}
+
 pub(super) fn resolve(plan: Plan, warnings: &mut Vec<String>) -> Vec<SaveLocation> {
     let mut found = Vec::new();
     for context in plan.contexts {

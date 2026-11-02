@@ -4,7 +4,10 @@ use caskade_core::{
     db::LibraryStore,
     emulation::EmulationService,
     ludusavi::Ludusavi,
-    saves::{LocationSpec, SaveMatch, SavePreferences, SaveState, Saves},
+    saves::{
+        LocationSpec, SaveMatch, SavePreferences, SaveState, Saves,
+        versions::{BeforePlay, SaveVersion, SaveVersions},
+    },
 };
 use tauri::State;
 
@@ -79,5 +82,32 @@ pub async fn game_saves_edit(
         .edit(&entry_id, preferences, revision)
         .await
         .map(Into::into)
+        .map_err(report)
+}
+
+/// Before a launch (#239): keeps a save changed here, then puts a newer one
+/// from another device in place, or says both devices played. Waits for
+/// other devices a few seconds at most.
+#[tauri::command]
+#[specta::specta]
+pub async fn game_saves_before_play(
+    versions: State<'_, SaveVersions>,
+    entry_id: String,
+) -> Result<BeforePlay, CommandError> {
+    versions.before_play(&entry_id).await.map_err(report)
+}
+
+/// Settles a [`SaveCheck::Conflict`](caskade_core::saves::versions::SaveCheck):
+/// the chosen version's files go in place, and the others stay as versions.
+#[tauri::command]
+#[specta::specta]
+pub async fn game_saves_choose(
+    versions: State<'_, SaveVersions>,
+    entry_id: String,
+    version_id: String,
+) -> Result<SaveVersion, CommandError> {
+    versions
+        .choose(&entry_id, &version_id)
+        .await
         .map_err(report)
 }

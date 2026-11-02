@@ -4,11 +4,14 @@ import { useLibraryApi } from "../../api/provider";
 import type { AgeRestriction, LaunchChoice, LaunchPrompt } from "../../api/types";
 import { LaunchChoiceDialog } from "../../components/LaunchChoiceDialog";
 import { AgeGateDialog } from "./AgeGate";
+import { usePlayWithSaves } from "./SavesBeforePlay";
 import { usePlayWithUpdates } from "./UpdateBeforePlay";
 
 /** Starting one of a game's entries, as the game page's Play and a game's
  * menu do it: an admin's PIN first when the account's age limit asks for
- * one (#209), then the update offer, then the launch, then the action,
+ * one (#209), then the update offer, then the saves (a newer one from
+ * another device, or which to use when both played, #239), then the
+ * launch, then the action,
  * profile or disc question when the launch asks one. A play action chosen
  * up front (#178), or in the question, goes with every later answer.
  * Render `dialogs`. */
@@ -37,7 +40,8 @@ export function useGameLaunch(gameId: string) {
       },
     );
   };
-  const updates = usePlayWithUpdates(gameId, (entryId) => start(entryId));
+  const saves = usePlayWithSaves((entryId) => start(entryId));
+  const updates = usePlayWithUpdates(gameId, (entryId) => saves.play(entryId));
   const play = (entryId: string, playAction?: string) => {
     action.current = playAction ?? null;
     if (!api.ageRestriction) {
@@ -83,13 +87,14 @@ export function useGameLaunch(gameId: string) {
         />
       )}
       {updates.dialog}
+      {saves.dialog}
     </>
   );
   return {
     /** Plays `entryId` (with one of its play actions, else its default):
      * the PIN if needed, then a newer release's offer. */
     play,
-    checking: updates.checking || gating,
+    checking: updates.checking || saves.checking || gating,
     launch,
     /** A PIN, profile or disc question is open; its dialog shows the
      * launch's error. */

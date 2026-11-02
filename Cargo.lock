@@ -1134,6 +1134,7 @@ version = "0.1.0"
 dependencies = [
  "argon2",
  "async-trait",
+ "base64 0.22.1",
  "cap-std",
  "caskade-discovery",
  "caskade-emulation-fixtures",

@@ -1,4 +1,4 @@
-import type { SaveState, SavesApi } from "./saves";
+import type { BeforePlay, SaveState, SavesApi, SaveVersion } from "./saves";
 
 /** Explicit fixture state, with the same stale-editor rule as the core. */
 export function createFixtureSaves() {
@@ -15,7 +15,14 @@ export function createFixtureSaves() {
         warnings: [],
       },
     );
-  const api: SavesApi & { seed(value: SaveState): void } = {
+  // What the next check before a launch answers, per entry.
+  const checks = new Map<string, BeforePlay>();
+  const chosen: { entryId: string; versionId: string }[] = [];
+  const api: SavesApi & {
+    seed(value: SaveState): void;
+    seedCheck(entryId: string, check: BeforePlay): void;
+    chosen: typeof chosen;
+  } = {
     state: async (entryId) => state(entryId),
     async edit(entryId, preferences, revision) {
       const current = state(entryId);
@@ -40,9 +47,34 @@ export function createFixtureSaves() {
       states.set(entryId, next);
       return structuredClone(next);
     },
+    beforePlay: async (entryId) =>
+      structuredClone(
+        checks.get(entryId) ?? { check: { type: "noSaves" }, checked: true, warnings: [] },
+      ),
+    async choose(entryId, versionId) {
+      const check = checks.get(entryId)?.check;
+      const versions = check?.type === "conflict" ? check.versions : [];
+      const version = versions.find((each) => each.id === versionId);
+      if (!version) throw new Error(`Save version ${versionId} was not found.`);
+      chosen.push({ entryId, versionId });
+      checks.delete(entryId);
+      const made: SaveVersion = {
+        ...version,
+        id: `${versionId}-chosen`,
+        parents: versions.map((each) => each.id),
+        reason: "chosen",
+        local: true,
+        createdAtMs: Date.now(),
+      };
+      return structuredClone(made);
+    },
     seed(value) {
       states.set(value.entryId, structuredClone(value));
     },
+    seedCheck(entryId, check) {
+      checks.set(entryId, structuredClone(check));
+    },
+    chosen,
   };
   return api;
 }

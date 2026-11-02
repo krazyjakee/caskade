@@ -48,10 +48,14 @@ pub enum Entity {
     /// A RomM server's shared definition (`core.romm`), never its password
     /// or token: each device keeps its own in its keychain. Key: server id.
     RommServer,
+    /// A save version (#239), one immutable record: its game, account,
+    /// device, session, time, parents and the hash of its file list. Its
+    /// files travel as blobs (`sync::blobs`). Key: version id.
+    SaveVersion,
 }
 
 impl Entity {
-    pub const ALL: [Self; 10] = [
+    pub const ALL: [Self; 11] = [
         Self::Game,
         Self::KeptApart,
         Self::IgdbMatch,
@@ -62,6 +66,7 @@ impl Entity {
         Self::Account,
         Self::Approval,
         Self::RommServer,
+        Self::SaveVersion,
     ];
 
     pub fn as_str(self) -> &'static str {
@@ -76,6 +81,7 @@ impl Entity {
             Self::Account => "account",
             Self::Approval => "approval",
             Self::RommServer => "rommServer",
+            Self::SaveVersion => "saveVersion",
         }
     }
 
@@ -93,6 +99,7 @@ impl Entity {
             Self::Session => Category::PlaySessions,
             Self::Account | Self::Approval => Category::Accounts,
             Self::RommServer => Category::RommServers,
+            Self::SaveVersion => Category::Saves,
         }
     }
 
@@ -101,7 +108,11 @@ impl Entity {
         match self {
             Self::Game | Self::KeptApart | Self::IgdbMatch | Self::ArtworkChoice => &[0],
             Self::Member | Self::Approval => &[1],
-            Self::Collection | Self::Session | Self::Account | Self::RommServer => &[],
+            Self::Collection
+            | Self::Session
+            | Self::Account
+            | Self::RommServer
+            | Self::SaveVersion => &[],
         }
     }
 

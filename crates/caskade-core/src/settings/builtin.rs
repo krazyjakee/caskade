@@ -372,11 +372,19 @@ pub struct SavesSettings {
     )]
     /// Download save-location definitions from this URL.
     pub manifest_url: String,
+    #[schemars(title = "Save versions to keep", range(min = 1, max = 1000))]
+    /// Versions kept per game; the newest stay.
+    #[serde(default = "default_keep")]
+    pub keep: u32,
+}
+fn default_keep() -> u32 {
+    crate::saves::versions::KEEP
 }
 impl Default for SavesSettings {
     fn default() -> Self {
         Self {
             manifest_url: crate::ludusavi::MANIFEST_URL.into(),
+            keep: default_keep(),
         }
     }
 }

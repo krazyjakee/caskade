@@ -1133,6 +1133,10 @@ msgstr "En startarlänk"
 msgid "A name or path at any depth (glob)"
 msgstr "Ett namn eller en sökväg på valfritt djup (glob)"
 
+#: apps/desktop/src/views/game/SavesBeforePlay.tsx
+msgid "A newer save from {device} hasn't arrived yet, so the game started with the save on this device."
+msgstr "En nyare sparfil från {device} har inte kommit fram än, så spelet startade med sparfilen på den här enheten."
+
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
 msgid "A notification for achievements unlocked since the last refresh. The first refresh of a game brings its history in without notifications."
 msgstr "En avisering för prestationer som låsts upp sedan den senaste uppdateringen. Ett spels första uppdatering hämtar historiken utan aviseringar."
@@ -1708,6 +1712,11 @@ msgstr "Animationer"
 msgid "Announced releases without a date yet."
 msgstr "Utannonserade utgåvor som ännu saknar datum."
 
+#: apps/desktop/src/components/saves/devices.ts
+msgctxt "save version"
+msgid "Another device"
+msgstr "En annan enhet"
+
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 msgid "Any platform"
 msgstr "Valfri plattform"
@@ -2125,6 +2134,7 @@ msgstr "Kan inte ansluta"
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/desktop/src/components/saves/SaveConflictDialog.tsx
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
 #: apps/desktop/src/views/activity/AddGame.tsx
@@ -2585,6 +2595,10 @@ msgstr "Välj arbetsmappen"
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Choose where Caskade installs games. Disconnected locations remain in your library."
 msgstr "Välj var Caskade installerar spel. Frånkopplade platser finns kvar i ditt bibliotek."
+
+#: apps/desktop/src/components/saves/SaveConflictDialog.tsx
+msgid "Choose which save to play with"
+msgstr "Välj vilken sparfil du vill spela med"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Choose your games folder, what to look for and how you play again."
@@ -3337,6 +3351,7 @@ msgstr "Skivor"
 #. Closes a plugin's notice
 #: apps/desktop/src/plugins/PluginViews.tsx
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/desktop/src/views/game/SavesBeforePlay.tsx
 #: apps/desktop/src/views/library/LibraryView.tsx
 msgid "Dismiss"
 msgstr "Stäng"
@@ -6219,6 +6234,10 @@ msgstr "Inte kompatibel"
 msgid "Not enough free space"
 msgstr "Inte tillräckligt med ledigt utrymme"
 
+#: apps/desktop/src/views/game/SavesBeforePlay.tsx
+msgid "Not every paired device could be reached, so one of them may have a newer save."
+msgstr "Alla parkopplade enheter kunde inte nås, så någon av dem kan ha en nyare sparfil."
+
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "Not fetched yet. Refresh achievements to see them."
 msgstr "Inte hämtade än. Uppdatera prestationerna för att se dem."
@@ -6984,6 +7003,10 @@ msgstr "Speltid som en butik rapporterar läggs till det Caskade har mätt, och 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 msgid "Play with {0}"
 msgstr "Spela med {0}"
+
+#: apps/desktop/src/components/saves/SaveConflictDialog.tsx
+msgid "Play with this save"
+msgstr "Spela med den här sparfilen"
 
 #. Games that have been played
 #: apps/desktop/src/components/collections/rules.ts
@@ -8213,6 +8236,7 @@ msgid "Saved scans that turn ROM folders into games. Multi-disc games and playli
 msgstr "Sparade skanningar som gör ROM-mappar till spel. Spel med flera skivor och spellistor importeras som ett spel."
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
+#: apps/desktop/src/components/saves/SaveConflictDialog.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #, fuzzy
 #| msgid "Save"
@@ -8910,6 +8934,10 @@ msgctxt "launch choice"
 msgid "Start with"
 msgstr "Starta med"
 
+#: apps/desktop/src/views/game/SavesBeforePlay.tsx
+msgid "Started with the save from {device}."
+msgstr "Startade med sparfilen från {device}."
+
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 msgid "Starting the update…"
 msgstr "Startar uppdateringen…"
@@ -8917,6 +8945,7 @@ msgstr "Startar uppdateringen…"
 #. A game starting, before its title is known
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
+#: apps/desktop/src/components/saves/SaveConflictDialog.tsx
 #: apps/desktop/src/shell/console/GameCurtain.tsx
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
@@ -9565,6 +9594,11 @@ msgstr "Den här samlingen är tom. Lägg till spel här, eller från ett spels 
 msgid "This device"
 msgstr ""
 
+#: apps/desktop/src/components/saves/devices.ts
+msgctxt "save version"
+msgid "This device"
+msgstr "Den här enheten"
+
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #, fuzzy
 #| msgid "Missing details only"
@@ -9606,6 +9640,10 @@ msgstr "Spelet finns inte längre i biblioteket."
 #: apps/desktop/src/api/storage.ts
 msgid "This game needs symbolic links"
 msgstr "Det här spelet behöver symboliska länkar"
+
+#: apps/desktop/src/components/saves/SaveConflictDialog.tsx
+msgid "This game was played on more than one device since they last shared saves. The save you don't choose is kept as a version."
+msgstr "Spelet har spelats på mer än en enhet sedan de senast delade sparfiler. Sparfilen du inte väljer behålls som en version."
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgid "This GPU is gone."

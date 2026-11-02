@@ -2912,6 +2912,35 @@ msgstr ""
 msgid "Choose an absolute file or folder path for saves."
 msgstr ""
 
+#: crates/caskade-core/src/saves/versions/blobs.rs
+#: crates/caskade-core/src/saves/versions/mod.rs
+msgid "A save file hasn't arrived yet."
+msgstr ""
+
+#: crates/caskade-core/src/saves/versions/mod.rs
+msgid "This game's save folders hold too many files to keep versions of."
+msgstr ""
+
+#: crates/caskade-core/src/saves/versions/mod.rs
+msgid "This game's saves are too large to keep versions of."
+msgstr ""
+
+#: crates/caskade-core/src/saves/versions/mod.rs
+msgid "A save file changed while it was being kept. Try again once the game has closed."
+msgstr ""
+
+#: crates/caskade-core/src/saves/versions/mod.rs
+msgid "{path} has no place on this device, so it wasn't restored."
+msgstr ""
+
+#: crates/caskade-core/src/saves/versions/mod.rs
+msgid "That save's files haven't arrived on this device yet."
+msgstr ""
+
+#: crates/caskade-core/src/saves/versions/store.rs
+msgid "Save version {id} was not found."
+msgstr ""
+
 #: crates/caskade-core/src/scripts/exec.rs
 msgid "“{program}” wasn't found; check that it is installed and the path is right"
 msgstr ""
@@ -3106,6 +3135,16 @@ msgstr ""
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Download save-location definitions from this URL."
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Save versions to keep"
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Versions kept per game; the newest stay."
 msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
@@ -3700,10 +3739,12 @@ msgstr ""
 msgid "{address} isn't a device's address"
 msgstr ""
 
+#: crates/caskade-core/src/sync/blobs.rs
 #: crates/caskade-core/src/sync/exchange.rs
 msgid "the connection to the other device failed"
 msgstr ""
 
+#: crates/caskade-core/src/sync/blobs.rs
 #: crates/caskade-core/src/sync/exchange.rs
 msgid "the other device sent something out of turn"
 msgstr ""

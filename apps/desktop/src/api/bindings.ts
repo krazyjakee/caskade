@@ -99,6 +99,17 @@ export const commands = {
 	gameSavesState: (entryId: string) => typedError<SaveLocationsState_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_saves_state", { entryId })),
 	gameSavesEdit: (entryId: string, preferences: SavePreferences_Deserialize, revision: number) => typedError<SaveLocationsState_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_saves_edit", { entryId, preferences, revision })),
 	/**
+	 *  Before a launch (#239): keeps a save changed here, then puts a newer one
+	 *  from another device in place, or says both devices played. Waits for
+	 *  other devices a few seconds at most.
+	 */
+	gameSavesBeforePlay: (entryId: string) => typedError<BeforePlay_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_saves_before_play", { entryId })),
+	/**
+	 *  Settles a [`SaveCheck::Conflict`](caskade_core::saves::versions::SaveCheck):
+	 *  the chosen version's files go in place, and the others stay as versions.
+	 */
+	gameSavesChoose: (entryId: string, versionId: string) => typedError<SaveVersion_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_saves_choose", { entryId, versionId })),
+	/**
 	 *  The game's cover, background and icon as the editor shows them: who
 	 *  chose each, what shows, and the automatic images to choose from. `null`
 	 *  when the game is gone.
@@ -1966,6 +1977,31 @@ export type BackupStatus_Serialize = {
 export type BackupTableRows = {
 	name: string,
 	rows: number,
+};
+
+/**  The check before a launch, and whether other devices could be asked. */
+export type BeforePlay = BeforePlay_Serialize | BeforePlay_Deserialize;
+
+/**  The check before a launch, and whether other devices could be asked. */
+export type BeforePlay_Deserialize = {
+	check: SaveCheck_Deserialize,
+	/**
+	 *  `false` when a paired device couldn't be reached in time: there may
+	 *  be a newer save this device hasn't seen.
+	 */
+	checked: boolean,
+	warnings: string[],
+};
+
+/**  The check before a launch, and whether other devices could be asked. */
+export type BeforePlay_Serialize = {
+	check: SaveCheck_Serialize,
+	/**
+	 *  `false` when a paired device couldn't be reached in time: there may
+	 *  be a newer save this device hasn't seen.
+	 */
+	checked: boolean,
+	warnings: string[],
 };
 
 /**
@@ -7285,6 +7321,47 @@ export type RuntimeSpec = { type: "native" } | { type: "proton_prefix"; value: {
 	id: string,
 } };
 
+/**  What happened before a launch. */
+export type SaveCheck = SaveCheck_Serialize | SaveCheck_Deserialize;
+
+/**  What happened before a launch. */
+export type SaveCheck_Deserialize = 
+/**  No version of this game's saves exists for the account. */
+{ type: "noSaves" } | 
+/**  This device already has the newest save. */
+{ type: "upToDate" } | 
+/**  A newer save from another device was put in place. */
+{ type: "restored"; version: SaveVersion_Deserialize } | 
+/**
+ *  A newer save exists on another device, but its files haven't
+ *  arrived: the game starts with the save here.
+ */
+{ type: "notArrived"; version: SaveVersion_Deserialize } | 
+/**
+ *  Both devices played since they last agreed: choose one
+ *  ([`SaveVersions::choose`]). Newest first.
+ */
+{ type: "conflict"; versions: SaveVersion_Deserialize[] };
+
+/**  What happened before a launch. */
+export type SaveCheck_Serialize = 
+/**  No version of this game's saves exists for the account. */
+{ type: "noSaves" } | 
+/**  This device already has the newest save. */
+{ type: "upToDate" } | 
+/**  A newer save from another device was put in place. */
+{ type: "restored"; version: SaveVersion_Serialize } | 
+/**
+ *  A newer save exists on another device, but its files haven't
+ *  arrived: the game starts with the save here.
+ */
+{ type: "notArrived"; version: SaveVersion_Serialize } | 
+/**
+ *  Both devices played since they last agreed: choose one
+ *  ([`SaveVersions::choose`]). Newest first.
+ */
+{ type: "conflict"; versions: SaveVersion_Serialize[] };
+
 /**
  *  A new collection, or an existing one's name, description and rules.
  *  Its pin changes through `set_collection_pinned`, a manual one's games
@@ -7363,6 +7440,51 @@ export type SavePreferences_Serialize = {
 	manifestTitle: string | null,
 	/**  None follows automatic locations; an empty list explicitly removes all. */
 	locations: LocationSpec[] | null,
+};
+
+/**  One version of a game's saves. */
+export type SaveVersion = SaveVersion_Serialize | SaveVersion_Deserialize;
+
+/**  One version of a game's saves. */
+export type SaveVersion_Deserialize = {
+	/**  The same on every device. */
+	id: string,
+	gameId: string,
+	/**  The account that played; empty when none was signed in. */
+	accountId: string,
+	/**  The device that made it: its sync id, or `local`. */
+	deviceId: string,
+	sessionId?: string | null,
+	createdAtMs: number,
+	/**  `sha256:…` of its file list: equal saves, equal hashes. */
+	contentHash: string,
+	sizeBytes: number,
+	fileCount: number,
+	parents: string[],
+	reason: VersionReason,
+	/**  Made on this device. */
+	local: boolean,
+};
+
+/**  One version of a game's saves. */
+export type SaveVersion_Serialize = {
+	/**  The same on every device. */
+	id: string,
+	gameId: string,
+	/**  The account that played; empty when none was signed in. */
+	accountId: string,
+	/**  The device that made it: its sync id, or `local`. */
+	deviceId: string,
+	sessionId: string | null,
+	createdAtMs: number,
+	/**  `sha256:…` of its file list: equal saves, equal hashes. */
+	contentHash: string,
+	sizeBytes: number,
+	fileCount: number,
+	parents: string[],
+	reason: VersionReason,
+	/**  Made on this device. */
+	local: boolean,
 };
 
 /**  A running or finished scan; every change is `emulation.scan.changed`. */
@@ -8840,6 +8962,19 @@ export type Verification = {
 	changed: string[],
 	valid: boolean,
 };
+
+/**  Why a version was made. */
+export type VersionReason = 
+/**  After a play session. */
+"session" | 
+/**  The files changed outside Caskade, found before a launch. */
+"found" | 
+/**  What was there before a restore. */
+"beforeRestore" | 
+/**  The user restored an older version. */
+"restored" | 
+/**  The user chose between versions both devices made. */
+"chosen";
 
 export type View = View_Serialize | View_Deserialize;
 

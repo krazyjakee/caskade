@@ -485,6 +485,31 @@ pub fn run() {
             }
         };
         app.manage(emulation);
+        // Save versions (#239): a game's saves kept after each session, and
+        // carried to paired devices below.
+        let save_versions = {
+            let saves = caskade_core::saves::Saves::new(
+                store.clone(),
+                app.state::<caskade_core::ludusavi::Ludusavi>()
+                    .inner()
+                    .clone(),
+            )
+            .with_catalog(
+                app.state::<caskade_core::emulation::EmulationService>()
+                    .catalog(),
+            );
+            let versions = caskade_core::saves::versions::SaveVersions::new(
+                saves,
+                setup_paths.data.join("saves").join("blobs"),
+            );
+            versions.set_settings(settings.clone());
+            if let Some(accounts) = app.try_state::<caskade_core::accounts::AccountService>() {
+                let accounts = accounts.inner().clone();
+                versions.set_account(move || accounts.active_id());
+            }
+            versions.attach(&bus);
+            versions
+        };
         // Plugins (#123): the folder is read at startup, but no plugin
         // code runs until an enabled plugin is first used. Without a
         // plugin host the app runs without plugins.
@@ -643,8 +668,20 @@ pub fn run() {
                     });
                 });
             }
+            // Save files travel after the changes (#239), and a launch asks
+            // paired devices for newer saves first.
+            sync.register_blobs(std::sync::Arc::new(
+                caskade_core::saves::versions::SaveBlobs(save_versions.clone()),
+            ));
+            save_versions.set_remote(caskade_core::saves::versions::SyncRefresh::new(
+                sync.clone(),
+                devices.clone(),
+            ));
+            let engine = sync.clone();
+            save_versions.set_device(move || engine.engine().map(|e| e.device().to_owned()));
             commands::sync::setup(app.handle(), devices, sync);
         }
+        app.manage(save_versions);
         app.manage(settings);
         app.manage(store);
         app.manage(launch);

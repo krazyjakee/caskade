@@ -52,6 +52,8 @@ struct Inner {
     romm_removed: OnceLock<Arc<dyn Fn(String) + Send + Sync>>,
     /// The engine for this device's current identity.
     engine: RwLock<Option<Arc<SyncEngine>>>,
+    /// Kinds of file exchanged after the changes (save files, #239).
+    blobs: super::blobs::Registry,
     /// Devices an exchange is running with.
     busy: Mutex<HashSet<String>>,
     /// Something wants an exchange now: devices to sync.
@@ -72,6 +74,7 @@ impl SyncService {
                 settings: OnceLock::new(),
                 romm_removed: OnceLock::new(),
                 engine: RwLock::default(),
+                blobs: super::blobs::Registry::default(),
                 busy: Mutex::default(),
                 due,
                 due_rx: tokio::sync::Mutex::new(due_rx),
@@ -91,6 +94,11 @@ impl SyncService {
     /// removes its downloaded ROMs through `RommService::remove_server`).
     pub fn on_romm_removed(&self, removed: impl Fn(String) + Send + Sync + 'static) {
         let _ = self.inner.romm_removed.set(Arc::new(removed));
+    }
+
+    /// Exchanges `kind`'s files with every paired device, after the changes.
+    pub fn register_blobs(&self, kind: Arc<dyn super::blobs::BlobKind>) {
+        self.inner.blobs.register(kind);
     }
 
     /// The engine, once this device's identity is ready.
@@ -122,7 +130,9 @@ impl Inner {
             return Some(engine);
         }
         // A new identity is a new device: a new engine with its id.
-        let engine = Arc::new(SyncEngine::new(self.store.clone(), device));
+        let mut engine = SyncEngine::new(self.store.clone(), device);
+        engine.set_blobs(self.blobs.clone());
+        let engine = Arc::new(engine);
         if let Some(settings) = self.settings.get() {
             engine.set_settings(settings.clone());
         }

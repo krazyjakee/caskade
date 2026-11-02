@@ -101,6 +101,8 @@ fn marked() -> Vec<crate::i18n::Message> {
             "settings",
             "Download save-location definitions from this URL."
         ),
+        msgp!("settings", "Save versions to keep"),
+        msgp!("settings", "Versions kept per game; the newest stay."),
         // core.sync
         msgp!("settings", "What syncs"),
         msgp!(

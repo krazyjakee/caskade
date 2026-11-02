@@ -318,6 +318,21 @@ pub(super) async fn merge_in(
     // none (#175).
     super::artwork_choice::merge_choices(tx, keep, remove).await?;
     sqlx::query("UPDATE artwork SET game_id=?,record_json=json_set(record_json,'$.gameId',?) WHERE game_id=?").bind(keep).bind(keep).bind(remove).execute(&mut **tx).await?;
+    // Save versions (#239) follow the game; the kept game's head wins.
+    sqlx::query("UPDATE save_versions SET game_id=? WHERE game_id=?")
+        .bind(keep)
+        .bind(remove)
+        .execute(&mut **tx)
+        .await?;
+    sqlx::query("UPDATE OR IGNORE save_heads SET game_id=? WHERE game_id=?")
+        .bind(keep)
+        .bind(remove)
+        .execute(&mut **tx)
+        .await?;
+    sqlx::query("DELETE FROM save_heads WHERE game_id=?")
+        .bind(remove)
+        .execute(&mut **tx)
+        .await?;
     // The game's lifecycle scripts (#179) run for the merged game, after its own.
     sqlx::query("UPDATE lifecycle_scripts SET game_id=?1,position=position+(SELECT coalesce(max(position)+1,0) FROM lifecycle_scripts WHERE game_id=?1),record_json=json_set(record_json,'$.scope.gameId',?1) WHERE game_id=?2").bind(keep).bind(remove).execute(&mut **tx).await?;
     sqlx::query("INSERT OR IGNORE INTO collection_members(collection_id,game_id,position) SELECT collection_id,?,position FROM collection_members WHERE game_id=?").bind(keep).bind(remove).execute(&mut **tx).await?;

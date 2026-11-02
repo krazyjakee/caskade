@@ -305,6 +305,7 @@ portable forms of what `sync::policy` declares synced:
 | `account` | account | `""`, `name`, `avatar`, `role`, `pinHash`, `permissions`, `maxAge`, `unratedNeedsPin`, `createdAt` | Accounts |
 | `approval` | account\|game | `""` | Accounts |
 | `rommServer` | server id | `""`: its shared definition, as the policy projects `core.romm` | RommServers |
+| `saveVersion` | version (UUIDv7) | `""`: game, account, device, session, time, size, file count, parents and the hash of its file list | Saves |
 
 A game's user values are what `overrides_json` marks as the user's, read from
 the shown record: the policy's `Receive::GameEdits` contract. Automatic
@@ -462,10 +463,102 @@ These are declared synced by the policy but don't travel yet:
 - launch actions and game scripts (optional categories);
 - add-ons;
 - the appearance and accounts settings;
-- the files of user-imported artwork (iroh-blobs).
+- the files of user-imported artwork (#273, over `sync::blobs` as save files are).
 
 Each device's own default admin account appears on the other devices as a
 second "Player" account.
+
+## Saves
+
+`caskade_core::saves::versions` (#239, migration 0033) keeps a game's saves
+as versions and carries them to paired devices (category Saves, synced by
+default).
+
+### Versions
+
+- **A version** is a release's save files (#238's resolved locations) at one
+  moment. Its file list (each file by named folder, relative path, SHA-256
+  and size) is itself a blob, and the version's `content_hash` is that list's
+  hash, so equal saves have equal hashes. Files are kept once by content under
+  `<data>/saves/blobs/`, so versions share what didn't change.
+- **Portable paths.** Each file is stored relative to the deepest named folder
+  holding it: the manifest's placeholders (`<winAppData>`, `<winDocuments>`,
+  `<home>`, …), or an emulator definition's variables (`{save_data}`, …). On
+  Linux, Windows placeholders are folders inside the release's Proton or Wine
+  prefix, so a save made on Windows restores into the prefix and back. A path
+  under no named folder stays absolute and restores only where that path
+  exists. A relative path never leaves its folder (`..` is refused).
+- **When.** After every session that exited, crashed or was interrupted (a
+  `launch.after` interceptor, hashing in the background so the session's end
+  isn't held up), and before each launch when the files changed outside
+  Caskade (`found`). Nothing is kept when the files are what this device's
+  head already holds. Each version belongs to the account that played.
+- **History.** A version names its parents: the version this device's files
+  matched when it was made (its *head*, per game and account, in `save_heads`,
+  which never syncs). The versions nothing descends from are the *tips*.
+- **Keeping.** Each device keeps `core.saves.keep` versions per game (20 by
+  default), never pruning a tip or a head, and deletes the files nothing kept
+  names. Sync never deletes a version: each device prunes its own.
+
+### Before a launch
+
+`SaveVersions::before_play` (Play through `game_saves_before_play`, and
+`caskade --launch`) asks every paired device in reach to sync and waits for
+them for 4 seconds at most, then:
+
+- keeps the files here as a version when they changed;
+- **one tip, another device's:** puts its files in place and makes it the head
+  (`restored`); when its files haven't arrived, the game starts with the save
+  here (`notArrived`);
+- **more than one tip:** both devices played since they last agreed. Nothing
+  is restored, and Play asks which save to use (`SaveConflictDialog`). The
+  choice becomes a new version descending from every tip, so it settles the
+  conflict on every device; the others stay as versions. `caskade --launch`
+  never asks: it starts with the save here and leaves the question to Play.
+- `checked: false` when a paired device couldn't be reached in time: Play
+  starts anyway and a note says a newer save may be waiting there.
+
+A failed check never stops a launch. Restoring writes each file atomically and
+leaves files the version doesn't list.
+
+### Between devices
+
+Versions made here travel as `saveVersion` records in the change log. Their
+files follow on the same granted `sync` session after both `Ack`s
+(`sync::blobs`): each side asks for the blobs its records name and it lacks (a
+file list first, then its files), and the other sends them in 512 KiB chunks.
+Each blob is checked against its hash before it's kept. Rounds repeat while
+anything moved, up to four. With Saves set to This device only, neither the
+records nor the files leave this device, and none are asked for. iroh-blobs'
+own protocol isn't used: it serves any blob to anyone who knows its hash, with
+no grant.
+
+Save files ride the sync session, so they go through a relay only when relays
+are allowed and nothing direct works; Never use relays keeps them direct. Game
+files never go through a relay.
+
+### Limits
+
+- Registry-based saves (the manifest's `registry` entries) aren't kept as
+  versions; only files are.
+- Backups keep the versions' records but not their files (saves are never in a
+  backup). After a restore, files a paired device still has come back on the
+  next sync.
+
+### Checks
+
+Core tests run two in-process cores on loopback (`tests/save_sync.rs`): a
+Windows device (a fixture machine) and a Linux device playing through a Proton
+prefix. The tests cover a save made on one starting the game on the other and
+back, both devices playing offline being asked and keeping both, Saves set to
+This device only, and an unreachable device. `tests/save_versions.rs` covers
+one device: versions, restoring an older one, pruning, and the after-session
+snapshot. Not yet checked on real machines:
+
+| Check | Result |
+| --- | --- |
+| Play on Windows, quit, start on a Linux device through Proton: the Windows save is there | not yet run |
+| Play on the Linux device, quit, start on Windows: the Linux save is there | not yet run |
 
 ## Settings → Devices
 
@@ -478,7 +571,10 @@ browser preview and tests):
   on), and Never use relays (`core.sync.neverRelay`).
 - **Your devices:** each paired device with how it is reached (`peer-link`),
   its last sync, or that the last try didn't reach it (never a toast), Sync
-  now and Forget.
+  now and Forget. Connections close between syncs, so with none open a device
+  shows `lan` while it announces itself here over mDNS, or the link of its
+  last exchange while that went through under three minutes ago with no
+  failure since (sync reaches each device every minute); otherwise `offline`.
 - **Pair a device:** nearby Caskade, a pairing link to copy, and a pasted one.
 - **What syncs:** #227's categories (`core.sync.categories`), synced and
   optional, plus what never syncs.

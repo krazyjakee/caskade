@@ -2914,6 +2914,35 @@ msgstr ""
 msgid "Choose an absolute file or folder path for saves."
 msgstr ""
 
+#: crates/caskade-core/src/saves/versions/blobs.rs
+#: crates/caskade-core/src/saves/versions/mod.rs
+msgid "A save file hasn't arrived yet."
+msgstr "En sparfil har inte kommit fram än."
+
+#: crates/caskade-core/src/saves/versions/mod.rs
+msgid "This game's save folders hold too many files to keep versions of."
+msgstr "Spelets sparmappar innehåller för många filer för att spara versioner av dem."
+
+#: crates/caskade-core/src/saves/versions/mod.rs
+msgid "This game's saves are too large to keep versions of."
+msgstr "Spelets sparfiler är för stora för att spara versioner av dem."
+
+#: crates/caskade-core/src/saves/versions/mod.rs
+msgid "A save file changed while it was being kept. Try again once the game has closed."
+msgstr "En sparfil ändrades medan den sparades. Försök igen när spelet har stängts."
+
+#: crates/caskade-core/src/saves/versions/mod.rs
+msgid "{path} has no place on this device, so it wasn't restored."
+msgstr "{path} har ingen plats på den här enheten, så den återställdes inte."
+
+#: crates/caskade-core/src/saves/versions/mod.rs
+msgid "That save's files haven't arrived on this device yet."
+msgstr "Sparfilerna har inte kommit fram till den här enheten än."
+
+#: crates/caskade-core/src/saves/versions/store.rs
+msgid "Save version {id} was not found."
+msgstr "Sparversionen {id} hittades inte."
+
 #: crates/caskade-core/src/scripts/exec.rs
 msgid "“{program}” wasn't found; check that it is installed and the path is right"
 msgstr "”{program}” hittades inte; kontrollera att det är installerat och att sökvägen stämmer"
@@ -3109,6 +3138,16 @@ msgstr ""
 msgctxt "settings"
 msgid "Download save-location definitions from this URL."
 msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Save versions to keep"
+msgstr "Sparversioner att behålla"
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Versions kept per game; the newest stay."
+msgstr "Versioner som behålls per spel; de nyaste stannar kvar."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
@@ -3702,10 +3741,12 @@ msgstr ""
 msgid "{address} isn't a device's address"
 msgstr ""
 
+#: crates/caskade-core/src/sync/blobs.rs
 #: crates/caskade-core/src/sync/exchange.rs
 msgid "the connection to the other device failed"
 msgstr ""
 
+#: crates/caskade-core/src/sync/blobs.rs
 #: crates/caskade-core/src/sync/exchange.rs
 msgid "the other device sent something out of turn"
 msgstr ""

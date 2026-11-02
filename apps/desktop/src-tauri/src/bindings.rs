@@ -40,6 +40,8 @@ pub fn builder() -> Builder<tauri::Wry> {
             crate::commands::game_edit::game_edit,
             crate::commands::saves::game_saves_state,
             crate::commands::saves::game_saves_edit,
+            crate::commands::saves::game_saves_before_play,
+            crate::commands::saves::game_saves_choose,
             crate::commands::game_edit::game_artwork,
             crate::commands::game_edit::game_artwork_set,
             crate::commands::game_edit::games_bulk_edit,

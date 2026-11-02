@@ -42,6 +42,15 @@ impl Saves {
     }
 
     pub async fn state(&self, entry_id: &str) -> Result<SaveState> {
+        Ok(self.resolve(entry_id).await?.0)
+    }
+
+    /// The release's save state and this device's named folders for it
+    /// (#239): where its save files are, and what they're relative to.
+    pub(crate) async fn resolve(
+        &self,
+        entry_id: &str,
+    ) -> Result<(SaveState, super::versions::Roots)> {
         let entry = self
             .store
             .get_entry(entry_id)
@@ -96,7 +105,7 @@ impl Saves {
         });
         let environment = self.environment.clone();
         let manual = preferences.locations.clone();
-        let (automatic, locations, scan_warnings) = tokio::task::spawn_blocking(move || {
+        let (automatic, locations, scan_warnings, roots) = tokio::task::spawn_blocking(move || {
             let mut context = paths
                 .as_ref()
                 .map(|(base, root)| Context::for_release(&environment, &entry, base, root))
@@ -106,7 +115,9 @@ impl Saves {
                 context.values.insert("storeGameId".into(), id);
             }
             let mut warnings = std::mem::take(&mut context.warnings);
+            let mut roots = context_roots(&context);
             let automatic = if let Some(plan) = emulator {
+                roots = super::emulator::roots(&plan);
                 super::emulator::resolve(plan, &mut warnings)
             } else if paths.is_some() {
                 definition
@@ -122,22 +133,25 @@ impl Saves {
             let locations = manual
                 .map(|locations| resolve_manual(&locations, &context, &mut warnings))
                 .unwrap_or_else(|| automatic.clone());
-            (automatic, locations, warnings)
+            (automatic, locations, warnings, roots)
         })
         .await
         .map_err(|error| crate::Error::Io(std::io::Error::other(error)))?;
         warnings.extend(scan_warnings);
         warnings.sort();
         warnings.dedup();
-        Ok(SaveState {
-            entry_id: entry_id.into(),
-            revision,
-            preferences,
-            matched,
-            automatic,
-            locations,
-            warnings,
-        })
+        Ok((
+            SaveState {
+                entry_id: entry_id.into(),
+                revision,
+                preferences,
+                matched,
+                automatic,
+                locations,
+                warnings,
+            },
+            roots,
+        ))
     }
 
     pub async fn edit(
@@ -358,6 +372,26 @@ fn select(games: Vec<ludusavi::Game>, method: MatchMethod) -> (SaveMatch, Option
             None,
         )
     }
+}
+
+/// The manifest's placeholders as folders on this device, Windows ones
+/// inside the release's prefix where it has one.
+fn context_roots(context: &Context) -> super::versions::Roots {
+    let mut roots = super::versions::Roots::new(context.case_sensitive);
+    for name in context.values.keys() {
+        if matches!(
+            name.as_str(),
+            "game" | "osUserName" | "storeUserId" | "storeGameId"
+        ) {
+            continue;
+        }
+        if let Ok(paths) = super::expand(&format!("<{name}>"), context)
+            && let Some(path) = paths.first()
+        {
+            roots.insert(format!("<{name}>"), path.clone());
+        }
+    }
+    roots
 }
 
 fn resolve_manifest(

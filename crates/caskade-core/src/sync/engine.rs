@@ -45,6 +45,9 @@ pub struct SyncEngine {
     romm_removed: std::sync::OnceLock<std::sync::Arc<dyn Fn(String) + Send + Sync>>,
     /// The wall clock: tests set one that's wrong.
     time: std::sync::RwLock<std::sync::Arc<dyn Fn() -> i64 + Send + Sync>>,
+    /// Files that travel after the changes (save files, #239).
+    #[cfg(feature = "net")]
+    blobs: super::blobs::Registry,
 }
 
 #[derive(Default)]
@@ -78,6 +81,7 @@ fn entity_rank(entity: Entity) -> u8 {
         Entity::Member | Entity::Approval => 4,
         Entity::Session => 5,
         Entity::RommServer => 6,
+        Entity::SaveVersion => 7,
     }
 }
 
@@ -99,7 +103,22 @@ impl SyncEngine {
             state: Mutex::default(),
             romm_removed: std::sync::OnceLock::new(),
             time: std::sync::RwLock::new(std::sync::Arc::new(now_ms)),
+            #[cfg(feature = "net")]
+            blobs: super::blobs::Registry::default(),
         }
+    }
+
+    /// The kinds of blob exchanged after the changes (#239).
+    #[cfg(feature = "net")]
+    pub fn blobs(&self) -> &super::blobs::Registry {
+        &self.blobs
+    }
+
+    /// Exchanges `blobs`' kinds, shared with other engines (a new identity
+    /// gets a new engine with the same kinds).
+    #[cfg(feature = "net")]
+    pub fn set_blobs(&mut self, blobs: super::blobs::Registry) {
+        self.blobs = blobs;
     }
 
     /// What to do when another device removed a RomM server: the app removes
@@ -180,8 +199,9 @@ impl SyncEngine {
             {
                 continue;
             }
-            // Sessions are a union: one that's gone here stays elsewhere.
-            if *entity == Entity::Session {
+            // Sessions and save versions are a union: one that's gone here
+            // (pruned, #239) stays elsewhere.
+            if matches!(*entity, Entity::Session | Entity::SaveVersion) {
                 continue;
             }
             // A game removed here isn't a game deleted everywhere: its
@@ -396,7 +416,7 @@ impl SyncEngine {
             }
         }
         let mut value = change.value.clone();
-        if change.entity == Entity::Session
+        if matches!(change.entity, Entity::Session | Entity::SaveVersion)
             && let Some(record) = value.as_mut()
         {
             let origin_game = record

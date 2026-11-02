@@ -1124,6 +1124,10 @@ msgstr ""
 msgid "A name or path at any depth (glob)"
 msgstr ""
 
+#: apps/desktop/src/views/game/SavesBeforePlay.tsx
+msgid "A newer save from {device} hasn't arrived yet, so the game started with the save on this device."
+msgstr ""
+
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
 msgid "A notification for achievements unlocked since the last refresh. The first refresh of a game brings its history in without notifications."
 msgstr ""
@@ -1693,6 +1697,11 @@ msgstr ""
 msgid "Announced releases without a date yet."
 msgstr ""
 
+#: apps/desktop/src/components/saves/devices.ts
+msgctxt "save version"
+msgid "Another device"
+msgstr ""
+
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 msgid "Any platform"
 msgstr ""
@@ -2108,6 +2117,7 @@ msgstr ""
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/desktop/src/components/saves/SaveConflictDialog.tsx
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
 #: apps/desktop/src/views/activity/AddGame.tsx
@@ -2563,6 +2573,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Choose where Caskade installs games. Disconnected locations remain in your library."
+msgstr ""
+
+#: apps/desktop/src/components/saves/SaveConflictDialog.tsx
+msgid "Choose which save to play with"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
@@ -3306,6 +3320,7 @@ msgstr ""
 #. Closes a plugin's notice
 #: apps/desktop/src/plugins/PluginViews.tsx
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/desktop/src/views/game/SavesBeforePlay.tsx
 #: apps/desktop/src/views/library/LibraryView.tsx
 msgid "Dismiss"
 msgstr ""
@@ -6161,6 +6176,10 @@ msgstr ""
 msgid "Not enough free space"
 msgstr ""
 
+#: apps/desktop/src/views/game/SavesBeforePlay.tsx
+msgid "Not every paired device could be reached, so one of them may have a newer save."
+msgstr ""
+
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "Not fetched yet. Refresh achievements to see them."
 msgstr ""
@@ -6904,6 +6923,10 @@ msgstr ""
 #. placeholder {0}: action.name
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 msgid "Play with {0}"
+msgstr ""
+
+#: apps/desktop/src/components/saves/SaveConflictDialog.tsx
+msgid "Play with this save"
 msgstr ""
 
 #. Games that have been played
@@ -8115,6 +8138,7 @@ msgid "Saved scans that turn ROM folders into games. Multi-disc games and playli
 msgstr ""
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
+#: apps/desktop/src/components/saves/SaveConflictDialog.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 msgid "Saves"
 msgstr ""
@@ -8807,6 +8831,10 @@ msgctxt "launch choice"
 msgid "Start with"
 msgstr ""
 
+#: apps/desktop/src/views/game/SavesBeforePlay.tsx
+msgid "Started with the save from {device}."
+msgstr ""
+
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 msgid "Starting the update…"
 msgstr ""
@@ -8814,6 +8842,7 @@ msgstr ""
 #. A game starting, before its title is known
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
+#: apps/desktop/src/components/saves/SaveConflictDialog.tsx
 #: apps/desktop/src/shell/console/GameCurtain.tsx
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
@@ -9451,6 +9480,11 @@ msgstr ""
 msgid "This device"
 msgstr ""
 
+#: apps/desktop/src/components/saves/devices.ts
+msgctxt "save version"
+msgid "This device"
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 msgid "This device only"
 msgstr ""
@@ -9487,6 +9521,10 @@ msgstr ""
 
 #: apps/desktop/src/api/storage.ts
 msgid "This game needs symbolic links"
+msgstr ""
+
+#: apps/desktop/src/components/saves/SaveConflictDialog.tsx
+msgid "This game was played on more than one device since they last shared saves. The save you don't choose is kept as a version."
 msgstr ""
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
