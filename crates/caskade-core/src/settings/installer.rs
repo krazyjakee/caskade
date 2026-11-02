@@ -61,7 +61,9 @@ impl Default for InstallerSettings {
         Self {
             windows_method: WindowsMethod::RunInstaller,
             execution: ExecutionPolicy::Allow,
-            download_execution: ExecutionPolicy::Ask,
+            // Installs run without a question: a silent run, then extraction,
+            // then an interactive run. Ask is a choice in Settings → Installer.
+            download_execution: ExecutionPolicy::Allow,
             ask_below_confidence: 0.5,
             language: String::new(),
             let_installers_create_shortcuts: false,

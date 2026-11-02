@@ -234,7 +234,7 @@ const sections: {
     defaults: {
       windowsMethod: "run_installer",
       execution: "allow",
-      downloadExecution: "ask",
+      downloadExecution: "allow",
       askBelowConfidence: 0.5,
       language: "",
       letInstallersCreateShortcuts: false,

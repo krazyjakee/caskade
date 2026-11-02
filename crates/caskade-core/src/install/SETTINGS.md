@@ -3,14 +3,14 @@
 `core.installer` version 3 is registered by `SettingsService::register_core`.
 Its JSON Schema supplies the Settings → Installer controls, labels, enum choices
 and numeric limits. The previous empty version 1 section migrates to defaults;
-version 2 gains `downloadExecution: ask`. Invalid persisted documents remain
+version 2 gains `downloadExecution: ask` (the default is now `allow`; stored values are kept). Invalid persisted documents remain
 errors rather than silently resetting.
 
 | Preference | Default | Effect |
 | --- | --- | --- |
 | `windowsMethod` | `run_installer` | Rank native Windows installer runs or extraction first. `run_installer` tries a silent run, then extraction, then an interactive run. |
 | `execution` | `allow` | Allow, ask before, or reject plans that execute installer code. |
-| `downloadExecution` | `ask` | The same for games downloaded from a link (deep links, pasted or dropped URLs, magnet links, torrents, updates); the stricter of the two applies. A static strategy that fails falls back to installer code only under `allow`; otherwise the job asks. |
+| `downloadExecution` | `allow` | The same for games downloaded from a link (deep links, pasted or dropped URLs, magnet links, torrents, updates); the stricter of the two applies. A static strategy that fails falls back to installer code only under `allow`; otherwise the job asks. |
 | `askBelowConfidence` | `0.5` | Pause for a choice below this plan confidence. |
 | `language` | empty | Let the installer choose, or request its supported language switch. |
 | `letInstallersCreateShortcuts` | `false` | Translate to each handler's shortcut switches; unsupported presets produce warnings. |

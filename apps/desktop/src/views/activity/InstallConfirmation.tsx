@@ -64,8 +64,8 @@ export function InstallConfirmation({
             <p className="mt-3 text-sm text-fg-muted">
               <Trans>
                 Nothing will be downloaded until you confirm. If the download is an installer
-                program, Caskade asks again before running it, unless Settings → Installer allows
-                downloaded installers to run.
+                program, Caskade runs it, unless Settings → Installer asks first for downloaded
+                installers.
               </Trans>
             </p>
           )}

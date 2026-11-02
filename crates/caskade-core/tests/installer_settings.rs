@@ -540,27 +540,32 @@ async fn keep_downloads_is_read_again_for_the_next_url_install() {
 
 #[cfg(feature = "net")]
 #[tokio::test(flavor = "multi_thread")]
-async fn a_downloaded_installer_asks_before_it_runs_by_default() {
+async fn a_downloaded_installer_runs_by_default_and_asks_under_the_ask_policy() {
     use wiremock::{
         Mock, MockServer, ResponseTemplate,
         matchers::{method, path},
     };
     let defaults = InstallerSettings::default();
     assert_eq!(defaults.execution_for(false), ExecutionPolicy::Allow);
-    assert_eq!(defaults.execution_for(true), ExecutionPolicy::Ask);
+    assert_eq!(defaults.execution_for(true), ExecutionPolicy::Allow);
     let never = InstallerSettings {
         execution: ExecutionPolicy::Never,
         ..Default::default()
     };
     assert_eq!(never.execution_for(true), ExecutionPolicy::Never);
-    let allow = InstallerSettings {
-        download_execution: ExecutionPolicy::Allow,
+    let ask = InstallerSettings {
+        download_execution: ExecutionPolicy::Ask,
         ..Default::default()
     };
-    assert_eq!(allow.execution_for(true), ExecutionPolicy::Allow);
+    assert_eq!(ask.execution_for(false), ExecutionPolicy::Allow);
+    assert_eq!(ask.execution_for(true), ExecutionPolicy::Ask);
 
     let temp = tempfile::tempdir().unwrap();
-    let (_store, _settings, service) = setup(temp.path()).await;
+    let (_store, settings, service) = setup(temp.path()).await;
+    settings
+        .set("core.installer", serde_json::to_value(&ask).unwrap(), None)
+        .await
+        .unwrap();
     let server = MockServer::start().await;
     Mock::given(method("GET"))
         .and(path("/setup.exe"))

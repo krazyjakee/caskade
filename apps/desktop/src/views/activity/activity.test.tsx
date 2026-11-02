@@ -315,7 +315,7 @@ it("keeps external URLs inert until the explicit confirmation and dismisses with
   );
   expect(confirm).not.toHaveBeenCalled();
   expect(screen.getByText(/Nothing will be downloaded/)).toBeTruthy();
-  expect(screen.getByText(/asks again before running it/)).toBeTruthy();
+  expect(screen.getByText(/Caskade runs it/)).toBeTruthy();
   fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Dismiss" }));
   await waitFor(() => expect(dismiss).toHaveBeenCalledExactlyOnceWith("request-7"));
   expect(confirm).not.toHaveBeenCalled();

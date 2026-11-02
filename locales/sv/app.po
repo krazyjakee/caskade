@@ -6016,8 +6016,8 @@ msgid "Nothing was saved. Check the marked fields."
 msgstr "Inget sparades. Kontrollera de markerade fälten."
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
-msgid "Nothing will be downloaded until you confirm. If the download is an installer program, Caskade asks again before running it, unless Settings → Installer allows downloaded installers to run."
-msgstr "Inget laddas ner förrän du bekräftar. Om nedladdningen är ett installationsprogram frågar Caskade igen innan det körs, om inte Inställningar → Installationsprogram tillåter att nedladdade installationsprogram körs."
+msgid "Nothing will be downloaded until you confirm. If the download is an installer program, Caskade runs it, unless Settings → Installer asks first for downloaded installers."
+msgstr "Inget laddas ner förrän du bekräftar. Om nedladdningen är ett installationsprogram kör Caskade det, om inte Inställningar → Installationsprogram frågar först för nedladdade installationsprogram."
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
 msgid "Notification pages"
