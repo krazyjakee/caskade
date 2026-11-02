@@ -90,6 +90,15 @@ pub async fn resolve_with_runners(
         };
         return Ok(PreparedLaunch::new(command, target, true));
     }
+    // A Flatpak app missing here (an action from another device, #245) is
+    // said plainly before anything starts.
+    if let LaunchSpec::Flatpak { app_id, .. } = &spec
+        && super::command::flatpak_id(app_id)
+        && let Some(missing) =
+            super::command::flatpak_missing(std::path::Path::new("flatpak"), app_id).await
+    {
+        return Err(LaunchError::Refused(missing));
+    }
     tokio::task::spawn_blocking(move || {
         let (real, alias) = locations(&entry, root.as_ref(), aliases.as_ref())?;
         let managed = matches!(entry.location, Some(InstallLocation::Managed { .. }));

@@ -1,6 +1,7 @@
 //! Integration tests, compiled as one binary: a change relinks once instead
 //! of once per file. Run one file's tests with `cargo test --test it <file>::`.
 
+mod addon_offers;
 mod appimage_env;
 mod device_defaults;
 mod i18n;
@@ -9,6 +10,7 @@ mod installer_settings;
 mod ludusavi;
 #[cfg(feature = "net")]
 mod milestone_editing;
+mod missing_programs;
 mod rom_scan;
 mod save_locations;
 #[cfg(feature = "net")]

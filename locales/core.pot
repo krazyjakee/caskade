@@ -2125,6 +2125,14 @@ msgid "invalid executable arguments or environment"
 msgstr ""
 
 #: crates/caskade-core/src/launch/command.rs
+msgid "{app} isn't installed on this device. Install it with Flatpak, or play another way."
+msgstr ""
+
+#: crates/caskade-core/src/launch/command.rs
+msgid "Flatpak isn't installed on this device, so {app} can't start."
+msgstr ""
+
+#: crates/caskade-core/src/launch/command.rs
 msgid "launch URI has no scheme"
 msgstr ""
 

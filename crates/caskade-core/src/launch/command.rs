@@ -116,6 +116,33 @@ pub(super) fn flatpak_id(app_id: &str) -> bool {
             .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'.' | b'_' | b'-'))
 }
 
+/// Why `app_id` can't start through Flatpak here, asking `program` (`flatpak`):
+/// it isn't installed, or Flatpak itself isn't (#245: an action from another
+/// device may name one). `None` when it's there, and when that can't be told
+/// in a few seconds: the launch then goes ahead and says what failed.
+pub async fn flatpak_missing(program: &std::path::Path, app_id: &str) -> Option<String> {
+    let mut command = tokio::process::Command::new(program);
+    crate::managed::outside_own_appimage(command.as_std_mut());
+    command
+        .args(["info", "--show-ref", app_id])
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .kill_on_drop(true);
+    match tokio::time::timeout(std::time::Duration::from_secs(5), command.status()).await {
+        Ok(Ok(status)) if status.success() => None,
+        Ok(Ok(_)) => Some(crate::tr!(
+            "{app} isn't installed on this device. Install it with Flatpak, or play another way.",
+            app = app_id
+        )),
+        Ok(Err(error)) if error.kind() == std::io::ErrorKind::NotFound => Some(crate::tr!(
+            "Flatpak isn't installed on this device, so {app} can't start.",
+            app = app_id
+        )),
+        _ => None,
+    }
+}
+
 /// Uses the platform's URI dispatcher, with one URI argument and no shell.
 pub fn uri_command(uri: &str) -> Result<LaunchCommand, super::LaunchError> {
     let (scheme, rest) = uri

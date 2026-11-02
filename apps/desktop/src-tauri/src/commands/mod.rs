@@ -2,6 +2,7 @@
 //! submodule per area (library, launch, settings, …), owned with that area.
 
 pub mod accounts;
+pub mod addon_offers;
 pub mod achievement_icons;
 pub mod achievements;
 pub mod actions;

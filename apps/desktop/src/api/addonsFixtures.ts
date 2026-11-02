@@ -6,6 +6,7 @@ import type {
   AddonsApi,
   CatalogueItem,
   CatalogueView,
+  DeviceAddon,
 } from "./addons";
 import type { AddonRecord } from "./bindings";
 
@@ -102,8 +103,10 @@ export function fixtureCatalogueItems(): CatalogueItem[] {
 
 export function createAddonsFixture(items = fixtureCatalogueItems()): AddonsApi & {
   setOffline(offline: boolean): void;
+  setFromDevices(offers: DeviceAddon[]): void;
 } {
   let offline = false;
+  let fromDevices: DeviceAddon[] = [];
   let fetchedAtMs: number | null = Date.now() - 3_600_000;
   const addons: Record<string, AddonRecord> = {};
   let records: AddonRecords = { updates: "notify", addons };
@@ -264,6 +267,10 @@ export function createAddonsFixture(items = fixtureCatalogueItems()): AddonsApi 
     },
     setOffline(next) {
       offline = next;
+    },
+    fromDevices: async () => structuredClone(fromDevices),
+    setFromDevices(offers) {
+      fromDevices = structuredClone(offers);
     },
   };
 }

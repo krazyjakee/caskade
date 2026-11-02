@@ -18,6 +18,7 @@ import {
 import { formatDateTime } from "../../api/presentation";
 import { useMode } from "../../shell/console/mode";
 import { AddonDetails } from "./AddonDetails";
+import { DeviceOffers } from "./DeviceOffers";
 
 type Kind = "all" | "plugin" | "theme";
 
@@ -109,6 +110,7 @@ export function AddonCatalogue() {
           {t`Check for add-on updates when Settings opens`}
         </Switch>
       )}
+      <DeviceOffers items={catalogue.data?.items ?? []} open={setOpen} />
       <div className="flex flex-wrap items-center gap-3">
         <TextField
           aria-label={t`Search the catalogue`}

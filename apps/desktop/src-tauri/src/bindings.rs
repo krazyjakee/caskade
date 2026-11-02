@@ -48,6 +48,7 @@ pub fn builder() -> Builder<tauri::Wry> {
             crate::commands::saves::saves_manifest_status,
             crate::commands::saves::saves_manifest_update,
             crate::commands::presence::devices_playing,
+            crate::commands::addon_offers::addons_from_devices::<tauri::Wry>,
             crate::commands::game_edit::game_artwork,
             crate::commands::game_edit::game_artwork_set,
             crate::commands::game_edit::games_bulk_edit,

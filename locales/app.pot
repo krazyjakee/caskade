@@ -6784,6 +6784,14 @@ msgstr ""
 msgid "On {device}, open Settings → Streaming in Caskade and enter this code:"
 msgstr ""
 
+#: apps/desktop/src/components/addons/DeviceOffers.tsx
+msgid "On {devices}"
+msgstr ""
+
+#: apps/desktop/src/components/addons/DeviceOffers.tsx
+msgid "On {devices}. It isn't in the catalogue, so install it there the way it came."
+msgstr ""
+
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
 msgid "On {name} since {since}"
 msgstr ""
@@ -6796,6 +6804,7 @@ msgstr ""
 msgid "On this network at {addresses}."
 msgstr ""
 
+#: apps/desktop/src/components/addons/DeviceOffers.tsx
 #: apps/desktop/src/views/game/OtherDevices.tsx
 msgid "On your other devices"
 msgstr ""
@@ -8840,8 +8849,16 @@ msgstr ""
 msgid "Searching…"
 msgstr ""
 
+#: apps/desktop/src/components/addons/DeviceOffers.tsx
+msgid "See {name}"
+msgstr ""
+
 #: apps/desktop/src/shell/SearchBox.tsx
 msgid "See all results for {input}"
+msgstr ""
+
+#: apps/desktop/src/components/addons/DeviceOffers.tsx
+msgid "See it"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
@@ -11087,6 +11104,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Your other devices at home can play this device's games, streamed over the network, with their own controller."
+msgstr ""
+
+#: apps/desktop/src/components/addons/DeviceOffers.tsx
+msgid "Your other devices have these. Nothing installs here until you choose to."
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx

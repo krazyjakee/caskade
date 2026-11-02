@@ -122,6 +122,8 @@ pub fn access(command: &str) -> Option<Access> {
         | "saves_manifest_update"
         // Which games run on which paired device (#240).
         | "devices_playing"
+        // Add-ons on the user's other devices (#245), offered to install.
+        | "addons_from_devices"
         // The add-on catalogue (#181): reading it, and fetching it again.
         | "addons_catalogue"
         | "addons_catalogue_refresh"

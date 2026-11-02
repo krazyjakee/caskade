@@ -356,7 +356,9 @@ that release's own emulator launch on the same platform; one that can't be
 bound yet waits. Only shell scripts travel (a direct command names a program
 on its device), and they arrive turned off (`Receive::DisableGameScript`); one
 whose command changes on another device is turned off again. A shell this
-system hasn't leaves the script waiting. A ROM hash this device verified
+system hasn't leaves the script waiting. A Flatpak action whose app isn't
+installed here is refused before anything starts, naming the app (#245,
+`launch::command::flatpak_missing`), rather than failing inside `flatpak run`. A ROM hash this device verified
 stays over a hand-made link from another device.
 
 Add-ons travel as each device's own inventory, keyed by the device: the
@@ -365,7 +367,11 @@ catalogue, with versions. Each device sends only its own and never removes
 another's, so two devices with different versions never overwrite each other.
 They're offers: nothing installs or turns on by itself, since a plugin's
 permissions are granted on each device. Theme folders copied in by hand
-aren't listed. A preferred emulator is a platform's default emulator
+aren't listed. Settings → Plugins' catalogue offers them under On your other
+devices (#245, `sync::offers::addon_offers`, `addons_from_devices`): what a
+paired device has and this one lacks, while Plugins and themes syncs here.
+Each opens its details, where installing a plugin goes through its review; one
+that isn't in the catalogue is named, with nothing to install. A preferred emulator is a platform's default emulator
 definition; it becomes this device's default only where this device has an
 emulator of that definition (with its first profile), and waits otherwise.
 Another device clearing its default clears nothing here.
@@ -543,8 +549,7 @@ up.
 
 ### Not carried yet
 
-Everything the policy declares synced or optional travels. Nothing offers
-another device's add-ons in the app yet.
+Everything the policy declares synced or optional travels.
 
 ### Copies on other devices
 

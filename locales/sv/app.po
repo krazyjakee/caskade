@@ -6879,6 +6879,14 @@ msgstr "På {device}"
 msgid "On {device}, open Settings → Streaming in Caskade and enter this code:"
 msgstr ""
 
+#: apps/desktop/src/components/addons/DeviceOffers.tsx
+msgid "On {devices}"
+msgstr "På {devices}"
+
+#: apps/desktop/src/components/addons/DeviceOffers.tsx
+msgid "On {devices}. It isn't in the catalogue, so install it there the way it came."
+msgstr "På {devices}. Det finns inte i katalogen, så installera det på samma sätt som där."
+
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
 msgid "On {name} since {since}"
 msgstr "På {name} sedan {since}"
@@ -6891,6 +6899,7 @@ msgstr "Vid varje uppdatering"
 msgid "On this network at {addresses}."
 msgstr ""
 
+#: apps/desktop/src/components/addons/DeviceOffers.tsx
 #: apps/desktop/src/views/game/OtherDevices.tsx
 msgid "On your other devices"
 msgstr "På dina andra enheter"
@@ -8987,9 +8996,17 @@ msgstr "Söker på IGDB…"
 msgid "Searching…"
 msgstr "Söker…"
 
+#: apps/desktop/src/components/addons/DeviceOffers.tsx
+msgid "See {name}"
+msgstr "Visa {name}"
+
 #: apps/desktop/src/shell/SearchBox.tsx
 msgid "See all results for {input}"
 msgstr "Visa alla resultat för {input}"
+
+#: apps/desktop/src/components/addons/DeviceOffers.tsx
+msgid "See it"
+msgstr "Visa"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Seed known launcher playtime on first import, without duplicating later sessions."
@@ -11280,6 +11297,10 @@ msgstr "Ditt bibliotek har inga spel än."
 msgid "Your other devices at home can play this device's games, streamed over the network, with their own controller."
 msgstr ""
 
+#: apps/desktop/src/components/addons/DeviceOffers.tsx
+msgid "Your other devices have these. Nothing installs here until you choose to."
+msgstr "Dina andra enheter har dessa. Inget installeras här förrän du väljer det."
+
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Your other devices know it by this name. Devices on the same network find each other and sync without the internet."
 msgstr ""
@@ -11320,6 +11341,11 @@ msgstr "ÅÅÅÅ-MM-DD"
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "YYYY-MM-DD, or empty for none"
 msgstr "ÅÅÅÅ-MM-DD, eller tomt för inget"
+
+#, fuzzy
+#~| msgid "Remove {0}"
+#~ msgid "See {0}"
+#~ msgstr "Ta bort {0}"
 
 #, fuzzy
 #~| msgid "{emulator} · {profile} (missing files)"

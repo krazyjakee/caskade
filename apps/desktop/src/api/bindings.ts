@@ -128,6 +128,11 @@ export const commands = {
 	/**  The games running on other devices now, by what they last said. */
 	devicesPlaying: () => typedError<PlayingElsewhere[], ErrorReport_Serialize>(__TAURI_INVOKE("devices_playing")),
 	/**
+	 *  What paired devices have that this one lacks; empty while Plugins and
+	 *  themes is This device only here, or before this device can sync.
+	 */
+	addonsFromDevices: () => typedError<DeviceAddon_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("addons_from_devices")),
+	/**
 	 *  The game's cover, background and icon as the editor shows them: who
 	 *  chose each, what shows, and the automatic images to choose from. `null`
 	 *  when the game is gone.
@@ -2921,6 +2926,27 @@ export type DetectedInstall_Serialize = {
 export type DetectedProfile = {
 	name: string,
 	available: boolean,
+};
+
+/**  An add-on on another device. */
+export type DeviceAddon = DeviceAddon_Serialize | DeviceAddon_Deserialize;
+
+/**  An add-on on another device. */
+export type DeviceAddon_Deserialize = {
+	deviceId: string,
+	/**  The device's name, as paired. */
+	deviceName: string,
+	addonId: string,
+	version?: string | null,
+};
+
+/**  An add-on on another device. */
+export type DeviceAddon_Serialize = {
+	deviceId: string,
+	/**  The device's name, as paired. */
+	deviceName: string,
+	addonId: string,
+	version: string | null,
 };
 
 export type DeviceKind = "desktop" | "laptop" | "handheld" | "tv";

@@ -10,6 +10,7 @@ pub mod copies;
 pub mod engine;
 #[cfg(feature = "net")]
 pub mod exchange;
+pub mod offers;
 pub mod policy;
 #[cfg(feature = "net")]
 pub mod presence;

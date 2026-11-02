@@ -16,6 +16,7 @@ import {
   type CatalogueStatus,
   type CatalogueView_Serialize,
   commands,
+  type DeviceAddon_Serialize,
   events,
   type UpdatePreference,
 } from "./bindings";
@@ -58,7 +59,13 @@ export interface AddonsApi {
   skipUpdate(id: string, version: string | null): Promise<AddonRecords>;
   setUpdatePreference(preference: UpdatePreference): Promise<AddonRecords>;
   subscribeProgress(listener: (progress: AddonProgress) => void): () => void;
+  /** Add-ons the user's other devices have and this one doesn't (#245),
+   * while Plugins and themes syncs; installing one is the user's choice. */
+  fromDevices?(): Promise<DeviceAddon[]>;
 }
+
+/** An add-on on another of the user's devices. */
+export type DeviceAddon = DeviceAddon_Serialize;
 
 export function createNativeAddons(): AddonsApi {
   const native = () => {
@@ -68,6 +75,10 @@ export function createNativeAddons(): AddonsApi {
     async catalogue(mode) {
       native();
       return unwrap(commands.addonsCatalogue(mode));
+    },
+    async fromDevices() {
+      native();
+      return unwrap(commands.addonsFromDevices());
     },
     async refresh(mode) {
       native();
