@@ -278,6 +278,91 @@ device and making a new identity are admin-only in the core
 (`AccountService::require(Permission::Admin)`), and in the adapter's
 permission table too. Reading the status needs a signed-in account.
 
+## The change log
+
+`caskade_core::sync` (#228) records every change to synced data with the
+device that made it and a hybrid logical clock, deletions included, so
+devices can tell each other exactly what they haven't seen and agree on the
+result whatever order changes arrive in. Migration 0032 holds it; all of it
+is local (sync policy).
+
+### What a change is
+
+`sync::change::Change`: an origin (the device's endpoint id), a clock, an
+`Entity`, a key in the origin's ids, a field and a value (`None` is a
+tombstone). The field `""` is a row's existence. The entities are the
+portable forms of what `sync::policy` declares synced:
+
+| Entity | Key | Fields | Category |
+| --- | --- | --- | --- |
+| `game` | game | `identity`, `favorite`, `hidden`, each user value (`title`, `description`, …; lists as `tags` plus `tags/<item>`) | Library |
+| `keptApart` | game | `""` | Library |
+| `igdbMatch` | game | `igdb` (an id, or `"none"`), hand-set only | Library |
+| `artworkChoice` | game\|kind | `""` | Artwork |
+| `collection` | collection | `""`, `name`, `description`, `pinned`, `rule` (kind and query), `account` | Library |
+| `member` | collection\|game | `""`, `position` | Library |
+| `session` | session (UUIDv7) | `""`: game, start, end and duration, once finished | PlaySessions |
+| `account` | account | `""`, `name`, `avatar`, `role`, `pinHash`, `permissions`, `maxAge`, `unratedNeedsPin`, `createdAt` | Accounts |
+| `approval` | account\|game | `""` | Accounts |
+
+A game's user values are what `overrides_json` marks as the user's, read from
+the shown record: the policy's `Receive::GameEdits` contract. Automatic
+metadata never enters the log, and applying a user value puts it on top of
+the automatic one (a reset brings the automatic value back), so refreshes keep
+working beneath it. Lists are sets: each item is a field of its own, so two
+devices adding tags concurrently keep both. The PIN throttle and the active
+account never sync. Sessions are a union: one is never deleted by sync, and a
+session whose game has no entry here gets an unlaunchable `sync:sessions`
+entry.
+
+### Clocks
+
+`sync::clock::Hlc` is wall milliseconds plus a counter. A device's clock
+never goes backwards: a reading is past the highest it has made or seen, and
+that highest is on disk (the version vector, `sync_seen`), so a restart or a
+clock set back carries on from it. Seeing another device's change moves the
+clock past it, so an edit made after receiving one always beats it, even with
+the system clock behind. Changes order by clock, then device id, so every
+device picks the same winner.
+
+### Capture and apply
+
+Capture (`SyncEngine::capture`) compares a snapshot of every synced field here
+(`LibraryStore::sync_snapshot`) with the winners recorded in `sync_fields`, and
+records each difference as a change with a new clock reading; a value that's
+gone becomes a tombstone. It doesn't matter what wrote the value (an editor, a
+bulk edit, a merge): only what the snapshot holds can be captured, and that
+excludes automatic values. A game removed here isn't a game deleted
+everywhere, so its fields send no tombstones, and neither do sessions.
+
+Apply (`SyncEngine::receive`, `apply_pending`) maps a change's keys to this
+device's ids, then writes it in one transaction with its field's new winner,
+if its stamp beats the winner here. A change waits, unapplied, while its
+category is This device only here or what it refers to hasn't arrived (a game
+whose identity is still on the way, an account a collection belongs to).
+Turning the category back on applies the waiting changes from the log, and
+the next exchange sends that category to each device again in full.
+
+A row's tombstone is a value like any other: a device that never saw the
+deletion can't bring the row back with an older change, and a field written to
+a deleted row is ignored.
+
+### Compaction
+
+`SyncEngine::compact` drops a change once every paired device has seen
+whatever replaced it, and drops a tombstone once every paired device has seen
+it (`sync_fields` still holds it, so an older change stays beaten). The newest
+identity each device sent per game stays. What remains is what some device
+hasn't seen and the live values, so a device paired later still gets the
+whole current state.
+
+### Backups
+
+Backups keep the log, the winners and the version vector, but leave out what
+other devices said they have (`sync_peers`). A restored library carries on
+from its own clocks; on its next connection it receives everything it lacks,
+its own later changes included, and nothing it restored is stamped as new.
+
 ## Lifetime
 
 `SyncEndpoint::bind` runs on the caller's tokio runtime; the crate creates

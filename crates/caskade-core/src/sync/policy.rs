@@ -564,6 +564,20 @@ pub const TABLES: &[Rule] = &[
     ),
     local("icon_checks", "executable icon checks are a local cache"),
     local(
+        "sync_changes",
+        "the change log is this device's record of what it has and still has to send",
+    ),
+    local(
+        "sync_fields",
+        "the clock each field's value here came with, for last-writer-wins",
+    ),
+    local("sync_seen", "this device's version vector"),
+    local("sync_peers", "what each paired device has seen, for this device's exchanges"),
+    local(
+        "sync_game_ids",
+        "which local game each other device's game is; ids differ per device",
+    ),
+    local(
         "paired_devices",
         "each device keeps its own pairings and the grants each side presents (credentials)",
     ),

@@ -14,6 +14,10 @@ pub const EXCLUDED_TABLES: &[(&str, &str)] = &[
         "pairings hold the grants each device presents (credentials); devices pair again after a restore",
     ),
     (
+        "sync_peers",
+        "what other devices said they have: a restored library re-syncs in full on its next connection",
+    ),
+    (
         "icon_checks",
         "which executables were read for icons: a restore without the icons must read them again",
     ),
