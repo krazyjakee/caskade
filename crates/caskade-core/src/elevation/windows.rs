@@ -30,6 +30,18 @@ pub const SERVICE: &str = "CaskadeStreaming";
 const SERVICE_NAME: &str = "Caskade streaming";
 pub const RULE_TCP: &str = "Caskade streaming (TCP)";
 pub const RULE_UDP: &str = "Caskade streaming (UDP)";
+/// The host's own files, which it changes as it runs: paired devices and
+/// its identity (`sunshine_state.json`'s `root`), its certificate and key,
+/// and the games Caskade published. A new copy of the program keeps them
+/// (an update, a repair), and switching hosting off sets them aside in
+/// [`KEPT`] beside the host folder, so pairings survive (§7).
+pub const RUNTIME: [&str; 3] = [
+    "config/sunshine_state.json",
+    "config/apps.json",
+    "config/credentials",
+];
+/// Where switching hosting off keeps [`RUNTIME`], beside `host`.
+pub const KEPT: &str = "kept";
 /// The host program, and the service launcher beside it (§4.2).
 const HOST_EXE: &str = "sunshine.exe";
 const SERVICE_EXE: [&str; 2] = ["tools", "sunshinesvc.exe"];
@@ -252,6 +264,22 @@ pub fn install_host(staging: &Path, expected: &str, target: &Path) -> Result<()>
         let _ = std::fs::remove_dir_all(&fresh);
         return Err(error);
     }
+    // The host's own state comes along: from the copy being replaced, or
+    // from where switching hosting off kept it.
+    let kept = kept_dir(target);
+    let from = if target.join(RUNTIME[0]).is_file() {
+        Some(target.to_path_buf())
+    } else if kept.is_dir() {
+        Some(kept.clone())
+    } else {
+        None
+    };
+    if let Some(from) = &from
+        && let Err(error) = carry_runtime(from, &fresh)
+    {
+        let _ = std::fs::remove_dir_all(&fresh);
+        return Err(error);
+    }
     let old = target.with_extension("old");
     let _ = std::fs::remove_dir_all(&old);
     if target.exists() {
@@ -265,12 +293,106 @@ pub fn install_host(staging: &Path, expected: &str, target: &Path) -> Result<()>
         return Err(error.into());
     }
     let _ = std::fs::remove_dir_all(&old);
+    // In use again: nothing is kept aside any more.
+    let _ = std::fs::remove_dir_all(&kept);
     Ok(())
 }
 
+/// `<Streaming>\kept`, beside the host folder.
+pub fn kept_dir(target: &Path) -> PathBuf {
+    target
+        .parent()
+        .map_or_else(|| target.with_extension(KEPT), |parent| parent.join(KEPT))
+}
+
+/// Copies the host's own files ([`RUNTIME`]) from `from` into `to`. The
+/// state keeps `from`'s paired devices and identity (`root`) and `to`'s
+/// web sign-in, which a repair may have made new.
+pub fn carry_runtime(from: &Path, to: &Path) -> Result<()> {
+    for relative in RUNTIME {
+        let source = from.join(relative);
+        let target = to.join(relative);
+        if source.is_dir() {
+            let _ = std::fs::remove_dir_all(&target);
+            copy_tree(&source, &target)?;
+        } else if source.is_file() {
+            if let Some(parent) = target.parent() {
+                std::fs::create_dir_all(parent)?;
+            }
+            if relative == RUNTIME[0] && target.is_file() {
+                let merged = merge_state(&std::fs::read(&target)?, &std::fs::read(&source)?)?;
+                std::fs::write(&target, merged)?;
+            } else {
+                std::fs::copy(&source, &target)?;
+            }
+        }
+    }
+    Ok(())
+}
+
+/// The new copy's state (`fresh`: its sign-in) with the old one's paired
+/// devices and identity (`old`'s `root`).
+pub fn merge_state(fresh: &[u8], old: &[u8]) -> Result<Vec<u8>> {
+    let mut fresh: serde_json::Value = serde_json::from_slice(fresh)?;
+    let old: serde_json::Value = serde_json::from_slice(old)?;
+    if let (Some(fresh), Some(root)) = (fresh.as_object_mut(), old.get("root")) {
+        fresh.insert("root".into(), root.clone());
+    }
+    Ok(serde_json::to_vec_pretty(&fresh)?)
+}
+
+fn copy_tree(from: &Path, to: &Path) -> Result<()> {
+    std::fs::create_dir_all(to)?;
+    for entry in std::fs::read_dir(from)? {
+        let entry = entry?;
+        let kind = entry.file_type()?;
+        let target = to.join(entry.file_name());
+        if kind.is_dir() {
+            copy_tree(&entry.path(), &target)?;
+        } else if kind.is_file() {
+            std::fs::copy(entry.path(), &target)?;
+        }
+    }
+    Ok(())
+}
+
+/// Whether the installed copy in `target` differs from the staged host in
+/// `staging`: a file missing or changed, the host's own files aside. Read
+/// without elevation (users may read Program Files).
+pub fn host_stale(staging: &Path, target: &Path) -> Result<bool> {
+    let runtime = |relative: &Path| {
+        let text = relative.to_string_lossy().replace('\\', "/");
+        text.starts_with(".caskade/")
+            || text.ends_with(".log")
+            || text.contains(".log.")
+            || RUNTIME
+                .iter()
+                .any(|own| text == *own || text.starts_with(&format!("{own}/")))
+    };
+    for relative in crate::managed::unpack::files(staging)? {
+        if runtime(&relative) {
+            continue;
+        }
+        let installed = target.join(&relative);
+        if !installed.is_file()
+            || sha256_file(&installed)? != sha256_file(&staging.join(&relative))?
+        {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
 /// Removes `target` and the `Streaming` and `Caskade` folders above it when
-/// that leaves them empty.
+/// that leaves them empty. The host's own files ([`RUNTIME`]) are kept
+/// aside first in [`kept_dir`], still administrator-only, so switching
+/// hosting on again needs no new pairing.
 pub fn remove_host(target: &Path) -> Result<()> {
+    if target.join(RUNTIME[0]).is_file() {
+        let kept = kept_dir(target);
+        let _ = std::fs::remove_dir_all(&kept);
+        carry_runtime(target, &kept)?;
+    }
     match std::fs::remove_dir_all(target) {
         Err(error) if error.kind() != std::io::ErrorKind::NotFound => return Err(error.into()),
         _ => {}

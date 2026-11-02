@@ -49,6 +49,8 @@ use std::{
 
 /// The managed tool that hosts.
 pub const TOOL: &str = "sunshine";
+/// The port the host answers `/serverinfo` on.
+pub const HTTP_PORT: u16 = 47989;
 const SETTINGS: &str = "core.streaming";
 
 /// Where hosting is.
@@ -130,6 +132,8 @@ struct Inner {
     /// Where the host's API answers.
     #[cfg(feature = "net")]
     api_base: url::Url,
+    /// Where the host answers `/serverinfo`: whether it streams now.
+    http_port: u16,
     name: Mutex<String>,
     status: Mutex<HostStatus>,
     watch: Mutex<Option<tokio::task::JoinHandle<()>>>,
@@ -175,6 +179,7 @@ impl StreamingHost {
                 timing: Timing::default(),
                 #[cfg(feature = "net")]
                 api_base: url::Url::parse(crate::streaming::api::LOCAL).expect("valid URL"),
+                http_port: HTTP_PORT,
             },
         )
     }
@@ -199,6 +204,7 @@ impl StreamingHost {
                 timing: parts.timing,
                 #[cfg(feature = "net")]
                 api_base: parts.api_base,
+                http_port: parts.http_port,
                 name: Mutex::new(name),
                 status: Mutex::new(HostStatus {
                     state: HostState::Off,
@@ -335,7 +341,9 @@ impl StreamingHost {
     }
 
     /// Writes the configuration and, the first time, the web credentials.
-    async fn configure(&self, program: &Path) -> Result<Credentials> {
+    /// `force` sets the credentials again (a repair): the host's copy may
+    /// have drifted from the keychain's, or the keychain lost them.
+    async fn configure(&self, program: &Path, force: bool) -> Result<Credentials> {
         let files = self.staged_files()?;
         let name = crate::lock(&self.inner.name).clone();
         config::write(&files, &HostConfig { name })?;
@@ -347,7 +355,7 @@ impl StreamingHost {
                 (credentials, true)
             }
         };
-        if new || !files.state().is_file() {
+        if new || force || !files.state().is_file() {
             let mut command = tokio::process::Command::new(program);
             crate::managed::outside_own_appimage(command.as_std_mut());
             command
@@ -392,7 +400,7 @@ impl StreamingHost {
             let _activity = caskade_jobs::global()
                 .activity(crate::tr!("Setting up streaming from this device"));
             let program = self.program(true).await?;
-            self.configure(&program).await?;
+            self.configure(&program, false).await?;
             Ok::<_, Error>(program)
         }
         .await;
@@ -468,6 +476,145 @@ impl StreamingHost {
         Ok(HostOutcome::Off)
     }
 
+    /// Whether a device is streaming from this one now.
+    async fn streaming_now(&self) -> bool {
+        #[cfg(feature = "net")]
+        {
+            crate::streaming::hosts::ask_server_info("127.0.0.1", self.inner.http_port)
+                .await
+                .is_some_and(|info| info.busy)
+        }
+        #[cfg(not(feature = "net"))]
+        {
+            // Nothing can ask without the network client.
+            let _ = self.inner.http_port;
+            false
+        }
+    }
+
+    /// Installs the newest host (STREAMING-PLAN §7), never during a stream:
+    /// it stops, the files are swapped (its configuration, state, paired
+    /// devices and published games stay), Caskade's configuration is
+    /// written again, the administrator step re-applies what the new copy
+    /// needs (on Windows, copying it into the administrator-only folder:
+    /// one prompt), and it starts again.
+    pub async fn update(&self) -> Result<HostOutcome> {
+        let _switching = self.inner.switching.lock().await;
+        #[cfg(feature = "net")]
+        if self.existing_mode().await {
+            return Err(Error::Invalid(crate::tr!(
+                "The streaming set up on this device before Caskade is updated the way it was installed."
+            )));
+        }
+        if self.streaming_now().await {
+            return Err(Error::Invalid(crate::tr!(
+                "A device is streaming from this one. Update once the game ends."
+            )));
+        }
+        let hosting = self.hosting().await;
+        let _activity =
+            caskade_jobs::global().activity(crate::tr!("Updating streaming from this device"));
+        if hosting {
+            self.halt().await;
+        }
+        let updated = async {
+            self.inner
+                .tools
+                .update(TOOL, &CancellationToken::new(), |_, _| {})
+                .await?;
+            let program = self.program(false).await?;
+            self.configure(&program, false).await?;
+            Ok::<_, Error>(program)
+        }
+        .await;
+        let program = match updated {
+            Ok(program) => program,
+            Err(error) => {
+                if hosting {
+                    self.resume().await;
+                }
+                return Err(error);
+            }
+        };
+        if !hosting {
+            return Ok(HostOutcome::Off);
+        }
+        let outcome = self.reapply().await;
+        self.run(&program).await;
+        outcome
+    }
+
+    /// Re-runs setup (§7): the program's missing files, the configuration
+    /// and the web credentials (new ones when the keychain lost them), and
+    /// whatever of the administrator step went (rules, the service, the
+    /// firewall, the administrator-only copy), behind one prompt. Paired
+    /// devices stay.
+    pub async fn repair(&self) -> Result<HostOutcome> {
+        let _switching = self.inner.switching.lock().await;
+        if !self.supported() {
+            self.set_status(HostState::Unsupported, None, None);
+            return Err(Error::Invalid(crate::tr!(
+                "this device can't host game streams"
+            )));
+        }
+        #[cfg(feature = "net")]
+        if self.existing_mode().await {
+            // Not Caskade's to set up: only whether it answers.
+            return match self.until_ready().await {
+                Ok(version) => {
+                    self.set_status(HostState::Ready, version, None);
+                    Ok(HostOutcome::On)
+                }
+                Err(error) => {
+                    self.set_status(HostState::NeedsAttention, None, Some(not_working()));
+                    Err(error)
+                }
+            };
+        }
+        self.halt().await;
+        self.set_status(HostState::SettingUp, None, None);
+        let prepared = async {
+            let _activity =
+                caskade_jobs::global().activity(crate::tr!("Repairing streaming from this device"));
+            if !self.inner.tools.intact(TOOL).await? {
+                self.inner
+                    .tools
+                    .install(TOOL, &CancellationToken::new(), |_, _| {})
+                    .await?;
+            }
+            let program = self.program(true).await?;
+            self.configure(&program, true).await?;
+            Ok::<_, Error>(program)
+        }
+        .await;
+        let program = match prepared {
+            Ok(program) => program,
+            Err(error) => {
+                self.set_status(HostState::NeedsAttention, None, Some(not_working()));
+                return Err(error);
+            }
+        };
+        let outcome = self.reapply().await?;
+        if outcome == HostOutcome::On {
+            self.set_hosting(true).await?;
+            self.run(&program).await;
+        } else {
+            self.set_status(HostState::NeedsAttention, None, Some(not_working()));
+        }
+        Ok(outcome)
+    }
+
+    /// The administrator step for what is missing or stale, as an outcome.
+    async fn reapply(&self) -> Result<HostOutcome> {
+        Ok(
+            match self.inner.elevation.apply(Plan::StreamingHost).await? {
+                Outcome::Cancelled => HostOutcome::Cancelled,
+                Outcome::Refused => HostOutcome::Refused,
+                Outcome::NothingToDo | Outcome::Done(_) => HostOutcome::On,
+            },
+        )
+    }
+
     /// At Caskade's start: runs the host when hosting is on.
     pub async fn start(&self) {
         if !self.supported() {
@@ -527,7 +674,7 @@ impl StreamingHost {
         let prepared = async {
             let program = self.program(false).await?;
             if self.inner.os != OperatingSystem::Windows {
-                self.configure(&program).await?;
+                self.configure(&program, false).await?;
             }
             Ok::<_, Error>(program)
         }
@@ -684,6 +831,12 @@ impl StreamingHost {
         self.api().await?.unpair(uuid).await
     }
 
+    /// Forgets every paired device: each pairs again with a code.
+    #[cfg(feature = "net")]
+    pub async fn unpair_all(&self) -> Result<()> {
+        self.api().await?.unpair_all().await
+    }
+
     /// The running host's API (publishing games, pairing).
     #[cfg(feature = "net")]
     pub async fn api(&self) -> Result<crate::streaming::api::HostApi> {
@@ -716,4 +869,6 @@ pub struct Parts {
     pub timing: Timing,
     #[cfg(feature = "net")]
     pub api_base: url::Url,
+    /// The host's `/serverinfo` port ([`HTTP_PORT`]; another in tests).
+    pub http_port: u16,
 }

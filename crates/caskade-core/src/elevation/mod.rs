@@ -169,6 +169,9 @@ pub struct Elevation {
     os: crate::emulation::OperatingSystem,
     records: PathBuf,
     host_dir: PathBuf,
+    /// Where the Windows host is installed; found in the registry when
+    /// `None` (tests give a folder).
+    host_target: Option<PathBuf>,
 }
 
 impl Elevation {
@@ -193,7 +196,27 @@ impl Elevation {
             os,
             records: paths.data.join("elevation"),
             host_dir: paths.data.join("streaming").join("host"),
+            host_target: None,
         }
+    }
+
+    /// The Windows host's installed folder (tests).
+    pub fn with_host_target(mut self, target: PathBuf) -> Self {
+        self.host_target = Some(target);
+        self
+    }
+
+    /// Whether the installed Windows host is not the staged one any more:
+    /// an update, or a file that changed or went (§7). Unknown counts as
+    /// current: the program check then decides.
+    fn host_stale(&self) -> bool {
+        if self.os != crate::emulation::OperatingSystem::Windows {
+            return false;
+        }
+        let Some(target) = self.host_target.clone().or_else(windows::target) else {
+            return false;
+        };
+        target.is_dir() && windows::host_stale(&self.host_dir, &target).unwrap_or(true)
     }
 
     fn record_path(&self, plan: Plan) -> PathBuf {
@@ -247,7 +270,10 @@ impl Elevation {
         let missing: Vec<Change> = changes
             .iter()
             .copied()
-            .filter(|change| !self.runner.present(*change))
+            .filter(|change| {
+                !self.runner.present(*change)
+                    || (*change == Change::HostProgram && self.host_stale())
+            })
             .collect();
         if missing.is_empty() {
             return Ok(Outcome::NothingToDo);

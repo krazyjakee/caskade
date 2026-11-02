@@ -375,6 +375,24 @@ impl ManagedTools {
         Ok(())
     }
 
+    /// Whether every file `id`'s release shipped is still in its folder.
+    /// A Flatpak, or a tool not installed, counts as whole.
+    pub async fn intact(&self, id: &str) -> Result<bool> {
+        let Some(managed) = self.managed(id).await? else {
+            return Ok(true);
+        };
+        let Some(dir) = managed.dir.map(PathBuf::from) else {
+            return Ok(true);
+        };
+        let missing = tokio::task::spawn_blocking(move || super::unpack::missing_shipped(&dir))
+            .await
+            .map_err(|error| Error::Invalid(error.to_string()))?;
+        if !missing.is_empty() {
+            tracing::warn!(tool = id, missing = missing.len(), "tool files missing");
+        }
+        Ok(missing.is_empty())
+    }
+
     /// Checks `id`'s source for a newer version now. A failure is kept in
     /// `error`; the version found and the time of the last check that
     /// worked stay.

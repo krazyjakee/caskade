@@ -1204,6 +1204,10 @@ msgstr ""
 msgid "A newer save from {device} hasn't arrived yet, so the game started with the save on this device."
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "A newer version, {latest}, is ready."
+msgstr ""
+
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
 msgid "A notification for achievements unlocked since the last refresh. The first refresh of a game brings its history in without notifications."
 msgstr ""
@@ -2435,6 +2439,10 @@ msgstr ""
 
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
 msgid "Caskade keeps a copy of the game. You'll play it for a minute so it can see what the game needs."
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Caskade keeps streaming up to date when you say so, never in the middle of a game."
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
@@ -3944,6 +3952,10 @@ msgstr ""
 msgid "Every backup is read back and checked before it's reported done, and a restore keeps the library it replaces until the restored one opens."
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Every device then needs a new code to play from this one."
+msgstr ""
+
 #: apps/desktop/src/views/StoreView.tsx
 msgid "Every game IGDB knows, with where it is sold. Prices and availability are the stores' own."
 msgstr ""
@@ -4151,6 +4163,14 @@ msgstr ""
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Forget {name}"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Forget all paired devices…"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Forget them all"
 msgstr ""
 
 #. A BIOS file's state
@@ -5178,6 +5198,10 @@ msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 msgid "Keep separate"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Keep them"
 msgstr ""
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
@@ -8084,6 +8108,10 @@ msgstr ""
 msgid "Repair"
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Repairing…"
+msgstr ""
+
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "Replace"
 msgstr ""
@@ -8949,6 +8977,10 @@ msgstr ""
 msgid "Set up ROM folders in Settings → Emulation."
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Sets it up again where something went missing or changed."
+msgstr ""
+
 #: apps/desktop/src/onboarding/SetupStep.tsx
 msgid "Setting things up"
 msgstr ""
@@ -9174,6 +9206,7 @@ msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Skip this version"
 msgstr ""
 
@@ -9561,6 +9594,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Streaming is already set up"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Streaming updates"
 msgstr ""
 
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
@@ -10399,6 +10436,10 @@ msgstr ""
 msgid "Up to date (checked {checked})."
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Up to date."
+msgstr ""
+
 #. A Store tab and shelf: releases to come
 #: apps/desktop/src/views/StoreView.tsx
 msgid "Upcoming"
@@ -10410,6 +10451,7 @@ msgstr ""
 
 #. Button: installs the newer release
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Update"
 msgstr ""
 
@@ -10497,6 +10539,7 @@ msgid "Updating the library…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Updating…"
 msgstr ""
 

@@ -18,6 +18,8 @@ import {
   type PairingStarted,
   type PairRequest,
   type StreamHost,
+  type StreamingPart,
+  type StreamingProgram,
 } from "./bindings";
 import { unwrap } from "./reply";
 import { createStreamingFixtureApi } from "./streamingFixtures";
@@ -32,6 +34,8 @@ export type {
   PairingStarted,
   PairRequest,
   StreamHost,
+  StreamingPart,
+  StreamingProgram,
 };
 
 /** How a pairing this device asked for ended. */
@@ -64,6 +68,16 @@ export interface StreamingApi {
   /** Devices paired with this one, which may stream from it. */
   pairedDevices(): Promise<PairedClient[]>;
   unpair(uuid: string): Promise<void>;
+  /** Forgets every paired device: each needs a code again. */
+  unpairAll(): Promise<void>;
+  /** Re-runs hosting's setup: one administrator prompt at most. */
+  repair(): Promise<HostOutcome>;
+  /** The streaming programs installed here, with updates waiting. */
+  programs(): Promise<StreamingProgram[]>;
+  /** Installs the newest version; never during a stream. */
+  update(part: StreamingPart): Promise<HostOutcome>;
+  /** Stops offering the newest version. */
+  skip(part: StreamingPart): Promise<void>;
 }
 
 const nothing = async () => {};
@@ -96,6 +110,11 @@ export const nativeStreamingApi: StreamingApi = {
   declinePairing: (id) => unwrap(commands.streamingDeclinePairing(id)).then(nothing),
   pairedDevices: () => unwrap(commands.streamingPairedDevices()),
   unpair: (uuid) => unwrap(commands.streamingUnpair(uuid)).then(nothing),
+  unpairAll: () => unwrap(commands.streamingUnpairAll()).then(nothing),
+  repair: () => unwrap(commands.streamingRepair()),
+  programs: () => unwrap(commands.streamingPrograms()),
+  update: (part) => unwrap(commands.streamingUpdate(part)),
+  skip: (part) => unwrap(commands.streamingSkip(part)).then(nothing),
 };
 
 let preview: StreamingApi | undefined;
@@ -165,6 +184,15 @@ export function usePairedDevices({ enabled = true } = {}) {
     queryKey: [...streamingKey, "paired"],
     queryFn: () => api.pairedDevices(),
     enabled,
+  });
+}
+
+/** The streaming programs installed here (#266). */
+export function useStreamingPrograms() {
+  const api = useStreamingApi();
+  return useQuery({
+    queryKey: [...streamingKey, "programs"],
+    queryFn: () => api.programs(),
   });
 }
 

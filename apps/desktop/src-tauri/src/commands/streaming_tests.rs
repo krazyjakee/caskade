@@ -61,6 +61,7 @@ fn closing_to_the_tray_keeps_the_host_and_quitting_stops_it() {
             secrets: HostSecrets::memory(),
             timing: Timing::default(),
             api_base: "https://127.0.0.1:1/".parse().unwrap(),
+            http_port: 1,
         },
     );
     let app = mock_builder().build(mock_context(noop_assets())).unwrap();

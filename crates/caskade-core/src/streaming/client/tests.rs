@@ -213,3 +213,66 @@ async fn the_flatpak_runs_in_a_folder_of_its_own_data() {
         ]
     );
 }
+
+/// A newer client release, as GitHub serves it.
+async fn newer(github: &MockServer, version: &str) {
+    github.reset().await;
+    Mock::given(method("HEAD"))
+        .and(path("/example/client/releases/latest"))
+        .respond_with(ResponseTemplate::new(302).insert_header(
+            "location",
+            format!("/example/client/releases/tag/v{version}"),
+        ))
+        .mount(github)
+        .await;
+    Mock::given(method("GET"))
+        .and(path(format!(
+            "/example/client/releases/expanded_assets/v{version}"
+        )))
+        .respond_with(ResponseTemplate::new(200).set_body_string(format!(
+            r#"<a href="/example/client/releases/download/v{version}/client-{version}.zip">c</a>"#
+        )))
+        .mount(github)
+        .await;
+    Mock::given(method("GET"))
+        .and(path(format!(
+            "/example/client/releases/download/v{version}/client-{version}.zip"
+        )))
+        .respond_with(ResponseTemplate::new(200).set_body_bytes(zip(&[
+            ("client/AppRun", APP_RUN),
+            (
+                "client/usr/bin/moonlight",
+                &format!("{MOONLIGHT}# {version}\n"),
+            ),
+        ])))
+        .mount(github)
+        .await;
+}
+
+#[tokio::test]
+async fn an_update_waits_for_the_stream_and_keeps_the_clients_state() {
+    let (_temp, client, github) = client(false).await;
+    let ready = client.ensure(&CancellationToken::new()).await.unwrap();
+    let ini = ready.state.join(SETTINGS_DIR).join(SETTINGS_FILE);
+    // Paired with a host, its identity made.
+    let mut text = std::fs::read_to_string(&ini).unwrap();
+    text.push_str("\n[hosts]\n1\\hostname=Den\n1\\uuid=ABC\nsize=1\n");
+    text = text.replace("[General]\n", "[General]\nuniqueid=0123abcd\n");
+    std::fs::write(&ini, &text).unwrap();
+    newer(&github, "6.3.0").await;
+
+    // A stream holds the client: no update.
+    let streaming = client.busy.clone().lock_owned().await;
+    assert!(client.update(&CancellationToken::new()).await.is_err());
+    drop(streaming);
+
+    client.update(&CancellationToken::new()).await.unwrap();
+    let managed = client.tools.managed(TOOL).await.unwrap().unwrap();
+    assert_eq!(managed.installed.as_deref(), Some("v6.3.0"));
+    let after = std::fs::read_to_string(&ini).unwrap();
+    assert!(after.contains("uniqueid=0123abcd"), "{after}");
+    assert!(after.contains("1\\uuid=ABC"), "{after}");
+    for (key, value) in QUIET {
+        assert!(after.contains(&format!("{key}={value}")), "{key}");
+    }
+}

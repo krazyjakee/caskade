@@ -198,6 +198,117 @@ pub async fn streaming_unpair(
     host.inner().clone().unpair(&uuid).await.map_err(report)
 }
 
+/// Forgets every device paired with this host: each needs a code again.
+#[tauri::command]
+#[specta::specta]
+pub async fn streaming_unpair_all(host: State<'_, StreamingHost>) -> Result<(), CommandError> {
+    host.inner().clone().unpair_all().await.map_err(report)
+}
+
+/// Re-runs hosting's setup (#266): the program's missing files, its
+/// configuration and sign-in, and the administrator step's rules, service
+/// or firewall entries that went, behind one prompt.
+#[tauri::command]
+#[specta::specta]
+pub async fn streaming_repair(host: State<'_, StreamingHost>) -> Result<HostOutcome, CommandError> {
+    host.inner().clone().repair().await.map_err(report)
+}
+
+/// Which streaming program: the one hosting here, or the one streaming to
+/// this device. People see neither's name.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub enum StreamingPart {
+    Host,
+    Client,
+}
+
+impl StreamingPart {
+    fn tool(self) -> &'static str {
+        match self {
+            Self::Host => caskade_core::streaming::host::TOOL,
+            Self::Client => caskade_core::streaming::client::TOOL,
+        }
+    }
+}
+
+/// A streaming program installed here, and whether a newer one waits.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct StreamingProgram {
+    pub part: StreamingPart,
+    /// What it is, in Caskade's words.
+    pub label: String,
+    pub installed: Option<String>,
+    pub latest: Option<String>,
+    /// A newer version was found and not skipped.
+    pub update: bool,
+}
+
+/// The streaming programs installed here (#266), for Update and Skip.
+#[tauri::command]
+#[specta::specta]
+pub async fn streaming_programs(
+    tools: State<'_, caskade_core::managed::ManagedTools>,
+) -> Result<Vec<StreamingProgram>, CommandError> {
+    let mut programs = Vec::new();
+    for part in [StreamingPart::Host, StreamingPart::Client] {
+        if let Some(managed) = tools.managed(part.tool()).await.map_err(report)? {
+            programs.push(StreamingProgram {
+                part,
+                label: caskade_core::managed::tool_label(part.tool()),
+                update: managed.update_available(),
+                installed: managed
+                    .installed
+                    .as_deref()
+                    .map(caskade_core::managed::version_label),
+                latest: managed
+                    .latest
+                    .as_deref()
+                    .map(caskade_core::managed::version_label),
+            });
+        }
+    }
+    Ok(programs)
+}
+
+/// Installs the newest version of a streaming program (#266), never during
+/// a stream: hosting restarts with its pairings and settings, and one
+/// administrator prompt where Windows needs the new copy put in place.
+#[tauri::command]
+#[specta::specta]
+pub async fn streaming_update(
+    part: StreamingPart,
+    host: State<'_, StreamingHost>,
+    client: State<'_, StreamingClient>,
+) -> Result<HostOutcome, CommandError> {
+    match part {
+        StreamingPart::Host => host.inner().clone().update().await.map_err(report),
+        StreamingPart::Client => client
+            .inner()
+            .clone()
+            .update(&caskade_core::managed::CancellationToken::new())
+            .await
+            .map(|()| HostOutcome::On)
+            .map_err(report),
+    }
+}
+
+/// Stops offering the newest version of a streaming program; a newer one
+/// is offered again.
+#[tauri::command]
+#[specta::specta]
+pub async fn streaming_skip(
+    part: StreamingPart,
+    tools: State<'_, caskade_core::managed::ManagedTools>,
+) -> Result<(), CommandError> {
+    tools
+        .skip(part.tool(), None)
+        .await
+        .map(|_| ())
+        .map_err(report)
+}
+
 /// Pairs this device with host `host_id`: the answer is the code to enter
 /// on the host; `StreamingPairingFinished` follows.
 #[tauri::command]

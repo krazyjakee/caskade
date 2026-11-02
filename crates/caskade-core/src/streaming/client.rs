@@ -326,6 +326,26 @@ impl StreamingClient {
         Ok(paired)
     }
 
+    /// Installs the newest client (STREAMING-PLAN §7), never during a
+    /// stream: a stream holds the client until it ends. Its state (this
+    /// device's identity, paired devices, settings) is a folder the
+    /// release doesn't ship, so it stays.
+    #[cfg(feature = "net")]
+    pub async fn update(&self, cancel: &CancellationToken) -> Result<()> {
+        let Ok(_busy) = self.busy.clone().try_lock_owned() else {
+            return Err(Error::Invalid(crate::tr!(
+                "This device is streaming. Update once the game ends."
+            )));
+        };
+        let _activity =
+            caskade_jobs::global().activity(crate::tr!("Updating streaming to this device"));
+        self.tools.update(TOOL, cancel, |_, _| {}).await?;
+        if let Some(install) = self.installed().await? {
+            prepare_state(&self.state_dir(&install)?)?;
+        }
+        Ok(())
+    }
+
     /// Forgets a paired host on this device.
     pub async fn forget(&self, host_id: &str) -> Result<()> {
         let _busy = self.busy.lock().await;

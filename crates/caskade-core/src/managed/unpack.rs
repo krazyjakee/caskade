@@ -378,6 +378,15 @@ pub(crate) fn record_shipped(dir: &Path) -> Result<()> {
     Ok(())
 }
 
+/// The shipped files of the release in `dir` that are gone: what a repair
+/// puts back (STREAMING-PLAN §7). Empty when nothing was recorded.
+pub(crate) fn missing_shipped(dir: &Path) -> Vec<PathBuf> {
+    shipped(dir)
+        .into_iter()
+        .filter(|relative| !dir.join(relative).exists())
+        .collect()
+}
+
 fn shipped(dir: &Path) -> BTreeSet<PathBuf> {
     fs::read(dir.join(SHIPPED))
         .ok()

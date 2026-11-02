@@ -1,6 +1,6 @@
 # Caskade — Game Streaming Plan
 
-Status: in progress; built: the managed-tool layer (§3.1, #254), `caskade --launch` (§8.1, #256), the elevation helper (§8.4, #255), the host (§4.1–4.2, #257), the client's install and state (§5.1–5.2, #261) finding hosts with their games in the library (§6.1, §8.2, #262) using a user's own Sunshine (§3.4, #258) publishing the library's games (§4.3, #259), pairing with a code (§6.2, #263), streaming a game from Play (§5.3, §8.2–8.3, #264) and Settings → Streaming (§8.5, #265); issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
+Status: in progress; built: the managed-tool layer (§3.1, #254), `caskade --launch` (§8.1, #256), the elevation helper (§8.4, #255), the host (§4.1–4.2, #257), the client's install and state (§5.1–5.2, #261) finding hosts with their games in the library (§6.1, §8.2, #262) using a user's own Sunshine (§3.4, #258) publishing the library's games (§4.3, #259), pairing with a code (§6.2, #263), streaming a game from Play (§5.3, §8.2–8.3, #264), Settings → Streaming (§8.5, #265) and updates, repair and removal (§7, #266); issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
 
 How Caskade lets a household play a game installed on one device from another, streamed over the local network. Caskade installs, configures, updates and drives two separate open-source programs: Sunshine on the device that runs the game (the host) and Moonlight on the device that shows it (the client). Users never see their names, windows or settings: they switch hosting on, pair a device once, and choose Stream from Living room. It follows the conventions in `TECH-PLAN.md`; the managed installs build on the emulator setup (`crates/caskade-sources/emulation/README.md`).
 
@@ -226,6 +226,32 @@ Once devices are paired through sync (#226) and exchange changes (#230), the cli
 - **Repair** re-runs setup: missing files, a configuration that drifted, rules removed by the OS, the service gone, credentials lost from the keychain (new ones, then pairing again).
 - **Turning hosting off** stops the host and removes its program, service, firewall rules and Linux rules (one administrator prompt). Its configuration, credentials (keychain) and paired clients stay, so turning hosting back on reinstalls it and every paired device streams again with no new code. Removing a device unpairs it; a Forget all paired devices button clears them.
 
+#### Built (#266)
+
+- **Updates.** Settings → Streaming → Streaming updates lists each program by Caskade's name for it, with Update and Skip this version (`streaming_programs`, `streaming_update`, `streaming_skip`; admins). The "Updates available" notification links there.
+  - **The host** (`StreamingHost::update`) refuses while a device streams: its own `/serverinfo` says busy. Otherwise it stops, `ManagedTools::update` swaps the files, the configuration is written again, the administrator step re-applies what's needed, and the host starts again.
+    - On Linux, the configuration folder (state, paired devices, certificate, published games) isn't shipped by the release, so it stays.
+    - On Windows, the new staging copy differs from the installed one (`elevation::windows::host_stale`, which ignores the host's own files), so the same one-prompt step copies it into the administrator-only folder.
+  - **The client** (`StreamingClient::update`) refuses while a stream holds it. Its state folder stays.
+- **The host's own files on Windows.** These are `config\sunshine_state.json` (whose `root` holds the paired devices and the host's id), `config\credentials\` (its certificate and key) and `config\apps.json` (`windows::RUNTIME`).
+  - A new copy (an update, a repair) carries them over from the copy it replaces. The state keeps the new copy's sign-in and the old one's `root` (`merge_state`).
+  - Switching hosting off sets them aside in `%ProgramFiles%\Caskade\Streaming\kept`, still administrator-only, before removing the host folder. Switching on again restores them from there and removes `kept`.
+  - No program file, service or firewall rule remains.
+- **Repair** (`StreamingHost::repair`, `streaming_repair`; the Repair button whenever hosting is on):
+  - reinstalls when a shipped file is missing (`ManagedTools::intact`);
+  - writes the configuration again;
+  - sets the sign-in again, with new credentials when the keychain lost them;
+  - re-applies whatever of the administrator step went (rules, the service, the firewall, a stale Windows copy) behind one prompt.
+
+  Paired devices stay.
+- **Forget all paired devices** (`HostApi::unpair_all`, `/api/clients/unpair-all`; `streaming_unpair_all`).
+- **Tests.**
+  - Host: an update refused during a stream, then keeping pairings, published games and settings with no prompt (`host::tests`). Repair fixing a missing program file, drifted configuration, removed rules, credentials lost from the keychain and a drifted sign-in. Off leaving no program, rule or record, and on again with the same pairing and sign-in.
+  - Windows elevated side (`elevation::tests`): a new copy keeping pairings, identity and games with a new sign-in; off keeping them aside with no program file; on again restoring them; a changed or damaged copy copied again behind one prompt.
+  - Client: an update refused during a stream, then keeping its state.
+  - UI (`test/streamingSettings.test.tsx`): Update refused during a stream, Update and Skip, Repair, Forget all.
+  - Live (`caskade-sources` `streaming::live_linux_pairing_survives_hosting_off_and_on`, Xvfb): the real host, paired natively, switched off (the program gone, nothing answering) and on, then the device paired before streams with no new code.
+
 ## 8. Core and app changes
 
 ### 8.1 Starting a game from outside
@@ -378,6 +404,7 @@ Each item names its issue; record the date and result here.
 - [ ] #263 per OS pair: Pair with a device shows a code; entering it on the host's Caskade pairs with no window from either program. A wrong code says so and can be tried again; an unanswered request disappears from the host after five minutes.
 - [ ] #264 per OS pair, the Steam Deck as a client included: Stream from <device> on the game page, the Play button and the game menu starts the stream with no Moonlight window in sight before or after (Cinnamon, GNOME, KDE, Windows, macOS, gamescope). The pad plays the game; guide brings up the quick menu and End stream returns to Caskade with the game stopped on the host. A host asleep wakes; one switched off, one that forgot this device and a game it no longer offers each show Caskade's error with no Moonlight process left. The host's playtime grows and the client's doesn't.
 - [ ] #265 per OS: a new user switches hosting on, pairs a device and streams a game without leaving Caskade or seeing a technology name; the same with a pad in console mode on the TV, the request prompt included.
+- [ ] #266 per OS: after switching hosting off, nothing of the host remains: Linux has no `/etc/udev/rules.d/60-caskade-streaming.rules` or `/etc/modules-load.d/60-caskade-streaming.conf`, and no program under `<data>/streaming/host`. Windows has no `CaskadeStreaming` service, no "Caskade streaming" firewall rule, and no program file under `%ProgramFiles%\Caskade\Streaming` (only `kept\`). Switching on again reinstalls it, and a device paired before streams with no new code. An update of either program from Settings → Streaming keeps pairings and settings. On Windows it applies with one UAC prompt into the administrator-only folder. Each repair case works on a real machine.
 - [ ] #256 Windows: with Caskade running, `caskade.exe --launch <game id>` starts the game; `taskkill /PID <caller>` (WM_CLOSE, without `/F`), or ending a Sunshine stream, quits the game and ends its session, and the caller exits 5.
 
 ### Testing

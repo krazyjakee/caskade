@@ -58,6 +58,7 @@ async fn live_linux_host_answers_pinned_and_stops_with_caskade() {
             secrets: secrets.clone(),
             timing: Timing::default(),
             api_base: caskade_core::streaming::api::LOCAL.parse().unwrap(),
+            http_port: caskade_core::streaming::host::HTTP_PORT,
         },
     );
     host.set_device_name("Caskade live test");
@@ -269,6 +270,7 @@ async fn live_linux_pairing_needs_no_window() {
             secrets: HostSecrets::memory(),
             timing: Timing::default(),
             api_base: caskade_core::streaming::api::LOCAL.parse().unwrap(),
+            http_port: caskade_core::streaming::host::HTTP_PORT,
         },
     );
     host.set_device_name("Caskade pairing test");
@@ -458,6 +460,7 @@ async fn live_linux_streaming_plays_from_the_host() {
             secrets: HostSecrets::memory(),
             timing: Timing::default(),
             api_base: caskade_core::streaming::api::LOCAL.parse().unwrap(),
+            http_port: caskade_core::streaming::host::HTTP_PORT,
         },
     );
     host.set_device_name("Caskade streaming test");
@@ -655,4 +658,161 @@ async fn live_linux_streaming_plays_from_the_host() {
     println!("host gone: {text}");
     assert!(text.contains("isn't answering"), "{text}");
     assert!(running_in(&state).is_empty());
+}
+
+/// #266: pairings survive switching hosting off and on with the real host
+/// and client. Off removes the host program (its configuration and paired
+/// devices stay); on again installs it, and the device paired before
+/// streams with no new code. Run under Xvfb.
+#[cfg(all(feature = "live-tests", target_os = "linux"))]
+#[tokio::test(flavor = "multi_thread")]
+#[ignore = "downloads and runs the real streaming host and client"]
+async fn live_linux_pairing_survives_hosting_off_and_on() {
+    use caskade_core::{
+        AppPaths,
+        bus::Bus,
+        db::{LibraryStore, StreamApp},
+        elevation::{Change, Elevation, Prompt, Request, Runner},
+        emulation::OperatingSystem,
+        launch::LaunchService,
+        managed::{CancellationToken, ManagedTools},
+        settings::SettingsService,
+        streaming::{
+            HostOutcome, HostState, StreamingClient, StreamingHost,
+            api::App,
+            client::{SETTINGS_DIR, SETTINGS_FILE},
+            host::{Parts, Timing, process::ChildRunner},
+            hosts::{ask_server_info, paired_hosts},
+            pairing::Paired,
+            play::Streams,
+            secrets::HostSecrets,
+        },
+    };
+    use std::{sync::Arc, time::Duration};
+
+    struct Allowed;
+    impl Runner for Allowed {
+        fn present(&self, _: Change) -> bool {
+            false
+        }
+        fn run(&self, _: &Request) -> caskade_core::Result<Prompt> {
+            Ok(Prompt::Done)
+        }
+    }
+    let temp = tempfile::tempdir().unwrap();
+    let paths = AppPaths::under(temp.path());
+    let store = LibraryStore::in_memory().await.unwrap();
+    let settings = SettingsService::new(store.clone());
+    settings.register_core(&paths).unwrap();
+    let tools = ManagedTools::new(
+        store.clone(),
+        Bus::default(),
+        caskade_sources::tools::catalog().unwrap(),
+        &paths,
+    );
+    let host = StreamingHost::with(
+        tools.clone(),
+        Elevation::with_runner(Arc::new(Allowed), OperatingSystem::Linux, &paths),
+        settings.clone(),
+        Parts {
+            existing: Arc::new(|| None),
+            os: OperatingSystem::Linux,
+            runner: Arc::new(ChildRunner::new(paths.data.join("streaming/run.json"))),
+            secrets: HostSecrets::memory(),
+            timing: Timing::default(),
+            api_base: caskade_core::streaming::api::LOCAL.parse().unwrap(),
+            http_port: caskade_core::streaming::host::HTTP_PORT,
+        },
+    );
+    host.set_device_name("Caskade off and on");
+    let ready = |host: StreamingHost| async move {
+        while host.status().state != HostState::Ready {
+            assert_ne!(host.status().state, HostState::NeedsAttention);
+            tokio::time::sleep(Duration::from_millis(250)).await;
+        }
+    };
+    assert_eq!(host.enable().await.unwrap(), HostOutcome::On);
+    ready(host.clone()).await;
+    host.api()
+        .await
+        .unwrap()
+        .add_app(&App::command("Live Game", "/bin/sleep 600"))
+        .await
+        .unwrap();
+    let client = StreamingClient::new(tools.clone());
+    let pairing = tokio::spawn({
+        let client = client.clone();
+        async move {
+            client
+                .pair(
+                    "127.0.0.1",
+                    "4831",
+                    Duration::from_secs(60),
+                    &CancellationToken::new(),
+                )
+                .await
+        }
+    });
+    let request = loop {
+        if let Some(request) = host.pair_requests().await.ok().and_then(|mut r| r.pop()) {
+            break request;
+        }
+        tokio::time::sleep(Duration::from_millis(200)).await;
+    };
+    host.accept_pairing(&request.id, "4831", "Living room")
+        .await
+        .unwrap();
+    assert!(matches!(
+        pairing.await.unwrap().unwrap(),
+        Paired::Paired { .. }
+    ));
+
+    // Off: the program goes, nothing answers.
+    assert_eq!(host.disable().await.unwrap(), HostOutcome::Off);
+    assert!(tools.find("sunshine").await.unwrap().is_none());
+    assert!(ask_server_info("127.0.0.1", 47989).await.is_none());
+
+    // On again: installed again, and the pairing still holds.
+    assert_eq!(host.enable().await.unwrap(), HostOutcome::On);
+    ready(host.clone()).await;
+    let devices = host.paired_devices().await.unwrap();
+    assert!(
+        devices.iter().any(|device| device.name == "Living room"),
+        "{devices:?}"
+    );
+    let state = client.state().await.unwrap().unwrap();
+    let text = std::fs::read_to_string(state.join(SETTINGS_DIR).join(SETTINGS_FILE)).unwrap();
+    let host_id = paired_hosts(&text)
+        .into_iter()
+        .find(|h| h.name == "Caskade off and on")
+        .unwrap()
+        .id;
+    store
+        .sync_stream_apps(
+            &host_id,
+            &[StreamApp {
+                id: "1".into(),
+                name: "Live Game".into(),
+            }],
+        )
+        .await
+        .unwrap();
+    let games = store.list_games(&Default::default()).await.unwrap();
+    let game = games.items.iter().find(|g| g.title == "Live Game").unwrap();
+    let entry = store.entries_for_game(&game.id).await.unwrap().remove(0);
+    let launch = LaunchService::new(store.clone());
+    launch.set_streamer(Arc::new(Streams::new(client.clone(), None, settings)));
+    // No code: the stream starts.
+    let handle = launch.launch(&entry.id).await.unwrap();
+    assert!(
+        ask_server_info("127.0.0.1", 47989)
+            .await
+            .is_some_and(|info| info.busy)
+    );
+    launch
+        .stop(&handle.ticket.session_id, Duration::from_secs(5))
+        .await
+        .unwrap();
+    handle.wait_status().await.unwrap();
+    host.shutdown();
 }

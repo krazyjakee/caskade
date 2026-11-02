@@ -224,3 +224,61 @@ it("a device asking to pair prompts over any view, and a pad enters its code", a
   );
   await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 });
+
+const programs = () => [
+  {
+    part: "host" as const,
+    label: "Game streaming from this device",
+    installed: "v1.0",
+    latest: "v1.1",
+    update: true,
+  },
+  {
+    part: "client" as const,
+    label: "Game streaming to this device",
+    installed: "v6.2.0",
+    latest: "v6.3.0",
+    update: true,
+  },
+];
+
+it("updates streaming when asked, never during a stream, and skips a version (#266)", async () => {
+  open("/settings?tab=streaming", { programs: programs(), busy: true });
+  const host = (await screen.findByText("Game streaming from this device")).closest(
+    "li",
+  ) as HTMLElement;
+  expect(host.textContent).toContain("A newer version, v1.1, is ready.");
+  fireEvent.click(within(host).getByRole("button", { name: "Update" }));
+  await screen.findByText("A device is streaming from this one. Update once the game ends.");
+
+  const client = screen.getByText("Game streaming to this device").closest("li") as HTMLElement;
+  fireEvent.click(within(client).getByRole("button", { name: "Update" }));
+  await waitFor(() => expect(client.textContent).toContain("Up to date."));
+  // Skipped: no longer offered.
+  fireEvent.click(within(host).getByRole("button", { name: "Skip this version" }));
+  await waitFor(() => expect(host.textContent).toContain("Up to date."));
+});
+
+it("repairs hosting and forgets every paired device (#266)", async () => {
+  const { streaming } = open("/settings?tab=streaming", {
+    hosting: {
+      state: "needsAttention",
+      version: null,
+      problem: "Streaming isn't working on this device",
+    },
+    paired: [
+      { uuid: "u1", name: "Deck" },
+      { uuid: "u2", name: "Bedroom TV" },
+    ],
+  });
+  await screen.findByText("Streaming isn't working on this device");
+  fireEvent.click(screen.getByRole("button", { name: "Repair" }));
+  await screen.findByText("Ready. Devices on this network can pair and play.");
+  expect(streaming.repairs).toBe(1);
+
+  await screen.findByText("Deck");
+  fireEvent.click(screen.getByRole("button", { name: "Forget all paired devices…" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Forget them all" }));
+  await waitFor(() => expect(screen.queryByText("Deck")).toBeNull());
+  expect(screen.queryByText("Bedroom TV")).toBeNull();
+});

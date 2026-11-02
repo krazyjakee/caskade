@@ -340,6 +340,12 @@ impl HostApi {
             .await
     }
 
+    /// Forgets every paired device.
+    pub async fn unpair_all(&self) -> Result<()> {
+        self.post_json("api/clients/unpair-all", serde_json::json!({}))
+            .await
+    }
+
     pub async fn delete_app(&self, index: usize) -> Result<()> {
         self.send(self.client.delete(self.url(&format!("api/apps/{index}"))?))
             .await?;

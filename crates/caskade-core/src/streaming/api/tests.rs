@@ -196,6 +196,15 @@ async fn pairing_requests_are_listed_answered_and_gone_once_they_expire() {
         .expect(1)
         .mount(&server)
         .await;
+    // Forget all paired devices (#266).
+    Mock::given(method("POST"))
+        .and(path("/api/clients/unpair-all"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(serde_json::json!({ "status": true })),
+        )
+        .expect(1)
+        .mount(&server)
+        .await;
     let front = tls_front(*server.address(), &served).await;
     let api = HostApi::new(
         Url::parse(&format!("https://{front}/")).unwrap(),
@@ -223,5 +232,6 @@ async fn pairing_requests_are_listed_answered_and_gone_once_they_expire() {
     let paired = api.paired_clients().await.unwrap();
     assert_eq!(paired[0].name, "Bedroom");
     api.unpair(&paired[0].uuid).await.unwrap();
+    api.unpair_all().await.unwrap();
     server.verify().await;
 }

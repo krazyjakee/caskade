@@ -590,3 +590,158 @@ fn the_windows_launcher_passes_names_and_caskades_own_paths() {
 }
 
 use std::path::Path;
+
+/// The host's own state as it is after a device paired and Caskade
+/// published a game, in the installed copy.
+fn host_ran(target: &Path) {
+    let config = target.join("config");
+    std::fs::write(
+        config.join("sunshine_state.json"),
+        r#"{"username":"caskade-1","password":"H1","salt":"s1","root":{"uniqueid":"U1","named_devices":[{"name":"Deck","cert":"PEM"}]}}"#,
+    )
+    .unwrap();
+    std::fs::create_dir_all(config.join("credentials")).unwrap();
+    std::fs::write(config.join("credentials").join("cacert.pem"), "CERT").unwrap();
+    std::fs::write(config.join("credentials").join("cakey.pem"), "KEY").unwrap();
+    std::fs::write(config.join("apps.json"), r#"{"apps":[{"name":"Celeste"}]}"#).unwrap();
+}
+
+fn add_host(host: &Path, target: &Path) -> i32 {
+    let manifest = windows::write_manifest(host).unwrap();
+    windows::perform_with(
+        &elevated(&["add-host"], host, Some(&manifest)),
+        target,
+        &mut |_, _| true,
+    )
+}
+
+#[test]
+fn a_new_windows_copy_keeps_the_hosts_pairings_and_hosting_off_keeps_them_aside() {
+    let (_temp, host, target) = staged();
+    std::fs::write(
+        host.join("config").join("sunshine_state.json"),
+        r#"{"username":"caskade-1","password":"H1","salt":"s1"}"#,
+    )
+    .unwrap();
+    assert_eq!(add_host(&host, &target), 0);
+    host_ran(&target);
+
+    // An update with new sign-in details (a repair after the keychain lost
+    // them): the new program and sign-in, the old pairings and identity.
+    std::fs::write(host.join("sunshine.exe"), "host 2").unwrap();
+    std::fs::write(
+        host.join("config").join("sunshine_state.json"),
+        r#"{"username":"caskade-2","password":"H2","salt":"s2"}"#,
+    )
+    .unwrap();
+    assert_eq!(add_host(&host, &target), 0);
+    assert_eq!(read(&target.join("sunshine.exe")), "host 2");
+    let state: serde_json::Value =
+        serde_json::from_str(&read(&target.join("config/sunshine_state.json"))).unwrap();
+    assert_eq!(state["username"], "caskade-2");
+    assert_eq!(state["root"]["uniqueid"], "U1");
+    assert_eq!(state["root"]["named_devices"][0]["name"], "Deck");
+    assert_eq!(read(&target.join("config/credentials/cacert.pem")), "CERT");
+    assert_eq!(read(&target.join("config/credentials/cakey.pem")), "KEY");
+    assert!(read(&target.join("config/apps.json")).contains("Celeste"));
+
+    // Hosting off: no program file left; the state kept aside, still in
+    // the administrator-only folder.
+    assert_eq!(
+        windows::perform_with(
+            &elevated(&["remove-host"], &host, None),
+            &target,
+            &mut |_, _| { true }
+        ),
+        0
+    );
+    assert!(!target.exists());
+    let kept = windows::kept_dir(&target);
+    assert_eq!(kept, target.parent().unwrap().join("kept"));
+    assert!(read(&kept.join("config/sunshine_state.json")).contains("Deck"));
+    assert_eq!(read(&kept.join("config/credentials/cakey.pem")), "KEY");
+    let left: Vec<_> = walk(target.parent().unwrap());
+    assert!(
+        left.iter().all(|path| !path.ends_with(".exe")),
+        "no program file: {left:?}"
+    );
+
+    // On again: the same identity and paired devices; nothing kept aside.
+    assert_eq!(add_host(&host, &target), 0);
+    let state = read(&target.join("config/sunshine_state.json"));
+    assert!(state.contains("Deck") && state.contains("U1"), "{state}");
+    assert_eq!(read(&target.join("config/credentials/cacert.pem")), "CERT");
+    assert!(!kept.exists());
+}
+
+/// Every file under `dir`, as `/`-joined text.
+fn walk(dir: &Path) -> Vec<String> {
+    let mut found = Vec::new();
+    for entry in std::fs::read_dir(dir).into_iter().flatten().flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            found.extend(walk(&path));
+        } else {
+            found.push(path.to_string_lossy().replace('\\', "/"));
+        }
+    }
+    found
+}
+
+#[tokio::test]
+async fn a_changed_windows_copy_is_copied_again_behind_one_prompt() {
+    let (elevation, fake, temp) = elevation(OperatingSystem::Windows);
+    let host = temp.path().join("data").join("streaming").join("host");
+    std::fs::create_dir_all(host.join("tools")).unwrap();
+    std::fs::create_dir_all(host.join("config")).unwrap();
+    std::fs::write(host.join("sunshine.exe"), "host").unwrap();
+    std::fs::write(host.join("tools").join("sunshinesvc.exe"), "svc").unwrap();
+    std::fs::write(host.join("config").join("sunshine.conf"), "a").unwrap();
+    std::fs::write(host.join("config").join("sunshine_state.json"), "{}").unwrap();
+    let target = temp
+        .path()
+        .join("pf")
+        .join("Caskade")
+        .join("Streaming")
+        .join("host");
+    assert_eq!(add_host(&host, &target), 0);
+    let elevation = elevation.with_host_target(target.clone());
+    fake.present
+        .lock()
+        .unwrap()
+        .extend(Plan::StreamingHost.changes(OperatingSystem::Windows));
+
+    // As installed: nothing to do, whatever the host itself changed.
+    assert_eq!(
+        elevation.apply(Plan::StreamingHost).await.unwrap(),
+        Outcome::NothingToDo
+    );
+    host_ran(&target);
+    assert_eq!(
+        elevation.apply(Plan::StreamingHost).await.unwrap(),
+        Outcome::NothingToDo
+    );
+
+    // An update, or configuration Caskade wrote again: one prompt copies
+    // only the program, checked by its manifest.
+    std::fs::write(host.join("config").join("sunshine.conf"), "b").unwrap();
+    assert_eq!(
+        elevation.apply(Plan::StreamingHost).await.unwrap(),
+        Outcome::Done(set(&[Change::HostProgram]))
+    );
+    let last = fake.requests.lock().unwrap().last().unwrap().clone();
+    assert_eq!(last.steps, [Step::Add(Change::HostProgram)]);
+    assert!(last.manifest.is_some());
+
+    // A program file deleted from the installed copy counts too.
+    std::fs::write(target.join("config").join("sunshine.conf"), "b").unwrap();
+    assert_eq!(
+        elevation.apply(Plan::StreamingHost).await.unwrap(),
+        Outcome::NothingToDo
+    );
+    std::fs::remove_file(target.join("tools").join("sunshinesvc.exe")).unwrap();
+    assert!(matches!(
+        elevation.apply(Plan::StreamingHost).await.unwrap(),
+        Outcome::Done(_)
+    ));
+}

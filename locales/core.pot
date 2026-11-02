@@ -3789,6 +3789,14 @@ msgstr ""
 msgid "{address} isn't answering"
 msgstr ""
 
+#: crates/caskade-core/src/streaming/client.rs
+msgid "This device is streaming. Update once the game ends."
+msgstr ""
+
+#: crates/caskade-core/src/streaming/client.rs
+msgid "Updating streaming to this device"
+msgstr ""
+
 #: crates/caskade-core/src/streaming/gamestream.rs
 msgid "the device didn't stop its game"
 msgstr ""
@@ -3819,6 +3827,22 @@ msgstr ""
 
 #: crates/caskade-core/src/streaming/host/mod.rs
 msgid "Setting up streaming from this device"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/host/mod.rs
+msgid "The streaming set up on this device before Caskade is updated the way it was installed."
+msgstr ""
+
+#: crates/caskade-core/src/streaming/host/mod.rs
+msgid "A device is streaming from this one. Update once the game ends."
+msgstr ""
+
+#: crates/caskade-core/src/streaming/host/mod.rs
+msgid "Updating streaming from this device"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/host/mod.rs
+msgid "Repairing streaming from this device"
 msgstr ""
 
 #: crates/caskade-core/src/streaming/host/mod.rs

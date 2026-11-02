@@ -79,6 +79,13 @@ impl HostSecrets {
             .await
     }
 
+    /// Drops Caskade's own credentials, as a keychain that lost them
+    /// would (tests).
+    #[cfg(test)]
+    pub async fn forget(&self) -> Result<()> {
+        self.store.delete(HOST).await
+    }
+
     /// The credentials of the user's own host Caskade uses.
     pub async fn existing(&self) -> Result<Option<Credentials>> {
         Ok(self

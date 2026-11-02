@@ -17,7 +17,7 @@ import {
   TextField,
 } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
-import { Cast, Gauge, MonitorPlay, Plus, RefreshCw, Trash2, Wrench } from "lucide-react";
+import { Cast, Download, Gauge, MonitorPlay, Plus, RefreshCw, Trash2, Wrench } from "lucide-react";
 import { useState } from "react";
 import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import {
@@ -25,11 +25,13 @@ import {
   type HostState,
   reachLabel,
   type StreamHost,
+  type StreamingPart,
   useHostStatus,
   usePairedDevices,
   usePairRequests,
   useStreamHosts,
   useStreamingAction,
+  useStreamingPrograms,
 } from "../../../api/streaming";
 import { FailureNotice } from "../../../components/FailureNotice";
 import { PairRequestForm } from "../../../components/streaming/PairRequestForm";
@@ -52,6 +54,7 @@ export function StreamingSettings() {
       <HostingSection />
       <StreamFromSection />
       <QualitySection />
+      <UpdatesSection />
     </div>
   );
 }
@@ -66,7 +69,8 @@ function HostingSection() {
   const state = status.data?.state;
   const [outcome, setOutcome] = useState<HostOutcome | null>(null);
   const hosting = useStreamingAction((api, next: boolean) => api.setHosting(next));
-  const switching = hosting.isPending;
+  const repair = useStreamingAction((api, _: undefined) => api.repair());
+  const switching = hosting.isPending || repair.isPending;
   const set = (next: boolean) =>
     hosting.mutate(next, { onSuccess: (result) => setOutcome(result) });
   return (
@@ -80,16 +84,26 @@ function HostingSection() {
         description={t`Setting up asks once for an administrator's permission.`}
       >
         <Switch
-          isSelected={switching ? Boolean(hosting.variables) : on(state)}
+          isSelected={hosting.isPending ? Boolean(hosting.variables) : on(state)}
           isDisabled={!admin || switching || state === undefined || state === "unsupported"}
           onChange={set}
         />
       </SettingRow>
       <HostStateLine state={state} problem={status.data?.problem ?? null} switching={switching} />
-      {state === "needsAttention" && admin && (
-        <Button className="mt-2 self-start" icon={Wrench} onPress={() => set(true)}>
-          <Trans>Repair</Trans>
-        </Button>
+      {admin && on(state) && (
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <Button
+            variant={state === "needsAttention" ? "primary" : "secondary"}
+            icon={Wrench}
+            isDisabled={switching}
+            onPress={() => repair.mutate(undefined, { onSuccess: (result) => setOutcome(result) })}
+          >
+            {repair.isPending ? t`Repairing…` : t`Repair`}
+          </Button>
+          <span className="text-xs text-fg-subtle">
+            <Trans>Sets it up again where something went missing or changed.</Trans>
+          </span>
+        </div>
       )}
       {(outcome === "cancelled" || outcome === "refused") && (
         <p role="status" className="mt-2 text-sm text-fg-muted">
@@ -100,7 +114,9 @@ function HostingSection() {
           )}
         </p>
       )}
-      {hosting.error && <FailureNotice variant="inline" error={hosting.error} />}
+      {(hosting.error ?? repair.error) && (
+        <FailureNotice variant="inline" error={hosting.error ?? repair.error} />
+      )}
       {outcome === "existingFound" && <ExistingDialog close={() => setOutcome(null)} />}
       {admin && state === "ready" && <WaitingRequests />}
       {admin && on(state) && <PairedDevices />}
@@ -234,6 +250,8 @@ function PairedDevices() {
   const { t } = useLingui();
   const paired = usePairedDevices().data ?? [];
   const remove = useStreamingAction((api, uuid: string) => api.unpair(uuid));
+  const removeAll = useStreamingAction((api, _: undefined) => api.unpairAll());
+  const [confirming, setConfirming] = useState(false);
   return (
     <div data-part="paired" className="mt-4 flex flex-col gap-2">
       <h3 className="text-sm font-semibold">
@@ -272,8 +290,107 @@ function PairedDevices() {
           })}
         </ul>
       )}
-      {remove.error && <FailureNotice variant="inline" error={remove.error} />}
+      {paired.length > 1 &&
+        (confirming ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm">
+              <Trans>Every device then needs a new code to play from this one.</Trans>
+            </span>
+            <Button
+              size="sm"
+              variant="danger"
+              isDisabled={removeAll.isPending}
+              onPress={() => removeAll.mutate(undefined, { onSuccess: () => setConfirming(false) })}
+            >
+              <Trans>Forget them all</Trans>
+            </Button>
+            <Button size="sm" variant="ghost" onPress={() => setConfirming(false)}>
+              <Trans>Keep them</Trans>
+            </Button>
+          </div>
+        ) : (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="self-start"
+            icon={Trash2}
+            onPress={() => setConfirming(true)}
+          >
+            <Trans>Forget all paired devices…</Trans>
+          </Button>
+        ))}
+      {(remove.error ?? removeAll.error) && (
+        <FailureNotice variant="inline" error={remove.error ?? removeAll.error} />
+      )}
     </div>
+  );
+}
+
+/** Newer versions of the streaming programs (#266): Update or Skip. An
+ * update never interrupts a stream. */
+function UpdatesSection() {
+  const { t } = useLingui();
+  const admin = useDeviceAdmin();
+  const programs = useStreamingPrograms().data ?? [];
+  const update = useStreamingAction((api, part: StreamingPart) => api.update(part));
+  const skip = useStreamingAction((api, part: StreamingPart) => api.skip(part));
+  if (programs.length === 0) return null;
+  return (
+    <SettingsSection
+      icon={Download}
+      title={t`Streaming updates`}
+      description={t`Caskade keeps streaming up to date when you say so, never in the middle of a game.`}
+    >
+      <ul className="flex flex-col gap-2">
+        {programs.map((program) => {
+          const latest = program.latest ?? "";
+          return (
+            <li
+              key={program.part}
+              data-cs="streaming-program"
+              data-status={program.update ? "update" : "current"}
+              className="flex flex-wrap items-center gap-3 rounded-control border border-border p-3"
+            >
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="font-medium">{program.label}</span>
+                <span data-part="version" className="text-xs text-fg-subtle">
+                  {program.update ? (
+                    <Trans>A newer version, {latest}, is ready.</Trans>
+                  ) : (
+                    <Trans>Up to date.</Trans>
+                  )}
+                </span>
+              </div>
+              {program.update && admin && (
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    isDisabled={update.isPending}
+                    onPress={() => update.mutate(program.part)}
+                  >
+                    {update.isPending && update.variables === program.part
+                      ? t`Updating…`
+                      : t`Update`}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    isDisabled={skip.isPending || update.isPending}
+                    onPress={() => skip.mutate(program.part)}
+                  >
+                    <Trans>Skip this version</Trans>
+                  </Button>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      {(update.error ?? skip.error) && (
+        <FailureNotice variant="inline" error={update.error ?? skip.error} />
+      )}
+    </SettingsSection>
   );
 }
 

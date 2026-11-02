@@ -398,6 +398,27 @@ export const commands = {
 	streamingPairWith: (hostId: string) => typedError<PairingStarted, ErrorReport_Serialize>(__TAURI_INVOKE("streaming_pair_with", { hostId })),
 	/**  Forgets a paired device on this device. */
 	streamingForgetHost: (hostId: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("streaming_forget_host", { hostId })),
+	/**  Forgets every device paired with this host: each needs a code again. */
+	streamingUnpairAll: () => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("streaming_unpair_all")),
+	/**
+	 *  Re-runs hosting's setup (#266): the program's missing files, its
+	 *  configuration and sign-in, and the administrator step's rules, service
+	 *  or firewall entries that went, behind one prompt.
+	 */
+	streamingRepair: () => typedError<HostOutcome, ErrorReport_Serialize>(__TAURI_INVOKE("streaming_repair")),
+	/**  The streaming programs installed here (#266), for Update and Skip. */
+	streamingPrograms: () => typedError<StreamingProgram_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("streaming_programs")),
+	/**
+	 *  Installs the newest version of a streaming program (#266), never during
+	 *  a stream: hosting restarts with its pairings and settings, and one
+	 *  administrator prompt where Windows needs the new copy put in place.
+	 */
+	streamingUpdate: (part: StreamingPart) => typedError<HostOutcome, ErrorReport_Serialize>(__TAURI_INVOKE("streaming_update", { part })),
+	/**
+	 *  Stops offering the newest version of a streaming program; a newer one
+	 *  is offered again.
+	 */
+	streamingSkip: (part: StreamingPart) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("streaming_skip", { part })),
 	storageList: () => typedError<RootSummary_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("storage_list")),
 	storageAdd: (path: string, label: string | null) => typedError<RootSummary_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("storage_add", { path, label })),
 	storageEdit: (id: string, label: string | null, folderTemplate: string) => typedError<RootSummary_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("storage_edit", { id, label, folderTemplate })),
@@ -8853,6 +8874,37 @@ export type StreamingPairingFinished_Serialize = {
 	hostId: string,
 	outcome: PairingOutcome,
 	message: string | null,
+};
+
+/**
+ *  Which streaming program: the one hosting here, or the one streaming to
+ *  this device. People see neither's name.
+ */
+export type StreamingPart = "host" | "client";
+
+/**  A streaming program installed here, and whether a newer one waits. */
+export type StreamingProgram = StreamingProgram_Serialize | StreamingProgram_Deserialize;
+
+/**  A streaming program installed here, and whether a newer one waits. */
+export type StreamingProgram_Deserialize = {
+	part: StreamingPart,
+	/**  What it is, in Caskade's words. */
+	label: string,
+	installed?: string | null,
+	latest?: string | null,
+	/**  A newer version was found and not skipped. */
+	update: boolean,
+};
+
+/**  A streaming program installed here, and whether a newer one waits. */
+export type StreamingProgram_Serialize = {
+	part: StreamingPart,
+	/**  What it is, in Caskade's words. */
+	label: string,
+	installed: string | null,
+	latest: string | null,
+	/**  A newer version was found and not skipped. */
+	update: boolean,
 };
 
 /**  One reading of the whole machine. */

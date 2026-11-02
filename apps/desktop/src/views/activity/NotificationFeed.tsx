@@ -389,8 +389,13 @@ function MemberLink({ member }: { member: NotificationMember }) {
         </span>
       </span>
     );
-  // Tool updates (streaming) have no settings page yet.
-  if (member.state === "other" && member.kind === "toolUpdate") return <span>{member.label}</span>;
+  // Streaming's programs are updated in Settings → Streaming (#266).
+  if (member.state === "other" && member.kind === "toolUpdate")
+    return (
+      <Link to="/settings" search={{ tab: "streaming" }} data-spatial="focusable" className={link}>
+        {member.label}
+      </Link>
+    );
   if (member.state === "other")
     return (
       <Link

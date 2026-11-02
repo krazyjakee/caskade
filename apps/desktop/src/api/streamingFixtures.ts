@@ -8,6 +8,7 @@ import type {
   PairRequest,
   StreamHost,
   StreamingApi,
+  StreamingProgram,
 } from "./streaming";
 
 export interface StreamingFixtureOptions {
@@ -19,6 +20,9 @@ export interface StreamingFixtureOptions {
   paired?: PairedClient[];
   /** Milliseconds hosting takes to set up and start; 0 is at once. */
   setupMs?: number;
+  programs?: StreamingProgram[];
+  /** A device streams from this one: the host's update waits. */
+  busy?: boolean;
 }
 
 export const fixtureStreamHosts = (): StreamHost[] => [
@@ -50,12 +54,16 @@ export function createStreamingFixtureApi(options: StreamingFixtureOptions = {})
   /** What was entered on this device for each request. */
   accepted: { id: string; code: string; name: string }[];
   hostingCalls: boolean[];
+  /** Repairs asked for. */
+  repairs: number;
 } {
   let hosts = structuredClone(options.hosts ?? fixtureStreamHosts());
   let status: HostStatus = options.hosting ?? { state: "off", version: null, problem: null };
   let requests = structuredClone(options.requests ?? []);
   let paired = structuredClone(options.paired ?? []);
   let existing = options.existing ?? false;
+  let programs = structuredClone(options.programs ?? []);
+  let repairs = 0;
   const setupMs = options.setupMs ?? 0;
   const listeners = new Set<(finished: PairingFinished) => void>();
   const accepted: { id: string; code: string; name: string }[] = [];
@@ -72,6 +80,9 @@ export function createStreamingFixtureApi(options: StreamingFixtureOptions = {})
   return {
     accepted,
     hostingCalls,
+    get repairs() {
+      return repairs;
+    },
     finishPairing(hostId, outcome, message) {
       if (outcome === "paired") {
         hosts = hosts.map((host) => (host.id === hostId ? { ...host, paired: true } : host));
@@ -151,6 +162,29 @@ export function createStreamingFixtureApi(options: StreamingFixtureOptions = {})
     },
     async unpair(uuid) {
       paired = paired.filter((each) => each.uuid !== uuid);
+    },
+    async unpairAll() {
+      paired = [];
+    },
+    async repair() {
+      repairs += 1;
+      return turnOn();
+    },
+    async programs() {
+      return structuredClone(programs);
+    },
+    async update(part) {
+      if (part === "host" && options.busy)
+        throw new Error("A device is streaming from this one. Update once the game ends.");
+      programs = programs.map((program) =>
+        program.part === part ? { ...program, installed: program.latest, update: false } : program,
+      );
+      return "on";
+    },
+    async skip(part) {
+      programs = programs.map((program) =>
+        program.part === part ? { ...program, update: false } : program,
+      );
     },
   };
 }

@@ -319,6 +319,12 @@ pub fn access(command: &str) -> Option<Access> {
         // Remembering a device to stream from changes what everyone sees.
         "streaming_add_host" => SignedIn,
         "streaming_set_hosting" | "streaming_use_existing" => Admin,
+        // Its upkeep (#266): what's installed is anyone's to see.
+        "streaming_programs" => Open,
+        "streaming_repair"
+        | "streaming_update"
+        | "streaming_skip"
+        | "streaming_unpair_all" => Admin,
         // Paired devices (#226): reading them needs an account; every change
         // is an admin's (pairing hands another device the library).
         "devices_status"
