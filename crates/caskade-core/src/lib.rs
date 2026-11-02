@@ -18,6 +18,7 @@ mod cache_db;
 pub mod db;
 #[cfg(feature = "net")]
 pub mod devices;
+pub mod elevation;
 pub mod emulation;
 pub mod error;
 pub mod hasheous;

@@ -1,6 +1,6 @@
 # Caskade — Game Streaming Plan
 
-Status: planned; the managed-tool layer (§3.1, #254) and `caskade --launch` (§8.1, #256) are built; issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
+Status: planned; the managed-tool layer (§3.1, #254), `caskade --launch` (§8.1, #256) and the elevation helper (§8.4, #255) are built; issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
 
 How Caskade lets a household play a game installed on one device from another, streamed over the local network. Caskade installs, configures, updates and drives two separate open-source programs: Sunshine on the device that runs the game (the host) and Moonlight on the device that shows it (the client). Users never see their names, windows or settings: they switch hosting on, pair a device once, and choose Stream from Living room. It follows the conventions in `TECH-PLAN.md`; the managed installs build on the emulator setup (`crates/caskade-sources/emulation/README.md`).
 
@@ -190,6 +190,16 @@ Caskade never elevates today (`caskade-installer` only delegates package install
 - Linux: `pkexec` running a fixed script shipped with Caskade (install or remove the udev rule and module load).
 - Windows: Caskade itself started elevated (`runas`) with a fixed subcommand that registers or removes the service (on demand, startable and stoppable by the interactive user) and firewall rules, and installs ViGEmBus (§4.5).
 
+Built (#255, `caskade_core::elevation`). Callers name a plan (`Plan::StreamingHost`); nothing else crosses, so no webview text reaches the elevated side.
+
+- **Changes.** A plan is a fixed set of changes per OS:
+  - Linux: `/etc/udev/rules.d/60-caskade-streaming.rules` (uinput, uhid and the virtual pads' nodes for group `input` and `uaccess`), `/etc/modules-load.d/60-caskade-streaming.conf` (uhid at boot) and uhid loaded now.
+  - Windows: the on-demand `CaskadeStreaming` service for `tools\sunshinesvc.exe`, whose security descriptor lets the interactive user start and stop it, and the `Caskade streaming (TCP)` (47984, 47989, 48010) and `(UDP)` (47998–48000) inbound rules for the host's `sunshine.exe`, on private and domain networks.
+- **One prompt, only for what's missing.** Caskade looks, unelevated, at which changes are there, asks once for the rest, and looks again. What appeared is recorded in `<data>/elevation/streaming-host.json` (change names only; a record holding anything else is refused). The undo removes the recorded changes still present, in reverse order, behind one prompt. What was there before is never touched. Nothing missing means no prompt.
+- **Linux:** `pkexec /bin/sh -c <constant script> caskade <step names>`. The script refuses unknown steps before changing anything, and undoes its own earlier steps when one fails. pkexec's 126 is a cancel and 127 a refusal. A uhid still in use stays loaded after the undo, and stops counting as Caskade's.
+- **Windows:** PowerShell `Start-Process -Verb RunAs` runs `caskade.exe --elevated <step names> --host <data>\streaming\host`, handled first in `run()`. The elevated side accepts only known step names and a host folder shaped `…\streaming\host` that holds `sunshine.exe` and `tools\sunshinesvc.exe`. It undoes its earlier steps when one fails; a dismissed UAC prompt exits 1223. ViGEmBus joins this prompt with #260.
+- **Risk (open).** A service running a launcher from the user's own data folder lets anyone who can write that folder run code as the service. On a machine whose user is an administrator that is no new power; for a standard user who had an administrator type the password, it is. Options: copy the service files into an administrator-only folder in the same prompt (updates would then need a prompt too), or lock the host folder's ACL. Decide before ST3 ships hosting.
+
 ### 8.5 Settings and UI
 
 - **Settings → Streaming** (admins; namespace `core.streaming`): the switch "Let other devices stream games from this one", the host's state (Ready, Setting up, Needs attention with Repair), paired devices with Remove, and waiting pairing requests. Client side: known devices, Pair with…, Add by address, and stream quality (Automatic, or resolution, frame rate, bitrate) passed as `stream` options.
@@ -210,6 +220,14 @@ Caskade never elevates today (`caskade-installer` only delegates package install
 | ST8 | Settings → Streaming and the game page on the real core (§8.5). |
 | ST9 | Updates, repair and turning hosting off (§7). |
 | ST10 | Pairing through sync (§6.3), after #226 and #230. |
+
+### Manual checks
+
+Each item names its issue; record the date and result here.
+
+- [ ] #255 Linux: switching hosting on shows one pkexec prompt, and cancelling it leaves `/etc/udev/rules.d` and `/etc/modules-load.d` unchanged. After allowing it, the rules and module list are there, `/dev/uinput` and `/dev/uhid` belong to group `input` with a seat ACL, and uhid is loaded. Switching hosting off removes exactly those, with one prompt.
+- [ ] #255 Windows: one UAC prompt (Caskade, verified publisher); cancelling changes nothing (`sc query CaskadeStreaming` fails, `netsh advfirewall firewall show rule name="Caskade streaming (TCP)"` finds none). After allowing it, the service is demand-start, a standard user can `sc start` and `sc stop` it, and both firewall rules name the host's `sunshine.exe`. A host path with a space and an apostrophe works. Switching hosting off removes the service and both rules, with one prompt.
+- [ ] #256 Windows: with Caskade running, `caskade.exe --launch <game id>` starts the game; `taskkill /PID <caller>` (WM_CLOSE, without `/F`), or ending a Sunshine stream, quits the game and ends its session, and the caller exits 5.
 
 ### Testing
 

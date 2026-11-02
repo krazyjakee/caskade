@@ -820,6 +820,42 @@ msgstr ""
 msgid "that isn't a device id"
 msgstr ""
 
+#: crates/caskade-core/src/elevation/linux.rs
+msgid "the administrator step failed and was undone: {error}"
+msgstr ""
+
+#: crates/caskade-core/src/elevation/linux.rs
+msgid "couldn't ask for an administrator (pkexec): {error}"
+msgstr ""
+
+#: crates/caskade-core/src/elevation/mod.rs
+msgid "The administrator step was cancelled, so nothing changed."
+msgstr ""
+
+#: crates/caskade-core/src/elevation/mod.rs
+msgid "The administrator step wasn't allowed, so nothing changed. It needs an administrator's password."
+msgstr ""
+
+#: crates/caskade-core/src/elevation/mod.rs
+msgid "the record of administrator steps is unreadable: {error}"
+msgstr ""
+
+#: crates/caskade-core/src/elevation/mod.rs
+msgid "this system doesn't need or support these administrator steps"
+msgstr ""
+
+#: crates/caskade-core/src/elevation/windows.rs
+msgid "the streaming host isn't installed where Caskade keeps it"
+msgstr ""
+
+#: crates/caskade-core/src/elevation/windows.rs
+msgid "the administrator step failed and was undone"
+msgstr ""
+
+#: crates/caskade-core/src/elevation/windows.rs
+msgid "Caskade can't find its own program"
+msgstr ""
+
 #: crates/caskade-core/src/emulation/catalog.rs
 msgid "the ROM file name {file} starts with `-`, which the emulator would read as an option; rename the file"
 msgstr "ROM-filnamnet {file} börjar med `-`, vilket emulatorn skulle läsa som ett alternativ; byt namn på filen"

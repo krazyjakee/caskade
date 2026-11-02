@@ -35,6 +35,18 @@ pub mod window_state;
 
 /// Builds and runs the app.
 pub fn run() {
+    // `caskade --elevated …` (#255): the administrator steps, in the
+    // process UAC started; nothing else.
+    #[cfg(windows)]
+    {
+        let args: Vec<String> = std::env::args().collect();
+        if args
+            .iter()
+            .any(|arg| arg == caskade_core::elevation::windows::ELEVATED_ARG)
+        {
+            std::process::exit(caskade_core::elevation::windows::perform(&args));
+        }
+    }
     // `caskade --launch <game>` (#256): hand the launch to the running
     // Caskade and wait for the game, not the app. Before logging: the
     // caller isn't Caskade starting, and the app logs the launch itself.
