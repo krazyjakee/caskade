@@ -13,9 +13,9 @@ use std::{
 };
 
 /// The files a release shipped, relative to the install folder.
-pub(super) const SHIPPED: &str = ".caskade/shipped.json";
+pub(crate) const SHIPPED: &str = ".caskade/shipped.json";
 /// User files a newer release also ships go here, per old version.
-pub(super) const BACKUP: &str = ".caskade/update-backup";
+pub(crate) const BACKUP: &str = ".caskade/update-backup";
 
 fn invalid(message: impl Into<String>) -> Error {
     Error::Invalid(message.into())
@@ -38,7 +38,7 @@ fn is_archive(name: &str) -> bool {
 /// Unpacks `file` into the empty folder `into`: archives are extracted,
 /// disk images (macOS) have their app copied out, anything else (an
 /// AppImage, a bare binary) is copied in and made executable.
-pub(super) fn unpack(file: &Path, into: &Path) -> Result<()> {
+pub(crate) fn unpack(file: &Path, into: &Path) -> Result<()> {
     fs::create_dir_all(into)?;
     let name = lower_name(file);
     if is_archive(&name) {
@@ -177,7 +177,7 @@ fn flatten(dir: &Path) -> Result<()> {
 }
 
 /// Every file under `dir`, relative, skipping Caskade's own folder.
-pub(super) fn files(dir: &Path) -> Result<Vec<PathBuf>> {
+pub(crate) fn files(dir: &Path) -> Result<Vec<PathBuf>> {
     let mut found = Vec::new();
     let mut pending = vec![PathBuf::new()];
     while let Some(relative) = pending.pop() {
@@ -201,7 +201,7 @@ pub(super) fn files(dir: &Path) -> Result<Vec<PathBuf>> {
 
 /// The install in `dir` that `rules` describe on `os`, shallowest first:
 /// an AppImage (Linux), an app bundle (macOS), or the executable.
-pub(super) fn locate(
+pub(crate) fn locate(
     dir: &Path,
     rules: &DetectRules,
     os: OperatingSystem,
@@ -282,7 +282,7 @@ fn executable_bit(path: &Path) -> Result<()> {
 }
 
 /// Moves `install` from `from` to `to`, keeping its relative path.
-pub(super) fn rebase(install: EmulatorInstall, from: &Path, to: &Path) -> EmulatorInstall {
+pub(crate) fn rebase(install: EmulatorInstall, from: &Path, to: &Path) -> EmulatorInstall {
     // `join("")` would add a trailing separator.
     let moved = |path: PathBuf| match path.strip_prefix(from) {
         Ok(relative) if relative.as_os_str().is_empty() => to.to_path_buf(),
@@ -304,7 +304,7 @@ pub(super) fn rebase(install: EmulatorInstall, from: &Path, to: &Path) -> Emulat
 
 /// Puts the file named `name` from `download` at `to`: the file itself, or
 /// the one of that name inside a `.zip`.
-pub(super) fn take(download: &Path, name: &str, to: &Path) -> Result<()> {
+pub(crate) fn take(download: &Path, name: &str, to: &Path) -> Result<()> {
     if let Some(parent) = to.parent() {
         fs::create_dir_all(parent)?;
     }
@@ -329,7 +329,7 @@ pub(super) fn take(download: &Path, name: &str, to: &Path) -> Result<()> {
 }
 
 /// Records the files a release shipped.
-pub(super) fn record_shipped(dir: &Path) -> Result<()> {
+pub(crate) fn record_shipped(dir: &Path) -> Result<()> {
     let shipped: Vec<String> = files(dir)?
         .iter()
         .map(|path| path.to_string_lossy().replace('\\', "/"))
@@ -355,7 +355,7 @@ fn shipped(dir: &Path) -> BTreeSet<PathBuf> {
 /// Where the new release ships the same path, its file stays and the
 /// user's goes to [`BACKUP`]`/<old version>/`. Earlier backups come along.
 /// Returns how many files were kept.
-pub(super) fn carry(old: &Path, new: &Path, old_version: &str) -> Result<usize> {
+pub(crate) fn carry(old: &Path, new: &Path, old_version: &str) -> Result<usize> {
     let shipped = shipped(old);
     let mut kept = 0;
     for relative in files(old)? {
@@ -386,6 +386,49 @@ pub(super) fn carry(old: &Path, new: &Path, old_version: &str) -> Result<usize> 
         }
     }
     Ok(kept)
+}
+
+/// Deletes the files the release in `dir` shipped (as recorded), the
+/// record, and the folders that leaves empty, `dir` too. Everything else
+/// (the user's settings and state) stays. A folder without a record loses
+/// nothing. Returns how many files went.
+pub(crate) fn remove_shipped(dir: &Path) -> Result<usize> {
+    if !dir.join(SHIPPED).is_file() {
+        return Ok(0);
+    }
+    let mut removed = 0;
+    for relative in shipped(dir) {
+        // Only plain relative paths: a record can't reach outside `dir`.
+        if !relative
+            .components()
+            .all(|part| matches!(part, std::path::Component::Normal(_)))
+        {
+            continue;
+        }
+        let path = dir.join(&relative);
+        if fs::symlink_metadata(&path).is_ok_and(|meta| !meta.is_dir()) {
+            fs::remove_file(&path)?;
+            removed += 1;
+        }
+    }
+    fs::remove_file(dir.join(SHIPPED))?;
+    prune(dir)?;
+    Ok(removed)
+}
+
+/// Removes the empty folders under `dir`, deepest first, and `dir` when it
+/// ends up empty. Symbolic links are left alone.
+fn prune(dir: &Path) -> Result<()> {
+    for entry in fs::read_dir(dir)? {
+        let entry = entry?;
+        if entry.file_type()?.is_dir() {
+            prune(&entry.path())?;
+        }
+    }
+    if fs::read_dir(dir)?.next().is_none() {
+        fs::remove_dir(dir)?;
+    }
+    Ok(())
 }
 
 /// A version as a folder name.

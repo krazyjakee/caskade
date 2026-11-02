@@ -100,6 +100,9 @@ pub enum Event {
     },
     /// Every change of an emulator detection.
     EmulationDetectChanged(Box<crate::emulation::DetectJob>),
+    /// A managed tool was installed, removed, checked or skipped
+    /// (`crate::managed`).
+    ToolsChanged,
     /// An event a backend plugin emitted (`host.emit`); `payload` is JSON.
     PluginEvent {
         plugin: String,
@@ -179,6 +182,7 @@ impl Event {
             Self::InputDevicesChanged { .. } => "input.devices.changed",
             Self::EmulationChanged { .. } => "emulation.changed",
             Self::EmulationDetectChanged(_) => "emulation.detect.changed",
+            Self::ToolsChanged => "tools.changed",
             Self::PluginEvent { .. } => "plugin.event",
             Self::PluginDisabled { .. } => "plugin.disabled",
             Self::PluginsChanged { .. } => "plugins.changed",

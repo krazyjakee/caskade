@@ -6,4 +6,5 @@ mod import;
 mod rebuild;
 mod roms;
 mod storage;
+mod tools;
 mod watch;

@@ -1,9 +1,25 @@
 //! What an install source's newest version is and where its file is
 //! (EMULATOR-SETUP-PLAN §2.1).
 
-use super::Hosts;
-use crate::{Error, Result, emulation::InstallSource};
+use crate::{Error, Result, emulation::InstallSource, updates::GitHub};
 use url::Url;
+
+/// Where Caskade looks for releases.
+#[derive(Debug, Clone)]
+pub struct Hosts {
+    pub github: GitHub,
+    /// Dolphin's update endpoint, ending in `/`.
+    pub dolphin: Url,
+}
+
+impl Default for Hosts {
+    fn default() -> Self {
+        Self {
+            github: GitHub::default(),
+            dolphin: Url::parse("https://dolphin-emu.org/update/latest/beta/").expect("valid URL"),
+        }
+    }
+}
 
 /// A source's newest version and the file to install it from.
 #[derive(Debug, Clone, PartialEq, Eq)]

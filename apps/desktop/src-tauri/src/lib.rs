@@ -296,6 +296,26 @@ pub fn run() {
             move || emulator_setup.watch()
         });
         app.manage(emulator_setup);
+        // Helper tools (the streaming host and client, STREAMING-PLAN §3):
+        // nothing installs them yet; their update checks follow
+        // `core.updates` like the emulators'.
+        match caskade_sources::tools::catalog() {
+            Ok(catalog) => {
+                let tools = caskade_core::managed::ManagedTools::new(
+                    store.clone(),
+                    bus.clone(),
+                    catalog,
+                    &setup_paths,
+                );
+                tools.set_settings(settings.clone());
+                background::supervise("tool updates", {
+                    let tools = tools.clone();
+                    move || tools.watch()
+                });
+                app.manage(tools);
+            }
+            Err(error) => tracing::error!(%error, "shipped tool definitions are invalid"),
+        }
         // Detection runs after every library scan (§5); results wait
         // for review in Settings → Emulators.
         background::supervise("emulator detection", {

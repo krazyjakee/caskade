@@ -25,6 +25,7 @@ pub mod igdb;
 pub mod install;
 pub mod launch;
 pub mod ludusavi;
+pub mod managed;
 pub mod manual;
 pub mod metadata;
 pub mod model;

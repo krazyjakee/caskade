@@ -6,7 +6,7 @@ use tokio::io::AsyncWriteExt;
 use tokio_util::sync::CancellationToken;
 
 /// Releases are tens to hundreds of MiB: no total timeout, only a stall one.
-pub(super) fn client() -> Result<reqwest::Client> {
+pub(crate) fn client() -> Result<reqwest::Client> {
     static CLIENT: OnceLock<reqwest::Client> = OnceLock::new();
     if let Some(client) = CLIENT.get() {
         return Ok(client.clone());
@@ -34,11 +34,11 @@ pub(super) fn client() -> Result<reqwest::Client> {
 }
 
 // Without the URL: download hosts sign theirs.
-pub(super) use crate::error::net;
+pub(crate) use crate::error::net;
 
 /// Streams `url` into `to` (through a `.part` file), reporting the bytes
 /// so far and the total when known.
-pub(super) async fn fetch(
+pub(crate) async fn fetch(
     url: &url::Url,
     to: &Path,
     cancel: &CancellationToken,

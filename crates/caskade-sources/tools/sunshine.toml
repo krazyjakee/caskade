@@ -1,0 +1,47 @@
+# The streaming host (STREAMING-PLAN §3.2, §4): Sunshine, GPLv3, run as a
+# separate program and never shown by name. Asset names were checked against
+# v2026.914.233613 (tests/tools.rs records them). No macOS host in the first
+# version (§1).
+
+id = "sunshine"
+name = "Sunshine"
+dir = "streaming/host"
+
+[detect.windows]
+executable = "(?i)^sunshine\\.exe$"
+
+[detect.linux]
+executable = "^sunshine$"
+appimage = '^Sunshine_[\d.]+_(?:x86_64|aarch64)\.AppImage$'
+flatpak = "dev.lizardbyte.app.Sunshine"
+
+# The lite zip, not the MSI: the MSI adds shortcuts, an Apps & Features
+# entry, PATH and firewall rules, all named Sunshine.
+[[install.windows]]
+when = ["x86_64"]
+source = "github"
+repo = "LizardByte/Sunshine"
+asset = '^Sunshine-Windows-AMD64-lite\.zip$'
+
+[[install.windows]]
+when = ["aarch64"]
+source = "github"
+repo = "LizardByte/Sunshine"
+asset = '^Sunshine-Windows-ARM64-lite\.zip$'
+
+[[install.linux]]
+when = ["x86_64"]
+source = "github"
+repo = "LizardByte/Sunshine"
+asset = '^Sunshine_[\d.]+_x86_64\.AppImage$'
+
+[[install.linux]]
+when = ["aarch64"]
+source = "github"
+repo = "LizardByte/Sunshine"
+asset = '^Sunshine_[\d.]+_aarch64\.AppImage$'
+
+# Anything else: Flathub.
+[[install.linux]]
+source = "flatpak"
+app = "dev.lizardbyte.app.Sunshine"

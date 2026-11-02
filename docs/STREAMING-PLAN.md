@@ -1,6 +1,6 @@
 # Caskade — Game Streaming Plan
 
-Status: planned; `caskade --launch` (§8.1, #256) is built; issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
+Status: planned; the managed-tool layer (§3.1, #254) and `caskade --launch` (§8.1, #256) are built; issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
 
 How Caskade lets a household play a game installed on one device from another, streamed over the local network. Caskade installs, configures, updates and drives two separate open-source programs: Sunshine on the device that runs the game (the host) and Moonlight on the device that shows it (the client). Users never see their names, windows or settings: they switch hosting on, pair a device once, and choose Stream from Living room. It follows the conventions in `TECH-PLAN.md`; the managed installs build on the emulator setup (`crates/caskade-sources/emulation/README.md`).
 
@@ -42,7 +42,7 @@ Non-goals:
 
 `EmulatorSetup` (`emulation/setup/`) already resolves sources (GitHub releases without the API, URLs, Flathub), downloads, unpacks through `caskade-installer`, carries user files over on update, records managed installs and watches for updates. Its emulator-only steps are `configure()` (profiles, platform defaults), BIOS and RetroArch cores.
 
-A `managed` layer takes the generic part: a `ToolDefinition` (install sources per OS, detect rules, version detection), `ManagedTools` (install, update, skip, remove, the update watch on `core.updates`) and a `managed_tools` table beside `managed_emulators`. `EmulatorSetup` becomes a user of it. Tool definitions live in `crates/caskade-sources/tools/` (`sunshine.toml`, `moonlight.toml`) and validate with the same table tests against recorded asset names, so an upstream rename is a one-line fix.
+Built (#254). `caskade_core::managed` takes the generic part: `resolve`, the download, the release swap that carries user files over, Flathub installs, and version comparison. `EmulatorSetup` uses it and keeps only its emulator-specific steps. A `ToolDefinition` gives a folder under `<data>`, detect rules and install sources per OS; a source's `when` (`x86_64`, `aarch64`, `wayland`, `x11`, `gamescope`) picks the machine's first. `ManagedTools` installs, finds, checks, updates, skips and removes tools, records them in `managed_tools` (migration 0029) and follows `core.updates`. Removing a tool deletes only the files its release shipped, so its configuration stays (§7). Versions come from the source (the release tag); nothing runs the program to ask it. Tool definitions live in `crates/caskade-sources/tools/` (`sunshine.toml`, `moonlight.toml`), and `tests/tools.rs` checks them against the full asset lists of Sunshine v2026.914.233613 and moonlight-qt v6.2.0, so an upstream rename is a one-line fix.
 
 ### 3.2 Install sources
 

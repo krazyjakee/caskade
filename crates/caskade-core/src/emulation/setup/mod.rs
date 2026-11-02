@@ -4,24 +4,21 @@
 //! platform defaults that are missing.
 
 mod bios;
-#[cfg(feature = "net")]
-mod download;
 mod first_run;
 mod jobs;
-mod source;
 #[cfg(all(test, feature = "net"))]
 mod tests;
-mod unpack;
 mod updates;
 
+pub use crate::managed::{Hosts, Resolved, resolve, version_label};
 pub use bios::{BiosFetch, BiosFuture, BiosProvider};
-pub use source::{Resolved, resolve};
-pub use updates::{available as update_available, label as version_label};
+pub use updates::available as update_available;
+#[cfg(test)]
+use {crate::updates::GitHub, url::Url};
 
 use super::{EmulationService, EmulatorDefinition, InstallSource};
 use crate::{
     AppPaths, Result, bus::Bus, db::LibraryStore, launch::LaunchService, settings::SettingsService,
-    updates::GitHub,
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -32,7 +29,6 @@ use std::{
     sync::{Arc, Mutex},
     time::Instant,
 };
-use url::Url;
 
 /// An emulator Caskade installed, as stored.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
@@ -156,23 +152,6 @@ pub struct SetupJob {
     /// Things the user should know: a BIOS to add, a step that failed.
     pub warnings: Vec<String>,
     pub error: Option<String>,
-}
-
-/// Where Caskade looks for releases.
-#[derive(Debug, Clone)]
-pub struct Hosts {
-    pub github: GitHub,
-    /// Dolphin's update endpoint, ending in `/`.
-    pub dolphin: Url,
-}
-
-impl Default for Hosts {
-    fn default() -> Self {
-        Self {
-            github: GitHub::default(),
-            dolphin: Url::parse("https://dolphin-emu.org/update/latest/beta/").expect("valid URL"),
-        }
-    }
 }
 
 struct Inner {
@@ -328,11 +307,11 @@ impl EmulatorSetup {
                     installed_label: managed
                         .as_ref()
                         .and_then(|row| row.installed.as_deref())
-                        .map(updates::label),
+                        .map(version_label),
                     latest_label: managed
                         .as_ref()
                         .and_then(|row| row.latest.as_deref())
-                        .map(updates::label),
+                        .map(version_label),
                     update_available: managed.as_ref().is_some_and(updates::available),
                     managed: managed.map(ManagedEmulator::shown),
                 })

@@ -58,7 +58,7 @@ export interface NotificationPage {
 export type MemberState = "present" | "merged" | "removed" | "other";
 
 export interface NotificationMember {
-  kind: "game" | "gameUpdate" | "emulatorUpdate";
+  kind: "game" | "gameUpdate" | "emulatorUpdate" | "toolUpdate";
   label: string;
   source: string | null;
   atMs: number;

@@ -240,9 +240,9 @@ Paths are relative to the crate or app named in the area.
 | Area | Where | Was | Gap | Recovery | Policy | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | Interrupted emulator update | `emulation/setup/jobs.rs:412` | A crash mid-swap strands `.old/` or `.staging/` | Emulator or user files stranded | Finish or undo at startup, like `recover_updates` | A | Follow-up (high) |
-| Emulator downloads | `emulation/setup/download.rs:47,76` | "the download was cut short" as `Invalid`; no retry or resume | One blip fails the install | Reuse the install `RETRY_DELAYS` and `.part` resume | A | Follow-up |
-| Executable bit | `emulation/setup/unpack.rs:257` | `let _ = executable_bit(..)` | Later "Permission denied" at launch | Job warning with the path | A | Follow-up |
-| Shipped manifest | `emulation/setup/unpack.rs:334` | Unreadable `shipped.json` = empty | Stale libraries carried into the new install | Carry only known user folders; warn | A | Follow-up |
+| Emulator downloads | `managed/download.rs` | "the download was cut short" as `Invalid`; no retry or resume | One blip fails the install | Reuse the install `RETRY_DELAYS` and `.part` resume | A | Follow-up |
+| Executable bit | `managed/unpack.rs` (`locate`) | `let _ = executable_bit(..)` | Later "Permission denied" at launch | Job warning with the path | A | Follow-up |
+| Shipped manifest | `managed/unpack.rs` (`shipped`) | Unreadable `shipped.json` = empty | Stale libraries carried into the new install | Carry only known user folders; warn | A | Follow-up |
 | ROM scan folders | `emulation/scan/enumerate.rs:21` | Bare ENOENT; one unreadable subfolder aborts | No folder named | Name it; skip unreadable subfolders with a warning | A | Follow-up |
 
 ### Standalone crates

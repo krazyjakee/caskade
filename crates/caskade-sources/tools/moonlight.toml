@@ -1,0 +1,57 @@
+# The streaming client (STREAMING-PLAN §3.2, §5): moonlight-qt, GPLv3, run
+# as a separate program in portable mode and never shown by name. Asset
+# names were checked against v6.2.0 (tests/tools.rs records them).
+
+id = "moonlight"
+name = "Moonlight"
+dir = "streaming/client"
+
+[detect.windows]
+executable = "(?i)^Moonlight\\.exe$"
+
+[detect.linux]
+executable = "^moonlight$"
+appimage = '^Moonlight-[\d.]+-x86_64\.AppImage$'
+flatpak = "com.moonlight_stream.Moonlight"
+
+[detect.macos]
+executable = "^Moonlight$"
+bundle = "com.moonlight-stream.Moonlight"
+
+# The portable zip: no administrator rights, no shortcuts. Not the
+# installer (a Burn bundle, UAC, a Start-menu entry).
+[[install.windows]]
+when = ["x86_64"]
+source = "github"
+repo = "moonlight-stream/moonlight-qt"
+asset = '^MoonlightPortable-x64-[\d.]+\.zip$'
+
+[[install.windows]]
+when = ["aarch64"]
+source = "github"
+repo = "moonlight-stream/moonlight-qt"
+asset = '^MoonlightPortable-arm64-[\d.]+\.zip$'
+
+# The Flatpak first on Wayland, gamescope and ARM: the AppImage is built
+# without Wayland and libdrm and warns that decoding may break under
+# XWayland (§3.2). This departs from the emulators' download-first rule.
+[[install.linux]]
+when = ["wayland", "gamescope", "aarch64"]
+source = "flatpak"
+app = "com.moonlight_stream.Moonlight"
+
+[[install.linux]]
+when = ["x86_64"]
+source = "github"
+repo = "moonlight-stream/moonlight-qt"
+asset = '^Moonlight-[\d.]+-x86_64\.AppImage$'
+
+[[install.linux]]
+source = "flatpak"
+app = "com.moonlight_stream.Moonlight"
+
+# Universal, signed and notarized; the app is copied out of the image.
+[[install.macos]]
+source = "github"
+repo = "moonlight-stream/moonlight-qt"
+asset = '^Moonlight-[\d.]+\.dmg$'

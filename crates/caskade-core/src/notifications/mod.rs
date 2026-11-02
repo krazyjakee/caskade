@@ -172,6 +172,8 @@ pub enum MemberKind {
     Game,
     GameUpdate,
     EmulatorUpdate,
+    /// A helper tool's (the streaming host or client).
+    ToolUpdate,
 }
 
 impl MemberKind {
@@ -180,6 +182,7 @@ impl MemberKind {
             Self::Game => "game",
             Self::GameUpdate => "gameUpdate",
             Self::EmulatorUpdate => "emulatorUpdate",
+            Self::ToolUpdate => "toolUpdate",
         }
     }
 
@@ -187,6 +190,7 @@ impl MemberKind {
         match text {
             "gameUpdate" => Self::GameUpdate,
             "emulatorUpdate" => Self::EmulatorUpdate,
+            "toolUpdate" => Self::ToolUpdate,
             _ => Self::Game,
         }
     }

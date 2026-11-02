@@ -137,6 +137,23 @@ impl Notifications {
                 label: format!("{} {}", managed.definition_id, version_label(&latest)),
             });
         }
+        for managed in store.managed_tools().await? {
+            if !managed.update_available() {
+                continue;
+            }
+            let latest = managed.latest.clone().unwrap_or_default();
+            members.push(MemberRow {
+                key: format!("tool:{}@{latest}", managed.tool_id),
+                kind: MemberKind::ToolUpdate,
+                game_id: None,
+                entry_id: None,
+                label: format!(
+                    "{} {}",
+                    crate::managed::tool_label(&managed.tool_id),
+                    version_label(&latest)
+                ),
+            });
+        }
         let count = members.len();
         let notice = Notice {
             category: NotificationCategory::UpdatesAvailable,
@@ -218,6 +235,7 @@ impl Notifications {
             | Event::EmulationScanCompleted { .. }
             | Event::InstallCompleted { .. } => return true,
             Event::EmulationChanged { scope } => return scope == "emulators",
+            Event::ToolsChanged => return true,
             _ => return false,
         };
         if let Err(error) = result {

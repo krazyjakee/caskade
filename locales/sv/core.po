@@ -279,12 +279,14 @@ msgid "the download server answered {status}"
 msgstr "nedladdningsservern svarade {status}"
 
 #: crates/caskade-core/src/addons/package.rs
-#: crates/caskade-core/src/emulation/setup/download.rs
 #: crates/caskade-core/src/emulation/setup/jobs.rs
 #: crates/caskade-core/src/install/downloads.rs
 #: crates/caskade-core/src/install/mod.rs
 #: crates/caskade-core/src/install/operations.rs
 #: crates/caskade-core/src/install/update.rs
+#: crates/caskade-core/src/managed/download.rs
+#: crates/caskade-core/src/managed/flatpak.rs
+#: crates/caskade-core/src/managed/release.rs
 msgid "cancelled"
 msgstr "avbruten"
 
@@ -1102,10 +1104,6 @@ msgstr "{platform} har ingen emulator än"
 msgid "the default emulator is gone"
 msgstr "standardemulatorn finns inte längre"
 
-#: crates/caskade-core/src/emulation/setup/download.rs
-msgid "the download was cut short"
-msgstr "nedladdningen avbröts i förtid"
-
 #: crates/caskade-core/src/emulation/setup/first_run.rs
 msgid "Couldn't prepare {emulator}'s settings: {error}"
 msgstr "Kunde inte förbereda inställningarna för {emulator}: {error}"
@@ -1147,14 +1145,6 @@ msgid "{emulator}'s download doesn't contain the emulator"
 msgstr "nedladdningen av {emulator} innehåller inte emulatorn"
 
 #: crates/caskade-core/src/emulation/setup/jobs.rs
-msgid "couldn't run flatpak: {error}"
-msgstr "kunde inte köra flatpak: {error}"
-
-#: crates/caskade-core/src/emulation/setup/jobs.rs
-msgid "flatpak couldn't install {app}: {error}"
-msgstr "flatpak kunde inte installera {app}: {error}"
-
-#: crates/caskade-core/src/emulation/setup/jobs.rs
 msgid "Couldn't download {emulator}'s {profile} ({file}): {error}"
 msgstr "Kunde inte ladda ner {profile} ({file}) för {emulator}: {error}"
 
@@ -1165,62 +1155,6 @@ msgstr "{emulator} behöver BIOS-filer för att spela: {files}. Lägg dem i {fol
 #: crates/caskade-core/src/emulation/setup/jobs.rs
 msgid "{emulator} needs BIOS files to play: {files}. Put them."
 msgstr "{emulator} behöver BIOS-filer för att spela: {files}. Lägg in dem."
-
-#: crates/caskade-core/src/emulation/setup/source.rs
-msgid "{url} names no file"
-msgstr "{url} anger ingen fil"
-
-#: crates/caskade-core/src/emulation/setup/source.rs
-msgid "{repo} has no release"
-msgstr "{repo} har ingen version"
-
-#: crates/caskade-core/src/emulation/setup/source.rs
-msgid "{repo} {tag} has no file for this system (looked for {pattern})"
-msgstr "{repo} {tag} har ingen fil för det här systemet (letade efter {pattern})"
-
-#: crates/caskade-core/src/emulation/setup/source.rs
-msgid "{repo}: no file named"
-msgstr "{repo}: ingen fil angiven"
-
-#: crates/caskade-core/src/emulation/setup/source.rs
-msgid "{app} installs through Flatpak, not a download"
-msgstr "{app} installeras via Flatpak, inte genom en nedladdning"
-
-#: crates/caskade-core/src/emulation/setup/source.rs
-msgid "Dolphin's update endpoint sent more than 1 MiB"
-msgstr "Dolphins uppdateringstjänst skickade mer än 1 MiB"
-
-#: crates/caskade-core/src/emulation/setup/source.rs
-msgid "Dolphin {version} has no {artifact} build"
-msgstr "Dolphin {version} har inget {artifact}-bygge"
-
-#: crates/caskade-core/src/emulation/setup/source.rs
-msgid "Dolphin's update endpoint named a {scheme} download"
-msgstr "Dolphins uppdateringstjänst angav en {scheme}-nedladdning"
-
-#: crates/caskade-core/src/emulation/setup/unpack.rs
-msgid "no file name"
-msgstr "inget filnamn"
-
-#: crates/caskade-core/src/emulation/setup/unpack.rs
-msgid "couldn't unpack {archive}: {error}"
-msgstr "kunde inte packa upp {archive}: {error}"
-
-#: crates/caskade-core/src/emulation/setup/unpack.rs
-msgid "couldn't open the disk image"
-msgstr "kunde inte öppna skivavbilden"
-
-#: crates/caskade-core/src/emulation/setup/unpack.rs
-msgid "the disk image has no app"
-msgstr "skivavbilden innehåller ingen app"
-
-#: crates/caskade-core/src/emulation/setup/unpack.rs
-msgid "disk images open only on macOS"
-msgstr "skivavbilder kan bara öppnas på macOS"
-
-#: crates/caskade-core/src/emulation/setup/unpack.rs
-msgid "the download has no {file}"
-msgstr "nedladdningen innehåller ingen {file}"
 
 #: crates/caskade-core/src/emulation/setup/updates.rs
 msgid "a game is running in this emulator; update it after the game"
@@ -2277,6 +2211,110 @@ msgstr "ingen pågående session {session}"
 #: crates/caskade-core/src/launch/stop.rs
 msgid "the game's processes aren't known yet"
 msgstr "spelets processer är inte kända än"
+
+#: crates/caskade-core/src/managed/download.rs
+msgid "the download was cut short"
+msgstr "nedladdningen avbröts i förtid"
+
+#: crates/caskade-core/src/managed/flatpak.rs
+msgid "couldn't run flatpak: {error}"
+msgstr "kunde inte köra flatpak: {error}"
+
+#: crates/caskade-core/src/managed/flatpak.rs
+msgid "flatpak couldn't install {app}: {error}"
+msgstr "flatpak kunde inte installera {app}: {error}"
+
+#: crates/caskade-core/src/managed/flatpak.rs
+msgid "flatpak couldn't remove {app}: {error}"
+msgstr ""
+
+#: crates/caskade-core/src/managed/source.rs
+msgid "{url} names no file"
+msgstr "{url} anger ingen fil"
+
+#: crates/caskade-core/src/managed/source.rs
+msgid "{repo} has no release"
+msgstr "{repo} har ingen version"
+
+#: crates/caskade-core/src/managed/source.rs
+msgid "{repo} {tag} has no file for this system (looked for {pattern})"
+msgstr "{repo} {tag} har ingen fil för det här systemet (letade efter {pattern})"
+
+#: crates/caskade-core/src/managed/source.rs
+msgid "{repo}: no file named"
+msgstr "{repo}: ingen fil angiven"
+
+#: crates/caskade-core/src/managed/source.rs
+msgid "{app} installs through Flatpak, not a download"
+msgstr "{app} installeras via Flatpak, inte genom en nedladdning"
+
+#: crates/caskade-core/src/managed/source.rs
+msgid "Dolphin's update endpoint sent more than 1 MiB"
+msgstr "Dolphins uppdateringstjänst skickade mer än 1 MiB"
+
+#: crates/caskade-core/src/managed/source.rs
+msgid "Dolphin {version} has no {artifact} build"
+msgstr "Dolphin {version} har inget {artifact}-bygge"
+
+#: crates/caskade-core/src/managed/source.rs
+msgid "Dolphin's update endpoint named a {scheme} download"
+msgstr "Dolphins uppdateringstjänst angav en {scheme}-nedladdning"
+
+#: crates/caskade-core/src/managed/tools.rs
+msgid "Game streaming from this device"
+msgstr ""
+
+#: crates/caskade-core/src/managed/tools.rs
+msgid "Game streaming to this device"
+msgstr ""
+
+#: crates/caskade-core/src/managed/tools.rs
+msgid "unknown tool {tool}"
+msgstr ""
+
+#: crates/caskade-core/src/managed/tools.rs
+msgid "{tool} is already being changed"
+msgstr ""
+
+#: crates/caskade-core/src/managed/tools.rs
+msgid "{tool} can't be installed on this system"
+msgstr ""
+
+#: crates/caskade-core/src/managed/tools.rs
+msgid "the download for {tool} doesn't contain it"
+msgstr ""
+
+#: crates/caskade-core/src/managed/tools.rs
+msgid "{tool} isn't where Caskade put it"
+msgstr ""
+
+#: crates/caskade-core/src/managed/tools.rs
+msgid "{tool} isn't installed by Caskade"
+msgstr ""
+
+#: crates/caskade-core/src/managed/unpack.rs
+msgid "no file name"
+msgstr "inget filnamn"
+
+#: crates/caskade-core/src/managed/unpack.rs
+msgid "couldn't unpack {archive}: {error}"
+msgstr "kunde inte packa upp {archive}: {error}"
+
+#: crates/caskade-core/src/managed/unpack.rs
+msgid "couldn't open the disk image"
+msgstr "kunde inte öppna skivavbilden"
+
+#: crates/caskade-core/src/managed/unpack.rs
+msgid "the disk image has no app"
+msgstr "skivavbilden innehåller ingen app"
+
+#: crates/caskade-core/src/managed/unpack.rs
+msgid "disk images open only on macOS"
+msgstr "skivavbilder kan bara öppnas på macOS"
+
+#: crates/caskade-core/src/managed/unpack.rs
+msgid "the download has no {file}"
+msgstr "nedladdningen innehåller ingen {file}"
 
 #: crates/caskade-core/src/manual.rs
 msgid "choose the game's program, shortcut or URI"

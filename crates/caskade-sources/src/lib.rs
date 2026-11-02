@@ -9,6 +9,7 @@ pub use progress::DiscoveryProgress;
 mod service;
 mod settings;
 pub mod storage;
+pub mod tools;
 mod watch;
 
 pub use adapter::{DiscoverySource, adapters};

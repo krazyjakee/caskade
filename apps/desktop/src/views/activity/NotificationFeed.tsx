@@ -389,6 +389,8 @@ function MemberLink({ member }: { member: NotificationMember }) {
         </span>
       </span>
     );
+  // Tool updates (streaming) have no settings page yet.
+  if (member.state === "other" && member.kind === "toolUpdate") return <span>{member.label}</span>;
   if (member.state === "other")
     return (
       <Link

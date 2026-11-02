@@ -1,7 +1,8 @@
 //! Install jobs (§3.2, §3.4): one per install or update, in memory, each
 //! change published as `emulation.setup.changed`.
 
-use super::{EmulatorSetup, ManagedEmulator, SetupJob, SetupStatus, first_run, source, unpack};
+use super::{EmulatorSetup, ManagedEmulator, SetupJob, SetupStatus, first_run};
+use crate::managed::{source, unpack};
 use crate::{
     Error, Result,
     bus::Event,
@@ -344,7 +345,7 @@ impl EmulatorSetup {
         cancel: &CancellationToken,
     ) -> Result<()> {
         let mut last = Instant::now() - PROGRESS_EVERY;
-        super::download::fetch(url, to, cancel, |downloaded, total| {
+        crate::managed::download::fetch(url, to, cancel, |downloaded, total| {
             let done = total.is_some_and(|total| downloaded >= total);
             if done || last.elapsed() >= PROGRESS_EVERY {
                 last = Instant::now();
@@ -381,104 +382,32 @@ impl EmulatorSetup {
         old_version: &str,
         cancel: &CancellationToken,
     ) -> Result<EmulatorInstall> {
-        let os = self.inner.emulation.os();
-        let rules = definition.detect.on(os).cloned().unwrap_or_default();
-        let staging = self.inner.root.join(".staging").join(id);
-        let aside = self.inner.root.join(".old").join(id);
-        let (file, target_dir) = (file.to_path_buf(), target.to_path_buf());
-        let old_version = old_version.to_owned();
-        let name = definition.name.clone();
-        let cancel = cancel.clone();
-        tokio::task::spawn_blocking(move || {
-            let _ = std::fs::remove_dir_all(&staging);
-            let unpacked = (|| {
-                unpack::unpack(&file, &staging)?;
-                let install = unpack::locate(&staging, &rules, os).ok_or_else(|| {
-                    let listing = unpack::files(&staging)
-                        .unwrap_or_default()
-                        .iter()
-                        .take(40)
-                        .map(|path| path.display().to_string())
-                        .collect::<Vec<_>>()
-                        .join(", ");
-                    tracing::warn!(emulator = name, listing, "no emulator in the release");
-                    Error::Invalid(crate::tr!(
-                        "{emulator}'s download doesn't contain the emulator",
-                        emulator = name
-                    ))
-                })?;
-                unpack::record_shipped(&staging)?;
-                if cancel.is_cancelled() {
-                    return Err(Error::Invalid(crate::tr!("cancelled")));
-                }
-                Ok(install)
-            })();
-            let install = match unpacked {
-                Ok(install) => install,
-                Err(error) => {
-                    let _ = std::fs::remove_dir_all(&staging);
-                    return Err(error);
-                }
-            };
-            // The old install goes aside; it comes back if the swap fails.
-            if target_dir.exists() {
-                std::fs::create_dir_all(aside.parent().unwrap_or(&aside))?;
-                std::fs::rename(&target_dir, &aside)?;
-            }
-            if let Err(error) = std::fs::rename(&staging, &target_dir) {
-                if aside.exists() {
-                    let _ = std::fs::rename(&aside, &target_dir);
-                }
-                let _ = std::fs::remove_dir_all(&staging);
-                return Err(error.into());
-            }
-            if aside.exists() {
-                let kept = unpack::carry(&aside, &target_dir, &old_version)?;
-                tracing::info!(
-                    emulator = name,
-                    kept,
-                    "user files carried to the new version"
-                );
-                std::fs::remove_dir_all(&aside)?;
-            }
-            Ok(unpack::rebase(install, &staging, &target_dir))
+        let missing = crate::tr!(
+            "{emulator}'s download doesn't contain the emulator",
+            emulator = definition.name
+        );
+        crate::managed::install_release(crate::managed::Release {
+            file: file.to_path_buf(),
+            staging: self.inner.root.join(".staging").join(id),
+            aside: self.inner.root.join(".old").join(id),
+            target: target.to_path_buf(),
+            rules: definition
+                .detect
+                .on(self.inner.emulation.os())
+                .cloned()
+                .unwrap_or_default(),
+            os: self.inner.emulation.os(),
+            old_version: old_version.to_owned(),
+            name: definition.name.clone(),
+            missing,
+            cancel: cancel.clone(),
         })
         .await
-        .map_err(|error| Error::Invalid(error.to_string()))?
     }
 
     /// `flatpak install --user` from Flathub.
     async fn flatpak(&self, app: &str, cancel: &CancellationToken) -> Result<()> {
-        let mut command = tokio::process::Command::new(&self.inner.flatpak);
-        command
-            .args([
-                "install",
-                "--user",
-                "--noninteractive",
-                "-y",
-                "flathub",
-                app,
-            ])
-            .kill_on_drop(true)
-            .stdin(std::process::Stdio::null())
-            .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::piped());
-        let child = command.spawn().map_err(|error| {
-            Error::Invalid(crate::tr!("couldn't run flatpak: {error}", error = error))
-        })?;
-        let output = tokio::select! {
-            () = cancel.cancelled() => return Err(Error::Invalid(crate::tr!("cancelled"))),
-            output = child.wait_with_output() => output?,
-        };
-        if !output.status.success() {
-            let message = String::from_utf8_lossy(&output.stderr);
-            return Err(Error::Invalid(crate::tr!(
-                "flatpak couldn't install {app}: {error}",
-                app = app,
-                error = message.trim()
-            )));
-        }
-        Ok(())
+        crate::managed::flatpak::install(&self.inner.flatpak, app, cancel).await
     }
 
     pub(super) fn context(&self, install: &EmulatorInstall) -> VarContext {

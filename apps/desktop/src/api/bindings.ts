@@ -5277,7 +5277,9 @@ export type MatchSource =
 /**  Nothing found one. */
 "none";
 
-export type MemberKind = "game" | "gameUpdate" | "emulatorUpdate";
+export type MemberKind = "game" | "gameUpdate" | "emulatorUpdate" | 
+/**  A helper tool's (the streaming host or client). */
+"toolUpdate";
 
 export type MemberPage = MemberPage_Serialize | MemberPage_Deserialize;
 

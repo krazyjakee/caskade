@@ -23,6 +23,7 @@ mod plugins;
 pub use plugins::{PLUGIN_KEY_MAX, PLUGIN_KV_TOTAL_MAX, PLUGIN_VALUE_MAX, PluginRow};
 mod imports;
 mod managed;
+mod managed_tools;
 mod manual;
 pub use imports::ImportedGroup;
 mod notifications;

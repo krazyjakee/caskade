@@ -2,8 +2,10 @@
 //! game updates, offered with Update and Skip, applied by installing the
 //! newer release over the old one with the user's files carried across.
 
-use super::{EmulatorSetup, ManagedEmulator, SetupJob, source};
-use crate::{Error, Result, settings::UpdateSettings, updates::newer};
+use super::{EmulatorSetup, ManagedEmulator, SetupJob};
+#[cfg(test)]
+use crate::managed::version_label as label;
+use crate::{Error, Result, settings::UpdateSettings};
 use std::time::{Duration, Instant};
 
 /// How often [`EmulatorSetup::watch`] looks for emulators due a check.
@@ -12,44 +14,14 @@ const TICK: Duration = Duration::from_secs(15 * 60);
 /// rather than the whole interval of a check that worked.
 const RETRY: Duration = Duration::from_secs(30 * 60);
 
-/// A version for people: a rolling build (`latest@2026-10-25T09:30:00Z`)
-/// as its tag and day.
-pub fn label(version: &str) -> String {
-    match version.split_once('@') {
-        Some((tag, time)) => format!("{tag} ({})", time.get(..10).unwrap_or(time)),
-        None => version.to_owned(),
-    }
-}
-
 /// Whether the newest version found is newer than the one installed and
 /// wasn't skipped.
 pub fn available(managed: &ManagedEmulator) -> bool {
-    match (&managed.latest, &managed.installed) {
-        (Some(latest), Some(installed)) => {
-            // Rolling builds compare by publish time (ISO 8601 sorts as text).
-            let newer = match (latest.split_once('@'), installed.split_once('@')) {
-                (Some((_, new)), Some((_, old))) => new > old,
-                _ => newer(latest, installed) || hotfix(latest, installed),
-            };
-            newer && managed.skipped.as_ref() != Some(latest)
-        }
-        _ => false,
-    }
-}
-
-/// A hotfix of the same release: Dolphin's `2609a` after `2609`, `2609b`
-/// after `2609a`.
-fn hotfix(latest: &str, installed: &str) -> bool {
-    fn split(version: &str) -> (&str, &str) {
-        let base = version.trim_end_matches(|c: char| c.is_ascii_lowercase());
-        version.split_at(base.len())
-    }
-    let (new_base, new_letter) = split(latest);
-    let (old_base, old_letter) = split(installed);
-    new_base == old_base
-        && new_base.ends_with(|c: char| c.is_ascii_digit())
-        && new_letter.len() <= 1
-        && new_letter > old_letter
+    crate::managed::update_available(
+        managed.installed.as_deref(),
+        managed.latest.as_deref(),
+        managed.skipped.as_deref(),
+    )
 }
 
 impl EmulatorSetup {
@@ -73,7 +45,7 @@ impl EmulatorSetup {
             return Ok((managed, None));
         };
         let mut failure = None;
-        match source::resolve(&self.inner.hosts, &source).await {
+        match crate::managed::resolve(&self.inner.hosts, &source).await {
             Ok(resolved) => {
                 crate::lock(&self.inner.retry_at).remove(emulator_id);
                 managed.latest = resolved.version;
