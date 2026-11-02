@@ -13,7 +13,7 @@ mod updates;
 pub use crate::managed::{Hosts, Resolved, resolve, version_label};
 pub use bios::{BiosFetch, BiosFuture, BiosProvider};
 pub use updates::available as update_available;
-#[cfg(test)]
+#[cfg(all(test, feature = "net"))]
 use {crate::updates::GitHub, url::Url};
 
 use super::{EmulationService, EmulatorDefinition, InstallSource};

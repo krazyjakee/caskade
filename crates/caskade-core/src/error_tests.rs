@@ -235,6 +235,7 @@ fn summaries_follow_the_language_shown() {
 }
 
 /// Swedish for an unreachable server.
+#[cfg(feature = "net")]
 const SV_NET: &str = r#"msgid ""
 msgstr ""
 "Language: sv\n"
