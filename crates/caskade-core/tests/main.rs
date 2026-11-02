@@ -13,5 +13,6 @@ mod save_locations;
 mod romm;
 #[cfg(feature = "net")]
 mod devices;
+mod sync_games;
 mod sync_log;
 mod sync_policy;

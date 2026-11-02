@@ -80,11 +80,14 @@ pub fn normal_title(title: &str) -> String {
         .join(" ")
 }
 
-/// A store id key (`store_accounts::key`) from its JSON.
+/// A store id key (`store_accounts::key`) from its JSON; `None` for ids that
+/// differ per machine (a non-Steam shortcut's id comes from local paths).
 fn store_key(json: &str) -> Option<String> {
-    super::store_accounts::key(&serde_json::from_str(json).ok()?)
-        .ok()
-        .flatten()
+    let id: crate::model::ExternalId = serde_json::from_str(json).ok()?;
+    if matches!(id, crate::model::ExternalId::SteamShortcut { .. }) {
+        return None;
+    }
+    super::store_accounts::key(&id).ok().flatten()
 }
 
 fn record_map(game: &Game) -> Result<Map<String, Value>> {
@@ -103,7 +106,8 @@ impl LibraryStore {
         // Games: identity, favourite, hidden and the user's values.
         let mut stores: HashMap<String, BTreeSet<String>> = HashMap::new();
         for (game, id) in sqlx::query_as::<_, (String, String)>(
-            "SELECT e.game_id,json(j.value) FROM game_entries e, json_each(e.record_json,'$.ids') j",
+            "SELECT e.game_id,json(j.value) FROM game_entries e, json_each(e.record_json,'$.ids') j \
+             WHERE e.source_id<>'manual'",
         )
         .fetch_all(&mut *conn)
         .await?
@@ -466,7 +470,7 @@ impl LibraryStore {
         if !wanted.is_empty() {
             let rows = sqlx::query_as::<_, (String, String)>(
                 "SELECT e.game_id,json(j.value) FROM game_entries e, json_each(e.record_json,'$.ids') j \
-                 ORDER BY e.game_id",
+                 WHERE e.source_id<>'manual' ORDER BY e.game_id",
             )
             .fetch_all(&self.pool)
             .await?;
@@ -569,7 +573,8 @@ impl LibraryStore {
         let mut out = Vec::new();
         for id in ids {
             let keys = sqlx::query_scalar::<_, String>(
-                "SELECT json(j.value) FROM game_entries e, json_each(e.record_json,'$.ids') j WHERE e.id=?",
+                "SELECT json(j.value) FROM game_entries e, json_each(e.record_json,'$.ids') j \
+                 WHERE e.id=? AND e.source_id<>'manual'",
             )
             .bind(&id)
             .fetch_all(&self.pool)

@@ -347,6 +347,42 @@ A row's tombstone is a value like any other: a device that never saw the
 deletion can't bring the row back with an older change, and a field written to
 a deleted row is ignored.
 
+### The same game on different devices
+
+Each device gives its games its own ids, so a change naming a game is mapped
+to the game here before it applies (#229). Every game's changes include its
+identity:
+- its automatic title, platforms and release year;
+- its IGDB id;
+- the store ids of its entries (`ExternalId`, keyed as store accounts do, so
+  Epic matches on namespace and catalog item);
+- the other devices' games already matched to it.
+
+Non-Steam shortcuts' ids come from local paths, and manual entries' ids
+belong to one machine, so neither counts.
+
+The first change from another device's game resolves it, in order:
+1. A game here it's already known as (an id in its list, or this device's own).
+2. Its IGDB id.
+3. A store id one of the game's entries shares.
+4. Title, platform and year.
+5. Otherwise, a new title-only game with that title, platforms and year. Its
+   collections and play history stay whole, and it gains an entry when the
+   game is installed here (#232, #233).
+
+The match is remembered in `sync_game_ids`. A rename changes the shown title,
+not the identity's automatic one, so it never breaks a match. When a merge here
+removes the matched game, the next change matches again.
+
+A game kept apart on another device is separated here too. When it matches a
+game here that also has entries whose store ids it doesn't have, those entries
+of its own move into a new game kept apart, as Separate does. Merging doesn't
+need a change: each device merges the same games by its own rules, and kept
+apart stops both.
+
+A session needs an entry: it goes to the game's own entry here, or to an
+unlaunchable `sync:sessions` entry when the game has none.
+
 ### Compaction
 
 `SyncEngine::compact` drops a change once every paired device has seen
