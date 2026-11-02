@@ -36,6 +36,7 @@ pub mod sessions;
 pub mod settings;
 pub mod storage;
 pub mod store_accounts;
+pub mod sync;
 pub mod system_stats;
 pub mod themes;
 pub mod tracking;

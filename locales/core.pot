@@ -2880,6 +2880,26 @@ msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
+msgid "What syncs"
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Choose Sync or This device only for each category."
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Sync"
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "This device only"
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
 msgid "Rating board"
 msgstr ""
 

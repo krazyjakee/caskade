@@ -452,6 +452,9 @@ impl SettingsService {
             1,
         )?)?;
         self.register(SectionDefinition::typed::<SavesSettings>("core.saves", 1)?)?;
+        self.register(
+            SectionDefinition::typed::<crate::sync::policy::SyncSettings>("core.sync", 1)?,
+        )?;
         self.register(SectionDefinition::typed::<AccountsSettings>(
             "core.accounts",
             1,

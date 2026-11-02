@@ -85,6 +85,14 @@ fn marked() -> Vec<crate::i18n::Message> {
             "settings",
             "Download save-location definitions from this URL."
         ),
+        // core.sync
+        msgp!("settings", "What syncs"),
+        msgp!(
+            "settings",
+            "Choose Sync or This device only for each category."
+        ),
+        msgp!("settings", "Sync"),
+        msgp!("settings", "This device only"),
         // core.accounts
         msgp!("settings", "Rating board"),
         // core.installer
