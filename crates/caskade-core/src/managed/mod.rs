@@ -22,7 +22,8 @@ mod tools;
 pub(crate) mod unpack;
 mod versions;
 
-#[cfg(all(test, feature = "net"))]
+/// They stand a shell script in for `flatpak`.
+#[cfg(all(test, feature = "net", unix))]
 mod tests;
 
 pub(crate) use release::{Release, install_release, remove_release};
