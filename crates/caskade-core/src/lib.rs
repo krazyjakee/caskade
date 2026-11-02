@@ -35,6 +35,27 @@ pub mod metadata;
 pub mod model;
 pub mod notifications;
 pub mod paths;
+pub mod ports;
+#[cfg(feature = "net")]
+pub(crate) mod remote_file;
+#[cfg(not(feature = "net"))]
+pub(crate) mod remote_file {
+    //! Built without network support: nothing is fetched.
+    use crate::Result;
+    #[expect(dead_code, reason = "network-free builds only read what is cached")]
+    pub(crate) enum Response {
+        Unchanged,
+        Changed {
+            bytes: Vec<u8>,
+            etag: Option<String>,
+        },
+    }
+    pub(crate) async fn fetch(_: &str, _: Option<&str>, _: &str) -> Result<Response> {
+        Err(crate::Error::Invalid(
+            "built without network support".into(),
+        ))
+    }
+}
 #[cfg(feature = "net")]
 pub mod remote_play;
 pub mod romm;

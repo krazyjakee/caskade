@@ -3,14 +3,12 @@
 //! publishes the pair atomically; neither failed refreshes nor offline starts
 //! discard the last working generation. No manifest is bundled with Caskade.
 
-#[cfg(feature = "net")]
-mod download;
 mod index;
 mod manifest;
 
 pub use manifest::{Constraint, Entry, Game, Ids, PrimaryId, StoreId, apply_secondary};
 
-use crate::{Error, Result};
+use crate::{Error, Result, remote_file as download};
 use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
 use std::{
@@ -340,7 +338,7 @@ impl Ludusavi {
             .filter(|_| usable && same_source)
             .and_then(|cached| cached.etag.as_deref());
         let conditional = etag.is_some();
-        match download::fetch(&self.inner.url, etag).await? {
+        match download::fetch(&self.inner.url, etag, "Ludusavi manifest").await? {
             download::Response::Unchanged => {
                 let mut cached = cached
                     .filter(|_| conditional)
@@ -457,20 +455,4 @@ fn invalid(message: impl Into<String>) -> Error {
         std::io::ErrorKind::InvalidData,
         message.into(),
     ))
-}
-
-#[cfg(not(feature = "net"))]
-mod download {
-    use crate::Result;
-    #[expect(dead_code, reason = "network-free builds only query existing indices")]
-    pub(super) enum Response {
-        Unchanged,
-        Changed {
-            bytes: Vec<u8>,
-            etag: Option<String>,
-        },
-    }
-    pub(super) async fn fetch(_: &str, _: Option<&str>) -> Result<Response> {
-        Err(super::invalid("built without network support"))
-    }
 }

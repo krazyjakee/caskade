@@ -159,6 +159,13 @@ The downloader verifies the archive before unpacking. Extraction lists and
 validates entries, quarantines external-tool output inside staging, and imports
 validated files through confined writers. Native archive candidates retain the
 sidecar alternative for a clean retry after rollback.
+An archive whose only content is one top-level tarball (`.tar`, `.tar.gz`,
+`.tgz`, `.tar.xz`, `.tar.zst`, `.tar.bz2`: releases zipped around a tarball so
+their programs keep the executable bit) has the tarball unpacked in its place,
+under the same budget; any other lone archive, such as a ROM set's zip, stays.
+A launch hint that is only a file name, with no such file at the top of the
+install, names the shallowest file of that name (ignoring case), so a caller
+that knows the program but not the release's folder can still point at it.
 
 ### uninstall and move
 

@@ -24,6 +24,11 @@ msgstr ""
 msgid "“{text}”"
 msgstr ""
 
+#. The region of a game file, e.g. USA
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "({region} version)"
+msgstr ""
+
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
 msgid "(no longer in the library)"
 msgstr ""
@@ -2598,6 +2603,10 @@ msgctxt "app build"
 msgid "Build"
 msgstr ""
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Built from source on this system"
+msgstr ""
+
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgid "Buttons, selection and glows; kept readable on the theme."
 msgstr ""
@@ -2689,6 +2698,7 @@ msgstr ""
 #: apps/desktop/src/views/activity/AddGame.tsx
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
 #: apps/desktop/src/views/library/web/RemoveWebGame.tsx
@@ -2871,6 +2881,10 @@ msgstr ""
 msgid "Caskade couldn't read this source."
 msgstr ""
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Caskade downloads {asset} ({release}) from {repository} on GitHub and adds it to this game as another way to play. It's a fan project, not the publisher's: installing it runs code from that repository."
+msgstr ""
+
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 msgid "Caskade downloads these for you, sets them up and makes them the default for platforms that have none. Emulators from GitHub are kept up to date."
 msgstr ""
@@ -2885,6 +2899,10 @@ msgstr ""
 
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 msgid "Caskade found no IGDB game for it."
+msgstr ""
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Caskade gives it yours when it starts."
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
@@ -3920,6 +3938,10 @@ msgstr ""
 msgid "Decline"
 msgstr ""
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "decompilation, recompilation, source port, Decomp Buddy"
+msgstr ""
+
 #: apps/desktop/src/views/settings/launchers.ts
 msgctxt "discovery source"
 msgid "Deep scans"
@@ -4809,6 +4831,14 @@ msgstr ""
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgctxt "script test result"
 msgid "Failed with exit code {0}"
+msgstr ""
+
+#: apps/desktop/src/views/settings/GeneralSettings.tsx
+msgid "Fan decompilations, recompilations and source ports on game pages, from Decomp Buddy's install plans, checked daily."
+msgstr ""
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Fan decompilations, recompilations and source ports that run this game natively, from your own copy."
 msgstr ""
 
 #. A heart on a favourite game's card
@@ -5788,6 +5818,10 @@ msgctxt "save version"
 msgid "In use"
 msgstr ""
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "in your library"
+msgstr ""
+
 #. A game of a shared collection
 #. A store game the library has but isn't installed
 #: apps/desktop/src/components/shares/ShareInfoDetails.tsx
@@ -5832,12 +5866,21 @@ msgctxt "job kind"
 msgid "Install"
 msgstr ""
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgctxt "port"
+msgid "Install"
+msgstr ""
+
 #: apps/desktop/src/views/settings/emulators/FromDevices.tsx
 msgid "Install {emulator}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 msgid "Install {name}"
+msgstr ""
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Install {repository}?"
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
@@ -5851,6 +5894,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "install emulators, download emulators, RetroArch"
+msgstr ""
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Install failed: {error}"
 msgstr ""
 
 #: apps/desktop/src/views/activity/AddGame.tsx
@@ -5907,6 +5954,10 @@ msgstr ""
 msgid "install picker"
 msgstr ""
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Install plans from Decomp Buddy"
+msgstr ""
+
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
 msgid "Install this game?"
 msgstr ""
@@ -5941,6 +5992,7 @@ msgstr ""
 #: apps/desktop/src/api/emulatorSetup.ts
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx
 msgid "Installed"
 msgstr ""
 
@@ -6008,6 +6060,10 @@ msgstr ""
 msgid "Installed themes."
 msgstr ""
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Installed: it's in Play from your library."
+msgstr ""
+
 #: apps/desktop/src/views/game/OwnedReleases.tsx
 msgid "Installed."
 msgstr ""
@@ -6029,6 +6085,10 @@ msgstr ""
 msgid "Installing"
 msgstr ""
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Installing copies yours in."
+msgstr ""
+
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 msgid "Installing needs a connection."
 msgstr ""
@@ -6046,8 +6106,13 @@ msgid "Installing version {version}…"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 msgid "Installing…"
+msgstr ""
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Installing… {percent}%"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
@@ -6124,6 +6189,10 @@ msgstr ""
 msgid "It arrives as a new version of your saves of {game}. Your own saves stay: the next Play asks which to use."
 msgstr ""
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "It asks for the file the first time it starts."
+msgstr ""
+
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 msgid "It asks there before copying"
 msgstr ""
@@ -6181,6 +6250,10 @@ msgstr ""
 msgid "It leaves your library: the offline copy and the progress saved in the game window are deleted, with its play sessions. Add its page again to play it again."
 msgstr ""
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "It needs"
+msgstr ""
+
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "It needs a new code to play from this device again."
 msgstr ""
@@ -6191,6 +6264,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "It stops syncing with this device. Nothing is deleted on either device, and what synced stays."
+msgstr ""
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "It takes the file when it starts."
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
@@ -6215,6 +6292,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "Its games stay in your library as not installed, because Caskade no longer looks for their ROMs. Your ROM files aren't touched."
+msgstr ""
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Its install plan has no checksum for the download, so it can't be checked."
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
@@ -7004,6 +7085,10 @@ msgstr ""
 msgid "Matched by store id"
 msgstr ""
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Matched by title: check it's this game"
+msgstr ""
+
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 msgid "Matched by your RomM server"
 msgstr ""
@@ -7612,6 +7697,10 @@ msgstr ""
 msgid "No recent releases here."
 msgstr ""
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "No release for this system"
+msgstr ""
+
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "No ROM scanners yet. Add one for each ROM folder."
 msgstr ""
@@ -7744,6 +7833,10 @@ msgstr ""
 msgid "Not built yet."
 msgstr ""
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Not certain in the plan"
+msgstr ""
+
 #. A BIOS file's state
 #. A BIOS file's state
 #. BIOS issues
@@ -7797,6 +7890,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
 msgid "Not found on this device"
+msgstr ""
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "not in your library"
 msgstr ""
 
 #. A game of a shared collection
@@ -7898,6 +7995,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx
 msgid "Notes"
 msgstr ""
 
@@ -8957,6 +9055,14 @@ msgstr ""
 msgid "Portable executables"
 msgstr ""
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Ports"
+msgstr ""
+
+#: apps/desktop/src/views/settings/GeneralSettings.tsx
+msgid "Ports of games"
+msgstr ""
+
 #: apps/desktop/src/views/settings/InstallerSettings.tsx
 msgid "Preferences apply to the next install job. Jobs already running keep their current settings."
 msgstr ""
@@ -9091,6 +9197,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Provides {providers}"
+msgstr ""
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Put it in the port's folder once installed."
 msgstr ""
 
 #. A release date known to the quarter of a year: Q1 2027
@@ -10036,6 +10146,11 @@ msgstr ""
 msgid "Runs on"
 msgstr ""
 
+#. Operating systems a port has releases for, e.g. Windows, Linux
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "runs on {systems}"
+msgstr ""
+
 #: apps/desktop/src/views/game/OwnedReleases.tsx
 msgid "Runs on {systems}, not on this computer's system."
 msgstr ""
@@ -10785,6 +10900,11 @@ msgstr ""
 msgid "Show none"
 msgstr ""
 
+#: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "Show ports of games"
+msgstr ""
+
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "Show settings"
 msgstr ""
@@ -11081,6 +11201,10 @@ msgstr ""
 msgid "Starting on {device}…"
 msgstr ""
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Starting the install…"
+msgstr ""
+
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 msgid "Starting the update…"
 msgstr ""
@@ -11092,6 +11216,7 @@ msgstr ""
 #: apps/desktop/src/components/streaming/StopHostDialog.tsx
 #: apps/desktop/src/shell/console/GameCurtain.tsx
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
@@ -11610,6 +11735,10 @@ msgstr ""
 msgid "The devices lost each other, or nobody confirmed in time. Nothing was paired."
 msgstr ""
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "The download is checked against the checksum in its install plan."
+msgstr ""
+
 #: apps/desktop/src/components/gameMenu/RemoveGameDialog.tsx
 msgid "The files Caskade installed for it are deleted, then it leaves your library with its play sessions. Files it didn't install stay where they are. The uninstall shows in Activity."
 msgstr ""
@@ -11648,6 +11777,14 @@ msgstr ""
 
 #: apps/desktop/src/api/emulatorSetup.ts
 msgid "The install failed"
+msgstr ""
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "The install needs a choice in Activity."
+msgstr ""
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "The install was cancelled."
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
@@ -11740,6 +11877,10 @@ msgstr ""
 #. placeholder {1}: outcome.error
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "The restore of {0} was undone, and the library from before is back: {1}"
+msgstr ""
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "The same game on IGDB"
 msgstr ""
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx

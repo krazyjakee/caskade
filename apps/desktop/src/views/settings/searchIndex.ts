@@ -127,6 +127,11 @@ export const settingsSearchIndex: readonly SettingsSearchEntry[] = [
     label: msg`Fetch artwork and game info online`,
     words: msg`metadata, IGDB, covers, offline`,
   },
+  {
+    tab: "general",
+    label: msg`Show ports of games`,
+    words: msg`decompilation, recompilation, source port, Decomp Buddy`,
+  },
   { tab: "general", label: msg`First-run setup`, words: msg`onboarding, welcome` },
   {
     tab: "general",

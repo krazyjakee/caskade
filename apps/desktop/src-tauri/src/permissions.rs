@@ -139,6 +139,7 @@ pub fn access(command: &str) -> Option<Access> {
         | "manual_game_duplicates"
         | "games_refresh_status"
         | "game_updates"
+        | "game_ports"
         | "updates_available"
         | "romm_overview"
         | "romm_cache_status"
@@ -340,7 +341,9 @@ pub fn access(command: &str) -> Option<Access> {
         | "share_receive_collection"
         | "game_action_settings_save"
         // Adding a game by hand: in effect what an install adds (#174).
-        | "manual_game_add" => Install,
+        | "manual_game_add"
+        // A fan port of a game: an install into the game.
+        | "game_port_install" => Install,
         "job_answer" | "job_retry" | "job_recover" => Job,
         "backup_status" | "backup_plan" => Open,
         // Game streaming (#257): its state is a read; hosting installs a

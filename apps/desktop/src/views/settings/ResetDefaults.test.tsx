@@ -36,6 +36,7 @@ function general(change?: (api: SettingsApi) => Partial<SettingsApi>) {
     ...coreSettingsDefaults(),
     "core.metadata": { online: true },
     "core.appUpdates": { check: true },
+    "core.ports": { enabled: true },
     "core.onboarding": { completed: false, sounds: true },
   });
   (fixture.values["core.onboarding"] as Record<string, unknown>).completed = true;

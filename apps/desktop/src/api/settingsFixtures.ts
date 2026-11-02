@@ -253,6 +253,14 @@ const sections: {
   },
   { namespace: "core.onboarding", version: 1, defaults: { completed: false, sounds: true } },
   { namespace: "core.metadata", version: 1, defaults: { online: true } },
+  {
+    namespace: "core.ports",
+    version: 1,
+    defaults: {
+      enabled: true,
+      catalogueUrl: "https://tanookistudios.com/decomp-buddy/plans.json",
+    },
+  },
   { namespace: "core.appUpdates", version: 1, defaults: { check: true } },
   {
     namespace: "core.storeAccounts",

@@ -117,6 +117,17 @@ fn marked() -> Vec<crate::i18n::Message> {
         ),
         msgp!("settings", "Save versions to keep"),
         msgp!("settings", "Versions kept per game; the newest stay."),
+        // core.ports
+        msgp!("settings", "Show ports of games"),
+        msgp!(
+            "settings",
+            "List fan decompilations, recompilations and source ports on game pages, from Decomp Buddy's install plans."
+        ),
+        msgp!("settings", "Port catalogue URL"),
+        msgp!(
+            "settings",
+            "Download the install plans of ports from this URL."
+        ),
         // core.sync
         msgp!("settings", "What syncs"),
         msgp!(

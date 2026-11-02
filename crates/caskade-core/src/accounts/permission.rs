@@ -27,7 +27,7 @@ impl Permission {
         let section = match namespace {
             // Game updates sit beside Caskade's own in General (#54).
             "core.general" | "core.console" | "core.onboarding" | "core.metadata"
-            | "core.appUpdates" | "core.updates" => "general",
+            | "core.appUpdates" | "core.updates" | "core.ports" => "general",
             "core.discovery" | "discovery.import" => "library-discovery",
             "core.launchers" => "launchers",
             "core.emulation" | "core.romm" => "emulators",

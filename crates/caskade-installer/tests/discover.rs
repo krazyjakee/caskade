@@ -1,4 +1,8 @@
-use std::{collections::BTreeMap, fs, path::Path};
+use std::{
+    collections::BTreeMap,
+    fs,
+    path::{Path, PathBuf},
+};
 
 use caskade_installer::{
     Question, RuntimeSpec,
@@ -199,6 +203,37 @@ fn metadata_title_priority_ids_and_installer_hooks() {
     assert_eq!(
         discover(root.path(), &host(), &hints).unwrap().title,
         "Installer Name"
+    );
+}
+
+#[test]
+fn a_launch_hint_by_name_finds_the_program_inside_a_wrapping_folder() {
+    let root = tempfile::tempdir().unwrap();
+    for name in [
+        "Port-v1.2/bin/Port.exe",
+        "Port-v1.2/Tools.exe",
+        "deeper/a/b/Port.exe",
+    ] {
+        put(root.path(), name, portable_pe(true));
+    }
+    let hints = DiscoveryHints {
+        launch_targets: vec![LaunchHint {
+            path: "port.exe".into(),
+            args: vec![],
+            working_dir: None,
+            reason: "the port's install plan".into(),
+        }],
+        ..Default::default()
+    };
+    let result = discover(root.path(), &host(), &hints).unwrap();
+    assert!(result.question.is_none(), "{:?}", result.question);
+    assert_eq!(
+        result.launch_targets[0].path,
+        PathBuf::from("Port-v1.2/bin/Port.exe")
+    );
+    assert_eq!(
+        result.launch_targets[0].working_dir,
+        PathBuf::from("Port-v1.2/bin")
     );
 }
 

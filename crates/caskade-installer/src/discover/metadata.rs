@@ -34,6 +34,39 @@ impl Found {
     }
 }
 
+/// A hint that is only a file name, when the tree has no such file at its
+/// top: the shallowest file of that name, ignoring case, first by path at
+/// that depth. Archives often wrap a release in a folder of its own, and a
+/// caller that knows the program's name doesn't know the folder's.
+fn by_name(tree: &Tree, hint: &Path) -> Option<PathBuf> {
+    let mut components = hint.components();
+    let (Some(std::path::Component::Normal(name)), None) = (components.next(), components.next())
+    else {
+        return None;
+    };
+    if tree.resolve(hint).is_some() {
+        return None;
+    }
+    let name = name.to_string_lossy().to_lowercase();
+    tree.entries
+        .iter()
+        .filter(|entry| !entry.directory)
+        .filter(|entry| {
+            entry
+                .path
+                .file_name()
+                .is_some_and(|file| file.to_string_lossy().to_lowercase() == name)
+        })
+        .min_by(|a, b| {
+            a.path
+                .components()
+                .count()
+                .cmp(&b.path.components().count())
+                .then_with(|| a.path.cmp(&b.path))
+        })
+        .map(|entry| entry.path.clone())
+}
+
 pub(super) fn scan(tree: &Tree, hints: &DiscoveryHints, config: DiscoveryConfig) -> Found {
     let mut found = Found {
         titles: vec![],
@@ -56,12 +89,20 @@ pub(super) fn scan(tree: &Tree, hints: &DiscoveryHints, config: DiscoveryConfig)
         found.ids.insert("source_url".into(), url.to_string());
     }
     for target in &hints.launch_targets {
+        let path = by_name(tree, &target.path).unwrap_or_else(|| target.path.clone());
         let working_dir = target
             .working_dir
             .as_ref()
-            .and_then(|path| tree.resolve(path));
+            .and_then(|path| tree.resolve(path))
+            .or_else(|| {
+                // A target found by name runs from its own folder.
+                (path != target.path)
+                    .then(|| path.parent().map(Path::to_path_buf))
+                    .flatten()
+                    .filter(|parent| !parent.as_os_str().is_empty())
+            });
         found.targets.push(ExactTarget {
-            path: target.path.clone(),
+            path,
             args: target.args.clone(),
             working_dir,
             score: 1100.0,

@@ -255,3 +255,73 @@ async fn archive_extractor_runs_through_executor_and_retains_reprobed_artifacts(
             .any(|event| event.bytes > 0 && event.message == "progress")
     );
 }
+
+/// A zip of one tarball (how GitHub artifacts keep executable bits) unpacks
+/// the tarball in its place; a zip of one zip (a ROM set) stays as it is.
+#[test]
+fn a_lone_tarball_in_an_archive_is_unpacked_in_its_place() {
+    let tarball = {
+        let mut builder = tar::Builder::new(flate2::write::GzEncoder::new(
+            Vec::new(),
+            flate2::Compression::fast(),
+        ));
+        for (name, mode, bytes) in [
+            ("Port", 0o755, &b"\x7fELF fake"[..]),
+            ("assets/menu.rml", 0o644, &b"<rml/>"[..]),
+        ] {
+            let mut header = tar::Header::new_gnu();
+            header.set_size(bytes.len() as u64);
+            header.set_mode(mode);
+            header.set_cksum();
+            builder.append_data(&mut header, name, bytes).unwrap();
+        }
+        builder.into_inner().unwrap().finish().unwrap()
+    };
+    let zip_of = |name: &str, bytes: &[u8]| {
+        let mut zip = zip::ZipWriter::new(Cursor::new(Vec::new()));
+        zip.start_file(name, zip::write::SimpleFileOptions::default())
+            .unwrap();
+        zip.write_all(bytes).unwrap();
+        zip.finish().unwrap().into_inner()
+    };
+    let unpack = |archive: Vec<u8>| {
+        let temp = tempfile::tempdir().unwrap();
+        let mut dir = writer(temp.path(), archive.len() as u64);
+        let options = ArchiveOptions::default();
+        let artifacts = extract(
+            Cursor::new(archive),
+            Format::Zip,
+            &mut dir,
+            &options,
+            &mut NoopControl,
+        )
+        .unwrap();
+        let artifacts = unwrap_tarball(&mut dir, artifacts, &options, &mut NoopControl).unwrap();
+        let mut files: Vec<String> = dir
+            .extracted_files()
+            .map(|path| path.to_string_lossy().replace('\\', "/"))
+            .collect();
+        files.sort();
+        (temp, files, artifacts)
+    };
+
+    let (temp, files, artifacts) = unpack(zip_of("Port.tar.gz", &tarball));
+    assert_eq!(files, ["Port", "assets/menu.rml"]);
+    assert!(!temp.path().join("Port.tar.gz").exists());
+    assert!(temp.path().join("Port").is_file());
+    assert_eq!(artifacts.len(), 2);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mode = std::fs::metadata(temp.path().join("Port"))
+            .unwrap()
+            .permissions()
+            .mode();
+        assert_eq!(mode & 0o111, 0o111, "the program stays executable");
+    }
+
+    let romset = zip_of("pacman.zip", &zip_of("pacman.6e", b"rom"));
+    let (temp, files, _) = unpack(romset);
+    assert_eq!(files, ["pacman.zip"]);
+    assert!(temp.path().join("pacman.zip").is_file());
+}
