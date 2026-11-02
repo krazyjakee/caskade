@@ -1,0 +1,29 @@
+Steam Fixture:
+  steam: {id: 620}
+  files:
+    <winDocuments>/Fixture/*.sav:
+      tags: [save]
+      when: [{os: windows, store: steam}]
+    <winAppData>/Fixture:
+      tags: [save, config]
+      when: [{os: windows}]
+    <xdgData>/Fixture/*.sav:
+      tags: [save]
+      when: [{os: linux}]
+  registry:
+    HKEY_CURRENT_USER/Software/Fixture:
+      tags: [save]
+    HKEY_LOCAL_MACHINE/Software/Fixture:
+      tags: [config]
+GOG Fixture:
+  gog: {id: 1207658924}
+  files:
+    <base>/gog-saves: {tags: [save]}
+Title Fixture:
+  files:
+    <base>/title-saves: {tags: [save]}
+Older Fixture Title:
+  alias: Title Fixture
+Hand Matched Fixture:
+  files:
+    <base>/hand-saves: {tags: [save]}

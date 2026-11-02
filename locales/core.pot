@@ -2802,6 +2802,74 @@ msgstr ""
 msgid "the library import saved no entry"
 msgstr ""
 
+#: crates/caskade-core/src/saves/context.rs
+msgid "Could not read the game's Wine or Proton prefix: {error}"
+msgstr ""
+
+#: crates/caskade-core/src/saves/context.rs
+msgid "This release has no recorded Wine or Proton prefix."
+msgstr ""
+
+#: crates/caskade-core/src/saves/context.rs
+msgid "The save path contains an unclosed placeholder."
+msgstr ""
+
+#: crates/caskade-core/src/saves/context.rs
+msgid "Save placeholder <{name}> is unavailable for this release."
+msgstr ""
+
+#: crates/caskade-core/src/saves/context.rs
+msgid "A Windows save path needs a recorded Wine or Proton prefix on this device."
+msgstr ""
+
+#: crates/caskade-core/src/saves/files.rs
+msgid "The save scan exceeded its file or folder limit."
+msgstr ""
+
+#: crates/caskade-core/src/saves/files.rs
+msgid "The network save path has no server or share."
+msgstr ""
+
+#: crates/caskade-core/src/saves/files.rs
+msgid "Save paths must resolve to an absolute location."
+msgstr ""
+
+#: crates/caskade-core/src/saves/files.rs
+msgid "Invalid save glob {pattern}: {error}"
+msgstr ""
+
+#: crates/caskade-core/src/saves/registry.rs
+msgid "The save scan exceeded its registry key limit."
+msgstr ""
+
+#: crates/caskade-core/src/saves/service.rs
+msgid "This release is not installed on this device."
+msgstr ""
+
+#: crates/caskade-core/src/saves/store.rs
+msgid "Save settings changed elsewhere. Reload them and try again."
+msgstr ""
+
+#: crates/caskade-core/src/saves/store.rs
+msgid "The manifest game name is invalid."
+msgstr ""
+
+#: crates/caskade-core/src/saves/store.rs
+msgid "Choose at most 256 save locations."
+msgstr ""
+
+#: crates/caskade-core/src/saves/store.rs
+msgid "The save location is invalid."
+msgstr ""
+
+#: crates/caskade-core/src/saves/store.rs
+msgid "Registry save locations must start with HKEY_CURRENT_USER or HKEY_LOCAL_MACHINE."
+msgstr ""
+
+#: crates/caskade-core/src/saves/store.rs
+msgid "Choose an absolute file or folder path for saves."
+msgstr ""
+
 #: crates/caskade-core/src/scripts/exec.rs
 msgid "“{program}” wasn't found; check that it is installed and the path is right"
 msgstr ""

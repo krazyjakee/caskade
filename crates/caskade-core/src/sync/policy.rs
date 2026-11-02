@@ -531,6 +531,10 @@ pub const TABLES: &[Rule] = &[
         "RomM inventory and downloaded ROM paths are per device",
     ),
     local(
+        "release_save_preferences",
+        "per-release save locations, overrides and manifest matching belong to this device; save versions are shared separately",
+    ),
+    local(
         "managed_tools",
         "managed helper program installations, executable paths and update state belong to this device",
     ),

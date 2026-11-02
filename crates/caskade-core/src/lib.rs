@@ -34,6 +34,7 @@ pub mod model;
 pub mod notifications;
 pub mod paths;
 pub mod romm;
+pub mod saves;
 pub mod scripts;
 pub mod sessions;
 pub mod settings;

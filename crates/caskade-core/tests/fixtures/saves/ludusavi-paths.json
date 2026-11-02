@@ -1,0 +1,27 @@
+{
+  "reference": "https://github.com/mtkennerly/ludusavi/blob/95b651aae0c9c3d99f6aebc8eda6caa8a49a2d1c/src/scan.rs#L127",
+  "description": "Expected parse_paths substitutions for explicit Windows, native Linux and a Steam Proton prefix. Windows cases are pure path logic, without accessing a Windows filesystem.",
+  "cases": [
+    {"profile":"windows","pattern":"<base>/saves","expected":["D:/Steam/steamapps/common/FixtureGame/saves"]},
+    {"profile":"windows","pattern":"<root>/steamapps/common/<game>/save.dat","expected":["D:/Steam/steamapps/common/FixtureGame/save.dat"]},
+    {"profile":"windows","pattern":"<home>/Saved Games/<osUserName>/*.sav","expected":["C:/Users/player/Saved Games/player/*.sav"]},
+    {"profile":"windows","pattern":"<winAppData>/Fixture/*.sav","expected":["C:/Users/player/AppData/Roaming/Fixture/*.sav"]},
+    {"profile":"windows","pattern":"<winLocalAppData>/Fixture","expected":["C:/Users/player/AppData/Local/Fixture"]},
+    {"profile":"windows","pattern":"<winLocalAppDataLow>/Fixture","expected":["C:/Users/player/AppData/LocalLow/Fixture"]},
+    {"profile":"windows","pattern":"<winDocuments>/Fixture","expected":["C:/Users/player/Documents/Fixture"]},
+    {"profile":"windows","pattern":"<winPublic>/Fixture","expected":["C:/Users/Public/Fixture"]},
+    {"profile":"windows","pattern":"<winProgramData>/Fixture","expected":["C:/ProgramData/Fixture"]},
+    {"profile":"windows","pattern":"<winDir>/Fixture","expected":["C:/Windows/Fixture"]},
+    {"profile":"windows","pattern":"<root>/userdata/*<storeUserId>*/<storeGameId>/remote/*.sav","expected":["D:/Steam/userdata/*/620/remote/*.sav"]},
+    {"profile":"linux","pattern":"<xdgData>/Fixture/*.sav","expected":["/home/player/.local/share/Fixture/*.sav"]},
+    {"profile":"linux","pattern":"<xdgConfig>/Fixture/save.json","expected":["/home/player/.config/Fixture/save.json"]},
+    {"profile":"proton","pattern":"<winAppData>/Fixture/*.sav","expected":["@PREFIX@/drive_c/users/steamuser/AppData/Roaming/Fixture/*.sav","@PREFIX@/drive_c/users/steamuser/Application Data/Fixture/*.sav"]},
+    {"profile":"proton","pattern":"<winLocalAppData>/Fixture","expected":["@PREFIX@/drive_c/users/steamuser/AppData/Local/Fixture","@PREFIX@/drive_c/users/steamuser/Local Settings/Application Data/Fixture"]},
+    {"profile":"proton","pattern":"<winLocalAppDataLow>/Fixture","expected":["@PREFIX@/drive_c/users/steamuser/AppData/LocalLow/Fixture"]},
+    {"profile":"proton","pattern":"<winDocuments>/Fixture/*.sav","expected":["@PREFIX@/drive_c/users/steamuser/Documents/Fixture/*.sav","@PREFIX@/drive_c/users/steamuser/My Documents/Fixture/*.sav"]},
+    {"profile":"proton","pattern":"<home>/Saved Games/<osUserName>","expected":["@PREFIX@/drive_c/users/steamuser/Saved Games/steamuser"]},
+    {"profile":"proton","pattern":"<winPublic>/Fixture","expected":["@PREFIX@/drive_c/users/Public/Fixture"]},
+    {"profile":"proton","pattern":"<winProgramData>/Fixture","expected":["@PREFIX@/drive_c/ProgramData/Fixture"]},
+    {"profile":"proton","pattern":"C:/users/steamuser/AppData/Roaming/Fixture/*.sav","expected":["@PREFIX@/drive_c/users/steamuser/AppData/Roaming/Fixture/*.sav"]}
+  ]
+}
