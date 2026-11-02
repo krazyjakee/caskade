@@ -43,6 +43,9 @@ pub struct SyncEngine {
     /// Called with a RomM server's id when another device removed it, to
     /// remove its downloaded ROMs here (the policy's `Receive::RommServer`).
     romm_removed: std::sync::OnceLock<std::sync::Arc<dyn Fn(String) + Send + Sync>>,
+    /// Called with an untouched default admin and the admin from another
+    /// device it joined (`LibraryStore::sync_join_stand_in`).
+    account_joined: std::sync::OnceLock<std::sync::Arc<dyn Fn(String, String) + Send + Sync>>,
     /// Where artwork files are: an `artwork` change applies once its file
     /// is here (#273).
     artwork: std::sync::OnceLock<crate::artwork::ArtworkCache>,
@@ -82,13 +85,22 @@ fn entity_rank(entity: Entity) -> u8 {
     match entity {
         Entity::Account => 0,
         Entity::Game => 1,
-        Entity::KeptApart | Entity::IgdbMatch | Entity::ArtworkChoice | Entity::Artwork => 2,
+        Entity::KeptApart
+        | Entity::IgdbMatch
+        | Entity::ArtworkChoice
+        | Entity::Artwork
+        | Entity::GameScript
+        | Entity::Action
+        | Entity::AchievementLink => 2,
+        // After the actions its default names.
+        Entity::ActionSettings => 3,
         Entity::Collection => 3,
         Entity::Member | Entity::Approval => 4,
         Entity::Session => 5,
         Entity::RommServer => 6,
         Entity::SaveVersion => 7,
         Entity::Appearance | Entity::AccountSettings => 8,
+        Entity::Addon | Entity::PreferredEmulator => 9,
     }
 }
 
@@ -110,6 +122,7 @@ impl SyncEngine {
             state: Mutex::default(),
             romm_removed: std::sync::OnceLock::new(),
             artwork: std::sync::OnceLock::new(),
+            account_joined: std::sync::OnceLock::new(),
             time: std::sync::RwLock::new(std::sync::Arc::new(now_ms)),
             #[cfg(feature = "net")]
             blobs: super::blobs::Registry::default(),
@@ -122,6 +135,12 @@ impl SyncEngine {
     #[cfg(feature = "net")]
     pub fn blobs(&self) -> &super::blobs::Registry {
         &self.blobs
+    }
+
+    /// What to do when this device's default admin joined one from another
+    /// device (the app hands the signed-in account over).
+    pub fn on_account_joined(&self, joined: impl Fn(String, String) + Send + Sync + 'static) {
+        let _ = self.account_joined.set(std::sync::Arc::new(joined));
     }
 
     /// The artwork cache, where `artwork` changes' files arrive.
@@ -205,7 +224,25 @@ impl SyncEngine {
     pub async fn capture(&self) -> Result<usize> {
         let mut state = self.state.lock().await;
         self.load(&mut state).await?;
+        // The categories as they start, so the first one turned on is noticed.
+        if state.on.is_none() {
+            let categories = self.categories().await;
+            state.on = Some(
+                Category::ALL
+                    .into_iter()
+                    .filter(|category| categories.allows(*category))
+                    .collect(),
+            );
+        }
         let mut snapshot = self.store.sync_snapshot().await?;
+        // Add-ons are each device's own: keyed by this device.
+        snapshot.values = std::mem::take(&mut snapshot.values)
+            .into_iter()
+            .map(|((entity, key, field), value)| match entity {
+                Entity::Addon => ((entity, join_key(&[&self.device, &key]), field), value),
+                _ => ((entity, key, field), value),
+            })
+            .collect();
         self.settings_snapshot(&mut snapshot.values).await;
         let mut changes = Vec::new();
         for ((entity, key, field), value) in &snapshot.values {
@@ -228,6 +265,21 @@ impl SyncEngine {
             // Sessions and save versions are a union: one that's gone here
             // (pruned, #239) stays elsewhere.
             if matches!(*entity, Entity::Session | Entity::SaveVersion) {
+                continue;
+            }
+            // A stand-in's marker isn't an account to delete: it joined one,
+            // or it's another device's.
+            if *entity == Entity::Account
+                && field == EXISTS
+                && current
+                    .value
+                    .as_ref()
+                    .is_some_and(crate::db::is_stand_in_marker)
+            {
+                continue;
+            }
+            // Another device's add-ons are that device's to remove.
+            if *entity == Entity::Addon && key_parts(key).first() != Some(&self.device.as_str()) {
                 continue;
             }
             // A game removed here isn't a game deleted everywhere: its
@@ -308,8 +360,8 @@ impl SyncEngine {
             .collect()
     }
 
-    /// Categories turned back on since the last call: their changes go to
-    /// each device again in full.
+    /// Categories turned on since the last call (or the first capture):
+    /// their changes go to each device again in full.
     pub async fn turned_on(&self) -> Vec<Category> {
         let categories = self.categories().await;
         let on: BTreeSet<Category> = Category::ALL
@@ -459,6 +511,12 @@ impl SyncEngine {
                 break;
             }
         }
+        if applied > 0
+            && let Some((from, into)) = self.store.sync_join_stand_in(&self.device).await?
+            && let Some(joined) = self.account_joined.get()
+        {
+            joined(from, into);
+        }
         Ok(applied)
     }
 
@@ -500,6 +558,26 @@ impl SyncEngine {
             }
         }
         let mut value = change.value.clone();
+        // An account another device named: the same here, or this device's
+        // household admin for another device's untouched default admin.
+        match (change.entity, change.field.as_str(), value.as_mut()) {
+            (Entity::Collection, "account", Some(account)) => {
+                if let Some(local) = account.as_str().map(str::to_owned)
+                    && let Some(local) = self.store.sync_local_account(&local).await?
+                {
+                    *account = Value::String(local);
+                }
+            }
+            (Entity::SaveVersion, _, Some(record)) => {
+                if let Some(account) = record.get("account").and_then(Value::as_str)
+                    && !account.is_empty()
+                    && let Some(local) = self.store.sync_local_account(account).await?
+                {
+                    record["account"] = Value::String(local);
+                }
+            }
+            _ => {}
+        }
         if matches!(change.entity, Entity::Session | Entity::SaveVersion)
             && let Some(record) = value.as_mut()
         {

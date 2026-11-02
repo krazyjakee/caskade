@@ -337,6 +337,21 @@ impl AccountService {
         Ok(check)
     }
 
+    /// Library sync removed `from`, this device's untouched default admin,
+    /// for `into`, an admin from another device it joined (#273): whoever
+    /// was signed in as `from` is `into` now, unless `into` has a PIN.
+    pub async fn joined(&self, from: &str, into: &str) {
+        if self.active_id().as_deref() != Some(from) {
+            return;
+        }
+        let next = match self.store.get_account(into).await {
+            Ok(Some(account)) if !account.has_pin => Some(account),
+            _ => None,
+        };
+        *write(&self.active) = next;
+        self.changed();
+    }
+
     pub fn sign_out(&self) {
         *write(&self.active) = None;
         self.changed();

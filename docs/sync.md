@@ -307,6 +307,12 @@ portable forms of what `sync::policy` declares synced:
 | `rommServer` | server id | `""`: its shared definition, as the policy projects `core.romm` | RommServers |
 | `saveVersion` | version (UUIDv7) | `""`: game, account, device, session, time, size, file count, parents and the hash of its file list | Saves |
 | `artwork` | game\|artwork id | `""`: the user's own image's kind, content hash and size; its file follows as a blob | Artwork |
+| `gameScript` | game\|script id | `""`: a shell script's name, phase, shell, text, time limit and place | GameScripts |
+| `action` | game\|release key\|action id | `""`: name, kind, tracking mode, place and a target bound on each device (a Flatpak's app id, an emulator's platform) | LaunchActions |
+| `actionSettings` | game\|release key | `defaultAction`, `ask`, `builtInName`, `builtInTracking`, each when not the default | LaunchActions |
+| `achievementLink` | game\|release key\|provider | `""`: the product, linked by hand | AchievementLinks |
+| `addon` | device\|add-on id | `""`: an installed plugin or catalogue add-on and its version; `enabled` for a plugin | Addons |
+| `preferredEmulator` | platform | `definition`: the emulator definition its default uses | PreferredEmulators |
 | `appearance` | `core.appearance` | each field changed from its default (`theme`, `density`, …) | Appearance |
 | `accountSettings` | `core.accounts` | `ratingBoard`, when not the default | Accounts |
 
@@ -335,6 +341,33 @@ full-size image, which the receiver decodes within the import limits and keeps
 under the same hash (`ArtworkCache::import_received`; it can't be checked
 against the hash, which is the original file's). Artwork may go through a
 relay, as save files may.
+
+Scripts, actions and achievement links belong to a release, whose entry has
+an id of its own on each device, so they're keyed by a *release key*
+(`db::sync_carried`) that names the same release everywhere: one of its store
+ids, its RomM ROM (RomM servers keep their ids between devices), or `only` for
+a game's only release. A release with none keeps them on its device. What
+names a place on one device stays there (`Receive::BindLaunchLocally`): an
+action's program, folders, arguments and environment, a tracking folder or
+process names. So only actions that can be bound on the other device travel:
+a Flatpak's app id (without arguments), and an emulator action, which takes
+that release's own emulator launch on the same platform; one that can't be
+bound yet waits. Only shell scripts travel (a direct command names a program
+on its device), and they arrive turned off (`Receive::DisableGameScript`); one
+whose command changes on another device is turned off again. A shell this
+system hasn't leaves the script waiting. A ROM hash this device verified
+stays over a hand-made link from another device.
+
+Add-ons travel as each device's own inventory, keyed by the device: the
+plugins it has (and whether each is on) and what it installed from the
+catalogue, with versions. Each device sends only its own and never removes
+another's, so two devices with different versions never overwrite each other.
+They're offers: nothing installs or turns on by itself, since a plugin's
+permissions are granted on each device. Theme folders copied in by hand
+aren't listed. A preferred emulator is a platform's default emulator
+definition; it becomes this device's default only where this device has an
+emulator of that definition (with its first profile), and waits otherwise.
+Another device clearing its default clears nothing here.
 
 Settings travel field by field (`sync::settings`), and only fields set away
 from their defaults: a device set up later would otherwise replace the
@@ -483,13 +516,31 @@ up.
 
 ### Not carried yet
 
-These are declared synced by the policy but don't travel yet:
-- hand-made achievement links;
-- launch actions and game scripts (optional categories);
-- add-ons.
+Everything the policy declares synced or optional travels. Nothing offers
+another device's add-ons in the app yet.
 
-Each device's own default admin account appears on the other devices as a
-second "Player" account.
+### The default admin
+
+Each library starts with a default admin, "Player" (migration 0014). Until
+someone changes it (a name, an avatar, a PIN, an age limit), it stands for
+whoever set the device up, and every device's stand-in is the same household
+(`db::sync_accounts`):
+- it never travels as an account, only as a marker (`{"placeholder": true}`),
+  so no device shows a second "Player";
+- what it owns that travels (a collection, a save version's account) goes to
+  the other device's household admin: that device's own stand-in, or else its
+  oldest admin. The engine maps it before applying, so the field holds this
+  device's id and nothing echoes back;
+- a device's stand-in joins the first admin that arrives from another device
+  (`LibraryStore::sync_join_stand_in`, after an apply): its collections,
+  approvals, store-account ownership and save versions and heads move to that
+  admin, and it's removed. Whoever was signed in as it is signed in as that
+  admin (`AccountService::joined`), unless the admin has a PIN, when nobody
+  is;
+- a row a device already had for another's stand-in (from before stand-ins
+  stayed home) hands what it owns to the household admin and goes.
+
+Once changed, a stand-in is an account like any other and travels as one.
 
 ## Saves
 

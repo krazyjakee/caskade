@@ -55,6 +55,26 @@ pub enum Entity {
     /// The user's own artwork: an imported image, or an automatic one they
     /// chose, its file following as a blob (#273). Key: game|artwork id.
     Artwork,
+    /// A game's shell script (`lifecycle_scripts` of game scope), arriving
+    /// turned off (#273). Key: game|script id.
+    GameScript,
+    /// A launch action whose target can be bound on each device (a Flatpak,
+    /// an emulator), by its release (`db::sync_carried`). Key:
+    /// game|release key|action id.
+    Action,
+    /// A release's action choices: `defaultAction`, `ask`, `builtInName`,
+    /// `builtInTracking`. Key: game|release key.
+    ActionSettings,
+    /// A hand-made achievement link of a release. Key: game|release
+    /// key|provider.
+    AchievementLink,
+    /// What one device has installed: a plugin or a catalogue add-on, with
+    /// its version and (plugins) whether it's on. An offer to the others;
+    /// nothing installs or turns on by itself. Key: device|add-on id.
+    Addon,
+    /// The emulator definition a platform uses (`definition`), applied only
+    /// where that emulator is installed. Key: platform id.
+    PreferredEmulator,
     /// A `core.appearance` field the user changed from its default (#273).
     /// Key: the namespace; field: the setting's.
     Appearance,
@@ -64,7 +84,7 @@ pub enum Entity {
 }
 
 impl Entity {
-    pub const ALL: [Self; 14] = [
+    pub const ALL: [Self; 20] = [
         Self::Game,
         Self::KeptApart,
         Self::IgdbMatch,
@@ -77,6 +97,12 @@ impl Entity {
         Self::RommServer,
         Self::SaveVersion,
         Self::Artwork,
+        Self::GameScript,
+        Self::Action,
+        Self::ActionSettings,
+        Self::AchievementLink,
+        Self::Addon,
+        Self::PreferredEmulator,
         Self::Appearance,
         Self::AccountSettings,
     ];
@@ -95,6 +121,12 @@ impl Entity {
             Self::RommServer => "rommServer",
             Self::SaveVersion => "saveVersion",
             Self::Artwork => "artwork",
+            Self::GameScript => "gameScript",
+            Self::Action => "action",
+            Self::ActionSettings => "actionSettings",
+            Self::AchievementLink => "achievementLink",
+            Self::Addon => "addon",
+            Self::PreferredEmulator => "preferredEmulator",
             Self::Appearance => "appearance",
             Self::AccountSettings => "accountSettings",
         }
@@ -115,6 +147,11 @@ impl Entity {
             Self::Account | Self::Approval => Category::Accounts,
             Self::RommServer => Category::RommServers,
             Self::SaveVersion => Category::Saves,
+            Self::GameScript => Category::GameScripts,
+            Self::Action | Self::ActionSettings => Category::LaunchActions,
+            Self::AchievementLink => Category::AchievementLinks,
+            Self::Addon => Category::Addons,
+            Self::PreferredEmulator => Category::PreferredEmulators,
             Self::Appearance => Category::Appearance,
             Self::AccountSettings => Category::Accounts,
         }
@@ -127,13 +164,19 @@ impl Entity {
             | Self::KeptApart
             | Self::IgdbMatch
             | Self::ArtworkChoice
-            | Self::Artwork => &[0],
+            | Self::Artwork
+            | Self::GameScript
+            | Self::Action
+            | Self::ActionSettings
+            | Self::AchievementLink => &[0],
             Self::Member | Self::Approval => &[1],
             Self::Collection
             | Self::Session
             | Self::Account
             | Self::RommServer
             | Self::SaveVersion
+            | Self::Addon
+            | Self::PreferredEmulator
             | Self::Appearance
             | Self::AccountSettings => &[],
         }
@@ -143,7 +186,12 @@ impl Entity {
     pub fn has_rows(self) -> bool {
         !matches!(
             self,
-            Self::Game | Self::IgdbMatch | Self::Appearance | Self::AccountSettings
+            Self::Game
+                | Self::IgdbMatch
+                | Self::ActionSettings
+                | Self::PreferredEmulator
+                | Self::Appearance
+                | Self::AccountSettings
         )
     }
 
@@ -162,6 +210,12 @@ impl Entity {
             Self::RommServer => &["core.romm"],
             Self::SaveVersion => &["save_versions"],
             Self::Artwork => &["artwork"],
+            Self::GameScript => &["lifecycle_scripts"],
+            Self::Action => &["game_actions"],
+            Self::ActionSettings => &["entry_action_settings"],
+            Self::AchievementLink => &["achievement_links"],
+            Self::Addon => &["plugins", "addons.records", "installed_addons"],
+            Self::PreferredEmulator => &["preferred_emulators"],
             Self::Appearance => &["core.appearance"],
             Self::AccountSettings => &["core.accounts"],
         }
@@ -213,17 +267,6 @@ mod tests {
 
     /// Rules carried as files beside the log rather than as an entity.
     const BLOBS: &[&str] = &["save_blobs"];
-    /// Rules #273 hasn't carried yet; empty when it closes.
-    const NOT_YET: &[&str] = &[
-        "achievement_links",
-        "game_actions",
-        "entry_action_settings",
-        "lifecycle_scripts",
-        "plugins",
-        "addons.records",
-        "preferred_emulators",
-        "installed_addons",
-    ];
 
     #[test]
     fn every_synced_or_optional_rule_has_an_entity() {
@@ -237,14 +280,6 @@ mod tests {
             let Some(category) = rule.category else {
                 continue;
             };
-            if NOT_YET.contains(&rule.name) {
-                assert!(
-                    !carried.contains(&rule.name),
-                    "{} is carried now",
-                    rule.name
-                );
-                continue;
-            }
             assert!(
                 carried.contains(&rule.name),
                 "{} ({category:?}) syncs, and no entity carries it",

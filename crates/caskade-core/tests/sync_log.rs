@@ -65,15 +65,24 @@ async fn settle(devices: &[&Device]) {
 }
 
 /// A device's synced data with game ids replaced by the games' automatic
-/// titles (unique in these tests), so devices compare.
+/// titles (unique in these tests), and its own default admin (each
+/// device's stays its own, #273) by `household`, so devices compare.
 async fn view(device: &Device) -> BTreeMap<String, Value> {
     let snapshot = device.store.sync_snapshot().await.unwrap();
     let mut titles = BTreeMap::new();
+    let mut household = None;
     for ((entity, key, field), value) in &snapshot.values {
         if *entity == Entity::Game && field == "identity" {
             titles.insert(key.clone(), value["title"].as_str().unwrap().to_owned());
         }
+        if *entity == Entity::Account && caskade_core::db::is_stand_in_marker(value) {
+            household = Some(key.clone());
+        }
     }
+    let household = |text: &str| match &household {
+        Some(id) => text.replace(id.as_str(), "household"),
+        None => text.to_owned(),
+    };
     let name = |id: &str| titles.get(id).cloned().unwrap_or_else(|| id.to_owned());
     let mut out = BTreeMap::new();
     for ((entity, key, field), value) in snapshot.values {
@@ -89,8 +98,11 @@ async fn view(device: &Device) -> BTreeMap<String, Value> {
             let game = name(value["game"].as_str().unwrap());
             value["game"] = Value::String(game);
         }
+        if let Some(account) = value.as_str().map(household) {
+            value = Value::String(account);
+        }
         out.insert(
-            format!("{}:{}:{field}", entity.as_str(), parts.join("|")),
+            household(&format!("{}:{}:{field}", entity.as_str(), parts.join("|"))),
             value,
         );
     }

@@ -58,6 +58,8 @@ struct Inner {
     presence: OnceLock<super::presence::Presence>,
     /// Where artwork files are, for each engine (#273).
     artwork: OnceLock<crate::artwork::ArtworkCache>,
+    /// Handed to each engine: this device's default admin joined another's.
+    account_joined: OnceLock<Arc<dyn Fn(String, String) + Send + Sync>>,
     /// Devices an exchange is running with.
     busy: Mutex<HashSet<String>>,
     /// Something wants an exchange now: devices to sync.
@@ -81,6 +83,7 @@ impl SyncService {
                 blobs: super::blobs::Registry::default(),
                 presence: OnceLock::new(),
                 artwork: OnceLock::new(),
+                account_joined: OnceLock::new(),
                 busy: Mutex::default(),
                 due,
                 due_rx: tokio::sync::Mutex::new(due_rx),
@@ -100,6 +103,13 @@ impl SyncService {
     /// removes its downloaded ROMs through `RommService::remove_server`).
     pub fn on_romm_removed(&self, removed: impl Fn(String) + Send + Sync + 'static) {
         let _ = self.inner.romm_removed.set(Arc::new(removed));
+    }
+
+    /// What to do when this device's untouched default admin joined an
+    /// admin from another device (the app hands the signed-in account over:
+    /// `AccountService::joined`).
+    pub fn on_account_joined(&self, joined: impl Fn(String, String) + Send + Sync + 'static) {
+        let _ = self.inner.account_joined.set(Arc::new(joined));
     }
 
     /// Exchanges `kind`'s files with every paired device, after the changes.
@@ -164,6 +174,9 @@ impl Inner {
         }
         if let Some(cache) = self.artwork.get() {
             engine.set_artwork_cache(cache.clone());
+        }
+        if let Some(joined) = self.account_joined.get().cloned() {
+            engine.on_account_joined(move |from, into| joined(from, into));
         }
         let engine = Arc::new(engine);
         if let Some(settings) = self.settings.get() {

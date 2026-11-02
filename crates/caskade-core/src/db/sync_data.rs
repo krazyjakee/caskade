@@ -304,7 +304,12 @@ impl LibraryStore {
             );
         }
 
-        // Accounts, with their PIN hashes; never the throttle.
+        // Accounts, with their PIN hashes; never the throttle. An untouched
+        // default admin travels only as a stand-in's marker (#273).
+        let stand_ins: HashSet<String> = super::sync_accounts::untouched(&mut conn)
+            .await?
+            .into_iter()
+            .collect();
         for (id, name, avatar, role, pin, permissions, max_age, unrated, created) in sqlx::query_as::<
             _,
             (String, String, String, String, Option<String>, String, Option<i64>, bool, i64),
@@ -320,6 +325,10 @@ impl LibraryStore {
                 .into_iter()
                 .filter(|(key, _)| key == "settings" || key == "install")
                 .collect::<Map<_, _>>();
+            if stand_ins.contains(&id) {
+                snapshot.put(Entity::Account, id, EXISTS, super::sync_accounts::marker());
+                continue;
+            }
             snapshot.put(Entity::Account, id.clone(), EXISTS, json!(true));
             snapshot.put(Entity::Account, id.clone(), "name", json!(name));
             snapshot.put(Entity::Account, id.clone(), "avatar", json!(avatar));
@@ -348,8 +357,10 @@ impl LibraryStore {
             );
         }
 
-        // The user's own artwork (#273).
+        // The user's own artwork, and what releases carry (#273).
         super::sync_artwork::snapshot(&mut conn, &mut snapshot.values).await?;
+        super::sync_carried::snapshot(&mut conn, &mut snapshot.values).await?;
+        super::sync_carried::snapshot_device(&mut conn, &mut snapshot.values).await?;
 
         // Save versions made here (#239).
         crate::saves::versions::sync_snapshot(&mut conn, &mut snapshot.values).await?;
@@ -744,6 +755,14 @@ async fn write(
         Entity::RommServer | Entity::Appearance | Entity::AccountSettings => Ok(true),
         // Applied by the engine once its file is here (`sync_apply_artwork`).
         Entity::Artwork => Ok(false),
+        Entity::GameScript
+        | Entity::Action
+        | Entity::ActionSettings
+        | Entity::AchievementLink
+        | Entity::Addon
+        | Entity::PreferredEmulator => {
+            super::sync_carried::write(conn, entity, target, field, value).await
+        }
         Entity::Account => account(conn, target, field, value).await,
         Entity::Approval => {
             let [account, game] = parts[..] else {
@@ -1014,6 +1033,10 @@ async fn account(
 ) -> Result<bool> {
     let now = crate::sync::clock::now_ms();
     match (field, value) {
+        // Another device's untouched default admin: never a second account.
+        (EXISTS, Some(value)) if super::sync_accounts::is_marker(value) => {
+            super::sync_accounts::retire(conn, id).await?;
+        }
         (EXISTS, Some(_)) => {
             sqlx::query(
                 "INSERT OR IGNORE INTO accounts(id,name,avatar,role,permissions_json,created_at_ms,updated_at_ms) \

@@ -674,6 +674,13 @@ pub fn run() {
             sync.register_blobs(std::sync::Arc::new(
                 caskade_core::saves::versions::SaveBlobs(save_versions.clone()),
             ));
+            // This device's default admin joining one from another device
+            // hands the signed-in account over (#273).
+            let joined = accounts.inner().clone();
+            sync.on_account_joined(move |from, into| {
+                let joined = joined.clone();
+                tauri::async_runtime::spawn(async move { joined.joined(&from, &into).await });
+            });
             // The user's own artwork travels with its files (#273).
             if let Some(cache) = artwork {
                 sync.set_artwork_cache(cache);

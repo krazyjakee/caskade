@@ -481,3 +481,80 @@ async fn an_imported_cover_shows_on_the_other_device_with_its_file() {
     })
     .await;
 }
+
+/// `core.sync` with `launchActions` set to `state`.
+fn launch_actions(state: &str) -> serde_json::Value {
+    json!({ "categories": { "launchActions": state }, "neverRelay": false, "port": null })
+}
+
+/// The names of Hades' launch actions on `core`.
+async fn action_names(core: &Core) -> Vec<String> {
+    let game = hades(core).await;
+    let entry = core.store.sync_game_entry_stores(&game).await.unwrap()[0]
+        .0
+        .clone();
+    let mut names: Vec<String> = core
+        .store
+        .game_actions(&entry)
+        .await
+        .unwrap()
+        .into_iter()
+        .map(|action| action.name)
+        .collect();
+    names.sort();
+    names
+}
+
+async fn add_action(core: &Core, name: &str) {
+    let game = hades(core).await;
+    let entry = core.store.sync_game_entry_stores(&game).await.unwrap()[0]
+        .0
+        .clone();
+    core.store
+        .save_game_action(&caskade_core::model::GameAction {
+            id: caskade_core::model::new_id(),
+            entry_id: entry,
+            name: name.into(),
+            kind: caskade_core::model::ActionKind::Play,
+            target: caskade_core::model::LaunchSpec::Flatpak {
+                app_id: "org.example.Loader".into(),
+                args: Vec::new(),
+            },
+            tracking: Default::default(),
+        })
+        .await
+        .unwrap();
+}
+
+#[tokio::test]
+async fn an_optional_category_turned_on_carries_what_is_there_and_off_stops_it() {
+    let desk = core("Desk").await;
+    let tv = core("TV").await;
+    pair(&desk, &tv).await;
+    let (_desk_sync, _tv_sync) = (desk.sync(), tv.sync());
+    // Launch actions are This device only until someone chooses otherwise.
+    add_action(&desk, "With mods").await;
+    tokio::time::sleep(Duration::from_secs(6)).await;
+    assert!(action_names(&tv).await.is_empty());
+
+    // On on both: the action made while it was off arrives.
+    for core in [&desk, &tv] {
+        core.settings
+            .set("core.sync", launch_actions("sync"), None)
+            .await
+            .unwrap();
+    }
+    within("the existing action arrives", 30, || async {
+        action_names(&tv).await == ["With mods"]
+    })
+    .await;
+
+    // Off on the TV: new ones stop there.
+    tv.settings
+        .set("core.sync", launch_actions("thisDeviceOnly"), None)
+        .await
+        .unwrap();
+    add_action(&desk, "Speedrun timer").await;
+    tokio::time::sleep(Duration::from_secs(8)).await;
+    assert_eq!(action_names(&tv).await, ["With mods"]);
+}
