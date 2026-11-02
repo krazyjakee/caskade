@@ -5,6 +5,9 @@
 id = "moonlight"
 name = "Moonlight"
 dir = "streaming/client"
+# Unpacked at install: no FUSE needed. Caskade runs its AppRun, which picks a
+# fallback VA-API when the system's doesn't work and then runs Moonlight.
+extract = true
 
 [detect.windows]
 executable = "(?i)^Moonlight\\.exe$"

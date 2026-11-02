@@ -14,6 +14,7 @@
 
 #[cfg(feature = "net")]
 pub(crate) mod download;
+mod env;
 pub(crate) mod flatpak;
 mod release;
 pub(crate) mod source;
@@ -26,6 +27,7 @@ mod versions;
 #[cfg(all(test, feature = "net", unix))]
 mod tests;
 
+pub use env::outside_own_appimage;
 pub(crate) use release::{Release, install_release, remove_release};
 pub use source::{Hosts, Resolved, resolve};
 pub use tokio_util::sync::CancellationToken;

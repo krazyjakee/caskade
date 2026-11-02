@@ -482,6 +482,7 @@ msgid "{path} is not an absolute path"
 msgstr ""
 
 #: crates/caskade-core/src/browse.rs
+#: crates/caskade-core/src/streaming/client.rs
 msgid "there is no home folder"
 msgstr ""
 
@@ -3637,6 +3638,14 @@ msgstr ""
 
 #: crates/caskade-core/src/streaming/api.rs
 msgid "the streaming host didn't say its version"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/client.rs
+msgid "Getting streaming ready"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/client.rs
+msgid "streaming couldn't be set up"
 msgstr ""
 
 #: crates/caskade-core/src/streaming/host/mod.rs

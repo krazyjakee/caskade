@@ -320,6 +320,7 @@ impl StreamingHost {
         };
         if new || !files.state().is_file() {
             let mut command = tokio::process::Command::new(program);
+            crate::managed::outside_own_appimage(command.as_std_mut());
             command
                 .args(["--creds", &credentials.user, &credentials.password])
                 .current_dir(self.staging()?)

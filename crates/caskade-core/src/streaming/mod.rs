@@ -6,9 +6,11 @@
 
 #[cfg(feature = "net")]
 pub mod api;
+pub mod client;
 pub mod host;
 pub mod secrets;
 #[cfg(all(test, feature = "net"))]
 mod testing;
 
+pub use client::{Client, StreamingClient};
 pub use host::{HostOutcome, HostState, HostStatus, StreamingHost};

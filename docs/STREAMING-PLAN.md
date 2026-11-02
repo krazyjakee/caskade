@@ -1,6 +1,6 @@
 # Caskade — Game Streaming Plan
 
-Status: in progress; built: the managed-tool layer (§3.1, #254), `caskade --launch` (§8.1, #256), the elevation helper (§8.4, #255) and the host (§4.1–4.2, #257); issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
+Status: in progress; built: the managed-tool layer (§3.1, #254), `caskade --launch` (§8.1, #256), the elevation helper (§8.4, #255), the host (§4.1–4.2, #257) and the client's install and state (§5.1–5.2, #261); issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
 
 How Caskade lets a household play a game installed on one device from another, streamed over the local network. Caskade installs, configures, updates and drives two separate open-source programs: Sunshine on the device that runs the game (the host) and Moonlight on the device that shows it (the client). Users never see their names, windows or settings: they switch hosting on, pair a device once, and choose Stream from Living room. It follows the conventions in `TECH-PLAN.md`; the managed installs build on the emulator setup (`crates/caskade-sources/emulation/README.md`).
 
@@ -133,6 +133,17 @@ Moonlight runs in portable mode: a `portable.dat` in its **working directory** m
 
 *Unverified:* the Flatpak's working directory (`flatpak run --cwd=` inside `~/.var/app/com.moonlight_stream.Moonlight/`).
 
+### 5.2.1 Built (#261)
+
+`caskade_core::streaming::StreamingClient`. Checked against the real moonlight-qt 6.2.0 on Linux on 2026-11-02:
+
+- **Install:** `ensure` installs it the first time, as an Activity job titled "Getting streaming ready". Linux unpacks the AppImage (`extract = true`; no FUSE, which Ubuntu 22.04 and later lack by default) and runs its `AppRun`. That script picks a fallback VA-API when the system's doesn't work, then `exec`s Moonlight, so the process stays the same.
+- **Portable state:** with `portable.dat` in the working directory, everything goes to `<cwd>/Moonlight Game Streaming Project/Moonlight.ini`: the `[General]` settings, the client certificate and key, the unique id, and `[hosts]` with each paired host's name, uuid, address, MAC and apps. Moonlight saves it only when it quits cleanly: SIGTERM, not SIGKILL.
+- **Quiet settings:** `prepare_state` writes the six settings into `[General]` before every run and keeps every other line.
+- **Flatpak:** the working directory is `~/.var/app/com.moonlight_stream.Moonlight/caskade`, reached with `flatpak run --cwd=` (*unverified*).
+- **Environment:** a tool started from Caskade drops Caskade's own AppImage runtime (`APPDIR`, `APPIMAGE`, `ARGV0`, `OWD`, and any variable pointing into Caskade's mount; `managed::outside_own_appimage`). Moonlight's `AppRun` otherwise takes an inherited `APPDIR` as its own folder and fails.
+- **The CLI and a real host:** `moonlight list <host> --csv` waited forever fetching box art for an app without an image, after it had written the host's apps into its settings. Caskade reads apps from its own client state and gives `list` a hard limit. `moonlight pair <host> --pin <code>` stays open on its "Pairing completed" dialog. In this Sunshine version `GET /api/pin` lists waiting requests (`id`, `name`, `address`), and `POST /api/pin` needs `pairing_id`, `pin` and `name`.
+
 ### 5.3 Moonlight's own windows
 
 Moonlight's command line was not built to be invisible; each case has a workaround:
@@ -242,6 +253,7 @@ Each item names its issue; record the date and result here.
 - [ ] #255 Windows: one UAC prompt (Caskade, verified publisher); cancelling changes nothing (`sc query CaskadeStreaming` fails, `netsh advfirewall firewall show rule name="Caskade streaming (TCP)"` finds none). After allowing it, the service is demand-start, a standard user can `sc start` and `sc stop` it, and both firewall rules name the host's `sunshine.exe`. A host path with a space and an apostrophe works. Switching hosting off removes the service and both rules, with one prompt.
 - [ ] #257 Linux, clean machine: switching hosting on shows one prompt, and Moonlight on another device pairs (§6.2) and streams a game. No `~/.config/sunshine`, desktop entry, tray icon or browser page appears. Closing Caskade to the tray keeps the stream available; Quit ends it; killing Caskade (`kill -9`) ends the host too.
 - [ ] #257 Windows, clean machine: the same with one UAC prompt. Services shows only "Caskade streaming", and firewall rules only "Caskade streaming (TCP/UDP)". `%ProgramFiles%\Caskade\Streaming\host` grants users read and execute only. A standard user can't change the host's files.
+- [ ] #261 per OS: the first Stream from a device installs the client under "Getting streaming ready", then streams. A Moonlight the user installed keeps its hosts and settings afterwards. No warning toast, overlay or Discord presence names Moonlight during or after the stream. Flatpak: `flatpak run --cwd=` keeps the state in `~/.var/app/com.moonlight_stream.Moonlight/caskade`.
 - [ ] #256 Windows: with Caskade running, `caskade.exe --launch <game id>` starts the game; `taskkill /PID <caller>` (WM_CLOSE, without `/F`), or ending a Sunshine stream, quits the game and ends its session, and the caller exits 5.
 
 ### Testing

@@ -142,6 +142,7 @@ fn command(launch: &HostLaunch) -> std::process::Command {
         .stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::null());
+    crate::managed::outside_own_appimage(&mut command);
     for (key, value) in &launch.env {
         command.env(key, value);
     }
