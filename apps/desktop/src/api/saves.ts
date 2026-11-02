@@ -7,6 +7,7 @@ import {
   events,
   type LocationSpec,
   type ManifestStatus_Serialize as ManifestStatus,
+  type PlayingElsewhere,
   type SaveCheck_Serialize as SaveCheck,
   type SaveHistory_Serialize as SaveHistory,
   type SaveMatch,
@@ -25,6 +26,7 @@ export type {
   BeforePlay,
   LocationSpec,
   ManifestStatus,
+  PlayingElsewhere,
   SaveCheck,
   SaveHistory,
   SaveMatch,
@@ -55,6 +57,11 @@ export interface SavesApi {
   manifestUpdate(): Promise<ManifestStatus>;
   /** Calls `listener` with a game whose versions changed here. */
   subscribe(listener: (gameId: string) => void): () => void;
+  /** Games running on other devices now (#240), from what they last said;
+   * never waits on the network. */
+  playingElsewhere(): Promise<PlayingElsewhere[]>;
+  /** Calls `listener` whenever what's running elsewhere changes. */
+  subscribePlaying(listener: (playing: PlayingElsewhere[]) => void): () => void;
 }
 export const nativeSaves: SavesApi = {
   state: (entryId) => unwrap(commands.gameSavesState(entryId)),
@@ -70,6 +77,9 @@ export const nativeSaves: SavesApi = {
   manifestUpdate: () => unwrap(commands.savesManifestUpdate()),
   subscribe: (listener) =>
     effectSubscription(events.saveVersionsChanged.listen, ({ payload }) => listener(payload)),
+  playingElsewhere: () => unwrap(commands.devicesPlaying()),
+  subscribePlaying: (listener) =>
+    effectSubscription(events.playingElsewhereChanged.listen, ({ payload }) => listener(payload)),
 };
 const key = (entryId: string) => ["save-locations", entryId] as const;
 export function useSaveLocations(entryId: string | undefined) {
@@ -163,4 +173,60 @@ export function useSaveManifest() {
     onSuccess: (next) => client.setQueryData(manifestKey, next),
   });
   return { status, update, available: Boolean(api) };
+}
+
+const playingKey = ["playing-elsewhere"] as const;
+
+/** One subscription per API however many views and cards watch it. */
+const playingWatchers = new WeakMap<SavesApi, { count: number; stop: () => void }>();
+
+function useWatchPlaying(api: SavesApi | undefined) {
+  const client = useQueryClient();
+  const sync = useProvidedSyncApi();
+  useEffect(() => {
+    if (!api) return;
+    let watcher = playingWatchers.get(api);
+    if (!watcher) {
+      const stopPlaying = api.subscribePlaying((now) => client.setQueryData(playingKey, now));
+      // A device going out of reach stops counting.
+      const stopSync = sync?.subscribe(
+        () => void client.invalidateQueries({ queryKey: playingKey }),
+      );
+      watcher = {
+        count: 0,
+        stop: () => {
+          stopPlaying();
+          stopSync?.();
+        },
+      };
+      playingWatchers.set(api, watcher);
+    }
+    watcher.count += 1;
+    const held = watcher;
+    return () => {
+      held.count -= 1;
+      if (held.count === 0) {
+        held.stop();
+        playingWatchers.delete(api);
+      }
+    };
+  }, [api, sync, client]);
+}
+
+/** Games running on other devices (#240), kept current by the core's
+ * changes and device updates; `gameId` narrows it to one game. */
+export function usePlayingElsewhere(gameId?: string) {
+  const api = useOptionalLibraryApi()?.saves;
+  useWatchPlaying(api);
+  const query = useQuery({
+    queryKey: playingKey,
+    queryFn: () => {
+      if (!api) throw new Error("Saves are unavailable");
+      return api.playingElsewhere();
+    },
+    enabled: Boolean(api),
+    staleTime: 30_000,
+  });
+  const all = query.data ?? [];
+  return gameId === undefined ? all : all.filter((each) => each.gameId === gameId);
 }

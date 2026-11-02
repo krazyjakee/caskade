@@ -369,6 +369,7 @@ Root: `[data-cs="game-card"]`
 | `storage-availability` (app only) | `[data-cs="game-card"] [data-part="storage-availability"]` | Shown when the managed copy is unavailable. |
 | `plugins` (app only) | `[data-cs="game-card"] [data-part="plugins"]` | Badges and overlays contributed by plugins. |
 | `select` (app only) | `[data-cs="game-card"] [data-part="select"]` | In selection mode, the check that shows whether the game is chosen. |
+| `playing-elsewhere` (app only) | `[data-cs="game-card"] [data-part="playing-elsewhere"]` | In console mode, the paired device the game is running on. |
 
 Slots: `plugins` hold the caller's content; parts inside them belong to that content.
 

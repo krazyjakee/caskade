@@ -120,6 +120,8 @@ pub fn access(command: &str) -> Option<Access> {
         | "game_save_history"
         | "saves_manifest_status"
         | "saves_manifest_update"
+        // Which games run on which paired device (#240).
+        | "devices_playing"
         // The add-on catalogue (#181): reading it, and fetching it again.
         | "addons_catalogue"
         | "addons_catalogue_refresh"

@@ -245,7 +245,8 @@
         "favorite",
         "storage-availability",
         "plugins",
-        "select"
+        "select",
+        "playing-elsewhere"
       ],
       "states": {
         "data-status": [

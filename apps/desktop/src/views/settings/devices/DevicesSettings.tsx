@@ -34,6 +34,7 @@ import { DeviceIcon, LinkBadge, osNames } from "../../../components/sync/common"
 import { useSettingsSection } from "../useSettings";
 import { useDeviceAdmin } from "./admin";
 import { CopiesAndShares } from "./CopiesAndShares";
+import { DevicePlaying } from "../../game/PlayingElsewhere";
 import { SavesSection } from "./SavesSection";
 import { SyncChoices, type SyncSettingsValue } from "./SyncChoices";
 
@@ -260,6 +261,7 @@ function DeviceRow({ device }: { device: PairedDevice }) {
             <Trans>Last try didn't reach it. It syncs when it's back.</Trans>
           </span>
         )}
+        <DevicePlaying deviceId={device.id} />
       </div>
       <div className="flex flex-wrap gap-2">
         <Button

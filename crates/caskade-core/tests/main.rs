@@ -10,6 +10,8 @@ mod milestone_editing;
 mod rom_scan;
 mod save_locations;
 #[cfg(feature = "net")]
+mod presence;
+#[cfg(feature = "net")]
 mod save_sync;
 mod save_versions;
 #[cfg(feature = "net")]

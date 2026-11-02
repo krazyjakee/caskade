@@ -7,7 +7,9 @@ import { platformLine } from "../../api/presentation";
 import { useStorageAvailability } from "../../api/StorageProvider";
 import type { GameSummary } from "../../api/types";
 import { PluginCardExtras } from "../../plugins/GameSlots";
+import { useMode } from "../../shell/console/mode";
 import { AgeLockLabel } from "../game/AgeGate";
+import { PlayingElsewhereMark } from "../game/PlayingElsewhere";
 import { useGameActions } from "./GameActions";
 
 /** A game in the library grid: its cover, its title and, unless it is a PC
@@ -26,6 +28,7 @@ export const LibraryCard = memo(function LibraryCard({
   const unavailableCopy = useStorageAvailability(game.id);
   const actions = useGameActions(game, index);
   const platform = platformLine(game.platform);
+  const { mode } = useMode();
   return (
     <div
       ref={actions.owner}
@@ -74,6 +77,7 @@ export const LibraryCard = memo(function LibraryCard({
           </span>
         )}
         {actions.chosen.mode && <SelectMark selected={actions.chosen.selected} />}
+        {mode === "console" && <PlayingElsewhereMark gameId={game.id} />}
         {game.favorite && (
           <Heart
             data-part="favorite"

@@ -51,6 +51,9 @@ pub struct SyncEngine {
     /// Files that travel after the changes (save files, #239).
     #[cfg(feature = "net")]
     blobs: super::blobs::Registry,
+    /// What's running on this device and the others (#240).
+    #[cfg(feature = "net")]
+    presence: std::sync::OnceLock<super::presence::Presence>,
 }
 
 #[derive(Default)]
@@ -110,6 +113,8 @@ impl SyncEngine {
             time: std::sync::RwLock::new(std::sync::Arc::new(now_ms)),
             #[cfg(feature = "net")]
             blobs: super::blobs::Registry::default(),
+            #[cfg(feature = "net")]
+            presence: std::sync::OnceLock::new(),
         }
     }
 
@@ -129,6 +134,17 @@ impl SyncEngine {
     #[cfg(feature = "net")]
     pub fn set_blobs(&mut self, blobs: super::blobs::Registry) {
         self.blobs = blobs;
+    }
+
+    /// Presence exchanged at the end of each exchange (#240).
+    #[cfg(feature = "net")]
+    pub fn presence(&self) -> Option<super::presence::Presence> {
+        self.presence.get().cloned()
+    }
+
+    #[cfg(feature = "net")]
+    pub fn set_presence(&self, presence: super::presence::Presence) {
+        let _ = self.presence.set(presence);
     }
 
     /// What to do when another device removed a RomM server: the app removes

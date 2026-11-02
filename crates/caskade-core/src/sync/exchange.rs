@@ -203,6 +203,8 @@ pub async fn exchange(
     if blobs.received > 0 {
         engine.apply_pending().await?;
     }
+    // Last, what's running on each device (#240).
+    super::presence::exchange(engine, peer, writer, reader).await?;
     Ok(Exchanged { sent, received })
 }
 

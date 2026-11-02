@@ -584,6 +584,37 @@ files never go through a relay.
   and `DevicesChanged` (a sync brought some). Everything is reachable with a
   pad in console mode (`test/saveFlows.test.tsx`).
 
+### Playing on another device
+
+`caskade_core::sync::presence` (#240) tells paired devices which games are
+running where. It's presence, not stored data: nothing is logged or kept on
+disk.
+
+- **The frame.** Each `sync` exchange ends, after the blobs, with both sides
+  sending a `Presence` frame (`version` 1): every open play session's game
+  in the sender's ids, the account playing and the start time. Games are
+  mapped through `SyncEngine::game`; one this device doesn't know yet is
+  skipped. A peer one build behind sends no frame: the exchange still ends
+  cleanly and that device shows nothing running. With Play history set to
+  This device only, presence is neither sent nor taken in.
+- **Within seconds.** A game starting or ending here (`GameStarted`,
+  `GameExited`) asks every paired device to sync at once (`Presence::watch`).
+- **Never stale for long.** A device's presence counts while it was received
+  within 3 minutes (sync polls each device a minute after the last
+  exchange), its link isn't offline, and its last sync didn't fail. So a
+  device that crashed or left stops showing a game running.
+- **Never blocks.** `devices_playing` and Play's check read only what's in
+  memory: no network wait, whether the other device can be reached or not.
+- **UI.** Play warns when the game is running on another device
+  (`views/game/PlayingElsewhere.tsx`): Cancel, or Play anyway, after which
+  each device keeps its own save and the next Play asks which to use (#239).
+  When the other device's session has just ended and its save's files are
+  still on their way, Play waits for them (looking every 2 seconds, up to a
+  minute) with Skip. "Playing on …" shows on the game page, on the game's
+  card in console mode (`data-part="playing-elsewhere"`) and in the device's
+  row in Settings → Devices. `PlayingElsewhereChanged` and `DevicesChanged`
+  keep them current. Play on that device comes with #234.
+
 ### Limits
 
 - Registry-based saves (the manifest's `registry` entries) aren't kept as

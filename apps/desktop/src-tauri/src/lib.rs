@@ -684,6 +684,20 @@ pub fn run() {
             ));
             let engine = sync.clone();
             save_versions.set_device(move || engine.engine().map(|e| e.device().to_owned()));
+            // What's running on which device (#240): told at the end of each
+            // exchange, and a game starting or ending here syncs at once.
+            let presence = caskade_core::sync::presence::Presence::new(store.clone());
+            if let Some(accounts) = app.try_state::<caskade_core::accounts::AccountService>() {
+                let accounts = accounts.inner().clone();
+                presence.set_account(move || accounts.active_id());
+            }
+            sync.set_presence(presence.clone());
+            background::supervise("presence", {
+                let (presence, bus, sync, devices) =
+                    (presence.clone(), bus.clone(), sync.clone(), devices.clone());
+                move || presence.watch(&bus, sync.clone(), devices.clone())
+            });
+            commands::presence::setup(app.handle(), presence, devices.clone());
             commands::sync::setup(app.handle(), devices, sync);
         }
         commands::saves::forward_changes(app.handle(), &save_versions);

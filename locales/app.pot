@@ -866,6 +866,10 @@ msgstr ""
 msgid "{title} from {device}"
 msgstr ""
 
+#: apps/desktop/src/views/game/PlayingElsewhere.tsx
+msgid "{title} is running on {device}"
+msgstr ""
+
 #: apps/desktop/src/plugins/PluginViews.tsx
 msgid "{title} isn't available in console mode."
 msgstr ""
@@ -1719,6 +1723,11 @@ msgctxt "save version"
 msgid "Another account"
 msgstr ""
 
+#: apps/desktop/src/views/game/PlayingElsewhere.tsx
+msgctxt "playing on"
+msgid "another device"
+msgstr ""
+
 #: apps/desktop/src/components/saves/devices.ts
 msgctxt "save version"
 msgid "Another device"
@@ -2149,6 +2158,8 @@ msgstr ""
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
 #: apps/desktop/src/views/activity/AddGame.tsx
 #: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/PlayingElsewhere.tsx
+#: apps/desktop/src/views/game/SavesBeforePlay.tsx
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
 #: apps/desktop/src/views/library/web/RemoveWebGame.tsx
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
@@ -4422,6 +4433,10 @@ msgstr ""
 msgid "If it fails or runs out of time, the game doesn't start and the after-exit scripts clean up."
 msgstr ""
 
+#: apps/desktop/src/views/game/PlayingElsewhere.tsx
+msgid "If you play here too, each device keeps its own save, and the next time you play you choose which one to carry on with."
+msgstr ""
+
 #. The eyebrow above a store game's title: where the page comes from
 #: apps/desktop/src/views/store/StoreGameView.tsx
 msgid "IGDB catalog"
@@ -4883,6 +4898,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "It stops syncing with this device. Nothing is deleted on either device, and what synced stays."
+msgstr ""
+
+#: apps/desktop/src/views/game/SavesBeforePlay.tsx
+msgid "It was just played there, and its save is on its way. Skip to play with the save on this device."
 msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
@@ -6498,6 +6517,10 @@ msgctxt "plugin status"
 msgid "On"
 msgstr ""
 
+#: apps/desktop/src/views/game/PlayingElsewhere.tsx
+msgid "On {name} since {since}"
+msgstr ""
+
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "On every refresh"
 msgstr ""
@@ -6954,6 +6977,10 @@ msgstr ""
 msgid "Play and utility actions you added. Their programs must be at the same place on each device."
 msgstr ""
 
+#: apps/desktop/src/views/game/PlayingElsewhere.tsx
+msgid "Play anyway"
+msgstr ""
+
 #: apps/desktop/src/views/settings/EmulatorSettings.tsx
 msgid "Play emulated games fullscreen in desktop mode too. Console mode always does."
 msgstr ""
@@ -7022,8 +7049,20 @@ msgstr ""
 msgid "Playing"
 msgstr ""
 
+#: apps/desktop/src/views/game/PlayingElsewhere.tsx
+msgid "Playing {games}"
+msgstr ""
+
 #: apps/desktop/src/views/game/GameView.tsx
 msgid "Playing now"
+msgstr ""
+
+#: apps/desktop/src/views/game/PlayingElsewhere.tsx
+msgid "Playing on {device}"
+msgstr ""
+
+#: apps/desktop/src/views/game/PlayingElsewhere.tsx
+msgid "Playing on {devices}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
@@ -8781,6 +8820,7 @@ msgid "Size unknown"
 msgstr ""
 
 #. Skips an emulator update
+#: apps/desktop/src/views/game/SavesBeforePlay.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 msgid "Skip"
 msgstr ""
@@ -10276,6 +10316,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgid "Waiting for the first reading…"
+msgstr ""
+
+#: apps/desktop/src/views/game/SavesBeforePlay.tsx
+msgid "Waiting for the save from {device}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx

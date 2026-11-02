@@ -876,6 +876,10 @@ msgstr "{title} startade inte"
 msgid "{title} from {device}"
 msgstr ""
 
+#: apps/desktop/src/views/game/PlayingElsewhere.tsx
+msgid "{title} is running on {device}"
+msgstr "{title} körs på {device}"
+
 #: apps/desktop/src/plugins/PluginViews.tsx
 msgid "{title} isn't available in console mode."
 msgstr "{title} är inte tillgängligt i konsolläge."
@@ -1734,6 +1738,11 @@ msgctxt "save version"
 msgid "Another account"
 msgstr "Ett annat konto"
 
+#: apps/desktop/src/views/game/PlayingElsewhere.tsx
+msgctxt "playing on"
+msgid "another device"
+msgstr "en annan enhet"
+
 #: apps/desktop/src/components/saves/devices.ts
 msgctxt "save version"
 msgid "Another device"
@@ -2166,6 +2175,8 @@ msgstr "Kan inte ansluta"
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
 #: apps/desktop/src/views/activity/AddGame.tsx
 #: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/PlayingElsewhere.tsx
+#: apps/desktop/src/views/game/SavesBeforePlay.tsx
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
 #: apps/desktop/src/views/library/web/RemoveWebGame.tsx
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
@@ -4469,6 +4480,10 @@ msgstr "Om Caskade inte kan öppna sitt bibliotek erbjuder felmeddelandet Åters
 msgid "If it fails or runs out of time, the game doesn't start and the after-exit scripts clean up."
 msgstr "Om det misslyckas eller får slut på tid startar inte spelet, och skripten efter avslut städar upp."
 
+#: apps/desktop/src/views/game/PlayingElsewhere.tsx
+msgid "If you play here too, each device keeps its own save, and the next time you play you choose which one to carry on with."
+msgstr "Om du spelar här också behåller varje enhet sin egen sparfil, och nästa gång du spelar väljer du vilken du vill fortsätta med."
+
 #. The eyebrow above a store game's title: where the page comes from
 #: apps/desktop/src/views/store/StoreGameView.tsx
 msgid "IGDB catalog"
@@ -4931,6 +4946,10 @@ msgstr "Det tas bort från biblioteket: offlinekopian och framstegen som sparats
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "It stops syncing with this device. Nothing is deleted on either device, and what synced stays."
 msgstr ""
+
+#: apps/desktop/src/views/game/SavesBeforePlay.tsx
+msgid "It was just played there, and its save is on its way. Skip to play with the save on this device."
+msgstr "Spelet spelades nyss där, och sparfilen är på väg. Hoppa över för att spela med sparfilen på den här enheten."
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "It was made by an older Caskade: its library is updated as it's restored."
@@ -6561,6 +6580,10 @@ msgctxt "plugin status"
 msgid "On"
 msgstr "På"
 
+#: apps/desktop/src/views/game/PlayingElsewhere.tsx
+msgid "On {name} since {since}"
+msgstr "På {name} sedan {since}"
+
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "On every refresh"
 msgstr "Vid varje uppdatering"
@@ -7031,6 +7054,10 @@ msgstr "Spela {name}"
 msgid "Play and utility actions you added. Their programs must be at the same place on each device."
 msgstr ""
 
+#: apps/desktop/src/views/game/PlayingElsewhere.tsx
+msgid "Play anyway"
+msgstr "Spela ändå"
+
 #: apps/desktop/src/views/settings/EmulatorSettings.tsx
 msgid "Play emulated games fullscreen in desktop mode too. Console mode always does."
 msgstr "Spela emulerade spel i helskärm även i skrivbordsläge. Konsolläget gör det alltid."
@@ -7101,9 +7128,21 @@ msgstr "Spelare"
 msgid "Playing"
 msgstr "Spelar"
 
+#: apps/desktop/src/views/game/PlayingElsewhere.tsx
+msgid "Playing {games}"
+msgstr "Spelar {games}"
+
 #: apps/desktop/src/views/game/GameView.tsx
 msgid "Playing now"
 msgstr "Spelas nu"
+
+#: apps/desktop/src/views/game/PlayingElsewhere.tsx
+msgid "Playing on {device}"
+msgstr "Spelas på {device}"
+
+#: apps/desktop/src/views/game/PlayingElsewhere.tsx
+msgid "Playing on {devices}"
+msgstr "Spelas på {devices}"
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "Playlists absorb the files they list, so disc tracks aren't separate games."
@@ -8882,6 +8921,7 @@ msgid "Size unknown"
 msgstr "Okänd storlek"
 
 #. Skips an emulator update
+#: apps/desktop/src/views/game/SavesBeforePlay.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 msgid "Skip"
 msgstr "Hoppa över"
@@ -10399,6 +10439,10 @@ msgstr "Väntar på enhetsprofilen från kärnan."
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgid "Waiting for the first reading…"
 msgstr "Väntar på den första mätningen…"
+
+#: apps/desktop/src/views/game/SavesBeforePlay.tsx
+msgid "Waiting for the save from {device}"
+msgstr "Väntar på sparfilen från {device}"
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Waiting for you to finish on the other device…"

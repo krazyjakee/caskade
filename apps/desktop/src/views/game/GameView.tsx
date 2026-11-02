@@ -44,6 +44,7 @@ import { IgdbPanel } from "./IgdbPanel";
 import { useGameLaunch } from "./launch";
 import { OwnedReleases } from "./OwnedReleases";
 import { useReplaceGame } from "./origin";
+import { PlayingElsewhereLine } from "./PlayingElsewhere";
 import { PlaytimeSources } from "./PlaytimeSources";
 import { SavesPanel } from "./SavesPanel";
 import { Screenshots } from "./Screenshots";
@@ -302,6 +303,7 @@ export function GameView({
               <PlaytimeSources gameId={game.id} totalSeconds={game.playtimeSeconds} />
               <AchievementSummary gameId={game.id} />
             </p>
+            <PlayingElsewhereLine gameId={game.id} />
             <p
               data-part="description"
               className="mt-4 max-w-3xl text-sm leading-relaxed text-fg-muted"

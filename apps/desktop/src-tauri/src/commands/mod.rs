@@ -29,6 +29,7 @@ pub mod manual_games;
 pub mod notifications;
 pub mod plugin_ui;
 pub mod plugins;
+pub mod presence;
 pub mod rom_scanners;
 pub mod romm;
 pub mod saves;

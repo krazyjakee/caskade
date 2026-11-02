@@ -1,6 +1,7 @@
 import type {
   BeforePlay,
   ManifestStatus,
+  PlayingElsewhere,
   SaveHistory,
   SaveState,
   SavesApi,
@@ -29,12 +30,16 @@ export function createFixtureSaves() {
   const revealed: { entryId: string; location: number }[] = [];
   const histories = new Map<string, SaveHistory>();
   const listeners = new Set<(gameId: string) => void>();
+  let playing: PlayingElsewhere[] = [];
+  const playingListeners = new Set<(now: PlayingElsewhere[]) => void>();
   let manifest: ManifestStatus = { available: true, checkedAtMs: Date.UTC(2026, 10, 1, 9) };
   const api: SavesApi & {
     seed(value: SaveState): void;
     seedCheck(entryId: string, check: BeforePlay): void;
     seedHistory(gameId: string, history: SaveHistory): void;
     seedManifest(status: ManifestStatus): void;
+    /** What other devices are playing; listeners hear it at once. */
+    setPlaying(now: PlayingElsewhere[]): void;
     chosen: typeof chosen;
     restored: typeof restored;
     revealed: typeof revealed;
@@ -127,6 +132,15 @@ export function createFixtureSaves() {
     subscribe(listener) {
       listeners.add(listener);
       return () => listeners.delete(listener);
+    },
+    playingElsewhere: async () => structuredClone(playing),
+    subscribePlaying(listener) {
+      playingListeners.add(listener);
+      return () => playingListeners.delete(listener);
+    },
+    setPlaying(now) {
+      playing = structuredClone(now);
+      for (const listener of playingListeners) listener(structuredClone(playing));
     },
     seed(value) {
       states.set(value.entryId, structuredClone(value));

@@ -125,6 +125,8 @@ export const commands = {
 	savesManifestStatus: () => typedError<ManifestStatus_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("saves_manifest_status")),
 	/**  Checks the manifest's source now (Update now), from the configured URL. */
 	savesManifestUpdate: () => typedError<ManifestStatus_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("saves_manifest_update")),
+	/**  The games running on other devices now, by what they last said. */
+	devicesPlaying: () => typedError<PlayingElsewhere[], ErrorReport_Serialize>(__TAURI_INVOKE("devices_playing")),
 	/**
 	 *  The game's cover, background and icon as the editor shows them: who
 	 *  chose each, what shows, and the automatic images to choose from. `null`
@@ -901,6 +903,7 @@ export const events = {
 	localeChanged: makeEvent<LocaleChanged, LocaleChanged>("locale-changed"),
 	notificationsChanged: makeEvent<NotificationsChanged, NotificationsChanged>("notifications-changed"),
 	pairingLinkOpened: makeEvent<PairingLinkOpened, PairingLinkOpened>("pairing-link-opened"),
+	playingElsewhereChanged: makeEvent<PlayingElsewhereChanged, PlayingElsewhereChanged>("playing-elsewhere-changed"),
 	pluginDisabled: makeEvent<PluginDisabled, PluginDisabled>("plugin-disabled"),
 	pluginReloaded: makeEvent<PluginReloaded_Serialize, PluginReloaded_Deserialize>("plugin-reloaded"),
 	pluginsChanged: makeEvent<PluginsChanged, PluginsChanged>("plugins-changed"),
@@ -6165,6 +6168,21 @@ export type PlaySession_Serialize = {
 	/**  Tracking service's versioned recovery payload (PID + process start time). */
 	tracking: Value | null,
 };
+
+/**  A game running on another device, as the webview shows it. */
+export type PlayingElsewhere = {
+	deviceId: string,
+	deviceName: string,
+	/**  The game in this library. */
+	gameId: string,
+	title: string,
+	/**  The account playing it there; empty when none was signed in. */
+	accountId: string,
+	startedAtMs: number,
+};
+
+/**  What's running on other devices changed. */
+export type PlayingElsewhereChanged = PlayingElsewhere[];
 
 /**  A game's play time and where it comes from. */
 export type PlaytimeBreakdown = PlaytimeBreakdown_Serialize | PlaytimeBreakdown_Deserialize;

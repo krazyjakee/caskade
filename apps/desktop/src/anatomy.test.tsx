@@ -51,7 +51,13 @@ import { type AppWindow, AppWindowContext } from "./shell/appWindow";
 import { type ConsoleApi, type Mode, ModeProvider } from "./shell/console/mode";
 import { AppCrash } from "./shell/ErrorFallback";
 import { fakeWindow } from "./shell/windowFixture";
-import { fakeLayout, fakePad, fakeViewport, renderApp as renderWholeApp } from "./test/harness";
+import {
+  fakeLayout,
+  fakePad,
+  fakeViewport,
+  playedGames,
+  renderApp as renderWholeApp,
+} from "./test/harness";
 import { renderOnboarding } from "./test/onboardingFixture";
 import { ActivityProvider } from "./views/activity/ActivityProvider";
 import { ActivityView } from "./views/activity/ActivityView";
@@ -490,6 +496,33 @@ describe("the shell's catalogued anatomy, and the app-only parts of shared compo
     await act(() => app.api.launchGame("entry-1"));
     await waitFor(() =>
       expect(document.querySelector('[data-cs="game-curtain"] [data-part="hint"]')).not.toBeNull(),
+    );
+    expect(survey(seen)).toEqual([]);
+  });
+
+  it("renders a console card for a game running on another device", async () => {
+    const undoLayout = fakeLayout();
+    fakeViewport();
+    onTestFinished(() => {
+      undoLayout();
+      vi.restoreAllMocks();
+      vi.unstubAllGlobals();
+    });
+    const app = renderWholeApp("/library", { mode: "console", games: playedGames(4) });
+    app.library.saves.setPlaying([
+      {
+        deviceId: "deck",
+        deviceName: "Steam Deck",
+        gameId: "fixture-1",
+        title: "Fixture Game 0002",
+        accountId: "",
+        startedAtMs: 0,
+      },
+    ]);
+    await waitFor(() =>
+      expect(
+        document.querySelector('[data-cs="game-card"] [data-part="playing-elsewhere"]'),
+      ).not.toBeNull(),
     );
     expect(survey(seen)).toEqual([]);
   });

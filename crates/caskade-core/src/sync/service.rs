@@ -54,6 +54,8 @@ struct Inner {
     engine: RwLock<Option<Arc<SyncEngine>>>,
     /// Kinds of file exchanged after the changes (save files, #239).
     blobs: super::blobs::Registry,
+    /// What's running here and on paired devices (#240).
+    presence: OnceLock<super::presence::Presence>,
     /// Where artwork files are, for each engine (#273).
     artwork: OnceLock<crate::artwork::ArtworkCache>,
     /// Devices an exchange is running with.
@@ -77,6 +79,7 @@ impl SyncService {
                 romm_removed: OnceLock::new(),
                 engine: RwLock::default(),
                 blobs: super::blobs::Registry::default(),
+                presence: OnceLock::new(),
                 artwork: OnceLock::new(),
                 busy: Mutex::default(),
                 due,
@@ -102,6 +105,14 @@ impl SyncService {
     /// Exchanges `kind`'s files with every paired device, after the changes.
     pub fn register_blobs(&self, kind: Arc<dyn super::blobs::BlobKind>) {
         self.inner.blobs.register(kind);
+    }
+
+    /// Exchanges presence (#240) at the end of each exchange.
+    pub fn set_presence(&self, presence: super::presence::Presence) {
+        if let Some(engine) = self.inner.engine() {
+            engine.set_presence(presence.clone());
+        }
+        let _ = self.inner.presence.set(presence);
     }
 
     /// The user's own artwork travels with its files, from and into
@@ -148,6 +159,9 @@ impl Inner {
         // A new identity is a new device: a new engine with its id.
         let mut engine = SyncEngine::new(self.store.clone(), device);
         engine.set_blobs(self.blobs.clone());
+        if let Some(presence) = self.presence.get() {
+            engine.set_presence(presence.clone());
+        }
         if let Some(cache) = self.artwork.get() {
             engine.set_artwork_cache(cache.clone());
         }

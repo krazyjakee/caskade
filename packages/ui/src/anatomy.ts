@@ -234,6 +234,7 @@ export const anatomy = {
       "storage-availability": "Shown when the managed copy is unavailable.",
       plugins: "Badges and overlays contributed by plugins.",
       select: "In selection mode, the check that shows whether the game is chosen.",
+      "playing-elsewhere": "In console mode, the paired device the game is running on.",
     },
     states: {
       "data-status": gameStatus,
@@ -248,6 +249,7 @@ export const anatomy = {
       "storage-availability",
       "plugins",
       "select",
+      "playing-elsewhere",
       "data-storage-status",
       "data-tile",
       "data-selected",
