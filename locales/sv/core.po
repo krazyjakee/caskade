@@ -685,6 +685,8 @@ msgstr "Den här kopian av spelet finns inte längre i biblioteket."
 #: crates/caskade-core/src/db/mod.rs
 #: crates/caskade-core/src/emulation/service/games.rs
 #: crates/caskade-core/src/metadata/page.rs
+#: crates/caskade-core/src/ports/install.rs
+#: crates/caskade-core/src/ports/mod.rs
 msgid "This game is no longer in the library."
 msgstr "Det här spelet finns inte längre i biblioteket."
 
@@ -1630,6 +1632,14 @@ msgstr "metadataservern är inte tillgänglig; försöker igen om {seconds} s"
 msgid "popularity isn't available from the metadata server yet; trying again in {seconds}s"
 msgstr "popularitet finns inte hos metadataservern än; försöker igen om {seconds} s"
 
+#: crates/caskade-core/src/install/attach.rs
+msgid "{program} isn't in the install; it starts what the installer chose"
+msgstr "{program} finns inte i installationen; det som installationsprogrammet valde startas"
+
+#: crates/caskade-core/src/install/attach.rs
+msgid "{file} couldn't be copied into the install: {error}"
+msgstr "{file} kunde inte kopieras till installationen: {error}"
+
 #: crates/caskade-core/src/install/dropped.rs
 msgid "a dropped path must be absolute"
 msgstr "en släppt sökväg måste vara absolut"
@@ -1818,6 +1828,10 @@ msgstr "ingen lagringsrot har konfigurerats"
 #: crates/caskade-core/src/launch/resolve.rs
 msgid "storage root identity changed"
 msgstr "lagringsrotens identitet har ändrats"
+
+#: crates/caskade-core/src/install/mod.rs
+msgid "the program the release names"
+msgstr "programmet som utgåvan anger"
 
 #: crates/caskade-core/src/install/mod.rs
 msgid "the ROM's game is missing"
@@ -2797,6 +2811,30 @@ msgstr "{game} kunde inte kopieras"
 msgid "couldn't create “{dir}”: {error}"
 msgstr "kunde inte skapa ”{dir}”: {error}"
 
+#: crates/caskade-core/src/ports/install.rs
+msgid "the port catalogue isn't downloaded yet"
+msgstr "portkatalogen är inte nedladdad än"
+
+#: crates/caskade-core/src/ports/install.rs
+msgid "This port is no longer in the catalogue."
+msgstr "Den här porten finns inte längre i katalogen."
+
+#: crates/caskade-core/src/ports/install.rs
+msgid "ports don't install on this system"
+msgstr "portar installeras inte på det här systemet"
+
+#: crates/caskade-core/src/ports/install.rs
+msgid "{port} has no release for this system"
+msgstr "{port} har ingen utgåva för det här systemet"
+
+#: crates/caskade-core/src/ports/install.rs
+msgid "only ports on GitHub install from Caskade"
+msgstr "bara portar på GitHub installeras från Caskade"
+
+#: crates/caskade-core/src/ports/install.rs
+msgid "the plan names no release file"
+msgstr "planen anger ingen utgåvefil"
+
 #: crates/caskade-core/src/remote_play/mod.rs
 #: apps/desktop/src-tauri/src/commands/copies.rs
 msgid "that device isn't paired"
@@ -3379,6 +3417,26 @@ msgstr "Sparversioner att behålla"
 msgctxt "settings"
 msgid "Versions kept per game; the newest stay."
 msgstr "Versioner som behålls per spel; de nyaste stannar kvar."
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Show ports of games"
+msgstr "Visa portar av spel"
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "List fan decompilations, recompilations and source ports on game pages, from Decomp Buddy's install plans."
+msgstr "Visa dekompileringar, omkompileringar och källkodsportar gjorda av fans på spelsidorna, från Decomp Buddys installationsplaner."
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Port catalogue URL"
+msgstr "Adress till portkatalogen"
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Download the install plans of ports from this URL."
+msgstr "Ladda ned portarnas installationsplaner från den här adressen."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"

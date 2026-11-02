@@ -4,6 +4,7 @@
 - [Technical architecture](TECH-PLAN.md): stack, domain model, plugin and theming design, and open questions. Prototype milestones provide historical context.
 - [Emulation design](EMULATION-PLAN.md): definitions, scanning and launch behavior, plus pending plugin definitions and ROM importers (E5).
 - [Web games](WEB-GAMES-PLAN.md): the Library's Web tab, Add web game, the game window, the mosaic, and the planned offline bundles (guided capture).
+- [Ports of games](ports.md): fan decompilations, recompilations and source ports on game pages, from Decomp Buddy's install plans: fetching, matching a library game (Hasheous to IGDB, then titles) and installing one as another release.
 - [Game streaming](STREAMING-PLAN.md) (planned): streaming games between a household's devices through Sunshine and Moonlight, installed, configured and driven by Caskade without showing either.
 - [Devices, sync, saves and sharing](sync.md): how devices find and reach each other (local network first, relays only when allowed, never for game files), pairing, what syncs and what never does, conflicts, saves and the Ludusavi manifest, copies, playing on another device and Wake-on-LAN, one-off shares, every switch in Settings → Devices, and the manual checklist.
 - [Background jobs](background-jobs.md)

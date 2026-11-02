@@ -91,6 +91,14 @@ pub fn extract(
         }
         _ => return Err(ArchiveError::Unsupported(format!("{format:?}"))),
     }
+    probe_extracted(dir, control)
+}
+
+/// Identifies every completed regular file from its bytes.
+fn probe_extracted(
+    dir: &SafeDir,
+    control: &mut dyn ExtractionControl,
+) -> Result<Vec<ArtifactNode>> {
     let mut engine = ProbeEngine::default();
     engine.register(Box::new(ArchiveProbe));
     let mut artifacts = Vec::new();
@@ -108,6 +116,57 @@ pub fn extract(
         artifacts.push(node);
     }
     Ok(artifacts)
+}
+
+/// File names of tarballs a release can wrap in another archive.
+const TARBALLS: [&str; 9] = [
+    ".tar", ".tar.gz", ".tgz", ".tar.xz", ".txz", ".tar.zst", ".tar.bz2", ".tbz2", ".tbz",
+];
+
+/// Unpacks a tarball that was the only thing in the archive just extracted
+/// into `dir`, in its place: releases are often zipped around a tarball so
+/// their programs keep their executable bits through GitHub's artifacts.
+/// Only a top-level file named and identified as a tarball counts, never
+/// another kind of archive (a zip inside a zip may be a ROM set). Shares
+/// `dir`'s budget. Returns the files' artifacts, or `artifacts` unchanged.
+pub fn unwrap_tarball(
+    dir: &mut SafeDir,
+    artifacts: Vec<ArtifactNode>,
+    options: &ArchiveOptions,
+    control: &mut dyn ExtractionControl,
+) -> Result<Vec<ArtifactNode>> {
+    let only = {
+        let mut files = dir.extracted_files();
+        match (files.next(), files.next()) {
+            (Some(only), None) => only.to_path_buf(),
+            _ => return Ok(artifacts),
+        }
+    };
+    let Some(name) = only.to_str().map(str::to_owned) else {
+        return Ok(artifacts);
+    };
+    let lower = name.to_lowercase();
+    let format = match artifacts.as_slice() {
+        [node]
+            if only.components().count() == 1
+                && TARBALLS.iter().any(|ending| lower.ends_with(ending)) =>
+        {
+            node.format
+        }
+        _ => return Ok(artifacts),
+    };
+    if !matches!(
+        format,
+        Format::Tar | Format::Gzip | Format::Xz | Format::Zstd | Format::Bzip2
+    ) {
+        return Ok(artifacts);
+    }
+    {
+        let file = dir.open_read(&name)?;
+        tar::extract(file, format, dir, options, control)?;
+    }
+    dir.remove_extracted(&name)?;
+    probe_extracted(dir, control)
 }
 
 /// Resolve multipart siblings before opening the parser. `SafeDir` must use the

@@ -676,6 +676,13 @@ export const commands = {
 	 *  fullscreen in console mode, else over Caskade's window.
 	 */
 	videoPlay: (videoId: string, title: string) => typedError<null, string>(__TAURI_INVOKE("video_play", { videoId, title })),
+	/**  The ports of a library game, surest first, and the catalogue's state. */
+	gamePorts: (gameId: string) => typedError<GamePorts_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_ports", { gameId })),
+	/**
+	 *  Installs port `project` as another release of the game, into `root_id`
+	 *  or the default root; the job follows like any install.
+	 */
+	gamePortInstall: (gameId: string, project: string, rootId: string | null) => typedError<JobSnapshot_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_port_install", { gameId, project, rootId })),
 	/**  The updates of a game's followed installs; empty when none is followed. */
 	gameUpdates: (gameId: string) => typedError<GameUpdate_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("game_updates", { gameId })),
 	/**  The installs with a newer release out. */
@@ -4204,6 +4211,21 @@ export type GamePage_Serialize = {
 	total: number,
 };
 
+/**  A game's ports and where they come from. */
+export type GamePorts = GamePorts_Serialize | GamePorts_Deserialize;
+
+/**  A game's ports and where they come from. */
+export type GamePorts_Deserialize = {
+	status: PortsStatus_Deserialize,
+	ports: Port_Deserialize[],
+};
+
+/**  A game's ports and where they come from. */
+export type GamePorts_Serialize = {
+	status: PortsStatus_Serialize,
+	ports: Port_Serialize[],
+};
+
 /**  A ROM file of a game. */
 export type GameRom = GameRom_Serialize | GameRom_Deserialize;
 
@@ -6851,6 +6873,129 @@ export type PluginSummary_Serialize = {
 /**  `plugins.changed`: a plugin was enabled, disabled, installed or removed. */
 export type PluginsChanged = {
 	plugin: string,
+};
+
+/**  A port of a library game. */
+export type Port = Port_Serialize | Port_Deserialize;
+
+export type PortFileHow = "inAppPicker" | "folder" | "commandLine";
+
+/**  What this device can do with a port. */
+export type PortHere = 
+/**  A release file for this system: installs in one click. */
+{ state: "installable"; asset: string; release: string; 
+/**  The catalogue gives the file's SHA-256, checked on download. */
+checked: boolean } | 
+/**  This system needs it built from source. */
+{ state: "buildFromSource" } | 
+/**  Not for this system. */
+{ state: "otherSystems" };
+
+/**  How sure a port is the game's. */
+export type PortMatch = 
+/**  The same IGDB game, through the Hasheous dumps. */
+"igdb" | 
+/**  The same title on the same system. */
+"title";
+
+/**  A file the port wants from the user. */
+export type PortNeeds = PortNeeds_Serialize | PortNeeds_Deserialize;
+
+/**  A file the port wants from the user. */
+export type PortNeeds_Deserialize = {
+	label: string,
+	/**  `game`, `bios`, `dlc`, `update` or `other`. */
+	kind: string,
+	/**  `USA`, `Europe`, `Japan`; `None` when any or unknown. */
+	region?: string | null,
+	/**
+	 *  `inAppPicker` (the port asks for it on first start), `folder`
+	 *  (installing copies it in) or `commandLine` (passed when it starts).
+	 */
+	how: PortFileHow,
+	/**  The library has a file of the game to give it. */
+	have: boolean,
+};
+
+/**  A file the port wants from the user. */
+export type PortNeeds_Serialize = {
+	label: string,
+	/**  `game`, `bios`, `dlc`, `update` or `other`. */
+	kind: string,
+	/**  `USA`, `Europe`, `Japan`; `None` when any or unknown. */
+	region: string | null,
+	/**
+	 *  `inAppPicker` (the port asks for it on first start), `folder`
+	 *  (installing copies it in) or `commandLine` (passed when it starts).
+	 */
+	how: PortFileHow,
+	/**  The library has a file of the game to give it. */
+	have: boolean,
+};
+
+/**  A port of a library game. */
+export type Port_Deserialize = {
+	/**  The catalogue's key, e.g. `github:zelda64recomp/zelda64recomp`. */
+	project: string,
+	name: string,
+	owner: string,
+	url: string,
+	/**  The game as the plan names it. */
+	gameTitle: string,
+	console: string,
+	matchedBy: PortMatch,
+	/**  Systems it has a release file for: `windows`, `linux`, `macos-arm64`. */
+	runsOn: string[],
+	here: PortHere,
+	needs: PortNeeds_Deserialize[],
+	notes: string[],
+	/**  What the plan's author wasn't sure of. */
+	unsure: string[],
+	/**  The installed release of it, when there is one. */
+	entryId?: string | null,
+};
+
+/**  A port of a library game. */
+export type Port_Serialize = {
+	/**  The catalogue's key, e.g. `github:zelda64recomp/zelda64recomp`. */
+	project: string,
+	name: string,
+	owner: string,
+	url: string,
+	/**  The game as the plan names it. */
+	gameTitle: string,
+	console: string,
+	matchedBy: PortMatch,
+	/**  Systems it has a release file for: `windows`, `linux`, `macos-arm64`. */
+	runsOn: string[],
+	here: PortHere,
+	needs: PortNeeds_Serialize[],
+	notes: string[],
+	/**  What the plan's author wasn't sure of. */
+	unsure: string[],
+	/**  The installed release of it, when there is one. */
+	entryId: string | null,
+};
+
+/**  The catalogue's state. */
+export type PortsStatus = PortsStatus_Serialize | PortsStatus_Deserialize;
+
+/**  The catalogue's state. */
+export type PortsStatus_Deserialize = {
+	enabled: boolean,
+	available: boolean,
+	projects: number,
+	checkedAtMs?: number | null,
+	creditUrl: string,
+};
+
+/**  The catalogue's state. */
+export type PortsStatus_Serialize = {
+	enabled: boolean,
+	available: boolean,
+	projects: number,
+	checkedAtMs: number | null,
+	creditUrl: string,
 };
 
 /**  A Wine-family prefix and the launcher that owns it, if any. */

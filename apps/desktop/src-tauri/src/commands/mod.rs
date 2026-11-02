@@ -33,6 +33,7 @@ pub mod notifications;
 pub mod peer_backups;
 pub mod plugin_ui;
 pub mod plugins;
+pub mod ports;
 pub mod presence;
 pub mod remote_play;
 pub mod rom_scanners;

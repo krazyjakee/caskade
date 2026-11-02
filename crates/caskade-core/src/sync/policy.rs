@@ -820,6 +820,10 @@ pub const SETTINGS: &[Rule] = &[
         "Ludusavi manifest source/cache configuration is local; save versions use the Saves category",
     ),
     local(
+        "core.ports",
+        "whether game pages list ports, and where their plans come from, belong to this device",
+    ),
+    local(
         "core.streaming",
         "hosting game streams installs and configures programs on this device",
     ),

@@ -25,6 +25,11 @@ msgstr "?123"
 msgid "“{text}”"
 msgstr "”{text}”"
 
+#. The region of a game file, e.g. USA
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "({region} version)"
+msgstr "({region}-version)"
+
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
 msgid "(no longer in the library)"
 msgstr "(finns inte längre i biblioteket)"
@@ -2597,6 +2602,10 @@ msgctxt "app build"
 msgid "Build"
 msgstr "Bygge"
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Built from source on this system"
+msgstr "Byggd från källkod på det här systemet"
+
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgid "Buttons, selection and glows; kept readable on the theme."
 msgstr "Knappar, markering och glöd; hålls läsbart med temat."
@@ -2688,6 +2697,7 @@ msgstr "Kan inte ansluta"
 #: apps/desktop/src/views/activity/AddGame.tsx
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
 #: apps/desktop/src/views/library/web/RemoveWebGame.tsx
@@ -2870,6 +2880,10 @@ msgstr "Caskade kunde inte läsa den här enhetens anslutningar"
 msgid "Caskade couldn't read this source."
 msgstr "Caskade kunde inte läsa den här källan."
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Caskade downloads {asset} ({release}) from {repository} on GitHub and adds it to this game as another way to play. It's a fan project, not the publisher's: installing it runs code from that repository."
+msgstr "Caskade laddar ned {asset} ({release}) från {repository} på GitHub och lägger till det i det här spelet som ett annat sätt att spela. Det är ett fanprojekt, inte utgivarens: när du installerar det körs kod från det förrådet."
+
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 msgid "Caskade downloads these for you, sets them up and makes them the default for platforms that have none. Emulators from GitHub are kept up to date."
 msgstr "Caskade laddar ner dessa åt dig, ställer in dem och gör dem till standard för plattformar som saknar en. Emulatorer från GitHub hålls uppdaterade."
@@ -2885,6 +2899,10 @@ msgstr "Caskade följer systemets språk om du inte väljer ett annat. Du kan ä
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 msgid "Caskade found no IGDB game for it."
 msgstr "Caskade hittade inget IGDB-spel för det."
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Caskade gives it yours when it starts."
+msgstr "Caskade ger den din när den startar."
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
 msgid "Caskade installs the game folder this program is in and launches it from there."
@@ -3917,6 +3935,10 @@ msgstr "Felsökningsbygge"
 msgid "Decline"
 msgstr "Avböj"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "decompilation, recompilation, source port, Decomp Buddy"
+msgstr "dekompilering, omkompilering, källkodsport, Decomp Buddy"
+
 #: apps/desktop/src/views/settings/launchers.ts
 msgctxt "discovery source"
 msgid "Deep scans"
@@ -4807,6 +4829,14 @@ msgstr "Misslyckat jobb"
 msgctxt "script test result"
 msgid "Failed with exit code {0}"
 msgstr "Misslyckades med slutkod {0}"
+
+#: apps/desktop/src/views/settings/GeneralSettings.tsx
+msgid "Fan decompilations, recompilations and source ports on game pages, from Decomp Buddy's install plans, checked daily."
+msgstr "Dekompileringar, omkompileringar och källkodsportar gjorda av fans på spelsidorna, från Decomp Buddys installationsplaner, kontrolleras dagligen."
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Fan decompilations, recompilations and source ports that run this game natively, from your own copy."
+msgstr "Dekompileringar, omkompileringar och källkodsportar gjorda av fans som kör det här spelet direkt, från din egen kopia."
 
 #. A heart on a favourite game's card
 #. A heart on a favourite game's card
@@ -5783,6 +5813,10 @@ msgctxt "save version"
 msgid "In use"
 msgstr "Används"
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "in your library"
+msgstr "i ditt bibliotek"
+
 #. A game of a shared collection
 #. A store game the library has but isn't installed
 #: apps/desktop/src/components/shares/ShareInfoDetails.tsx
@@ -5827,6 +5861,11 @@ msgctxt "job kind"
 msgid "Install"
 msgstr "Installation"
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgctxt "port"
+msgid "Install"
+msgstr "Installera"
+
 #: apps/desktop/src/views/settings/emulators/FromDevices.tsx
 msgid "Install {emulator}"
 msgstr "Installera {emulator}"
@@ -5834,6 +5873,10 @@ msgstr "Installera {emulator}"
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 msgid "Install {name}"
 msgstr "Installera {name}"
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Install {repository}?"
+msgstr "Installera {repository}?"
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
 msgid "Install {title}?"
@@ -5847,6 +5890,10 @@ msgstr "Installera och tillåt"
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "install emulators, download emulators, RetroArch"
 msgstr "installera emulatorer, ladda ner emulatorer, RetroArch"
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Install failed: {error}"
+msgstr "Installationen misslyckades: {error}"
 
 #: apps/desktop/src/views/activity/AddGame.tsx
 msgid "Install from file"
@@ -5902,6 +5949,10 @@ msgstr "Okänd installationsplats"
 msgid "install picker"
 msgstr "installationsväljare"
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Install plans from Decomp Buddy"
+msgstr "Installationsplaner från Decomp Buddy"
+
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
 msgid "Install this game?"
 msgstr "Installera det här spelet?"
@@ -5936,6 +5987,7 @@ msgstr "Installationsdetaljer"
 #: apps/desktop/src/api/emulatorSetup.ts
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx
 msgid "Installed"
 msgstr "Installerad"
 
@@ -6003,6 +6055,10 @@ msgstr "Installerade program"
 msgid "Installed themes."
 msgstr "Installerade teman."
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Installed: it's in Play from your library."
+msgstr "Installerad: den finns under Spela från ditt bibliotek."
+
 #: apps/desktop/src/views/game/OwnedReleases.tsx
 msgid "Installed."
 msgstr "Installerat."
@@ -6024,6 +6080,10 @@ msgstr "Installationsprogram"
 msgid "Installing"
 msgstr "Installation"
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Installing copies yours in."
+msgstr "Installationen kopierar in din."
+
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 msgid "Installing needs a connection."
 msgstr "Installation kräver en anslutning."
@@ -6041,9 +6101,14 @@ msgid "Installing version {version}…"
 msgstr "Installerar version {version}…"
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 msgid "Installing…"
 msgstr "Installerar…"
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Installing… {percent}%"
+msgstr "Installerar… {percent} %"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
 msgctxt "plugin event"
@@ -6119,6 +6184,10 @@ msgstr "Det lägger till"
 msgid "It arrives as a new version of your saves of {game}. Your own saves stay: the next Play asks which to use."
 msgstr "Den kommer som en ny version av dina sparfiler för {game}. Dina egna sparfiler finns kvar: nästa Spela frågar vilken som ska användas."
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "It asks for the file the first time it starts."
+msgstr "Den frågar efter filen första gången den startar."
+
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 msgid "It asks there before copying"
 msgstr "Där frågar den innan kopieringen"
@@ -6176,6 +6245,10 @@ msgstr "Spelet tas bort från ditt bibliotek tillsammans med dess spelsessioner.
 msgid "It leaves your library: the offline copy and the progress saved in the game window are deleted, with its play sessions. Add its page again to play it again."
 msgstr "Det tas bort från biblioteket: offlinekopian och framstegen som sparats i spelfönstret raderas, tillsammans med dess spelsessioner. Lägg till sidan igen för att spela det igen."
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "It needs"
+msgstr "Den behöver"
+
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "It needs a new code to play from this device again."
 msgstr "Den behöver en ny kod för att spela från den här enheten igen."
@@ -6187,6 +6260,10 @@ msgstr "Där startar det via butikens startprogram. Installera det från butiken
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "It stops syncing with this device. Nothing is deleted on either device, and what synced stays."
 msgstr "Den slutar synka med den här enheten. Inget raderas på någon av enheterna, och det som redan har synkats finns kvar."
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "It takes the file when it starts."
+msgstr "Den tar filen när den startar."
 
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
 msgid "It was just played there, and its save is on its way. Skip to play with the save on this device."
@@ -6211,6 +6288,10 @@ msgstr "Dess spel försvinner från ditt bibliotek, ROM-filerna som laddats ner 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "Its games stay in your library as not installed, because Caskade no longer looks for their ROMs. Your ROM files aren't touched."
 msgstr "Dess spel stannar i ditt bibliotek som ej installerade, eftersom Caskade inte längre letar efter deras ROM-filer. Dina ROM-filer rörs inte."
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Its install plan has no checksum for the download, so it can't be checked."
+msgstr "Installationsplanen har ingen kontrollsumma för nedladdningen, så den kan inte kontrolleras."
 
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
 msgid "Its installed files are deleted from {location}, with the play sessions recorded for this install. The game stays in your library. The uninstall shows in Activity."
@@ -6998,6 +7079,10 @@ msgstr "Matchat via namn (Hasheous)"
 msgid "Matched by store id"
 msgstr "Matchat via butiks-id"
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Matched by title: check it's this game"
+msgstr "Matchad på titel: kontrollera att det är det här spelet"
+
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 msgid "Matched by your RomM server"
 msgstr "Matchat av din RomM-server"
@@ -7604,6 +7689,10 @@ msgstr "Ingen avläsning den här gången."
 msgid "No recent releases here."
 msgstr "Inga nya utgåvor här."
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "No release for this system"
+msgstr "Ingen utgåva för det här systemet"
+
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "No ROM scanners yet. Add one for each ROM folder."
 msgstr "Inga ROM-skannrar än. Lägg till en för varje ROM-mapp."
@@ -7736,6 +7825,10 @@ msgstr "Inte tillgänglig"
 msgid "Not built yet."
 msgstr "Inte byggt än."
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Not certain in the plan"
+msgstr "Inte säkert i planen"
+
 #. A BIOS file's state
 #. A BIOS file's state
 #. BIOS issues
@@ -7790,6 +7883,10 @@ msgstr "Hittades inte"
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
 msgid "Not found on this device"
 msgstr "Hittades inte på den här enheten"
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "not in your library"
+msgstr "inte i ditt bibliotek"
 
 #. A game of a shared collection
 #: apps/desktop/src/components/shares/ShareInfoDetails.tsx
@@ -7890,6 +7987,7 @@ msgstr "Inte medan ett spel körs."
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx
 msgid "Notes"
 msgstr "Anteckningar"
 
@@ -8949,6 +9047,14 @@ msgstr "Populära spel"
 msgid "Portable executables"
 msgstr "Portabla körbara filer"
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Ports"
+msgstr "Portar"
+
+#: apps/desktop/src/views/settings/GeneralSettings.tsx
+msgid "Ports of games"
+msgstr "Portar av spel"
+
 #: apps/desktop/src/views/settings/InstallerSettings.tsx
 msgid "Preferences apply to the next install job. Jobs already running keep their current settings."
 msgstr "Inställningarna gäller nästa installationsjobb. Jobb som redan körs behåller sina nuvarande inställningar."
@@ -9084,6 +9190,10 @@ msgstr "Projektsida"
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Provides {providers}"
 msgstr "Tillhandahåller {providers}"
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Put it in the port's folder once installed."
+msgstr "Lägg den i portens mapp när den är installerad."
 
 #. A release date known to the quarter of a year: Q1 2027
 #: apps/desktop/src/views/store/releases.ts
@@ -10025,6 +10135,11 @@ msgstr "Kör det en gång nu, som en start skulle, utan att ett spel startar."
 msgid "Runs on"
 msgstr "Körs på"
 
+#. Operating systems a port has releases for, e.g. Windows, Linux
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "runs on {systems}"
+msgstr "körs på {systems}"
+
 #: apps/desktop/src/views/game/OwnedReleases.tsx
 msgid "Runs on {systems}, not on this computer's system."
 msgstr "Körs på {systems}, inte på den här datorns system."
@@ -10772,6 +10887,11 @@ msgstr "Visa i mapp: {path}"
 msgid "Show none"
 msgstr "Visa ingen"
 
+#: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "Show ports of games"
+msgstr "Visa portar av spel"
+
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "Show settings"
 msgstr "Visa inställningar"
@@ -11068,6 +11188,10 @@ msgstr "Startade med sparfilen från {device}."
 msgid "Starting on {device}…"
 msgstr "Startar på {device}…"
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "Starting the install…"
+msgstr "Startar installationen…"
+
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 msgid "Starting the update…"
 msgstr "Startar uppdateringen…"
@@ -11079,6 +11203,7 @@ msgstr "Startar uppdateringen…"
 #: apps/desktop/src/components/streaming/StopHostDialog.tsx
 #: apps/desktop/src/shell/console/GameCurtain.tsx
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
@@ -11596,6 +11721,10 @@ msgstr "Samlingen tas bort. Dess spel finns kvar i ditt bibliotek."
 msgid "The devices lost each other, or nobody confirmed in time. Nothing was paired."
 msgstr "Enheterna tappade kontakten med varandra, eller ingen bekräftade i tid. Inget parkopplades."
 
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "The download is checked against the checksum in its install plan."
+msgstr "Nedladdningen kontrolleras mot kontrollsumman i installationsplanen."
+
 #: apps/desktop/src/components/gameMenu/RemoveGameDialog.tsx
 msgid "The files Caskade installed for it are deleted, then it leaves your library with its play sessions. Files it didn't install stay where they are. The uninstall shows in Activity."
 msgstr "Filerna som Caskade installerade för spelet raderas, sedan tas det bort från ditt bibliotek tillsammans med dess spelsessioner. Filer som Caskade inte installerade ligger kvar där de är. Avinstallationen visas i Aktivitet."
@@ -11635,6 +11764,14 @@ msgstr "Bilden ändrades inte: {error}"
 #: apps/desktop/src/api/emulatorSetup.ts
 msgid "The install failed"
 msgstr "Installationen misslyckades"
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "The install needs a choice in Activity."
+msgstr "Installationen behöver ett val i Aktivitet."
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "The install was cancelled."
+msgstr "Installationen avbröts."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "The keychain didn't answer. Unlock it, then try again. Everything else works meanwhile."
@@ -11727,6 +11864,10 @@ msgstr "Uppdateringen blev inte klar: {0}"
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "The restore of {0} was undone, and the library from before is back: {1}"
 msgstr "Återställningen av {0} ångrades, och biblioteket från tidigare är tillbaka: {1}"
+
+#: apps/desktop/src/views/game/PortsPanel.tsx
+msgid "The same game on IGDB"
+msgstr "Samma spel på IGDB"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgid "the sampler didn't answer"

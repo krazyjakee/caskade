@@ -228,6 +228,8 @@ pub fn builder() -> Builder<tauri::Wry> {
             crate::commands::igdb::igdb_owned,
             crate::commands::igdb::game_age_ratings,
             crate::commands::video::video_play::<tauri::Wry>,
+            crate::commands::ports::game_ports,
+            crate::commands::ports::game_port_install,
             crate::commands::updates::game_updates,
             crate::commands::updates::updates_available,
             crate::commands::updates::game_update_check,

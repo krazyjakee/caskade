@@ -321,6 +321,99 @@ async fn install_hints_choose_the_title_and_launch_target() {
     );
 }
 
+/// A port installed for a game the user has becomes another release of it,
+/// with the user's file copied in and passed along (ports, AttachTo).
+#[cfg(target_os = "linux")]
+#[tokio::test(flavor = "multi_thread")]
+async fn an_attached_install_becomes_a_release_of_the_existing_game() {
+    use std::os::unix::fs::PermissionsExt;
+    let temp = tempfile::tempdir().unwrap();
+    let root_path = temp.path().join("Games");
+    std::fs::create_dir_all(&root_path).unwrap();
+    let identity = caskade_installer::manifest::RootManifest::new("root-attach").unwrap();
+    identity.write(&root_path).unwrap();
+    let store = crate::db::LibraryStore::in_memory().await.unwrap();
+    let mut root =
+        StorageRoot::from_manifest(std::fs::canonicalize(&root_path).unwrap(), &identity);
+    root.is_default = true;
+    store.upsert_root(&root).await.unwrap();
+    let owned = store
+        .upsert_game(&crate::model::Game::new("Majora's Mask"))
+        .await
+        .unwrap();
+    let source = temp.path().join("Zelda64Recomp");
+    for exe in ["Zelda64Recompiled/Zelda64Recompiled", "tools/helper.x86_64"] {
+        let exe = source.join(exe);
+        std::fs::create_dir_all(exe.parent().unwrap()).unwrap();
+        std::fs::copy(
+            concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../caskade-installer/tests/fixtures/bin/fixture-game-linux-x86_64"
+            ),
+            &exe,
+        )
+        .unwrap();
+        std::fs::set_permissions(&exe, std::fs::Permissions::from_mode(0o755)).unwrap();
+    }
+    let rom = temp.path().join("Majora's Mask (USA).z64");
+    std::fs::write(&rom, b"rom").unwrap();
+    let service = InstallService::new(
+        store.clone(),
+        Bus::default(),
+        InstallOptions {
+            downloads: 1,
+            aliases: None,
+        },
+    );
+    let queued = service
+        .install_attached(
+            source.to_string_lossy().into_owned(),
+            None,
+            caskade_installer::discover::DiscoveryHints {
+                installer_title: Some("Zelda64Recomp".into()),
+                ..Default::default()
+            },
+            AttachTo {
+                game_id: owned.id.clone(),
+                executable: Some("Zelda64Recompiled".into()),
+                files: vec![PlacedFile {
+                    source: rom.clone(),
+                    into: "Game Files".into(),
+                    name: None,
+                }],
+                args: vec![rom.to_string_lossy().into_owned()],
+            },
+        )
+        .await
+        .unwrap();
+    let job = finished(&service, &queued.id).await;
+    assert_eq!(job.status, JobStatus::Completed, "{job:?}");
+    assert_eq!(job.game_id.as_deref(), Some(owned.id.as_str()));
+    assert!(job.warnings.is_empty(), "{:?}", job.warnings);
+    assert_eq!(
+        store.game_ids(&Default::default()).await.unwrap(),
+        vec![owned.id.clone()],
+        "no second game"
+    );
+    let entries = store.entries_for_game(&owned.id).await.unwrap();
+    assert_eq!(entries.len(), 1);
+    assert!(
+        matches!(
+            &entries[0].launch,
+            Some(crate::model::LaunchSpec::Executable { path, args, .. })
+                if path.ends_with("Zelda64Recompiled/Zelda64Recompiled")
+                    && args == &[rom.to_string_lossy().into_owned()]
+        ),
+        "{:?}",
+        entries[0].launch
+    );
+    let dir = job.target_dir.unwrap();
+    assert_eq!(
+        std::fs::read(dir.join("Game Files/Majora's Mask (USA).z64")).unwrap(),
+        b"rom"
+    );
+}
+
 #[tokio::test]
 async fn installs_need_a_storage_root() {
     let store = crate::db::LibraryStore::in_memory().await.unwrap();
@@ -660,6 +753,7 @@ async fn progress_bursts_are_throttled() {
             hints: Default::default(),
             peer: None,
             peer_fetcher: None,
+            attach: None,
         },
     );
     let event = |phase, bytes, total_bytes, message: &str| JobEvent {

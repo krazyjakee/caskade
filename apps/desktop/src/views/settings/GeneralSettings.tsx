@@ -30,6 +30,7 @@ import {
   Rocket,
   RotateCcw,
   Sparkles,
+  Wrench,
 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { StorageSummary } from "../../components/storage/StorageSummary";
@@ -159,6 +160,7 @@ interface GeneralPreferences {
 function OnlineSection() {
   const { t } = useLingui();
   const metadata = useSettingsSection<{ online: boolean }>("core.metadata");
+  const ports = useSettingsSection<{ enabled: boolean; catalogueUrl: string }>("core.ports");
   return (
     <SettingsSection
       icon={Cloud}
@@ -177,6 +179,19 @@ function OnlineSection() {
           />
         </SettingRow>
       )}
+      {ports.settings && (
+        <SettingRow
+          icon={Wrench}
+          label={t`Show ports of games`}
+          description={t`Fan decompilations, recompilations and source ports on game pages, from Decomp Buddy's install plans, checked daily.`}
+        >
+          <Switch
+            isSelected={ports.settings.enabled}
+            onChange={(enabled) => ports.setSettings((s) => ({ ...s, enabled }))}
+          />
+        </SettingRow>
+      )}
+      <SettingsStatus section={ports} what={t`Ports of games`} />
       <SettingsStatus section={metadata} what={t`Online lookups`} />
     </SettingsSection>
   );
@@ -247,6 +262,7 @@ export function GeneralSettings() {
       namespace: "core.metadata",
       fields: [{ key: "online", label: t`Fetch artwork and game info online` }],
     },
+    { namespace: "core.ports", fields: [{ key: "enabled", label: t`Show ports of games` }] },
   ];
 
   // Two columns only where the panel itself has room for them beside both

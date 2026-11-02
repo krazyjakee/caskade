@@ -222,8 +222,12 @@ impl Extractor for ArchiveExtractor {
         let (reader, format) = source(path).map_err(ExecError::from)?;
         let mut dir = context.open_destination(destination, reader.size())?;
         let options = ArchiveOptions::for_step(select, strip, &context.limits);
-        let artifacts = super::extract(reader, format, &mut dir, &options, &mut &*context)
+        let mut artifacts = super::extract(reader, format, &mut dir, &options, &mut &*context)
             .map_err(ExecError::from)?;
+        if select.is_empty() && strip.is_none() {
+            artifacts = super::unwrap_tarball(&mut dir, artifacts, &options, &mut &*context)
+                .map_err(ExecError::from)?;
+        }
         self.artifacts
             .lock()
             .expect("archive artifacts poisoned")

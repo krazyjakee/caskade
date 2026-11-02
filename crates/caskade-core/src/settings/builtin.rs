@@ -538,6 +538,10 @@ impl SettingsService {
             1,
         )?)?;
         self.register(SectionDefinition::typed::<SavesSettings>("core.saves", 1)?)?;
+        self.register(SectionDefinition::typed::<crate::ports::PortsSettings>(
+            "core.ports",
+            1,
+        )?)?;
         self.register(
             SectionDefinition::typed::<crate::sync::policy::SyncSettings>("core.sync", 1)?,
         )?;

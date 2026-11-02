@@ -684,6 +684,8 @@ msgstr ""
 #: crates/caskade-core/src/db/mod.rs
 #: crates/caskade-core/src/emulation/service/games.rs
 #: crates/caskade-core/src/metadata/page.rs
+#: crates/caskade-core/src/ports/install.rs
+#: crates/caskade-core/src/ports/mod.rs
 msgid "This game is no longer in the library."
 msgstr ""
 
@@ -1628,6 +1630,14 @@ msgstr ""
 msgid "popularity isn't available from the metadata server yet; trying again in {seconds}s"
 msgstr ""
 
+#: crates/caskade-core/src/install/attach.rs
+msgid "{program} isn't in the install; it starts what the installer chose"
+msgstr ""
+
+#: crates/caskade-core/src/install/attach.rs
+msgid "{file} couldn't be copied into the install: {error}"
+msgstr ""
+
 #: crates/caskade-core/src/install/dropped.rs
 msgid "a dropped path must be absolute"
 msgstr ""
@@ -1815,6 +1825,10 @@ msgstr ""
 #: crates/caskade-core/src/install/operations.rs
 #: crates/caskade-core/src/launch/resolve.rs
 msgid "storage root identity changed"
+msgstr ""
+
+#: crates/caskade-core/src/install/mod.rs
+msgid "the program the release names"
 msgstr ""
 
 #: crates/caskade-core/src/install/mod.rs
@@ -2795,6 +2809,30 @@ msgstr ""
 msgid "couldn't create “{dir}”: {error}"
 msgstr ""
 
+#: crates/caskade-core/src/ports/install.rs
+msgid "the port catalogue isn't downloaded yet"
+msgstr ""
+
+#: crates/caskade-core/src/ports/install.rs
+msgid "This port is no longer in the catalogue."
+msgstr ""
+
+#: crates/caskade-core/src/ports/install.rs
+msgid "ports don't install on this system"
+msgstr ""
+
+#: crates/caskade-core/src/ports/install.rs
+msgid "{port} has no release for this system"
+msgstr ""
+
+#: crates/caskade-core/src/ports/install.rs
+msgid "only ports on GitHub install from Caskade"
+msgstr ""
+
+#: crates/caskade-core/src/ports/install.rs
+msgid "the plan names no release file"
+msgstr ""
+
 #: crates/caskade-core/src/remote_play/mod.rs
 #: apps/desktop/src-tauri/src/commands/copies.rs
 msgid "that device isn't paired"
@@ -3376,6 +3414,26 @@ msgstr ""
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Versions kept per game; the newest stay."
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Show ports of games"
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "List fan decompilations, recompilations and source ports on game pages, from Decomp Buddy's install plans."
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Port catalogue URL"
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Download the install plans of ports from this URL."
 msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs

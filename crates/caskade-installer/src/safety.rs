@@ -307,6 +307,24 @@ impl SafeDir {
     pub fn open_read(&self, name: &str) -> Result<cap_std::fs::File> {
         Ok(self.root.open(sanitize_path(name)?)?)
     }
+    /// Deletes a top-level regular file this extraction wrote, and forgets
+    /// it: a wrapper archive whose contents were unpacked in its place. Its
+    /// bytes stay counted against the budget.
+    pub fn remove_extracted(&mut self, name: &str) -> Result<()> {
+        let path = sanitize_path(name)?;
+        if path.components().count() != 1 || !self.files.contains(&path) {
+            return Err(SafetyError::Collision(path));
+        }
+        let metadata = self.root.symlink_metadata(&path)?;
+        if !metadata.is_file() || metadata.is_symlink() {
+            return Err(SafetyError::WriteThroughLink(path));
+        }
+        self.root.remove_file(&path)?;
+        self.files.remove(&path);
+        self.explicit.remove(&path);
+        self.names.retain(|_, claimed| claimed != &path);
+        Ok(())
+    }
     /// Replace only a completed file owned by this extraction. Used for
     /// explicitly recorded generated references, never arbitrary input edits.
     /// A fresh temporary inode prevents hardlink aliases from being modified.

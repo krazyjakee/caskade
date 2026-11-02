@@ -1,10 +1,13 @@
-use crate::{Result, error::net};
+//! A file fetched again only when it changed (ETag), gzip-decoded and
+//! bounded: Ludusavi's save manifest, the ports catalogue.
+
+use crate::{Error, Result, error::net};
 use reqwest::header::{ACCEPT_ENCODING, CONTENT_ENCODING, ETAG, IF_NONE_MATCH};
 use std::{io::Read, sync::OnceLock, time::Duration};
 
 const MAX_RESPONSE: usize = 64 << 20;
 
-pub(super) enum Response {
+pub(crate) enum Response {
     Unchanged,
     Changed {
         bytes: Vec<u8>,
@@ -12,7 +15,9 @@ pub(super) enum Response {
     },
 }
 
-pub(super) async fn fetch(url: &str, etag: Option<&str>) -> Result<Response> {
+/// Fetches `url`, `what` naming it in errors. With `etag`, an unchanged
+/// file answers [`Response::Unchanged`].
+pub(crate) async fn fetch(url: &str, etag: Option<&str>, what: &str) -> Result<Response> {
     static CLIENT: OnceLock<reqwest::Client> = OnceLock::new();
     let client = match CLIENT.get() {
         Some(client) => client,
@@ -35,8 +40,8 @@ pub(super) async fn fetch(url: &str, etag: Option<&str>) -> Result<Response> {
         return Ok(Response::Unchanged);
     }
     if response.status() != reqwest::StatusCode::OK {
-        return Err(super::invalid(format!(
-            "Ludusavi manifest server answered {}",
+        return Err(invalid(format!(
+            "{what} server answered {}",
             response.status()
         )));
     }
@@ -52,23 +57,31 @@ pub(super) async fn fetch(url: &str, etag: Option<&str>) -> Result<Response> {
     let mut bytes = Vec::new();
     while let Some(chunk) = response.chunk().await.map_err(net)? {
         if chunk.len() > MAX_RESPONSE - bytes.len() {
-            return Err(super::invalid("Ludusavi manifest exceeds 64 MiB"));
+            return Err(invalid(format!("{what} exceeds 64 MiB")));
         }
         bytes.extend_from_slice(&chunk);
     }
     if gzip {
+        let what = what.to_owned();
         bytes = tokio::task::spawn_blocking(move || -> Result<Vec<u8>> {
             let mut decoded = Vec::new();
             flate2::read::GzDecoder::new(bytes.as_slice())
                 .take(MAX_RESPONSE as u64 + 1)
                 .read_to_end(&mut decoded)?;
             if decoded.len() > MAX_RESPONSE {
-                return Err(super::invalid("Ludusavi manifest exceeds 64 MiB"));
+                return Err(invalid(format!("{what} exceeds 64 MiB")));
             }
             Ok(decoded)
         })
         .await
-        .map_err(|error| super::invalid(error.to_string()))??;
+        .map_err(|error| invalid(error.to_string()))??;
     }
     Ok(Response::Changed { bytes, etag })
+}
+
+fn invalid(message: impl Into<String>) -> Error {
+    Error::Io(std::io::Error::new(
+        std::io::ErrorKind::InvalidData,
+        message.into(),
+    ))
 }

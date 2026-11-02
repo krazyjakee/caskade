@@ -8,9 +8,11 @@
 //! `Game` and a `caskade-storage` entry keyed on the install's stable id,
 //! launched through its alias.
 
+mod attach;
 mod carry;
 mod downloads;
 mod failure_text;
+pub use attach::{AttachTo, PlacedFile};
 pub use failure_text::failure_message;
 pub mod dropped;
 pub mod hooks;
@@ -94,6 +96,8 @@ struct Job {
     /// Where that copy comes from, when not the app's own copies (a
     /// share, #246).
     peer_fetcher: Option<Arc<dyn peer::PeerFetcher>>,
+    /// The library game the install becomes a release of; a retry keeps it.
+    attach: Option<AttachTo>,
 }
 
 /// A run's input, downloaded or read, and what installing it needs.
@@ -264,6 +268,49 @@ impl InstallService {
         Ok(snapshot)
     }
 
+    /// [`install_with`](Self::install_with), finishing as another release
+    /// of the library game `attach` names instead of a game of its own.
+    pub async fn install_attached(
+        &self,
+        input: String,
+        root_id: Option<String>,
+        mut hints: DiscoveryHints,
+        attach: AttachTo,
+    ) -> Result<JobSnapshot> {
+        // The program to start, found by name inside the release's folder,
+        // so discovery doesn't ask between it and the release's tools.
+        if hints.launch_targets.is_empty()
+            && let Some(executable) = &attach.executable
+        {
+            hints
+                .launch_targets
+                .push(caskade_installer::discover::LaunchHint {
+                    path: executable.into(),
+                    args: Vec::new(),
+                    working_dir: None,
+                    reason: crate::tr!("the program the release names"),
+                });
+        }
+        let root = self.root(root_id.as_deref()).await?;
+        let title = hints
+            .installer_title
+            .clone()
+            .unwrap_or_else(|| title_of(&input));
+        let snapshot = JobSnapshot::queued(
+            JobKind::Install,
+            title,
+            input.clone(),
+            Some(root.id.clone()),
+        );
+        let cancel = self.add_job(snapshot.clone(), None, hints);
+        if let Some(job) = lock(&self.inner.jobs).get_mut(&snapshot.id) {
+            job.attach = Some(attach);
+        }
+        self.lifecycle(&snapshot);
+        self.spawn_install(snapshot.id.clone(), input, root, cancel);
+        Ok(snapshot)
+    }
+
     /// Installs, updates, uninstalls and rescans take a root's lock, one at
     /// a time.
     fn root_lock(&self, root_id: &str) -> Arc<tokio::sync::Mutex<()>> {
@@ -293,6 +340,7 @@ impl InstallService {
                 hints,
                 peer: None,
                 peer_fetcher: None,
+                attach: None,
             },
         );
         self.publish(&snapshot);
@@ -502,17 +550,38 @@ impl InstallService {
                     .map_err(|error| Error::Invalid(error.to_string()))?;
                 let (game, mut entry) = from_manifest(&root.id, &installed.dir, &manifest)?;
                 // A copy from another device is a release of the game the
-                // user copied, while it's still here (#233).
-                let copied = lock(&self.inner.jobs)
-                    .get(id)
-                    .and_then(|job| job.peer.as_ref().map(|peer| peer.game_id.clone()));
-                let existing = match copied {
+                // user copied, while it's still here (#233), and a port one
+                // of the game it was installed for.
+                let (copied, attach) = {
+                    let jobs = lock(&self.inner.jobs);
+                    let job = jobs.get(id);
+                    (
+                        job.and_then(|job| job.peer.as_ref().map(|peer| peer.game_id.clone())),
+                        job.and_then(|job| job.attach.clone()),
+                    )
+                };
+                let target = copied.or_else(|| attach.as_ref().map(|to| to.game_id.clone()));
+                let existing = match target {
                     Some(game_id) => store.game(&game_id).await?,
                     None => None,
                 };
-                let game = match existing {
-                    Some(existing) => existing,
-                    None => store.upsert_game(&game).await?,
+                let mut attach_warnings = Vec::new();
+                let (game, added) = match (existing, attach) {
+                    (Some(existing), Some(attach)) => {
+                        attach_warnings =
+                            attach::apply(&root.path.join(&installed.dir), &attach, &mut entry)
+                                .await
+                                .into_iter()
+                                .map(|message| caskade_installer::Warning {
+                                    code: "attach".into(),
+                                    message,
+                                    path: None,
+                                })
+                                .collect();
+                        (existing, false)
+                    }
+                    (Some(existing), None) => (existing, false),
+                    (None, _) => (store.upsert_game(&game).await?, true),
                 };
                 entry.game_id = game.id.clone();
                 let entry = store.upsert_entry(&entry).await?;
@@ -521,8 +590,14 @@ impl InstallService {
                     Some(cleanup) => cleanup.finish(cancel).await,
                     None => None,
                 };
-                self.inner.bus.emit(Event::LibraryGameAdded {
-                    game_id: game.id.clone(),
+                self.inner.bus.emit(if added {
+                    Event::LibraryGameAdded {
+                        game_id: game.id.clone(),
+                    }
+                } else {
+                    Event::LibraryGameUpdated {
+                        game_id: game.id.clone(),
+                    }
                 });
                 let after_warning = hooks::notify::<hooks::InstallAfter>(
                     &self.inner.bus,
@@ -543,6 +618,7 @@ impl InstallService {
                         .cloned()
                         .chain(cleanup_warning)
                         .chain(after_warning)
+                        .chain(attach_warnings.iter().cloned())
                         .collect();
                     job.game_id = Some(game.id.clone());
                     job.target_dir = Some(root.path.join(&installed.dir));

@@ -395,6 +395,8 @@ pub fn run() {
         // and PC games, kept current in the background.
         let hasheous = caskade_core::hasheous::Hasheous::new(setup_paths.cache.join("hasheous"));
         let ludusavi = caskade_core::ludusavi::Ludusavi::new(setup_paths.cache.join("ludusavi"));
+        // Fan ports of games: Decomp Buddy's install plans, fetched daily.
+        let ports = caskade_core::ports::Ports::new(setup_paths.cache.join("ports"));
         // IGDB metadata from Caskade's metadata server, cached for good.
         let igdb = caskade_core::igdb::Igdb::new(setup_paths.cache.join("igdb"));
         // Artwork the user chooses or imports in the game editor (#175).
@@ -441,11 +443,13 @@ pub fn run() {
         onboarding::supervise_online(settings.clone(), {
             let (hasheous, metadata) = (hasheous.clone(), metadata.clone());
             let (ludusavi, settings) = (ludusavi.clone(), settings.clone());
+            let ports = ports.clone();
             let (bus, emulation, store) = (bus.clone(), emulation.clone(), store.clone());
             move || {
                 vec![
                     hasheous.watch(&bus, emulation.clone(), store.clone()),
                     ludusavi.watch_settings(settings.clone()),
+                    ports.watch_settings(settings.clone()),
                     metadata.watch(),
                 ]
             }
@@ -455,6 +459,7 @@ pub fn run() {
         app.manage(metadata);
         app.manage(hasheous);
         app.manage(ludusavi);
+        app.manage(ports);
         app.manage(igdb);
         if let Some(install) = app
             .try_state::<caskade_core::install::InstallService>()
