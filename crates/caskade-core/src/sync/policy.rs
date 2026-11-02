@@ -794,6 +794,14 @@ pub const RESOURCES: &[Rule] = &[
         &["id", "version", "kind"],
     ),
     shared(
+        "installed_copies",
+        Category::Library,
+        "each device's installed copies of synced games (#232): release key, size, build OS, location kind and whether it can be copied; never paths, which stay on their device",
+        &[
+            "device", "game", "entry", "release", "size", "os", "location", "copyable",
+        ],
+    ),
+    shared(
         "save_blobs",
         Category::Saves,
         "save files and file lists by SHA-256 (#239), sent as blobs on the sync session; never their paths here",

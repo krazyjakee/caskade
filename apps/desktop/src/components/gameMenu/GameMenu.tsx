@@ -10,6 +10,7 @@ import {
   HeartOff,
   Info,
   ListPlus,
+  MonitorSmartphone,
   Pencil,
   Play,
   Square,
@@ -26,12 +27,15 @@ import {
   useSetHidden,
   useStopGame,
 } from "../../api/hooks";
+import { formatSize } from "../../api/presentation";
 import { useLibraryApi } from "../../api/provider";
 import { useStorageApi, useUnavailableStorageEntries } from "../../api/StorageProvider";
 import { streamReleaseName, useStreamHosts } from "../../api/streaming";
+import { usePeerCopies } from "../../api/sync";
 import type { GameEntry } from "../../api/types";
 import { useGameActionContributions } from "../../plugins/GameSlots";
 import { useMode } from "../../shell/console/mode";
+import { usePeerNote } from "../../views/game/OtherDevices";
 import { useOpenGame } from "../../views/game/origin";
 import { useRemoveOffline } from "../../views/library/web/SaveOffline";
 import type { GameMenuDialog, GameMenuTarget } from "./GameMenuHost";
@@ -90,6 +94,9 @@ export function GameMenu({
   const api = useLibraryApi();
   const removeOffline = useRemoveOffline();
   const plugins = useGameActionContributions();
+  // The game's copies on the other devices (#232): each opens its page.
+  const peers = usePeerCopies(target.gameId).data ?? [];
+  const peerNote = usePeerNote();
   // Releases' play actions and tools (#178).
   const releases = useGameActions(target.gameId).data ?? [];
   // Releases streamed from other devices (#264), by the device's name.
@@ -363,6 +370,34 @@ export function GameMenu({
           </MenuItem>
         )}
       </MenuSection>
+      {!scoped && peers.length > 0 && (
+        <>
+          <MenuSeparator />
+          <MenuSection title={t({ message: "Your devices", context: "game menu section" })}>
+            {peers.map((peer) => {
+              const device = peer.deviceName;
+              return (
+                <MenuItem
+                  key={`device:${peer.deviceId}`}
+                  id={`device:${peer.deviceId}`}
+                  icon={MonitorSmartphone}
+                  description={
+                    [peer.sizeBytes === null ? null : formatSize(peer.sizeBytes), peerNote(peer)]
+                      .filter(Boolean)
+                      .join(" · ") || undefined
+                  }
+                  onAction={() => openGame(target.gameId)}
+                >
+                  {t({
+                    message: `On ${device}`,
+                    comment: "The game is installed on another of the user's devices",
+                  })}
+                </MenuItem>
+              );
+            })}
+          </MenuSection>
+        </>
+      )}
       {tools.length > 0 && (
         <>
           <MenuSeparator />

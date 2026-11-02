@@ -322,6 +322,7 @@ pub fn access(command: &str) -> Option<Access> {
         // Paired devices (#226): reading them needs an account; every change
         // is an admin's (pairing hands another device the library).
         "devices_status"
+        | "game_other_devices"
         | "devices_opened_link"
         | "devices_dismiss_opened_link"
         | "devices_sync_now" => SignedIn,

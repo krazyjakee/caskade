@@ -425,6 +425,10 @@ msgstr ""
 msgid "{description} · {queued} queued"
 msgstr ""
 
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "{device} is out of reach."
+msgstr ""
+
 #. {device} is another device's name; {playing} and {title} are games
 #: apps/desktop/src/components/streaming/StopHostDialog.tsx
 msgid "{device} is playing {playing}. Stop it and stream {title}?"
@@ -443,6 +447,10 @@ msgstr ""
 #. {device} is another device's name
 #: apps/desktop/src/components/streaming/StopHostDialog.tsx
 msgid "{device} is playing another game. Stop it and stream this game?"
+msgstr ""
+
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "{device}'s copy is for {system} and can't run here."
 msgstr ""
 
 #: apps/desktop/src/components/sync/common.tsx
@@ -1230,6 +1238,10 @@ msgstr ""
 msgid "a Windows compatibility tool"
 msgstr ""
 
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "A Windows game: it runs here through Proton."
+msgstr ""
+
 #. The key that switches back to letters
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
 msgctxt "on-screen keyboard"
@@ -1751,6 +1763,11 @@ msgstr ""
 #: apps/desktop/src/components/saves/devices.ts
 msgctxt "save version"
 msgid "Another device"
+msgstr ""
+
+#: apps/desktop/src/api/presentation.ts
+msgctxt "library source"
+msgid "Another of your devices"
 msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
@@ -4937,6 +4954,10 @@ msgstr ""
 msgid "It leaves your library: the offline copy and the progress saved in the game window are deleted, with its play sessions. Add its page again to play it again."
 msgstr ""
 
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "It starts through its store's launcher there. Install it from the store here."
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "It stops syncing with this device. Nothing is deleted on either device, and what synced stays."
 msgstr ""
@@ -6558,6 +6579,12 @@ msgctxt "plugin status"
 msgid "On"
 msgstr ""
 
+#. The game is installed on another of the user's devices
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "On {device}"
+msgstr ""
+
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
 msgid "On {name} since {since}"
 msgstr ""
@@ -6568,6 +6595,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "On this network at {addresses}."
+msgstr ""
+
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "On your other devices"
 msgstr ""
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
@@ -7100,6 +7131,10 @@ msgstr ""
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
 msgid "Playing on {device}"
+msgstr ""
+
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "Playing on {device} now."
 msgstr ""
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
@@ -10698,6 +10733,11 @@ msgid "Your Collections"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Your devices"
+msgstr ""
+
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+msgctxt "game menu section"
 msgid "Your devices"
 msgstr ""
 

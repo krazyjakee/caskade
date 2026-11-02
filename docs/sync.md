@@ -312,6 +312,7 @@ portable forms of what `sync::policy` declares synced:
 | `actionSettings` | game\|release key | `defaultAction`, `ask`, `builtInName`, `builtInTracking`, each when not the default | LaunchActions |
 | `achievementLink` | game\|release key\|provider | `""`: the product, linked by hand | AchievementLinks |
 | `addon` | device\|add-on id | `""`: an installed plugin or catalogue add-on and its version; `enabled` for a plugin | Addons |
+| `copy` | device\|game\|entry id | `""`: an installed copy's release key, size, build OS, location kind (`managed`, `external`, `launcher`) and whether its folder can be copied | Library |
 | `preferredEmulator` | platform | `definition`: the emulator definition its default uses | PreferredEmulators |
 | `appearance` | `core.appearance` | each field changed from its default (`theme`, `density`, …) | Appearance |
 | `accountSettings` | `core.accounts` | `ratingBoard`, when not the default | Accounts |
@@ -518,6 +519,32 @@ up.
 
 Everything the policy declares synced or optional travels. Nothing offers
 another device's add-ons in the app yet.
+
+### Copies on other devices
+
+Each device announces its installed copies of synced games (#232,
+`db::sync_copies`, policy resource `installed_copies`): the release key, size,
+the build's OS (a Windows build, or this system's own), where it lives (a
+Caskade-managed folder, a folder of its own, or a launcher's: an external
+install that starts through a URI or Flatpak) and whether its folder can be
+copied (not a launcher's). Never a path: the entry id is an opaque UUID. Like
+add-ons they're keyed by the device, which alone removes them.
+
+Another device's copy is an entry here from source `peer:<device id>`,
+uninstalled and not launchable, like a store account's owned entry; its
+details stay in the log's field. Uninstalled there, its tombstone removes the
+entry here on the next sync, and forgetting the device removes all of its.
+The Library's Ready to Install tab and its count include copies that could
+come here: copyable, and a build this system runs (a Windows build runs on
+Linux through Proton). `sync::copies::peer_copies` (command
+`game_other_devices`) adds each device's name, kind, OS and link, whether the
+game is running there now (`sync::presence`), and why a copy can't come here
+(`launcherOnly`, `otherSystem`).
+
+The game page's On your other devices panel (`views/game/OtherDevices.tsx`)
+and the game menu's Your devices section show them; peer entries stay out of
+the page's releases. Both only tell for now: copying here is #233, and waking
+a device or playing there is #234.
 
 ### The default admin
 

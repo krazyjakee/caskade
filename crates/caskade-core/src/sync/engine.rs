@@ -100,7 +100,7 @@ fn entity_rank(entity: Entity) -> u8 {
         Entity::RommServer => 6,
         Entity::SaveVersion => 7,
         Entity::Appearance | Entity::AccountSettings => 8,
-        Entity::Addon | Entity::PreferredEmulator => 9,
+        Entity::Addon | Entity::Copy | Entity::PreferredEmulator => 9,
     }
 }
 
@@ -235,11 +235,13 @@ impl SyncEngine {
             );
         }
         let mut snapshot = self.store.sync_snapshot().await?;
-        // Add-ons are each device's own: keyed by this device.
+        // Add-ons and installed copies are each device's own: keyed by it.
         snapshot.values = std::mem::take(&mut snapshot.values)
             .into_iter()
             .map(|((entity, key, field), value)| match entity {
-                Entity::Addon => ((entity, join_key(&[&self.device, &key]), field), value),
+                Entity::Addon | Entity::Copy => {
+                    ((entity, join_key(&[&self.device, &key]), field), value)
+                }
                 _ => ((entity, key, field), value),
             })
             .collect();
@@ -278,8 +280,10 @@ impl SyncEngine {
             {
                 continue;
             }
-            // Another device's add-ons are that device's to remove.
-            if *entity == Entity::Addon && key_parts(key).first() != Some(&self.device.as_str()) {
+            // Another device's add-ons and copies are that device's to remove.
+            if matches!(*entity, Entity::Addon | Entity::Copy)
+                && key_parts(key).first() != Some(&self.device.as_str())
+            {
                 continue;
             }
             // A game removed here isn't a game deleted everywhere: its

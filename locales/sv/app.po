@@ -429,6 +429,10 @@ msgstr "{count} versioner"
 msgid "{description} · {queued} queued"
 msgstr "{description} · {queued} i kö"
 
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "{device} is out of reach."
+msgstr "{device} går inte att nå."
+
 #. {device} is another device's name; {playing} and {title} are games
 #: apps/desktop/src/components/streaming/StopHostDialog.tsx
 msgid "{device} is playing {playing}. Stop it and stream {title}?"
@@ -448,6 +452,10 @@ msgstr ""
 #: apps/desktop/src/components/streaming/StopHostDialog.tsx
 msgid "{device} is playing another game. Stop it and stream this game?"
 msgstr ""
+
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "{device}'s copy is for {system} and can't run here."
+msgstr "Kopian på {device} är för {system} och kan inte köras här."
 
 #: apps/desktop/src/components/sync/common.tsx
 #, fuzzy
@@ -1239,6 +1247,10 @@ msgstr "för ett tag sedan"
 msgid "a Windows compatibility tool"
 msgstr "ett Windows-kompatibilitetsverktyg"
 
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "A Windows game: it runs here through Proton."
+msgstr "Ett Windows-spel: det körs här via Proton."
+
 #. The key that switches back to letters
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
 msgctxt "on-screen keyboard"
@@ -1767,6 +1779,11 @@ msgstr "en annan enhet"
 msgctxt "save version"
 msgid "Another device"
 msgstr "En annan enhet"
+
+#: apps/desktop/src/api/presentation.ts
+msgctxt "library source"
+msgid "Another of your devices"
+msgstr "En annan av dina enheter"
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 msgid "Any platform"
@@ -4986,6 +5003,10 @@ msgstr "Spelet tas bort från ditt bibliotek tillsammans med dess spelsessioner.
 msgid "It leaves your library: the offline copy and the progress saved in the game window are deleted, with its play sessions. Add its page again to play it again."
 msgstr "Det tas bort från biblioteket: offlinekopian och framstegen som sparats i spelfönstret raderas, tillsammans med dess spelsessioner. Lägg till sidan igen för att spela det igen."
 
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "It starts through its store's launcher there. Install it from the store here."
+msgstr "Där startar det via butikens startprogram. Installera det från butiken här."
+
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "It stops syncing with this device. Nothing is deleted on either device, and what synced stays."
 msgstr ""
@@ -6623,6 +6644,12 @@ msgctxt "plugin status"
 msgid "On"
 msgstr "På"
 
+#. The game is installed on another of the user's devices
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "On {device}"
+msgstr "På {device}"
+
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
 msgid "On {name} since {since}"
 msgstr "På {name} sedan {since}"
@@ -6634,6 +6661,10 @@ msgstr "Vid varje uppdatering"
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "On this network at {addresses}."
 msgstr ""
+
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "On your other devices"
+msgstr "På dina andra enheter"
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
 msgid "On-screen keyboard"
@@ -7182,6 +7213,10 @@ msgstr "Spelas nu"
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
 msgid "Playing on {device}"
 msgstr "Spelas på {device}"
+
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "Playing on {device} now."
+msgstr "Spelas på {device} just nu."
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
 msgid "Playing on {devices}"
@@ -10831,10 +10866,13 @@ msgid "Your Collections"
 msgstr "Dina samlingar"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
-#, fuzzy
-#| msgid "Your image"
 msgid "Your devices"
-msgstr "Din bild"
+msgstr "Dina enheter"
+
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+msgctxt "game menu section"
+msgid "Your devices"
+msgstr "Dina enheter"
 
 #: apps/desktop/src/views/game/GameView.tsx
 msgid "Your first session will appear here."

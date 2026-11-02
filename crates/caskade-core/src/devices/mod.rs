@@ -520,7 +520,8 @@ impl Devices {
     }
 
     /// Forgets a paired device: it's refused from now on, and told when it
-    /// can be reached. Nothing synced is deleted.
+    /// can be reached. Nothing synced is deleted, except what that device
+    /// said it has installed (#232).
     pub async fn forget(&self, device_id: &str) -> Result<()> {
         self.admin()?;
         let peer = parse_id(device_id)?;
@@ -534,6 +535,7 @@ impl Devices {
             return Err(crate::db::missing("paired device", device_id));
         }
         self.inner.store.delete_sync_peer(device_id).await?;
+        self.inner.store.sync_forget_copies(device_id).await?;
         self.inner.changed();
         let inner = self.inner.clone();
         tokio::spawn(async move { inner.tell_forgotten().await });
@@ -1074,6 +1076,7 @@ impl Inner {
     async fn forgotten_by(&self, peer: EndpointId) {
         self.gate.forget(&peer, false);
         let _ = self.store.delete_paired_device(&peer.to_string()).await;
+        let _ = self.store.sync_forget_copies(&peer.to_string()).await;
         self.changed();
     }
 }

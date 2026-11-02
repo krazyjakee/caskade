@@ -361,6 +361,8 @@ impl LibraryStore {
         super::sync_artwork::snapshot(&mut conn, &mut snapshot.values).await?;
         super::sync_carried::snapshot(&mut conn, &mut snapshot.values).await?;
         super::sync_carried::snapshot_device(&mut conn, &mut snapshot.values).await?;
+        // This device's installed copies (#232).
+        super::sync_copies::snapshot(&mut conn, &mut snapshot.values).await?;
 
         // Save versions made here (#239).
         crate::saves::versions::sync_snapshot(&mut conn, &mut snapshot.values).await?;
@@ -753,6 +755,7 @@ async fn write(
         Entity::SaveVersion => crate::saves::versions::sync_apply(conn, target, value).await,
         // Settings: the engine applies them through `SettingsService`.
         Entity::RommServer | Entity::Appearance | Entity::AccountSettings => Ok(true),
+        Entity::Copy => super::sync_copies::write(conn, target, value).await,
         // Applied by the engine once its file is here (`sync_apply_artwork`).
         Entity::Artwork => Ok(false),
         Entity::GameScript

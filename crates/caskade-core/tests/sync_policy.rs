@@ -538,6 +538,10 @@ fn synced_fields_of_fixture_rows_never_include_paths_executables_or_credentials(
             "installed_addons",
             json!({"id":"dev.example.stats","version":"1.0.0","kind":"plugin","dir":"C:\\plugins","password":"fixture-secret"}),
         ),
+        (
+            "installed_copies",
+            json!({"device":"d","game":"g","entry":"e","release":"only","size":1024,"os":"windows","location":"external","copyable":true,"path":"/home/local/games/game","externalPath":"C:\\Games\\game","password":"fixture-secret"}),
+        ),
     ] {
         assert_portable(
             &policy::resource(name)

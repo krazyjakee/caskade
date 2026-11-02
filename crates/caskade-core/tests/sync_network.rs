@@ -558,3 +558,103 @@ async fn an_optional_category_turned_on_carries_what_is_there_and_off_stops_it()
     tokio::time::sleep(Duration::from_secs(8)).await;
     assert_eq!(action_names(&tv).await, ["With mods"]);
 }
+
+/// Celeste, installed in a folder of its own on `core` only.
+async fn install_celeste(core: &Core) -> String {
+    let game = core.store.upsert_game(&Game::new("Celeste")).await.unwrap();
+    let mut entry = GameEntry::new(&game.id, "itch".to_owned().into(), "celeste");
+    entry.location = Some(caskade_core::model::InstallLocation::External {
+        path: "/home/desk/Games/Celeste".into(),
+    });
+    entry.launch = Some(caskade_core::model::LaunchSpec::Executable {
+        path: "/home/desk/Games/Celeste/Celeste".into(),
+        args: Vec::new(),
+        cwd: None,
+        env: Default::default(),
+    });
+    entry.size = Some(1_200_000_000);
+    entry.state = caskade_core::model::InstallState::Installed;
+    core.store.upsert_entry(&entry).await.unwrap().id
+}
+
+async fn ready_to_install(core: &Core) -> Vec<String> {
+    core.store
+        .list_games(&caskade_core::model::ListGames {
+            filter: caskade_core::model::GameFilter::Owned,
+            ..Default::default()
+        })
+        .await
+        .unwrap()
+        .items
+        .into_iter()
+        .map(|game| game.title)
+        .collect()
+}
+
+#[tokio::test]
+async fn a_game_installed_only_on_another_device_shows_there_and_goes_when_uninstalled() {
+    let desk = core("Desk").await;
+    let tv = core("TV").await;
+    pair(&desk, &tv).await;
+    let (_desk_sync, _tv_sync) = (desk.sync(), tv.sync());
+    let entry = install_celeste(&desk).await;
+
+    within("Celeste is ready to install on the TV", 30, || async {
+        ready_to_install(&tv).await == ["Celeste"]
+    })
+    .await;
+    let game = tv
+        .store
+        .list_games(&caskade_core::model::ListGames {
+            filter: caskade_core::model::GameFilter::Owned,
+            ..Default::default()
+        })
+        .await
+        .unwrap()
+        .items[0]
+        .id
+        .clone();
+    let copies = caskade_core::sync::copies::peer_copies(&tv.store, &tv.devices, None, &game)
+        .await
+        .unwrap();
+    assert_eq!(copies.len(), 1);
+    assert_eq!(copies[0].device_name, "Desk");
+    assert_eq!(copies[0].size_bytes, Some(1_200_000_000));
+    assert_eq!(copies[0].link, DeviceLink::Lan);
+    assert_eq!(copies[0].blocked, None);
+    assert_eq!(
+        tv.store.library_stats().await.unwrap().owned,
+        1,
+        "Ready to Install counts it"
+    );
+    // The TV's own entry for it is another device's: not installed, not
+    // launchable.
+    let entries = tv.store.entries_for_game(&game).await.unwrap();
+    assert_eq!(entries.len(), 1);
+    assert!(entries[0].source_id.as_str().starts_with("peer:"));
+    assert!(entries[0].launch.is_none() && entries[0].location.is_none());
+
+    // Nothing of the Desk's folders reached the TV: not its log, not its
+    // library.
+    let log = SyncEngine::new(tv.store.clone(), "z".repeat(64))
+        .changes_for(&Default::default(), 100_000)
+        .await
+        .unwrap();
+    assert!(!serde_json::to_string(&log).unwrap().contains("/home/desk"));
+    assert!(
+        !serde_json::to_string(&entries)
+            .unwrap()
+            .contains("/home/desk")
+    );
+
+    // Uninstalled on the Desk: gone from the TV.
+    desk.store.delete_entry(&entry).await.unwrap();
+    within("the TV's entry for the Desk's copy goes", 30, || async {
+        ready_to_install(&tv).await.is_empty()
+            && caskade_core::sync::copies::peer_copies(&tv.store, &tv.devices, None, &game)
+                .await
+                .unwrap()
+                .is_empty()
+    })
+    .await;
+}

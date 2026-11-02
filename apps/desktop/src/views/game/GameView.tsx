@@ -42,6 +42,7 @@ import { canStart, EmulatedEntry } from "./EmulatedEntry";
 import { EntryUpdate } from "./EntryUpdate";
 import { IgdbPanel } from "./IgdbPanel";
 import { useGameLaunch } from "./launch";
+import { OtherDevices } from "./OtherDevices";
 import { OwnedReleases } from "./OwnedReleases";
 import { useReplaceGame } from "./origin";
 import { PlayingElsewhereLine } from "./PlayingElsewhere";
@@ -258,7 +259,9 @@ export function GameView({
         <GameBackLink gameId={gameId} from={from} />
       </section>
     );
-  const several = game.entries.length > 1;
+  // Other devices' copies (#232) are on their own panel, not releases here.
+  const releases = game.entries.filter((entry) => !entry.source.startsWith("peer:"));
+  const several = releases.length > 1;
   // The game's Play starts the release the user chose, else the first
   // that can launch.
   const chosen =
@@ -387,7 +390,7 @@ export function GameView({
                   message: "Release",
                   comment: "Picks which of the game's releases Play starts",
                 })}
-                options={game.entries.map((entry) => ({
+                options={releases.map((entry) => ({
                   id: entry.id,
                   label: releaseLabel(entry),
                 }))}
@@ -411,6 +414,7 @@ export function GameView({
                 primary={!game.entries.some(launchable)}
               />
             )}
+            {!running && <OtherDevices gameId={game.id} />}
             {edit && editable && (
               <UiButton
                 data-part="edit"
@@ -440,7 +444,7 @@ export function GameView({
         <h2 id="entries-heading" className="font-display text-xl font-semibold">
           <Trans>Play from your library</Trans>
         </h2>
-        {game.entries.length === 0 && (
+        {releases.length === 0 && (
           <p className="mt-4 text-fg-muted">
             <Trans>
               Caskade can't start this game: it has nothing to launch. Add a program or URI in Edit
@@ -449,7 +453,7 @@ export function GameView({
           </p>
         )}
         <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(min(100%,34rem),1fr))] gap-3">
-          {game.entries.map((entry) => {
+          {releases.map((entry) => {
             const name = names.get(entry.id) ?? formatSource(entry.source);
             return (
               <div

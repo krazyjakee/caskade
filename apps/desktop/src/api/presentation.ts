@@ -152,6 +152,8 @@ export function formatSource(source: string): string {
   if (source.startsWith("store:"))
     return t({ message: "Store account", context: "library source" });
   if (source.startsWith("stream:")) return t({ message: "Streaming", context: "library source" });
+  if (source.startsWith("peer:"))
+    return t({ message: "Another of your devices", context: "library source" });
   switch (source) {
     case "steam.shortcuts":
       // Games added to Steam by hand.

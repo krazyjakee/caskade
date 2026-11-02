@@ -23,6 +23,7 @@ import {
   type PairingLinkInfo,
   type PairingLinkTarget,
   type PairingState,
+  type PeerCopy_Serialize,
   type ThisDevice_Serialize,
 } from "./bindings";
 import { unwrap } from "./reply";
@@ -32,6 +33,8 @@ import { createSyncFixtureApi } from "./syncFixtures";
 export type DevicesStatus = DevicesStatus_Serialize;
 export type ThisDevice = ThisDevice_Serialize;
 export type PairedDevice = PairedDevice_Serialize;
+/** A game's copy on another of the user's devices (#232). */
+export type PeerCopy = PeerCopy_Serialize;
 /** How a device is reached right now. */
 export type PeerLink = DeviceLink;
 export type {
@@ -89,6 +92,8 @@ export interface SyncApi {
   dismissOpenedLink(): Promise<void>;
   forget(deviceId: string): Promise<void>;
   syncNow(deviceId: string): Promise<void>;
+  /** A game's copies on the other devices, best reached first. */
+  copies(gameId: string): Promise<PeerCopy[]>;
   /** After the keychain lost this device's key: a new identity. */
   createIdentity(): Promise<void>;
   retryIdentity(): Promise<void>;
@@ -116,6 +121,7 @@ export const nativeSyncApi: SyncApi = {
   dismissOpenedLink: () => unwrap(commands.devicesDismissOpenedLink()).then(nothing),
   forget: (id) => unwrap(commands.devicesForget(id)).then(nothing),
   syncNow: (id) => unwrap(commands.devicesSyncNow(id)).then(nothing),
+  copies: (gameId) => unwrap(commands.gameOtherDevices(gameId)),
   createIdentity: () => unwrap(commands.devicesCreateIdentity()).then(nothing),
   retryIdentity: () => unwrap(commands.devicesRetryIdentity()).then(nothing),
   transfers: async () => [],
@@ -177,6 +183,8 @@ export const useSyncStatus = () => useSyncQuery(["status"], (api) => api.status(
 export const useOpenedLink = () => useSyncQuery(["opened"], (api) => api.openedLink());
 export const useTransfers = () => useSyncQuery(["transfers"], (api) => api.transfers());
 export const useShares = () => useSyncQuery(["shares"], (api) => api.shares());
+export const usePeerCopies = (gameId: string) =>
+  useSyncQuery(["copies", gameId], (api) => api.copies(gameId));
 
 /** Runs a sync action, then refreshes what it changed. */
 export function useSyncAction<A, R>(action: (api: SyncApi, argument: A) => Promise<R>) {

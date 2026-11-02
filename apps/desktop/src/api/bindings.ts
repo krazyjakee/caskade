@@ -728,6 +728,11 @@ export const commands = {
 	/**  Windows: opens Default apps at Caskade's page. */
 	torrentLinksChoose: () => typedError<null, string>(__TAURI_INVOKE("torrent_links_choose")),
 	devicesStatus: () => typedError<DevicesStatus_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("devices_status")),
+	/**
+	 *  A game's copies on the user's other devices (#232): the device, how
+	 *  it's reached, the size, and whether the copy could come here.
+	 */
+	gameOtherDevices: (gameId: string) => typedError<PeerCopy_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("game_other_devices", { gameId })),
 	/**  Renames this device; an empty name goes back to the host name. */
 	devicesRename: (name: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_rename", { name })),
 	devicesSetKind: (kind: DeviceKind) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_set_kind", { kind })),
@@ -2661,6 +2666,25 @@ export type Contributes_Serialize = {
 	/**  Theme folders the plugin bundles, each with a `theme.json` (#139). */
 	themes: string[],
 };
+
+/**  Why a copy can't come to this device. */
+export type CopyBlocked = 
+/**
+ *  It starts through its store's launcher there: install it from the
+ *  store here instead.
+ */
+"launcherOnly" | 
+/**  A build for another system (a Linux or macOS build here on Windows). */
+"otherSystem";
+
+/**  Where a copy lives on its device. */
+export type CopyLocation = 
+/**  A folder Caskade installed and manages. */
+"managed" | 
+/**  A folder of its own, found or added there. */
+"external" | 
+/**  A launcher's (Steam, …): it starts through that launcher. */
+"launcher";
 
 export type CpuSample = CpuSample_Serialize | CpuSample_Deserialize;
 
@@ -6069,6 +6093,45 @@ export type PairingState =
 /**  The connection failed or timed out; nothing was stored. */
 "failed";
 
+/**  Another device's copy of a game. */
+export type PeerCopy = PeerCopy_Serialize | PeerCopy_Deserialize;
+
+/**  Another device's copy of a game. */
+export type PeerCopy_Deserialize = {
+	deviceId: string,
+	deviceName: string,
+	kind: DeviceKind,
+	os: DeviceOs,
+	/**  How the device is reached now. */
+	link: DeviceLink,
+	sizeBytes?: number | null,
+	location: CopyLocation,
+	/**  Why it can't come here; `None` when it could. */
+	blocked?: CopyBlocked | null,
+	/**  A Windows build that runs here through Proton. */
+	throughProton: boolean,
+	/**  The game is running on that device now. */
+	playing: boolean,
+};
+
+/**  Another device's copy of a game. */
+export type PeerCopy_Serialize = {
+	deviceId: string,
+	deviceName: string,
+	kind: DeviceKind,
+	os: DeviceOs,
+	/**  How the device is reached now. */
+	link: DeviceLink,
+	sizeBytes: number | null,
+	location: CopyLocation,
+	/**  Why it can't come here; `None` when it could. */
+	blocked: CopyBlocked | null,
+	/**  A Windows build that runs here through Proton. */
+	throughProton: boolean,
+	/**  The game is running on that device now. */
+	playing: boolean,
+};
+
 /**  What the plugin asks for; granted by the user (#124 enforces). */
 export type Permissions = Permissions_Serialize | Permissions_Deserialize;
 
@@ -8985,6 +9048,12 @@ export type ThisDevice_Deserialize = {
 	os: DeviceOs,
 	/**  Addresses on this network other devices reach it at. */
 	lanAddresses: string[],
+	/**
+	 *  Whether the internet can be reached (a relay answers); `None` when
+	 *  it can't be told (Never use relays is on, or the endpoint isn't up).
+	 *  Devices on this network sync without it.
+	 */
+	internet?: boolean | null,
 	neverRelay: boolean,
 	port?: number | null,
 	identity: IdentityStatus,
@@ -9000,6 +9069,12 @@ export type ThisDevice_Serialize = {
 	os: DeviceOs,
 	/**  Addresses on this network other devices reach it at. */
 	lanAddresses: string[],
+	/**
+	 *  Whether the internet can be reached (a relay answers); `None` when
+	 *  it can't be told (Never use relays is on, or the endpoint isn't up).
+	 *  Devices on this network sync without it.
+	 */
+	internet: boolean | null,
 	neverRelay: boolean,
 	port: number | null,
 	identity: IdentityStatus,

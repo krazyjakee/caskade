@@ -72,6 +72,10 @@ pub enum Entity {
     /// its version and (plugins) whether it's on. An offer to the others;
     /// nothing installs or turns on by itself. Key: device|add-on id.
     Addon,
+    /// One device's installed copy of a game (#232): release key, size,
+    /// build OS, where it lives and whether it can be copied, never its
+    /// path. Key: device|game|entry id.
+    Copy,
     /// The emulator definition a platform uses (`definition`), applied only
     /// where that emulator is installed. Key: platform id.
     PreferredEmulator,
@@ -84,7 +88,7 @@ pub enum Entity {
 }
 
 impl Entity {
-    pub const ALL: [Self; 20] = [
+    pub const ALL: [Self; 21] = [
         Self::Game,
         Self::KeptApart,
         Self::IgdbMatch,
@@ -102,6 +106,7 @@ impl Entity {
         Self::ActionSettings,
         Self::AchievementLink,
         Self::Addon,
+        Self::Copy,
         Self::PreferredEmulator,
         Self::Appearance,
         Self::AccountSettings,
@@ -126,6 +131,7 @@ impl Entity {
             Self::ActionSettings => "actionSettings",
             Self::AchievementLink => "achievementLink",
             Self::Addon => "addon",
+            Self::Copy => "copy",
             Self::PreferredEmulator => "preferredEmulator",
             Self::Appearance => "appearance",
             Self::AccountSettings => "accountSettings",
@@ -151,6 +157,7 @@ impl Entity {
             Self::Action | Self::ActionSettings => Category::LaunchActions,
             Self::AchievementLink => Category::AchievementLinks,
             Self::Addon => Category::Addons,
+            Self::Copy => Category::Library,
             Self::PreferredEmulator => Category::PreferredEmulators,
             Self::Appearance => Category::Appearance,
             Self::AccountSettings => Category::Accounts,
@@ -169,7 +176,7 @@ impl Entity {
             | Self::Action
             | Self::ActionSettings
             | Self::AchievementLink => &[0],
-            Self::Member | Self::Approval => &[1],
+            Self::Member | Self::Approval | Self::Copy => &[1],
             Self::Collection
             | Self::Session
             | Self::Account
@@ -215,6 +222,7 @@ impl Entity {
             Self::ActionSettings => &["entry_action_settings"],
             Self::AchievementLink => &["achievement_links"],
             Self::Addon => &["plugins", "addons.records", "installed_addons"],
+            Self::Copy => &["installed_copies"],
             Self::PreferredEmulator => &["preferred_emulators"],
             Self::Appearance => &["core.appearance"],
             Self::AccountSettings => &["core.accounts"],

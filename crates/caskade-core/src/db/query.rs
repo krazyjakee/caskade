@@ -306,9 +306,11 @@ impl LibraryStore {
         self.library_stats_for_account(None).await
     }
     pub async fn library_stats_for_account(&self, account: Option<&str>) -> Result<LibraryStats> {
-        // Each tab's count; play time is the whole library's.
+        // Each tab's count; play time is the whole library's. Ready to
+        // Install counts other devices' copies that can come here (#232).
+        let copyable = super::sync_copies::copyable_here_sql();
         let query = format!(
-            "SELECT coalesce(sum(n),0),coalesce(sum(n AND {INSTALLED}),0),coalesce(sum(n AND g.favorite),0),coalesce(sum(n AND {RECENT} IS NOT NULL),0),coalesce(sum(n AND {EMULATED}),0),coalesce(sum({WEB}),0),coalesce(sum({PLAYTIME}),0),coalesce(sum(n AND {OWNED} AND NOT {INSTALLED}),0) FROM (SELECT g.*,{NOT_WEB_ONLY} AS n FROM games g WHERE g.hidden=0"
+            "SELECT coalesce(sum(n),0),coalesce(sum(n AND {INSTALLED}),0),coalesce(sum(n AND g.favorite),0),coalesce(sum(n AND {RECENT} IS NOT NULL),0),coalesce(sum(n AND {EMULATED}),0),coalesce(sum({WEB}),0),coalesce(sum({PLAYTIME}),0),coalesce(sum(n AND ({OWNED} OR {copyable}) AND NOT {INSTALLED}),0) FROM (SELECT g.*,{NOT_WEB_ONLY} AS n FROM games g WHERE g.hidden=0"
         );
         let mut query = QueryBuilder::<Sqlite>::new(query);
         age_visibility(&mut query, &ListGames::default(), account);
@@ -388,10 +390,13 @@ fn filters(
             query.push(" AND ").push(WEB);
         }
         GameFilter::Owned => {
+            // Owned, or another device's copy that can come here (#232).
             query
-                .push(" AND ")
+                .push(" AND (")
                 .push(OWNED)
-                .push(" AND NOT ")
+                .push(" OR ")
+                .push(super::sync_copies::copyable_here_sql())
+                .push(") AND NOT ")
                 .push(INSTALLED);
         }
     }

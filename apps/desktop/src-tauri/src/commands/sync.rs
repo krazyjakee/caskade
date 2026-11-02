@@ -114,6 +114,21 @@ pub async fn devices_status(devices: State<'_, Devices>) -> Result<DevicesStatus
     Ok(devices.status().await)
 }
 
+/// A game's copies on the user's other devices (#232): the device, how
+/// it's reached, the size, and whether the copy could come here.
+#[tauri::command]
+#[specta::specta]
+pub async fn game_other_devices(
+    store: State<'_, caskade_core::db::LibraryStore>,
+    devices: State<'_, Devices>,
+    presence: State<'_, caskade_core::sync::presence::Presence>,
+    game_id: String,
+) -> Result<Vec<caskade_core::sync::copies::PeerCopy>, CommandError> {
+    caskade_core::sync::copies::peer_copies(&store, &devices, Some(&presence), &game_id)
+        .await
+        .map_err(report)
+}
+
 /// Renames this device; an empty name goes back to the host name.
 #[tauri::command]
 #[specta::specta]
