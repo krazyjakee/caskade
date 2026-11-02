@@ -270,6 +270,16 @@ const sections: {
   },
   { namespace: "core.accounts", version: 1, defaults: { ratingBoard: "pegi" } },
   {
+    namespace: "core.streaming",
+    version: 1,
+    defaults: {
+      hosting: false,
+      addresses: [],
+      existing: false,
+      quality: { resolution: null, fps: null, bitrateKbps: null },
+    },
+  },
+  {
     namespace: "core.sync",
     version: 1,
     defaults: {

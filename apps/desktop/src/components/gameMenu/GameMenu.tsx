@@ -30,7 +30,7 @@ import {
 import { formatSize } from "../../api/presentation";
 import { useLibraryApi } from "../../api/provider";
 import { useStorageApi, useUnavailableStorageEntries } from "../../api/StorageProvider";
-import { streamReleaseName, useStreamHosts } from "../../api/streaming";
+import { streamReleaseName, streamReleaseState, useStreamHosts } from "../../api/streaming";
 import { usePeerCopies } from "../../api/sync";
 import type { GameEntry } from "../../api/types";
 import { useGameActionContributions } from "../../plugins/GameSlots";
@@ -174,7 +174,7 @@ export function GameMenu({
                 ? entries.length
                   ? t`Not installed or unavailable`
                   : t`Nothing to launch`
-                : undefined
+                : playable && streamReleaseState(playable.source, hosts)
             }
             onAction={() => onDialog({ type: "play", entryId: playable?.id ?? target.entryId })}
           >
@@ -189,6 +189,7 @@ export function GameMenu({
                 key={`stream:${entry.id}`}
                 id={`stream:${entry.id}`}
                 icon={Play}
+                description={streamReleaseState(entry.source, hosts)}
                 onAction={() => onDialog({ type: "play", entryId: entry.id })}
               >
                 {streamName(entry)}

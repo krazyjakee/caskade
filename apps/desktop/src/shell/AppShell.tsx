@@ -2,6 +2,7 @@ import { useLingui } from "@lingui/react/macro";
 import { Outlet, useRouter, useRouterState } from "@tanstack/react-router";
 import { GameMenuHost } from "../components/gameMenu/GameMenuHost";
 import { PathPickerProvider } from "../components/pathBrowser/PathPicker";
+import { StreamPairingHost } from "../components/streaming/StreamPairingHost";
 import { PairingHost } from "../components/sync/PairingHost";
 import { InputProvider, useInputAction } from "../input";
 import { GuideMenu, nativeGuideApi } from "../input/GuideMenu";
@@ -92,6 +93,7 @@ export function AppShell() {
               <ShellActions />
               <JobQuestionHost />
               <PairingHost />
+              <StreamPairingHost />
               <GameMenuHost>
                 {consoleMode ? (
                   <ConsoleShell pathname={pathname} />

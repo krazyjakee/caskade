@@ -71,6 +71,12 @@ export function coreSettingsDefaults(): Record<string, Record<string, unknown>> 
       keep: 7,
     },
     "core.accounts": { ratingBoard: "pegi" },
+    "core.streaming": {
+      hosting: false,
+      addresses: [],
+      existing: false,
+      quality: { resolution: null, fps: null, bitrateKbps: null },
+    },
     "core.achievements": { enabled: true, background: true, notifyUnlocks: true },
     "core.saves": {
       manifestUrl:

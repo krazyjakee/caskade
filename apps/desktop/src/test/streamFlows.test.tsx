@@ -8,6 +8,7 @@ vi.setConfig({ testTimeout: 30_000 });
 
 import { createFixtureGames } from "../api/fixtures";
 import { type StreamHost, StreamingApiProvider } from "../api/streaming";
+import { createStreamingFixtureApi } from "../api/streamingFixtures";
 import type { GameDetails } from "../api/types";
 import type { Action } from "../input/actions";
 import { type GuideApi, GuideMenu } from "../input/GuideMenu";
@@ -52,12 +53,14 @@ function games(): GameDetails[] {
   return all;
 }
 
-function open(path: string, mode: "desktop" | "console" = "desktop") {
+function open(path: string, mode: "desktop" | "console" = "desktop", host: StreamHost = den) {
   return renderApp(path, {
     mode,
     games: games(),
     wrap: (app) => (
-      <StreamingApiProvider api={{ hosts: async () => [den] }}>{app}</StreamingApiProvider>
+      <StreamingApiProvider api={createStreamingFixtureApi({ hosts: [host] })}>
+        {app}
+      </StreamingApiProvider>
     ),
   });
 }
@@ -174,4 +177,20 @@ it("the guide menu ends a stream, saying the game stops on the other device", as
   );
   fireEvent.click(within(menu).getByRole("button", { name: "End stream" }));
   await waitFor(() => expect(api.stop).toHaveBeenCalledWith("s1"));
+});
+
+it("a release says when its device is asleep or busy (#265)", async () => {
+  open("/games/fixture-1", "desktop", { ...den, reach: "asleep" });
+  const row = (
+    await screen.findByRole("heading", { level: 3, name: "Stream from Living room" })
+  ).closest('[data-part="entry"]') as HTMLElement;
+  expect(within(row).getByText("Asleep: it wakes when you stream")).toBeTruthy();
+  // The Release picker names the state too.
+  const picker = screen.getByRole("button", { name: /Release/ });
+  fireEvent.click(picker);
+  expect(
+    await screen.findByRole("option", {
+      name: "Stream from Living room (Asleep: it wakes when you stream)",
+    }),
+  ).toBeTruthy();
 });

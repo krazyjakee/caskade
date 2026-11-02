@@ -1,6 +1,6 @@
 # Caskade — Game Streaming Plan
 
-Status: in progress; built: the managed-tool layer (§3.1, #254), `caskade --launch` (§8.1, #256), the elevation helper (§8.4, #255), the host (§4.1–4.2, #257), the client's install and state (§5.1–5.2, #261) finding hosts with their games in the library (§6.1, §8.2, #262) using a user's own Sunshine (§3.4, #258) publishing the library's games (§4.3, #259), pairing with a code (§6.2, #263) and streaming a game from Play (§5.3, §8.2–8.3, #264); issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
+Status: in progress; built: the managed-tool layer (§3.1, #254), `caskade --launch` (§8.1, #256), the elevation helper (§8.4, #255), the host (§4.1–4.2, #257), the client's install and state (§5.1–5.2, #261) finding hosts with their games in the library (§6.1, §8.2, #262) using a user's own Sunshine (§3.4, #258) publishing the library's games (§4.3, #259), pairing with a code (§6.2, #263), streaming a game from Play (§5.3, §8.2–8.3, #264) and Settings → Streaming (§8.5, #265); issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
 
 How Caskade lets a household play a game installed on one device from another, streamed over the local network. Caskade installs, configures, updates and drives two separate open-source programs: Sunshine on the device that runs the game (the host) and Moonlight on the device that shows it (the client). Users never see their names, windows or settings: they switch hosting on, pair a device once, and choose Stream from Living room. It follows the conventions in `TECH-PLAN.md`; the managed installs build on the emulator setup (`crates/caskade-sources/emulation/README.md`).
 
@@ -319,6 +319,34 @@ Built (#255, `caskade_core::elevation`). Callers name a plan (`Plan::StreamingHo
 - **Settings → Streaming** (admins; namespace `core.streaming`): the switch "Let other devices stream games from this one", the host's state (Ready, Setting up, Needs attention with Repair), paired devices with Remove, and waiting pairing requests. Client side: known devices, Pair with…, Add by address, and stream quality (Automatic, or resolution, frame rate, bitrate) passed as `stream` options.
 - The game page and Play button (§8.2), the pairing prompt as a notification and dialog on the host, and setup jobs in Activity.
 
+#### Built (#265)
+
+- **Settings → Streaming** (`views/settings/streaming/`) is shown to every account, like Devices. Hosting, accepting pairings and quality are an admin's (`useDeviceAdmin`; the core refuses anyone else). Pairing this device with another is anyone's.
+  - **Let other devices play:**
+    - The switch "Let other devices stream games from this one".
+    - The state: Off, Setting up…, Starting…, Ready, or Needs attention with the core's problem and Repair. Repair switches hosting on again, which redoes only what's missing.
+    - What a dismissed or refused administrator prompt means.
+    - Someone else's streaming (`existingFound`) asks for its user name and password.
+    - While Ready: the devices waiting to pair, each with its code and a name, Pair or Decline (`components/streaming/PairRequestForm.tsx`), and the paired devices with Remove.
+  - **Play from other devices:** every device found or added, with its state (Ready, Playing another game, Asleep: it wakes when you stream, Can't be reached), paired or not, and how many games it offers. Pair… opens `PairDialog`: the code to enter on that device, then Paired, a wrong code or an expired request (Try again), or declined. Paired devices have Forget. "Add a device by its address".
+  - **Stream quality:** resolution, frame rate and bitrate, each Automatic by default (`core.streaming.quality`, #264).
+- **The pairing prompt.** `components/streaming/StreamPairingHost.tsx`, in the shell, shows a request over any view while this device hosts and an admin is signed in, with the same form. It stays away while Settings → Streaming is open. A request expires after five minutes, so it is a prompt, not an entry in the notification feed.
+- **Activity.** Hosting's download and setup show as "Setting up streaming from this device". The client's first install shows as "Getting streaming ready" (#261).
+- **The game page and the game menu.** A streamed release says its device's state when it isn't ready: the Release picker ("Stream from Living room (Asleep: it wakes when you stream)"), the release row and the menu items' descriptions. Releases have no launch-time choices of their own (no actions, profiles or discs), so `LaunchChoiceDialog` and `PlayChoice` show nothing new.
+- **No technology names.** No string a user sees names either program.
+- **Pads.** The tab works with a pad through the shell's spatial navigation, and dialogs focus their first control.
+- **The webview's API.** `StreamingApi` (`api/streaming.ts`) is the native core in the app. The browser preview gets `api/streamingFixtures.ts`, which tests drive: `finishPairing`, `request`.
+- **Tests.** `test/streamingSettings.test.tsx`:
+  - hosting on, a request paired and the device removed;
+  - someone else's streaming used with its sign-in;
+  - pairing with a wrong code, then the right one;
+  - adding a device by address, and quality saved;
+  - a standard account's view;
+  - a pad turning hosting on and pairing in console mode;
+  - a request prompting over the Library, answered with a pad.
+
+  `test/streamFlows.test.tsx` checks a device's state on the game page.
+
 ## 9. Milestones
 
 | #   | Contents |
@@ -349,6 +377,7 @@ Each item names its issue; record the date and result here.
 - [ ] #259 per OS: a client lists the host's games with their covers, plus "Caskade". Starting one plays it on the host with a session there, and quitting the stream stops it. Installing, uninstalling, hiding or renaming a game changes the client's list after a refresh.
 - [ ] #263 per OS pair: Pair with a device shows a code; entering it on the host's Caskade pairs with no window from either program. A wrong code says so and can be tried again; an unanswered request disappears from the host after five minutes.
 - [ ] #264 per OS pair, the Steam Deck as a client included: Stream from <device> on the game page, the Play button and the game menu starts the stream with no Moonlight window in sight before or after (Cinnamon, GNOME, KDE, Windows, macOS, gamescope). The pad plays the game; guide brings up the quick menu and End stream returns to Caskade with the game stopped on the host. A host asleep wakes; one switched off, one that forgot this device and a game it no longer offers each show Caskade's error with no Moonlight process left. The host's playtime grows and the client's doesn't.
+- [ ] #265 per OS: a new user switches hosting on, pairs a device and streams a game without leaving Caskade or seeing a technology name; the same with a pad in console mode on the TV, the request prompt included.
 - [ ] #256 Windows: with Caskade running, `caskade.exe --launch <game id>` starts the game; `taskkill /PID <caller>` (WM_CLOSE, without `/F`), or ending a Sunshine stream, quits the game and ends its session, and the caller exits 5.
 
 ### Testing

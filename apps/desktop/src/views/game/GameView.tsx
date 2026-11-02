@@ -23,7 +23,7 @@ import {
   formatSource,
 } from "../../api/presentation";
 import { useUnavailableStorageEntries } from "../../api/StorageProvider";
-import { streamReleaseName, useStreamHosts } from "../../api/streaming";
+import { streamReleaseName, streamReleaseState, useStreamHosts } from "../../api/streaming";
 import type { GameEntry } from "../../api/types";
 import { AgeRatingLabel } from "../../components/AgeRatingLabel";
 import {
@@ -215,6 +215,7 @@ export function GameView({
   useDefaultFocus(first, Boolean(result.data && sessions.data), running?.id ?? "idle");
   const unavailable = useUnavailableStorageEntries();
   const names = useReleaseNames(result.data?.entries ?? []);
+  const hosts = useStreamHosts().data ?? [];
   const setDefault = useSetDefaultEntry();
   // Right clicks on the hero and on each entry open the game's menu.
   const menus = useGameMenus();
@@ -283,8 +284,16 @@ export function GameView({
       ? (own ?? t({ message: "Stream", comment: "Button: streams the game from another device" }))
       : playLabel;
   /** A release in the Release picker, with why it can't start. */
+  // A streamed release says how its device is (#265): asleep, busy, …
+  const streamState = (entry: GameEntry) => streamReleaseState(entry.source, hosts);
   const releaseLabel = (entry: GameEntry) => {
     const name = names.get(entry.id) ?? formatSource(entry.source);
+    const device = streamState(entry);
+    if (launchable(entry) && device)
+      return t({
+        message: `${name} (${device})`,
+        comment: "A release streamed from another device, and that device's state",
+      });
     if (launchable(entry)) return name;
     if (unavailable.has(entry.id))
       return t({
@@ -476,14 +485,22 @@ export function GameView({
                         </span>
                       )}
                     </h3>
-                    <p className="text-xs text-fg-subtle">
-                      {name === formatSource(entry.source)
-                        ? formatInstallState(entry.state)
-                        : `${formatSource(entry.source)} · ${formatInstallState(entry.state)}`}
-                    </p>
-                    <p className="mt-1 break-all font-mono text-xs text-fg-muted">
-                      {entry.location ?? t`Install location unknown`}
-                    </p>
+                    {streamed(entry) ? (
+                      <p data-part="device" className="text-xs text-fg-subtle">
+                        {streamState(entry) ?? t({ message: "Ready", context: "streaming device" })}
+                      </p>
+                    ) : (
+                      <>
+                        <p className="text-xs text-fg-subtle">
+                          {name === formatSource(entry.source)
+                            ? formatInstallState(entry.state)
+                            : `${formatSource(entry.source)} · ${formatInstallState(entry.state)}`}
+                        </p>
+                        <p className="mt-1 break-all font-mono text-xs text-fg-muted">
+                          {entry.location ?? t`Install location unknown`}
+                        </p>
+                      </>
+                    )}
                   </div>
                   <div className="flex flex-wrap items-start justify-end gap-2">
                     {entry.source === "caskade-storage" && (

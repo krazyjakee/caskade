@@ -3,6 +3,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { useNavigate } from "@tanstack/react-router";
 import {
   Activity,
+  Cast,
   DatabaseBackup,
   Gamepad2,
   HardDrive,
@@ -39,6 +40,7 @@ import { ScriptsSettings } from "./settings/ScriptsSettings";
 import { StorageSettings } from "./settings/StorageSettings";
 import { StatisticsSettings } from "./settings/statistics/StatisticsSettings";
 import { StoreAccountsSettings } from "./settings/stores/StoreAccountsSettings";
+import { StreamingSettings } from "./settings/streaming/StreamingSettings";
 import { TorrentLinksSettings } from "./settings/TorrentLinksSettings";
 import { UpdateSettings } from "./settings/UpdateSettings";
 import { SettingsProvider } from "./settings/useSettings";
@@ -89,6 +91,13 @@ export const settingsTabs = [
     label: msg({ message: "Devices", context: "settings tab" }),
     icon: MonitorSmartphone,
   },
+  // Game streaming (#265): every account pairs to play from other devices;
+  // only an admin lets others play from this one.
+  {
+    id: "streaming",
+    label: msg({ message: "Streaming", context: "settings tab" }),
+    icon: Cast,
+  },
   // Admins only (#193): a backup holds every account's data.
   {
     id: "backup",
@@ -129,6 +138,7 @@ const panels: Record<SettingsTab, () => ReactNode> = {
   plugins: PluginsSettings,
   stores: StoreAccountsSettings,
   devices: DevicesSettings,
+  streaming: StreamingSettings,
   backup: BackupSettings,
   accounts: AccountsSettings,
   profile: ProfileSettings,
@@ -157,6 +167,8 @@ function useEditable() {
     id === "profile" ||
     // Every account sees its devices; the panel leaves changes to admins.
     id === "devices" ||
+    // Every account plays from other devices; hosting is an admin's.
+    id === "streaming" ||
     account === undefined ||
     account?.role === "admin" ||
     (account?.permissions.settings.includes(id) ?? false);

@@ -388,6 +388,9 @@ impl StreamingHost {
         }
         self.set_status(HostState::SettingUp, None, None);
         let prepared = async {
+            // Downloads and setup show in Activity (#265).
+            let _activity = caskade_jobs::global()
+                .activity(crate::tr!("Setting up streaming from this device"));
             let program = self.program(true).await?;
             self.configure(&program).await?;
             Ok::<_, Error>(program)

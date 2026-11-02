@@ -221,6 +221,16 @@ msgstr[1] ""
 msgid "{0} · {1}"
 msgstr ""
 
+#. placeholder {0}: reachLabel(host.reach)
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "{0} · Not paired"
+msgstr ""
+
+#. placeholder {0}: reachLabel(host.reach)
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "{0} · Paired · {games} games"
+msgstr ""
+
 #. A duplicated launch action's name
 #. A duplicated script's name
 #. placeholder {0}: action.name
@@ -425,6 +435,10 @@ msgstr ""
 msgid "{description} · {queued} queued"
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+msgid "{device} declined."
+msgstr ""
+
 #: apps/desktop/src/views/game/OtherDevices.tsx
 msgid "{device} is out of reach."
 msgstr ""
@@ -447,6 +461,14 @@ msgstr ""
 #. {device} is another device's name
 #: apps/desktop/src/components/streaming/StopHostDialog.tsx
 msgid "{device} is playing another game. Stop it and stream this game?"
+msgstr ""
+
+#: apps/desktop/src/components/streaming/StreamPairingHost.tsx
+msgid "{device} wants to play from this device"
+msgstr ""
+
+#: apps/desktop/src/components/streaming/PairRequestForm.tsx
+msgid "{device} wants to stream games from this device."
 msgstr ""
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
@@ -497,6 +519,10 @@ msgstr ""
 #. BIOS files found out of all the platform needs
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
 msgid "{found}/{total} found · {unknown} not checked"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "{fps} frames a second"
 msgstr ""
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
@@ -607,6 +633,11 @@ msgid_plural "# games match now"
 msgstr[0] ""
 msgstr[1] ""
 
+#. Network speed of a game stream
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "{mbps} Mbit/s"
+msgstr ""
+
 #. A span of time in minutes, abbreviated
 #: apps/desktop/src/views/settings/statistics/format.ts
 msgid "{minutes} min"
@@ -620,6 +651,11 @@ msgstr ""
 #. How many games moved before one failed; {total} is always 2 or more
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "{moved} of {total} games moved."
+msgstr ""
+
+#. A release streamed from another device, and that device's state
+#: apps/desktop/src/views/game/GameView.tsx
+msgid "{name} ({device})"
 msgstr ""
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
@@ -1367,7 +1403,12 @@ msgstr ""
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Add"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Add a device by its address"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
@@ -1898,12 +1939,21 @@ msgstr ""
 msgid "Ask while a game is running."
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+msgid "Asking {device}…"
+msgstr ""
+
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 msgid "Asks for"
 msgstr ""
 
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 msgid "Asks for an emulator when launching"
+msgstr ""
+
+#: apps/desktop/src/api/streaming.ts
+msgctxt "streaming device"
+msgid "Asleep: it wakes when you stream"
 msgstr ""
 
 #. A game release's region
@@ -1927,6 +1977,11 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgctxt "start mode"
+msgid "Automatic"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgctxt "stream quality"
 msgid "Automatic"
 msgstr ""
 
@@ -2096,6 +2151,10 @@ msgstr ""
 msgid "BIOS issues"
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Bitrate"
+msgstr ""
+
 #. A game release's region
 #: apps/desktop/src/views/store/releases.ts
 msgid "Brazil"
@@ -2168,6 +2227,15 @@ msgstr ""
 msgid "caches"
 msgstr ""
 
+#: apps/desktop/src/components/streaming/PairRequestForm.tsx
+msgid "Call it"
+msgstr ""
+
+#: apps/desktop/src/api/streaming.ts
+msgctxt "streaming device"
+msgid "Can't be reached"
+msgstr ""
+
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
 msgid "Can't be used:"
 msgstr ""
@@ -2209,6 +2277,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 msgid "Cancel"
 msgstr ""
 
@@ -2543,6 +2612,7 @@ msgstr ""
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Checking…"
 msgstr ""
 
@@ -2702,6 +2772,7 @@ msgstr ""
 #: apps/desktop/src/views/game/Screenshots.tsx
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
+#: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 msgid "Close"
 msgstr ""
 
@@ -2730,6 +2801,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
 msgid "Close profile editor"
+msgstr ""
+
+#: apps/desktop/src/components/streaming/PairRequestForm.tsx
+msgid "Code shown on {device}"
 msgstr ""
 
 #: apps/desktop/src/shell/nav.ts
@@ -3134,6 +3209,10 @@ msgstr ""
 msgid "Debug build"
 msgstr ""
 
+#: apps/desktop/src/components/streaming/PairRequestForm.tsx
+msgid "Decline"
+msgstr ""
+
 #. The default cache folder is used
 #. The release the game's Play starts
 #: apps/desktop/src/views/game/GameView.tsx
@@ -3346,6 +3425,10 @@ msgstr ""
 msgid "Devices out of reach"
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Devices that can play from this one"
+msgstr ""
+
 #: apps/desktop/src/shell/SyncStatusLink.tsx
 msgid "Devices: open Settings → Devices"
 msgstr ""
@@ -3432,6 +3515,7 @@ msgstr ""
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
 #: apps/desktop/src/components/sync/PairingHost.tsx
+#: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 msgid "Done"
 msgstr ""
 
@@ -3791,6 +3875,10 @@ msgstr ""
 msgid "Enter for results · Esc to cancel · Backspace to delete"
 msgstr ""
 
+#: apps/desktop/src/components/streaming/StreamPairingHost.tsx
+msgid "Enter the code {device} shows to let it play this device's games."
+msgstr ""
+
 #: apps/desktop/src/views/settings/accounts/PinDialog.tsx
 msgid "Enter the new PIN again"
 msgstr ""
@@ -4032,6 +4120,10 @@ msgstr ""
 msgid "Folder-name template"
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "For a device on another network, or one that isn't found by itself."
+msgstr ""
+
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 msgid "For a server on your home network without a public certificate."
 msgstr ""
@@ -4048,7 +4140,12 @@ msgstr ""
 msgid "For new games only"
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Forget"
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Forget {name}"
 msgstr ""
 
@@ -4057,6 +4154,10 @@ msgstr ""
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
 msgid "Found"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Frame rate"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
@@ -4163,6 +4264,10 @@ msgstr ""
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Game storage"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Game streaming was set up on this device before. Caskade can use it, adding only its own games. Enter the user name and password it was set up with."
 msgstr ""
 
 #: apps/desktop/src/views/settings/UpdateSettings.tsx
@@ -4417,6 +4522,10 @@ msgctxt "gauge"
 msgid "High"
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Higher looks sharper and needs a faster network."
+msgstr ""
+
 #. The sidebar link to the home view
 #. The sidebar link to the home view
 #: apps/desktop/src/shell/nav.ts
@@ -4440,6 +4549,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgid "How games are shown in grids."
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "How games streamed to this device look. Automatic suits this screen and the network."
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
@@ -5023,6 +5136,7 @@ msgstr ""
 #. Cancels uninstalling a plugin
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Keep"
 msgstr ""
 
@@ -5192,6 +5306,10 @@ msgstr ""
 msgid "Leave blank to match automatically. A name from the Ludusavi manifest sets the match by hand."
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Leave it off"
+msgstr ""
+
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "Leave out of library updates"
 msgstr ""
@@ -5203,6 +5321,14 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 msgid "Legal sections"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Let other devices play"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Let other devices stream games from this one"
 msgstr ""
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
@@ -5497,6 +5623,10 @@ msgstr ""
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgctxt "settings section"
 msgid "Look"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Look again"
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
@@ -5851,6 +5981,10 @@ msgctxt "script"
 msgid "Name"
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Needs attention."
+msgstr ""
+
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 msgid "Needs setup"
 msgstr ""
@@ -6029,6 +6163,10 @@ msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
 msgid "No description yet."
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "No devices found on this network yet. On another device running Caskade, turn on Let other devices stream games from this one, or add it by its address below."
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
@@ -6243,6 +6381,10 @@ msgstr ""
 msgid "No web games yet. Add one with Add web game."
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+msgid "Nobody entered the code on {device} in time."
+msgstr ""
+
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "none"
 msgstr ""
@@ -6275,6 +6417,10 @@ msgstr ""
 #. An emulator profile's platforms
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "None selected"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "None yet. On another device, open Settings → Streaming in Caskade and choose Pair with this one."
 msgstr ""
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
@@ -6369,6 +6515,7 @@ msgstr ""
 msgid "Not needed"
 msgstr ""
 
+#: apps/desktop/src/components/streaming/StreamPairingHost.tsx
 #: apps/desktop/src/components/sync/PairingHost.tsx
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
@@ -6433,6 +6580,14 @@ msgstr ""
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Nothing beyond its own storage"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Nothing changed: the administrator's permission wasn't given."
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Nothing changed: the system didn't allow it."
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
@@ -6513,6 +6668,10 @@ msgstr ""
 msgid "Off keeps every version on this device only."
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Off."
+msgstr ""
+
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
 msgid "Offer Caskade for them"
 msgstr ""
@@ -6585,6 +6744,10 @@ msgstr ""
 msgid "On {device}"
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+msgid "On {device}, open Settings → Streaming in Caskade and enter this code:"
+msgstr ""
+
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
 msgid "On {name} since {since}"
 msgstr ""
@@ -6613,6 +6776,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Online lookups, and the setup Caskade starts with."
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Only an admin can let other devices stream from this one or change the stream quality. Anyone can pair this device with another to play its games."
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
@@ -6817,6 +6984,7 @@ msgstr ""
 msgid "Page up"
 msgstr ""
 
+#: apps/desktop/src/components/streaming/PairRequestForm.tsx
 #: apps/desktop/src/components/sync/PairingHost.tsx
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Pair"
@@ -6824,6 +6992,14 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Pair a device"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Pair once with a device that lets others play, and its games show in your library as Stream from that device."
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+msgid "Pair with {device}"
 msgstr ""
 
 #: apps/desktop/src/components/sync/PairingHost.tsx
@@ -6843,6 +7019,7 @@ msgid "Pair with the device from this link?"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Pair…"
 msgstr ""
 
@@ -6864,8 +7041,16 @@ msgstr ""
 msgid "Paired with {name}"
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+msgid "Paired. {device}'s games show in your library as Stream from {device}."
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Pairing link copied"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+msgid "Pairing with {device} didn't work."
 msgstr ""
 
 #: apps/desktop/src/components/sync/PairingHost.tsx
@@ -6874,6 +7059,10 @@ msgstr ""
 
 #: apps/desktop/src/components/sync/PairingHost.tsx
 msgid "Pairing with {name} was cancelled"
+msgstr ""
+
+#: apps/desktop/src/components/streaming/PairRequestForm.tsx
+msgid "Pairing…"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
@@ -6887,6 +7076,7 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Password"
 msgstr ""
 
@@ -7057,6 +7247,10 @@ msgstr ""
 msgid "Play emulated games fullscreen in desktop mode too. Console mode always does."
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Play from other devices"
+msgstr ""
+
 #: apps/desktop/src/views/game/GameView.tsx
 msgid "Play from your library"
 msgstr ""
@@ -7123,6 +7317,11 @@ msgstr ""
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
 msgid "Playing {games}"
+msgstr ""
+
+#: apps/desktop/src/api/streaming.ts
+msgctxt "streaming device"
+msgid "Playing another game"
 msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
@@ -7481,12 +7680,22 @@ msgstr ""
 msgid "Ready"
 msgstr ""
 
+#: apps/desktop/src/api/streaming.ts
+#: apps/desktop/src/views/game/GameView.tsx
+msgctxt "streaming device"
+msgid "Ready"
+msgstr ""
+
 #. Games a connected store account owns that aren't installed
 #. Games a connected store account owns that aren't installed
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
 msgctxt "library filter"
 msgid "Ready to Install"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Ready. Devices on this network can pair and play."
 msgstr ""
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
@@ -7727,6 +7936,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Remove"
 msgstr ""
 
@@ -7769,6 +7979,10 @@ msgstr ""
 #. placeholder {0}: index + 1
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 msgid "Remove {label} {0}"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Remove {name}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
@@ -7852,6 +8066,10 @@ msgstr ""
 #: apps/desktop/src/components/gameMenu/RemoveGameDialog.tsx
 #: apps/desktop/src/views/library/web/RemoveWebGame.tsx
 msgid "Removing…"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Repair"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
@@ -7950,6 +8168,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/UpdateSettings.tsx
 msgid "Reset update settings"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Resolution"
 msgstr ""
 
 #. A notification whose problem was fixed
@@ -8715,8 +8937,16 @@ msgstr ""
 msgid "Setting things up"
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Setting up asks once for an administrator's permission."
+msgstr ""
+
 #: apps/desktop/src/api/emulatorSetup.ts
 msgid "Setting up…"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Setting up… The first time takes a few minutes."
 msgstr ""
 
 #: apps/desktop/src/shell/nav.ts
@@ -9071,6 +9301,7 @@ msgstr ""
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Starting…"
 msgstr ""
 
@@ -9293,6 +9524,10 @@ msgstr ""
 msgid "Stream from another device"
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Stream quality"
+msgstr ""
+
 #. The game is streaming from another device
 #: apps/desktop/src/views/game/GameView.tsx
 msgid "Streaming"
@@ -9301,6 +9536,15 @@ msgstr ""
 #: apps/desktop/src/api/presentation.ts
 msgctxt "library source"
 msgid "Streaming"
+msgstr ""
+
+#: apps/desktop/src/views/SettingsView.tsx
+msgctxt "settings tab"
+msgid "Streaming"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Streaming is already set up"
 msgstr ""
 
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
@@ -9482,6 +9726,10 @@ msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 msgid "The catalogue is empty."
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+msgid "The code entered on {device} didn't match. Try again with a new code."
 msgstr ""
 
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
@@ -9731,6 +9979,10 @@ msgctxt "save version"
 msgid "This device"
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "This device can't share its games yet."
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 msgid "This device only"
 msgstr ""
@@ -9939,6 +10191,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/desktop/src/views/StoreView.tsx
 msgid "Try again"
 msgstr ""
@@ -10255,6 +10508,10 @@ msgstr ""
 msgid "Use {title}"
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Use it"
+msgstr ""
+
 #: apps/desktop/src/components/gameEditor/fields.tsx
 msgid "Use theirs"
 msgstr ""
@@ -10276,6 +10533,10 @@ msgstr ""
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgctxt "memory"
 msgid "Used"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "User name"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
@@ -10393,6 +10654,10 @@ msgstr ""
 msgid "Waiting for {0} to finish installing it."
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+msgid "Waiting for {device}…"
+msgstr ""
+
 #: apps/desktop/src/components/sync/PairingHost.tsx
 msgid "Waiting for {name} to confirm…"
 msgstr ""
@@ -10423,6 +10688,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Waiting for you to finish on the other device…"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Waiting to pair"
 msgstr ""
 
 #: apps/desktop/src/api/emulatorSetup.ts
@@ -10755,6 +11024,10 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/AddGamesDialog.tsx
 msgid "Your library has no games yet."
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Your other devices at home can play this device's games, streamed over the network, with their own controller."
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx

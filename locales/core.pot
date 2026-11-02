@@ -3808,6 +3808,10 @@ msgid "this device can't host game streams"
 msgstr ""
 
 #: crates/caskade-core/src/streaming/host/mod.rs
+msgid "Setting up streaming from this device"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/host/mod.rs
 msgid "Caskade can't find the certificate of the streaming already set up here"
 msgstr ""
 
