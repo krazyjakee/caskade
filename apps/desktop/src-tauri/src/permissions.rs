@@ -295,8 +295,10 @@ pub fn access(command: &str) -> Option<Access> {
         "backup_status" | "backup_plan" => Open,
         // Game streaming (#257): its state is a read; hosting installs a
         // program and changes the system with an administrator prompt.
-        "streaming_host_status" => Open,
-        "streaming_set_hosting" => Admin,
+        "streaming_host_status" | "streaming_hosts" => Open,
+        // Remembering a device to stream from changes what everyone sees.
+        "streaming_add_host" => SignedIn,
+        "streaming_set_hosting" | "streaming_use_existing" => Admin,
         // Paired devices (#226): reading them needs an account; every change
         // is an admin's (pairing hands another device the library).
         "devices_status"

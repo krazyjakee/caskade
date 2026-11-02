@@ -161,6 +161,7 @@ async fn fixture(timing: Timing) -> Fixture {
         elevation,
         settings.clone(),
         Parts {
+            existing: Arc::new(|| None),
             os: OperatingSystem::Linux,
             runner: Arc::new(process::ChildRunner::new(
                 paths.data.join("streaming/run.json"),
@@ -373,6 +374,7 @@ async fn macos_does_not_host_in_this_milestone() {
         f.host.inner.elevation.clone(),
         f.settings.clone(),
         Parts {
+            existing: Arc::new(|| None),
             os: OperatingSystem::Macos,
             runner: Arc::new(process::ChildRunner::new(f.temp.path().join("run.json"))),
             secrets: HostSecrets::memory(),
@@ -418,3 +420,185 @@ fn a_host_left_running_by_a_crash_is_stopped_at_the_next_start() {
 }
 
 use std::os::unix::process::CommandExt;
+
+/// Sunshine's app list, kept as the real one does: added at the end, then
+/// sorted by name; deleted by index.
+#[derive(Clone, Default)]
+struct Apps(Arc<Mutex<Vec<serde_json::Value>>>);
+
+impl wiremock::Respond for Apps {
+    fn respond(&self, request: &wiremock::Request) -> ResponseTemplate {
+        let mut apps = crate::lock(&self.0);
+        match request.method.as_str() {
+            "GET" => ResponseTemplate::new(200)
+                .set_body_json(serde_json::json!({ "env": {}, "apps": *apps })),
+            "POST" => {
+                let mut app: serde_json::Value = serde_json::from_slice(&request.body).unwrap();
+                app.as_object_mut().unwrap().remove("index");
+                apps.push(app);
+                apps.sort_by(|a, b| a["name"].as_str().cmp(&b["name"].as_str()));
+                ResponseTemplate::new(200).set_body_json(serde_json::json!({ "status": true }))
+            }
+            "DELETE" => {
+                let index: usize = request
+                    .url
+                    .path()
+                    .rsplit('/')
+                    .next()
+                    .unwrap()
+                    .parse()
+                    .unwrap();
+                apps.remove(index);
+                ResponseTemplate::new(200).set_body_json(serde_json::json!({ "status": true }))
+            }
+            _ => ResponseTemplate::new(405),
+        }
+    }
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn a_users_own_host_is_used_with_consent_and_only_caskades_apps_change() {
+    use crate::streaming::{
+        existing::{Existing, Found},
+        publish::{self, Offer},
+    };
+    let f = fixture(fast()).await;
+    // Their Sunshine, its certificate where its install keeps it, and its
+    // own app.
+    let theirs = f
+        .temp
+        .path()
+        .join("home/.config/sunshine/credentials/cacert.pem");
+    std::fs::create_dir_all(theirs.parent().unwrap()).unwrap();
+    std::fs::copy(HostFiles::linux(&f.staging.join("config")).cert(), &theirs).unwrap();
+    let apps = Apps::default();
+    crate::lock(&apps.0)
+        .push(serde_json::json!({ "name": "Desktop", "image-path": "desktop.png" }));
+    let user = Credentials {
+        user: "sunshine".into(),
+        password: "theirs".into(),
+    };
+    Mock::given(method("GET"))
+        .and(path("/api/config"))
+        .and(basic_auth("sunshine", "theirs"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "status": true, "version": "2025.628.4510"
+        })))
+        .mount(&f.api)
+        .await;
+    Mock::given(path("/api/config"))
+        .respond_with(ResponseTemplate::new(401))
+        .mount(&f.api)
+        .await;
+    Mock::given(path("/api/apps"))
+        .and(basic_auth("sunshine", "theirs"))
+        .respond_with(apps.clone())
+        .mount(&f.api)
+        .await;
+    Mock::given(wiremock::matchers::path_regex("^/api/apps/[0-9]+$"))
+        .and(basic_auth("sunshine", "theirs"))
+        .respond_with(apps.clone())
+        .mount(&f.api)
+        .await;
+    let found = Existing {
+        found: vec![Found::Package],
+        cert: Some(theirs.clone()),
+    };
+    let host = StreamingHost::with(
+        f.host.inner.tools.clone(),
+        f.host.inner.elevation.clone(),
+        f.settings.clone(),
+        Parts {
+            existing: Arc::new(move || Some(found.clone())),
+            os: OperatingSystem::Linux,
+            runner: Arc::new(process::ChildRunner::new(f.temp.path().join("run.json"))),
+            secrets: f.secrets.clone(),
+            timing: fast(),
+            api_base: f.host.inner.api_base.clone(),
+        },
+    );
+
+    // Switching on offers theirs: nothing installed, no prompt.
+    assert_eq!(host.enable().await.unwrap(), HostOutcome::ExistingFound);
+    assert!(f.host.inner.tools.managed(TOOL).await.unwrap().is_none());
+    assert!(crate::lock(&f.system.prompts).is_empty());
+    assert!(!host.hosting().await);
+
+    // A wrong password changes nothing; theirs works.
+    let wrong = Credentials {
+        password: "guess".into(),
+        ..user.clone()
+    };
+    assert!(matches!(
+        host.use_existing(wrong).await,
+        Err(Error::Forbidden(_))
+    ));
+    assert!(!host.hosting().await);
+    assert_eq!(
+        host.use_existing(user.clone()).await.unwrap(),
+        HostOutcome::On
+    );
+    assert!(host.hosting().await);
+    assert_eq!(host.status().version.as_deref(), Some("2025.628.4510"));
+    assert_eq!(f.secrets.existing().await.unwrap(), Some(user));
+
+    // Caskade's games go in beside theirs.
+    let caskade = std::env::current_exe().unwrap();
+    let api = host.api().await.unwrap();
+    let offers = [Offer {
+        title: "Hades".into(),
+        game_id: "g1".into(),
+    }];
+    let published = publish::sync(&api, &caskade, &offers).await.unwrap();
+    assert_eq!(
+        published,
+        publish::Published {
+            added: 1,
+            removed: 0
+        }
+    );
+    // Again: nothing to do.
+    assert_eq!(
+        publish::sync(&api, &caskade, &offers).await.unwrap(),
+        Default::default()
+    );
+    let names: Vec<String> = crate::lock(&apps.0)
+        .iter()
+        .map(|app| app["name"].as_str().unwrap().to_owned())
+        .collect();
+    assert_eq!(names, ["Desktop", "Hades"]);
+    assert_eq!(
+        crate::lock(&apps.0)[1]["cmd"],
+        publish::launch_command(&caskade, "g1")
+    );
+
+    // Hosting off: only Caskade's app goes; theirs, and their host, stay.
+    assert_eq!(host.disable().await.unwrap(), HostOutcome::Off);
+    let left = crate::lock(&apps.0).clone();
+    assert_eq!(
+        left,
+        [serde_json::json!({ "name": "Desktop", "image-path": "desktop.png" })]
+    );
+    assert!(!host.hosting().await);
+    assert!(crate::lock(&f.system.prompts).is_empty(), "never a prompt");
+}
+
+#[test]
+fn caskades_apps_are_told_by_their_command() {
+    use crate::streaming::{api::App, publish};
+    let caskade = std::path::Path::new("/opt/Caskade Games/caskade");
+    let ours = App::command("Hades", &publish::launch_command(caskade, "g1"));
+    assert_eq!(
+        ours.cmd.as_deref(),
+        Some("\"/opt/Caskade Games/caskade\" --launch g1")
+    );
+    assert_eq!(publish::caskade_game(&ours, caskade).as_deref(), Some("g1"));
+    let theirs = App::command("Steam", "setsid steam steam://open/bigpicture");
+    assert_eq!(publish::caskade_game(&theirs, caskade), None);
+    // Another Caskade's (another install) isn't this one's.
+    let other = App::command(
+        "Hades",
+        &publish::launch_command(std::path::Path::new("/usr/bin/caskade"), "g1"),
+    );
+    assert_eq!(publish::caskade_game(&other, caskade), None);
+}

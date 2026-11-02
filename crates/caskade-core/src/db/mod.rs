@@ -24,6 +24,8 @@ pub use plugins::{PLUGIN_KEY_MAX, PLUGIN_KV_TOTAL_MAX, PLUGIN_VALUE_MAX, PluginR
 mod imports;
 mod managed;
 mod managed_tools;
+mod streaming;
+pub use streaming::{StreamApp, StreamSync, stream_source};
 mod manual;
 pub use imports::ImportedGroup;
 mod notifications;

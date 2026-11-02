@@ -1,6 +1,6 @@
 # Caskade — Game Streaming Plan
 
-Status: in progress; built: the managed-tool layer (§3.1, #254), `caskade --launch` (§8.1, #256), the elevation helper (§8.4, #255), the host (§4.1–4.2, #257) and the client's install and state (§5.1–5.2, #261); issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
+Status: in progress; built: the managed-tool layer (§3.1, #254), `caskade --launch` (§8.1, #256), the elevation helper (§8.4, #255), the host (§4.1–4.2, #257), the client's install and state (§5.1–5.2, #261) finding hosts with their games in the library (§6.1, §8.2, #262) and using a user's own Sunshine (§3.4, #258); issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
 
 How Caskade lets a household play a game installed on one device from another, streamed over the local network. Caskade installs, configures, updates and drives two separate open-source programs: Sunshine on the device that runs the game (the host) and Moonlight on the device that shows it (the client). Users never see their names, windows or settings: they switch hosting on, pair a device once, and choose Stream from Living room. It follows the conventions in `TECH-PLAN.md`; the managed installs build on the emulator setup (`crates/caskade-sources/emulation/README.md`).
 
@@ -64,6 +64,17 @@ Detection reuses discovery's probes and the Windows uninstall entries: Sunshine'
 
 - A user's own **Moonlight** is left alone: Caskade's copy runs in portable mode with its own state (§5.2), so the two never see each other.
 - A user's own **Sunshine** collides with Caskade's on ports and on mDNS. Hosting then offers to use it ("Streaming is already set up on this device. Use it?"), asking once for its user name and password, which go to the keychain. Caskade changes only the apps it added (§4.3) and never its other settings. Declining leaves hosting off.
+
+### 3.4.1 Built (#258)
+
+- **Detection** (`streaming::existing`):
+  - Windows: the MSI's UpgradeCode under `Installer\UpgradeCodes` (packed `B1D3A21561EBB1040A1D95BB3A49F28B`) and the `SunshineService` service.
+  - Linux: `/usr/bin/sunshine`, the Flatpak's install folders and the `app-dev.lizardbyte.app.Sunshine` user unit.
+  - macOS: `Sunshine.app` and Homebrew.
+  - With each, its `credentials/cacert.pem` where that install keeps it.
+- **Switching hosting on** then installs nothing and answers `existingFound`. `streaming_use_existing` takes its web user name and password, checks them against its API (pinned to its own certificate), keeps them in the keychain (`existing`) and sets `core.streaming.existing`.
+- **Only Caskade's apps change** (`streaming::publish`). An app is Caskade's when its command runs this Caskade's `--launch`; `sync` adds and removes only those. Turning hosting off withdraws them and leaves the host, its settings and its other apps as they were. Caskade never starts or stops someone else's host; its status is only whether the API answers.
+- Choosing which games to offer, and keeping them current, is #259.
 
 ## 4. The host
 
@@ -161,6 +172,16 @@ Moonlight's command line was not built to be invisible; each case has a workarou
 - Any Sunshine host is welcome, not only Caskade's: a friend's PC running Sunshine pairs the same way, through its own web page.
 - Hosts that are known but asleep are woken: Moonlight sends Wake-on-LAN to every known host with a stored MAC before it looks for it. Sunshine gives the MAC only to paired clients.
 
+### 6.1.1 Built (#262)
+
+`caskade_core::streaming::hosts::StreamHosts`, watched every 5 s while Caskade runs. Commands `streaming_hosts` and `streaming_add_host`.
+
+- **mDNS** (`streaming::mdns`, with `hickory-proto`): one `_nvstream._tcp.local` PTR question from an ordinary port, so responders answer it directly (legacy unicast) and no port-5353 socket is needed. Answers' PTR, SRV and A records are put together. The instance name is the host's **OS host name**; checked against Sunshine v2026.914 through Avahi.
+- **Hosts typed by address** live in `core.streaming.addresses`. **Paired hosts** come from Caskade's own client state (`[hosts]`: uuid, name, address, MAC, apps).
+- **State:** every candidate is asked `GET http://<host>:47989/serverinfo`, which needs no pairing. The host's name is `hostname` (its `sunshine_name`), its id `uniqueid`, and it is busy when `state` says BUSY or `currentgame` isn't 0. One that doesn't answer is **asleep** when Moonlight knows its MAC, else **unreachable**.
+- **Games:** a paired host's apps become uninstalled, unlaunchable releases under `stream:<host id>` (`LibraryStore::sync_stream_apps`). Each joins the library game with the same title key (case, composition and punctuation aside; hidden and kept-apart games excluded), or becomes a streaming-only game. An app the host stops offering goes, and its game goes with it when nothing else is left. The game page names the release "Stream from <device>" (`api/streaming.ts`).
+- **App lists** are refreshed at most every 10 minutes per reachable paired host, with `moonlight list <host> --csv` stopped after 20 s by SIGTERM (so it saves), then read back from the client's state.
+
 ### 6.2 Pairing with a code
 
 1. On the client, Pair with Living room picks a random four-digit code, shows it ("Enter 4831 on Living room") and runs `moonlight pair <host> --pin 4831`.
@@ -254,6 +275,8 @@ Each item names its issue; record the date and result here.
 - [ ] #257 Linux, clean machine: switching hosting on shows one prompt, and Moonlight on another device pairs (§6.2) and streams a game. No `~/.config/sunshine`, desktop entry, tray icon or browser page appears. Closing Caskade to the tray keeps the stream available; Quit ends it; killing Caskade (`kill -9`) ends the host too.
 - [ ] #257 Windows, clean machine: the same with one UAC prompt. Services shows only "Caskade streaming", and firewall rules only "Caskade streaming (TCP/UDP)". `%ProgramFiles%\Caskade\Streaming\host` grants users read and execute only. A standard user can't change the host's files.
 - [ ] #261 per OS: the first Stream from a device installs the client under "Getting streaming ready", then streams. A Moonlight the user installed keeps its hosts and settings afterwards. No warning toast, overlay or Discord presence names Moonlight during or after the stream. Flatpak: `flatpak run --cwd=` keeps the state in `~/.var/app/com.moonlight_stream.Moonlight/caskade`.
+- [ ] #262: a host on the LAN appears in `streaming_hosts` within seconds, and shows unreachable after it leaves the network. After pairing (#263), its games show as "Stream from <device>" on the matching library games.
+- [ ] #258 per OS: with Sunshine installed the usual way, switching hosting on offers to use it, and the right password works, a wrong one doesn't. Caskade's games appear in its apps beside the user's; switching off removes only Caskade's.
 - [ ] #256 Windows: with Caskade running, `caskade.exe --launch <game id>` starts the game; `taskkill /PID <caller>` (WM_CLOSE, without `/F`), or ending a Sunshine stream, quits the game and ends its session, and the caller exits 5.
 
 ### Testing

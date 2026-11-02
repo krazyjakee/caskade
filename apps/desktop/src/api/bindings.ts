@@ -333,6 +333,23 @@ export const commands = {
 	 *  off removes it with one. A dismissed prompt changes nothing.
 	 */
 	streamingSetHosting: (on: boolean) => typedError<HostOutcome, ErrorReport_Serialize>(__TAURI_INVOKE("streaming_set_hosting", { on })),
+	/**
+	 *  Hosts through the streaming someone already set up on this device
+	 *  (after `streaming_set_hosting` answered `existingFound`), with its web
+	 *  user name and password, which go to the keychain once they work. Nothing
+	 *  is installed, and only Caskade's own games change in it.
+	 */
+	streamingUseExisting: (user: string, password: string) => typedError<HostOutcome, ErrorReport_Serialize>(__TAURI_INVOKE("streaming_use_existing", { user, password })),
+	/**
+	 *  The devices this one can stream from: found on the network, added by
+	 *  address or paired, each ready, busy, asleep or unreachable.
+	 */
+	streamingHosts: () => __TAURI_INVOKE<StreamHost_Serialize[]>("streaming_hosts"),
+	/**
+	 *  Adds a device to stream from by its address (a name or an IP), for
+	 *  networks where it isn't found by itself, and looks for it at once.
+	 */
+	streamingAddHost: (address: string) => typedError<StreamHost_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("streaming_add_host", { address })),
 	storageList: () => typedError<RootSummary_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("storage_list")),
 	storageAdd: (path: string, label: string | null) => typedError<RootSummary_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("storage_add", { path, label })),
 	storageEdit: (id: string, label: string | null, folderTemplate: string) => typedError<RootSummary_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("storage_edit", { id, label, folderTemplate })),
@@ -4189,7 +4206,19 @@ export type HostOutcome = "on" | "off" |
 /**  The administrator prompt was dismissed: nothing changed. */
 "cancelled" | 
 /**  The OS refused the prompt: nothing changed. */
-"refused";
+"refused" | 
+/**
+ *  Someone already set streaming up on this device (#258): nothing
+ *  was installed. Use it with `use_existing`, or leave hosting off.
+ */
+"existingFound";
+
+/**  Whether a host can be streamed from now. */
+export type HostReach = "ready" | 
+/**  Playing another game. */
+"busy" | 
+/**  Not answering, but it can be woken (its MAC is known). */
+"asleep" | "unreachable";
 
 /**  Where hosting is. */
 export type HostState = "off" | 
@@ -8404,6 +8433,37 @@ export type StoreSyncState_Serialize = {
 
 export type Strategy = "copy" | "extract" | "run_silent" | "run_interactive" | "delegate" | "hand_off";
 
+/**  A host as the client sees it. */
+export type StreamHost = StreamHost_Serialize | StreamHost_Deserialize;
+
+/**  A host as the client sees it. */
+export type StreamHost_Deserialize = {
+	/**  Its unique id. */
+	id: string,
+	/**  Its device name. */
+	name: string,
+	address?: string | null,
+	reach: HostReach,
+	/**  This device paired with it. */
+	paired: boolean,
+	/**  The games it offers this device. */
+	games: number,
+};
+
+/**  A host as the client sees it. */
+export type StreamHost_Serialize = {
+	/**  Its unique id. */
+	id: string,
+	/**  Its device name. */
+	name: string,
+	address: string | null,
+	reach: HostReach,
+	/**  This device paired with it. */
+	paired: boolean,
+	/**  The games it offers this device. */
+	games: number,
+};
+
 /**  One reading of the whole machine. */
 export type SystemSample = SystemSample_Serialize | SystemSample_Deserialize;
 
@@ -8597,12 +8657,6 @@ export type ThisDevice_Deserialize = {
 	os: DeviceOs,
 	/**  Addresses on this network other devices reach it at. */
 	lanAddresses: string[],
-	/**
-	 *  Whether the internet can be reached (a relay answers); `None` when
-	 *  it can't be told (Never use relays is on, or the endpoint isn't up).
-	 *  Devices on this network sync without it.
-	 */
-	internet?: boolean | null,
 	neverRelay: boolean,
 	port?: number | null,
 	identity: IdentityStatus,
@@ -8618,12 +8672,6 @@ export type ThisDevice_Serialize = {
 	os: DeviceOs,
 	/**  Addresses on this network other devices reach it at. */
 	lanAddresses: string[],
-	/**
-	 *  Whether the internet can be reached (a relay answers); `None` when
-	 *  it can't be told (Never use relays is on, or the endpoint isn't up).
-	 *  Devices on this network sync without it.
-	 */
-	internet: boolean | null,
 	neverRelay: boolean,
 	port: number | null,
 	identity: IdentityStatus,

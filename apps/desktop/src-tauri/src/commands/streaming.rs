@@ -2,7 +2,10 @@
 //! state. Settings → Streaming (#265) is their UI.
 
 use crate::error::{CommandError, report};
-use caskade_core::streaming::{HostOutcome, HostStatus, StreamingHost};
+use caskade_core::streaming::{
+    HostOutcome, HostStatus, StreamingHost,
+    hosts::{StreamHost, StreamHosts},
+};
 use tauri::{AppHandle, Manager, Runtime, State};
 
 /// The host's state: off, setting up, starting, ready or needing attention.
@@ -28,6 +31,51 @@ pub async fn streaming_set_hosting(
         host.disable().await
     };
     outcome.map_err(report)
+}
+
+/// Hosts through the streaming someone already set up on this device
+/// (after `streaming_set_hosting` answered `existingFound`), with its web
+/// user name and password, which go to the keychain once they work. Nothing
+/// is installed, and only Caskade's own games change in it.
+#[tauri::command]
+#[specta::specta]
+pub async fn streaming_use_existing(
+    user: String,
+    password: String,
+    host: State<'_, StreamingHost>,
+) -> Result<HostOutcome, CommandError> {
+    let host = host.inner().clone();
+    host.use_existing(caskade_core::streaming::secrets::Credentials { user, password })
+        .await
+        .map_err(report)
+}
+
+/// The devices this one can stream from: found on the network, added by
+/// address or paired, each ready, busy, asleep or unreachable.
+#[tauri::command]
+#[specta::specta]
+pub fn streaming_hosts(hosts: State<'_, StreamHosts>) -> Vec<StreamHost> {
+    hosts.hosts()
+}
+
+/// Adds a device to stream from by its address (a name or an IP), for
+/// networks where it isn't found by itself, and looks for it at once.
+#[tauri::command]
+#[specta::specta]
+pub async fn streaming_add_host(
+    address: String,
+    hosts: State<'_, StreamHosts>,
+) -> Result<Vec<StreamHost>, CommandError> {
+    let hosts = hosts.inner().clone();
+    hosts.add_address(&address).await.map_err(report)?;
+    hosts.refresh().await.map_err(report)?;
+    Ok(hosts.hosts())
+}
+
+/// Looks for devices to stream from while Caskade runs (#262).
+pub fn watch_hosts<R: Runtime>(app: &AppHandle<R>, hosts: StreamHosts) {
+    app.manage(hosts.clone());
+    crate::background::supervise("streaming hosts", move || hosts.watch());
 }
 
 /// Runs the host at start when hosting is on.

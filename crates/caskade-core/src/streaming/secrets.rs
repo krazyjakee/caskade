@@ -14,6 +14,8 @@ use std::sync::Arc;
 pub const KEYCHAIN_SERVICE: &str = "dev.caskade.streaming";
 /// The entry of Caskade's own host.
 const HOST: &str = "host";
+/// The entry of a user's own host Caskade was allowed to use (#258).
+const EXISTING: &str = "existing";
 
 /// A user name and password for the host's web API.
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -74,6 +76,21 @@ impl HostSecrets {
     pub async fn set(&self, credentials: &Credentials) -> Result<()> {
         self.store
             .set(HOST, &serde_json::to_string(credentials)?)
+            .await
+    }
+
+    /// The credentials of the user's own host Caskade uses.
+    pub async fn existing(&self) -> Result<Option<Credentials>> {
+        Ok(self
+            .store
+            .get(EXISTING)
+            .await?
+            .and_then(|text| serde_json::from_str(&text).ok()))
+    }
+
+    pub async fn set_existing(&self, credentials: &Credentials) -> Result<()> {
+        self.store
+            .set(EXISTING, &serde_json::to_string(credentials)?)
             .await
     }
 }

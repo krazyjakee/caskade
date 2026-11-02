@@ -52,6 +52,7 @@ async fn live_linux_host_answers_pinned_and_stops_with_caskade() {
         Elevation::with_runner(Arc::new(Allowed), OperatingSystem::Linux, &paths),
         settings,
         Parts {
+            existing: Arc::new(|| None),
             os: OperatingSystem::Linux,
             runner: Arc::new(ChildRunner::new(paths.data.join("streaming/run.json"))),
             secrets: secrets.clone(),
@@ -93,6 +94,41 @@ async fn live_linux_host_answers_pinned_and_stops_with_caskade() {
     assert!(wrong.version().await.is_err());
     // It wrote nothing under the user's own Sunshine folder.
     assert_eq!(home_config.exists(), had_home_config);
+
+    // Another device finds it on the network (#262): mDNS through the
+    // system's responder, named by its /serverinfo as Caskade set it.
+    let hosts = caskade_core::streaming::hosts::StreamHosts::new(
+        LibraryStore::in_memory().await.unwrap(),
+        Bus::default(),
+        {
+            let store = LibraryStore::in_memory().await.unwrap();
+            let settings = SettingsService::new(store);
+            settings.register_core(&paths).unwrap();
+            settings
+        },
+        caskade_core::streaming::StreamingClient::new(ManagedTools::new(
+            LibraryStore::in_memory().await.unwrap(),
+            Bus::default(),
+            caskade_sources::tools::catalog().unwrap(),
+            &AppPaths::under(&temp.path().join("client")),
+        )),
+    )
+    .unwrap();
+    let mut found = Vec::new();
+    for _ in 0..10 {
+        hosts.refresh().await.unwrap();
+        found = hosts.hosts();
+        if found.iter().any(|host| host.name == "Caskade live test") {
+            break;
+        }
+        tokio::time::sleep(Duration::from_secs(1)).await;
+    }
+    println!("found on the network: {found:?}");
+    assert!(
+        found.iter().any(|host| host.name == "Caskade live test"
+            && host.reach == caskade_core::streaming::hosts::HostReach::Ready),
+        "{found:?}"
+    );
 
     host.shutdown();
     tokio::time::sleep(Duration::from_millis(500)).await;

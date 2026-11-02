@@ -334,6 +334,16 @@ pub fn run() {
                         &setup_paths,
                     ),
                 );
+                // Devices to stream from (#262), through Caskade's own client.
+                match caskade_core::streaming::hosts::StreamHosts::new(
+                    store.clone(),
+                    bus.clone(),
+                    settings.clone(),
+                    caskade_core::streaming::StreamingClient::new(tools.clone()),
+                ) {
+                    Ok(hosts) => commands::streaming::watch_hosts(app.handle(), hosts),
+                    Err(error) => tracing::error!(%error, "streaming hosts unavailable"),
+                }
                 app.manage(tools);
             }
             Err(error) => tracing::error!(%error, "shipped tool definitions are invalid"),

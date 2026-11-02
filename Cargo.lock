@@ -1147,6 +1147,7 @@ dependencies = [
  "flate2",
  "fs2",
  "globset",
+ "hickory-proto",
  "icu_collator",
  "icu_locale_core",
  "icu_normalizer",

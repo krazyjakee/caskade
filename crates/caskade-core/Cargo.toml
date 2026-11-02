@@ -11,7 +11,7 @@ rust-version.workspace = true
 autotests = false
 [features]
 default = ["net"]
-net = ["dep:caskade-sync", "dep:reqwest", "dep:rustls", "dep:flate2", "dep:scraper", "caskade-installer/fetch", "caskade-installer/torrent"]
+net = ["dep:caskade-sync", "dep:reqwest", "dep:rustls", "dep:hickory-proto", "dep:flate2", "dep:scraper", "caskade-installer/fetch", "caskade-installer/torrent"]
 
 [dependencies]
 caskade-jobs = { path = "../caskade-jobs" }
@@ -73,6 +73,8 @@ reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"
 # The streaming host's API, pinned to its own certificate (`streaming::api`);
 # reqwest's rustls, so it takes the configuration.
 rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"], optional = true }
+# Finding streaming hosts with mDNS (`streaming::mdns`); iroh's version.
+hickory-proto = { version = "0.26", default-features = false, features = ["std"], optional = true }
 # Gzip answers from the metadata server; the backend zip already uses.
 flate2 = { version = "1", default-features = false, features = ["rust_backend"], optional = true }
 # Web games' pages (WEB-GAMES-PLAN §4), same pin as the installer.

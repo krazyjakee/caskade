@@ -1,0 +1,338 @@
+//! Finding hosts with a fake mDNS responder and `/serverinfo` from
+//! wiremock, and a paired host's apps joining library games. The XML and
+//! the settings lines are Sunshine v2026.914's and moonlight-qt 6.2.0's.
+
+use super::*;
+use crate::{
+    AppPaths,
+    managed::{ManagedTools, ToolCatalog},
+    model::Game,
+};
+use hickory_proto::{
+    op::{Message, MessageType, OpCode},
+    rr::{
+        Name, Record,
+        rdata::{A, PTR, SRV},
+    },
+};
+use std::net::{Ipv4Addr, SocketAddr};
+use wiremock::{
+    Mock, MockServer, ResponseTemplate,
+    matchers::{method, path},
+};
+
+const SERVERINFO: &str = r#"<?xml version="1.0" encoding="utf-8"?>
+<root status_code="200"><hostname>Den</hostname><appversion>7.1.431.-1</appversion><GfeVersion>3.23.0.74</GfeVersion><uniqueid>A466B6A4-3EC7-8C2E-629E-021AC1F5E209</uniqueid><HttpsPort>47984</HttpsPort><ExternalPort>47989</ExternalPort><mac>00:00:00:00:00:00</mac><LocalIP>127.0.0.1</LocalIP><PairStatus>0</PairStatus><currentgame>0</currentgame><state>SUNSHINE_SERVER_FREE</state></root>"#;
+
+const PAIRED: &str = r"[General]
+uniqueid=37460f2e7934c368
+
+[hosts]
+1\apps\1\appcollector=false
+1\apps\1\id=1285314453
+1\apps\1\name=Hades
+1\apps\2\id=88
+1\apps\2\name=Celeste
+1\apps\size=2
+1\hostname=Den
+1\localaddress=
+1\mac=@ByteArray(\x12\x34\x56\x78\x9a\xbc)
+1\manualaddress=127.0.0.1
+1\uuid=A466B6A4-3EC7-8C2E-629E-021AC1F5E209
+size=1
+";
+
+#[test]
+fn serverinfo_names_the_host_and_says_when_it_is_busy() {
+    let info = server_info(SERVERINFO).unwrap();
+    assert_eq!(info.name, "Den");
+    assert_eq!(info.id, "A466B6A4-3EC7-8C2E-629E-021AC1F5E209");
+    assert!(!info.busy);
+    let busy = SERVERINFO
+        .replace("SUNSHINE_SERVER_FREE", "SUNSHINE_SERVER_BUSY")
+        .replace("<currentgame>0", "<currentgame>881448767");
+    assert!(server_info(&busy).unwrap().busy);
+    assert!(server_info("<root><hostname>x</hostname></root>").is_none());
+}
+
+#[test]
+fn paired_hosts_and_their_apps_come_from_the_clients_state() {
+    let hosts = paired_hosts(PAIRED);
+    assert_eq!(hosts.len(), 1);
+    let den = &hosts[0];
+    assert_eq!(den.id, "A466B6A4-3EC7-8C2E-629E-021AC1F5E209");
+    assert_eq!(den.name, "Den");
+    assert_eq!(den.address.as_deref(), Some("127.0.0.1"));
+    assert!(den.wakeable);
+    let names: Vec<&str> = den.apps.iter().map(|app| app.name.as_str()).collect();
+    assert_eq!(names, ["Hades", "Celeste"]);
+    assert!(
+        !paired_hosts(&PAIRED.replace(r"@ByteArray(\x12\x34\x56\x78\x9a\xbc)", "@ByteArray()"))[0]
+            .wakeable
+    );
+}
+
+/// An mDNS answer for host `instance` at `address`, HTTP on `port`.
+fn answer(instance: &str, address: Ipv4Addr, port: u16) -> Vec<u8> {
+    let service = Name::from_ascii(mdns::SERVICE).unwrap();
+    let full = Name::from_ascii(format!("{instance}.{}", mdns::SERVICE)).unwrap();
+    let target = Name::from_ascii(format!("{instance}.local.")).unwrap();
+    let mut message = Message::new(0, MessageType::Response, OpCode::Query);
+    message.answers.push(Record::from_rdata(
+        service,
+        120,
+        RData::PTR(PTR(full.clone())),
+    ));
+    message.additionals.push(Record::from_rdata(
+        full,
+        120,
+        RData::SRV(SRV::new(0, 0, port, target.clone())),
+    ));
+    message
+        .additionals
+        .push(Record::from_rdata(target, 120, RData::A(A(address))));
+    message.to_vec().unwrap()
+}
+
+use hickory_proto::rr::RData;
+
+#[test]
+fn mdns_answers_make_hosts() {
+    let found = mdns::hosts(&[(
+        answer("krazy", Ipv4Addr::new(192, 168, 1, 7), 47989),
+        IpAddr::from([192, 168, 1, 7]),
+    )]);
+    assert_eq!(
+        found,
+        [mdns::Found {
+            instance: "krazy".into(),
+            address: IpAddr::from([192, 168, 1, 7]),
+            port: 47989,
+        }]
+    );
+    // A question, or noise, is no host.
+    assert!(mdns::hosts(&[(mdns::query().unwrap(), IpAddr::from([127, 0, 0, 1]))]).is_empty());
+    assert!(mdns::hosts(&[(vec![1, 2, 3], IpAddr::from([127, 0, 0, 1]))]).is_empty());
+}
+
+/// Answers every mDNS question with `answer` while `on` is set.
+async fn responder(answer: Vec<u8>, on: Arc<std::sync::atomic::AtomicBool>) -> SocketAddr {
+    let socket = tokio::net::UdpSocket::bind("127.0.0.1:0").await.unwrap();
+    let address = socket.local_addr().unwrap();
+    tokio::spawn(async move {
+        let mut buffer = vec![0_u8; 2048];
+        while let Ok((_, from)) = socket.recv_from(&mut buffer).await {
+            if on.load(std::sync::atomic::Ordering::SeqCst) {
+                let _ = socket.send_to(&answer, from).await;
+            }
+        }
+    });
+    address
+}
+
+struct Fixture {
+    temp: tempfile::TempDir,
+    store: LibraryStore,
+    hosts: StreamHosts,
+    serverinfo: MockServer,
+    on: Arc<std::sync::atomic::AtomicBool>,
+}
+
+async fn fixture(paired: Option<&str>) -> Fixture {
+    let temp = tempfile::tempdir().unwrap();
+    let paths = AppPaths::under(temp.path());
+    let store = LibraryStore::in_memory().await.unwrap();
+    let settings = SettingsService::new(store.clone());
+    settings.register_core(&paths).unwrap();
+    let serverinfo = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/serverinfo"))
+        .respond_with(ResponseTemplate::new(200).set_body_string(SERVERINFO))
+        .mount(&serverinfo)
+        .await;
+    let on = Arc::new(std::sync::atomic::AtomicBool::new(true));
+    let mdns = responder(
+        answer("krazy", Ipv4Addr::LOCALHOST, serverinfo.address().port()),
+        on.clone(),
+    )
+    .await;
+    let tools = ManagedTools::new(
+        store.clone(),
+        Bus::default(),
+        ToolCatalog::default(),
+        &paths,
+    );
+    let state = temp.path().join("client-state");
+    std::fs::create_dir_all(state.join(super::SETTINGS_DIR)).unwrap();
+    if let Some(paired) = paired {
+        std::fs::write(
+            state.join(super::SETTINGS_DIR).join(super::SETTINGS_FILE),
+            paired,
+        )
+        .unwrap();
+    }
+    let hosts = StreamHosts::with(
+        store.clone(),
+        Bus::default(),
+        settings,
+        StreamingClient::new(tools),
+        mdns,
+        HostTiming {
+            listen: Duration::from_millis(300),
+            answer: Duration::from_millis(500),
+            every: Duration::from_millis(100),
+            apps_every: Duration::from_secs(3600),
+        },
+    )
+    .unwrap()
+    .with_client_state(state);
+    Fixture {
+        temp,
+        store,
+        hosts,
+        serverinfo,
+        on,
+    }
+}
+
+#[tokio::test]
+async fn a_host_on_the_network_appears_and_one_that_leaves_is_unreachable() {
+    let f = fixture(None).await;
+    let started = Instant::now();
+    f.hosts.refresh().await.unwrap();
+    let hosts = f.hosts.hosts();
+    assert_eq!(hosts.len(), 1, "{hosts:?}");
+    assert_eq!(hosts[0].name, "Den", "named by /serverinfo, not mDNS");
+    assert_eq!(hosts[0].reach, HostReach::Ready);
+    assert!(!hosts[0].paired);
+    assert!(started.elapsed() < Duration::from_secs(3), "within seconds");
+
+    // It leaves: no answers, no /serverinfo.
+    f.on.store(false, std::sync::atomic::Ordering::SeqCst);
+    f.serverinfo.reset().await;
+    f.hosts.refresh().await.unwrap();
+    let hosts = f.hosts.hosts();
+    assert_eq!(hosts[0].reach, HostReach::Unreachable);
+    let _ = &f.temp;
+}
+
+#[tokio::test]
+async fn a_typed_address_is_kept_and_asked() {
+    let f = fixture(None).await;
+    f.on.store(false, std::sync::atomic::Ordering::SeqCst);
+    assert!(f.hosts.add_address("not an address!").await.is_err());
+    // A host mDNS doesn't reach, typed in: here, Den's test port is
+    // reachable only through mDNS, so a typed host that doesn't answer
+    // isn't listed.
+    f.hosts.add_address("192.0.2.1").await.unwrap();
+    f.hosts.add_address("192.0.2.1").await.unwrap();
+    let settings: StreamingSettings = f.hosts.inner.settings.read_or_default(SETTINGS).await;
+    assert_eq!(settings.addresses, ["192.0.2.1"]);
+    f.hosts.refresh().await.unwrap();
+    assert!(f.hosts.hosts().is_empty());
+}
+
+#[tokio::test]
+async fn a_paired_hosts_games_join_the_library_and_leave_with_it() {
+    let f = fixture(Some(PAIRED)).await;
+    let hades = Game::new("HADES");
+    f.store.upsert_game(&hades).await.unwrap();
+    let steam = crate::model::GameEntry::new(&hades.id, "steam".to_owned().into(), "1145360");
+    f.store.upsert_entry(&steam).await.unwrap();
+    f.hosts.refresh().await.unwrap();
+    let den = &f.hosts.hosts()[0];
+    assert!(den.paired);
+    assert_eq!(den.games, 2);
+
+    // Hades joins the library's Hades (title case aside); Celeste becomes a
+    // streaming-only game.
+    let entries: Vec<_> = f
+        .store
+        .entries_for_game(&hades.id)
+        .await
+        .unwrap()
+        .into_iter()
+        .filter(|entry| entry.source_id.as_str() != "steam")
+        .collect();
+    assert_eq!(entries.len(), 1);
+    assert_eq!(
+        entries[0].source_id.as_str(),
+        "stream:A466B6A4-3EC7-8C2E-629E-021AC1F5E209"
+    );
+    assert_eq!(entries[0].external_id, "1285314453");
+    assert_eq!(entries[0].state, crate::model::InstallState::Partial);
+    assert!(entries[0].launch.is_none());
+    let all = f.store.list_games(&Default::default()).await.unwrap();
+    let titles: Vec<&str> = all.items.iter().map(|game| game.title.as_str()).collect();
+    assert!(titles.contains(&"Celeste"), "{titles:?}");
+
+    // Again: nothing changes.
+    let again = f
+        .store
+        .sync_stream_apps(
+            "A466B6A4-3EC7-8C2E-629E-021AC1F5E209",
+            &paired_hosts(PAIRED)[0].apps,
+        )
+        .await
+        .unwrap();
+    assert_eq!(again, crate::db::StreamSync::default());
+
+    // The host stops offering both: Celeste's streaming-only game goes; the
+    // library's Hades stays with its own release.
+    let fewer = f
+        .store
+        .sync_stream_apps("A466B6A4-3EC7-8C2E-629E-021AC1F5E209", &[])
+        .await
+        .unwrap();
+    assert_eq!(fewer.removed.len(), 1);
+    assert_eq!(fewer.updated, std::slice::from_ref(&hades.id));
+    assert!(f.store.game(&hades.id).await.unwrap().is_some());
+    let left = f.store.entries_for_game(&hades.id).await.unwrap();
+    assert_eq!(left.len(), 1);
+    assert_eq!(left[0].source_id.as_str(), "steam");
+
+    // Unreachable now, but wakeable: asleep.
+    f.on.store(false, std::sync::atomic::Ordering::SeqCst);
+    f.serverinfo.reset().await;
+    f.hosts.refresh().await.unwrap();
+    assert_eq!(f.hosts.hosts()[0].reach, HostReach::Asleep);
+}
+
+#[tokio::test]
+async fn hidden_games_and_title_only_records_are_not_joined() {
+    let f = fixture(None).await;
+    let mut hidden = Game::new("Hades");
+    hidden.hidden = true;
+    f.store.upsert_game(&hidden).await.unwrap();
+    let release = crate::model::GameEntry::new(&hidden.id, "steam".to_owned().into(), "1");
+    f.store.upsert_entry(&release).await.unwrap();
+    // A title-only record (#174) isn't joined either: it would go with the app.
+    let wished = Game::new("Celeste");
+    f.store.upsert_game(&wished).await.unwrap();
+    let apps = [
+        StreamApp {
+            id: "1".into(),
+            name: "Hades".into(),
+        },
+        StreamApp {
+            id: "2".into(),
+            name: "Celeste".into(),
+        },
+    ];
+    let sync = f.store.sync_stream_apps("host", &apps).await.unwrap();
+    assert_eq!(sync.added.len(), 2, "games of their own");
+    assert_eq!(f.store.entries_for_game(&hidden.id).await.unwrap().len(), 1);
+    assert!(
+        f.store
+            .entries_for_game(&wished.id)
+            .await
+            .unwrap()
+            .is_empty()
+    );
+    let gone = f.store.sync_stream_apps("host", &[]).await.unwrap();
+    assert_eq!(gone.removed.len(), 2);
+    assert!(
+        f.store.game(&wished.id).await.unwrap().is_some(),
+        "the record stays"
+    );
+}

@@ -87,6 +87,9 @@ pub enum HostOutcome {
     Cancelled,
     /// The OS refused the prompt: nothing changed.
     Refused,
+    /// Someone already set streaming up on this device (#258): nothing
+    /// was installed. Use it with `use_existing`, or leave hosting off.
+    ExistingFound,
 }
 
 /// How often things are looked at (shorter in tests).
@@ -120,6 +123,8 @@ struct Inner {
     settings: SettingsService,
     secrets: HostSecrets,
     runner: Arc<dyn HostRunner>,
+    /// Finds a user's own host ([`crate::streaming::existing`]).
+    existing: Arc<dyn Fn() -> Option<crate::streaming::existing::Existing> + Send + Sync>,
     os: OperatingSystem,
     timing: Timing,
     /// Where the host's API answers.
@@ -165,6 +170,7 @@ impl StreamingHost {
             Parts {
                 os,
                 runner,
+                existing: Arc::new(crate::streaming::existing::detect_here),
                 secrets: HostSecrets::keychain(),
                 timing: Timing::default(),
                 #[cfg(feature = "net")]
@@ -188,6 +194,7 @@ impl StreamingHost {
                 settings,
                 secrets: parts.secrets,
                 runner: parts.runner,
+                existing: parts.existing,
                 os: parts.os,
                 timing: parts.timing,
                 #[cfg(feature = "net")]
@@ -238,9 +245,24 @@ impl StreamingHost {
             .hosting
     }
 
+    /// Whether hosting goes through a user's own host (#258).
+    #[cfg(feature = "net")]
+    async fn existing_mode(&self) -> bool {
+        self.inner
+            .settings
+            .read_or_default::<StreamingSettings>(SETTINGS)
+            .await
+            .existing
+    }
+
     async fn set_hosting(&self, hosting: bool) -> Result<()> {
+        self.set_mode(hosting, false).await
+    }
+
+    async fn set_mode(&self, hosting: bool, existing: bool) -> Result<()> {
         let mut settings: StreamingSettings = self.inner.settings.read_or_default(SETTINGS).await;
         settings.hosting = hosting;
+        settings.existing = existing;
         self.inner
             .settings
             .set(SETTINGS, serde_json::to_value(settings)?, None)
@@ -353,6 +375,10 @@ impl StreamingHost {
                 "this device can't host game streams"
             )));
         }
+        // A user's own host: offer it instead of installing a second.
+        if self.inner.tools.managed(TOOL).await?.is_none() && (self.inner.existing)().is_some() {
+            return Ok(HostOutcome::ExistingFound);
+        }
         self.set_status(HostState::SettingUp, None, None);
         let prepared = async {
             let program = self.program(true).await?;
@@ -392,6 +418,16 @@ impl StreamingHost {
     /// credentials and pairings stay. A cancelled prompt leaves it on.
     pub async fn disable(&self) -> Result<HostOutcome> {
         let _switching = self.inner.switching.lock().await;
+        #[cfg(feature = "net")]
+        if self.existing_mode().await {
+            // Only Caskade's apps go; the host and its other apps stay.
+            let api = self.api().await?;
+            let caskade = std::env::current_exe()?;
+            crate::streaming::publish::withdraw(&api, &caskade).await?;
+            self.set_mode(false, false).await?;
+            self.set_status(HostState::Off, None, None);
+            return Ok(HostOutcome::Off);
+        }
         self.halt().await;
         let outcome = match self.inner.elevation.undo(Plan::StreamingHost).await {
             Ok(outcome) => outcome,
@@ -428,7 +464,49 @@ impl StreamingHost {
         if !self.hosting().await {
             return;
         }
+        #[cfg(feature = "net")]
+        if self.existing_mode().await {
+            // Not Caskade's to run: only whether it answers.
+            match self.until_ready().await {
+                Ok(version) => self.set_status(HostState::Ready, version, None),
+                Err(_) => self.set_status(HostState::NeedsAttention, None, Some(not_working())),
+            }
+            return;
+        }
         self.resume().await;
+    }
+
+    /// Hosts through the user's own host (#258) with its web credentials,
+    /// once they work against its API (pinned to its own certificate).
+    /// Nothing is installed and its settings and apps stay as they are.
+    #[cfg(feature = "net")]
+    pub async fn use_existing(&self, credentials: Credentials) -> Result<HostOutcome> {
+        let _switching = self.inner.switching.lock().await;
+        let cert = (self.inner.existing)()
+            .and_then(|existing| existing.cert)
+            .ok_or_else(|| {
+                Error::Invalid(crate::tr!(
+                    "Caskade can't find the certificate of the streaming already set up here"
+                ))
+            })?;
+        let api = crate::streaming::api::HostApi::with_cert_file(
+            self.inner.api_base.clone(),
+            credentials.clone(),
+            &cert,
+        )?;
+        let version = match api.version().await {
+            Ok(version) => version,
+            Err(Error::Forbidden(_)) => {
+                return Err(Error::Forbidden(crate::tr!(
+                    "That user name and password didn't work"
+                )));
+            }
+            Err(error) => return Err(error),
+        };
+        self.inner.secrets.set_existing(&credentials).await?;
+        self.set_mode(true, true).await?;
+        self.set_status(HostState::Ready, Some(version), None);
+        Ok(HostOutcome::On)
     }
 
     /// Starts it again after a pause, with its configuration rewritten.
@@ -522,21 +600,7 @@ impl StreamingHost {
         {
             let deadline = Instant::now() + self.inner.timing.ready_wait;
             loop {
-                let answer = async {
-                    let credentials = self
-                        .inner
-                        .secrets
-                        .get()
-                        .await?
-                        .ok_or_else(|| Error::Invalid(not_working()))?;
-                    let api = crate::streaming::api::HostApi::with_cert_file(
-                        self.inner.api_base.clone(),
-                        credentials,
-                        &self.running_files()?.cert(),
-                    )?;
-                    api.version().await
-                }
-                .await;
+                let answer = async { self.api().await?.version().await }.await;
                 match answer {
                     Ok(version) => return Ok(Some(version)),
                     // A refused sign-in won't change by waiting.
@@ -578,16 +642,22 @@ impl StreamingHost {
     /// The running host's API (publishing games, pairing).
     #[cfg(feature = "net")]
     pub async fn api(&self) -> Result<crate::streaming::api::HostApi> {
-        let credentials = self
-            .inner
-            .secrets
-            .get()
-            .await?
-            .ok_or_else(|| Error::Invalid(not_working()))?;
+        let (credentials, cert) = if self.existing_mode().await {
+            let cert = (self.inner.existing)()
+                .and_then(|existing| existing.cert)
+                .ok_or_else(|| Error::Invalid(not_working()))?;
+            (self.inner.secrets.existing().await?, cert)
+        } else {
+            (
+                self.inner.secrets.get().await?,
+                self.running_files()?.cert(),
+            )
+        };
+        let credentials = credentials.ok_or_else(|| Error::Invalid(not_working()))?;
         crate::streaming::api::HostApi::with_cert_file(
             self.inner.api_base.clone(),
             credentials,
-            &self.running_files()?.cert(),
+            &cert,
         )
     }
 }
@@ -596,6 +666,7 @@ impl StreamingHost {
 pub struct Parts {
     pub os: OperatingSystem,
     pub runner: Arc<dyn HostRunner>,
+    pub existing: Arc<dyn Fn() -> Option<crate::streaming::existing::Existing> + Send + Sync>,
     pub secrets: HostSecrets,
     pub timing: Timing,
     #[cfg(feature = "net")]

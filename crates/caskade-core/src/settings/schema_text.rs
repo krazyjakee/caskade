@@ -85,6 +85,16 @@ fn marked() -> Vec<crate::i18n::Message> {
             "settings",
             "Other devices on the local network can play this device's games."
         ),
+        msgp!("settings", "Devices added by address"),
+        msgp!(
+            "settings",
+            "Devices to stream from that aren't found on the network by themselves."
+        ),
+        msgp!("settings", "Use the streaming already set up on this device"),
+        msgp!(
+            "settings",
+            "Host through the streaming program someone already installed here, changing only Caskade's games in it."
+        ),
         // core.saves
         msgp!("settings", "Save manifest URL"),
         msgp!(

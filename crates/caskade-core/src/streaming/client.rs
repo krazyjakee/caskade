@@ -138,6 +138,11 @@ impl StreamingClient {
         }
     }
 
+    /// The installed client, if any.
+    pub async fn installed(&self) -> Result<Option<EmulatorInstall>> {
+        self.tools.find(TOOL).await
+    }
+
     /// The working directory for `install`.
     pub fn state_dir(&self, install: &EmulatorInstall) -> Result<PathBuf> {
         match install {

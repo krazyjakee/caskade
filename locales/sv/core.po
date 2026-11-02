@@ -3082,6 +3082,26 @@ msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
+msgid "Devices added by address"
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Devices to stream from that aren't found on the network by themselves."
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Use the streaming already set up on this device"
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Host through the streaming program someone already installed here, changing only Caskade's games in it."
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
 msgid "Save manifest URL"
 msgstr ""
 
@@ -3666,8 +3686,20 @@ msgstr ""
 msgid "this device can't host game streams"
 msgstr ""
 
+#: crates/caskade-core/src/streaming/host/mod.rs
+msgid "Caskade can't find the certificate of the streaming already set up here"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/host/mod.rs
+msgid "That user name and password didn't work"
+msgstr ""
+
 #: crates/caskade-core/src/streaming/host/process.rs
 msgid "the streaming host didn't start"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/hosts.rs
+msgid "{address} isn't a device's address"
 msgstr ""
 
 #: crates/caskade-core/src/sync/exchange.rs

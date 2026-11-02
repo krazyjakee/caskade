@@ -9124,6 +9124,20 @@ msgstr "Butikskonton"
 msgid "Store sign-ins (connect each device)"
 msgstr ""
 
+#. {device} is another device's name
+#: apps/desktop/src/api/streaming.ts
+msgid "Stream from {device}"
+msgstr ""
+
+#: apps/desktop/src/api/streaming.ts
+msgid "Stream from another device"
+msgstr ""
+
+#: apps/desktop/src/api/presentation.ts
+msgctxt "library source"
+msgid "Streaming"
+msgstr ""
+
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
 msgid "Submitting…"
 msgstr "Skickar in…"

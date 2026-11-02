@@ -55,6 +55,7 @@ fn closing_to_the_tray_keeps_the_host_and_quitting_stops_it() {
         Elevation::new(&paths),
         settings.clone(),
         Parts {
+            existing: Arc::new(|| None),
             os: OperatingSystem::Linux,
             runner: fake.clone(),
             secrets: HostSecrets::memory(),

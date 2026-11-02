@@ -23,6 +23,7 @@ import {
   formatSource,
 } from "../../api/presentation";
 import { useUnavailableStorageEntries } from "../../api/StorageProvider";
+import { streamReleaseName, useStreamHosts } from "../../api/streaming";
 import type { GameEntry } from "../../api/types";
 import { AgeRatingLabel } from "../../components/AgeRatingLabel";
 import {
@@ -118,9 +119,12 @@ function PlayButton({
 function useReleaseNames(entries: readonly GameEntry[]) {
   const emulated = entries.filter((entry) => entry.emulated);
   const emulations = useGameEmulations(emulated.map((entry) => entry.id));
+  const hosts = useStreamHosts().data ?? [];
   const base = entries.map(
     (entry) =>
-      emulations[emulated.indexOf(entry)]?.data?.platform?.name ?? formatSource(entry.source),
+      streamReleaseName(entry.source, hosts) ??
+      emulations[emulated.indexOf(entry)]?.data?.platform?.name ??
+      formatSource(entry.source),
   );
   return new Map(
     entries.map((entry, index) => {

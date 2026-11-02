@@ -317,6 +317,14 @@ pub struct StreamingSettings {
     #[schemars(title = "Let other devices stream games from this one")]
     /// Other devices on the local network can play this device's games.
     pub hosting: bool,
+    #[serde(default)]
+    #[schemars(title = "Devices added by address")]
+    /// Devices to stream from that aren't found on the network by themselves.
+    pub addresses: Vec<String>,
+    #[serde(default)]
+    #[schemars(title = "Use the streaming already set up on this device")]
+    /// Host through the streaming program someone already installed here, changing only Caskade's games in it.
+    pub existing: bool,
 }
 
 /// First-run setup: whether it has been done, and its sounds.

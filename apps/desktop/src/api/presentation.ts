@@ -151,6 +151,7 @@ export function formatSource(source: string): string {
   if (source.startsWith("plugin:")) return source.slice("plugin:".length);
   if (source.startsWith("store:"))
     return t({ message: "Store account", context: "library source" });
+  if (source.startsWith("stream:")) return t({ message: "Streaming", context: "library source" });
   switch (source) {
     case "steam.shortcuts":
       // Games added to Steam by hand.
