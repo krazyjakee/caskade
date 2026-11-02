@@ -5,16 +5,21 @@ use std::net::{Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
 use std::sync::Arc;
 use std::time::Duration;
 
+use iroh::Watcher as _;
+
 use async_trait::async_trait;
 use iroh::endpoint::{Connection, VarInt, presets};
 use iroh::protocol::{AcceptError, ProtocolHandler, Router};
 use iroh::{Endpoint, EndpointAddr, EndpointId, RelayMode};
 
 use crate::ALPN;
+use crate::device::{DeviceInfo, DeviceKind};
 use crate::error::{Error, Result};
 use crate::frame::{FrameReader, FrameWriter};
 use crate::grant::Grant;
 use crate::identity::Identity;
+use crate::lan::{Lan, Nearby};
+use crate::link::{Link, Links};
 use crate::opening::{self, Purpose};
 
 /// QUIC application close codes, with fixed reasons: nothing a peer reads
@@ -25,16 +30,75 @@ mod close {
     pub(super) const REFUSED_REASON: &[u8] = b"refused";
 }
 
-/// Which transports the endpoint has.
+/// Which relays an endpoint may use.
+#[derive(Debug, Clone)]
+pub enum Relays {
+    /// n0's relays, used only when nothing direct works.
+    N0,
+    /// None: Never use relays. Direct paths, over the internet too, still
+    /// work; a device only a relay could reach stays offline.
+    Never,
+    /// A relay of the test's own (iroh's `test_utils::run_relay_server`),
+    /// with its self-signed certificate accepted.
+    #[cfg(feature = "test-utils")]
+    Local(iroh::RelayMap),
+}
+
+/// Which IP sockets an endpoint binds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Reach {
-    /// What the app uses: n0's address lookup, and n0's relays when `relays`
-    /// is true. `port` fixes the UDP port to listen on (for firewall rules);
-    /// `None` lets the OS pick.
-    Network { relays: bool, port: Option<u16> },
-    /// One socket on 127.0.0.1, no relays and no address lookup. Tests use it:
-    /// nothing bound this way can leave the machine.
-    Loopback,
+pub enum Ip {
+    /// Every interface. `port` fixes the UDP port (for firewall rules; Windows
+    /// asks to allow incoming UDP the first time); `None` lets the OS pick.
+    Any { port: Option<u16> },
+    /// 127.0.0.1 only: nothing bound this way leaves the machine.
+    Loopback { port: Option<u16> },
+    /// No IP sockets: relays only.
+    Off,
+}
+
+/// How far an endpoint reaches.
+#[derive(Debug, Clone)]
+pub struct Reach {
+    pub relays: Relays,
+    pub ip: Ip,
+    /// n0's DNS/pkarr address lookup: publishes this endpoint's addresses
+    /// (never its device info) and finds other devices' over the internet.
+    pub internet_lookup: bool,
+    /// mDNS on the local network under this service name, announcing
+    /// [`Config::device`]. `None` turns local discovery off.
+    pub lan: Option<String>,
+}
+
+impl Reach {
+    /// What the app uses: local discovery first, n0's address lookup, and
+    /// n0's relays unless `never_relay`.
+    pub fn network(never_relay: bool, port: Option<u16>) -> Self {
+        Self {
+            relays: if never_relay {
+                Relays::Never
+            } else {
+                Relays::N0
+            },
+            ip: Ip::Any { port },
+            internet_lookup: true,
+            lan: Some(crate::lan::SERVICE.to_owned()),
+        }
+    }
+
+    /// One socket on 127.0.0.1, no relays and no address lookup, for tests.
+    pub fn loopback() -> Self {
+        Self {
+            relays: Relays::Never,
+            ip: Ip::Loopback { port: None },
+            internet_lookup: false,
+            lan: None,
+        }
+    }
+
+    /// Whether this endpoint may use a relay.
+    pub fn relays_allowed(&self) -> bool {
+        !matches!(self.relays, Relays::Never)
+    }
 }
 
 /// How an endpoint is set up.
@@ -43,6 +107,8 @@ pub struct Config {
     /// The identity to present. `None` makes a throwaway one, for tests.
     pub identity: Option<Identity>,
     pub reach: Reach,
+    /// This device's name, kind and OS, announced on the local network.
+    pub device: DeviceInfo,
     /// How long a peer gets for each step of the opening.
     pub open_timeout: Duration,
     /// iroh-blobs on the same endpoint, under `iroh_blobs::ALPN`. Every ALPN
@@ -54,10 +120,8 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             identity: None,
-            reach: Reach::Network {
-                relays: true,
-                port: None,
-            },
+            reach: Reach::network(false, None),
+            device: DeviceInfo::new("Caskade", DeviceKind::Desktop),
             open_timeout: Duration::from_secs(10),
             blobs: None,
         }
@@ -69,6 +133,7 @@ impl fmt::Debug for Config {
         f.debug_struct("Config")
             .field("identity", &self.identity)
             .field("reach", &self.reach)
+            .field("device", &self.device)
             .field("open_timeout", &self.open_timeout)
             .field("blobs", &self.blobs.is_some())
             .finish()
@@ -79,43 +144,48 @@ impl Config {
     /// Loopback only, for tests.
     pub fn loopback() -> Self {
         Self {
-            reach: Reach::Loopback,
+            reach: Reach::loopback(),
             ..Self::default()
         }
     }
 
     async fn bind(&self) -> Result<Endpoint> {
-        let builder = match self.reach {
-            Reach::Network { relays, port } => {
-                let builder = if relays {
-                    Endpoint::builder(presets::N0)
-                } else {
-                    Endpoint::builder(presets::N0DisableRelay)
-                };
-                match port {
-                    Some(port) => builder
-                        .clear_ip_transports()
-                        .bind_addr(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, port))
-                        .and_then(|builder| {
-                            builder.bind_addr(SocketAddrV6::new(Ipv6Addr::UNSPECIFIED, port, 0, 0))
-                        })
-                        .expect("unspecified addresses are valid bind addresses"),
-                    None => builder,
-                }
-            }
-            Reach::Loopback => Endpoint::builder(presets::Minimal)
+        let reach = &self.reach;
+        // The N0 presets when looking devices up over the internet; Minimal
+        // (the crypto provider only) otherwise.
+        let mut builder = match (reach.internet_lookup, &reach.relays) {
+            (true, Relays::N0) => Endpoint::builder(presets::N0),
+            (true, _) => Endpoint::builder(presets::N0DisableRelay),
+            (false, _) => Endpoint::builder(presets::Minimal)
                 .relay_mode(RelayMode::Disabled)
-                .clear_address_lookup()
+                .clear_address_lookup(),
+        };
+        #[cfg(feature = "test-utils")]
+        if let Relays::Local(map) = &reach.relays {
+            builder = builder
+                .relay_mode(RelayMode::Custom(map.clone()))
+                .ca_tls_config(iroh::tls::CaTlsConfig::insecure_skip_verify());
+        }
+        builder = match reach.ip {
+            Ip::Any { port: None } => builder,
+            Ip::Any { port: Some(port) } => builder
                 .clear_ip_transports()
-                .bind_addr(SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0))
-                .expect("127.0.0.1:0 is a valid bind address"),
+                .bind_addr(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, port))
+                .and_then(|builder| {
+                    builder.bind_addr(SocketAddrV6::new(Ipv6Addr::UNSPECIFIED, port, 0, 0))
+                })
+                .expect("unspecified addresses are valid bind addresses"),
+            Ip::Loopback { port } => builder
+                .clear_ip_transports()
+                .bind_addr(SocketAddrV4::new(Ipv4Addr::LOCALHOST, port.unwrap_or(0)))
+                .expect("127.0.0.1 is a valid bind address"),
+            Ip::Off => builder.clear_ip_transports(),
         };
         // The only place the device key leaves `Identity`: straight into
         // iroh's builder.
-        let builder = match &self.identity {
-            Some(identity) => builder.secret_key(identity.secret_key().clone()),
-            None => builder,
-        };
+        if let Some(identity) = &self.identity {
+            builder = builder.secret_key(identity.secret_key().clone());
+        }
         builder
             .bind()
             .await
@@ -214,6 +284,9 @@ impl Session {
 pub struct SyncEndpoint {
     router: Router,
     open_timeout: Duration,
+    relays_allowed: bool,
+    links: Links,
+    lan: Option<Lan>,
 }
 
 impl SyncEndpoint {
@@ -224,6 +297,21 @@ impl SyncEndpoint {
         sessions: Arc<dyn Sessions>,
     ) -> Result<Self> {
         let endpoint = config.bind().await?;
+        let links = Links::new(&endpoint);
+        let lan = match &config.reach.lan {
+            Some(service) => {
+                match Lan::start(&endpoint, service, config.device.clone(), links.clone()).await {
+                    Ok(lan) => Some(lan),
+                    Err(error) => {
+                        // A network that allows neither IPv4 nor IPv6 multicast:
+                        // pairing links and typed addresses still work.
+                        tracing::warn!(%error, "no local network discovery");
+                        None
+                    }
+                }
+            }
+            None => None,
+        };
         let open_timeout = config.open_timeout;
         let mut builder = Router::builder(endpoint).accept(
             ALPN,
@@ -231,6 +319,7 @@ impl SyncEndpoint {
                 admission,
                 sessions,
                 open_timeout,
+                links: links.clone(),
             },
         );
         if let Some(blobs) = config.blobs {
@@ -239,6 +328,9 @@ impl SyncEndpoint {
         Ok(Self {
             router: builder.spawn(),
             open_timeout,
+            relays_allowed: config.reach.relays_allowed(),
+            links,
+            lan,
         })
     }
 
@@ -250,6 +342,56 @@ impl SyncEndpoint {
     /// Where this endpoint can be reached right now.
     pub fn addr(&self) -> EndpointAddr {
         self.endpoint().addr()
+    }
+
+    /// This endpoint's address for a pairing link or a share: every local
+    /// address, plus the relay once there is one.
+    ///
+    /// Waits at most `wait`. Local addresses come first and are enough on
+    /// the local network, so this never waits for the internet the way
+    /// `Endpoint::online` would (and with no internet, a relay never comes).
+    /// When relays are allowed but none answered in time, the address has
+    /// none; mint again later to include it.
+    pub async fn shareable_addr(&self, wait: Duration) -> EndpointAddr {
+        let mut watcher = self.endpoint().watch_addr();
+        let deadline = tokio::time::Instant::now() + wait;
+        loop {
+            let addr = watcher.get();
+            let has_ip = addr.ip_addrs().next().is_some();
+            let has_relay = addr.relay_urls().next().is_some();
+            if has_ip && (has_relay || !self.relays_allowed) {
+                return addr;
+            }
+            match tokio::time::timeout_at(deadline, watcher.updated()).await {
+                Ok(Ok(_)) => {}
+                _ => return watcher.get(),
+            }
+        }
+    }
+
+    /// Whether this endpoint may use relays (Never use relays is off).
+    pub fn relays_allowed(&self) -> bool {
+        self.relays_allowed
+    }
+
+    /// Every connection's link state, and its changes.
+    pub fn links(&self) -> &Links {
+        &self.links
+    }
+
+    /// The link state of one device: [`Link::Offline`] with no connection.
+    pub fn link(&self, peer: EndpointId) -> Link {
+        self.links.get(peer)
+    }
+
+    /// Local network discovery, when it's on and the network allows it.
+    pub fn lan(&self) -> Option<&Lan> {
+        self.lan.as_ref()
+    }
+
+    /// The Caskade devices announcing themselves on this network.
+    pub fn nearby(&self) -> Vec<Nearby> {
+        self.lan.as_ref().map(Lan::nearby).unwrap_or_default()
     }
 
     /// The iroh endpoint, for protocols stacked on it (iroh-blobs'
@@ -275,6 +417,7 @@ impl SyncEndpoint {
                 .map_err(|source| Error::Dial { peer: id, source })
         })
         .await?;
+        self.links.track(&connection);
         let exchange = opening::offer(&connection, purpose, grant.as_ref());
         match opening::within(self.open_timeout, exchange).await {
             Ok((writer, reader)) => Ok(Session {
@@ -308,6 +451,7 @@ struct Inbound {
     admission: Arc<dyn Admission>,
     sessions: Arc<dyn Sessions>,
     open_timeout: Duration,
+    links: Links,
 }
 
 /// Written by hand: a derived `Debug` would ask the policy to print itself,
@@ -333,6 +477,7 @@ impl ProtocolHandler for Inbound {
             connection.close(VarInt::from_u32(close::REFUSED), close::REFUSED_REASON);
             return Ok(());
         };
+        self.links.track(&connection);
         let session = Session {
             purpose: received.purpose,
             grant: received.grant,

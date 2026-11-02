@@ -6,14 +6,23 @@ edition.workspace = true
 rust-version.workspace = true
 autotests = false
 
+[features]
+# Local relays with self-signed certificates (`Relays::Local`), for tests.
+test-utils = ["iroh/test-utils"]
+
 [dependencies]
 async-trait = "0.1"
+futures-util = "0.3"
 # The set wobu proved together (docs/sync.md); 0.103.1 is the patch release
 # of the yanked 0.103.0. Cargo.lock also holds iroh-base, iroh-relay,
 # iroh-dns and noq at the versions iroh 1.0.3 shipped with.
 iroh = "=1.0.3"
 iroh-blobs = { version = "=0.103.1", default-features = false, features = ["fs-store"] }
 iroh-tickets = "=1.0.0"
+# mDNS for iroh 1.0: released with iroh 1.0.0 and the version iroh-blobs
+# 0.103 tests against.
+iroh-mdns-address-lookup = "=0.4.0"
+n0-future = "0.3"
 keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service", "crypto-rust"] }
 rand = "0.10"
 serde = { version = "1", features = ["derive"] }
@@ -24,6 +33,7 @@ tokio = { version = "1", features = ["rt", "time", "macros", "sync"] }
 tracing = "0.1"
 
 [dev-dependencies]
+caskade-sync = { path = ".", features = ["test-utils"] }
 iroh = "=1.0.3"
 iroh-blobs = { version = "=0.103.1", default-features = false, features = ["fs-store"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time"] }

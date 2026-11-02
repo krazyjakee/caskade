@@ -21,6 +21,14 @@
 //! Messages are one JSON object per line, each read with a bound set by this
 //! build ([`FrameReader::read`]); no length a peer wrote is trusted.
 //!
+//! ## Reaching devices
+//!
+//! [`Reach::network`] finds devices on the local network over mDNS first
+//! ([`lan`]), then through n0's address lookup, and uses n0's relays only
+//! when allowed ([`Relays::Never`] turns them off). [`link`] reports how each
+//! device is reached (lan, direct, relay or offline) and follows a connection
+//! from a relay to a direct path.
+//!
 //! ## Identity
 //!
 //! [`Identity`] keeps the device key in the OS keychain
@@ -42,19 +50,25 @@
 //! shipped with in `Cargo.lock`. Mismatched generations fail at resolve time
 //! with an `ed25519-dalek` error that never names iroh.
 
+pub mod device;
 pub mod endpoint;
 pub mod error;
 pub mod frame;
 pub mod grant;
 pub mod identity;
+pub mod lan;
+pub mod link;
 pub mod opening;
 
-pub use endpoint::{Admission, Config, Reach, Session, Sessions, SyncEndpoint};
+pub use device::{DeviceInfo, DeviceKind, DeviceOs};
+pub use endpoint::{Admission, Config, Ip, Reach, Relays, Session, Sessions, SyncEndpoint};
 pub use error::{Error, Result};
 pub use frame::{FrameReader, FrameWriter};
 pub use grant::Grant;
 pub use identity::{Identity, KEYCHAIN_SERVICE, KeyStore, Keychain, Loaded, Lost, MemoryKeyStore};
 pub use iroh::{EndpointAddr, EndpointId};
+pub use lan::{Lan, Nearby, NearbyChanged};
+pub use link::{Link, LinkChanged, Links};
 pub use opening::{Purpose, REFUSAL};
 
 /// The ALPN Caskade's devices speak. It names the protocol and its version:

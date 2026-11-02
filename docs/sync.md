@@ -115,6 +115,66 @@ answer, the dial itself) has `Config::open_timeout` (10 s): a peer that
 connects and says nothing can't hold a task open, and one that stalls can't
 hang the dialler.
 
+## Reaching devices
+
+Devices on one network find and reach each other directly, with or without
+internet. Away from home they connect directly where routers allow, and
+through a relay only when relays are allowed and nothing else works.
+
+`Reach` says what an endpoint has. `Reach::network(never_relay, port)` is what
+the app uses:
+
+- **mDNS on the local network**, under Caskade's own service name (`caskade`),
+  so only Caskade devices answer. iroh 1.0 moved mDNS into
+  `iroh-mdns-address-lookup`; 0.4.0 pairs with iroh 1.0.3 (released with iroh
+  1.0.0, and the version iroh-blobs 0.103 tests against). It's an address
+  lookup on the endpoint, so dialling a nearby device by its id alone finds its
+  local addresses. The announcement carries the device's name, kind and OS
+  (`DeviceInfo`) for the nearby list (`SyncEndpoint::nearby`,
+  `Lan::subscribe`). That goes only into the mDNS record: the endpoint's own
+  user data stays empty, so n0's DNS never sees a device name.
+- **n0's address lookup** (DNS/pkarr) through the `N0` preset: this endpoint's
+  addresses, and other devices' over the internet.
+- **n0's relays** only when Never use relays is off. On, it's the
+  `N0DisableRelay` preset: the endpoint has no relay transport at all, direct
+  paths over the internet still work, and a device only a relay could reach
+  stays offline.
+- **The default portmapper** (UPnP / NAT-PMP) for more direct paths.
+- **A fixed UDP port** (`port`), for firewall rules; Windows asks to allow
+  incoming UDP the first time. `None` lets the OS pick.
+
+There is no DHT.
+
+When multicast is blocked (guest Wi-Fi, client isolation), a pairing link or
+a typed address still works: it carries the addresses.
+
+### Addresses for links
+
+`SyncEndpoint::shareable_addr(wait)` gives every local address, plus the relay
+once there is one. It waits at most `wait` and never for the internet, unlike
+`Endpoint::online`, which waits for a relay that never comes offline. A link
+minted before the relay answered has local addresses only; mint again to
+include the relay.
+
+### Link state
+
+A connection holds several paths at once (a relay path and direct ones) and
+selects one to carry data. A device's link state comes from the selected path
+of its best open connection:
+
+| State | Selected path |
+| --- | --- |
+| `lan` | An IP address on the local network: private, link-local or loopback; announced by the device over mDNS here; or an IPv6 address in the same /64 as one of this device's own |
+| `direct` | Any other IP address |
+| `relay` | Through a relay |
+| `offline` | No open connection |
+
+`Links` follows every session's connection through its path events and sends
+a `LinkChanged` whenever a device's state changes, including a connection that
+started through a relay switching to a direct path once holepunching succeeds.
+Relays carry data at roughly 1 MB/s (wobu measured 512 KiB in 504 ms against
+22 ms direct), which is why game files require a direct path (#233).
+
 ## Lifetime
 
 `SyncEndpoint::bind` runs on the caller's tokio runtime; the crate creates
@@ -129,7 +189,18 @@ endpoint for the process lifetime and calls `SyncEndpoint::shutdown` at exit.
   nothing leaves the machine. They cover the opening, admission, a refusal
   that is byte-identical for every reason (including against a device that
   holds nothing), a silent dialler, the identity across a restart, and
-  iroh-blobs on the same endpoint.
+  iroh-blobs on the same endpoint. `tests/network.rs` covers reaching devices
+  against a local relay server (iroh's test relay, so nothing reaches the
+  internet): Never use relays leaving a relay-only device (IP transports
+  cleared) offline, the same device reached through the relay when allowed,
+  a connection dialled through the relay alone switching to a direct path
+  with link events following it, a typed address with no discovery, a link
+  address that doesn't wait for a missing relay, and a fixed port. mDNS
+  discovery runs on this machine's real interfaces with no relay and no
+  internet lookup, under a service name unique to the run: the devices find
+  each other, read each other's name, kind and OS, dial by id alone, and see
+  a rename. Set `CASKADE_TEST_NO_MULTICAST=1` where the platform has no
+  multicast.
 - Lint: `flock /tmp/caskade-heavy.lock cargo clippy -p caskade-sync
   --all-targets -- -D warnings`, and the same with
   `--target x86_64-pc-windows-gnu`.
@@ -143,3 +214,24 @@ endpoint for the process lifetime and calls `SyncEndpoint::shutdown` at exit.
   flock /tmp/caskade-heavy.lock cargo clippy -p caskade-sync --all-targets \
     --target x86_64-apple-darwin -- -D warnings
   ```
+
+## Two machines on one network, internet unplugged
+
+The in-process tests share one host, so they can't show two routers' worth of
+network. This check needs two machines on one network, with the router's
+internet unplugged:
+
+1. Start Caskade on both; open Settings → Devices (#231) or call the commands.
+2. Each lists the other as nearby within a few seconds.
+3. Pair them by code (#226); the link state is `lan`.
+4. Make an edit on one and see it on the other (#230).
+5. Turn on Never use relays on one and plug the internet back in: the link
+   stays `lan`.
+6. Block multicast between them (or use client isolation) and pair with a
+   pairing link instead.
+
+Results:
+
+| Date | Machines | Steps passed | Notes |
+| --- | --- | --- | --- |
+| — | — | — | Not run yet: needs two machines (#225, #226) and library sync (#230). |
