@@ -60,3 +60,20 @@ name = "Master System"
 platforms = ["sega_mastersystem"]
 extensions = ["sms", "zip", "7z"]
 args = ["{RomPath}"]
+
+[vars]
+save_data = "{UserHome}/Documents/MesenCE"
+
+[vars.linux]
+save_data = "{XdgConfig}/MesenCE"
+
+[vars.linux.flatpak]
+save_data = "{EmulatorDir}/config/MesenCE"
+
+[vars.macos]
+save_data = "{AppSupport}/MesenCE"
+
+# Save defaults: https://github.com/nesdev-org/MesenCE/blob/master/UI/Config/ConfigManager.cs
+[saves]
+files = ["{save_data}/Saves"]
+states = ["{save_data}/SaveStates"]

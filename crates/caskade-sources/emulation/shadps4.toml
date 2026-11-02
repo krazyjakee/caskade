@@ -43,3 +43,17 @@ name = "PlayStation 4"
 platforms = ["sony_playstation4"]
 extensions = ["bin"]
 args = ["-g", "{RomPath}"]
+
+[vars]
+save_data = "{AppData}/shadPS4"
+
+[vars.linux]
+save_data = "{UserHome}/.local/share/shadPS4"
+
+[vars.macos]
+save_data = "{AppSupport}/shadPS4"
+
+# Save defaults: https://github.com/shadps4-emu/shadPS4/blob/2183807e592b36d4440384878165b43d930c1dee/src/common/path_util.cpp and src/core/libraries/save_data/save_instance.cpp
+[saves]
+files = ["{save_data}/home/*/savedata"]
+states = []

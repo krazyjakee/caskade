@@ -30,8 +30,8 @@ pub use config::{
     PlatformSettings, ProfileHooks, ProfileRef, RomLocation, RomScanner, Tracking,
 };
 pub use definition::{
-    Bios, DefinitionProfile, Detect, DetectRules, Display, EmulatorDefinition, Install,
-    InstallKind, InstallSource, OSES, OsVars, Platform, PlatformIds, Region, RequiresFrom,
+    Bios, DefinitionProfile, DefinitionSaves, Detect, DetectRules, Display, EmulatorDefinition,
+    Install, InstallKind, InstallSource, OSES, OsVars, Platform, PlatformIds, Region, RequiresFrom,
     SetupAction, SetupStep, Vars, os_key,
 };
 pub use detect::{DetectedInstall, DetectedProfile, detect, folders as detect_folders};

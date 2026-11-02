@@ -51,3 +51,8 @@ name = "Saturn"
 platforms = ["sega_saturn"]
 extensions = ["cue", "chd", "ccd", "iso", "mds"]
 args = ["--profile", "{profile}", "--disc", "{RomPath}"]
+
+# Save defaults: https://github.com/ymir-emu/Ymir/blob/0d7f58b9c0de34ed8a37739d1524916f1b3704ba/apps/ymir-sdl3/src/app/profile.cpp
+[saves]
+files = ["{profile}/backup"]
+states = ["{profile}/savestates"]

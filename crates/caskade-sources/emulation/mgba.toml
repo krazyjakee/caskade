@@ -63,3 +63,8 @@ platforms = ["nintendo_gba"]
 extensions = ["zip", "7z", "rar", "bin", "elf", "mb", "gba", "agb"]
 args = ["{RomPath}"]
 requires = []
+
+# Save defaults: https://github.com/mgba-emu/mgba/blob/master/src/core/core.c (mCoreAutoloadSave, mCoreGetState)
+[saves]
+files = ["{RomDir}/{RomNameNoExt}.sav", "{RomDir}/{RomNameNoExt}.sa[2-9]"]
+states = ["{RomDir}/{RomNameNoExt}.ss[0-9]*"]

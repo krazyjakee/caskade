@@ -49,3 +49,20 @@ platforms = ["nintendo_wiiu"]
 extensions = ["wud", "wux", "rpx", "wua"]
 args = ["-g", "{RomPath}"]
 requires = []
+
+[vars]
+save_data = "{AppData}/Cemu"
+
+[vars.linux]
+save_data = "{UserHome}/.local/share/Cemu"
+
+[vars.linux.flatpak]
+save_data = "{EmulatorDir}/data/Cemu"
+
+[vars.macos]
+save_data = "{AppSupport}/Cemu"
+
+# Save defaults: https://github.com/cemu-project/Cemu/blob/3f8dd913cfd4c8247ad65ab41ba6ef0a55926769/src/gui/wxgui/CemuApp.cpp and src/config/ActiveSettings.cpp; src/Cafe/TitleList/SaveInfo.cpp
+[saves]
+files = ["{save_data}/mlc01/usr/save"]
+states = []

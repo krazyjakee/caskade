@@ -225,13 +225,18 @@ const MAX_DEPTH: usize = 16;
 
 impl Expander<'_> {
     pub fn expand(&self, template: &str) -> Result<String, String> {
-        self.expand_at(template, &mut Vec::new())
+        self.expand_at(template, &mut Vec::new(), false)
+    }
+
+    pub(super) fn expand_glob(&self, template: &str) -> Result<String, String> {
+        self.expand_at(template, &mut Vec::new(), true)
     }
 
     fn expand_at<'t>(
         &'t self,
         template: &'t str,
         stack: &mut Vec<&'t str>,
+        glob: bool,
     ) -> Result<String, String> {
         let mut out = String::new();
         for piece in parse(template)? {
@@ -245,10 +250,21 @@ impl Expander<'_> {
                             return Err(format!("variable `{{{name}}}` refers to itself"));
                         }
                         stack.push(name);
-                        out.push_str(&self.expand_at(value, stack)?);
+                        out.push_str(&self.expand_at(value, stack, glob)?);
                         stack.pop();
                     } else if let Some(builtin) = builtin(name) {
-                        out.push_str(&self.context.value(builtin, self.os));
+                        let value = self.context.value(builtin, self.os);
+                        if glob {
+                            if value.is_empty() {
+                                return Err(crate::tr!(
+                                    "Save variable {variable} is unavailable for this release.",
+                                    variable = format!("{{{builtin}}}")
+                                ));
+                            }
+                            out.push_str(&globset::escape(&value.replace('\\', "/")));
+                        } else {
+                            out.push_str(&value);
+                        }
                     } else {
                         return Err(format!("unknown variable `{{{name}}}`"));
                     }

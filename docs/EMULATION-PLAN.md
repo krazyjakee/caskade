@@ -1,6 +1,6 @@
 # Caskade — Emulation Plan
 
-Status: core implemented; plugin definitions and ROM importers (E5) pending · Last updated: 2026-10-28
+Status: core implemented; plugin definitions and ROM importers (E5) pending · Last updated: 2026-11-02
 
 How Caskade finds emulators, configures them, turns ROM folders into library entries, and launches them. The model is Playnite's emulation support with its gaps fixed. This doc follows the conventions in `TECH-PLAN.md`, and it fills in the **Platform / Emulator / EmulatorProfile** row of TECH-PLAN §3 and the emulator side of the launch pipeline.
 
@@ -151,6 +151,33 @@ Available in `args`, `requires`, `vars`, working directory and tracking path. Na
 | any key from the definition's `vars`              |                                                                          |
 
 Unknown variables are a validation error at save time, not a silent empty string at launch.
+
+### 3.4 Save locations
+
+Emulator definitions may declare save files and save states separately:
+
+```toml
+[saves]
+files = ["{save_data}/saves/**/{RomNameNoExt}.srm"]
+states = ["{save_data}/states/**/{RomNameNoExt}.state*"]
+```
+
+These use the same built-in and definition variables as profiles. Paths are
+absolute glob templates; matching folders are scanned recursively. Runtime
+ROM and device values are escaped as literal glob components, so a ROM named
+`Game[1]` does not match another game's saves. Missing variables fail rather
+than becoming empty strings. Catalogue validation checks variables, cycles,
+absolute paths and glob syntax for every OS and install kind. Old definitions
+without `[saves]` remain valid and have no automatic locations.
+
+`caskade_core::saves::Saves::with_catalog` resolves an emulated release using
+its pinned emulator/profile or platform default, with each disc's ROM path.
+An ask-at-launch target has no known emulator destination and stays unknown.
+The result tags save files `save` and save states `state`; per-release manual
+locations take precedence. Global memory cards and emulator save folders stay
+global where the emulator does not name them after the ROM. The shipped
+defaults, source references and custom-directory limitations are documented
+in the [emulation README](../crates/caskade-sources/emulation/README.md).
 
 ## 4. User configuration
 

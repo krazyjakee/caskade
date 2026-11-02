@@ -46,3 +46,20 @@ name = "Dreamcast"
 platforms = ["sega_dreamcast"]
 extensions = ["cdi", "gdi", "chd", "cue", "m3u"]
 args = ["{RomPath}"]
+
+[vars]
+save_data = "{EmulatorDir}/data"
+
+[vars.linux]
+save_data = "{UserHome}/.local/share/flycast"
+
+[vars.linux.flatpak]
+save_data = "{EmulatorDir}/data/flycast"
+
+[vars.macos]
+save_data = "{AppSupport}/Flycast/data"
+
+# Save defaults: https://github.com/flyinghead/flycast/blob/7adbf3caef251b153e348df3f469a0f35878339d/core/windows/winmain.cpp and core/linux-dist/main.cpp; shell/apple/emulator-osx/emulator-osx/osx-main.mm; core/oslib/oslib.cpp; core/hw/maple/maple_devs.cpp
+[saves]
+files = ["{save_data}/vmu_save_*.bin", "{save_data}/*_vmu_save_*.bin"]
+states = ["{save_data}/{RomNameNoExt}.state*", "{save_data}/{RomNameNoExt}_[0-9]*.state*"]

@@ -52,3 +52,7 @@ name = "Xbox"
 platforms = ["microsoft_xbox"]
 extensions = ["iso", "xiso"]
 args = ["-dvd_path", "{RomPath}"]
+
+# Saves and snapshots are inside the user-selected HDD image, with no fixed
+# default file path. Add that image explicitly in the game Saves tab.
+# Source: https://xemu.app/docs/faq/ and https://xemu.app/docs/snapshots/

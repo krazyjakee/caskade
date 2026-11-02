@@ -42,3 +42,17 @@ name = "Nintendo 64"
 platforms = ["nintendo_n64"]
 extensions = ["z64", "n64", "v64", "zip", "7z"]
 args = ["{RomPath}"]
+
+[vars]
+save_data = "{AppData}/gopher64"
+
+[vars.linux]
+save_data = "{UserHome}/.local/share/gopher64"
+
+[vars.macos]
+save_data = "{AppSupport}/gopher64"
+
+# Save defaults: https://github.com/gopher64/gopher64/blob/0c863c5f70e5fb42a49391d95694318b9aab628f/src/ui.rs and src/ui/storage.rs
+[saves]
+files = ["{save_data}/saves"]
+states = ["{save_data}/states"]

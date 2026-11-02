@@ -28,6 +28,7 @@ path = ["Ryujinx"]
 locations = ["/Applications/Ryujinx.app/Contents/MacOS", "{UserHome}/Applications/Ryujinx.app/Contents/MacOS"]
 
 [vars]
+save_data = "{AppData}/Ryujinx"
 process = "Ryujinx"
 [vars.windows]
 process = "Ryujinx.exe"
@@ -43,3 +44,17 @@ platforms = ["nintendo_switch"]
 extensions = ["xci", "nsp"]
 args = ["{RomPath}"]
 requires = []
+
+[vars.linux]
+save_data = "{XdgConfig}/Ryujinx"
+
+[vars.linux.flatpak]
+save_data = "{EmulatorDir}/config/Ryujinx"
+
+[vars.macos]
+save_data = "{AppSupport}/Ryujinx"
+
+# Save defaults: https://docs.ryujinx.app/guides/setup-guide/ and https://github.com/Ryubing/docs/blob/main/docs/info/faq-%26-troubleshooting.md (retained upstream guide: application data, user/system saves)
+[saves]
+files = ["{save_data}/bis/user/save", "{save_data}/bis/system/save"]
+states = []

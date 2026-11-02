@@ -39,3 +39,15 @@ name = "Xbox 360"
 platforms = ["microsoft_xbox360"]
 extensions = ["iso", "xex", "zar"]
 args = ["{RomPath}"]
+
+[vars]
+save_data = "{EmulatorDir}"
+[vars.linux]
+save_data = "{UserHome}/.local/share/Xenia"
+[vars.macos]
+save_data = "{UserHome}/.local/share/Xenia"
+
+# Save defaults: https://github.com/xenia-canary/xenia-canary/blob/master/src/xenia/app/xenia_main.cc and src/xenia/base/filesystem_posix.cc (Windows portable, Unix data root)
+[saves]
+files = ["{save_data}/content"]
+states = []

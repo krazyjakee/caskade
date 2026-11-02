@@ -308,6 +308,120 @@ mod integration {
     }
 
     #[tokio::test]
+    async fn emulator_saves_follow_pinned_and_default_profiles_and_never_guess_for_ask() {
+        use caskade_core::emulation::{
+            Catalog, Emulator, EmulatorInstall, EmulatorProfile, EmulatorTarget, GameRom,
+            PlatformSettings, ProfileRef,
+        };
+        let dir = tempfile::tempdir().unwrap();
+        let env = host(dir.path());
+        let store = LibraryStore::in_memory().await.unwrap();
+        let catalog = Catalog::load([
+            ("platforms.toml", "[[platform]]\nid='snes'\nname='SNES'\nshort='SNES'\n"),
+            ("emulator.toml", "id='retroarch'\nname='RetroArch'\n[saves]\nfiles=['{XdgConfig}/retroarch/saves/**/{RomNameNoExt}.srm']\nstates=['{XdgConfig}/retroarch/states/**/{RomNameNoExt}.state*']\n[[profile]]\nname='SNES'\nplatforms=['snes']\nargs=['{RomPath}']\n"),
+        ]).unwrap();
+        let emulator = store
+            .upsert_emulator(&Emulator {
+                id: "emulator".into(),
+                name: "RetroArch".into(),
+                definition: Some("retroarch".into()),
+                install: EmulatorInstall::Folder {
+                    dir: env.home().join("tools/RetroArch"),
+                    executable: "retroarch".into(),
+                },
+                profiles: vec![EmulatorProfile::BuiltIn {
+                    id: "snes-profile".into(),
+                    definition_profile: "SNES".into(),
+                    args: Default::default(),
+                    hooks: Default::default(),
+                }],
+            })
+            .await
+            .unwrap();
+        let chosen = ProfileRef {
+            emulator_id: emulator.id.clone(),
+            profile_id: emulator.profiles[0].id().into(),
+        };
+        let game = store
+            .upsert_game(&Game::new("Steam Fixture"))
+            .await
+            .unwrap();
+        let rom = env.home().join("ROMs/Game[1].sfc");
+        write(&rom, "rom");
+        write(
+            env.home()
+                .join(".config/retroarch/saves/Snes9x/Game[1].srm"),
+            "save",
+        );
+        write(
+            env.home().join(".config/retroarch/saves/Snes9x/Other.srm"),
+            "other",
+        );
+        write(
+            env.home()
+                .join(".config/retroarch/states/Snes9x/Game[1].state1"),
+            "state",
+        );
+        let mut entry = GameEntry::new(&game.id, SourceId::new("manual"), "console");
+        entry.launch = Some(caskade_core::model::LaunchSpec::Emulator {
+            platform_id: "snes".into(),
+            target: EmulatorTarget::Profile {
+                emulator_id: chosen.emulator_id.clone(),
+                profile_id: chosen.profile_id.clone(),
+            },
+            roms: vec![GameRom::absolute(&rom)],
+            args: Default::default(),
+        });
+        entry = store.upsert_entry(&entry).await.unwrap();
+        let saves = Saves::with_environment(store.clone(), manifest(dir.path()).await, env)
+            .with_catalog(std::sync::Arc::new(catalog));
+        let state = saves.state(&entry.id).await.unwrap();
+        assert!(state.warnings.is_empty(), "{:?}", state.warnings);
+        assert!(matches!(
+            state.matched,
+            SaveMatch::Matched {
+                method: MatchMethod::Emulator,
+                ..
+            }
+        ));
+        assert_eq!(state.locations.len(), 2);
+        assert!(
+            state
+                .locations
+                .iter()
+                .any(|location| location.tags == ["state"])
+        );
+        assert!(
+            !serde_json::to_string(&state.locations)
+                .unwrap()
+                .contains("Other.srm")
+        );
+        store
+            .set_platform_settings(&PlatformSettings {
+                platform: "snes".into(),
+                default: Some(chosen),
+                bios_dir: None,
+            })
+            .await
+            .unwrap();
+        if let Some(caskade_core::model::LaunchSpec::Emulator { target, .. }) = &mut entry.launch {
+            *target = EmulatorTarget::PlatformDefault;
+        }
+        store.upsert_entry(&entry).await.unwrap();
+        assert_eq!(
+            saves.state(&entry.id).await.unwrap().locations,
+            state.locations
+        );
+        if let Some(caskade_core::model::LaunchSpec::Emulator { target, .. }) = &mut entry.launch {
+            *target = EmulatorTarget::AskEmulator;
+        }
+        store.upsert_entry(&entry).await.unwrap();
+        let state = saves.state(&entry.id).await.unwrap();
+        assert_eq!(state.matched, SaveMatch::Unknown);
+        assert!(state.locations.is_empty());
+    }
+
+    #[tokio::test]
     async fn matching_prefers_steam_then_gog_then_title_and_library_or_manifest_aliases() {
         let dir = tempfile::tempdir().unwrap();
         let env = host(dir.path());

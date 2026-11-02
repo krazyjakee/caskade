@@ -56,3 +56,20 @@ platforms = ["nintendo_wii"]
 extensions = ["elf", "dol", "tgc", "wbfs", "ciso", "gcz", "iso", "wad", "dff", "rvz", "wia", "m3u"]
 args = ["--config=Dolphin.Analytics.PermissionAsked=True", "--exec={RomPath}", "--batch"]
 requires = []
+
+[vars]
+save_data = "{AppData}/Dolphin Emulator"
+
+[vars.linux]
+save_data = "{UserHome}/.local/share/dolphin-emu"
+
+[vars.linux.flatpak]
+save_data = "{EmulatorDir}/data/dolphin-emu"
+
+[vars.macos]
+save_data = "{AppSupport}/Dolphin"
+
+# Save defaults: https://dolphin-emu.org/docs/guides/controlling-global-user-directory/ and https://github.com/dolphin-emu/dolphin/blob/master/Source/Core/Common/CommonPaths.h
+[saves]
+files = ["{save_data}/GC", "{save_data}/Wii/title"]
+states = ["{save_data}/StateSaves"]

@@ -267,6 +267,97 @@ fn flatpak_retroarch_cores_and_argv_boundaries_are_explicit() {
 }
 
 #[test]
+fn save_defaults_cover_shipped_emulators_and_expand_for_every_os_and_install_kind() {
+    let catalog = catalog().unwrap();
+    for definition in catalog.emulators() {
+        if definition.id == "xemu" {
+            // xemu has no default HDD image: it is chosen by the user.
+            assert!(definition.saves.files.is_empty());
+            continue;
+        }
+        assert!(!definition.saves.files.is_empty(), "{}", definition.id);
+        for os in OSES {
+            for kind in InstallKind::on(os) {
+                let paths = definition.resolve_saves(os, *kind, &context(os)).unwrap();
+                for pattern in paths.files.iter().chain(&paths.states) {
+                    assert!(!pattern.contains('{'), "{}/{pattern}", definition.id);
+                    assert!(
+                        pattern.starts_with('/') || pattern.as_bytes().get(1) == Some(&b':'),
+                        "{pattern}"
+                    );
+                }
+            }
+        }
+    }
+    for (file, text) in definition_files().filter(|(_, text)| text.contains("[saves]")) {
+        assert!(
+            text.contains("# Save defaults: https://"),
+            "{file} has no upstream source"
+        );
+    }
+}
+
+#[test]
+fn retroarch_and_rom_named_saves_stay_per_rom_and_literals_are_not_globs() {
+    let catalog = catalog().unwrap();
+    let mut context = context(OperatingSystem::Linux);
+    context.rom = Some("/ROMs[one]/Game[1].gba".into());
+    context.emulator_dir = Some("/home/fixture/.var/app/org.libretro.RetroArch".into());
+    let paths = catalog
+        .emulator("retroarch")
+        .unwrap()
+        .resolve_saves(OperatingSystem::Linux, InstallKind::Flatpak, &context)
+        .unwrap();
+    assert_eq!(
+        paths.files[0],
+        "/home/fixture/.var/app/org.libretro.RetroArch/config/retroarch/saves/**/Game[[]1[]].srm"
+    );
+    assert!(paths.states[0].ends_with("/states/**/Game[[]1[]].state*"));
+    let paths = catalog
+        .emulator("mgba")
+        .unwrap()
+        .resolve_saves(OperatingSystem::Linux, InstallKind::Folder, &context)
+        .unwrap();
+    assert_eq!(paths.files[0], "/ROMs[[]one[]]/Game[[]1[]].sav");
+    context.rom = None;
+    assert!(
+        catalog
+            .emulator("mgba")
+            .unwrap()
+            .resolve_saves(OperatingSystem::Linux, InstallKind::Folder, &context,)
+            .is_err()
+    );
+    let windows = catalog
+        .emulator("mgba")
+        .unwrap()
+        .resolve_saves(
+            OperatingSystem::Windows,
+            InstallKind::Folder,
+            &self::context(OperatingSystem::Windows),
+        )
+        .unwrap();
+    assert_eq!(windows.files[0], "D:/ROMs/Sample Game (USA).sav");
+}
+
+#[test]
+fn invalid_save_definitions_fail_at_catalog_load() {
+    for body in [
+        "files = ['{Missing}/saves']",
+        "files = ['']",
+        "states = ['relative/save']",
+        "files = ['{RomDir}/[']",
+        "unknown = []",
+    ] {
+        let text = format!("id='bad'\nname='Bad'\n[saves]\n{body}\n");
+        assert!(
+            Catalog::load([("bad.toml", text.as_str())]).is_err(),
+            "{body}"
+        );
+    }
+    assert!(Catalog::load([("old.toml", "id='old'\nname='Old'\n")]).is_ok());
+}
+
+#[test]
 fn user_definition_overrides_preserve_the_shipped_catalogue() {
     let mut files: Vec<_> = definition_files().collect();
     files.push(("user/retroarch.toml", "id='retroarch'\nname='User RetroArch'\n[[profile]]\nname='Custom'\nplatforms=['nintendo_snes']\nargs=['{RomPath}']\n"));

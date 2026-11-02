@@ -256,6 +256,59 @@ impl Catalog {
         for (key, template) in definition.vars.templates() {
             check_template(&definition.vars, &everywhere, template, &key, report);
         }
+        for (field, patterns) in [
+            ("files", &definition.saves.files),
+            ("states", &definition.saves.states),
+        ] {
+            for (index, pattern) in patterns.iter().enumerate() {
+                let key = format!("saves.{field}[{index}]");
+                if pattern.trim().is_empty() || pattern.contains('\0') {
+                    report.push(&key, "must be a nonempty path template");
+                }
+                check_template(&definition.vars, &everywhere, pattern, &key, report);
+                let path = Some(PathBuf::from("/fixture"));
+                let context = VarContext {
+                    rom: Some(PathBuf::from("/fixture/Game.rom")),
+                    emulator_dir: path.clone(),
+                    name: Some("Game".into()),
+                    platform: Some("platform".into()),
+                    game_id: Some("game".into()),
+                    caskade_dir: path.clone(),
+                    storage_root: path.clone(),
+                    folders: super::OsFolders {
+                        user_home: path.clone(),
+                        xdg_config: path.clone(),
+                        app_data: path.clone(),
+                        program_files: path.clone(),
+                        app_support: path,
+                    },
+                };
+                for (os, kind) in &everywhere {
+                    let expander = Expander {
+                        vars: &definition.vars,
+                        os: *os,
+                        kind: *kind,
+                        context: &context,
+                    };
+                    if let Ok(expanded) = expander.expand_glob(pattern) {
+                        let absolute = expanded.starts_with('/')
+                            || (expanded.as_bytes().get(1) == Some(&b':')
+                                && expanded.as_bytes().get(2) == Some(&b'/'));
+                        if !absolute {
+                            report.push(&key, "save templates must resolve to absolute paths");
+                            break;
+                        }
+                        if let Err(error) = globset::GlobBuilder::new(&expanded)
+                            .literal_separator(true)
+                            .build()
+                        {
+                            report.push(&key, &format!("invalid save glob: {error}"));
+                            break;
+                        }
+                    }
+                }
+            }
+        }
         if let Some(tracking) = &definition.tracking {
             check_tracking(&definition.vars, &everywhere, tracking, "tracking", report);
         }

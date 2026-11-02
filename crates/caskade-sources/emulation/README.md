@@ -87,6 +87,59 @@ Validation: `cargo test -p caskade-sources --test it emulation_definitions::`.
 The test validates all embedded files, every platform/profile link, every
 OS/install-kind variable expansion and the exact resolved argv snapshots.
 
+## Save locations
+
+`[saves].files` and `[saves].states` are lists of absolute path/glob templates
+using the definition's existing variables. Matching folders are recursive.
+`{RomNameNoExt}` selects per-ROM saves where their filenames follow the ROM;
+RetroArch also searches core/content subdirectories below `saves` and `states`.
+Paths come from the emulator's own documentation or source, linked in a
+`Save defaults` comment beside each table. The definition tests check every
+OS/install-kind expansion, source comments, literal ROM names, missing values
+and invalid tables. No emulator or ROM download is needed.
+
+| Emulator | Save files | Save states |
+| --- | --- | --- |
+| RetroArch | Per-ROM SRAM, RTC and related saves | Per-ROM `.state*` |
+| mGBA | ROM-adjacent `.sav` / multiplayer `.saN` | ROM-adjacent `.ssN` |
+| melonDS | ROM-adjacent `.sav` | ROM-adjacent `.mlN` |
+| ares | ROM-adjacent `.ram` / `.eeprom` | ROM-adjacent `.bsN`, undo states |
+| MesenCE | `Saves` | `SaveStates` |
+| gopher64 | `saves` (header/hash names) | `states` |
+| RMG | `Save/Game` | `Save/State` |
+| Dolphin | `GC`, `Wii/title` | `StateSaves` |
+| DuckStation | `memcards` | `savestates` |
+| PCSX2 | `memcards` | `sstates` |
+| PPSSPP | `PSP/SAVEDATA` | `PSP/PPSSPP_STATE` |
+| Cemu | `mlc01/usr/save` | Not declared |
+| RPCS3 | `dev_hdd0/home/*/savedata` | `savestates` |
+| Azahar | SDMC title saves and NAND system saves | `states` |
+| Ryujinx | `bis/user/save`, `bis/system/save` | Not declared |
+| Flycast | Shared and per-game VMU files | Per-ROM `.state` slots |
+| Ymir | Profile `backup` | Profile `savestates` |
+| MAME | `nvram/<ROM set>` | `sta/<ROM set>` |
+| shadPS4 | `home/*/savedata` | Not declared |
+| Xenia Canary | `content` | Not declared |
+
+These are upstream defaults, not an emulator configuration importer. Custom
+save directories, command-line data-directory overrides, older layouts and
+portable-mode switches need explicit choices in the game Saves tab (or a
+definition override). PPSSPP uses the portable Windows `memstick` default;
+its Documents fallback needs an override. MesenCE uses its user-profile default,
+not portable or legacy Mesen2 folders. Dolphin uses its current AppData/XDG
+default, not the older Documents/`.dolphin-emu` locations. Cemu uses its default
+MLC folder; Azahar and shadPS4 use their default user folders. Native Linux
+data paths use the upstream `~/.local/share` defaults; a nondefault
+`XDG_DATA_HOME` needs an override. RetroArch's macOS saves are in
+`~/Documents/RetroArch`, independently of its cores in Application Support.
+Flatpak defaults point inside the configured app's sandbox.
+
+xemu is the sole exception: its saves and snapshots are inside the HDD image
+the user selects, and it supplies no fixed default image path. Its
+[FAQ](https://xemu.app/docs/faq/) and [snapshot documentation](https://xemu.app/docs/snapshots/)
+describe this. It intentionally has no `[saves]`; select the actual disk image
+as an explicit file instead. No guessed HDD image path is scanned.
+
 The macOS bundle identifiers were checked against the projects' build files:
 [PCSX2](https://github.com/PCSX2/pcsx2/blob/master/pcsx2/Resources/Info.plist.in),
 [DuckStation](https://github.com/stenzek/duckstation/blob/master/src/duckstation-qt/Info.plist.in),

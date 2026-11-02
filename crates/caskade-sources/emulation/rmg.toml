@@ -40,3 +40,20 @@ name = "Nintendo 64"
 platforms = ["nintendo_n64"]
 extensions = ["z64", "n64", "v64", "ndd", "zip", "7z"]
 args = ["--nogui", "--quit-after-emulation", "{RomPath}"]
+
+[vars]
+save_data = "{AppData}/RMG"
+
+[vars.linux]
+save_data = "{UserHome}/.local/share/RMG"
+
+[vars.linux.flatpak]
+save_data = "{EmulatorDir}/data/RMG"
+
+[vars.macos]
+save_data = "{UserHome}/.local/share/RMG"
+
+# Save defaults: https://github.com/Rosalie241/RMG/blob/4777ed3f1fb7f1e4a0e70438a27dc4a5e9fb1927/Source/RMG-Core/Directories.cpp
+[saves]
+files = ["{save_data}/Save/Game"]
+states = ["{save_data}/Save/State"]

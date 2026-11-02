@@ -74,6 +74,10 @@ pub struct EmulatorDefinition {
     pub detect: Detect,
     #[serde(default)]
     pub vars: Vars,
+    /// Save files and save states, as absolute path/glob templates. Folders
+    /// are scanned recursively; ROM variables keep per-game saves separate.
+    #[serde(default)]
+    pub saves: DefinitionSaves,
     /// Profiles in recommended order.
     #[serde(default, rename = "profile")]
     pub profiles: Vec<DefinitionProfile>,
@@ -100,6 +104,41 @@ impl EmulatorDefinition {
     pub fn profile(&self, name: &str) -> Option<&DefinitionProfile> {
         self.profiles.iter().find(|profile| profile.name == name)
     }
+
+    /// Expand save patterns, escaping device/ROM values as glob literals.
+    /// Missing values fail rather than scanning an unintended parent folder.
+    pub fn resolve_saves(
+        &self,
+        os: OperatingSystem,
+        kind: InstallKind,
+        context: &super::VarContext,
+    ) -> Result<DefinitionSaves, String> {
+        let expander = super::vars::Expander {
+            vars: &self.vars,
+            os,
+            kind,
+            context,
+        };
+        let expand = |patterns: &[String]| -> Result<Vec<String>, String> {
+            patterns
+                .iter()
+                .map(|pattern| expander.expand_glob(pattern))
+                .collect()
+        };
+        Ok(DefinitionSaves {
+            files: expand(&self.saves.files)?,
+            states: expand(&self.saves.states)?,
+        })
+    }
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct DefinitionSaves {
+    #[serde(default)]
+    pub files: Vec<String>,
+    #[serde(default)]
+    pub states: Vec<String>,
 }
 
 /// Where to look for an emulator on each OS.

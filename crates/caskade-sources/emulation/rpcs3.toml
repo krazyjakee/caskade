@@ -56,3 +56,20 @@ platforms = ["sony_playstation3"]
 extensions = ["bin", "elf", "self"]
 args = ["--no-gui", "{RomPath}"]
 requires = []
+
+[vars]
+save_data = "{EmulatorDir}"
+
+[vars.linux]
+save_data = "{XdgConfig}/rpcs3"
+
+[vars.linux.flatpak]
+save_data = "{EmulatorDir}/config/rpcs3"
+
+[vars.macos]
+save_data = "{AppSupport}/rpcs3"
+
+# Save defaults: https://github.com/RPCS3/rpcs3/blob/01668211ccfef44ac40c01a0a9835f757bc7ca28/Utilities/File.cpp and rpcs3/Emu/vfs_config.h; rpcs3/Emu/savestate_utils.cpp; https://rpcs3.net/quickstart
+[saves]
+files = ["{save_data}/dev_hdd0/home/*/savedata"]
+states = ["{save_data}/savestates"]

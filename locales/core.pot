@@ -1360,6 +1360,10 @@ msgctxt "field name"
 msgid "exclusion"
 msgstr ""
 
+#: crates/caskade-core/src/emulation/vars.rs
+msgid "Save variable {variable} is unavailable for this release."
+msgstr ""
+
 #: crates/caskade-core/src/error.rs
 msgid "the server"
 msgstr ""

@@ -50,3 +50,20 @@ platforms = ["sony_psp"]
 extensions = ["iso", "cso", "pbp", "chd"]
 args = ["--pause-menu-exit", "{RomPath}"]
 requires = []
+
+[vars]
+save_data = "{EmulatorDir}/memstick"
+
+[vars.linux]
+save_data = "{XdgConfig}/ppsspp"
+
+[vars.linux.flatpak]
+save_data = "{EmulatorDir}/config/ppsspp"
+
+[vars.macos]
+save_data = "{UserHome}/.config/ppsspp"
+
+# Save defaults: https://www.ppsspp.org/docs/troubleshooting/my-saves-wont-load/ and https://www.ppsspp.org/docs/faq/
+[saves]
+files = ["{save_data}/PSP/SAVEDATA"]
+states = ["{save_data}/PSP/PPSSPP_STATE"]

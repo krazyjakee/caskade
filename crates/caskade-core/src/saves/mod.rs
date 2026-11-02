@@ -2,6 +2,7 @@
 //! The manifest supplies patterns; discovery supplies the actual install and
 //! Wine/Proton prefix. Unknown games produce no automatic locations.
 mod context;
+mod emulator;
 mod files;
 mod registry;
 mod service;

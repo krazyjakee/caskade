@@ -12,6 +12,7 @@ use caskade_discovery::{HostEnv, OperatingSystem};
 use std::{
     collections::{BTreeMap, BTreeSet},
     path::{Path, PathBuf},
+    sync::Arc,
 };
 
 #[derive(Clone)]
@@ -19,6 +20,7 @@ pub struct Saves {
     pub(crate) store: LibraryStore,
     pub(crate) manifest: Ludusavi,
     pub(crate) environment: HostEnv,
+    pub(crate) catalog: Arc<crate::emulation::Catalog>,
 }
 
 impl Saves {
@@ -30,7 +32,13 @@ impl Saves {
             store,
             manifest,
             environment,
+            catalog: Arc::default(),
         }
+    }
+
+    pub fn with_catalog(mut self, catalog: Arc<crate::emulation::Catalog>) -> Self {
+        self.catalog = catalog;
+        self
     }
 
     pub async fn state(&self, entry_id: &str) -> Result<SaveState> {
@@ -58,9 +66,24 @@ impl Saves {
         } else {
             Vec::new()
         };
-        let (matched, definition) = self
+        let (mut matched, definition) = self
             .match_game(&entry, &game, &preferences, &secondary)
             .await?;
+        let emulated = matches!(
+            entry.launch,
+            Some(crate::model::LaunchSpec::Emulator { .. })
+        );
+        let emulator = if emulated && preferences.manifest_title.is_none() {
+            super::emulator::plan(self, &entry, &game).await?
+        } else {
+            None
+        };
+        if let Some(plan) = &emulator {
+            matched = SaveMatch::Matched {
+                title: plan.definition.name.clone(),
+                method: MatchMethod::Emulator,
+            };
+        }
         let ids = ids(&entry);
         let store = store_name(&entry, &ids);
         let store_id = ids.iter().find_map(|id| match (store.as_deref(), id) {
@@ -83,13 +106,17 @@ impl Saves {
                 context.values.insert("storeGameId".into(), id);
             }
             let mut warnings = std::mem::take(&mut context.warnings);
-            let automatic = if paths.is_some() {
+            let automatic = if let Some(plan) = emulator {
+                super::emulator::resolve(plan, &mut warnings)
+            } else if paths.is_some() {
                 definition
                     .as_ref()
                     .map(|definition| resolve_manifest(definition, &context, &mut warnings))
                     .unwrap_or_default()
             } else {
-                warnings.push(crate::tr!("This release is not installed on this device."));
+                if !emulated {
+                    warnings.push(crate::tr!("This release is not installed on this device."));
+                }
                 Vec::new()
             };
             let locations = manual
@@ -415,7 +442,7 @@ fn resolve_manual(
     deduplicate(locations)
 }
 
-fn deduplicate(locations: Vec<SaveLocation>) -> Vec<SaveLocation> {
+pub(super) fn deduplicate(locations: Vec<SaveLocation>) -> Vec<SaveLocation> {
     let mut found = BTreeMap::<_, SaveLocation>::new();
     for location in locations {
         let key = (location.spec.kind, location.spec.path.clone());

@@ -49,3 +49,8 @@ name = "Mega Drive"
 platforms = ["sega_genesis"]
 extensions = ["md", "gen", "smd", "bin", "zip"]
 args = ["--system", "Mega Drive", "--no-file-prompt", "{RomPath}"]
+
+# Save defaults: https://github.com/ares-emulator/ares/blob/4307bf2eff6e4f9a277fdc6f9d4f4de177b3f932/desktop-ui/emulator/emulator.cpp and mia/medium/mega-drive.cpp; desktop-ui/program/states.cpp
+[saves]
+files = ["{RomDir}/{RomNameNoExt}.ram", "{RomDir}/{RomNameNoExt}.eeprom"]
+states = ["{RomDir}/{RomNameNoExt}.bs*", "{RomDir}/{RomNameNoExt}.blu"]

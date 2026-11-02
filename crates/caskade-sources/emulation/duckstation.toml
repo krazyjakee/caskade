@@ -78,3 +78,8 @@ platforms = ["sony_playstation"]
 extensions = ["bin", "img", "exe", "chd", "psexe", "m3u", "cue", "pbp", "iso"]
 args = ["-batch", "--", "{RomPath}"]
 requires = []
+
+# Save defaults: https://github.com/stenzek/duckstation/blob/f606b4412ace09fa496cc16680deadc97cdecade/src/core/settings.cpp
+[saves]
+files = ["{data}/memcards"]
+states = ["{data}/savestates"]

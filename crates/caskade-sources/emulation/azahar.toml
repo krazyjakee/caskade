@@ -44,3 +44,20 @@ name = "Nintendo 3DS"
 platforms = ["nintendo_3ds"]
 extensions = ["3ds", "cci", "cxi", "3dsx", "app", "elf", "axf"]
 args = ["{RomPath}"]
+
+[vars]
+save_data = "{AppData}/Azahar"
+
+[vars.linux]
+save_data = "{UserHome}/.local/share/azahar-emu"
+
+[vars.linux.flatpak]
+save_data = "{EmulatorDir}/data/azahar-emu"
+
+[vars.macos]
+save_data = "{AppSupport}/Azahar"
+
+# Save defaults: https://github.com/azahar-emu/azahar/blob/e3c916e41a36ae19f7daa8a98e05492873944071/src/common/file_util.cpp and src/common/common_paths.h; src/core/file_sys/archive_{systemsavedata,extsavedata}.cpp
+[saves]
+files = ["{save_data}/sdmc/Nintendo 3DS/*/*/title/*/*/data", "{save_data}/sdmc/Nintendo 3DS/*/*/extdata", "{save_data}/nand/data/*/sysdata"]
+states = ["{save_data}/states"]

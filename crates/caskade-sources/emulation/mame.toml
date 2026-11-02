@@ -38,3 +38,8 @@ name = "Arcade"
 platforms = ["arcade"]
 extensions = ["zip", "7z", "chd"]
 args = ["-rompath", "{RomDir}", "-skip_gameinfo", "{RomNameNoExt}"]
+
+# Save defaults: https://docs.mamedev.org/commandline/commandline-all.html (nvram_directory, state_directory)
+[saves]
+files = ["{EmulatorDir}/nvram/{RomNameNoExt}"]
+states = ["{EmulatorDir}/sta/{RomNameNoExt}"]
