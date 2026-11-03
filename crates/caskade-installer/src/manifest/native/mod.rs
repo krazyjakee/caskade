@@ -13,6 +13,8 @@ pub use model::{
     RegistryEffect, UninstallRegistration,
 };
 pub use registry::PlatformRegistry;
+#[cfg(windows)]
+pub(crate) use registry::{VIEWS, created_effects, software_keys};
 use std::{io, path::Path};
 pub(super) fn prepare(
     game: &Path,

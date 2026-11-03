@@ -94,6 +94,9 @@ pub fn effects_from_journal(
             JournalEntry::ExternalDirectory { path } => {
                 Some(locate(path).map(|location| ExternalEffect::Directory { location }))
             }
+            JournalEntry::Registry { effect } => Some(Ok(ExternalEffect::Registry {
+                effect: effect.clone(),
+            })),
             JournalEntry::Compensation { .. } | JournalEntry::InstallLocation { .. } => None,
         })
         .collect()

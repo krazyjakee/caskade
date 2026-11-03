@@ -83,6 +83,7 @@ impl NativeRegistry for Registry {
                 location,
                 name,
                 original,
+                ..
             } => {
                 let key = format!("{}/{}", location.path.as_str(), name);
                 let mut values = self.values.lock().unwrap();
@@ -243,6 +244,7 @@ async fn all_families_run_presets_then_remove_registry_shortcuts_and_manifest_le
                     location: location("Software/Fixture"),
                     name: "InstallPath".into(),
                     original: None,
+                    installed: None,
                 },
             },
             ExternalEffect::Registry {
@@ -250,6 +252,7 @@ async fn all_families_run_presets_then_remove_registry_shortcuts_and_manifest_le
                     location: location("Software/Fixture"),
                     name: "Existing".into(),
                     original: Some(RegistryValue::String("old user value".into())),
+                    installed: None,
                 },
             },
         ];

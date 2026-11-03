@@ -13,10 +13,12 @@ pub mod appimage;
 mod native;
 pub mod proton;
 pub mod registry;
+mod registry_watch;
 pub mod umu;
 mod watch;
 pub use appimage::outside_appimage;
 pub use native::NativeRuntime;
+pub use registry_watch::RegistryWatcher;
 pub use watch::{OutOfRootWatcher, default_watch_roots};
 
 #[derive(

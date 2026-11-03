@@ -10,13 +10,19 @@ manifest cleanup and remain visible in `UninstallReport.native`. Cancellation
 retains the game. Arbitrary unsupported uninstall DSLs retain their existing
 explicit-error semantics.
 
-The caller records native registry inverse effects as
+Native registry inverse effects are recorded as
 `ExternalEffect::Registry { effect: RegistryEffect::Value/Key }`, preserving
-original values when a pre-existing value was changed. Value reversal restores
-the old typed value or deletes a created value; a created key is removed only
-when empty. The default Windows adapter allows only explicit HKCU/HKLM 32/64
-Software scopes. Other hosts inject a `NativeRegistry` for the Wine/Proton
-prefix; the host registry is never substituted for a prefix registry.
+original values when a pre-existing value was changed. On Windows the
+pipeline's `runtime::RegistryWatcher` journals them around each native run:
+keys that appear one or two levels below `Software` (outside `Microsoft`,
+`Classes` and `Policies`) are recorded with their subkeys and every value's
+data as installed, so the manifest route can remove them after a move that
+leaves the native uninstaller unsafe (#38). Value reversal restores the old
+typed value or deletes a created value, but keeps a value whose data changed
+since the install; a created key is removed only when empty. The default
+Windows adapter allows only explicit HKCU/HKLM 32/64 Software scopes. Other
+hosts inject a `NativeRegistry` for the Wine/Proton prefix; the host registry
+is never substituted for a prefix registry.
 
 After a native install, call `uninstall_registration_effects(game, registry)`
 and append the returned effects to the manifest. This stores the exact logical

@@ -31,7 +31,7 @@ mod steps;
 pub(crate) use api::source_path;
 pub use api::{
     AttemptFailure, ExecConfig, ExecError, ExecReport, ExecRequest, Extractor, FinalizationContext,
-    Finalizer, ProcessObservation, ProcessObserver, Result, folder_name,
+    Finalizer, Observers, ProcessObservation, ProcessObserver, Result, folder_name,
 };
 pub use context::{CheckedReader, StepContext};
 pub use engine::Executor;

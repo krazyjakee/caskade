@@ -225,9 +225,11 @@ pub async fn install_prepared(
         execution: policy.execution,
         ..Default::default()
     };
+    let observers: Vec<Arc<dyn crate::exec::ProcessObserver>> =
+        vec![watcher, Arc::new(crate::runtime::RegistryWatcher)];
     let worker = base_worker
         .with_config(config)
-        .with_observer(watcher)
+        .with_observer(Arc::new(crate::exec::Observers(observers)))
         .with_extractor(extractor)
         .with_finalizer(finalizer.clone());
     let worker = match &ctx.aliases {

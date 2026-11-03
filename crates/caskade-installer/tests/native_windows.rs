@@ -797,6 +797,7 @@ mod native {
                         location,
                         name: "InstallPath".into(),
                         original: None,
+                        installed: None,
                     },
                 },
             ]);

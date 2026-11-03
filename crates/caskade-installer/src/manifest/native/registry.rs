@@ -26,10 +26,13 @@ impl NativeRegistry for PlatformRegistry {
     }
 }
 #[cfg(windows)]
+pub(crate) use windows::{VIEWS, created_effects, software_keys};
+#[cfg(windows)]
 mod windows {
     use super::*;
     use crate::RegistryValue;
     use crate::manifest::{ExternalLocation, ManifestPath};
+    use std::collections::BTreeSet;
     use winreg::{RegKey, enums::*, types::ToRegValue};
     const UNINSTALL: &str = "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall";
     const LIMIT: u32 = 64 * 1024;
@@ -83,6 +86,158 @@ mod windows {
             quiet_uninstall_string: text(&key, "QuietUninstallString")?,
             windows_installer: key.get_value::<u32, _>("WindowsInstaller").unwrap_or(0) == 1,
         })
+    }
+    /// Typed data of a raw value; types without a typed form keep their bytes.
+    fn typed(raw: winreg::RegValue) -> RegistryValue {
+        use winreg::types::FromRegValue;
+        let decoded = match raw.vtype {
+            REG_SZ => String::from_reg_value(&raw).ok().map(RegistryValue::String),
+            REG_EXPAND_SZ => String::from_reg_value(&raw)
+                .ok()
+                .map(RegistryValue::ExpandString),
+            REG_MULTI_SZ => Vec::<String>::from_reg_value(&raw)
+                .ok()
+                .map(RegistryValue::MultiString),
+            REG_DWORD => u32::from_reg_value(&raw).ok().map(RegistryValue::Dword),
+            REG_QWORD => u64::from_reg_value(&raw).ok().map(RegistryValue::Qword),
+            _ => None,
+        };
+        decoded.unwrap_or_else(|| RegistryValue::Binary(raw.bytes.to_vec()))
+    }
+    fn read(key: &RegKey, name: &str) -> io::Result<Option<RegistryValue>> {
+        match key.get_raw_value(name) {
+            Ok(raw) => Ok(Some(typed(raw))),
+            Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(None),
+            Err(error) => Err(error),
+        }
+    }
+    /// Views an install can write to below Software: HKLM's two, and HKCU
+    /// (its Software is shared by both views).
+    pub(crate) const VIEWS: [(bool, bool); 3] = [(true, true), (true, false), (false, true)];
+    /// System and shared trees whose new keys during an install are not the
+    /// installer's to own; Uninstall registrations are recorded separately.
+    const SHARED: [&str; 4] = ["Microsoft", "Classes", "Policies", "WOW6432Node"];
+    const MAX_KEYS: usize = 200_000;
+    /// Keys one and two levels below Software in a view, as `Vendor` and
+    /// `Vendor\\Product`.
+    pub(crate) fn software_keys(machine: bool, bits64: bool) -> io::Result<BTreeSet<String>> {
+        let mut keys = BTreeSet::new();
+        let software =
+            match root(machine).open_subkey_with_flags("Software", KEY_READ | view(bits64)) {
+                Ok(key) => key,
+                Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(keys),
+                Err(error) => return Err(error),
+            };
+        for name in software.enum_keys() {
+            let name = name?;
+            if SHARED
+                .iter()
+                .any(|shared| shared.eq_ignore_ascii_case(&name))
+            {
+                continue;
+            }
+            if let Ok(child) = software.open_subkey_with_flags(&name, KEY_READ | view(bits64)) {
+                for sub in child.enum_keys() {
+                    keys.insert(format!("{name}\\{}", sub?));
+                    if keys.len() > MAX_KEYS {
+                        return Err(io::Error::other("registry snapshot budget exceeded"));
+                    }
+                }
+            }
+            keys.insert(name);
+        }
+        Ok(keys)
+    }
+    /// Effects that undo the keys an install created below Software in one
+    /// view: every created key (parents first), then each value with the data
+    /// it holds now, so removal keeps what the user changed since.
+    pub(crate) fn created_effects(
+        machine: bool,
+        bits64: bool,
+        created: &BTreeSet<String>,
+    ) -> io::Result<Vec<RegistryEffect>> {
+        let scope = format!(
+            "registry.{}.{}",
+            if machine { "hklm" } else { "hkcu" },
+            if bits64 { 64 } else { 32 }
+        );
+        let mut keys = Vec::new();
+        let mut values = Vec::new();
+        // A new key's parent may be new too; walking the topmost covers both.
+        for key in created.iter().filter(|key| {
+            !key.rsplit_once('\\')
+                .is_some_and(|(parent, _)| created.contains(parent))
+        }) {
+            walk(
+                machine,
+                bits64,
+                &format!("Software\\{key}"),
+                0,
+                &mut keys,
+                &mut values,
+            )?;
+        }
+        let location = |path: &str| -> io::Result<ExternalLocation> {
+            Ok(ExternalLocation {
+                scope: scope.clone(),
+                path: ManifestPath::new(path.replace('\\', "/")).map_err(io::Error::other)?,
+            })
+        };
+        let mut effects = Vec::new();
+        for key in keys {
+            effects.push(RegistryEffect::Key {
+                location: location(&key)?,
+            });
+        }
+        for (key, name, data) in values {
+            effects.push(RegistryEffect::Value {
+                location: location(&key)?,
+                name,
+                original: None,
+                installed: Some(data),
+            });
+        }
+        Ok(effects)
+    }
+    fn walk(
+        machine: bool,
+        bits64: bool,
+        path: &str,
+        depth: usize,
+        keys: &mut Vec<String>,
+        values: &mut Vec<(String, String, RegistryValue)>,
+    ) -> io::Result<()> {
+        // A '/' in a key name would read as a separator in its manifest
+        // path: such a subtree is left alone rather than misrecorded.
+        if depth > 16 || path.contains('/') {
+            return Ok(());
+        }
+        if keys.len() >= 1_000 || values.len() >= 10_000 {
+            return Err(io::Error::other("created registry keys exceed the budget"));
+        }
+        let key = match root(machine).open_subkey_with_flags(path, KEY_READ | view(bits64)) {
+            Ok(key) => key,
+            Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(()),
+            Err(error) => return Err(error),
+        };
+        bounded(&key)?;
+        keys.push(path.to_owned());
+        for value in key.enum_values() {
+            let (name, raw) = value?;
+            values.push((path.to_owned(), name, typed(raw)));
+        }
+        let children: Vec<String> = key.enum_keys().collect::<io::Result<_>>()?;
+        for child in children {
+            walk(
+                machine,
+                bits64,
+                &format!("{path}\\{child}"),
+                depth + 1,
+                keys,
+                values,
+            )?;
+        }
+        Ok(())
     }
     impl NativeRegistry for PlatformRegistry {
         fn uninstall_entries(&self) -> io::Result<Vec<UninstallRegistration>> {
@@ -158,6 +313,7 @@ mod windows {
                     location,
                     name,
                     original,
+                    installed,
                 } => {
                     let key = match open(location, KEY_READ | KEY_WRITE) {
                         Ok(key) => key,
@@ -175,6 +331,18 @@ mod windows {
                         }
                         Err(error) => return Err(error),
                     };
+                    // Data the user changed since the install is theirs now.
+                    if let Some(installed) = installed {
+                        match read(&key, name)? {
+                            None if original.is_none() => return Ok(()),
+                            Some(current) if current != *installed => {
+                                return Err(io::Error::other(
+                                    "registry value changed since the install; preserved",
+                                ));
+                            }
+                            _ => {}
+                        }
+                    }
                     if let Some(value) = original {
                         let raw = match value {
                             RegistryValue::String(value) => value.to_reg_value(),
@@ -233,5 +401,76 @@ mod windows {
                 }
             }
         }
+    }
+}
+
+#[cfg(all(test, windows))]
+mod tests {
+    use super::*;
+    use crate::RegistryValue;
+    use std::collections::BTreeSet;
+    use winreg::{RegKey, enums::*};
+
+    /// A per-user key named for this process, removed whatever the outcome.
+    struct Scratch(String);
+    impl Drop for Scratch {
+        fn drop(&mut self) {
+            let _ = RegKey::predef(HKEY_CURRENT_USER)
+                .open_subkey_with_flags("Software", KEY_ALL_ACCESS)
+                .and_then(|software| software.delete_subkey_all(&self.0));
+        }
+    }
+
+    fn install(name: &str) -> Vec<RegistryEffect> {
+        let (key, _) = RegKey::predef(HKEY_CURRENT_USER)
+            .create_subkey(format!("Software\\{name}\\Game"))
+            .unwrap();
+        key.set_value("InstallPath", &String::from("C:\\Games\\Game"))
+            .unwrap();
+        let effects = created_effects(false, true, &BTreeSet::from([name.to_owned()])).unwrap();
+        assert!(effects.iter().any(|effect| matches!(
+            effect,
+            RegistryEffect::Value { name, installed: Some(RegistryValue::String(data)), .. }
+                if name == "InstallPath" && data == "C:\\Games\\Game"
+        )));
+        effects
+    }
+
+    fn exists(name: &str) -> bool {
+        RegKey::predef(HKEY_CURRENT_USER)
+            .open_subkey(format!("Software\\{name}"))
+            .is_ok()
+    }
+
+    #[test]
+    fn created_keys_go_and_values_the_user_changed_stay() {
+        let name = format!("CaskadeRegistryWatchTest{}", std::process::id());
+        let _scratch = Scratch(name.clone());
+
+        // Unchanged since the install: everything goes, values first.
+        for effect in install(&name).iter().rev() {
+            PlatformRegistry.undo_effect(effect).unwrap();
+        }
+        assert!(!exists(&name));
+
+        // Changed by the user: the value, and so its keys, stay.
+        let effects = install(&name);
+        RegKey::predef(HKEY_CURRENT_USER)
+            .open_subkey_with_flags(format!("Software\\{name}\\Game"), KEY_WRITE)
+            .unwrap()
+            .set_value("InstallPath", &String::from("D:\\Mine"))
+            .unwrap();
+        let failures = effects
+            .iter()
+            .rev()
+            .filter(|effect| PlatformRegistry.undo_effect(effect).is_err())
+            .count();
+        assert_eq!(failures, 3, "the value and both keys are preserved");
+        let kept: String = RegKey::predef(HKEY_CURRENT_USER)
+            .open_subkey(format!("Software\\{name}\\Game"))
+            .unwrap()
+            .get_value("InstallPath")
+            .unwrap();
+        assert_eq!(kept, "D:\\Mine");
     }
 }

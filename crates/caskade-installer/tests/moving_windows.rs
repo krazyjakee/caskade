@@ -8,9 +8,8 @@ use caskade_installer::{
     formats::windows::{inno::InnoHandler, msi::MsiHandler},
     host::HostCaps,
     manifest::{
-        ExternalEffect, ExternalLocation, InstallManifest, InstalledFile, ManifestPath,
-        ManifestSource, RelocationVerdict, RootManifest, Sha256Digest, UninstallRequest,
-        Uninstaller,
+        ExternalEffect, InstallManifest, InstalledFile, ManifestPath, ManifestSource,
+        RelocationVerdict, RootManifest, Sha256Digest, UninstallRequest, Uninstaller,
         native::{PlatformRegistry, RegistryEffect, uninstall_registration_effects},
     },
     plan::{PlanEngine, Policy},
@@ -164,15 +163,6 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
     if std::env::var("CASKADE_TEST_NATIVE").as_deref() != Ok("1") {
         return;
     }
-    // After a C:→D: move the game's own uninstaller isn't found and the
-    // manifest route leaves the HKLM key its installer wrote, for the Inno
-    // and MSI minis alike (#38). Each case's uninstall would leave that key
-    // for the next one, so the whole test waits for #38 (CASKADE_TEST_MOVE_38=1
-    // runs it).
-    if std::env::var_os("CASKADE_TEST_MOVE_38").is_none() {
-        eprintln!("skipping: uninstalling a game after a C:→D: move is #38");
-        return;
-    }
     let target_parent = std::env::var_os("CASKADE_TEST_MOVE_ROOT")
         .map(PathBuf::from)
         .unwrap_or_else(|| PathBuf::from(r"D:\CaskadeTests"));
@@ -266,7 +256,8 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
                 runtime.clone(),
                 Arc::new(FakeDiskSpace::fixed(u64::MAX)),
                 Arc::new(RecordingSink::default()),
-            );
+            )
+            .with_observer(Arc::new(caskade_installer::runtime::RegistryWatcher));
             if aliased {
                 executor = executor.with_aliases(aliases.clone(), "moving-windows-c");
             }
@@ -389,15 +380,24 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
                 1,
                 "native uninstaller must be recorded"
             );
-            record.external_effects = registrations;
-            record.external_effects.push(ExternalEffect::Registry {
-                effect: RegistryEffect::Key {
-                    location: ExternalLocation {
-                        scope: "registry.hklm.64".into(),
-                        path: ManifestPath::new(CUSTOM_KEY.replace('\\', "/")).unwrap(),
-                    },
-                },
-            });
+            // As the pipeline records them: what the registry watcher saw the
+            // installer create, then its Uninstall registrations.
+            record.external_effects = caskade_installer::manifest::effects_from_journal(
+                &report.journal,
+                &BTreeMap::new(),
+            )
+            .unwrap();
+            assert!(
+                record.external_effects.iter().any(|effect| matches!(
+                    effect,
+                    ExternalEffect::Registry {
+                        effect: RegistryEffect::Value { name, .. }
+                    } if name == "InstallPath"
+                )),
+                "{id}: the installer's InstallPath value was not recorded: {:?}",
+                record.external_effects
+            );
+            record.external_effects.extend(registrations);
             record.relocation.verdict = scan.verdict;
             record.relocation.references = scan.references.clone();
             record.relocation.last_path = Some(report.dir.to_string_lossy().into_owned());

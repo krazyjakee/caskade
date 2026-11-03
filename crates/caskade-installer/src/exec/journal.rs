@@ -41,6 +41,10 @@ pub enum JournalEntry {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         only_if: Option<ProcessCommand>,
     },
+    /// A host registry key or value the installer created (Windows).
+    Registry {
+        effect: crate::manifest::native::RegistryEffect,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -223,6 +227,12 @@ pub(super) fn rollback(root: &Dir, record: &Record, runtimes: &Runtimes) -> Resu
                 }
                 Ok(())
             })(),
+            JournalEntry::Registry { effect } => {
+                use crate::manifest::native::NativeRegistry;
+                crate::manifest::native::PlatformRegistry
+                    .undo_effect(effect)
+                    .map_err(Into::into)
+            }
         };
         if let Err(error) = result {
             errors.push(error.to_string());

@@ -195,6 +195,7 @@ async fn genuine_inno_nsis_msi_native_install_uninstall_remove_files_registry_an
                     location: location(&registry_key.replace('\\', "/")),
                     name: "InstallPath".into(),
                     original: None,
+                    installed: None,
                 },
             },
         ]);

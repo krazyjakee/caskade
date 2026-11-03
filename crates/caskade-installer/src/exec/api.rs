@@ -193,6 +193,37 @@ pub trait ProcessObservation: Send {
     fn finish(self: Box<Self>, journal: &JournalHandle) -> Result<()>;
 }
 
+/// Several observers around the same step, started in order and finished
+/// in reverse.
+pub struct Observers(pub Vec<Arc<dyn ProcessObserver>>);
+impl ProcessObserver for Observers {
+    fn start(
+        &self,
+        command: &ProcessCommand,
+        journal: &JournalHandle,
+        context: &StepContext,
+    ) -> Result<Box<dyn ProcessObservation>> {
+        let mut started = Vec::with_capacity(self.0.len());
+        for observer in &self.0 {
+            started.push(observer.start(command, journal, context)?);
+        }
+        Ok(Box::new(Started(started)))
+    }
+}
+struct Started(Vec<Box<dyn ProcessObservation>>);
+impl ProcessObservation for Started {
+    fn finish(self: Box<Self>, journal: &JournalHandle) -> Result<()> {
+        let mut first = Ok(());
+        for observation in self.0.into_iter().rev() {
+            let result = observation.finish(journal);
+            if first.is_ok() {
+                first = result;
+            }
+        }
+        first
+    }
+}
+
 pub(super) struct NoObserver;
 impl ProcessObserver for NoObserver {
     fn start(

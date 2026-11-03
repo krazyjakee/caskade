@@ -34,6 +34,10 @@ pub enum RegistryEffect {
         location: ExternalLocation,
         name: String,
         original: Option<RegistryValue>,
+        /// The data right after the install. When recorded, a value the user
+        /// has changed since is preserved rather than restored or deleted.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        installed: Option<RegistryValue>,
     },
     /// Remove a newly-created key only when it is empty after value reversal.
     Key { location: ExternalLocation },
