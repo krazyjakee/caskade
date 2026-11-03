@@ -1,9 +1,10 @@
 name: installer-pr
-# Base-branch workflow, guarded BEFORE checking out same-repository PR code.
-# No local reusable workflows (important on Gitea 1.22).
+# The installer suite (crates/caskade-installer/docs/ci.md) on GitHub-hosted
+# Linux, Windows and macOS runners. Pull requests, from forks too, use the plain
+# `pull_request` event: a read-only token, no secrets and hosted machines only.
+# The repository has no self-hosted runners, and no job here may ask for one.
 on:
-  pull_request_target:
-    types: [opened, synchronize, reopened]
+  pull_request:
   push:
     branches: [master]
   workflow_dispatch:
@@ -11,65 +12,68 @@ permissions:
   contents: read
 concurrency:
   group: installer-pr-${{ github.event.pull_request.number || github.ref }}
-  # Forgejo 14+ honors this; ci-scope also skips queued obsolete PR heads on 12.
-  cancel-in-progress: ${{ github.event_name == 'pull_request_target' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   changes:
-    if: >-
-      github.event_name != 'pull_request_target' ||
-      (github.event.pull_request.head.repo.full_name == github.repository &&
-       github.event.pull_request.head.repo.fork == false)
-    runs-on: caskade-linux
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       installer: ${{ steps.scope.outputs.installer }}
     steps:
-      - uses: https://github.com/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.base.sha || github.sha }}
-          fetch-depth: ${{ github.event_name == 'pull_request_target' && '0' || '1' }}
+          fetch-depth: ${{ github.event_name == 'pull_request' && '0' || '1' }}
           persist-credentials: false
+      # Master pushes and manual runs select everything; a PR selects the
+      # installer suite when the installer or anything it depends on changed.
       - id: scope
         run: python3 scripts/ci-scope.py
   installer:
     needs: changes
-    if: >-
-      needs.changes.outputs.installer == 'true' &&
-      (github.event_name != 'pull_request_target' ||
-       (github.event.pull_request.head.repo.full_name == github.repository &&
-        github.event.pull_request.head.repo.fork == false))
+    if: needs.changes.outputs.installer == 'true'
     strategy:
       fail-fast: false
       matrix:
         include:
-          - runner: caskade-linux
+          - runner: ubuntu-latest
             os: linux
-            shell: bash
             python: python3
-          - runner: caskade-windows-x64
+          - runner: windows-latest
             os: windows
-            shell: pwsh
             python: python
-          - runner: caskade-macos
+          - runner: macos-latest
             os: macos
-            shell: bash
             python: python3
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 60
+    timeout-minutes: 90
     defaults:
       run:
-        shell: ${{ matrix.shell }}
+        shell: bash
     env:
       CARGO_TERM_COLOR: always
       INSTA_UPDATE: 'no'
     steps:
-      - uses: https://github.com/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          persist-credentials: false
-      - name: Record native toolchain
+      # Committed fixtures and snapshots are compared byte for byte.
+      - name: Check out without line-ending conversion
+        if: matrix.os == 'windows'
         run: |
+          git config --global core.autocrlf false
+          git config --global core.longpaths true
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal --component rustfmt,clippy
+          rustup default stable
           rustc -Vv
-          cargo nextest --version
+      - uses: taiki-e/install-action@682ce6c3c696a4cd5168a05f98e51aa02b877941 # v2.89.1
+        with:
+          tool: cargo-nextest@0.9.114
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: installer
+          cache-on-failure: true
       - name: Formatting (installer only)
         run: cargo fmt -p caskade-installer -- --check
       - name: Build with every feature
@@ -95,22 +99,34 @@ jobs:
         if: matrix.os == 'macos'
         run: |
           python3 xtask/macos-fixtures.py --artifact target/macos-fixture-artifact
-          python3 -c "from pathlib import Path; import os; p=Path('target/macos-fixture-artifact').resolve(); f=open(os.environ['GITHUB_ENV'],'a'); f.write('CASKADE_MACOS_FIXTURES='+str(p)+'\n'); f.close()"
-      - name: Native Windows and macOS sidecar / golden gates
+          echo "CASKADE_MACOS_FIXTURES=$PWD/target/macos-fixture-artifact" >> "$GITHUB_ENV"
+      # Hosted Windows runners have a second volume, D:, which the C:→D:
+      # relocation tests need; TEMP stays on C:.
+      - name: Second volume for the C to D move tests
+        if: matrix.os == 'windows'
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'D:\')) { throw 'this runner has no D: volume for the C:->D: move tests' }
+          $temp = [System.IO.Path]::GetTempPath()
+          if (-not $temp.ToUpper().StartsWith('C:')) { throw "TEMP must be on C:, got $temp" }
+          New-Item -ItemType Directory -Force 'D:\CaskadeTests' | Out-Null
+          "CASKADE_TEST_MOVE_ROOT=D:\CaskadeTests" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+          Get-Volume | Format-Table -AutoSize
+      - name: Provision the SHA-verified official 7-Zip sidecar
         if: matrix.os != 'linux'
-        env:
-          CASKADE_TEST_NATIVE: '1'
         run: |
           ${{ matrix.python }} scripts/7zz-download.py > sidecar.json
           ${{ matrix.python }} -c "import json,os; d=json.load(open('sidecar.json')); f=open(os.environ['GITHUB_ENV'],'a'); f.write('CASKADE_7ZZ='+d['program']+'\n'); f.close()"
+      # Linux's native profile needs privileged Docker, Proton and a second
+      # filesystem: installer-linux-native runs it.
       - name: T7 native Windows and macOS
         if: matrix.os != 'linux'
         env:
           CASKADE_TEST_NATIVE: '1'
         run: cargo nextest run -p caskade-installer --all-features --locked --profile native --run-ignored all
-      - name: Upload native OS test results
+      - name: Upload test results
         if: always()
-        uses: https://github.com/actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: installer-${{ matrix.os }}-${{ github.run_id }}
           path: |
@@ -118,14 +134,13 @@ jobs:
             target/native-windows/*.json
             sidecar.json
           retention-days: 14
+          if-no-files-found: ignore
   result:
     name: installer result
     needs: [changes, installer]
-    if: >-
-      always() && (github.event_name != 'pull_request_target' ||
-      (github.event.pull_request.head.repo.full_name == github.repository &&
-       github.event.pull_request.head.repo.fork == false))
-    runs-on: caskade-linux
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: All selected installer checks passed
         env:
