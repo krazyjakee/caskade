@@ -52,6 +52,14 @@ fn sources() -> Vec<Arc<dyn Source>> {
     vec![Arc::new(Steam)]
 }
 
+/// One source's rescan, with the same fixture on every host. Windows' file
+/// opens cost several times Linux's (tests/HARDENING.md has the measurements).
+const RESCAN_BUDGET: Duration = if cfg!(windows) {
+    Duration::from_millis(500)
+} else {
+    Duration::from_millis(200)
+};
+
 #[test]
 fn installing_and_removing_a_game_each_produce_one_delta() {
     let (_temp, machine) = machine();
@@ -60,16 +68,21 @@ fn installing_and_removing_a_game_each_produce_one_delta() {
     let initial = library.scan(&Cancel::new()).unwrap();
     assert_eq!(initial.added.len(), 4);
     let steam = BTreeSet::from([STEAM]);
-    assert!(library.rescan(&steam, &Cancel::new()).unwrap().is_empty());
+    // Unchanged rescans, logged with the timed one below for the per-OS
+    // budget in tests/HARDENING.md: steady state, not a cold first read.
+    for _ in 0..5 {
+        let started = Instant::now();
+        assert!(library.rescan(&steam, &Cancel::new()).unwrap().is_empty());
+        println!("unchanged rescan: {:?}", started.elapsed());
+    }
 
     install(&steamapps(&machine), 2_000_060, "Fixture Newcomer");
     let started = Instant::now();
     let delta = library.rescan(&steam, &Cancel::new()).unwrap();
     let elapsed = started.elapsed();
-    // Logged for the per-OS budget in tests/HARDENING.md.
     println!("one source rescan: {elapsed:?}");
     assert!(
-        elapsed < Duration::from_millis(200),
+        elapsed < RESCAN_BUDGET,
         "one source rescan took {elapsed:?}"
     );
     assert_eq!(titles(&delta.added), ["Fixture Newcomer"]);

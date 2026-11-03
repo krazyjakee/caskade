@@ -45,16 +45,25 @@ fn writer_open_wal_commits_are_visible_without_source_side_effects() {
         temp.path().join(format!("{URI_NAME}-wal")),
         temp.path().join(format!("{URI_NAME}-shm")),
     ];
-    let before = names
-        .iter()
-        .map(|p| std::fs::read(p).unwrap())
-        .collect::<Vec<_>>();
+    // The writer holds byte-range locks in -shm, and Windows refuses to read
+    // locked bytes (the snapshot never reads -shm); there it is compared by
+    // size and modification time.
+    let state = |p: &std::path::Path| {
+        let metadata = std::fs::metadata(p).unwrap();
+        let bytes = if cfg!(windows) && p.to_string_lossy().ends_with("-shm") {
+            None
+        } else {
+            Some(std::fs::read(p).unwrap())
+        };
+        (metadata.len(), metadata.modified().unwrap(), bytes)
+    };
+    let before = names.iter().map(|p| state(p)).collect::<Vec<_>>();
     let mut db = open(&path);
     assert!(db.is_snapshot());
     let result = db.query("SELECT name FROM games", &[]).unwrap();
     assert_eq!(result.rows, [vec![SqlValue::Text("committed".into())]]);
-    for (p, bytes) in names.iter().zip(before) {
-        assert_eq!(std::fs::read(p).unwrap(), bytes);
+    for (p, state_before) in names.iter().zip(before) {
+        assert_eq!(state(p), state_before, "{p:?} changed");
     }
     writer.execute_batch("ROLLBACK").unwrap();
 }

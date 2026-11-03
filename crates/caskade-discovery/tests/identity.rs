@@ -105,7 +105,8 @@ fn wine_c_and_z_map_to_host_without_guessing_other_drives() {
         runner: None,
     };
     let c = canonical_path(&env, Path::new(r"C:\Games\Foo"), &runtime).unwrap();
-    assert!(c.same(&path(&env, "/home/test/prefix/drive_c/Games/Foo")));
+    let host = path(&env, "/home/test/prefix/drive_c/Games/Foo");
+    assert!(c.same(&host), "{c:?} != {host:?}");
     assert!(
         canonical_path(&env, Path::new(r"Z:\home\test\Games\Foo"), &runtime)
             .unwrap()

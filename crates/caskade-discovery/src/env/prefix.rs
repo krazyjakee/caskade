@@ -203,26 +203,28 @@ impl HostEnv {
     }
 }
 
-/// `dir/name`, or the existing entry whose name differs only in case.
+/// The entry of `dir` named `name` as it is stored: the exact name if there
+/// is one, else the entry whose name differs only in case, else `dir/name`.
+/// The directory is always read, because on a case-insensitive volume (APFS,
+/// NTFS) `dir/name` exists in any case and would carry the caller's.
 fn case_insensitive_child(dir: &Path, name: &str) -> PathBuf {
-    let exact = dir.join(name);
-    if exact.exists() {
-        return exact;
+    let Ok(entries) = fs::read_dir(dir) else {
+        return dir.join(name);
+    };
+    let mut folded = None;
+    for entry in entries.filter_map(Result::ok) {
+        let candidate = entry.file_name();
+        let Some(text) = candidate.to_str() else {
+            continue;
+        };
+        if text == name {
+            return dir.join(candidate);
+        }
+        if text.eq_ignore_ascii_case(name) && folded.as_ref().is_none_or(|f| &candidate < f) {
+            folded = Some(candidate);
+        }
     }
-    fs::read_dir(dir)
-        .ok()
-        .and_then(|entries| {
-            entries
-                .filter_map(Result::ok)
-                .map(|entry| entry.file_name())
-                .filter(|candidate| {
-                    candidate
-                        .to_str()
-                        .is_some_and(|text| text.eq_ignore_ascii_case(name))
-                })
-                .min()
-        })
-        .map_or(exact, |found| dir.join(found))
+    dir.join(folded.as_deref().unwrap_or(std::ffi::OsStr::new(name)))
 }
 
 /// `dosdevices/<x>:` links (raw `<x>::` devices are skipped).

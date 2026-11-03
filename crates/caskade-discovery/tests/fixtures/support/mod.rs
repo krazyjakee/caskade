@@ -65,12 +65,12 @@ fn component(name: &str) -> io::Result<()> {
 impl Scenario {
     pub fn load(fixtures: &Path, id: &str) -> io::Result<Self> {
         component(id)?;
-        let base = fixtures.join("machines").canonicalize()?;
+        let base = dunce::canonicalize(fixtures.join("machines"))?;
         let path = base.join(id);
         if fs::symlink_metadata(&path)?.is_symlink() {
             return Err(invalid("scenario cannot be a symlink"));
         }
-        let path = path.canonicalize()?;
+        let path = dunce::canonicalize(path)?;
         if path.parent() != Some(base.as_path()) {
             return Err(invalid("scenario escapes machine corpus"));
         }
@@ -95,7 +95,7 @@ impl Scenario {
         {
             return Err(invalid("fixture path must be relative"));
         }
-        let candidate = self.path.join(relative).canonicalize()?;
+        let candidate = dunce::canonicalize(self.path.join(relative))?;
         if !candidate.starts_with(&self.path) {
             return Err(invalid("fixture path escapes scenario"));
         }
@@ -156,7 +156,7 @@ pub fn all(fixtures: &Path) -> io::Result<Vec<Scenario>> {
 pub fn relative_value(value: &impl Serialize, root: &Path) -> serde_json::Result<Value> {
     let mut value = serde_json::to_value(value)?;
     let mut prefixes = vec![root.to_string_lossy().into_owned()];
-    if let Ok(canonical) = root.canonicalize() {
+    if let Ok(canonical) = dunce::canonicalize(root) {
         prefixes.push(canonical.to_string_lossy().into_owned());
     }
     prefixes.sort_by_key(|prefix| std::cmp::Reverse(prefix.len()));

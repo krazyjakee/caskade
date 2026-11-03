@@ -111,7 +111,8 @@ fn game_category_localized_name_exec_field_codes_and_env_remain_literal() {
     // Field replacements are data, not another shell/tokenization pass.
     assert_eq!(args[0], "--name");
     assert_eq!(args[1], "Quête Spatiale");
-    assert_eq!(args[2], desktop.to_str().unwrap());
+    // A host path: compared by component.
+    assert_eq!(Path::new(&args[2]), desktop);
     assert_eq!(args[3], "--icon");
     assert_eq!(args[5], "%");
     assert_eq!(args[6], "$(never-run)");

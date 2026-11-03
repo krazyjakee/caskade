@@ -245,23 +245,31 @@ impl HostEnv {
                     ));
                 }
             }
-            if !case_sensitive && fs::symlink_metadata(&next).is_err() && current.is_dir() {
+            // Use the stored name. A case-insensitive native filesystem
+            // finds `next` in any case, so there the folder is always read.
+            if !case_sensitive
+                && (cfg!(any(windows, target_os = "macos")) || fs::symlink_metadata(&next).is_err())
+                && current.is_dir()
+            {
                 let wanted = name.to_string_lossy().to_lowercase();
                 let mut found = None;
+                let mut exact = None;
                 for (count, entry) in fs::read_dir(&current)?.enumerate() {
                     if count >= 100_000 {
                         return Err(invalid("fixture directory exceeds lookup limit"));
                     }
                     let entry = entry?;
-                    if entry.file_name().to_string_lossy().to_lowercase() == wanted {
+                    if entry.file_name() == name {
+                        exact = Some(entry.path());
+                    } else if entry.file_name().to_string_lossy().to_lowercase() == wanted {
                         if found.is_some() {
                             return Err(invalid("ambiguous case-insensitive fixture path"));
                         }
                         found = Some(entry.path());
                     }
                 }
-                if let Some(found) = found {
-                    next = found;
+                if let Some(stored) = exact.or(found) {
+                    next = stored;
                 }
             }
             match fs::symlink_metadata(&next) {

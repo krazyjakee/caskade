@@ -12,6 +12,10 @@ CASKADE_DISCOVERY_PERF_OUTPUT=target/discovery-performance flock /tmp/caskade-he
 
 Generation/build are excluded from the measured interval. The public default full scan, including launcher detection, source execution and merging, must finish strictly below two seconds **per OS-profile machine**. The test verifies all 1,000 generated IDs survive without cross-group duplication, each launcher family contributes a record, no source fails, and the report invariants hold. Timing the three different machines is not a single combined budget. JSON measurements include source counts, group counts, UTC completion time and optional CI commit SHA.
 
+### One-source rescan
+
+`watch::installing_and_removing_a_game_each_produce_one_delta` times one Steam rescan after a new manifest appears, over the same `steam-linux-shared` fixture on every host, and logs it with five unchanged rescans before it. The work is the same everywhere, so the spread is the host's file system: GitHub-hosted runners measured 24.6 ms on Linux, 52.3 ms on macOS and 210 ms and 243 ms on Windows (ci.yml runs 41634212530 and 41623171279, 3 Nov 2026), where every file open goes through NTFS and Defender's real-time scan. The budget is 200 ms, and 500 ms on Windows.
+
 ## Aggregate-only live invariants
 
 Live reads are explicit and ignored in the hermetic default suite:

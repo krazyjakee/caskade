@@ -24,7 +24,7 @@ fn fixture(metadata: &str) -> tempfile::TempDir {
 #[test]
 fn the_same_tree_is_read_as_windows_linux_and_macos() {
     let temp = fixture("schema_version=1\nos='linux'\n");
-    let root = temp.path().join("root").canonicalize().unwrap();
+    let root = dunce::canonicalize(temp.path().join("root")).unwrap();
     for (os, home, config) in [
         (
             OperatingSystem::Windows,
@@ -69,7 +69,7 @@ fn the_same_tree_is_read_as_windows_linux_and_macos() {
         }
         assert_eq!(
             env.fixture_root(),
-            Some(temp.path().canonicalize().unwrap().as_path())
+            Some(dunce::canonicalize(temp.path()).unwrap().as_path())
         );
         assert_eq!(env.fs_root(), root);
     }
