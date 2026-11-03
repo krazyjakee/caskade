@@ -21,6 +21,19 @@ struct Setup {
     hooks: Arc<PluginHooks>,
 }
 
+/// Waits, up to a bound generous enough for a loaded CI runner, until `done`
+/// holds: re-attaching a plugin instantiates its component again.
+async fn eventually(what: &str, mut done: impl FnMut() -> bool) {
+    let deadline = std::time::Instant::now() + Duration::from_secs(30);
+    while !done() {
+        assert!(
+            std::time::Instant::now() < deadline,
+            "timed out waiting for {what}"
+        );
+        tokio::time::sleep(Duration::from_millis(20)).await;
+    }
+}
+
 /// Plugins as `(id, manifest additions)`, all running the test guest.
 async fn setup(plugins: &[(&str, Value)]) -> Setup {
     setup_with(plugins, Bus::default()).await
@@ -233,13 +246,10 @@ async fn crashing_steps_are_skipped_then_the_plugin_is_disabled() {
     // Enabling again puts it back (the host's plugins.changed event
     // re-syncs the adapter) with a fresh count.
     s.host.set_enabled("dev.test.crashy", true).await.unwrap();
-    for _ in 0..100 {
-        if s.hooks.attached("dev.test.crashy") {
-            break;
-        }
-        tokio::time::sleep(Duration::from_millis(20)).await;
-    }
-    assert!(s.hooks.attached("dev.test.crashy"));
+    eventually("the plugin back on the bus", || {
+        s.hooks.attached("dev.test.crashy")
+    })
+    .await;
 }
 
 #[tokio::test]
@@ -407,17 +417,15 @@ async fn the_circuit_breaker_trips_when_the_bus_gives_up_first() {
         assert_eq!(report.outcome, Outcome::Continue(command(&["spin-me"])));
     }
     let mut disabled = None;
-    for _ in 0..100 {
+    eventually("the plugin disabled", || {
         while let Ok(event) = stream.try_recv() {
             if let Event::PluginDisabled { plugin, .. } = event {
                 disabled = Some(plugin);
             }
         }
-        if disabled.is_some() && !s.host.enabled("dev.test.crashy") {
-            break;
-        }
-        tokio::time::sleep(Duration::from_millis(25)).await;
-    }
+        disabled.is_some() && !s.host.enabled("dev.test.crashy")
+    })
+    .await;
     assert_eq!(disabled.as_deref(), Some("dev.test.crashy"));
     assert!(!s.host.enabled("dev.test.crashy"));
     let row = s
