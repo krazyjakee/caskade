@@ -1,6 +1,8 @@
 //! A Windows installer on Linux without umu-launcher and without a network:
-//! umu is fetched only when a candidate runs a program under it.
-#![cfg(all(feature = "fetch", feature = "windows-formats"))]
+//! umu is fetched only when a candidate runs a program under it. The context
+//! plans and records for a Linux host profile; a Windows host never runs a
+//! candidate under umu or Proton, so the scenario doesn't exist there.
+#![cfg(all(feature = "fetch", feature = "windows-formats", not(windows)))]
 use caskade_installer::{
     InstallOutcome, Strategy,
     exec::CancellationToken,

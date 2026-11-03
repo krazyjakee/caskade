@@ -43,6 +43,39 @@ fn admitted(born: Option<SystemTime>, observed: bool, started: SystemTime) -> bo
     }
 }
 
+/// Every entry of `directory`, descending only into folders modified since
+/// `since`: adding or removing an entry updates a folder's modification time,
+/// so this reaches what a run made without reading untouched trees. The
+/// storage root (the game itself) is left out.
+fn changed(
+    directory: &Path,
+    since: SystemTime,
+    storage: &Path,
+    paths: &mut BTreeSet<PathBuf>,
+    budget: &mut usize,
+) {
+    let Ok(entries) = std::fs::read_dir(directory) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        if *budget == 0 {
+            return;
+        }
+        *budget -= 1;
+        let path = entry.path();
+        if path.starts_with(storage) {
+            continue;
+        }
+        let Ok(metadata) = std::fs::symlink_metadata(&path) else {
+            continue;
+        };
+        if metadata.is_dir() && metadata.modified().is_ok_and(|modified| modified >= since) {
+            changed(&path, since, storage, paths, budget);
+        }
+        paths.insert(path);
+    }
+}
+
 fn walk(directory: &Path, paths: &mut BTreeSet<PathBuf>, budget: &mut usize) {
     let Ok(entries) = std::fs::read_dir(directory) else {
         return;
@@ -267,6 +300,13 @@ impl ProcessObservation for Observation {
         let mut budget = MAX_WALK;
         for directory in directories.into_iter().chain(rescan) {
             walk(&directory, &mut derived, &mut budget);
+        }
+        // Events still go missing (FSEvents loses some in the stream's first
+        // moments and coalesces others): the folders the run changed are
+        // found by their modification times, and what they hold is admitted
+        // by birth time like any other derived path.
+        for root in &self.watched {
+            changed(root, self.started, &self.storage, &mut derived, &mut budget);
         }
         // Parents sort before children; rollback replays in reverse, so
         // children are removed before their directories. Only effects that
