@@ -306,6 +306,22 @@ fn external(report: &[JournalEntry]) -> Vec<(PathBuf, bool)> {
         .collect()
 }
 
+/// For a failed assertion: when each path was born, against a time taken
+/// just before the run (the watch began after it).
+#[cfg(unix)]
+fn births(home: &Path, before: std::time::SystemTime, paths: &[&str]) -> String {
+    let mut lines = vec![format!("taken before the run: {before:?}")];
+    for path in paths {
+        let born = fs::symlink_metadata(home.join(path)).and_then(|meta| meta.created());
+        let after = born.as_ref().ok().map(|born| {
+            born.duration_since(before)
+                .map_or_else(|e| format!("-{:?}", e.duration()), |d| format!("+{d:?}"))
+        });
+        lines.push(format!("{path}: born {born:?} ({after:?} after)"));
+    }
+    lines.join("\n")
+}
+
 #[cfg(unix)]
 #[tokio::test]
 async fn native_install_lands_in_the_root_and_reports_out_of_root_files() {
@@ -314,6 +330,7 @@ async fn native_install_lands_in_the_root_and_reports_out_of_root_files() {
     let home_path = dunce::canonicalize(home.path()).unwrap();
     fs::create_dir(home_path.join("Documents")).unwrap();
     fs::write(home_path.join("Documents/existing.txt"), b"keep").unwrap();
+    let before = std::time::SystemTime::now();
     let report = run(&root, &home_path, 0).await.unwrap();
     assert_eq!(
         fs::read(root.path().join("Indie Game/bin/game")).unwrap(),
@@ -329,7 +346,18 @@ async fn native_install_lands_in_the_root_and_reports_out_of_root_files() {
     ] {
         assert!(
             recorded.contains(&(home_path.join(path), directory)),
-            "{path} missing from {recorded:?}"
+            "{path} missing from {recorded:?}\n{}",
+            births(
+                &home_path,
+                before,
+                &[
+                    "Desktop",
+                    "Desktop/Indie Game.desktop",
+                    "AppData",
+                    "AppData/Indie Game",
+                    "AppData/Indie Game/settings.ini"
+                ]
+            )
         );
     }
     // The journal converts to portable, scope-relative manifest effects.
@@ -362,13 +390,31 @@ async fn failed_native_install_rolls_back_its_out_of_root_files() {
     let home_path = dunce::canonicalize(home.path()).unwrap();
     fs::create_dir(home_path.join("Desktop")).unwrap();
     fs::write(home_path.join("Desktop/existing.desktop"), b"keep").unwrap();
+    let before = std::time::SystemTime::now();
     let error = run(&root, &home_path, 3).await.unwrap_err();
     assert!(
         matches!(&error, ExecError::AllCandidatesFailed { .. }),
         "{error:?}"
     );
-    assert!(!home_path.join("Desktop/Indie Game.desktop").exists());
-    assert!(!home_path.join("AppData").exists());
+    let left = || {
+        births(
+            &home_path,
+            before,
+            &[
+                "Desktop",
+                "Desktop/Indie Game.desktop",
+                "AppData",
+                "AppData/Indie Game",
+                "AppData/Indie Game/settings.ini",
+            ],
+        )
+    };
+    assert!(
+        !home_path.join("Desktop/Indie Game.desktop").exists(),
+        "{}",
+        left()
+    );
+    assert!(!home_path.join("AppData").exists(), "{}", left());
     assert_eq!(
         fs::read(home_path.join("Desktop/existing.desktop")).unwrap(),
         b"keep"

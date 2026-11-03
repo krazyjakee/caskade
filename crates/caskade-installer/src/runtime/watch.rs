@@ -209,8 +209,19 @@ impl ProcessObservation for Observation {
         drop(self.watcher.take());
         events.extend(self.events.try_iter());
         let mut created = BTreeSet::new();
+        let mut rescan = BTreeSet::new();
         for event in events {
             let event = event.map_err(watch_error)?;
+            // FSEvents gives up on per-file events when it coalesces and asks
+            // for a rescan of a folder (every watched location if it names none).
+            if event.need_rescan() {
+                if event.paths.is_empty() {
+                    rescan.extend(self.watched.iter().cloned());
+                } else {
+                    rescan.extend(event.paths);
+                }
+                continue;
+            }
             match event.kind {
                 EventKind::Create(_) => created.extend(event.paths),
                 // Renames into a watched location appear as the new name.
@@ -254,7 +265,7 @@ impl ProcessObservation for Observation {
             .cloned()
             .collect();
         let mut budget = MAX_WALK;
-        for directory in directories {
+        for directory in directories.into_iter().chain(rescan) {
             walk(&directory, &mut derived, &mut budget);
         }
         // Parents sort before children; rollback replays in reverse, so

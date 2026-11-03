@@ -234,6 +234,27 @@ impl Observation {
         // Native watchers may coalesce or deliver late. A bounded final inventory
         // complements notify events; no result depends solely on notification timing.
         std::thread::sleep(self.config.settle);
+        // Outside roots count only what the watcher saw created, and its
+        // events arrive from another thread: wait until an interval brings
+        // none (bounded), so a loaded machine doesn't drop a new folder.
+        let quiet = self.config.settle.max(std::time::Duration::from_millis(50));
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
+        let seen = || {
+            self.events
+                .lock()
+                .expect("interactive watcher poisoned")
+                .paths
+                .len()
+        };
+        let mut count = seen();
+        loop {
+            std::thread::sleep(quiet);
+            let now = seen();
+            if now == count || std::time::Instant::now() >= deadline {
+                break;
+            }
+            count = now;
+        }
         context.checkpoint(0)?;
         let events = self.events.lock().expect("interactive watcher poisoned");
         if events.overflow || events.failed {
