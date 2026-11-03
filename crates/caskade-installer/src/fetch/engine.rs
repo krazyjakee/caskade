@@ -580,6 +580,7 @@ impl FetchEngine {
         state.complete = true;
         storage.write(&state)?;
         context.emit("completed", size, Some(size))?;
+        let validator = state.validator().map(str::to_owned);
         Ok(DownloadedFile {
             path: context
                 .root
@@ -589,6 +590,7 @@ impl FetchEngine {
             source_url: request.url.clone(),
             insecure_transport: request.url.scheme() == "http"
                 || state.final_url.scheme() == "http",
+            validator,
             final_url: state.final_url,
             size,
             sha256: digest,
@@ -673,7 +675,7 @@ fn reset(storage: &Storage, previous: &mut Option<State>) -> Result<()> {
     Ok(())
 }
 
-fn expected_checksum(request: &DownloadRequest) -> Result<Option<String>> {
+pub(super) fn expected_checksum(request: &DownloadRequest) -> Result<Option<String>> {
     let fragment = request
         .url
         .fragment()

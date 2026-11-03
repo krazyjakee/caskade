@@ -498,6 +498,7 @@ impl InstallService {
                         as Arc<dyn caskade_installer::fetch::UrlResolver>
                 })
                 .collect();
+            ctx.local = lock(&self.inner.local_source).clone();
         }
         if let Some(tool) = lock(&self.inner.tool).clone() {
             ctx.tool = Some(tool);

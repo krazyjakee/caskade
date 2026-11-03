@@ -73,6 +73,10 @@ pub struct Context {
     /// Plugin URL resolvers (#55); they run before the built-ins.
     #[cfg(feature = "fetch")]
     pub resolvers: Vec<Arc<dyn crate::fetch::UrlResolver>>,
+    /// Where a download may already be (another of the user's devices,
+    /// #236), asked before its source.
+    #[cfg(feature = "fetch")]
+    pub local: Option<Arc<dyn crate::fetch::LocalSource>>,
     /// Peer discovery, upload and limits for torrent inputs (#159).
     #[cfg(feature = "torrent")]
     pub torrent: crate::fetch::torrent::TorrentConfig,
@@ -104,6 +108,8 @@ impl Context {
             handlers: Vec::new(),
             #[cfg(feature = "fetch")]
             resolvers: Vec::new(),
+            #[cfg(feature = "fetch")]
+            local: None,
             #[cfg(feature = "torrent")]
             torrent: Default::default(),
             review: None,

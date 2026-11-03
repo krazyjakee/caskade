@@ -101,6 +101,10 @@ pub struct SyncSettings {
     /// A fixed UDP port for firewall rules; empty lets the system choose.
     #[serde(default)]
     pub port: Option<u16>,
+    #[schemars(title = "Downloads from my devices")]
+    /// Get a download from another of your devices on this network when it has the same file, before the internet. Game files never go through a relay.
+    #[serde(default = "peer_downloads")]
+    pub peer_downloads: bool,
     #[schemars(title = "Settings kept on this device")]
     /// Settings sections that stay on this device while their category syncs.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
@@ -116,6 +120,10 @@ pub struct SyncSettings {
 }
 
 fn allowed() -> bool {
+    true
+}
+
+fn peer_downloads() -> bool {
     true
 }
 
@@ -136,6 +144,7 @@ impl Default for SyncSettings {
                 .collect(),
             never_relay: false,
             port: None,
+            peer_downloads: true,
             sections: BTreeMap::new(),
             accept_copies: false,
             remote_play: true,

@@ -3744,6 +3744,10 @@ msgctxt "RomM"
 msgid "Downloads"
 msgstr "Nedladdningar"
 
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Downloads from my devices"
+msgstr "Nedladdningar från mina enheter"
+
 #: apps/desktop/src/views/library/LibraryDrop.tsx
 msgid "Drop to install into your library"
 msgstr "Släpp för att installera i ditt bibliotek"
@@ -4561,6 +4565,10 @@ msgstr "Genre"
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 msgid "Genres"
 msgstr "Genrer"
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Get a download from another of your devices on this network when it has the same file, before the internet. Game files never go through a relay."
+msgstr "Hämta en nedladdning från en annan av dina enheter i det här nätverket när den har samma fil, före internet. Spelfiler går aldrig via ett relä."
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Get a key"

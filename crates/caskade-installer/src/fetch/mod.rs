@@ -10,6 +10,7 @@ mod api;
 mod engine;
 pub mod grant;
 mod http;
+pub mod local;
 mod names;
 mod resolver;
 pub mod resolvers;
@@ -23,6 +24,7 @@ pub use api::{
     UrlResolver,
 };
 pub use engine::FetchEngine;
+pub use local::{LocalSource, Near};
 pub use names::{disposition_name, safe_file_name};
 pub use resolver::{Direct, ResolverRegistry};
 

@@ -16,6 +16,7 @@ import {
   Link2,
   Monitor,
   MonitorSmartphone,
+  Network,
   Play,
   Radar,
   RefreshCw,
@@ -216,6 +217,17 @@ function ThisDeviceSection() {
             isSelected={sync.settings?.acceptCopies ?? false}
             isDisabled={!admin || !sync.settings || sync.saving}
             onChange={(on) => sync.setSettings((current) => ({ ...current, acceptCopies: on }))}
+          />
+        </SettingRow>
+        <SettingRow
+          icon={Network}
+          label={t`Downloads from my devices`}
+          description={t`Get a download from another of your devices on this network when it has the same file, before the internet. Game files never go through a relay.`}
+        >
+          <Switch
+            isSelected={sync.settings?.peerDownloads ?? true}
+            isDisabled={!admin || !sync.settings || sync.saving}
+            onChange={(on) => sync.setSettings((current) => ({ ...current, peerDownloads: on }))}
           />
         </SettingRow>
       </div>

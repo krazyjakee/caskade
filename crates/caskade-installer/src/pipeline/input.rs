@@ -100,9 +100,18 @@ pub async fn prepare(
             if requests.len() != 1 {
                 return Err("this input resolves to multiple files; use fetch to download the set, then select a local member".into());
             }
-            let file = engine
-                .download(root, job, &requests[0], ctx.cancel.clone())
-                .await?;
+            let file = match near(root, job, &requests[0], ctx).await {
+                Some(file) => file,
+                None => {
+                    let file = engine
+                        .download(root, job, &requests[0], ctx.cancel.clone())
+                        .await?;
+                    if let Some(local) = &ctx.local {
+                        local.keep(&requests[0], &file).await;
+                    }
+                    file
+                }
+            };
             // A link to a .torrent installs what the torrent holds (#159).
             #[cfg(feature = "torrent")]
             if crate::fetch::torrent::is_metadata(&file.path) {
@@ -140,6 +149,31 @@ pub async fn prepare(
         (path.clone(), Input::Path(path), None, None, None, false)
     };
     finish(got, ctx).await
+}
+
+/// The download from where it already is (#236), checked as a download from
+/// its source would be; `None` to fetch it from the source.
+#[cfg(feature = "fetch")]
+async fn near(
+    root: &Path,
+    job: &str,
+    request: &crate::fetch::DownloadRequest,
+    ctx: &Context,
+) -> Option<crate::fetch::DownloadedFile> {
+    let local = ctx.local.as_ref()?;
+    crate::fetch::safe_file_name(job).ok()?;
+    let dir = root.join(".caskade/downloads").join(job).join("near");
+    fs::create_dir_all(&dir).ok()?;
+    let near = local.find(request, &dir, &ctx.cancel).await?;
+    // Only a file it wrote where it was asked to.
+    if near.path.parent() != Some(dir.as_path()) {
+        return None;
+    }
+    let request = request.clone();
+    tokio::task::spawn_blocking(move || crate::fetch::local::accept(&request, &near))
+        .await
+        .ok()
+        .flatten()
 }
 
 /// What [`prepare`] got before reading it: the path, the input, the final

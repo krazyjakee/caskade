@@ -31,6 +31,8 @@ export interface SyncSettingsValue {
   categories: Partial<Record<SyncCategory, CategoryState>>;
   neverRelay: boolean;
   port: number | null;
+  /** Downloads come from a device nearby that has them first (#236). */
+  peerDownloads?: boolean;
   /** Copies other devices send here start without asking (#235). */
   acceptCopies?: boolean;
   /** Other devices can start games here (#234). */

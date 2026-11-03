@@ -204,4 +204,8 @@ pub struct DownloadedFile {
     pub sha256: String,
     /// Plain HTTP is accepted for explicit user input and recorded for manifests.
     pub insecure_transport: bool,
+    /// The source's strong validator for what was downloaded: its ETag, or
+    /// a Last-Modified date the source's clock vouches for.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub validator: Option<String>,
 }

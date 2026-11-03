@@ -299,6 +299,7 @@ const sections: {
       },
       neverRelay: false,
       port: null,
+      peerDownloads: true,
       acceptCopies: false,
       remotePlay: true,
     },

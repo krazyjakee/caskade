@@ -681,7 +681,7 @@ downloaded from the source, and turned off the source is used).
 
 Not yet: emulator installs, RetroArch cores, BIOS files, Hasheous dumps, the
 Ludusavi manifest and artwork download outside the installer's pipeline and
-still go to the internet.
+still go to the internet (#277).
 
 ### Playing a game on another device
 

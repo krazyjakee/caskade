@@ -18,6 +18,8 @@ mod new_device;
 #[cfg(feature = "net")]
 mod peer_backups;
 #[cfg(feature = "net")]
+mod peer_downloads;
+#[cfg(feature = "net")]
 mod presence;
 #[cfg(feature = "net")]
 mod save_sync;

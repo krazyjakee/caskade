@@ -117,6 +117,8 @@ async fn cli_dmg_route_copies_discovers_records_and_always_detaches() {
             handlers: Vec::new(),
             #[cfg(feature = "fetch")]
             resolvers: Vec::new(),
+            #[cfg(feature = "fetch")]
+            local: None,
             #[cfg(feature = "torrent")]
             torrent: Default::default(),
             review: None,

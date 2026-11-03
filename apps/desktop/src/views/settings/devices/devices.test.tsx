@@ -99,7 +99,7 @@ it("pairs with a pasted link, makes one to copy, and forgets a device", async ()
   );
 });
 
-it("changes what syncs and Never use relays", async () => {
+it("changes what syncs, Never use relays and downloads from my devices", async () => {
   const sync = createSyncFixtureApi();
   const app = devices("/settings?tab=devices", sync);
   const row = (await screen.findByText("Play history")).closest('[data-cs="setting-row"]');
@@ -114,6 +114,14 @@ it("changes what syncs and Never use relays", async () => {
   await waitFor(async () => {
     const value = app.settings.values["core.sync"] as { neverRelay: boolean };
     expect(value.neverRelay).toBe(true);
+  });
+  // Downloads from devices nearby (#236): on until turned off.
+  const downloads = screen.getByRole("switch", { name: "Downloads from my devices" });
+  expect(downloads).toHaveProperty("checked", true);
+  fireEvent.click(downloads);
+  await waitFor(async () => {
+    const value = app.settings.values["core.sync"] as { peerDownloads: boolean };
+    expect(value.peerDownloads).toBe(false);
   });
 });
 

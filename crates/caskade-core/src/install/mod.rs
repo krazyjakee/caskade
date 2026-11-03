@@ -16,6 +16,8 @@ pub mod dropped;
 pub mod hooks;
 mod jobs;
 mod mapping;
+#[cfg(feature = "net")]
+pub mod nearby;
 mod operations;
 mod peer;
 mod recovery;
@@ -121,6 +123,9 @@ struct Inner {
     recovery: recovery::State,
     /// Where copies from other devices come from (#233).
     peer_fetcher: Mutex<Option<Arc<dyn peer::PeerFetcher>>>,
+    /// Asked for a download before its source (#236).
+    #[cfg(feature = "net")]
+    local_source: Mutex<Option<Arc<dyn caskade_installer::fetch::LocalSource>>>,
 }
 
 /// The install queues; cheap to clone.
@@ -148,6 +153,8 @@ impl InstallService {
                 tracker: Mutex::default(),
                 recovery: recovery::State::default(),
                 peer_fetcher: Mutex::new(None),
+                #[cfg(feature = "net")]
+                local_source: Mutex::new(None),
             }),
         }
     }
@@ -171,6 +178,13 @@ impl InstallService {
     /// later.
     pub fn set_tracker(&self, tracker: crate::updates::Tracker) {
         *lock(&self.inner.tracker) = Some(tracker);
+    }
+
+    /// Downloads are asked for here before their source: another device
+    /// on the network that has them (#236).
+    #[cfg(feature = "net")]
+    pub fn set_local_source(&self, source: Arc<dyn caskade_installer::fetch::LocalSource>) {
+        *lock(&self.inner.local_source) = Some(source);
     }
 
     fn storage(&self) -> Option<crate::storage::StorageService> {

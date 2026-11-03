@@ -695,15 +695,26 @@ pub fn run() {
             }
             // Copies of games between devices (#233): served with the
             // endpoint, so set up before it starts.
+            let mut peer_downloads = None;
             match tauri::async_runtime::block_on(caskade_core::transfer::Transfers::new(
                 store.clone(),
                 devices.clone(),
                 &setup_paths.cache,
             )) {
                 Ok(transfers) => {
+                    // Downloads come from a device nearby that has them
+                    // before the internet (#236).
+                    let downloads = caskade_core::install::nearby::PeerDownloads::new(
+                        transfers.clone(),
+                        devices.clone(),
+                        settings.clone(),
+                        &setup_paths.cache,
+                    );
                     if let Some(install) = app.try_state::<caskade_core::install::InstallService>() {
                         install.set_peer_fetcher(std::sync::Arc::new(transfers.clone()));
+                        install.set_local_source(std::sync::Arc::new(downloads.clone()));
                     }
+                    peer_downloads = Some(downloads);
                     // A game another device sends here (#235): confirmed
                     // here first, unless copies are accepted without asking.
                     commands::copies::take_sends(app.handle(), &transfers, devices.clone());
@@ -773,6 +784,10 @@ pub fn run() {
             );
             peer_backups.set_devices(devices.clone());
             sync.register_blobs(std::sync::Arc::new(peer_backups.clone()));
+            // What each device keeps of its downloads, told on each exchange.
+            if let Some(downloads) = peer_downloads {
+                sync.register_blobs(std::sync::Arc::new(downloads));
+            }
             app.manage(peer_backups);
             background::supervise("presence", {
                 let (presence, bus, sync, devices) =

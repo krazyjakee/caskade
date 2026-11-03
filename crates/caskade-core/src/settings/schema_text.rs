@@ -130,6 +130,11 @@ fn marked() -> Vec<crate::i18n::Message> {
             "settings",
             "Connect to other devices only directly. A device only a relay could reach shows as offline."
         ),
+        msgp!("settings", "Downloads from my devices"),
+        msgp!(
+            "settings",
+            "Get a download from another of your devices on this network when it has the same file, before the internet. Game files never go through a relay."
+        ),
         msgp!("settings", "Listening port"),
         msgp!(
             "settings",

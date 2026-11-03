@@ -67,6 +67,15 @@ its sibling volumes. The initial built-in resolver is Direct; service-specific
 resolver integrations are separate work. A link returning HTML produces an
 error instead of passing a web page to the installer.
 
+Library callers can set `Context::local` to a `fetch::LocalSource`: an install's
+download step asks it first for the file (Caskade asks its paired devices on the
+local network, #236). What it hands over lands in
+`.caskade/downloads/<job>/near/` and is taken only when its size and SHA-256
+match the request's and what the source said it was (`fetch::local::accept`);
+otherwise it's deleted and the URL downloaded. A finished download from the URL
+is offered back to it with `keep`. `DownloadedFile::validator` records the
+source's strong ETag or Last-Modified date.
+
 ### probe and plan
 
 `probe <path|url> [--root <dir>] [--job-id <id>]` reports static identification,

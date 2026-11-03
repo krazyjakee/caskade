@@ -3692,6 +3692,10 @@ msgctxt "RomM"
 msgid "Downloads"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Downloads from my devices"
+msgstr ""
+
 #: apps/desktop/src/views/library/LibraryDrop.tsx
 msgid "Drop to install into your library"
 msgstr ""
@@ -4489,6 +4493,10 @@ msgstr ""
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 msgid "Genres"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Get a download from another of your devices on this network when it has the same file, before the internet. Game files never go through a relay."
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
