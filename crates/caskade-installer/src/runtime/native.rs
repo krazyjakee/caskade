@@ -53,8 +53,9 @@ pub(crate) enum WindowsArg {
 /// Installers parse their own command line. NSIS reads `/D=` (and its
 /// uninstaller's `_?=`) raw to the end, so those go unquoted and must be the
 /// final argument; Inno's `/DIR="..."` wrapper quotes are normalised to a
-/// standard argument. Any other embedded quote, and control characters, are
-/// rejected rather than passed through.
+/// standard argument; an MSI `PROPERTY=value` with spaces quotes the value
+/// only. Any other embedded quote, and control characters, are rejected
+/// rather than passed through.
 #[cfg_attr(not(windows), allow(dead_code))]
 pub(crate) fn windows_arg(arg: &str, last: bool) -> Result<WindowsArg, RuntimeError> {
     let invalid = |reason: &str| io(format!("invalid installer argument {arg:?}: {reason}"));
@@ -80,6 +81,18 @@ pub(crate) fn windows_arg(arg: &str, last: bool) -> Result<WindowsArg, RuntimeEr
     }
     if arg.contains('"') {
         return Err(invalid("embedded quotes"));
+    }
+    // msiexec reads PROPERTY="value", not a wholly quoted "PROPERTY=value";
+    // given that, it shows its usage dialog and waits, even with /qn.
+    // CommandLineToArgvW parses both forms to the same argument.
+    if let Some((name, value)) = arg.split_once('=')
+        && name.starts_with(|c: char| c.is_ascii_alphabetic() || c == '_')
+        && name
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '.')
+        && value.contains(char::is_whitespace)
+    {
+        return Ok(WindowsArg::Raw(format!("{name}=\"{value}\"")));
     }
     Ok(WindowsArg::Quoted(arg.into()))
 }
@@ -336,6 +349,16 @@ mod tests {
             quoted("/VERYSILENT")
         );
         assert!(windows_arg("say \"hi\"", false).is_err());
+        // MSI properties: quotes around the value only, as msiexec parses them.
+        assert_eq!(
+            windows_arg(r"INSTALLDIR=C:\Games\Café Space", false).unwrap(),
+            raw(r#"INSTALLDIR="C:\Games\Café Space""#)
+        );
+        assert_eq!(
+            windows_arg(r"TARGETDIR=C:\Games\Game", false).unwrap(),
+            quoted(r"TARGETDIR=C:\Games\Game")
+        );
+        assert!(windows_arg(r#"INSTALLDIR=C:\a "b""#, false).is_err());
         assert!(windows_arg("a\nb", false).is_err());
     }
 }
