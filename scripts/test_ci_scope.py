@@ -82,6 +82,13 @@ class ScopeTests(unittest.TestCase):
             self.assertTrue(ci.select("workflow_dispatch", {"inputs": {"bundle": value}})["bundle"])
         self.assertFalse(ci.select("workflow_dispatch", {"inputs": {"bundle": "false"}})["bundle"])
 
+    def test_manual_run_of_a_workflow_without_inputs(self):
+        for event in [{"inputs": None}, {}]:
+            with self.subTest(event=event):
+                scope = ci.select("workflow_dispatch", event)
+                self.assertTrue(all(value for key, value in scope.items() if key != "bundle"))
+                self.assertFalse(scope["bundle"])
+
     def test_missing_pr_history_runs_full_checks_instead_of_skipping(self):
         for event_name in ci.PR_EVENTS:
             with self.subTest(event_name=event_name):

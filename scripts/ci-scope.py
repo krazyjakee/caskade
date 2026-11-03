@@ -120,7 +120,8 @@ def scope(paths, root=ROOT):
 
 def select(event_name, event, root=ROOT):
     bundle = event_name == "schedule" or (
-        event_name == "workflow_dispatch" and enabled(event.get("inputs", {}).get("bundle", False))
+        # GitHub sends `"inputs": null` for a workflow without inputs.
+        event_name == "workflow_dispatch" and enabled((event.get("inputs") or {}).get("bundle", False))
     )
     if event_name not in PR_EVENTS:
         result = dict.fromkeys(FIELDS, True)
