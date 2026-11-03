@@ -17,7 +17,7 @@ use iroh::{Endpoint, EndpointAddr, EndpointId, RelayMode};
 use crate::ALPN;
 use crate::device::{DeviceInfo, DeviceKind};
 use crate::error::{Error, Result};
-use crate::frame::{FrameReader, FrameWriter};
+use crate::frame::{FrameReader, FrameWriter, end_together};
 use crate::grant::Grant;
 use crate::identity::Identity;
 use crate::lan::{Lan, Nearby};
@@ -303,15 +303,21 @@ impl Session {
         )
     }
 
-    /// Ends the session normally once the peer has everything written: the
-    /// stream is finished and its data acknowledged (waiting at most 2 s),
-    /// then the connection closes. A plain [`Session::close`] can discard a
-    /// last message still in flight.
+    /// Ends the session normally, together with the peer: this side's stream
+    /// ends, then the session waits for the peer to end its own, at most
+    /// [`END_WAIT`], and the connection closes. A peer that has read what it
+    /// needed ends its side at once (or closes, which ends the wait too), so
+    /// the close can't discard a last message it hasn't read yet; an
+    /// acknowledgement alone only says it arrived. A plain [`Session::close`]
+    /// can discard a last message still in flight.
     pub async fn end(self) {
         let Self {
-            writer, connection, ..
+            writer,
+            reader,
+            connection,
+            ..
         } = self;
-        let _ = tokio::time::timeout(Duration::from_secs(2), writer.finish()).await;
+        let _ = tokio::time::timeout(END_WAIT, end_together(writer, reader)).await;
         connection.close(VarInt::from_u32(close::DONE), b"done");
     }
 
@@ -321,6 +327,10 @@ impl Session {
             .close(VarInt::from_u32(close::DONE), b"done");
     }
 }
+
+/// How long [`Session::end`] waits for the peer to end its side. A peer
+/// that never does (or one from before this wait) costs at most this.
+pub const END_WAIT: Duration = Duration::from_secs(2);
 
 /// A bound endpoint speaking `caskade/sync/1` (and iroh-blobs when
 /// configured).

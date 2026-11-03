@@ -210,10 +210,8 @@ async fn a_cancel_on_either_device_ends_it_on_both() {
             matches!(desk_result, Err(Error::Cancelled)),
             "{desk_result:?}"
         );
-        assert!(
-            matches!(tv_result, Err(Error::Cancelled | Error::Interrupted { .. })),
-            "{tv_result:?}"
-        );
+        // Both see the cancel, whichever side's close lands first (#39).
+        assert!(matches!(tv_result, Err(Error::Cancelled)), "{tv_result:?}");
     }
 }
 

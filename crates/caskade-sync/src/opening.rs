@@ -28,7 +28,7 @@ use iroh::endpoint::Connection;
 use serde::{Deserialize, Serialize};
 
 use crate::error::{Error, Result};
-use crate::frame::{FrameReader, FrameWriter};
+use crate::frame::{FrameReader, FrameWriter, end_together};
 use crate::grant::Grant;
 
 /// The longest opening line this build reads. An offer is a purpose and a
@@ -142,19 +142,20 @@ pub(crate) async fn answer(
             })
         }
         _ => {
-            refuse(writer).await;
+            refuse(writer, reader).await;
             None
         }
     }
 }
 
-/// Writes [`REFUSAL`] and waits (briefly) for the peer to have read it, so the
-/// close that follows can't swallow it. Failures are ignored: the connection is
-/// closed either way.
-pub(crate) async fn refuse(mut writer: FrameWriter) {
+/// Writes [`REFUSAL`] and waits (briefly) for the peer to have read it and
+/// ended its side, so the close that follows can't swallow it. Failures are
+/// ignored: the connection is closed either way.
+pub(crate) async fn refuse(mut writer: FrameWriter, reader: FrameReader) {
     let _ = tokio::time::timeout(REFUSAL_FLUSH, async {
-        writer.write_raw(REFUSAL).await?;
-        writer.finish().await
+        if writer.write_raw(REFUSAL).await.is_ok() {
+            end_together(writer, reader).await;
+        }
     })
     .await;
 }

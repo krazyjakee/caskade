@@ -69,7 +69,8 @@ pub mod testing;
 
 pub use device::{DeviceInfo, DeviceKind, DeviceOs};
 pub use endpoint::{
-    Admission, Config, InternetChanges, Ip, Reach, Relays, Session, Sessions, SyncEndpoint,
+    Admission, Config, END_WAIT, InternetChanges, Ip, Reach, Relays, Session, Sessions,
+    SyncEndpoint,
 };
 pub use error::{Error, Result};
 pub use frame::{FrameReader, FrameWriter};

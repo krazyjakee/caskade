@@ -36,12 +36,38 @@ impl FrameWriter {
         self.send.write_all(line).await.map_err(Error::interrupted)
     }
 
-    /// Ends the stream and waits until the peer has read everything written,
-    /// so a close straight afterwards can't discard the last message.
+    /// Ends the stream and waits for the peer's transport to acknowledge
+    /// everything written. That is receipt, not reading: a close straight
+    /// afterwards can still discard data the peer hasn't read, so ending a
+    /// conversation goes through [`end_together`].
     pub async fn finish(mut self) -> Result<()> {
         self.send.finish().map_err(Error::interrupted)?;
         self.send.stopped().await.map_err(Error::interrupted)?;
         Ok(())
+    }
+}
+
+/// How much of what a peer still sends is read, and dropped, while waiting
+/// for it to end its side.
+const DRAIN_LIMIT: usize = 1024 * 1024;
+
+/// Ends a conversation so the close that follows can't discard anything the
+/// peer still means to read: ends this side's stream, then waits until the
+/// peer ends its own (or closes, or goes away), dropping whatever it still
+/// sends. A peer ends its side only once its protocol has read what it
+/// needed. The caller bounds the wait.
+pub(crate) async fn end_together(writer: FrameWriter, mut reader: FrameReader) {
+    let FrameWriter { mut send } = writer;
+    if send.finish().is_err() {
+        return;
+    }
+    let mut drained = reader.buffer.len();
+    while drained <= DRAIN_LIMIT {
+        match reader.recv.read_chunk(CHUNK).await {
+            Ok(Some(chunk)) => drained += chunk.len(),
+            // The peer ended its side, closed or went away.
+            Ok(None) | Err(_) => return,
+        }
     }
 }
 
