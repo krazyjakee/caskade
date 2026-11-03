@@ -376,7 +376,17 @@ fn canonical_install_directory_merges_uninstall_metadata_without_title_matching(
         .iter()
         .map(|group| group.entries.iter().map(|e| &e.install_dir).collect())
         .collect();
-    assert_eq!(merged.len(), 1, "{dirs:?}");
+    let identities: Vec<_> = [&game, &uninstall]
+        .iter()
+        .map(|entry| {
+            caskade_discovery::identity::canonical_path(
+                &env,
+                entry.install_dir.as_ref().unwrap(),
+                &entry.runtime,
+            )
+        })
+        .collect();
+    assert_eq!(merged.len(), 1, "{dirs:?}\n{identities:#?}");
     assert_eq!(merged[0].entries.len(), 2);
     assert_eq!(merged[0].primary_entry().unwrap().source, ID);
     assert!(merged[0].primary_entry().unwrap().uninstall.is_some());

@@ -242,9 +242,13 @@ async fn self_contained_packages_rewrite_final_desktop_references_skip_scripts_a
         );
         let refs = extractor.take_references(&node.id).unwrap();
         assert_eq!(refs.len(), 3);
+        // Exec values are quoted, with backslashes doubled as the Desktop
+        // Entry format requires (Windows paths have them).
         assert!(
             refs.iter().all(|r| r.origin == "caskade-generated"
-                && r.replacement.contains(report.dir.to_str().unwrap())
+                && r.replacement
+                    .replace("\\\\", "\\")
+                    .contains(report.dir.to_str().unwrap())
                 && !r.replacement.contains("staging")),
             "{:?} in {refs:#?}",
             report.dir

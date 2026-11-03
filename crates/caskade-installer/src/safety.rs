@@ -382,6 +382,7 @@ impl SafeDir {
     pub fn entry_is_symlink(&self, name: &str) -> Result<bool> {
         Ok(self.root.symlink_metadata(self.owned(name)?)?.is_symlink())
     }
+    #[cfg(unix)]
     fn metadata_file(&self, name: &str) -> Result<cap_std::fs::File> {
         let path = self.owned(name)?;
         if self.root.symlink_metadata(&path)?.is_symlink() {
@@ -392,10 +393,10 @@ impl SafeDir {
     /// Apply only ordinary permission bits to an entry created by this job.
     /// Directory modes should be restored after all children are extracted.
     pub fn set_entry_mode(&self, name: &str, mode: u32) -> Result<()> {
-        let file = self.metadata_file(name)?;
         #[cfg(unix)]
         {
             use cap_std::fs::{Permissions, PermissionsExt};
+            let file = self.metadata_file(name)?;
             let mut mode = safe_mode(mode);
             // The owner keeps full access to directories, or uninstall
             // couldn't empty them (CSK-12).
@@ -404,8 +405,16 @@ impl SafeDir {
             }
             file.set_permissions(Permissions::from_mode(mode))?;
         }
+        // Windows has no mode bits, and opening a directory as a file is
+        // ERROR_ACCESS_DENIED there; check the entry without opening it.
         #[cfg(not(unix))]
-        let _ = (file, mode);
+        {
+            let path = self.owned(name)?;
+            if self.root.symlink_metadata(&path)?.is_symlink() {
+                return Err(SafetyError::WriteThroughLink(path));
+            }
+            let _ = mode;
+        }
         Ok(())
     }
     /// Preserve bundle metadata through a confined descriptor. Attributes never
