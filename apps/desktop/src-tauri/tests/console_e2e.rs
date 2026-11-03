@@ -91,10 +91,13 @@ seek-section nav.left sidebar
 seek nav.up Home
 seek nav.down Library
 press confirm
-wait-text Your collection
-seek nav.right Emulated
+wait-text Save as collection
+# The Library's filters are under its link in the sidebar.
+seek-section nav.left sidebar
+seek nav.down Emulated
 press confirm
 wait-text Pocket Quest
+seek-section nav.right main
 seek nav.down Pocket Quest
 press confirm
 wait-text Play from your library
@@ -104,14 +107,20 @@ seek nav.down Play
 press confirm
 wait-event game-started
 wait-event game-exited
-# Settings: LB to General, and a switch.
+# Settings opens on General, its first tab: RB to Library Discovery, LB
+# back, then a switch in the panel to the right of the tabs.
 seek-section nav.left sidebar
 seek nav.up Home
 seek nav.down Settings
 press confirm
-wait-text Library Discovery
+wait-text Launch on system startup
+focus-has General
+press tab.next
+wait-text Automatic Library Discovery
 press tab.prev
 wait-text Launch on system startup
+focus-has General
+press nav.right
 seek nav.down Launch on system startup
 press confirm
 wait-event settings-changed
