@@ -1,16 +1,17 @@
 import { useLingui } from "@lingui/react/macro";
-import { Pencil, Pin, PinOff, Plus, Trash2 } from "lucide-react";
+import { Pencil, Pin, PinOff, Plus, Share2, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useSetCollectionPinned } from "../../api/collections";
 import type { CollectionSummary } from "../../api/types";
 import type { MenuAction } from "../ActionMenu";
+import { ShareGameDialog } from "../shares/ShareGameDialog";
 import { AddGamesDialog } from "./AddGamesDialog";
 import { CollectionDialog } from "./CollectionDialog";
 import { DeleteCollectionDialog } from "./DeleteCollectionDialog";
 
-type Open = { type: "edit" | "add" | "delete"; collection: CollectionSummary };
+type Open = { type: "edit" | "add" | "share" | "delete"; collection: CollectionSummary };
 
-/** A collection's commands (edit, add games, pin, delete) as menu actions,
+/** A collection's commands (edit, add games, pin, share, delete) as menu actions,
  * and the dialogs they open. Render `dialogs` once. */
 export function useCollectionActions({ onDeleted }: { onDeleted?: () => void } = {}) {
   const { t } = useLingui();
@@ -42,6 +43,13 @@ export function useCollectionActions({ onDeleted }: { onDeleted?: () => void } =
       onAction: () => pin.mutate({ id: collection.id, pinned: !collection.pinned }),
     },
     {
+      // As a list of games, without files (#248).
+      id: "share",
+      label: t`Share with someone…`,
+      icon: Share2,
+      onAction: () => setOpen({ type: "share", collection }),
+    },
+    {
       id: "delete",
       label: t`Delete…`,
       icon: Trash2,
@@ -54,6 +62,15 @@ export function useCollectionActions({ onDeleted }: { onDeleted?: () => void } =
       <CollectionDialog collection={open.collection} close={close} />
     ) : open?.type === "add" ? (
       <AddGamesDialog collection={open.collection} close={close} />
+    ) : open?.type === "share" ? (
+      <ShareGameDialog
+        target={{
+          kind: "item",
+          item: { kind: "collection", collectionId: open.collection.id },
+          title: open.collection.name,
+        }}
+        close={close}
+      />
     ) : open?.type === "delete" ? (
       <DeleteCollectionDialog collection={open.collection} close={close} onDeleted={onDeleted} />
     ) : null;

@@ -56,10 +56,22 @@ export function ShareGameDialog({ target, close }: { target: ShareTarget; close:
           {!share || !link ? (
             <>
               <p className="text-sm text-fg-muted">
-                <Trans>
-                  Caskade makes a link. Whoever opens it in their Caskade gets the game straight
-                  from this computer, on this network or over the internet.
-                </Trans>
+                {target.kind === "game" ? (
+                  <Trans>
+                    Caskade makes a link. Whoever opens it in their Caskade gets the game straight
+                    from this computer, on this network or over the internet.
+                  </Trans>
+                ) : target.item.kind === "collection" ? (
+                  <Trans>
+                    Caskade makes a link. Whoever opens it in their Caskade sees the collection's
+                    games and which of them they have. Nothing is downloaded.
+                  </Trans>
+                ) : (
+                  <Trans>
+                    Caskade makes a link. Whoever opens it in their Caskade gets it straight from
+                    this computer, on this network or over the internet.
+                  </Trans>
+                )}
               </p>
               <div className="flex flex-col gap-2">
                 <span id="share-expiry" className="text-sm font-medium">

@@ -1353,6 +1353,10 @@ msgstr "En borttagen emulator"
 msgid "A ROMs folder with a folder per console, like snes or psx."
 msgstr "En ROM-mapp med en mapp per konsol, till exempel snes eller psx."
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "a save of {title}"
+msgstr "en sparning av {title}"
+
 #. {title} is shown as is: the template's placeholder for the game's title
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "A single folder name containing {title}."
@@ -2626,8 +2630,16 @@ msgid "Caskade keeps streaming up to date when you say so, never in the middle o
 msgstr ""
 
 #: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "Caskade makes a link. Whoever opens it in their Caskade gets it straight from this computer, on this network or over the internet."
+msgstr "Caskade gör en länk. Den som öppnar den i sin Caskade får det direkt från den här datorn, på det här nätverket eller över internet."
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
 msgid "Caskade makes a link. Whoever opens it in their Caskade gets the game straight from this computer, on this network or over the internet."
 msgstr ""
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "Caskade makes a link. Whoever opens it in their Caskade sees the collection's games and which of them they have. Nothing is downloaded."
+msgstr "Caskade gör en länk. Den som öppnar den i sin Caskade ser samlingens spel och vilka av dem de har. Inget laddas ner."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Caskade on this network shows here. Both devices show a code: pair when they match."
@@ -9712,9 +9724,18 @@ msgstr "{phase}: {title}"
 msgid "Share link"
 msgstr "Parkopplingslänk"
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Share this save with someone…"
+msgstr "Dela den här sparningen med någon…"
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Share…"
+msgstr "Dela…"
+
+#: apps/desktop/src/components/collections/useCollectionActions.tsx
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 msgid "Share with someone…"
-msgstr ""
+msgstr "Dela med någon…"
 
 #. A notification's category
 #: apps/desktop/src/views/activity/NotificationFeed.tsx

@@ -15,6 +15,7 @@ import {
 import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { useGame } from "../../api/hooks";
 import { useUnavailableStorageEntries } from "../../api/StorageProvider";
+import type { ShareItem } from "../../api/shares";
 import { useMode } from "../../shell/console/mode";
 import { useGameLaunch } from "../../views/game/launch";
 import { useOpenGame } from "../../views/game/origin";
@@ -57,8 +58,9 @@ export type GameMenuDialog =
   /** Remove from library… for a game Caskade added; `uninstalls` when it
    * has installed files to delete first. */
   | { type: "remove"; uninstalls: boolean }
-  /** Share with someone… (#247): a link to the release `entryId`. */
-  | { type: "share"; entryId: string };
+  /** Share with someone… (#247): a link to the release `entryId`, or to
+   * `item` (a web game's offline copy, a ROM, #248). */
+  | { type: "share"; entryId: string; item?: ShareItem };
 
 interface Host {
   open(target: GameMenuTarget, anchor: MenuAnchor): void;
@@ -306,11 +308,11 @@ export function GameMenuHost({ children }: { children: ReactNode }) {
       )}
       {dialog?.dialog.type === "share" && (
         <ShareGameDialog
-          target={{
-            kind: "game",
-            entryId: dialog.dialog.entryId,
-            title: dialog.target.title,
-          }}
+          target={
+            dialog.dialog.item
+              ? { kind: "item", item: dialog.dialog.item, title: dialog.target.title }
+              : { kind: "game", entryId: dialog.dialog.entryId, title: dialog.target.title }
+          }
           close={close}
         />
       )}

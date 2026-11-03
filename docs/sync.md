@@ -847,7 +847,12 @@ expires (a day, a week, or until stopped). Only `to_url` writes a link out:
   user picks how long the link works (a day, a week, until stopped), then gets the link
   with Copy, what the share is doing, who received it, and Stop sharing. Console mode adds
   the link as a QR code (`share_qr`, an SVG from the `qrcode` crate), for a phone to pass
-  on. The dialog also takes #248's items (`ShareTarget` `item`).
+  on. The dialog also takes #248's items (`ShareTarget` `item`), from where
+  each lives: a save version's *Share…* in the game's Saves panel; *Share
+  with someone…* in a collection's menu (its page's More, its card), which
+  says nothing is downloaded; and the game menu's *Share with someone…*,
+  which shares a web game's offline copy or an emulated game's ROM as
+  those kinds rather than the folder they're in.
 - **Add game → Receive a shared game…** (`ReceiveShareDialog`) takes a pasted link. A pad
   pastes on the on-screen keyboard's Paste key (`clipboard_read_text`; Copy buttons write
   through `clipboard_write_text`, since a webview allows the clipboard only for a click or
@@ -1199,8 +1204,12 @@ Every control, section by section:
   (`core.saves.keep`), and the *save locations list* with its last check and
   Update now.
 - **Copies and shares**: copies going on both ways (`devices_transfers`),
-  with progress, shown only while there are any; shares (#247) list here
-  too.
+  with progress, shown only while there are any. Then the shares this
+  device made (#247): each with its state, who received it and how far
+  each got (and whether they help others receive it), *Copy link* and
+  *Stop sharing* while it runs, and *Forget* once it stopped or expired.
+  Then what was received here: each "<title> from <sharer>" with its
+  *Help others receive it* switch (`share_keep_helping`, #249).
 
 Every switch here is kept on each device: `core.sync` is local in the sync
 policy, so turning one off on one device never turns it off elsewhere.

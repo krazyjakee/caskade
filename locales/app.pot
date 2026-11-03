@@ -1334,6 +1334,10 @@ msgstr ""
 msgid "A ROMs folder with a folder per console, like snes or psx."
 msgstr ""
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "a save of {title}"
+msgstr ""
+
 #. {title} is shown as is: the template's placeholder for the game's title
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "A single folder name containing {title}."
@@ -2581,7 +2585,15 @@ msgid "Caskade keeps streaming up to date when you say so, never in the middle o
 msgstr ""
 
 #: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "Caskade makes a link. Whoever opens it in their Caskade gets it straight from this computer, on this network or over the internet."
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
 msgid "Caskade makes a link. Whoever opens it in their Caskade gets the game straight from this computer, on this network or over the internet."
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "Caskade makes a link. Whoever opens it in their Caskade sees the collection's games and which of them they have. Nothing is downloaded."
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
@@ -9513,6 +9525,15 @@ msgstr ""
 msgid "Share link"
 msgstr ""
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Share this save with someone…"
+msgstr ""
+
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Share…"
+msgstr ""
+
+#: apps/desktop/src/components/collections/useCollectionActions.tsx
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 msgid "Share with someone…"
 msgstr ""

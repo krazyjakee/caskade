@@ -6,6 +6,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { FolderOpen } from "lucide-react";
 import { useState } from "react";
 import { useAccounts } from "../../api/accounts";
+import { useGame } from "../../api/hooks";
 import { formatBytes, formatDateTime } from "../../api/presentation";
 import { useOptionalLibraryApi } from "../../api/provider";
 import {
@@ -16,6 +17,7 @@ import {
 } from "../../api/saves";
 import { useSaveDeviceName } from "../../components/saves/devices";
 import { SaveConflictDialog } from "../../components/saves/SaveConflictDialog";
+import { ShareGameDialog } from "../../components/shares/ShareGameDialog";
 import { useMode } from "../../shell/console/mode";
 
 /** `entryId` is the release Play starts: restores go into its save
@@ -37,6 +39,9 @@ export function SavesPanel({
   const reasonLabel = useReasonLabel();
   const [choosing, setChoosing] = useState(false);
   const [done, setDone] = useState<string | null>(null);
+  // A version shared with someone else through a link (#248).
+  const [sharing, setSharing] = useState<string | null>(null);
+  const title = useGame(gameId).data?.title ?? "";
   if (!available || !query.data) return null;
   const history = query.data;
   if (history.versions.length === 0 && locations.length === 0) return null;
@@ -107,25 +112,38 @@ export function SavesPanel({
                     {!each.complete && ` · ${t`Not on this device yet`}`}
                   </p>
                 </div>
-                {!each.current && (
-                  <Button
-                    data-spatial="focusable"
-                    size="sm"
-                    isDisabled={!canRestore(each)}
-                    onPress={() =>
-                      entryId &&
-                      restore.mutate(
-                        { entryId, versionId: version.id },
-                        {
-                          onSuccess: () =>
-                            setDone(t`Restored. The save that was in use is kept as a version.`),
-                        },
-                      )
-                    }
-                  >
-                    <Trans>Restore</Trans>
-                  </Button>
-                )}
+                <div className="flex gap-2">
+                  {each.complete && (
+                    <Button
+                      data-spatial="focusable"
+                      size="sm"
+                      variant="ghost"
+                      aria-label={t`Share this save with someone…`}
+                      onPress={() => setSharing(version.id)}
+                    >
+                      <Trans>Share…</Trans>
+                    </Button>
+                  )}
+                  {!each.current && (
+                    <Button
+                      data-spatial="focusable"
+                      size="sm"
+                      isDisabled={!canRestore(each)}
+                      onPress={() =>
+                        entryId &&
+                        restore.mutate(
+                          { entryId, versionId: version.id },
+                          {
+                            onSuccess: () =>
+                              setDone(t`Restored. The save that was in use is kept as a version.`),
+                          },
+                        )
+                      }
+                    >
+                      <Trans>Restore</Trans>
+                    </Button>
+                  )}
+                </div>
               </li>
             );
           })}
@@ -159,6 +177,16 @@ export function SavesPanel({
           choose={(versionId) =>
             choose.mutate({ entryId, versionId }, { onSuccess: () => setChoosing(false) })
           }
+        />
+      )}
+      {sharing && (
+        <ShareGameDialog
+          target={{
+            kind: "item",
+            item: { kind: "save", versionId: sharing },
+            title: t`a save of ${title}`,
+          }}
+          close={() => setSharing(null)}
         />
       )}
     </section>

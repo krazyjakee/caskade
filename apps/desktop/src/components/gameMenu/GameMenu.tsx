@@ -443,7 +443,20 @@ export function GameMenu({
                 id="share"
                 icon={Share2}
                 description={t`A link for someone else's Caskade`}
-                onAction={() => onDialog({ type: "share", entryId: copyable.id })}
+                onAction={() =>
+                  onDialog({
+                    type: "share",
+                    entryId: copyable.id,
+                    // A web game's offline copy, or a ROM with its emulator
+                    // profile, rather than the folder they're in (#248).
+                    item:
+                      copyable.source === "web"
+                        ? { kind: "web", gameId: target.gameId }
+                        : copyable.emulated
+                          ? { kind: "rom", entryId: copyable.id }
+                          : undefined,
+                  })
+                }
               >
                 {t`Share with someone…`}
               </MenuItem>
