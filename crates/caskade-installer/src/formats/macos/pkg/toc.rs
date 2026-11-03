@@ -40,11 +40,19 @@ struct RawData {
     extracted_style: Option<String>,
     extracted: Option<String>,
 }
-fn set<T>(slot: &mut Option<T>, value: T) -> Result<()> {
-    if slot.replace(value).is_some() {
-        return Err(invalid("duplicate XAR metadata field"));
+/// A field given twice must say the same thing both times: productbuild on
+/// current macOS repeats some, and only a conflicting repeat is ambiguous.
+fn set<T: PartialEq + std::fmt::Debug>(slot: &mut Option<T>, value: T) -> Result<()> {
+    match slot {
+        Some(existing) if *existing != value => Err(PkgError::Invalid(format!(
+            "conflicting XAR metadata field: {existing:?} then {value:?}"
+        ))),
+        Some(_) => Ok(()),
+        None => {
+            *slot = Some(value);
+            Ok(())
+        }
     }
-    Ok(())
 }
 fn attrs(element: &BytesStart<'_>) -> Result<Vec<(String, String)>> {
     let mut values = Vec::new();
