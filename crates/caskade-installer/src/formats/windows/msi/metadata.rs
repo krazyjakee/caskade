@@ -9,6 +9,7 @@ type Row = BTreeMap<String, serde_json::Value>;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MsiFile {
     pub id: String,
+    #[serde(serialize_with = "crate::formats::windows::portable_path::serialize")]
     pub path: PathBuf,
     pub size: u64,
     pub sequence: u32,

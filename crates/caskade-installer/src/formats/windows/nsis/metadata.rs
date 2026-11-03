@@ -10,6 +10,7 @@ use std::{
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NsisFile {
     pub destination: String,
+    #[serde(serialize_with = "crate::formats::windows::portable_path::serialize_option")]
     pub path: Option<PathBuf>,
     pub size: Option<u64>,
 }
@@ -17,6 +18,7 @@ pub struct NsisFile {
 pub struct NsisShortcut {
     pub link: String,
     pub target: String,
+    #[serde(serialize_with = "crate::formats::windows::portable_path::serialize_option")]
     pub path: Option<PathBuf>,
     pub parameters: String,
 }
@@ -36,6 +38,7 @@ pub struct NsisMetadata {
     pub shortcuts: Vec<NsisShortcut>,
     pub effects: Vec<NsisEffect>,
     pub custom_instructions: Vec<i32>,
+    #[serde(serialize_with = "crate::formats::windows::portable_path::serialize_vec")]
     pub uninstallers: Vec<PathBuf>,
 }
 impl NsisMetadata {

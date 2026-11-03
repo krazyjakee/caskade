@@ -437,7 +437,7 @@ impl SafeDir {
         self.budget.record_bytes(value.len() as u64)
     }
     /// macOS can attach metadata to the link inode itself. Open that inode
-    /// with O_SYMLINK and refuse resolution of the final component.
+    /// with O_SYMLINK, by name under the link's confined parent.
     #[cfg(all(target_os = "macos", feature = "macos-formats"))]
     pub fn set_symlink_xattr(
         &mut self,
@@ -445,23 +445,33 @@ impl SafeDir {
         attribute: &std::ffi::OsStr,
         value: &[u8],
     ) -> Result<()> {
-        use cap_fs_ext::{FollowSymlinks, OpenOptionsFollowExt};
-        use cap_std::fs::OpenOptionsExt;
+        use rustix::fs::{Mode, OFlags, openat};
         use xattr::FileExt;
         let path = self.owned(name)?;
         if !self.root.symlink_metadata(&path)?.is_symlink() {
             return Err(SafetyError::InvalidSymlinkTarget);
         }
         self.admit_xattr(attribute, value)?;
-        let mut options = OpenOptions::new();
-        options
-            .read(true)
-            .follow(FollowSymlinks::No)
-            .custom_flags(rustix::fs::OFlags::SYMLINK.bits() as i32);
-        self.root
-            .open_with(path, &options)?
-            .into_std()
-            .set_xattr(attribute, value)?;
+        // cap-std's no-follow open adds O_NOFOLLOW, which makes macOS refuse
+        // the link (ELOOP) even with O_SYMLINK. Open the parent through the
+        // capability, then the link itself by its bare name.
+        let parent = match path.parent() {
+            Some(parent) if !parent.as_os_str().is_empty() => self.root.open_dir(parent)?,
+            _ => self.root.try_clone()?,
+        };
+        let link = path
+            .file_name()
+            .ok_or_else(|| std::io::Error::from(std::io::ErrorKind::InvalidInput))?;
+        std::fs::File::from(
+            openat(
+                &parent,
+                link,
+                OFlags::RDONLY | OFlags::SYMLINK | OFlags::CLOEXEC,
+                Mode::empty(),
+            )
+            .map_err(std::io::Error::from)?,
+        )
+        .set_xattr(attribute, value)?;
         Ok(())
     }
     fn reserve(&mut self, name: &str, declared: u64, depth: usize) -> Result<PathBuf> {

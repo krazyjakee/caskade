@@ -27,7 +27,9 @@ fn confined(root: &TestRoot) {
             sanitize_path(relative.to_str().unwrap()).unwrap();
             let metadata = fs::symlink_metadata(&path).unwrap();
             assert!(metadata.is_file() || metadata.is_dir() || metadata.is_symlink());
-            assert!(dunce::canonicalize(&path).unwrap().starts_with(root));
+            // std on both sides: dunce keeps the \\?\ prefix only for names that
+            // need it, and these tests make exactly such names.
+            assert!(fs::canonicalize(&path).unwrap().starts_with(root));
             if metadata.is_dir() && !metadata.is_symlink() {
                 walk(root, &path);
             }
@@ -38,7 +40,7 @@ fn confined(root: &TestRoot) {
             }
         }
     }
-    let canonical = dunce::canonicalize(root.path()).unwrap();
+    let canonical = fs::canonicalize(root.path()).unwrap();
     walk(&canonical, &canonical);
     root.assert_sentinel_untouched();
     let mut siblings: Vec<_> = fs::read_dir(root.parent_path())

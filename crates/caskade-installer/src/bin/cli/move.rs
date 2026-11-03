@@ -17,6 +17,10 @@ pub(super) async fn run(
     ctx: &Context,
 ) -> CliResult<Output> {
     let destination = destination.ok_or("move needs a destination storage root")?;
+    // Games record their folder as they were given it, which can go through a
+    // link (macOS's /var is /private/var): that spelling moves too.
+    let given = std::path::absolute(&game_dir)?;
+    let given_target = std::path::absolute(&destination)?;
     let game = dunce::canonicalize(&game_dir)?;
     let root = game
         .parent()
@@ -77,6 +81,13 @@ pub(super) async fn run(
                 })?);
             let relocator =
                 reconcile::engine_for_move(&source, &final_dir, &manifest, &host, sink)?;
+            let spellings = match given.file_name() {
+                Some(name) if given != source => caskade_installer::relocate::spelling_pairs(
+                    &given.to_string_lossy(),
+                    &given_target.join(name).to_string_lossy(),
+                ),
+                _ => vec![],
+            };
             let request = RelocateRequest {
                 job_id: input::job_id(
                     &format!("move:{}:{}", source.display(), target_root.display()),
@@ -86,7 +97,7 @@ pub(super) async fn run(
                 game_dir: source,
                 target_root,
                 references: prepared.references,
-                spellings: vec![],
+                spellings,
                 alias: record
                     .alias
                     .clone()

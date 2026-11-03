@@ -79,7 +79,7 @@ fn binary_repairs_external_folder_and_root_renames_then_uninstalls_from_the_new_
     assert!(
         fs::read_to_string(new.join("config.ini"))
             .unwrap()
-            .contains(new.to_str().unwrap())
+            .contains(dunce::canonicalize(&new).unwrap().to_str().unwrap())
     );
     let mount = home.path().join("Changed Mount");
     fs::rename(&root, &mount).unwrap();
@@ -128,7 +128,7 @@ fn binary_can_repair_a_legacy_manifest_from_an_explicit_old_anchor() {
     assert!(
         fs::read_to_string(new.join("config.ini"))
             .unwrap()
-            .contains(new.to_str().unwrap())
+            .contains(dunce::canonicalize(&new).unwrap().to_str().unwrap())
     );
 }
 

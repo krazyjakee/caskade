@@ -321,6 +321,8 @@ impl Observation {
             if tree.iter().any(|path| path.is_symlink()) {
                 continue;
             }
+            // Windows can't rename a folder while a handle to it is open.
+            drop(dir);
             // Prefix payloads belong to staging: preserve them in a confined
             // recovery folder before rollback removes that private prefix.
             let retained = if folder.starts_with(game) {
@@ -341,7 +343,6 @@ impl Observation {
             } else {
                 folder.clone()
             };
-            drop(dir);
             journal.preserve_observed_folder(
                 &retained,
                 "interactive expected payload outside requested game folder",

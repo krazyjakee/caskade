@@ -127,6 +127,7 @@ impl FetchEngine {
             return Ok(());
         }
         let downloads = storage::directory(&capability, Path::new(".caskade/downloads"), false)?;
+        let mut cleaned = vec![];
         for entry in downloads.entries()? {
             let entry = entry?;
             let job_id =
@@ -199,6 +200,14 @@ impl FetchEngine {
                     storage.job.remove_file(name)?;
                 }
             }
+            // Windows can't remove a folder while a handle to it is open.
+            drop(storage);
+            storage::prune(&root, &job_id);
+            cleaned.push(job_id);
+        }
+        // The shared parents empty out only once `downloads` is closed too.
+        drop(downloads);
+        for job_id in cleaned {
             storage::prune(&root, &job_id);
         }
         Ok(())

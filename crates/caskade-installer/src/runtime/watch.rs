@@ -19,10 +19,29 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-/// Delay for late events after the process exits (Windows and FSEvents batch).
-const SETTLE: Duration = Duration::from_millis(250);
+/// Delay for late events after the process exits (Windows and FSEvents batch;
+/// FSEvents can take a second to deliver).
+const SETTLE: Duration = if cfg!(target_os = "macos") {
+    Duration::from_secs(1)
+} else {
+    Duration::from_millis(250)
+};
+/// Late events keep arriving in batches: wait for a quiet `SETTLE`, at most this long.
+const MAX_SETTLE: Duration = Duration::from_secs(5);
 /// Bound on entries discovered by walking newly created directories.
 const MAX_WALK: usize = 100_000;
+
+/// Whether a path was made during the run, so rollback and uninstall may
+/// remove it. A birth time decides: before the watch began, the path was
+/// already there, whatever an event says. Without one (filesystems that don't
+/// keep it), only the watcher's own create event counts; a path found through
+/// an ancestor or a folder walk then counts as pre-existing and is left alone.
+fn admitted(born: Option<SystemTime>, observed: bool, started: SystemTime) -> bool {
+    match born {
+        Some(born) => born >= started,
+        None => observed,
+    }
+}
 
 fn walk(directory: &Path, paths: &mut BTreeSet<PathBuf>, budget: &mut usize) {
     let Ok(entries) = std::fs::read_dir(directory) else {
@@ -179,9 +198,18 @@ struct Observation {
 impl ProcessObservation for Observation {
     fn finish(mut self: Box<Self>, journal: &JournalHandle) -> Result<()> {
         std::thread::sleep(SETTLE);
+        let mut events = vec![];
+        let deadline = std::time::Instant::now() + MAX_SETTLE;
+        while let Ok(event) = self.events.recv_timeout(SETTLE) {
+            events.push(event);
+            if std::time::Instant::now() >= deadline {
+                break;
+            }
+        }
         drop(self.watcher.take());
+        events.extend(self.events.try_iter());
         let mut created = BTreeSet::new();
-        for event in self.events.try_iter() {
+        for event in events {
             let event = event.map_err(watch_error)?;
             match event.kind {
                 EventKind::Create(_) => created.extend(event.paths),
@@ -195,11 +223,13 @@ impl ProcessObservation for Observation {
             }
         }
         // FSEvents coalesces events, so a file can arrive without the
-        // directories made for it: an ancestor inside a watched location that
-        // was born after the watch began is new too (with the coarsest birth
-        // time resolution, FAT's two seconds, as slack).
-        let since = self.started - Duration::from_secs(2);
-        for path in created.clone() {
+        // directories made for it: its ancestors inside a watched location
+        // are candidates, and so (below) is everything inside a new folder,
+        // including entries made before the recursive watch reached it
+        // (inotify adds watches on new directories asynchronously).
+        let observed = created;
+        let mut derived = BTreeSet::new();
+        for path in &observed {
             let Some(root) = self.watched.iter().find(|root| path.starts_with(root)) else {
                 continue;
             };
@@ -207,24 +237,31 @@ impl ProcessObservation for Observation {
                 if ancestor == root.as_path() || !ancestor.starts_with(root) {
                     break;
                 }
-                let born = std::fs::symlink_metadata(ancestor).and_then(|meta| meta.created());
-                if born.is_ok_and(|born| born >= since) {
-                    created.insert(ancestor.to_path_buf());
-                }
+                derived.insert(ancestor.to_path_buf());
             }
         }
-        // Everything inside a created directory is new too, including entries
-        // made before the recursive watch reached it (inotify adds watches on
-        // new directories asynchronously).
-        let mut paths = created;
-        let directories: Vec<_> = paths.iter().filter(|path| path.is_dir()).cloned().collect();
+        let born = |path: &Path| {
+            std::fs::symlink_metadata(path)
+                .and_then(|metadata| metadata.created())
+                .ok()
+        };
+        let directories: Vec<_> = observed
+            .iter()
+            .chain(&derived)
+            .filter(|path| {
+                path.is_dir() && admitted(born(path), observed.contains(*path), self.started)
+            })
+            .cloned()
+            .collect();
         let mut budget = MAX_WALK;
         for directory in directories {
-            walk(&directory, &mut paths, &mut budget);
+            walk(&directory, &mut derived, &mut budget);
         }
         // Parents sort before children; rollback replays in reverse, so
         // children are removed before their directories. Only effects that
-        // still exist and are outside the storage root are recorded.
+        // still exist, are outside the storage root and were made during the
+        // run are recorded.
+        let paths: BTreeSet<_> = observed.union(&derived).cloned().collect();
         for path in paths {
             if path.starts_with(&self.storage) {
                 continue;
@@ -232,6 +269,13 @@ impl ProcessObservation for Observation {
             let Ok(metadata) = std::fs::symlink_metadata(&path) else {
                 continue;
             };
+            if !admitted(
+                metadata.created().ok(),
+                observed.contains(&path),
+                self.started,
+            ) {
+                continue;
+            }
             let entry = if metadata.is_dir() {
                 JournalEntry::ExternalDirectory { path }
             } else {
@@ -243,5 +287,27 @@ impl ProcessObservation for Observation {
             journal.record(entry)?;
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::admitted;
+    use std::time::{Duration, SystemTime};
+
+    #[test]
+    fn only_paths_made_during_the_run_are_admitted() {
+        let started = SystemTime::now();
+        let before = started - Duration::from_secs(1);
+        let after = started + Duration::from_millis(1);
+        // A birth time decides, even against a create event.
+        assert!(admitted(Some(after), false, started));
+        assert!(admitted(Some(started), true, started));
+        assert!(!admitted(Some(before), true, started));
+        assert!(!admitted(Some(before), false, started));
+        // No birth time: the watcher's create event counts, an ancestor or a
+        // folder walk doesn't.
+        assert!(admitted(None, true, started));
+        assert!(!admitted(None, false, started));
     }
 }

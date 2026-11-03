@@ -104,16 +104,14 @@ impl UndoLog {
         }
         self.persist()
     }
-    pub fn finish(&self) -> io::Result<()> {
-        if let Some((dir, name, _)) = &self.durable {
-            dir.remove_file(name)?;
+    pub fn finish(&mut self) -> io::Result<()> {
+        if let Some((dir, name, record)) = self.durable.take() {
+            dir.remove_file(&name)?;
             #[cfg(unix)]
             dir.open(".")?.sync_all()?;
-            if let Some(root) = self
-                .durable
-                .as_ref()
-                .and_then(|(_, _, record)| record.destination.parent())
-            {
+            // Windows can't remove `.caskade/moves` while this handle is open.
+            drop(dir);
+            if let Some(root) = record.destination.parent() {
                 let parent = Dir::open_ambient_dir(root, cap_std::ambient_authority())?;
                 // Only remove empty bookkeeping directories created by moves;
                 // root.json, other jobs and existing metadata are retained.

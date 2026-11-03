@@ -35,7 +35,7 @@ fn engine(kill: Option<String>) -> Relocator {
     }
 }
 fn request(base: &Path, copy: bool) -> RelocateRequest {
-    let source = base.join("source/Game");
+    let source = base.join("source").join("Game");
     let refs = scan::scan_references(&ScanInput {
         game_dir: &source,
         real_path: &source.to_string_lossy(),
@@ -95,7 +95,7 @@ fn restart_rolls_back_killed_copy_rename_and_reference_rewrite() {
     ] {
         let temp = tempfile::tempdir().unwrap();
         let base = dunce::canonicalize(temp.path()).unwrap();
-        let game = base.join("source/Game");
+        let game = base.join("source").join("Game");
         fs::create_dir_all(&game).unwrap();
         fs::create_dir(base.join("target")).unwrap();
         let original = format!("InstallPath={}\n", game.display());
@@ -120,7 +120,7 @@ fn restart_rolls_back_killed_copy_rename_and_reference_rewrite() {
             fs::read_to_string(game.join("config.ini")).unwrap(),
             original
         );
-        assert!(!base.join("target/Game").exists());
+        assert!(!base.join("target").join("Game").exists());
         assert_eq!(
             aliases.target("fixture").unwrap().as_deref(),
             Some(game.as_path())
@@ -136,7 +136,7 @@ fn restart_rolls_back_killed_copy_rename_and_reference_rewrite() {
 fn restart_finishes_a_durably_committed_copy_instead_of_reverting_it() {
     let temp = tempfile::tempdir().unwrap();
     let base = dunce::canonicalize(temp.path()).unwrap();
-    let game = base.join("source/Game");
+    let game = base.join("source").join("Game");
     fs::create_dir_all(&game).unwrap();
     fs::create_dir(base.join("target")).unwrap();
     fs::write(
@@ -159,7 +159,7 @@ fn restart_finishes_a_durably_committed_copy_instead_of_reverting_it() {
         .unwrap();
     assert_eq!(status.code(), Some(77));
     assert!(game.is_dir());
-    let destination = base.join("target/Game");
+    let destination = base.join("target").join("Game");
     assert!(destination.is_dir());
     assert!(engine(None).recover_move(&request(&base, true)).unwrap());
     assert!(!game.exists());

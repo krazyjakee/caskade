@@ -546,7 +546,7 @@ async fn managed_move_then_external_root_rename_reconciles_by_the_new_root_ident
     );
     assert_eq!(
         fixture.aliases.target(&fixture.id).unwrap(),
-        Some(game.clone())
+        Some(dunce::canonicalize(&game).unwrap())
     );
     assert!(!fixture.root.join("Café Game").exists());
     let verified = manifest.verify(&game).unwrap();

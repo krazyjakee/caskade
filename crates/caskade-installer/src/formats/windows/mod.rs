@@ -4,6 +4,7 @@ pub mod inno;
 
 pub mod msi;
 
+mod portable_path;
 mod uninstall;
 pub use uninstall::uninstall_steps;
 
