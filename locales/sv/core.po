@@ -460,16 +460,16 @@ msgid "This backup was made by a newer version of Caskade."
 msgstr "Den här säkerhetskopian gjordes av en nyare version av Caskade."
 
 #: crates/caskade-core/src/backup/peers.rs
+msgid "That backup isn't on this device."
+msgstr "Den säkerhetskopian finns inte på den här enheten."
+
+#: crates/caskade-core/src/backup/peers.rs
 msgid "The backup didn't arrive from the other device. Make sure it's on and in reach, then try again."
 msgstr "Säkerhetskopian kom inte fram från den andra enheten. Se till att den är på och inom räckhåll och försök igen."
 
 #: crates/caskade-core/src/backup/peers.rs
 msgid "The backup that arrived can't be read."
 msgstr "Säkerhetskopian som kom fram kan inte läsas."
-
-#: crates/caskade-core/src/backup/peers.rs
-msgid "That backup isn't on this device."
-msgstr "Den säkerhetskopian finns inte på den här enheten."
 
 #: crates/caskade-core/src/backup/restore.rs
 msgid "its database has no migration record"

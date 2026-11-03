@@ -459,15 +459,15 @@ msgid "This backup was made by a newer version of Caskade."
 msgstr ""
 
 #: crates/caskade-core/src/backup/peers.rs
+msgid "That backup isn't on this device."
+msgstr ""
+
+#: crates/caskade-core/src/backup/peers.rs
 msgid "The backup didn't arrive from the other device. Make sure it's on and in reach, then try again."
 msgstr ""
 
 #: crates/caskade-core/src/backup/peers.rs
 msgid "The backup that arrived can't be read."
-msgstr ""
-
-#: crates/caskade-core/src/backup/peers.rs
-msgid "That backup isn't on this device."
 msgstr ""
 
 #: crates/caskade-core/src/backup/restore.rs

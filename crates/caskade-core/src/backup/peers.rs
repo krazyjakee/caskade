@@ -88,7 +88,9 @@ struct Inner {
     offered: Mutex<HashMap<String, (String, Offer)>>,
     /// What each paired device holds, as it last said.
     listed: Mutex<HashMap<String, Vec<HeldBackup>>>,
-    /// Backups asked for to restore, by hash.
+    /// Backups asked for to restore, by hash: asked for in every exchange
+    /// until they arrive, and kept from collection while this runs, so the
+    /// restore can read them. A fetch that gives up takes its hash back.
     requested: Mutex<HashSet<String>>,
     arrived: tokio::sync::Notify,
     /// Paired devices, for their names.
@@ -255,41 +257,25 @@ impl PeerBackups {
     /// Fetches the backup `hash` from whichever paired device holds it,
     /// waiting up to `within` for it to arrive. Returns its path here, ready
     /// to restore.
-    pub async fn fetch(&self, hash: &str, within: Duration) -> Result<PathBuf> {
-        if let Some(path) = self
-            .inner
-            .store
-            .path(hash)
-            .filter(|_| self.inner.store.has(hash))
-        {
-            return Ok(path);
-        }
-        self.inner
-            .requested
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .insert(hash.to_owned());
-        let deadline = tokio::time::Instant::now() + within;
-        loop {
-            let arrived = self.inner.arrived.notified();
-            if self.inner.store.has(hash) {
-                break;
-            }
-            if tokio::time::timeout_at(deadline, arrived).await.is_err() {
-                return Err(Error::Invalid(crate::tr!(
-                    "The backup didn't arrive from the other device. Make sure it's on and in reach, then try again."
-                )));
-            }
-        }
-        self.inner
-            .store
-            .path(hash)
-            .ok_or_else(|| Error::Invalid(crate::tr!("The backup that arrived can't be read.")))
+    ///
+    /// It's asked for from the call, before the future is first polled: an
+    /// exchange started after this returns asks for it.
+    pub fn fetch(
+        &self,
+        hash: &str,
+        within: Duration,
+    ) -> impl Future<Output = Result<PathBuf>> + Send + 'static {
+        let request = Request::new(self.clone(), hash);
+        async move { request.wait(within).await }
     }
 
     /// Keeps an arrived backup: a device's own, under its origin, pruned to
     /// the newest it should keep.
     async fn kept(&self, hash: &str) -> Result<()> {
+        // One arrival at a time: two exchanges with a device can run at once
+        // and both bring the same backup. The second must find the first's
+        // index, or it would collect the blob as unasked for.
+        let _held = self.inner.index_lock.lock().await;
         let offered = self
             .inner
             .offered
@@ -301,11 +287,10 @@ impl PeerBackups {
             .requested
             .lock()
             .unwrap_or_else(|e| e.into_inner())
-            .remove(hash);
+            .contains(hash);
         if let Some((origin, offer)) = offered {
             let keep = usize::try_from(self.settings().await.keep.max(1)).unwrap_or(usize::MAX);
             let origin_name = self.name_of(&origin).await;
-            let _held = self.inner.index_lock.lock().await;
             let mut held = self.index();
             held.retain(|known| known.hash != hash);
             held.push(HeldBackup {
@@ -456,6 +441,61 @@ impl BlobKind for PeerBackups {
     }
 }
 
+/// A fetch's request: asked for while it waits, taken back if it gives up
+/// before the backup arrived.
+struct Request {
+    backups: PeerBackups,
+    hash: String,
+}
+
+impl Request {
+    fn new(backups: PeerBackups, hash: &str) -> Self {
+        backups
+            .inner
+            .requested
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .insert(hash.to_owned());
+        Self {
+            backups,
+            hash: hash.to_owned(),
+        }
+    }
+
+    async fn wait(&self, within: Duration) -> Result<PathBuf> {
+        let inner = &self.backups.inner;
+        let deadline = tokio::time::Instant::now() + within;
+        loop {
+            let arrived = inner.arrived.notified();
+            if inner.store.has(&self.hash) {
+                break;
+            }
+            if tokio::time::timeout_at(deadline, arrived).await.is_err() {
+                return Err(Error::Invalid(crate::tr!(
+                    "The backup didn't arrive from the other device. Make sure it's on and in reach, then try again."
+                )));
+            }
+        }
+        inner
+            .store
+            .path(&self.hash)
+            .ok_or_else(|| Error::Invalid(crate::tr!("The backup that arrived can't be read.")))
+    }
+}
+
+impl Drop for Request {
+    fn drop(&mut self) {
+        let inner = &self.backups.inner;
+        if !inner.store.has(&self.hash) {
+            inner
+                .requested
+                .lock()
+                .unwrap_or_else(|e| e.into_inner())
+                .remove(&self.hash);
+        }
+    }
+}
+
 fn read_at(path: &Path, offset: u64, len: usize) -> Result<Vec<u8>> {
     use std::io::{Read, Seek, SeekFrom};
     let mut file = std::fs::File::open(path)?;
@@ -491,5 +531,56 @@ impl BlobWriter for Receiving {
             self.backups.kept(&self.hash).await?;
         }
         Ok(kept)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::db::LibraryStore;
+    use crate::saves::versions::hash_bytes;
+
+    async fn peers() -> (PeerBackups, tempfile::TempDir) {
+        let temp = tempfile::tempdir().unwrap();
+        let settings = SettingsService::new(LibraryStore::in_memory().await.unwrap());
+        let peers = PeerBackups::new(settings, temp.path().join("peer-backups"), temp.path());
+        (peers, temp)
+    }
+
+    async fn arrive(peers: &PeerBackups, hash: &str, bytes: &[u8]) -> Box<dyn BlobWriter> {
+        let mut writer = peers.receive(hash).await.unwrap();
+        writer.write(bytes).await.unwrap();
+        writer
+    }
+
+    #[tokio::test]
+    async fn a_fetched_backup_that_arrives_twice_stays() {
+        let (peers, _temp) = peers().await;
+        let bytes = b"a backup";
+        let hash = hash_bytes(bytes);
+        let fetching = peers.fetch(&hash, Duration::from_secs(5));
+        assert_eq!(peers.wanted().await.unwrap(), vec![hash.clone()]);
+
+        // Two exchanges with the holder at once both bring it.
+        let (first, second) = (
+            arrive(&peers, &hash, bytes).await,
+            arrive(&peers, &hash, bytes).await,
+        );
+        assert!(first.finish().await.unwrap());
+        assert!(second.finish().await.unwrap());
+
+        let path = fetching.await.unwrap();
+        assert_eq!(std::fs::read(path).unwrap(), bytes);
+        assert!(peers.wanted().await.unwrap().is_empty());
+    }
+
+    #[tokio::test]
+    async fn a_fetch_that_gives_up_stops_asking() {
+        let (peers, _temp) = peers().await;
+        let hash = hash_bytes(b"never comes");
+        let fetching = peers.fetch(&hash, Duration::from_millis(10));
+        assert_eq!(peers.wanted().await.unwrap(), vec![hash]);
+        assert!(fetching.await.is_err());
+        assert!(peers.wanted().await.unwrap().is_empty());
     }
 }

@@ -65,6 +65,7 @@ struct Inner {
     /// Something wants an exchange now: devices to sync.
     due: mpsc::UnboundedSender<Option<String>>,
     due_rx: tokio::sync::Mutex<mpsc::UnboundedReceiver<Option<String>>>,
+    /// An exchange ended.
     done: Notify,
 }
 
@@ -322,8 +323,14 @@ impl Inner {
         let Some(engine) = self.engine() else {
             return false;
         };
-        if !self.claim(device) {
-            return true;
+        // One already running may have started before what this one is for
+        // (a backup asked for since, say): wait for it to end, then run.
+        loop {
+            let ended = self.done.notified();
+            if self.claim(device) {
+                break;
+            }
+            ended.await;
         }
         self.devices.set_sync_state(
             device,

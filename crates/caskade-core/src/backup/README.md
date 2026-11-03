@@ -215,10 +215,17 @@ user's devices, so losing a drive doesn't lose the library, without a cloud.
   `<data>/peer-backups/index.json` naming each: the device it came from (and
   that device's name), its file name, size and time. It keeps the newest `keep`
   per device, and each blob is checked against its SHA-256 before it's kept.
+  Two exchanges with a device can run at once and both bring the same backup:
+  arrivals are kept one at a time, so the second finds the first in the index
+  instead of collecting it as unasked for.
 - **Restoring.** Every exchange also lists what the holder keeps
   (`PeerBackups::held`). A fresh install paired with the holder sees its
   backups of every device in Settings → Backup → Restore → On your other
   devices (`backups_on_devices`). Restore… fetches one here
   (`backup_fetch_from_device`, which asks the holder to sync until it arrives)
-  and opens the usual preview and staged restore. Both commands are admin-only,
+  and opens the usual preview and staged restore. `PeerBackups::fetch` asks for
+  it from the call until it arrives or the fetch gives up, and keeps it from
+  collection while the app runs, so the restore can read it. A `sync_now` that
+  comes while an exchange with that device runs waits for it and runs another,
+  so an exchange starts after the request. Both commands are admin-only,
   like restoring.

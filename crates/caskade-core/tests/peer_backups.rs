@@ -187,18 +187,11 @@ async fn a_backup_made_while_the_holder_is_away_reaches_it_and_restores_on_a_fre
             .is_some_and(|held| held.iter().any(|backup| backup.hash == hash))
     })
     .await;
-    let fetching = fresh.peers.fetch(&hash, Duration::from_secs(30));
-    // Nudged until it arrives: under load one exchange may come too early.
-    let nudge = async {
-        loop {
-            tokio::time::sleep(Duration::from_millis(500)).await;
-            fresh.sync.sync_now(&nas_id);
-        }
-    };
-    let archive = tokio::select! {
-        archive = fetching => archive.unwrap(),
-        () = nudge => unreachable!(),
-    };
+    // Asked for from here: the exchange this starts asks for it, even when
+    // one already running began before it.
+    let fetching = fresh.peers.fetch(&hash, Duration::from_secs(60));
+    fresh.sync.sync_now(&nas_id);
+    let archive = fetching.await.unwrap();
     assert_eq!(
         caskade_core::saves::versions::hash_file(&archive)
             .unwrap()
