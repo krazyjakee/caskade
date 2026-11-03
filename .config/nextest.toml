@@ -28,6 +28,12 @@ report-name = "installer"
 store-success-output = false
 store-failure-output = true
 
+# Cancels a move at every one of its events in turn: over three minutes on
+# hosted Windows runners.
+[[profile.ci.overrides]]
+filter = 'test(/^moving_transactions::cancellation_at_every_event/)'
+slow-timeout = { period = "120s", terminate-after = 5 }
+
 # Invoke with CASKADE_TEST_NATIVE=1 and --run-ignored all. The dedicated nightly
 # performance job runs the 3 GiB T10 case, rather than every native run.
 [profile.native]

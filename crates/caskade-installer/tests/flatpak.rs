@@ -137,6 +137,18 @@ fn sparse_twenty_gigabyte_bundle_probe_reads_framing_and_identity_without_payloa
     let bytes = fs::read(source()).unwrap();
     let metadata_end = u32::from_le_bytes(bytes[bytes.len() - 4..].try_into().unwrap()) as u64;
     let mut file = fs::File::create(&path).unwrap();
+    // NTFS zero-fills up to a write past the end of a file that isn't sparse:
+    // 20 GiB of writes for the trailer below.
+    #[cfg(windows)]
+    assert!(
+        std::process::Command::new("fsutil")
+            .args(["sparse", "setflag"])
+            .arg(&path)
+            .status()
+            .unwrap()
+            .success(),
+        "mark the bundle sparse"
+    );
     file.write_all(&bytes).unwrap();
     let size = 20 * 1024 * 1024 * 1024u64;
     file.set_len(size).unwrap();
