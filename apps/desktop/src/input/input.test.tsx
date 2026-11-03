@@ -501,6 +501,31 @@ it("up and down stay in the area focus is in, and left and right cross over", as
   expect(document.activeElement).toBe(button("Switch"));
 });
 
+it("down from the hero goes to the shelf below it, not a card in its column further down", () => {
+  const pad = padSource();
+  render(
+    <InputProvider console subscribe={pad.subscribe}>
+      <Button data-rect="560 380 260 56">Resume · View details</Button>
+      {/* Recently Played: its View all at the right, one card at the left. */}
+      <Button data-rect="1400 480 120 30">View all →</Button>
+      <Button data-rect="340 530 200 280">Pocket Quest</Button>
+      {/* Recently Added: its second card is under the hero's button. */}
+      <Button data-rect="1400 860 120 30">View all → added</Button>
+      <Button data-rect="340 910 200 280">Pocket Quest added</Button>
+      <Button data-rect="560 910 200 280">Couch Runner</Button>
+    </InputProvider>,
+  );
+  act(() => screen.getByText("Resume · View details").focus());
+  pad.press("nav.down");
+  expect(focused()).toBe("View all →");
+  pad.press("nav.down");
+  expect(focused()).toBe("Pocket Quest");
+  // Up is the same: the line just above, its shelf's View all.
+  act(() => screen.getByText("Couch Runner").focus());
+  pad.press("nav.up");
+  expect(focused()).toBe("View all → added");
+});
+
 it("a settings row is one stop going up and down, wherever its control sits", async () => {
   const pad = padSource();
   render(

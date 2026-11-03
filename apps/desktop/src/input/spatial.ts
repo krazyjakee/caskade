@@ -126,7 +126,8 @@ function place(element: HTMLElement, from: HTMLElement): Box {
 
 /** Added for a target outside the row or column you're in, so one in it wins
  * however far along it is: across a list row to its button, not up to the
- * filter just above. */
+ * filter just above. Going up or down, only within the nearest line
+ * (`nearestLine`). */
 const OFF_AXIS = 100_000;
 
 /** How far `to` is from `from` in `direction`, or null if it isn't that way.
@@ -163,6 +164,31 @@ function gap(aLow: number, aHigh: number, bLow: number, bHigh: number) {
   return Math.max(0, bLow - aHigh, aLow - bHigh);
 }
 
+interface Target {
+  element: HTMLElement;
+  to: Box;
+  d: number;
+  inHome: boolean;
+}
+
+/** Going up or down, the line of targets nearest that way: those level
+ * with the nearest one. A target in the column focus is in wins within the
+ * line, never over a line in between (from the hero, the shelf below it, not
+ * a card two shelves down). Left and right keep every target: a list row
+ * goes across to its button, however far. */
+function nearestLine(targets: Target[], direction: Direction): Target[] {
+  if (direction === "nav.left" || direction === "nav.right") return targets;
+  const down = direction === "nav.down";
+  let first: Target | undefined;
+  for (const target of targets) {
+    if (!first || (down ? target.to.top < first.to.top : target.to.bottom > first.to.bottom))
+      first = target;
+  }
+  if (!first) return [];
+  const { top, bottom } = first.to;
+  return targets.filter((target) => (down ? target.to.top < bottom : target.to.bottom > top));
+}
+
 /** The focusable `direction` of `from` in the current scope, entering
  * another section where it last had focus. */
 export function next(from: HTMLElement, direction: Direction): HTMLElement | null {
@@ -170,18 +196,23 @@ export function next(from: HTMLElement, direction: Direction): HTMLElement | nul
   // something that way; only then cross into another. A control at the
   // content's left edge isn't "above" the sidebar's last item.
   const home = outermost(from);
-  let best: HTMLElement | null = null;
-  let score = Number.POSITIVE_INFINITY;
-  let bestHome = false;
+  const ahead: Target[] = [];
   for (const candidate of focusables()) {
     if (candidate === from) continue;
-    const d = distance(place(from, candidate), place(candidate, from), direction);
+    const to = place(candidate, from);
+    const d = distance(place(from, candidate), to, direction);
     if (d === null) continue;
-    const inHome = home?.contains(candidate) ?? false;
-    if ((inHome && !bestHome) || (inHome === bestHome && d < score)) {
-      best = candidate;
-      score = d;
-      bestHome = inHome;
+    ahead.push({ element: candidate, to, d, inHome: home?.contains(candidate) ?? false });
+  }
+  const area = ahead.some((target) => target.inHome)
+    ? ahead.filter((target) => target.inHome)
+    : ahead;
+  let best: HTMLElement | null = null;
+  let score = Number.POSITIVE_INFINITY;
+  for (const target of nearestLine(area, direction)) {
+    if (target.d < score) {
+      best = target.element;
+      score = target.d;
     }
   }
   if (!best) return null;
