@@ -410,6 +410,13 @@ msgid_plural "# save files"
 msgstr[0] ""
 msgstr[1] ""
 
+#. js-lingui:icu=%7Bcount%2C+plural%2C+one+%7BCopy+%23+game%7D+other+%7BCopy+%23+games%7D%7D&pluralize_on=count
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "Copy # game"
+msgid_plural "Copy # games"
+msgstr[0] ""
+msgstr[1] ""
+
 #. js-lingui:icu=%7Bcount%2C+plural%2C+one+%7BEdit+%23+game%7D+other+%7BEdit+%23+games%7D%7D&pluralize_on=count
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "Edit # game"
@@ -710,6 +717,10 @@ msgstr ""
 msgid "{name} didn't start"
 msgstr ""
 
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "{name} has no installed games that can be copied to this device. Install games here as usual."
+msgstr ""
+
 #: apps/desktop/src/views/CollectionView.tsx
 msgid "{name} options"
 msgstr ""
@@ -761,6 +772,18 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 msgid "{name}'s collections go with it. Games, installs and play history stay."
+msgstr ""
+
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "{neededText} chosen"
+msgstr ""
+
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "{neededText} chosen needs {peakText} while it copies, but only {freeText} is free here"
+msgstr ""
+
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "{neededText} chosen, {freeText} free here"
 msgstr ""
 
 #. The screenshot shown, of how many
@@ -2781,6 +2804,10 @@ msgstr ""
 msgid "Choose the game's folder"
 msgstr ""
 
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "Choose the games to copy here over your network. They copy in the background while you finish setting up. Nothing copies unless you choose it."
+msgstr ""
+
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "Choose the program"
@@ -3047,6 +3074,10 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/SetupStep.tsx
 msgid "Continue with current settings"
+msgstr ""
+
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "Continue without copying"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
@@ -4441,6 +4472,10 @@ msgstr ""
 msgid "Games found so far are ready to play. More may appear while discovery continues in the background."
 msgstr ""
 
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "Games from {name}"
+msgstr ""
+
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 msgid "Games from a server you can't reach stay in your library. Downloaded ones still play; the rest show as unavailable until the server is back."
 msgstr ""
@@ -4481,6 +4516,10 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 msgid "Games that match every rule, as the library changes"
+msgstr ""
+
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "Games to copy"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
@@ -5809,6 +5848,10 @@ msgstr ""
 msgid "Look inside archives"
 msgstr ""
 
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "Looking at what it has…"
+msgstr ""
+
 #: apps/desktop/src/onboarding/DeviceStep.tsx
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Looking for Caskade on this network…"
@@ -6690,6 +6733,7 @@ msgstr ""
 
 #: apps/desktop/src/components/streaming/StreamPairingHost.tsx
 #: apps/desktop/src/components/sync/PairingHost.tsx
+#: apps/desktop/src/onboarding/GamesStep.tsx
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Not now"
@@ -8673,6 +8717,10 @@ msgstr ""
 msgid "Runs once the game has ended, or a launch didn't start. A failure is noted."
 msgstr ""
 
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "Runs through Proton"
+msgstr ""
+
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 msgid "Runs with"
 msgstr ""
@@ -9386,6 +9434,7 @@ msgstr ""
 
 #. A game whose size isn't known
 #: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/onboarding/GamesStep.tsx
 msgid "Size unknown"
 msgstr ""
 

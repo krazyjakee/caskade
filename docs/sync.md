@@ -1098,6 +1098,18 @@ device (storage, installs, emulators, console and window settings, the
 interface scale) stays the new device's own. None of it needs the internet:
 devices find each other on the local network and connect directly.
 
+After the folder question, setup from another device asks which of that
+device's games to copy here (#276, `onboarding/GamesStep.tsx`):
+`sync::offers::device_games` (command `device_games`) lists the games it has
+installed whose copy can come here (its own folder or a Caskade-managed one,
+a build that runs on this system, Windows builds through Proton on Linux; no
+launcher installs, hidden games or games installed here already), each with
+its size. The chosen total, plus the largest game again (a copy arrives in
+the cache before it installs, so on one disk it takes twice its size while it
+does), is checked against the chosen folder's free space, and Copy waits while
+it doesn't fit; the copy job's own room check still has the last word. Each chosen game becomes a copy job (#233) in Activity and arrives while
+setup goes on; choosing none copies nothing.
+
 `tests/new_device.rs` covers it with two cores on loopback, where there's no
 relay and no address lookup: the new device gets the library, both accounts
 (the admin's PIN included), the collection and a synced setting, and keeps its
@@ -1108,6 +1120,7 @@ real devices:
 | Check | Result |
 | --- | --- |
 | A new device on a network with no internet set up from another: same library, accounts and collections; its own storage, emulators and settings | not yet run |
+| Games chosen during setup copy from the other device over the local network (#276) | not yet run |
 
 ## Settings → Devices
 

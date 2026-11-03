@@ -92,3 +92,73 @@ it("without devices, setup starts as before", async () => {
   await screen.findByRole("button", { name: /Get started/ });
   expect(screen.queryByRole("button", { name: "Set up from another device" })).toBeNull();
 });
+
+/** Paired by a link and synced, then on through the language and folder
+ * questions to the games the other device can copy here (#276). */
+async function toGames(sync: ReturnType<typeof createSyncFixtureApi>) {
+  render(sync);
+  fireEvent.click(await screen.findByRole("button", { name: "Set up from another device" }));
+  fireEvent.change(await screen.findByRole("textbox", { name: "Pairing link" }), {
+    target: { value: "caskade://pair?caskadepair=1" },
+  });
+  fireEvent.click(screen.getAllByRole("button", { name: "Pair" }).at(-1) as HTMLElement);
+  await screen.findByRole("heading", { name: "Your library is here" });
+  const office = sync.state().devices[0]?.id as string;
+  const gib = 1024 ** 3;
+  sync.setDeviceGames(office, [
+    { gameId: "celeste", title: "Celeste", sizeBytes: 1.5 * gib, throughProton: false },
+    { gameId: "halo", title: "Halo", sizeBytes: 9 * gib, throughProton: true },
+    { gameId: "flight", title: "Flight Simulator", sizeBytes: 500 * gib, throughProton: true },
+  ]);
+  fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+  await screen.findByRole("heading", { name: /language/i });
+  fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+  await screen.findByRole("heading", { name: "Where should new games go?" });
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Continue" }).hasAttribute("disabled")).toBe(false),
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+  await screen.findByRole("heading", { name: "Games from Office desktop" });
+  await screen.findByRole("list", { name: "Games to copy" });
+  return office;
+}
+
+it("lists the other device's games with sizes and free space, and copies the chosen ones", async () => {
+  const sync = await freshDevices();
+  const office = await toGames(sync);
+  const list = screen.getByRole("list", { name: "Games to copy" });
+  expect(list.textContent).toContain("Celeste");
+  expect(list.textContent).toContain("Runs through Proton");
+  // Nothing copies until chosen.
+  expect(sync.state().devices).toHaveLength(1);
+  expect(await sync.transfers()).toEqual([]);
+
+  fireEvent.click(within(list).getByRole("checkbox", { name: "Celeste" }));
+  fireEvent.click(within(list).getByRole("checkbox", { name: "Halo" }));
+  const space = document.querySelector('[data-part="space"]') as HTMLElement;
+  expect(space.dataset.status).toBe("fits");
+  expect(space.textContent).toMatch(/chosen, 400.*free here$/);
+  // One that doesn't fit says so, and copying waits.
+  fireEvent.click(within(list).getByRole("checkbox", { name: "Flight Simulator" }));
+  expect(screen.getByRole("alert").textContent).toMatch(/but only .* is free here/);
+  expect(screen.getByRole("button", { name: "Copy 3 games" }).hasAttribute("disabled")).toBe(true);
+  fireEvent.click(within(list).getByRole("checkbox", { name: "Flight Simulator" }));
+
+  fireEvent.click(screen.getByRole("button", { name: "Copy 2 games" }));
+  await waitFor(async () =>
+    expect((await sync.transfers()).map((transfer) => transfer.id)).toEqual([
+      `copy:celeste:${office}`,
+      `copy:halo:${office}`,
+    ]),
+  );
+  // Setup goes on while they arrive.
+  await waitFor(() => expect(document.querySelector('[data-question="sources"]')).toBeTruthy());
+});
+
+it("choosing none copies nothing, and setup goes on", async () => {
+  const sync = await freshDevices();
+  await toGames(sync);
+  fireEvent.click(screen.getByRole("button", { name: "Continue without copying" }));
+  await waitFor(() => expect(document.querySelector('[data-question="sources"]')).toBeTruthy());
+  expect(await sync.transfers()).toEqual([]);
+});

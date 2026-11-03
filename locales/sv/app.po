@@ -416,6 +416,13 @@ msgid_plural "# save files"
 msgstr[0] "# fil"
 msgstr[1] "# filer"
 
+#. js-lingui:icu=%7Bcount%2C+plural%2C+one+%7BCopy+%23+game%7D+other+%7BCopy+%23+games%7D%7D&pluralize_on=count
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "Copy # game"
+msgid_plural "Copy # games"
+msgstr[0] "Kopiera # spel"
+msgstr[1] "Kopiera # spel"
+
 #. js-lingui:icu=%7Bcount%2C+plural%2C+one+%7BEdit+%23+game%7D+other+%7BEdit+%23+games%7D%7D&pluralize_on=count
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "Edit # game"
@@ -720,6 +727,10 @@ msgstr "{name} kunde inte visa den här delen."
 msgid "{name} didn't start"
 msgstr "{name} startade inte"
 
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "{name} has no installed games that can be copied to this device. Install games here as usual."
+msgstr "{name} har inga installerade spel som kan kopieras till den här enheten. Installera spel här som vanligt."
+
 #: apps/desktop/src/views/CollectionView.tsx
 msgid "{name} options"
 msgstr "Alternativ för {name}"
@@ -774,6 +785,18 @@ msgstr "{name}s prestationer är privata på {provider}. Gör dina speldetaljer 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 msgid "{name}'s collections go with it. Games, installs and play history stay."
 msgstr "{name}s samlingar försvinner med kontot. Spel, installationer och spelhistorik finns kvar."
+
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "{neededText} chosen"
+msgstr "{neededText} valt"
+
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "{neededText} chosen needs {peakText} while it copies, but only {freeText} is free here"
+msgstr "{neededText} valt behöver {peakText} medan det kopieras, men bara {freeText} är ledigt här"
+
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "{neededText} chosen, {freeText} free here"
+msgstr "{neededText} valt, {freeText} ledigt här"
 
 #. The screenshot shown, of how many
 #: apps/desktop/src/views/game/Screenshots.tsx
@@ -2814,6 +2837,10 @@ msgstr "Välj lagring för installationen"
 msgid "Choose the game's folder"
 msgstr "Välj spelets mapp"
 
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "Choose the games to copy here over your network. They copy in the background while you finish setting up. Nothing copies unless you choose it."
+msgstr "Välj spelen som ska kopieras hit över ditt nätverk. De kopieras i bakgrunden medan du gör klart inställningen. Inget kopieras om du inte väljer det."
+
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "Choose the program"
@@ -3086,6 +3113,10 @@ msgstr "Fortsätt spela"
 #| msgid_plural "Continue with the # games left"
 msgid "Continue with current settings"
 msgstr "Fortsätt med det sista spelet"
+
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "Continue without copying"
+msgstr "Fortsätt utan att kopiera"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Contributions"
@@ -4513,6 +4544,10 @@ msgstr ""
 msgid "Games found so far are ready to play. More may appear while discovery continues in the background."
 msgstr ""
 
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "Games from {name}"
+msgstr "Spel från {name}"
+
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 msgid "Games from a server you can't reach stay in your library. Downloaded ones still play; the rest show as unavailable until the server is back."
 msgstr "Spel från en server du inte når finns kvar i ditt bibliotek. Nedladdade spel går fortfarande att spela; resten visas som otillgängliga tills servern är tillbaka."
@@ -4553,6 +4588,10 @@ msgstr "Spel som lämnar biblioteket"
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 msgid "Games that match every rule, as the library changes"
 msgstr "Spel som uppfyller alla regler, allteftersom biblioteket ändras"
+
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "Games to copy"
+msgstr "Spel att kopiera"
 
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "Games you install with Caskade are kept here. You can add more places later."
@@ -5887,6 +5926,10 @@ msgstr "Sök i alla mappar under genomsökningsmappen."
 msgid "Look inside archives"
 msgstr "Sök i arkiv"
 
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "Looking at what it has…"
+msgstr "Tittar på vad den har…"
+
 #: apps/desktop/src/onboarding/DeviceStep.tsx
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Looking for Caskade on this network…"
@@ -6778,6 +6821,7 @@ msgstr "Behövs inte"
 
 #: apps/desktop/src/components/streaming/StreamPairingHost.tsx
 #: apps/desktop/src/components/sync/PairingHost.tsx
+#: apps/desktop/src/onboarding/GamesStep.tsx
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Not now"
@@ -8807,6 +8851,10 @@ msgstr "Körs på {systems}, inte på den här datorns system."
 msgid "Runs once the game has ended, or a launch didn't start. A failure is noted."
 msgstr "Körs när spelet har avslutats, eller när en start inte blev av. Ett fel noteras."
 
+#: apps/desktop/src/onboarding/GamesStep.tsx
+msgid "Runs through Proton"
+msgstr "Körs via Proton"
+
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 msgid "Runs with"
 msgstr "Körs med"
@@ -9535,6 +9583,7 @@ msgstr "Storleksgräns"
 
 #. A game whose size isn't known
 #: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/onboarding/GamesStep.tsx
 msgid "Size unknown"
 msgstr "Okänd storlek"
 

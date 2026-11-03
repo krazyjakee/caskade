@@ -126,6 +126,8 @@ pub fn access(command: &str) -> Option<Access> {
         | "addons_from_devices"
         // Emulators the user's other devices prefer (#275), offered.
         | "emulators_from_devices"
+        // Another device's games to copy here, during setup (#276).
+        | "device_games"
         // The add-on catalogue (#181): reading it, and fetching it again.
         | "addons_catalogue"
         | "addons_catalogue_refresh"

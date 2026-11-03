@@ -51,6 +51,7 @@ pub fn builder() -> Builder<tauri::Wry> {
             crate::commands::addon_offers::addons_from_devices::<tauri::Wry>,
             crate::commands::addon_offers::emulators_from_devices::<tauri::Wry>,
             crate::commands::addon_offers::emulator_offer_keep::<tauri::Wry>,
+            crate::commands::addon_offers::device_games,
             crate::commands::peer_backups::backups_on_devices::<tauri::Wry>,
             crate::commands::peer_backups::backup_fetch_from_device::<tauri::Wry>,
             crate::commands::game_edit::game_artwork,

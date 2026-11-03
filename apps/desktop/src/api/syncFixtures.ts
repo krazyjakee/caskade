@@ -3,6 +3,7 @@
  * pairing that completes once confirmed. Tests drive the rest through the
  * extra methods (an incoming pairing, an opened link, a forgotten key). */
 import type {
+  DeviceGame,
   DeviceKind,
   DevicesStatus,
   PairedDevice,
@@ -24,6 +25,9 @@ export interface SyncFixtureApi extends SyncApi {
   setTransfers(transfers: Transfer[], shares?: Share[]): void;
   /** A game's copies on the other devices (#232). */
   setCopies(gameId: string, copies: PeerCopy[]): void;
+  /** A paired device's games that can be copied here (#276); each gets a
+   * copy on that device too. */
+  setDeviceGames(deviceId: string, games: DeviceGame[]): void;
   /** The games sent to other devices, as `gameId → deviceId`. */
   sent(): [string, string][];
   /** Another device asks to start a game here. */
@@ -119,6 +123,7 @@ export function createSyncFixtureApi(): SyncFixtureApi {
   let transfers: Transfer[] = [];
   let shares: Share[] = [];
   const copies = new Map<string, PeerCopy[]>();
+  const deviceGames = new Map<string, DeviceGame[]>();
   const sent: [string, string][] = [];
   const started: [string, string][] = [];
   const finished: [string, boolean, string?][] = [];
@@ -278,6 +283,31 @@ export function createSyncFixtureApi(): SyncFixtureApi {
     played: () => ({ started: [...started], finished: [...finished] }),
     setCopies: (gameId, next) => {
       copies.set(gameId, next);
+      changed();
+    },
+    deviceGames: async (deviceId) => structuredClone(deviceGames.get(deviceId) ?? []),
+    setDeviceGames: (deviceId, games) => {
+      deviceGames.set(deviceId, games);
+      const device = status.devices.find((paired) => paired.id === deviceId);
+      for (const game of games) {
+        const others = (copies.get(game.gameId) ?? []).filter((c) => c.deviceId !== deviceId);
+        copies.set(game.gameId, [
+          ...others,
+          {
+            deviceId,
+            deviceName: device?.name ?? "",
+            kind: device?.kind ?? "desktop",
+            os: device?.os ?? "linux",
+            link: "lan",
+            sizeBytes: game.sizeBytes,
+            location: "external",
+            blocked: null,
+            throughProton: game.throughProton,
+            playing: false,
+            wakeable: false,
+          },
+        ]);
+      }
       changed();
     },
     transfers: async () => structuredClone(transfers),

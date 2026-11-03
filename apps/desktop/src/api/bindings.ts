@@ -142,6 +142,11 @@ export const commands = {
 	 *  device chose.
 	 */
 	emulatorOfferKeep: (platformId: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("emulator_offer_keep", { platformId })),
+	/**
+	 *  The games `device_id` has installed that can be copied here (#276), for
+	 *  first-run setup from that device.
+	 */
+	deviceGames: (deviceId: string) => typedError<DeviceGame_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("device_games", { deviceId })),
 	/**  What paired devices keep, as each last said when they synced. */
 	backupsOnDevices: () => typedError<DeviceBackups[], ErrorReport_Serialize>(__TAURI_INVOKE("backups_on_devices")),
 	/**
@@ -3040,6 +3045,27 @@ export type DeviceEmulator = {
 	deviceName: string,
 	/**  Caskade can install it on this system. */
 	installable: boolean,
+};
+
+/**  A game another device has installed that could be copied here (#276). */
+export type DeviceGame = DeviceGame_Serialize | DeviceGame_Deserialize;
+
+/**  A game another device has installed that could be copied here (#276). */
+export type DeviceGame_Deserialize = {
+	gameId: string,
+	title: string,
+	sizeBytes?: number | null,
+	/**  A Windows build that runs here through Proton. */
+	throughProton: boolean,
+};
+
+/**  A game another device has installed that could be copied here (#276). */
+export type DeviceGame_Serialize = {
+	gameId: string,
+	title: string,
+	sizeBytes: number | null,
+	/**  A Windows build that runs here through Proton. */
+	throughProton: boolean,
 };
 
 export type DeviceKind = "desktop" | "laptop" | "handheld" | "tv";

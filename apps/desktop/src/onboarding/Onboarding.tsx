@@ -20,6 +20,7 @@ import { WindowControls } from "../shell/WindowControls";
 import { useSettingsApi, useSettingsSection } from "../views/settings/useSettings";
 import { AccountStep } from "./AccountStep";
 import { DeviceStep } from "./DeviceStep";
+import { GamesStep } from "./GamesStep";
 import { LanguageStep } from "./LanguageStep";
 import { FolderStep, ModeStep, SourcesStep } from "./Questions";
 import { type Choices, defaultChoices, markCompleted } from "./run";
@@ -31,6 +32,7 @@ export type Step =
   | "device"
   | "language"
   | "folder"
+  | "games"
   | "sources"
   | "mode"
   | "account"
@@ -66,7 +68,12 @@ export function Onboarding({ onDone }: { onDone(): void }) {
   const active = useActiveAccount();
   const admin = active?.role === "admin" ? active : null;
   // The household's accounts came from the other device: nothing to name.
-  const questions: Step[] = admin && !fromDevice ? [...basics, "account"] : basics;
+  // Its games can be copied once this device's folder is chosen (#276).
+  const questions: Step[] = fromDevice
+    ? ["language", "folder", "games", "sources", "mode"]
+    : admin
+      ? [...basics, "account"]
+      : basics;
   const order: Step[] = [
     "welcome",
     ...(fromDevice ? (["device"] as Step[]) : []),
@@ -195,6 +202,7 @@ export function Onboarding({ onDone }: { onDone(): void }) {
               )}
               {step === "language" && <LanguageStep onNext={next} />}
               {step === "folder" && <FolderStep onNext={next} />}
+              {step === "games" && <GamesStep onNext={next} />}
               {step === "sources" && (
                 <SourcesStep choices={choices} onChange={setChoices} onNext={next} />
               )}

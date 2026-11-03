@@ -180,3 +180,53 @@ pub fn watch_emulators(
         }
     })
 }
+
+/// A game another device has installed that could be copied here (#276).
+#[cfg(feature = "net")]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct DeviceGame {
+    pub game_id: String,
+    pub title: String,
+    pub size_bytes: Option<u64>,
+    /// A Windows build that runs here through Proton.
+    pub through_proton: bool,
+}
+
+/// Every game `device_id` has installed whose copy can come here: not a
+/// launcher's install, and a build that runs on this system. Hidden games
+/// and games already installed here stay out. By title.
+#[cfg(feature = "net")]
+pub async fn device_games(
+    store: &crate::db::LibraryStore,
+    devices: &crate::devices::Devices,
+    device_id: &str,
+) -> Result<Vec<DeviceGame>> {
+    let games: Vec<(String, String)> = sqlx::query_as(
+        "SELECT DISTINCT g.id,g.title FROM game_entries e JOIN games g ON g.id=e.game_id \
+         WHERE e.source_id=? AND g.hidden=0 AND NOT EXISTS (SELECT 1 FROM game_entries h \
+         WHERE h.game_id=g.id AND h.source_id NOT LIKE 'peer:%' \
+         AND h.state_kind IN ('installed','updating')) \
+         ORDER BY g.sort_title COLLATE NOCASE,g.id",
+    )
+    .bind(format!("peer:{device_id}"))
+    .fetch_all(&store.pool)
+    .await?;
+    let mut found = Vec::new();
+    for (game_id, title) in games {
+        let copies = super::copies::peer_copies(store, devices, None, &game_id).await?;
+        let Some(copy) = copies
+            .into_iter()
+            .find(|copy| copy.device_id == device_id && copy.blocked.is_none())
+        else {
+            continue;
+        };
+        found.push(DeviceGame {
+            game_id,
+            title,
+            size_bytes: copy.size_bytes,
+            through_proton: copy.through_proton,
+        });
+    }
+    Ok(found)
+}

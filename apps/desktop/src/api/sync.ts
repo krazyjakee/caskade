@@ -14,6 +14,7 @@ import {
   type DeviceKind,
   type DeviceLink,
   type DeviceOs,
+  type DeviceGame_Serialize,
   type DevicesStatus_Serialize,
   events,
   type IdentityStatus,
@@ -36,6 +37,8 @@ export type ThisDevice = ThisDevice_Serialize;
 export type PairedDevice = PairedDevice_Serialize;
 /** A game's copy on another of the user's devices (#232). */
 export type PeerCopy = PeerCopy_Serialize;
+/** A game another device has that can be copied here (#276). */
+export type DeviceGame = DeviceGame_Serialize;
 /** Another device asks to start a game here (#234). */
 export type PlayRequest = RemotePlayRequested;
 /** How a device is reached right now. */
@@ -100,6 +103,9 @@ export interface SyncApi {
   /** Copies a game from another device to this computer: an install job
    * in Activity (#233). */
   copyHere(gameId: string, deviceId: string): Promise<void>;
+  /** The games a device has installed that can be copied here, for
+   * setting this device up from it (#276). */
+  deviceGames(deviceId: string): Promise<DeviceGame[]>;
   /** Asks a device to copy a game from this computer; it confirms there
    * unless it accepts copies without asking (#235). */
   sendTo(gameId: string, deviceId: string): Promise<void>;
@@ -140,6 +146,7 @@ export const nativeSyncApi: SyncApi = {
   copies: (gameId) => unwrap(commands.gameOtherDevices(gameId)),
   copyHere: (gameId, deviceId) =>
     unwrap(commands.gameCopyHere(gameId, deviceId, null)).then(nothing),
+  deviceGames: (deviceId) => unwrap(commands.deviceGames(deviceId)),
   sendTo: (gameId, deviceId) => unwrap(commands.gameSendTo(gameId, deviceId)).then(nothing),
   playOn: (gameId, deviceId) => unwrap(commands.gamePlayOn(gameId, deviceId)).then(nothing),
   onPlayRequest: (listener) =>

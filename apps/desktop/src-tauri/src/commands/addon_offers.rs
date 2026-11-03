@@ -139,3 +139,17 @@ pub async fn emulator_offer_keep<R: Runtime>(
         .await
         .map_err(report)
 }
+
+/// The games `device_id` has installed that can be copied here (#276), for
+/// first-run setup from that device.
+#[tauri::command]
+#[specta::specta]
+pub async fn device_games(
+    store: tauri::State<'_, caskade_core::db::LibraryStore>,
+    devices: tauri::State<'_, Devices>,
+    device_id: String,
+) -> Result<Vec<caskade_core::sync::offers::DeviceGame>, CommandError> {
+    caskade_core::sync::offers::device_games(&store, &devices, &device_id)
+        .await
+        .map_err(report)
+}
