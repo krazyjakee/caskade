@@ -422,8 +422,9 @@ async fn native_system_and_product_packages_delegate_and_clean_their_fixture_rec
             .unwrap();
         let selected = plans.selected.unwrap_or_else(|| {
             panic!(
-                "no plan selected: {:?}; candidates {:?}",
+                "{id}: no plan selected: {:?}; probe error {:?}; candidates {:?}",
                 plans.question,
+                node.facts.get("macos.pkg_error"),
                 plans
                     .candidates
                     .iter()

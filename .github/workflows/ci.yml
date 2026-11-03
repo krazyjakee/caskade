@@ -344,11 +344,27 @@ jobs:
           ${{ matrix.python }} -c "import json,os; d=json.load(open('sidecar.json')); f=open(os.environ['GITHUB_ENV'],'a'); f.write('CASKADE_7ZZ='+d['program']+'\n'); f.close()"
       # Linux's native profile needs privileged Docker, Proton and a second
       # filesystem: the installer-linux-native job runs it.
+      # Windows Installer writes a verbose log of every run to TEMP (MSI*.LOG).
+      - name: Windows Installer logging for the native profile
+        if: matrix.os == 'windows'
+        shell: pwsh
+        run: |
+          $policy = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer'
+          New-Item -Force $policy | Out-Null
+          Set-ItemProperty $policy -Name Logging -Value 'voicewarmupx'
       - name: T7 native Windows and macOS
         if: matrix.os != 'linux'
         env:
           CASKADE_TEST_NATIVE: "1"
         run: cargo nextest run -p caskade-installer --all-features --locked --profile native --run-ignored all
+      - name: Windows Installer logs of a failed native run
+        if: failure() && matrix.os == 'windows'
+        shell: pwsh
+        run: |
+          Get-ChildItem $env:TEMP -Filter 'MSI*.LOG' | Sort-Object LastWriteTime | Select-Object -Last 3 | ForEach-Object {
+            "===== $($_.FullName)"
+            Get-Content $_.FullName -Tail 80
+          }
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
