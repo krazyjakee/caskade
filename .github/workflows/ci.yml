@@ -17,8 +17,11 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+# A pull request's new push cancels its older run. Each master commit gets a
+# run of its own (public repository: hosted minutes are free), so a fix
+# doesn't wait behind the previous commit's Linux native profile.
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref }}
+  group: ci-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 env:
   CARGO_TERM_COLOR: always
