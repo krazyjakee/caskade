@@ -2,7 +2,7 @@ import { plural } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { LoaderCircle } from "lucide-react";
 import { useJobs } from "../views/activity/ActivityProvider";
-import { jobPhase } from "../views/activity/jobPhase";
+import { jobPhase } from "../views/activity/jobLabels";
 import { AppUpdateLink } from "./AppUpdateLink";
 import { SyncStatusLink } from "./SyncStatusLink";
 import { useBackgroundStatus } from "./useBackgroundStatus";

@@ -3201,6 +3201,12 @@ msgstr ""
 msgid "Copy a pairing link"
 msgstr ""
 
+#. A game copied from another of the user's devices
+#: apps/desktop/src/views/activity/jobLabels.ts
+msgctxt "job kind"
+msgid "Copy from another device"
+msgstr ""
+
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
 msgid "Copy here"
 msgstr ""
@@ -3763,6 +3769,11 @@ msgstr ""
 msgid "Download"
 msgstr ""
 
+#: apps/desktop/src/views/activity/jobLabels.ts
+msgctxt "job kind"
+msgid "Download"
+msgstr ""
+
 #: apps/desktop/src/views/activity/JobRecovery.tsx
 msgid "Download again"
 msgstr ""
@@ -3797,7 +3808,7 @@ msgid "Downloaded metadata and images"
 msgstr ""
 
 #. A background job's phase
-#: apps/desktop/src/views/activity/jobPhase.ts
+#: apps/desktop/src/views/activity/jobLabels.ts
 msgid "Downloading"
 msgstr ""
 
@@ -5110,6 +5121,11 @@ msgctxt "emulator"
 msgid "Install"
 msgstr ""
 
+#: apps/desktop/src/views/activity/jobLabels.ts
+msgctxt "job kind"
+msgid "Install"
+msgstr ""
+
 #: apps/desktop/src/views/settings/emulators/FromDevices.tsx
 msgid "Install {emulator}"
 msgstr ""
@@ -5289,7 +5305,7 @@ msgstr ""
 
 #. A background job's phase
 #. The stage a failed install stopped at
-#: apps/desktop/src/views/activity/jobPhase.ts
+#: apps/desktop/src/views/activity/jobLabels.ts
 #: apps/desktop/src/views/activity/JobRecovery.tsx
 msgid "Installing"
 msgstr ""
@@ -5474,6 +5490,12 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 msgid "JavaScript package"
+msgstr ""
+
+#. A background job of a kind the app has no name for (a plugin's own)
+#: apps/desktop/src/views/activity/jobLabels.ts
+msgctxt "job kind"
+msgid "Job"
 msgstr ""
 
 #. An Activity tab: installs and other background jobs
@@ -6298,6 +6320,11 @@ msgstr ""
 msgid "Motion & Effects"
 msgstr ""
 
+#: apps/desktop/src/views/activity/jobLabels.ts
+msgctxt "job kind"
+msgid "Move"
+msgstr ""
+
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Move completed. Library identity and playtime were preserved."
 msgstr ""
@@ -6330,7 +6357,7 @@ msgid "Move up"
 msgstr ""
 
 #. A background job's phase
-#: apps/desktop/src/views/activity/jobPhase.ts
+#: apps/desktop/src/views/activity/jobLabels.ts
 msgid "Moving"
 msgstr ""
 
@@ -10905,6 +10932,11 @@ msgstr ""
 msgid "Uninstall"
 msgstr ""
 
+#: apps/desktop/src/views/activity/jobLabels.ts
+msgctxt "job kind"
+msgid "Uninstall"
+msgstr ""
+
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
 msgid "Uninstall {title}?"
 msgstr ""
@@ -11054,6 +11086,11 @@ msgstr ""
 #. Button: installs the newer release
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Update"
+msgstr ""
+
+#: apps/desktop/src/views/activity/jobLabels.ts
+msgctxt "job kind"
 msgid "Update"
 msgstr ""
 
@@ -11247,6 +11284,11 @@ msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
 msgid "Verification results"
+msgstr ""
+
+#: apps/desktop/src/views/activity/jobLabels.ts
+msgctxt "job kind"
+msgid "Verify"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
@@ -11584,7 +11626,7 @@ msgid "Wine and Proton prefixes"
 msgstr ""
 
 #. A running job with no phase
-#: apps/desktop/src/views/activity/jobPhase.ts
+#: apps/desktop/src/views/activity/jobLabels.ts
 msgid "Working"
 msgstr ""
 

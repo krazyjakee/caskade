@@ -3261,6 +3261,14 @@ msgstr "Kopiera {title} från {device}?"
 msgid "Copy a pairing link"
 msgstr ""
 
+#. A game copied from another of the user's devices
+#: apps/desktop/src/views/activity/jobLabels.ts
+#, fuzzy
+#| msgid "Set up from another device"
+msgctxt "job kind"
+msgid "Copy from another device"
+msgstr "Ställ in från en annan enhet"
+
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
 msgid "Copy here"
 msgstr "Kopiera hit"
@@ -3835,6 +3843,13 @@ msgstr "Vy: {title}"
 msgid "Download"
 msgstr "Nedladdning"
 
+#: apps/desktop/src/views/activity/jobLabels.ts
+#, fuzzy
+#| msgid "Download"
+msgctxt "job kind"
+msgid "Download"
+msgstr "Nedladdning"
+
 #: apps/desktop/src/views/activity/JobRecovery.tsx
 msgid "Download again"
 msgstr "Ladda ner igen"
@@ -3871,7 +3886,7 @@ msgid "Downloaded metadata and images"
 msgstr "Ladda ner och installera"
 
 #. A background job's phase
-#: apps/desktop/src/views/activity/jobPhase.ts
+#: apps/desktop/src/views/activity/jobLabels.ts
 #, fuzzy
 #| msgctxt "download status"
 #| msgid "Downloading"
@@ -5207,6 +5222,13 @@ msgctxt "emulator"
 msgid "Install"
 msgstr "Installera"
 
+#: apps/desktop/src/views/activity/jobLabels.ts
+#, fuzzy
+#| msgid "Install"
+msgctxt "job kind"
+msgid "Install"
+msgstr "Installera"
+
 #: apps/desktop/src/views/settings/emulators/FromDevices.tsx
 msgid "Install {emulator}"
 msgstr "Installera {emulator}"
@@ -5386,7 +5408,7 @@ msgstr "Inställningar för installationsprogram"
 
 #. A background job's phase
 #. The stage a failed install stopped at
-#: apps/desktop/src/views/activity/jobPhase.ts
+#: apps/desktop/src/views/activity/jobLabels.ts
 #: apps/desktop/src/views/activity/JobRecovery.tsx
 msgid "Installing"
 msgstr "Installation"
@@ -5574,6 +5596,14 @@ msgstr "Japan"
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 msgid "JavaScript package"
 msgstr "JavaScript-paket"
+
+#. A background job of a kind the app has no name for (a plugin's own)
+#: apps/desktop/src/views/activity/jobLabels.ts
+#, fuzzy
+#| msgid "Jobs"
+msgctxt "job kind"
+msgid "Job"
+msgstr "Jobb"
 
 #. An Activity tab: installs and other background jobs
 #: apps/desktop/src/views/activity/ActivityView.tsx
@@ -6412,6 +6442,13 @@ msgstr "Flest betyg det senaste året"
 msgid "Motion & Effects"
 msgstr "Rörelse och effekter"
 
+#: apps/desktop/src/views/activity/jobLabels.ts
+#, fuzzy
+#| msgid "Move up"
+msgctxt "job kind"
+msgid "Move"
+msgstr "Flytta upp"
+
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Move completed. Library identity and playtime were preserved."
 msgstr "Flytten är klar. Biblioteksidentitet och speltid har bevarats."
@@ -6444,7 +6481,7 @@ msgid "Move up"
 msgstr "Flytta upp"
 
 #. A background job's phase
-#: apps/desktop/src/views/activity/jobPhase.ts
+#: apps/desktop/src/views/activity/jobLabels.ts
 #, fuzzy
 #| msgid "Moving…"
 msgid "Moving"
@@ -11142,6 +11179,13 @@ msgstr "Med en åldersgräns behöver även spel utan klassificering en administ
 msgid "Uninstall"
 msgstr "Avinstallera"
 
+#: apps/desktop/src/views/activity/jobLabels.ts
+#, fuzzy
+#| msgid "Uninstall"
+msgctxt "job kind"
+msgid "Uninstall"
+msgstr "Avinstallera"
+
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
 msgid "Uninstall {title}?"
 msgstr "Avinstallera {title}?"
@@ -11293,6 +11337,13 @@ msgstr "Kommande utgåvor"
 #. Button: installs the newer release
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Update"
+msgstr "Uppdatera"
+
+#: apps/desktop/src/views/activity/jobLabels.ts
+#, fuzzy
+#| msgid "Update"
+msgctxt "job kind"
 msgid "Update"
 msgstr "Uppdatera"
 
@@ -11493,6 +11544,14 @@ msgstr "Verifieringen godkändes"
 #: apps/desktop/src/views/activity/JobCard.tsx
 msgid "Verification results"
 msgstr "Verifieringsresultat"
+
+#: apps/desktop/src/views/activity/jobLabels.ts
+#, fuzzy
+#| msgctxt "download status"
+#| msgid "Verifying"
+msgctxt "job kind"
+msgid "Verify"
+msgstr "Verifierar"
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 msgid "Verify downloads"
@@ -11844,7 +11903,7 @@ msgid "Wine and Proton prefixes"
 msgstr "Wine- och Proton-prefix"
 
 #. A running job with no phase
-#: apps/desktop/src/views/activity/jobPhase.ts
+#: apps/desktop/src/views/activity/jobLabels.ts
 msgid "Working"
 msgstr "Arbetar"
 
