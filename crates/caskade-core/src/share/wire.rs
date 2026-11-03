@@ -6,6 +6,9 @@ use serde::{Deserialize, Serialize};
 
 /// The longest frame read on a share session.
 pub(super) const MAX_LINE: usize = 64 * 1024;
+/// The longest `About` frame, which only a recipient reads: a shared
+/// collection's list rides in it (#248).
+pub(super) const MAX_ABOUT: usize = 1024 * 1024;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
@@ -22,6 +25,9 @@ pub(super) enum Message {
         sharer: String,
         expires_at_ms: Option<i64>,
         extras: Vec<String>,
+        /// What a share other than a game is (#248, `items::Details`).
+        #[serde(default)]
+        details: Option<serde_json::Value>,
     },
     /// Sharer: still reading the files.
     Preparing { done: u64, total: u64 },

@@ -279,6 +279,8 @@ pub fn builder() -> Builder<tauri::Wry> {
             crate::commands::shares::share_receive,
             crate::commands::shares::shares_received,
             crate::commands::shares::share_keep_helping,
+            crate::commands::share_items::share_item,
+            crate::commands::share_items::share_receive_collection,
             crate::commands::sync::devices_rename,
             crate::commands::sync::devices_set_kind,
             crate::commands::sync::devices_pair_nearby,

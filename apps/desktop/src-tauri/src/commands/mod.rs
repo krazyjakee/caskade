@@ -39,6 +39,7 @@ pub mod romm;
 pub mod saves;
 pub mod scripts;
 pub mod settings;
+pub mod share_items;
 pub mod shares;
 pub mod storage;
 pub mod streaming;

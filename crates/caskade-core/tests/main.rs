@@ -29,6 +29,8 @@ mod save_versions;
 #[cfg(feature = "net")]
 mod shares;
 #[cfg(feature = "net")]
+mod share_items;
+#[cfg(feature = "net")]
 mod romm;
 #[cfg(feature = "net")]
 mod cores;

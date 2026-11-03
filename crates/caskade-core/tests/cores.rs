@@ -1,7 +1,7 @@
 //! Two or more cores in one process (#250), each with its own library,
 //! settings, device key and storage, connected on loopback (or through a
-//! local relay, `core_with`): what the devices, sync, copy, send and
-//! play-there tests start from. Nothing here reaches the internet.
+//! local relay, `core_with`): what the devices, sync, copy, send, play-there
+//! and share tests start from. Nothing here reaches the internet.
 
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -16,6 +16,7 @@ use caskade_core::install::{InstallOptions, InstallService};
 use caskade_core::model::{ExternalId, Game, GameEntry, StorageRoot};
 use caskade_core::paths::AppPaths;
 use caskade_core::settings::SettingsService;
+use caskade_core::share::Shares;
 use caskade_core::sync::SyncService;
 use caskade_core::transfer::Transfers;
 use caskade_installer::manifest::RootManifest;
@@ -32,6 +33,8 @@ pub struct Core {
     pub account: String,
     pub transfers: Transfers,
     pub install: InstallService,
+    /// One-off shares, both ways (#246, #248).
+    pub shares: Shares,
     /// The storage root installs land in.
     pub games: PathBuf,
     pub dir: tempfile::TempDir,
@@ -78,11 +81,7 @@ pub async fn core_with(name: &str, reach: Reach) -> Core {
         reach,
     );
     devices.set_settings(settings.clone());
-    // Served with the endpoint: set up before it starts.
-    let transfers = Transfers::new(store.clone(), devices.clone(), &dir.path().join("cache"))
-        .await
-        .unwrap();
-    devices.start();
+    let cache = dir.path().join("cache");
     let games = dir.path().join("Games");
     std::fs::create_dir_all(&games).unwrap();
     let identity = RootManifest::new(format!("{}-root", name.to_lowercase())).unwrap();
@@ -101,7 +100,19 @@ pub async fn core_with(name: &str, reach: Reach) -> Core {
     )
     .with_settings(settings.clone())
     .with_host(input::host(Some("linux")).unwrap());
+    // Copies and shares are served with the endpoint: set up before it starts.
+    let transfers = Transfers::new(store.clone(), devices.clone(), &cache)
+        .await
+        .unwrap();
     install.set_peer_fetcher(Arc::new(transfers.clone()));
+    let shares = Shares::new(
+        store.clone(),
+        devices.clone(),
+        transfers.clone(),
+        install.clone(),
+        &cache,
+    );
+    devices.start();
     let core = Core {
         artwork: ArtworkCache::new(dir.path().join("artwork")).unwrap(),
         store,
@@ -110,6 +121,7 @@ pub async fn core_with(name: &str, reach: Reach) -> Core {
         account,
         transfers,
         install,
+        shares,
         games,
         dir,
     };

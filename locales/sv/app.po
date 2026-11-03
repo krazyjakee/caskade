@@ -9383,6 +9383,11 @@ msgstr "# uppgift behöver uppmärksamhet"
 msgid "Setup will keep running in the background."
 msgstr "Fortsätter i bakgrunden"
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgctxt "save version"
+msgid "Shared by someone"
+msgstr "Delad av någon"
+
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "Shell"
 msgstr "Skal"

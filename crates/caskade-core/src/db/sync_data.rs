@@ -551,6 +551,53 @@ impl LibraryStore {
         Ok(None)
     }
 
+    /// One game's identity as sync sends it (#229), for another library to
+    /// find it by ([`LibraryStore::sync_find_game`]): what shares send with
+    /// a save or a collection (#248). `None` when there's no such game.
+    pub async fn game_identity(&self, game: &str) -> Result<Option<Value>> {
+        let Some((record, overrides)) = sqlx::query_as::<_, (String, String)>(
+            "SELECT record_json,overrides_json FROM games WHERE id=?",
+        )
+        .bind(game)
+        .fetch_optional(&self.pool)
+        .await?
+        else {
+            return Ok(None);
+        };
+        let shown: Game = serde_json::from_str(&record)?;
+        let overrides: Overrides = serde_json::from_str(&overrides)?;
+        let base = automatic(&shown, &overrides)?;
+        let year = base
+            .release_date
+            .as_deref()
+            .and_then(|date| date.get(..4))
+            .and_then(|year| year.parse::<i64>().ok());
+        let igdb: Option<i64> = sqlx::query_scalar(
+            "SELECT igdb_id FROM igdb_matches WHERE game_id=? AND igdb_id IS NOT NULL AND source<>'none'",
+        )
+        .bind(game)
+        .fetch_optional(&self.pool)
+        .await?
+        .flatten();
+        let stores: BTreeSet<String> = sqlx::query_scalar::<_, String>(
+            "SELECT json(j.value) FROM game_entries e, json_each(e.record_json,'$.ids') j \
+             WHERE e.game_id=? AND e.source_id<>'manual'",
+        )
+        .bind(game)
+        .fetch_all(&self.pool)
+        .await?
+        .iter()
+        .filter_map(|id| store_key(id))
+        .collect();
+        Ok(Some(json!({
+            "title": base.title,
+            "platforms": base.platforms,
+            "year": year,
+            "igdb": igdb,
+            "stores": stores,
+        })))
+    }
+
     /// A title-only game for another device's game that has none here: its
     /// title, platforms and release year; entries come when it's installed
     /// here (#232, #233).

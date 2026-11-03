@@ -18,7 +18,7 @@ use caskade_installer::exec::CancellationToken;
 
 use super::InstallService;
 use super::jobs::{JobKind, JobPhase, JobProgress, JobSnapshot, JobStatus};
-use crate::{Error, Result, lock, model::StorageRoot};
+use crate::{Error, Result, bus::Event, lock, model::StorageRoot};
 
 /// What a copy brings, and onto which game here.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -39,6 +39,18 @@ pub struct Fetched {
     pub title: String,
     /// The program, relative to the folder and `/`-separated.
     pub launch: Option<String>,
+    /// Put where it belongs by the fetcher itself (a shared save, web game
+    /// or ROM, #248): the installer doesn't run.
+    pub placed: Option<Placed>,
+}
+
+/// What a fetcher placed itself.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Placed {
+    /// The game it's part of here.
+    pub game_id: String,
+    /// The game is new to the library.
+    pub added: bool,
 }
 
 /// How a fetch is going.
@@ -241,6 +253,31 @@ impl InstallService {
                 }
             }
         };
+        if let Some(placed) = fetched.placed {
+            let title = self
+                .inner
+                .store
+                .game(&placed.game_id)
+                .await?
+                .map_or(fetched.title, |game| game.title);
+            self.inner.bus.emit(if placed.added {
+                Event::LibraryGameAdded {
+                    game_id: placed.game_id.clone(),
+                }
+            } else {
+                Event::LibraryGameUpdated {
+                    game_id: placed.game_id.clone(),
+                }
+            });
+            self.update(id, |job| {
+                job.status = JobStatus::Completed;
+                job.title = title;
+                job.game_id = Some(placed.game_id);
+                job.progress = None;
+            });
+            fetcher.finished(&root.path, id).await;
+            return Ok(());
+        }
         // What the sender said outranks what the files suggest.
         let hints = DiscoveryHints {
             installer_title: Some(fetched.title.clone()),

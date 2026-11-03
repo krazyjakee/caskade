@@ -3051,6 +3051,18 @@ msgstr "{path} har ingen plats på den här enheten, så den återställdes inte
 msgid "That save's files haven't arrived on this device yet."
 msgstr "Sparfilerna har inte kommit fram till den här enheten än."
 
+#: crates/caskade-core/src/saves/versions/shared.rs
+msgid "This save has no files that can go on this device."
+msgstr "Den här sparningen har inga filer som kan läggas på den här enheten."
+
+#: crates/caskade-core/src/saves/versions/shared.rs
+msgid "This save is too large to keep versions of."
+msgstr "Den här sparningen är för stor för att spara versioner av den."
+
+#: crates/caskade-core/src/saves/versions/shared.rs
+msgid "A file of this save arrived damaged. Ask for it again."
+msgstr "En fil i den här sparningen kom fram skadad. Be om den igen."
+
 #: crates/caskade-core/src/saves/versions/store.rs
 msgid "Save version {id} was not found."
 msgstr "Sparversionen {id} hittades inte."
@@ -3546,13 +3558,89 @@ msgctxt "settings"
 msgid "Maximum simultaneous downloads. Active downloads finish when this limit is lowered."
 msgstr "Högsta antal samtidiga nedladdningar. Pågående nedladdningar slutförs när gränsen sänks."
 
+#: crates/caskade-core/src/share/items.rs
+msgid "no free folder name for it"
+msgstr "det finns inget ledigt mappnamn för den"
+
+#: crates/caskade-core/src/share/items.rs
+msgid "saves aren't available"
+msgstr "sparningar är inte tillgängliga"
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that save isn't here any more"
+msgstr "den sparningen finns inte här längre"
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that save's files haven't all arrived on this device"
+msgstr "alla filer i den sparningen har inte kommit fram till den här enheten"
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that save's files are only where this device keeps them, so they can't go elsewhere"
+msgstr "den sparningens filer finns bara där den här enheten har dem, så de kan inte flyttas någon annanstans"
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that isn't a web game"
+msgstr "det är inte ett webbspel"
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that isn't an emulated game"
+msgstr "det är inte ett emulerat spel"
+
+#: crates/caskade-core/src/share/items.rs
+msgid "save it for offline play first: only an offline copy can be shared"
+msgstr "spara det för spel utan uppkoppling först: bara en offlinekopia kan delas"
+
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "the game's storage isn't available"
 msgstr "spelets lagring är inte tillgänglig"
 
+#: crates/caskade-core/src/share/items.rs
+msgid "the offline copy's files aren't there"
+msgstr "offlinekopians filer finns inte där"
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that game isn't on this device"
+msgstr "det spelet finns inte på den här enheten"
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that game has no ROM files to share"
+msgstr "det spelet har inga ROM-filer att dela"
+
+#: crates/caskade-core/src/share/items.rs
+msgid "a ROM file of that game isn't there"
+msgstr "en ROM-fil för det spelet finns inte där"
+
+#: crates/caskade-core/src/share/items.rs
+msgid "this share's description is damaged"
+msgstr "den här delningens beskrivning är skadad"
+
 #: crates/caskade-core/src/share/mod.rs
 msgid "this share has no game"
 msgstr ""
+
+#: crates/caskade-core/src/share/items.rs
+msgid "a file of that save isn't on this device any more"
+msgstr "en fil i den sparningen finns inte på den här enheten längre"
+
+#: crates/caskade-core/src/share/items.rs
+msgid "a collection has no files to receive"
+msgstr "en samling har inga filer att ta emot"
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that isn't a web game's offline copy"
+msgstr "det är inte en offlinekopia av ett webbspel"
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that storage location is gone"
+msgstr "den lagringsplatsen finns inte längre"
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that link doesn't share a collection"
+msgstr "den länken delar ingen samling"
+
+#: crates/caskade-core/src/share/items.rs
+msgid "Shared by {sharer}"
+msgstr "Delad av {sharer}"
 
 #: crates/caskade-core/src/share/mod.rs
 #: crates/caskade-core/src/transfer/mod.rs
@@ -3594,6 +3682,14 @@ msgstr ""
 #: crates/caskade-core/src/share/receive.rs
 msgid "that isn't a Caskade share link"
 msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "This Caskade can't receive what that link shares. Update Caskade, then try again."
+msgstr "Den här Caskade kan inte ta emot det som länken delar. Uppdatera Caskade och försök sedan igen."
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "That link shares a collection: add it to your collections instead."
+msgstr "Länken delar en samling: lägg till den bland dina samlingar i stället."
 
 #: crates/caskade-core/src/share/receive.rs
 msgid "that share isn't here any more"
@@ -4220,6 +4316,10 @@ msgstr "temat {id} kan inte tillämpas: det är ogiltigt"
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "the other device didn't take the copy"
 msgstr "den andra enheten tog inte emot kopian"
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "couldn't reach the other device directly"
+msgstr "kunde inte nå den andra enheten direkt"
 
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "this device doesn't take copies"

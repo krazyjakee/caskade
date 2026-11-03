@@ -77,7 +77,7 @@ impl Default for InstallOptions {
     }
 }
 
-pub use peer::{FetchFailure, Fetched, PeerCopyTarget, PeerFetcher, PeerProgress};
+pub use peer::{FetchFailure, Fetched, PeerCopyTarget, PeerFetcher, PeerProgress, Placed};
 
 struct Job {
     snapshot: JobSnapshot,

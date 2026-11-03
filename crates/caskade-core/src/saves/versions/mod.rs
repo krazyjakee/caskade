@@ -27,6 +27,7 @@ mod blobs;
 #[cfg(feature = "net")]
 mod net;
 mod portable;
+mod shared;
 mod store;
 
 pub use blobs::{BlobStore, Incoming, hash_bytes, hash_file};
@@ -97,6 +98,8 @@ pub enum VersionReason {
     Restored,
     /// The user chose between versions both devices made.
     Chosen,
+    /// Someone shared it through a link (#248).
+    Shared,
 }
 
 /// One file of a version.

@@ -819,6 +819,14 @@ export const commands = {
 	 *  other recipients once it's here (#249).
 	 */
 	shareKeepHelping: (job: string, on: boolean) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("share_keep_helping", { job, on })),
+	/**  Shares `item` until `expiry`. A collection is the signed-in account's. */
+	shareItem: (item: ShareItem, expiry: ShareExpiry) => typedError<ShareCreated_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("share_item", { item, expiry })),
+	/**
+	 *  Adds the collection `link` shares to the signed-in account's
+	 *  collections: the games here, and a title-only record of each one that
+	 *  isn't. Nothing downloads.
+	 */
+	shareReceiveCollection: (link: string) => typedError<Collection_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("share_receive_collection", { link })),
 	/**  Renames this device; an empty name goes back to the host name. */
 	devicesRename: (name: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_rename", { name })),
 	devicesSetKind: (kind: DeviceKind) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_set_kind", { kind })),
@@ -4040,6 +4048,15 @@ export type GameFilter = "all" | "installed" | "favorites" | "recent" | "emulate
 "web" | 
 /**  Owned by a store account and not installed: ready to install (#170). */
 "owned";
+
+/**  Whether a library has a game. */
+export type GameHere = 
+/**  Installed on this device. */
+"installed" | 
+/**  A store account owns it. */
+"owned" | 
+/**  In the library, neither installed nor owned. */
+"inLibrary" | "missing";
 
 /**  A game's match for the game page. */
 export type GameIgdb = GameIgdb_Serialize | GameIgdb_Deserialize;
@@ -8431,6 +8448,33 @@ export type SetupStatus = "queued" | "downloading" | "unpacking" | "configuring"
 
 export type Severity = "info" | "warning" | "error";
 
+/**  What a share is, as the recipient sees it before taking it. */
+export type ShareContents = ShareContents_Serialize | ShareContents_Deserialize;
+
+/**  What a share is, as the recipient sees it before taking it. */
+export type ShareContents_Deserialize = { kind: "game" } | { kind: "save"; 
+/**  The game it's a save of, and whether it's in the library here. */
+game: string; here?: string | null; files: number } | { kind: "web"; url: string; 
+/**  The web game here with that address, when there is one. */
+here?: string | null } | { kind: "rom"; platform: string; 
+/**
+ *  The emulator it played with (its definition), and whether this
+ *  device has one for the platform or that emulator.
+ */
+emulator?: string | null; ready: boolean } | { kind: "collection"; name: string; games: SharedGame_Deserialize[] };
+
+/**  What a share is, as the recipient sees it before taking it. */
+export type ShareContents_Serialize = { kind: "game" } | { kind: "save"; 
+/**  The game it's a save of, and whether it's in the library here. */
+game: string; here: string | null; files: number } | { kind: "web"; url: string; 
+/**  The web game here with that address, when there is one. */
+here: string | null } | { kind: "rom"; platform: string; 
+/**
+ *  The emulator it played with (its definition), and whether this
+ *  device has one for the platform or that emulator.
+ */
+emulator: string | null; ready: boolean } | { kind: "collection"; name: string; games: SharedGame_Serialize[] };
+
 /**  A share just made, and its link. */
 export type ShareCreated = ShareCreated_Serialize | ShareCreated_Deserialize;
 
@@ -8467,6 +8511,8 @@ export type ShareInfo_Deserialize = {
 	extras: string[],
 	expiresAtMs?: number | null,
 	reach: ShareReach,
+	/**  What it holds, and what of it this library has (#248). */
+	contents: ShareContents_Deserialize,
 };
 
 /**  What a link shares, as its sharer says. */
@@ -8482,7 +8528,20 @@ export type ShareInfo_Serialize = {
 	extras: string[],
 	expiresAtMs: number | null,
 	reach: ShareReach,
+	/**  What it holds, and what of it this library has (#248). */
+	contents: ShareContents_Serialize,
 };
+
+/**  Something other than a game to share. */
+export type ShareItem = 
+/**  One version of a game's saves (its Saves panel). */
+{ kind: "save"; versionId: string } | 
+/**  A web game's offline copy. */
+{ kind: "web"; gameId: string } | 
+/**  An emulated release: its ROM files, platform and emulator profile. */
+{ kind: "rom"; entryId: string } | 
+/**  One of the account's collections, as a list of games. */
+{ kind: "collection"; collectionId: string };
 
 /**  How the link reached the sharer. */
 export type ShareReach = 
@@ -8546,6 +8605,27 @@ export type ShareState =
 { state: "ready" } | 
 /**  Its files couldn't be read. */
 { state: "failed"; reason: string } | { state: "stopped" } | { state: "expired" };
+
+/**  A game of a shared collection, and whether the recipient has it. */
+export type SharedGame = SharedGame_Serialize | SharedGame_Deserialize;
+
+/**  A game of a shared collection, and whether the recipient has it. */
+export type SharedGame_Deserialize = {
+	title: string,
+	igdbId?: string | null,
+	here: GameHere,
+	/**  The game here, when there is one. */
+	gameId?: string | null,
+};
+
+/**  A game of a shared collection, and whether the recipient has it. */
+export type SharedGame_Serialize = {
+	title: string,
+	igdbId: string | null,
+	here: GameHere,
+	/**  The game here, when there is one. */
+	gameId: string | null,
+};
 
 /**  The shares, or what's received, changed. */
 export type SharesChanged = null;
@@ -9685,7 +9765,9 @@ export type VersionReason =
 /**  The user restored an older version. */
 "restored" | 
 /**  The user chose between versions both devices made. */
-"chosen";
+"chosen" | 
+/**  Someone shared it through a link (#248). */
+"shared";
 
 /**  One version in a game's history. */
 export type VersionState = VersionState_Serialize | VersionState_Deserialize;

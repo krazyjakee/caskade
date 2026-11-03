@@ -3049,6 +3049,18 @@ msgstr ""
 msgid "That save's files haven't arrived on this device yet."
 msgstr ""
 
+#: crates/caskade-core/src/saves/versions/shared.rs
+msgid "This save has no files that can go on this device."
+msgstr ""
+
+#: crates/caskade-core/src/saves/versions/shared.rs
+msgid "This save is too large to keep versions of."
+msgstr ""
+
+#: crates/caskade-core/src/saves/versions/shared.rs
+msgid "A file of this save arrived damaged. Ask for it again."
+msgstr ""
+
 #: crates/caskade-core/src/saves/versions/store.rs
 msgid "Save version {id} was not found."
 msgstr ""
@@ -3544,12 +3556,88 @@ msgctxt "settings"
 msgid "Maximum simultaneous downloads. Active downloads finish when this limit is lowered."
 msgstr ""
 
+#: crates/caskade-core/src/share/items.rs
+msgid "no free folder name for it"
+msgstr ""
+
+#: crates/caskade-core/src/share/items.rs
+msgid "saves aren't available"
+msgstr ""
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that save isn't here any more"
+msgstr ""
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that save's files haven't all arrived on this device"
+msgstr ""
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that save's files are only where this device keeps them, so they can't go elsewhere"
+msgstr ""
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that isn't a web game"
+msgstr ""
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that isn't an emulated game"
+msgstr ""
+
+#: crates/caskade-core/src/share/items.rs
+msgid "save it for offline play first: only an offline copy can be shared"
+msgstr ""
+
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "the game's storage isn't available"
 msgstr ""
 
+#: crates/caskade-core/src/share/items.rs
+msgid "the offline copy's files aren't there"
+msgstr ""
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that game isn't on this device"
+msgstr ""
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that game has no ROM files to share"
+msgstr ""
+
+#: crates/caskade-core/src/share/items.rs
+msgid "a ROM file of that game isn't there"
+msgstr ""
+
+#: crates/caskade-core/src/share/items.rs
+msgid "this share's description is damaged"
+msgstr ""
+
 #: crates/caskade-core/src/share/mod.rs
 msgid "this share has no game"
+msgstr ""
+
+#: crates/caskade-core/src/share/items.rs
+msgid "a file of that save isn't on this device any more"
+msgstr ""
+
+#: crates/caskade-core/src/share/items.rs
+msgid "a collection has no files to receive"
+msgstr ""
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that isn't a web game's offline copy"
+msgstr ""
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that storage location is gone"
+msgstr ""
+
+#: crates/caskade-core/src/share/items.rs
+msgid "that link doesn't share a collection"
+msgstr ""
+
+#: crates/caskade-core/src/share/items.rs
+msgid "Shared by {sharer}"
 msgstr ""
 
 #: crates/caskade-core/src/share/mod.rs
@@ -3591,6 +3679,14 @@ msgstr ""
 
 #: crates/caskade-core/src/share/receive.rs
 msgid "that isn't a Caskade share link"
+msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "This Caskade can't receive what that link shares. Update Caskade, then try again."
+msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "That link shares a collection: add it to your collections instead."
 msgstr ""
 
 #: crates/caskade-core/src/share/receive.rs
@@ -4217,6 +4313,10 @@ msgstr ""
 
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "the other device didn't take the copy"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "couldn't reach the other device directly"
 msgstr ""
 
 #: crates/caskade-core/src/transfer/mod.rs

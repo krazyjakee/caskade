@@ -836,6 +836,48 @@ serves only while its session with the sharer is open, so stopping the share
 stops every recipient serving it. Test: `shares::the_third_recipient_…` (four
 cores) and `cargo test -p caskade-sync --test it swarm::`.
 
+**Saves, web games, ROMs and collections** (#248, `share::items`). The
+same links share smaller things (`Shares::share_item`, command
+`share_item` with a `ShareItem`): a version of a game's saves (its Saves
+panel), a web game's offline copy, an emulated release with its emulator
+profile, or a collection. Each one's description travels in the session's
+`About` frame (`items::Details`, kept in `shares.details_json`), so a
+recipient's `share_inspect` answers what it holds and what of it they
+have (`ShareInfo.contents`) before anything comes. The files, where there
+are any, travel as a game's do (direct only, resumable, recipients helping
+each other):
+
+- **A save** is its files, named by their SHA-256, with each file's named
+  folder (`<winAppData>`, `{save_data}`, …) and path. The recipient finds the
+  same game by its identity, as sync does (IGDB id, store ids, then title),
+  or adds a title-only record of it, and keeps the files as a new version
+  of its saves for the account signed in (`SaveVersions::add_shared`,
+  reason *Shared by someone*). The version descends from nothing, so it
+  never replaces a save without asking: with saves of their own, the next
+  Play asks which to use; with none, it is simply their save. Files that
+  were at an absolute path on the sharer's computer have no place
+  elsewhere and are left out.
+- **A web game's offline copy** (`WebGames::save_offline`'s bundle) becomes
+  the offline copy of the web game at the same address, in the storage the
+  recipient chose; the game is added when they haven't got it. An offline
+  copy they already have stays.
+- **A ROM** brings its files, its platform, and the emulator definition and
+  profile it played with. It arrives as a game of that platform in a folder
+  of its own in the chosen storage, pinned to the recipient's emulator of
+  that definition and profile when they have one; otherwise it follows the
+  platform's default, and emulator setup installs that emulator when the
+  platform has none.
+- **A collection** is only its list: each game's identity, up to 1,000,
+  read through a larger `About` (1 MiB; every other frame stays at 64 KiB).
+  `share_inspect` shows which games the recipient has installed, owns
+  through a store account, has in the library or hasn't got;
+  `share_receive_collection` adds it to the signed-in account's
+  collections, the games they have and a title-only record of each one they
+  don't. Nothing downloads.
+
+Tests: `cargo test -p caskade-core --test it share_items::` (one per kind,
+between cores that aren't paired).
+
 ### The default admin
 
 Each library starts with a default admin, "Player" (migration 0014). Until

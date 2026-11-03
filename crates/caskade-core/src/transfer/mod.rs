@@ -855,6 +855,7 @@ impl PeerFetcher for Transfers {
             folder,
             title,
             launch,
+            placed: None,
         })
     }
 

@@ -287,6 +287,7 @@ impl VersionReason {
             Self::BeforeRestore => "beforeRestore",
             Self::Restored => "restored",
             Self::Chosen => "chosen",
+            Self::Shared => "shared",
         }
     }
 
@@ -296,6 +297,7 @@ impl VersionReason {
             "beforeRestore" => Self::BeforeRestore,
             "restored" => Self::Restored,
             "chosen" => Self::Chosen,
+            "shared" => Self::Shared,
             _ => Self::Session,
         }
     }

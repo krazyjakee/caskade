@@ -94,8 +94,12 @@ impl Shares {
             sharer,
             expires_at_ms: row.expires_at_ms,
             extras: Vec::new(),
+            details: serde_json::from_str::<serde_json::Value>(&row.details_json)
+                .ok()
+                .filter(|details| details.get("kind").is_some()),
         };
-        if session.writer().write(&about).await.is_err() || !fetch {
+        // A collection is only its list: nothing more to send.
+        if session.writer().write(&about).await.is_err() || !fetch || row.kind == "collection" {
             return session.end().await;
         }
 

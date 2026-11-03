@@ -9234,6 +9234,11 @@ msgstr ""
 msgid "Setup will keep running in the background."
 msgstr ""
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgctxt "save version"
+msgid "Shared by someone"
+msgstr ""
+
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "Shell"
 msgstr ""

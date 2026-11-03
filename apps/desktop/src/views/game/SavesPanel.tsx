@@ -246,6 +246,8 @@ function useReasonLabel() {
         return t({ message: "Restored", context: "save version" });
       case "chosen":
         return t({ message: "Chosen between devices", context: "save version" });
+      case "shared":
+        return t({ message: "Shared by someone", context: "save version" });
     }
   };
 }

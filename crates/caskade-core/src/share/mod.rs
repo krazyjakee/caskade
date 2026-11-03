@@ -25,6 +25,7 @@
 //! Shares are this device's alone: `shares` and `share_recipients` never
 //! sync and are never backed up (their grant is a credential).
 
+mod items;
 mod receive;
 mod serve;
 mod wire;
@@ -47,6 +48,7 @@ use crate::install::InstallService;
 use crate::transfer::Transfers;
 use crate::{Error, Result, lock};
 
+pub use items::{EmulatorInstaller, GameHere, ShareContents, ShareItem, SharedGame};
 pub use receive::{ReceivedShare, ShareInfo, ShareReach};
 
 /// Whether `text` reads as a share link (`caskade://receive?t=…`).
@@ -169,6 +171,8 @@ struct Inner {
     /// Shares being received, or served after, by install job.
     received: Mutex<HashMap<String, receive::Received>>,
     changed: broadcast::Sender<()>,
+    /// Saves and emulator setup, for what else is shared (#248).
+    items: items::Parts,
 }
 
 /// The tag a share's collection is kept under in the send store.
@@ -196,6 +200,7 @@ impl Shares {
                 running: Mutex::default(),
                 received: Mutex::default(),
                 changed: broadcast::channel(16).0,
+                items: items::Parts::default(),
             }),
         };
         let weak = Arc::downgrade(&shares.inner);
@@ -437,11 +442,27 @@ impl Shares {
     /// Reads `row`'s files into the send store, saying how far it got.
     async fn prepare(&self, row: &ShareRow, prepared: &watch::Sender<Prepared>) {
         let outcome = async {
-            let entry = row
-                .entry_id
-                .as_deref()
-                .ok_or_else(|| Error::Invalid(crate::tr!("this share has no game")))?;
-            let (folder, _, launch, _) = self.inner.transfers.source(entry).await?;
+            let (folder, launch) = if row.kind == "game" {
+                let entry = row
+                    .entry_id
+                    .as_deref()
+                    .ok_or_else(|| Error::Invalid(crate::tr!("this share has no game")))?;
+                let (folder, _, launch, _) = self.inner.transfers.source(entry).await?;
+                (folder, launch)
+            } else {
+                match self.staged(row).await? {
+                    Some(folder) => (folder, None),
+                    // A collection: only its list, no files.
+                    None => {
+                        return Ok(Ready {
+                            root: String::new(),
+                            size: 0,
+                            files: 0,
+                            launch: None,
+                        });
+                    }
+                }
+            };
             let this = self.clone();
             let reporter = prepared.clone();
             let offered = self
@@ -491,6 +512,7 @@ impl Shares {
             }
         }
         let _ = self.inner.transfers.release(&share_tag(id)).await;
+        self.unstage(id).await;
     }
 }
 

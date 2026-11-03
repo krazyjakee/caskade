@@ -17,7 +17,8 @@ use serde::{Deserialize, Serialize};
 use tokio_util::sync::CancellationToken;
 
 use super::Shares;
-use super::wire::{MAX_LINE, Message};
+use super::items::{Details, ShareContents};
+use super::wire::{MAX_ABOUT, MAX_LINE, Message};
 use crate::install::{
     FetchFailure, Fetched, JobSnapshot, PeerCopyTarget, PeerFetcher, PeerProgress,
 };
@@ -55,6 +56,8 @@ pub struct ShareInfo {
     pub extras: Vec<String>,
     pub expires_at_ms: Option<i64>,
     pub reach: ShareReach,
+    /// What it holds, and what of it this library has (#248).
+    pub contents: ShareContents,
 }
 
 /// A share received here, or being received, as the app shows it.
@@ -184,6 +187,11 @@ impl Shares {
     /// reason when the link expired, was stopped, or its sharer can't be
     /// reached.
     pub async fn inspect(&self, text: &str) -> Result<ShareInfo> {
+        self.look(text).await.map(|(info, _)| info)
+    }
+
+    /// [`Shares::inspect`], with what a share other than a game is.
+    pub(super) async fn look(&self, text: &str) -> Result<(ShareInfo, Option<Details>)> {
         let link = ShareLink::parse(text)
             .map_err(|_| Error::Invalid(crate::tr!("that isn't a Caskade share link")))?;
         let mut session = self.open(&link).await.map_err(|failure| match failure {
@@ -194,7 +202,7 @@ impl Shares {
             session.close();
             return Err(Error::Invalid(unreachable()));
         }
-        let about = tokio::time::timeout(ABOUT_WAIT, session.reader().read(MAX_LINE)).await;
+        let about = tokio::time::timeout(ABOUT_WAIT, session.reader().read(MAX_ABOUT)).await;
         let reach = if session.direct_addrs().is_empty() {
             ShareReach::RelayOnly
         } else {
@@ -210,17 +218,29 @@ impl Shares {
                 sharer,
                 expires_at_ms,
                 extras,
-            })) => Ok(ShareInfo {
-                sharer_id: link.peer().to_string(),
-                sharer,
-                kind,
-                title,
-                size,
-                windows,
-                extras,
-                expires_at_ms,
-                reach,
-            }),
+                details,
+            })) => {
+                let details = Details::read(details.as_ref());
+                if kind != "game" && details.is_none() {
+                    return Err(Error::Invalid(crate::tr!(
+                        "This Caskade can't receive what that link shares. Update Caskade, then try again."
+                    )));
+                }
+                let contents = self.contents(details.as_ref()).await?;
+                let info = ShareInfo {
+                    sharer_id: link.peer().to_string(),
+                    sharer,
+                    kind,
+                    title,
+                    size,
+                    windows,
+                    extras,
+                    expires_at_ms,
+                    reach,
+                    contents,
+                };
+                Ok((info, details))
+            }
             _ => Err(Error::Invalid(unreachable())),
         }
     }
@@ -229,13 +249,19 @@ impl Shares {
     /// default when `root_id` is `None`), as a copy job: the game arrives as
     /// a game of its own, installed like any copy.
     pub async fn receive(&self, text: &str, root_id: Option<String>) -> Result<JobSnapshot> {
-        let info = self.inspect(text).await?;
+        let (info, details) = self.look(text).await?;
+        if matches!(details, Some(Details::Collection { .. })) {
+            return Err(Error::Invalid(crate::tr!(
+                "That link shares a collection: add it to your collections instead."
+            )));
+        }
         let link = ShareLink::parse(text)
             .map_err(|_| Error::Invalid(crate::tr!("that isn't a Caskade share link")))?;
         let fetcher = Arc::new(ShareFetcher {
             shares: self.clone(),
             link,
             sharer: info.sharer.clone(),
+            details,
         });
         self.inner
             .install
@@ -399,6 +425,9 @@ struct ShareFetcher {
     shares: Shares,
     link: ShareLink,
     sharer: String,
+    /// What a share other than a game is: put where it belongs, not
+    /// installed (#248).
+    details: Option<Details>,
 }
 
 /// What the sharer offered.
@@ -655,10 +684,20 @@ impl PeerFetcher for ShareFetcher {
             session.end().await;
         }
         exported.map_err(FetchFailure::Failed)?;
+        let placed = match &self.details {
+            Some(details) => Some(
+                shares
+                    .place(details, &folder, root, &target.title)
+                    .await
+                    .map_err(FetchFailure::Failed)?,
+            ),
+            None => None,
+        };
         Ok(Fetched {
             folder,
             title: target.title.clone(),
             launch: offered.launch,
+            placed,
         })
     }
 

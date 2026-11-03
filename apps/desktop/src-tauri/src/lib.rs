@@ -728,6 +728,16 @@ pub fn run() {
                             install.inner().clone(),
                             &setup_paths.cache,
                         );
+                        // What else can be shared (#248): save versions, and
+                        // a ROM's emulator, which emulator setup installs.
+                        shares.set_saves(save_versions.clone());
+                        if let Some(setup) =
+                            app.try_state::<caskade_core::emulation::EmulatorSetup>()
+                        {
+                            shares.set_emulator_installer(std::sync::Arc::new(
+                                setup.inner().clone(),
+                            ));
+                        }
                         if let Some(requests) =
                             app.try_state::<commands::install_requests::InstallRequests>()
                         {

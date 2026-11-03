@@ -318,6 +318,10 @@ pub fn access(command: &str) -> Option<Access> {
         | "share_forget"
         | "share_receive"
         | "share_keep_helping"
+        // Something smaller shared once, and a shared collection added to
+        // the account's own (#248).
+        | "share_item"
+        | "share_receive_collection"
         | "game_action_settings_save"
         // Adding a game by hand: in effect what an install adds (#174).
         | "manual_game_add" => Install,
