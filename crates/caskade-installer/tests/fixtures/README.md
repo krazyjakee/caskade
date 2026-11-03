@@ -149,13 +149,15 @@ python3 xtask/windows-fixtures.py --families inno,msi \
   --only gog-inno-unity,legacy-registry-path,msi-plus-cab
 ```
 
-The refresh workflow `.github/workflows/installer-fixtures.yml` builds Inno/NSIS
-on Windows, MSI/SFX/archives, Burn and the Linux minis on Linux and the native
-macOS fixtures on macOS (GitHub-hosted runners), combines only outputs produced
-by each job, checks the lock/budgets, and pushes `automation/installer-fixtures`
-and opens a PR (see [CI setup](../../docs/ci.md#fork-boundary) for the token).
-It never executes untrusted PR code. Builder and independent extraction evidence
-do not substitute for the native Windows/macOS pipeline tests in `installer-pr`.
+Fixture rebuilds run locally only; no workflow rebuilds them. Inno/NSIS build on
+Windows (`just fixtures windows --prepare --families inno,nsis`), MSI/SFX/archives,
+Burn and the Linux minis on Linux, and the native macOS fixtures on a Mac
+(`python3 xtask/macos-fixtures.py --artifact <dir>`); then `just fixtures check`
+and commit the outputs with `build.lock` (see
+[CI setup](../../docs/ci.md#local-only-runs)). The genuine builds are not
+byte-for-byte reproducible across hosts. Builder and independent extraction
+evidence do not substitute for the native Windows/macOS pipeline tests in CI's
+`installer` job.
 
 
 ## Linux shell fixtures for #37

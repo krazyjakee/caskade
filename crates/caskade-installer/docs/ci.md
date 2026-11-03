@@ -1,31 +1,33 @@
 # Installer CI on GitHub Actions
 
-Every installer workflow runs on GitHub-hosted runners. The repository has no
-self-hosted runners, and no workflow asks for one. Pull requests use the plain
-`pull_request` event, so a fork's PR gets a read-only token, no secrets and a
-fresh hosted machine.
+The installer's checks are jobs in `.github/workflows/ci.yml`, which runs on
+master pushes, pull requests and manual runs, on GitHub-hosted runners. The
+repository has no self-hosted runners, and no job asks for one. Pull requests
+use the plain `pull_request` event, so a fork's PR gets a read-only token, no
+secrets and a fresh hosted machine.
 
-## Workflows and results
+## Jobs and results
 
-| Workflow | Trigger | Runner | Evidence |
+| Job | Runs | Runner | Evidence |
 | --- | --- | --- | --- |
-| `installer-pr` | PR (scoped by `scripts/ci-scope.py`), master push, manual | `ubuntu-latest`, `windows-latest`, `macos-latest` | fmt, strict Clippy, T1–T6 and T9 fixture pass/fail, doc tests, the CLI-only feature contract, fixture staleness/size checks, xtask tests, JUnit; the native profile on Windows and macOS |
-| `installer-linux-native` | master push, nightly, manual, PR labelled `run-native` | `ubuntu-latest` | serial Linux native profile: Proton, Debian/Fedora delegates in the runner's Docker, Flatpak, second-filesystem moves |
-| `installer-nightly` | nightly or manual, master only | `ubuntu-latest` | each parser fuzzer for 600 s with retained bounded corpora; the T10 release gates and Criterion; native Proton/delegates and the mini scoreboard |
-| `installer-cache-refresh` | manual, master only | `ubuntu-latest` | replaces the Proton cache entry (`xtask/runner/README.md`) |
-| `installer-fixtures` | master push touching a fixture builder, manual | all three | genuine fixture rebuilds, then a review PR from `automation/installer-fixtures`; never invoked by ordinary tests |
+| `installer` | master push, manual, PR when `scripts/ci-scope.py` selects the installer | `ubuntu-latest`, `windows-latest`, `macos-latest` | fmt, strict Clippy, T1–T6 and T9 fixture pass/fail, doc tests, the CLI-only feature contract, fixture staleness/size checks, xtask tests, JUnit; the native profile on Windows and macOS |
+| `installer-linux-native` | master push, manual, PR labelled `run-native` (when the installer is selected) | `ubuntu-latest` | serial Linux native profile: Proton, Debian/Fedora delegates in the runner's Docker, Flatpak, second-filesystem moves |
 
-`installer-pr` ends in an `installer result` job that passes when the selected
-checks passed, or when the PR's scope skipped them. A master push or a manual
-run always selects the whole suite.
+Both feed `ci result`, the one required check, which passes when every selected
+job passed or the PR's scope skipped it. A master push or a manual run selects
+the whole suite.
+
+Fuzzing (T8), the T10 release performance gates, the mini scoreboard and the
+fixture rebuilds have no workflow: they run locally only, as described under
+[Local-only runs](#local-only-runs).
 
 Actions are pinned to full commit SHAs. Main-suite and standalone-CLI reports
 are kept apart (`suite-junit.xml` and `junit.xml`). Nextest's `ci` profile does
 not stop at the first failure. Native runs are serial; only the external
 package/download group retries twice. Local HTTP/mock tests never retry. The
-`native` profile requires `CASKADE_TEST_NATIVE=1` and `--run-ignored all`;
-workflows supply both. T10 is excluded from that profile and has its own nightly
-gate. Rust is the current stable release with cargo-nextest 0.9.114.
+`native` profile requires `CASKADE_TEST_NATIVE=1` and `--run-ignored all`; the
+jobs supply both. T10 is excluded from that profile. Rust is the current stable
+release with cargo-nextest 0.9.114.
 
 ### Hosts
 
@@ -43,25 +45,18 @@ gate. Rust is the current stable release with cargo-nextest 0.9.114.
   `--all-features`, including fetch.
 - **Linux** (`ubuntu-latest`): the native profile needs Docker, Flatpak, Xvfb,
   unprivileged user namespaces and Proton, so it runs in `installer-linux-native`
-  rather than in every PR. The second filesystem for the Proton moves is the
+  rather than in every PR. Ubuntu's AppArmor blocks unprivileged user namespaces
+  by default; the job turns that off for Steam Runtime's bwrap and Flatpak. The second filesystem for the Proton moves is the
   runner's `/mnt` disk, or a tmpfs mounted there.
 
 ### Fork boundary
 
-A fork's pull request runs `installer-pr` like any other, on hosted runners with
-a read-only `GITHUB_TOKEN` and no secrets. `installer-linux-native` runs for a PR
-only with the `run-native` label, which only maintainers can add. Nightly, cache
-refresh and fixtures have no PR trigger, and their jobs check for master. Only
-master runs save the caches that every run reads (GitHub scopes caches to the
-branch that saved them); a PR's own cache entries stay in its scope. Checkouts
-never persist credentials, except the fixtures `propose` job, which pushes its
-review branch.
-
-The fixtures PR needs a token that may open PRs: the repository setting
-"Allow GitHub Actions to create and approve pull requests", or a
-`FIXTURE_PR_TOKEN` secret with contents and pull-requests write access. Without
-either, `xtask/fixture-pr.py` pushes the branch and links the comparison in the
-job summary. A run started by hand with `propose` off only rebuilds and checks.
+A fork's pull request runs the `installer` job like any other, on hosted runners
+with a read-only `GITHUB_TOKEN` and no secrets. `installer-linux-native` runs for
+a PR only with the `run-native` label, which only maintainers can add. Only
+master runs save the caches every run reads (GitHub scopes caches to the branch
+that saved them); a PR's own cache entries stay in its scope. Checkouts never
+persist credentials.
 
 ## Local validation
 
@@ -71,7 +66,7 @@ cargo nextest run -p caskade-installer --all-features --locked --profile ci
 CASKADE_TEST_NATIVE=1 cargo nextest run -p caskade-installer --all-features \
   --locked --profile native --run-ignored all
 cargo xtask fixtures check
-actionlint .github/workflows/installer-*.yml
+actionlint .github/workflows/ci.yml
 ```
 
 Use the shared heavy lock around Cargo invocations in the developer checkout.
@@ -81,7 +76,7 @@ Profile syntax and retry/report behavior follow
 
 The explicitly ignored `fetch_resolvers_live` recording test is excluded from the
 `native` profile. Run `just test-resolvers-live` manually to refresh public metadata;
-ordinary PR, native and nightly suites replay committed resolver responses.
+the CI suites replay committed resolver responses.
 
 ## Native fixture evidence
 
@@ -131,34 +126,44 @@ Native JUnit and the
 as workflow artifacts. The checklist requires a separate manual Deck run.
 
 
-## Proton, performance and scoreboard (#50)
+## Proton (#50)
 
 [Runner setup](../../../xtask/runner/README.md) defines the cached umu 1.4.4,
-Steam Runtime and UMU-Proton layout, kept as one Actions cache entry that
-`installer-cache-refresh` replaces. `prepare-proton.py` copies the cache into a
-writable job-local XDG tree and records a JSON receipt. Proton runs as the
-runner's unprivileged user (Steam Runtime refuses UID 0). Proton JUnit is
-retained separately from the remaining native suite.
-
-`installer-linux-native` runs on master pushes and nightly. `installer-nightly`
-also runs the native Proton suite and produces a mini-installer Markdown/JSON
-scoreboard. Foreign host rows are plan-only/not-run; actual per-mini CLI
-lifecycle times, native delegated lifecycle times and pending runner-only
-fixture families remain distinguishable.
-
-The nightly performance job enforces the release-mode bounds in
-[benches/README.md](../benches/README.md): 20 GiB sparse installer probe under
-16 MiB/200 ms, extraction no slower than 1.5 times pinned official 7zz, 10 GiB
-extraction below 256 MiB peak RSS in an isolated process, and discovery of
-100,000 files below one second. JSON and Criterion reports are retained.
-The native nextest profile excludes these nightly-only heavy performance gates.
-
-The fuzz job discovers every target from the committed fuzz manifest, runs each
-for 600 seconds, and keeps a bounded corpus per target in the Actions cache for
-the next night. Limits are 1 MiB/input, 100,000 files and 256 MiB/target. Pull
-requests never run it.
+Steam Runtime and UMU-Proton layout, kept as one Actions cache entry that the
+`installer-linux-native` job warms on a miss and saves from master.
+`prepare-proton.py` copies the cache into a writable job-local XDG tree and
+records a JSON receipt. Proton runs as the runner's unprivileged user (Steam
+Runtime refuses UID 0). Proton JUnit is retained separately from the remaining
+native suite.
 
 The #62 Proton moving test needs a second filesystem with 4 GiB free, supplied
 through `CASKADE_TEST_MOVE_ROOT`: the runner's separate `/mnt` disk, or an 8 GiB
 executable tmpfs mounted at `/mnt/caskade-move` when `/mnt` is on the
 workspace's filesystem.
+
+## Local-only runs
+
+These have no workflow; run them on a developer machine (Linux) before changing
+the code they cover. Each takes the shared heavy lock for its builds.
+
+- **Fuzzing (T8):** `just fuzz <target> --seconds 600` per target in
+  `crates/caskade-installer/fuzz/Cargo.toml` (nightly Rust and cargo-fuzz; see
+  the [fuzz README](../fuzz/README.md)). Keep a target's corpus between runs with
+  `xtask/runner/fuzz-corpus.py`, which bounds it to 1 MiB/input, 100,000 files
+  and 256 MiB/target.
+- **Performance (T10):** the release-mode bounds in
+  [benches/README.md](../benches/README.md): 20 GiB sparse installer probe under
+  16 MiB/200 ms, extraction no slower than 1.5 times pinned official 7zz, 10 GiB
+  extraction below 256 MiB peak RSS in an isolated process, and discovery of
+  100,000 files below one second, plus the Criterion distributions. The commands
+  are in that README; they need 12 GiB free under `/tmp`.
+- **Mini scoreboard (T9):** `just corpus` runs the installer CLI's lifecycle over
+  the fixture corpus into `target/scoreboard`. Pass `--native-junit` with a
+  native-profile JUnit report to include the delegated rows. Foreign host rows
+  are plan-only/not-run; pending runner-only fixture families stay distinct.
+- **Fixture rebuilds:** `just fixtures <family> --prepare` (see the
+  [fixtures README](../tests/fixtures/README.md)), and on a Mac
+  `python3 xtask/macos-fixtures.py --artifact <dir>`. Then `just fixtures check`
+  and commit the outputs with `build.lock`. The genuine Inno, NSIS, deb,
+  AppImage and Burn builds are not byte-for-byte reproducible across hosts, so a
+  rebuild changes those binaries even when their sources did not.

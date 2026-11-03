@@ -1,8 +1,8 @@
-# Linux native / nightly runner contract (#50)
+# Linux native runner contract (#50)
 
-`installer-linux-native` and `installer-nightly` run on GitHub-hosted
-`ubuntu-latest` runners (see `crates/caskade-installer/docs/ci.md`). Their
-cached tools are one GitHub Actions cache entry, `installer-proton-<hash of
+The `installer-linux-native` job in `.github/workflows/ci.yml` runs on a
+GitHub-hosted `ubuntu-latest` runner (see `crates/caskade-installer/docs/ci.md`).
+Its cached tools are one GitHub Actions cache entry, `installer-proton-<hash of
 warm-proton.py>`, holding `~/caskade-cache/native/share`:
 
 ```
@@ -11,18 +11,18 @@ native/share/umu/steamrt3/
 native/share/Steam/compatibilitytools.d/UMU-Proton-<version>/
 ```
 
-`installer-cache-refresh` (manual, master only) replaces that entry by running
+On a cache miss the job runs
 `python3 xtask/runner/warm-proton.py --cache ~/caskade-cache` as the runner's
-unprivileged account. The tool downloads SHA-256-pinned umu-launcher 1.4.4,
+unprivileged account, and master's runs save the result (GitHub evicts entries
+unused for 7 days; changing `warm-proton.py` starts a new key). The tool downloads SHA-256-pinned umu-launcher 1.4.4,
 then asks umu to cache its Steam Runtime and UMU-Proton using a disposable
-wineboot prefix. It never changes HOME or a personal prefix. When the entry is
-missing (GitHub evicts caches unused for 7 days), the native and scoreboard
-jobs warm it the same way, and master's native job saves it. Only master runs
-write the cache master's and pull requests' runs read. UMU-Proton is required;
+wineboot prefix. It never changes HOME or a personal prefix. Only master runs
+write the cache master's and pull requests' runs read. To warm a local cache,
+run the same command with `--cache` pointing at a private directory. UMU-Proton is required;
 GE-Proton10-34 crashes 32-bit fixtures on the development host. Never warm a
 personal library or persist a game prefix as a shared cache.
 
-Ubuntu's AppArmor refuses unprivileged user namespaces by default; the jobs set
+Ubuntu's AppArmor refuses unprivileged user namespaces by default; the job sets
 `kernel.apparmor_restrict_unprivileged_userns=0`, because Steam Runtime's
 pressure-vessel (bwrap) and Flatpak need them.
 
@@ -34,23 +34,21 @@ as the runner's unprivileged user (Steam Runtime refuses UID 0; the quiet Window
 installers still need a display). Run as root, it only proceeds inside a fresh
 Actions job container, where it hands the workspace to the `caskade` user.
 
-`fuzz-corpus.py` is the corpus writer. The nightly fuzz job restores each
-target's retained corpus from the Actions cache (`installer-fuzz-<target>-*`),
-merges it into the job-local corpus, and saves the bounded result for the next
-night. Merges keep only regular flat SHA-named input files, at most 1 MiB each /
+`fuzz-corpus.py` keeps a fuzz target's corpus between local runs (fuzzing has no
+workflow; see the docs' Local-only runs): merge a retained corpus into
+`crates/caskade-installer/fuzz/corpus/<target>` before `just fuzz <target>`, and
+the result back out afterwards. Merges keep only regular flat SHA-named input files, at most 1 MiB each /
 100,000 files / 256 MiB per target. Contents are rehashed; writes replace
 atomically; links/special files and unsafe names are ignored. All targets come
-from the actual fuzz manifest, so newly added parsers automatically receive a
-600-second nightly run. Pull requests never run the fuzz job.
+from the actual fuzz manifest.
 
 Native profile evidence includes Proton install/launch/Z-drive isolation, legacy
-registry self-check, and actual own-uninstaller cleanup under Proton. The
-performance profile generates its sparse 20 GiB probe and 10 GiB extraction
-workloads under `/tmp` (minimum 12 GiB free; the job removes unused toolchains
-from the runner first), never commits them, and retains JSON measurements +
-Criterion reports. The scoreboard consumes the native JUnit for isolated system
-delegates and runs real CLI probe/plan/install/verify/uninstall for other
-available minis. Foreign host rows are labelled plan-only/not-run; missing
+registry self-check, and actual own-uninstaller cleanup under Proton. The local
+performance gates generate their sparse 20 GiB probe and 10 GiB extraction
+workloads under `/tmp` (minimum 12 GiB free), never commit them, and write JSON
+measurements + Criterion reports. The local scoreboard (`just corpus`) can
+consume the native JUnit for isolated system delegates and runs real CLI
+probe/plan/install/verify/uninstall for other available minis. Foreign host rows are labelled plan-only/not-run; missing
 runner-only fixture families are explicitly pending, never counted as passed.
 Linux launch acceptance is separately proven by `linux_mini`, Flatpak,
 Debian/Fedora and Proton native tests.

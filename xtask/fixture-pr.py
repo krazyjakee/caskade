@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Open or update the fixture refresh PR on GitHub.
+"""Open or update a fixture refresh PR on GitHub from a pushed branch.
 
-Called only by the trusted installer-fixtures workflow after it pushed the
-branch. GitHub refuses PRs from the workflow token unless the repository allows
-Actions to create them; a FIXTURE_PR_TOKEN secret (contents and pull requests:
-write) works either way. Without one, the job summary links the comparison.
+No workflow runs this any more: fixture rebuilds are local only (see
+crates/caskade-installer/docs/ci.md, Local-only runs). Run it by hand after
+pushing FIXTURE_BRANCH (default automation/installer-fixtures), with a
+FIXTURE_PR_TOKEN that has contents and pull requests write access and
+GITHUB_REPOSITORY set to owner/name. A 403 prints the comparison link instead.
 """
 import json
 import os

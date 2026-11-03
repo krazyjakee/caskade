@@ -45,6 +45,7 @@ pub async fn run(
         handlers: Vec::new(),
         #[cfg(feature = "fetch")]
         resolvers: Vec::new(),
+        #[cfg(feature = "fetch")]
         local: None,
         #[cfg(feature = "torrent")]
         torrent: Default::default(),
