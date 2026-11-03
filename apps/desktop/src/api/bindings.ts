@@ -4649,6 +4649,11 @@ export type IgdbCatalogPage_Deserialize = {
 	nextOffset?: number | null,
 	/**  The last copy of the page: the server couldn't be reached. */
 	stale: boolean,
+	/**
+	 *  The server doesn't offer the sort asked for yet (#253): this page is
+	 *  in its usual order instead.
+	 */
+	sortUnavailable: boolean,
 };
 
 /**  A page of the catalog. */
@@ -4663,6 +4668,11 @@ export type IgdbCatalogPage_Serialize = {
 	nextOffset: number | null,
 	/**  The last copy of the page: the server couldn't be reached. */
 	stale: boolean,
+	/**
+	 *  The server doesn't offer the sort asked for yet (#253): this page is
+	 *  in its usual order instead.
+	 */
+	sortUnavailable: boolean,
 };
 
 export type IgdbExternalId = IgdbExternalId_Serialize | IgdbExternalId_Deserialize;

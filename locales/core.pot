@@ -1604,6 +1604,10 @@ msgstr ""
 msgid "the metadata server is unavailable; trying again in {seconds}s"
 msgstr ""
 
+#: crates/caskade-core/src/igdb/popularity.rs
+msgid "popularity isn't available from the metadata server yet; trying again in {seconds}s"
+msgstr ""
+
 #: crates/caskade-core/src/install/dropped.rs
 msgid "a dropped path must be absolute"
 msgstr ""

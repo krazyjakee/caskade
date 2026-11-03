@@ -40,6 +40,32 @@ then appends unscored games by title. `nextOffset` is the next filtered page,
 or null; no total is claimed. Install the server changes before using the
 new app sorts; an older server has no popularity endpoint.
 
+## A server without popularity
+
+An older server answers `/popularity` with 404 and ignores `sort` on
+`/catalog/search`, answering in its usual order (so a page can't tell
+whether it was sorted). The app degrades without errors:
+
+- A popularity request answered 400, 404, 405, 422 or 501 pauses
+  popularity alone for an hour (`popularity::UNSUPPORTED_PAUSE`); game
+  lookups, matching and the Store are not paused, and matching's watch
+  doesn't count it as a failed run. The Library's Popular sort keeps the
+  last scores, and games without one (all of them, on a library that never
+  had any) follow by title.
+- A Store search with a sort other than relevance first learns whether the
+  server has popularity (`Igdb::popularity_offered`: any popularity answer
+  says so, else one request for a single id, remembered, and asked again
+  after the hour). Without it, the search asks for the usual order and the
+  page says so (`IgdbCatalogPage::sort_unavailable`); the Store shows a
+  quiet note instead of an error. A server that has popularity but refuses
+  a sort with one of those statuses gets the same answer.
+- Other failures (unreachable, 429, 5xx) keep the client's shared pause and
+  Retry-After rules.
+
+Once the server has popularity, the sorts work without an app update. Check
+it with the ignored live test:
+`cargo test -p caskade-core --lib igdb::popularity_tests::live -- --ignored`.
+
 ## Local cache and ordering
 
 `igdb::popularity` refreshes due matched ids from `Metadata::watch`, after

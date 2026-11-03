@@ -1606,6 +1606,10 @@ msgstr "ogiltigt svar med popularitetsdata"
 msgid "the metadata server is unavailable; trying again in {seconds}s"
 msgstr "metadataservern är inte tillgänglig; försöker igen om {seconds} s"
 
+#: crates/caskade-core/src/igdb/popularity.rs
+msgid "popularity isn't available from the metadata server yet; trying again in {seconds}s"
+msgstr "popularitet finns inte hos metadataservern än; försöker igen om {seconds} s"
+
 #: crates/caskade-core/src/install/dropped.rs
 msgid "a dropped path must be absolute"
 msgstr "en släppt sökväg måste vara absolut"

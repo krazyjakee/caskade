@@ -13,6 +13,8 @@ const MAX_RESPONSE: usize = 64 << 20;
 pub(super) struct Failure {
     pub(super) error: Error,
     pub(super) retry_after: Option<Duration>,
+    /// The HTTP status the server answered with, when it answered.
+    pub(super) status: Option<u16>,
 }
 
 impl<E: Into<Error>> From<E> for Failure {
@@ -20,6 +22,7 @@ impl<E: Into<Error>> From<E> for Failure {
         Self {
             error: error.into(),
             retry_after: None,
+            status: None,
         }
     }
 }
@@ -80,6 +83,7 @@ async fn read(request: reqwest::RequestBuilder) -> Result<Vec<u8>, Failure> {
                 status = status
             ))),
             retry_after,
+            status: Some(status.as_u16()),
         });
     }
     let gzip = response

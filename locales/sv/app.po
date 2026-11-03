@@ -10570,6 +10570,10 @@ msgstr ""
 msgid "The first view you see."
 msgstr "Den första vyn du ser."
 
+#: apps/desktop/src/views/StoreView.tsx
+msgid "The game catalog can't sort this way yet, so these are in its usual order."
+msgstr "Spelkatalogen kan inte sortera så här än, så de visas i sin vanliga ordning."
+
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 msgid "The game stays, and plays online."
 msgstr "Spelet finns kvar och spelas online."

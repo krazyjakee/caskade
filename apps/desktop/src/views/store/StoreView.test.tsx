@@ -285,3 +285,15 @@ it.each([undefined, "console"] as const)(
     });
   },
 );
+
+it("says quietly when the catalog can't sort by popularity yet, and still lists games (#253)", async () => {
+  const app = show("/store?sort=popular", { sortsUnavailable: true });
+  await waitFor(() => expect(results()).toHaveLength(24));
+  const note = await screen.findByText(
+    "The game catalog can't sort this way yet, so these are in its usual order.",
+  );
+  expect(note.getAttribute("role")).toBe("status");
+  expect(screen.queryByRole("alert")).toBeNull();
+  // The choice stays, for when the server has it.
+  expect(app.router.state.location.search).toMatchObject({ sort: "popular" });
+});

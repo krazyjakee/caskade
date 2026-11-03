@@ -216,6 +216,9 @@ export interface CatalogFixtureOptions {
   offline?: boolean;
   /** Pages answer as the last copy. */
   stale?: boolean;
+  /** The server has no sorts yet (#253): searches answer in its usual
+   * order, flagged. */
+  sortsUnavailable?: boolean;
   /** Each call waits this long (ms). */
   delay?: number;
 }
@@ -235,6 +238,7 @@ export function createCatalogFixtureApi(options: CatalogFixtureOptions = {}) {
     releases: [],
     nextOffset: offset + limit < games.length ? offset + limit : null,
     stale: options.stale ?? false,
+    sortUnavailable: false,
   });
   const releases = (
     listed: { game: string; release: IgdbReleaseDate }[],
@@ -250,6 +254,7 @@ export function createCatalogFixtureApi(options: CatalogFixtureOptions = {}) {
       releases: slice,
       nextOffset: offset + limit < kept.length ? offset + limit : null,
       stale: options.stale ?? false,
+      sortUnavailable: false,
     };
   };
   const api: CatalogApi = {
@@ -269,6 +274,13 @@ export function createCatalogFixtureApi(options: CatalogFixtureOptions = {}) {
           (!from || (game.releaseDate !== null && game.releaseDate >= from)) &&
           (!to || (game.releaseDate !== null && game.releaseDate <= to)),
       );
+      const sorted = search.sort && search.sort !== "relevance";
+      if (sorted && options.sortsUnavailable) {
+        return {
+          ...page(found, search.offset ?? 0, search.limit || 20),
+          sortUnavailable: true,
+        };
+      }
       if (search.sort === "popular") {
         const scores = options.popularity ?? { "1002": 0.006, "1001": 0.003 };
         found.sort((a, b) => {

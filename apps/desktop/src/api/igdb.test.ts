@@ -35,7 +35,7 @@ it("surfaces core errors and refuses outside the desktop app", async () => {
 
 it("passes catalog requests to the core and unwraps its pages", async () => {
   vi.stubGlobal("isTauri", true);
-  const page = { games: [], releases: [], nextOffset: null, stale: false };
+  const page = { games: [], releases: [], nextOffset: null, stale: false, sortUnavailable: false };
   const invoke = vi.fn((_command: string, _args?: unknown) => page);
   mockIPC(invoke);
   expect(await nativeCatalogApi.search({ query: "zelda", offset: 24, platforms: ["6"] })).toEqual(

@@ -391,6 +391,12 @@ struct Inner {
     filters: Pages<IgdbCatalogFilters>,
     /// Serializes background popularity refreshes, separate from game lookups.
     popularity: Mutex<()>,
+    /// No popularity request before this: a server without popularity yet
+    /// (#253). Other requests go on.
+    popularity_paused_until: std::sync::Mutex<Option<Instant>>,
+    /// The server answered a popularity request: it has popularity and the
+    /// catalog's sorts (#253).
+    popularity_offered: std::sync::atomic::AtomicBool,
 }
 
 impl Igdb {
@@ -412,6 +418,8 @@ impl Igdb {
                 pages: Pages::default(),
                 filters: Pages::default(),
                 popularity: Mutex::new(()),
+                popularity_paused_until: std::sync::Mutex::default(),
+                popularity_offered: std::sync::atomic::AtomicBool::new(false),
             }),
         }
     }
@@ -870,6 +878,7 @@ mod fetch {
     pub(super) struct Failure {
         pub(super) error: Error,
         pub(super) retry_after: Option<std::time::Duration>,
+        pub(super) status: Option<u16>,
     }
 
     fn offline() -> Failure {
@@ -878,6 +887,7 @@ mod fetch {
                 "built without network support"
             ))),
             retry_after: None,
+            status: None,
         }
     }
 

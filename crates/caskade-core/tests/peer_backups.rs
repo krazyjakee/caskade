@@ -188,12 +188,17 @@ async fn a_backup_made_while_the_holder_is_away_reaches_it_and_restores_on_a_fre
     })
     .await;
     let fetching = fresh.peers.fetch(&hash, Duration::from_secs(30));
+    // Nudged until it arrives: under load one exchange may come too early.
     let nudge = async {
-        tokio::time::sleep(Duration::from_millis(200)).await;
-        fresh.sync.sync_now(&nas_id);
+        loop {
+            tokio::time::sleep(Duration::from_millis(500)).await;
+            fresh.sync.sync_now(&nas_id);
+        }
     };
-    let (archive, ()) = tokio::join!(fetching, nudge);
-    let archive = archive.unwrap();
+    let archive = tokio::select! {
+        archive = fetching => archive.unwrap(),
+        () = nudge => unreachable!(),
+    };
     assert_eq!(
         caskade_core::saves::versions::hash_file(&archive)
             .unwrap()

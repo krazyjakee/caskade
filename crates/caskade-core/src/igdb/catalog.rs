@@ -113,6 +113,9 @@ pub struct IgdbCatalogPage {
     pub next_offset: Option<u32>,
     /// The last copy of the page: the server couldn't be reached.
     pub stale: bool,
+    /// The server doesn't offer the sort asked for yet (#253): this page is
+    /// in its usual order instead.
+    pub sort_unavailable: bool,
 }
 
 /// The release that listed a game.
@@ -168,7 +171,7 @@ struct RawRelease {
 }
 
 /// What `/catalog/search` is asked: ids as numbers.
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(super) struct SearchBody<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -375,8 +378,36 @@ impl Igdb {
             released_from: day(search.released_from.as_deref())?,
             released_to: day(search.released_to.as_deref())?,
         };
-        self.catalog_page("/catalog/search", serde_json::to_value(&body)?, SEARCH_TTL)
-            .await
+        if is_relevance(&search.sort) {
+            return self
+                .catalog_page(
+                    "/catalog/search",
+                    serde_json::to_value(&body)?,
+                    None,
+                    SEARCH_TTL,
+                )
+                .await;
+        }
+        // A server without the sorts yet (#253) would ignore the sort: ask
+        // for its usual order and say so. One that refuses it gets the same.
+        let usual = serde_json::to_value(&SearchBody {
+            sort: CatalogSort::Relevance,
+            ..body.clone()
+        })?;
+        if !self.popularity_offered().await {
+            let mut page = self
+                .catalog_page("/catalog/search", usual, None, SEARCH_TTL)
+                .await?;
+            page.sort_unavailable = true;
+            return Ok(page);
+        }
+        self.catalog_page(
+            "/catalog/search",
+            serde_json::to_value(&body)?,
+            Some(usual),
+            SEARCH_TTL,
+        )
+        .await
     }
 
     /// A page of the releases of the last 90 days, newest first.
@@ -458,7 +489,7 @@ impl Igdb {
             genres: &unique(&releases.genres),
             tbd: releases.tbd,
         };
-        self.catalog_page(path, serde_json::to_value(&body)?, RELEASES_TTL)
+        self.catalog_page(path, serde_json::to_value(&body)?, None, RELEASES_TTL)
             .await
     }
 
@@ -466,13 +497,26 @@ impl Igdb {
         &self,
         path: &'static str,
         body: Value,
+        usual: Option<Value>,
         ttl: Duration,
     ) -> Result<IgdbCatalogPage> {
         let key = format!("{path} {body}");
         let request = async {
             let store = self.store().await?;
             self.check_pause()?;
-            let raw = self.outcome(super::fetch::catalog(&self.inner.base, path, &body).await)?;
+            let mut sort_unavailable = false;
+            let raw = match (
+                super::fetch::catalog(&self.inner.base, path, &body).await,
+                &usual,
+            ) {
+                (Err(failure), Some(usual)) if super::popularity::unsupported(failure.status) => {
+                    tracing::debug!("the metadata server refused the sort; its usual order");
+                    sort_unavailable = true;
+                    super::fetch::catalog(&self.inner.base, path, usual).await
+                }
+                (result, _) => result,
+            };
+            let raw = self.outcome(raw)?;
             let games = readable(raw.games);
             store.put(&games, &[]).await?;
             let listed: HashSet<u64> = games.iter().map(|(game, _)| game.id).collect();
@@ -491,6 +535,7 @@ impl Igdb {
                 releases,
                 next_offset: raw.next_offset,
                 stale: false,
+                sort_unavailable,
             })
         };
         self.inner.pages.get(key, ttl, request).await

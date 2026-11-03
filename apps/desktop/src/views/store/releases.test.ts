@@ -63,6 +63,7 @@ it("keeps each game once across pages, with the release that listed it first", (
     releases,
     nextOffset: null,
     stale: false,
+    sortUnavailable: false,
   });
   const pc = release("2026-11-01");
   const ps5 = release("2026-11-02", {

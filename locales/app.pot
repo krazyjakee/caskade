@@ -10354,6 +10354,10 @@ msgstr ""
 msgid "The first view you see."
 msgstr ""
 
+#: apps/desktop/src/views/StoreView.tsx
+msgid "The game catalog can't sort this way yet, so these are in its usual order."
+msgstr ""
+
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 msgid "The game stays, and plays online."
 msgstr ""

@@ -51,7 +51,7 @@ impl Metadata {
                     }
                 }
                 // `Some(offline)` after a failed run.
-                let mut failed = match this.run().await {
+                let failed = match this.run().await {
                     Ok(report) => (report.deferred > 0).then_some(report.unreachable),
                     Err(error) => {
                         tracing::warn!(%error, "IGDB matching failed");
@@ -63,10 +63,9 @@ impl Metadata {
                 match this.inner.igdb.refresh_popularity(&this.inner.store).await {
                     Ok(true) => this.inner.bus.emit(Event::LibraryPopularityUpdated),
                     Ok(false) => {}
-                    Err(error) => {
-                        tracing::debug!(%error, "popularity refresh deferred");
-                        failed = Some(true);
-                    }
+                    // Matching went fine: the next run tries popularity
+                    // again, within its own pause (#253).
+                    Err(error) => tracing::debug!(%error, "popularity refresh deferred"),
                 }
                 if let Some(offline) = failed {
                     failures = failures.saturating_add(1);

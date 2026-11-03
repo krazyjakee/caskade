@@ -401,6 +401,11 @@ function Notices({ result, children }: { result: PagedResult; children?: ReactNo
           <Trans>Showing saved results: the metadata server can't be reached right now.</Trans>
         </p>
       )}
+      {pages.some((page) => page.sortUnavailable) && (
+        <p data-part="sort-unavailable" role="status" className="mb-3 text-xs text-fg-muted">
+          <Trans>The game catalog can't sort this way yet, so these are in its usual order.</Trans>
+        </p>
+      )}
       {children}
     </>
   );
