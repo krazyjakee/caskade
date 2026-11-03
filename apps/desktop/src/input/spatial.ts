@@ -167,20 +167,38 @@ function gap(aLow: number, aHigh: number, bLow: number, bHigh: number) {
 interface Target {
   element: HTMLElement;
   to: Box;
+  /** What it stands in when lining targets up (`reach`). */
+  reach: Box;
   d: number;
   inHome: boolean;
+}
+
+/** The outermost focus section around `target` that focus isn't in (a
+ * shelf, the settings tabs), when it has a box; else `target`'s own place. */
+function reach(target: HTMLElement, from: HTMLElement, own: Box): Box {
+  let entered: HTMLElement | null = null;
+  for (let at = section(target); at && !at.contains(from); at = section(at.parentElement ?? from))
+    entered = at;
+  if (!entered || !hasBox(entered)) return own;
+  const r = entered.getBoundingClientRect();
+  return { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
 }
 
 /** Going up or down, the line of targets nearest that way: those level
  * with the nearest one. A target in the column focus is in wins within the
  * line, never over a line in between (from the hero, the shelf below it, not
- * a card two shelves down). Left and right keep every target: a list row
- * goes across to its button, however far. */
-function nearestLine(targets: Target[], direction: Direction): Target[] {
+ * a card two shelves down). Only targets that reach into the column set the
+ * line: a shelf across the view does, the settings tabs beside the panel
+ * don't. Left and right keep every target: a list row goes across to its
+ * button, however far. */
+function nearestLine(targets: Target[], direction: Direction, from: Box): Target[] {
   if (direction === "nav.left" || direction === "nav.right") return targets;
   const down = direction === "nav.down";
+  const inColumn = targets.filter(
+    (target) => gap(from.left, from.right, target.reach.left, target.reach.right) === 0,
+  );
   let first: Target | undefined;
-  for (const target of targets) {
+  for (const target of inColumn.length > 0 ? inColumn : targets) {
     if (!first || (down ? target.to.top < first.to.top : target.to.bottom > first.to.bottom))
       first = target;
   }
@@ -202,14 +220,20 @@ export function next(from: HTMLElement, direction: Direction): HTMLElement | nul
     const to = place(candidate, from);
     const d = distance(place(from, candidate), to, direction);
     if (d === null) continue;
-    ahead.push({ element: candidate, to, d, inHome: home?.contains(candidate) ?? false });
+    ahead.push({
+      element: candidate,
+      to,
+      reach: reach(candidate, from, to),
+      d,
+      inHome: home?.contains(candidate) ?? false,
+    });
   }
   const area = ahead.some((target) => target.inHome)
     ? ahead.filter((target) => target.inHome)
     : ahead;
   let best: HTMLElement | null = null;
   let score = Number.POSITIVE_INFINITY;
-  for (const target of nearestLine(area, direction)) {
+  for (const target of nearestLine(area, direction, rect(from))) {
     if (target.d < score) {
       best = target.element;
       score = target.d;

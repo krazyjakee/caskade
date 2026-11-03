@@ -506,13 +506,18 @@ it("down from the hero goes to the shelf below it, not a card in its column furt
   render(
     <InputProvider console subscribe={pad.subscribe}>
       <Button data-rect="560 380 260 56">Resume · View details</Button>
-      {/* Recently Played: its View all at the right, one card at the left. */}
-      <Button data-rect="1400 480 120 30">View all →</Button>
-      <Button data-rect="340 530 200 280">Pocket Quest</Button>
+      {/* Recently Played, a shelf across the view: its View all at the
+          right, one card at the left. */}
+      <FocusSection id="shelf-recent" data-rect="340 470 1200 350">
+        <Button data-rect="1400 480 120 30">View all →</Button>
+        <Button data-rect="340 530 200 280">Pocket Quest</Button>
+      </FocusSection>
       {/* Recently Added: its second card is under the hero's button. */}
-      <Button data-rect="1400 860 120 30">View all → added</Button>
-      <Button data-rect="340 910 200 280">Pocket Quest added</Button>
-      <Button data-rect="560 910 200 280">Couch Runner</Button>
+      <FocusSection id="shelf-added" data-rect="340 850 1200 350">
+        <Button data-rect="1400 860 120 30">View all → added</Button>
+        <Button data-rect="340 910 200 280">Pocket Quest added</Button>
+        <Button data-rect="560 910 200 280">Couch Runner</Button>
+      </FocusSection>
     </InputProvider>,
   );
   act(() => screen.getByText("Resume · View details").focus());
@@ -524,6 +529,35 @@ it("down from the hero goes to the shelf below it, not a card in its column furt
   act(() => screen.getByText("Couch Runner").focus());
   pad.press("nav.up");
   expect(focused()).toBe("View all → added");
+});
+
+it("down from the top of a settings panel stays in it, not on the tabs beside it", () => {
+  const pad = padSource();
+  render(
+    <InputProvider console subscribe={pad.subscribe}>
+      <FocusSection id="main">
+        {/* The tabs, a strip at the side, start lower than the panel's top. */}
+        <FocusSection id="settings-nav" data-rect="340 140 260 800">
+          <Button data-rect="340 160 260 48">General</Button>
+          <Button data-rect="340 212 260 48">Library Discovery</Button>
+        </FocusSection>
+        {/* The panel's full-width top row, then two columns of rows. */}
+        <Button data-rect="1380 100 160 32">Reset to defaults</Button>
+        <div data-cs="setting-row" data-rect="640 230 440 64">
+          <Button data-rect="1020 250 44 24">Launch on system startup</Button>
+        </div>
+        <div data-cs="setting-row" data-rect="1100 230 440 64">
+          <Button data-rect="1380 250 140 32">When a game launches</Button>
+        </div>
+      </FocusSection>
+    </InputProvider>,
+  );
+  act(() => screen.getByText("Reset to defaults").focus());
+  pad.press("nav.down");
+  expect(focused()).toBe("When a game launches");
+  // Left along the row is the other column's switch, before the tabs.
+  pad.press("nav.left");
+  expect(focused()).toBe("Launch on system startup");
 });
 
 it("a settings row is one stop going up and down, wherever its control sits", async () => {
