@@ -51,7 +51,7 @@ pnpm workspace (`apps/*`, `packages/*`), with `just` wrappers for each command:
 
 - The desktop adapter emits only an `rlib`: the app, bindings exporter and catalogue tool are Rust binaries. Do not reintroduce the Tauri mobile template's `staticlib`/`cdylib` outputs for this desktop-only crate.
 - Dev builds use `debug = "line-tables-only"`, and dependencies have no debug info (root `Cargo.toml`). Backtraces still show file:line. For a debugger session, build with `CARGO_PROFILE_DEV_DEBUG=full`.
-- `just build-timings` builds the desktop binaries with Cargo's HTML timing report. [Build performance](docs/build-performance.md) explains the CI scopes, nightly/opt-in bundles and how to measure a change without cleaning the shared target.
+- `just build-timings` builds the desktop binaries with Cargo's HTML timing report. [Build performance](docs/build-performance.md) explains the CI scopes (`.github/workflows/ci.yml`) and how to measure a change without cleaning the shared target.
 - Each crate's integration tests compile into one `it` binary: `autotests = false` plus `[[test]] name = "it"` in its `Cargo.toml`, and `tests/main.rs` declares each `tests/<file>.rs` as a module. A new test file needs a `mod <file>;` line in `main.rs`. Run one file with `cargo test -p <crate> --test it <file>::`; insta snapshots are named `it__<file>__<name>.snap`. A few binaries stay separate (installer `cli` and `performance`, discovery `performance`) because CI runs them by name. `tests/fixtures/support/mod.rs` is declared once in `main.rs` and imported with `use crate::fixtures;`.
 
 ## App build, lint and test

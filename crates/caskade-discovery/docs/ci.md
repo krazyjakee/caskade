@@ -1,20 +1,23 @@
 # Discovery CI on GitHub Actions
 
-`.github/workflows/discovery.yml` runs on GitHub-hosted runners (`ubuntu-24.04`,
-`windows-latest`, `macos-latest`); the repository is public, so they cost
-nothing and no self-hosted runner is involved. Pull requests run it when their
-changes reach `caskade-discovery` (`scripts/ci-scope.py`,
+The `discovery` and `discovery-live` jobs of `.github/workflows/ci.yml` run on
+GitHub-hosted runners (`ubuntu-24.04`, `windows-latest`, `macos-latest`); the
+repository is public, so they cost nothing and no self-hosted runner is
+involved. Pull requests run `discovery` when their changes reach
+`caskade-discovery` (`scripts/ci-scope.py`,
 [build performance](../../../docs/build-performance.md)); master pushes and
-manual runs always do. `.github/workflows/discovery-nightly.yml` runs the fuzz
-targets and the performance budget (see [the fuzz README](../fuzz/README.md)).
+manual runs always do. CI runs neither the fuzz targets nor the release
+performance budget; run them by hand ([the fuzz README](../fuzz/README.md)).
 
 ## Jobs and reports
 
 | Job | Trigger | Runners | Checks |
 | --- | --- | --- | --- |
-| `check` | master push, pull request the scope selects, manual | Linux, Windows, macOS | discovery-only fmt; all-feature build and strict Clippy; fixture/parser suite; doc tests; baseline and every isolated feature; fixture privacy/hashes/size; Linux cross-target Clippy |
-| `result` | every run | Linux | fails if a selected `check` leg failed or did not run; succeeds for an unaffected pull request |
-| `live` | pull request carrying `run-native`, or manual run with `live` | Linux, Windows, macOS | only ignored live invariant tests, serially |
+| `discovery` | master push, pull request the scope selects, manual | Linux, Windows, macOS | discovery-only fmt; all-feature build and strict Clippy; fixture/parser suite; doc tests; baseline and every isolated feature; fixture privacy/hashes/size; Linux cross-target Clippy |
+| `discovery-live` | pull request carrying `run-native` | Linux, Windows, macOS | only ignored live invariant tests, serially |
+
+`ci result`, the workflow's one required check, fails if a selected leg failed
+or did not run, and succeeds for a pull request that doesn't reach discovery.
 
 Actions are pinned to commit SHAs. Checkout does not retain Git credentials.
 The matrix does not stop other OS jobs when one fails. Nextest reports are kept
@@ -86,7 +89,7 @@ python3 scripts/discovery-ci.py cross --dry-run
 The fixture suite uses the recorded machine trees on Linux for all OS profiles.
 Live Windows registry parity, representative installed-launcher invariants on each
 OS remain on #71's deferred-native checklist until performed. Native all-feature
-Windows and macOS runs happen on every `check` run since the move to GitHub (#35).
+Windows and macOS runs happen on every `discovery` run since the move to GitHub (#35).
 
 Reference: [nextest configuration](https://nexte.st/docs/configuration/).
 

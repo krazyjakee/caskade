@@ -8,11 +8,13 @@ binary per crate. Local Cargo incremental compilation stays enabled.
 
 ## Pull requests and master
 
-The app, installer and discovery workflows (`.github/workflows/`, on
-GitHub-hosted runners) run `scripts/ci-scope.py` in a full-history checkout of
-the pull request. They run on the `pull_request` event with a read-only token and
-no secrets, so pull requests from forks get the same checks. The selector uses a merge-base diff with renames expanded into
-deleted/added paths, and derives transitive local dependencies from Cargo
+`.github/workflows/ci.yml` runs every check on GitHub-hosted runners: the app's
+frontend, Rust, Windows cross-Clippy and console e2e jobs, the installer and
+discovery crates on Linux, Windows and macOS, and the translation catalogs. Its
+`changes` job runs `scripts/ci-scope.py` in a full-history checkout of the pull
+request. Pull requests run on the `pull_request` event with a read-only token and
+no secrets, so pull requests from forks get the same checks. The selector uses a
+merge-base diff with renames expanded into deleted/added paths, and derives transitive local dependencies from Cargo
 manifests, including target, build and dev dependencies.
 
 | Change | PR checks |
@@ -26,22 +28,22 @@ manifests, including target, build and dev dependencies.
 
 A changed crate's README and doctests still select its Rust checks. Unknown or
 unavailable diff information selects all checks; it never silently skips them.
-Every workflow has a `result` job that fails if a selected job failed or did not
-run, and succeeds explicitly for unaffected PRs. Select these aggregate jobs if
-configuring required checks.
+The `ci result` job fails if a selected job failed or did not run, and succeeds
+explicitly for an unaffected PR. Make it the required check.
 
-Every master push and manual run retains the full native, cross-target and
-console e2e checks. PRs can opt into console e2e with the `run-e2e` label, or
-both console e2e and packaging with `run-bundle`. Bundles run nightly at 04:17 UTC and on manual runs with the
-`bundle` input enabled; ordinary master pushes no longer build deb/AppImage
-packages. Signed release builds on GitHub are unchanged.
+Every master push and manual run runs the full native, cross-target and console
+e2e checks, and the installer's Linux native profile. PRs can opt into console
+e2e with the `run-e2e` label, and into the installer's native profile and
+discovery's live-machine checks with `run-native`. CI builds no deb/AppImage
+packages: `release.yml` builds and signs every platform's bundles from a tag, and
+`just build-app` builds a debug bundle locally.
 
 The app's Rust suites run in one Cargo invocation to unify dependency features
 once. The emulation fixture step prepares the helper and tests definitions and
 fixtures; the combined suite runs the core's emulation tests once, along with
 all other core tests.
 
-Each workflow's `concurrency` block cancels a pull request's superseded run when
+The workflow's `concurrency` block cancels a pull request's superseded run when
 a new commit arrives; master runs are never cancelled.
 
 Run the selector's regression tests with:
