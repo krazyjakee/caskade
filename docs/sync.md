@@ -1293,7 +1293,7 @@ endpoint for the process lifetime and calls `SyncEndpoint::shutdown` at exit.
   (`caskade_sync::testing::local_relay`, the `test-utils` feature): the
   library syncs, the link says `relay`, and a copy waits for a direct
   connection with no game bytes moved.
-- CI: the app workflow's Rust suites (`.gitea/workflows/app.yml`) run
+- CI: the app workflow's Rust suites (`.github/workflows/app.yml`) run
   `caskade-sync`'s tests with the core's on Linux on every change to either,
   and its Windows GNU cross Clippy builds them for Windows. No test reaches
   the internet: endpoints are on loopback or a local relay, mDNS runs on this

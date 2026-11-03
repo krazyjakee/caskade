@@ -7,8 +7,7 @@ name: release
 # CLI's `signer sign` on the legs' artifacts. Publishing the draft by hand is
 # what ships it: the in-app updater
 # reads releases/latest/download/latest.json, and releases/latest skips
-# drafts. This runs only on GitHub Actions (Gitea runs .gitea/workflows/ and
-# ignores this folder). See docs/RELEASING.md.
+# drafts. See docs/RELEASING.md.
 on:
   push:
     tags: ["v*"]
@@ -251,7 +250,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # The committed config leaves createUpdaterArtifacts off, so local and
-      # Gitea builds need no key. A file rather than inline JSON, so no
+      # CI builds need no key. A file rather than inline JSON, so no
       # shell on any runner has to keep the quotes. With it on, the bundler
       # also makes macOS's updater bundle (Caskade.app.tar.gz); --no-sign
       # below leaves the signatures to the sign job.
