@@ -336,6 +336,29 @@ async fn turned_off_every_download_goes_to_the_source() {
     assert!(deck.downloads.announce(&desk.id().await).await.is_none());
 }
 
+/// A kept download whose file went (a cache clean) is offered no longer,
+/// and its place in the copy store is let go of.
+#[tokio::test(flavor = "multi_thread")]
+async fn a_kept_download_whose_file_is_gone_is_offered_no_longer() {
+    let desk = core("Desk").await;
+    let deck = core("Deck").await;
+    pair(&desk, &deck).await;
+    let server = source().await;
+    desk.installed(format!("{}/fixture-runner-1.1.zip", server.uri()))
+        .await;
+    let deck_id = deck.id().await;
+    assert!(desk.downloads.announce(&deck_id).await.is_some());
+    let kept = desk.dir.path().join("cache/peer-downloads");
+    for entry in std::fs::read_dir(&kept).unwrap().flatten() {
+        if entry.path().is_dir() {
+            std::fs::remove_dir_all(entry.path()).unwrap();
+        }
+    }
+    assert!(desk.downloads.announce(&deck_id).await.is_none());
+    let index = std::fs::read_to_string(kept.join("index.json")).unwrap();
+    assert_eq!(index.trim(), "[]");
+}
+
 const PLATFORMS: &str = r#"
 [[platform]]
 id = "sony_playstation"

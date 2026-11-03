@@ -723,6 +723,8 @@ faster, without spending the connection, and with no internet at all.
   strong ETag, or a Last-Modified date the source's clock vouches for;
   `DownloadedFile::validator`). Kept files past 32 GiB go oldest first, and
   only when a new one is kept, which is after a download from the internet.
+  One whose file is gone or changed size (a cache clean) is let go of, its
+  copy-store tag released, before the next exchange tells anyone about it.
 - **Telling.** Each exchange's blob round carries a `download` note
   (`BlobKind`, governed by its own setting) listing them. The device that
   tells lets the other fetch each one through the copy gate.

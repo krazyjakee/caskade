@@ -138,10 +138,7 @@ impl PeerDownloads {
             .ok()
             .and_then(|bytes| serde_json::from_slice(&bytes).ok())
             .unwrap_or_default();
-        let kept = kept
-            .into_iter()
-            .filter(|kept| dir.join(&kept.sha256).join(&kept.name).is_file())
-            .collect();
+        // Files gone since are let go of (their tags too) by `tidy`.
         Self {
             inner: Arc::new(Inner {
                 transfers,
@@ -162,6 +159,37 @@ impl PeerDownloads {
     /// How many downloads `device_id` said it keeps, at the last exchange.
     pub fn heard_from(&self, device_id: &str) -> usize {
         lock(&self.inner.heard).get(device_id).map_or(0, Vec::len)
+    }
+
+    /// Lets go of kept downloads whose file is gone or changed size (a
+    /// cache clean, a folder deleted by hand): serving a missing file would
+    /// spoil it in the copy store that copies and shares use too.
+    async fn tidy(&self) {
+        let mut kept = self.inner.kept.lock().await;
+        let dir = &self.inner.dir;
+        let mut gone = Vec::new();
+        kept.retain(|entry| {
+            let intact = std::fs::metadata(dir.join(&entry.sha256).join(&entry.name))
+                .is_ok_and(|metadata| metadata.is_file() && metadata.len() == entry.size);
+            if !intact {
+                gone.push(entry.sha256.clone());
+            }
+            intact
+        });
+        if gone.is_empty() {
+            return;
+        }
+        self.save(&kept);
+        drop(kept);
+        for sha in gone {
+            tracing::info!(sha, "a kept download's file is gone");
+            let _ = self
+                .inner
+                .transfers
+                .release(&format!("download:{sha}"))
+                .await;
+            let _ = tokio::fs::remove_dir_all(self.inner.dir.join(sha)).await;
+        }
     }
 
     async fn on(&self) -> bool {
@@ -557,6 +585,7 @@ impl BlobKind for PeerDownloads {
             return None;
         }
         let id = peer.parse().ok()?;
+        self.tidy().await;
         let kept = self.inner.kept.lock().await.clone();
         let kept: Vec<Kept> = kept
             .into_iter()
