@@ -149,12 +149,13 @@ python3 xtask/windows-fixtures.py --families inno,msi \
   --only gog-inno-unity,legacy-registry-path,msi-plus-cab
 ```
 
-The refresh workflow skeleton in `.gitea/workflows/installer-fixtures.yml`
-builds Inno/NSIS on Windows, MSI/SFX/archives on Linux, combines only outputs
-produced by each job, checks the lock/budgets, and pushes a review branch/opens
-a Gitea PR. #22 must configure runner labels/tools and FIXTURE_PR_TOKEN. It never
-executes untrusted PR code. Native Windows/macOS T2/T4 remain #22 gates; builder
-and independent extraction evidence do not substitute for those pipeline tests.
+The refresh workflow `.github/workflows/installer-fixtures.yml` builds Inno/NSIS
+on Windows, MSI/SFX/archives, Burn and the Linux minis on Linux and the native
+macOS fixtures on macOS (GitHub-hosted runners), combines only outputs produced
+by each job, checks the lock/budgets, and pushes `automation/installer-fixtures`
+and opens a PR (see [CI setup](../../docs/ci.md#fork-boundary) for the token).
+It never executes untrusted PR code. Builder and independent extraction evidence
+do not substitute for the native Windows/macOS pipeline tests in `installer-pr`.
 
 
 ## Linux shell fixtures for #37

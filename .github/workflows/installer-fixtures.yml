@@ -57,12 +57,13 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Wine, MinGW, dpkg, 7-Zip and Flatpak
+      - name: Wine, MinGW, dpkg, 7-Zip, Flatpak and the libraries the unpacked msitools need
         run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            wine wine32 wine64 xvfb xauth gcc-mingw-w64-x86-64 dpkg-dev p7zip-full flatpak
+            wine wine32 wine64 xvfb xauth gcc-mingw-w64-x86-64 dpkg-dev p7zip-full flatpak \
+            libgsf-1-114 libgcab-1.0-0
       - name: Provision the pinned official sidecar
         run: python3 scripts/7zz-download.py --platform linux-x64
       - name: Build MSI, SFX and portable mini installers

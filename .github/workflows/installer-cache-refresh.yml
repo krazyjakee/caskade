@@ -27,6 +27,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends xvfb xauth libvulkan1 libgl1 libegl1 libgl1-mesa-dri
+          # Ubuntu's AppArmor refuses unprivileged user namespaces, which
+          # Steam Runtime's bwrap (pressure-vessel) and Flatpak need.
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       - name: Download the pinned umu and let it fetch the Steam Runtime and UMU-Proton
         run: xvfb-run -a python3 xtask/runner/warm-proton.py --cache ~/caskade-cache
       - name: Drop the previous cache entry

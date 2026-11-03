@@ -38,6 +38,34 @@ def sla_resources(text):
             'STR#': [resource(strings, 'English')], 'TEXT': [resource(text.encode('mac_roman'), 'English SLA')]}
 
 
+
+def embed_resources(image, resources):
+    """Add classic resources to a UDIF image's XML, as `hdiutil udifrez` did.
+
+    Current macOS no longer runs udifrez, so the plist after the data fork is
+    rewritten here and the `koly` trailer (UDIF version 4, 512 bytes, XML span
+    at 216/224) points at it. The data fork and its checksums are unchanged.
+    """
+    data = image.read_bytes()
+    trailer = bytearray(data[-512:])
+    if trailer[:4] != b'koly' or struct.unpack_from('>II', trailer, 4) != (4, 512):
+        raise RuntimeError('not a UDIF version 4 image')
+    offset, length = struct.unpack_from('>QQ', trailer, 216)
+    if offset + length != len(data) - 512:
+        raise RuntimeError('UDIF XML is not directly before the trailer')
+    plist = plistlib.loads(data[offset:offset + length])
+    plist.setdefault('resource-fork', {}).update(resources)
+    xml = plistlib.dumps(plist)
+    struct.pack_into('>Q', trailer, 224, len(xml))
+    image.write_bytes(data[:offset] + xml + bytes(trailer))
+
+
+def image_resources(image):
+    data = image.read_bytes()
+    offset, length = struct.unpack_from('>QQ', data[-512:], 216)
+    return plistlib.loads(data[offset:offset + length]).get('resource-fork', {})
+
+
 def source_check():
     pin = json.loads((SOURCE / 'builder.json').read_text())
     required = {'mac-native-app-zip', 'mac-dmg-udzo', 'mac-dmg-ulfo', 'mac-dmg-sla',
@@ -118,15 +146,15 @@ def build(output, pin):
         job = Path(temp); stage = job / 'stage'; stage.mkdir(); app = native_bundle(stage, job / 'build', pin)
         run(['ditto', '-c', '-k', '--norsrc', '--keepParent', app, binary / 'mac-native-app-zip.zip'])
         expectation(output, 'mac-native-app-zip', 'zip', stage)
-        resources = job / 'sla.plist'; resources.write_bytes(plistlib.dumps(sla_resources((SOURCE / 'license.txt').read_text())))
+        resources = sla_resources((SOURCE / 'license.txt').read_text())
         volume = job / 'volume'; shutil.copytree(stage, volume, symlinks=True); (volume / 'Applications').symlink_to('/Applications')
         for id, format in [('mac-dmg-udzo', 'UDZO'), ('mac-dmg-ulfo', 'ULFO'), ('mac-dmg-sla', 'UDZO')]:
             image = binary / (id + '.dmg')
             run(['hdiutil', 'create', '-srcfolder', volume, '-volname', 'CaskadeFixture', '-fs', 'HFS+', '-format', format, '-ov', image])
             if id == 'mac-dmg-sla':
-                run(['hdiutil', 'udifrez', '-xml', resources, image])
-                exported = run(['hdiutil', 'udifderez', '-xml', image], stdout=subprocess.PIPE).stdout
-                if b'LPic' not in exported or b'TEXT' not in exported:
+                embed_resources(image, resources)
+                exported = image_resources(image)
+                if 'LPic' not in exported or 'TEXT' not in exported:
                     raise RuntimeError('SLA resources missing from genuine image')
             run(['hdiutil', 'verify', image]); expectation(output, id, 'dmg', stage)
         for id, location in [('mac-native-pkg', '/Applications'), ('mac-native-pkg-system', pin['system_location'])]:

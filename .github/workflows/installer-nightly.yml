@@ -153,6 +153,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             flatpak dbus xvfb xauth libvulkan1 libgl1 libegl1 libgl1-mesa-dri time util-linux
+          # Ubuntu's AppArmor refuses unprivileged user namespaces, which
+          # Steam Runtime's bwrap (pressure-vessel) and Flatpak need.
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       - name: Rust toolchain
         run: |
           rustup toolchain install stable --profile minimal

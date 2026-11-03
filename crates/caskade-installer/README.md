@@ -385,15 +385,14 @@ custom TOML profiles, human/progress output, URL caching and installation,
 portable folders, ROM hand-off, structured errors and real SIGINT cancellation
 during a slow HTTP response.
 
-Gitea workflow coverage, nextest profiles and user-owned runner registration are
-documented in [CI setup](docs/ci.md). Native Windows/macOS evidence is pending
-runner registration; local cross-compilation is recorded separately.
+The GitHub Actions workflows (Linux, Windows and macOS on GitHub-hosted
+runners) and nextest profiles are documented in [CI setup](docs/ci.md).
 
 The [native Windows acceptance tests](docs/ci.md#native-fixture-evidence) share
 payload goldens with extraction, exercise all six Inno/NSIS/MSI mini installers
 through the CLI on every PR, and retain Windows OS command-line readback reports.
-The documented Wine replay is pre-evidence only; Windows runner and manual
-wizard checks remain required.
+The documented Wine replay is pre-evidence only; manual wizard checks remain
+required.
 
 Disc inputs use a verified `--seven-zip` sidecar without mounting images. PC ISO/UDF
 images select their validated nested installer and keep temporary contents alive

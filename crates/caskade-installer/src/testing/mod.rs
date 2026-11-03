@@ -46,12 +46,21 @@ impl FakeDiskSpace {
 
 impl DiskSpace for FakeDiskSpace {
     fn available_bytes(&self, _: &Path) -> io::Result<u64> {
-        Ok(self
-            .remaining
-            .fetch_update(Ordering::SeqCst, Ordering::SeqCst, |current| {
-                Some(current.saturating_sub(self.decrease))
-            })
-            .expect("update always succeeds"))
+        // Rust 1.99 renamed `fetch_update` to `try_update`, which the MSRV
+        // lacks: the same compare-exchange loop, spelled out.
+        let mut current = self.remaining.load(Ordering::SeqCst);
+        loop {
+            let next = current.saturating_sub(self.decrease);
+            match self.remaining.compare_exchange_weak(
+                current,
+                next,
+                Ordering::SeqCst,
+                Ordering::SeqCst,
+            ) {
+                Ok(previous) => return Ok(previous),
+                Err(actual) => current = actual,
+            }
+        }
     }
 }
 

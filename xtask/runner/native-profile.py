@@ -8,6 +8,9 @@ import shutil
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
+# Integration tests share one `it` binary, so the Proton suites are matched
+# by their module path.
+PROTON = 'test(/^(proton|perf_proton|moving_proton)::/)'
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -17,7 +20,7 @@ def main():
     environment['CASKADE_TEST_NATIVE'] = '1'
     command = ['flock', '/tmp/caskade-heavy.lock', 'cargo', 'nextest', 'run', '-p', 'caskade-installer',
                '--all-features', '--locked', '--profile', 'native', '--run-ignored', 'all', '-E',
-               'binary(/^(proton|perf_proton|moving_proton)$/)' if args.proton else 'not (binary(/^(proton|perf_proton|moving_proton)$/))']
+               PROTON if args.proton else f'not ({PROTON})']
     if args.proton and environment.get('GITHUB_ACTIONS') == 'true':
         command = ['xvfb-run', '-a', *command]
     if args.proton and os.geteuid() == 0:
