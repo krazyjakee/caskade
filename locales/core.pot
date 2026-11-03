@@ -3568,10 +3568,6 @@ msgctxt "settings"
 msgid "Maximum simultaneous downloads. Active downloads finish when this limit is lowered."
 msgstr ""
 
-#: crates/caskade-core/src/transfer/rom.rs
-msgid "no free folder name for it"
-msgstr ""
-
 #: crates/caskade-core/src/share/items.rs
 msgid "saves aren't available"
 msgstr ""
@@ -3592,10 +3588,6 @@ msgstr ""
 msgid "that isn't a web game"
 msgstr ""
 
-#: crates/caskade-core/src/transfer/rom.rs
-msgid "that isn't an emulated game"
-msgstr ""
-
 #: crates/caskade-core/src/share/items.rs
 msgid "save it for offline play first: only an offline copy can be shared"
 msgstr ""
@@ -3607,18 +3599,6 @@ msgstr ""
 
 #: crates/caskade-core/src/share/items.rs
 msgid "the offline copy's files aren't there"
-msgstr ""
-
-#: crates/caskade-core/src/transfer/rom.rs
-msgid "that game isn't on this device"
-msgstr ""
-
-#: crates/caskade-core/src/transfer/rom.rs
-msgid "that game has no ROM files to share"
-msgstr ""
-
-#: crates/caskade-core/src/transfer/rom.rs
-msgid "a ROM file of that game isn't there"
 msgstr ""
 
 #: crates/caskade-core/src/share/items.rs
@@ -3641,10 +3621,6 @@ msgstr ""
 
 #: crates/caskade-core/src/share/items.rs
 msgid "that isn't a web game's offline copy"
-msgstr ""
-
-#: crates/caskade-core/src/transfer/rom.rs
-msgid "that storage location is gone"
 msgstr ""
 
 #: crates/caskade-core/src/share/items.rs
@@ -4372,6 +4348,30 @@ msgstr ""
 
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "{device} can't be reached directly yet: the copy waits for a direct connection"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/rom.rs
+msgid "no free folder name for it"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/rom.rs
+msgid "that game isn't on this device"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/rom.rs
+msgid "that isn't an emulated game"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/rom.rs
+msgid "that game has no ROM files to share"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/rom.rs
+msgid "a ROM file of that game isn't there"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/rom.rs
+msgid "that storage location is gone"
 msgstr ""
 
 #: crates/caskade-core/src/updates/github.rs

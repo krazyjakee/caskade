@@ -3570,10 +3570,6 @@ msgctxt "settings"
 msgid "Maximum simultaneous downloads. Active downloads finish when this limit is lowered."
 msgstr "Högsta antal samtidiga nedladdningar. Pågående nedladdningar slutförs när gränsen sänks."
 
-#: crates/caskade-core/src/transfer/rom.rs
-msgid "no free folder name for it"
-msgstr "det finns inget ledigt mappnamn för den"
-
 #: crates/caskade-core/src/share/items.rs
 msgid "saves aren't available"
 msgstr "sparningar är inte tillgängliga"
@@ -3594,10 +3590,6 @@ msgstr "den sparningens filer finns bara där den här enheten har dem, så de k
 msgid "that isn't a web game"
 msgstr "det är inte ett webbspel"
 
-#: crates/caskade-core/src/transfer/rom.rs
-msgid "that isn't an emulated game"
-msgstr "det är inte ett emulerat spel"
-
 #: crates/caskade-core/src/share/items.rs
 msgid "save it for offline play first: only an offline copy can be shared"
 msgstr "spara det för spel utan uppkoppling först: bara en offlinekopia kan delas"
@@ -3610,18 +3602,6 @@ msgstr "spelets lagring är inte tillgänglig"
 #: crates/caskade-core/src/share/items.rs
 msgid "the offline copy's files aren't there"
 msgstr "offlinekopians filer finns inte där"
-
-#: crates/caskade-core/src/transfer/rom.rs
-msgid "that game isn't on this device"
-msgstr "det spelet finns inte på den här enheten"
-
-#: crates/caskade-core/src/transfer/rom.rs
-msgid "that game has no ROM files to share"
-msgstr "det spelet har inga ROM-filer att dela"
-
-#: crates/caskade-core/src/transfer/rom.rs
-msgid "a ROM file of that game isn't there"
-msgstr "en ROM-fil för det spelet finns inte där"
 
 #: crates/caskade-core/src/share/items.rs
 #: crates/caskade-core/src/transfer/rom.rs
@@ -3644,10 +3624,6 @@ msgstr "en samling har inga filer att ta emot"
 #: crates/caskade-core/src/share/items.rs
 msgid "that isn't a web game's offline copy"
 msgstr "det är inte en offlinekopia av ett webbspel"
-
-#: crates/caskade-core/src/transfer/rom.rs
-msgid "that storage location is gone"
-msgstr "den lagringsplatsen finns inte längre"
 
 #: crates/caskade-core/src/share/items.rs
 msgid "that link doesn't share a collection"
@@ -4375,6 +4351,30 @@ msgstr "Bara ett relä når {device}: kopian väntar på en direkt anslutning"
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "{device} can't be reached directly yet: the copy waits for a direct connection"
 msgstr "{device} går inte att nå direkt än: kopian väntar på en direkt anslutning"
+
+#: crates/caskade-core/src/transfer/rom.rs
+msgid "no free folder name for it"
+msgstr "det finns inget ledigt mappnamn för den"
+
+#: crates/caskade-core/src/transfer/rom.rs
+msgid "that game isn't on this device"
+msgstr "det spelet finns inte på den här enheten"
+
+#: crates/caskade-core/src/transfer/rom.rs
+msgid "that isn't an emulated game"
+msgstr "det är inte ett emulerat spel"
+
+#: crates/caskade-core/src/transfer/rom.rs
+msgid "that game has no ROM files to share"
+msgstr "det spelet har inga ROM-filer att dela"
+
+#: crates/caskade-core/src/transfer/rom.rs
+msgid "a ROM file of that game isn't there"
+msgstr "en ROM-fil för det spelet finns inte där"
+
+#: crates/caskade-core/src/transfer/rom.rs
+msgid "that storage location is gone"
+msgstr "den lagringsplatsen finns inte längre"
 
 #: crates/caskade-core/src/updates/github.rs
 msgid "GitHub's address can't have a path"
