@@ -149,3 +149,17 @@ The macOS bundle identifiers were checked against the projects' build files:
 [mGBA](https://github.com/mgba-emu/mgba/blob/master/src/platform/qt/CMakeLists.txt),
 [Cemu](https://github.com/cemu-project/Cemu/blob/main/src/CMakeLists.txt), and
 [RPCS3](https://github.com/RPCS3/rpcs3/blob/master/rpcs3/rpcs3.plist.in).
+
+## Configuration that syncs
+
+`[config].files` lists path/glob templates for an emulator's own
+configuration that travels between the user's devices while Emulator
+configuration syncs (#275, `sync::config_files`). A trailing `**` takes every
+file under a folder. Each file is named on other devices by the deepest of the
+definition's variables (or built-in folders) holding it, so declare a variable
+for the folder (`config` below) and the file lands in each device's own copy of
+it. Only RetroArch declares one so far:
+
+| Emulator | `{config}` | What's in it |
+| --- | --- | --- |
+| RetroArch | `config_directory`: `{EmulatorDir}/config` (Windows), `{XdgConfig}/retroarch/config` (Linux), inside the Flatpak's `config/retroarch`, `{AppSupport}/RetroArch/config` (macOS) | Input remaps, core and game overrides, core options, shader presets |

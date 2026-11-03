@@ -18,6 +18,7 @@ const scannersKey = ["emulation", "settings", "scanners"] as const;
 export const scanJobsKey = ["emulation", "scans"] as const;
 /** Under `emulationKey`, so a configuration change refetches them. */
 const missingKey = ["emulation", "settings", "missing"] as const;
+const fromDevicesKey = ["emulation", "settings", "fromDevices"] as const;
 const installableKey = ["emulation", "settings", "installable"] as const;
 const setupJobsKey = ["emulation", "setup", "jobs"] as const;
 /** Keeps the newest revision of every install, oldest first. */
@@ -117,6 +118,23 @@ export function useMissingEmulators() {
   return useQuery({
     queryKey: missingKey,
     queryFn: () => setup?.missing() ?? Promise.resolve([]),
+  });
+}
+/** Emulators the user's other devices prefer that this one lacks (#275). */
+export function useEmulatorOffers() {
+  const { setup } = useEmulationApi();
+  return useQuery({
+    queryKey: fromDevicesKey,
+    queryFn: () => setup?.fromDevices() ?? Promise.resolve([]),
+  });
+}
+/** Keeps this device's emulator for a platform instead of another device's. */
+export function useKeepEmulator() {
+  const { setup } = useEmulationApi();
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (platformId: string) => setup?.keepMine(platformId) ?? Promise.resolve(),
+    onSettled: () => client.invalidateQueries({ queryKey: fromDevicesKey }),
   });
 }
 export function useInstallable() {

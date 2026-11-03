@@ -4,6 +4,7 @@ import { useState } from "react";
 import { afterEach, expect, it, vi } from "vitest";
 import type { EmulationApi, EmulationSnapshot } from "../../../api/emulation";
 import { createEmulationFixtureApi } from "../../../api/emulationFixtures";
+import { createEmulatorSetupFixtureApi } from "../../../api/emulatorSetupFixtures";
 import { EmulationPanel, type EmulationSection } from "./EmulationPanel";
 import { EmulationProvider } from "./EmulationProvider";
 
@@ -315,4 +316,54 @@ it("gets a platform's missing BIOS files from RomM", async () => {
   fireEvent.click(within(row).getByRole("button", { name: "Get from RomM" }));
   await within(row).findByText("Got scph5500.bin.");
   expect(fetchBios).toHaveBeenCalledWith("ps1");
+});
+it("offers the emulator another device uses for a platform, installing nothing unasked (#275)", async () => {
+  const offer = (platformId: string, platformName: string) => ({
+    platformId,
+    platformName,
+    definitionId: "dolphin",
+    emulatorName: "Dolphin",
+    deviceId: "kids-pc",
+    deviceName: "Kids' PC",
+    installable: true,
+  });
+  const api = {
+    ...createEmulationFixtureApi(),
+    setup: createEmulatorSetupFixtureApi({
+      fromDevices: [
+        offer("nintendo_gamecube", "Nintendo GameCube"),
+        {
+          ...offer("nintendo_wii", "Nintendo Wii"),
+          definitionId: "cemu",
+          emulatorName: "Cemu",
+          installable: false,
+        },
+      ],
+    }),
+  };
+  const install = vi.spyOn(setupOf(api), "install");
+  const keepMine = vi.spyOn(setupOf(api), "keepMine");
+  mount(api);
+  const region = await screen.findByRole("region", { name: "From your other devices" });
+  const gamecube = itemOf(region, "Nintendo GameCube");
+  expect(within(gamecube).getByText("Kids' PC uses Dolphin")).toBeTruthy();
+  const wii = itemOf(region, "Nintendo Wii");
+  expect(within(wii).getByText("Caskade can't install Cemu on this system.")).toBeTruthy();
+  // Shown, and nothing installs by itself.
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  expect(install).not.toHaveBeenCalled();
+
+  // Keep mine sets the other device's choice aside.
+  fireEvent.click(
+    within(wii).getByRole("button", { name: "Keep this device's emulator for Nintendo Wii" }),
+  );
+  await waitFor(() => expect(keepMine).toHaveBeenCalledWith("nintendo_wii"));
+  await waitFor(() => expect(screen.queryByText("Nintendo Wii")).toBeNull());
+
+  // Install: one click, then the offer is gone.
+  fireEvent.click(within(gamecube).getByRole("button", { name: "Install Dolphin" }));
+  await waitFor(() => expect(install).toHaveBeenCalledWith("dolphin"));
+  await waitFor(() =>
+    expect(screen.queryByRole("region", { name: "From your other devices" })).toBeNull(),
+  );
 });

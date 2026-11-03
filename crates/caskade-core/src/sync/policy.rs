@@ -26,10 +26,11 @@ pub enum Category {
     GameScripts,
     PreferredEmulators,
     Addons,
+    EmulatorConfig,
 }
 
 impl Category {
-    pub const ALL: [Self; 12] = [
+    pub const ALL: [Self; 13] = [
         Self::Library,
         Self::Artwork,
         Self::AchievementLinks,
@@ -42,13 +43,16 @@ impl Category {
         Self::GameScripts,
         Self::PreferredEmulators,
         Self::Addons,
+        Self::EmulatorConfig,
     ];
 
     pub const fn disposition(self) -> Disposition {
         match self {
-            Self::LaunchActions | Self::GameScripts | Self::PreferredEmulators | Self::Addons => {
-                Disposition::Optional
-            }
+            Self::LaunchActions
+            | Self::GameScripts
+            | Self::PreferredEmulators
+            | Self::Addons
+            | Self::EmulatorConfig => Disposition::Optional,
             Self::Library
             | Self::Artwork
             | Self::AchievementLinks

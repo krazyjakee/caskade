@@ -1,6 +1,12 @@
 /** Synthetic one-click emulator installs for the browser preview and
  * tests: installs finish after a short download. */
-import type { EmulatorSetupApi, Installable, MissingPlatform, SetupJob } from "./emulatorSetup";
+import type {
+  EmulatorOffer,
+  EmulatorSetupApi,
+  Installable,
+  MissingPlatform,
+  SetupJob,
+} from "./emulatorSetup";
 
 const fixtureCatalog: Installable[] = [
   {
@@ -69,8 +75,11 @@ const fixtureCatalog: Installable[] = [
   },
 ];
 
-export function createEmulatorSetupFixtureApi(): EmulatorSetupApi {
+export function createEmulatorSetupFixtureApi(
+  options: { fromDevices?: EmulatorOffer[] } = {},
+): EmulatorSetupApi {
   let catalog = structuredClone(fixtureCatalog);
+  let offers = structuredClone(options.fromDevices ?? []);
   let missing: MissingPlatform[] = [
     {
       platformId: "sony_playstation",
@@ -139,6 +148,8 @@ export function createEmulatorSetupFixtureApi(): EmulatorSetupApi {
           : row,
       );
       missing = missing.filter((row) => !platforms.includes(row.platformId));
+      // Installed here: the other device's choice applies.
+      offers = offers.filter((offer) => offer.definitionId !== definitionId);
       emit({
         ...job,
         revision: 1,
@@ -185,6 +196,10 @@ export function createEmulatorSetupFixtureApi(): EmulatorSetupApi {
       missing: [],
       dir: "/home/you/.local/share/duckstation/bios",
     }),
+    fromDevices: async () => structuredClone(offers),
+    keepMine: async (platformId) => {
+      offers = offers.filter((offer) => offer.platformId !== platformId);
+    },
     cancel: async (jobId) => {
       const job = jobs.get(jobId);
       if (!job) throw new Error(`unknown emulator install ${jobId}`);

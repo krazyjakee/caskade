@@ -3,6 +3,7 @@ import { isTauri } from "@tauri-apps/api/core";
 import {
   type BiosFetch_Serialize,
   commands,
+  type DeviceEmulator,
   events,
   type Installable_Serialize,
   type ManagedEmulator_Serialize,
@@ -18,6 +19,8 @@ export type MissingPlatform = MissingPlatform_Serialize;
 export type SetupJob = SetupJob_Serialize;
 export type ManagedEmulator = ManagedEmulator_Serialize;
 export type BiosFetch = BiosFetch_Serialize;
+/** A platform's emulator on another device that this one lacks (#275). */
+export type EmulatorOffer = DeviceEmulator;
 
 export interface EmulatorSetupApi {
   /** Every emulator Caskade can install on this system. */
@@ -37,6 +40,11 @@ export interface EmulatorSetupApi {
   update(emulatorId: string): Promise<SetupJob>;
   /** Fetches a platform's missing BIOS files from RomM. */
   fetchBios(platformId: string): Promise<BiosFetch>;
+  /** Emulators the user's other devices use for a platform and this one
+   * doesn't have (#275). Nothing installs until asked. */
+  fromDevices(): Promise<EmulatorOffer[]>;
+  /** Keeps this device's emulator for the platform instead. */
+  keepMine(platformId: string): Promise<void>;
   subscribe(listener: (job: SetupJob) => void): Promise<() => void>;
 }
 
@@ -82,6 +90,10 @@ export function createNativeEmulatorSetupApi(): EmulatorSetupApi {
     skip: (emulatorId) => unwrap(commands.emulatorSetupSkip(emulatorId)),
     update: (emulatorId) => unwrap(commands.emulatorSetupUpdate(emulatorId)),
     fetchBios: (platformId) => unwrap(commands.emulatorSetupFetchBios(platformId)),
+    fromDevices: () => unwrap(commands.emulatorsFromDevices()),
+    keepMine: async (platformId) => {
+      await unwrap(commands.emulatorOfferKeep(platformId));
+    },
     subscribe: async (listener) =>
       isTauri()
         ? events.emulationSetupChanged.listen(({ payload }) => listener(payload))

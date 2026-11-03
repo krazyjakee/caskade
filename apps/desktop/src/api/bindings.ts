@@ -132,6 +132,16 @@ export const commands = {
 	 *  themes is This device only here, or before this device can sync.
 	 */
 	addonsFromDevices: () => typedError<DeviceAddon_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("addons_from_devices")),
+	/**
+	 *  Preferred emulators from paired devices waiting here for their
+	 *  emulator; empty while Preferred emulators is This device only.
+	 */
+	emulatorsFromDevices: () => typedError<DeviceEmulator[], ErrorReport_Serialize>(__TAURI_INVOKE("emulators_from_devices")),
+	/**
+	 *  Keeps this device's emulator for a platform instead of the one another
+	 *  device chose.
+	 */
+	emulatorOfferKeep: (platformId: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("emulator_offer_keep", { platformId })),
 	/**  What paired devices keep, as each last said when they synced. */
 	backupsOnDevices: () => typedError<DeviceBackups[], ErrorReport_Serialize>(__TAURI_INVOKE("backups_on_devices")),
 	/**
@@ -2982,6 +2992,21 @@ export type DeviceBackups = {
 	deviceName: string,
 	/**  Newest first. */
 	backups: HeldBackup[],
+};
+
+/**
+ *  A platform's emulator on another device that this device doesn't have
+ *  (#275): offered in Settings → Emulation, installed only when asked.
+ */
+export type DeviceEmulator = {
+	platformId: string,
+	platformName: string,
+	definitionId: string,
+	emulatorName: string,
+	deviceId: string,
+	deviceName: string,
+	/**  Caskade can install it on this system. */
+	installable: boolean,
 };
 
 export type DeviceKind = "desktop" | "laptop" | "handheld" | "tv";

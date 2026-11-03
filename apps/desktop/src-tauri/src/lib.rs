@@ -788,7 +788,24 @@ pub fn run() {
             if let Some(downloads) = peer_downloads {
                 sync.register_blobs(std::sync::Arc::new(downloads));
             }
+            // Emulators' configuration files, while Emulator configuration
+            // syncs (#275).
+            if let Some(emulation) = app.try_state::<caskade_core::emulation::EmulationService>() {
+                sync.register_blobs(std::sync::Arc::new(
+                    caskade_core::sync::config_files::EmulatorConfig::new(
+                        store.clone(),
+                        emulation.catalog(),
+                        &setup_paths.data,
+                    ),
+                ));
+            }
             app.manage(peer_backups);
+            // An emulator installed from another device's preference
+            // becomes the platform's default at once (#275).
+            background::supervise("preferred emulators", {
+                let (bus, sync) = (bus.clone(), sync.clone());
+                move || caskade_core::sync::offers::watch_emulators(&bus, sync.clone())
+            });
             background::supervise("presence", {
                 let (presence, bus, sync, devices) =
                     (presence.clone(), bus.clone(), sync.clone(), devices.clone());

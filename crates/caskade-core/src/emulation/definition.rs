@@ -78,6 +78,11 @@ pub struct EmulatorDefinition {
     /// are scanned recursively; ROM variables keep per-game saves separate.
     #[serde(default)]
     pub saves: DefinitionSaves,
+    /// Configuration that travels between the user's devices while
+    /// Emulator configuration syncs (#275): controller mappings, core
+    /// options, shader presets. Path/glob templates like `saves`'s.
+    #[serde(default)]
+    pub config: DefinitionConfig,
     /// Profiles in recommended order.
     #[serde(default, rename = "profile")]
     pub profiles: Vec<DefinitionProfile>,
@@ -131,6 +136,27 @@ impl EmulatorDefinition {
         })
     }
 
+    /// Expand the `[config]` patterns for this install, as `resolve_saves`
+    /// does the save patterns.
+    pub fn resolve_config(
+        &self,
+        os: OperatingSystem,
+        kind: InstallKind,
+        context: &super::VarContext,
+    ) -> Result<Vec<String>, String> {
+        let expander = super::vars::Expander {
+            vars: &self.vars,
+            os,
+            kind,
+            context,
+        };
+        self.config
+            .files
+            .iter()
+            .map(|pattern| expander.expand_glob(pattern))
+            .collect()
+    }
+
     /// The folders saves may sit under for this install, by name: the
     /// definition's variables (`{save_data}`) and the built-in folders
     /// (`{RomDir}`, `{EmulatorDir}`, …), each with its path here. Save
@@ -179,6 +205,15 @@ pub struct DefinitionSaves {
     pub files: Vec<String>,
     #[serde(default)]
     pub states: Vec<String>,
+}
+
+/// Files of an emulator's own configuration that sync (#275), as absolute
+/// path/glob templates; a trailing `**` takes every file under a folder.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct DefinitionConfig {
+    #[serde(default)]
+    pub files: Vec<String>,
 }
 
 /// Where to look for an emulator on each OS.

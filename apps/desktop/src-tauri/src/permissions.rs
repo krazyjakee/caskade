@@ -124,6 +124,8 @@ pub fn access(command: &str) -> Option<Access> {
         | "devices_playing"
         // Add-ons on the user's other devices (#245), offered to install.
         | "addons_from_devices"
+        // Emulators the user's other devices prefer (#275), offered.
+        | "emulators_from_devices"
         // The add-on catalogue (#181): reading it, and fetching it again.
         | "addons_catalogue"
         | "addons_catalogue_refresh"
@@ -246,6 +248,7 @@ pub fn access(command: &str) -> Option<Access> {
         | "emulation_game_set"
         | "emulator_setup_install"
         | "emulator_setup_install_for"
+        | "emulator_offer_keep"
         | "emulator_setup_cancel"
         | "emulator_setup_check"
         | "emulator_setup_skip"

@@ -17,8 +17,8 @@ Milestone: Devices, sync and sharing (#252).
 - **What syncs.** The library's user values, favourites, hidden games,
   collections, play history, accounts and PINs, artwork the user chose,
   achievement links, RomM servers (never their passwords), appearance and
-  saves; launch actions, game scripts, preferred emulators and add-ons when
-  the user turns them on. Installs, folders, emulators, store sign-ins and
+  saves; launch actions, game scripts, preferred emulators, emulator
+  configuration and add-ons when the user turns them on. Installs, folders, emulators, store sign-ins and
   caches never sync. Each category is Sync or This device only on each
   device. ("What a change is", "Settings → Devices".)
 - **Conflicts.** The later change to a field wins (hybrid logical clocks, so
@@ -408,7 +408,34 @@ Each opens its details, where installing a plugin goes through its review; one
 that isn't in the catalogue is named, with nothing to install. A preferred emulator is a platform's default emulator
 definition; it becomes this device's default only where this device has an
 emulator of that definition (with its first profile), and waits otherwise.
-Another device clearing its default clears nothing here.
+Another device clearing its default clears nothing here. A waiting one is
+offered in Settings → Emulation → Emulators under From your other devices
+(#275, `sync::offers::emulator_offers`, `emulators_from_devices`): the
+platform, the emulator and the device that chose it, with Install (one-click
+emulator setup, where Caskade can install it here) and Keep mine
+(`keep_emulator`, `emulator_offer_keep`: the waiting changes are set aside, so
+installing that emulator later changes nothing). Nothing installs by itself.
+When emulators change here (`EmulationChanged { scope: "emulators" }`),
+`offers::watch_emulators` applies what waited, so an emulator installed from
+the offer is the platform's default at once.
+
+Emulator configuration (#275, optional, `sync::config_files::EmulatorConfig`)
+carries the files an emulator's definition names in `[config]` (RetroArch:
+`{config}/**`, its config_directory, with input remaps, core and game
+overrides, core options and shader presets). It travels in the blob exchange
+like add-ons' offers, not the change log: each exchange's `emulatorConfig`
+note lists this device's files for every emulator it has, each by definition,
+named folder (from the definition's variables, as save versions name theirs)
+and path inside it, with its SHA-256, size and when it last changed. An index
+in `<data>/emulator-config/index.json` reads a file again only when its size
+or time changed. A file another device changed later is fetched (at most
+4 MiB) and written into this device's own folder of that name: the same
+RetroArch remap goes to `~/.config/retroarch/config/remaps/…` beside an
+AppImage, inside `~/.var/app/org.libretro.RetroArch/` for the Flatpak, and
+beside `retroarch.exe` on Windows. A file changed here since it was last seen
+is kept and goes the other way next time; a device without that emulator
+takes nothing, and removals aren't carried. Test:
+`cargo test -p caskade-core --test it emulator_config::`.
 
 Settings travel field by field (`sync::settings`), and only fields set away
 from their defaults: a device set up later would otherwise replace the
@@ -979,7 +1006,8 @@ Every control, section by section:
   minutes), and *Paste a pairing link from another device* with *Pair*.
 - **What syncs**: Sync or This device only for each of #227's categories
   (`core.sync.categories`), the synced ones first, then the optional ones
-  (launch actions, game scripts, preferred emulators, add-ons) that start
+  (launch actions, game scripts, preferred emulators, emulator
+  configuration, add-ons) that start
   This device only; and **Never synced**, what stays on each device. The
   Appearance, Accounts and RomM panels each have *Same on your other
   devices* (`core.sync.sections`, #244): off keeps that section on this

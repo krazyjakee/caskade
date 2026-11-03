@@ -87,3 +87,96 @@ async fn installed_here(pool: &sqlx::SqlitePool) -> Result<HashSet<String>> {
     }
     Ok(ids)
 }
+
+/// A platform's preferred emulator from another device that waits here
+/// because this device has no emulator of that definition (#275).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct EmulatorOffer {
+    pub platform_id: String,
+    /// The emulator definition the other device uses for it.
+    pub definition_id: String,
+    /// The device that chose it last.
+    pub device_id: String,
+}
+
+/// Every preferred emulator waiting for its emulator here, newest choice
+/// per platform; nothing while Preferred emulators is This device only.
+/// Installs nothing: the offer is the user's to take.
+pub async fn emulator_offers(engine: &SyncEngine) -> Result<Vec<EmulatorOffer>> {
+    if !engine
+        .categories()
+        .await
+        .allows(Category::PreferredEmulators)
+    {
+        return Ok(Vec::new());
+    }
+    let rows: Vec<(String, String, Option<String>)> = sqlx::query_as(
+        "SELECT key,origin,value_json FROM sync_changes WHERE applied=0 AND entity=? AND field='definition' \
+         ORDER BY wall,counter,origin",
+    )
+    .bind(Entity::PreferredEmulator.as_str())
+    .fetch_all(&engine.store().pool)
+    .await?;
+    // The newest choice per platform wins, a cleared one included.
+    let mut latest = std::collections::BTreeMap::new();
+    for (platform, origin, value) in rows {
+        let definition = value
+            .as_deref()
+            .and_then(|text| serde_json::from_str::<Value>(text).ok())
+            .and_then(|value| value.as_str().map(str::to_owned));
+        latest.insert(platform, (origin, definition));
+    }
+    Ok(latest
+        .into_iter()
+        .filter_map(|(platform_id, (device_id, definition))| {
+            Some(EmulatorOffer {
+                platform_id,
+                definition_id: definition?,
+                device_id,
+            })
+        })
+        .collect())
+}
+
+/// Keeps this device's emulator for `platform_id`: the waiting choice from
+/// other devices is set aside, so installing that emulator later changes
+/// nothing either.
+pub async fn keep_emulator(engine: &SyncEngine, platform_id: &str) -> Result<()> {
+    sqlx::query(
+        "UPDATE sync_changes SET applied=1,target=key WHERE applied=0 AND entity=? AND key=? \
+         AND field='definition'",
+    )
+    .bind(Entity::PreferredEmulator.as_str())
+    .bind(platform_id)
+    .execute(&engine.store().pool)
+    .await?;
+    Ok(())
+}
+
+#[cfg(feature = "net")]
+/// Applies waiting preferred emulators once emulators change here: one
+/// installed from an offer becomes the platform's default at once, not at
+/// the next exchange.
+pub fn watch_emulators(
+    bus: &crate::bus::Bus,
+    sync: super::SyncService,
+) -> tokio::task::JoinHandle<()> {
+    let mut events = bus.stream();
+    tokio::spawn(async move {
+        loop {
+            match events.recv().await {
+                Ok(crate::bus::Event::EmulationChanged { scope }) if scope == "emulators" => {
+                    let Some(engine) = sync.engine() else {
+                        continue;
+                    };
+                    if let Err(error) = engine.apply_pending().await {
+                        tracing::warn!(%error, "waiting preferred emulators not applied");
+                    }
+                }
+                Ok(_) | Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => {}
+                Err(tokio::sync::broadcast::error::RecvError::Closed) => break,
+            }
+        }
+    })
+}

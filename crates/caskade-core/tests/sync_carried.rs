@@ -452,6 +452,80 @@ async fn a_preferred_emulator_applies_where_that_emulator_is_installed() {
     );
 }
 
+/// #275: a preferred emulator the Laptop lacks is offered there, nothing
+/// installs, and Keep mine sets it aside for good.
+#[tokio::test]
+async fn a_preferred_emulator_missing_here_is_offered_and_can_be_set_aside() {
+    use caskade_core::sync::offers::{emulator_offers, keep_emulator};
+    let desk = device('a').await;
+    let laptop = device('b').await;
+    for device in [&desk, &laptop] {
+        set_category(device, "preferredEmulators", "sync").await;
+    }
+    emulator(&desk, "desk-mgba", "mgba").await;
+    emulator(&desk, "desk-duck", "duckstation").await;
+    for (platform, emulator, profile) in [
+        ("gba", "desk-mgba", "desk-mgba-gba"),
+        ("psx", "desk-duck", "desk-duck-gba"),
+    ] {
+        desk.store
+            .set_platform_settings(&caskade_core::emulation::PlatformSettings {
+                platform: platform.into(),
+                default: Some(caskade_core::emulation::ProfileRef {
+                    emulator_id: emulator.into(),
+                    profile_id: profile.into(),
+                }),
+                bios_dir: None,
+            })
+            .await
+            .unwrap();
+    }
+    sync(&desk, &laptop).await;
+    let offers = emulator_offers(&laptop.engine).await.unwrap();
+    let offered: Vec<_> = offers
+        .iter()
+        .map(|offer| (offer.platform_id.as_str(), offer.definition_id.as_str()))
+        .collect();
+    assert_eq!(offered, [("gba", "mgba"), ("psx", "duckstation")]);
+    assert_eq!(offers[0].device_id, desk.engine.device());
+    // Offered, not installed: the Laptop has no emulators.
+    assert!(laptop.store.emulators().await.unwrap().is_empty());
+    // The Desk has its own: nothing to offer there.
+    assert!(emulator_offers(&desk.engine).await.unwrap().is_empty());
+
+    // Keep mine: no longer offered, and installing it later changes nothing.
+    keep_emulator(&laptop.engine, "psx").await.unwrap();
+    let offers = emulator_offers(&laptop.engine).await.unwrap();
+    assert_eq!(offers.len(), 1);
+    assert_eq!(offers[0].platform_id, "gba");
+    emulator(&laptop, "laptop-duck", "duckstation").await;
+    laptop.engine.apply_pending().await.unwrap();
+    assert_eq!(default_emulator(&laptop, "psx").await, None);
+
+    // Installed: it applies, and the offer goes.
+    emulator(&laptop, "laptop-mgba", "mgba").await;
+    laptop.engine.apply_pending().await.unwrap();
+    assert_eq!(
+        default_emulator(&laptop, "gba").await.as_deref(),
+        Some("laptop-mgba")
+    );
+    assert!(emulator_offers(&laptop.engine).await.unwrap().is_empty());
+
+    // Preferred emulators This device only: nothing offered.
+    let settings = caskade_core::emulation::PlatformSettings {
+        platform: "snes".into(),
+        default: Some(caskade_core::emulation::ProfileRef {
+            emulator_id: "desk-mgba".into(),
+            profile_id: "desk-mgba-gba".into(),
+        }),
+        bios_dir: None,
+    };
+    set_category(&laptop, "preferredEmulators", "thisDeviceOnly").await;
+    desk.store.set_platform_settings(&settings).await.unwrap();
+    sync(&desk, &laptop).await;
+    assert!(emulator_offers(&laptop.engine).await.unwrap().is_empty());
+}
+
 #[tokio::test]
 async fn each_device_offers_its_add_ons_and_nothing_installs_itself() {
     let desk = device('a').await;

@@ -297,6 +297,68 @@ fn save_defaults_cover_shipped_emulators_and_expand_for_every_os_and_install_kin
     }
 }
 
+/// #275: RetroArch's configuration that syncs is its config_directory on
+/// every OS and install kind, under the `{config}` folder its files are
+/// named by on other devices.
+#[test]
+fn retroarch_config_is_its_config_directory_everywhere() {
+    let catalog = catalog().unwrap();
+    let retroarch = catalog.emulator("retroarch").unwrap();
+    let resolve = |os, kind, emulator_dir: Option<&str>| {
+        let mut context = context(os);
+        context.rom = None;
+        context.emulator_dir = emulator_dir.map(Into::into);
+        let files = retroarch.resolve_config(os, kind, &context).unwrap();
+        let roots = retroarch.save_roots(os, kind, &context);
+        let config = roots
+            .into_iter()
+            .find(|(name, _)| name == "{config}")
+            .map(|(_, path)| path);
+        (files, config)
+    };
+    assert_eq!(
+        resolve(OperatingSystem::Linux, InstallKind::AppImage, None),
+        (
+            vec!["/home/fixture/.config/retroarch/config/**".to_owned()],
+            Some("/home/fixture/.config/retroarch/config".to_owned())
+        )
+    );
+    assert_eq!(
+        resolve(
+            OperatingSystem::Linux,
+            InstallKind::Flatpak,
+            Some("/home/fixture/.var/app/org.libretro.RetroArch")
+        )
+        .1
+        .as_deref(),
+        Some("/home/fixture/.var/app/org.libretro.RetroArch/config/retroarch/config")
+    );
+    assert_eq!(
+        resolve(
+            OperatingSystem::Windows,
+            InstallKind::Folder,
+            Some(r"C:\Emulators\RetroArch")
+        )
+        .1
+        .as_deref(),
+        Some("C:/Emulators/RetroArch/config")
+    );
+    let macos = resolve(OperatingSystem::Macos, InstallKind::AppBundle, None).1;
+    assert!(
+        macos
+            .as_deref()
+            .is_some_and(|path| path.ends_with("/RetroArch/config")),
+        "{macos:?}"
+    );
+    // Only RetroArch declares configuration so far.
+    for definition in catalog
+        .emulators()
+        .filter(|definition| definition.id != "retroarch")
+    {
+        assert!(definition.config.files.is_empty(), "{}", definition.id);
+    }
+}
+
 #[test]
 fn retroarch_and_rom_named_saves_stay_per_rom_and_literals_are_not_globs() {
     let catalog = catalog().unwrap();

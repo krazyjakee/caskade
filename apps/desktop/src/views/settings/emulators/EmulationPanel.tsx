@@ -22,6 +22,7 @@ import { ConfiguredPlatforms } from "./ConfiguredPlatforms";
 import { DetectionReview, useDetection } from "./DetectionReview";
 import { emulationKey, useEmulation, useEmulationApi, useScanners } from "./EmulationProvider";
 import { BrowseEmulators, MissingEmulators } from "./EmulatorSetup";
+import { EmulatorsFromDevices } from "./FromDevices";
 import { ScannersSection } from "./ScannersSection";
 
 /** Labels are descriptors, translated where they're shown. */
@@ -241,6 +242,7 @@ export function EmulationPanel({
         onChange={setSection}
         className="self-start"
       />
+      {section === "emulators" && <EmulatorsFromDevices />}
       {section === "emulators" && <MissingEmulators />}
       {section === "emulators" && (
         <ConfiguredEmulators

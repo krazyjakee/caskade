@@ -22,7 +22,8 @@ export type SyncCategory =
   | "launchActions"
   | "gameScripts"
   | "preferredEmulators"
-  | "addons";
+  | "addons"
+  | "emulatorConfig";
 
 export type CategoryState = "sync" | "thisDeviceOnly";
 
@@ -52,7 +53,13 @@ const synced: SyncCategory[] = [
 ];
 
 /** Kept on each device until the user turns them on. */
-const optional: SyncCategory[] = ["launchActions", "gameScripts", "preferredEmulators", "addons"];
+const optional: SyncCategory[] = [
+  "launchActions",
+  "gameScripts",
+  "preferredEmulators",
+  "emulatorConfig",
+  "addons",
+];
 
 const labels: Record<SyncCategory, [MessageDescriptor, MessageDescriptor]> = {
   library: [
@@ -88,7 +95,11 @@ const labels: Record<SyncCategory, [MessageDescriptor, MessageDescriptor]> = {
   ],
   preferredEmulators: [
     msg`Preferred emulators`,
-    msg`Which emulator each platform uses, where the other device has it.`,
+    msg`Which emulator each platform uses. One this device doesn't have is offered in Settings → Emulation.`,
+  ],
+  emulatorConfig: [
+    msg`Emulator configuration`,
+    msg`Controller mappings, core options and shader presets, each in this device's own emulator folders.`,
   ],
   addons: [
     msg`Plugins and themes`,

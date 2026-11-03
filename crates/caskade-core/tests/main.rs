@@ -4,6 +4,8 @@
 mod addon_offers;
 mod appimage_env;
 mod device_defaults;
+#[cfg(feature = "net")]
+mod emulator_config;
 mod i18n;
 mod installer_settings;
 #[cfg(feature = "net")]

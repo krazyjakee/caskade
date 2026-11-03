@@ -30,20 +30,24 @@ locations = ["/Applications/RetroArch.app/Contents/MacOS", "{UserHome}/Applicati
 # `bios` is where the emulator looks for BIOS files (#122).
 [vars]
 save_data = "{EmulatorDir}"
+config = "{EmulatorDir}/config"
 cores = "{EmulatorDir}/cores"
 bios = "{EmulatorDir}/system"
 lib = ".dll"
 [vars.linux]
 save_data = "{XdgConfig}/retroarch"
+config = "{XdgConfig}/retroarch/config"
 cores = "{XdgConfig}/retroarch/cores"
 bios = "{XdgConfig}/retroarch/system"
 lib = ".so"
 [vars.linux.flatpak]
 save_data = "{EmulatorDir}/config/retroarch"
+config = "{EmulatorDir}/config/retroarch/config"
 cores = "{UserHome}/.var/app/org.libretro.RetroArch/config/retroarch/cores"
 bios = "{UserHome}/.var/app/org.libretro.RetroArch/config/retroarch/system"
 [vars.macos]
 save_data = "{UserHome}/Documents/RetroArch"
+config = "{AppSupport}/RetroArch/config"
 cores = "{AppSupport}/RetroArch/cores"
 bios = "{AppSupport}/RetroArch/system"
 lib = ".dylib"
@@ -167,3 +171,11 @@ requires = ["{cores}/fbneo_libretro{lib}"]
 [saves]
 files = ["{save_data}/saves/**/{RomNameNoExt}.srm", "{save_data}/saves/**/{RomNameNoExt}.rtc", "{save_data}/saves/**/{RomNameNoExt}.psrm", "{save_data}/saves/**/{RomNameNoExt}.sav"]
 states = ["{save_data}/states/**/{RomNameNoExt}.state*"]
+
+# Configuration that syncs between devices (#275): input remaps
+# (`remaps/<core>/<game>.rmp`), core and game overrides (`<core>/*.cfg`), core
+# options (`*.opt`) and shader presets, all in RetroArch's config_directory.
+# Defaults: https://github.com/libretro/RetroArch/blob/master/retroarch.cfg
+# (config_directory, input_remapping_directory) and frontend/drivers/platform_{win32,unix,darwin}.{c,m}
+[config]
+files = ["{config}/**"]

@@ -6,6 +6,8 @@ pub mod blobs;
 pub mod change;
 pub mod clock;
 #[cfg(feature = "net")]
+pub mod config_files;
+#[cfg(feature = "net")]
 pub mod copies;
 pub mod engine;
 #[cfg(feature = "net")]

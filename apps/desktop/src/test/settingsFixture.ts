@@ -97,6 +97,7 @@ export function coreSettingsDefaults(): Record<string, Record<string, unknown>> 
         gameScripts: "thisDeviceOnly",
         preferredEmulators: "thisDeviceOnly",
         addons: "thisDeviceOnly",
+        emulatorConfig: "thisDeviceOnly",
       },
       neverRelay: false,
       port: null,
