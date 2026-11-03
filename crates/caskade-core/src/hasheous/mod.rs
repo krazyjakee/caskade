@@ -175,6 +175,9 @@ struct Inner {
     index: OnceCell<Index>,
     /// One sync at a time.
     sync: Mutex<()>,
+    /// Devices nearby that may have a dump already (#277).
+    #[cfg(feature = "net")]
+    near: std::sync::Mutex<Option<crate::install::nearby::PeerDownloads>>,
 }
 
 impl Hasheous {
@@ -191,7 +194,62 @@ impl Hasheous {
                 base: base.into().trim_end_matches('/').to_owned(),
                 index: OnceCell::new(),
                 sync: Mutex::new(()),
+                #[cfg(feature = "net")]
+                near: std::sync::Mutex::default(),
             }),
+        }
+    }
+
+    /// Dumps are asked of devices nearby first, and kept for them (#277):
+    /// a device that has never been online gets them from one that has.
+    #[cfg(feature = "net")]
+    pub fn set_nearby(&self, near: crate::install::nearby::PeerDownloads) {
+        *crate::lock(&self.inner.near) = Some(near);
+    }
+
+    /// The dump file `name` from a device nearby, at `zip`, and its MD5:
+    /// the listing's size and MD5 when there is a listing.
+    #[cfg(feature = "net")]
+    async fn fetch_nearby(
+        &self,
+        name: &str,
+        zip: &std::path::Path,
+        listed: Option<&Listed>,
+    ) -> Option<String> {
+        let near = crate::lock(&self.inner.near).clone()?;
+        let url = download::dump_url(&self.inner.base, name).ok()?;
+        let cancel = tokio_util::sync::CancellationToken::new();
+        if !near.fetch_to(&url, zip, &cancel, &|_, _| {}).await {
+            return None;
+        }
+        let md5 = md5_file(zip.to_owned()).await.ok()?;
+        let size = tokio::fs::metadata(zip).await.ok()?.len();
+        if listed.is_some_and(|listed| {
+            listed.size_bytes != size || !listed.md5hash.eq_ignore_ascii_case(&md5)
+        }) {
+            let _ = tokio::fs::remove_file(zip).await;
+            return None;
+        }
+        tracing::info!(dump = name, "Hasheous dump from a device nearby");
+        Some(md5.to_ascii_lowercase())
+    }
+
+    #[cfg(not(feature = "net"))]
+    async fn fetch_nearby(
+        &self,
+        _name: &str,
+        _zip: &std::path::Path,
+        _listed: Option<&Listed>,
+    ) -> Option<String> {
+        None
+    }
+
+    /// Keeps a dump downloaded from Hasheous for the other devices.
+    #[cfg(feature = "net")]
+    async fn keep_nearby(&self, name: &str, zip: &std::path::Path) {
+        let near = crate::lock(&self.inner.near).clone();
+        if let (Some(near), Ok(url)) = (near, download::dump_url(&self.inner.base, name)) {
+            near.keep_path(&url, zip, None).await;
         }
     }
 
@@ -277,22 +335,37 @@ impl Hasheous {
             } else if let Some(listed) = listed {
                 let _activity = caskade_jobs::global()
                     .activity(crate::tr!("Downloading {dump} database", dump = dump));
-                match download::fetch(&self.inner.base, listed, &zip).await {
-                    Ok(()) => {
-                        tracing::info!(dump, bytes = listed.size_bytes, "Hasheous dump downloaded");
-                        report.downloaded.push(dump.clone());
-                        listed.md5hash.to_ascii_lowercase()
-                    }
-                    Err(error) => {
-                        tracing::warn!(dump, %error, "Hasheous dump download failed");
-                        report.failed.push((dump.clone(), error.to_string()));
-                        continue;
+                if let Some(md5) = self.fetch_nearby(&listed.name, &zip, Some(listed)).await {
+                    report.downloaded.push(dump.clone());
+                    md5
+                } else {
+                    match download::fetch(&self.inner.base, listed, &zip).await {
+                        Ok(()) => {
+                            tracing::info!(
+                                dump,
+                                bytes = listed.size_bytes,
+                                "Hasheous dump downloaded"
+                            );
+                            #[cfg(feature = "net")]
+                            self.keep_nearby(&listed.name, &zip).await;
+                            report.downloaded.push(dump.clone());
+                            listed.md5hash.to_ascii_lowercase()
+                        }
+                        Err(error) => {
+                            tracing::warn!(dump, %error, "Hasheous dump download failed");
+                            report.failed.push((dump.clone(), error.to_string()));
+                            continue;
+                        }
                     }
                 }
             } else if listing.is_some() {
                 tracing::info!(dump, "Hasheous has no such dump");
                 report.unavailable.push(dump.clone());
                 continue;
+            } else if let Some(md5) = self.fetch_nearby(&format!("{dump}.zip"), &zip, None).await {
+                // Offline, but a device nearby has it.
+                report.downloaded.push(dump.clone());
+                md5
             } else {
                 // Offline with no copy yet: a failure, so the watch tries
                 // again soon.

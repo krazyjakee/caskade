@@ -103,6 +103,11 @@ impl EmulatorSetup {
             }
             _ => Vec::new(),
         };
+        #[cfg(feature = "net")]
+        let fetched = match &dir {
+            Some(dir) => self.bios_nearby(&wanted, dir, fetched).await,
+            None => fetched,
+        };
         if !fetched.is_empty() {
             self.changed();
         }
@@ -129,5 +134,62 @@ impl EmulatorSetup {
             missing,
             dir: dir.map(|dir| dir.to_string_lossy().into_owned()),
         })
+    }
+}
+
+#[cfg(feature = "net")]
+impl EmulatorSetup {
+    /// BIOS files through devices nearby (#277), by the MD5 the definition
+    /// gives: what the provider fetched is kept for them, and what it
+    /// couldn't (or with no provider, offline) is asked of them, checked
+    /// against that MD5. Returns `fetched` with what arrived.
+    async fn bios_nearby(
+        &self,
+        wanted: &[Bios],
+        dir: &Path,
+        mut fetched: Vec<String>,
+    ) -> Vec<String> {
+        let Some(near) = crate::lock(&self.inner.near).clone() else {
+            return fetched;
+        };
+        let cancel = tokio_util::sync::CancellationToken::new();
+        for bios in wanted {
+            let Some(md5) = bios.md5.as_deref().map(str::to_ascii_lowercase) else {
+                continue;
+            };
+            let Ok(url) = url::Url::parse(&format!("caskade-bios:md5/{md5}")) else {
+                continue;
+            };
+            let path = dir.join(&bios.file);
+            if fetched.contains(&bios.file) {
+                near.keep_path(&url, &path, None).await;
+                continue;
+            }
+            if !near.fetch_to(&url, &path, &cancel, &|_, _| {}).await {
+                continue;
+            }
+            let file = path.clone();
+            let matches = tokio::task::spawn_blocking(move || {
+                use md5::Digest;
+                let bytes = std::fs::read(&file).ok()?;
+                let digest = md5::Md5::digest(&bytes);
+                Some(
+                    digest
+                        .iter()
+                        .map(|byte| format!("{byte:02x}"))
+                        .collect::<String>(),
+                )
+            })
+            .await
+            .ok()
+            .flatten()
+            .is_some_and(|digest| digest == md5);
+            if matches {
+                fetched.push(bios.file.clone());
+            } else {
+                let _ = tokio::fs::remove_file(&path).await;
+            }
+        }
+        fetched
     }
 }

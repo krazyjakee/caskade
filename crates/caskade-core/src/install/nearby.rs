@@ -33,7 +33,7 @@ use std::time::Duration;
 
 use async_trait::async_trait;
 use caskade_installer::exec::CancellationToken;
-use caskade_installer::fetch::local::LocalFuture;
+use caskade_installer::fetch::local::{LocalFuture, Progress};
 use caskade_installer::fetch::{DownloadRequest, DownloadedFile, LocalSource, Near};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -67,6 +67,12 @@ struct Kept {
     root: String,
     #[serde(default)]
     kept_ms: i64,
+    /// The release it is, for a download a source resolves first (an
+    /// emulator's newest release, #277): `emulator:<id>:<os>:<arch>`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    release: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    version: Option<String>,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
@@ -234,6 +240,8 @@ impl PeerDownloads {
             validator: file.validator.clone(),
             root: offered.root,
             kept_ms: crate::sync::clock::now_ms(),
+            release: None,
+            version: None,
         });
         // Over the budget: the oldest go.
         kept.sort_by_key(|kept| std::cmp::Reverse(kept.kept_ms));
@@ -335,6 +343,7 @@ impl PeerDownloads {
         addrs: &[SocketAddr],
         kept: &Kept,
         dir: &Path,
+        progress: &Progress<'_>,
     ) -> Result<PathBuf> {
         caskade_installer::fetch::safe_file_name(&kept.name)
             .map_err(|_| Error::Invalid("a file name that isn't one".into()))?;
@@ -346,8 +355,12 @@ impl PeerDownloads {
         let transfers = &self.inner.transfers;
         let fetched = async {
             transfers
-                .fetch_direct(peer, addrs, &kept.root, &tag, |_| {})
+                .fetch_direct(peer, addrs, &kept.root, &tag, |done| {
+                    // The collection's own bytes count too: never past the file.
+                    progress(done.min(kept.size), kept.size)
+                })
                 .await?;
+            progress(kept.size, kept.size);
             transfers.export(&kept.root, dir).await
         }
         .await;
@@ -368,6 +381,7 @@ impl PeerDownloads {
         request: &DownloadRequest,
         dir: &Path,
         cancel: &CancellationToken,
+        progress: &Progress<'_>,
     ) -> Option<Near> {
         if !self.on().await {
             return None;
@@ -375,7 +389,7 @@ impl PeerDownloads {
         for (peer, addrs, kept) in self.candidates(request).await {
             let fetched = tokio::select! {
                 _ = cancel.cancelled() => return None,
-                fetched = self.fetch(peer, &addrs, &kept, dir) => fetched,
+                fetched = self.fetch(peer, &addrs, &kept, dir, progress) => fetched,
             };
             match fetched {
                 Ok(path) => {
@@ -396,14 +410,118 @@ impl PeerDownloads {
     }
 }
 
+/// Downloads outside the installer (#277): emulators and their cores,
+/// managed tools, BIOS files, Hasheous dumps and the save manifest ask here
+/// first and keep what they download from the internet.
+impl PeerDownloads {
+    /// What `url` serves, from a device nearby, at `to`: checked against
+    /// the size and SHA-256 that device said it has. `false` (and nothing
+    /// at `to`) when no device has it, or what came fails the check.
+    pub async fn fetch_to(
+        &self,
+        url: &url::Url,
+        to: &Path,
+        cancel: &CancellationToken,
+        progress: &Progress<'_>,
+    ) -> bool {
+        let (Some(parent), Some(name)) = (to.parent(), to.file_name()) else {
+            return false;
+        };
+        let mut folder = std::ffi::OsString::from(".near-");
+        folder.push(name);
+        let dir = parent.join(folder);
+        if tokio::fs::create_dir_all(&dir).await.is_err() {
+            return false;
+        }
+        let request = DownloadRequest::new(url.clone());
+        let taken = match self.find_file(&request, &dir, cancel, progress).await {
+            Some(near) => tokio::task::spawn_blocking(move || {
+                caskade_installer::fetch::local::accept(&request, &near)
+            })
+            .await
+            .ok()
+            .flatten(),
+            None => None,
+        };
+        let placed = match taken {
+            Some(file) => tokio::fs::rename(&file.path, to).await.is_ok(),
+            None => false,
+        };
+        let _ = tokio::fs::remove_dir_all(&dir).await;
+        placed
+    }
+
+    /// Marks what was kept from `url` as release `key` at `version`, so a
+    /// device that can't ask the source which release is newest takes it
+    /// ([`Self::release`]).
+    pub async fn keep_release(&self, key: &str, url: &url::Url, version: Option<String>) {
+        let url = url.to_string();
+        let mut kept = self.inner.kept.lock().await;
+        let Some(entry) = kept.iter_mut().find(|kept| kept.urls.contains(&url)) else {
+            return;
+        };
+        entry.release = Some(key.to_owned());
+        entry.version = version;
+        self.save(&kept);
+    }
+
+    /// The newest release `key` a device nearby keeps: its URL, file name
+    /// and version. For a device that can't reach the source to resolve it.
+    pub async fn release(&self, key: &str) -> Option<(url::Url, String, Option<String>)> {
+        if !self.on().await {
+            return None;
+        }
+        let candidates: Vec<(String, Kept)> = lock(&self.inner.heard)
+            .iter()
+            .flat_map(|(peer, kept)| kept.iter().map(move |kept| (peer.clone(), kept.clone())))
+            .filter(|(_, kept)| kept.release.as_deref() == Some(key))
+            .collect();
+        let devices = self.inner.devices.status().await.devices;
+        let newest = candidates
+            .into_iter()
+            .filter(|(peer, _)| {
+                devices
+                    .iter()
+                    .any(|device| device.id == *peer && device.link == DeviceLink::Lan)
+            })
+            .max_by_key(|(_, kept)| kept.kept_ms)?
+            .1;
+        let url = url::Url::parse(newest.urls.first()?).ok()?;
+        Some((url, newest.name, newest.version))
+    }
+
+    /// Keeps `path`, downloaded from `url` (with the source's `validator`,
+    /// when it gave one), for the other devices.
+    pub async fn keep_path(&self, url: &url::Url, path: &Path, validator: Option<String>) {
+        let file = path.to_owned();
+        let Ok(Ok((sha256, size))) =
+            tokio::task::spawn_blocking(move || caskade_installer::fetch::local::digest(&file))
+                .await
+        else {
+            return;
+        };
+        let downloaded = DownloadedFile {
+            path: path.to_owned(),
+            source_url: url.clone(),
+            final_url: url.clone(),
+            size,
+            sha256,
+            insecure_transport: false,
+            validator,
+        };
+        LocalSource::keep(self, &DownloadRequest::new(url.clone()), &downloaded).await;
+    }
+}
+
 impl LocalSource for PeerDownloads {
     fn find<'a>(
         &'a self,
         request: &'a DownloadRequest,
         dir: &'a Path,
         cancel: &'a CancellationToken,
+        progress: &'a Progress<'a>,
     ) -> LocalFuture<'a, Option<Near>> {
-        Box::pin(self.find_file(request, dir, cancel))
+        Box::pin(self.find_file(request, dir, cancel, progress))
     }
 
     fn keep<'a>(

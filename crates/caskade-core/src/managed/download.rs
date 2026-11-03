@@ -37,13 +37,45 @@ pub(crate) fn client() -> Result<reqwest::Client> {
 pub(crate) use crate::error::net;
 
 /// Streams `url` into `to` (through a `.part` file), reporting the bytes
-/// so far and the total when known.
+/// so far and the total when known. A device nearby that has the file
+/// (`near`, #277) is asked first; what comes from the internet is kept
+/// for the other devices.
 pub(crate) async fn fetch(
     url: &url::Url,
     to: &Path,
     cancel: &CancellationToken,
-    mut progress: impl FnMut(u64, Option<u64>),
+    near: Option<&crate::install::nearby::PeerDownloads>,
+    progress: impl FnMut(u64, Option<u64>) + Send,
 ) -> Result<()> {
+    let progress = std::sync::Mutex::new(progress);
+    let report = |done: u64, total: Option<u64>| {
+        (progress.lock().unwrap_or_else(|e| e.into_inner()))(done, total)
+    };
+    if let Some(near) = near {
+        if let Some(parent) = to.parent() {
+            tokio::fs::create_dir_all(parent).await?;
+        }
+        if near
+            .fetch_to(url, to, cancel, &|done, total| report(done, Some(total)))
+            .await
+        {
+            return Ok(());
+        }
+    }
+    let validator = download(url, to, cancel, report).await?;
+    if let Some(near) = near {
+        near.keep_path(url, to, validator).await;
+    }
+    Ok(())
+}
+
+/// The download itself; the source's validator for what it sent.
+async fn download(
+    url: &url::Url,
+    to: &Path,
+    cancel: &CancellationToken,
+    progress: impl Fn(u64, Option<u64>),
+) -> Result<Option<String>> {
     let cancelled = || Error::Invalid(crate::tr!("cancelled"));
     let mut response = tokio::select! {
         () = cancel.cancelled() => return Err(cancelled()),
@@ -51,6 +83,17 @@ pub(crate) async fn fetch(
     }
     .error_for_status()
     .map_err(net)?;
+    let header = |name| {
+        response
+            .headers()
+            .get(name)
+            .and_then(|value: &reqwest::header::HeaderValue| value.to_str().ok())
+            .map(str::to_owned)
+    };
+    let validator = match header(reqwest::header::ETAG) {
+        Some(etag) => (!etag.starts_with("W/")).then_some(etag),
+        None => header(reqwest::header::LAST_MODIFIED),
+    };
     let total = response.content_length();
     if let Some(parent) = to.parent() {
         tokio::fs::create_dir_all(parent).await?;
@@ -80,7 +123,10 @@ pub(crate) async fn fetch(
     }
     .await;
     match written {
-        Ok(()) => Ok(tokio::fs::rename(&part, to).await?),
+        Ok(()) => {
+            tokio::fs::rename(&part, to).await?;
+            Ok(validator)
+        }
         Err(error) => {
             let _ = tokio::fs::remove_file(&part).await;
             Err(error)

@@ -174,6 +174,9 @@ struct Inner {
     bios: Mutex<Option<Arc<dyn BiosProvider>>>,
     /// Emulators whose last update check failed, and when to try again.
     retry_at: Mutex<HashMap<String, Instant>>,
+    /// Devices nearby that may have a download already (#277).
+    #[cfg(feature = "net")]
+    near: Mutex<Option<crate::install::nearby::PeerDownloads>>,
 }
 
 /// Installs, configures and updates emulators; cheap to clone.
@@ -203,6 +206,8 @@ impl EmulatorSetup {
                 launch: Mutex::default(),
                 bios: Mutex::default(),
                 retry_at: Mutex::default(),
+                #[cfg(feature = "net")]
+                near: Mutex::default(),
             }),
         }
     }
@@ -216,6 +221,13 @@ impl EmulatorSetup {
     /// and on request.
     pub fn set_bios(&self, provider: Arc<dyn BiosProvider>) {
         *crate::lock(&self.inner.bios) = Some(provider);
+    }
+
+    /// Emulators, cores and BIOS files are asked of devices nearby first,
+    /// and kept for them (#277).
+    #[cfg(feature = "net")]
+    pub fn set_nearby(&self, near: crate::install::nearby::PeerDownloads) {
+        *crate::lock(&self.inner.near) = Some(near);
     }
 
     /// Updates wait while a game runs in the emulator. Settable after

@@ -740,9 +740,36 @@ loopback and a wiremock source: an update installs on the second with the
 source gone, a file that isn't what the other device said is discarded and
 downloaded from the source, and turned off the source is used).
 
-Not yet: emulator installs, RetroArch cores, BIOS files, Hasheous dumps, the
-Ludusavi manifest and artwork download outside the installer's pipeline and
-still go to the internet (#277).
+Outside the installer (#277), the same `PeerDownloads` serves what other
+services download, through `PeerDownloads::fetch_to` (by URL, checked against
+the size and SHA-256 the other device said it has) and `keep_path`:
+
+- **Emulators, RetroArch cores and managed tools** (`managed::download::fetch`,
+  `EmulatorSetup::set_nearby`, `ManagedTools::set_nearby`) ask first and keep
+  what they download, with its ETag or Last-Modified. A release a source has
+  to resolve first (GitHub's newest release) is also kept under a release key
+  (`emulator:<id>:<os>:<arch>`, `tool:…`) with its version, so a device that
+  can't reach GitHub installs the newest release a device nearby has
+  (`PeerDownloads::release`). Setup shows the bytes as they arrive.
+- **BIOS files** (`EmulatorSetup::fetch_bios`): what RomM's firmware supplied
+  is kept under `caskade-bios:md5/<md5>` (the definition's MD5), and what it
+  couldn't, or every file with no RomM server, is asked of devices nearby and
+  checked against that MD5.
+- **Hasheous dumps** (`Hasheous::set_nearby`): asked before Hasheous, checked
+  against the listing's size and MD5; with no listing (never online) the
+  dump's URL is still known (`api/v1/Dumps/platforms/<name>.zip`), so it comes
+  from a device nearby and is indexed as usual.
+- **The save manifest** (`Ludusavi::set_nearby`): while this device has no
+  usable manifest from the same source, `refresh` asks devices nearby first,
+  online or not. One from a device counts as never checked, so the next
+  refresh online asks the source.
+
+IGDB artwork doesn't travel this way: it is thousands of small files that
+would swell every exchange's note, the artwork users chose already syncs
+(#273), and covers download again once online. Tests:
+`peer_downloads::an_emulator_installed_on_one_device_installs_on_another_without_the_internet`
+(release, file and BIOS from the Desk with the fake GitHub gone) and
+`peer_downloads::a_hasheous_dump_and_the_save_manifest_reach_a_device_never_online`.
 
 ### Playing a game on another device
 
@@ -1327,6 +1354,16 @@ Results:
 | Date | Machines | Steps passed | Notes |
 | --- | --- | --- | --- |
 | — | — | — | Not run yet: needs two machines. Loopback with a wiremock source passes. |
+
+Emulators, dumps and the manifest (#277): with the first machine's emulator
+installed through Get emulators and its Hasheous dumps and save manifest
+downloaded, set up the second with the router's internet unplugged. Install
+the same emulator there, then check Settings → Emulation's game database and a
+game's Saves tab.
+
+| Date | Machines | Steps passed | Notes |
+| --- | --- | --- | --- |
+| — | — | — | Not run yet: needs two machines. Loopback with a fake GitHub, Hasheous and manifest server passes. |
 
 ### Waking a device to play (#234)
 

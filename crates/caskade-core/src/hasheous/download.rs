@@ -51,13 +51,19 @@ pub(super) async fn listing(base: &str) -> Result<Vec<Listed>> {
     Ok(serde_json::from_slice(&bytes)?)
 }
 
-pub(super) async fn fetch(base: &str, listed: &Listed, to: &Path) -> Result<()> {
+/// Where the dump file `name` (with `.zip`) downloads from.
+pub(super) fn dump_url(base: &str, name: &str) -> Result<url::Url> {
     let mut url = url::Url::parse(&format!("{base}/api/v1/Dumps/platforms/"))
         .map_err(|error| invalid(error.to_string()))?;
     url.path_segments_mut()
         .map_err(|()| invalid("Hasheous URL cannot be a base"))?
         .pop_if_empty()
-        .push(&listed.name);
+        .push(name);
+    Ok(url)
+}
+
+pub(super) async fn fetch(base: &str, listed: &Listed, to: &Path) -> Result<()> {
+    let url = dump_url(base, &listed.name)?;
     let mut response = client()?
         .get(url)
         .send()

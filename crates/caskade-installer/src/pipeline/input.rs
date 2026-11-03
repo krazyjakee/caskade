@@ -164,7 +164,21 @@ async fn near(
     crate::fetch::safe_file_name(job).ok()?;
     let dir = root.join(".caskade/downloads").join(job).join("near");
     fs::create_dir_all(&dir).ok()?;
-    let near = local.find(request, &dir, &ctx.cancel).await?;
+    let sink = ctx.sink.clone();
+    let job_id = job.to_owned();
+    let progress = move |bytes: u64, total: u64| {
+        sink.emit(crate::events::JobEvent {
+            job_id: job_id.clone(),
+            phase: crate::events::Phase::Download,
+            step: None,
+            bytes,
+            total_bytes: Some(total),
+            files: 0,
+            eta_secs: None,
+            message: "nearby".into(),
+        });
+    };
+    let near = local.find(request, &dir, &ctx.cancel, &progress).await?;
     // Only a file it wrote where it was asked to.
     if near.path.parent() != Some(dir.as_path()) {
         return None;

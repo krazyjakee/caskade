@@ -88,6 +88,9 @@ struct Inner {
     retry_at: Mutex<HashMap<String, Instant>>,
     /// Tools being installed, updated or removed.
     busy: Mutex<BTreeSet<String>>,
+    /// Devices nearby that may have a download already (#277).
+    #[cfg(feature = "net")]
+    near: Mutex<Option<crate::install::nearby::PeerDownloads>>,
 }
 
 /// Installs, finds, checks, updates and removes helper tools; cheap to
@@ -124,6 +127,8 @@ impl ManagedTools {
                 settings: Mutex::default(),
                 retry_at: Mutex::default(),
                 busy: Mutex::default(),
+                #[cfg(feature = "net")]
+                near: Mutex::default(),
             }),
         }
     }
@@ -145,6 +150,13 @@ impl ManagedTools {
     /// Update checks follow `core.updates` (on/off, interval).
     pub fn set_settings(&self, settings: SettingsService) {
         *crate::lock(&self.inner.settings) = Some(settings);
+    }
+
+    /// Downloads are asked of devices nearby first, and kept for them
+    /// (#277).
+    #[cfg(feature = "net")]
+    pub fn set_nearby(&self, near: crate::install::nearby::PeerDownloads) {
+        *crate::lock(&self.inner.near) = Some(near);
     }
 
     pub fn catalog(&self) -> &ToolCatalog {
@@ -209,7 +221,7 @@ impl ManagedTools {
         &self,
         id: &str,
         cancel: &CancellationToken,
-        progress: impl FnMut(u64, Option<u64>),
+        progress: impl FnMut(u64, Option<u64>) + Send,
     ) -> Result<ManagedTool> {
         let definition = self.definition(id)?;
         let source = self.source(id).cloned().ok_or_else(|| {
@@ -269,7 +281,7 @@ impl ManagedTools {
         existing: Option<&ManagedTool>,
         job: &str,
         cancel: &CancellationToken,
-        progress: impl FnMut(u64, Option<u64>),
+        progress: impl FnMut(u64, Option<u64>) + Send,
     ) -> Result<(
         EmulatorInstall,
         Option<String>,
@@ -283,9 +295,21 @@ impl ManagedTools {
             };
             return Ok((install, None, None, None));
         }
-        let resolved = resolve(&self.inner.hosts, source).await?;
+        let key = format!(
+            "tool:{}:{}:{}",
+            definition.id,
+            std::env::consts::OS,
+            std::env::consts::ARCH
+        );
+        let resolved = match resolve(&self.inner.hosts, source).await {
+            Ok(resolved) => resolved,
+            // Offline: the newest release a device nearby has (#277).
+            Err(error) => self.release_nearby(&key).await.ok_or(error)?,
+        };
         let download = self.inner.cache.join(job).join(&resolved.file);
-        fetch(&resolved.url, &download, cancel, progress).await?;
+        self.fetch(&resolved.url, &download, cancel, progress)
+            .await?;
+        self.keep_release(&key, &resolved).await;
         let target = self.inner.data.join(&definition.dir);
         let work = self.inner.data.join(".caskade-tools");
         let missing = crate::tr!(
@@ -328,7 +352,7 @@ impl ManagedTools {
         &self,
         id: &str,
         cancel: &CancellationToken,
-        progress: impl FnMut(u64, Option<u64>),
+        progress: impl FnMut(u64, Option<u64>) + Send,
     ) -> Result<ManagedTool> {
         self.managed_or_err(id).await?;
         self.install(id, cancel, progress).await
@@ -495,24 +519,53 @@ impl ManagedTools {
     }
 }
 
-#[cfg(feature = "net")]
-async fn fetch(
-    url: &url::Url,
-    to: &std::path::Path,
-    cancel: &CancellationToken,
-    progress: impl FnMut(u64, Option<u64>),
-) -> Result<()> {
-    super::download::fetch(url, to, cancel, progress).await
-}
+impl ManagedTools {
+    #[cfg(feature = "net")]
+    async fn release_nearby(&self, key: &str) -> Option<super::source::Resolved> {
+        let near = crate::lock(&self.inner.near).clone()?;
+        let (url, file, version) = near.release(key).await?;
+        Some(super::source::Resolved { version, url, file })
+    }
 
-#[cfg(not(feature = "net"))]
-async fn fetch(
-    _url: &url::Url,
-    _to: &std::path::Path,
-    _cancel: &CancellationToken,
-    _progress: impl FnMut(u64, Option<u64>),
-) -> Result<()> {
-    Err(Error::Io(std::io::Error::other(
-        "built without network support",
-    )))
+    #[cfg(not(feature = "net"))]
+    async fn release_nearby(&self, _key: &str) -> Option<super::source::Resolved> {
+        None
+    }
+
+    #[cfg(feature = "net")]
+    async fn keep_release(&self, key: &str, resolved: &super::source::Resolved) {
+        let near = crate::lock(&self.inner.near).clone();
+        if let Some(near) = near {
+            near.keep_release(key, &resolved.url, resolved.version.clone())
+                .await;
+        }
+    }
+
+    #[cfg(not(feature = "net"))]
+    async fn keep_release(&self, _key: &str, _resolved: &super::source::Resolved) {}
+
+    #[cfg(feature = "net")]
+    async fn fetch(
+        &self,
+        url: &url::Url,
+        to: &std::path::Path,
+        cancel: &CancellationToken,
+        progress: impl FnMut(u64, Option<u64>) + Send,
+    ) -> Result<()> {
+        let near = crate::lock(&self.inner.near).clone();
+        super::download::fetch(url, to, cancel, near.as_ref(), progress).await
+    }
+
+    #[cfg(not(feature = "net"))]
+    async fn fetch(
+        &self,
+        _url: &url::Url,
+        _to: &std::path::Path,
+        _cancel: &CancellationToken,
+        _progress: impl FnMut(u64, Option<u64>) + Send,
+    ) -> Result<()> {
+        Err(Error::Io(std::io::Error::other(
+            "built without network support",
+        )))
+    }
 }

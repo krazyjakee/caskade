@@ -714,6 +714,20 @@ pub fn run() {
                         install.set_peer_fetcher(std::sync::Arc::new(transfers.clone()));
                         install.set_local_source(std::sync::Arc::new(downloads.clone()));
                     }
+                    // And emulators, cores, tools, BIOS files, Hasheous dumps
+                    // and the save manifest (#277).
+                    if let Some(setup) = app.try_state::<caskade_core::emulation::EmulatorSetup>() {
+                        setup.set_nearby(downloads.clone());
+                    }
+                    if let Some(tools) = app.try_state::<caskade_core::managed::ManagedTools>() {
+                        tools.set_nearby(downloads.clone());
+                    }
+                    if let Some(hasheous) = app.try_state::<caskade_core::hasheous::Hasheous>() {
+                        hasheous.set_nearby(downloads.clone());
+                    }
+                    if let Some(ludusavi) = app.try_state::<caskade_core::ludusavi::Ludusavi>() {
+                        ludusavi.set_nearby(downloads.clone());
+                    }
                     peer_downloads = Some(downloads);
                     // A game another device sends here (#235): confirmed
                     // here first, unless copies are accepted without asking.

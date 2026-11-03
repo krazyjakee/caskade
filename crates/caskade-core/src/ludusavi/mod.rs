@@ -64,6 +64,9 @@ struct Inner {
     catalog: OnceCell<SqlitePool>,
     active: Mutex<Option<(String, SqlitePool)>>,
     refresh: Mutex<()>,
+    /// Devices nearby that may have the manifest already (#277).
+    #[cfg(feature = "net")]
+    near: std::sync::Mutex<Option<crate::install::nearby::PeerDownloads>>,
 }
 
 impl Ludusavi {
@@ -81,6 +84,8 @@ impl Ludusavi {
                 catalog: OnceCell::new(),
                 active: Mutex::new(None),
                 refresh: Mutex::new(()),
+                #[cfg(feature = "net")]
+                near: std::sync::Mutex::default(),
             }),
         }
     }
@@ -234,12 +239,71 @@ impl Ludusavi {
     /// Refresh only when online and at least a day after the last successful
     /// check. Errors leave both the old check time and old generation intact.
     pub async fn refresh(&self, online: bool) -> Result<Refresh> {
+        let _refresh = self.inner.refresh.lock().await;
+        // None here yet: a device nearby that has it, online or not (#277).
+        #[cfg(feature = "net")]
+        if let Some(refresh) = self.fetch_nearby().await? {
+            return Ok(refresh);
+        }
         if !online {
             return Ok(Refresh::Offline);
         }
-        let _refresh = self.inner.refresh.lock().await;
         self.refresh_at(crate::now_ms().max(0) as u64 / 1000, false)
             .await
+    }
+
+    /// The manifest is asked of devices nearby while this device has none
+    /// from its source, and kept for them once downloaded (#277).
+    #[cfg(feature = "net")]
+    pub fn set_nearby(&self, near: crate::install::nearby::PeerDownloads) {
+        *crate::lock(&self.inner.near) = Some(near);
+    }
+
+    /// The manifest from a device nearby, when this device has no usable
+    /// copy from the same source. It counts as never checked, so the next
+    /// refresh online asks the source.
+    #[cfg(feature = "net")]
+    async fn fetch_nearby(&self) -> Result<Option<Refresh>> {
+        let Some(near) = crate::lock(&self.inner.near).clone() else {
+            return Ok(None);
+        };
+        let cached = self.cached().await?;
+        if let Some(cached) = &cached
+            && cached.url == self.inner.url
+            && tokio::fs::try_exists(self.inner.dir.join(&cached.generation).join("index.sqlite"))
+                .await?
+        {
+            return Ok(None);
+        }
+        let Ok(url) = url::Url::parse(&self.inner.url) else {
+            return Ok(None);
+        };
+        let file = self.inner.dir.join("manifest.yaml.near");
+        let cancel = tokio_util::sync::CancellationToken::new();
+        if !near.fetch_to(&url, &file, &cancel, &|_, _| {}).await {
+            return Ok(None);
+        }
+        let bytes = tokio::fs::read(&file).await?;
+        let _ = tokio::fs::remove_file(&file).await;
+        let generation = uuid::Uuid::now_v7().to_string();
+        let dir = self.inner.dir.join(&generation);
+        let games = match index::build(&dir, bytes).await {
+            Ok(games) => games,
+            Err(error) => {
+                tracing::warn!(%error, "the save manifest from a device nearby didn't read");
+                let _ = tokio::fs::remove_dir_all(&dir).await;
+                return Ok(None);
+            }
+        };
+        self.publish(&Cached {
+            generation: generation.clone(),
+            url: self.inner.url.clone(),
+            etag: None,
+            checked: 0,
+        })
+        .await?;
+        tracing::info!(games, "save manifest from a device nearby");
+        Ok(Some(Refresh::Updated { games }))
     }
 
     /// Checks the source now, however recently it was checked (Update now):
@@ -296,6 +360,14 @@ impl Ludusavi {
                         return Err(error);
                     }
                 };
+                #[cfg(feature = "net")]
+                {
+                    let near = crate::lock(&self.inner.near).clone();
+                    if let (Some(near), Ok(url)) = (near, url::Url::parse(&self.inner.url)) {
+                        near.keep_path(&url, &dir.join("manifest.yaml"), etag.clone())
+                            .await;
+                    }
+                }
                 self.publish(&Cached {
                     generation: generation.clone(),
                     url: self.inner.url.clone(),

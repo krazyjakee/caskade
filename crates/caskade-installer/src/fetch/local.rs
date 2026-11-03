@@ -16,6 +16,8 @@ use tokio_util::sync::CancellationToken;
 use super::{DownloadRequest, DownloadedFile};
 
 pub type LocalFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
+/// Bytes so far and the total, as a file arrives.
+pub type Progress<'a> = dyn Fn(u64, u64) + Send + Sync + 'a;
 
 /// A file a [`LocalSource`] found, and what its source says it is.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -31,12 +33,14 @@ pub struct Near {
 /// Somewhere a download may already be.
 pub trait LocalSource: Send + Sync {
     /// A file with `request`'s content, written into `dir`; `None` to
-    /// download it from its source.
+    /// download it from its source. `progress` hears the bytes so far and
+    /// the total while it arrives.
     fn find<'a>(
         &'a self,
         request: &'a DownloadRequest,
         dir: &'a Path,
         cancel: &'a CancellationToken,
+        progress: &'a Progress<'a>,
     ) -> LocalFuture<'a, Option<Near>>;
     /// A download from the source finished and checked out: keep it for
     /// others, if this source does that.

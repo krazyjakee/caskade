@@ -235,13 +235,18 @@ impl EmulatorSetup {
                 (install, None, None, None)
             }
             (_, None) => {
-                let resolved = source::resolve(&self.inner.hosts, &source).await?;
+                let resolved = match source::resolve(&self.inner.hosts, &source).await {
+                    Ok(resolved) => resolved,
+                    // Offline: the newest release a device nearby has (#277).
+                    Err(error) => self.release_nearby(&definition.id).await.ok_or(error)?,
+                };
                 self.update_job(id, |job| {
                     job.status = SetupStatus::Downloading;
                     job.version.clone_from(&resolved.version);
                 });
                 let download = self.inner.cache.join(id).join(&resolved.file);
                 self.download(id, &resolved.url, &download, cancel).await?;
+                self.keep_release(&definition.id, &resolved).await;
                 self.update_job(id, |job| job.status = SetupStatus::Unpacking);
                 let target = self.inner.root.join(&definition.id);
                 let old_version = existing
@@ -336,6 +341,45 @@ impl EmulatorSetup {
             .find(|row| row.definition_id == definition_id))
     }
 
+    /// What release `definition` is on this system, among downloads devices
+    /// nearby keep (#277).
+    #[cfg(feature = "net")]
+    fn release_key(definition: &str) -> String {
+        format!(
+            "emulator:{definition}:{}:{}",
+            std::env::consts::OS,
+            std::env::consts::ARCH
+        )
+    }
+
+    #[cfg(feature = "net")]
+    async fn release_nearby(&self, definition: &str) -> Option<source::Resolved> {
+        let near = lock(&self.inner.near).clone()?;
+        let (url, file, version) = near.release(&Self::release_key(definition)).await?;
+        Some(source::Resolved { version, url, file })
+    }
+
+    #[cfg(not(feature = "net"))]
+    async fn release_nearby(&self, _definition: &str) -> Option<source::Resolved> {
+        None
+    }
+
+    #[cfg(feature = "net")]
+    async fn keep_release(&self, definition: &str, resolved: &source::Resolved) {
+        let near = lock(&self.inner.near).clone();
+        if let Some(near) = near {
+            near.keep_release(
+                &Self::release_key(definition),
+                &resolved.url,
+                resolved.version.clone(),
+            )
+            .await;
+        }
+    }
+
+    #[cfg(not(feature = "net"))]
+    async fn keep_release(&self, _definition: &str, _resolved: &source::Resolved) {}
+
     #[cfg(feature = "net")]
     async fn download(
         &self,
@@ -345,7 +389,8 @@ impl EmulatorSetup {
         cancel: &CancellationToken,
     ) -> Result<()> {
         let mut last = Instant::now() - PROGRESS_EVERY;
-        crate::managed::download::fetch(url, to, cancel, |downloaded, total| {
+        let near = crate::lock(&self.inner.near).clone();
+        crate::managed::download::fetch(url, to, cancel, near.as_ref(), |downloaded, total| {
             let done = total.is_some_and(|total| downloaded >= total);
             if done || last.elapsed() >= PROGRESS_EVERY {
                 last = Instant::now();
