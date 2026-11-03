@@ -66,7 +66,7 @@ class ScopeTests(unittest.TestCase):
 
     def test_unknown_build_inputs_and_new_crates_select_every_suite(self):
         for path in ["Cargo.lock", "Cargo.toml", "vendor/inno-0.7.1/src/lib.rs",
-                     "scripts/ci-scope.py", ".gitea/workflows/app.yml",
+                     "scripts/ci-scope.py", ".github/workflows/app.yml",
                      "crates/new-crate/src/lib.rs", "docs/plugins/plugin.schema.json"]:
             with self.subTest(path=path):
                 self.assertTrue(all(ci.scope([path]).values()))
@@ -83,14 +83,33 @@ class ScopeTests(unittest.TestCase):
         self.assertFalse(ci.select("workflow_dispatch", {"inputs": {"bundle": "false"}})["bundle"])
 
     def test_missing_pr_history_runs_full_checks_instead_of_skipping(self):
-        scope = ci.select("pull_request_target", {})
-        self.assertTrue(scope["rust"] and scope["installer"] and scope["discovery"])
-        self.assertFalse(scope["bundle"])
+        for event_name in ci.PR_EVENTS:
+            with self.subTest(event_name=event_name):
+                scope = ci.select(event_name, {})
+                self.assertTrue(scope["rust"] and scope["installer"] and scope["discovery"])
+                self.assertFalse(scope["bundle"])
+
+    def test_pull_requests_are_scoped_by_their_diff(self):
+        for event_name in ci.PR_EVENTS:
+            with self.subTest(event_name=event_name), \
+                    patch.object(ci, "changed_paths", return_value=["crates/caskade-discovery/src/lib.rs"]):
+                scope = ci.select(event_name, {"pull_request": {"labels": []}})
+                self.assertTrue(scope["discovery"] and scope["rust"] and scope["app"])
+                self.assertFalse(scope["installer"] or scope["e2e"] or scope["bundle"])
+            with self.subTest(event_name=event_name, paths="prose"), \
+                    patch.object(ci, "changed_paths", return_value=["docs/README.md"]):
+                self.assertFalse(any(ci.select(event_name, {"pull_request": {}}).values()))
+
+    def test_workflow_changes_select_every_suite(self):
+        for path in [".github/workflows/discovery.yml", ".github/workflows/i18n.yml",
+                     ".config/nextest.toml", "scripts/discovery-ci.py"]:
+            with self.subTest(path=path):
+                self.assertTrue(all(ci.scope([path]).values()))
 
     def test_labels_allow_e2e_or_bundle_for_an_otherwise_unaffected_pr(self):
         for label in ["run-e2e", "run-bundle"]:
             with self.subTest(label=label), patch.object(ci, "changed_paths", return_value=["docs/README.md"]):
-                scope = ci.select("pull_request_target", {"pull_request": {"labels": [{"name": label}]}})
+                scope = ci.select("pull_request", {"pull_request": {"labels": [{"name": label}]}})
                 self.assertTrue(scope["app"] and scope["rust"] and scope["e2e"])
                 self.assertEqual(scope["bundle"], label == "run-bundle")
 
@@ -111,7 +130,7 @@ class ScopeTests(unittest.TestCase):
             _, graph = ci.package_graph(root)
             self.assertEqual(graph["consumer"], {"shared", "build", "dev", "platform"})
 
-    def test_real_diff_preserves_deleted_and_renamed_inputs_and_skips_superseded_heads(self):
+    def test_real_diff_preserves_deleted_and_renamed_inputs(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
 
@@ -135,9 +154,6 @@ class ScopeTests(unittest.TestCase):
             advanced = git("commit-tree", head + "^{tree}", "-p", base, "-m", "base advanced")
             event["pull_request"]["base"]["sha"] = advanced
             self.assertEqual(set(ci.changed_paths(root, event)), {"old.rs", "renamed.rs"})
-            git("update-ref", "refs/remotes/origin/pr-head", head)
-            event["pull_request"]["head"] = {"ref": "pr-head", "sha": base}
-            self.assertFalse(any(ci.select("pull_request_target", event, root).values()))
 
 
 if __name__ == "__main__":

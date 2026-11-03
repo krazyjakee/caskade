@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Select PR checks without running Cargo; master/manual/scheduled runs stay full.
 
-Run from the trusted base checkout before any PR-head checkout. Unknown paths,
-events or unavailable history select the full suite rather than skipping checks.
+Run in a full-history checkout of the pull request. Unknown paths, events or
+unavailable history select the full suite rather than skipping checks.
 """
 import argparse
 import json
@@ -13,6 +13,8 @@ import subprocess
 import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
+# GitHub cancels superseded PR runs itself (`concurrency` in each workflow).
+PR_EVENTS = ("pull_request", "pull_request_target")
 FIELDS = ("app", "frontend", "rust", "catalogs", "e2e", "cross", "bundle", "installer", "discovery")
 
 
@@ -120,25 +122,10 @@ def select(event_name, event, root=ROOT):
     bundle = event_name == "schedule" or (
         event_name == "workflow_dispatch" and enabled(event.get("inputs", {}).get("bundle", False))
     )
-    if event_name != "pull_request_target":
+    if event_name not in PR_EVENTS:
         result = dict.fromkeys(FIELDS, True)
     else:
         pr = event.get("pull_request", {})
-        head = pr.get("head", {})
-        branch = head.get("ref", "")
-        if branch and head.get("sha"):
-            # The server currently runs Forgejo 12, which ignores concurrency.
-            # A full base checkout fetches branch tips: queued runs for a head
-            # that was already replaced can finish before reserving OS runners.
-            reference = "refs/remotes/origin/" + branch
-            valid = subprocess.run(["git", "check-ref-format", reference], cwd=root,
-                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            if not valid.returncode:
-                tip = subprocess.run(["git", "rev-parse", "--verify", reference], cwd=root,
-                                     text=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-                if not tip.returncode and tip.stdout.strip() != head["sha"]:
-                    print("PR head was superseded; no heavy checks are needed for this queued run.")
-                    return dict.fromkeys(FIELDS, False)
         try:
             result = scope(changed_paths(root, event), root)
         except (KeyError, ValueError, OSError, subprocess.SubprocessError) as error:
@@ -156,8 +143,8 @@ def select(event_name, event, root=ROOT):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--event", default=os.environ.get("GITHUB_EVENT_PATH") or os.environ.get("GITEA_EVENT_PATH"))
-    parser.add_argument("--event-name", default=os.environ.get("GITHUB_EVENT_NAME") or os.environ.get("GITEA_EVENT_NAME", ""))
+    parser.add_argument("--event", default=os.environ.get("GITHUB_EVENT_PATH"))
+    parser.add_argument("--event-name", default=os.environ.get("GITHUB_EVENT_NAME", ""))
     args = parser.parse_args()
     try:
         event = json.loads(Path(args.event).read_text()) if args.event else {}
@@ -165,7 +152,7 @@ def main():
         event = {}
     result = select(args.event_name, event)
     print(json.dumps(result, sort_keys=True))
-    output = os.environ.get("GITHUB_OUTPUT") or os.environ.get("GITEA_OUTPUT")
+    output = os.environ.get("GITHUB_OUTPUT")
     if output:
         with open(output, "a", encoding="utf-8") as stream:
             for key, value in result.items():

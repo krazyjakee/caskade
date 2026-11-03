@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Emulation's generated-fixture contract for the trusted app workflow (#114).
+"""Emulation's generated-fixture contract for the app workflow (#114).
 
 No live user data, emulator installation or builder download is used here.
 Each Cargo step holds the heavy lane separately, including the fake binary
@@ -50,8 +50,8 @@ def emulation():
     binary = binary_artifact(output)
     environment = dict(os.environ, CASKADE_TEST_EMULATOR=str(binary))
     # Later core/adapter workflow steps use the same once-built native helper.
-    for filename in set(filter(None, [os.environ.get("GITHUB_ENV"), os.environ.get("GITEA_ENV")])):
-        with Path(filename).open("a", encoding="utf-8") as file:
+    if os.environ.get("GITHUB_ENV"):
+        with Path(os.environ["GITHUB_ENV"]).open("a", encoding="utf-8") as file:
             file.write(f"CASKADE_TEST_EMULATOR={binary}\n")
     report = json.loads(cargo([
         "run", "-p", "xtask", "--locked", "--", "emulation", "check",

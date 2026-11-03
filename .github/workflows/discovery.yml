@@ -1,0 +1,189 @@
+name: discovery
+# caskade-discovery on GitHub-hosted Linux, Windows and macOS runners.
+# Pull requests run it when their changes reach the crate
+# (scripts/ci-scope.py); master pushes and manual runs always do. No secrets
+# and a read-only token, so pull requests from forks run too. See
+# crates/caskade-discovery/docs/ci.md.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      live:
+        description: Run the ignored live-machine checks as well
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: discovery-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+env:
+  CARGO_TERM_COLOR: always
+  INSTA_UPDATE: 'no'
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      discovery: ${{ steps.scope.outputs.discovery }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: ${{ github.event_name == 'pull_request' && '0' || '1' }}
+          persist-credentials: false
+      - id: scope
+        run: python3 scripts/ci-scope.py
+
+  check:
+    needs: changes
+    if: needs.changes.outputs.discovery == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            os: linux
+          - runner: windows-latest
+            os: windows
+          - runner: macos-latest
+            os: macos
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # scripts/discovery-ci.py reads Cargo.toml with tomllib (3.11+).
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      # The Linux leg also lints the Windows GNU and Apple targets; bundled
+      # SQLite builds for Windows with the MinGW compiler.
+      - name: Windows GNU cross compiler
+        if: matrix.os == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gcc-mingw-w64-x86-64
+      - name: Rust toolchain
+        env:
+          TARGETS: ${{ matrix.os == 'linux' && '--target x86_64-pc-windows-gnu --target x86_64-apple-darwin' || '' }}
+        run: |
+          rustup toolchain install stable --profile minimal --component clippy,rustfmt $TARGETS
+          rustup default stable
+          rustc -Vv
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: discovery-${{ matrix.os }}
+          save-if: ${{ github.ref == 'refs/heads/master' }}
+      # The version .config/nextest.toml is written for.
+      - uses: taiki-e/install-action@682ce6c3c696a4cd5168a05f98e51aa02b877941 # v2.89.1
+        with:
+          tool: cargo-nextest@0.9.114
+      - name: Format discovery only
+        run: python scripts/discovery-ci.py fmt
+      - name: Build all discovery features
+        run: python scripts/discovery-ci.py build
+      - name: Strict Clippy on the native target
+        run: python scripts/discovery-ci.py clippy
+      - name: Fixture and parser suite with JUnit
+        run: python scripts/discovery-ci.py test
+      - name: Public documentation examples
+        run: python scripts/discovery-ci.py doc
+      - name: Build every feature in isolation
+        run: python scripts/discovery-ci.py features
+      - name: Read-only discovery fixture privacy, hashes and size budget
+        run: python scripts/discovery-ci.py fixtures
+      - name: Windows GNU and Apple cross-target Clippy
+        if: matrix.os == 'linux'
+        run: python scripts/discovery-ci.py cross
+      - name: Upload discovery test results
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: discovery-${{ matrix.os }}-${{ github.run_id }}
+          path: target/nextest/discovery-ci/junit.xml
+          if-no-files-found: ignore
+          retention-days: 14
+
+  result:
+    name: discovery result
+    needs: [changes, check]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: All selected discovery checks passed
+        env:
+          SCOPE_RESULT: ${{ needs.changes.result }}
+          CHECK_RESULT: ${{ needs.check.result }}
+          SELECTED: ${{ needs.changes.outputs.discovery }}
+        run: |
+          python3 - <<'PYTHON'
+          import os
+          assert os.environ['SCOPE_RESULT'] == 'success', 'scope selection failed'
+          assert os.environ['SELECTED'] in ('true', 'false'), 'scope output is missing'
+          expected = 'success' if os.environ['SELECTED'] == 'true' else 'skipped'
+          assert os.environ['CHECK_RESULT'] == expected, 'discovery checks did not pass'
+          PYTHON
+
+  # The ignored live checks read the runner's own launchers and stores, so
+  # they run only when asked for: a manual run with `live`, or the
+  # `run-native` label, which only maintainers can add.
+  live:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.live) ||
+      (github.event_name == 'pull_request' &&
+       contains(github.event.pull_request.labels.*.name, 'run-native'))
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            os: linux
+          - runner: windows-latest
+            os: windows
+          - runner: macos-latest
+            os: macos
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    env:
+      CASKADE_DISCOVERY_LIVE: '1'
+      CASKADE_TEST_NATIVE: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustc -Vv
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: discovery-${{ matrix.os }}
+          save-if: false
+      - uses: taiki-e/install-action@682ce6c3c696a4cd5168a05f98e51aa02b877941 # v2.89.1
+        with:
+          tool: cargo-nextest@0.9.114
+      - name: Run only ignored live checks
+        run: python scripts/discovery-ci.py live
+      - name: Upload live invariants report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: discovery-live-${{ matrix.os }}-${{ github.run_id }}
+          path: target/nextest/discovery-live/junit.xml
+          if-no-files-found: ignore
+          retention-days: 14
