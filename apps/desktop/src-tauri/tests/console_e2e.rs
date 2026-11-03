@@ -45,16 +45,20 @@ const SCRIPT: &str = r#"
 # Console mode from the start; Home opens on the hero.
 wait-text Continue Playing
 focus-is Resume · View details
-# Down into Recently Played (its View all, then the card below it); LB and
-# RB page the shelf, and focus follows.
+# Down into Recently Played (its View all, then the card below it; the
+# hero's game isn't in it), then into Recently Added, which has both games:
+# LT and RT page the shelf, and focus follows.
 press nav.down
 focus-is View all →
 seek nav.down Pocket Quest
-press tab.prev
+seek-section nav.down shelf-added
+press nav.down
+seek nav.left Pocket Quest
+press page.next
 focus-has Couch Runner
-press tab.next
+press page.prev
 focus-has Pocket Quest
-press tab.prev
+press page.next
 focus-has Couch Runner
 # The game, and Play.
 press confirm
