@@ -1,6 +1,7 @@
 //! T7 macOS runner-only tests. Inputs are genuine native tool output produced
 //! by xtask/macos-fixtures.py; no synthetic filesystem image is accepted.
 #![cfg(all(target_os = "macos", feature = "macos-formats"))]
+use crate::fixtures;
 use caskade_installer::{
     Input, InstallPlan, RuntimeSpec, Step, Strategy,
     exec::{CancellationToken, ExecRequest, Executor, Extractor},
@@ -26,7 +27,6 @@ use std::{
     sync::{Arc, Mutex},
     time::Duration,
 };
-use crate::fixtures;
 fn artifact_root() -> PathBuf {
     let root=std::env::var_os("CASKADE_MACOS_FIXTURES").map(PathBuf::from).expect("build genuine native fixtures: python3 xtask/macos-fixtures.py --artifact target/macos-fixture-artifact; set CASKADE_MACOS_FIXTURES");
     let bytes = std::fs::read(root.join("native-build.json")).unwrap();

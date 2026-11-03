@@ -1,3 +1,4 @@
+use crate::fixtures;
 use caskade_installer::{
     exec::CancellationToken,
     formats::archive::{EventProgress, NoopControl, sevenzip::*},
@@ -10,7 +11,6 @@ use std::{
     sync::{Arc, Mutex},
     time::Duration,
 };
-use crate::fixtures;
 
 fn fake(root: &Path, body: &str) -> PathBuf {
     let python = root.join("fake.py");

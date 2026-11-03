@@ -1,4 +1,5 @@
 #![cfg(feature = "windows-formats")]
+use crate::fixtures;
 use caskade_installer::{
     ArtifactNode, Fidelity, Strategy,
     exec::{CancellationToken, ExecRequest, Executor},
@@ -16,7 +17,6 @@ use std::{
     path::{Path, PathBuf},
     sync::Arc,
 };
-use crate::fixtures;
 
 fn corpus() -> Vec<fixtures::Fixture> {
     fixtures::load_windows(&Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures"))

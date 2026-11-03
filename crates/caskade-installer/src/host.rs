@@ -114,10 +114,18 @@ impl HostCaps {
             },
             packages: PackageCapabilities {
                 managers: if os == OperatingSystem::Linux {
-                    ["apt", "dnf", "zypper", "dpkg-query", "rpm", "pkexec", "flatpak"]
-                        .into_iter()
-                        .filter_map(|name| find_tool(name).map(|path| (name.into(), path)))
-                        .collect()
+                    [
+                        "apt",
+                        "dnf",
+                        "zypper",
+                        "dpkg-query",
+                        "rpm",
+                        "pkexec",
+                        "flatpak",
+                    ]
+                    .into_iter()
+                    .filter_map(|name| find_tool(name).map(|path| (name.into(), path)))
+                    .collect()
                 } else if os == OperatingSystem::Macos {
                     // /usr/sbin is often absent from a GUI app's PATH.
                     // osascript provides the OS authentication prompt for

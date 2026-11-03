@@ -1,5 +1,6 @@
 //! Genuine runner-generated disk images through the built development CLI.
 #![cfg(all(feature = "cli", feature = "macos-formats", target_os = "macos"))]
+use crate::fixtures;
 use caskade_installer::{
     manifest::{InstallManifest, RootManifest},
     testing::TestRoot,
@@ -10,7 +11,6 @@ use std::{
     path::{Path, PathBuf},
     process::Command,
 };
-use crate::fixtures;
 
 fn attached() -> BTreeSet<PathBuf> {
     let output = Command::new("/usr/bin/hdiutil")

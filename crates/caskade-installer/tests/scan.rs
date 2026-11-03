@@ -1,10 +1,10 @@
 //! #32: reference scan and relocation verdict.
+#[cfg(feature = "windows-formats")]
+use caskade_installer::scan::{Location, Via};
 use caskade_installer::{
     manifest::RelocationVerdict,
     scan::{RegistryValue, ScanInput, ScanLimits, scan_references},
 };
-#[cfg(feature = "windows-formats")]
-use caskade_installer::scan::{Location, Via};
 use std::{fs, path::PathBuf};
 
 fn input<'a>(

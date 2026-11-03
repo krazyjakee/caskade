@@ -21,8 +21,8 @@ use crate::{
     host::{HostCaps, RunnerKind},
 };
 
-pub(crate) use metadata::split_args;
 pub use icons::executable_icon;
+pub(crate) use metadata::split_args;
 pub use title::clean_title;
 
 /// Exact launch targets recovered by a format handler. Inno [Icons] and MSI

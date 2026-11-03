@@ -1,4 +1,5 @@
 #![cfg(feature = "windows-formats")]
+use crate::fixtures;
 use caskade_installer::{
     exec::{CancellationToken, ExecConfig, ExecRequest, Executor},
     formats::{
@@ -18,7 +19,6 @@ use caskade_installer::{
     *,
 };
 use std::{collections::BTreeMap, io::Cursor, path::Path, sync::Arc};
-use crate::fixtures;
 fn fixture() -> fixtures::Fixture {
     fixtures::load_burn(&Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures"))
         .unwrap()

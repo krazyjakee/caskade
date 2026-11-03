@@ -1,3 +1,4 @@
+use crate::fixtures;
 use caskade_installer::{
     ArtifactId, ArtifactNode, Candidate, Fidelity, Format, HandlerId, PayloadPlatform,
     Requirements, Role, RuntimeSpec, Step, Strategy,
@@ -20,7 +21,6 @@ use std::{
     path::{Path, PathBuf},
     sync::Arc,
 };
-use crate::fixtures;
 fn node() -> ArtifactNode {
     ArtifactNode {
         id: ArtifactId("source:0".into()),

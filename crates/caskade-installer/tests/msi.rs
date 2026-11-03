@@ -1,4 +1,5 @@
 #![cfg(feature = "windows-formats")]
+use crate::fixtures;
 use caskade_installer::{
     events::{EventSink, JobEvent},
     exec::{CancellationToken, ExecRequest, Executor},
@@ -21,7 +22,6 @@ use std::{
         atomic::{AtomicUsize, Ordering},
     },
 };
-use crate::fixtures;
 fn root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures")
 }

@@ -1,7 +1,7 @@
 //! Linux I2 catalogue coverage and real installed launch proofs.
 #![cfg(feature = "linux-formats")]
-use std::path::{Path, PathBuf};
 use crate::fixtures;
+use std::path::{Path, PathBuf};
 fn fixture_root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures")
 }

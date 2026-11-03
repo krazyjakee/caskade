@@ -1,4 +1,5 @@
 #![cfg(feature = "macos-formats")]
+use crate::fixtures;
 use caskade_installer::{
     Format,
     exec::{CancellationToken, ExecRequest, Executor},
@@ -17,7 +18,6 @@ use std::{
     path::{Path, PathBuf},
     sync::Arc,
 };
-use crate::fixtures;
 fn fixture() -> fixtures::Fixture {
     fixtures::load_all(&Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures"))
         .unwrap()

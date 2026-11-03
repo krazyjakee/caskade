@@ -21,9 +21,7 @@ pub const RSS_BYTES: u64 = 10 * GIB;
 pub const THROUGHPUT_BYTES: u64 = 128 * 1024 * 1024;
 pub fn temporary(prefix: &str) -> Result<tempfile::TempDir> {
     // Tests explicitly use /tmp, never a committed fixture or user library.
-    Ok(tempfile::Builder::new()
-        .prefix(prefix)
-        .tempdir_in("/tmp")?)
+    Ok(tempfile::Builder::new().prefix(prefix).tempdir_in("/tmp")?)
 }
 pub fn sparse_installer(root: &Path) -> Result<PathBuf> {
     let path = root.join("twenty-gib-setup.exe");
