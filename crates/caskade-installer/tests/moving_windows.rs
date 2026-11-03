@@ -164,6 +164,15 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
     if std::env::var("CASKADE_TEST_NATIVE").as_deref() != Ok("1") {
         return;
     }
+    // After a C:→D: move the game's own uninstaller isn't found and the
+    // manifest route leaves the HKLM key its installer wrote, for the Inno
+    // and MSI minis alike (#38). Each case's uninstall would leave that key
+    // for the next one, so the whole test waits for #38 (CASKADE_TEST_MOVE_38=1
+    // runs it).
+    if std::env::var_os("CASKADE_TEST_MOVE_38").is_none() {
+        eprintln!("skipping: uninstalling a game after a C:→D: move is #38");
+        return;
+    }
     let target_parent = std::env::var_os("CASKADE_TEST_MOVE_ROOT")
         .map(PathBuf::from)
         .unwrap_or_else(|| PathBuf::from(r"D:\CaskadeTests"));
@@ -178,12 +187,6 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
     let fixture_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/bin/windows");
     let mut evidence = vec![];
     for id in ["gog-inno-unity", "legacy-registry-path", "msi-plus-cab"] {
-        if id == "msi-plus-cab" {
-            // A moved MSI isn't uninstalled cleanly yet: its uninstaller isn't
-            // found after the move and its HKLM data stays (#38).
-            eprintln!("skipping msi-plus-cab: uninstall after a move is #38");
-            continue;
-        }
         for aliased in [true, false] {
             let old = tempfile::tempdir().unwrap();
             let old_root = old.path().to_path_buf();

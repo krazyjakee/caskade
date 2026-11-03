@@ -139,6 +139,11 @@ async fn genuine_inno_nsis_msi_native_install_uninstall_remove_files_registry_an
         record.source =
             ManifestSource::from_input(&caskade_installer::Input::Path(source), None, None)
                 .unwrap();
+        // The record names the handler that ran, as an install's would.
+        record.handlers = vec![caskade_installer::manifest::HandlerVersion {
+            id: report.candidate.handler.clone(),
+            version: "0.1.0".into(),
+        }];
         record.plan.candidate = report.candidate;
         record.plan.relative_dir = report.relative_dir;
         record.files.clear();
