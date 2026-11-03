@@ -41,7 +41,9 @@ pub(super) enum Message {
         addrs: Vec<SocketAddr>,
     },
     /// Sharer: the share's other recipients that serve it, by endpoint id.
-    Providers { list: Vec<(String, Vec<SocketAddr>)> },
+    Providers {
+        list: Vec<(String, Vec<SocketAddr>)>,
+    },
     /// Sharer, to a recipient that serves: let these fetch it from you too.
     Allow { peers: Vec<String> },
     /// Recipient: done, they may.

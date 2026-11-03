@@ -16,9 +16,9 @@ pub mod browse;
 pub mod bus;
 mod cache_db;
 pub mod db;
+pub mod device_type;
 #[cfg(feature = "net")]
 pub mod devices;
-pub mod device_type;
 pub mod elevation;
 pub mod emulation;
 pub mod error;
@@ -35,6 +35,8 @@ pub mod metadata;
 pub mod model;
 pub mod notifications;
 pub mod paths;
+#[cfg(feature = "net")]
+pub mod remote_play;
 pub mod romm;
 pub mod saves;
 pub mod scripts;
@@ -51,8 +53,6 @@ pub mod themes;
 pub mod tracking;
 #[cfg(feature = "net")]
 pub mod transfer;
-#[cfg(feature = "net")]
-pub mod remote_play;
 pub mod updates;
 pub mod web;
 

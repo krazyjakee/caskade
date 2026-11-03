@@ -1,10 +1,10 @@
 #![cfg(feature = "cli")]
 //! End-to-end fixture export never touches live launcher data.
+use crate::fixtures as support;
 use std::{
     path::{Path, PathBuf},
     process::Command,
 };
-use crate::fixtures as support;
 fn binary() -> Command {
     Command::new(env!("CARGO_BIN_EXE_caskade-discovery"))
 }

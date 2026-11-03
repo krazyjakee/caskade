@@ -270,13 +270,9 @@ impl Shares {
                     });
                 }
             }
-            share.connected.insert(
-                peer,
-                Connected {
-                    out,
-                    serving: None,
-                },
-            );
+            share
+                .connected
+                .insert(peer, Connected { out, serving: None });
             let waiter = share.allowed.subscribe();
             (serving, waiter)
         };

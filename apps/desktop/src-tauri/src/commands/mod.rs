@@ -2,10 +2,10 @@
 //! submodule per area (library, launch, settings, …), owned with that area.
 
 pub mod accounts;
-pub mod addon_offers;
 pub mod achievement_icons;
 pub mod achievements;
 pub mod actions;
+pub mod addon_offers;
 pub mod addon_packages;
 pub mod addons;
 pub mod app_update;
@@ -32,9 +32,9 @@ pub mod manual_games;
 pub mod notifications;
 pub mod peer_backups;
 pub mod plugin_ui;
-pub mod remote_play;
 pub mod plugins;
 pub mod presence;
+pub mod remote_play;
 pub mod rom_scanners;
 pub mod romm;
 pub mod saves;
@@ -43,8 +43,8 @@ pub mod settings;
 pub mod share_items;
 pub mod shares;
 pub mod storage;
-pub mod streaming;
 pub mod store_accounts;
+pub mod streaming;
 pub mod sync;
 pub mod system_stats;
 #[cfg(test)]

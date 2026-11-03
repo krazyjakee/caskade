@@ -152,7 +152,10 @@ impl Data {
         unique(
             "launchers.toml",
             "battlenet code",
-            self.launchers.battlenet.iter().map(|product| product.code.clone()),
+            self.launchers
+                .battlenet
+                .iter()
+                .map(|product| product.code.clone()),
         )?;
         unique(
             "publishers.toml",

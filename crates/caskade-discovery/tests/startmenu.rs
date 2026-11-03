@@ -1,11 +1,11 @@
 #![cfg(feature = "windows-sources")]
+use crate::fixtures as support;
 use caskade_discovery::{sources::startmenu::StartMenuSource, *};
 use std::{
     fs,
     path::{Path, PathBuf},
     sync::Arc,
 };
-use crate::fixtures as support;
 fn scenario() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/machines/startmenu-windows")
 }

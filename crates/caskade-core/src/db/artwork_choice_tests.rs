@@ -280,7 +280,10 @@ async fn merges_and_separation_keep_the_choices() {
         (slot.choice, slot.shown.unwrap().content_hash),
         (ArtworkChoice::Chosen, icon.content_hash.clone())
     );
-    assert_eq!(f.covers(&keep).await.1, std::slice::from_ref(&kept.content_hash));
+    assert_eq!(
+        f.covers(&keep).await.1,
+        std::slice::from_ref(&kept.content_hash)
+    );
 
     let first = GameEntry::new(&keep, SourceId::new("steam"), "620");
     let second = GameEntry::new(&keep, SourceId::new("gog"), "portal2");

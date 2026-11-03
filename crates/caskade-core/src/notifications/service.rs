@@ -262,7 +262,11 @@ impl Notifications {
                     category: NotificationCategory::ShareArrived,
                     severity: Severity::Info,
                     key: format!("share.arrived:{job}"),
-                    title: msg!("{title} arrived from {sharer}", title = title, sharer = sharer),
+                    title: msg!(
+                        "{title} arrived from {sharer}",
+                        title = title,
+                        sharer = sharer
+                    ),
                     body: Text::Plain(String::new()),
                     target: match game_id {
                         Some(game_id) => NotificationTarget::Game {

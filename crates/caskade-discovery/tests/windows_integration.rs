@@ -1,11 +1,11 @@
 #![cfg(all(feature = "windows-sources", feature = "sqlite"))]
 //! D2's independently authored logical inventory and classifier confusion matrix.
+use crate::fixtures;
 use caskade_discovery::{
     sources::uninstall::{self, UninstallSource},
     *,
 };
 use std::{collections::BTreeSet, fs, path::PathBuf};
-use crate::fixtures;
 const SOURCES: [&str; 13] = [
     "steam",
     "uninstall",

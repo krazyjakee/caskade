@@ -477,7 +477,10 @@ mod tests {
         release.send(()).unwrap();
         let deadline = Instant::now() + Duration::from_secs(5);
         while BLOCKED.lock().unwrap().contains(&key) {
-            assert!(Instant::now() < deadline, "the blocked check never finished");
+            assert!(
+                Instant::now() < deadline,
+                "the blocked check never finished"
+            );
             std::thread::sleep(Duration::from_millis(5));
         }
         assert_eq!(within(key, ANSWER_WAIT, || false), Some(false));

@@ -81,11 +81,16 @@ impl ShareExpiry {
 #[serde(tag = "state", rename_all = "camelCase")]
 pub enum ShareState {
     /// Reading the game's files.
-    Preparing { done: u64, total: u64 },
+    Preparing {
+        done: u64,
+        total: u64,
+    },
     /// Its link works.
     Ready,
     /// Its files couldn't be read.
-    Failed { reason: String },
+    Failed {
+        reason: String,
+    },
     Stopped,
     Expired,
 }
@@ -253,12 +258,9 @@ impl Shares {
             return self.share_item(item, expiry, "").await;
         }
         let (_, title, _, _) = self.inner.transfers.source(entry_id).await?;
-        let entry = self
-            .inner
-            .store
-            .get_entry(entry_id)
-            .await?
-            .ok_or_else(|| Error::Invalid(crate::tr!("that game isn't installed on this device")))?;
+        let entry = self.inner.store.get_entry(entry_id).await?.ok_or_else(|| {
+            Error::Invalid(crate::tr!("that game isn't installed on this device"))
+        })?;
         let now = crate::now_ms();
         let row = ShareRow {
             id: crate::model::new_id(),
@@ -266,7 +268,9 @@ impl Shares {
             game_id: Some(entry.game_id.clone()),
             entry_id: Some(entry_id.to_owned()),
             title,
-            size: entry.size.map_or(0, |size| i64::try_from(size).unwrap_or(i64::MAX)),
+            size: entry
+                .size
+                .map_or(0, |size| i64::try_from(size).unwrap_or(i64::MAX)),
             root: None,
             extras_root: None,
             grant: Grant::generate().to_hex(),

@@ -676,9 +676,9 @@ impl Devices {
             .connect(addr, purpose, grant)
             .await
             .map_err(|error| match error {
-                caskade_sync::Error::Refused => Error::Forbidden(crate::tr!(
-                    "the other device turned the connection down"
-                )),
+                caskade_sync::Error::Refused => {
+                    Error::Forbidden(crate::tr!("the other device turned the connection down"))
+                }
                 error => Error::Invalid(error.to_string()),
             })
     }

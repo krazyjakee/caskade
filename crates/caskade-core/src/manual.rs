@@ -84,7 +84,11 @@ fn is_uri(input: &str) -> bool {
 
 /// The entry `target` would be, for validation and for adding it.
 pub(crate) fn entry_for(game_id: &str, target: &ManualTarget) -> GameEntry {
-    let mut entry = GameEntry::new(game_id, caskade_discovery::SourceId::new(MANUAL_SOURCE), new_id());
+    let mut entry = GameEntry::new(
+        game_id,
+        caskade_discovery::SourceId::new(MANUAL_SOURCE),
+        new_id(),
+    );
     entry.state = InstallState::Installed;
     entry.location = target
         .folder

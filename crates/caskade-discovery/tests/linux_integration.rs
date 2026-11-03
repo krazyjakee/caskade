@@ -1,10 +1,10 @@
 #![cfg(all(feature = "linux-sources", feature = "sqlite"))]
 //! D1's authored inventory is independent of the scan and contains only
 //! original synthetic metadata, including intentional duplicate interfaces.
+use crate::fixtures;
 use caskade_discovery::*;
 use serde::Deserialize;
 use std::{collections::BTreeSet, fs, path::PathBuf};
-use crate::fixtures;
 #[derive(Deserialize)]
 struct Inventory {
     groups: Vec<Vec<String>>,

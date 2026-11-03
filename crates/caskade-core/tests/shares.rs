@@ -288,7 +288,11 @@ async fn a_shared_game_arrives_from_its_link_and_is_ready_to_play() {
     .expect("the sharer is told");
     assert_eq!(
         received,
-        (share.clone(), "Celeste".to_owned(), "Friend's PC".to_owned())
+        (
+            share.clone(),
+            "Celeste".to_owned(),
+            "Friend's PC".to_owned()
+        )
     );
     // And once it's here, the friend no longer serves it by default.
     within("the friend stops serving", 10, || async {
@@ -493,7 +497,9 @@ async fn the_third_recipient_receives_from_the_sharer_and_the_first_two_until_it
     // Thirty files, so the third's fetch has requests to spread.
     let (entry, folder) = add_celeste(&desk, 1024).await;
     for n in 0..30 {
-        let bytes: Vec<u8> = (0..1024 * 1024).map(|i| ((i + n * 7) % 251) as u8).collect();
+        let bytes: Vec<u8> = (0..1024 * 1024)
+            .map(|i| ((i + n * 7) % 251) as u8)
+            .collect();
         std::fs::write(folder.join(format!("Content/{n:02}.pak")), bytes).unwrap();
     }
     let (share, link) = shared(&desk, &entry).await;
@@ -507,7 +513,11 @@ async fn the_third_recipient_receives_from_the_sharer_and_the_first_two_until_it
             JobStatus::Completed
         );
         within("it serves the share", 10, || async {
-            recipient.shares.received().iter().any(|share| share.serving)
+            recipient
+                .shares
+                .received()
+                .iter()
+                .any(|share| share.serving)
         })
         .await;
     }
@@ -519,11 +529,19 @@ async fn the_third_recipient_receives_from_the_sharer_and_the_first_two_until_it
 
     // Cy receives from all three at once. The Desk forgets what it sent Cy
     // once Cy leaves, so it's counted while Cy receives.
-    let root = desk.store.share(&share).await.unwrap().unwrap().root.unwrap();
+    let root = desk
+        .store
+        .share(&share)
+        .await
+        .unwrap()
+        .unwrap()
+        .root
+        .unwrap();
     let cy_id: caskade_sync::EndpointId = id(&cy).await.parse().unwrap();
     let from_desk = Arc::new(std::sync::atomic::AtomicU64::new(0));
     let counting = {
-        let (transfers, root, from_desk) = (desk.transfers.clone(), root.clone(), from_desk.clone());
+        let (transfers, root, from_desk) =
+            (desk.transfers.clone(), root.clone(), from_desk.clone());
         tokio::spawn(async move {
             loop {
                 from_desk.fetch_max(
@@ -553,7 +571,11 @@ async fn the_third_recipient_receives_from_the_sharer_and_the_first_two_until_it
     desk.shares.stop(&share).await.unwrap();
     for (name, recipient) in [("Ann", &ann), ("Bo", &bo)] {
         within(&format!("{name} stops serving"), 10, || async {
-            recipient.shares.received().iter().all(|share| !share.serving)
+            recipient
+                .shares
+                .received()
+                .iter()
+                .all(|share| !share.serving)
         })
         .await;
     }

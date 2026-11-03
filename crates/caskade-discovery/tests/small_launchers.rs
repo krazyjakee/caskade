@@ -1,10 +1,10 @@
 #![cfg(feature = "linux-sources")]
+use crate::fixtures;
 use caskade_discovery::{
     sources::{faugus::Faugus, heroic::Heroic, minigalaxy::Minigalaxy},
     *,
 };
 use std::{fs, path::PathBuf, sync::Arc};
-use crate::fixtures;
 fn corpus() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures")
 }

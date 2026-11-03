@@ -141,11 +141,18 @@ fn bios_files_are_found_checked_and_looked_up_in_order() {
         [PathBuf::from("/emu/system"), PathBuf::from("/emu/bios")]
     );
     assert_eq!(
-        bios_dirs(Some(Path::new("/mine")), &Vars::default(), os, kind, &context),
+        bios_dirs(
+            Some(Path::new("/mine")),
+            &Vars::default(),
+            os,
+            kind,
+            &context
+        ),
         [PathBuf::from("/mine")]
     );
     let mut vars = Vars::default();
-    vars.shared.insert("bios".into(), "{EmulatorDir}/firmware".into());
+    vars.shared
+        .insert("bios".into(), "{EmulatorDir}/firmware".into());
     assert_eq!(
         bios_dirs(None, &vars, os, kind, &context),
         [PathBuf::from("/emu/firmware")]
@@ -157,14 +164,20 @@ async fn readiness_walks_from_no_emulator_to_ready() {
     let f = fixture().await;
     let game = f.service.game(&f.entry.id).await.unwrap();
     assert_eq!(game.readiness, Readiness::NoEmulator);
-    assert_eq!(game.message.as_deref(), Some("No emulator for PS1 — configure"));
+    assert_eq!(
+        game.message.as_deref(),
+        Some("No emulator for PS1 — configure")
+    );
     assert_eq!(game.discs[0].name.as_deref(), Some("Disc 1"));
     assert!(game.discs[0].exists);
     // Without an emulator the BIOS list is known, its state isn't.
     assert_eq!(game.bios[0].state, None);
     assert_eq!(f.service.overview().await.unwrap().bios_issues, Some(0));
 
-    f.store.upsert_emulator(&emulator(&f.emulator_dir)).await.unwrap();
+    f.store
+        .upsert_emulator(&emulator(&f.emulator_dir))
+        .await
+        .unwrap();
     f.service
         .set_platform_settings(PlatformSettings {
             platform: "sony_playstation".into(),
@@ -185,7 +198,11 @@ async fn readiness_walks_from_no_emulator_to_ready() {
     );
     assert_eq!(game.profile.as_ref().unwrap().profile_id, "psx");
     // The optional file being absent is not a problem.
-    let optional = game.bios.iter().find(|b| b.file == "dc/optional.bin").unwrap();
+    let optional = game
+        .bios
+        .iter()
+        .find(|b| b.file == "dc/optional.bin")
+        .unwrap();
     assert_eq!(optional.state, Some(BiosState::Missing));
     assert_eq!(f.service.overview().await.unwrap().bios_issues, Some(1));
     let platform = f.service.platforms().await.unwrap().remove(0);
@@ -197,7 +214,10 @@ async fn readiness_walks_from_no_emulator_to_ready() {
     let game = f.service.game(&f.entry.id).await.unwrap();
     assert_eq!(game.readiness, Readiness::Ready);
     assert_eq!(game.message, None);
-    assert_eq!(f.service.readiness(&f.entry).await.unwrap(), Readiness::Ready);
+    assert_eq!(
+        f.service.readiness(&f.entry).await.unwrap(),
+        Readiness::Ready
+    );
     assert_eq!(f.service.overview().await.unwrap().bios_issues, Some(0));
 
     // A platform BIOS folder override wins over the emulator's folder.
@@ -220,13 +240,19 @@ async fn readiness_walks_from_no_emulator_to_ready() {
     let game = f.service.game(&f.entry.id).await.unwrap();
     assert_eq!(game.bios[0].state, Some(BiosState::WrongHash));
     std::fs::write(elsewhere.join("scph5501.bin"), BIOS).unwrap();
-    assert_eq!(f.service.game(&f.entry.id).await.unwrap().readiness, Readiness::Ready);
+    assert_eq!(
+        f.service.game(&f.entry.id).await.unwrap().readiness,
+        Readiness::Ready
+    );
 
     // The emulator going away, then the ROM going away.
     std::fs::remove_file(f.emulator_dir.join("emu")).unwrap();
     let game = f.service.game(&f.entry.id).await.unwrap();
     assert_eq!(game.readiness, Readiness::NotInstalled);
-    assert_eq!(game.message.as_deref(), Some("Emu isn't installed any more — configure"));
+    assert_eq!(
+        game.message.as_deref(),
+        Some("Emu isn't installed any more — configure")
+    );
     std::fs::remove_file(&f.rom).unwrap();
     assert!(matches!(
         f.service.game(&f.entry.id).await.unwrap().readiness,
@@ -237,7 +263,10 @@ async fn readiness_walks_from_no_emulator_to_ready() {
 #[tokio::test]
 async fn games_can_be_pinned_asked_and_given_arguments() {
     let f = fixture().await;
-    f.store.upsert_emulator(&emulator(&f.emulator_dir)).await.unwrap();
+    f.store
+        .upsert_emulator(&emulator(&f.emulator_dir))
+        .await
+        .unwrap();
     let pinned = EmulatorTarget::Profile {
         emulator_id: "emu".into(),
         profile_id: "psx".into(),
@@ -262,7 +291,11 @@ async fn games_can_be_pinned_asked_and_given_arguments() {
 
     let asked = f
         .service
-        .set_game(&f.entry.id, EmulatorTarget::AskEmulator, ArgsOverride::Default)
+        .set_game(
+            &f.entry.id,
+            EmulatorTarget::AskEmulator,
+            ArgsOverride::Default,
+        )
         .await
         .unwrap();
     assert_eq!(asked.readiness, Readiness::Ask);
@@ -272,7 +305,12 @@ async fn games_can_be_pinned_asked_and_given_arguments() {
         emulator_id: "emu".into(),
         profile_id: "nope".into(),
     };
-    assert!(f.service.set_game(&f.entry.id, unknown, ArgsOverride::Default).await.is_err());
+    assert!(
+        f.service
+            .set_game(&f.entry.id, unknown, ArgsOverride::Default)
+            .await
+            .is_err()
+    );
     let bad_args = ArgsOverride::Replace {
         args: vec!["{cores}".into()],
         replaced: vec![],

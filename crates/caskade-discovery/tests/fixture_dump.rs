@@ -1,4 +1,5 @@
 //! Only synthetic machines are read. No real launcher directories are inspected.
+use crate::fixtures;
 use caskade_discovery::{
     Cancel, Config, DetectedGame, ExternalId, HostEnv, LauncherStatus, OsSet, ScanCtx, Source,
     SourceError, SourceId, WatchPath, dump::dump_anonymized, env::KnownFolder, scan_with_sources,
@@ -8,7 +9,6 @@ use std::{
     path::{Path, PathBuf},
     sync::Arc,
 };
-use crate::fixtures;
 fn corpus() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures")
 }

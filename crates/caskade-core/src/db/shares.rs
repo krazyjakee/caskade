@@ -219,10 +219,22 @@ mod tests {
         assert!(!s1.running(5_000), "expired");
         assert!(store.share("s2").await.unwrap().unwrap().running(i64::MAX));
 
-        store.add_share_recipient("s1", "peer1", "Sam", 2_000).await.unwrap();
-        store.add_share_recipient("s1", "peer1", "Sam's PC", 2_500).await.unwrap();
-        store.set_share_progress("s1", "peer1", 512, None).await.unwrap();
-        store.set_share_progress("s1", "peer1", 100, Some(3_000)).await.unwrap();
+        store
+            .add_share_recipient("s1", "peer1", "Sam", 2_000)
+            .await
+            .unwrap();
+        store
+            .add_share_recipient("s1", "peer1", "Sam's PC", 2_500)
+            .await
+            .unwrap();
+        store
+            .set_share_progress("s1", "peer1", 512, None)
+            .await
+            .unwrap();
+        store
+            .set_share_progress("s1", "peer1", 100, Some(3_000))
+            .await
+            .unwrap();
         let recipients = store.share_recipients("s1").await.unwrap();
         assert_eq!(recipients.len(), 1);
         assert_eq!(recipients[0].name, "Sam's PC");

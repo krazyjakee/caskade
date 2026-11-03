@@ -124,7 +124,9 @@ fn expired(link: &ShareLink) -> Error {
     let at = link
         .expires_at()
         .and_then(|at| at.duration_since(SystemTime::UNIX_EPOCH).ok())
-        .map_or(0, |since| i64::try_from(since.as_millis()).unwrap_or(i64::MAX));
+        .map_or(0, |since| {
+            i64::try_from(since.as_millis()).unwrap_or(i64::MAX)
+        });
     Error::Invalid(crate::tr!(
         "This link expired on {date}. Ask whoever shared it for a new one.",
         date = date(at)
@@ -319,7 +321,9 @@ impl Shares {
             return Err(Error::Invalid(crate::tr!("that share isn't here any more")));
         }
         // A job whose files haven't started coming yet takes it when they do.
-        let share = received.entry(job.to_owned()).or_insert_with(Received::queued);
+        let share = received
+            .entry(job.to_owned())
+            .or_insert_with(Received::queued);
         if on && !share.receiving && !share.serving {
             return Err(Error::Invalid(crate::tr!(
                 "it's here already: it can help others only if that's chosen while it arrives"
@@ -482,8 +486,8 @@ impl ShareFetcher {
         let cache_free = fs2::available_space(incoming).unwrap_or(u64::MAX);
         let root_free = fs2::available_space(root).unwrap_or(u64::MAX);
         let to_come = size.saturating_sub(have);
-        let same_disk =
-            fs2::total_space(incoming).ok() == fs2::total_space(root).ok() && cache_free == root_free;
+        let same_disk = fs2::total_space(incoming).ok() == fs2::total_space(root).ok()
+            && cache_free == root_free;
         let short = if same_disk {
             to_come.saturating_add(size).saturating_sub(root_free)
         } else {
@@ -524,8 +528,7 @@ impl PeerFetcher for ShareFetcher {
                 return Err(failure);
             }
         };
-        let others = match tokio::time::timeout(ABOUT_WAIT, session.reader().read(MAX_LINE)).await
-        {
+        let others = match tokio::time::timeout(ABOUT_WAIT, session.reader().read(MAX_LINE)).await {
             Ok(Ok(Message::Providers { list })) => list,
             _ => Vec::new(),
         };
@@ -600,7 +603,10 @@ impl PeerFetcher for ShareFetcher {
                 move |bytes| {
                     let now = have.saturating_add(bytes).min(size);
                     done.store(now, std::sync::atomic::Ordering::Relaxed);
-                    report(PeerProgress::Receiving { done: now, total: size });
+                    report(PeerProgress::Receiving {
+                        done: now,
+                        total: size,
+                    });
                 },
             )
         };

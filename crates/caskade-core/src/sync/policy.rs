@@ -670,7 +670,10 @@ pub const TABLES: &[Rule] = &[
         "the clock each field's value here came with, for last-writer-wins",
     ),
     local("sync_seen", "this device's version vector"),
-    local("sync_peers", "what each paired device has seen, for this device's exchanges"),
+    local(
+        "sync_peers",
+        "what each paired device has seen, for this device's exchanges",
+    ),
     local(
         "sync_game_ids",
         "which local game each other device's game is; ids differ per device",

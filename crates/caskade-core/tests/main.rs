@@ -3,9 +3,15 @@
 
 mod addon_offers;
 mod appimage_env;
+#[cfg(feature = "net")]
+mod cores;
 mod device_defaults;
 #[cfg(feature = "net")]
+mod devices;
+#[cfg(feature = "net")]
 mod emulator_config;
+#[cfg(feature = "net")]
+mod game_copy;
 mod i18n;
 mod installer_settings;
 #[cfg(feature = "net")]
@@ -13,8 +19,6 @@ mod ludusavi;
 #[cfg(feature = "net")]
 mod milestone_editing;
 mod missing_programs;
-mod rom_scan;
-mod save_locations;
 #[cfg(feature = "net")]
 mod new_device;
 #[cfg(feature = "net")]
@@ -23,26 +27,22 @@ mod peer_backups;
 mod peer_downloads;
 #[cfg(feature = "net")]
 mod presence;
+mod rom_scan;
+#[cfg(feature = "net")]
+mod romm;
+mod save_locations;
 #[cfg(feature = "net")]
 mod save_sync;
 mod save_versions;
 #[cfg(feature = "net")]
-mod shares;
-#[cfg(feature = "net")]
 mod share_items;
 #[cfg(feature = "net")]
-mod romm;
-#[cfg(feature = "net")]
-mod cores;
-#[cfg(feature = "net")]
-mod devices;
-#[cfg(feature = "net")]
-mod game_copy;
+mod shares;
 mod sync_carried;
 mod sync_games;
 mod sync_log;
-mod sync_sections;
-mod sync_romm;
 #[cfg(feature = "net")]
 mod sync_network;
 mod sync_policy;
+mod sync_romm;
+mod sync_sections;

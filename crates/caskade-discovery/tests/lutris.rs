@@ -1,4 +1,5 @@
 #![cfg(all(feature = "linux-sources", feature = "sqlite"))]
+use crate::fixtures;
 use caskade_discovery::{
     sources::{heroic::Heroic, lutris::Lutris, steam::Steam},
     *,
@@ -8,7 +9,6 @@ use std::{
     path::{Path, PathBuf},
     sync::Arc,
 };
-use crate::fixtures;
 fn corpus() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures")
 }

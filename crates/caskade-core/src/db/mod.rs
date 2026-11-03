@@ -51,10 +51,10 @@ mod game_edit_tests;
 mod hidden_tests;
 #[cfg(test)]
 mod letter_tests;
+mod paired_devices;
 #[cfg(test)]
 mod platform_tests;
 mod playtime;
-mod paired_devices;
 mod sync_accounts;
 mod sync_artwork;
 mod sync_carried;

@@ -398,9 +398,7 @@ impl ScannerService {
                     .iter()
                     .find(|profile| profile.id == scanner.profile.profile_id)
             })
-            .ok_or_else(|| {
-                Error::Invalid(crate::tr!("the scanner's profile does not exist"))
-            })?;
+            .ok_or_else(|| Error::Invalid(crate::tr!("the scanner's profile does not exist")))?;
         let ids: Vec<&String> = match &scanner.platform {
             Some(platform) if profile.platforms.contains(platform) => vec![platform],
             Some(platform) => {

@@ -1,12 +1,12 @@
 #![cfg(feature = "sqlite")]
 //! All machines/databases/receipts are original synthetic records.
+use crate::fixtures;
 use caskade_discovery::{sources::itch::Itch, *};
 use std::{
     fs,
     io::Write,
     path::{Path, PathBuf},
 };
-use crate::fixtures;
 fn source(name: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests/fixtures/src/itch")

@@ -552,6 +552,9 @@ async fn select_all_lists_every_game_a_query_finds() {
     assert!(!found.is_empty() && found.len() < 1205);
     assert_eq!(
         found,
-        page.items.into_iter().map(|game| game.id).collect::<Vec<_>>()
+        page.items
+            .into_iter()
+            .map(|game| game.id)
+            .collect::<Vec<_>>()
     );
 }
