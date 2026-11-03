@@ -372,7 +372,11 @@ fn canonical_install_directory_merges_uninstall_metadata_without_title_matching(
         &merge::MergeConfig::default(),
     )
     .unwrap();
-    assert_eq!(merged.len(), 1);
+    let dirs: Vec<Vec<_>> = merged
+        .iter()
+        .map(|group| group.entries.iter().map(|e| &e.install_dir).collect())
+        .collect();
+    assert_eq!(merged.len(), 1, "{dirs:?}");
     assert_eq!(merged[0].entries.len(), 2);
     assert_eq!(merged[0].primary_entry().unwrap().source, ID);
     assert!(merged[0].primary_entry().unwrap().uninstall.is_some());

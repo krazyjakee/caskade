@@ -242,10 +242,15 @@ fn map_windows(env: &HostEnv, text: &str, context: &PathContext) -> io::Result<P
         if text.as_bytes().get(1..3) != Some(b":\\") {
             return Err(invalid("drive-relative path"));
         }
-        let link = prefix
-            .join("dosdevices")
-            .join(format!("{}:", (drive as char).to_ascii_lowercase()));
-        let base = if fs::symlink_metadata(&link).is_ok() {
+        let name = format!("{}:", (drive as char).to_ascii_lowercase());
+        let link = prefix.join("dosdevices").join(&name);
+        // On a Windows host `c:` parses as a drive, and the join would be the
+        // drive itself; NTFS can't hold such a link anyway.
+        let ordinary = matches!(
+            Path::new(&name).components().next(),
+            Some(Component::Normal(_))
+        );
+        let base = if ordinary && fs::symlink_metadata(&link).is_ok() {
             env.resolve_path(&link)?
         } else if drive.eq_ignore_ascii_case(&b'c') {
             prefix.join("drive_c")
