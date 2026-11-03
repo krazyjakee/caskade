@@ -62,7 +62,9 @@ impl Reconciler {
                 ));
             }
         }
-        let game = fs::canonicalize(game)?;
+        // dunce, like the root lease: std's verbatim \\?\ spelling on Windows
+        // never starts with the root's ordinary one.
+        let game = dunce::canonicalize(game)?;
         if !game.starts_with(root) || game == root {
             return Err(ReconcileError::Invalid("game escapes selected root".into()));
         }
@@ -153,7 +155,7 @@ impl Reconciler {
         // alias or rewrite shared external state while both locations exist.
         if path_changed && Path::new(&old).is_absolute() {
             match fs::symlink_metadata(&old) {
-                Ok(_) if fs::canonicalize(&old).ok().as_deref() != Some(game.as_path()) => {
+                Ok(_) if dunce::canonicalize(&old).ok().as_deref() != Some(game.as_path()) => {
                     report.status = ReconcileStatus::NeedsUser;
                     report.question = Some(Question::ChooseInstallDirectory {
                         paths: vec![old.into(), game],

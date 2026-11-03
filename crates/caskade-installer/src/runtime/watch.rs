@@ -16,7 +16,7 @@ use std::{
     collections::BTreeSet,
     path::{Path, PathBuf},
     sync::mpsc::{Receiver, channel},
-    time::Duration,
+    time::{Duration, SystemTime},
 };
 
 /// Delay for late events after the process exits (Windows and FSEvents batch).
@@ -128,12 +128,13 @@ impl ProcessObserver for OutOfRootWatcher {
         // the game itself live below it and are never external effects.
         let game = context.final_destination_path(Path::new("."))?;
         let storage = game.parent().map(Path::to_path_buf).unwrap_or(game);
-        let storage = storage.canonicalize().unwrap_or(storage);
+        let storage = dunce::canonicalize(&storage).unwrap_or(storage);
+        let started = SystemTime::now();
         let (send, events) = channel();
         let mut watcher = notify::recommended_watcher(send).map_err(watch_error)?;
         let mut watched = vec![];
         for root in self.roots.values() {
-            let Ok(root) = root.canonicalize() else {
+            let Ok(root) = dunce::canonicalize(root) else {
                 continue;
             };
             // A storage root inside a watched location is excluded by path;
@@ -155,6 +156,8 @@ impl ProcessObserver for OutOfRootWatcher {
             watcher: Some(watcher),
             events,
             storage,
+            watched,
+            started,
         }))
     }
 }
@@ -169,6 +172,8 @@ struct Observation {
     watcher: Option<notify::RecommendedWatcher>,
     events: Receiver<notify::Result<notify::Event>>,
     storage: PathBuf,
+    watched: Vec<PathBuf>,
+    started: SystemTime,
 }
 
 impl ProcessObservation for Observation {
@@ -187,6 +192,25 @@ impl ProcessObservation for Observation {
                     }
                 }
                 _ => {}
+            }
+        }
+        // FSEvents coalesces events, so a file can arrive without the
+        // directories made for it: an ancestor inside a watched location that
+        // was born after the watch began is new too (with the coarsest birth
+        // time resolution, FAT's two seconds, as slack).
+        let since = self.started - Duration::from_secs(2);
+        for path in created.clone() {
+            let Some(root) = self.watched.iter().find(|root| path.starts_with(root)) else {
+                continue;
+            };
+            for ancestor in path.ancestors().skip(1) {
+                if ancestor == root.as_path() || !ancestor.starts_with(root) {
+                    break;
+                }
+                let born = std::fs::symlink_metadata(ancestor).and_then(|meta| meta.created());
+                if born.is_ok_and(|born| born >= since) {
+                    created.insert(ancestor.to_path_buf());
+                }
             }
         }
         // Everything inside a created directory is new too, including entries

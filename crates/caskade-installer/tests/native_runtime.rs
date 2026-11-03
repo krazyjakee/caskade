@@ -76,7 +76,7 @@ fn argv_env_cwd_and_exit_codes_are_passed_without_a_shell_layer() {
     );
     runtime.kill(process).unwrap();
     let out = fs::read_to_string(dir.path().join("out")).unwrap();
-    let cwd = dir.path().canonicalize().unwrap();
+    let cwd = dunce::canonicalize(dir.path()).unwrap();
     assert_eq!(
         out,
         format!("two words|value; $(not expanded)|{}", cwd.display())
@@ -311,7 +311,7 @@ fn external(report: &[JournalEntry]) -> Vec<(PathBuf, bool)> {
 async fn native_install_lands_in_the_root_and_reports_out_of_root_files() {
     let root = TestRoot::new().unwrap();
     let home = tempfile::tempdir().unwrap();
-    let home_path = home.path().canonicalize().unwrap();
+    let home_path = dunce::canonicalize(home.path()).unwrap();
     fs::create_dir(home_path.join("Documents")).unwrap();
     fs::write(home_path.join("Documents/existing.txt"), b"keep").unwrap();
     let report = run(&root, &home_path, 0).await.unwrap();
@@ -359,7 +359,7 @@ async fn native_install_lands_in_the_root_and_reports_out_of_root_files() {
 async fn failed_native_install_rolls_back_its_out_of_root_files() {
     let root = TestRoot::new().unwrap();
     let home = tempfile::tempdir().unwrap();
-    let home_path = home.path().canonicalize().unwrap();
+    let home_path = dunce::canonicalize(home.path()).unwrap();
     fs::create_dir(home_path.join("Desktop")).unwrap();
     fs::write(home_path.join("Desktop/existing.desktop"), b"keep").unwrap();
     let error = run(&root, &home_path, 3).await.unwrap_err();
@@ -452,7 +452,7 @@ async fn inno_fixture_installs_silently_into_the_root_with_watched_effects() {
     .await
     .unwrap();
     assert!(root.path().join("Fixture Game/FixtureGame.exe").is_file());
-    let storage = root.path().canonicalize().unwrap();
+    let storage = dunce::canonicalize(root.path()).unwrap();
     for entry in &report.journal {
         if let JournalEntry::ExternalFile { path, .. } | JournalEntry::ExternalDirectory { path } =
             entry

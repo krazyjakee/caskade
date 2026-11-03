@@ -113,7 +113,7 @@ async fn run(
 
 fn store() -> (tempfile::TempDir, AliasStore) {
     let home = tempfile::tempdir().unwrap();
-    let store = AliasStore::new(home.path().canonicalize().unwrap().join("Caskade/g"));
+    let store = AliasStore::new(dunce::canonicalize(home.path()).unwrap().join("Caskade/g"));
     (home, store)
 }
 
@@ -128,7 +128,7 @@ async fn native_installer_receives_and_records_only_the_alias() {
     let id = report.alias.clone().expect("alias recorded");
     assert_eq!(id, AliasStore::short_id("root-1/Indie Game"));
     assert_eq!(*seen.0.lock().unwrap(), [Some(id.clone())]);
-    let real = root.path().canonicalize().unwrap().join("Indie Game");
+    let real = dunce::canonicalize(root.path()).unwrap().join("Indie Game");
     assert_eq!(store.target(&id).unwrap().as_deref(), Some(real.as_path()));
     let config = fs::read_to_string(real.join("config.ini")).unwrap();
     let alias = store.path(&id).unwrap();

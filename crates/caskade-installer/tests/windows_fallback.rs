@@ -312,7 +312,7 @@ async fn native_burn_bundle_installs_silently_and_actual_fixture_game_runs() {
         }
     }
     let fixture = fixture();
-    let source = std::fs::canonicalize(fixture.input()).unwrap();
+    let source = dunce::canonicalize(fixture.input()).unwrap();
     let _cleanup = Uninstall(source.clone());
     let mut node = engine().probe_path(&source).unwrap().root;
     node.facts.insert(

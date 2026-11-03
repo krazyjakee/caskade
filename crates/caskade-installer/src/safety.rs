@@ -681,7 +681,7 @@ fn in_caskade_folder(path: &Path) -> bool {
 /// std canonicalization supplies the extended-length `\\?\` representation;
 /// entry names themselves must never contain that prefix.
 pub fn open_staging(path: &Path) -> Result<Dir> {
-    let canonical = std::fs::canonicalize(path)?;
+    let canonical = dunce::canonicalize(path)?;
     Ok(Dir::open_ambient_dir(
         canonical,
         cap_std::ambient_authority(),

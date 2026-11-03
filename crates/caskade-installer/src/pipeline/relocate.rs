@@ -37,7 +37,7 @@ impl RunningCheck for Processes {
                 && [process.exe(), process.cwd()]
                     .into_iter()
                     .flatten()
-                    .any(|path| fs::canonicalize(path).is_ok_and(|path| path.starts_with(game)))
+                    .any(|path| dunce::canonicalize(path).is_ok_and(|path| path.starts_with(game)))
         })
     }
 }
@@ -137,7 +137,7 @@ fn engine_at(
                 let prefix = path.join(".caskade/prefix");
                 if !prefix.is_dir()
                     || fs::symlink_metadata(&prefix)?.file_type().is_symlink()
-                    || !fs::canonicalize(&prefix)?.starts_with(path)
+                    || !dunce::canonicalize(&prefix)?.starts_with(path)
                 {
                     return Err(ReconcileError::Invalid(
                         "CLI prefix must be a real game-local .caskade/prefix directory".into(),

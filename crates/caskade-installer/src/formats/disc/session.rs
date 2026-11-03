@@ -93,7 +93,7 @@ impl DiscSession {
             let text = crate::safety::decode_name(&bytes, crate::safety::NameEncoding::Detect)?;
             let track = parse_cue(&text)?;
             let candidate = parent.join(&track.file);
-            let actual = fs::canonicalize(&candidate).or_else(|error| {
+            let actual = dunce::canonicalize(&candidate).or_else(|error| {
                 members
                     .iter()
                     .find(|p| {

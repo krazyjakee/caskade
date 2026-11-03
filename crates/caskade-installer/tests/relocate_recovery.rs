@@ -94,7 +94,7 @@ fn restart_rolls_back_killed_copy_rename_and_reference_rewrite() {
         (false, "rewriting"),
     ] {
         let temp = tempfile::tempdir().unwrap();
-        let base = temp.path().canonicalize().unwrap();
+        let base = dunce::canonicalize(temp.path()).unwrap();
         let game = base.join("source/Game");
         fs::create_dir_all(&game).unwrap();
         fs::create_dir(base.join("target")).unwrap();
@@ -135,7 +135,7 @@ fn restart_rolls_back_killed_copy_rename_and_reference_rewrite() {
 #[test]
 fn restart_finishes_a_durably_committed_copy_instead_of_reverting_it() {
     let temp = tempfile::tempdir().unwrap();
-    let base = temp.path().canonicalize().unwrap();
+    let base = dunce::canonicalize(temp.path()).unwrap();
     let game = base.join("source/Game");
     fs::create_dir_all(&game).unwrap();
     fs::create_dir(base.join("target")).unwrap();

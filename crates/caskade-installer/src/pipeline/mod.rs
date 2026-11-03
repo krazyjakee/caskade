@@ -127,7 +127,8 @@ pub fn extractor(
     Arc::new(extract::PipelineExtractor::new(
         ctx,
         sources,
-        HostCaps::detect(),
+        // The host the plan was made for, when the caller gave one.
+        ctx.host.clone().unwrap_or_else(HostCaps::detect),
         Arc::new(NativeRuntime::new()),
     ))
 }
@@ -170,7 +171,7 @@ pub(crate) async fn uninstall_with(
     if !metadata.is_dir() || metadata.is_symlink() {
         return Err("game directory must be a real directory, not a symlink".into());
     }
-    let game = fs::canonicalize(game_dir)?;
+    let game = dunce::canonicalize(game_dir)?;
     let root = game
         .parent()
         .ok_or("game directory has no storage root")?
@@ -186,7 +187,7 @@ pub(crate) async fn uninstall_with(
         if scope.is_empty() || !supplied_scopes.insert(scope.to_owned()) {
             return Err("external scope must be nonempty and unique".into());
         }
-        roots.insert(scope.to_owned(), fs::canonicalize(path)?);
+        roots.insert(scope.to_owned(), dunce::canonicalize(path)?);
     }
     let job_id = input::job_id(&format!("uninstall:{}", game.display()), None)?;
     let mut worker = executor(ctx, BTreeMap::new());

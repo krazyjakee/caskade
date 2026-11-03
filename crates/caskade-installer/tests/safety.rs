@@ -66,8 +66,8 @@ proptest! {
             let mut safe = SafeDir::new(open_staging(&root).unwrap(), Limits::default(), 1024, true);
             // Host path length constraints may reject otherwise valid names.
             if safe.write_file(&name, Cursor::new(b"ok"), Some(2), 0, 0o644).is_ok() {
-                let resolved = std::fs::canonicalize(root.join(path)).unwrap();
-                prop_assert!(resolved.starts_with(std::fs::canonicalize(&root).unwrap()));
+                let resolved = dunce::canonicalize(root.join(path)).unwrap();
+                prop_assert!(resolved.starts_with(dunce::canonicalize(&root).unwrap()));
             }
             prop_assert_eq!(std::fs::read(sentinel).unwrap(), b"unchanged");
         }

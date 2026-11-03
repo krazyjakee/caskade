@@ -27,7 +27,7 @@ fn attached() -> BTreeSet<PathBuf> {
         .into_iter()
         .flatten()
         .filter_map(|value| value.as_dictionary()?.get("image-path")?.as_string())
-        .map(|path| fs::canonicalize(path).unwrap_or_else(|_| path.into()))
+        .map(|path| dunce::canonicalize(path).unwrap_or_else(|_| path.into()))
         .collect()
 }
 fn cli(args: &[&str]) -> serde_json::Value {
@@ -58,7 +58,7 @@ fn native_cli_udzo_ulfo_sla_install_launch_uninstall_and_detach() {
             .iter()
             .find(|fixture| fixture.expected.id == id)
             .unwrap();
-        let source = fixture.input().canonicalize().unwrap();
+        let source = dunce::canonicalize(fixture.input()).unwrap();
         assert!(!attached().contains(&source));
         let root = TestRoot::new().unwrap();
         let outcome = cli(&[

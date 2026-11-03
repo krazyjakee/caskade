@@ -90,7 +90,7 @@ fn binary_repairs_external_folder_and_root_renames_then_uninstalls_from_the_new_
     let manifest = InstallManifest::read(&current).unwrap();
     assert_eq!(
         manifest.record().relocation.last_path.as_deref(),
-        current.to_str()
+        dunce::canonicalize(&current).unwrap().to_str()
     );
     assert!(manifest.verify(&current).unwrap().changed.is_empty());
     let (status, report, stderr) = cli(&["uninstall", current.to_str().unwrap()]);

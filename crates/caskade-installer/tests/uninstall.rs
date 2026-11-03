@@ -64,7 +64,7 @@ impl ProcessObservation for NoObservation {
 async fn retained_executor_journal_removes_created_files_and_restores_previous_bytes() {
     let root = TestRoot::new().unwrap();
     let outside = tempfile::tempdir().unwrap();
-    let base = fs::canonicalize(outside.path()).unwrap();
+    let base = dunce::canonicalize(outside.path()).unwrap();
     let settings = base.join("settings.ini");
     let shortcut = base.join("Game/shortcut.lnk");
     fs::write(&settings, b"old config").unwrap();
@@ -203,7 +203,9 @@ async fn recorded_alias_is_removed_from_the_alias_store() {
     let link = store
         .link(
             &id,
-            &root.path().canonicalize().unwrap().join("Fixture Game"),
+            &dunce::canonicalize(root.path())
+                .unwrap()
+                .join("Fixture Game"),
         )
         .unwrap();
     record.alias = Some(id.clone());

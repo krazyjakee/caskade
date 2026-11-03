@@ -145,9 +145,13 @@ impl Reconciler {
                         ));
                     }
                     let mut allowed = false;
-                    for root in &self.external_roots {
-                        let root = fs::canonicalize(root)?;
+                    for configured in &self.external_roots {
+                        let root = dunce::canonicalize(configured)?;
+                        // A reference may spell the root as configured (macOS's
+                        // /var is a link to /private/var); what follows is
+                        // still checked beneath the canonical root.
                         if let Some(relative) = external_relative(path, &root)
+                            .or_else(|| external_relative(path, configured))
                             && !relative.as_os_str().is_empty()
                             && confined_file(&root, &relative)?
                         {
@@ -194,7 +198,7 @@ pub(super) fn confined_file(root: &Path, relative: &Path) -> Result<bool> {
             Err(error) => return Err(error.into()),
         }
     }
-    if !path.is_file() || !fs::canonicalize(&path)?.starts_with(root) {
+    if !path.is_file() || !dunce::canonicalize(&path)?.starts_with(root) {
         return Err(ReconcileError::Invalid(
             "rewrite path escapes its root".into(),
         ));

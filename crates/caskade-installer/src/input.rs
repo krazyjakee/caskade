@@ -86,7 +86,7 @@ pub fn resolve(input: &Input) -> Result<ResolvedInput> {
 }
 
 pub fn resolve_path(path: &Path) -> Result<ResolvedInput> {
-    let path = std::fs::canonicalize(path)?;
+    let path = dunce::canonicalize(path)?;
     let metadata = std::fs::metadata(&path)?;
     if metadata.is_dir() {
         return resolve_folder(&path);
@@ -436,7 +436,7 @@ fn resolve_cue(path: &Path, siblings: &[PathBuf]) -> Result<ResolvedInput> {
     let mut missing = Vec::new();
     for target in cue_references(path)? {
         // Cue references may contain subdirectories; canonicalize and confine.
-        match std::fs::canonicalize(&target) {
+        match dunce::canonicalize(&target) {
             Ok(actual) if actual.starts_with(parent) && actual.is_file() => {
                 if !files.contains(&actual) {
                     files.push(actual);

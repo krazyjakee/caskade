@@ -202,15 +202,27 @@ impl Copier<'_> {
     }
     #[cfg(target_os = "macos")]
     fn symlink_attributes(&mut self, source: &Path, destination: &Path) -> Result<()> {
-        use cap_fs_ext::{FollowSymlinks, OpenOptionsFollowExt};
-        use cap_std::fs::{OpenOptions, OpenOptionsExt};
+        use rustix::fs::{Mode, OFlags, openat};
         use xattr::FileExt;
-        let mut options = OpenOptions::new();
-        options
-            .read(true)
-            .follow(FollowSymlinks::No)
-            .custom_flags(rustix::fs::OFlags::SYMLINK.bits() as i32);
-        let file = self.source.open_with(source, &options)?.into_std();
+        // cap-std's no-follow open adds O_NOFOLLOW, which makes macOS refuse
+        // the link (ELOOP) even with O_SYMLINK. Open the parent through the
+        // capability, then the link itself by its bare name.
+        let parent = match source.parent() {
+            Some(parent) if !parent.as_os_str().is_empty() => self.source.open_dir(parent)?,
+            _ => self.source.try_clone()?,
+        };
+        let name = source
+            .file_name()
+            .ok_or_else(|| std::io::Error::from(std::io::ErrorKind::InvalidInput))?;
+        let file = std::fs::File::from(
+            openat(
+                &parent,
+                name,
+                OFlags::RDONLY | OFlags::SYMLINK | OFlags::CLOEXEC,
+                Mode::empty(),
+            )
+            .map_err(std::io::Error::from)?,
+        );
         let mut bytes = 0_usize;
         for (count, name) in file.list_xattr()?.enumerate() {
             if count >= 1024 {

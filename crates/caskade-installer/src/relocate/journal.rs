@@ -146,7 +146,7 @@ impl UndoLog {
             return Err(io::Error::other("move journal exceeds its budget"));
         }
         let mut record: Record = serde_json::from_slice(&bytes)?;
-        let expected_destination = request.target_root.canonicalize()?.join(
+        let expected_destination = dunce::canonicalize(&request.target_root)?.join(
             request
                 .game_dir
                 .file_name()
@@ -189,7 +189,7 @@ fn paths(request: &RelocateRequest) -> io::Result<(Dir, String, PathBuf)> {
     {
         return Err(io::Error::other("invalid move job id"));
     }
-    let root = request.target_root.canonicalize()?;
+    let root = dunce::canonicalize(&request.target_root)?;
     let dir = Dir::open_ambient_dir(&root, cap_std::ambient_authority())?;
     dir.create_dir_all(".caskade/moves")?;
     dir.create_dir_all(".caskade/staging")?;

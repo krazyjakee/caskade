@@ -180,11 +180,11 @@ impl Relocator {
             .game_dir
             .file_name()
             .ok_or_else(|| RelocateError::Target("game directory has no name".into()))?;
-        let source = request.game_dir.canonicalize()?;
+        let source = dunce::canonicalize(&request.game_dir)?;
         if self.running.running(&source) {
             return Err(RelocateError::Running);
         }
-        let target_root = request.target_root.canonicalize().map_err(|error| {
+        let target_root = dunce::canonicalize(&request.target_root).map_err(|error| {
             RelocateError::Target(format!("{}: {error}", request.target_root.display()))
         })?;
         let destination = target_root.join(name);

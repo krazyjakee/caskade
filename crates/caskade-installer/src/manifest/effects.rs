@@ -59,7 +59,7 @@ pub fn effects_from_journal(
     let mut canonical = Vec::new();
     for (id, root) in roots {
         super::validation::identifier(id, "external scope")?;
-        canonical.push((id, std::fs::canonicalize(root)?));
+        canonical.push((id, dunce::canonicalize(root)?));
     }
     canonical.sort_by_key(|(_, root)| std::cmp::Reverse(root.components().count()));
     let locate = |path: &Path| -> Result<ExternalLocation> {

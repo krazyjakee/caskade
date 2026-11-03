@@ -81,7 +81,7 @@ fn root(parent: &Path, name: &str) -> PathBuf {
         .unwrap()
         .write(&root)
         .unwrap();
-    fs::canonicalize(root).unwrap()
+    dunce::canonicalize(root).unwrap()
 }
 fn digest(bytes: &[u8]) -> Sha256Digest {
     Sha256Digest::new(format!("{:x}", Sha256::digest(bytes))).unwrap()
@@ -152,7 +152,7 @@ fn assert_manifest_clean(game: &Path) -> InstallManifest {
     );
     assert_eq!(
         manifest.record().relocation.last_path.as_deref(),
-        game.to_str()
+        dunce::canonicalize(game).unwrap().to_str()
     );
     manifest
 }

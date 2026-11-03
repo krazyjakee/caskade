@@ -24,7 +24,7 @@ pub(super) struct Tree {
 
 impl Tree {
     pub fn scan(root: &Path, max_entries: u64) -> Result<Self, DiscoverError> {
-        let root = root.canonicalize()?;
+        let root = dunce::canonicalize(root)?;
         if !root.is_dir() {
             return Err(io::Error::other("discovery root is not a directory").into());
         }
@@ -50,7 +50,7 @@ impl Tree {
                 // avoids resolving the full path again for every child.
                 let mut metadata = child.metadata()?;
                 if metadata.file_type().is_symlink() {
-                    let Ok(target) = root.join(&path).canonicalize() else {
+                    let Ok(target) = dunce::canonicalize(root.join(&path)) else {
                         continue;
                     };
                     if !target.starts_with(&root) {
@@ -113,7 +113,7 @@ impl Tree {
         if self.paths.contains(&clean) {
             return Some(clean);
         }
-        let target = self.root.join(&clean).canonicalize().ok()?;
+        let target = dunce::canonicalize(self.root.join(&clean)).ok()?;
         if !target.starts_with(&self.root) {
             return None;
         }

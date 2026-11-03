@@ -198,7 +198,7 @@ async fn outside_explicit_scope_is_preserved_but_preexisting_folder_is_not_claim
         let mut cfg = config();
         cfg.interactive
             .outside_roots
-            .push(std::fs::canonicalize(outside.path()).unwrap());
+            .push(dunce::canonicalize(outside.path()).unwrap());
         let result = executor(runtime, cfg)
             .execute(
                 request(&root, vec![candidate(RuntimeSpec::Native, vec![])]),
@@ -211,7 +211,8 @@ async fn outside_explicit_scope_is_preserved_but_preexisting_folder_is_not_claim
         else {
             panic!("{result:?}")
         };
-        assert_eq!(paths, if preexisting { vec![] } else { vec![chosen] });
+        let expected = dunce::canonicalize(outside.path()).unwrap().join("Chosen");
+        assert_eq!(paths, if preexisting { vec![] } else { vec![expected] });
         root.assert_clean();
     }
 }
@@ -240,7 +241,10 @@ async fn prefix_outside_game_payload_is_retained_under_confined_recovery_before_
         paths,
         vec![
             root.path()
-                .join(".caskade/interactive/interactive-job/payload-0")
+                .join(".caskade")
+                .join("interactive")
+                .join("interactive-job")
+                .join("payload-0")
         ]
     );
     assert!(paths[0].join("game.exe").is_file());

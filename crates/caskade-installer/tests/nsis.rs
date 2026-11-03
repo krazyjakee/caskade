@@ -469,7 +469,7 @@ async fn native_uninstaller_uses_a_confined_path_and_a_final_unquoted_directory_
         .unwrap();
     assert_eq!(
         runtime.processes()[0].command.program,
-        root.path().join("空白 Game Folder/uninstall.exe")
+        root.path().join("空白 Game Folder").join("uninstall.exe")
     );
     assert_eq!(
         runtime.processes()[0].command.args,

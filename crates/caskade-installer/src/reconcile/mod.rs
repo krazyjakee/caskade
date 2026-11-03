@@ -165,7 +165,7 @@ impl Reconciler {
         old_dir: &str,
         manifest: &InstallManifest,
     ) -> Result<PreparedReferences> {
-        let game = std::fs::canonicalize(game)?;
+        let game = dunce::canonicalize(game)?;
         let repair = match &self.factory {
             Some(factory) => factory.for_game(&game, manifest)?,
             None => self.repair.clone(),

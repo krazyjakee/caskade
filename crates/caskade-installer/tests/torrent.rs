@@ -137,6 +137,7 @@ fn config(peers: &[SocketAddr]) -> TorrentConfig {
 
 fn context(peers: &[SocketAddr]) -> Context {
     let mut ctx = Context::new(Arc::new(RecordingSink::default()), CancellationToken::new());
+    ctx.host = caskade_installer::testing::host_for_windows_payloads();
     ctx.torrent = config(peers);
     ctx
 }
@@ -184,6 +185,7 @@ async fn a_magnet_link_downloads_from_a_local_peer_and_installs() {
     let root = tempfile::tempdir().unwrap();
     let sink = Arc::new(RecordingSink::default());
     let mut ctx = Context::new(sink.clone(), CancellationToken::new());
+    ctx.host = caskade_installer::testing::host_for_windows_payloads();
     ctx.torrent = config(&[seeder.peer]);
     let game = install(seeder.magnet.clone(), root.path(), false, &ctx).await;
     assert!(game.is_dir());
@@ -211,6 +213,7 @@ async fn a_torrent_file_and_an_http_hosted_torrent_install() {
     let root = temp.path().join("Games");
     let sink = Arc::new(RecordingSink::default());
     let mut ctx = Context::new(sink.clone(), CancellationToken::new());
+    ctx.host = caskade_installer::testing::host_for_windows_payloads();
     ctx.torrent = config(&[seeder.peer]);
     let game = install(file.to_string_lossy().into_owned(), &root, true, &ctx).await;
     assert!(game.is_dir());

@@ -181,7 +181,7 @@ impl TorrentEngine {
         cancellation: CancellationToken,
     ) -> Result<Fetched> {
         safe_file_name(job_id)?;
-        let root = std::fs::canonicalize(root)?;
+        let root = dunce::canonicalize(root)?;
         let capability = crate::safety::open_staging(&root)?;
         let token = cancellation.child_token();
         let _stop = token.clone().drop_guard();

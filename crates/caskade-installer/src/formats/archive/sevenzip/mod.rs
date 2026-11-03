@@ -108,7 +108,7 @@ impl SevenZip {
             std::io::copy(&mut std::fs::File::open(path)?, &mut hash)?;
             Ok(format!("{:x}", hash.finalize()))
         }
-        let program = std::fs::canonicalize(program.into())?;
+        let program = dunce::canonicalize(program.into())?;
         let checksum = digest(&program)?;
         let dll = match checksum.as_str() {
             "d32657a7a0e4cdc0a8aa57cafe474746944d76e861e753e9c902b9c9356fa886"

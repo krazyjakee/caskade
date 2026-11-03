@@ -264,6 +264,12 @@ impl Executor {
                     Err(rollback) => Err(rollback.after(&error)),
                 },
             };
+            // Windows refuses to delete a folder while a handle to it is open:
+            // close the game folder and the journal's before `finalize` (an
+            // uninstall removes the game) and before pruning `.caskade`.
+            drop(context);
+            drop(attempt);
+            journal::prune(&root);
             finalize(&root, execution)
         })
         .await

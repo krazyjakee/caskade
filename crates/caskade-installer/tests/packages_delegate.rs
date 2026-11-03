@@ -89,7 +89,7 @@ impl Runtime for DockerRuntime {
         assert!(
             matches!(
                 command.program.to_str(),
-                Some("/usr/bin/apt" | "/usr/bin/dpkg-query")
+                Some("apt" | "dpkg-query" | "/usr/bin/apt" | "/usr/bin/dpkg-query")
             ),
             "unexpected process {:?}",
             command.program

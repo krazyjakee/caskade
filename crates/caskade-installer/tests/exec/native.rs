@@ -443,7 +443,7 @@ async fn native_rollback_invokes_the_registered_uninstaller_before_removing_the_
     assert_eq!(processes.len(), 2);
     assert_eq!(
         processes[1].command.program,
-        root.path().join("Fixture Game/unins000.exe")
+        root.path().join("Fixture Game").join("unins000.exe")
     );
     assert_eq!(processes[1].command.args, vec!["/VERYSILENT"]);
     root.assert_clean();

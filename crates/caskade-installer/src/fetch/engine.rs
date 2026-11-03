@@ -93,7 +93,7 @@ impl FetchEngine {
         if self.config.keep_downloads {
             return Ok(());
         }
-        let root = std::fs::canonicalize(root)?;
+        let root = dunce::canonicalize(root)?;
         let _guard = job_lock(&root.join(".caskade/downloads").join(job_id))
             .lock_owned()
             .await;
@@ -121,7 +121,7 @@ impl FetchEngine {
     /// Active job IDs come from the persisted job queue. Completed or invalid
     /// orphan files are removed; only validator-backed nonempty partials survive.
     pub async fn cleanup_orphans(&self, root: &Path, active_jobs: &[String]) -> Result<()> {
-        let root = std::fs::canonicalize(root)?;
+        let root = dunce::canonicalize(root)?;
         let capability = crate::safety::open_staging(&root)?;
         if !capability.try_exists(".caskade/downloads")? {
             return Ok(());
@@ -228,7 +228,7 @@ impl FetchEngine {
         if let Some(name) = &request.file_name {
             super::safe_file_name(name)?;
         }
-        let root = std::fs::canonicalize(root)?;
+        let root = dunce::canonicalize(root)?;
         let token = cancellation.child_token();
         let _cancel_on_drop = token.clone().drop_guard();
         let _permit = tokio::select! {

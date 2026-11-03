@@ -187,7 +187,7 @@ fn proton_builds() -> Vec<PathBuf> {
             if (tool_dirs.contains(directory) || name.starts_with("proton"))
                 && path.join("proton").is_file()
             {
-                found.push(path.canonicalize().unwrap_or(path));
+                found.push(dunce::canonicalize(&path).unwrap_or(path));
             }
         }
     }

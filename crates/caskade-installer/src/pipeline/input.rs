@@ -145,7 +145,7 @@ pub async fn prepare(
             return Err("URL input requires the fetch feature".into());
         }
     } else {
-        let path = fs::canonicalize(input)?;
+        let path = dunce::canonicalize(input)?;
         (path.clone(), Input::Path(path), None, None, None, false)
     };
     finish(got, ctx).await

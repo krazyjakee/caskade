@@ -17,13 +17,13 @@ pub(super) async fn run(
     ctx: &Context,
 ) -> CliResult<Output> {
     let destination = destination.ok_or("move needs a destination storage root")?;
-    let game = fs::canonicalize(&game_dir)?;
+    let game = dunce::canonicalize(&game_dir)?;
     let root = game
         .parent()
         .ok_or("game directory has no storage root")?
         .to_path_buf();
     fs::create_dir_all(&destination)?;
-    let destination = fs::canonicalize(&destination)?;
+    let destination = dunce::canonicalize(&destination)?;
     let host = actual_host(ctx)?;
     let sink = ctx.sink.clone();
     let source = game.clone();
@@ -43,7 +43,7 @@ pub(super) async fn run(
             }
             let old = source.to_string_lossy().into_owned();
             if record.relocation.last_path.as_deref().is_some_and(|path| {
-                path != old && fs::canonicalize(path).ok().as_deref() != Some(source.as_path())
+                path != old && dunce::canonicalize(path).ok().as_deref() != Some(source.as_path())
             }) {
                 return Err(ReconcileError::Invalid(
                     "game already moved outside Caskade; reconcile it before moving again".into(),
@@ -56,7 +56,7 @@ pub(super) async fn run(
             if let (Some(id), Some(store)) = (&record.alias, &aliases)
                 && let Some(target) = store.target(id).map_err(std::io::Error::other)?
                 && target.try_exists()?
-                && fs::canonicalize(&target)? != source
+                && dunce::canonicalize(&target)? != source
             {
                 return Err(ReconcileError::Invalid(
                     "alias names another existing installation; reconcile the copies first".into(),

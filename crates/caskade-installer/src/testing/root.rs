@@ -13,7 +13,9 @@ pub struct TestRoot {
 
 impl TestRoot {
     pub fn new() -> io::Result<Self> {
-        let parent = tempfile::tempdir()?;
+        // The installer reports canonical paths; macOS's temp folder is under
+        // the /var symlink and Windows' may use 8.3 short names.
+        let parent = tempfile::tempdir_in(dunce::canonicalize(std::env::temp_dir())?)?;
         let root = parent.path().join("root");
         let sentinel = parent.path().join("sentinel");
         fs::create_dir(&root)?;

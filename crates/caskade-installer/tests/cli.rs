@@ -16,7 +16,9 @@ use std::{
 mod fixtures;
 
 fn binary() -> Command {
-    Command::new(env!("CARGO_BIN_EXE_caskade-install"))
+    let mut command = Command::new(env!("CARGO_BIN_EXE_caskade-install"));
+    command.envs(caskade_installer::testing::windows_runner_path().map(|path| ("PATH", path)));
+    command
 }
 fn run(args: &[&str]) -> Output {
     binary().args(args).output().unwrap()
@@ -190,7 +192,21 @@ fn genuine_linux_shell_fixtures_complete_the_binary_pipeline() {
     let fixtures = fixtures::load_linux_shell(&fixtures_root()).unwrap();
     assert_eq!(fixtures.len(), 2);
     for fixture in fixtures {
-        cycle(&fixture, None);
+        if cfg!(target_os = "linux") {
+            cycle(&fixture, None);
+        } else {
+            // A Linux game installs only on Linux: elsewhere nothing is selected.
+            let root = TestRoot::new().unwrap();
+            let input = fixture.input();
+            let planned = value(&run(&[
+                "--json",
+                "plan",
+                input.to_str().unwrap(),
+                "--root",
+                root.path().to_str().unwrap(),
+            ]));
+            assert_eq!(planned["plans"]["selected"], Value::Null);
+        }
     }
 }
 

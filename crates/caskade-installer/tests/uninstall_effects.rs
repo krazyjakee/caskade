@@ -7,7 +7,7 @@ use std::{collections::BTreeMap, fs};
 #[test]
 fn executor_effects_become_portable_scoped_manifest_records() {
     let scope = tempfile::tempdir().unwrap();
-    let base = fs::canonicalize(scope.path()).unwrap();
+    let base = dunce::canonicalize(scope.path()).unwrap();
     let journal = vec![
         JournalEntry::ExternalDirectory {
             path: base.join("Caskade"),
@@ -43,7 +43,7 @@ fn executor_effects_become_portable_scoped_manifest_records() {
 fn the_most_specific_external_scope_is_used() {
     let scope = tempfile::tempdir().unwrap();
     fs::create_dir(scope.path().join("desktop")).unwrap();
-    let base = fs::canonicalize(scope.path()).unwrap();
+    let base = dunce::canonicalize(scope.path()).unwrap();
     let roots = BTreeMap::from([
         ("profile".into(), base.clone()),
         ("desktop".into(), base.join("desktop")),
@@ -63,7 +63,7 @@ fn the_most_specific_external_scope_is_used() {
 #[test]
 fn unbound_absolute_traversing_and_scope_root_effects_are_not_recorded() {
     let scope = tempfile::tempdir().unwrap();
-    let base = fs::canonicalize(scope.path()).unwrap();
+    let base = dunce::canonicalize(scope.path()).unwrap();
     let roots = BTreeMap::from([("desktop".into(), base.clone())]);
     for path in [
         base.parent().unwrap().join("outside"),

@@ -1,5 +1,5 @@
 schema_version = 1
-source_sha256 = "62cabe33c5a6f722e1a3bc5d71f984001f1ecda2ae5058895178698718c7f2ea"
+source_sha256 = "16374727ab6b31c84253983e8d220c44b93d17cf5eccbe23342729bf2817d54b"
 
 [builders]
 appimage = "appimagetool 1.9.1 + type2-runtime 20251108, SHA-pinned (src/appimage/builder.json)"

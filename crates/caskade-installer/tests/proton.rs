@@ -104,7 +104,7 @@ async fn install_and_launch(fixture: &str, args: &[&str]) {
         )
         .await
         .unwrap();
-    let game = report.dir.canonicalize().unwrap();
+    let game = dunce::canonicalize(&report.dir).unwrap();
     assert!(game.join("FixtureGame.exe").is_file());
     let prefix = game.join(".caskade/prefix");
     assert_eq!(
@@ -238,7 +238,7 @@ async fn extracted_legacy_registry_path_self_checks_under_proton() {
         )
         .await
         .unwrap();
-    let game = report.dir.canonicalize().unwrap();
+    let game = dunce::canonicalize(&report.dir).unwrap();
     let game_dir = caskade_installer::runtime::proton::GAME_DIR;
     assert!(
         fs::read_to_string(game.join("config.ini"))

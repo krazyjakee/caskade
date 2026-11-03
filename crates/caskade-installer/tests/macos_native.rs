@@ -75,7 +75,7 @@ fn attached_images() -> BTreeSet<PathBuf> {
         .into_iter()
         .flatten()
         .filter_map(|v| v.as_dictionary()?.get("image-path")?.as_string())
-        .map(|p| std::fs::canonicalize(p).unwrap_or_else(|_| p.into()))
+        .map(|p| dunce::canonicalize(p).unwrap_or_else(|_| p.into()))
         .collect()
 }
 fn worker(extractor: Arc<dyn Extractor>) -> Executor {
@@ -88,7 +88,7 @@ fn worker(extractor: Arc<dyn Extractor>) -> Executor {
 }
 async fn managed(id: &str, launch: bool, quarantine: bool) {
     let fixture = fixture(id);
-    let source = fixture.input().canonicalize().unwrap();
+    let source = dunce::canonicalize(fixture.input()).unwrap();
     let root = TestRoot::new().unwrap();
     let probe = ProbeEngine::with_builtin_formats(ProbeLimits::default());
     let mut artifact = probe.probe_path(&source).unwrap().root;
@@ -297,7 +297,7 @@ async fn native_dmg_cancelled_copy_detaches_and_rolls_back() {
         }
     }
     let fixture = fixture("mac-dmg-sla");
-    let source = fixture.input().canonicalize().unwrap();
+    let source = dunce::canonicalize(fixture.input()).unwrap();
     assert!(!attached_images().contains(&source));
     let root = TestRoot::new().unwrap();
     let host = host();

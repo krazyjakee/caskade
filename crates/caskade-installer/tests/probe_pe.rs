@@ -165,7 +165,15 @@ fn certificate_without_payload_and_large_sparse_overlay_stay_bounded() {
         b"Inno Setup Setup Data (",
     ))
     .unwrap();
-    file.set_len(20 * 1024 * 1024 * 1024).unwrap();
+    // Past 4 GiB checks 64-bit overlay sizes. Unix files are sparse; NTFS
+    // reserves the clusters of a file that isn't marked sparse, so Windows
+    // stays just past the 32-bit boundary.
+    let size: u64 = if cfg!(windows) {
+        4 * 1024 * 1024 * 1024 + 1024 * 1024
+    } else {
+        20 * 1024 * 1024 * 1024
+    };
+    file.set_len(size).unwrap();
     file.seek(SeekFrom::Start(0)).unwrap();
     let result = engine()
         .probe_reader(&mut file, Path::new("large.exe"))

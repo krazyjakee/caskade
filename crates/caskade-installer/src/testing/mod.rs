@@ -5,6 +5,7 @@
 mod fake_runtime;
 mod pe;
 mod root;
+mod windows_runner;
 
 use std::{
     io,
@@ -23,6 +24,7 @@ use crate::{
 pub use fake_runtime::*;
 pub use pe::pe_with_icon;
 pub use root::TestRoot;
+pub use windows_runner::{host_for_windows_payloads, windows_runner_path};
 
 #[derive(Debug)]
 pub struct FakeDiskSpace {

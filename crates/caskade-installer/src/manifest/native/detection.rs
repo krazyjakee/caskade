@@ -142,9 +142,9 @@ pub(super) fn owned(game: &Path, entry: &UninstallRegistration) -> bool {
     if registry_address(&entry.location).is_err() {
         return false;
     }
-    let canonical_match = std::fs::canonicalize(&entry.install_location)
+    let canonical_match = dunce::canonicalize(&entry.install_location)
         .ok()
-        .zip(std::fs::canonicalize(game).ok())
+        .zip(dunce::canonicalize(game).ok())
         .is_some_and(|(location, game)| location == game);
     let prefix = "software/microsoft/windows/currentversion/uninstall/";
     entry

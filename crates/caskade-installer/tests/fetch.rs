@@ -966,6 +966,7 @@ async fn install_cli_downloads_a_real_zipped_fixture_and_writes_a_verified_manif
     let url = format!("{}/game.zip#sha256={}", server.uri(), checksum(&body));
     let output = tokio::task::spawn_blocking(move || {
         std::process::Command::new(env!("CARGO_BIN_EXE_caskade-install"))
+            .envs(caskade_installer::testing::windows_runner_path().map(|path| ("PATH", path)))
             .arg("--json")
             .arg("install")
             .arg(url)
@@ -1010,6 +1011,7 @@ async fn install_cli_accepts_a_local_archive_without_deleting_the_source() {
     let target_root = root.path().to_owned();
     let output = tokio::task::spawn_blocking(move || {
         std::process::Command::new(env!("CARGO_BIN_EXE_caskade-install"))
+            .envs(caskade_installer::testing::windows_runner_path().map(|path| ("PATH", path)))
             .arg("--json")
             .arg("install")
             .arg(source)

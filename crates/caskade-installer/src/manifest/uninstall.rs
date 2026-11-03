@@ -168,7 +168,7 @@ impl Uninstaller {
                 "expected one managed game folder outside .caskade".into(),
             ));
         }
-        let root = std::fs::canonicalize(&request.root)?;
+        let root = dunce::canonicalize(&request.root)?;
         let game = root.join(relative.as_path());
         // Optional root identity exists independently of individual game records.
         match RootManifest::read(&root) {

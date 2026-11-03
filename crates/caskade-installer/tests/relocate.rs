@@ -117,7 +117,9 @@ fn setup() -> Setup {
     let new_root = tempfile::tempdir().unwrap();
     let outside = tempfile::tempdir().unwrap();
     let aliases = tempfile::tempdir().unwrap();
-    let game = old_root.path().canonicalize().unwrap().join("Indie Game");
+    let game = dunce::canonicalize(old_root.path())
+        .unwrap()
+        .join("Indie Game");
     fs::create_dir_all(game.join("data")).unwrap();
     let real = game.to_string_lossy().into_owned();
     let windows = format!("Z:{}", real.replace('/', "\\"));
@@ -165,7 +167,7 @@ fn setup() -> Setup {
     let store = AliasStore::new(aliases.path().join("g"));
     let alias = AliasStore::short_id("root/Indie Game");
     store.link(&alias, &game).unwrap();
-    let target = new_root.path().canonicalize().unwrap();
+    let target = dunce::canonicalize(new_root.path()).unwrap();
     Setup {
         _dirs: vec![old_root, new_root, outside, aliases],
         game,

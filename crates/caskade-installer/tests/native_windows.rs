@@ -207,6 +207,7 @@ fn t9_mini_installers_pass_and_malformed_inputs_fail_through_the_cli() {
     for fixture in corpus() {
         let root = TestRoot::new().unwrap();
         let installed = Command::new(env!("CARGO_BIN_EXE_caskade-install"))
+            .envs(caskade_installer::testing::windows_runner_path().map(|path| ("PATH", path)))
             .args([
                 "--json",
                 "install",
@@ -254,6 +255,7 @@ fn t9_mini_installers_pass_and_malformed_inputs_fail_through_the_cli() {
             .collect();
         assert_eq!(actual, expected);
         let removed = Command::new(env!("CARGO_BIN_EXE_caskade-install"))
+            .envs(caskade_installer::testing::windows_runner_path().map(|path| ("PATH", path)))
             .args(["--json", "uninstall", game.to_str().unwrap()])
             .output()
             .unwrap();
@@ -269,6 +271,7 @@ fn t9_mini_installers_pass_and_malformed_inputs_fail_through_the_cli() {
         fs::write(&truncated, &fs::read(fixture.input()).unwrap()[..16]).unwrap();
         let root = TestRoot::new().unwrap();
         let rejected = Command::new(env!("CARGO_BIN_EXE_caskade-install"))
+            .envs(caskade_installer::testing::windows_runner_path().map(|path| ("PATH", path)))
             .args([
                 "--json",
                 "install",

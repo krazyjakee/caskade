@@ -142,7 +142,7 @@ fn sidecar_listing_rejects_hostile_paths_link_graphs_and_false_sizes() {
 fn generated_password_encrypted_seven_zip_is_a_clean_error() {
     use archive::sevenzip::{SevenZip, SevenZipError};
     let program =
-        fs::canonicalize(std::env::var_os("CASKADE_7ZZ").expect("set CASKADE_7ZZ")).unwrap();
+        dunce::canonicalize(std::env::var_os("CASKADE_7ZZ").expect("set CASKADE_7ZZ")).unwrap();
     let tool = SevenZip::pinned(&program).unwrap();
     let temp = tempfile::tempdir().unwrap();
     fs::write(temp.path().join("payload"), b"encrypted payload").unwrap();

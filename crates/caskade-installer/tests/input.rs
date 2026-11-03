@@ -43,7 +43,7 @@ fn single_file_and_url_boundary() {
     assert_eq!(
         resolve(&Input::Path(temp.path().join("game.zip"))).unwrap(),
         ResolvedInput::File {
-            path: std::fs::canonicalize(temp.path().join("game.zip")).unwrap()
+            path: dunce::canonicalize(temp.path().join("game.zip")).unwrap()
         }
     );
     assert!(matches!(
@@ -293,8 +293,8 @@ fn relative_paths(value: &mut serde_json::Value, root: &Path) {
 
 #[test]
 fn resolved_archive_fixture_snapshots() {
-    let root = std::fs::canonicalize(Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures"))
-        .unwrap();
+    let root =
+        dunce::canonicalize(Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures")).unwrap();
     let mut manifests: Vec<_> = std::fs::read_dir(root.join("expected"))
         .unwrap()
         .map(|entry| entry.unwrap().path())
@@ -316,7 +316,7 @@ fn resolved_archive_fixture_snapshots() {
             .as_array()
             .unwrap()
             .iter()
-            .map(|p| std::fs::canonicalize(root.join(p.as_str().unwrap())).unwrap())
+            .map(|p| dunce::canonicalize(root.join(p.as_str().unwrap())).unwrap())
             .collect();
         assert_eq!(parts, declared, "{id}");
         let mut value = serde_json::to_value(resolved).unwrap();

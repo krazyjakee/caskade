@@ -152,7 +152,7 @@ struct Fixture {
 impl Fixture {
     fn new(copy: bool) -> Self {
         let temp = tempfile::tempdir().unwrap();
-        let base = temp.path().canonicalize().unwrap();
+        let base = dunce::canonicalize(temp.path()).unwrap();
         let root = base.join("old root");
         let target = base.join("new root");
         let game = root.join("Café Game");
@@ -538,7 +538,7 @@ async fn managed_move_then_external_root_rename_reconciles_by_the_new_root_ident
     assert_eq!(manifest.record().plan.root_id, "moving-root-new");
     assert_eq!(
         manifest.record().relocation.last_path.as_deref(),
-        game.to_str()
+        dunce::canonicalize(&game).unwrap().to_str()
     );
     assert_eq!(
         RootManifest::read(&renamed).unwrap().root_id(),

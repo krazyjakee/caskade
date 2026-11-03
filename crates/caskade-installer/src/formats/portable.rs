@@ -21,7 +21,6 @@ use sha2::{Digest, Sha256};
 use specta::Type;
 use std::{
     collections::BTreeMap,
-    fs,
     io::{self, Read},
     path::{Path, PathBuf},
     sync::{Arc, Mutex},
@@ -213,8 +212,8 @@ type Snapshot = BTreeMap<PathBuf, String>;
 fn prepare(
     mut request: FolderInstallRequest,
 ) -> Result<(FolderInstallRequest, ArtifactNode, Option<Snapshot>), PortableError> {
-    request.source = fs::canonicalize(&request.source)?;
-    request.root = fs::canonicalize(&request.root)?;
+    request.source = dunce::canonicalize(&request.source)?;
+    request.root = dunce::canonicalize(&request.root)?;
     if request.root.starts_with(&request.source) || request.source.starts_with(&request.root) {
         return Err(PortableError::Invalid(
             "source and managed root must be disjoint".into(),

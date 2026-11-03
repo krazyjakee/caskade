@@ -62,6 +62,8 @@ def main():
     with tempfile.TemporaryDirectory(prefix='caskade-umu-cache-warm-') as temporary:
         environment['WINEPREFIX']=str(Path(temporary)/'prefix')
         subprocess.run([str(launcher/'umu/umu-run'),'wineboot','-u'],env=environment,check=True,timeout=1800)
-        subprocess.run([str(launcher/'umu/umu-run'),'wineserver','-k'],env=environment,timeout=120,check=True)
+        # Only tidies the disposable prefix: UMU-Proton 10 runs the argument as
+        # a Windows program and fails, and an idle wineserver exits by itself.
+        subprocess.run([str(launcher/'umu/umu-run'),'wineserver','-k'],env=environment,timeout=120,check=False)
     print(f'Warmed umu/UMU-Proton/Steam Runtime cache: {share}')
 if __name__=='__main__':main()

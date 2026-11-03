@@ -11,7 +11,7 @@ pub async fn install(
     let job_id = input::job_id(&value, job)?;
     let host = actual_host(ctx)?;
     fs::create_dir_all(&root)?;
-    let root = fs::canonicalize(root)?;
+    let root = dunce::canonicalize(root)?;
     let prepared = input::prepare(value, &root, &job_id, &host, ctx).await?;
     install_prepared(prepared, root, job_id, host, keep_downloads, extract, ctx).await
 }

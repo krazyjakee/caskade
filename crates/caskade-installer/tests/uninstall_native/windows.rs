@@ -215,8 +215,8 @@ async fn genuine_inno_nsis_msi_native_install_uninstall_remove_files_registry_an
         let matched: Vec<_> = before
             .iter()
             .filter(|entry| {
-                fs::canonicalize(&entry.install_location)
-                    .is_ok_and(|location| location == fs::canonicalize(&report.dir).unwrap())
+                dunce::canonicalize(&entry.install_location)
+                    .is_ok_and(|location| location == dunce::canonicalize(&report.dir).unwrap())
             })
             .cloned()
             .collect();

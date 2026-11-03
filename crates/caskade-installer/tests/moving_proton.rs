@@ -290,8 +290,8 @@ async fn aliased_proton_install_moves_filesystems_without_rewriting_then_self_ch
     let g = moved.game_dir.join(".caskade/prefix/dosdevices/g:");
     assert_eq!(fs::read_link(g).unwrap(), Path::new("../drive_g"));
     assert_eq!(
-        fs::canonicalize(moved.game_dir.join(".caskade/prefix/drive_g/Game")).unwrap(),
-        moved.game_dir.canonicalize().unwrap()
+        dunce::canonicalize(moved.game_dir.join(".caskade/prefix/drive_g/Game")).unwrap(),
+        dunce::canonicalize(&moved.game_dir).unwrap()
     );
     self_check(&*runtime, &moved.game_dir);
     assert_eq!(
