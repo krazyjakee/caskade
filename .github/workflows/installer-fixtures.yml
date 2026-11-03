@@ -71,7 +71,8 @@ jobs:
           CASKADE_7ZZ: target/sidecars/7zip/26.05/linux-x64/7zz
         run: cargo xtask fixtures windows --prepare --families msi,sfx,archives --artifact target/fixture-artifact
       - name: Build genuine WiX Burn bundle with verified toolchain
-        run: cargo xtask fixtures burn --artifact target/fixture-artifact
+        # `cargo xtask fixtures burn` has no --artifact; propose checks the lock.
+        run: python3 xtask/burn-fixtures.py --artifact target/fixture-artifact
       - name: Build genuine Linux minis and acceptance catalogue
         run: |
           cargo xtask fixtures linux-shell --prepare
