@@ -389,6 +389,13 @@ async fn a_rom_arrives_with_its_platform_and_emulator_profile() {
     );
     tokio::time::sleep(Duration::from_millis(200)).await;
     assert_eq!(installs.0.lock().unwrap().len(), 1);
+
+    // The same link again on Sam, whose first copy's files moved on into
+    // the library (#278): it arrives whole again, as a game of its own.
+    let again = the_rom_game(&sam, &receive(&sam, &link).await).await;
+    assert_ne!(again.game_id, placed.game_id);
+    let (_, paths) = rom_path(&again);
+    assert_eq!(fs::read(&paths[0]).unwrap(), vec![7u8; 40_000]);
 }
 
 /// The harness's Hades on `core`.

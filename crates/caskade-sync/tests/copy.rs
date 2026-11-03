@@ -121,6 +121,51 @@ async fn a_folder_arrives_whole_and_only_for_who_was_allowed() {
     assert!(gate.sent(dialer.id(), &offered.root) >= 3 * 1024 * 1024);
 }
 
+/// #278: what a copy left in the store after its files moved on (an install
+/// takes them from the folder they were exported to) never stands in for
+/// the files when the same folder comes again.
+#[tokio::test(flavor = "multi_thread")]
+async fn a_folder_received_again_after_its_files_moved_arrives_whole() {
+    let temp = tempfile::tempdir().unwrap();
+    let folder = temp.path().join("Celeste");
+    game(&folder, 2 * 1024 * 1024);
+    let offering = CopyStore::open(&temp.path().join("send")).await.unwrap();
+    let gate = CopyGate::default();
+    let endpoint = sender(&offering, &gate).await;
+    let offered = offering
+        .offer(&folder, "copy/test", |_, _| {})
+        .await
+        .unwrap();
+    let receiving =
+        CopyStore::open_collecting(&temp.path().join("receive"), Duration::from_millis(200))
+            .await
+            .unwrap();
+    let dialer = DirectDialer::bind(None, true).await.unwrap();
+    gate.allow(dialer.id(), &offered.root).unwrap();
+
+    for round in 0..2 {
+        let connection = dialer
+            .connect(endpoint.id(), &direct(&endpoint))
+            .await
+            .unwrap();
+        tokio::time::timeout(
+            Duration::from_secs(30),
+            receiving.fetch(connection, &offered.root, "copy/in", |_| {}),
+        )
+        .await
+        .unwrap_or_else(|_| panic!("round {round} arrives"))
+        .unwrap();
+        let target = temp.path().join(format!("staging-{round}"));
+        receiving.export(&offered.root, &target).await.unwrap();
+        same_tree(&folder, &target);
+        // Installed elsewhere, then uninstalled: the exported files are gone.
+        let installed = temp.path().join(format!("installed-{round}"));
+        std::fs::rename(&target, &installed).unwrap();
+        std::fs::remove_dir_all(&installed).unwrap();
+        receiving.release("copy/in").await.unwrap();
+    }
+}
+
 #[tokio::test]
 async fn an_interrupted_copy_resumes_without_starting_over() {
     let temp = tempfile::tempdir().unwrap();

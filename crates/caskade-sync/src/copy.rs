@@ -35,6 +35,8 @@ use iroh_blobs::provider::events::{
     RequestUpdate, ThrottleMode,
 };
 use iroh_blobs::store::fs::FsStore;
+use iroh_blobs::store::fs::options::Options as StoreOptions;
+use iroh_blobs::store::{GcConfig, ProtectOutcome};
 use iroh_blobs::{BlobFormat, Hash, HashAndFormat};
 
 pub use iroh_blobs::BlobsProtocol;
@@ -119,19 +121,93 @@ fn files_of(folder: &Path) -> Result<Vec<(PathBuf, String, u64)>> {
     Ok(found)
 }
 
+/// How often a store collects what no tag keeps (#278).
+const COLLECT_EVERY: std::time::Duration = std::time::Duration::from_secs(10);
+
 /// A blob store for copies: on the sending device the outboards of the
 /// folders it offers, on the receiving one what has arrived so far.
+///
+/// Everything it keeps is kept by a tag: an offer's, a fetch's from its
+/// start, or a temporary one while it's added. What no tag keeps is left
+/// over, above all a collection exported by reference whose files have
+/// since moved on (an install took them, then was removed), and is
+/// collected every few seconds. A fetch of such a collection waits for that
+/// first ([`CopyStore::settle`]), since the store would read the moved
+/// files as its own.
 #[derive(Debug, Clone)]
 pub struct CopyStore {
     store: FsStore,
+    /// Counts collections started.
+    collections: Arc<tokio::sync::watch::Sender<u64>>,
+    every: std::time::Duration,
 }
 
 impl CopyStore {
     /// Opens (or makes) a store in `dir`.
     pub async fn open(dir: &Path) -> Result<Self> {
+        Self::open_collecting(dir, COLLECT_EVERY).await
+    }
+
+    /// [`open`](Self::open), collecting what no tag keeps every `every`.
+    pub async fn open_collecting(dir: &Path, every: std::time::Duration) -> Result<Self> {
         std::fs::create_dir_all(dir).map_err(store_error)?;
-        let store = FsStore::load(dir).await.map_err(store_error)?;
-        Ok(Self { store })
+        let collections = Arc::new(tokio::sync::watch::channel(0u64).0);
+        let started = collections.clone();
+        let mut options = StoreOptions::new(dir);
+        options.gc = Some(GcConfig {
+            interval: every,
+            add_protected: Some(Arc::new(move |_: &mut HashSet<Hash>| {
+                started.send_modify(|count| *count += 1);
+                Box::pin(async { ProtectOutcome::Continue })
+            })),
+        });
+        let store = FsStore::load_with_opts(dir.join("blobs.db"), options)
+            .await
+            .map_err(store_error)?;
+        Ok(Self {
+            store,
+            collections,
+            every,
+        })
+    }
+
+    /// Waits until what an earlier transfer of `content` left behind is
+    /// collected: data that no tag keeps, which may be files exported by
+    /// reference that have since moved (#278). Returns at once when there's
+    /// none, or a tag keeps it; otherwise after one whole collection that
+    /// began after this call (two starts), or a while.
+    pub(crate) async fn settle(&self, content: HashAndFormat) -> Result<()> {
+        // Only the store's records: opening the leftovers would read moved
+        // files as the store's own, which spoils them for good.
+        let status = self
+            .store
+            .blobs()
+            .status(content.hash)
+            .await
+            .map_err(store_error)?;
+        if matches!(status, iroh_blobs::api::blobs::BlobStatus::NotFound) {
+            return Ok(());
+        }
+        let mut tags = self.store.tags().list().await.map_err(store_error)?;
+        while let Some(tag) = tags.next().await {
+            if tag.map_err(store_error)?.hash_and_format() == content {
+                return Ok(());
+            }
+        }
+        let mut started = self.collections.subscribe();
+        let first = *started.borrow_and_update();
+        let collected = async {
+            while *started.borrow_and_update() < first + 2 {
+                if started.changed().await.is_err() {
+                    break;
+                }
+            }
+        };
+        let patience = self.every * 3 + std::time::Duration::from_secs(5);
+        if tokio::time::timeout(patience, collected).await.is_err() {
+            tracing::warn!("leftovers of an earlier transfer weren't collected in time");
+        }
+        Ok(())
     }
 
     /// Adds every file under `folder`, referenced in place, as a collection
@@ -192,6 +268,7 @@ impl CopyStore {
     /// Bytes of the collection `root` this store has, verified.
     pub async fn local_bytes(&self, root: &str) -> Result<u64> {
         let root = parse(root)?;
+        self.settle(HashAndFormat::hash_seq(root)).await?;
         let local = self
             .store
             .remote()
@@ -213,6 +290,7 @@ impl CopyStore {
     ) -> Result<()> {
         let root = parse(root)?;
         let content = HashAndFormat::hash_seq(root);
+        self.settle(content).await?;
         // Kept from the start, so a cancelled fetch keeps what arrived.
         self.store
             .tags()

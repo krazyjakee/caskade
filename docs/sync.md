@@ -682,6 +682,13 @@ Activity, cancellable, retried from where it stopped (`install::peer`).
    as the files say (a Windows build runs through umu/Proton on Linux). The
    staging folder goes afterwards, whatever the Installer's source setting
    says.
+6. Everything in a copy store is kept by a tag (an offer's, a fetch's from
+   its start, a temporary one while files are added), and the store collects
+   what no tag keeps every 10 s (#278). Exports leave the store pointing at
+   files that then move on into an install, and reading those would spoil
+   the store, so a fetch or `local_bytes` that finds leftovers of the same
+   collection waits for a collection first (`CopyStore::settle`, up to about
+   half a minute). Collecting never touches files outside the store.
 
 From the device that has it, a game's menu offers **Copy to …** (#235,
 `game_send_to`) for each paired device reached directly (`lan` or `direct`)
