@@ -177,3 +177,28 @@ backup chosen or dropped is inspected and previewed (components, an older
 Caskade's, another OS's, locations and games not found here) before
 Restore and restart. `api/backup.ts` falls back to an in-memory fixture
 (`backupFixtures.ts`) in the browser preview.
+
+## On another device (#243)
+
+`backup::peers::PeerBackups` (`net` feature) keeps backups on another of the
+user's devices, so losing a drive doesn't lose the library, without a cloud.
+
+- **Sending.** `core.backups.keepOnDevice` names a paired device (Settings →
+  Backup → Also keep backups on). Every sync exchange with it offers this
+  device's newest verified backups (as many as `keep`) in the first-round note
+  of the blob exchange (`sync::blobs`, `BlobKind::announce`). That device asks
+  for the ones it lacks, and they travel as `backup` blobs on the granted sync
+  session. A backup made while the device is away is offered again until it has
+  it.
+- **Keeping.** The holder keeps each device's backups apart from its own,
+  content-addressed under `<data>/peer-backups/blobs/`, with
+  `<data>/peer-backups/index.json` naming each: the device it came from (and
+  that device's name), its file name, size and time. It keeps the newest `keep`
+  per device, and each blob is checked against its SHA-256 before it's kept.
+- **Restoring.** Every exchange also lists what the holder keeps
+  (`PeerBackups::held`). A fresh install paired with the holder sees its
+  backups of every device in Settings → Backup → Restore → On your other
+  devices (`backups_on_devices`). Restore… fetches one here
+  (`backup_fetch_from_device`, which asks the holder to sync until it arrives)
+  and opens the usual preview and staged restore. Both commands are admin-only,
+  like restoring.

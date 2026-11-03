@@ -24,7 +24,7 @@
 //! the same total. A kind whose category is This device only here neither
 //! asks nor serves.
 
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::sync::{Arc, RwLock};
 
 use async_trait::async_trait;
@@ -59,6 +59,19 @@ pub trait BlobKind: Send + Sync {
     async fn read(&self, hash: &str, offset: u64, len: usize) -> Result<Vec<u8>>;
     /// Starts receiving `hash`.
     async fn receive(&self, hash: &str) -> Result<Box<dyn BlobWriter>>;
+    /// Governed by a setting of its own (backups kept on a device, #243)
+    /// rather than by its category.
+    fn own_setting(&self) -> bool {
+        false
+    }
+    /// A note for the device on the other end, sent with the first round's
+    /// wants: what this device offers it, say.
+    async fn announce(&self, _peer: &str) -> Option<serde_json::Value> {
+        None
+    }
+    /// The note the device on the other end sent for this kind; what it
+    /// adds to [`Self::wanted`] is asked for in the next round.
+    async fn heard(&self, _peer: &str, _note: serde_json::Value) {}
 }
 
 /// A blob being received, chunk by chunk in order.
@@ -99,6 +112,10 @@ struct Want {
 enum Message {
     Want {
         wants: Vec<Want>,
+        /// Each kind's note, in the first round only; an older build
+        /// ignores it.
+        #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+        notes: BTreeMap<String, serde_json::Value>,
     },
     Blob {
         kind: String,
@@ -122,9 +139,11 @@ pub struct BlobsExchanged {
     pub received: usize,
 }
 
-/// Exchanges blobs with the device on the other end, after the changes.
+/// Exchanges blobs with `peer`, the device on the other end, after the
+/// changes.
 pub async fn exchange(
     engine: &SyncEngine,
+    peer: &str,
     writer: &mut caskade_sync::FrameWriter,
     reader: &mut caskade_sync::FrameReader,
 ) -> Result<BlobsExchanged> {
@@ -133,11 +152,19 @@ pub async fn exchange(
         .blobs()
         .kinds()
         .into_iter()
-        .filter(|kind| categories.allows(kind.category()))
+        .filter(|kind| kind.own_setting() || categories.allows(kind.category()))
         .map(|kind| (kind.name().to_owned(), kind))
         .collect();
     let mut total = BlobsExchanged::default();
-    for _ in 0..MAX_ROUNDS {
+    for round in 0..MAX_ROUNDS {
+        let mut notes = BTreeMap::new();
+        if round == 0 {
+            for kind in kinds.values() {
+                if let Some(note) = kind.announce(peer).await {
+                    notes.insert(kind.name().to_owned(), note);
+                }
+            }
+        }
         let mut mine = Vec::new();
         for kind in kinds.values() {
             match kind.wanted().await {
@@ -154,15 +181,27 @@ pub async fn exchange(
         writer
             .write(&Message::Want {
                 wants: mine.clone(),
+                notes: notes.clone(),
             })
             .await
             .map_err(interrupted)?;
-        let Message::Want { wants: theirs } = reader.read(MAX_LINE).await.map_err(interrupted)?
+        let Message::Want {
+            wants: theirs,
+            notes: their_notes,
+        } = reader.read(MAX_LINE).await.map_err(interrupted)?
         else {
             return Err(Error::Invalid(crate::tr!(
                 "the other device sent something out of turn"
             )));
         };
+        // What the other device noted may add to this device's wants: they're
+        // asked for in the next round, which both sides then run.
+        for (name, note) in &their_notes {
+            if let Some(kind) = kinds.get(name) {
+                kind.heard(peer, note.clone()).await;
+            }
+        }
+        let noted = !notes.is_empty() || !their_notes.is_empty();
         let send = async {
             let mut sent = 0;
             for want in theirs.iter().take(MAX_WANTS) {
@@ -273,8 +312,9 @@ pub async fn exchange(
         let (sent, (arrived, kept)) = (sent?, received?);
         total.sent += sent;
         total.received += kept;
-        // The same on both sides: what one sent is what arrived at the other.
-        if sent + arrived == 0 {
+        // The same on both sides: what one sent is what arrived at the other,
+        // and both saw the same notes.
+        if sent + arrived == 0 && !noted {
             break;
         }
     }

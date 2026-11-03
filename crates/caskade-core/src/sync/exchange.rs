@@ -199,7 +199,7 @@ pub async fn exchange(
     engine.store().set_sync_peer_replay(peer, &[]).await?;
     // Then the files the changes name (#239), and what was waiting for them
     // (artwork, #273).
-    let blobs = super::blobs::exchange(engine, writer, reader).await?;
+    let blobs = super::blobs::exchange(engine, peer, writer, reader).await?;
     if blobs.received > 0 {
         engine.apply_pending().await?;
     }

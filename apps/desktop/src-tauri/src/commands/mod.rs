@@ -29,6 +29,7 @@ pub mod launch;
 pub mod library;
 pub mod manual_games;
 pub mod notifications;
+pub mod peer_backups;
 pub mod plugin_ui;
 pub mod plugins;
 pub mod presence;

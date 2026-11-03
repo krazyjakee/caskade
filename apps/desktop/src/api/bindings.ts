@@ -132,6 +132,13 @@ export const commands = {
 	 *  themes is This device only here, or before this device can sync.
 	 */
 	addonsFromDevices: () => typedError<DeviceAddon_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("addons_from_devices")),
+	/**  What paired devices keep, as each last said when they synced. */
+	backupsOnDevices: () => typedError<DeviceBackups[], ErrorReport_Serialize>(__TAURI_INVOKE("backups_on_devices")),
+	/**
+	 *  Fetches the backup `hash` from the paired device that keeps it, and
+	 *  returns where it is here, to inspect and restore.
+	 */
+	backupFetchFromDevice: (hash: string) => typedError<string, ErrorReport_Serialize>(__TAURI_INVOKE("backup_fetch_from_device", { hash })),
 	/**
 	 *  The game's cover, background and icon as the editor shows them: who
 	 *  chose each, what shows, and the automatic images to choose from. `null`
@@ -2956,6 +2963,14 @@ export type DeviceAddon_Serialize = {
 	version: string | null,
 };
 
+/**  The backups one paired device keeps, of this device and others. */
+export type DeviceBackups = {
+	deviceId: string,
+	deviceName: string,
+	/**  Newest first. */
+	backups: HeldBackup[],
+};
+
 export type DeviceKind = "desktop" | "laptop" | "handheld" | "tv";
 
 /**  How a device is reached right now. */
@@ -4350,6 +4365,19 @@ export type HardcoreUnlock_Deserialize = {
 export type HardcoreUnlock_Serialize = {
 	unlocked: boolean,
 	unlockedAtMs: number | null,
+};
+
+/**  A backup one device holds of another. */
+export type HeldBackup = {
+	/**  The device it's a backup of. */
+	origin: string,
+	/**  That device's name, as the holder knows it. */
+	originName: string,
+	/**  `sha256:…` of the archive. */
+	hash: string,
+	name: string,
+	size: number,
+	createdMs: number,
 };
 
 /**  Emitted after every `hello` command. */

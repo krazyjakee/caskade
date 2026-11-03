@@ -52,6 +52,10 @@ pub struct BackupSettings {
     pub schedule: Schedule,
     #[schemars(title = "Automatic backups to keep", range(min = 1, max = 100))]
     pub keep: u32,
+    #[schemars(title = "Also keep backups on")]
+    /// A paired device that keeps a copy of each backup (#243); empty keeps them here only.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub keep_on_device: Option<String>,
 }
 
 impl Default for BackupSettings {
@@ -66,6 +70,7 @@ impl Default for BackupSettings {
             ]),
             schedule: Schedule::Off,
             keep: 7,
+            keep_on_device: None,
         }
     }
 }

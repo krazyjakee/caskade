@@ -14,6 +14,8 @@ mod missing_programs;
 mod rom_scan;
 mod save_locations;
 #[cfg(feature = "net")]
+mod peer_backups;
+#[cfg(feature = "net")]
 mod presence;
 #[cfg(feature = "net")]
 mod save_sync;

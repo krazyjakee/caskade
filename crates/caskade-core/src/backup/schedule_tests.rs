@@ -24,6 +24,7 @@ async fn scheduled(destination: &Path, schedule: Schedule, keep: u32) -> super::
                 components: [Component::Plugins].into(),
                 schedule,
                 keep,
+                keep_on_device: None,
             })
             .unwrap(),
             None,

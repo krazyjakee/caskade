@@ -371,7 +371,11 @@ pub fn access(command: &str) -> Option<Access> {
         | "backup_restore"
         | "backup_restore_discard"
         | "backup_restart"
-        | "backup_reveal" => Admin,
+        | "backup_reveal"
+        // Backups kept on other devices (#243): listing and fetching one
+        // to restore, as restoring is.
+        | "backups_on_devices"
+        | "backup_fetch_from_device" => Admin,
         // A test runs the script: whoever may change the scope.
         "lifecycle_script_save"
         | "lifecycle_script_delete"

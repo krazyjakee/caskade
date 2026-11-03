@@ -539,6 +539,10 @@ msgstr ""
 msgid "{free} free of {total}"
 msgstr ""
 
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgid "{from}, {when}"
+msgstr ""
+
 #. js-lingui:icu=%7Bgames%2C+plural%2C+one+%7BMove+its+game+there%2C+then+remove%7D+other+%7BMove+its+%23+games+there%2C+then+remove%7D%7D&pluralize_on=games
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Move its game there, then remove"
@@ -1172,6 +1176,10 @@ msgstr ""
 msgid "A controller is connected."
 msgstr ""
 
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgid "A device no longer paired"
+msgstr ""
+
 #: apps/desktop/src/views/activity/AddGame.tsx
 msgid "A download link or a magnet link"
 msgstr ""
@@ -1737,6 +1745,10 @@ msgstr ""
 msgid "Also fetches matched games again from the metadata server and replaces their automatic details and artwork."
 msgstr ""
 
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgid "Also keep backups on"
+msgstr ""
+
 #: apps/desktop/src/views/game/AgeGate.tsx
 msgid "Always allow this game for this account"
 msgstr ""
@@ -1807,6 +1819,11 @@ msgstr ""
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
 msgctxt "playing on"
 msgid "another device"
+msgstr ""
+
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgctxt "backup of"
+msgid "Another device"
 msgstr ""
 
 #: apps/desktop/src/components/saves/devices.ts
@@ -3663,6 +3680,10 @@ msgstr ""
 msgid "Each argument goes to the program as it is, with no shell: {PLACEHOLDERS} and the other values below are put in as text."
 msgstr ""
 
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgid "Each backup also goes to that device the next time they sync, even when it was away. It keeps them apart from its own, as many as are kept here."
+msgstr ""
+
 #. A game release's status
 #: apps/desktop/src/views/store/CatalogCard.tsx
 msgid "Early access"
@@ -4450,6 +4471,10 @@ msgstr ""
 msgid "Get started"
 msgstr ""
 
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgid "Getting it from {holder}…"
+msgstr ""
+
 #: apps/desktop/src/api/presentation.ts
 msgctxt "byte unit"
 msgid "GiB"
@@ -5218,6 +5243,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
 msgid "Keeps your CSS but stops applying it, to recover from a broken look."
+msgstr ""
+
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgid "Kept on {holder}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SectionSync.tsx
@@ -6818,6 +6847,7 @@ msgstr ""
 
 #: apps/desktop/src/components/addons/DeviceOffers.tsx
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
 msgid "On your other devices"
 msgstr ""
 
@@ -6857,6 +6887,11 @@ msgstr ""
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 msgid "Only the program it starts"
+msgstr ""
+
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgctxt "keep backups on"
+msgid "Only this device"
 msgstr ""
 
 #. How often a RomM server syncs
@@ -8273,6 +8308,14 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Restore and restart"
+msgstr ""
+
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgid "Restore the backup of {from} from {when}"
+msgstr ""
+
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgid "Restore…"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx

@@ -547,6 +547,10 @@ msgstr "{free} ledigt"
 msgid "{free} free of {total}"
 msgstr "{free} ledigt av {total}"
 
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgid "{from}, {when}"
+msgstr "{from}, {when}"
+
 #. js-lingui:icu=%7Bgames%2C+plural%2C+one+%7BMove+its+game+there%2C+then+remove%7D+other+%7BMove+its+%23+games+there%2C+then+remove%7D%7D&pluralize_on=games
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Move its game there, then remove"
@@ -1185,6 +1189,10 @@ msgstr "En kommentar stängs aldrig."
 msgid "A controller is connected."
 msgstr "En handkontroll är ansluten."
 
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgid "A device no longer paired"
+msgstr "En enhet som inte längre är parkopplad"
+
 #: apps/desktop/src/views/activity/AddGame.tsx
 msgid "A download link or a magnet link"
 msgstr "En nedladdningslänk eller en magnetlänk"
@@ -1758,6 +1766,10 @@ msgstr "Redan konfigurerad"
 msgid "Also fetches matched games again from the metadata server and replaces their automatic details and artwork."
 msgstr "Hämtar också matchade spel igen från metadataservern och ersätter deras automatiska detaljer och bilder."
 
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgid "Also keep backups on"
+msgstr "Behåll även säkerhetskopior på"
+
 #: apps/desktop/src/views/game/AgeGate.tsx
 msgid "Always allow this game for this account"
 msgstr "Tillåt alltid det här spelet för det här kontot"
@@ -1829,6 +1841,11 @@ msgstr "Ett annat konto"
 msgctxt "playing on"
 msgid "another device"
 msgstr "en annan enhet"
+
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgctxt "backup of"
+msgid "Another device"
+msgstr "En annan enhet"
 
 #: apps/desktop/src/components/saves/devices.ts
 msgctxt "save version"
@@ -3715,6 +3732,10 @@ msgstr "Duplicera"
 msgid "Each argument goes to the program as it is, with no shell: {PLACEHOLDERS} and the other values below are put in as text."
 msgstr "Varje argument går till programmet som det är, utan skal: {PLACEHOLDERS} och de andra värdena nedan sätts in som text."
 
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgid "Each backup also goes to that device the next time they sync, even when it was away. It keeps them apart from its own, as many as are kept here."
+msgstr "Varje säkerhetskopia skickas också till den enheten nästa gång de synkar, även om den var borta. Den håller dem åtskilda från sina egna, lika många som behålls här."
+
 #. A game release's status
 #: apps/desktop/src/views/store/CatalogCard.tsx
 msgid "Early access"
@@ -4521,6 +4542,10 @@ msgstr "Hämta från RomM"
 msgid "Get started"
 msgstr "Kom igång"
 
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgid "Getting it from {holder}…"
+msgstr "Hämtar den från {holder}…"
+
 #: apps/desktop/src/api/presentation.ts
 msgctxt "byte unit"
 msgid "GiB"
@@ -5291,6 +5316,10 @@ msgstr "Behåll det"
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
 msgid "Keeps your CSS but stops applying it, to recover from a broken look."
 msgstr "Behåller din CSS men slutar tillämpa den, så att du kan återställa ett trasigt utseende."
+
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgid "Kept on {holder}"
+msgstr "Sparas på {holder}"
 
 #: apps/desktop/src/views/settings/devices/SectionSync.tsx
 msgid "Kept on this device. Changes here stay here, and other devices' don't arrive."
@@ -6913,6 +6942,7 @@ msgstr ""
 
 #: apps/desktop/src/components/addons/DeviceOffers.tsx
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
 msgid "On your other devices"
 msgstr "På dina andra enheter"
 
@@ -6953,6 +6983,11 @@ msgstr "Bara installationer som hanteras av Caskade kan flyttas."
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 msgid "Only the program it starts"
 msgstr "Bara programmet det startar"
+
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgctxt "keep backups on"
+msgid "Only this device"
+msgstr "Bara den här enheten"
 
 #. How often a RomM server syncs
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
@@ -8406,6 +8441,14 @@ msgstr "Återställ"
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Restore and restart"
 msgstr "Återställ och starta om"
+
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgid "Restore the backup of {from} from {when}"
+msgstr "Återställ säkerhetskopian av {from} från {when}"
+
+#: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+msgid "Restore…"
+msgstr "Återställ…"
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
 msgctxt "save version"

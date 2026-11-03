@@ -528,6 +528,13 @@ desktop mode too (`core.emulation.desktopFullscreen`) and a larger interface
 (`uiScale` 115 or 125). A desktop or laptop keeps the defaults. An existing
 library never changes.
 
+A blob kind may add a note to its first round's wants (`BlobKind::announce`
+and `heard`, an optional field older builds ignore). Both sides then run one
+more round, so what a note offers is asked for in the same exchange. Backups
+kept on a paired device (#243, `backup::peers`, see the backup README) use it:
+the chosen holder is offered new backups, and every device lists what it holds
+for a fresh install to restore from.
+
 ### When it runs
 
 - Every 2 seconds it captures this device's changes, and exchanges with every

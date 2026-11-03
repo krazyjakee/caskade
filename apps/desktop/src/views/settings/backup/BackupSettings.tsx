@@ -33,6 +33,7 @@ import { usePathPicker } from "../../../components/pathBrowser/PathPicker";
 import { useDropZone } from "../../../drop/DropProvider";
 import { ProgressLine } from "../../activity/ProgressLine";
 import { useSettingsSection } from "../useSettings";
+import { DeviceBackupList, KeepOnDevice } from "./DeviceBackups";
 
 type Schedule = "off" | "daily" | "weekly";
 interface BackupSettingsValue {
@@ -330,6 +331,7 @@ function ScheduleSection() {
           }
         />
       </SettingRow>
+      <KeepOnDevice />
     </SettingsSection>
   );
 }
@@ -414,6 +416,7 @@ function RestoreSection() {
             <FolderOpen className="size-4" />
             <Trans>Choose a backup…</Trans>
           </Button>
+          <DeviceBackupList open={open} busy={busy || inspect.isPending} />
         </div>
       )}
       {status.running?.kind === "inspect" || status.running?.kind === "restore" ? (

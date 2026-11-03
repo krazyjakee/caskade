@@ -29,7 +29,7 @@ mod net;
 mod portable;
 mod store;
 
-pub use blobs::{BlobStore, hash_bytes, hash_file};
+pub use blobs::{BlobStore, Incoming, hash_bytes, hash_file};
 #[cfg(feature = "net")]
 pub use net::{SaveBlobs, SyncRefresh};
 pub use portable::Roots;

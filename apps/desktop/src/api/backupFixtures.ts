@@ -6,6 +6,7 @@ import type {
   BackupInspection,
   BackupPlan,
   BackupStatus,
+  DeviceBackups,
 } from "./backup";
 
 const MB = 1024 * 1024;
@@ -53,7 +54,10 @@ export const fixtureInspection = (path: string): BackupInspection => ({
 
 export function createBackupFixtureApi(initial?: Partial<BackupStatus>): BackupApi & {
   calls: string[];
+  /** What the user's other devices keep. */
+  setOnDevices(held: DeviceBackups[]): void;
 } {
+  let onDevices: DeviceBackups[] = [];
   let status: BackupStatus = {
     running: null,
     last: null,
@@ -165,6 +169,16 @@ export function createBackupFixtureApi(initial?: Partial<BackupStatus>): BackupA
     subscribe: (listener) => {
       listeners.add(listener);
       return () => listeners.delete(listener);
+    },
+    onDevices: async () => structuredClone(onDevices),
+    fetchFromDevice: async (hash) => {
+      calls.push(`fetch ${hash}`);
+      const held = onDevices.flatMap((device) => device.backups).find((b) => b.hash === hash);
+      if (!held) throw new Error("The backup didn't arrive from the other device.");
+      return `/fetched/${held.name}`;
+    },
+    setOnDevices(held) {
+      onDevices = structuredClone(held);
     },
   };
 }

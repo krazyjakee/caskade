@@ -754,6 +754,17 @@ pub fn run() {
                 presence.set_account(move || accounts.active_id());
             }
             sync.set_presence(presence.clone());
+            // Backups kept on a paired device (#243): sent to the chosen
+            // one after the changes, and held here for the others.
+            let peer_backups = caskade_core::backup::peers::PeerBackups::new(
+                settings.clone(),
+                setup_paths.data.join("peer-backups"),
+                app.state::<caskade_core::backup::Backups>()
+                    .default_destination(),
+            );
+            peer_backups.set_devices(devices.clone());
+            sync.register_blobs(std::sync::Arc::new(peer_backups.clone()));
+            app.manage(peer_backups);
             background::supervise("presence", {
                 let (presence, bus, sync, devices) =
                     (presence.clone(), bus.clone(), sync.clone(), devices.clone());

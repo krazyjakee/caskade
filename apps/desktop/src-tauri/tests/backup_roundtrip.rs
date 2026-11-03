@@ -241,6 +241,7 @@ async fn a_library_that_wont_open_comes_back_from_a_scheduled_backup_on_a_drive(
                 components: Default::default(),
                 schedule: Schedule::Daily,
                 keep: 1,
+                keep_on_device: None,
             })
             .unwrap(),
             None,

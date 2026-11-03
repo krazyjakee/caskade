@@ -5,6 +5,8 @@
 mod archive;
 mod export;
 mod manifest;
+#[cfg(feature = "net")]
+pub mod peers;
 pub mod policy;
 pub mod restore;
 #[cfg(test)]

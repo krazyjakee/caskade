@@ -16,7 +16,9 @@ import {
   type BackupPlan_Serialize,
   type BackupStatus_Serialize,
   commands,
+  type DeviceBackups,
   events,
+  type HeldBackup,
   type RestoreJournal_Serialize,
 } from "./bindings";
 import { unwrap } from "./reply";
@@ -26,7 +28,14 @@ export type BackupStatus = BackupStatus_Serialize;
 export type BackupPlan = BackupPlan_Serialize;
 export type BackupInspection = BackupInspection_Serialize;
 export type RestoreJournal = RestoreJournal_Serialize;
-export type { BackupComponent, BackupExclusion, BackupJobKind, BackupPhase };
+export type {
+  BackupComponent,
+  BackupExclusion,
+  BackupJobKind,
+  BackupPhase,
+  DeviceBackups,
+  HeldBackup,
+};
 
 /** The components a backup can hold besides the library, in the order
  * Settings lists them. */
@@ -54,6 +63,11 @@ export interface BackupApi {
   /** Shows a backup in the file manager. */
   reveal(path: string): Promise<void>;
   subscribe(listener: (status: BackupStatus) => void): () => void;
+  /** Backups the user's other devices keep (#243), as each last said. */
+  onDevices?(): Promise<DeviceBackups[]>;
+  /** Fetches one of them here; resolves to its path, to inspect and
+   * restore. */
+  fetchFromDevice?(hash: string): Promise<string>;
 }
 
 export const nativeBackupApi: BackupApi = {
@@ -76,6 +90,8 @@ export const nativeBackupApi: BackupApi = {
   },
   subscribe: (listener) =>
     effectSubscription(events.backupChanged.listen, ({ payload }) => listener(payload)),
+  onDevices: () => unwrap(commands.backupsOnDevices()),
+  fetchFromDevice: (hash) => unwrap(commands.backupFetchFromDevice(hash)),
 };
 
 let preview: BackupApi | undefined;
