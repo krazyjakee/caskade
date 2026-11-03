@@ -111,7 +111,7 @@ fn uri(path: &Path) -> Result<String> {
 }
 impl Database {
     pub fn open(path: &Path, limits: DatabaseLimits) -> Result<Self> {
-        let path = dunce::canonicalize(&path)?;
+        let path = dunce::canonicalize(path)?;
         let size = fs::metadata(&path)?.len();
         if size > limits.max_file_bytes {
             return Err(ParseError::Limit {

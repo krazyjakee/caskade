@@ -132,7 +132,7 @@ impl HostEnv {
             return true;
         }
         let root = dunce::canonicalize(&self.fs_root).unwrap_or_else(|_| self.fs_root.clone());
-        dunce::canonicalize(&path)
+        dunce::canonicalize(path)
             .map(|path| path.starts_with(&root))
             .unwrap_or_else(|_| path.starts_with(&self.fs_root))
     }

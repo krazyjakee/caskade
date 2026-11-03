@@ -59,7 +59,7 @@ impl WineRegistry {
     }
     /// Load a machine scenario's registry/ files, confined to the scenario.
     pub fn from_fixture(scenario: &Path, limits: Limits) -> io::Result<Self> {
-        let scenario = dunce::canonicalize(&scenario)?;
+        let scenario = dunce::canonicalize(scenario)?;
         let mut registry = Self::default();
         for (name, hive, view) in [
             ("hkcu.reg", RegistryHive::CurrentUser, RegistryView::Native),
@@ -235,7 +235,7 @@ fn invalid(message: &str) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, message)
 }
 fn read_file(path: &Path, limits: Limits, root: Option<&Path>) -> io::Result<Option<String>> {
-    let resolved = match dunce::canonicalize(&path) {
+    let resolved = match dunce::canonicalize(path) {
         Ok(p) => p,
         Err(e) if e.kind() == io::ErrorKind::NotFound => return Ok(None),
         Err(e) => return Err(e),

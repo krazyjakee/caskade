@@ -223,7 +223,7 @@ impl HostEnv {
         Self::load_fixture(scenario.as_ref(), Some(os))
     }
     fn load_fixture(scenario: &Path, os_override: Option<OperatingSystem>) -> io::Result<Self> {
-        let scenario = dunce::canonicalize(&scenario)?;
+        let scenario = dunce::canonicalize(scenario)?;
         let root = dunce::canonicalize(scenario.join("root"))?;
         if !root.starts_with(&scenario) || !root.is_dir() {
             return Err(io::Error::new(

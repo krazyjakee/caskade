@@ -81,10 +81,10 @@ pub(super) fn child(env: &HostEnv, base: &Path, relative: &str) -> io::Result<Pa
     let path = env.resolve_path(&path)?;
     // Missing files can still produce a Broken record; check the nearest
     // existing ancestor, which catches links used to escape a package.
-    let anchor = dunce::canonicalize(&base)?;
+    let anchor = dunce::canonicalize(base)?;
     let mut ancestor = path.as_path();
     loop {
-        match dunce::canonicalize(&ancestor) {
+        match dunce::canonicalize(ancestor) {
             Ok(canonical) => {
                 if !canonical.starts_with(&anchor) {
                     return Err(invalid("package path escapes its root"));
