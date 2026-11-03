@@ -41,7 +41,7 @@ const data = [
   /Ludusavi manifest|PCGamingWiki|pcgamingwiki\.com/g,
   // Launchers and rating boards.
   /Steam|Heroic|Lutris|Epic Games|GOG Galaxy|EA App|Ubisoft Connect|Battle\.net|itch\.io|Amazon Games/g,
-  /PEGI|ESRB/g,
+  /PEGI|ESRB|USK|CERO|ACB|GRAC|ClassInd/g,
   // The built-in theme.
   /Nexus/g,
   "Caskade's dark sci-fi look: indigo and cyan accents, glass panels, HUD frames and a drifting grid.",
@@ -175,7 +175,9 @@ it.each([
         ? // Plugins' own settings pages are the plugin host's (plugins/PluginViews.tsx).
           '[role="tabpanel"] > div > :not(section)'
         : undefined;
-  await waitFor(() => expect(shown('[role="tabpanel"]', { skip })).toEqual([]));
+  // Checked once, after its data (`ready`): a check that may pass early
+  // would pass on a tab still loading.
+  expect(shown('[role="tabpanel"]', { skip })).toEqual([]);
 });
 
 it("labels a row's control with the translated row", async () => {

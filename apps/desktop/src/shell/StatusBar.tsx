@@ -2,6 +2,7 @@ import { plural } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { LoaderCircle } from "lucide-react";
 import { useJobs } from "../views/activity/ActivityProvider";
+import { jobPhase } from "../views/activity/jobPhase";
 import { AppUpdateLink } from "./AppUpdateLink";
 import { SyncStatusLink } from "./SyncStatusLink";
 import { useBackgroundStatus } from "./useBackgroundStatus";
@@ -23,7 +24,7 @@ export function StatusBar() {
     job &&
     (job.status === "queued"
       ? t({ message: "Queued", comment: "A job waiting for its turn" })
-      : job.phase || t({ message: "Working", comment: "A running job with no phase" }));
+      : t(jobPhase(job.phase)));
   const description =
     running[0]?.label ??
     (queued ? background.tasks[0]?.label : undefined) ??

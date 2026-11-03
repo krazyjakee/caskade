@@ -2,12 +2,13 @@
  * real routes and shells over fixture APIs, a fake window, a console-mode
  * API that records its calls, and a pad the test presses. */
 
+import { createRequire } from "node:module";
 import { i18n, sourceLocale } from "@caskade/i18n";
 import { HostScope } from "@caskade/sdk";
 import type { Messages } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 import { createMemoryHistory, createRouter, RouterProvider } from "@tanstack/react-router";
-import { act, render, waitFor } from "@testing-library/react";
+import { act, configure, getConfig, render, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { vi } from "vitest";
 import { createAccountsFixtureApi, type FixtureAccount } from "../api/accountsFixtures";
@@ -36,6 +37,40 @@ import { DefaultSettingsApi } from "../views/settings/useSettings";
 import { createDiscoveryFixture, createSettingsFixture } from "./settingsFixture";
 
 const refuse = (name: string) => async () => Promise.reject(new Error(`unexpected ${name}`));
+
+/** The scheduler react-dom renders with: resolved from react-dom itself, so
+ * it's the same instance. */
+const scheduler = createRequire(createRequire(import.meta.url).resolve("react-dom"))(
+  "scheduler",
+) as {
+  unstable_scheduleCallback: (priority: number, callback: () => void) => unknown;
+  unstable_IdlePriority: number;
+};
+
+/** Resolves once React has nothing left to do: an idle-priority task runs
+ * only after every render, commit and effect queued before it. */
+const reactIdle = () =>
+  new Promise<void>((resolve) => {
+    scheduler.unstable_scheduleCallback(scheduler.unstable_IdlePriority, resolve);
+  });
+
+// `waitFor` and `findBy*` render on React's own scheduler, which yields
+// every few milliseconds, and return once the DOM matches. Under load a
+// commit's effects can still be pending then: the bindings a pad press
+// needs, focus moving into a dialog. A press is synchronous, so each wait
+// also waits for React to finish before the test goes on (#36).
+// RTL's config outlives a test file's modules: wrapped once per worker.
+const settles = Symbol.for("caskade.test.settles");
+const { asyncWrapper } = getConfig();
+if (!(settles in asyncWrapper)) {
+  const settling = (callback: () => Promise<unknown>) =>
+    asyncWrapper(async () => {
+      const result = await callback();
+      await reactIdle();
+      return result;
+    });
+  configure({ asyncWrapper: Object.assign(settling, { [settles]: true }) });
+}
 
 /** The element with focus. */
 export const focused = () => document.activeElement as HTMLElement | null;

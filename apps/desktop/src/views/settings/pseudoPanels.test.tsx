@@ -110,6 +110,16 @@ it("shows Library Discovery in the pseudo-locale", async () => {
   );
 });
 
+/** Data each Emulation section shows once it has loaded: checked before
+ * that, a loading section passes with nothing to check. */
+const loaded: Record<string, string> = {
+  emulators: "Sony PlayStation",
+  browse: "PPSSPP",
+  platforms: "scph5500.bin",
+  scanners: "SNES collection",
+  romm: "https://romm.local",
+};
+
 for (const section of ["emulators", "browse", "platforms", "scanners", "romm"]) {
   it(`shows Emulation → ${section} in the pseudo-locale`, async () => {
     const data = await emulationData();
@@ -121,33 +131,38 @@ for (const section of ["emulators", "browse", "platforms", "scanners", "romm"]) 
       ),
     });
     await screen.findByRole("radio", { name: /^\[.*\]$/, checked: true });
-    await waitFor(() =>
-      expect(
-        untranslated([panel()], {
-          data: [
-            ...data,
-            ...paths,
-            "Home",
-            "admin",
-            "RomM",
-            "RetroArch",
-            "Flatpak",
-            "AppImage",
-            // Emulators and platforms the setup offers, a scanner's name,
-            // file types, BIOS files and launch commands.
-            "Sample Game (USA)",
-            "SNES collection",
-            "bios/",
-            "org.libretro.RetroArch",
-            /Sony PlayStation|Nintendo Switch|Switch|DuckStation/g,
-            /scph\d+/g,
-            /\b(sfc|smc|cue|chd|flatpak|run)\b/g,
-          ],
-          // Patterns are code, and the Flatpak hint is the core's text.
-          skip: 'code, [data-part="flatpak-hint"]',
-        }),
-      ).toEqual([]),
-    );
+    await waitFor(() => expect(panel()?.textContent).toContain(loaded[section]));
+    expect(
+      untranslated([panel()], {
+        data: [
+          ...data,
+          // Addresses before paths, which would leave their scheme.
+          /https?:\/\/[^\s,]+/g,
+          ...paths,
+          "Home",
+          "admin",
+          "RomM",
+          "RetroArch",
+          "Flatpak",
+          "AppImage",
+          // Emulators and platforms the setup offers, a scanner's name,
+          // file types, BIOS files and launch commands.
+          "Sample Game (USA)",
+          "SNES collection",
+          "bios/",
+          "org.libretro.RetroArch",
+          // Whole, before the fixtures' "PlayStation" takes its middle.
+          "Sony PlayStation",
+          /Nintendo Switch|Switch|DuckStation|PPSSPP|Dolphin/g,
+          // Platform ids, as definitions list them.
+          /\b(?:sony|nintendo)_\w+/g,
+          /scph\d+/g,
+          /\b(sfc|smc|cue|chd|flatpak|run)\b/g,
+        ],
+        // Patterns are code, and the Flatpak hint is the core's text.
+        skip: 'code, [data-part="flatpak-hint"]',
+      }),
+    ).toEqual([]);
   });
 }
 

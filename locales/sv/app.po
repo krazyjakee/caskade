@@ -3870,6 +3870,14 @@ msgstr "Nedladdade bilder"
 msgid "Downloaded metadata and images"
 msgstr "Ladda ner och installera"
 
+#. A background job's phase
+#: apps/desktop/src/views/activity/jobPhase.ts
+#, fuzzy
+#| msgctxt "download status"
+#| msgid "Downloading"
+msgid "Downloading"
+msgstr "Laddar ner"
+
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 msgctxt "download status"
 msgid "Downloading"
@@ -5376,7 +5384,9 @@ msgstr "Installationsprogram"
 msgid "Installer settings"
 msgstr "Inställningar för installationsprogram"
 
+#. A background job's phase
 #. The stage a failed install stopped at
+#: apps/desktop/src/views/activity/jobPhase.ts
 #: apps/desktop/src/views/activity/JobRecovery.tsx
 msgid "Installing"
 msgstr "Installation"
@@ -6432,6 +6442,13 @@ msgstr "Flytta installerade filer…"
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "Move up"
 msgstr "Flytta upp"
+
+#. A background job's phase
+#: apps/desktop/src/views/activity/jobPhase.ts
+#, fuzzy
+#| msgid "Moving…"
+msgid "Moving"
+msgstr "Flyttar…"
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
 msgid "Moving…"
@@ -11827,7 +11844,7 @@ msgid "Wine and Proton prefixes"
 msgstr "Wine- och Proton-prefix"
 
 #. A running job with no phase
-#: apps/desktop/src/shell/StatusBar.tsx
+#: apps/desktop/src/views/activity/jobPhase.ts
 msgid "Working"
 msgstr "Arbetar"
 

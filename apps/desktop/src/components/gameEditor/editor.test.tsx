@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { createFixtureGames } from "../../api/fixtures";
-import { renderApp } from "../../test/harness";
+import { focused, renderApp, until } from "../../test/harness";
 
 afterEach(cleanup);
 
@@ -203,6 +203,8 @@ it("edits by pad alone in console mode", async () => {
   app.pad.press("confirm");
   const dialog = await screen.findByRole("dialog", { name: "Edit Fixture Game 0001" });
   await waitFor(() => expect(field(dialog, "Notes").value).toBe(""));
+  // The editor's buttons apply once focus is in it.
+  await until(() => dialog.contains(focused()), "focus in the editor");
   // RB/LB switch the editor's tabs.
   app.pad.press("tab.next");
   expect(within(dialog).getByRole("tab", { name: "Artwork" }).getAttribute("aria-selected")).toBe(

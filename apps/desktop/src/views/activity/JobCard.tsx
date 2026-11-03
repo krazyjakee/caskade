@@ -9,6 +9,7 @@ import { canRetry, isActiveJob, type JobSnapshot } from "../../api/install";
 import { formatSize } from "../../api/presentation";
 import { useActionMenus } from "../../components/ActionMenu";
 import { JobFailurePanel } from "./JobRecovery";
+import { jobPhase } from "./jobPhase";
 import { ProgressLine } from "./ProgressLine";
 
 const statusLabels: Record<JobSnapshot["status"], MessageDescriptor> = {
@@ -94,7 +95,7 @@ export function JobCard({
         <div className="min-w-0">
           <p className="font-mono text-xs text-fg-subtle uppercase">
             {job.kind}
-            {job.phase && job.phase !== job.kind ? ` · ${job.phase}` : ""}
+            {job.phase && job.phase !== job.kind ? ` · ${t(jobPhase(job.phase))}` : ""}
           </p>
           <h2 id={heading} className="mt-1 break-words font-display text-lg font-semibold">
             {job.title}

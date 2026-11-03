@@ -12,9 +12,9 @@ afterEach(cleanup);
 
 const locale = pseudoLocale ?? "en-XA";
 
-/** Text that is data, not interface: the brand, fixture names and titles,
- * and the clock's AM/PM. */
-const data = [/CASKADE/g, /Player/g, /Fixture Game \d+/g, /\b[AP]M\b/g];
+/** Text that is data, not interface: the brand, fixture names and titles
+ * (the install job's included), and the clock's AM/PM. */
+const data = [/CASKADE/g, /Player/g, /Fixture Game \d+/g, "Fixture installation", /\b[AP]M\b/g];
 
 const untranslated = (roots: Iterable<Element | null>) => findUntranslated(roots, { data });
 
@@ -33,7 +33,12 @@ it("shows the desktop shell and its menus in the pseudo-locale", async () => {
     one('[data-cs="topbar"]'),
     one('[data-cs="status-bar"]'),
   ];
-  await waitFor(() => expect(untranslated(shell())).toEqual([]));
+  // Checked once the status bar shows the running job: before that, it has
+  // nothing to check.
+  await waitFor(() =>
+    expect(one('[data-cs="status-bar"]')?.textContent).toContain("Fixture installation"),
+  );
+  expect(untranslated(shell())).toEqual([]);
 
   // The title bar's own menu.
   fireEvent.contextMenu(one('[data-cs="topbar"]') as Element, {

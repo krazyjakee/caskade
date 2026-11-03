@@ -112,7 +112,7 @@ it("shows unavailable status on IPC failure instead of claiming the app is idle"
 
 it("shows installs between worker stages and distinguishes a question from active work", async () => {
   state.jobs = [
-    { id: "install", status: "running", title: "Example game", phase: "Installing" },
+    { id: "install", status: "running", title: "Example game", phase: "install" },
   ] as JobSnapshot[];
   const { rerender, container } = render(<StatusBar />);
   expect(screen.getByText("Installing: Example game")).toBeTruthy();

@@ -3796,6 +3796,11 @@ msgstr ""
 msgid "Downloaded metadata and images"
 msgstr ""
 
+#. A background job's phase
+#: apps/desktop/src/views/activity/jobPhase.ts
+msgid "Downloading"
+msgstr ""
+
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 msgctxt "download status"
 msgid "Downloading"
@@ -5282,7 +5287,9 @@ msgstr ""
 msgid "Installer settings"
 msgstr ""
 
+#. A background job's phase
 #. The stage a failed install stopped at
+#: apps/desktop/src/views/activity/jobPhase.ts
 #: apps/desktop/src/views/activity/JobRecovery.tsx
 msgid "Installing"
 msgstr ""
@@ -6320,6 +6327,11 @@ msgstr ""
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "Move up"
+msgstr ""
+
+#. A background job's phase
+#: apps/desktop/src/views/activity/jobPhase.ts
+msgid "Moving"
 msgstr ""
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
@@ -11572,7 +11584,7 @@ msgid "Wine and Proton prefixes"
 msgstr ""
 
 #. A running job with no phase
-#: apps/desktop/src/shell/StatusBar.tsx
+#: apps/desktop/src/views/activity/jobPhase.ts
 msgid "Working"
 msgstr ""
 
