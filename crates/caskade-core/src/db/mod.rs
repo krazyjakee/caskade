@@ -83,6 +83,31 @@ use sqlx::{
 use std::{path::Path, sync::Arc, time::Duration};
 
 pub static MIGRATOR: sqlx::migrate::Migrator = sqlx::migrate!("./migrations");
+
+/// How long opening a database file may take: its first connection, which
+/// creates or opens the file and switches it to WAL, and the migrations.
+/// Queries afterwards wait sqlx's default for a connection, so a stuck one
+/// still fails fast.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Opening {
+    pub wait: Duration,
+}
+
+impl Opening {
+    /// As long as a query waits for a connection.
+    pub const QUICK: Self = Self {
+        wait: Duration::from_secs(30),
+    };
+    /// The library, at startup and after a restore: a slow disk, where one
+    /// write can stall for minutes, is waited out rather than refusing to
+    /// start (#36).
+    pub const LIBRARY: Self = Self {
+        wait: Duration::from_secs(300),
+    };
+}
+
+#[cfg(test)]
+mod opening_tests;
 #[derive(Debug, Clone)]
 pub struct LibraryStore {
     pub(super) pool: SqlitePool,
@@ -92,9 +117,23 @@ pub struct LibraryStore {
 }
 impl LibraryStore {
     pub async fn open(path: &Path) -> Result<Self> {
+        Self::open_with(path, Opening::QUICK).await
+    }
+    pub async fn open_with(path: &Path, opening: Opening) -> Result<Self> {
+        Self::open_after(path, opening, std::future::ready(())).await
+    }
+    /// Opens `path` once `before` is done, all within `opening`: `before`
+    /// stands in for a slow disk in tests.
+    async fn open_after(
+        path: &Path,
+        opening: Opening,
+        before: impl std::future::Future<Output = ()>,
+    ) -> Result<Self> {
         if let Some(parent) = path.parent().filter(|p| !p.as_os_str().is_empty()) {
             tokio::fs::create_dir_all(parent).await?;
         }
+        let titles = Arc::new(collation::TitleOrder::new(None));
+        let order = titles.clone();
         let options = SqliteConnectOptions::new()
             .filename(path)
             .create_if_missing(true)
@@ -102,11 +141,39 @@ impl LibraryStore {
             .journal_mode(SqliteJournalMode::Wal)
             .synchronous(SqliteSynchronous::Normal)
             .busy_timeout(Duration::from_secs(5))
-            .disable_statement_logging();
-        Self::connect(options, 4, None).await
+            .disable_statement_logging()
+            .collation(collation::TITLE, move |a, b| order.compare(a, b));
+        let pool = SqlitePoolOptions::new()
+            .max_connections(4)
+            .connect_lazy_with(options);
+        // A pool waits the same for every connection, a query's included. Its
+        // first, which creates the file and switches it to WAL, tries again
+        // for as long as `opening` allows; back in the pool, it's the one the
+        // migrations, then the first query, take at once.
+        let first = async {
+            before.await;
+            loop {
+                match pool.acquire().await {
+                    Err(sqlx::Error::PoolTimedOut) => continue,
+                    acquired => drop(acquired?),
+                }
+                break;
+            }
+            MIGRATOR.run(&pool).await?;
+            Ok::<(), crate::Error>(())
+        };
+        let opened = tokio::time::timeout(opening.wait, first)
+            .await
+            .unwrap_or_else(|_| Err(sqlx::Error::PoolTimedOut.into()));
+        if let Err(error) = opened {
+            pool.close().await;
+            return Err(error);
+        }
+        Ok(Self { pool, titles })
     }
+    /// The library, waited for as `Opening::LIBRARY` allows.
     pub async fn open_default(paths: &AppPaths) -> Result<Self> {
-        Self::open(&paths.database()).await
+        Self::open_with(&paths.database(), Opening::LIBRARY).await
     }
     pub async fn in_memory() -> Result<Self> {
         Self::in_memory_sorted(None).await

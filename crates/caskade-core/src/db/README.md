@@ -1,7 +1,11 @@
 # Library store
 
 `LibraryStore::open_default(&AppPaths)` opens the per-user library database and
-runs the embedded migrations. `open(path)` supports an explicit database;
+runs the embedded migrations. Opening (the first connection, which creates the
+file and switches it to WAL, and the migrations) has its own bound, `Opening`:
+the library, and a staged restore's, wait up to five minutes for a slow disk
+(`Opening::LIBRARY`); `open(path)` waits 30 s. Queries keep sqlx's default
+wait for a connection. `open(path)` supports an explicit database;
 `in_memory()` isolates tests. Handles are cloneable and use an asynchronous
 SQLx pool, foreign keys, WAL for files and a five-second busy timeout.
 

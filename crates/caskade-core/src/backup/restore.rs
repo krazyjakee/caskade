@@ -505,7 +505,8 @@ fn extract_one(
 /// The staged database: migrated to this Caskade's schema, its plugins'
 /// grants dropped unless their files come back too, out of WAL and checked.
 async fn prepare(file: &Path, components: &BTreeSet<Component>) -> Result<(), BackupError> {
-    let store = LibraryStore::open(file).await?;
+    // The library it will be: opened as patiently as the library is.
+    let store = LibraryStore::open_with(file, crate::db::Opening::LIBRARY).await?;
     store.close().await;
     let mut connection = snapshot::open(file).await?;
     let result = async {
