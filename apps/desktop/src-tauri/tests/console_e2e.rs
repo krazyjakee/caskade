@@ -81,6 +81,9 @@ press confirm
 focus-is Stop Couch Runner
 press confirm
 wait-event game-exited
+# The quick menu closes once the stop it ran returns, which can be after
+# the exit: focus back on the page's Play first, then B.
+focus-is Play
 # Back to Home, into the sidebar, to the Library's emulated games.
 press back
 wait-text Welcome back
