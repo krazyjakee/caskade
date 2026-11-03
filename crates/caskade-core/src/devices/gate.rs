@@ -92,7 +92,7 @@ impl Admission for Gate {
     fn admits(&self, peer: EndpointId, purpose: Purpose, grant: Option<&Grant>) -> bool {
         match purpose {
             // Only a paired device, presenting the grant this device gave it.
-            Purpose::Sync | Purpose::Copy | Purpose::Forget | Purpose::Stream => {
+            Purpose::Sync | Purpose::Copy | Purpose::Forget | Purpose::Stream | Purpose::Play => {
                 let state = self.state();
                 let admitted = match (state.paired.get(&peer), grant) {
                     (Some(expected), Some(grant)) => expected == grant,
@@ -146,6 +146,8 @@ mod tests {
         assert!(gate.admits(a, Purpose::Sync, Some(&grant)));
         assert!(gate.admits(a, Purpose::Forget, Some(&grant)));
         assert!(gate.admits(a, Purpose::Stream, Some(&grant)));
+        assert!(gate.admits(a, Purpose::Play, Some(&grant)));
+        assert!(!gate.admits(b, Purpose::Play, Some(&grant)), "not paired");
         assert!(!gate.admits(a, Purpose::Sync, None));
         assert!(!gate.admits(a, Purpose::Sync, Some(&Grant::generate())));
         assert!(

@@ -268,12 +268,17 @@ struct Inner {
     stream_handler: OnceLock<Arc<dyn Sessions>>,
     /// Where one-off shares (#246) take `share` sessions.
     share_handler: OnceLock<Arc<dyn Sessions>>,
+    /// Where play requests (#234) take `play` sessions.
+    play_handler: OnceLock<Arc<dyn Sessions>>,
     /// Serves the folders offered to other devices (#233), bound with the
     /// endpoint.
     copy_provider: OnceLock<caskade_sync::copy::BlobsProtocol>,
     /// Pulls game files with no relay transport (#233), for the current
     /// identity.
     dialer: tokio::sync::Mutex<Option<(EndpointId, caskade_sync::copy::DirectDialer)>>,
+    /// Fetches shares from several of their holders (#249), for the current
+    /// identity.
+    swarm: tokio::sync::Mutex<Option<(EndpointId, caskade_sync::swarm::SwarmDialer)>>,
     /// Each device's sync, as library sync reports it.
     sync: Mutex<HashMap<String, DeviceSync>>,
     /// Paired devices that came into reach (found on this network).
@@ -364,8 +369,10 @@ impl Devices {
                 copy_handler: OnceLock::new(),
                 stream_handler: OnceLock::new(),
                 share_handler: OnceLock::new(),
+                play_handler: OnceLock::new(),
                 copy_provider: OnceLock::new(),
                 dialer: tokio::sync::Mutex::new(None),
+                swarm: tokio::sync::Mutex::new(None),
                 sync: Mutex::default(),
                 reachable: tokio::sync::broadcast::channel(32).0,
             }),
@@ -643,13 +650,21 @@ impl Devices {
         self.inner.gate.set_share_admission(admission);
     }
 
+    /// Where `play` sessions from paired devices go (#234).
+    pub fn set_play_handler(&self, handler: Arc<dyn Sessions>) {
+        let _ = self.inner.play_handler.set(handler);
+    }
+
     /// Where `share` sessions go (#246).
     pub fn set_share_handler(&self, handler: Arc<dyn Sessions>) {
         let _ = self.inner.share_handler.set(handler);
     }
 
     /// Opens a connection for `purpose` to a device that isn't paired (a
-    /// share link's), at `addr`, presenting `grant` (#246).
+    /// share link's), at `addr`, presenting `grant` (#246). The device
+    /// turning it down is [`Error::Forbidden`] (a stopped or expired share:
+    /// the one refusal); anything else, reaching it included, is
+    /// [`Error::Invalid`], worth trying again.
     pub async fn connect_to(
         &self,
         addr: EndpointAddr,
@@ -660,7 +675,12 @@ impl Devices {
         endpoint
             .connect(addr, purpose, grant)
             .await
-            .map_err(|error| Error::Invalid(error.to_string()))
+            .map_err(|error| match error {
+                caskade_sync::Error::Refused => Error::Forbidden(crate::tr!(
+                    "the other device turned the connection down"
+                )),
+                error => Error::Invalid(error.to_string()),
+            })
     }
 
     /// This device's address for a link: every local address, plus the
@@ -698,6 +718,33 @@ impl Devices {
             .await
             .map_err(|error| Error::Invalid(error.to_string()))?;
         *dialer = Some((key.id(), bound.clone()));
+        Ok(bound)
+    }
+
+    /// [`Devices::direct_dialer`] for fetching from several providers at
+    /// once (shares, #249): this device's key, no relay transport, only the
+    /// direct addresses it's given.
+    pub async fn swarm_dialer(&self) -> Result<caskade_sync::swarm::SwarmDialer> {
+        let key = self.inner.lock().key.clone();
+        let Some(key) = key else {
+            return Err(Error::Invalid(crate::tr!(
+                "this device has no identity to connect with"
+            )));
+        };
+        let mut swarm = self.inner.swarm.lock().await;
+        if let Some((id, dialer)) = swarm.as_ref()
+            && *id == key.id()
+        {
+            return Ok(dialer.clone());
+        }
+        let loopback = matches!(
+            self.inner.reach.as_ref().map(|reach| &reach.ip),
+            Some(caskade_sync::Ip::Loopback { .. })
+        );
+        let bound = caskade_sync::swarm::SwarmDialer::bind(Some(&key), loopback)
+            .await
+            .map_err(|error| Error::Invalid(error.to_string()))?;
+        *swarm = Some((key.id(), bound.clone()));
         Ok(bound)
     }
 
@@ -1244,6 +1291,10 @@ impl Sessions for Handler {
                 None => session.end().await,
             },
             Purpose::Stream => match inner.stream_handler.get() {
+                Some(handler) => handler.opened(session).await,
+                None => session.end().await,
+            },
+            Purpose::Play => match inner.play_handler.get() {
                 Some(handler) => handler.opened(session).await,
                 None => session.end().await,
             },

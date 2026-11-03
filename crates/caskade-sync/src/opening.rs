@@ -58,6 +58,8 @@ pub enum Purpose {
     /// Streaming between paired devices: a client hands its pairing code to
     /// the host.
     Stream,
+    /// A paired device asks this one to start a game here (#234).
+    Play,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
