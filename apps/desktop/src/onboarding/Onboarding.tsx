@@ -7,22 +7,34 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { Volume2, VolumeX } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button as AriaButton } from "react-aria-components";
-import { useActiveAccount } from "../api/accounts";
+import { useAccounts, useActiveAccount } from "../api/accounts";
+import { useProvidedSyncApi } from "../api/sync";
 import { PathPickerProvider } from "../components/pathBrowser/PathPicker";
+import { PairingHost } from "../components/sync/PairingHost";
 import { InputProvider, useDefaultFocus } from "../input";
+import { AccountPicker } from "../shell/accounts/AccountPicker";
 import { useAppWindow } from "../shell/appWindow";
 import { useMode } from "../shell/console/mode";
 import { useWindowDrag } from "../shell/useWindowDrag";
 import { WindowControls } from "../shell/WindowControls";
 import { useSettingsApi, useSettingsSection } from "../views/settings/useSettings";
 import { AccountStep } from "./AccountStep";
+import { DeviceStep } from "./DeviceStep";
 import { LanguageStep } from "./LanguageStep";
 import { FolderStep, ModeStep, SourcesStep } from "./Questions";
 import { type Choices, defaultChoices, markCompleted } from "./run";
 import { SetupStep } from "./SetupStep";
 import { createSounds } from "./sound";
 
-export type Step = "welcome" | "language" | "folder" | "sources" | "mode" | "account" | "setup";
+export type Step =
+  | "welcome"
+  | "device"
+  | "language"
+  | "folder"
+  | "sources"
+  | "mode"
+  | "account"
+  | "setup";
 const basics: Step[] = ["language", "folder", "sources", "mode"];
 
 export interface OnboardingSettings {
@@ -41,6 +53,10 @@ export function Onboarding({ onDone }: { onDone(): void }) {
   enabled.current = soundsOn;
   const sounds = useMemo(() => createSounds(() => enabled.current), []);
   const [step, setStep] = useState<Step>("welcome");
+  // Set up from another device (#242): its library comes over first.
+  const [fromDevice, setFromDevice] = useState(false);
+  const devices = useProvidedSyncApi();
+  const accountList = useAccounts().data;
   const [choices, setChoices] = useState<Choices>(defaultChoices);
   useCurrentChoices(step, setChoices);
   const { mode } = useMode();
@@ -49,8 +65,14 @@ export function Onboarding({ onDone }: { onDone(): void }) {
   // The admin names their account last, where there are accounts.
   const active = useActiveAccount();
   const admin = active?.role === "admin" ? active : null;
-  const questions: Step[] = admin ? [...basics, "account"] : basics;
-  const order: Step[] = ["welcome", ...questions, "setup"];
+  // The household's accounts came from the other device: nothing to name.
+  const questions: Step[] = admin && !fromDevice ? [...basics, "account"] : basics;
+  const order: Step[] = [
+    "welcome",
+    ...(fromDevice ? (["device"] as Step[]) : []),
+    ...questions,
+    "setup",
+  ];
 
   const go = (next: Step) => {
     sounds.play("step");
@@ -70,6 +92,16 @@ export function Onboarding({ onDone }: { onDone(): void }) {
     if (!on) sounds.silence();
     if (prefs.settings) prefs.setSettings((current) => ({ ...current, sounds: on }));
   };
+
+  // The other device's admin has a PIN: it's asked for here before setup
+  // goes on, as at any start.
+  if (
+    fromDevice &&
+    accountList &&
+    accountList.accounts.length > 0 &&
+    !accountList.accounts.some((account) => account.id === accountList.activeId)
+  )
+    return <AccountPicker list={accountList} />;
 
   return (
     <InputProvider console={mode === "console"} locationKey={step} onBack={back}>
@@ -144,7 +176,22 @@ export function Onboarding({ onDone }: { onDone(): void }) {
                     sounds.unlock();
                     setStep("language");
                   }}
+                  onFromDevice={
+                    devices
+                      ? () => {
+                          sounds.unlock();
+                          setFromDevice(true);
+                          setStep("device");
+                        }
+                      : undefined
+                  }
                 />
+              )}
+              {step === "device" && (
+                <>
+                  <DeviceStep onNext={next} />
+                  <PairingHost />
+                </>
               )}
               {step === "language" && <LanguageStep onNext={next} />}
               {step === "folder" && <FolderStep onNext={next} />}
@@ -180,7 +227,16 @@ function useCurrentChoices(step: Step, set: (update: (choices: Choices) => Choic
   }, [early, discovery?.enabled, history?.seedPlaytime, metadata?.online, set]);
 }
 
-function Welcome({ onShown, onStart }: { onShown(): void; onStart(): void }) {
+function Welcome({
+  onShown,
+  onStart,
+  onFromDevice,
+}: {
+  onShown(): void;
+  onStart(): void;
+  /** Set up from another device, where devices can pair. */
+  onFromDevice?: () => void;
+}) {
   const start = useRef<HTMLButtonElement>(null);
   useDefaultFocus(start);
   // The startup sound comes in with the logo.
@@ -211,6 +267,15 @@ function Welcome({ onShown, onStart }: { onShown(): void; onStart(): void }) {
       >
         <Trans comment="First-run setup's welcome button">Get started</Trans>
       </AriaButton>
+      {onFromDevice && (
+        <AriaButton
+          data-part="from-device"
+          onPress={onFromDevice}
+          className="mt-4 animate-rise rounded-control px-6 py-2 text-sm text-fg-muted [--i:9] data-focus-visible:focus-ring data-hovered:bg-surface-hover data-hovered:text-fg"
+        >
+          <Trans>Set up from another device</Trans>
+        </AriaButton>
+      )}
     </section>
   );
 }

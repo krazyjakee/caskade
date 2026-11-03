@@ -1,6 +1,7 @@
 /** First-run setup over fixtures, for its tests and the anatomy survey: a games folder, a scan that finds Steam's games on its second
  * look, the emulation fixtures and a RomM server that answers. */
 import { render } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { vi } from "vitest";
 import type { DiscoveryApi, DiscoverySnapshot } from "../api/discovery";
 import { createEmulationFixtureApi } from "../api/emulationFixtures";
@@ -117,6 +118,11 @@ export function renderOnboarding(
   settings = createSettingsFixture(),
   found = discovery(),
   systemLanguages = ["en-US"],
+  /** Accounts and devices, for setting up from another device (#242). */
+  extra: {
+    accounts?: (library: ReturnType<typeof createFixtureApi>) => void;
+    wrap?: (children: ReactNode) => ReactNode;
+  } = {},
 ) {
   const onDone = vi.fn();
   // The Language setting switches the language as the core would.
@@ -124,6 +130,12 @@ export function renderOnboarding(
   const consoleApi = fakeConsoleApi();
   const pad = fakePad();
   const library = createFixtureApi(createFixtureGames(3));
+  extra.accounts?.(library);
+  const gate = (
+    <OnboardingGate onDone={onDone}>
+      <p>The library</p>
+    </OnboardingGate>
+  );
   render(
     <LocaleProvider api={locale}>
       <LibraryProvider api={library} client={createLibraryQueryClient()}>
@@ -134,9 +146,7 @@ export function renderOnboarding(
                 <ModeProvider api={consoleApi.api}>
                   <SettingsProvider api={settings.api}>
                     <PadSource value={pad.subscribe}>
-                      <OnboardingGate onDone={onDone}>
-                        <p>The library</p>
-                      </OnboardingGate>
+                      {extra.wrap ? extra.wrap(gate) : gate}
                     </PadSource>
                   </SettingsProvider>
                 </ModeProvider>

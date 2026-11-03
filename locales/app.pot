@@ -2201,6 +2201,10 @@ msgstr ""
 msgid "Brazil"
 msgstr ""
 
+#: apps/desktop/src/onboarding/DeviceStep.tsx
+msgid "Bringing your library from {name}"
+msgstr ""
+
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Brings in every game your {name} account owns, installed or not."
 msgstr ""
@@ -3019,6 +3023,7 @@ msgstr ""
 msgid "Console mode, window and start-up choices"
 msgstr ""
 
+#: apps/desktop/src/onboarding/DeviceStep.tsx
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
 msgid "Continue"
@@ -4458,6 +4463,10 @@ msgstr ""
 msgid "Games you linked to their achievements by hand."
 msgstr ""
 
+#: apps/desktop/src/onboarding/DeviceStep.tsx
+msgid "Games, accounts, collections and play history came from {name}. Next, set up what belongs to this device: its folders, emulators and how it starts."
+msgstr ""
+
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Games, play time, collections, edits, launch actions, accounts and settings. Always included."
 msgstr ""
@@ -4502,6 +4511,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
 msgid "Getting it from {holder}…"
+msgstr ""
+
+#: apps/desktop/src/onboarding/DeviceStep.tsx
+msgid "Getting this device ready to pair…"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
@@ -5751,6 +5764,7 @@ msgstr ""
 msgid "Look inside archives"
 msgstr ""
 
+#: apps/desktop/src/onboarding/DeviceStep.tsx
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Looking for Caskade on this network…"
 msgstr ""
@@ -6085,6 +6099,14 @@ msgstr ""
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgctxt "script"
 msgid "Name"
+msgstr ""
+
+#: apps/desktop/src/onboarding/DeviceStep.tsx
+msgid "Nearby"
+msgstr ""
+
+#: apps/desktop/src/onboarding/DeviceStep.tsx
+msgid "Nearby devices"
 msgstr ""
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
@@ -6874,6 +6896,10 @@ msgstr ""
 msgid "On every refresh"
 msgstr ""
 
+#: apps/desktop/src/onboarding/DeviceStep.tsx
+msgid "On the other device, open Settings → Devices and copy a pairing link, then paste it here."
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "On this network at {addresses}."
 msgstr ""
@@ -6954,6 +6980,10 @@ msgstr ""
 
 #: apps/desktop/src/api/romm.ts
 msgid "Open Caskade desktop to use RomM."
+msgstr ""
+
+#: apps/desktop/src/onboarding/DeviceStep.tsx
+msgid "Open Caskade on the device you already use, on the same network. Pair with it here and compare the codes both show."
 msgstr ""
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
@@ -7067,6 +7097,10 @@ msgstr ""
 msgid "Or paste the code the page shows"
 msgstr ""
 
+#: apps/desktop/src/onboarding/DeviceStep.tsx
+msgid "Or use a pairing link"
+msgstr ""
+
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "Order at launch"
 msgstr ""
@@ -7111,6 +7145,7 @@ msgstr ""
 
 #: apps/desktop/src/components/streaming/PairRequestForm.tsx
 #: apps/desktop/src/components/sync/PairingHost.tsx
+#: apps/desktop/src/onboarding/DeviceStep.tsx
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Pair"
 msgstr ""
@@ -7168,6 +7203,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 msgid "Paired. {device}'s games show in your library as Stream from {device}."
+msgstr ""
+
+#: apps/desktop/src/onboarding/DeviceStep.tsx
+msgid "Pairing link"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
@@ -9078,6 +9117,11 @@ msgstr ""
 msgid "Set up"
 msgstr ""
 
+#: apps/desktop/src/onboarding/DeviceStep.tsx
+#: apps/desktop/src/onboarding/Onboarding.tsx
+msgid "Set up from another device"
+msgstr ""
+
 #: apps/desktop/src/onboarding/run.ts
 msgid "Set up ROM folders in Settings → Emulation."
 msgstr ""
@@ -9758,6 +9802,10 @@ msgstr ""
 msgid "Sync saves"
 msgstr ""
 
+#: apps/desktop/src/onboarding/DeviceStep.tsx
+msgid "Syncing with {name}…"
+msgstr ""
+
 #. A RomM server's status
 #. A RomM server's status
 #: apps/desktop/src/onboarding/run.ts
@@ -9945,6 +9993,10 @@ msgstr ""
 #. placeholder {0}: sync.error.summary
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "The last refresh failed: {0}"
+msgstr ""
+
+#: apps/desktop/src/onboarding/DeviceStep.tsx
+msgid "The last try didn't reach {name}. It tries again in a moment."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
@@ -10233,6 +10285,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
 msgid "This system can't send magnet links and .torrent files to Caskade yet."
+msgstr ""
+
+#: apps/desktop/src/onboarding/DeviceStep.tsx
+msgid "This takes a moment on the same network, with or without the internet."
 msgstr ""
 
 #: apps/desktop/src/shell/ErrorFallback.tsx
@@ -11188,6 +11244,10 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/AddGamesDialog.tsx
 msgid "Your library has no games yet."
+msgstr ""
+
+#: apps/desktop/src/onboarding/DeviceStep.tsx
+msgid "Your library is here"
 msgstr ""
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx

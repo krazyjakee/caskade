@@ -811,6 +811,33 @@ snapshot. Not yet checked on real machines:
 | Play on Windows, quit, start on a Linux device through Proton: the Windows save is there | not yet run |
 | Play on the Linux device, quit, start on Windows: the Linux save is there | not yet run |
 
+## Setting up a new device
+
+First-run setup's welcome offers **Set up from another device** (#242,
+`onboarding/DeviceStep.tsx`) wherever devices can pair. The new device pairs
+with a nearby Caskade (both show the code, confirmed on both) or by a pasted
+pairing link, then asks that device to sync and waits for the first sync to
+finish. That brings the household's library, accounts with their PIN hashes,
+collections, play history and the settings that sync. The new device's own
+untouched admin joins the household's (see The default admin), and when that
+admin has a PIN, setup asks for it before going on. Setup then asks about this
+device as on any first start (language, folder, sources, how it starts) and
+runs the usual tasks, emulator setup included. What policy keeps on each
+device (storage, installs, emulators, console and window settings, the
+interface scale) stays the new device's own. None of it needs the internet:
+devices find each other on the local network and connect directly.
+
+`tests/new_device.rs` covers it with two cores on loopback, where there's no
+relay and no address lookup: the new device gets the library, both accounts
+(the admin's PIN included), the collection and a synced setting, and keeps its
+own storage root, no emulators, its console mode and its interface scale.
+`onboarding/fromDevice.test.tsx` covers the setup screens. Not yet checked on
+real devices:
+
+| Check | Result |
+| --- | --- |
+| A new device on a network with no internet set up from another: same library, accounts and collections; its own storage, emulators and settings | not yet run |
+
 ## Settings → Devices
 
 `views/settings/devices/` (#231), over `api/sync.ts` (the native API on the
