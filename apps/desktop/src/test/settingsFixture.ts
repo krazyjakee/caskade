@@ -12,6 +12,21 @@ const installerSchema = {
   },
 };
 
+/** `UpdateSettings`: game updates, shown with the installer's. */
+const updatesSchema = {
+  type: "object",
+  properties: {
+    check: { type: "boolean", title: "Check for game updates" },
+    intervalHours: { type: "integer", title: "Check every (hours)", minimum: 1, maximum: 168 },
+    askBeforePlay: { type: "boolean", title: "Offer updates before playing" },
+  },
+};
+
+const schemas: Record<string, unknown> = {
+  "core.installer": installerSchema,
+  "core.updates": updatesSchema,
+};
+
 export function coreSettingsDefaults(): Record<string, Record<string, unknown>> {
   return {
     "core.general": {
@@ -60,6 +75,7 @@ export function coreSettingsDefaults(): Record<string, Record<string, unknown>> 
     "discovery.import": { seedPlaytime: true },
     "core.storage": { alwaysUseDefault: false },
     "core.installer": { shortcuts: false, downloads: 2 },
+    "core.updates": { check: true, intervalHours: 6, askBeforePlay: true },
     "core.onboarding": { completed: false, sounds: true },
     "core.metadata": { online: true },
     "core.appUpdates": { check: true },
@@ -124,7 +140,7 @@ export function createSettingsFixture(values = coreSettingsDefaults()) {
       Object.keys(values).map((namespace) => ({
         namespace,
         version: 1,
-        schema: namespace === "core.installer" ? installerSchema : {},
+        schema: schemas[namespace] ?? {},
         defaults: defaults[namespace],
       })),
     get: async (namespace) => {

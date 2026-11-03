@@ -8,6 +8,7 @@ import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/re
 import type { ReactNode } from "react";
 import { afterEach, expect, it, vi } from "vitest";
 import type { FixtureAccount } from "../../api/accountsFixtures";
+import { fixtureCatalogueItems } from "../../api/addonsFixtures";
 import { type AppUpdateApi, AppUpdateProvider, type AppUpdateStatus } from "../../api/appUpdate";
 import {
   type PluginManagerApi,
@@ -59,6 +60,8 @@ const data = [
   /\/data\b/g,
   // The language list names each language in itself.
   /English|Svenska|Pseudo-Accents/g,
+  // The add-on catalogue's entries (the harness's fixture catalogue).
+  ...fixtureCatalogueItems().flatMap(({ entry }) => [entry.name, entry.summary, entry.description]),
 ];
 
 const status: AppUpdateStatus = {

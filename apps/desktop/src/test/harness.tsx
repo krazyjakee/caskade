@@ -12,6 +12,8 @@ import { act, configure, getConfig, render, waitFor } from "@testing-library/rea
 import type { ReactNode } from "react";
 import { vi } from "vitest";
 import { createAccountsFixtureApi, type FixtureAccount } from "../api/accountsFixtures";
+import { type AddonsApi, AddonsProvider } from "../api/addons";
+import { createAddonsFixture } from "../api/addonsFixtures";
 import { createEmulationFixtureApi } from "../api/emulationFixtures";
 import { createFixtureApi, createFixtureGames } from "../api/fixtures";
 import type { JobSnapshot } from "../api/install";
@@ -71,6 +73,13 @@ if (!(settles in asyncWrapper)) {
     });
   configure({ asyncWrapper: Object.assign(settling, { [settles]: true }) });
 }
+
+// The whole app, routes and all: a route's first render has Vitest
+// transform its modules, which on a loaded machine takes seconds. Waits
+// keep their bound, wider than RTL's 1 s and Vitest's 5 s; a file can still
+// set its own (#36).
+configure({ asyncUtilTimeout: 10_000 });
+vi.setConfig({ testTimeout: 30_000 });
 
 /** The element with focus. */
 export const focused = () => document.activeElement as HTMLElement | null;
@@ -159,6 +168,8 @@ export interface AppOptions {
   /** The OS's languages, for the Language setting's System; `en-US` by
    * default. The setting switches the language as the core would. */
   systemLanguages?: string[];
+  /** The add-on catalogue; the fixture catalogue by default. */
+  addons?: AddonsApi;
 }
 
 export function renderApp(path: string, options: AppOptions = {}) {
@@ -174,6 +185,7 @@ export function renderApp(path: string, options: AppOptions = {}) {
   });
   const emulation = createEmulationFixtureApi();
   const installs = createInstallFixtureApi(options.jobs ?? [fixtureJob()]);
+  const addons = options.addons ?? createAddonsFixture();
   const pad = fakePad();
   const console = fakeConsoleApi();
   const window = { ...fakeWindow(), frame: options.frame ?? "custom" };
@@ -188,31 +200,33 @@ export function renderApp(path: string, options: AppOptions = {}) {
   });
   const view = render(
     <I18nProvider i18n={i18n}>
-      <LocaleProvider api={locale}>
-        <LibraryProvider api={library} client={createLibraryQueryClient()}>
-          <StorageProvider api={options.storage ?? emptyStorage}>
-            <ActivityProvider api={installs} storageApi={options.storage ?? emptyStorage}>
-              <PluginRegistryContext.Provider value={options.registry ?? new PluginRegistry()}>
-                <ModeProvider api={console.api} initial={options.mode ?? "desktop"}>
-                  <AppWindowContext value={window}>
-                    <DefaultSettingsApi value={settings.api}>
-                      <DiscoveryProvider api={createDiscoveryFixture()}>
-                        <EmulationProvider api={emulation}>
-                          <PadSource value={pad.subscribe}>
-                            <HostScope.Provider value={host}>
-                              {options.wrap ? options.wrap(app) : app}
-                            </HostScope.Provider>
-                          </PadSource>
-                        </EmulationProvider>
-                      </DiscoveryProvider>
-                    </DefaultSettingsApi>
-                  </AppWindowContext>
-                </ModeProvider>
-              </PluginRegistryContext.Provider>
-            </ActivityProvider>
-          </StorageProvider>
-        </LibraryProvider>
-      </LocaleProvider>
+      <AddonsProvider api={addons}>
+        <LocaleProvider api={locale}>
+          <LibraryProvider api={library} client={createLibraryQueryClient()}>
+            <StorageProvider api={options.storage ?? emptyStorage}>
+              <ActivityProvider api={installs} storageApi={options.storage ?? emptyStorage}>
+                <PluginRegistryContext.Provider value={options.registry ?? new PluginRegistry()}>
+                  <ModeProvider api={console.api} initial={options.mode ?? "desktop"}>
+                    <AppWindowContext value={window}>
+                      <DefaultSettingsApi value={settings.api}>
+                        <DiscoveryProvider api={createDiscoveryFixture()}>
+                          <EmulationProvider api={emulation}>
+                            <PadSource value={pad.subscribe}>
+                              <HostScope.Provider value={host}>
+                                {options.wrap ? options.wrap(app) : app}
+                              </HostScope.Provider>
+                            </PadSource>
+                          </EmulationProvider>
+                        </DiscoveryProvider>
+                      </DefaultSettingsApi>
+                    </AppWindowContext>
+                  </ModeProvider>
+                </PluginRegistryContext.Provider>
+              </ActivityProvider>
+            </StorageProvider>
+          </LibraryProvider>
+        </LocaleProvider>
+      </AddonsProvider>
     </I18nProvider>,
   );
   return {
@@ -226,6 +240,7 @@ export function renderApp(path: string, options: AppOptions = {}) {
     settings,
     emulation,
     installs,
+    addons,
   };
 }
 

@@ -35,6 +35,13 @@ async function walkTo(app: App, found: (element: HTMLElement) => boolean, limit 
   return null;
 }
 
+/** The view's sections still loading their data, by what they say. */
+function loading(): string[] {
+  return Array.from(main()?.querySelectorAll('[role="status"]') ?? [], (status) =>
+    (status.textContent ?? "").trim(),
+  ).filter((text) => text.startsWith("Loading"));
+}
+
 /** Every control a user could operate in the view. */
 function interactive(within: HTMLElement): HTMLElement[] {
   return Array.from(
@@ -119,8 +126,9 @@ it.each(views)("every control in %s is reached by direction", async (path) => {
     jobs: [fixtureJob(), fixtureJob({ id: "waiting", status: "needs_user", question })],
   });
   await waitFor(() => expect(interactive(main() as HTMLElement).length).toBeGreaterThan(0));
-  // Let the view's data settle.
-  await new Promise((resolve) => setTimeout(resolve, 50));
+  // Walked once every section's data is in: none still shows its loading
+  // state (and the harness waits for React to finish rendering it).
+  await waitFor(() => expect(loading()).toEqual([]));
   const visited = await walk(app);
   const missed = interactive(main() as HTMLElement).filter((element) => !visited.has(element));
   expect(missed.map((element) => element.outerHTML.slice(0, 120))).toEqual([]);
