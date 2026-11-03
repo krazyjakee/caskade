@@ -20,7 +20,7 @@ fn updater() -> AppUpdater<&'static str> {
 }
 
 #[test]
-fn only_bundles_that_replace_themselves_update_in_place() {
+fn only_an_rpm_or_a_development_build_cant_update() {
     for bundle in [
         BundleType::AppImage,
         BundleType::Nsis,
@@ -29,8 +29,10 @@ fn only_bundles_that_replace_themselves_update_in_place() {
     ] {
         assert_eq!(unavailable_reason(Some(bundle.clone())), None, "{bundle:?}");
     }
-    let deb = unavailable_reason(Some(BundleType::Deb)).unwrap();
-    assert!(deb.contains("package manager"), "{deb}");
+    #[cfg(target_os = "linux")]
+    assert_eq!(unavailable_reason(Some(BundleType::Deb)), None);
+    let rpm = unavailable_reason(Some(BundleType::Rpm)).unwrap();
+    assert!(rpm.contains("package manager"), "{rpm}");
     assert!(unavailable_reason(Some(BundleType::Dmg)).is_some());
     let dev = unavailable_reason(None).unwrap();
     assert!(dev.contains("Development"), "{dev}");
@@ -240,4 +242,81 @@ fn the_same_version_is_up_to_date_and_a_broken_feed_fails() {
         refused.to_string().contains("Check for updates"),
         "{refused}"
     );
+}
+
+/// A `.deb` goes to the package manager through the elevation command
+/// (here a script standing in for pkexec), and pkexec's answers become
+/// reasons.
+#[cfg(target_os = "linux")]
+mod deb {
+    use std::ffi::OsString;
+    use std::path::Path;
+
+    use super::super::deb::install_with;
+
+    const PACKAGE: &[u8] =
+        b"!<arch>\ndebian-binary   0           0     0     100644  4         `\n2.0\n";
+
+    /// Runs the stand-in, which records its arguments and the package it
+    /// was given, prints `stderr` and exits with `code`.
+    fn elevate(dir: &Path, code: i32, stderr: &str) -> Vec<OsString> {
+        let script = dir.join("pkexec.sh");
+        std::fs::write(
+            &script,
+            format!(
+                "printf '%s\\n' \"$@\" > '{args}'\nfor last; do :; done\ncp \"$last\" '{copy}'\nprintf '%s\\n' '{stderr}' >&2\nexit {code}\n",
+                args = dir.join("args").display(),
+                copy = dir.join("package").display(),
+            ),
+        )
+        .unwrap();
+        vec!["sh".into(), script.into()]
+    }
+
+    #[test]
+    fn a_deb_is_installed_by_the_package_manager_as_root() {
+        let dir = tempfile::tempdir().unwrap();
+        install_with(&elevate(dir.path(), 0, ""), PACKAGE, "0.2.0").unwrap();
+        let args = std::fs::read_to_string(dir.path().join("args")).unwrap();
+        let args: Vec<&str> = args.lines().collect();
+        assert!(
+            args[0] == "/usr/bin/apt-get" || args[0] == "/usr/bin/dpkg",
+            "{args:?}"
+        );
+        assert!(
+            args.last().unwrap().ends_with("/caskade_0.2.0_amd64.deb"),
+            "{args:?}"
+        );
+        assert_eq!(std::fs::read(dir.path().join("package")).unwrap(), PACKAGE);
+        assert!(
+            !Path::new(args.last().unwrap()).exists(),
+            "the package is removed afterwards"
+        );
+    }
+
+    #[test]
+    fn pkexecs_refusals_and_the_package_managers_errors_are_reasons() {
+        let dir = tempfile::tempdir().unwrap();
+        let dismissed = install_with(&elevate(dir.path(), 126, ""), PACKAGE, "0.2.0");
+        assert!(dismissed.unwrap_err().contains("dismissed"));
+        let refused = install_with(&elevate(dir.path(), 127, ""), PACKAGE, "0.2.0");
+        assert!(refused.unwrap_err().contains("may not install packages"));
+        let failed = install_with(
+            &elevate(dir.path(), 100, "E: Could not get lock"),
+            PACKAGE,
+            "0.2.0",
+        );
+        let failed = failed.unwrap_err();
+        assert!(failed.contains("E: Could not get lock"), "{failed}");
+    }
+
+    #[test]
+    fn only_a_debian_package_reaches_the_package_manager() {
+        let dir = tempfile::tempdir().unwrap();
+        let error = install_with(&elevate(dir.path(), 0, ""), b"ELF", "0.2.0").unwrap_err();
+        assert!(error.contains("isn't a Debian package"), "{error}");
+        assert!(!dir.path().join("args").exists());
+        let missing = install_with(&[OsString::from("/nonexistent/pkexec")], PACKAGE, "0.2.0");
+        assert!(missing.unwrap_err().contains("pkexec isn't installed"));
+    }
 }

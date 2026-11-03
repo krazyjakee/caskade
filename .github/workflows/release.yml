@@ -166,7 +166,7 @@ jobs:
           - macOS: `Caskade_@VERSION@_aarch64.dmg` (Apple silicon) or `Caskade_@VERSION@_x64.dmg` (Intel)
           - Linux: `Caskade_@VERSION@_amd64.AppImage`, or `Caskade_@VERSION@_amd64.deb` for Debian and Ubuntu
 
-          The Windows install, the macOS app and the AppImage update themselves from inside Caskade. The .deb doesn't: install the next .deb over it.
+          The Windows install, the macOS app, the AppImage and the .deb update themselves from inside Caskade (the .deb asks for your password once). A .deb of 0.1.1 or earlier doesn't: install this .deb over it once.
 
           These builds aren't code-signed yet. On Windows, SmartScreen warns about an unknown publisher: choose More info, then Run anyway. On macOS, Gatekeeper blocks the first start: run `xattr -dr com.apple.quarantine /Applications/Caskade.app` in Terminal, or allow it under System Settings > Privacy & Security.
           BODY

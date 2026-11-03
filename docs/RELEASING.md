@@ -122,7 +122,8 @@ published release is never rebuilt: fix the problem, bump the version and tag
 again.
 
 `latest.json` also has a `linux-x86_64-deb` entry, because the `sign` job signs
-the deb too, as `tauri build` would. Caskade ignores it (see below). Each
+the deb too, as `tauri build` would. Copies installed from the deb update from
+it (see below). Each
 signature is bound to the version (`signer sign --app-version`), because the
 app's updater config has `requireSignedVersion` on.
 
@@ -133,7 +134,7 @@ app's updater config has `requireSignedVersion` on.
 | AppImage | Yes |
 | Windows installer (NSIS) | Yes |
 | macOS app (from the dmg) | Yes |
-| `.deb` | No: the app says to use the package manager. Install the new `.deb` over it (`sudo apt install ./Caskade_0.2.0_amd64.deb`). |
+| `.deb` | Yes, from 0.1.2: Caskade installs the new `.deb` with `pkexec apt-get install` (dpkg without apt), so the system's password prompt appears once. It never falls back to asking for the password itself or to `sudo`. 0.1.1 and earlier say to use the package manager: install the next `.deb` over them once (`sudo apt install ./Caskade_0.1.2_amd64.deb`). |
 | Development build (`just dev`, `cargo run`) | No |
 
 An update downloads only when the user asks for it, and the new version runs

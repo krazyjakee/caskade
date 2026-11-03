@@ -4525,6 +4525,26 @@ msgstr "Installerar Caskade {version}"
 msgid "Couldn't install the update: {error}"
 msgstr "Det gick inte att installera uppdateringen: {error}"
 
+#: apps/desktop/src-tauri/src/commands/app_update.rs
+msgid "the download isn't a Debian package"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/app_update.rs
+msgid "pkexec isn't installed, so Caskade can't ask for permission. Install the new .deb from the release page yourself."
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/app_update.rs
+msgid "the password prompt was dismissed"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/app_update.rs
+msgid "this account may not install packages, or no password prompt could be shown"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/app_update.rs
+msgid "the package manager failed: {detail}"
+msgstr ""
+
 #: apps/desktop/src-tauri/src/commands/backup.rs
 msgid "No restore is waiting for a restart."
 msgstr "Ingen återställning väntar på en omstart."

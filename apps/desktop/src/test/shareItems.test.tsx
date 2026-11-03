@@ -4,7 +4,7 @@
  * as that kind of share, not the folder it's in. */
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import { type ShareTarget, SharesProvider } from "../api/shares";
+import { SharesProvider, type ShareTarget } from "../api/shares";
 import { createSharesFixtureApi } from "../api/sharesFixtures";
 import type { GameDetails } from "../api/types";
 import { playedGames, renderApp } from "./harness";

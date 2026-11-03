@@ -3,9 +3,9 @@
 //! webview asks to check, install and restart, and never names a URL or a
 //! version. The plugin verifies a download's signature before installing it.
 //!
-//! Only the bundles that can replace themselves update in place (AppImage,
-//! NSIS, MSI and the macOS app); a deb, or a development build, says why it
-//! can't. While `core.appUpdates.check` is on, and once first-run setup is
+//! The AppImage, NSIS, MSI and the macOS app replace themselves; a deb is
+//! installed over this one through one polkit prompt (`deb`). An rpm, or a
+//! development build, says why it can't update. While `core.appUpdates.check` is on, and once first-run setup is
 //! done, checks run shortly after startup and then every six hours. Nothing
 //! downloads until the user asks, and the new version runs after a restart.
 
@@ -96,6 +96,7 @@ pub struct AppUpdateChanged(pub AppUpdateStatus);
 pub fn unavailable_reason(bundle: Option<BundleType>) -> Option<String> {
     match bundle {
         Some(BundleType::AppImage | BundleType::Nsis | BundleType::Msi | BundleType::App) => None,
+        Some(BundleType::Deb) if cfg!(target_os = "linux") => None,
         Some(BundleType::Deb | BundleType::Rpm) => Some(caskade_core::tr!(
             "Caskade was installed as a system package: update it with your package manager."
         )),
@@ -376,7 +377,7 @@ pub fn install<R: Runtime>(app: AppHandle<R>) -> Result<AppUpdateStatus, String>
             emit(&app, updater.installing());
             // Installing writes the new bundle over this one.
             let installed = tauri::async_runtime::spawn_blocking(move || {
-                let installed = update.install(&bytes);
+                let installed = put_in_place(&update, &bytes);
                 (update, installed)
             })
             .await;
@@ -401,6 +402,137 @@ pub fn install<R: Runtime>(app: AppHandle<R>) -> Result<AppUpdateStatus, String>
         }
     });
     Ok(emit(&app, status))
+}
+
+/// Puts a downloaded release in place of this copy, once its signature
+/// checks out.
+fn put_in_place(update: &Update, bytes: &[u8]) -> Result<(), String> {
+    #[cfg(target_os = "linux")]
+    if matches!(tauri::utils::platform::bundle_type(), Some(BundleType::Deb)) {
+        update.verify(bytes).map_err(|error| error.to_string())?;
+        return deb::install(bytes, &update.version);
+    }
+    update.install(bytes).map_err(|error| error.to_string())
+}
+
+/// Installs a downloaded `.deb` over this copy with one polkit prompt.
+/// The updater plugin's own deb install falls back to a password box whose
+/// answer it pipes into sudo, then to sudo on a terminal nobody may see:
+/// Caskade never handles the password, so it asks pkexec alone.
+#[cfg(target_os = "linux")]
+mod deb {
+    use std::ffi::OsString;
+    use std::path::{Path, PathBuf};
+    use std::process::Command;
+    use std::sync::atomic::{AtomicU32, Ordering};
+
+    /// pkexec's exit status when the user dismissed its prompt.
+    const DISMISSED: i32 = 126;
+    /// pkexec's exit status when the account isn't allowed, or no prompt
+    /// could be shown.
+    const NOT_AUTHORIZED: i32 = 127;
+
+    pub fn install(bytes: &[u8], version: &str) -> Result<(), String> {
+        install_with(&["pkexec".into()], bytes, version)
+    }
+
+    /// `elevate` runs the package manager as root: pkexec, or a stand-in
+    /// in tests.
+    pub(super) fn install_with(
+        elevate: &[OsString],
+        bytes: &[u8],
+        version: &str,
+    ) -> Result<(), String> {
+        if !bytes.starts_with(b"!<arch>\ndebian-binary") {
+            return Err(caskade_core::tr!("the download isn't a Debian package"));
+        }
+        let scratch = Scratch::new().map_err(|error| error.to_string())?;
+        let package = scratch.0.join(format!("caskade_{version}_amd64.deb"));
+        std::fs::write(&package, bytes).map_err(|error| error.to_string())?;
+        let (program, args) = elevate.split_first().expect("an elevation command");
+        let mut command = Command::new(program);
+        command.args(args).args(package_manager()).arg(&package);
+        caskade_core::managed::outside_own_appimage(&mut command);
+        let output = command.output().map_err(|error| {
+            if error.kind() == std::io::ErrorKind::NotFound {
+                caskade_core::tr!(
+                    "pkexec isn't installed, so Caskade can't ask for permission. Install the new .deb from the release page yourself."
+                )
+            } else {
+                error.to_string()
+            }
+        })?;
+        match output.status.code() {
+            Some(0) => Ok(()),
+            Some(DISMISSED) => Err(caskade_core::tr!("the password prompt was dismissed")),
+            Some(NOT_AUTHORIZED) => Err(caskade_core::tr!(
+                "this account may not install packages, or no password prompt could be shown"
+            )),
+            _ => Err(caskade_core::tr!(
+                "the package manager failed: {detail}",
+                detail = last_lines(&output.stderr)
+                    .or_else(|| last_lines(&output.stdout))
+                    .unwrap_or_else(|| output.status.to_string())
+            )),
+        }
+    }
+
+    /// apt-get, which also fetches any package the new version came to
+    /// need, waiting up to two minutes for another package manager to
+    /// finish; dpkg where there's no apt.
+    fn package_manager() -> &'static [&'static str] {
+        if Path::new("/usr/bin/apt-get").exists() {
+            &[
+                "/usr/bin/apt-get",
+                "install",
+                "--yes",
+                "-o",
+                "DPkg::Lock::Timeout=120",
+            ]
+        } else {
+            &["/usr/bin/dpkg", "--install"]
+        }
+    }
+
+    fn last_lines(output: &[u8]) -> Option<String> {
+        let text = String::from_utf8_lossy(output);
+        let lines: Vec<&str> = text
+            .lines()
+            .map(str::trim)
+            .filter(|line| !line.is_empty())
+            .collect();
+        let tail = lines[lines.len().saturating_sub(3)..].join(" ");
+        (!tail.is_empty()).then_some(tail)
+    }
+
+    /// A folder only this user can open, removed afterwards. Root reads
+    /// the package from it.
+    struct Scratch(PathBuf);
+
+    impl Scratch {
+        fn new() -> std::io::Result<Self> {
+            use std::os::unix::fs::DirBuilderExt;
+            static NEXT: AtomicU32 = AtomicU32::new(0);
+            let path = std::env::temp_dir().join(format!(
+                "caskade-update-{}-{}",
+                std::process::id(),
+                NEXT.fetch_add(1, Ordering::Relaxed)
+            ));
+            if let Err(error) = std::fs::remove_dir_all(&path)
+                && error.kind() != std::io::ErrorKind::NotFound
+            {
+                return Err(error);
+            }
+            std::fs::DirBuilder::new().mode(0o700).create(&path)?;
+            Ok(Self(path))
+        }
+    }
+
+    impl Drop for Scratch {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
 }
 
 /// Checks shortly after startup and then every six hours, while the setting

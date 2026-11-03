@@ -1,6 +1,6 @@
 [package]
 name = "caskade-desktop"
-version = "0.1.1"
+version = "0.1.2"
 description = "Caskade desktop app: the Tauri adapter over caskade-core"
 edition.workspace = true
 rust-version.workspace = true

@@ -112,10 +112,10 @@ it("offers the release again after a failed download", async () => {
 it("says why a copy can't update itself and hides the automatic checks", async () => {
   const core = fakeCore({
     ...idle,
-    unavailable: "Caskade was installed as a system package: update it with your package manager.",
+    unavailable: "Development builds don't update themselves.",
   });
   renderSection(core.api);
-  expect(await screen.findByText(/update it with your package manager/)).toBeTruthy();
+  expect(await screen.findByText(/Development builds don't update themselves/)).toBeTruthy();
   expect(screen.getByRole("button", { name: "Check now" }).hasAttribute("disabled")).toBe(true);
   expect(screen.queryByText("Check automatically")).toBeNull();
 });
