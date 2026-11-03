@@ -28,7 +28,7 @@ class ScopeTests(unittest.TestCase):
                 ci.main()
             values = dict(line.split("=", 1) for line in output.read_text().splitlines())
             self.assertEqual(set(values), set(ci.FIELDS))
-            self.assertEqual(values["bundle"], "false")
+            self.assertEqual(values["e2e"], "true")
             self.assertTrue(all(value in ("true", "false") for value in values.values()))
 
     def test_prose_skips_heavy_jobs(self):
@@ -66,35 +66,25 @@ class ScopeTests(unittest.TestCase):
 
     def test_unknown_build_inputs_and_new_crates_select_every_suite(self):
         for path in ["Cargo.lock", "Cargo.toml", "vendor/inno-0.7.1/src/lib.rs",
-                     "scripts/ci-scope.py", ".github/workflows/app.yml",
+                     "scripts/ci-scope.py", ".github/workflows/ci.yml",
                      "crates/new-crate/src/lib.rs", "docs/plugins/plugin.schema.json"]:
             with self.subTest(path=path):
                 self.assertTrue(all(ci.scope([path]).values()))
 
-    def test_master_keeps_full_checks_without_packaging(self):
-        scope = ci.select("push", {})
-        self.assertTrue(all(value for key, value in scope.items() if key != "bundle"))
-        self.assertFalse(scope["bundle"])
+    def test_master_keeps_full_checks(self):
+        self.assertTrue(all(ci.select("push", {}).values()))
 
-    def test_nightly_and_explicit_manual_bundle(self):
-        self.assertTrue(ci.select("schedule", {})["bundle"])
-        for value in [True, "true"]:
-            self.assertTrue(ci.select("workflow_dispatch", {"inputs": {"bundle": value}})["bundle"])
-        self.assertFalse(ci.select("workflow_dispatch", {"inputs": {"bundle": "false"}})["bundle"])
-
-    def test_manual_run_of_a_workflow_without_inputs(self):
+    def test_manual_run_keeps_full_checks(self):
+        # GitHub sends `"inputs": null` for a workflow without inputs.
         for event in [{"inputs": None}, {}]:
             with self.subTest(event=event):
-                scope = ci.select("workflow_dispatch", event)
-                self.assertTrue(all(value for key, value in scope.items() if key != "bundle"))
-                self.assertFalse(scope["bundle"])
+                self.assertTrue(all(ci.select("workflow_dispatch", event).values()))
 
     def test_missing_pr_history_runs_full_checks_instead_of_skipping(self):
         for event_name in ci.PR_EVENTS:
             with self.subTest(event_name=event_name):
                 scope = ci.select(event_name, {})
-                self.assertTrue(scope["rust"] and scope["installer"] and scope["discovery"])
-                self.assertFalse(scope["bundle"])
+                self.assertTrue(all(scope.values()))
 
     def test_pull_requests_are_scoped_by_their_diff(self):
         for event_name in ci.PR_EVENTS:
@@ -102,23 +92,22 @@ class ScopeTests(unittest.TestCase):
                     patch.object(ci, "changed_paths", return_value=["crates/caskade-discovery/src/lib.rs"]):
                 scope = ci.select(event_name, {"pull_request": {"labels": []}})
                 self.assertTrue(scope["discovery"] and scope["rust"] and scope["app"])
-                self.assertFalse(scope["installer"] or scope["e2e"] or scope["bundle"])
+                self.assertFalse(scope["installer"] or scope["e2e"])
             with self.subTest(event_name=event_name, paths="prose"), \
                     patch.object(ci, "changed_paths", return_value=["docs/README.md"]):
                 self.assertFalse(any(ci.select(event_name, {"pull_request": {}}).values()))
 
     def test_workflow_changes_select_every_suite(self):
-        for path in [".github/workflows/discovery.yml", ".github/workflows/i18n.yml",
+        for path in [".github/workflows/ci.yml", ".github/workflows/release.yml",
                      ".config/nextest.toml", "scripts/discovery-ci.py"]:
             with self.subTest(path=path):
                 self.assertTrue(all(ci.scope([path]).values()))
 
-    def test_labels_allow_e2e_or_bundle_for_an_otherwise_unaffected_pr(self):
-        for label in ["run-e2e", "run-bundle"]:
-            with self.subTest(label=label), patch.object(ci, "changed_paths", return_value=["docs/README.md"]):
-                scope = ci.select("pull_request", {"pull_request": {"labels": [{"name": label}]}})
-                self.assertTrue(scope["app"] and scope["rust"] and scope["e2e"])
-                self.assertEqual(scope["bundle"], label == "run-bundle")
+    def test_label_allows_e2e_for_an_otherwise_unaffected_pr(self):
+        with patch.object(ci, "changed_paths", return_value=["docs/README.md"]):
+            scope = ci.select("pull_request", {"pull_request": {"labels": [{"name": "run-e2e"}]}})
+            self.assertTrue(scope["app"] and scope["rust"] and scope["e2e"])
+            self.assertFalse(scope["installer"] or scope["discovery"])
 
     def test_dependency_graph_includes_target_build_dev_and_workspace_dependencies(self):
         with tempfile.TemporaryDirectory() as temporary:

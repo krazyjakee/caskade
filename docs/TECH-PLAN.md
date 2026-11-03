@@ -55,7 +55,7 @@ Tauri plugins: `single-instance`, `window-state`, `deep-link` (`caskade://instal
 
 ### Tooling & delivery
 
-- **GitHub Actions** (`.github/workflows/`) on GitHub-hosted runners. The app workflow (`app.yml`) lints and tests on Linux, with Windows GNU cross-Clippy, and bundles (deb, AppImage) nightly; the installer and discovery crates also test on Windows and macOS; `release.yml` builds every platform from a tag. Pull requests run only what their changes reach (`docs/build-performance.md`).
+- **GitHub Actions** (`.github/workflows/`) on GitHub-hosted runners. Two workflows: `ci.yml` (master pushes and pull requests) lints and tests the app on Linux, with Windows GNU cross-Clippy, and the installer and discovery crates on Linux, Windows and macOS; `release.yml` builds every platform's bundles from a tag. Pull requests run only what their changes reach (`docs/build-performance.md`).
 - `just` as the task runner (`just dev`, `just test-app`, `just bindings`, `just plugin-new`).
 - Code signing, auto-update, Flatpak, and the plugin registry are **post-prototype**.
 

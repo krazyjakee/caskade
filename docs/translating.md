@@ -64,7 +64,7 @@ The interface picks up changes to `ui.po` and `app.po` when the page reloads; th
 just i18n-check
 ```
 
-It runs what CI runs (the `app` and `i18n` workflows on GitHub) and fails, naming the file, the line and the entry, on:
+It runs what CI runs (the `frontend` and `rust` jobs of `.github/workflows/ci.yml`) and fails, naming the file, the line and the entry, on:
 
 - a template that doesn't match the code (run `just i18n`);
 - a PO file `msgfmt --check` rejects (a broken header, a missing plural form, a line ending that differs from the English);

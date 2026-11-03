@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Select PR checks without running Cargo; master/manual/scheduled runs stay full.
+"""Select ci.yml's PR checks without running Cargo; master and manual runs stay full.
 
 Run in a full-history checkout of the pull request. Unknown paths, events or
 unavailable history select the full suite rather than skipping checks.
@@ -15,11 +15,7 @@ import tomllib
 ROOT = Path(__file__).resolve().parents[1]
 # GitHub cancels superseded PR runs itself (`concurrency` in each workflow).
 PR_EVENTS = ("pull_request", "pull_request_target")
-FIELDS = ("app", "frontend", "rust", "catalogs", "e2e", "cross", "bundle", "installer", "discovery")
-
-
-def enabled(value):
-    return value is True or value == "true"
+FIELDS = ("app", "frontend", "rust", "catalogs", "e2e", "cross", "installer", "discovery")
 
 
 def package_graph(root):
@@ -119,10 +115,6 @@ def scope(paths, root=ROOT):
 
 
 def select(event_name, event, root=ROOT):
-    bundle = event_name == "schedule" or (
-        # GitHub sends `"inputs": null` for a workflow without inputs.
-        event_name == "workflow_dispatch" and enabled((event.get("inputs") or {}).get("bundle", False))
-    )
     if event_name not in PR_EVENTS:
         result = dict.fromkeys(FIELDS, True)
     else:
@@ -132,13 +124,9 @@ def select(event_name, event, root=ROOT):
         except (KeyError, ValueError, OSError, subprocess.SubprocessError) as error:
             print(f"Cannot determine PR scope ({type(error).__name__}); running all checks.")
             result = dict.fromkeys(FIELDS, True)
-        labels = {label.get("name") for label in pr.get("labels", [])}
-        bundle = "run-bundle" in labels
-        if labels & {"run-e2e", "run-bundle"}:
+        labels = {label.get("name") for label in pr.get("labels") or []}
+        if "run-e2e" in labels:
             result["app"] = result["frontend"] = result["rust"] = result["catalogs"] = result["e2e"] = True
-    # A master push runs all checks, but packaging is nightly or explicitly
-    # requested. A broad/unknown PR change alone never requests a bundle.
-    result["bundle"] = bundle
     return result
 
 
