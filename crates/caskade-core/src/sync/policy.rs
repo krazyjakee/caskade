@@ -105,6 +105,10 @@ pub struct SyncSettings {
     /// Settings sections that stay on this device while their category syncs.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub sections: BTreeMap<String, CategoryState>,
+    #[schemars(title = "Accept copies from my devices")]
+    /// A game another of your devices sends here is copied into the default storage without asking.
+    #[serde(default)]
+    pub accept_copies: bool,
 }
 
 /// Settings sections that can be This device only on their own (#244),
@@ -125,6 +129,7 @@ impl Default for SyncSettings {
             never_relay: false,
             port: None,
             sections: BTreeMap::new(),
+            accept_copies: false,
         }
     }
 }

@@ -3308,6 +3308,16 @@ msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
+msgid "Accept copies from my devices"
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "A game another of your devices sends here is copied into the default storage without asking."
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
 msgid "Settings kept on this device"
 msgstr ""
 
@@ -4096,6 +4106,14 @@ msgid "that game isn't installed on this device"
 msgstr ""
 
 #: crates/caskade-core/src/transfer/mod.rs
+msgid "the other device didn't take the copy"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "this device doesn't take copies"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/mod.rs
 msgid "the game isn't fully installed on this device"
 msgstr ""
 
@@ -4311,6 +4329,10 @@ msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/copies.rs
 msgid "that device isn't paired"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/copies.rs
+msgid "the game isn't installed on this computer in a folder that can be copied"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/emulation.rs

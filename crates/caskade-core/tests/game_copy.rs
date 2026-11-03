@@ -3,7 +3,8 @@
 //! Caskade-managed install of the same game, with a `caskade-install` id of
 //! its own, its program relative to its folder and a Windows runtime (Proton
 //! on Linux); a launcher's install is refused; the sender can't move or
-//! uninstall it while sending.
+//! uninstall it while sending. Sent from the Desk (#235), it waits on the TV
+//! until confirmed there.
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -272,5 +273,73 @@ async fn a_launcher_s_install_is_refused_and_says_why() {
     assert!(
         done.error.unwrap_or_default().contains("launcher"),
         "the reason names the launcher"
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn a_game_sent_from_the_desk_waits_on_the_tv_until_confirmed() {
+    let desk = core("Desk").await;
+    let tv = core("TV").await;
+    pair(&desk, &tv).await;
+    let (_, desk_entry, folder) = add_celeste(&desk).await;
+    let (sent, mut requests) = tokio::sync::mpsc::unbounded_channel();
+    tv.transfers.on_send(move |request| {
+        let _ = sent.send(request);
+    });
+
+    desk.transfers
+        .send_to(&id(&tv).await, &desk_entry)
+        .await
+        .unwrap();
+    let request = tokio::time::timeout(Duration::from_secs(10), requests.recv())
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(request.device_id, id(&desk).await);
+    assert_eq!(request.entry_id, desk_entry);
+    assert_eq!(request.title, "Celeste");
+    // Nothing is written on the TV until it's confirmed there.
+    tokio::time::sleep(Duration::from_secs(1)).await;
+    assert!(tv.install.jobs().is_empty());
+    let incoming = tv.dir.path().join("cache/copies/receive/incoming");
+    assert!(!incoming.exists() || std::fs::read_dir(&incoming).unwrap().next().is_none());
+    assert_eq!(
+        std::fs::read_dir(&tv.games)
+            .unwrap()
+            .filter(|entry| !entry
+                .as_ref()
+                .unwrap()
+                .file_name()
+                .to_string_lossy()
+                .starts_with('.'))
+            .count(),
+        0
+    );
+
+    // Confirmed: copied from the Desk.
+    let job = tv
+        .install
+        .copy_from_device(
+            PeerCopyTarget {
+                device_id: request.device_id,
+                device_name: "Desk".into(),
+                entry_id: request.entry_id,
+                game_id: request.game_id.unwrap_or_default(),
+                title: request.title,
+            },
+            None,
+        )
+        .await
+        .unwrap();
+    let done = finished(&tv.install, &job.id).await;
+    assert_eq!(done.status, JobStatus::Completed, "{done:?}");
+    let game = done.game_id.unwrap();
+    let entries = tv.store.entries_for_game(&game).await.unwrap();
+    let Some(InstallLocation::Managed { rel_dir, .. }) = &entries[0].location else {
+        panic!("not managed")
+    };
+    assert_eq!(
+        std::fs::read(tv.games.join(rel_dir).join("Celeste.exe")).unwrap(),
+        std::fs::read(folder.join("Celeste.exe")).unwrap()
     );
 }

@@ -704,6 +704,9 @@ pub fn run() {
                     if let Some(install) = app.try_state::<caskade_core::install::InstallService>() {
                         install.set_peer_fetcher(std::sync::Arc::new(transfers.clone()));
                     }
+                    // A game another device sends here (#235): confirmed
+                    // here first, unless copies are accepted without asking.
+                    commands::copies::take_sends(app.handle(), &transfers, devices.clone());
                     app.manage(transfers);
                 }
                 Err(error) => tracing::warn!(%error, "copies between devices unavailable"),

@@ -31,6 +31,8 @@ export interface SyncSettingsValue {
   categories: Partial<Record<SyncCategory, CategoryState>>;
   neverRelay: boolean;
   port: number | null;
+  /** Copies other devices send here start without asking (#235). */
+  acceptCopies?: boolean;
 }
 
 /** Synced by default, in the order Settings lists them. */

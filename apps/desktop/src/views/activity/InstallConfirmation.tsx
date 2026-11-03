@@ -4,7 +4,8 @@ import { msg } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useMutation } from "@tanstack/react-query";
 import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
-import type { DropPlan, InstallRequest } from "../../api/installRequests";
+import type { DropPlan, InstallRequest, PeerSend } from "../../api/installRequests";
+import { formatSize } from "../../api/presentation";
 
 export type { InstallRequest } from "../../api/installRequests";
 
@@ -40,10 +41,14 @@ export function InstallConfirmation({
           data-focus-scope="install-confirmation"
           className="outline-none"
         >
-          <Heading slot="title" className="font-display text-xl font-semibold">
-            {title ? t`Install ${title}?` : t`Install this game?`}
-          </Heading>
-          {request.plan ? (
+          {request.peer ? (
+            <PeerDetails peer={request.peer} />
+          ) : (
+            <Heading slot="title" className="font-display text-xl font-semibold">
+              {title ? t`Install ${title}?` : t`Install this game?`}
+            </Heading>
+          )}
+          {request.peer ? null : request.plan ? (
             <PlanDetails plan={request.plan} />
           ) : (
             <>
@@ -89,14 +94,46 @@ export function InstallConfirmation({
               isDisabled={action.isPending}
               onPress={() => action.mutate(true)}
             >
-              {request.plan
-                ? t({ message: "Install", context: "button", comment: "Starts an install" })
-                : t`Confirm installation`}
+              {request.peer
+                ? t`Copy here`
+                : request.plan
+                  ? t({ message: "Install", context: "button", comment: "Starts an install" })
+                  : t`Confirm installation`}
             </Button>
           </div>
         </Dialog>
       </Modal>
     </ModalOverlay>
+  );
+}
+
+/** A game another of the user's devices sends here (#235): nothing is
+ * written until it's confirmed. */
+function PeerDetails({ peer }: { peer: PeerSend }) {
+  const device = peer.deviceName;
+  const title = peer.title;
+  const size = peer.sizeBytes === null ? null : formatSize(peer.sizeBytes);
+  return (
+    <div data-part="peer">
+      <Heading slot="title" className="font-display text-xl font-semibold">
+        <Trans>
+          Copy {title} from {device}?
+        </Trans>
+      </Heading>
+      <p className="mt-3 text-sm text-fg-muted">
+        {size ? (
+          <Trans>
+            {device} sends {title} ({size}) to this computer. It's copied straight from {device} and
+            installed like any other game; nothing is written until you say so.
+          </Trans>
+        ) : (
+          <Trans>
+            {device} sends {title} to this computer. It's copied straight from {device} and{" "}
+            installed like any other game; nothing is written until you say so.
+          </Trans>
+        )}
+      </p>
+    </div>
   );
 }
 

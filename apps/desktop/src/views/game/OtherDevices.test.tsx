@@ -124,3 +124,25 @@ it("lists the devices in the game's menu, each opening its page", async () => {
   await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
   expect(screen.getByRole("heading", { name: "On your other devices" })).toBeTruthy();
 });
+
+it("offers Copy to only for devices reached directly that don't have the game", async () => {
+  const sync = app("/games/fixture-1");
+  const hero = (
+    await screen.findByRole("heading", { level: 1, name: "Fixture Game 0002" })
+  ).closest('[data-cs="hero"]') as HTMLElement;
+  await screen.findByRole("heading", { name: "On your other devices" });
+  fireEvent.contextMenu(hero);
+  const menu = await screen.findByRole("menu");
+  // The Deck has it, the laptop is behind a relay, the TV is out of reach:
+  // only the Work PC (direct) can take it.
+  await waitFor(() =>
+    expect(
+      within(menu)
+        .getAllByRole("menuitem")
+        .map((item) => item.textContent ?? "")
+        .filter((text) => text.startsWith("Copy to")),
+    ).toEqual([expect.stringMatching(/^Copy to Work PC/)]),
+  );
+  fireEvent.click(within(menu).getByRole("menuitem", { name: /Copy to Work PC/ }));
+  await waitFor(() => expect(sync.sent()).toEqual([["fixture-1", "8".repeat(64)]]));
+});

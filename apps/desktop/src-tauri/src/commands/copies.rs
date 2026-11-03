@@ -7,7 +7,7 @@ use caskade_core::install::{InstallService, JobSnapshot, PeerCopyTarget};
 use caskade_core::transfer::Transfers;
 use serde::Serialize;
 use specta::Type;
-use tauri::State;
+use tauri::{AppHandle, Manager, Runtime, State};
 
 use crate::error::{CommandError, report};
 
@@ -100,6 +100,99 @@ pub async fn game_copy_here(
         )
         .await
         .map_err(report)
+}
+
+/// Asks `device_id` to copy `game_id` from this computer (#235): the
+/// device confirms it there, unless it accepts copies without asking.
+#[tauri::command]
+#[specta::specta]
+pub async fn game_send_to(
+    transfers: State<'_, Transfers>,
+    store: State<'_, LibraryStore>,
+    game_id: String,
+    device_id: String,
+) -> Result<(), CommandError> {
+    let entries = store.entries_for_game(&game_id).await.map_err(report)?;
+    // A release installed here in a folder that can be copied: a managed
+    // one first.
+    let mut candidates: Vec<_> = entries
+        .iter()
+        .filter(|entry| {
+            let source = entry.source_id.as_str();
+            !(source.starts_with("peer:")
+                || source.starts_with("store:")
+                || source.starts_with("stream:"))
+                && entry.state == caskade_core::model::InstallState::Installed
+                && entry.location.is_some()
+        })
+        .collect();
+    candidates.sort_by_key(|entry| {
+        !matches!(
+            entry.location,
+            Some(caskade_core::model::InstallLocation::Managed { .. })
+        )
+    });
+    let mut last = None;
+    for entry in candidates {
+        match transfers.send_to(&device_id, &entry.id).await {
+            Ok(()) => return Ok(()),
+            Err(error) => last = Some(error),
+        }
+    }
+    Err(report(last.unwrap_or_else(|| {
+        caskade_core::Error::Invalid(caskade_core::tr!(
+            "the game isn't installed on this computer in a folder that can be copied"
+        ))
+    })))
+}
+
+/// Takes other devices' requests to copy a game here (#235): queued in the
+/// install confirmations, or started at once into the default storage when
+/// `core.sync.acceptCopies` is on.
+pub fn take_sends<R: Runtime>(app: &AppHandle<R>, transfers: &Transfers, devices: Devices) {
+    let handle = app.clone();
+    transfers.on_send(move |request| {
+        let handle = handle.clone();
+        let devices = devices.clone();
+        tauri::async_runtime::spawn(async move {
+            let device_name = devices
+                .status()
+                .await
+                .devices
+                .into_iter()
+                .find(|device| device.id == request.device_id)
+                .map(|device| device.name)
+                .unwrap_or_default();
+            let send = super::install_requests::PeerSend {
+                device_id: request.device_id,
+                device_name,
+                entry_id: request.entry_id,
+                game_id: request.game_id,
+                title: request.title,
+                size_bytes: request.size,
+            };
+            let accept = match handle.try_state::<caskade_core::settings::SettingsService>() {
+                Some(settings) => {
+                    settings
+                        .read_or_default::<caskade_core::sync::policy::SyncSettings>("core.sync")
+                        .await
+                        .accept_copies
+                }
+                None => false,
+            };
+            if accept
+                && let Some(install) = handle.try_state::<InstallService>()
+                && install.copy_from_device(send.target(), None).await.is_ok()
+            {
+                return;
+            }
+            if let Some(requests) = handle.try_state::<super::install_requests::InstallRequests>()
+                && let Err(error) = requests.queue_peer(&handle, send)
+            {
+                tracing::warn!(%error, "a copy from another device wasn't queued");
+            }
+        });
+    });
 }
 
 /// Copies going on to and from this device.

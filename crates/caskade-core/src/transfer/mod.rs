@@ -72,6 +72,29 @@ enum Message {
     Refused { reason: String },
     /// Receiver: everything arrived.
     Done,
+    /// A device that has the game: copy it from me (#235). `game` is its id
+    /// there.
+    Send {
+        entry: String,
+        game: String,
+        title: String,
+        size: Option<u64>,
+    },
+    /// The device took the request: it's waiting to be confirmed there, or
+    /// the copy started.
+    Queued,
+}
+
+/// Another device asks this one to copy a game from it (#235).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SendRequest {
+    pub device_id: String,
+    /// The release on that device.
+    pub entry_id: String,
+    /// The game here it is, when the two devices have matched it.
+    pub game_id: Option<String>,
+    pub title: String,
+    pub size: Option<u64>,
 }
 
 /// A transfer as the app shows it.
@@ -129,6 +152,8 @@ struct Inner {
     receiving: CopyStore,
     incoming_dir: PathBuf,
     changed: broadcast::Sender<()>,
+    /// Where requests to copy a game here go (#235).
+    on_send: std::sync::OnceLock<Arc<dyn Fn(SendRequest) + Send + Sync>>,
 }
 
 fn sync_error(error: caskade_sync::Error) -> Error {
@@ -170,10 +195,51 @@ impl Transfers {
                 receiving,
                 incoming_dir,
                 changed: broadcast::channel(16).0,
+                on_send: std::sync::OnceLock::new(),
             }),
         };
         devices.set_copy_handler(Arc::new(Serve(Arc::downgrade(&transfers.inner))));
         Ok(transfers)
+    }
+
+    /// Where another device's request to copy a game here goes: the app
+    /// queues it for confirmation, or starts it when copies are accepted
+    /// without asking (#235).
+    pub fn on_send(&self, handler: impl Fn(SendRequest) + Send + Sync + 'static) {
+        let _ = self.inner.on_send.set(Arc::new(handler));
+    }
+
+    /// Asks `device_id` to copy release `entry_id` (installed here) from
+    /// this device (#235). Answers once the device took the request.
+    pub async fn send_to(&self, device_id: &str, entry_id: &str) -> Result<()> {
+        let entry = self.inner.store.get_entry(entry_id).await?.ok_or_else(|| {
+            Error::Invalid(crate::tr!("that game isn't installed on this device"))
+        })?;
+        let (_, title, _, _) = self.source(entry_id).await?;
+        let mut session = self
+            .inner
+            .devices
+            .connect(device_id, ConnectionPurpose::Copy)
+            .await?;
+        session
+            .writer()
+            .write(&Message::Send {
+                entry: entry_id.to_owned(),
+                game: entry.game_id.clone(),
+                title,
+                size: entry.size,
+            })
+            .await
+            .map_err(sync_error)?;
+        let answer = tokio::time::timeout(FRAME_WAIT, session.reader().read(MAX_LINE)).await;
+        session.end().await;
+        match answer {
+            Ok(Ok(Message::Queued)) => Ok(()),
+            Ok(Ok(Message::Refused { reason })) => Err(Error::Invalid(reason)),
+            _ => Err(Error::Invalid(crate::tr!(
+                "the other device didn't take the copy"
+            ))),
+        }
     }
 
     /// A signal on every change to [`Transfers::transfers`].
@@ -244,8 +310,15 @@ impl Sessions for Serve {
 impl Transfers {
     async fn serve(&self, mut session: Session) {
         let peer = session.peer();
-        let Ok(Message::Request { entry }) = session.reader().read(MAX_LINE).await else {
-            return session.end().await;
+        let entry = match session.reader().read(MAX_LINE).await {
+            Ok(Message::Request { entry }) => entry,
+            Ok(Message::Send {
+                entry,
+                game,
+                title,
+                size,
+            }) => return self.requested(session, entry, game, title, size).await,
+            _ => return session.end().await,
         };
         match self.offer(&entry, peer, &mut session).await {
             Ok(()) => {
@@ -275,6 +348,43 @@ impl Transfers {
                 session.end().await;
             }
         }
+    }
+
+    /// Another device asks this one to copy a game from it: queued for
+    /// confirmation here, or started (the app decides, `on_send`).
+    async fn requested(
+        &self,
+        mut session: Session,
+        entry: String,
+        game: String,
+        title: String,
+        size: Option<u64>,
+    ) {
+        let peer = session.peer().to_string();
+        let answer = match self.inner.on_send.get() {
+            Some(handler) => {
+                let game_id = self
+                    .inner
+                    .store
+                    .sync_mapped_game(&peer, &game)
+                    .await
+                    .ok()
+                    .flatten();
+                handler(SendRequest {
+                    device_id: peer,
+                    entry_id: entry,
+                    game_id,
+                    title,
+                    size,
+                });
+                Message::Queued
+            }
+            None => Message::Refused {
+                reason: crate::tr!("this device doesn't take copies"),
+            },
+        };
+        let _ = session.writer().write(&answer).await;
+        session.end().await;
     }
 
     /// The folder release `entry` is in, its program relative to it, and

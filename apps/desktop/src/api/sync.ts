@@ -97,6 +97,9 @@ export interface SyncApi {
   /** Copies a game from another device to this computer: an install job
    * in Activity (#233). */
   copyHere(gameId: string, deviceId: string): Promise<void>;
+  /** Asks a device to copy a game from this computer; it confirms there
+   * unless it accepts copies without asking (#235). */
+  sendTo(gameId: string, deviceId: string): Promise<void>;
   /** After the keychain lost this device's key: a new identity. */
   createIdentity(): Promise<void>;
   retryIdentity(): Promise<void>;
@@ -127,6 +130,7 @@ export const nativeSyncApi: SyncApi = {
   copies: (gameId) => unwrap(commands.gameOtherDevices(gameId)),
   copyHere: (gameId, deviceId) =>
     unwrap(commands.gameCopyHere(gameId, deviceId, null)).then(nothing),
+  sendTo: (gameId, deviceId) => unwrap(commands.gameSendTo(gameId, deviceId)).then(nothing),
   createIdentity: () => unwrap(commands.devicesCreateIdentity()).then(nothing),
   retryIdentity: () => unwrap(commands.devicesRetryIdentity()).then(nothing),
   transfers: () => unwrap(commands.devicesTransfers()),

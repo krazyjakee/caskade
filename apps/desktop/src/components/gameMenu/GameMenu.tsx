@@ -13,6 +13,7 @@ import {
   MonitorSmartphone,
   Pencil,
   Play,
+  Send,
   Square,
   Trash2,
   Wrench,
@@ -31,7 +32,7 @@ import { formatSize } from "../../api/presentation";
 import { useLibraryApi } from "../../api/provider";
 import { useStorageApi, useUnavailableStorageEntries } from "../../api/StorageProvider";
 import { streamReleaseName, streamReleaseState, useStreamHosts } from "../../api/streaming";
-import { usePeerCopies } from "../../api/sync";
+import { usePeerCopies, useSyncAction, useSyncStatus } from "../../api/sync";
 import type { GameEntry } from "../../api/types";
 import { useGameActionContributions } from "../../plugins/GameSlots";
 import { useMode } from "../../shell/console/mode";
@@ -97,6 +98,23 @@ export function GameMenu({
   // The game's copies on the other devices (#232): each opens its page.
   const peers = usePeerCopies(target.gameId).data ?? [];
   const peerNote = usePeerNote();
+  // Devices it can be sent to (#235): reached directly, without a copy,
+  // when this computer has one in a folder that can be copied.
+  const sendable = (game?.entries ?? []).some(
+    (entry) =>
+      !/^(peer|store|stream):/.test(entry.source) &&
+      entry.state === "installed" &&
+      entry.location !== null,
+  );
+  const paired = useSyncStatus().data?.devices ?? [];
+  const targets = sendable
+    ? paired.filter(
+        (device) =>
+          (device.link === "lan" || device.link === "direct") &&
+          !peers.some((peer) => peer.deviceId === device.id),
+      )
+    : [];
+  const send = useSyncAction((api, deviceId: string) => api.sendTo(target.gameId, deviceId));
   // Releases' play actions and tools (#178).
   const releases = useGameActions(target.gameId).data ?? [];
   // Releases streamed from other devices (#264), by the device's name.
@@ -142,6 +160,7 @@ export function GameMenu({
     reveal?.error?.message ??
     setFavorite?.error?.message ??
     removeOffline?.error?.message ??
+    send.error?.message ??
     stop.error?.message;
   return (
     <ContextMenu aria-label={target.title} anchor={anchor} onClose={onClose}>
@@ -371,10 +390,27 @@ export function GameMenu({
           </MenuItem>
         )}
       </MenuSection>
-      {!scoped && peers.length > 0 && (
+      {!scoped && (peers.length > 0 || targets.length > 0) && (
         <>
           <MenuSeparator />
           <MenuSection title={t({ message: "Your devices", context: "game menu section" })}>
+            {targets.map((device) => {
+              const name = device.name;
+              return (
+                <MenuItem
+                  key={`send:${device.id}`}
+                  id={`send:${device.id}`}
+                  icon={Send}
+                  description={t`It asks there before copying`}
+                  onAction={() => send.mutate(device.id)}
+                >
+                  {t({
+                    message: `Copy to ${name}`,
+                    comment: "Sends the game to another of the user's devices",
+                  })}
+                </MenuItem>
+              );
+            })}
             {peers.map((peer) => {
               const device = peer.deviceName;
               return (

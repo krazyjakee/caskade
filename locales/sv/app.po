@@ -473,6 +473,14 @@ msgstr ""
 msgid "{device} is playing another game. Stop it and stream this game?"
 msgstr ""
 
+#: apps/desktop/src/views/activity/InstallConfirmation.tsx
+msgid "{device} sends {title} ({size}) to this computer. It's copied straight from {device} and installed like any other game; nothing is written until you say so."
+msgstr "{device} skickar {title} ({size}) till den här datorn. Det kopieras direkt från {device} och installeras som alla andra spel; inget skrivs förrän du säger till."
+
+#: apps/desktop/src/views/activity/InstallConfirmation.tsx
+msgid "{device} sends {title} to this computer. It's copied straight from {device} and installed like any other game; nothing is written until you say so."
+msgstr "{device} skickar {title} till den här datorn. Det kopieras direkt från {device} och installeras som alla andra spel; inget skrivs förrän du säger till."
+
 #: apps/desktop/src/components/streaming/StreamPairingHost.tsx
 msgid "{device} wants to play from this device"
 msgstr ""
@@ -1209,6 +1217,10 @@ msgstr "En Flatpak-app"
 msgid "A full scan reconciles missing records; incremental watching picks up local changes."
 msgstr "En fullständig skanning stämmer av saknade poster; inkrementell bevakning fångar upp lokala ändringar."
 
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "A game another of your devices sends here is copied into the default storage without asking."
+msgstr "Ett spel som en annan av dina enheter skickar hit kopieras till standardlagringen utan att fråga."
+
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 msgid "A game launcher's link, like steam://rungameid/620."
 msgstr "En spelstartares länk, som steam://rungameid/620."
@@ -1346,6 +1358,10 @@ msgstr "Accentfärg"
 msgctxt "discovery review"
 msgid "Accept"
 msgstr "Godkänn"
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Accept copies from my devices"
+msgstr "Ta emot kopior från mina enheter"
 
 #. Accepts the checked discovery results; {count} is how many are checked
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
@@ -3071,9 +3087,22 @@ msgstr "Styr manuella skanningar, schemalagd uppdatering och mappbevakning."
 msgid "Copies and shares"
 msgstr ""
 
+#: apps/desktop/src/views/activity/InstallConfirmation.tsx
+msgid "Copy {title} from {device}?"
+msgstr "Kopiera {title} från {device}?"
+
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Copy a pairing link"
 msgstr ""
+
+#: apps/desktop/src/views/activity/InstallConfirmation.tsx
+msgid "Copy here"
+msgstr "Kopiera hit"
+
+#. Sends the game to another of the user's devices
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+msgid "Copy to {name}"
+msgstr "Kopiera till {name}"
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
 msgid "Copy to this computer"
@@ -5161,6 +5190,10 @@ msgstr ""
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "It adds"
 msgstr "Det lägger till"
+
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+msgid "It asks there before copying"
+msgstr "Där frågar den innan kopieringen"
 
 #. Heading over a plugin's permissions
 #: apps/desktop/src/views/settings/PluginsSettings.tsx

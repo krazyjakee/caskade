@@ -305,6 +305,8 @@ pub fn access(command: &str) -> Option<Access> {
         | "owned_install"
         // Copying a game from another of the user's devices (#233).
         | "game_copy_here"
+        // Sending one there: it's confirmed on that device (#235).
+        | "game_send_to"
         | "game_action_settings_save"
         // Adding a game by hand: in effect what an install adds (#174).
         | "manual_game_add" => Install,

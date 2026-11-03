@@ -467,6 +467,14 @@ msgstr ""
 msgid "{device} is playing another game. Stop it and stream this game?"
 msgstr ""
 
+#: apps/desktop/src/views/activity/InstallConfirmation.tsx
+msgid "{device} sends {title} ({size}) to this computer. It's copied straight from {device} and installed like any other game; nothing is written until you say so."
+msgstr ""
+
+#: apps/desktop/src/views/activity/InstallConfirmation.tsx
+msgid "{device} sends {title} to this computer. It's copied straight from {device} and installed like any other game; nothing is written until you say so."
+msgstr ""
+
 #: apps/desktop/src/components/streaming/StreamPairingHost.tsx
 msgid "{device} wants to play from this device"
 msgstr ""
@@ -1196,6 +1204,10 @@ msgstr ""
 msgid "A full scan reconciles missing records; incremental watching picks up local changes."
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "A game another of your devices sends here is copied into the default storage without asking."
+msgstr ""
+
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 msgid "A game launcher's link, like steam://rungameid/620."
 msgstr ""
@@ -1332,6 +1344,10 @@ msgstr ""
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
 msgctxt "discovery review"
 msgid "Accept"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Accept copies from my devices"
 msgstr ""
 
 #. Accepts the checked discovery results; {count} is how many are checked
@@ -3033,8 +3049,21 @@ msgstr ""
 msgid "Copies and shares"
 msgstr ""
 
+#: apps/desktop/src/views/activity/InstallConfirmation.tsx
+msgid "Copy {title} from {device}?"
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Copy a pairing link"
+msgstr ""
+
+#: apps/desktop/src/views/activity/InstallConfirmation.tsx
+msgid "Copy here"
+msgstr ""
+
+#. Sends the game to another of the user's devices
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+msgid "Copy to {name}"
 msgstr ""
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
@@ -5090,6 +5119,10 @@ msgstr ""
 #. Heading over what a plugin contributes
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "It adds"
+msgstr ""
+
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+msgid "It asks there before copying"
 msgstr ""
 
 #. Heading over a plugin's permissions

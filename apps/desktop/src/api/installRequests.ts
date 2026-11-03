@@ -1,13 +1,17 @@
 import { createContext, useContext } from "react";
-import type { DropPlan_Serialize } from "./bindings";
+import type { DropPlan_Serialize, PeerSend_Serialize } from "./bindings";
 
 export type DropPlan = DropPlan_Serialize;
+/** A game another of the user's devices sends here (#235). */
+export type PeerSend = PeerSend_Serialize;
 export interface InstallRequest {
   requestId: string;
-  kind: "url" | "path";
+  kind: "url" | "path" | "peer";
   value: string;
   /** How a dropped file or folder installs. */
   plan?: DropPlan | null;
+  /** The device and game, for a copy another device sends. */
+  peer?: PeerSend | null;
 }
 export interface InstallRequestApi {
   pending(): Promise<InstallRequest[]>;

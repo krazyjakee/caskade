@@ -11,6 +11,7 @@ import { Button, Select, SettingRow, SettingsSection, Switch, TextField } from "
 import { msg } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import {
+  Download,
   KeyRound,
   Link2,
   Monitor,
@@ -31,10 +32,10 @@ import {
 } from "../../../api/sync";
 import { FailureNotice } from "../../../components/FailureNotice";
 import { DeviceIcon, LinkBadge, osNames } from "../../../components/sync/common";
+import { DevicePlaying } from "../../game/PlayingElsewhere";
 import { useSettingsSection } from "../useSettings";
 import { useDeviceAdmin } from "./admin";
 import { CopiesAndShares } from "./CopiesAndShares";
-import { DevicePlaying } from "../../game/PlayingElsewhere";
 import { SavesSection } from "./SavesSection";
 import { SyncChoices, type SyncSettingsValue } from "./SyncChoices";
 
@@ -192,6 +193,17 @@ function ThisDeviceSection() {
             isSelected={neverRelay}
             isDisabled={!admin || !sync.settings || sync.saving}
             onChange={(on) => sync.setSettings((current) => ({ ...current, neverRelay: on }))}
+          />
+        </SettingRow>
+        <SettingRow
+          icon={Download}
+          label={t`Accept copies from my devices`}
+          description={t`A game another of your devices sends here is copied into the default storage without asking.`}
+        >
+          <Switch
+            isSelected={sync.settings?.acceptCopies ?? false}
+            isDisabled={!admin || !sync.settings || sync.saving}
+            onChange={(on) => sync.setSettings((current) => ({ ...current, acceptCopies: on }))}
           />
         </SettingRow>
       </div>

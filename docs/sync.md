@@ -622,6 +622,19 @@ Activity, cancellable, retried from where it stopped (`install::peer`).
    staging folder goes afterwards, whatever the Installer's source setting
    says.
 
+From the device that has it, a game's menu offers **Copy to …** (#235,
+`game_send_to`) for each paired device reached directly (`lan` or `direct`)
+that has no copy of it, when this device has it installed in a folder that
+can be copied. The device asks the other on a `copy` session (`Send`: the
+release, the game's id there, title and size); the other answers once it
+took the request (`Queued`). There it's an install request of kind `peer` in
+the confirmation queue (`InstallRequests::queue_peer`), naming the sending
+device, and nothing is written until it's confirmed there, in the storage
+root picked there: confirming starts the copy above from that end. With
+`core.sync.acceptCopies` on (Settings → Devices → Accept copies from my
+devices; off by default, kept on each device), it starts at once into the
+default storage.
+
 Settings → Devices lists copies going on both ways (`devices_transfers`,
 refreshed every two seconds while there are any). On loopback, a release build
 moves 256 MiB in 0.62 s (432 MB/s; the offer took 0.19 s):

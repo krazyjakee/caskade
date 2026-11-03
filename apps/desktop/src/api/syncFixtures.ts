@@ -23,6 +23,8 @@ export interface SyncFixtureApi extends SyncApi {
   setTransfers(transfers: Transfer[], shares?: Share[]): void;
   /** A game's copies on the other devices (#232). */
   setCopies(gameId: string, copies: PeerCopy[]): void;
+  /** The games sent to other devices, as `gameId → deviceId`. */
+  sent(): [string, string][];
   /** The current state, for assertions. */
   state(): DevicesStatus;
 }
@@ -112,6 +114,7 @@ export function createSyncFixtureApi(): SyncFixtureApi {
   let transfers: Transfer[] = [];
   let shares: Share[] = [];
   const copies = new Map<string, PeerCopy[]>();
+  const sent: [string, string][] = [];
   const listeners = new Set<(opened?: PairingLinkTarget) => void>();
   const changed = (link?: PairingLinkTarget) => {
     for (const listener of listeners) listener(link);
@@ -240,6 +243,13 @@ export function createSyncFixtureApi(): SyncFixtureApi {
       ];
       changed();
     },
+    sendTo: async (gameId, deviceId) => {
+      const device = status.devices.find((d) => d.id === deviceId);
+      if (!device || device.link === "offline" || device.link === "relay")
+        throw new Error("couldn't reach the other device directly");
+      sent.push([gameId, deviceId]);
+    },
+    sent: () => [...sent],
     setCopies: (gameId, next) => {
       copies.set(gameId, next);
       changed();

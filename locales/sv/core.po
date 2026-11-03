@@ -3310,6 +3310,16 @@ msgstr "En fast UDP-port för brandväggsregler; tomt låter systemet välja."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
+msgid "Accept copies from my devices"
+msgstr "Ta emot kopior från mina enheter"
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "A game another of your devices sends here is copied into the default storage without asking."
+msgstr "Ett spel som en annan av dina enheter skickar hit kopieras till standardlagringen utan att fråga."
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
 msgid "Settings kept on this device"
 msgstr "Inställningar som behålls på den här enheten"
 
@@ -4098,6 +4108,14 @@ msgid "that game isn't installed on this device"
 msgstr "det spelet är inte installerat på den här enheten"
 
 #: crates/caskade-core/src/transfer/mod.rs
+msgid "the other device didn't take the copy"
+msgstr "den andra enheten tog inte emot kopian"
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "this device doesn't take copies"
+msgstr "den här enheten tar inte emot kopior"
+
+#: crates/caskade-core/src/transfer/mod.rs
 msgid "the game isn't fully installed on this device"
 msgstr "spelet är inte helt installerat på den här enheten"
 
@@ -4314,6 +4332,10 @@ msgstr "den enheten har ingen kopia av spelet"
 #: apps/desktop/src-tauri/src/commands/copies.rs
 msgid "that device isn't paired"
 msgstr "den enheten är inte parkopplad"
+
+#: apps/desktop/src-tauri/src/commands/copies.rs
+msgid "the game isn't installed on this computer in a folder that can be copied"
+msgstr "spelet är inte installerat på den här datorn i en mapp som kan kopieras"
 
 #: apps/desktop/src-tauri/src/commands/emulation.rs
 msgid "unknown emulator {id}"

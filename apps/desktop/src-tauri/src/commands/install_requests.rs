@@ -19,12 +19,43 @@ pub struct InstallRequest {
     pub value: String,
     /// How a dropped file or folder installs; `None` for other requests.
     pub plan: Option<DropPlan>,
+    /// A game another of the user's devices sends here (#235).
+    #[serde(default)]
+    pub peer: Option<PeerSend>,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "snake_case")]
 pub enum InputKind {
     Path,
     Url,
+    /// A copy from another of the user's devices (#235).
+    Peer,
+}
+/// A game another device sends to this one: copied from it once confirmed
+/// (#233's copy, started from here).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct PeerSend {
+    pub device_id: String,
+    pub device_name: String,
+    /// The release on that device.
+    pub entry_id: String,
+    /// The game here it is, when the devices have matched it.
+    pub game_id: Option<String>,
+    pub title: String,
+    pub size_bytes: Option<u64>,
+}
+impl PeerSend {
+    pub fn target(&self) -> caskade_core::install::PeerCopyTarget {
+        caskade_core::install::PeerCopyTarget {
+            device_id: self.device_id.clone(),
+            device_name: self.device_name.clone(),
+            entry_id: self.entry_id.clone(),
+            // A game id that isn't here makes the copy a game of its own.
+            game_id: self.game_id.clone().unwrap_or_default(),
+            title: self.title.clone(),
+        }
+    }
 }
 #[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
 pub struct InstallRequested(pub InstallRequest);
@@ -78,6 +109,7 @@ impl InstallRequests {
             kind,
             value,
             plan,
+            peer: None,
         };
         pending.insert(
             request.request_id.clone(),
@@ -130,6 +162,16 @@ impl InstallRequests {
         service: &InstallService,
     ) -> Result<JobSnapshot, String> {
         let mut claim = self.claim(id)?;
+        if let Some(peer) = claim.request.peer.clone() {
+            // Nothing was written here until now (#235).
+            let job = service
+                .copy_from_device(peer.target(), root_id)
+                .await
+                .map_err(|e| e.to_string())?;
+            locked(&self.pending).remove(id);
+            claim.complete = true;
+            return Ok(job);
+        }
         let hints = claim
             .request
             .plan
@@ -154,6 +196,48 @@ impl InstallRequests {
     ) -> Result<InstallRequest, String> {
         let (kind, value) = validated(value).await?;
         self.queue_and_emit(app, kind, value, None)
+    }
+    /// Queues a game another device sends here, to be confirmed (#235).
+    pub fn queue_peer<R: Runtime>(
+        &self,
+        app: &tauri::AppHandle<R>,
+        peer: PeerSend,
+    ) -> Result<InstallRequest, String> {
+        let request = {
+            let mut pending = self.live();
+            if let Some(existing) = pending
+                .values()
+                .find(|p| p.request.peer.as_ref() == Some(&peer))
+            {
+                existing.request.clone()
+            } else {
+                if pending.len() >= 32 {
+                    return Err(caskade_core::tr!(
+                        "too many pending install requests; dismiss one first"
+                    ));
+                }
+                let request = InstallRequest {
+                    request_id: caskade_core::model::new_id(),
+                    kind: InputKind::Peer,
+                    value: peer.title.clone(),
+                    plan: None,
+                    peer: Some(peer),
+                };
+                pending.insert(
+                    request.request_id.clone(),
+                    Pending {
+                        request: request.clone(),
+                        created: Instant::now(),
+                        claimed: false,
+                    },
+                );
+                request
+            }
+        };
+        InstallRequested(request.clone())
+            .emit(app)
+            .map_err(|e| e.to_string())?;
+        Ok(request)
     }
     fn queue_and_emit<R: Runtime>(
         &self,

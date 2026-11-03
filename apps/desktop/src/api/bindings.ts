@@ -771,6 +771,11 @@ export const commands = {
 	 *  root `root_id` (the default when absent), as an install job.
 	 */
 	gameCopyHere: (gameId: string, deviceId: string, rootId: string | null) => typedError<JobSnapshot_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_copy_here", { gameId, deviceId, rootId })),
+	/**
+	 *  Asks `device_id` to copy `game_id` from this computer (#235): the
+	 *  device confirms it there, unless it accepts copies without asking.
+	 */
+	gameSendTo: (gameId: string, deviceId: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("game_send_to", { gameId, deviceId })),
 	/**  Copies going on to and from this device. */
 	devicesTransfers: () => typedError<TransferView[], ErrorReport_Serialize>(__TAURI_INVOKE("devices_transfers")),
 	/**  Renames this device; an empty name goes back to the host name. */
@@ -4928,7 +4933,9 @@ export type InputAction = {
 /**  One normalized action from a pad (TECH-PLAN §6). */
 export type InputActionEvent = InputAction;
 
-export type InputKind = "path" | "url";
+export type InputKind = "path" | "url" | 
+/**  A copy from another of the user's devices (#235). */
+"peer";
 
 export type InstallLocation = { type: "managed"; rootId: string; relDir: string } | { type: "external"; path: string };
 
@@ -4947,6 +4954,8 @@ export type InstallRequest_Deserialize = {
 	value: string,
 	/**  How a dropped file or folder installs; `None` for other requests. */
 	plan?: DropPlan_Deserialize | null,
+	/**  A game another of the user's devices sends here (#235). */
+	peer?: PeerSend_Deserialize | null,
 };
 
 export type InstallRequest_Serialize = {
@@ -4955,6 +4964,8 @@ export type InstallRequest_Serialize = {
 	value: string,
 	/**  How a dropped file or folder installs; `None` for other requests. */
 	plan: DropPlan_Serialize | null,
+	/**  A game another of the user's devices sends here (#235). */
+	peer: PeerSend_Serialize | null,
 };
 
 export type InstallRequested = InstallRequested_Serialize | InstallRequested_Deserialize;
@@ -6229,6 +6240,42 @@ export type PeerCopy_Serialize = {
 	throughProton: boolean,
 	/**  The game is running on that device now. */
 	playing: boolean,
+};
+
+/**
+ *  A game another device sends to this one: copied from it once confirmed
+ *  (#233's copy, started from here).
+ */
+export type PeerSend = PeerSend_Serialize | PeerSend_Deserialize;
+
+/**
+ *  A game another device sends to this one: copied from it once confirmed
+ *  (#233's copy, started from here).
+ */
+export type PeerSend_Deserialize = {
+	deviceId: string,
+	deviceName: string,
+	/**  The release on that device. */
+	entryId: string,
+	/**  The game here it is, when the devices have matched it. */
+	gameId?: string | null,
+	title: string,
+	sizeBytes?: number | null,
+};
+
+/**
+ *  A game another device sends to this one: copied from it once confirmed
+ *  (#233's copy, started from here).
+ */
+export type PeerSend_Serialize = {
+	deviceId: string,
+	deviceName: string,
+	/**  The release on that device. */
+	entryId: string,
+	/**  The game here it is, when the devices have matched it. */
+	gameId: string | null,
+	title: string,
+	sizeBytes: number | null,
 };
 
 /**  What the plugin asks for; granted by the user (#124 enforces). */
