@@ -64,6 +64,8 @@ pub mod opening;
 pub mod pairing;
 pub mod share;
 pub mod swarm;
+#[cfg(feature = "test-utils")]
+pub mod testing;
 
 pub use device::{DeviceInfo, DeviceKind, DeviceOs};
 pub use endpoint::{

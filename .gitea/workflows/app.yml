@@ -127,13 +127,16 @@ jobs:
         run: node plugins/examples/build.mjs gamemode howlongtobeat playtime-stats
       # One selection unifies dependency features once rather than rebuilding
       # common crates for five different package selections. Includes the
-      # bindings, emulation, plugin guest/schema, gamepad and theme checks.
+      # bindings, emulation, plugin guest/schema, gamepad and theme checks,
+      # and devices and sync (#250): two or more cores on loopback, and the
+      # relay paths through a local relay (iroh's test-utils), never the
+      # internet.
       - name: Rust app suites
         if: needs.changes.outputs.rust == 'true'
         run: >-
           cargo test -p caskade-core -p caskade-desktop -p caskade-input
           -p caskade-plugin-host -p caskade-theme -p caskade-component-cache
-          -p caskade-jobs -p caskade-plugin-sdk --locked --timings
+          -p caskade-jobs -p caskade-plugin-sdk -p caskade-sync --locked --timings
       # The M5 exit (#153): the built app in console mode, driven by a pad
       # only, under Xvfb. The `e2e` feature embeds the built UI. The runner
       # needs xvfb (xvfb-run, xauth) and dbus-run-session.
@@ -145,7 +148,7 @@ jobs:
           xvfb-run -a -s "-screen 0 1600x1000x24" dbus-run-session -- cargo test -p caskade-desktop --features e2e --locked --test it console_e2e:: -- --ignored
       - name: Windows GNU cross Clippy
         if: needs.changes.outputs.cross == 'true'
-        run: cargo clippy -p caskade-core -p caskade-desktop -p caskade-plugin-host -p caskade-input --all-targets --locked --target x86_64-pc-windows-gnu -- -D warnings
+        run: cargo clippy -p caskade-core -p caskade-desktop -p caskade-plugin-host -p caskade-input -p caskade-sync --all-targets --locked --target x86_64-pc-windows-gnu -- -D warnings
       # The tray icon: the Tauri CLI finds libayatana-appindicator3 through
       # pkg-config, so the runner needs libayatana-appindicator3-dev.
       - name: Debug app bundle

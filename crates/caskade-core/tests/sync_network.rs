@@ -7,112 +7,15 @@
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use caskade_core::accounts::AccountService;
-use caskade_core::artwork::ArtworkCache;
-use caskade_core::bus::Bus;
-use caskade_core::db::LibraryStore;
-use caskade_core::devices::{ConnectionPurpose, DeviceLink, Devices, MemoryKeyStore, Reach};
+use caskade_core::devices::{ConnectionPurpose, DeviceLink};
 use caskade_core::model::{
-    ArtworkKind, CollectionKind, ExternalId, Game, GameEdit, GameEntry, PlaySession,
-    SaveCollection, TextEdit,
+    ArtworkKind, CollectionKind, Game, GameEdit, GameEntry, PlaySession, SaveCollection, TextEdit,
 };
-use caskade_core::paths::AppPaths;
-use caskade_core::settings::SettingsService;
+use caskade_core::sync::SyncEngine;
 use caskade_core::sync::exchange::{self, Options};
-use caskade_core::sync::{SyncEngine, SyncService};
 use serde_json::json;
 
-struct Core {
-    store: LibraryStore,
-    artwork: ArtworkCache,
-    devices: Devices,
-    settings: SettingsService,
-    account: String,
-    _dir: tempfile::TempDir,
-}
-
-impl Core {
-    async fn id(&self) -> String {
-        self.devices.status().await.this_device.id.unwrap()
-    }
-
-    /// Its sync service, started.
-    fn sync(&self) -> SyncService {
-        let service = SyncService::new(self.store.clone(), self.devices.clone());
-        service.set_settings(self.settings.clone());
-        service.set_artwork_cache(self.artwork.clone());
-        service.start();
-        service
-    }
-}
-
-async fn core(name: &str) -> Core {
-    let dir = tempfile::tempdir().unwrap();
-    let store = LibraryStore::in_memory().await.unwrap();
-    let accounts = AccountService::open(store.clone(), Bus::default())
-        .await
-        .unwrap();
-    let account = accounts.active_id().unwrap();
-    let settings = SettingsService::new(store.clone());
-    settings
-        .register_core(&AppPaths::under(dir.path()))
-        .unwrap();
-    let devices = Devices::with_reach(
-        store.clone(),
-        accounts,
-        Arc::new(MemoryKeyStore::default()),
-        Reach::loopback(),
-    );
-    devices.set_settings(settings.clone());
-    devices.start();
-    let core = Core {
-        artwork: ArtworkCache::new(dir.path().join("artwork")).unwrap(),
-        store,
-        devices,
-        settings,
-        account,
-        _dir: dir,
-    };
-    within("the endpoint starts", 20, || async {
-        core.devices.status().await.this_device.listening
-    })
-    .await;
-    core.devices.rename(name).await.unwrap();
-    // The same game, discovered on each.
-    let game = core.store.upsert_game(&Game::new("Hades")).await.unwrap();
-    let mut entry = GameEntry::new(&game.id, "steam".to_owned().into(), "1145360");
-    entry.ids = vec![ExternalId::Steam { app_id: 1_145_360 }];
-    core.store.upsert_entry(&entry).await.unwrap();
-    core
-}
-
-async fn pair(a: &Core, b: &Core) {
-    let link = a.devices.pairing_link().await.unwrap();
-    b.devices.accept_pairing_link(&link.url).await.unwrap();
-    let b_id = b.id().await;
-    within("the link pairs both", 20, || async {
-        a.devices
-            .status()
-            .await
-            .devices
-            .iter()
-            .any(|d| d.id == b_id)
-    })
-    .await;
-}
-
-/// Waits up to `seconds` for `check`.
-async fn within<F, Fut>(what: &str, seconds: u64, check: F)
-where
-    F: Fn() -> Fut,
-    Fut: std::future::Future<Output = bool>,
-{
-    let deadline = Instant::now() + Duration::from_secs(seconds);
-    while !check().await {
-        assert!(Instant::now() < deadline, "{what} within {seconds} s");
-        tokio::time::sleep(Duration::from_millis(100)).await;
-    }
-}
+use crate::cores::{Core, core, core_with, pair, within};
 
 async fn hades(core: &Core) -> String {
     core.store
@@ -453,7 +356,7 @@ async fn an_imported_cover_shows_on_the_other_device_with_its_file() {
     image::DynamicImage::ImageRgb8(image)
         .write_to(&mut std::io::Cursor::new(&mut png), image::ImageFormat::Png)
         .unwrap();
-    let file = desk._dir.path().join("cover.png");
+    let file = desk.dir.path().join("cover.png");
     std::fs::write(&file, png).unwrap();
     let imported = desk
         .store
@@ -742,4 +645,101 @@ async fn a_paired_device_starts_a_game_here_and_a_stranger_cannot() {
         .await;
     assert!(knocked.is_err(), "an unpaired device opened a play session");
     assert!(requests.try_recv().is_err());
+}
+
+/// Through a relay only (#250, a local one: no internet): the library syncs,
+/// the link says `relay`, and a copy waits for a direct connection instead
+/// of sending game files through it.
+#[tokio::test(flavor = "multi_thread")]
+async fn through_a_relay_the_library_syncs_and_game_files_wait() {
+    use caskade_core::devices::Reach;
+    use caskade_core::install::{JobStatus, PeerCopyTarget};
+    use caskade_sync::Ip;
+    let (relays, _relay) = caskade_sync::testing::local_relay().await;
+    let reach = |ip| Reach {
+        relays: relays.clone(),
+        ip,
+        internet_lookup: false,
+        lan: None,
+    };
+    // The Desk has no IP transport at all: only the relay reaches it.
+    let desk = core_with("Desk", reach(Ip::Off)).await;
+    let tv = core_with("TV", reach(Ip::Loopback { port: None })).await;
+    for core in [&desk, &tv] {
+        within("the relay answers", 20, || async {
+            core.devices.status().await.this_device.internet == Some(true)
+        })
+        .await;
+    }
+    pair(&tv, &desk).await;
+    let (_desk_sync, _tv_sync) = (desk.sync(), tv.sync());
+
+    // The library syncs through the relay.
+    let tv_game = hades(&tv).await;
+    tv.store
+        .edit_game(&tv_game, &describe("through the relay"), None)
+        .await
+        .unwrap();
+    within("the edit arrives through the relay", 30, || async {
+        description(&desk).await == "through the relay"
+    })
+    .await;
+    let desk_id = desk.id().await;
+    let link = tv
+        .devices
+        .status()
+        .await
+        .devices
+        .into_iter()
+        .find(|d| d.id == desk_id)
+        .unwrap()
+        .link;
+    assert_eq!(link, DeviceLink::Relay);
+
+    // A copy from the Desk waits: game files never go through a relay.
+    let folder = desk.dir.path().join("My Games/Celeste");
+    std::fs::create_dir_all(&folder).unwrap();
+    std::fs::write(folder.join("Celeste.x86_64"), vec![1u8; 2 * 1024 * 1024]).unwrap();
+    let game = desk.store.upsert_game(&Game::new("Celeste")).await.unwrap();
+    let mut entry = GameEntry::new(&game.id, "manual".to_owned().into(), "celeste");
+    entry.state = caskade_core::model::InstallState::Installed;
+    entry.location = Some(caskade_core::model::InstallLocation::External {
+        path: folder.clone(),
+    });
+    entry.launch = Some(caskade_core::model::LaunchSpec::Executable {
+        path: folder.join("Celeste.x86_64"),
+        args: Vec::new(),
+        cwd: None,
+        env: Default::default(),
+    });
+    let entry = desk.store.upsert_entry(&entry).await.unwrap();
+    let job = tv
+        .install
+        .copy_from_device(
+            PeerCopyTarget {
+                device_id: desk_id,
+                device_name: "Desk".into(),
+                entry_id: entry.id,
+                game_id: String::new(),
+                title: "Celeste".into(),
+            },
+            None,
+        )
+        .await
+        .unwrap();
+    within("the copy waits for a direct connection", 30, || async {
+        tv.install.job(&job.id).is_some_and(|job| {
+            job.progress
+                .as_ref()
+                .is_some_and(|progress| progress.message.contains("relay"))
+        })
+    })
+    .await;
+    let snapshot = tv.install.job(&job.id).unwrap();
+    assert_eq!(snapshot.status, JobStatus::Downloading);
+    assert!(
+        tv.transfers.transfers().iter().all(|t| t.done == 0),
+        "game files moved through the relay"
+    );
+    tv.install.cancel(&job.id).unwrap();
 }

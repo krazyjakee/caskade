@@ -84,6 +84,26 @@ Writing and checking run on the shared resource queue
 
 Tests inject a full disk, a crash before publishing and the free space.
 
+## Sync state
+
+What devices, library sync and copies keep (`docs/sync.md`), in a backup:
+
+- **Left out** (`policy.rs`): `paired_devices`, which holds the grants each
+  device presents: devices pair again after a restore. `sync_peers`, what
+  other devices said they have: the restored library sends everything again
+  on its next exchange, and last writer wins sorts it out. The `sync.device`
+  setting, this device's endpoint id and name: a restore on another machine
+  mustn't take over this one's identity. `shares` and `share_recipients`,
+  whose grants are credentials too. The device key never is in the database:
+  it's in the OS keychain.
+- **Kept**: the change log and its clocks (`sync_changes`, `sync_fields`,
+  `sync_seen`) and which local game each other device's game is
+  (`sync_game_ids`), so a restored library still knows what it changed and
+  when, and matches the same games; and everything synced itself (accounts,
+  collections, sessions, save versions' records).
+- **Elsewhere**: copies' stores (`<cache>/copies/`) are caches, and presence
+  (#240) lives in memory: neither is in a backup.
+
 ## Restore (#192)
 
 `restore::inspect` (or `Backups::inspect`) verifies an archive, refuses a

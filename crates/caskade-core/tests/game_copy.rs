@@ -7,117 +7,14 @@
 //! until confirmed there.
 
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use caskade_core::accounts::AccountService;
-use caskade_core::bus::Bus;
-use caskade_core::db::LibraryStore;
-use caskade_core::devices::{Devices, MemoryKeyStore, Reach};
-use caskade_core::install::{
-    InstallOptions, InstallService, JobSnapshot, JobStatus, PeerCopyTarget,
-};
+use caskade_core::install::{InstallService, JobSnapshot, JobStatus, PeerCopyTarget};
 use caskade_core::model::{
-    Game, GameEntry, GameRuntime, InstallLocation, InstallState, LaunchSpec, StorageRoot,
+    Game, GameEntry, GameRuntime, InstallLocation, InstallState, LaunchSpec,
 };
-use caskade_core::paths::AppPaths;
-use caskade_core::settings::SettingsService;
-use caskade_core::transfer::Transfers;
-use caskade_installer::manifest::RootManifest;
-use caskade_installer::pipeline::input;
 
-struct Core {
-    store: LibraryStore,
-    devices: Devices,
-    transfers: Transfers,
-    install: InstallService,
-    games: PathBuf,
-    dir: tempfile::TempDir,
-}
-
-/// Waits up to `seconds` for `check`.
-async fn within<F, Fut>(what: &str, seconds: u64, check: F)
-where
-    F: Fn() -> Fut,
-    Fut: std::future::Future<Output = bool>,
-{
-    let deadline = Instant::now() + Duration::from_secs(seconds);
-    while !check().await {
-        assert!(Instant::now() < deadline, "{what} within {seconds} s");
-        tokio::time::sleep(Duration::from_millis(100)).await;
-    }
-}
-
-async fn core(name: &str) -> Core {
-    let dir = tempfile::tempdir().unwrap();
-    let store = LibraryStore::in_memory().await.unwrap();
-    let accounts = AccountService::open(store.clone(), Bus::default())
-        .await
-        .unwrap();
-    let settings = SettingsService::new(store.clone());
-    settings
-        .register_core(&AppPaths::under(&dir.path().join("app")))
-        .unwrap();
-    let devices = Devices::with_reach(
-        store.clone(),
-        accounts,
-        Arc::new(MemoryKeyStore::default()),
-        Reach::loopback(),
-    );
-    devices.set_settings(settings.clone());
-    let transfers = Transfers::new(store.clone(), devices.clone(), &dir.path().join("cache"))
-        .await
-        .unwrap();
-    devices.start();
-    // A storage root for what arrives.
-    let games = dir.path().join("Games");
-    std::fs::create_dir_all(&games).unwrap();
-    let identity = RootManifest::new(format!("{}-root", name.to_lowercase())).unwrap();
-    identity.write(&games).unwrap();
-    let mut root = StorageRoot::from_manifest(games.canonicalize().unwrap(), &identity);
-    root.is_default = true;
-    store.upsert_root(&root).await.unwrap();
-    let install = InstallService::new(
-        store.clone(),
-        Bus::default(),
-        InstallOptions {
-            downloads: 1,
-            aliases: None,
-        },
-    )
-    .with_settings(settings.clone())
-    .with_host(input::host(Some("linux")).unwrap());
-    install.set_peer_fetcher(Arc::new(transfers.clone()));
-    let core = Core {
-        store,
-        devices,
-        transfers,
-        install,
-        games: games.canonicalize().unwrap(),
-        dir,
-    };
-    within("the endpoint starts", 20, || async {
-        core.devices.status().await.this_device.listening
-    })
-    .await;
-    core.devices.rename(name).await.unwrap();
-    core
-}
-
-async fn pair(a: &Core, b: &Core) {
-    let link = a.devices.pairing_link().await.unwrap();
-    b.devices.accept_pairing_link(&link.url).await.unwrap();
-    let b_id = b.devices.status().await.this_device.id.unwrap();
-    within("the link pairs both", 20, || async {
-        a.devices
-            .status()
-            .await
-            .devices
-            .iter()
-            .any(|d| d.id == b_id)
-    })
-    .await;
-}
+use crate::cores::{Core, core, pair, within};
 
 fn fixture_exe() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))

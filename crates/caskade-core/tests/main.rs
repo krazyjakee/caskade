@@ -27,6 +27,8 @@ mod save_versions;
 #[cfg(feature = "net")]
 mod romm;
 #[cfg(feature = "net")]
+mod cores;
+#[cfg(feature = "net")]
 mod devices;
 #[cfg(feature = "net")]
 mod game_copy;

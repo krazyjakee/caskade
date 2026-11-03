@@ -103,7 +103,8 @@ minisign-verify = "=0.3.0"
 semver = { version = "1", features = ["serde"] }
 
 [dev-dependencies]
-caskade-sync = { path = "../caskade-sync" }
+# A local relay for relay-path tests (#250).
+caskade-sync = { path = "../caskade-sync", features = ["test-utils"] }
 caskade-emulation-fixtures = { path = "../caskade-emulation-fixtures" }
 # The stale-template test runs extraction (tests/i18n.rs).
 caskade-i18n = { path = "../caskade-i18n", features = ["extract"] }

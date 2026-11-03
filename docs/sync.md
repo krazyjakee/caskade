@@ -1,8 +1,42 @@
-# Device connections and pairing
+# Devices, sync, saves and sharing
 
-How a household's Caskade devices reach each other: the `caskade-sync` crate
-(`crates/caskade-sync`), its identity, the opening every connection starts
-with, and how to check it. Milestone: Devices, sync and sharing (#252).
+How a household's Caskade devices reach each other, keep the library in
+step, carry saves, copy and share games and start them on each other.
+Milestone: Devices, sync and sharing (#252).
+
+## At a glance
+
+- **Connections.** Devices find each other on the local network first
+  (mDNS), connect directly over the internet where the routers allow it, and
+  use n0's relays only when allowed and nothing direct works; *Never use
+  relays* turns relays off. Everything works with no internet on one network.
+  Game files never go through a relay. ("Reaching devices", "Link state".)
+- **Pairing.** By matching codes on one network, or by a one-time link that
+  works for ten minutes; an admin confirms either. Forgetting a device tells
+  it. ("Pairing and devices".)
+- **What syncs.** The library's user values, favourites, hidden games,
+  collections, play history, accounts and PINs, artwork the user chose,
+  achievement links, RomM servers (never their passwords), appearance and
+  saves; launch actions, game scripts, preferred emulators and add-ons when
+  the user turns them on. Installs, folders, emulators, store sign-ins and
+  caches never sync. Each category is Sync or This device only on each
+  device. ("What a change is", "Settings → Devices".)
+- **Conflicts.** The later change to a field wins (hybrid logical clocks, so
+  a wrong clock can't win); lists merge item by item; play sessions add up.
+  Saves are the exception: when both devices played since they last agreed,
+  both saves are kept and Play asks which to use. ("Clocks", "Saves".)
+- **Saves.** Where each game keeps its saves comes from the Ludusavi manifest,
+  cached so it works offline; versions are kept and travel as files beside
+  the change log. ("Saves".)
+- **Copies, sending and sharing.** A game copies from another device as a
+  managed install, sends to one that confirms it, or shares once with someone
+  else through a revocable link. ("Copying a game from another device",
+  shares.)
+- **Playing elsewhere.** Play on … starts a game on another device, waking a
+  sleeping desktop with Wake-on-LAN first. ("Playing a game on another
+  device".)
+- **Settings → Devices** explains every switch ("Settings → Devices"), and
+  "Manual checklist (#250)" is what only real machines can show.
 
 ## The crate
 
@@ -910,20 +944,55 @@ real devices:
 `devices_*` commands and `DevicesChanged`; `api/syncFixtures.ts` for the
 browser preview and tests):
 
-- **This device:** its name and kind, its addresses on this network, whether
-  the internet answers (a relay is connected; unknown with Never use relays
-  on), and Never use relays (`core.sync.neverRelay`).
-- **Your devices:** each paired device with how it is reached (`peer-link`),
-  its last sync, or that the last try didn't reach it (never a toast), Sync
-  now and Forget. Connections close between syncs, so with none open a device
-  shows `lan` while it announces itself here over mDNS, or the link of its
-  last exchange while that went through under three minutes ago with no
-  failure since (sync reaches each device every minute); otherwise `offline`.
-- **Pair a device:** nearby Caskade, a pairing link to copy, and a pasted one.
-- **What syncs:** #227's categories (`core.sync.categories`), synced and
-  optional, plus what never syncs.
-- **Copies and shares:** shows nothing until #233 and #246 exist, and no
-  buttons.
+Every control, section by section:
+
+- **This device**
+  - *Device name*: what other devices and the nearby list call this one;
+    empty goes back to the computer's name (`devices_rename`).
+  - *Kind*: desktop, laptop, handheld or TV, for its icon elsewhere; until
+    the user picks one, what the device looks like (`device_type`, #244).
+  - Its addresses on this network, and whether the internet answers (a relay
+    is connected; unknown with Never use relays on).
+  - *Never use relays* (`core.sync.neverRelay`, off): connect only directly,
+    on this network or over the internet where the routers allow it; a
+    device only a relay could reach shows offline. Game files never use a
+    relay whatever this says.
+  - *Play requests from my devices* (`core.sync.remotePlay`, on): other
+    devices' Play on … starts games here (#234, "Playing a game on another
+    device").
+  - *Accept copies from my devices* (`core.sync.acceptCopies`, off): a game
+    another device sends here copies into the default storage without asking
+    (#235); off, it waits in the install confirmations.
+  - *Downloads from my devices* (`core.sync.peerDownloads`, on): a download
+    comes from a device on this network that has the same file before the
+    internet (#236, "Downloads from a device nearby").
+- **Your devices**: each paired device with how it is reached (`peer-link`),
+  its last sync, or that the last try didn't reach it (never a toast), what
+  it is playing now (#240), and *Sync now* and *Forget* (forgetting tells the
+  other device when it can be reached, and removes its copies listed here).
+  Connections close between syncs, so with none open a device shows `lan`
+  while it announces itself here over mDNS, or the link of its last exchange
+  while that went through under three minutes ago with no failure since
+  (sync reaches each device every minute); otherwise `offline`.
+- **Pair a device**: Caskade on this network with *Pair…* (both show a code;
+  pair when they match), *Copy a pairing link* (works once, for ten
+  minutes), and *Paste a pairing link from another device* with *Pair*.
+- **What syncs**: Sync or This device only for each of #227's categories
+  (`core.sync.categories`), the synced ones first, then the optional ones
+  (launch actions, game scripts, preferred emulators, add-ons) that start
+  This device only; and **Never synced**, what stays on each device. The
+  Appearance, Accounts and RomM panels each have *Same on your other
+  devices* (`core.sync.sections`, #244): off keeps that section on this
+  device while its category syncs.
+- **Saves** (#241): *Sync saves* (the Saves category), *Versions to keep*
+  (`core.saves.keep`), and the *save locations list* with its last check and
+  Update now.
+- **Copies and shares**: copies going on both ways (`devices_transfers`),
+  with progress, shown only while there are any; shares (#247) list here
+  too.
+
+Every switch here is kept on each device: `core.sync` is local in the sync
+policy, so turning one off on one device never turns it off elsewhere.
 
 Every account sees the tab. Only an admin's controls are enabled, and the core
 refuses anyone else whatever the webview shows: the devices commands and
@@ -939,8 +1008,9 @@ any view:
 The status bar's `sync` part shows how many paired devices are in reach and
 the best link, and opens Settings → Devices.
 
-Waking a device (#234), copying a game here (#233), playing on another device
-(#234) and shares (#246, #247) aren't shown: they come with their issues.
+A game's page shows its copies on the other devices with *Copy to this
+computer* and *Play on …* / *Wake and play on …* (#232–#234), and its menu
+offers *Copy to …* for devices without it (#235).
 
 ## Lifetime
 
@@ -983,6 +1053,21 @@ endpoint for the process lifetime and calls `SyncEndpoint::shutdown` at exit.
   commands and `DevicesChanged` on Tauri's mock runtime, a `caskade://pair`
   link held for an admin rather than pairing, and every change refused for a
   standard account.
+- Two or more cores (#250): `crates/caskade-core/tests/cores.rs` builds a
+  device in one process (its own library, settings, device key, copies and a
+  storage root) on loopback, or through a local relay (`core_with`); the
+  sync, copy, send and play-there tests start from it (`sync_network`,
+  `game_copy`). `sync_network::through_a_relay_the_library_syncs_and_game_files_wait`
+  runs two cores whose only link is a local relay
+  (`caskade_sync::testing::local_relay`, the `test-utils` feature): the
+  library syncs, the link says `relay`, and a copy waits for a direct
+  connection with no game bytes moved.
+- CI: the app workflow's Rust suites (`.gitea/workflows/app.yml`) run
+  `caskade-sync`'s tests with the core's on Linux on every change to either,
+  and its Windows GNU cross Clippy builds them for Windows. No test reaches
+  the internet: endpoints are on loopback or a local relay, mDNS runs on this
+  machine's interfaces under a service unique to the run, and the ignored
+  `loopback_throughput` measures a copy by hand.
 - Lint: `flock /tmp/caskade-heavy.lock cargo clippy -p caskade-sync
   --all-targets -- -D warnings`, and the same with
   `--target x86_64-pc-windows-gnu`.
@@ -996,6 +1081,60 @@ endpoint for the process lifetime and calls `SyncEndpoint::shutdown` at exit.
   flock /tmp/caskade-heavy.lock cargo clippy -p caskade-sync --all-targets \
     --target x86_64-apple-darwin -- -D warnings
   ```
+
+## What iroh costs the build (#250)
+
+Measured on 2026-11-03 on the development machine (Linux x86-64, a warm
+`~/.cargo` registry, the shared target's release profile cold):
+`cargo build --release -p caskade-desktop --bin caskade --timings`.
+
+- **Build time.** 5 min 2 s wall clock (56 min CPU) for 1,408 units. The
+  iroh family (iroh, iroh-blobs, iroh-relay, iroh-dns, noq, netwatch,
+  portmapper, redb, swarm-discovery, simple-dns, pkarr, irpc, bao-tree and
+  `caskade-sync`; 46 units) takes 152 s of the 2,276 s serial build time,
+  6.7 %: portmapper 22 s, iroh-blobs 18 s, redb 18 s, iroh 16 s, then the
+  rest. Most of it builds in parallel with the rest of the app.
+- **Size.** The release binary is 200.9 MB, 142.0 MB stripped. The iroh
+  family's own code symbols are 3.6 MB of 105.9 MB (3.4 %); its generic code
+  instantiated in `core` and `tokio` adds a little to that.
+
+Measure again with the same command; the timing report is under
+`<target>/cargo-timings/`, and `nm -S --size-sort -C` on the binary groups
+code by crate.
+
+## Manual checklist (#250)
+
+CI covers what one machine can (below, and in `## Checks`): two or more
+cores on loopback, relay paths through a local relay, no internet. What only
+real machines can show (other operating systems, Wi-Fi against Ethernet,
+NAT, a sleeping computer, two separate networks) is this checklist, run on
+Linux, Windows and macOS, each pair of them:
+
+1. **Pairing and sync**, with the router's internet unplugged: the procedure
+   in "Two machines on one network, internet unplugged" below.
+2. **A large copy over Wi-Fi, then over Ethernet**: "Copying a game (#233)"
+   below, with a game of tens of GB. Record the speed each way against the
+   disks' and the network's.
+3. **Downloads from a device nearby**: "Downloads from a device nearby
+   (#236)" below.
+4. **Wake-on-LAN**: "Waking a device to play (#234)" below (the desktop of
+   the pair).
+5. **A share across two networks** (#246), between two people: share a
+   game from one machine on the home network; open the link on a machine on
+   another network (a phone's hotspot). The files come straight from the
+   sharer (a direct path through the routers, or the port the sharer's router
+   mapped), or the receiver says it waits for a direct connection; never
+   through a relay. The game installs and plays. Stop the share: the link
+   fails at once, mid-copy too. With a third machine receiving after the
+   second chose Help others receive this, both serve it (#249).
+6. **Everything with the internet unplugged**: steps 1 to 4 again with the
+   router's internet unplugged (and step 5 shows "can't reach directly").
+
+| Pair | 1 Pairing, sync | 2 Copy (Wi-Fi / Ethernet) | 3 Nearby downloads | 4 Wake-on-LAN | 5 Share across networks | 6 Offline | Date, notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Linux ↔ Windows | — | — | — | — | — | — | Not run yet |
+| Linux ↔ macOS | — | — | — | — | — | — | Not run yet |
+| Windows ↔ macOS | — | — | — | — | — | — | Not run yet |
 
 ## Two machines on one network, internet unplugged
 
