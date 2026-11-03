@@ -41,6 +41,9 @@ const MAX_LINE: usize = 8 * 1024 * 1024;
 enum Message {
     Hello {
         seen: Seen,
+        /// The sender's Wake-on-LAN addresses (#234); none from older builds.
+        #[serde(default)]
+        macs: Vec<String>,
     },
     Page {
         changes: Vec<Change>,
@@ -81,16 +84,27 @@ pub async fn exchange(
     engine.capture().await?;
     let seen = engine.seen().await?;
     let (writer, reader) = session.split();
+    let macs = tokio::task::spawn_blocking(crate::remote_play::local_macs)
+        .await
+        .unwrap_or_default();
     writer
-        .write(&Message::Hello { seen })
+        .write(&Message::Hello { seen, macs })
         .await
         .map_err(interrupted)?;
-    let Message::Hello { seen: theirs } = reader.read(MAX_LINE).await.map_err(interrupted)? else {
+    let Message::Hello {
+        seen: theirs,
+        macs: their_macs,
+    } = reader.read(MAX_LINE).await.map_err(interrupted)?
+    else {
         return Err(Error::Invalid(
             "the other device didn't say what it has".into(),
         ));
     };
     engine.store().set_sync_peer_seen(peer, &theirs).await?;
+    if !their_macs.is_empty() {
+        let macs: Vec<String> = their_macs.into_iter().take(16).collect();
+        engine.store().set_paired_device_macs(peer, &macs).await?;
+    }
 
     let send = async {
         let mut sent = 0;

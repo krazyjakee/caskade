@@ -658,3 +658,88 @@ async fn a_game_installed_only_on_another_device_shows_there_and_goes_when_unins
     })
     .await;
 }
+
+#[tokio::test]
+async fn a_paired_device_starts_a_game_here_and_a_stranger_cannot() {
+    use caskade_core::remote_play::{PlayOutcome, RemotePlay};
+    let desk = core("Desk").await;
+    let tv = core("TV").await;
+    pair(&desk, &tv).await;
+    let (_desk_sync, _tv_sync) = (desk.sync(), tv.sync());
+    let desk_play = RemotePlay::new(desk.store.clone(), desk.devices.clone());
+    desk_play.set_settings(desk.settings.clone());
+    let tv_play = RemotePlay::new(tv.store.clone(), tv.devices.clone());
+    // The Desk's app: starts what's asked, or says it didn't (a PIN not
+    // given for a game over the account's age limit, say).
+    let (asked, mut requests) = tokio::sync::mpsc::unbounded_channel();
+    let answer = desk_play.clone();
+    let outcome = std::sync::Arc::new(std::sync::Mutex::new(PlayOutcome::Started));
+    let next = outcome.clone();
+    desk_play.on_request(move |request| {
+        let _ = asked.send(request.clone());
+        answer.finished(&request.id, next.lock().unwrap().clone());
+    });
+    // The games are matched once the two have synced.
+    let desk_id = desk.id().await;
+    within("a first sync", 20, || async {
+        tv.devices
+            .status()
+            .await
+            .devices
+            .iter()
+            .any(|d| d.id == desk_id && d.last_sync_ms.is_some())
+    })
+    .await;
+    let tv_hades = hades(&tv).await;
+    let desk_hades = hades(&desk).await;
+    within("the Desk knows the TV's Hades", 20, || async {
+        desk.store
+            .sync_mapped_game(&tv.id().await, &tv_hades)
+            .await
+            .unwrap()
+            .is_some()
+    })
+    .await;
+
+    tv_play.play_on(&desk_id, &tv_hades, |_| {}).await.unwrap();
+    let request = requests.recv().await.unwrap();
+    assert_eq!(
+        request.game_id, desk_hades,
+        "started as the Desk's own game"
+    );
+    assert_eq!(request.device_id, tv.id().await);
+
+    // Not started there: the requester hears why.
+    *outcome.lock().unwrap() = PlayOutcome::NotStarted("the admin PIN wasn't given".into());
+    let refused = tv_play.play_on(&desk_id, &tv_hades, |_| {}).await;
+    assert_eq!(
+        refused.unwrap_err().to_string(),
+        "the admin PIN wasn't given"
+    );
+    assert_eq!(requests.recv().await.unwrap().game_id, desk_hades);
+
+    // Play requests turned off on the Desk.
+    let mut sync = desk.settings.get("core.sync").await.unwrap().value;
+    sync["remotePlay"] = json!(false);
+    desk.settings.set("core.sync", sync, None).await.unwrap();
+    let off = tv_play.play_on(&desk_id, &tv_hades, |_| {}).await;
+    assert!(
+        off.unwrap_err()
+            .to_string()
+            .contains("doesn't take play requests")
+    );
+
+    // A device that isn't paired can't even ask.
+    let stranger = core("Stranger").await;
+    let desk_addr = desk
+        .devices
+        .link_addr(Duration::from_secs(2))
+        .await
+        .unwrap();
+    let knocked = stranger
+        .devices
+        .connect_to(desk_addr, ConnectionPurpose::Play, None)
+        .await;
+    assert!(knocked.is_err(), "an unpaired device opened a play session");
+    assert!(requests.try_recv().is_err());
+}

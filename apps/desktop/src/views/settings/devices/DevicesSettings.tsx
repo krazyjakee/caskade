@@ -16,6 +16,7 @@ import {
   Link2,
   Monitor,
   MonitorSmartphone,
+  Play,
   Radar,
   RefreshCw,
   ShieldCheck,
@@ -193,6 +194,17 @@ function ThisDeviceSection() {
             isSelected={neverRelay}
             isDisabled={!admin || !sync.settings || sync.saving}
             onChange={(on) => sync.setSettings((current) => ({ ...current, neverRelay: on }))}
+          />
+        </SettingRow>
+        <SettingRow
+          icon={Play}
+          label={t`Play requests from my devices`}
+          description={t`Your other devices can start a game here, as Play here would.`}
+        >
+          <Switch
+            isSelected={sync.settings?.remotePlay ?? true}
+            isDisabled={!admin || !sync.settings || sync.saving}
+            onChange={(on) => sync.setSettings((current) => ({ ...current, remotePlay: on }))}
           />
         </SettingRow>
         <SettingRow

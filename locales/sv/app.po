@@ -5228,6 +5228,10 @@ msgstr "Det installerades inte; försök igen senare: {0}"
 msgid "It didn't install: {0}"
 msgstr "Det installerades inte: {0}"
 
+#: apps/desktop/src/components/sync/RemotePlayHost.tsx
+msgid "It has nothing installed here that can launch."
+msgstr "Det har inget installerat här som kan startas."
+
 #: apps/desktop/src/components/gameMenu/GameMenuHost.tsx
 msgid "It has nothing installed that can launch."
 msgstr "Det har inget installerat som kan startas."
@@ -7552,9 +7556,22 @@ msgstr "Spela offline"
 msgid "Play offline…"
 msgstr "Spela offline…"
 
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "Play on {device}"
+msgstr "Spela på {device}"
+
+#. Starts the game on another of the user's devices
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+msgid "Play on {name}"
+msgstr "Spela på {name}"
+
 #: apps/desktop/src/views/CollectionView.tsx
 msgid "Play Random"
 msgstr "Spela slumpmässigt"
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Play requests from my devices"
+msgstr "Spelförfrågningar från mina enheter"
 
 #. Picks which of a release's launch actions Play starts
 #. Picks which of a release's launch actions Play starts
@@ -9631,9 +9648,17 @@ msgctxt "launch choice"
 msgid "Start with"
 msgstr "Starta med"
 
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "Started on {device}."
+msgstr "Startat på {device}."
+
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
 msgid "Started with the save from {device}."
 msgstr "Startade med sparfilen från {device}."
+
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "Starting on {device}…"
+msgstr "Startar på {device}…"
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 msgid "Starting the update…"
@@ -11102,6 +11127,18 @@ msgstr "Väntar på förlopp"
 msgid "Waiting…"
 msgstr "Väntar…"
 
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "Wake and play on {device}"
+msgstr "Väck och spela på {device}"
+
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+msgid "Wakes it first"
+msgstr "Väcker den först"
+
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "Waking {device}…"
+msgstr "Väcker {device}…"
+
 #: apps/desktop/src/views/activity/JobCard.tsx
 msgid "Warnings"
 msgstr "Varningar"
@@ -11442,6 +11479,10 @@ msgstr "Ditt bibliotek är här"
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Your other devices at home can play this device's games, streamed over the network, with their own controller."
 msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Your other devices can start a game here, as Play here would."
+msgstr "Dina andra enheter kan starta ett spel här, som Spela här skulle göra."
 
 #: apps/desktop/src/components/addons/DeviceOffers.tsx
 msgid "Your other devices have these. Nothing installs here until you choose to."

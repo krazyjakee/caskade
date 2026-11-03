@@ -9,6 +9,7 @@ import type {
   Pairing,
   PairingLinkTarget,
   PeerCopy,
+  PlayRequest,
   Share,
   SyncApi,
   Transfer,
@@ -25,6 +26,10 @@ export interface SyncFixtureApi extends SyncApi {
   setCopies(gameId: string, copies: PeerCopy[]): void;
   /** The games sent to other devices, as `gameId → deviceId`. */
   sent(): [string, string][];
+  /** Another device asks to start a game here. */
+  requestPlay(request: PlayRequest): void;
+  /** Games started on other devices, and how requests here went. */
+  played(): { started: [string, string][]; finished: [string, boolean, string?][] };
   /** The current state, for assertions. */
   state(): DevicesStatus;
 }
@@ -115,6 +120,9 @@ export function createSyncFixtureApi(): SyncFixtureApi {
   let shares: Share[] = [];
   const copies = new Map<string, PeerCopy[]>();
   const sent: [string, string][] = [];
+  const started: [string, string][] = [];
+  const finished: [string, boolean, string?][] = [];
+  const playListeners = new Set<(request: PlayRequest) => void>();
   const listeners = new Set<(opened?: PairingLinkTarget) => void>();
   const changed = (link?: PairingLinkTarget) => {
     for (const listener of listeners) listener(link);
@@ -250,6 +258,24 @@ export function createSyncFixtureApi(): SyncFixtureApi {
       sent.push([gameId, deviceId]);
     },
     sent: () => [...sent],
+    playOn: async (gameId, deviceId) => {
+      const copy = copies.get(gameId)?.find((c) => c.deviceId === deviceId);
+      if (!copy) throw new Error("that game isn't in this device's library");
+      if (copy.link === "offline" && !copy.wakeable)
+        throw new Error(`${copy.deviceName} is out of reach, and it can't be woken from here`);
+      started.push([gameId, deviceId]);
+    },
+    onPlayRequest: (listener) => {
+      playListeners.add(listener);
+      return () => playListeners.delete(listener);
+    },
+    finishPlay: async (requestId, ok, reason) => {
+      finished.push([requestId, ok, reason]);
+    },
+    requestPlay: (request) => {
+      for (const listener of playListeners) listener(request);
+    },
+    played: () => ({ started: [...started], finished: [...finished] }),
     setCopies: (gameId, next) => {
       copies.set(gameId, next);
       changed();

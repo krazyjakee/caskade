@@ -109,6 +109,14 @@ pub struct SyncSettings {
     /// A game another of your devices sends here is copied into the default storage without asking.
     #[serde(default)]
     pub accept_copies: bool,
+    #[schemars(title = "Play requests from my devices")]
+    /// Your other devices can start a game here, as Play here would.
+    #[serde(default = "allowed")]
+    pub remote_play: bool,
+}
+
+fn allowed() -> bool {
+    true
 }
 
 /// Settings sections that can be This device only on their own (#244),
@@ -130,6 +138,7 @@ impl Default for SyncSettings {
             port: None,
             sections: BTreeMap::new(),
             accept_copies: false,
+            remote_play: true,
         }
     }
 }

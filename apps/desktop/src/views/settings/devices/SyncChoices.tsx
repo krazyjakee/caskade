@@ -33,6 +33,8 @@ export interface SyncSettingsValue {
   port: number | null;
   /** Copies other devices send here start without asking (#235). */
   acceptCopies?: boolean;
+  /** Other devices can start games here (#234). */
+  remotePlay?: boolean;
 }
 
 /** Synced by default, in the order Settings lists them. */

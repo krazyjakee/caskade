@@ -335,6 +335,10 @@ pub fn access(command: &str) -> Option<Access> {
         // is an admin's (pairing hands another device the library).
         "devices_status"
         | "game_other_devices"
+        // Playing a game on another device (#234): that device's own
+        // account and limits decide there.
+        | "game_play_on"
+        | "remote_play_finished"
         | "devices_transfers"
         | "devices_opened_link"
         | "devices_dismiss_opened_link"

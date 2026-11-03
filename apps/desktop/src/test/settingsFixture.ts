@@ -101,6 +101,7 @@ export function coreSettingsDefaults(): Record<string, Record<string, unknown>> 
       neverRelay: false,
       port: null,
       acceptCopies: false,
+      remotePlay: true,
     },
   };
 }

@@ -807,6 +807,10 @@ msgid "couldn't reach the other device"
 msgstr ""
 
 #: crates/caskade-core/src/devices/mod.rs
+msgid "the other device turned the connection down"
+msgstr "den andra enheten avvisade anslutningen"
+
+#: crates/caskade-core/src/devices/mod.rs
 msgid "this device has no identity to connect with"
 msgstr "den här enheten har ingen identitet att ansluta med"
 
@@ -3310,6 +3314,16 @@ msgstr "En fast UDP-port för brandväggsregler; tomt låter systemet välja."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
+msgid "Play requests from my devices"
+msgstr "Spelförfrågningar från mina enheter"
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Your other devices can start a game here, as Play here would."
+msgstr "Dina andra enheter kan starta ett spel här, som Spela här skulle göra."
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
 msgid "Accept copies from my devices"
 msgstr "Ta emot kopior från mina enheter"
 
@@ -4329,9 +4343,34 @@ msgstr "konsolläget är inte redo än"
 msgid "that device has no copy of the game"
 msgstr "den enheten har ingen kopia av spelet"
 
+#: crates/caskade-core/src/remote_play/mod.rs
 #: apps/desktop/src-tauri/src/commands/copies.rs
 msgid "that device isn't paired"
 msgstr "den enheten är inte parkopplad"
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "{device} is out of reach, and it can't be woken from here"
+msgstr "{device} går inte att nå, och den kan inte väckas härifrån"
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "the connection to {device} was lost"
+msgstr "anslutningen till {device} bröts"
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "the device didn't wake up; check that Wake-on-LAN is on in its settings"
+msgstr "enheten vaknade inte; kontrollera att Wake-on-LAN är påslaget i dess inställningar"
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "this device doesn't take play requests"
+msgstr "den här enheten tar inte emot spelförfrågningar"
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "nobody started it on that device in time"
+msgstr "ingen startade det på den enheten i tid"
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "that game isn't in this device's library"
+msgstr "det spelet finns inte i den här enhetens bibliotek"
 
 #: apps/desktop/src-tauri/src/commands/copies.rs
 msgid "the game isn't installed on this computer in a folder that can be copied"
@@ -4428,6 +4467,10 @@ msgstr "Det gick inte att öppna filhanteraren ({opener}) för att visa ”{fold
 #: apps/desktop/src-tauri/src/commands/peer_backups.rs
 msgid "Devices aren't ready on this device yet."
 msgstr "Enheter är inte redo på den här enheten än."
+
+#: apps/desktop/src-tauri/src/commands/remote_play.rs
+msgid "it didn't start on that device"
+msgstr "det startade inte på den enheten"
 
 #: apps/desktop/src-tauri/src/commands/rom_scanners.rs
 msgid "unknown ROM scanner {id}"

@@ -39,6 +39,9 @@ pub struct PeerCopy {
     pub through_proton: bool,
     /// The game is running on that device now.
     pub playing: bool,
+    /// Out of reach, it can be woken: its Wake-on-LAN addresses are known
+    /// (#234).
+    pub wakeable: bool,
 }
 
 /// `game`'s copies on paired devices, the best reached first.
@@ -58,6 +61,16 @@ pub async fn peer_copies(
         None => Vec::new(),
     };
     let here = this_os();
+    let mut wakeable = std::collections::HashSet::new();
+    for record in &records {
+        if !store
+            .paired_device_macs(&record.device_id)
+            .await?
+            .is_empty()
+        {
+            wakeable.insert(record.device_id.clone());
+        }
+    }
     let mut copies: Vec<PeerCopy> = records
         .into_iter()
         .filter_map(|record| {
@@ -84,6 +97,7 @@ pub async fn peer_copies(
                 playing: playing
                     .iter()
                     .any(|p| p.device_id == device.id && p.game_id == game),
+                wakeable: wakeable.contains(&device.id),
             })
         })
         .collect();

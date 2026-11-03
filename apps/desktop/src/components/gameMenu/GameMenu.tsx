@@ -13,6 +13,7 @@ import {
   MonitorSmartphone,
   Pencil,
   Play,
+  Power,
   Send,
   Square,
   Trash2,
@@ -115,6 +116,11 @@ export function GameMenu({
       )
     : [];
   const send = useSyncAction((api, deviceId: string) => api.sendTo(target.gameId, deviceId));
+  // Play there (#234): in reach or wakeable, and not running there already.
+  const playThere = peers.filter(
+    (peer) => !peer.playing && (peer.link !== "offline" || peer.wakeable),
+  );
+  const playOn = useSyncAction((api, deviceId: string) => api.playOn(target.gameId, deviceId));
   // Releases' play actions and tools (#178).
   const releases = useGameActions(target.gameId).data ?? [];
   // Releases streamed from other devices (#264), by the device's name.
@@ -161,6 +167,7 @@ export function GameMenu({
     setFavorite?.error?.message ??
     removeOffline?.error?.message ??
     send.error?.message ??
+    playOn.error?.message ??
     stop.error?.message;
   return (
     <ContextMenu aria-label={target.title} anchor={anchor} onClose={onClose}>
@@ -394,6 +401,23 @@ export function GameMenu({
         <>
           <MenuSeparator />
           <MenuSection title={t({ message: "Your devices", context: "game menu section" })}>
+            {playThere.map((peer) => {
+              const name = peer.deviceName;
+              return (
+                <MenuItem
+                  key={`play-on:${peer.deviceId}`}
+                  id={`play-on:${peer.deviceId}`}
+                  icon={peer.link === "offline" ? Power : Play}
+                  description={peer.link === "offline" ? t`Wakes it first` : undefined}
+                  onAction={() => playOn.mutate(peer.deviceId)}
+                >
+                  {t({
+                    message: `Play on ${name}`,
+                    comment: "Starts the game on another of the user's devices",
+                  })}
+                </MenuItem>
+              );
+            })}
             {targets.map((device) => {
               const name = device.name;
               return (

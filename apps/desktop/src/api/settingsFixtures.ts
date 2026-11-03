@@ -300,6 +300,7 @@ const sections: {
       neverRelay: false,
       port: null,
       acceptCopies: false,
+      remotePlay: true,
     },
   },
   {

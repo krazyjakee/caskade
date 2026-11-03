@@ -31,6 +31,7 @@ pub mod manual_games;
 pub mod notifications;
 pub mod peer_backups;
 pub mod plugin_ui;
+pub mod remote_play;
 pub mod plugins;
 pub mod presence;
 pub mod rom_scanners;

@@ -24,6 +24,7 @@ import {
   type PairingLinkTarget,
   type PairingState,
   type PeerCopy_Serialize,
+  type RemotePlayRequested,
   type ThisDevice_Serialize,
 } from "./bindings";
 import { unwrap } from "./reply";
@@ -35,6 +36,8 @@ export type ThisDevice = ThisDevice_Serialize;
 export type PairedDevice = PairedDevice_Serialize;
 /** A game's copy on another of the user's devices (#232). */
 export type PeerCopy = PeerCopy_Serialize;
+/** Another device asks to start a game here (#234). */
+export type PlayRequest = RemotePlayRequested;
 /** How a device is reached right now. */
 export type PeerLink = DeviceLink;
 export type {
@@ -100,6 +103,13 @@ export interface SyncApi {
   /** Asks a device to copy a game from this computer; it confirms there
    * unless it accepts copies without asking (#235). */
   sendTo(gameId: string, deviceId: string): Promise<void>;
+  /** Starts a game on another device, waking it first when it sleeps and
+   * can be woken (#234). Resolves once it started there. */
+  playOn(gameId: string, deviceId: string): Promise<void>;
+  /** Other devices' requests to start a game here. */
+  onPlayRequest(listener: (request: PlayRequest) => void): () => void;
+  /** How starting a requested game went here. */
+  finishPlay(requestId: string, started: boolean, reason?: string): Promise<void>;
   /** After the keychain lost this device's key: a new identity. */
   createIdentity(): Promise<void>;
   retryIdentity(): Promise<void>;
@@ -131,6 +141,11 @@ export const nativeSyncApi: SyncApi = {
   copyHere: (gameId, deviceId) =>
     unwrap(commands.gameCopyHere(gameId, deviceId, null)).then(nothing),
   sendTo: (gameId, deviceId) => unwrap(commands.gameSendTo(gameId, deviceId)).then(nothing),
+  playOn: (gameId, deviceId) => unwrap(commands.gamePlayOn(gameId, deviceId)).then(nothing),
+  onPlayRequest: (listener) =>
+    effectSubscription(events.remotePlayRequested.listen, ({ payload }) => listener(payload)),
+  finishPlay: (requestId, started, reason) =>
+    commands.remotePlayFinished(requestId, started, reason ?? null),
   createIdentity: () => unwrap(commands.devicesCreateIdentity()).then(nothing),
   retryIdentity: () => unwrap(commands.devicesRetryIdentity()).then(nothing),
   transfers: () => unwrap(commands.devicesTransfers()),

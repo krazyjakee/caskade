@@ -135,6 +135,11 @@ fn marked() -> Vec<crate::i18n::Message> {
             "settings",
             "A fixed UDP port for firewall rules; empty lets the system choose."
         ),
+        msgp!("settings", "Play requests from my devices"),
+        msgp!(
+            "settings",
+            "Your other devices can start a game here, as Play here would."
+        ),
         msgp!("settings", "Accept copies from my devices"),
         msgp!(
             "settings",

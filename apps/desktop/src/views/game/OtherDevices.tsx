@@ -4,7 +4,7 @@
  * (#234) comes later. */
 import { Button } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
-import { Download } from "lucide-react";
+import { Download, Play, Power } from "lucide-react";
 import { formatSize } from "../../api/presentation";
 import { type PeerCopy, usePeerCopies, useSyncAction } from "../../api/sync";
 import { FailureNotice } from "../../components/FailureNotice";
@@ -20,6 +20,7 @@ export function OtherDevices({
 }) {
   const { data } = usePeerCopies(gameId);
   const copy = useSyncAction((api, deviceId: string) => api.copyHere(gameId, deviceId));
+  const play = useSyncAction((api, deviceId: string) => api.playOn(gameId, deviceId));
   if (!data || data.length === 0) return null;
   // The first copy that can come here is the one the page offers first.
   const best = data.find((peer) => peer.blocked === null && peer.link !== "offline");
@@ -39,6 +40,9 @@ export function OtherDevices({
           primary={primary && peer === best}
           copying={copy.isPending || (copy.isSuccess && copy.variables === peer.deviceId)}
           onCopy={() => copy.mutate(peer.deviceId)}
+          playing={play.isPending && play.variables === peer.deviceId}
+          played={play.isSuccess && play.variables === peer.deviceId}
+          onPlay={() => play.mutate(peer.deviceId)}
         />
       ))}
       {copy.isSuccess && (
@@ -46,7 +50,9 @@ export function OtherDevices({
           <Trans>Copying to this computer. Follow it in Activity.</Trans>
         </p>
       )}
-      {copy.error && <FailureNotice variant="inline" error={copy.error} />}
+      {(copy.error ?? play.error) && (
+        <FailureNotice variant="inline" error={copy.error ?? play.error} />
+      )}
     </section>
   );
 }
@@ -73,17 +79,27 @@ function PeerRow({
   primary,
   copying,
   onCopy,
+  playing,
+  played,
+  onPlay,
 }: {
   peer: PeerCopy;
   primary: boolean;
   copying: boolean;
   onCopy: () => void;
+  /** Asked to start there, waiting for it (#234). */
+  playing: boolean;
+  played: boolean;
+  onPlay: () => void;
 }) {
   const { t } = useLingui();
   const note = usePeerNote()(peer);
   // Game files go only over a direct connection: through a relay the copy
   // waits, and says so in Activity.
   const canCopy = peer.blocked === null && peer.link !== "offline";
+  // Played there: in reach, or asleep and wakeable, and not running already.
+  const asleep = peer.link === "offline";
+  const canPlay = !peer.playing && (!asleep || peer.wakeable);
   const device = peer.deviceName;
   const size = peer.sizeBytes === null ? null : formatSize(peer.sizeBytes);
   const details = [size, note].filter(Boolean).join(" · ");
@@ -101,18 +117,41 @@ function PeerRow({
         <LinkBadge link={peer.link} />
       </span>
       {details && <span className="text-xs text-fg-muted">{details}</span>}
-      {canCopy && (
-        <div>
-          <Button
-            size="sm"
-            variant={primary ? "primary" : "secondary"}
-            data-focus-default={primary || undefined}
-            icon={Download}
-            isDisabled={copying}
-            onPress={onCopy}
-          >
-            {t`Copy to this computer`}
-          </Button>
+      {playing && (
+        <span role="status" className="text-xs text-fg-muted">
+          {asleep ? t`Waking ${device}…` : t`Starting on ${device}…`}
+        </span>
+      )}
+      {played && (
+        <span role="status" className="text-xs text-status-installed">
+          {t`Started on ${device}.`}
+        </span>
+      )}
+      {(canCopy || canPlay) && (
+        <div className="flex flex-wrap gap-2">
+          {canCopy && (
+            <Button
+              size="sm"
+              variant={primary ? "primary" : "secondary"}
+              data-focus-default={primary || undefined}
+              icon={Download}
+              isDisabled={copying}
+              onPress={onCopy}
+            >
+              {t`Copy to this computer`}
+            </Button>
+          )}
+          {canPlay && (
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={asleep ? Power : Play}
+              isDisabled={playing}
+              onPress={onPlay}
+            >
+              {asleep ? t`Wake and play on ${device}` : t`Play on ${device}`}
+            </Button>
+          )}
         </div>
       )}
     </div>

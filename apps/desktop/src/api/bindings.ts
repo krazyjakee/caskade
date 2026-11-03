@@ -776,6 +776,13 @@ export const commands = {
 	 *  device confirms it there, unless it accepts copies without asking.
 	 */
 	gameSendTo: (gameId: string, deviceId: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("game_send_to", { gameId, deviceId })),
+	/**
+	 *  Starts `game_id` on `device_id`, waking it first when it's out of reach
+	 *  and can be woken. Answers once it started there, or why not.
+	 */
+	gamePlayOn: (gameId: string, deviceId: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("game_play_on", { gameId, deviceId })),
+	/**  How starting a game another device asked for went here. */
+	remotePlayFinished: (requestId: string, started: boolean, reason: string | null) => __TAURI_INVOKE<void>("remote_play_finished", { requestId, started, reason }),
 	/**  Copies going on to and from this device. */
 	devicesTransfers: () => typedError<TransferView[], ErrorReport_Serialize>(__TAURI_INVOKE("devices_transfers")),
 	/**  Renames this device; an empty name goes back to the host name. */
@@ -957,6 +964,7 @@ export const events = {
 	pluginDisabled: makeEvent<PluginDisabled, PluginDisabled>("plugin-disabled"),
 	pluginReloaded: makeEvent<PluginReloaded_Serialize, PluginReloaded_Deserialize>("plugin-reloaded"),
 	pluginsChanged: makeEvent<PluginsChanged, PluginsChanged>("plugins-changed"),
+	remotePlayRequested: makeEvent<RemotePlayRequested, RemotePlayRequested>("remote-play-requested"),
 	rommDownloadChanged: makeEvent<RommDownloadChanged_Serialize, RommDownloadChanged_Deserialize>("romm-download-changed"),
 	saveVersionsChanged: makeEvent<SaveVersionsChanged, SaveVersionsChanged>("save-versions-changed"),
 	settingsChanged: makeEvent<SettingsChanged, SettingsChanged>("settings-changed"),
@@ -6222,6 +6230,11 @@ export type PeerCopy_Deserialize = {
 	throughProton: boolean,
 	/**  The game is running on that device now. */
 	playing: boolean,
+	/**
+	 *  Out of reach, it can be woken: its Wake-on-LAN addresses are known
+	 *  (#234).
+	 */
+	wakeable: boolean,
 };
 
 /**  Another device's copy of a game. */
@@ -6240,6 +6253,11 @@ export type PeerCopy_Serialize = {
 	throughProton: boolean,
 	/**  The game is running on that device now. */
 	playing: boolean,
+	/**
+	 *  Out of reach, it can be woken: its Wake-on-LAN addresses are known
+	 *  (#234).
+	 */
+	wakeable: boolean,
 };
 
 /**
@@ -7099,6 +7117,16 @@ export type RemotePlatform_Serialize = {
 	customName: string | null,
 	romCount: number,
 	igdbId: number | null,
+};
+
+/**
+ *  Another device asks to start a game here: the app plays it as Play would
+ *  and says how it went (`remote_play_finished`).
+ */
+export type RemotePlayRequested = {
+	requestId: string,
+	gameId: string,
+	deviceName: string,
 };
 
 /**  One reported total. */

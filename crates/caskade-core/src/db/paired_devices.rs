@@ -138,6 +138,28 @@ impl LibraryStore {
         Ok(())
     }
 
+    /// A paired device's Wake-on-LAN addresses, as it last said (#234).
+    pub async fn paired_device_macs(&self, endpoint_id: &str) -> Result<Vec<String>> {
+        let text: Option<String> =
+            sqlx::query_scalar("SELECT wol_macs_json FROM paired_devices WHERE endpoint_id=?")
+                .bind(endpoint_id)
+                .fetch_optional(&self.pool)
+                .await?;
+        Ok(text
+            .and_then(|text| serde_json::from_str(&text).ok())
+            .unwrap_or_default())
+    }
+
+    /// Records a paired device's Wake-on-LAN addresses (#234).
+    pub async fn set_paired_device_macs(&self, endpoint_id: &str, macs: &[String]) -> Result<()> {
+        sqlx::query("UPDATE paired_devices SET wol_macs_json=? WHERE endpoint_id=?")
+            .bind(serde_json::to_string(macs)?)
+            .bind(endpoint_id)
+            .execute(&self.pool)
+            .await?;
+        Ok(())
+    }
+
     /// Records where a paired device was reached.
     pub async fn set_paired_device_addresses(
         &self,

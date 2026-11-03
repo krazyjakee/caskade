@@ -4,6 +4,7 @@ import { GameMenuHost } from "../components/gameMenu/GameMenuHost";
 import { PathPickerProvider } from "../components/pathBrowser/PathPicker";
 import { StreamPairingHost } from "../components/streaming/StreamPairingHost";
 import { PairingHost } from "../components/sync/PairingHost";
+import { RemotePlayHost } from "../components/sync/RemotePlayHost";
 import { InputProvider, useInputAction } from "../input";
 import { GuideMenu, nativeGuideApi } from "../input/GuideMenu";
 import { useOptionalInput } from "../input/InputProvider";
@@ -93,6 +94,7 @@ export function AppShell() {
               <ShellActions />
               <JobQuestionHost />
               <PairingHost />
+              <RemotePlayHost />
               <StreamPairingHost />
               <GameMenuHost>
                 {consoleMode ? (

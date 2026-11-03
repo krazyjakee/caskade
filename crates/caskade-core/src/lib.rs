@@ -49,6 +49,8 @@ pub mod themes;
 pub mod tracking;
 #[cfg(feature = "net")]
 pub mod transfer;
+#[cfg(feature = "net")]
+pub mod remote_play;
 pub mod updates;
 pub mod web;
 

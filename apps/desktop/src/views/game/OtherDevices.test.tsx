@@ -33,6 +33,7 @@ const copies: PeerCopy[] = [
     blocked: null,
     throughProton: true,
     playing: false,
+    wakeable: false,
   },
   {
     deviceId: "c".repeat(64),
@@ -45,6 +46,7 @@ const copies: PeerCopy[] = [
     blocked: "launcherOnly",
     throughProton: false,
     playing: false,
+    wakeable: false,
   },
   {
     deviceId: "d".repeat(64),
@@ -57,6 +59,7 @@ const copies: PeerCopy[] = [
     blocked: null,
     throughProton: false,
     playing: false,
+    wakeable: true,
   },
 ];
 
@@ -88,8 +91,12 @@ it("shows the game's copies on the other devices on its page", async () => {
     within(panel)
       .getAllByRole("button")
       .map((b) => b.textContent),
-  ).toEqual(["Copy to this computer"]);
-  expect(within(rows[0] as HTMLElement).getByRole("button")).toBeTruthy();
+  ).toEqual([
+    "Copy to this computer",
+    "Play on Steam Deck",
+    "Play on Office laptop",
+    "Wake and play on Living room",
+  ]);
   // The copies aren't releases here.
   expect(screen.queryByText("Another of your devices")).toBeNull();
 });
@@ -145,4 +152,24 @@ it("offers Copy to only for devices reached directly that don't have the game", 
   );
   fireEvent.click(within(menu).getByRole("menuitem", { name: /Copy to Work PC/ }));
   await waitFor(() => expect(sync.sent()).toEqual([["fixture-1", "8".repeat(64)]]));
+});
+
+it("plays a game on another device, waking one that sleeps", async () => {
+  const sync = app("/games/fixture-1");
+  fireEvent.click(await screen.findByRole("button", { name: "Play on Steam Deck" }));
+  expect(await screen.findByText("Started on Steam Deck.")).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Wake and play on Living room" }));
+  await waitFor(() =>
+    expect(sync.played().started).toEqual([
+      ["fixture-1", "b".repeat(64)],
+      ["fixture-1", "d".repeat(64)],
+    ]),
+  );
+});
+
+it("starts a game another device asks for, as Play here would", async () => {
+  const sync = app("/library");
+  await screen.findByRole("heading", { name: "Library" });
+  sync.requestPlay({ requestId: "r1", gameId: "fixture-1", deviceName: "Steam Deck" });
+  await waitFor(() => expect(sync.played().finished).toEqual([["r1", true, undefined]]));
 });

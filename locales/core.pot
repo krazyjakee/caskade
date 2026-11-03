@@ -806,6 +806,10 @@ msgid "couldn't reach the other device"
 msgstr ""
 
 #: crates/caskade-core/src/devices/mod.rs
+msgid "the other device turned the connection down"
+msgstr ""
+
+#: crates/caskade-core/src/devices/mod.rs
 msgid "this device has no identity to connect with"
 msgstr ""
 
@@ -3308,6 +3312,16 @@ msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
+msgid "Play requests from my devices"
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
+msgid "Your other devices can start a game here, as Play here would."
+msgstr ""
+
+#: crates/caskade-core/src/settings/schema_text.rs
+msgctxt "settings"
 msgid "Accept copies from my devices"
 msgstr ""
 
@@ -4327,8 +4341,33 @@ msgstr ""
 msgid "that device has no copy of the game"
 msgstr ""
 
+#: crates/caskade-core/src/remote_play/mod.rs
 #: apps/desktop/src-tauri/src/commands/copies.rs
 msgid "that device isn't paired"
+msgstr ""
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "{device} is out of reach, and it can't be woken from here"
+msgstr ""
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "the connection to {device} was lost"
+msgstr ""
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "the device didn't wake up; check that Wake-on-LAN is on in its settings"
+msgstr ""
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "this device doesn't take play requests"
+msgstr ""
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "nobody started it on that device in time"
+msgstr ""
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "that game isn't in this device's library"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/copies.rs
@@ -4425,6 +4464,10 @@ msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/peer_backups.rs
 msgid "Devices aren't ready on this device yet."
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/remote_play.rs
+msgid "it didn't start on that device"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/rom_scanners.rs

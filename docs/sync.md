@@ -641,6 +641,72 @@ moves 256 MiB in 0.62 s (432 MB/s; the offer took 0.19 s):
 `cargo test --release -p caskade-sync --test it copy::loopback_throughput --
 --ignored --nocapture`. A relay moves about 1 MB/s.
 
+### Downloads from a device nearby
+
+When one device has downloaded a file, the others get it from that device
+over the local network before the internet (#236, `install::nearby`):
+faster, without spending the connection, and with no internet at all.
+
+- **Keeping.** A download the installer finished from its source (a game, an
+  update, any install from a link) is kept in
+  `<cache>/peer-downloads/<sha256>/<file>` (a hard link where it can be),
+  offered through the copy store (`download:<sha256>`) and listed in
+  `index.json` with its URLs, size, SHA-256 and the source's validator (a
+  strong ETag, or a Last-Modified date the source's clock vouches for;
+  `DownloadedFile::validator`). Kept files past 32 GiB go oldest first, and
+  only when a new one is kept, which is after a download from the internet.
+- **Telling.** Each exchange's blob round carries a `download` note
+  (`BlobKind`, governed by its own setting) listing them. The device that
+  tells lets the other fetch each one through the copy gate.
+- **Finding.** Before the installer downloads (`caskade_installer::fetch::LocalSource`,
+  asked by the pipeline's download step), the file is looked for on a paired
+  device whose link is `lan`: by SHA-256 where the request names one,
+  otherwise by URL. A URL match is taken only when the source, asked with a
+  `HEAD`, answers with the same validator and size, or doesn't answer at all.
+  The file comes over the `DirectDialer` only (game files never relay) into
+  `.caskade/downloads/<job>/near/`.
+- **Checking.** The installer checks it as it checks any download: the
+  request's size and SHA-256, and also the size and SHA-256 the other device
+  said it had. A file that fails is deleted and the download goes to its
+  source, as it does when no device has the file or one stops answering.
+  The pipeline then reads it like any download (archive checks included).
+
+`core.sync.peerDownloads` (Settings → Devices → Downloads from my devices; on
+by default, kept on each device) turned off keeps, offers and asks for
+nothing: every download goes to its source. Tests:
+`cargo test -p caskade-core --test it peer_downloads::` (two cores on
+loopback and a wiremock source: an update installs on the second with the
+source gone, a file that isn't what the other device said is discarded and
+downloaded from the source, and turned off the source is used).
+
+Not yet: emulator installs, RetroArch cores, BIOS files, Hasheous dumps, the
+Ludusavi manifest and artwork download outside the installer's pipeline and
+still go to the internet.
+
+### Playing a game on another device
+
+Play on … (#234: the On your other devices panel and the game menu's Your
+devices; command `game_play_on`) starts a game on a paired device that has
+it installed (`remote_play`). The requester opens a `play` session (its own
+grant: an unpaired device is refused before anything is read) and names the
+game in its ids. The target maps it through library sync's game matching,
+refuses when `core.sync.remotePlay` is off (Settings → Devices → Play requests
+from my devices; on by default, kept on each device) or the game isn't in its
+library, and hands it to the app (`RemotePlayRequested`):
+`components/sync/RemotePlayHost.tsx` plays it as Play there would, with that
+device's signed-in account. So an age limit asks for the admin PIN on the
+target, and console mode shows the game as for a local launch. How it went
+(`remote_play_finished`) goes back on the session within three minutes: the
+requester shows Starting on …, then Started on …, or the reason it didn't. The
+game running there then shows on the requester through presence (#240), and
+its session lands on both devices through library sync.
+
+A device out of reach is woken first when its Wake-on-LAN addresses are
+known: each device sends its wired and wireless MAC addresses in every sync's
+`Hello` (recorded in `paired_devices.wol_macs_json`), and Wake sends a magic
+packet to every local broadcast address on ports 9 and 7, then waits up to two
+minutes for the device to come into reach ("Waking …"; "Wake and play on …").
+
 ### The default admin
 
 Each library starts with a default admin, "Player" (migration 0014). Until
@@ -968,3 +1034,35 @@ Results:
 | Date | Machines | Steps passed | Speed | Notes |
 | --- | --- | --- | --- | --- |
 | — | — | — | — | Not run yet: needs a Windows and a Linux machine. Loopback: 432 MB/s. |
+
+### Downloads from a device nearby (#236)
+
+1. On two paired machines on one network, install the same older release of
+   a game from a link (a GitHub release, say) on both.
+2. Update it on the first from the internet.
+3. Unplug the router's internet. On the second, wait for a sync (or press
+   Sync now in Settings → Devices), then update: the update installs, from
+   the first machine.
+4. Plug the internet back in, turn off Downloads from my devices on the
+   second and install another game the first has downloaded: it downloads
+   from the internet.
+
+| Date | Machines | Steps passed | Notes |
+| --- | --- | --- | --- |
+| — | — | — | Not run yet: needs two machines. Loopback with a wiremock source passes. |
+
+### Waking a device to play (#234)
+
+1. On a desktop with Wake-on-LAN on in its firmware and network settings, sync
+   once with the other device (it learns the MAC addresses), then put the
+   desktop to sleep.
+2. On the other device, open a game installed on the desktop: On your other
+   devices offers Wake and play on …. Press it.
+3. The desktop wakes ("Waking …"), the game starts there ("Started on …"),
+   and the game shows as running on both devices.
+4. With an age-limited account signed in on the desktop, the admin PIN is
+   asked there before it starts.
+
+| Date | Machines | Steps passed | Notes |
+| --- | --- | --- | --- |
+| — | — | — | Not run yet: needs a sleeping desktop with Wake-on-LAN. |

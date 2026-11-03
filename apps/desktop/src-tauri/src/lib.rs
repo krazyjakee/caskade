@@ -711,6 +711,12 @@ pub fn run() {
                 }
                 Err(error) => tracing::warn!(%error, "copies between devices unavailable"),
             }
+            // Games other devices start here, and starting games there (#234).
+            let remote_play =
+                caskade_core::remote_play::RemotePlay::new(store.clone(), devices.clone());
+            remote_play.set_settings(settings.clone());
+            commands::remote_play::setup(app.handle(), &remote_play, devices.clone());
+            app.manage(remote_play);
             // Library sync with paired devices (#228–#230), in the background.
             let sync = caskade_core::sync::SyncService::new(store.clone(), devices.clone());
             sync.set_settings(settings.clone());
