@@ -661,9 +661,17 @@ Activity, cancellable, retried from where it stopped (`install::peer`).
    (`caskade_sync::copy::CopyStore`, `<cache>/copies/send`; only BLAKE3
    outboards are stored), saying how far it got, and offers the root hash, size,
    title, the program relative to the folder and whether it's a Windows build.
-   Never a path or arguments. The offer is kept for six hours, so a copy that
-   comes back resumes without the files being read again; while it's being
-   sent, the release can't be moved or uninstalled.
+   Never a path or arguments. An emulated release goes as its ROM files
+   alone, never its folder, which may be a ROM scanner's holding every game
+   of the platform (#279, `transfer::rom`): they're linked together under
+   `<cache>/copies/send/roms/<entry>/`, and the offer adds the platform and
+   the emulator definition and profile they play with. The receiver places
+   them as a release of the same game in a folder of its own in the chosen
+   storage, pinned to its emulator of that definition and profile, or else
+   emulator setup installs it (as a shared ROM, #248). The offer is kept
+   for six hours, so a copy that comes back resumes without the files being
+   read again; while it's being sent, the release can't be moved or
+   uninstalled.
 3. Its iroh-blobs provider serves only paired devices it offered something,
    and only those collections (`CopyGate`: connections and get requests are
    intercepted; get-many, push and observe are refused).

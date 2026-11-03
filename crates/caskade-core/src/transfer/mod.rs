@@ -21,6 +21,13 @@
 //! The sender keeps an offer for [`OFFER_LIFETIME`], so a copy that comes
 //! back resumes without the files being read again; while it's being sent,
 //! the release can't be moved or uninstalled.
+//!
+//! An emulated release goes as its ROM files, never its folder, which may be
+//! a ROM scanner's holding every game of the platform (#279, [`rom`]): the
+//! offer describes the platform and emulator profile, and the receiver
+//! places the files as a game of that platform instead of installing them.
+
+pub(crate) mod rom;
 
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
@@ -67,6 +74,10 @@ enum Message {
         launch: Option<String>,
         /// A Windows build.
         windows: bool,
+        /// An emulated release: its ROM files, platform and emulator
+        /// profile (#279).
+        #[serde(default)]
+        rom: Option<rom::RomCopy>,
     },
     /// Sender: not this one, and why.
     Refused { reason: String },
@@ -115,6 +126,7 @@ struct Offer {
     title: String,
     launch: Option<String>,
     windows: bool,
+    rom: Option<rom::RomCopy>,
     peers: HashSet<EndpointId>,
 }
 
@@ -154,6 +166,10 @@ struct Inner {
     changed: broadcast::Sender<()>,
     /// Where requests to copy a game here go (#235).
     on_send: std::sync::OnceLock<Arc<dyn Fn(SendRequest) + Send + Sync>>,
+    /// Installs the emulator a received ROM plays with (#279).
+    emulators: std::sync::OnceLock<Arc<dyn rom::EmulatorInstaller>>,
+    /// Where an emulated release's ROM files are put together to send.
+    outgoing_dir: PathBuf,
 }
 
 fn sync_error(error: caskade_sync::Error) -> Error {
@@ -181,6 +197,7 @@ impl Transfers {
             .await
             .map_err(sync_error)?;
         let incoming_dir = cache.join("copies").join("receive").join("incoming");
+        let outgoing_dir = cache.join("copies").join("send").join("roms");
         let gate = CopyGate::default();
         devices.set_copy_provider(sending.protocol(&gate));
         let transfers = Self {
@@ -196,10 +213,22 @@ impl Transfers {
                 incoming_dir,
                 changed: broadcast::channel(16).0,
                 on_send: std::sync::OnceLock::new(),
+                emulators: std::sync::OnceLock::new(),
+                outgoing_dir,
             }),
         };
         devices.set_copy_handler(Arc::new(Serve(Arc::downgrade(&transfers.inner))));
         Ok(transfers)
+    }
+
+    /// Installs the emulator a received ROM plays with when this device has
+    /// none for it (emulator setup).
+    pub fn set_emulator_installer(&self, installer: Arc<dyn rom::EmulatorInstaller>) {
+        let _ = self.inner.emulators.set(installer);
+    }
+
+    pub(crate) fn emulator_installer(&self) -> Option<Arc<dyn rom::EmulatorInstaller>> {
+        self.inner.emulators.get().cloned()
     }
 
     /// Where another device's request to copy a game here goes: the app
@@ -499,6 +528,13 @@ impl Transfers {
                 "the game isn't fully installed on this device"
             )));
         }
+        // Its ROM files go instead (`rom`): its folder may hold every game
+        // of the platform.
+        if rom::emulated(&entry) {
+            return Err(Error::Invalid(crate::tr!(
+                "an emulated game goes as its ROM files, not its folder"
+            )));
+        }
         let folder = match &entry.location {
             Some(InstallLocation::Managed { root_id, rel_dir }) => {
                 let root = self.inner.store.get_root(root_id).await?.ok_or_else(|| {
@@ -507,10 +543,7 @@ impl Transfers {
                 root.path.join(rel_dir)
             }
             Some(InstallLocation::External { path })
-                if matches!(
-                    entry.launch,
-                    Some(LaunchSpec::Executable { .. } | LaunchSpec::Emulator { .. })
-                ) =>
+                if matches!(entry.launch, Some(LaunchSpec::Executable { .. })) =>
             {
                 if path.is_dir() {
                     path.clone()
@@ -570,13 +603,14 @@ impl Transfers {
                     offer.title.clone(),
                     offer.launch.clone(),
                     offer.windows,
+                    offer.rom.clone(),
                 )
             })
         };
-        let (offered, title, launch, windows) = match earlier {
+        let (offered, title, launch, windows, rom) = match earlier {
             Some(earlier) => earlier,
             None => {
-                let (folder, title, launch, windows) = self.source(entry).await?;
+                let (folder, title, launch, windows, rom) = self.what_to_send(entry).await?;
                 let tag = format!("copy/{entry}");
                 let (tx, mut rx) = mpsc::unbounded_channel();
                 let reading = self.inner.sending.offer(&folder, &tag, move |done, total| {
@@ -610,10 +644,11 @@ impl Transfers {
                             title: title.clone(),
                             launch: launch.clone(),
                             windows,
+                            rom: rom.clone(),
                             peers: HashSet::new(),
                         },
                     );
-                (offered, title, launch, windows)
+                (offered, title, launch, windows, rom)
             }
         };
         self.inner
@@ -658,9 +693,39 @@ impl Transfers {
                 title,
                 launch,
                 windows,
+                rom,
             })
             .await
             .map_err(sync_error)
+    }
+
+    /// What release `entry` sends: its folder, title, program and whether
+    /// it's a Windows build; or, for an emulated release, its ROM files put
+    /// together on their own and what they are.
+    async fn what_to_send(
+        &self,
+        entry: &str,
+    ) -> Result<(PathBuf, String, Option<String>, bool, Option<rom::RomCopy>)> {
+        let release = self.inner.store.get_entry(entry).await?;
+        if !release.as_ref().is_some_and(rom::emulated) {
+            let (folder, title, launch, windows) = self.source(entry).await?;
+            return Ok((folder, title, launch, windows, None));
+        }
+        let (release, copy, files) = rom::describe(&self.inner.store, entry).await?;
+        if !matches!(release.state, InstallState::Installed) {
+            return Err(Error::Invalid(crate::tr!(
+                "the game isn't fully installed on this device"
+            )));
+        }
+        let folder = rom::put_together(&self.inner.outgoing_dir.join(entry), files).await?;
+        let title = self
+            .inner
+            .store
+            .game(&release.game_id)
+            .await?
+            .map(|game| game.title)
+            .unwrap_or_default();
+        Ok((folder, title, None, false, Some(copy)))
     }
 
     /// `peer` has release `entry`, or its offer ran out: withdrawn, and let
@@ -686,6 +751,7 @@ impl Transfers {
             .remove(&(peer, entry.to_owned()));
         if let Some(tag) = released {
             let _ = self.inner.sending.release(&tag).await;
+            let _ = tokio::fs::remove_dir_all(self.inner.outgoing_dir.join(entry)).await;
         }
         self.changed();
     }
@@ -724,7 +790,7 @@ impl PeerFetcher for Transfers {
             })
             .await
             .map_err(|_| waiting(unreachable()))?;
-        let (root_hash, size, title, launch) = loop {
+        let (root_hash, size, title, launch, rom) = loop {
             let frame = tokio::time::timeout(FRAME_WAIT, session.reader().read(MAX_LINE)).await;
             match frame {
                 Ok(Ok(Message::Preparing { done, total })) => {
@@ -735,8 +801,9 @@ impl PeerFetcher for Transfers {
                     size,
                     title,
                     launch,
+                    rom,
                     ..
-                })) => break (root, size, title, launch),
+                })) => break (root, size, title, launch, rom),
                 Ok(Ok(Message::Refused { reason })) => {
                     return Err(FetchFailure::Failed(Error::Invalid(reason)));
                 }
@@ -851,11 +918,31 @@ impl PeerFetcher for Transfers {
         let exported = store.export(&root_hash, &folder).await;
         finished(self);
         exported.map_err(|error| FetchFailure::Failed(sync_error(error)))?;
+        // An emulated release: placed as a game of its platform, not
+        // installed (#279).
+        let placed = match &rom {
+            Some(rom) => Some(
+                rom::place(
+                    &self.inner.store,
+                    self.emulator_installer(),
+                    rom,
+                    &folder,
+                    root,
+                    &title,
+                    Some(&target.game_id)
+                        .filter(|game| !game.is_empty())
+                        .map(String::as_str),
+                )
+                .await
+                .map_err(FetchFailure::Failed)?,
+            ),
+            None => None,
+        };
         Ok(Fetched {
             folder,
             title,
             launch,
-            placed: None,
+            placed,
         })
     }
 

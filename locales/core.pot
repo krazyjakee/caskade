@@ -3564,7 +3564,7 @@ msgctxt "settings"
 msgid "Maximum simultaneous downloads. Active downloads finish when this limit is lowered."
 msgstr ""
 
-#: crates/caskade-core/src/share/items.rs
+#: crates/caskade-core/src/transfer/rom.rs
 msgid "no free folder name for it"
 msgstr ""
 
@@ -3588,7 +3588,7 @@ msgstr ""
 msgid "that isn't a web game"
 msgstr ""
 
-#: crates/caskade-core/src/share/items.rs
+#: crates/caskade-core/src/transfer/rom.rs
 msgid "that isn't an emulated game"
 msgstr ""
 
@@ -3605,19 +3605,20 @@ msgstr ""
 msgid "the offline copy's files aren't there"
 msgstr ""
 
-#: crates/caskade-core/src/share/items.rs
+#: crates/caskade-core/src/transfer/rom.rs
 msgid "that game isn't on this device"
 msgstr ""
 
-#: crates/caskade-core/src/share/items.rs
+#: crates/caskade-core/src/transfer/rom.rs
 msgid "that game has no ROM files to share"
 msgstr ""
 
-#: crates/caskade-core/src/share/items.rs
+#: crates/caskade-core/src/transfer/rom.rs
 msgid "a ROM file of that game isn't there"
 msgstr ""
 
 #: crates/caskade-core/src/share/items.rs
+#: crates/caskade-core/src/transfer/rom.rs
 msgid "this share's description is damaged"
 msgstr ""
 
@@ -3638,7 +3639,7 @@ msgstr ""
 msgid "that isn't a web game's offline copy"
 msgstr ""
 
-#: crates/caskade-core/src/share/items.rs
+#: crates/caskade-core/src/transfer/rom.rs
 msgid "that storage location is gone"
 msgstr ""
 
@@ -4335,6 +4336,10 @@ msgstr ""
 
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "the game isn't fully installed on this device"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "an emulated game goes as its ROM files, not its folder"
 msgstr ""
 
 #: crates/caskade-core/src/transfer/mod.rs

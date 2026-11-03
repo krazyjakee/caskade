@@ -3566,7 +3566,7 @@ msgctxt "settings"
 msgid "Maximum simultaneous downloads. Active downloads finish when this limit is lowered."
 msgstr "Högsta antal samtidiga nedladdningar. Pågående nedladdningar slutförs när gränsen sänks."
 
-#: crates/caskade-core/src/share/items.rs
+#: crates/caskade-core/src/transfer/rom.rs
 msgid "no free folder name for it"
 msgstr "det finns inget ledigt mappnamn för den"
 
@@ -3590,7 +3590,7 @@ msgstr "den sparningens filer finns bara där den här enheten har dem, så de k
 msgid "that isn't a web game"
 msgstr "det är inte ett webbspel"
 
-#: crates/caskade-core/src/share/items.rs
+#: crates/caskade-core/src/transfer/rom.rs
 msgid "that isn't an emulated game"
 msgstr "det är inte ett emulerat spel"
 
@@ -3607,19 +3607,20 @@ msgstr "spelets lagring är inte tillgänglig"
 msgid "the offline copy's files aren't there"
 msgstr "offlinekopians filer finns inte där"
 
-#: crates/caskade-core/src/share/items.rs
+#: crates/caskade-core/src/transfer/rom.rs
 msgid "that game isn't on this device"
 msgstr "det spelet finns inte på den här enheten"
 
-#: crates/caskade-core/src/share/items.rs
+#: crates/caskade-core/src/transfer/rom.rs
 msgid "that game has no ROM files to share"
 msgstr "det spelet har inga ROM-filer att dela"
 
-#: crates/caskade-core/src/share/items.rs
+#: crates/caskade-core/src/transfer/rom.rs
 msgid "a ROM file of that game isn't there"
 msgstr "en ROM-fil för det spelet finns inte där"
 
 #: crates/caskade-core/src/share/items.rs
+#: crates/caskade-core/src/transfer/rom.rs
 msgid "this share's description is damaged"
 msgstr "den här delningens beskrivning är skadad"
 
@@ -3640,7 +3641,7 @@ msgstr "en samling har inga filer att ta emot"
 msgid "that isn't a web game's offline copy"
 msgstr "det är inte en offlinekopia av ett webbspel"
 
-#: crates/caskade-core/src/share/items.rs
+#: crates/caskade-core/src/transfer/rom.rs
 msgid "that storage location is gone"
 msgstr "den lagringsplatsen finns inte längre"
 
@@ -4338,6 +4339,10 @@ msgstr "den här enheten tar inte emot kopior"
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "the game isn't fully installed on this device"
 msgstr "spelet är inte helt installerat på den här enheten"
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "an emulated game goes as its ROM files, not its folder"
+msgstr "ett emulerat spel skickas som sina ROM-filer, inte sin mapp"
 
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "it starts through its store's launcher here; install it from the store there"

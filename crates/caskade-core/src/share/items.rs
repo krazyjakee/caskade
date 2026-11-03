@@ -22,30 +22,27 @@
 //!   they have, and a title-only record of each game they don't
 //!   ([`Shares::receive_collection`]).
 
-use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, OnceLock};
 
-use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use super::{ShareExpiry, ShareRecord, Shares};
 use crate::db::{LibraryStore, ShareRow};
-use crate::emulation::{EmulatorSetup, EmulatorTarget, RomLocation};
 use crate::install::Placed;
 use crate::metadata::{Applied, IgdbMatch, MatchSource};
 use crate::model::{
     Collection, CollectionKind, GameEntry, InstallLocation, InstallState, LaunchSpec,
-    SaveCollection, StorageRoot,
+    SaveCollection,
 };
 use crate::saves::versions::{ManifestFile, SaveVersions};
+pub use crate::transfer::rom::EmulatorInstaller;
+use crate::transfer::rom::{self, RomCopy};
 use crate::{Error, Result};
 
 /// The most games a shared collection lists.
 pub(super) const MAX_GAMES: usize = 1000;
-/// The most ROM files a shared ROM brings (discs of one game).
-const MAX_ROMS: usize = 64;
 
 /// Something other than a game to share.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
@@ -81,29 +78,14 @@ pub(super) enum Details {
     Web {
         url: String,
     },
-    Rom {
-        platform: String,
-        /// The emulator definition and its profile it played with.
-        definition: Option<String>,
-        profile: Option<String>,
-        roms: Vec<SharedRom>,
-    },
+    /// Its files, platform and emulator profile, as copies send them.
+    Rom(RomCopy),
     Collection {
         name: String,
         description: String,
         /// Each game's identity.
         games: Vec<Value>,
     },
-}
-
-/// One ROM file of a shared ROM.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub(super) struct SharedRom {
-    /// Its file name in the shared folder.
-    file: String,
-    /// Shown in the disc picker.
-    name: Option<String>,
 }
 
 /// What a share is, as the recipient sees it before taking it.
@@ -163,24 +145,10 @@ pub enum GameHere {
     Missing,
 }
 
-/// Installs an emulator by its definition (emulator setup, #146).
-#[async_trait]
-pub trait EmulatorInstaller: Send + Sync {
-    async fn install(&self, definition: &str) -> Result<()>;
-}
-
-#[async_trait]
-impl EmulatorInstaller for EmulatorSetup {
-    async fn install(&self, definition: &str) -> Result<()> {
-        EmulatorSetup::install(self, definition).await.map(drop)
-    }
-}
-
 /// What the items need besides the library.
 #[derive(Default)]
 pub(super) struct Parts {
     saves: OnceLock<SaveVersions>,
-    emulators: OnceLock<Arc<dyn EmulatorInstaller>>,
 }
 
 impl Details {
@@ -199,11 +167,7 @@ impl Details {
                     && files.iter().all(|file| blob_name(&file.hash).is_some())
             }
             Self::Web { url } => crate::web::page_url(url).is_ok(),
-            Self::Rom { roms, .. } => {
-                !roms.is_empty()
-                    && roms.len() <= MAX_ROMS
-                    && roms.iter().all(|rom| plain(&rom.file))
-            }
+            Self::Rom(rom) => rom.sound(),
             Self::Collection { games, .. } => games.len() <= MAX_GAMES,
         };
         fits.then_some(details)
@@ -214,52 +178,6 @@ impl Details {
 fn blob_name(hash: &str) -> Option<&str> {
     let hex = hash.strip_prefix("sha256:")?;
     (hex.len() == 64 && hex.bytes().all(|b| b.is_ascii_hexdigit())).then_some(hex)
-}
-
-/// A bare file name: nothing that leads out of its folder.
-fn plain(name: &str) -> bool {
-    !name.is_empty()
-        && name.len() <= 255
-        && name != "."
-        && name != ".."
-        && !name.contains(['/', '\\', ':', '\0'])
-}
-
-/// Puts `from` (a file or folder) at `to`: renamed, or copied then removed
-/// when they're on different disks. Blocking.
-fn move_path(from: &Path, to: &Path) -> std::io::Result<()> {
-    if let Some(parent) = to.parent() {
-        std::fs::create_dir_all(parent)?;
-    }
-    if std::fs::rename(from, to).is_ok() {
-        return Ok(());
-    }
-    if from.is_dir() {
-        std::fs::create_dir_all(to)?;
-        for entry in std::fs::read_dir(from)? {
-            let entry = entry?;
-            move_path(&entry.path(), &to.join(entry.file_name()))?;
-        }
-        std::fs::remove_dir_all(from)
-    } else {
-        std::fs::copy(from, to)?;
-        std::fs::remove_file(from)
-    }
-}
-
-/// `name`, or `name (2)`, `name (3)`, …: the first that `root` hasn't got.
-fn free_folder(root: &Path, name: &str) -> Result<PathBuf> {
-    for n in 1..1000 {
-        let candidate = if n == 1 {
-            name.to_owned()
-        } else {
-            format!("{name} ({n})")
-        };
-        if !root.join(&candidate).exists() {
-            return Ok(PathBuf::from(candidate));
-        }
-    }
-    Err(Error::Invalid(crate::tr!("no free folder name for it")))
 }
 
 /// Whether the library has `game`: installed, owned or only listed.
@@ -331,7 +249,7 @@ impl Shares {
     }
 
     pub fn set_emulator_installer(&self, installer: Arc<dyn EmulatorInstaller>) {
-        let _ = self.inner.items.emulators.set(installer);
+        self.inner.transfers.set_emulator_installer(installer);
     }
 
     fn saves(&self) -> Result<&SaveVersions> {
@@ -414,16 +332,7 @@ impl Shares {
                 )
             }
             ShareItem::Rom { entry_id } => {
-                let (entry, files) = self.rom_files(&entry_id).await?;
-                let Some(LaunchSpec::Emulator {
-                    platform_id,
-                    target,
-                    ..
-                }) = &entry.launch
-                else {
-                    return Err(Error::Invalid(crate::tr!("that isn't an emulated game")));
-                };
-                let (definition, profile) = self.portable_profile(platform_id, target).await?;
+                let (entry, rom, files) = rom::describe(store, &entry_id).await?;
                 let title = store
                     .game(&entry.game_id)
                     .await?
@@ -431,25 +340,16 @@ impl Shares {
                     .unwrap_or_default();
                 let size = files
                     .iter()
-                    .filter_map(|(path, _, _)| std::fs::metadata(path).ok())
+                    .filter_map(|(path, _)| std::fs::metadata(path).ok())
                     .map(|metadata| metadata.len())
                     .sum();
-                let roms = files
-                    .into_iter()
-                    .map(|(_, file, name)| SharedRom { file, name })
-                    .collect();
                 (
                     "rom",
                     title,
                     Some(entry.game_id.clone()),
                     Some(entry_id),
                     size,
-                    Details::Rom {
-                        platform: platform_id.clone(),
-                        definition,
-                        profile,
-                        roms,
-                    },
+                    Details::Rom(rom),
                 )
             }
             ShareItem::Collection { collection_id } => {
@@ -540,97 +440,6 @@ impl Shares {
         Ok((entry, folder))
     }
 
-    /// An emulated release and its ROM files: each one's path here, the
-    /// name it's shared under and its disc name.
-    async fn rom_files(
-        &self,
-        entry_id: &str,
-    ) -> Result<(GameEntry, Vec<(PathBuf, String, Option<String>)>)> {
-        let store = &self.inner.store;
-        let entry = store
-            .get_entry(entry_id)
-            .await?
-            .ok_or_else(|| Error::Invalid(crate::tr!("that game isn't on this device")))?;
-        let Some(LaunchSpec::Emulator { roms, .. }) = &entry.launch else {
-            return Err(Error::Invalid(crate::tr!("that isn't an emulated game")));
-        };
-        if roms.is_empty() || roms.len() > MAX_ROMS {
-            return Err(Error::Invalid(crate::tr!(
-                "that game has no ROM files to share"
-            )));
-        }
-        let scanners = store.scanners().await?;
-        let mut names = HashSet::new();
-        let mut files = Vec::new();
-        for (index, rom) in roms.iter().enumerate() {
-            let path = match &rom.location {
-                RomLocation::Absolute { path } => Some(path.clone()),
-                RomLocation::Scanner { scanner_id, path } => scanners
-                    .iter()
-                    .find(|scanner| scanner.id == *scanner_id)
-                    .and_then(|scanner| RomLocation::scanner_path(&scanner.folder, path)),
-            }
-            .filter(|path| path.is_file())
-            .ok_or_else(|| Error::Invalid(crate::tr!("a ROM file of that game isn't there")))?;
-            let base = path
-                .file_name()
-                .map(|name| name.to_string_lossy().into_owned())
-                .filter(|name| plain(name))
-                .unwrap_or_else(|| format!("rom{index}"));
-            // Two discs with one name in different folders stay apart.
-            let name = if names.insert(base.clone()) {
-                base
-            } else {
-                let name = format!("{index} {base}");
-                names.insert(name.clone());
-                name
-            };
-            files.push((path, name, rom.name.clone()));
-        }
-        Ok((entry, files))
-    }
-
-    /// The emulator definition and profile `target` plays `platform` with
-    /// here, as another device can find them.
-    async fn portable_profile(
-        &self,
-        platform: &str,
-        target: &EmulatorTarget,
-    ) -> Result<(Option<String>, Option<String>)> {
-        let store = &self.inner.store;
-        let (emulator, profile) = match target {
-            EmulatorTarget::Profile {
-                emulator_id,
-                profile_id,
-            } => (Some(emulator_id.clone()), Some(profile_id.clone())),
-            EmulatorTarget::AskProfile { emulator_id } => (Some(emulator_id.clone()), None),
-            EmulatorTarget::PlatformDefault => match store
-                .get_platform_settings(platform)
-                .await?
-                .and_then(|settings| settings.default)
-            {
-                Some(default) => (Some(default.emulator_id), Some(default.profile_id)),
-                None => (None, None),
-            },
-            EmulatorTarget::AskEmulator => (None, None),
-        };
-        let Some(emulator) = emulator else {
-            return Ok((None, None));
-        };
-        let Some(emulator) = store.get_emulator(&emulator).await? else {
-            return Ok((None, None));
-        };
-        let profile = profile
-            .and_then(|id| emulator.profile(&id).cloned())
-            .and_then(|profile| match profile {
-                crate::emulation::EmulatorProfile::BuiltIn {
-                    definition_profile, ..
-                } => Some(definition_profile),
-                crate::emulation::EmulatorProfile::Custom { .. } => None,
-            });
-        Ok((emulator.definition, profile))
-    }
-
     /// The folder to offer for share `row` other than a game's; `None` for
     /// a collection, which has no files. The save's and the ROM's files are
     /// put together under [`Shares::outgoing`] (linked where the disk
@@ -667,16 +476,12 @@ impl Shares {
                 }
                 self.put_together(&row.id, sources).await.map(Some)
             }
-            Details::Rom { .. } => {
+            Details::Rom(_) => {
                 let entry = row
                     .entry_id
                     .as_deref()
                     .ok_or_else(|| Error::Invalid(crate::tr!("this share has no game")))?;
-                let (_, files) = self.rom_files(entry).await?;
-                let sources = files
-                    .into_iter()
-                    .map(|(path, name, _)| (path, name))
-                    .collect();
+                let (_, _, sources) = rom::describe(&self.inner.store, entry).await?;
                 self.put_together(&row.id, sources).await.map(Some)
             }
         }
@@ -684,25 +489,7 @@ impl Shares {
 
     /// A folder of `sources` under their names, made afresh.
     async fn put_together(&self, id: &str, sources: Vec<(PathBuf, String)>) -> Result<PathBuf> {
-        let dir = self.outgoing(id);
-        let folder = dir.clone();
-        tokio::task::spawn_blocking(move || {
-            let _ = std::fs::remove_dir_all(&folder);
-            std::fs::create_dir_all(&folder)?;
-            for (source, name) in sources {
-                let target = folder.join(name);
-                if target.exists() {
-                    continue;
-                }
-                if std::fs::hard_link(&source, &target).is_err() {
-                    std::fs::copy(&source, &target)?;
-                }
-            }
-            Ok::<_, Error>(())
-        })
-        .await
-        .map_err(|error| Error::Io(std::io::Error::other(error)))??;
-        Ok(dir)
+        rom::put_together(&self.outgoing(id), sources).await
     }
 
     /// Removes what [`Shares::staged`] put together for share `id`.
@@ -727,14 +514,10 @@ impl Shares {
                     .await?
                     .map(|entry| entry.game_id),
             },
-            Some(Details::Rom {
-                platform,
-                definition,
-                ..
-            }) => ShareContents::Rom {
-                platform: platform.clone(),
-                emulator: definition.clone(),
-                ready: self.emulator_here(platform, definition.as_deref()).await?,
+            Some(Details::Rom(rom)) => ShareContents::Rom {
+                platform: rom.platform.clone(),
+                emulator: rom.definition.clone(),
+                ready: rom::emulator_here(store, &rom.platform, rom.definition.as_deref()).await?,
             },
             Some(Details::Collection { name, games, .. }) => {
                 let mut list = Vec::with_capacity(games.len());
@@ -760,23 +543,6 @@ impl Shares {
                 }
             }
         })
-    }
-
-    /// Whether this device has an emulator of `definition`, or else one set
-    /// for `platform`.
-    async fn emulator_here(&self, platform: &str, definition: Option<&str>) -> Result<bool> {
-        let store = &self.inner.store;
-        if let Some(definition) = definition {
-            return Ok(store
-                .emulators()
-                .await?
-                .iter()
-                .any(|emulator| emulator.definition.as_deref() == Some(definition)));
-        }
-        Ok(store
-            .get_platform_settings(platform)
-            .await?
-            .is_some_and(|settings| settings.default.is_some()))
     }
 
     /// Puts what arrived in `folder` where `details` says it belongs here,
@@ -809,7 +575,7 @@ impl Shares {
             }
             Details::Web { url } => {
                 let url = crate::web::page_url(url)?.to_string();
-                let root = self.root_at(root).await?;
+                let root = rom::root_at(store, root).await?;
                 let existing = store
                     .entry_by_source(crate::web::WEB_SOURCE.as_str(), &url)
                     .await?;
@@ -825,9 +591,9 @@ impl Shares {
                     let (folder, base) = (folder.to_owned(), root.path.clone());
                     let name = crate::transfer::folder_name(title);
                     tokio::task::spawn_blocking(move || {
-                        let rel_dir = free_folder(&base, &name)?;
+                        let rel_dir = rom::free_folder(&base, &name)?;
                         let target = base.join(&rel_dir);
-                        move_path(&folder, &target)?;
+                        rom::move_path(&folder, &target)?;
                         let bundle = crate::web::bundle::Bundle::open(&target).map_err(|_| {
                             let _ = std::fs::remove_dir_all(&target);
                             Error::Invalid(crate::tr!("that isn't a web game's offline copy"))
@@ -870,118 +636,19 @@ impl Shares {
                     added,
                 })
             }
-            Details::Rom {
-                platform,
-                definition,
-                profile,
-                roms,
-            } => {
-                let root = self.root_at(root).await?;
-                let (dir, files) = {
-                    let (folder, base) = (folder.to_owned(), root.path.clone());
-                    let name = crate::transfer::folder_name(title);
-                    let names: Vec<String> = roms.iter().map(|rom| rom.file.clone()).collect();
-                    tokio::task::spawn_blocking(move || {
-                        let dir = base.join(free_folder(&base, &name)?);
-                        std::fs::create_dir_all(&dir)?;
-                        for name in &names {
-                            move_path(&folder.join(name), &dir.join(name))?;
-                        }
-                        Ok::<_, Error>((
-                            dir,
-                            names.into_iter().map(PathBuf::from).collect::<Vec<_>>(),
-                        ))
-                    })
-                    .await
-                    .map_err(|error| Error::Io(std::io::Error::other(error)))??
-                };
-                let (mut game, mut entry) =
-                    crate::emulation::rom_entry(platform, &dir, &files, None);
-                if !title.trim().is_empty() {
-                    title.trim().clone_into(&mut game.title);
-                }
-                game.platforms = vec![platform.clone()];
-                let target = self
-                    .profile_here(definition.as_deref(), profile.as_deref())
-                    .await?;
-                if let Some(LaunchSpec::Emulator {
-                    target: pinned,
-                    roms: placed,
-                    ..
-                }) = &mut entry.launch
-                {
-                    if let Some(target) = target.clone() {
-                        *pinned = target;
-                    }
-                    // Disc names as the sharer had them, in the shared order.
-                    for (rom, shared) in placed.iter_mut().zip(roms) {
-                        if shared.name.is_some() {
-                            rom.name.clone_from(&shared.name);
-                        }
-                    }
-                }
-                let game = store.upsert_game(&game).await?;
-                entry.game_id = game.id.clone();
-                store.upsert_entry(&entry).await?;
-                if target.is_none()
-                    && !self.emulator_here(platform, definition.as_deref()).await?
-                    && let (Some(definition), Some(installer)) = (
-                        definition.clone(),
-                        self.inner.items.emulators.get().cloned(),
-                    )
-                {
-                    // Emulator setup follows in Activity; the game is here
-                    // whatever it does.
-                    tokio::spawn(async move {
-                        if let Err(error) = installer.install(&definition).await {
-                            tracing::warn!(%definition, %error, "a shared ROM's emulator wasn't installed");
-                        }
-                    });
-                }
-                Ok(Placed {
-                    game_id: game.id,
-                    added: true,
-                })
+            Details::Rom(copy) => {
+                rom::place(
+                    store,
+                    self.inner.transfers.emulator_installer(),
+                    copy,
+                    folder,
+                    root,
+                    title,
+                    None,
+                )
+                .await
             }
         }
-    }
-
-    /// The storage root at `path`.
-    async fn root_at(&self, path: &Path) -> Result<StorageRoot> {
-        self.inner
-            .store
-            .roots()
-            .await?
-            .into_iter()
-            .find(|root| root.path == path)
-            .ok_or_else(|| Error::Invalid(crate::tr!("that storage location is gone")))
-    }
-
-    /// This device's emulator and profile for a definition's profile, when
-    /// it has them.
-    async fn profile_here(
-        &self,
-        definition: Option<&str>,
-        profile: Option<&str>,
-    ) -> Result<Option<EmulatorTarget>> {
-        let (Some(definition), Some(profile)) = (definition, profile) else {
-            return Ok(None);
-        };
-        for emulator in self.inner.store.emulators().await? {
-            if emulator.definition.as_deref() != Some(definition) {
-                continue;
-            }
-            let found = emulator.profiles.iter().find(|candidate| {
-                matches!(candidate, crate::emulation::EmulatorProfile::BuiltIn { definition_profile, .. } if definition_profile == profile)
-            });
-            if let Some(found) = found {
-                return Ok(Some(EmulatorTarget::Profile {
-                    emulator_id: emulator.id.clone(),
-                    profile_id: found.id().to_owned(),
-                }));
-            }
-        }
-        Ok(None)
     }
 
     /// Receives the collection `text` links to as a collection of

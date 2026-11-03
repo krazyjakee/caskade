@@ -243,6 +243,15 @@ impl Shares {
     /// returns the share; its link is [`Shares::link`]. Its files are read
     /// in the background meanwhile.
     pub async fn share(&self, entry_id: &str, expiry: ShareExpiry) -> Result<ShareRecord> {
+        // An emulated release goes as its ROM, never its folder (#279).
+        if let Some(release) = self.inner.store.get_entry(entry_id).await?
+            && crate::transfer::rom::emulated(&release)
+        {
+            let item = ShareItem::Rom {
+                entry_id: entry_id.to_owned(),
+            };
+            return self.share_item(item, expiry, "").await;
+        }
         let (_, title, _, _) = self.inner.transfers.source(entry_id).await?;
         let entry = self
             .inner

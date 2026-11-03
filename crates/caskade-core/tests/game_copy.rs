@@ -131,6 +131,94 @@ async fn a_windows_game_added_by_hand_arrives_as_a_managed_install_of_the_same_g
     .await;
 }
 
+/// #279: an emulated game whose folder is a ROM folder holding other games
+/// arrives as its own ROM file alone, placed as a release of the same game.
+#[tokio::test(flavor = "multi_thread")]
+async fn an_emulated_game_arrives_as_its_rom_alone_not_its_folder() {
+    let desk = core("Desk").await;
+    let tv = core("TV").await;
+    pair(&desk, &tv).await;
+    let roms = desk.dir.path().join("ROMs/gba");
+    std::fs::create_dir_all(&roms).unwrap();
+    std::fs::write(roms.join("Golden Sun (Europe).gba"), vec![7u8; 40_000]).unwrap();
+    std::fs::write(roms.join("Metroid Fusion (USA).gba"), vec![9u8; 30_000]).unwrap();
+    let (game, mut entry) = caskade_core::emulation::rom_entry(
+        "gba",
+        &roms,
+        &[PathBuf::from("Golden Sun (Europe).gba")],
+        None,
+    );
+    let game = desk.store.upsert_game(&game).await.unwrap();
+    entry.game_id = game.id.clone();
+    let entry = desk.store.upsert_entry(&entry).await.unwrap();
+    let tv_game = tv
+        .store
+        .upsert_game(&Game::new("Golden Sun"))
+        .await
+        .unwrap();
+
+    let job = tv
+        .install
+        .copy_from_device(
+            PeerCopyTarget {
+                device_id: id(&desk).await,
+                device_name: "Desk".into(),
+                entry_id: entry.id.clone(),
+                game_id: tv_game.id.clone(),
+                title: "Golden Sun".into(),
+            },
+            None,
+        )
+        .await
+        .unwrap();
+    let done = finished(&tv.install, &job.id).await;
+    assert_eq!(done.status, JobStatus::Completed, "{done:?}");
+    assert_eq!(done.game_id.as_deref(), Some(tv_game.id.as_str()));
+    let copy = tv
+        .store
+        .entries_for_game(&tv_game.id)
+        .await
+        .unwrap()
+        .into_iter()
+        .find(|entry| matches!(entry.launch, Some(LaunchSpec::Emulator { .. })))
+        .expect("an emulated release of the same game");
+    let Some(LaunchSpec::Emulator {
+        platform_id, roms, ..
+    }) = &copy.launch
+    else {
+        unreachable!()
+    };
+    assert_eq!(platform_id, "gba");
+    assert_eq!(roms.len(), 1);
+    // Only its own ROM came, into the TV's storage.
+    let mut arrived = Vec::new();
+    for entry in walk(&tv.games) {
+        arrived.push(entry.file_name().unwrap().to_string_lossy().into_owned());
+    }
+    assert!(
+        arrived.contains(&"Golden Sun (Europe).gba".to_owned()),
+        "{arrived:?}"
+    );
+    assert!(
+        !arrived.iter().any(|name| name.contains("Metroid")),
+        "{arrived:?}"
+    );
+}
+
+/// Every file under `dir`.
+fn walk(dir: &Path) -> Vec<PathBuf> {
+    let mut files = Vec::new();
+    for entry in std::fs::read_dir(dir).unwrap().flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            files.extend(walk(&path));
+        } else {
+            files.push(path);
+        }
+    }
+    files
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn a_launcher_s_install_is_refused_and_says_why() {
     let desk = core("Desk").await;
