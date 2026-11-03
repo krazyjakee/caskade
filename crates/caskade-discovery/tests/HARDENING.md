@@ -14,7 +14,7 @@ Generation/build are excluded from the measured interval. The public default ful
 
 ### One-source rescan
 
-`watch::installing_and_removing_a_game_each_produce_one_delta` times one Steam rescan after a new manifest appears, over the same `steam-linux-shared` fixture on every host, and logs it with five unchanged rescans before it. The work is the same everywhere, so the spread is the host's file system: GitHub-hosted runners measured 24.6 ms on Linux, 52.3 ms on macOS and 210 ms and 243 ms on Windows (ci.yml runs 41634212530 and 41623171279, 3 Nov 2026), where every file open goes through NTFS and Defender's real-time scan. Windows stays there in steady state: five unchanged rescans took 198, 185, 175, 164 and 152 ms, then the measured one 159 ms (run 41640251814). The budget is 200 ms, and 400 ms (about twice Windows' steady state) on Windows.
+`watch::installing_and_removing_a_game_each_produce_one_delta` times one Steam rescan after a new manifest appears, over the same `steam-linux-shared` fixture on every host, and logs it with five unchanged rescans before it. The work is the same everywhere, so the spread is the host's file system: GitHub-hosted runners measured 24.6 ms on Linux, 52.3 ms on macOS and 210 ms and 243 ms on Windows (ci.yml runs 41634212530 and 41623171279, 3 Nov 2026), where every file open goes through NTFS and Defender's real-time scan. Windows stays there in steady state, with wide single-sample spread: five unchanged rescans took 198, 185, 175, 164 and 152 ms, then the measured one 159 ms (run 41640251814); in run 41688202984 they took 201, 194, 191, 190 and 273 ms, then the measured one 410 ms. The budget is 200 ms, and on Windows 800 ms, twice the slowest single sample seen.
 
 ## Aggregate-only live invariants
 

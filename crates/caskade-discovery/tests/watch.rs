@@ -55,7 +55,7 @@ fn sources() -> Vec<Arc<dyn Source>> {
 /// One source's rescan, with the same fixture on every host. Windows' file
 /// opens cost several times Linux's (tests/HARDENING.md has the measurements).
 const RESCAN_BUDGET: Duration = if cfg!(windows) {
-    Duration::from_millis(400)
+    Duration::from_millis(800)
 } else {
     Duration::from_millis(200)
 };
