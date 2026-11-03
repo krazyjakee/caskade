@@ -203,17 +203,25 @@ impl<R: Runtime> Driver<R> {
             }
             "seek" => {
                 let (direction, text) = rest.split_once(' ').ok_or("seek <direction> <text>")?;
+                // Where focus went, to tell a layout's path from a missing control.
+                let mut path: Vec<String> = Vec::new();
                 for _ in 0..SEEK_LIMIT {
                     let focused = self.probe()?.focused;
                     tracing::debug!(focused, "e2e seek");
                     if focused.contains(text) {
                         return Ok(());
                     }
+                    if path.last() != Some(&focused) {
+                        path.push(focused);
+                    }
                     self.press(direction)?;
                 }
                 Err(format!(
-                    "never reached {text:?}; focus is on {:?}",
-                    self.last.focused
+                    "never reached {text:?}; focus went {}",
+                    path.iter()
+                        .map(|focused| format!("{focused:?}"))
+                        .collect::<Vec<_>>()
+                        .join(" → ")
                 ))
             }
             "seek-section" => {
