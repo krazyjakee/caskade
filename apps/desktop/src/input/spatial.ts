@@ -167,19 +167,19 @@ function gap(aLow: number, aHigh: number, bLow: number, bHigh: number) {
 interface Target {
   element: HTMLElement;
   to: Box;
-  /** What it stands in when lining targets up (`reach`). */
-  reach: Box;
+  /** The section it's in beside focus, if any (`reach`). */
+  reach: Box | null;
   d: number;
   inHome: boolean;
 }
 
 /** The outermost focus section around `target` that focus isn't in (a
- * shelf, the settings tabs), when it has a box; else `target`'s own place. */
-function reach(target: HTMLElement, from: HTMLElement, own: Box): Box {
+ * shelf, the settings tabs), when it has a box. */
+function reach(target: HTMLElement, from: HTMLElement): Box | null {
   let entered: HTMLElement | null = null;
   for (let at = section(target); at && !at.contains(from); at = section(at.parentElement ?? from))
     entered = at;
-  if (!entered || !hasBox(entered)) return own;
+  if (!entered || !hasBox(entered)) return null;
   const r = entered.getBoundingClientRect();
   return { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
 }
@@ -187,18 +187,19 @@ function reach(target: HTMLElement, from: HTMLElement, own: Box): Box {
 /** Going up or down, the line of targets nearest that way: those level
  * with the nearest one. A target in the column focus is in wins within the
  * line, never over a line in between (from the hero, the shelf below it, not
- * a card two shelves down). Only targets that reach into the column set the
- * line: a shelf across the view does, the settings tabs beside the panel
- * don't. Left and right keep every target: a list row goes across to its
+ * a card two shelves down). A section beside the column focus is in doesn't
+ * set the line (the settings tabs beside the panel); one across it does (a
+ * shelf), and so does any target in no other section (a card in focus's own
+ * shelf). Left and right keep every target: a list row goes across to its
  * button, however far. */
 function nearestLine(targets: Target[], direction: Direction, from: Box): Target[] {
   if (direction === "nav.left" || direction === "nav.right") return targets;
   const down = direction === "nav.down";
-  const inColumn = targets.filter(
-    (target) => gap(from.left, from.right, target.reach.left, target.reach.right) === 0,
+  const level = targets.filter(
+    ({ reach }) => !reach || gap(from.left, from.right, reach.left, reach.right) === 0,
   );
   let first: Target | undefined;
-  for (const target of inColumn.length > 0 ? inColumn : targets) {
+  for (const target of level.length > 0 ? level : targets) {
     if (!first || (down ? target.to.top < first.to.top : target.to.bottom > first.to.bottom))
       first = target;
   }
@@ -223,7 +224,7 @@ export function next(from: HTMLElement, direction: Direction): HTMLElement | nul
     ahead.push({
       element: candidate,
       to,
-      reach: reach(candidate, from, to),
+      reach: reach(candidate, from),
       d,
       inHome: home?.contains(candidate) ?? false,
     });

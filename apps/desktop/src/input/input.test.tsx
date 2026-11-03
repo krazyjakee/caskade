@@ -505,18 +505,20 @@ it("down from the hero goes to the shelf below it, not a card in its column furt
   const pad = padSource();
   render(
     <InputProvider console subscribe={pad.subscribe}>
-      <Button data-rect="560 380 260 56">Resume · View details</Button>
-      {/* Recently Played, a shelf across the view: its View all at the
+      <FocusSection id="main">
+        <Button data-rect="560 380 260 56">Resume · View details</Button>
+        {/* Recently Played, a shelf across the view: its View all at the
           right, one card at the left. */}
-      <FocusSection id="shelf-recent" data-rect="340 470 1200 350">
-        <Button data-rect="1400 480 120 30">View all →</Button>
-        <Button data-rect="340 530 200 280">Pocket Quest</Button>
-      </FocusSection>
-      {/* Recently Added: its second card is under the hero's button. */}
-      <FocusSection id="shelf-added" data-rect="340 850 1200 350">
-        <Button data-rect="1400 860 120 30">View all → added</Button>
-        <Button data-rect="340 910 200 280">Pocket Quest added</Button>
-        <Button data-rect="560 910 200 280">Couch Runner</Button>
+        <FocusSection id="shelf-recent" data-rect="340 470 1200 350">
+          <Button data-rect="1400 480 120 30">View all →</Button>
+          <Button data-rect="340 530 200 280">Pocket Quest</Button>
+        </FocusSection>
+        {/* Recently Added: its second card is under the hero's button. */}
+        <FocusSection id="shelf-added" data-rect="340 850 1200 350">
+          <Button data-rect="1400 860 120 30">View all → added</Button>
+          <Button data-rect="340 910 200 280">Pocket Quest added</Button>
+          <Button data-rect="560 910 200 280">Couch Runner</Button>
+        </FocusSection>
       </FocusSection>
     </InputProvider>,
   );
