@@ -768,6 +768,74 @@ known: each device sends its wired and wireless MAC addresses in every sync's
 packet to every local broadcast address on ports 9 and 7, then waits up to two
 minutes for the device to come into reach ("Waking …"; "Wake and play on …").
 
+### Sharing a game once
+
+A game can be shared once with someone else, through a link (#246,
+`caskade_core::share::Shares`, `net` feature): **Share with someone…**, then
+the link, `caskade://receive?t=…` (`caskade_sync::share::ShareLink`, a ticket
+of kind `caskadeshare`). It holds the sharer's address (local addresses, and
+the relay once there is one), a grant made for that share alone and when it
+expires (a day, a week, or until stopped). Only `to_url` writes a link out:
+`Debug` leaves the grant out, and `parse` reads at most 4 KiB.
+
+- **Sharing.** The release's folder goes through the copies' checks
+  (`Transfers::source`: installed, a managed install or a folder of its own,
+  not a launcher's) and is read into the send store under `share/<id>` in the
+  background (`ShareState::Preparing`, then `Ready`). The share and its grant
+  are `shares` rows, and who opened it `share_recipients` (migration 0034).
+  Both stay on this device: not synced, not backed up (the grant is a
+  credential). Shares that were running start again with Caskade (`resume`).
+- **Admission.** A `share` session is admitted only with the grant of a share
+  that is running now (`Devices::set_share_admission`). A paired device's
+  grant never opens one, and a share's grant opens nothing else. Stop sharing
+  (`stop`) and the expiry both end it at once: the link is refused from then
+  on, sessions still open are told `Stopped` and closed, and every gate
+  revokes the collection, which stops transfers part-way. What was received
+  stays.
+- **Looking.** `inspect` asks the sharer what the link shares (`About`:
+  title, size, OS of the build, sharer, expiry) and whether it was reached
+  directly or only through a relay (`ShareReach`). Nothing is fetched. A
+  link past its expiry says "This link expired on <date>" without dialling;
+  a refused one says the share was stopped or has expired (the refusal is
+  the same bytes either way); a sharer out of reach says Caskade keeps
+  trying.
+- **Receiving.** `receive` runs the copy job (`InstallService::copy_with`
+  with a `PeerFetcher` of the share's): the same waiting, resume, cancel and
+  install as a copy, as a game of its own. The offer names the collection,
+  its size, the program relative to the folder and the sharer's own direct
+  addresses.
+
+**Off the local network.** The `share` session itself may go through a relay
+(it carries no game data), and that connection is how both ends learn each
+other's direct addresses: iroh's hole punching and the port mapping it asks
+the router for (UPnP, NAT-PMP, PCP) put the sharer's public address on the
+session's paths. The files then come only over the relay-free dialer, to
+those addresses. When none is known, or none answers, the job waits and
+says so ("Only a relay reaches …"); game files never take the relay. So a
+share works across networks when the sharer's router maps a port or the two
+ends punch a direct path; between two strict NATs it waits. Tested on
+loopback with the relay transport removed (`Reach::loopback`): `cargo test -p
+caskade-core --test it shares::`. Two people on different networks is the
+manual check (step 5 of the manual checklist below).
+
+**Recipients help each other** (#249, `caskade_sync::swarm`). A recipient
+fetches with iroh-blobs' downloader from several providers at once: the
+collection split per file, each file asked of the providers in a shuffled
+order, every chunk checked against the BLAKE3 tree whoever sent it. The
+providers are the sharer and the share's other recipients that serve it.
+While it receives, a recipient serves what it has (`Serving` with its direct
+addresses). The sharer names the recipients that serve to each new one
+(`Providers`), after asking them to let it in (`Allow`, answered `Allowed`;
+each recipient's gate allows only that collection, only to recipients the
+sharer named). Once the game is here it stops serving, unless the user chose
+**Help others receive this** (`Shares::keep_helping`) while it arrived: then
+the store keeps its own copy of the files (`Transfers::export_copy`, so the
+game takes its space twice while it helps) and serves them until the share
+stops, the session with the sharer ends, or the switch goes off. A recipient
+serves only while its session with the sharer is open, so stopping the share
+stops every recipient serving it. Test: `shares::the_third_recipient_…` (four
+cores) and `cargo test -p caskade-sync --test it swarm::`.
+
 ### The default admin
 
 Each library starts with a default admin, "Player" (migration 0014). Until

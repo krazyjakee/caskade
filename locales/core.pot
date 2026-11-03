@@ -2732,6 +2732,35 @@ msgstr ""
 msgid "couldn't create “{dir}”: {error}"
 msgstr ""
 
+#: crates/caskade-core/src/remote_play/mod.rs
+#: apps/desktop/src-tauri/src/commands/copies.rs
+msgid "that device isn't paired"
+msgstr ""
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "{device} is out of reach, and it can't be woken from here"
+msgstr ""
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "the connection to {device} was lost"
+msgstr ""
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "the device didn't wake up; check that Wake-on-LAN is on in its settings"
+msgstr ""
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "this device doesn't take play requests"
+msgstr ""
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "nobody started it on that device in time"
+msgstr ""
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "that game isn't in this device's library"
+msgstr ""
+
 #: crates/caskade-core/src/romm/cache.rs
 msgid "{checksum} for {file}"
 msgstr ""
@@ -3515,6 +3544,67 @@ msgctxt "settings"
 msgid "Maximum simultaneous downloads. Active downloads finish when this limit is lowered."
 msgstr ""
 
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "the game's storage isn't available"
+msgstr ""
+
+#: crates/caskade-core/src/share/mod.rs
+msgid "this share has no game"
+msgstr ""
+
+#: crates/caskade-core/src/share/mod.rs
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "that game isn't installed on this device"
+msgstr ""
+
+#: crates/caskade-core/src/share/mod.rs
+msgid "this share has stopped; share the game again for a new link"
+msgstr ""
+
+#: crates/caskade-core/src/share/mod.rs
+msgid "this share's link is damaged"
+msgstr ""
+
+#: crates/caskade-core/src/share/mod.rs
+msgid "stop sharing it first"
+msgstr ""
+
+#: crates/caskade-core/src/share/mod.rs
+msgid "there's no such share"
+msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "This link expired on {date}. Ask whoever shared it for a new one."
+msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "This link doesn't work any more: the share was stopped or has expired. Ask whoever shared it for a new one."
+msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "Can't reach whoever shared this: their Caskade may be closed or offline. Caskade keeps trying."
+msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "Only a relay reaches {sharer}'s computer: the game waits for a direct connection"
+msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "that isn't a Caskade share link"
+msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "that share isn't here any more"
+msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "it's here already: it can help others only if that's chosen while it arrives"
+msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "there isn't enough room for the game: {short} more bytes are needed"
+msgstr ""
+
 #: crates/caskade-core/src/storage/catalogue.rs
 msgid "storage catalogue supports at most 128 locations"
 msgstr ""
@@ -4126,10 +4216,6 @@ msgid "theme {id} can't be applied: it is invalid"
 msgstr ""
 
 #: crates/caskade-core/src/transfer/mod.rs
-msgid "that game isn't installed on this device"
-msgstr ""
-
-#: crates/caskade-core/src/transfer/mod.rs
 msgid "the other device didn't take the copy"
 msgstr ""
 
@@ -4139,10 +4225,6 @@ msgstr ""
 
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "the game isn't fully installed on this device"
-msgstr ""
-
-#: crates/caskade-core/src/transfer/mod.rs
-msgid "the game's storage isn't available"
 msgstr ""
 
 #: crates/caskade-core/src/transfer/mod.rs
@@ -4351,35 +4433,6 @@ msgstr ""
 msgid "that device has no copy of the game"
 msgstr ""
 
-#: crates/caskade-core/src/remote_play/mod.rs
-#: apps/desktop/src-tauri/src/commands/copies.rs
-msgid "that device isn't paired"
-msgstr ""
-
-#: crates/caskade-core/src/remote_play/mod.rs
-msgid "{device} is out of reach, and it can't be woken from here"
-msgstr ""
-
-#: crates/caskade-core/src/remote_play/mod.rs
-msgid "the connection to {device} was lost"
-msgstr ""
-
-#: crates/caskade-core/src/remote_play/mod.rs
-msgid "the device didn't wake up; check that Wake-on-LAN is on in its settings"
-msgstr ""
-
-#: crates/caskade-core/src/remote_play/mod.rs
-msgid "this device doesn't take play requests"
-msgstr ""
-
-#: crates/caskade-core/src/remote_play/mod.rs
-msgid "nobody started it on that device in time"
-msgstr ""
-
-#: crates/caskade-core/src/remote_play/mod.rs
-msgid "that game isn't in this device's library"
-msgstr ""
-
 #: apps/desktop/src-tauri/src/commands/copies.rs
 msgid "the game isn't installed on this computer in a folder that can be copied"
 msgstr ""
@@ -4438,6 +4491,11 @@ msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/install_requests.rs
 msgid "request is expired or already being confirmed"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/install_requests.rs
+#: apps/desktop/src-tauri/src/commands/shares.rs
+msgid "receiving shares isn't available"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/install_requests.rs

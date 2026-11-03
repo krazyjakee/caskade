@@ -36,6 +36,8 @@ mod rom_scans;
 mod romm;
 mod same_game;
 mod scripts;
+mod shares;
+pub use shares::{RecipientRow, ShareRow};
 #[cfg(test)]
 mod scripts_tests;
 pub use rom_scans::ScanState;

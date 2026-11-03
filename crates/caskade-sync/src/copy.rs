@@ -252,6 +252,16 @@ impl CopyStore {
     /// Writes the collection `root`'s files under `target`, moving them out
     /// of the store where it can (the store then refers to them there).
     pub async fn export(&self, root: &str, target: &Path) -> Result<()> {
+        self.export_as(root, target, ExportMode::TryReference).await
+    }
+
+    /// [`export`](Self::export), copying the files: the store keeps its own,
+    /// to go on serving them (a share's recipient that helps others, #249).
+    pub async fn export_copy(&self, root: &str, target: &Path) -> Result<()> {
+        self.export_as(root, target, ExportMode::Copy).await
+    }
+
+    async fn export_as(&self, root: &str, target: &Path, mode: ExportMode) -> Result<()> {
         let collection = Collection::load(parse(root)?, self.store.as_ref())
             .await
             .map_err(store_error)?;
@@ -265,7 +275,7 @@ impl CopyStore {
                 .blobs()
                 .export_with_opts(ExportOptions {
                     hash: *hash,
-                    mode: ExportMode::TryReference,
+                    mode,
                     target: path,
                 })
                 .finish()

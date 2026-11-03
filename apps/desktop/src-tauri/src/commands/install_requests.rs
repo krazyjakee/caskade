@@ -22,6 +22,10 @@ pub struct InstallRequest {
     /// A game another of the user's devices sends here (#235).
     #[serde(default)]
     pub peer: Option<PeerSend>,
+    /// A game someone shared through a link (#246), as its sharer says.
+    /// The link stays here: it's a credential.
+    #[serde(default)]
+    pub share: Option<caskade_core::share::ShareInfo>,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "snake_case")]
@@ -30,6 +34,8 @@ pub enum InputKind {
     Url,
     /// A copy from another of the user's devices (#235).
     Peer,
+    /// A game someone shared through a link (#246).
+    Share,
 }
 /// A game another device sends to this one: copied from it once confirmed
 /// (#233's copy, started from here).
@@ -68,10 +74,14 @@ struct Pending {
     request: InstallRequest,
     created: Instant,
     claimed: bool,
+    /// A share request's link (#246).
+    link: Option<String>,
 }
 #[derive(Clone, Default)]
 pub struct InstallRequests {
     pending: Arc<Mutex<BTreeMap<String, Pending>>>,
+    /// Where share requests are received from, once set up (#246).
+    shares: Arc<std::sync::OnceLock<caskade_core::share::Shares>>,
 }
 /// How long an unconfirmed request waits.
 const EXPIRY: Duration = Duration::from_secs(600);
@@ -79,6 +89,10 @@ fn locked<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
     mutex.lock().unwrap_or_else(|e| e.into_inner())
 }
 impl InstallRequests {
+    /// Receives confirmed share requests through `shares` (#246).
+    pub fn set_shares(&self, shares: caskade_core::share::Shares) {
+        let _ = self.shares.set(shares);
+    }
     /// The queue, without unclaimed requests that expired.
     fn live(&self) -> std::sync::MutexGuard<'_, BTreeMap<String, Pending>> {
         let mut pending = locked(&self.pending);
@@ -110,6 +124,7 @@ impl InstallRequests {
             value,
             plan,
             peer: None,
+            share: None,
         };
         pending.insert(
             request.request_id.clone(),
@@ -117,6 +132,7 @@ impl InstallRequests {
                 request: request.clone(),
                 created: Instant::now(),
                 claimed: false,
+                link: None,
             },
         );
         Ok(request)
@@ -152,6 +168,7 @@ impl InstallRequests {
         Ok(Claim {
             queue: self.clone(),
             request: p.request.clone(),
+            link: p.link.clone(),
             complete: false,
         })
     }
@@ -162,6 +179,18 @@ impl InstallRequests {
         service: &InstallService,
     ) -> Result<JobSnapshot, String> {
         let mut claim = self.claim(id)?;
+        if let Some(link) = claim.link.clone() {
+            // Nothing was fetched until now (#246).
+            let shares = self.shares.get().cloned();
+            let job = shares
+                .ok_or_else(|| caskade_core::tr!("receiving shares isn't available"))?
+                .receive(&link, root_id)
+                .await
+                .map_err(|e| e.to_string())?;
+            locked(&self.pending).remove(id);
+            claim.complete = true;
+            return Ok(job);
+        }
         if let Some(peer) = claim.request.peer.clone() {
             // Nothing was written here until now (#235).
             let job = service
@@ -197,6 +226,52 @@ impl InstallRequests {
         let (kind, value) = validated(value).await?;
         self.queue_and_emit(app, kind, value, None)
     }
+    /// Queues a game someone shared through `link`, as `info` says, to be
+    /// confirmed (#246). The same link twice is one request.
+    pub fn queue_share<R: Runtime>(
+        &self,
+        app: &tauri::AppHandle<R>,
+        link: String,
+        info: caskade_core::share::ShareInfo,
+    ) -> Result<InstallRequest, String> {
+        let request = {
+            let mut pending = self.live();
+            if let Some(existing) = pending
+                .values()
+                .find(|p| p.link.as_deref() == Some(link.as_str()))
+            {
+                existing.request.clone()
+            } else {
+                if pending.len() >= 32 {
+                    return Err(caskade_core::tr!(
+                        "too many pending install requests; dismiss one first"
+                    ));
+                }
+                let request = InstallRequest {
+                    request_id: caskade_core::model::new_id(),
+                    kind: InputKind::Share,
+                    value: info.title.clone(),
+                    plan: None,
+                    peer: None,
+                    share: Some(info),
+                };
+                pending.insert(
+                    request.request_id.clone(),
+                    Pending {
+                        request: request.clone(),
+                        created: Instant::now(),
+                        claimed: false,
+                        link: Some(link),
+                    },
+                );
+                request
+            }
+        };
+        InstallRequested(request.clone())
+            .emit(app)
+            .map_err(|e| e.to_string())?;
+        Ok(request)
+    }
     /// Queues a game another device sends here, to be confirmed (#235).
     pub fn queue_peer<R: Runtime>(
         &self,
@@ -222,6 +297,7 @@ impl InstallRequests {
                     value: peer.title.clone(),
                     plan: None,
                     peer: Some(peer),
+                    share: None,
                 };
                 pending.insert(
                     request.request_id.clone(),
@@ -229,6 +305,7 @@ impl InstallRequests {
                         request: request.clone(),
                         created: Instant::now(),
                         claimed: false,
+                        link: None,
                     },
                 );
                 request
@@ -256,6 +333,7 @@ impl InstallRequests {
 struct Claim {
     queue: InstallRequests,
     request: InstallRequest,
+    link: Option<String>,
     complete: bool,
 }
 impl Drop for Claim {
@@ -349,6 +427,10 @@ pub async fn request_install_input<R: Runtime>(
     state: tauri::State<'_, InstallRequests>,
     value: String,
 ) -> Result<InstallRequest, String> {
+    // A pasted share link (#246) asks its sharer first.
+    if caskade_core::share::is_link(&value) {
+        return super::shares::queue_share_link(&app, value).await;
+    }
     state.request_and_emit(&app, value).await
 }
 #[tauri::command]

@@ -679,6 +679,14 @@ pub const TABLES: &[Rule] = &[
         "paired_devices",
         "each device keeps its own pairings and the grants each side presents (credentials)",
     ),
+    local(
+        "shares",
+        "one-off shares belong to the device that shares; their grants are credentials and never leave it",
+    ),
+    local(
+        "share_recipients",
+        "who received this device's shares, and how far each got, belongs to this device",
+    ),
     local("igdb_popularity", "IGDB popularity is a refetchable cache"),
     local("game_additions", "notification import journal is local"),
     local("notification_revision", "notification revisions are local"),

@@ -131,7 +131,8 @@ async fn the_third_recipient_fetches_from_the_sharer_and_the_first_two_at_once()
     }
     for (name, provider) in [("sharer", &sharer), ("first", &first), ("second", &second)] {
         let sent = provider.gate.sent(dialer.id(), &offered.root);
-        assert!(sent > 0, "the {name} sent the third nothing");
+        // Whole files, not just the collection's list of them.
+        assert!(sent >= 256 * 1024, "the {name} sent the third {sent} bytes");
         assert!(sent < offered.size, "the {name} sent the third everything");
     }
     dialer.close().await;

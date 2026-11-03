@@ -161,7 +161,7 @@ fn sync_error(error: caskade_sync::Error) -> Error {
 }
 
 /// A folder name for a title: letters, digits, spaces and a few marks.
-fn folder_name(title: &str) -> String {
+pub(crate) fn folder_name(title: &str) -> String {
     let name: String = title
         .chars()
         .filter(|c| c.is_alphanumeric() || matches!(c, ' ' | '-' | '_' | '.' | '\''))
@@ -361,6 +361,16 @@ impl Transfers {
         self.inner
             .sending
             .export(root, target)
+            .await
+            .map_err(sync_error)
+    }
+
+    /// [`export`](Self::export), copying the files: the send store keeps
+    /// its own, to serve them on (#249).
+    pub async fn export_copy(&self, root: &str, target: &Path) -> Result<()> {
+        self.inner
+            .sending
+            .export_copy(root, target)
             .await
             .map_err(sync_error)
     }

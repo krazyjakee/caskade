@@ -40,6 +40,8 @@ pub mod saves;
 pub mod scripts;
 pub mod sessions;
 pub mod settings;
+#[cfg(feature = "net")]
+pub mod share;
 pub mod storage;
 pub mod store_accounts;
 pub mod streaming;

@@ -718,6 +718,24 @@ pub fn run() {
                     // A game another device sends here (#235): confirmed
                     // here first, unless copies are accepted without asking.
                     commands::copies::take_sends(app.handle(), &transfers, devices.clone());
+                    // One-off shares (#246): admitted and served by the same
+                    // endpoint, so set up before it starts too.
+                    if let Some(install) = app.try_state::<caskade_core::install::InstallService>() {
+                        let shares = caskade_core::share::Shares::new(
+                            store.clone(),
+                            devices.clone(),
+                            transfers.clone(),
+                            install.inner().clone(),
+                            &setup_paths.cache,
+                        );
+                        if let Some(requests) =
+                            app.try_state::<commands::install_requests::InstallRequests>()
+                        {
+                            requests.set_shares(shares.clone());
+                        }
+                        commands::shares::setup(app.handle(), &shares);
+                        app.manage(shares);
+                    }
                     app.manage(transfers);
                 }
                 Err(error) => tracing::warn!(%error, "copies between devices unavailable"),

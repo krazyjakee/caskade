@@ -795,6 +795,30 @@ export const commands = {
 	remotePlayFinished: (requestId: string, started: boolean, reason: string | null) => __TAURI_INVOKE<void>("remote_play_finished", { requestId, started, reason }),
 	/**  Copies going on to and from this device. */
 	devicesTransfers: () => typedError<TransferView[], ErrorReport_Serialize>(__TAURI_INVOKE("devices_transfers")),
+	/**  Shares release `entry_id` until `expiry`. */
+	shareGame: (entryId: string, expiry: ShareExpiry) => typedError<ShareCreated_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("share_game", { entryId, expiry })),
+	/**  Every share this device made, the newest first. */
+	sharesList: () => typedError<ShareRecord_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("shares_list")),
+	/**  A running share's link again, to copy. */
+	shareLink: (id: string) => typedError<string, ErrorReport_Serialize>(__TAURI_INVOKE("share_link", { id })),
+	/**  Stops share `id`: its link fails at once. */
+	shareStop: (id: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("share_stop", { id })),
+	/**  Forgets a stopped or expired share. */
+	shareForget: (id: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("share_forget", { id })),
+	/**  What a share link shares, asked of its sharer; nothing is fetched. */
+	shareInspect: (link: string) => typedError<ShareInfo_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("share_inspect", { link })),
+	/**
+	 *  Receives the share `link` links to into storage root `root_id` (the
+	 *  default when absent), as a copy job.
+	 */
+	shareReceive: (link: string, rootId: string | null) => typedError<JobSnapshot_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("share_receive", { link, rootId })),
+	/**  Shares received here that are arriving or helping others receive them. */
+	sharesReceived: () => __TAURI_INVOKE<ReceivedShare[]>("shares_received"),
+	/**
+	 *  Whether the share received as job `job` goes on helping the share's
+	 *  other recipients once it's here (#249).
+	 */
+	shareKeepHelping: (job: string, on: boolean) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("share_keep_helping", { job, on })),
 	/**  Renames this device; an empty name goes back to the host name. */
 	devicesRename: (name: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_rename", { name })),
 	devicesSetKind: (kind: DeviceKind) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_set_kind", { kind })),
@@ -978,6 +1002,7 @@ export const events = {
 	rommDownloadChanged: makeEvent<RommDownloadChanged_Serialize, RommDownloadChanged_Deserialize>("romm-download-changed"),
 	saveVersionsChanged: makeEvent<SaveVersionsChanged, SaveVersionsChanged>("save-versions-changed"),
 	settingsChanged: makeEvent<SettingsChanged, SettingsChanged>("settings-changed"),
+	sharesChanged: makeEvent<SharesChanged, SharesChanged>("shares-changed"),
 	storeAccountsChanged: makeEvent<StoreAccountsChanged, StoreAccountsChanged>("store-accounts-changed"),
 	streamingPairingFinished: makeEvent<StreamingPairingFinished_Serialize, StreamingPairingFinished_Deserialize>("streaming-pairing-finished"),
 	systemStatsSampled: makeEvent<SystemStatsSampled_Serialize, SystemStatsSampled_Deserialize>("system-stats-sampled"),
@@ -4968,7 +4993,9 @@ export type InputActionEvent = InputAction;
 
 export type InputKind = "path" | "url" | 
 /**  A copy from another of the user's devices (#235). */
-"peer";
+"peer" | 
+/**  A game someone shared through a link (#246). */
+"share";
 
 export type InstallLocation = { type: "managed"; rootId: string; relDir: string } | { type: "external"; path: string };
 
@@ -4989,6 +5016,11 @@ export type InstallRequest_Deserialize = {
 	plan?: DropPlan_Deserialize | null,
 	/**  A game another of the user's devices sends here (#235). */
 	peer?: PeerSend_Deserialize | null,
+	/**
+	 *  A game someone shared through a link (#246), as its sharer says.
+	 *  The link stays here: it's a credential.
+	 */
+	share?: ShareInfo_Deserialize | null,
 };
 
 export type InstallRequest_Serialize = {
@@ -4999,6 +5031,11 @@ export type InstallRequest_Serialize = {
 	plan: DropPlan_Serialize | null,
 	/**  A game another of the user's devices sends here (#235). */
 	peer: PeerSend_Serialize | null,
+	/**
+	 *  A game someone shared through a link (#246), as its sharer says.
+	 *  The link stays here: it's a credential.
+	 */
+	share: ShareInfo_Serialize | null,
 };
 
 export type InstallRequested = InstallRequested_Serialize | InstallRequested_Deserialize;
@@ -6945,6 +6982,22 @@ export type ReasonCode =
 /**  Installed under the same id as the other kind (a theme for a plugin). */
 "kind";
 
+/**  A share received here, or being received, as the app shows it. */
+export type ReceivedShare = {
+	/**  Its install job. */
+	job: string,
+	title: string,
+	sharer: string,
+	/**  Still arriving. */
+	receiving: boolean,
+	/**  Serves the share to its other recipients after it's here. */
+	keepHelping: boolean,
+	/**  Serves it now. */
+	serving: boolean,
+	/**  Recipients it lets fetch the share. */
+	helping: number,
+};
+
 export type Recommendation = {
 	definitionId: string,
 	name: string,
@@ -8377,6 +8430,125 @@ export type SetupJob_Serialize = {
 export type SetupStatus = "queued" | "downloading" | "unpacking" | "configuring" | "done" | "failed" | "cancelled";
 
 export type Severity = "info" | "warning" | "error";
+
+/**  A share just made, and its link. */
+export type ShareCreated = ShareCreated_Serialize | ShareCreated_Deserialize;
+
+/**  A share just made, and its link. */
+export type ShareCreated_Deserialize = {
+	share: ShareRecord_Deserialize,
+	link: string,
+};
+
+/**  A share just made, and its link. */
+export type ShareCreated_Serialize = {
+	share: ShareRecord_Serialize,
+	link: string,
+};
+
+/**  How long a link may last. */
+export type ShareExpiry = "day" | "week" | 
+/**  Until it's stopped. */
+"never";
+
+/**  What a link shares, as its sharer says. */
+export type ShareInfo = ShareInfo_Serialize | ShareInfo_Deserialize;
+
+/**  What a link shares, as its sharer says. */
+export type ShareInfo_Deserialize = {
+	sharerId: string,
+	sharer: string,
+	kind: string,
+	title: string,
+	size?: number | null,
+	/**  A Windows build. */
+	windows: boolean,
+	/**  What comes with the game. */
+	extras: string[],
+	expiresAtMs?: number | null,
+	reach: ShareReach,
+};
+
+/**  What a link shares, as its sharer says. */
+export type ShareInfo_Serialize = {
+	sharerId: string,
+	sharer: string,
+	kind: string,
+	title: string,
+	size: number | null,
+	/**  A Windows build. */
+	windows: boolean,
+	/**  What comes with the game. */
+	extras: string[],
+	expiresAtMs: number | null,
+	reach: ShareReach,
+};
+
+/**  How the link reached the sharer. */
+export type ShareReach = 
+/**  Directly: the game can come. */
+"direct" | 
+/**
+ *  Only through a relay: the game waits for a direct connection, since
+ *  game files never pass through one.
+ */
+"relayOnly";
+
+/**  Someone who opened a share's link. */
+export type ShareRecipient = {
+	name: string,
+	done: number,
+	finished: boolean,
+	/**  Its session is open now. */
+	connected: boolean,
+	/**  It serves the share to its other recipients. */
+	serving: boolean,
+};
+
+/**  A share as the app shows it. */
+export type ShareRecord = ShareRecord_Serialize | ShareRecord_Deserialize;
+
+/**  A share as the app shows it. */
+export type ShareRecord_Deserialize = {
+	id: string,
+	kind: string,
+	title: string,
+	gameId?: string | null,
+	entryId?: string | null,
+	size?: number | null,
+	createdAtMs: number,
+	expiresAtMs?: number | null,
+	stoppedAtMs?: number | null,
+	state: ShareState,
+	recipients: ShareRecipient[],
+};
+
+/**  A share as the app shows it. */
+export type ShareRecord_Serialize = {
+	id: string,
+	kind: string,
+	title: string,
+	gameId: string | null,
+	entryId: string | null,
+	size: number | null,
+	createdAtMs: number,
+	expiresAtMs: number | null,
+	stoppedAtMs: number | null,
+	state: ShareState,
+	recipients: ShareRecipient[],
+};
+
+/**  How a share is going on this device. */
+export type ShareState = 
+/**  Reading the game's files. */
+{ state: "preparing"; done: number; total: number } | 
+/**  Its link works. */
+{ state: "ready" } | 
+/**  Its files couldn't be read. */
+{ state: "failed"; reason: string } | { state: "stopped" } | { state: "expired" };
+
+/**  The shares, or what's received, changed. */
+export type SharesChanged = null;
 
 /**
  *  The shells a script can be written for. `powershell` and `cmd` exist

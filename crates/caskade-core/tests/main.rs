@@ -27,6 +27,8 @@ mod presence;
 mod save_sync;
 mod save_versions;
 #[cfg(feature = "net")]
+mod shares;
+#[cfg(feature = "net")]
 mod romm;
 #[cfg(feature = "net")]
 mod cores;

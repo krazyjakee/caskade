@@ -113,6 +113,13 @@ pub fn open_in_background<R: Runtime>(app: &tauri::AppHandle<R>, links: Vec<Url>
         for link in pairs {
             crate::commands::sync::open_pair_link(&app, &link);
         }
+        // Share links (#246) ask their sharer, then wait for confirmation.
+        let (shares, links): (Vec<_>, Vec<_>) = links
+            .into_iter()
+            .partition(crate::commands::shares::is_share_link);
+        for link in shares {
+            crate::commands::shares::open_share_link(&app, link.to_string()).await;
+        }
         let (callbacks, installs): (Vec<_>, Vec<_>) = links
             .into_iter()
             .partition(crate::commands::store_accounts::is_callback);

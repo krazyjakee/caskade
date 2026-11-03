@@ -310,6 +310,14 @@ pub fn access(command: &str) -> Option<Access> {
         | "game_copy_here"
         // Sending one there: it's confirmed on that device (#235).
         | "game_send_to"
+        // Sharing a game once with someone else, and receiving one (#246):
+        // games out and in, like copies.
+        | "share_game"
+        | "share_link"
+        | "share_stop"
+        | "share_forget"
+        | "share_receive"
+        | "share_keep_helping"
         | "game_action_settings_save"
         // Adding a game by hand: in effect what an install adds (#174).
         | "manual_game_add" => Install,
@@ -343,6 +351,11 @@ pub fn access(command: &str) -> Option<Access> {
         | "game_play_on"
         | "remote_play_finished"
         | "devices_transfers"
+        // Shares and what's received (#246); looking at a link fetches
+        // nothing.
+        | "shares_list"
+        | "shares_received"
+        | "share_inspect"
         | "devices_opened_link"
         | "devices_dismiss_opened_link"
         | "devices_sync_now" => SignedIn,

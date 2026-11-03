@@ -2734,6 +2734,35 @@ msgstr "{game} kunde inte kopieras"
 msgid "couldn't create “{dir}”: {error}"
 msgstr "kunde inte skapa ”{dir}”: {error}"
 
+#: crates/caskade-core/src/remote_play/mod.rs
+#: apps/desktop/src-tauri/src/commands/copies.rs
+msgid "that device isn't paired"
+msgstr "den enheten är inte parkopplad"
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "{device} is out of reach, and it can't be woken from here"
+msgstr "{device} går inte att nå, och den kan inte väckas härifrån"
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "the connection to {device} was lost"
+msgstr "anslutningen till {device} bröts"
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "the device didn't wake up; check that Wake-on-LAN is on in its settings"
+msgstr "enheten vaknade inte; kontrollera att Wake-on-LAN är påslaget i dess inställningar"
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "this device doesn't take play requests"
+msgstr "den här enheten tar inte emot spelförfrågningar"
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "nobody started it on that device in time"
+msgstr "ingen startade det på den enheten i tid"
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "that game isn't in this device's library"
+msgstr "det spelet finns inte i den här enhetens bibliotek"
+
 #: crates/caskade-core/src/romm/cache.rs
 msgid "{checksum} for {file}"
 msgstr "{checksum} för {file}"
@@ -3517,6 +3546,67 @@ msgctxt "settings"
 msgid "Maximum simultaneous downloads. Active downloads finish when this limit is lowered."
 msgstr "Högsta antal samtidiga nedladdningar. Pågående nedladdningar slutförs när gränsen sänks."
 
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "the game's storage isn't available"
+msgstr "spelets lagring är inte tillgänglig"
+
+#: crates/caskade-core/src/share/mod.rs
+msgid "this share has no game"
+msgstr ""
+
+#: crates/caskade-core/src/share/mod.rs
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "that game isn't installed on this device"
+msgstr "det spelet är inte installerat på den här enheten"
+
+#: crates/caskade-core/src/share/mod.rs
+msgid "this share has stopped; share the game again for a new link"
+msgstr ""
+
+#: crates/caskade-core/src/share/mod.rs
+msgid "this share's link is damaged"
+msgstr ""
+
+#: crates/caskade-core/src/share/mod.rs
+msgid "stop sharing it first"
+msgstr ""
+
+#: crates/caskade-core/src/share/mod.rs
+msgid "there's no such share"
+msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "This link expired on {date}. Ask whoever shared it for a new one."
+msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "This link doesn't work any more: the share was stopped or has expired. Ask whoever shared it for a new one."
+msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "Can't reach whoever shared this: their Caskade may be closed or offline. Caskade keeps trying."
+msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "Only a relay reaches {sharer}'s computer: the game waits for a direct connection"
+msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "that isn't a Caskade share link"
+msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "that share isn't here any more"
+msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "it's here already: it can help others only if that's chosen while it arrives"
+msgstr ""
+
+#: crates/caskade-core/src/share/receive.rs
+msgid "there isn't enough room for the game: {short} more bytes are needed"
+msgstr ""
+
 #: crates/caskade-core/src/storage/catalogue.rs
 msgid "storage catalogue supports at most 128 locations"
 msgstr "lagringskatalogen stöder högst 128 platser"
@@ -4128,10 +4218,6 @@ msgid "theme {id} can't be applied: it is invalid"
 msgstr "temat {id} kan inte tillämpas: det är ogiltigt"
 
 #: crates/caskade-core/src/transfer/mod.rs
-msgid "that game isn't installed on this device"
-msgstr "det spelet är inte installerat på den här enheten"
-
-#: crates/caskade-core/src/transfer/mod.rs
 msgid "the other device didn't take the copy"
 msgstr "den andra enheten tog inte emot kopian"
 
@@ -4142,10 +4228,6 @@ msgstr "den här enheten tar inte emot kopior"
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "the game isn't fully installed on this device"
 msgstr "spelet är inte helt installerat på den här enheten"
-
-#: crates/caskade-core/src/transfer/mod.rs
-msgid "the game's storage isn't available"
-msgstr "spelets lagring är inte tillgänglig"
 
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "it starts through its store's launcher here; install it from the store there"
@@ -4353,35 +4435,6 @@ msgstr "konsolläget är inte redo än"
 msgid "that device has no copy of the game"
 msgstr "den enheten har ingen kopia av spelet"
 
-#: crates/caskade-core/src/remote_play/mod.rs
-#: apps/desktop/src-tauri/src/commands/copies.rs
-msgid "that device isn't paired"
-msgstr "den enheten är inte parkopplad"
-
-#: crates/caskade-core/src/remote_play/mod.rs
-msgid "{device} is out of reach, and it can't be woken from here"
-msgstr "{device} går inte att nå, och den kan inte väckas härifrån"
-
-#: crates/caskade-core/src/remote_play/mod.rs
-msgid "the connection to {device} was lost"
-msgstr "anslutningen till {device} bröts"
-
-#: crates/caskade-core/src/remote_play/mod.rs
-msgid "the device didn't wake up; check that Wake-on-LAN is on in its settings"
-msgstr "enheten vaknade inte; kontrollera att Wake-on-LAN är påslaget i dess inställningar"
-
-#: crates/caskade-core/src/remote_play/mod.rs
-msgid "this device doesn't take play requests"
-msgstr "den här enheten tar inte emot spelförfrågningar"
-
-#: crates/caskade-core/src/remote_play/mod.rs
-msgid "nobody started it on that device in time"
-msgstr "ingen startade det på den enheten i tid"
-
-#: crates/caskade-core/src/remote_play/mod.rs
-msgid "that game isn't in this device's library"
-msgstr "det spelet finns inte i den här enhetens bibliotek"
-
 #: apps/desktop/src-tauri/src/commands/copies.rs
 msgid "the game isn't installed on this computer in a folder that can be copied"
 msgstr "spelet är inte installerat på den här datorn i en mapp som kan kopieras"
@@ -4441,6 +4494,11 @@ msgstr "okänd eller utgången begäran"
 #: apps/desktop/src-tauri/src/commands/install_requests.rs
 msgid "request is expired or already being confirmed"
 msgstr "begäran har gått ut eller håller redan på att bekräftas"
+
+#: apps/desktop/src-tauri/src/commands/install_requests.rs
+#: apps/desktop/src-tauri/src/commands/shares.rs
+msgid "receiving shares isn't available"
+msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/install_requests.rs
 msgid "input must be one path or HTTP(S) URL"
