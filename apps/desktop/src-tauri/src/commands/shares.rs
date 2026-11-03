@@ -63,9 +63,10 @@ pub async fn share_qr(shares: State<'_, Shares>, id: String) -> Result<String, C
 /// `text` as a QR code's SVG, dark modules on a light ground with a quiet
 /// zone, as scanners expect whatever the theme.
 fn qr_svg(text: &str) -> caskade_core::Result<String> {
-    let code = qrcode::QrCode::with_error_correction_level(text, qrcode::EcLevel::M).map_err(|_| {
-        caskade_core::Error::Invalid(caskade_core::tr!("the link is too long for a QR code"))
-    })?;
+    let code =
+        qrcode::QrCode::with_error_correction_level(text, qrcode::EcLevel::M).map_err(|_| {
+            caskade_core::Error::Invalid(caskade_core::tr!("the link is too long for a QR code"))
+        })?;
     Ok(code
         .render::<qrcode::render::svg::Color>()
         .min_dimensions(256, 256)
@@ -198,6 +199,82 @@ pub async fn queue_share_link<R: Runtime>(
 
 #[cfg(test)]
 mod tests {
+    use super::super::install_requests::InstallRequests;
+    use crate::commands::test_ipc::invoke;
+    use caskade_core::share::{ShareContents, ShareInfo, ShareReach};
+    use serde_json::json;
+    use tauri::test::{mock_builder, mock_context, noop_assets};
+
+    fn info() -> ShareInfo {
+        ShareInfo {
+            sharer_id: "a".repeat(64),
+            sharer: "Alex's Desk".into(),
+            kind: "game".into(),
+            title: "Hades".into(),
+            size: Some(15_000_000_000),
+            windows: true,
+            extras: Vec::new(),
+            expires_at_ms: None,
+            reach: ShareReach::Direct,
+            contents: ShareContents::Game,
+        }
+    }
+
+    #[test]
+    fn a_share_request_shows_what_it_shares_and_never_its_link() {
+        let queue = InstallRequests::default();
+        let store =
+            tauri::async_runtime::block_on(caskade_core::db::LibraryStore::in_memory()).unwrap();
+        let service = caskade_core::install::InstallService::new(
+            store,
+            caskade_core::bus::Bus::default(),
+            caskade_core::install::InstallOptions::default(),
+        );
+        let specta = tauri_specta::Builder::<tauri::test::MockRuntime>::new()
+            .dangerously_cast_bigints_to_number()
+            .commands(tauri_specta::collect_commands![
+                crate::commands::install_requests::pending_install_requests,
+                crate::commands::install_requests::confirm_install_request
+            ])
+            .events(tauri_specta::collect_events![
+                super::super::install_requests::InstallRequested
+            ]);
+        let app = mock_builder()
+            .manage(service.clone())
+            .manage(queue.clone())
+            .invoke_handler(specta.invoke_handler())
+            .build(mock_context(noop_assets()))
+            .unwrap();
+        specta.mount_events(&app);
+        let window = tauri::WebviewWindowBuilder::new(&app, "main", Default::default())
+            .build()
+            .unwrap();
+        let link = "caskade://receive?t=caskadesharesecretgrantbytes";
+        let first = queue
+            .queue_share(app.handle(), link.to_owned(), info())
+            .unwrap();
+        // The same link twice is one request.
+        let again = queue
+            .queue_share(app.handle(), link.to_owned(), info())
+            .unwrap();
+        assert_eq!(first.request_id, again.request_id);
+        let pending = invoke(&window, "pending_install_requests", json!({})).unwrap();
+        assert_eq!(pending.as_array().unwrap().len(), 1);
+        assert_eq!(pending[0]["kind"], "share");
+        assert_eq!(pending[0]["share"]["sharer"], "Alex's Desk");
+        assert_eq!(pending[0]["value"], "Hades");
+        assert!(!pending.to_string().contains("secretgrant"), "{pending}");
+        // Nothing to receive it with: refused, and it still waits.
+        let refused = invoke(
+            &window,
+            "confirm_install_request",
+            json!({"requestId": first.request_id, "rootId": null}),
+        );
+        assert!(refused.is_err());
+        assert!(service.jobs().is_empty());
+        assert_eq!(queue.pending().len(), 1);
+    }
+
     #[test]
     fn a_link_makes_a_qr_code() {
         let link = format!("caskade://receive?t=caskadeshare{}", "a".repeat(400));
