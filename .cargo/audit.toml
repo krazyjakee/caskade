@@ -1,0 +1,10 @@
+# `cargo audit` (app.yml's Rust dependency advisories, #157). Each ignored
+# advisory says why it can't reach Caskade and when to look again.
+[advisories]
+ignore = [
+  # ringbuf 0.4.8: a double free in `Consumer::skip`/`clear` when an
+  # element's `Drop` panics. Only librqbit-utp 0.7.0 (the installer's torrent
+  # support) uses it, with `u8` elements, which have no `Drop`. Its newest
+  # release still needs ringbuf ^0.4.7; drop this once it moves to >= 0.5.2.
+  "RUSTSEC-2026-0293",
+]
