@@ -147,6 +147,7 @@ async fn pair(endpoint: &Endpoint, pin: &str, wait: Duration) -> Paired {
         identity: &identity(),
         pin,
         wait,
+        device_name: "Living room",
     }
     .run()
     .await

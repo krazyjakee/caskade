@@ -16,6 +16,8 @@ pub mod host;
 #[cfg(feature = "net")]
 pub mod hosts;
 #[cfg(feature = "net")]
+pub mod linked;
+#[cfg(feature = "net")]
 pub mod mdns;
 #[cfg(feature = "net")]
 pub mod pairing;

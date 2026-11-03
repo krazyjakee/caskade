@@ -62,6 +62,20 @@ impl LibraryStore {
     /// games with a release of their own keeps a title-only record (#174)
     /// from going with a host's app.
     pub async fn sync_stream_apps(&self, host_id: &str, apps: &[StreamApp]) -> Result<StreamSync> {
+        self.sync_stream_apps_from(host_id, apps, None).await
+    }
+
+    /// [`Self::sync_stream_apps`] for a host on `device`, a device paired
+    /// through sync (#267): an app joins the game of that device's own
+    /// installed copy (#232), named by sync's identity rather than by a
+    /// title anywhere in the library; only apps none of its copies match
+    /// fall back to the title.
+    pub async fn sync_stream_apps_from(
+        &self,
+        host_id: &str,
+        apps: &[StreamApp],
+        device: Option<&str>,
+    ) -> Result<StreamSync> {
         let source = stream_source(host_id);
         let mut tx = self.pool.begin().await?;
         let known: Vec<(String, String, String)> =
@@ -128,6 +142,20 @@ impl LibraryStore {
             let mut by_title: BTreeMap<String, String> = BTreeMap::new();
             for (id, title) in titles {
                 by_title.entry(title_key(&title)).or_insert(id);
+            }
+            // The games the host's device itself has installed come first.
+            if let Some(device) = device {
+                let copies: Vec<(String, String)> = sqlx::query_as(
+                    "SELECT g.id,g.title FROM games g WHERE g.hidden=0 \
+                     AND EXISTS(SELECT 1 FROM game_entries e WHERE e.game_id=g.id \
+                     AND e.source_id=?) ORDER BY g.rowid DESC",
+                )
+                .bind(format!("{}{device}", super::sync_copies::PEER_PREFIX))
+                .fetch_all(&mut *tx)
+                .await?;
+                for (id, title) in copies {
+                    by_title.insert(title_key(&title), id);
+                }
             }
             for app in new {
                 let key = title_key(&app.name);

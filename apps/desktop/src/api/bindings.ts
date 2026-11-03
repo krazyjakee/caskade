@@ -6149,6 +6149,11 @@ export type PairingStarted = {
 	hostId: string,
 	hostName: string,
 	code: string,
+	/**
+	 *  The host is one of this user's devices paired through sync, and it
+	 *  entered the code itself (#267): nothing to type.
+	 */
+	automatic: boolean,
 };
 
 export type PairingState = 

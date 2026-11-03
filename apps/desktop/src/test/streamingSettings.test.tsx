@@ -283,6 +283,21 @@ it("repairs hosting and forgets every paired device (#266)", async () => {
   expect(screen.queryByText("Bedroom TV")).toBeNull();
 });
 
+it("a device paired through sync pairs with no code (#267)", async () => {
+  const { streaming } = open("/settings?tab=streaming", { linked: ["fixture-study"] });
+  const study = (await screen.findByText("Study")).closest("li") as HTMLElement;
+  fireEvent.click(within(study).getByRole("button", { name: "Pair…" }));
+  const dialog = await screen.findByRole("dialog", { name: "Pair with Study" });
+  await within(dialog).findByText(
+    "Study is one of your devices, so it's pairing without a code. This takes a moment.",
+  );
+  expect(within(dialog).queryByText("4831")).toBeNull();
+  streaming.finishPairing("fixture-study", "paired");
+  await within(dialog).findByText(
+    "Paired. Study's games show in your library as Stream from Study.",
+  );
+});
+
 it("says when controllers or a screen won't work on this host (#260)", async () => {
   open("/settings?tab=streaming", {
     hosting: {

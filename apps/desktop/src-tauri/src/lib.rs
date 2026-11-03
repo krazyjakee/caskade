@@ -678,6 +678,21 @@ pub fn run() {
                 std::sync::Arc::new(caskade_core::devices::Keychain),
             );
             devices.set_settings(settings.clone());
+            // Streaming pairs through sync with no code (#267): this host
+            // enters a paired device's code; this client hands its over.
+            if let Some(host) = app.try_state::<caskade_core::streaming::StreamingHost>() {
+                devices.set_stream_handler(std::sync::Arc::new(
+                    caskade_core::streaming::linked::HostHandover::new(std::sync::Arc::new(
+                        host.inner().clone(),
+                    )),
+                ));
+            }
+            app.manage(caskade_core::streaming::linked::LinkedPairing::new(
+                devices.clone(),
+            ));
+            if let Some(hosts) = app.try_state::<caskade_core::streaming::hosts::StreamHosts>() {
+                hosts.set_devices(devices.clone());
+            }
             // Copies of games between devices (#233): served with the
             // endpoint, so set up before it starts.
             match tauri::async_runtime::block_on(caskade_core::transfer::Transfers::new(

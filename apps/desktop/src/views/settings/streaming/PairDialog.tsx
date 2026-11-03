@@ -76,7 +76,15 @@ export function PairDialog({ host, close }: { host: StreamHost; close: () => voi
               <Trans>Asking {device}…</Trans>
             </p>
           )}
-          {step.type === "code" && (
+          {step.type === "code" && step.started.automatic && (
+            <p role="status" className="mt-3 text-sm text-fg-muted">
+              <Trans>
+                {device} is one of your devices, so it's pairing without a code. This takes a
+                moment.
+              </Trans>
+            </p>
+          )}
+          {step.type === "code" && !step.started.automatic && (
             <>
               <p className="mt-3 text-sm text-fg-muted">
                 <Trans>

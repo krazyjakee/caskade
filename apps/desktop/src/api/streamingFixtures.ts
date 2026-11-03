@@ -23,6 +23,8 @@ export interface StreamingFixtureOptions {
   programs?: StreamingProgram[];
   /** A device streams from this one: the host's update waits. */
   busy?: boolean;
+  /** Hosts on devices paired through sync: they take the code (#267). */
+  linked?: string[];
 }
 
 export const fixtureStreamHosts = (): StreamHost[] => [
@@ -115,7 +117,12 @@ export function createStreamingFixtureApi(options: StreamingFixtureOptions = {})
     async pairWith(hostId) {
       const host = hosts.find((each) => each.id === hostId);
       if (!host) throw new Error("That device isn't on this network");
-      return { hostId, hostName: host.name, code: "4831" };
+      return {
+        hostId,
+        hostName: host.name,
+        code: "4831",
+        automatic: options.linked?.includes(hostId) ?? false,
+      };
     },
     onPairingFinished(listener) {
       listeners.add(listener);

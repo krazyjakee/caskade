@@ -273,6 +273,9 @@ struct Inner {
     /// The client's state folder, when a test gives one.
     state: Option<std::path::PathBuf>,
     refreshing: tokio::sync::Mutex<()>,
+    /// The devices paired through sync (#267): a host on one of them names
+    /// its games by that device's copies.
+    devices: std::sync::OnceLock<crate::devices::Devices>,
 }
 
 /// The hosts this device can stream from; cheap to clone.
@@ -326,6 +329,7 @@ impl StreamHosts {
                 apps_at: Mutex::default(),
                 state: None,
                 refreshing: tokio::sync::Mutex::new(()),
+                devices: std::sync::OnceLock::new(),
             }),
         })
     }
@@ -344,6 +348,37 @@ impl StreamHosts {
     }
 
     /// Every host seen since Caskade started, by name.
+    /// Names a host's games by its device's own copies when the host is a
+    /// device paired through sync (#267). Set once, when devices exist.
+    pub fn set_devices(&self, devices: crate::devices::Devices) {
+        let _ = self.inner.devices.set(devices);
+    }
+
+    /// The sync-paired device at one of `addresses`, by its id.
+    async fn device_at(&self, addresses: &[String]) -> Option<String> {
+        let devices = self.inner.devices.get()?;
+        let ip = |text: &str| {
+            text.parse::<std::net::SocketAddr>()
+                .map(|addr| addr.ip())
+                .or_else(|_| text.parse::<IpAddr>())
+                .ok()
+        };
+        let wanted: Vec<IpAddr> = addresses.iter().filter_map(|a| ip(a)).collect();
+        devices
+            .status()
+            .await
+            .devices
+            .into_iter()
+            .find(|device| {
+                device
+                    .addresses
+                    .iter()
+                    .filter_map(|a| ip(a))
+                    .any(|at| wanted.contains(&at))
+            })
+            .map(|device| device.id)
+    }
+
     pub fn hosts(&self) -> Vec<StreamHost> {
         let mut hosts: Vec<StreamHost> = crate::lock(&self.inner.hosts).values().cloned().collect();
         hosts.sort_by_key(|host| host.name.to_lowercase());
@@ -549,10 +584,18 @@ impl StreamHosts {
             paired.to_vec()
         };
         for host in &paired {
+            let mut addresses = host.addresses.clone();
+            if let Some(found) = crate::lock(&self.inner.hosts)
+                .get(&host.id)
+                .and_then(|known| known.address.clone())
+            {
+                addresses.push(found);
+            }
+            let device = self.device_at(&addresses).await;
             let sync = self
                 .inner
                 .store
-                .sync_stream_apps(&host.id, &host.apps)
+                .sync_stream_apps_from(&host.id, &host.apps, device.as_deref())
                 .await?;
             for game_id in sync.added {
                 self.inner.bus.emit(Event::LibraryGameAdded { game_id });

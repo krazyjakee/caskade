@@ -439,6 +439,10 @@ msgstr ""
 msgid "{device} declined."
 msgstr ""
 
+#: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+msgid "{device} is one of your devices, so it's pairing without a code. This takes a moment."
+msgstr ""
+
 #: apps/desktop/src/views/game/OtherDevices.tsx
 msgid "{device} is out of reach."
 msgstr ""

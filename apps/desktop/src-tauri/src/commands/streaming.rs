@@ -25,6 +25,9 @@ pub struct PairingStarted {
     pub host_id: String,
     pub host_name: String,
     pub code: String,
+    /// The host is one of this user's devices paired through sync, and it
+    /// entered the code itself (#267): nothing to type.
+    pub automatic: bool,
 }
 
 /// How a pairing ended.
@@ -334,31 +337,57 @@ pub async fn streaming_pair_with<R: Runtime>(
         )))
     })?;
     let code = caskade_core::streaming::pairing::new_code().map_err(report)?;
-    let started = PairingStarted {
-        host_id: host.id.clone(),
-        host_name: host.name.clone(),
-        code: code.clone(),
+    // Devices paired through sync (#267) take the code without typing.
+    // Devices paired through sync (#267) take the code without typing.
+    let linked = app
+        .try_state::<caskade_core::streaming::linked::LinkedPairing>()
+        .map(|linked| linked.inner().clone());
+    let name = match &linked {
+        Some(linked) => linked.device_name().await,
+        None => {
+            caskade_core::streaming::pairing::device_name(&sysinfo_host_name().unwrap_or_default())
+        }
     };
     let (client, hosts) = (client.inner().clone(), hosts.inner().clone());
-    tauri::async_runtime::spawn(async move {
-        let result = client
-            .pair(
-                &address,
-                &code,
-                PAIRING_WAIT,
-                &caskade_core::managed::CancellationToken::new(),
-            )
-            .await;
-        let (outcome, message) = pairing_outcome(&result, &host.name);
-        let _ = hosts.refresh().await;
-        let _ = StreamingPairingFinished {
-            host_id: host.id,
-            outcome,
-            message,
-        }
-        .emit(&app);
-    });
-    Ok(started)
+    let pairing = {
+        let (address, code, name) = (address.clone(), code.clone(), name.clone());
+        let host = host.clone();
+        tauri::async_runtime::spawn(async move {
+            let result = client
+                .pair_as(
+                    &address,
+                    &code,
+                    &name,
+                    PAIRING_WAIT,
+                    &caskade_core::managed::CancellationToken::new(),
+                )
+                .await;
+            let (outcome, message) = pairing_outcome(&result, &host.name);
+            let _ = hosts.refresh().await;
+            let _ = StreamingPairingFinished {
+                host_id: host.id,
+                outcome,
+                message,
+            }
+            .emit(&app);
+        })
+    };
+    drop(pairing);
+    let automatic = match linked {
+        Some(linked) => linked.hand_over(&host.id, &name, &code, &name).await,
+        None => false,
+    };
+    Ok(PairingStarted {
+        host_id: host.id.clone(),
+        host_name: host.name.clone(),
+        code,
+        automatic,
+    })
+}
+
+/// The OS's name for this computer.
+fn sysinfo_host_name() -> Option<String> {
+    caskade_core::streaming::pairing::this_host_name()
 }
 
 /// Forgets a paired device on this device.

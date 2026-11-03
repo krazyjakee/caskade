@@ -820,3 +820,213 @@ async fn live_linux_pairing_survives_hosting_off_and_on() {
     handle.wait_status().await.unwrap();
     host.shutdown();
 }
+
+/// #267: two devices paired through sync stream with no code. The client
+/// starts pairing with the real host and hands its code over sync; the
+/// host's device enters it. The device then streams a game. Run under Xvfb.
+#[cfg(all(feature = "live-tests", target_os = "linux"))]
+#[tokio::test(flavor = "multi_thread")]
+#[ignore = "downloads and runs the real streaming host and client"]
+async fn live_linux_sync_paired_devices_stream_with_no_code() {
+    use caskade_core::{
+        AppPaths,
+        accounts::AccountService,
+        bus::Bus,
+        db::{LibraryStore, StreamApp},
+        devices::{Devices, MemoryKeyStore, Reach},
+        elevation::{Change, Elevation, Prompt, Request, Runner},
+        emulation::OperatingSystem,
+        launch::LaunchService,
+        managed::{CancellationToken, ManagedTools},
+        settings::SettingsService,
+        streaming::{
+            HostOutcome, HostState, StreamingClient, StreamingHost,
+            api::App,
+            host::{Parts, Timing, process::ChildRunner},
+            hosts::ask_server_info,
+            linked::{HostHandover, LinkedPairing},
+            pairing::Paired,
+            play::Streams,
+            secrets::HostSecrets,
+        },
+    };
+    use std::{
+        sync::Arc,
+        time::{Duration, Instant},
+    };
+
+    struct Allowed;
+    impl Runner for Allowed {
+        fn present(&self, _: Change) -> bool {
+            false
+        }
+        fn run(&self, _: &Request) -> caskade_core::Result<Prompt> {
+            Ok(Prompt::Done)
+        }
+    }
+    async fn device(name: &str, dir: &std::path::Path) -> (Devices, LibraryStore, SettingsService) {
+        let store = LibraryStore::in_memory().await.unwrap();
+        let accounts = AccountService::open(store.clone(), Bus::default())
+            .await
+            .unwrap();
+        let settings = SettingsService::new(store.clone());
+        settings.register_core(&AppPaths::under(dir)).unwrap();
+        let devices = Devices::with_reach(
+            store.clone(),
+            accounts,
+            Arc::new(MemoryKeyStore::default()),
+            Reach::loopback(),
+        );
+        devices.set_settings(settings.clone());
+        devices.start();
+        let deadline = Instant::now() + Duration::from_secs(20);
+        while !devices.status().await.this_device.listening {
+            assert!(Instant::now() < deadline, "the endpoint starts");
+            tokio::time::sleep(Duration::from_millis(50)).await;
+        }
+        devices.rename(name).await.unwrap();
+        (devices, store, settings)
+    }
+
+    // The host's device.
+    let host_dir = tempfile::tempdir().unwrap();
+    let (host_devices, host_store, host_settings) = device("Den", host_dir.path()).await;
+    let host_paths = AppPaths::under(host_dir.path());
+    let host_tools = ManagedTools::new(
+        host_store,
+        Bus::default(),
+        caskade_sources::tools::catalog().unwrap(),
+        &host_paths,
+    );
+    let host = StreamingHost::with(
+        host_tools,
+        Elevation::with_runner(Arc::new(Allowed), OperatingSystem::Linux, &host_paths),
+        host_settings,
+        Parts {
+            existing: Arc::new(|| None),
+            os: OperatingSystem::Linux,
+            runner: Arc::new(ChildRunner::new(host_paths.data.join("streaming/run.json"))),
+            secrets: HostSecrets::memory(),
+            timing: Timing::default(),
+            api_base: caskade_core::streaming::api::LOCAL.parse().unwrap(),
+            http_port: caskade_core::streaming::host::HTTP_PORT,
+            checks: Arc::new(caskade_core::streaming::host::HostChecks::here),
+        },
+    );
+    host.set_device_name("Den");
+    assert_eq!(host.enable().await.unwrap(), HostOutcome::On);
+    while host.status().state != HostState::Ready {
+        assert_ne!(host.status().state, HostState::NeedsAttention);
+        tokio::time::sleep(Duration::from_millis(250)).await;
+    }
+    host.api()
+        .await
+        .unwrap()
+        .add_app(&App::command("Live Game", "/bin/sleep 600"))
+        .await
+        .unwrap();
+    host_devices.set_stream_handler(Arc::new(HostHandover::new(Arc::new(host.clone()))));
+
+    // The client's device, paired with the host's through sync.
+    let client_dir = tempfile::tempdir().unwrap();
+    let (client_devices, client_store, client_settings) =
+        device("Steam Deck", client_dir.path()).await;
+    let link = host_devices.pairing_link().await.unwrap();
+    client_devices.accept_pairing_link(&link.url).await.unwrap();
+    let client_id = client_devices.status().await.this_device.id.unwrap();
+    let deadline = Instant::now() + Duration::from_secs(20);
+    while !host_devices
+        .status()
+        .await
+        .devices
+        .iter()
+        .any(|d| d.id == client_id)
+    {
+        assert!(Instant::now() < deadline, "paired through sync");
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+    let client_paths = AppPaths::under(client_dir.path());
+    let client = StreamingClient::new(ManagedTools::new(
+        client_store.clone(),
+        Bus::default(),
+        caskade_sources::tools::catalog().unwrap(),
+        &client_paths,
+    ));
+    let linked = LinkedPairing::new(client_devices.clone());
+    let name = linked.device_name().await;
+    assert_eq!(name, "Steam Deck");
+    let host_id = ask_server_info("127.0.0.1", 47989).await.unwrap().id;
+
+    // Pairing: the code goes over sync; nobody types it.
+    let code = caskade_core::streaming::pairing::new_code().unwrap();
+    let pairing = tokio::spawn({
+        let (client, code, name) = (client.clone(), code.clone(), name.clone());
+        async move {
+            client
+                .pair_as(
+                    "127.0.0.1",
+                    &code,
+                    &name,
+                    Duration::from_secs(60),
+                    &CancellationToken::new(),
+                )
+                .await
+        }
+    });
+    assert!(
+        linked.hand_over(&host_id, &name, &code, &name).await,
+        "the host took the code"
+    );
+    assert!(matches!(
+        pairing.await.unwrap().unwrap(),
+        Paired::Paired { .. }
+    ));
+    let paired = host.paired_devices().await.unwrap();
+    assert!(paired.iter().any(|d| d.name == "Steam Deck"), "{paired:?}");
+
+    // And it streams.
+    client_store
+        .sync_stream_apps(
+            &host_id,
+            &[StreamApp {
+                id: "1".into(),
+                name: "Live Game".into(),
+            }],
+        )
+        .await
+        .unwrap();
+    let games = client_store.list_games(&Default::default()).await.unwrap();
+    let game = games.items.iter().find(|g| g.title == "Live Game").unwrap();
+    let entry = client_store
+        .entries_for_game(&game.id)
+        .await
+        .unwrap()
+        .remove(0);
+    let launch = LaunchService::new(client_store.clone());
+    launch.set_streamer(Arc::new(Streams::new(
+        client.clone(),
+        None,
+        client_settings,
+    )));
+    let handle = launch.launch(&entry.id).await.unwrap();
+    assert!(
+        ask_server_info("127.0.0.1", 47989)
+            .await
+            .is_some_and(|info| info.busy)
+    );
+    launch
+        .stop(&handle.ticket.session_id, Duration::from_secs(5))
+        .await
+        .unwrap();
+    handle.wait_status().await.unwrap();
+
+    // A device not paired through sync still needs the code.
+    let stranger_dir = tempfile::tempdir().unwrap();
+    let (stranger, _, _) = device("Stranger", stranger_dir.path()).await;
+    assert!(
+        !LinkedPairing::new(stranger)
+            .hand_over(&host_id, "Stranger", "1234", "Stranger")
+            .await
+    );
+    host.shutdown();
+}

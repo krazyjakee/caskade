@@ -1,6 +1,6 @@
 # Caskade — Game Streaming Plan
 
-Status: in progress; built: the managed-tool layer (§3.1, #254), `caskade --launch` (§8.1, #256), the elevation helper (§8.4, #255), the host (§4.1–4.2, #257), the client's install and state (§5.1–5.2, #261) finding hosts with their games in the library (§6.1, §8.2, #262) using a user's own Sunshine (§3.4, #258) publishing the library's games (§4.3, #259), pairing with a code (§6.2, #263), streaming a game from Play (§5.3, §8.2–8.3, #264), Settings → Streaming (§8.5, #265), updates, repair and removal (§7, #266) and the host's display, input and capture (§4.4–4.5, #260); issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
+Status: in progress; built: the managed-tool layer (§3.1, #254), `caskade --launch` (§8.1, #256), the elevation helper (§8.4, #255), the host (§4.1–4.2, #257), the client's install and state (§5.1–5.2, #261) finding hosts with their games in the library (§6.1, §8.2, #262) using a user's own Sunshine (§3.4, #258) publishing the library's games (§4.3, #259), pairing with a code (§6.2, #263), streaming a game from Play (§5.3, §8.2–8.3, #264), Settings → Streaming (§8.5, #265), updates, repair and removal (§7, #266), the host's display, input and capture (§4.4–4.5, #260) and pairing through sync (§6.3, #267); issues #254–#267 in the Game streaming milestone, tracked in #268 · Last updated: 2026-10-30
 
 How Caskade lets a household play a game installed on one device from another, streamed over the local network. Caskade installs, configures, updates and drives two separate open-source programs: Sunshine on the device that runs the game (the host) and Moonlight on the device that shows it (the client). Users never see their names, windows or settings: they switch hosting on, pair a device once, and choose Stream from Living room. It follows the conventions in `TECH-PLAN.md`; the managed installs build on the emulator setup (`crates/caskade-sources/emulation/README.md`).
 
@@ -244,6 +244,22 @@ Moonlight's `pair` opens a window (its AppImage has only Qt's `xcb` platform, so
 
 Once devices are paired through sync (#226) and exchange changes (#230), the client sends its code to the host over `caskade/sync/1` and the host submits it unprompted: paired devices stream with no code. Sync's view of other devices' installed copies (#232) then names exactly which game each app is (§8.2).
 
+#### Built (#267)
+
+- **Pairing requests carry the client's device name** (`Pairing.device_name`, `StreamingClient::pair_as`): Caskade's name for this device, so a host's prompt shows it, and a handover can find the request by it.
+- **The client** (`streaming::linked::LinkedPairing`) starts the usual pairing (§6.2), then offers `{"type":"pair","host","request","code","name"}` to every device paired through sync at once. It opens a `caskade/sync/1` session with purpose `stream` (engineer 1's `Purpose::Stream`, admitted like `sync` and `copy`: paired devices with their grant, never forgotten ones).
+- **The host's device** (`HostHandover`, `Devices::set_stream_handler`) answers `accepted`, `notHere` or `refused`:
+  - `notHere` unless it is hosting (Ready) and its `/serverinfo` `uniqueid` is the host being paired with.
+  - Otherwise it waits up to 10 s for the pending request with that name, enters the code (`accept_pairing`) and answers `accepted`.
+
+  `streaming_pair_with` then answers `PairingStarted.automatic`, and Pair… shows "<device> is one of your devices, so it's pairing without a code" instead of the code. A device not paired through sync can't open the session, so it still needs the code.
+- **Names, not titles.** A paired host on a device paired through sync (matched by address, `StreamHosts::set_devices`) names its apps by that device's own copies (#232). `LibraryStore::sync_stream_apps_from` joins each app to the game of that device's `peer:` copy with the app's title before any other game of that title.
+- **Tests.**
+  - `streaming::linked::tests`, two in-process devices on loopback paired through sync: the host enters the code; another host answers `notHere`; a device not paired through sync has nobody to hand the code to and is refused outright; the host answers only for itself and only while hosting.
+  - `streaming::hosts::tests`: a synced device's copy wins over a title elsewhere.
+  - `test/streamingSettings.test.tsx`: pairing with no code shown.
+  - Live (`caskade-sources` `streaming::live_linux_sync_paired_devices_stream_with_no_code`, Xvfb): two devices paired through sync. The real host takes the code over sync, the client pairs and streams. A third, unpaired device can't hand a code over.
+
 ## 7. Updates and repair
 
 - Both programs follow `core.updates` like managed emulators: the watch checks GitHub's `releases/latest` redirect without the API, an update shows in "Updates available" with Update and Skip, and nothing updates itself. Neither program has its own updater; Moonlight's check only shows a toolbar button that command-line launches hide.
@@ -431,6 +447,7 @@ Each item names its issue; record the date and result here.
 - [ ] #265 per OS: a new user switches hosting on, pairs a device and streams a game without leaving Caskade or seeing a technology name; the same with a pad in console mode on the TV, the request prompt included.
 - [ ] #266 per OS: after switching hosting off, nothing of the host remains: Linux has no `/etc/udev/rules.d/60-caskade-streaming.rules` or `/etc/modules-load.d/60-caskade-streaming.conf`, and no program under `<data>/streaming/host`. Windows has no `CaskadeStreaming` service, no "Caskade streaming" firewall rule, and no program file under `%ProgramFiles%\Caskade\Streaming` (only `kept\`). Switching on again reinstalls it, and a device paired before streams with no new code. An update of either program from Settings → Streaming keeps pairings and settings. On Windows it applies with one UAC prompt into the administrator-only folder. Each repair case works on a real machine.
 - [ ] #260: a 1080p client streaming from a 1440p Windows host gets a 1080p stream, and the host's mode comes back afterwards (HDR too, on an HDR screen). A pad on the client drives the game on a Linux host (X11 and Wayland, the portal's approval asked once) and on a Windows host, with rumble. A Windows host where ViGEmBus was already installed keeps it and works, and one without gets it in the same UAC prompt (`/exenoui /qn /norestart`, verified here first). A host with no screen, or whose pads don't work, says so in Settings → Streaming.
+- [ ] #267: two of the household's devices, paired in Settings → Devices, pair for streaming with no code typed. A device not paired there still needs the host's code. A host on a synced device names each streamed game as that device's installed copy.
 - [ ] #256 Windows: with Caskade running, `caskade.exe --launch <game id>` starts the game; `taskkill /PID <caller>` (WM_CLOSE, without `/F`), or ending a Sunshine stream, quits the game and ends its session, and the caller exits 5.
 
 ### Testing

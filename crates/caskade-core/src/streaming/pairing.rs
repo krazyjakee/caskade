@@ -245,6 +245,31 @@ pub struct Pairing<'a> {
     /// How long the host may take to have the code entered: its requests
     /// expire after five minutes.
     pub wait: Duration,
+    /// What the host shows the request as ([`device_name`]): this device's
+    /// name. A paired device hands the code over by it (#267).
+    pub device_name: &'a str,
+}
+
+/// The OS's name for this computer.
+pub fn this_host_name() -> Option<String> {
+    sysinfo::System::host_name()
+}
+
+/// A device name as a pairing request carries it: printable, at most 64
+/// characters, never empty.
+pub fn device_name(name: &str) -> String {
+    let name: String = name
+        .chars()
+        .filter(|c| !c.is_control())
+        .take(64)
+        .collect::<String>()
+        .trim()
+        .to_owned();
+    if name.is_empty() {
+        "Caskade".to_owned()
+    } else {
+        name
+    }
 }
 
 impl Pairing<'_> {
@@ -252,7 +277,7 @@ impl Pairing<'_> {
         let mut params = vec![
             ("uniqueid".to_owned(), self.identity.unique_id.clone()),
             ("uuid".to_owned(), uuid::Uuid::new_v4().simple().to_string()),
-            ("devicename".to_owned(), "roth".to_owned()),
+            ("devicename".to_owned(), device_name(self.device_name)),
             ("updateState".to_owned(), "1".to_owned()),
         ];
         params.extend(

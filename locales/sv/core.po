@@ -3922,6 +3922,10 @@ msgstr ""
 msgid "{address} isn't a device's address"
 msgstr ""
 
+#: crates/caskade-core/src/streaming/linked.rs
+msgid "the pairing request didn't arrive"
+msgstr ""
+
 #: crates/caskade-core/src/streaming/pairing.rs
 msgid "the device that answered isn't the one asked to pair"
 msgstr ""

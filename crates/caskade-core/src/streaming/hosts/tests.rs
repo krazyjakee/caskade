@@ -387,3 +387,42 @@ async fn hidden_games_and_title_only_records_are_not_joined() {
         "the record stays"
     );
 }
+
+#[tokio::test]
+async fn a_host_on_a_synced_device_names_its_games_by_that_devices_copies() {
+    let store = LibraryStore::in_memory().await.unwrap();
+    // Two games of one title: this device's own, and the one the host's
+    // device has installed (its copy, through sync).
+    let here = Game::new("Hades");
+    store.upsert_game(&here).await.unwrap();
+    store
+        .upsert_entry(&crate::model::GameEntry::new(
+            &here.id,
+            "steam".to_owned().into(),
+            "1145360",
+        ))
+        .await
+        .unwrap();
+    let there = Game::new("Hades");
+    store.upsert_game(&there).await.unwrap();
+    store
+        .upsert_entry(&crate::model::GameEntry::new(
+            &there.id,
+            "peer:DEVICE1".to_owned().into(),
+            "entry-1",
+        ))
+        .await
+        .unwrap();
+    let apps = [crate::db::StreamApp {
+        id: "7".into(),
+        name: "Hades".into(),
+    }];
+    let named = store
+        .sync_stream_apps_from("HOST1", &apps, Some("DEVICE1"))
+        .await
+        .unwrap();
+    assert_eq!(named.updated, std::slice::from_ref(&there.id));
+    // Without the device, the title decides, as before.
+    let titled = store.sync_stream_apps("HOST2", &apps).await.unwrap();
+    assert_eq!(titled.updated, std::slice::from_ref(&here.id));
+}

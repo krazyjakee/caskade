@@ -292,6 +292,20 @@ impl StreamingClient {
         wait: Duration,
         cancel: &CancellationToken,
     ) -> Result<super::pairing::Paired> {
+        let name = sysinfo::System::host_name().unwrap_or_default();
+        self.pair_as(address, pin, &name, wait, cancel).await
+    }
+
+    /// [`Self::pair`], with the host showing the request as `device_name`:
+    /// how a device paired through sync recognises it (#267).
+    pub async fn pair_as(
+        &self,
+        address: &str,
+        pin: &str,
+        device_name: &str,
+        wait: Duration,
+        cancel: &CancellationToken,
+    ) -> Result<super::pairing::Paired> {
         let _busy = self.busy.lock().await;
         let client = self.ensure(cancel).await?;
         let identity = self.identity(&client).await?;
@@ -306,6 +320,7 @@ impl StreamingClient {
             identity: &identity,
             pin,
             wait,
+            device_name,
         }
         .run()
         .await?;
