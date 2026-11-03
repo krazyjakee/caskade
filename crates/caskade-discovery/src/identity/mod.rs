@@ -117,7 +117,11 @@ pub fn canonical_path_with(
 ) -> io::Result<CanonicalPath> {
     let mut path = path.to_path_buf();
     let host_reference = path.to_str().is_some_and(|v| v.starts_with("/run/host/"));
-    if let Some(text) = path.to_str() {
+    if env.is_fixture() && path.starts_with(env.fs_root()) {
+        // A path this env handed out. On a Windows host its text looks like
+        // a `C:\` path, which would be mapped into the fixture a second time.
+        path = env.resolve_path(&path)?;
+    } else if let Some(text) = path.to_str() {
         if text.contains('\0') {
             return Err(invalid("NUL in path"));
         }
