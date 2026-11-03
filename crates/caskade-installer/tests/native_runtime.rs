@@ -438,6 +438,28 @@ async fn inno_fixture_installs_silently_into_the_root_with_watched_effects() {
     let setup = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests/fixtures/bin/native-uninstall/native-inno-shortcuts/setup.exe");
     let root = TestRoot::new().unwrap();
+    // The fixture registers itself, writes HKCU\Software\CaskadeNativeFixture\inno
+    // and makes shortcuts; leaving them would fail uninstall_native's
+    // clean-runner check later in the same job.
+    struct Uninstall(PathBuf);
+    impl Drop for Uninstall {
+        fn drop(&mut self) {
+            let uninstaller = self.0.join("unins000.exe");
+            if uninstaller.is_file() {
+                let _ = std::process::Command::new(uninstaller)
+                    .args(["/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART"])
+                    .status();
+            }
+            use winreg::{RegKey, enums::*};
+            let _ = RegKey::predef(HKEY_CURRENT_USER)
+                .open_subkey_with_flags(
+                    r"Software\CaskadeNativeFixture",
+                    KEY_READ | KEY_WRITE | KEY_WOW64_32KEY,
+                )
+                .and_then(|key| key.delete_subkey_all("inno"));
+        }
+    }
+    let _uninstall = Uninstall(root.path().join("Fixture Game"));
     let watcher = OutOfRootWatcher::for_host();
     let step = Step::Run {
         program: Program::Source(SourcePath::Artifact {
