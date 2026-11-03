@@ -466,7 +466,10 @@ impl Transfers {
 
     /// The folder release `entry` is in, its program relative to it, and
     /// whether it's a Windows build; refused when it can't be copied.
-    async fn source(&self, entry: &str) -> Result<(PathBuf, String, Option<String>, bool)> {
+    pub(crate) async fn source(
+        &self,
+        entry: &str,
+    ) -> Result<(PathBuf, String, Option<String>, bool)> {
         let not_here = || Error::Invalid(crate::tr!("that game isn't installed on this device"));
         let entry = self
             .inner
