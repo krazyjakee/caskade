@@ -353,13 +353,15 @@ fn full_disk_fake_clock_budget_reports_progress_and_stops_at_the_next_entry() {
     let report = deep::scan_with_options(
         &env,
         &ctx,
+        // The budget also stops on real time, as a backstop; keep it out of
+        // reach so only the fake clock ends the scan.
         &Options {
-            budget_ms: 5,
+            budget_ms: 1000,
             ..Default::default()
         },
         &|p| {
             if p.visited == 4 && !p.done {
-                clock.advance(Duration::from_millis(10));
+                clock.advance(Duration::from_millis(2000));
             }
             progress.lock().unwrap().push((p.kind, p.visited, p.done));
         },

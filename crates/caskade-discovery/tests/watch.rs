@@ -52,10 +52,13 @@ fn sources() -> Vec<Arc<dyn Source>> {
     vec![Arc::new(Steam)]
 }
 
-/// One source's rescan, with the same fixture on every host. Windows' file
-/// opens cost several times Linux's (tests/HARDENING.md has the measurements).
+/// One source's rescan, with the same fixture on every host. Windows' and
+/// macOS's file opens cost several times Linux's (tests/HARDENING.md has the
+/// measurements).
 const RESCAN_BUDGET: Duration = if cfg!(windows) {
     Duration::from_millis(800)
+} else if cfg!(target_os = "macos") {
+    Duration::from_millis(400)
 } else {
     Duration::from_millis(200)
 };
