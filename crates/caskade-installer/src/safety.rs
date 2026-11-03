@@ -665,7 +665,12 @@ impl SafeDir {
         self.reserve(name, 0, depth)?;
         // Preserve the archive spelling after capability-based resolution;
         // immutable extracted targets cannot later be swapped for escaping links.
+        // Windows stores the target as given and doesn't read `/` in it as a
+        // separator, so a link through `Versions/Current` couldn't be followed.
+        #[cfg(not(windows))]
         let relative = PathBuf::from(target.replace('\\', "/"));
+        #[cfg(windows)]
+        let relative = PathBuf::from(target.replace('/', "\\"));
         #[cfg(not(windows))]
         self.root.symlink(&relative, &path)?;
         #[cfg(windows)]

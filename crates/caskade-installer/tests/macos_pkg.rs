@@ -268,9 +268,10 @@ async fn delegate_resolves_source_as_one_argument_and_records_component_receipt(
     .unwrap();
     let processes = runtime.processes();
     assert_eq!(processes.len(), 1);
+    // The resolved source path, compared by component.
     assert_eq!(
-        processes[0].command.args[5],
-        fixture.input().to_str().unwrap()
+        std::path::Path::new(&processes[0].command.args[5]),
+        fixture.input()
     );
     assert_eq!(report.candidate.strategy, Strategy::Delegate);
     root.assert_sentinel_untouched();

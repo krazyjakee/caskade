@@ -174,7 +174,7 @@ impl PrefixRuntime {
 /// `/unix` without either); programs outside the game keep their host path.
 pub fn windows_program(program: &Path, game_dir: &Path) -> String {
     match program.strip_prefix(game_dir) {
-        Ok(inside) if program.is_absolute() && !inside.as_os_str().is_empty() => {
+        Ok(inside) if program.has_root() && !inside.as_os_str().is_empty() => {
             let mut path = GAME_DIR.to_owned();
             for part in inside.components() {
                 path.push('\\');

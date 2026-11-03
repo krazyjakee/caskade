@@ -209,7 +209,8 @@ async fn native_silent_interactive_and_product_code_uninstall_have_exact_argv() 
         plans.candidates = vec![candidate];
         plans.selected = Some(0);
         let root = TestRoot::new().unwrap();
-        let source = PathBuf::from("/picked/空白 setup.msi");
+        // Absolute on every host; the fake runtime never opens it.
+        let source = std::env::temp_dir().join("picked").join("空白 setup.msi");
         let runtime = Arc::new(FakeRuntime::new([
             FakeScript {
                 actions: vec![

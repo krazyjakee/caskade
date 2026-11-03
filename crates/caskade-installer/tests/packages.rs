@@ -242,9 +242,13 @@ async fn self_contained_packages_rewrite_final_desktop_references_skip_scripts_a
         );
         let refs = extractor.take_references(&node.id).unwrap();
         assert_eq!(refs.len(), 3);
-        assert!(refs.iter().all(|r| r.origin == "caskade-generated"
-            && r.replacement.contains(report.dir.to_str().unwrap())
-            && !r.replacement.contains("staging")));
+        assert!(
+            refs.iter().all(|r| r.origin == "caskade-generated"
+                && r.replacement.contains(report.dir.to_str().unwrap())
+                && !r.replacement.contains("staging")),
+            "{:?} in {refs:#?}",
+            report.dir
+        );
         let desktop = std::fs::read_to_string(
             report
                 .dir

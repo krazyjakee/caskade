@@ -21,10 +21,15 @@ fn script(code: i32) -> FakeScript {
         actions: vec![FakeAction::Exit { code }],
     }
 }
+/// A stand-in for `hdiutil` that is absolute on every host, as `attach`
+/// requires; the fake runtime never runs it.
+fn hdiutil() -> PathBuf {
+    std::env::temp_dir().join("hdiutil")
+}
 fn attach(runtime: Arc<FakeRuntime>) -> dmg::Result<MountedImage> {
     MountedImage::attach(
         runtime,
-        Path::new("/usr/bin/hdiutil"),
+        &hdiutil(),
         &std::env::temp_dir().join("unopened-guard-test.dmg"),
         &mut NoopControl,
         Duration::from_secs(1),
@@ -141,7 +146,7 @@ fn cancellation_and_timeout_still_detach_without_consulting_cancelled_control() 
         let runtime = Arc::new(FakeRuntime::new([script(0), script(0)]));
         let result = MountedImage::attach(
             runtime.clone(),
-            Path::new("/usr/bin/hdiutil"),
+            &hdiutil(),
             &std::env::temp_dir().join("unopened-guard-test.dmg"),
             &mut CancelAt { calls: 0, at },
             Duration::from_secs(1),
@@ -349,7 +354,7 @@ fn image_path_encoding_is_never_lossily_rewritten_in_native_argv() {
     assert!(matches!(
         MountedImage::attach(
             runtime.clone(),
-            Path::new("/usr/bin/hdiutil"),
+            &hdiutil(),
             &source,
             &mut NoopControl,
             Duration::from_secs(1)
