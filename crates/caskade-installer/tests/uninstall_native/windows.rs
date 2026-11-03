@@ -42,7 +42,12 @@ async fn genuine_inno_nsis_msi_native_install_uninstall_remove_files_registry_an
         .with_aliases(aliases.clone(), "root-fixture-0001")
         .with_observer(Arc::new(watcher.clone()));
         let source = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("tests/fixtures/bin/native-uninstall")
+            // By component: msiexec reads a '/' in its package path as a switch
+            // (exit 1619).
+            .join("tests")
+            .join("fixtures")
+            .join("bin")
+            .join("native-uninstall")
             .join(id)
             .join(if family == NativeFamily::Msi {
                 "setup.msi"
