@@ -26,6 +26,7 @@ const categoryLabels: Record<NotificationCategory, MessageDescriptor> = {
   scriptFailed: msg({ message: "Script", comment: "A notification's category" }),
   achievementsUnlocked: msg({ message: "Achievements", comment: "A notification's category" }),
   shareReceived: msg({ message: "Shared", comment: "A notification's category" }),
+  shareArrived: msg({ message: "Shared", comment: "A notification's category" }),
 };
 
 /** Where Back from a game opened here goes. */

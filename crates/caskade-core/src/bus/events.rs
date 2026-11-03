@@ -174,6 +174,14 @@ pub enum Event {
         /// The recipient's endpoint: one item per share and person.
         endpoint: String,
     },
+    /// A game someone shared with this device arrived and installed (#247).
+    /// Not in the plugin event list either.
+    ShareArrived {
+        job: String,
+        title: String,
+        sharer: String,
+        game_id: Option<String>,
+    },
 }
 
 impl Event {
@@ -216,6 +224,7 @@ impl Event {
             Self::AchievementsChanged { .. } => "achievements.changed",
             Self::AchievementsUnlocked(_) => "achievements.unlocked",
             Self::ShareReceived { .. } => "share.received",
+            Self::ShareArrived { .. } => "share.arrived",
         }
     }
 }

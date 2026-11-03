@@ -205,9 +205,25 @@ async fn a_shared_game_arrives_from_its_link_and_is_ready_to_play() {
     // Looking fetched nothing.
     assert!(friend.install.jobs().is_empty());
 
+    let arrivals = Bus::default();
+    friend.shares.set_bus(arrivals.clone());
+    let mut arrived = arrivals.stream();
     let job = friend.shares.receive(&link, None).await.unwrap();
     let done = finished(&friend.install, &job.id).await;
     assert_eq!(done.status, JobStatus::Completed, "{done:?}");
+    // The friend hears it arrived, naming who sent it.
+    let (title, sharer) = tokio::time::timeout(Duration::from_secs(10), async {
+        loop {
+            if let Ok(caskade_core::bus::Event::ShareArrived { title, sharer, .. }) =
+                arrived.recv().await
+            {
+                return (title, sharer);
+            }
+        }
+    })
+    .await
+    .expect("the friend is told");
+    assert_eq!((title.as_str(), sharer.as_str()), ("Celeste", "Desk"));
 
     // A game of its own here, a managed install that starts its program.
     let game = done.game_id.expect("a game");

@@ -758,3 +758,26 @@ async fn someone_receiving_a_share_is_noted_once_per_share_and_person() {
         }
     );
 }
+
+#[tokio::test]
+async fn a_shared_game_arriving_opens_its_page() {
+    let fx = Fixture::new().await;
+    fx.feed
+        .on_event(&Event::ShareArrived {
+            job: "j1".into(),
+            title: "Celeste".into(),
+            sharer: "Alex's Desk".into(),
+            game_id: Some("g1".into()),
+        })
+        .await;
+    let items = fx.items().await;
+    assert_eq!(items.len(), 1);
+    assert_eq!(items[0].category, NotificationCategory::ShareArrived);
+    assert_eq!(items[0].title, "Celeste arrived from Alex's Desk");
+    assert_eq!(
+        items[0].target,
+        NotificationTarget::Game {
+            game_id: "g1".into()
+        }
+    );
+}

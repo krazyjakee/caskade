@@ -18,6 +18,8 @@ import {
   fixtureShare,
   fixtureShareInfo,
 } from "../api/sharesFixtures";
+import type { StorageApi } from "../api/storage";
+import { createStorageFixtureApi } from "../api/storageFixtures";
 import type { GameDetails } from "../api/types";
 import type { Action } from "../input/actions";
 import { InstallConfirmation } from "../views/activity/InstallConfirmation";
@@ -54,10 +56,17 @@ function games(): GameDetails[] {
   }));
 }
 
+/** Two storage locations; `always` uses the default one without asking. */
+function storage(always = true): StorageApi {
+  const api = createStorageFixtureApi();
+  return { ...api, preferences: async () => ({ alwaysUseDefault: always }) };
+}
+
 function open(path: string, api: SharesApi = createSharesFixtureApi()) {
   const app = renderApp(path, {
     mode: "console",
     games: games(),
+    storage: storage(),
     wrap: (children) => <SharesProvider api={api}>{children}</SharesProvider>,
   });
   return { app, api };
@@ -155,6 +164,8 @@ it("a pad receives a shared game, the link pasted on the on-screen keyboard", as
   await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   const [received] = await api.received();
   expect(received).toMatchObject({ title: "Hades", sharer: "Alex's Desk", keepHelping: true });
+  // Into the default storage, without asking.
+  expect((api as ReturnType<typeof createSharesFixtureApi>).receivedInto()).toBe("root-1");
 });
 
 it("a link that expired says so, and nothing is received", async () => {
@@ -230,6 +241,27 @@ it("Settings → Devices lists shares: a pad copies a link, stops a share and fo
   await seek(app, onSwitch, "the switch", 6);
   app.pad.press("confirm");
   await waitFor(async () => expect((await api.received())[0]?.keepHelping).toBe(true));
+});
+
+it("Receive asks where the game goes when there's a choice", async () => {
+  const api = createSharesFixtureApi();
+  renderApp("/library", {
+    games: games(),
+    storage: storage(false),
+    wrap: (children) => <SharesProvider api={api}>{children}</SharesProvider>,
+  });
+  fireEvent.click(await screen.findByRole("button", { name: "Add game" }));
+  fireEvent.click(await screen.findByRole("menuitem", { name: /Receive a shared game…/ }));
+  const dialog = await screen.findByRole("dialog", { name: "Receive a shared game" });
+  fireEvent.change(within(dialog).getByRole("textbox", { name: "Share link" }), {
+    target: { value: FIXTURE_LINK },
+  });
+  fireEvent.click(within(dialog).getByRole("button", { name: "Look" }));
+  fireEvent.click(await within(dialog).findByRole("button", { name: "Receive" }));
+  fireEvent.click(await within(dialog).findByRole("radio", { name: /External/ }));
+  fireEvent.click(within(dialog).getByRole("button", { name: "Install here" }));
+  await waitFor(() => expect(api.receivedInto()).toBe("root-2"));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 });
 
 it("a shared collection says which games are here, and joins the collections", async () => {

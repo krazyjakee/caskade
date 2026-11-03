@@ -6009,7 +6009,9 @@ export type NotificationCategory =
  */
 "achievementsUnlocked" | 
 /**  Someone received a game this device shared (#247). */
-"shareReceived";
+"shareReceived" | 
+/**  A game someone shared with this device arrived (#247). */
+"shareArrived";
 
 /**  One thing a notification is about. */
 export type NotificationMember = NotificationMember_Serialize | NotificationMember_Deserialize;

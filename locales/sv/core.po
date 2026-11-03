@@ -2693,6 +2693,10 @@ msgid "{recipient} received {title}"
 msgstr ""
 
 #: crates/caskade-core/src/notifications/service.rs
+msgid "{title} arrived from {sharer}"
+msgstr ""
+
+#: crates/caskade-core/src/notifications/service.rs
 msgid "A script after {game} started failed"
 msgstr "Ett skript efter att {game} startade misslyckades"
 

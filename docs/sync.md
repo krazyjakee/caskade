@@ -858,7 +858,8 @@ expires (a day, a week, or until stopped). Only `to_url` writes a link out:
   through `clipboard_write_text`, since a webview allows the clipboard only for a click or
   a key). It asks the sharer what the link holds (`ShareInfoDetails`: who, size, build,
   expiry, whether only a relay reaches them; for #248's kinds, where it goes and which of
-  a collection's games are here). Receive starts the copy job. Help others receive it
+  a collection's games are here). Receive asks where it goes (the storage picker, which
+  skips itself when there's no choice) and starts the copy job. Help others receive it
   after it's here sets `keep_helping`, and a collection is added to the account's
   collections and opens.
 - **Links from outside.** A `caskade://receive` link opened from outside waits in the
@@ -867,8 +868,10 @@ expires (a day, a week, or until stopped). Only `to_url` writes a link out:
 - **Settings → Devices → Copies and shares** lists the shares (Copy link and Stop sharing
   while one runs, Forget after; each recipient's progress and whether they help) and what
   was received (the Help others receive it switch).
-- **Notification.** Someone receiving everything of a share is a notification
-  (`shareReceived`, `Event::ShareReceived`).
+- **Notifications.** Someone receiving everything of a share is a notification on the
+  sharer's device (`shareReceived`, `Event::ShareReceived`), and a received game that
+  installed is one on the recipient's, opening its page (`shareArrived`,
+  `Event::ShareArrived`).
 
 **Off the local network.** The `share` session itself may go through a relay
 (it carries no game data), and that connection is how both ends learn each

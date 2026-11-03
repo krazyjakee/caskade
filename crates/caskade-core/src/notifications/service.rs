@@ -252,6 +252,27 @@ impl Notifications {
                 })
                 .await
             }
+            Event::ShareArrived {
+                job,
+                title,
+                sharer,
+                game_id,
+            } => {
+                self.notice(Notice {
+                    category: NotificationCategory::ShareArrived,
+                    severity: Severity::Info,
+                    key: format!("share.arrived:{job}"),
+                    title: msg!("{title} arrived from {sharer}", title = title, sharer = sharer),
+                    body: Text::Plain(String::new()),
+                    target: match game_id {
+                        Some(game_id) => NotificationTarget::Game {
+                            game_id: game_id.clone(),
+                        },
+                        None => NotificationTarget::Jobs,
+                    },
+                })
+                .await
+            }
             Event::LibraryGameAdded { .. }
             | Event::LibraryGameUpdated { .. }
             | Event::LibraryScanCompleted { .. }

@@ -9529,15 +9529,16 @@ msgstr ""
 msgid "Share this save with someone…"
 msgstr ""
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
-msgid "Share…"
-msgstr ""
-
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 msgid "Share with someone…"
 msgstr ""
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Share…"
+msgstr ""
+
+#. A notification's category
 #. A notification's category
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
 msgid "Shared"

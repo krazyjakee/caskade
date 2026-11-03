@@ -55,6 +55,8 @@ pub enum NotificationCategory {
     AchievementsUnlocked,
     /// Someone received a game this device shared (#247).
     ShareReceived,
+    /// A game someone shared with this device arrived (#247).
+    ShareArrived,
 }
 
 impl NotificationCategory {
@@ -67,6 +69,7 @@ impl NotificationCategory {
             Self::ScriptFailed => "script.failed",
             Self::AchievementsUnlocked => "achievements.unlocked",
             Self::ShareReceived => "share.received",
+            Self::ShareArrived => "share.arrived",
         }
     }
 
@@ -79,6 +82,7 @@ impl NotificationCategory {
             "script.failed" => Self::ScriptFailed,
             "achievements.unlocked" => Self::AchievementsUnlocked,
             "share.received" => Self::ShareReceived,
+            "share.arrived" => Self::ShareArrived,
             _ => return None,
         })
     }

@@ -720,6 +720,19 @@ impl PeerFetcher for ShareFetcher {
         if release {
             let _ = shares.inner.transfers.release(&tag(job)).await;
         }
+        // It's here: a notification, opening the game.
+        if let Some(bus) = shares.inner.bus.get() {
+            let snapshot = shares.inner.install.job(job);
+            bus.emit(crate::bus::Event::ShareArrived {
+                job: job.to_owned(),
+                title: snapshot
+                    .as_ref()
+                    .map(|job| job.title.clone())
+                    .unwrap_or_default(),
+                sharer: self.sharer.clone(),
+                game_id: snapshot.and_then(|job| job.game_id),
+            });
+        }
         shares.changed();
     }
 

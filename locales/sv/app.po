@@ -9728,15 +9728,16 @@ msgstr "Parkopplingslänk"
 msgid "Share this save with someone…"
 msgstr "Dela den här sparningen med någon…"
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
-msgid "Share…"
-msgstr "Dela…"
-
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 msgid "Share with someone…"
 msgstr "Dela med någon…"
 
+#: apps/desktop/src/views/game/SavesPanel.tsx
+msgid "Share…"
+msgstr "Dela…"
+
+#. A notification's category
 #. A notification's category
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
 #, fuzzy

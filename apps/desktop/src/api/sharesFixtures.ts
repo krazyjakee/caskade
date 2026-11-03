@@ -92,12 +92,15 @@ function job(title: string): JobSnapshot_Serialize {
 export interface SharesFixtureApi extends SharesApi {
   /** Someone opens share `id`'s link. */
   receivedBy(id: string, recipient: ShareRecipient): void;
+  /** The storage the last share received went to (none: the default). */
+  receivedInto(): string | undefined;
 }
 
 export function createSharesFixtureApi(options: SharesFixtureOptions = {}): SharesFixtureApi {
   let shares = options.shares ?? [];
   let received = options.received ?? [];
   const info = options.info ?? fixtureShareInfo();
+  let into: string | undefined;
   const listeners = new Set<() => void>();
   const changed = () => {
     for (const listener of listeners) listener();
@@ -186,8 +189,9 @@ export function createSharesFixtureApi(options: SharesFixtureOptions = {}): Shar
         };
       return link.includes("relay") ? { ...info, reach: "relayOnly" } : info;
     },
-    async receive(link) {
+    async receive(link, rootId) {
       known(link);
+      into = rootId;
       const started = job(info.title);
       received = [
         ...received,
@@ -228,6 +232,7 @@ export function createSharesFixtureApi(options: SharesFixtureOptions = {}): Shar
       listeners.add(listener);
       return () => listeners.delete(listener);
     },
+    receivedInto: () => into,
     receivedBy(id, recipient) {
       shares = shares.map((s) =>
         s.id === id ? { ...s, recipients: [...s.recipients, recipient] } : s,
