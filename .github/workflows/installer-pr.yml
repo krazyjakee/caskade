@@ -51,7 +51,7 @@ jobs:
         shell: bash
     env:
       CARGO_TERM_COLOR: always
-      INSTA_UPDATE: 'no'
+      INSTA_UPDATE: "no"
     steps:
       # Committed fixtures and snapshots are compared byte for byte.
       - name: Check out without line-ending conversion
@@ -122,7 +122,7 @@ jobs:
       - name: T7 native Windows and macOS
         if: matrix.os != 'linux'
         env:
-          CASKADE_TEST_NATIVE: '1'
+          CASKADE_TEST_NATIVE: "1"
         run: cargo nextest run -p caskade-installer --all-features --locked --profile native --run-ignored all
       - name: Upload test results
         if: always()

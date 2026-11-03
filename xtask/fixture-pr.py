@@ -1,25 +1,44 @@
 #!/usr/bin/env python3
-"""Open/update the fixture refresh PR on the configured Gitea origin."""
+"""Open or update the fixture refresh PR on GitHub.
+
+Called only by the trusted installer-fixtures workflow after it pushed the
+branch. GitHub refuses PRs from the workflow token unless the repository allows
+Actions to create them; a FIXTURE_PR_TOKEN secret (contents and pull requests:
+write) works either way. Without one, the job summary links the comparison.
+"""
 import json
 import os
+import urllib.error
 import urllib.request
 
-# Called only by the trusted refresh workflow after its branch was pushed.
-server = os.environ['GITHUB_SERVER_URL'].rstrip('/')
+api = os.environ.get('GITHUB_API_URL', 'https://api.github.com').rstrip('/')
+server = os.environ.get('GITHUB_SERVER_URL', 'https://github.com').rstrip('/')
 repo = os.environ['GITHUB_REPOSITORY']
 token = os.environ['FIXTURE_PR_TOKEN']
 branch = os.environ.get('FIXTURE_BRANCH', 'automation/installer-fixtures')
-headers = {'Authorization': 'token ' + token, 'Content-Type': 'application/json'}
-url = f'{server}/api/v1/repos/{repo}/pulls'
-request = urllib.request.Request(url + '?state=open&limit=100', headers=headers)
+headers = {'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json',
+           'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json'}
+url = f'{api}/repos/{repo}/pulls'
+owner = repo.split('/')[0]
+request = urllib.request.Request(f'{url}?state=open&head={owner}:{branch}', headers=headers)
 with urllib.request.urlopen(request, timeout=30) as response:
     pulls = json.load(response)
-if any(pr['head']['ref'] == branch for pr in pulls):
-    print('Fixture refresh PR already exists; branch updated.')
-else:
-    body = {'title': 'Refresh pinned installer fixtures', 'head': branch, 'base': 'master',
-            'body': 'Rebuilt using the committed committed Windows/Linux/macOS fixture builders. '
-                    'Review binary inventories, source staleness/size checks and native test results.'}
-    request = urllib.request.Request(url, data=json.dumps(body).encode(), headers=headers, method='POST')
+if pulls:
+    print(f'Fixture refresh PR already exists; branch updated: {pulls[0]["html_url"]}')
+    raise SystemExit
+body = {'title': 'Refresh pinned installer fixtures', 'head': branch, 'base': 'master',
+        'body': 'Rebuilt using the committed Windows/Linux/macOS fixture builders. '
+                'Review binary inventories, source staleness/size checks and native test results.'}
+request = urllib.request.Request(url, data=json.dumps(body).encode(), headers=headers, method='POST')
+try:
     with urllib.request.urlopen(request, timeout=30) as response:
         print(json.load(response)['html_url'])
+except urllib.error.HTTPError as error:
+    if error.code != 403:
+        raise
+    compare = f'{server}/{repo}/compare/master...{branch}?expand=1'
+    message = f'GitHub refused to open the PR with this token ({error.code}). Open it here: {compare}'
+    print('::warning::' + message)
+    if summary := os.environ.get('GITHUB_STEP_SUMMARY'):
+        with open(summary, 'a', encoding='utf-8') as stream:
+            stream.write(message + '\n')
