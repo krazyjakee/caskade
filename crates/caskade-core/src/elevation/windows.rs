@@ -42,6 +42,54 @@ pub const RUNTIME: [&str; 3] = [
 ];
 /// Where switching hosting off keeps [`RUNTIME`], beside `host`.
 pub const KEPT: &str = "kept";
+/// ViGEmBus (§4.5): the last release of the only open-source gamepad
+/// driver unmodified Sunshine speaks to, production-signed, pinned here.
+pub const GAMEPAD_DRIVER_URL: &str = "https://github.com/nefarius/ViGEmBus/releases/download/v1.22.0/ViGEmBus_1.22.0_x64_x86_arm64.exe";
+pub const GAMEPAD_DRIVER_FILE: &str = "ViGEmBus_1.22.0_x64_x86_arm64.exe";
+pub const GAMEPAD_DRIVER_SHA256: &str =
+    "89220a7865076b342892f98865f3499fb7c4cfd673159e89d352c360fd014c6a";
+/// Its service, which is how it is found installed.
+pub const GAMEPAD_DRIVER_SERVICE: &str = "ViGEmBus";
+/// Silent: no window, no reboot.
+pub const GAMEPAD_DRIVER_ARGS: [&str; 3] = ["/exenoui", "/qn", "/norestart"];
+/// Where Caskade downloads it, beside the staging folder:
+/// `<data>\streaming\drivers`.
+pub fn gamepad_driver_download(staging: &Path) -> PathBuf {
+    staging
+        .parent()
+        .unwrap_or(staging)
+        .join("drivers")
+        .join(GAMEPAD_DRIVER_FILE)
+}
+
+/// Installs ViGEmBus: copies the downloaded installer into the
+/// administrator-only folder beside `target`, checks it against the pinned
+/// SHA-256 there (nobody else can change it after), and runs it silently.
+/// `true` when it ran and finished.
+pub fn install_gamepad_driver(
+    staging: &Path,
+    target: &Path,
+    run: &mut dyn FnMut(&str, &[String]) -> bool,
+) -> bool {
+    let drivers = target.parent().map_or_else(
+        || target.with_extension("drivers"),
+        |parent| parent.join("drivers"),
+    );
+    let copy = drivers.join(GAMEPAD_DRIVER_FILE);
+    let checked = (|| -> Result<bool> {
+        std::fs::create_dir_all(&drivers)?;
+        std::fs::copy(gamepad_driver_download(staging), &copy)?;
+        Ok(sha256_file(&copy)? == GAMEPAD_DRIVER_SHA256)
+    })();
+    let ran = matches!(checked, Ok(true))
+        && run(
+            &copy.to_string_lossy(),
+            &GAMEPAD_DRIVER_ARGS.map(str::to_owned),
+        );
+    let _ = std::fs::remove_dir_all(&drivers);
+    ran
+}
+
 /// The host program, and the service launcher beside it (§4.2).
 const HOST_EXE: &str = "sunshine.exe";
 const SERVICE_EXE: [&str; 2] = ["tools", "sunshinesvc.exe"];
@@ -64,6 +112,8 @@ pub fn token(step: Step) -> Option<&'static str> {
         Step::Remove(Change::FirewallTcp) => "remove-firewall-tcp",
         Step::Add(Change::FirewallUdp) => "add-firewall-udp",
         Step::Remove(Change::FirewallUdp) => "remove-firewall-udp",
+        Step::Add(Change::GamepadDriver) => "add-gamepad-driver",
+        Step::Remove(Change::GamepadDriver) => "remove-gamepad-driver",
         _ => return None,
     })
 }
@@ -74,6 +124,7 @@ fn step(token: &str) -> Option<Step> {
         Change::Service,
         Change::FirewallTcp,
         Change::FirewallUdp,
+        Change::GamepadDriver,
     ]
     .into_iter()
     .flat_map(|change| [Step::Add(change), Step::Remove(change)])
@@ -515,6 +566,15 @@ pub fn perform_with(
                 install_host(&request.host, expected, target).is_ok()
             }
             Step::Remove(Change::HostProgram) => remove_host(target).is_ok(),
+            // Best effort: hosting works without pads, and says so.
+            Step::Add(Change::GamepadDriver) => {
+                if !install_gamepad_driver(&request.host, target, run) {
+                    tracing::warn!("the gamepad driver wasn't installed");
+                }
+                true
+            }
+            // Never removed: other programs use it.
+            Step::Remove(Change::GamepadDriver) => true,
             // The service and rules point only at the administrator-only copy.
             Step::Add(_) if !installed(target) => false,
             _ => commands(step, target)
@@ -688,6 +748,7 @@ impl Runner for WindowsRunner {
             Change::Service => quietly("sc.exe", &["query", SERVICE]),
             Change::FirewallTcp => rule(RULE_TCP),
             Change::FirewallUdp => rule(RULE_UDP),
+            Change::GamepadDriver => quietly("sc.exe", &["query", GAMEPAD_DRIVER_SERVICE]),
             Change::UdevRules | Change::ModulesLoad | Change::UhidLoaded => false,
         }
     }

@@ -90,6 +90,11 @@ function HostingSection() {
         />
       </SettingRow>
       <HostStateLine state={state} problem={status.data?.problem ?? null} switching={switching} />
+      {state === "ready" && status.data?.warning && (
+        <p data-part="host-warning" role="note" className="mt-1 text-sm">
+          <StatusDot tone="warning">{status.data.warning}</StatusDot>
+        </p>
+      )}
       {admin && on(state) && (
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <Button

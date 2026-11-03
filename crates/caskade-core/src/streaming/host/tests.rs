@@ -179,6 +179,7 @@ async fn fixture(timing: Timing) -> Fixture {
             timing,
             api_base: Url::parse(&format!("https://{front}/")).unwrap(),
             http_port: serverinfo.address().port(),
+            checks: Arc::new(HostChecks::fine),
         },
     );
     host.set_device_name("Living\nroom");
@@ -392,6 +393,7 @@ async fn macos_does_not_host_in_this_milestone() {
             timing: fast(),
             api_base: Url::parse("https://127.0.0.1:1/").unwrap(),
             http_port: 1,
+            checks: Arc::new(HostChecks::fine),
         },
     );
     assert!(host.enable().await.is_err());
@@ -493,6 +495,7 @@ async fn a_users_own_host_is_used_with_consent_and_only_caskades_apps_change() {
             timing: fast(),
             api_base: f.host.inner.api_base.clone(),
             http_port: f.host.inner.http_port,
+            checks: Arc::new(HostChecks::fine),
         },
     );
 
@@ -877,4 +880,69 @@ async fn off_leaves_no_program_or_rules_and_on_again_pairs_with_no_new_code() {
     assert_eq!(f.secrets.get().await.unwrap().unwrap(), credentials);
     until("ready again", || f.host.status().state == HostState::Ready).await;
     f.host.shutdown();
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn a_ready_host_says_when_pads_or_a_screen_wont_work() {
+    let f = fixture(fast()).await;
+    let host = |checks: fn(OperatingSystem) -> HostChecks| {
+        StreamingHost::with(
+            f.host.inner.tools.clone(),
+            f.host.inner.elevation.clone(),
+            f.settings.clone(),
+            Parts {
+                existing: Arc::new(|| None),
+                os: OperatingSystem::Linux,
+                runner: Arc::new(process::ChildRunner::new(
+                    f.temp.path().join("data/streaming/run.json"),
+                )),
+                secrets: f.secrets.clone(),
+                timing: fast(),
+                api_base: f.host.inner.api_base.clone(),
+                http_port: f.host.inner.http_port,
+                checks: Arc::new(checks),
+            },
+        )
+    };
+    let no_pads = host(|_| HostChecks {
+        screen: true,
+        pads: false,
+    });
+    let enabling = tokio::spawn({
+        let host = no_pads.clone();
+        async move { host.enable().await }
+    });
+    until("credentials made", || at_once(f.secrets.get()).is_some()).await;
+    answer(&f).await;
+    enabling.await.unwrap().unwrap();
+    until("ready", || no_pads.status().state == HostState::Ready).await;
+    assert_eq!(
+        no_pads.status().warning.as_deref(),
+        Some("Controllers on other devices won't work here until Repair sets them up.")
+    );
+    no_pads.shutdown();
+
+    let headless = host(|_| HostChecks {
+        screen: false,
+        pads: true,
+    });
+    headless.start().await;
+    until("ready", || headless.status().state == HostState::Ready).await;
+    assert!(headless.status().warning.unwrap().contains("no screen"));
+    headless.shutdown();
+
+    let fine = host(HostChecks::fine);
+    fine.start().await;
+    until("ready", || fine.status().state == HostState::Ready).await;
+    assert_eq!(fine.status().warning, None);
+    fine.shutdown();
+    assert!(
+        HostChecks {
+            screen: true,
+            pads: false
+        }
+        .warning(OperatingSystem::Windows)
+        .unwrap()
+        .contains("controller driver")
+    );
 }

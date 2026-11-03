@@ -317,7 +317,10 @@ fn ending_the_caller_stops_the_game() {
     drop((lines, write));
     wait_until("the game was never stopped", || h.ended(&game));
     assert!(block_on(h.launches.running_sessions()).unwrap().is_empty());
-    // The server took its own stop's record.
+    // The server takes its own stop's record, once the session has ended.
+    wait_until("the server took its stop's record", || {
+        !h.launches.is_stopped(&session)
+    });
     assert!(!h.launches.take_stopped(&session));
 }
 

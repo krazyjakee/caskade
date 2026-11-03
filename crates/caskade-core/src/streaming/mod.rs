@@ -9,6 +9,8 @@ pub mod api;
 pub mod client;
 pub mod existing;
 #[cfg(feature = "net")]
+pub mod gamepads;
+#[cfg(feature = "net")]
 pub mod gamestream;
 pub mod host;
 #[cfg(feature = "net")]

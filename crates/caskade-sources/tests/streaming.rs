@@ -59,6 +59,7 @@ async fn live_linux_host_answers_pinned_and_stops_with_caskade() {
             timing: Timing::default(),
             api_base: caskade_core::streaming::api::LOCAL.parse().unwrap(),
             http_port: caskade_core::streaming::host::HTTP_PORT,
+            checks: Arc::new(caskade_core::streaming::host::HostChecks::here),
         },
     );
     host.set_device_name("Caskade live test");
@@ -271,6 +272,7 @@ async fn live_linux_pairing_needs_no_window() {
             timing: Timing::default(),
             api_base: caskade_core::streaming::api::LOCAL.parse().unwrap(),
             http_port: caskade_core::streaming::host::HTTP_PORT,
+            checks: Arc::new(caskade_core::streaming::host::HostChecks::here),
         },
     );
     host.set_device_name("Caskade pairing test");
@@ -461,6 +463,7 @@ async fn live_linux_streaming_plays_from_the_host() {
             timing: Timing::default(),
             api_base: caskade_core::streaming::api::LOCAL.parse().unwrap(),
             http_port: caskade_core::streaming::host::HTTP_PORT,
+            checks: Arc::new(caskade_core::streaming::host::HostChecks::here),
         },
     );
     host.set_device_name("Caskade streaming test");
@@ -722,6 +725,7 @@ async fn live_linux_pairing_survives_hosting_off_and_on() {
             timing: Timing::default(),
             api_base: caskade_core::streaming::api::LOCAL.parse().unwrap(),
             http_port: caskade_core::streaming::host::HTTP_PORT,
+            checks: Arc::new(caskade_core::streaming::host::HostChecks::here),
         },
     );
     host.set_device_name("Caskade off and on");

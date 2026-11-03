@@ -55,6 +55,7 @@ impl Plan {
                 Change::Service,
                 Change::FirewallTcp,
                 Change::FirewallUdp,
+                Change::GamepadDriver,
             ],
             (Self::StreamingHost, Macos) => &[],
         }
@@ -84,6 +85,18 @@ pub enum Change {
     FirewallTcp,
     /// Windows: the inbound UDP rule for the host program.
     FirewallUdp,
+    /// Windows: the ViGEmBus gamepad driver (§4.5), installed silently from
+    /// its pinned installer when it isn't there. Best effort: hosting works
+    /// without it, and says pads won't. Kept by the undo: other programs use
+    /// it, and an install that was there before is never touched.
+    GamepadDriver,
+}
+
+impl Change {
+    /// Whether the undo leaves it in place.
+    pub fn kept_on_undo(self) -> bool {
+        self == Self::GamepadDriver
+    }
 }
 
 /// Add or remove one change.
@@ -223,6 +236,11 @@ impl Elevation {
         self.records.join(format!("{}.json", plan.key()))
     }
 
+    /// Whether `change` is on the system now (looked at without elevation).
+    pub fn present(&self, change: Change) -> bool {
+        self.runner.present(change)
+    }
+
     /// What `plan` added and still owns; empty when nothing.
     pub fn record(&self, plan: Plan) -> Result<Record> {
         match std::fs::read(self.record_path(plan)) {
@@ -318,7 +336,7 @@ impl Elevation {
             .iter()
             .rev()
             .copied()
-            .filter(|change| record.added.contains(change))
+            .filter(|change| record.added.contains(change) && !change.kept_on_undo())
             .collect();
         let present: Vec<Change> = ours
             .iter()

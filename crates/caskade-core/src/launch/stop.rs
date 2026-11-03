@@ -52,6 +52,12 @@ impl LaunchService {
     pub fn take_stopped(&self, session_id: &str) -> bool {
         crate::lock(&self.stopped).remove(session_id)
     }
+
+    /// Whether [`Self::stop`] ended `session_id` and nobody took the record
+    /// yet, without taking it (tests waiting on the taker).
+    pub fn is_stopped(&self, session_id: &str) -> bool {
+        crate::lock(&self.stopped).contains(session_id)
+    }
 }
 
 /// The identities still running, signalling each with `signal` (none: just look).

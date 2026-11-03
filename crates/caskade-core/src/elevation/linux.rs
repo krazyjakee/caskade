@@ -130,9 +130,11 @@ impl Runner for LinuxRunner {
             // A module built into the kernel shows here too, and is never
             // loaded or unloaded.
             Change::UhidLoaded => Path::new("/sys/module/uhid").exists(),
-            Change::HostProgram | Change::Service | Change::FirewallTcp | Change::FirewallUdp => {
-                false
-            }
+            Change::HostProgram
+            | Change::Service
+            | Change::FirewallTcp
+            | Change::FirewallUdp
+            | Change::GamepadDriver => false,
         }
     }
 

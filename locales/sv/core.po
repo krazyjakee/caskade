@@ -3807,6 +3807,10 @@ msgstr ""
 msgid "Updating streaming to this device"
 msgstr ""
 
+#: crates/caskade-core/src/streaming/gamepads.rs
+msgid "the controller driver's download wasn't the expected file"
+msgstr ""
+
 #: crates/caskade-core/src/streaming/gamestream.rs
 msgid "the device didn't stop its game"
 msgstr ""
@@ -3817,6 +3821,18 @@ msgstr ""
 
 #: crates/caskade-core/src/streaming/gamestream.rs
 msgid "the wake-up message couldn't be sent"
+msgstr ""
+
+#: crates/caskade-core/src/streaming/host/mod.rs
+msgid "This device has no screen for other devices to see. Connect a monitor or a display dummy plug."
+msgstr ""
+
+#: crates/caskade-core/src/streaming/host/mod.rs
+msgid "Controllers on other devices won't work here: the controller driver isn't answering. Repair may fix it."
+msgstr ""
+
+#: crates/caskade-core/src/streaming/host/mod.rs
+msgid "Controllers on other devices won't work here until Repair sets them up."
 msgstr ""
 
 #: crates/caskade-core/src/streaming/host/mod.rs

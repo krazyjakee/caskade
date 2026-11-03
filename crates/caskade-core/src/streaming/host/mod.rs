@@ -77,6 +77,77 @@ pub struct HostStatus {
     pub version: Option<String>,
     /// Why it needs attention, for people.
     pub problem: Option<String>,
+    /// What a ready host can't do (§4.4–4.5): no screen to show, or pads
+    /// that won't work. Streaming works otherwise.
+    #[serde(default)]
+    pub warning: Option<String>,
+}
+
+/// What this machine lets a host do (§4.4–4.5), looked at when it is ready.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct HostChecks {
+    /// A screen to capture: a desktop session (Linux), always on Windows.
+    pub screen: bool,
+    /// Virtual pads: `/dev/uinput` writable (Linux), ViGEmBus running
+    /// (Windows).
+    pub pads: bool,
+}
+
+impl HostChecks {
+    /// This machine, looked at now.
+    pub fn here(os: OperatingSystem) -> Self {
+        match os {
+            OperatingSystem::Windows => Self {
+                screen: true,
+                pads: std::process::Command::new("sc.exe")
+                    .args(["query", crate::elevation::windows::GAMEPAD_DRIVER_SERVICE])
+                    .stdin(std::process::Stdio::null())
+                    .stderr(std::process::Stdio::null())
+                    .output()
+                    .is_ok_and(|out| {
+                        out.status.success()
+                            && String::from_utf8_lossy(&out.stdout).contains("RUNNING")
+                    }),
+            },
+            _ => Self {
+                screen: ["DISPLAY", "WAYLAND_DISPLAY"]
+                    .iter()
+                    .any(|var| std::env::var_os(var).is_some_and(|value| !value.is_empty())),
+                pads: std::fs::OpenOptions::new()
+                    .write(true)
+                    .open("/dev/uinput")
+                    .is_ok(),
+            },
+        }
+    }
+
+    /// Everything works (tests).
+    pub fn fine(_: OperatingSystem) -> Self {
+        Self {
+            screen: true,
+            pads: true,
+        }
+    }
+
+    /// What people are told, when anything is missing.
+    pub fn warning(self, os: OperatingSystem) -> Option<String> {
+        if !self.screen {
+            return Some(crate::tr!(
+                "This device has no screen for other devices to see. Connect a monitor or a display dummy plug."
+            ));
+        }
+        if !self.pads {
+            return Some(match os {
+                OperatingSystem::Windows => crate::tr!(
+                    "Controllers on other devices won't work here: the controller driver isn't answering. Repair may fix it."
+                ),
+                _ => crate::tr!(
+                    "Controllers on other devices won't work here until Repair sets them up."
+                ),
+            });
+        }
+        None
+    }
 }
 
 /// How switching hosting on or off ended.
@@ -134,6 +205,7 @@ struct Inner {
     api_base: url::Url,
     /// Where the host answers `/serverinfo`: whether it streams now.
     http_port: u16,
+    checks: Arc<dyn Fn(OperatingSystem) -> HostChecks + Send + Sync>,
     name: Mutex<String>,
     status: Mutex<HostStatus>,
     watch: Mutex<Option<tokio::task::JoinHandle<()>>>,
@@ -180,6 +252,7 @@ impl StreamingHost {
                 #[cfg(feature = "net")]
                 api_base: url::Url::parse(crate::streaming::api::LOCAL).expect("valid URL"),
                 http_port: HTTP_PORT,
+                checks: Arc::new(HostChecks::here),
             },
         )
     }
@@ -205,11 +278,13 @@ impl StreamingHost {
                 #[cfg(feature = "net")]
                 api_base: parts.api_base,
                 http_port: parts.http_port,
+                checks: parts.checks,
                 name: Mutex::new(name),
                 status: Mutex::new(HostStatus {
                     state: HostState::Off,
                     version: None,
                     problem: None,
+                    warning: None,
                 }),
                 watch: Mutex::default(),
                 switching: tokio::sync::Mutex::new(()),
@@ -232,7 +307,40 @@ impl StreamingHost {
             state,
             version,
             problem,
+            warning: None,
         };
+    }
+
+    /// Ready, with what this machine can't do (§4.5): looked at now.
+    async fn set_ready(&self, version: Option<String>) {
+        let (checks, os) = (self.inner.checks.clone(), self.inner.os);
+        let warning = tokio::task::spawn_blocking(move || checks(os).warning(os))
+            .await
+            .ok()
+            .flatten();
+        *crate::lock(&self.inner.status) = HostStatus {
+            state: HostState::Ready,
+            version,
+            problem: None,
+            warning,
+        };
+    }
+
+    /// Windows: downloads the gamepad driver's pinned installer when the
+    /// driver isn't there, for the administrator step to install (§4.5).
+    /// Hosting goes on without it.
+    async fn fetch_gamepad_driver(&self) {
+        #[cfg(feature = "net")]
+        if self.inner.os == OperatingSystem::Windows
+            && !self
+                .inner
+                .elevation
+                .present(crate::elevation::Change::GamepadDriver)
+            && let Ok(staging) = self.staging()
+            && let Err(error) = super::gamepads::fetch(&staging).await
+        {
+            tracing::warn!(%error, "the gamepad driver wasn't downloaded");
+        }
     }
 
     fn supported(&self) -> bool {
@@ -346,7 +454,13 @@ impl StreamingHost {
     async fn configure(&self, program: &Path, force: bool) -> Result<Credentials> {
         let files = self.staged_files()?;
         let name = crate::lock(&self.inner.name).clone();
-        config::write(&files, &HostConfig { name })?;
+        config::write(
+            &files,
+            &HostConfig {
+                name,
+                windows: self.inner.os == OperatingSystem::Windows,
+            },
+        )?;
         let (credentials, new) = match self.inner.secrets.get().await? {
             Some(credentials) => (credentials, false),
             None => {
@@ -411,6 +525,7 @@ impl StreamingHost {
                 return Err(error);
             }
         };
+        self.fetch_gamepad_driver().await;
         match self.inner.elevation.apply(Plan::StreamingHost).await {
             Ok(Outcome::Cancelled) => {
                 self.set_status(HostState::Off, None, None);
@@ -606,6 +721,7 @@ impl StreamingHost {
 
     /// The administrator step for what is missing or stale, as an outcome.
     async fn reapply(&self) -> Result<HostOutcome> {
+        self.fetch_gamepad_driver().await;
         Ok(
             match self.inner.elevation.apply(Plan::StreamingHost).await? {
                 Outcome::Cancelled => HostOutcome::Cancelled,
@@ -721,7 +837,7 @@ impl StreamingHost {
                 return;
             }
             match self.until_ready().await {
-                Ok(version) => self.set_status(HostState::Ready, version, None),
+                Ok(version) => self.set_ready(version).await,
                 Err(error) => {
                     tracing::warn!(%error, "streaming host isn't answering");
                     self.set_status(HostState::NeedsAttention, None, Some(not_working()));
@@ -799,6 +915,15 @@ impl StreamingHost {
         self.set_status(HostState::Off, None, None);
     }
 
+    /// This host's streaming id, as clients know it: its `/serverinfo`
+    /// `uniqueid`. `None` when it isn't answering.
+    #[cfg(feature = "net")]
+    pub async fn host_id(&self) -> Option<String> {
+        crate::streaming::hosts::ask_server_info("127.0.0.1", self.inner.http_port)
+            .await
+            .map(|info| info.id)
+    }
+
     /// Devices waiting to pair (#263); expired ones are gone from the list.
     #[cfg(feature = "net")]
     pub async fn pair_requests(&self) -> Result<Vec<crate::streaming::api::PairRequest>> {
@@ -871,4 +996,6 @@ pub struct Parts {
     pub api_base: url::Url,
     /// The host's `/serverinfo` port ([`HTTP_PORT`]; another in tests).
     pub http_port: u16,
+    /// What this machine lets a host do ([`HostChecks::here`]).
+    pub checks: Arc<dyn Fn(OperatingSystem) -> HostChecks + Send + Sync>,
 }

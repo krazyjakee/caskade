@@ -4416,6 +4416,11 @@ export type HostStatus_Deserialize = {
 	version?: string | null,
 	/**  Why it needs attention, for people. */
 	problem?: string | null,
+	/**
+	 *  What a ready host can't do (§4.4–4.5): no screen to show, or pads
+	 *  that won't work. Streaming works otherwise.
+	 */
+	warning?: string | null,
 };
 
 export type HostStatus_Serialize = {
@@ -4424,6 +4429,11 @@ export type HostStatus_Serialize = {
 	version: string | null,
 	/**  Why it needs attention, for people. */
 	problem: string | null,
+	/**
+	 *  What a ready host can't do (§4.4–4.5): no screen to show, or pads
+	 *  that won't work. Streaming works otherwise.
+	 */
+	warning: string | null,
 };
 
 /**  Where this device's identity stands. */

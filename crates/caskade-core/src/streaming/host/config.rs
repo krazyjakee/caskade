@@ -53,7 +53,22 @@ impl HostFiles {
 pub struct HostConfig {
     /// The device's name in Caskade: what clients show.
     pub name: String,
+    /// A Windows host (§4.4–4.5): its display follows the client during a
+    /// stream, and pads go through ViGEmBus.
+    pub windows: bool,
 }
+
+/// On Windows (§4.4–4.5): the display made active for the stream with the
+/// client's resolution, refresh rate and HDR, put back afterwards
+/// (Sunshine's default), and pads through ViGEmBus, which also stops its
+/// driver prompts. Linux picks an unprivileged capture by itself (X11, the
+/// desktop portal, KWin) and keeps the portal's approval in its own
+/// `portal_token`; Caskade never grants it capabilities.
+const WINDOWS: &str = "dd_configuration_option = ensure_active\n\
+     dd_resolution_option = auto\n\
+     dd_refresh_rate_option = auto\n\
+     dd_hdr_option = auto\n\
+     gamepad_driver = vigembus\n";
 
 /// The device name as one line of `sunshine.conf`: printable, at most 64
 /// characters, and never empty.
@@ -82,8 +97,9 @@ pub fn render(config: &HostConfig) -> String {
          system_tray = disabled\n\
          origin_web_ui_allowed = pc\n\
          upnp = disabled\n\
-         notify_pre_releases = disabled\n",
-        clean_name(&config.name)
+         notify_pre_releases = disabled\n{}",
+        clean_name(&config.name),
+        if config.windows { WINDOWS } else { "" }
     )
 }
 
@@ -109,4 +125,33 @@ fn write_atomically(path: &Path, bytes: &[u8]) -> Result<()> {
     std::fs::write(&part, bytes)?;
     std::fs::rename(&part, path)?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn windows_follows_the_clients_display_and_uses_vigembus() {
+        let windows = render(&HostConfig {
+            name: "Den".into(),
+            windows: true,
+        });
+        for line in [
+            "dd_configuration_option = ensure_active",
+            "dd_resolution_option = auto",
+            "dd_refresh_rate_option = auto",
+            "dd_hdr_option = auto",
+            "gamepad_driver = vigembus",
+        ] {
+            assert!(windows.contains(line), "{line}");
+        }
+        // Linux picks its own unprivileged capture and pads (uinput).
+        let linux = render(&HostConfig {
+            name: "Den".into(),
+            windows: false,
+        });
+        assert!(!linux.contains("dd_") && !linux.contains("gamepad_driver"));
+        assert!(!linux.contains("capture"));
+    }
 }

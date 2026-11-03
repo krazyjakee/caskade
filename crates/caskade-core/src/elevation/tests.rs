@@ -154,7 +154,8 @@ async fn the_undo_spares_what_someone_else_added_and_survives_a_cancel() {
         Outcome::Done(set(&[
             Change::HostProgram,
             Change::Service,
-            Change::FirewallUdp
+            Change::FirewallUdp,
+            Change::GamepadDriver
         ]))
     );
     // Copying the host program carries the staged manifest's hash.
@@ -169,7 +170,12 @@ async fn the_undo_spares_what_someone_else_added_and_survives_a_cancel() {
     );
     assert_eq!(
         elevation.record(Plan::StreamingHost).unwrap().added,
-        set(&[Change::HostProgram, Change::Service, Change::FirewallUdp])
+        set(&[
+            Change::HostProgram,
+            Change::Service,
+            Change::FirewallUdp,
+            Change::GamepadDriver
+        ])
     );
     *fake.answer.lock().unwrap() = None;
     elevation.undo(Plan::StreamingHost).await.unwrap();
@@ -183,7 +189,11 @@ async fn the_undo_spares_what_someone_else_added_and_survives_a_cancel() {
         ]
     );
     assert_eq!(last.manifest, None);
-    assert_eq!(*fake.present.lock().unwrap(), set(&[Change::FirewallTcp]));
+    // The gamepad driver stays: other programs use it.
+    assert_eq!(
+        *fake.present.lock().unwrap(),
+        set(&[Change::FirewallTcp, Change::GamepadDriver])
+    );
 }
 
 /// A record holds names only; a file that says anything else is refused
@@ -744,4 +754,83 @@ async fn a_changed_windows_copy_is_copied_again_behind_one_prompt() {
         elevation.apply(Plan::StreamingHost).await.unwrap(),
         Outcome::Done(_)
     ));
+}
+
+#[tokio::test]
+async fn the_gamepad_driver_joins_the_windows_prompt_and_stays_after_the_undo() {
+    let (elevation, fake, _temp) = elevation(OperatingSystem::Windows);
+    assert!(
+        Plan::StreamingHost
+            .changes(OperatingSystem::Windows)
+            .contains(&Change::GamepadDriver)
+    );
+    assert!(
+        !Plan::StreamingHost
+            .changes(OperatingSystem::Linux)
+            .contains(&Change::GamepadDriver)
+    );
+    let done = elevation.apply(Plan::StreamingHost).await.unwrap();
+    assert!(matches!(done, Outcome::Done(added) if added.contains(&Change::GamepadDriver)));
+    assert_eq!(fake.requests.lock().unwrap().len(), 1, "one prompt");
+    assert!(
+        fake.requests.lock().unwrap()[0]
+            .steps
+            .contains(&Step::Add(Change::GamepadDriver))
+    );
+    // Off: everything else goes; the driver stays (other programs use it).
+    elevation.undo(Plan::StreamingHost).await.unwrap();
+    let undo = fake.requests.lock().unwrap().last().unwrap().clone();
+    assert!(!undo.steps.contains(&Step::Remove(Change::GamepadDriver)));
+    assert!(undo.steps.contains(&Step::Remove(Change::Service)));
+    assert!(
+        fake.present
+            .lock()
+            .unwrap()
+            .contains(&Change::GamepadDriver)
+    );
+    // Already installed (by the user, or before): on again asks for nothing
+    // about it.
+    elevation.apply(Plan::StreamingHost).await.unwrap();
+    let again = fake.requests.lock().unwrap().last().unwrap().clone();
+    assert!(!again.steps.contains(&Step::Add(Change::GamepadDriver)));
+}
+
+#[test]
+fn only_the_pinned_gamepad_installer_runs_and_never_from_staging() {
+    let (_temp, host, target) = staged();
+    let download = windows::gamepad_driver_download(&host);
+    std::fs::create_dir_all(download.parent().unwrap()).unwrap();
+    std::fs::write(&download, "not the driver").unwrap();
+    assert_eq!(add_host(&host, &target), 0);
+    let mut ran = Vec::new();
+    let code = windows::perform_with(
+        &elevated(&["add-gamepad-driver"], &host, None),
+        &target,
+        &mut |program, args| {
+            ran.push(format!("{program} {}", args.join(" ")));
+            true
+        },
+    );
+    // Best effort: the step succeeds, nothing ran, nothing is left.
+    assert_eq!(code, 0);
+    assert!(ran.is_empty(), "{ran:?}");
+    assert!(!target.parent().unwrap().join("drivers").exists());
+    // Removing it is never asked of the system.
+    let mut ran = Vec::new();
+    assert_eq!(
+        windows::perform_with(
+            &elevated(&["remove-gamepad-driver"], &host, None),
+            &target,
+            &mut |program, args| {
+                ran.push(format!("{program} {}", args.join(" ")));
+                true
+            }
+        ),
+        0
+    );
+    assert!(ran.is_empty());
+    assert_eq!(
+        windows::token(Step::Add(Change::GamepadDriver)),
+        Some("add-gamepad-driver")
+    );
 }

@@ -282,3 +282,20 @@ it("repairs hosting and forgets every paired device (#266)", async () => {
   await waitFor(() => expect(screen.queryByText("Deck")).toBeNull());
   expect(screen.queryByText("Bedroom TV")).toBeNull();
 });
+
+it("says when controllers or a screen won't work on this host (#260)", async () => {
+  open("/settings?tab=streaming", {
+    hosting: {
+      state: "ready",
+      version: "1",
+      problem: null,
+      warning: "Controllers on other devices won't work here until Repair sets them up.",
+    },
+  });
+  expect(
+    await screen.findByText(
+      "Controllers on other devices won't work here until Repair sets them up.",
+    ),
+  ).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Repair" })).toBeTruthy();
+});
