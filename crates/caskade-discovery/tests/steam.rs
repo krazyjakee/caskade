@@ -123,7 +123,7 @@ fn windows_install_with_three_libraries() {
 
 #[test]
 fn no_steam_reports_a_missing_launcher() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     fs::write(
         temp.path().join("machine.toml"),
         "schema_version = 1\nos = \"linux\"\n",
@@ -141,7 +141,7 @@ fn no_steam_reports_a_missing_launcher() {
 #[test]
 fn hostile_manifests_become_warnings() {
     let scenario = support::Scenario::load(&fixtures(), "steam-linux-shared").unwrap();
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let machine = temp.path().join("machine");
     scenario.materialize(&machine).unwrap();
     let steamapps = machine.join("root/home/fixture/.local/share/Steam/steamapps");
@@ -197,7 +197,7 @@ fn watch_paths_cover_libraries_and_user_config() {
 #[test]
 fn a_manifest_without_its_folder_is_broken_and_not_certain() {
     let scenario = support::Scenario::load(&fixtures(), "steam-linux-shared").unwrap();
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let machine = temp.path().join("machine");
     scenario.materialize(&machine).unwrap();
     fs::remove_dir_all(

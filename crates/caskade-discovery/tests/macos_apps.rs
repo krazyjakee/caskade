@@ -4,7 +4,7 @@ use crate::fixtures::write;
 use caskade_discovery::{sources::macos_apps::MacosApps, *};
 use std::{collections::BTreeMap, fs, path::Path, sync::Arc};
 fn scenario() -> tempfile::TempDir {
-    let t = tempfile::tempdir().unwrap();
+    let t = crate::fixtures::tempdir();
     fs::create_dir(t.path().join("root")).unwrap();
     write(t.path(), "machine.toml", "schema_version=1\nos='macos'\n");
     t
@@ -262,7 +262,7 @@ fn empty_profile_and_cancellation_are_host_independent() {
 #[test]
 fn app_and_executable_symlinks_do_not_escape_the_fixture_or_bundle() {
     let t = scenario();
-    let other = tempfile::tempdir().unwrap();
+    let other = crate::fixtures::tempdir();
     app(
         other.path(),
         "Applications/Outside.app",

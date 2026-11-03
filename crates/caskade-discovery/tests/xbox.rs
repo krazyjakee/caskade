@@ -18,7 +18,7 @@ struct Machine {
 }
 impl Machine {
     fn new() -> Self {
-        let temp = tempfile::tempdir().unwrap();
+        let temp = crate::fixtures::tempdir();
         for drive in ["c", "d"] {
             fs::create_dir_all(temp.path().join(format!("root/drives/{drive}"))).unwrap();
         }

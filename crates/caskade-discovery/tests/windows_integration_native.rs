@@ -33,7 +33,7 @@ fn live_registry_fixture_games_are_found_once_and_test_keys_are_removed() {
             .unwrap()
             .as_nanos()
     );
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let mut cleanup = Cleanup(Vec::new());
     let mut titles = Vec::new();
     for (index, view) in [KEY_WOW64_32KEY, KEY_WOW64_64KEY].into_iter().enumerate() {

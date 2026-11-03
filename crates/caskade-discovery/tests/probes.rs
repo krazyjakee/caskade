@@ -21,7 +21,7 @@ fn executable(root: &Path, name: &str) -> PathBuf {
     path
 }
 fn machine(os: &str, extra: &str) -> tempfile::TempDir {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     fs::create_dir(temp.path().join("root")).unwrap();
     write(
         temp.path(),
@@ -329,7 +329,7 @@ fn escaped_bundle_executable_is_rejected_without_touching_external_sentinel() {
         "Escape",
         "org.example.Escape",
     );
-    let outside = tempfile::tempdir().unwrap();
+    let outside = crate::fixtures::tempdir();
     let sentinel = write(outside.path(), "sentinel", b"untouched");
     fs::remove_file(app.join("Contents/MacOS/Emulator")).unwrap();
     std::os::unix::fs::symlink(&sentinel, app.join("Contents/MacOS/Emulator")).unwrap();

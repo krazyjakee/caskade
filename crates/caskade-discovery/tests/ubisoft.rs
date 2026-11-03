@@ -8,7 +8,7 @@ use caskade_discovery::{
 };
 use std::{fs, path::Path, sync::Arc};
 fn scenario() -> tempfile::TempDir {
-    let t = tempfile::tempdir().unwrap();
+    let t = crate::fixtures::tempdir();
     fs::create_dir(t.path().join("root")).unwrap();
     write(t.path(), "machine.toml", "schema_version=1\nos='windows'\n");
     t
@@ -369,7 +369,7 @@ fn empty_fixture_and_cancel_never_scan_the_live_machine() {
 #[cfg(unix)]
 fn cache_symlink_cannot_read_outside_fixture() {
     let temp = scenario();
-    let outside = tempfile::tempdir().unwrap();
+    let outside = crate::fixtures::tempdir();
     write(outside.path(), "configurations", cache());
     let path = temp.path().join(
         "root/drives/c/Users/fixture/AppData/Local/Ubisoft Game Launcher/cache/configuration",

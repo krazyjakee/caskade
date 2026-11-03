@@ -7,7 +7,7 @@ use caskade_discovery::{
 };
 use std::{collections::BTreeMap, fs, path::Path, sync::Arc};
 fn fixture() -> (tempfile::TempDir, HostEnv) {
-    let t = tempfile::tempdir().unwrap();
+    let t = crate::fixtures::tempdir();
     fs::create_dir(t.path().join("root")).unwrap();
     let env = HostEnv::fixture(t.path()).unwrap();
     (t, env)
@@ -512,7 +512,7 @@ fn ambiguous_epic_app_names_do_not_override_distinct_complete_catalog_ids() {
 }
 #[test]
 fn windows_path_globs_obey_volume_case_and_original_machine_spelling() {
-    let t = tempfile::tempdir().unwrap();
+    let t = crate::fixtures::tempdir();
     fs::create_dir(t.path().join("root")).unwrap();
     fs::write(t.path().join("machine.toml"), "os = 'windows'\n").unwrap();
     let env = HostEnv::fixture(t.path()).unwrap();

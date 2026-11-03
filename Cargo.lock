@@ -1267,6 +1267,7 @@ dependencies = [
  "caskade-jobs",
  "clap",
  "directories",
+ "dunce",
  "encoding_rs",
  "flate2",
  "globset",

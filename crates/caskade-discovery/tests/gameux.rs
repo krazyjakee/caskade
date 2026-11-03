@@ -18,7 +18,7 @@ struct Machine {
 }
 impl Machine {
     fn new() -> Self {
-        let temp = tempfile::tempdir().unwrap();
+        let temp = crate::fixtures::tempdir();
         fs::create_dir_all(temp.path().join("root/drives/c")).unwrap();
         fs::write(
             temp.path().join("machine.toml"),

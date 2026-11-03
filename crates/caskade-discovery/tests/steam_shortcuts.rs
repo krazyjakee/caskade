@@ -159,7 +159,7 @@ fn shortcuts_become_games_or_launcher_proxies() {
 #[test]
 fn stale_shortcuts_are_broken_and_uncertain() {
     let scenario = scenario();
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let machine = temp.path().join("machine");
     scenario.materialize(&machine).unwrap();
     std::fs::remove_dir_all(machine.join("root/home/fixture/Games/Fixture Indie")).unwrap();

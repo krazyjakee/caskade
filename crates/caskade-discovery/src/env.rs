@@ -223,8 +223,8 @@ impl HostEnv {
         Self::load_fixture(scenario.as_ref(), Some(os))
     }
     fn load_fixture(scenario: &Path, os_override: Option<OperatingSystem>) -> io::Result<Self> {
-        let scenario = scenario.canonicalize()?;
-        let root = scenario.join("root").canonicalize()?;
+        let scenario = dunce::canonicalize(&scenario)?;
+        let root = dunce::canonicalize(scenario.join("root"))?;
         if !root.starts_with(&scenario) || !root.is_dir() {
             return Err(io::Error::new(
                 io::ErrorKind::PermissionDenied,
@@ -232,7 +232,7 @@ impl HostEnv {
             ));
         }
         let metadata_path = scenario.join("machine.toml");
-        if let Ok(path) = metadata_path.canonicalize()
+        if let Ok(path) = dunce::canonicalize(&metadata_path)
             && !path.starts_with(&scenario)
         {
             return Err(io::Error::new(

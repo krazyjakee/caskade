@@ -275,7 +275,7 @@ fn canonical_existing(path: &Path) -> io::Result<PathBuf> {
     let mut current = path;
     let mut tail = Vec::new();
     loop {
-        match current.canonicalize() {
+        match dunce::canonicalize(&current) {
             Ok(mut root) => {
                 for part in tail.iter().rev() {
                     root.push(part);

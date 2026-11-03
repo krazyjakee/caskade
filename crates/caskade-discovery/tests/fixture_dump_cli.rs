@@ -37,7 +37,7 @@ fn scan(root: &Path) -> serde_json::Value {
 }
 #[test]
 fn cli_requires_anonymization_and_replays_nonempty_builtin_source_groups() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let destination = temp.path().join("dump");
     let denied = binary()
         .arg("--json")

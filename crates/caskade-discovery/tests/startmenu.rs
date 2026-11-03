@@ -139,7 +139,7 @@ fn non_games_broken_and_corrupt_shortcuts_are_excluded_with_clean_warnings() {
     assert!(warnings.iter().any(|w| w.contains("Missing.lnk")));
 }
 fn materialized() -> (tempfile::TempDir, HostEnv) {
-    let t = tempfile::tempdir().unwrap();
+    let t = crate::fixtures::tempdir();
     let dest = t.path().join("machine");
     support::Scenario::load(
         &Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures"),
@@ -153,7 +153,7 @@ fn materialized() -> (tempfile::TempDir, HostEnv) {
 }
 #[test]
 fn empty_fixture_cancellation_and_directory_count_budgets_do_not_scan_host() {
-    let t = tempfile::tempdir().unwrap();
+    let t = crate::fixtures::tempdir();
     fs::create_dir(t.path().join("root")).unwrap();
     fs::write(
         t.path().join("machine.toml"),
@@ -196,7 +196,7 @@ fn oversized_link_is_a_warning_and_healthy_siblings_survive() {
 fn symlinks_to_external_shortcuts_or_directories_never_leave_fixture() {
     use std::os::unix::fs::symlink;
     let (_temp, env) = materialized();
-    let outside = tempfile::tempdir().unwrap();
+    let outside = crate::fixtures::tempdir();
     let sentinel = outside.path().join("sentinel");
     fs::write(&sentinel, b"untouched").unwrap();
     fs::write(

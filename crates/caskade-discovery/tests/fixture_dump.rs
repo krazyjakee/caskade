@@ -74,7 +74,22 @@ fn groups(env: &HostEnv) -> serde_json::Value {
             .trim_matches('"'),
         "$HOME",
     );
-    serde_json::from_str(&json).unwrap()
+    let mut value = serde_json::from_str(&json).unwrap();
+    portable_home_paths(&mut value);
+    value
+}
+
+/// Paths below the home are host paths, joined with `\` on Windows; the
+/// snapshot keeps them in one form.
+fn portable_home_paths(value: &mut serde_json::Value) {
+    match value {
+        serde_json::Value::String(text) if text.starts_with("$HOME") => {
+            *text = text.replace('\\', "/");
+        }
+        serde_json::Value::Array(items) => items.iter_mut().for_each(portable_home_paths),
+        serde_json::Value::Object(map) => map.values_mut().for_each(portable_home_paths),
+        _ => {}
+    }
 }
 
 #[test]
@@ -85,7 +100,7 @@ fn scenario_loader_is_sorted_confined_and_materializes_only_declared_machine() {
     assert!(fixtures::Scenario::load(&corpus(), "../private").is_err());
     let scenario = fixtures::Scenario::load(&corpus(), "linux-mixed").unwrap();
     assert!(scenario.file("../README.md").is_err());
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let copy = temp.path().join("machine");
     scenario.materialize(&copy).unwrap();
     assert!(copy.join("machine.toml").is_file());
@@ -114,7 +129,7 @@ fn nested_report_snapshot_paths_become_fixture_relative() {
 #[test]
 fn nonempty_scan_groups_survive_anonymized_dump_and_fixture_replay() {
     let scenario = fixtures::Scenario::load(&corpus(), "linux-mixed").unwrap();
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let live = temp.path().join("synthetic-live");
     scenario.materialize(&live).unwrap();
     let metadata = fs::read_to_string(live.join("machine.toml"))
@@ -163,7 +178,7 @@ fn nonempty_scan_groups_survive_anonymized_dump_and_fixture_replay() {
 #[test]
 fn existing_destination_is_refused_without_changes() {
     let env = HostEnv::fixture(corpus().join("machines/linux-mixed")).unwrap();
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     fs::write(temp.path().join("keep"), "existing data").unwrap();
     assert!(dump_anonymized(&env, temp.path()).is_err());
     assert_eq!(
@@ -176,7 +191,7 @@ fn existing_destination_is_refused_without_changes() {
 #[test]
 fn sqlite_export_preserves_games_and_omits_deleted_pages_and_account_tables() {
     let scenario = fixtures::Scenario::load(&corpus(), "linux-mixed").unwrap();
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let live = temp.path().join("machine");
     scenario.materialize(&live).unwrap();
     let source = live.join("root/home/fixture/.local/share/lutris/pga.db");
@@ -223,7 +238,7 @@ fn generated_windows_macos_and_wine_metadata_dumps_replay_without_host_access() 
         "steam-linux-shared",
         "steam-windows-libraries",
     ] {
-        let temp = tempfile::tempdir().unwrap();
+        let temp = crate::fixtures::tempdir();
         let env = HostEnv::fixture(corpus().join("machines").join(name)).unwrap();
         let output = temp.path().join("dump");
         let report = dump_anonymized(&env, &output).unwrap_or_else(|e| panic!("{name}: {e}"));
@@ -258,7 +273,7 @@ fn generated_windows_macos_and_wine_metadata_dumps_replay_without_host_access() 
 #[test]
 fn malformed_allowlisted_metadata_does_not_publish_a_partial_dump() {
     let scenario = fixtures::Scenario::load(&corpus(), "linux-mixed").unwrap();
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let live = temp.path().join("machine");
     scenario.materialize(&live).unwrap();
     fs::write(

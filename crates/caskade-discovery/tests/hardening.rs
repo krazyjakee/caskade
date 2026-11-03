@@ -9,7 +9,7 @@ use std::{
 mod invariants;
 #[test]
 fn invariant_checker_detects_missing_paths_duplicate_ids_and_tool_groups() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     std::fs::create_dir(temp.path().join("root")).unwrap();
     let env = HostEnv::fixture(temp.path()).unwrap();
     let mut one = DetectedGame::new(SourceId::new("test"), "one", "Original Game");

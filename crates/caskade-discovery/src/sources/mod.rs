@@ -167,7 +167,7 @@ pub(crate) fn list_or_warn(
 /// path itself when it can't be resolved.
 pub(crate) fn canonical(env: &HostEnv, path: &Path) -> PathBuf {
     env.resolve_path(path)
-        .and_then(fs::canonicalize)
+        .and_then(dunce::canonicalize)
         .unwrap_or_else(|_| path.to_path_buf())
 }
 

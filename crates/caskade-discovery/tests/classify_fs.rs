@@ -20,7 +20,7 @@ fn host() -> HostCaps {
     .unwrap()
 }
 fn fixture() -> (tempfile::TempDir, HostEnv, PathBuf) {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     fs::write(
         temp.path().join("machine.toml"),
         "schema_version=1\nos=\"linux\"\n",

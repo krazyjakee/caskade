@@ -266,7 +266,7 @@ impl HostEnv {
             }
             match fs::symlink_metadata(&next) {
                 Ok(_) => {
-                    let canonical = next.canonicalize()?;
+                    let canonical = dunce::canonicalize(&next)?;
                     if !canonical.starts_with(&self.fs_root) {
                         return Err(denied("fixture symlink leaves its filesystem root"));
                     }

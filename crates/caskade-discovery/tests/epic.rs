@@ -90,7 +90,7 @@ fn machine(root: &Path) {
 
 #[test]
 fn games_without_dlc_incomplete_or_stale_installs() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     machine(temp.path());
     let env = HostEnv::fixture(temp.path()).unwrap();
     let ctx = ScanCtx::default();
@@ -171,7 +171,7 @@ fn games_without_dlc_incomplete_or_stale_installs() {
 
 #[test]
 fn default_data_dir_without_registry() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     machine(temp.path());
     fs::remove_file(temp.path().join("registry/hklm32.reg")).unwrap();
     let env = HostEnv::fixture(temp.path()).unwrap();
@@ -181,7 +181,7 @@ fn default_data_dir_without_registry() {
 
 #[test]
 fn no_launcher() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     write(
         temp.path(),
         "machine.toml",

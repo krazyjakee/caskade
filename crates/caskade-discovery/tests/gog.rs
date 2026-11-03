@@ -92,7 +92,7 @@ fn galaxy_machine(root: &Path) {
 
 #[test]
 fn galaxy_with_three_games() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     galaxy_machine(temp.path());
     let env = HostEnv::fixture(temp.path()).unwrap();
     let ctx = ScanCtx::default();
@@ -178,7 +178,7 @@ fn galaxy_with_three_games() {
 
 #[test]
 fn offline_install_without_galaxy() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let root = temp.path();
     write(
         root,
@@ -211,7 +211,7 @@ fn offline_install_without_galaxy() {
 
 #[test]
 fn a_gog_game_also_in_heroic_merges_on_the_gog_id() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     galaxy_machine(temp.path());
     write(
         &temp

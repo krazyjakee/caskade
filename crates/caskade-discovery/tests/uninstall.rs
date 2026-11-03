@@ -22,7 +22,7 @@ fn scan(env: &HostEnv) -> Vec<DetectedGame> {
         .unwrap()
 }
 fn temporary() -> tempfile::TempDir {
-    let t = tempfile::tempdir().unwrap();
+    let t = crate::fixtures::tempdir();
     fs::create_dir(t.path().join("root")).unwrap();
     fs::write(
         t.path().join("machine.toml"),

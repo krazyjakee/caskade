@@ -37,6 +37,14 @@ pub struct Scenario {
     pub machine: Machine,
 }
 
+/// A temporary folder under the canonical temp directory, so the paths a test
+/// builds from it match the canonical ones `HostEnv` hands back: macOS's
+/// `/var` is `/private/var`, and Windows' `TEMP` can be an 8.3 short name.
+pub fn tempdir() -> tempfile::TempDir {
+    let base = dunce::canonicalize(std::env::temp_dir()).unwrap();
+    tempfile::tempdir_in(base).unwrap()
+}
+
 /// Writes a file below `root`, creating its parent folders.
 pub fn write(root: &Path, relative: &str, bytes: impl AsRef<[u8]>) -> PathBuf {
     let path = root.join(relative);

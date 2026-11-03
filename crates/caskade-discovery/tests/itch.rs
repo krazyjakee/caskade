@@ -19,7 +19,7 @@ struct Machine {
 }
 impl Machine {
     fn new(os: OperatingSystem) -> Self {
-        let temp = tempfile::tempdir().unwrap();
+        let temp = crate::fixtures::tempdir();
         fs::create_dir(temp.path().join("root")).unwrap();
         let os_name = match os {
             OperatingSystem::Linux => "linux",

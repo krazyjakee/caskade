@@ -131,11 +131,8 @@ impl HostEnv {
         if !self.is_fixture() {
             return true;
         }
-        let root = self
-            .fs_root
-            .canonicalize()
-            .unwrap_or_else(|_| self.fs_root.clone());
-        path.canonicalize()
+        let root = dunce::canonicalize(&self.fs_root).unwrap_or_else(|_| self.fs_root.clone());
+        dunce::canonicalize(&path)
             .map(|path| path.starts_with(&root))
             .unwrap_or_else(|_| path.starts_with(&self.fs_root))
     }

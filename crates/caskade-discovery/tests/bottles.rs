@@ -11,7 +11,7 @@ use caskade_discovery::{
 
 #[test]
 fn a_game_and_a_non_game_program_in_one_bottle() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     write(
         temp.path(),
         "machine.toml",

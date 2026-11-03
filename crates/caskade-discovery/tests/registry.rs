@@ -175,7 +175,7 @@ fn win32_arch_native_view_and_duplicate_case_records() {
 
 #[test]
 fn fixture_registry_is_automatic_and_never_falls_back_to_live() {
-    let tmp = tempfile::tempdir().unwrap();
+    let tmp = crate::fixtures::tempdir();
     fs::create_dir(tmp.path().join("root")).unwrap();
     fs::create_dir(tmp.path().join("registry")).unwrap();
     fs::write(tmp.path().join("registry/hklm64.reg"), TEXT).unwrap();
@@ -214,7 +214,7 @@ fn fixture_registry_is_automatic_and_never_falls_back_to_live() {
 
 #[test]
 fn prefix_loader_reads_all_hives_and_default_user() {
-    let tmp = tempfile::tempdir().unwrap();
+    let tmp = crate::fixtures::tempdir();
     for name in ["system.reg", "user.reg", "userdef.reg"] {
         fs::write(
             tmp.path().join(name),
@@ -332,7 +332,7 @@ fn registry_slashes_are_literal_key_characters_and_unicode_names_ignore_case() {
 
 #[test]
 fn malformed_files_limits_and_fixture_symlinks_are_errors() {
-    let tmp = tempfile::tempdir().unwrap();
+    let tmp = crate::fixtures::tempdir();
     fs::create_dir(tmp.path().join("root")).unwrap();
     fs::create_dir(tmp.path().join("registry")).unwrap();
     fs::write(tmp.path().join("registry/hkcu.reg"), [0xff]).unwrap();

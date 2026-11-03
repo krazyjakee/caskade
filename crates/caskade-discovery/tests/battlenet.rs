@@ -84,7 +84,7 @@ fn machine(root: &Path) {
 
 #[test]
 fn product_db_games_without_the_agent_or_battle_net() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     machine(temp.path());
     let env = HostEnv::fixture(temp.path()).unwrap();
     let ctx = ScanCtx::default();
@@ -145,7 +145,7 @@ fn product_db_games_without_the_agent_or_battle_net() {
 
 #[test]
 fn corrupt_product_db_is_a_source_error() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     machine(temp.path());
     write(
         &temp.path().join("root/drives/c"),

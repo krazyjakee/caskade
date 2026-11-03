@@ -33,7 +33,7 @@ fn live_gameux_reads_its_owned_temporary_registration() {
         }
     }
     let _cleanup = Cleanup(key_path.clone());
-    let root = tempfile::tempdir().unwrap();
+    let root = crate::fixtures::tempdir();
     let exe = root.path().join("Fixture2009.exe");
     let gdf = root.path().join("FixtureGdf.dll");
     fs::write(&exe, b"inert fixture: never executed").unwrap();

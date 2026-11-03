@@ -32,10 +32,13 @@ pub fn applications(env: &HostEnv, ctx: &ScanCtx) -> Result<Vec<Application>, So
             if seen.contains(&id) {
                 continue;
             }
-            let Ok(app) = env.resolve_path(&entry.path()).and_then(fs::canonicalize) else {
+            let Ok(app) = env
+                .resolve_path(&entry.path())
+                .and_then(dunce::canonicalize)
+            else {
                 continue;
             };
-            let Ok(root) = env.resolve_path(&root).and_then(fs::canonicalize) else {
+            let Ok(root) = env.resolve_path(&root).and_then(dunce::canonicalize) else {
                 continue;
             };
             if !app.starts_with(&root) {
@@ -44,7 +47,7 @@ pub fn applications(env: &HostEnv, ctx: &ScanCtx) -> Result<Vec<Application>, So
             }
             let Ok(active) = env
                 .resolve_path(&entry.path().join("current/active"))
-                .and_then(fs::canonicalize)
+                .and_then(dunce::canonicalize)
             else {
                 continue;
             };

@@ -16,7 +16,7 @@ const XML: &str = r#"<?xml version="1.0"?><game>
 <gameTitles><gameTitle locale="de_DE">Anderer Titel</gameTitle><gameTitle locale="en_US">Fixture EA &amp; Friends</gameTitle></gameTitles>
 <runtime><launcher><filePath>__InstallLoc__\bin\Game.exe</filePath></launcher></runtime></game>"#;
 fn scenario() -> tempfile::TempDir {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     fs::create_dir(temp.path().join("root")).unwrap();
     write(
         temp.path(),
@@ -320,7 +320,7 @@ fn cancellation_and_absent_registry_do_not_fall_back_to_live_host() {
 #[cfg(unix)]
 fn installer_metadata_symlink_cannot_escape_fixture() {
     let temp = scenario();
-    let outside = tempfile::tempdir().unwrap();
+    let outside = crate::fixtures::tempdir();
     write(outside.path(), "installerdata.xml", XML);
     let dir = temp.path().join("root/drives/c/Games/Game/__Installer");
     fs::create_dir_all(dir.parent().unwrap()).unwrap();

@@ -16,7 +16,7 @@ struct Machine {
 }
 impl Machine {
     fn new() -> Self {
-        let temp = tempfile::tempdir().unwrap();
+        let temp = crate::fixtures::tempdir();
         for path in ["home/fixture", "media/usb"] {
             fs::create_dir_all(temp.path().join("root").join(path)).unwrap();
         }
@@ -547,7 +547,7 @@ fn symlinked_directories_and_payloads_are_not_followed_or_modified() {
         ..Default::default()
     });
     assert!(report.games.is_empty(), "{w:?}");
-    let outside = tempfile::tempdir().unwrap();
+    let outside = crate::fixtures::tempdir();
     fs::write(outside.path().join("sentinel"), b"unchanged").unwrap();
     symlink(outside.path(), m.path("/custom/HostData")).unwrap();
     let _ = m.scan(DeepScans {

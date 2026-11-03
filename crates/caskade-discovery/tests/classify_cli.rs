@@ -1,7 +1,7 @@
 #![cfg(feature = "cli")]
 use std::{fs, process::Command};
 fn fixture() -> tempfile::TempDir {
-    let dir = tempfile::tempdir().unwrap();
+    let dir = crate::fixtures::tempdir();
     fs::write(
         dir.path().join("machine.toml"),
         "schema_version=1\nos=\"linux\"\n",

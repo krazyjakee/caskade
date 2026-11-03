@@ -146,7 +146,7 @@ fn faugus_current_legacy_and_flatpak_files_preserve_prefixes_without_executing_h
 }
 #[test]
 fn malformed_or_oversized_inputs_cancel_and_unsafe_task_paths_are_bounded() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let root = temp.path().join("mini");
     fixtures::Scenario::load(&corpus(), "minigalaxy-linux")
         .unwrap()

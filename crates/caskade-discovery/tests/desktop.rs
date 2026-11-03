@@ -19,7 +19,7 @@ struct Machine {
 }
 impl Machine {
     fn new() -> Self {
-        let temp = tempfile::tempdir().unwrap();
+        let temp = crate::fixtures::tempdir();
         fs::create_dir(temp.path().join("root")).unwrap();
         fs::write(temp.path().join("machine.toml"),"schema_version=1\nos=\"linux\"\n[env]\nPATH=\"/usr/bin:/snap/bin\"\nLANG=\"fr_FR.UTF-8\"\n").unwrap();
         Self { temp }

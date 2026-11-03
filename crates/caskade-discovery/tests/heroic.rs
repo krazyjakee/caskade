@@ -206,7 +206,7 @@ fn legendary_cli_and_rare() {
 #[test]
 fn missing_and_hostile_configs() {
     let scenario = scenario();
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let machine = temp.path().join("machine");
     scenario.materialize(&machine).unwrap();
     let heroic = machine.join("root/home/fixture/.config/heroic");
@@ -242,7 +242,7 @@ fn missing_and_hostile_configs() {
 
 #[test]
 fn windows_config_locations() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let machine = temp.path();
     std::fs::write(
         machine.join("machine.toml"),

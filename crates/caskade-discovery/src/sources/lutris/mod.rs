@@ -142,7 +142,10 @@ fn mapped(env: &HostEnv, value: &str, base: Option<&Path>) -> Option<PathBuf> {
             .replace("$GAMEDIR", &base.to_string_lossy());
     }
     let path = Path::new(&value);
-    if path.is_absolute()
+    // `has_root`, not `is_absolute`: a Unix profile's `/home/…` has no drive,
+    // so a Windows host wouldn't call it absolute, and joining it to `base`
+    // would keep only the base's drive.
+    if path.has_root()
         || value.starts_with(['~', '$', '%'])
         || value.as_bytes().get(1) == Some(&b':')
     {

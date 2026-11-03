@@ -27,16 +27,23 @@ fn committed_sqlite_golden_and_source_is_untouched() {
     assert_eq!(std::fs::read(&path).unwrap(), before);
     assert!(!path.with_extension("db-wal").exists());
 }
+/// Characters SQLite's URI form would misread. Windows file names can't hold
+/// `?`; `%` exercises the same escaping there.
+const URI_NAME: &str = if cfg!(windows) {
+    "test %# café.db"
+} else {
+    "test ?# café.db"
+};
 #[test]
 fn writer_open_wal_commits_are_visible_without_source_side_effects() {
-    let temp = tempfile::tempdir().unwrap();
-    let path = temp.path().join("test ?# café.db");
+    let temp = crate::fixtures::tempdir();
+    let path = temp.path().join(URI_NAME);
     let writer = Connection::open(&path).unwrap();
     writer.execute_batch("PRAGMA journal_mode=WAL; CREATE TABLE games(name); INSERT INTO games VALUES('committed'); BEGIN IMMEDIATE; INSERT INTO games VALUES('uncommitted');").unwrap();
     let names = [
         path.clone(),
-        temp.path().join("test ?# café.db-wal"),
-        temp.path().join("test ?# café.db-shm"),
+        temp.path().join(format!("{URI_NAME}-wal")),
+        temp.path().join(format!("{URI_NAME}-shm")),
     ];
     let before = names
         .iter()
@@ -53,7 +60,7 @@ fn writer_open_wal_commits_are_visible_without_source_side_effects() {
 }
 #[test]
 fn exclusive_writer_is_readable_through_private_rollback_recovery() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let path = temp.path().join("exclusive.db");
     let writer = Connection::open(&path).unwrap();
     writer.execute_batch("CREATE TABLE games(name); INSERT INTO games VALUES('before'); BEGIN EXCLUSIVE; UPDATE games SET name='after';").unwrap();
@@ -66,7 +73,7 @@ fn exclusive_writer_is_readable_through_private_rollback_recovery() {
 }
 #[test]
 fn row_byte_and_vm_limits_stop_queries() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let path = temp.path().join("limits.db");
     Connection::open(&path)
         .unwrap()
@@ -109,11 +116,13 @@ fn row_byte_and_vm_limits_stop_queries() {
     assert!(db.query("SELECT load_extension('nope')", &[]).is_err());
 }
 
-#[cfg(unix)]
+// APFS and HFS+ refuse file names that aren't UTF-8 (EILSEQ), so no such
+// file can exist on macOS.
+#[cfg(all(unix, not(target_os = "macos")))]
 #[test]
 fn sqlite_non_utf8_filename_is_read_without_lossy_conversion() {
     use std::os::unix::ffi::OsStringExt;
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let path = temp
         .path()
         .join(std::ffi::OsString::from_vec(b"query-\xff.db".to_vec()));

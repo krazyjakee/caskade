@@ -20,7 +20,7 @@ use crate::fixtures as support;
 fn machine() -> (tempfile::TempDir, PathBuf) {
     let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
     let scenario = support::Scenario::load(&fixtures, "steam-linux-shared").unwrap();
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let machine = temp.path().join("machine");
     scenario.materialize(&machine).unwrap();
     (temp, machine)
@@ -66,6 +66,8 @@ fn installing_and_removing_a_game_each_produce_one_delta() {
     let started = Instant::now();
     let delta = library.rescan(&steam, &Cancel::new()).unwrap();
     let elapsed = started.elapsed();
+    // Logged for the per-OS budget in tests/HARDENING.md.
+    println!("one source rescan: {elapsed:?}");
     assert!(
         elapsed < Duration::from_millis(200),
         "one source rescan took {elapsed:?}"
@@ -147,7 +149,7 @@ mod live {
 
     #[test]
     fn a_launcher_installed_after_the_watch_started_is_picked_up() {
-        let temp = tempfile::tempdir().unwrap();
+        let temp = crate::fixtures::tempdir();
         let machine = temp.path().join("machine");
         fs::create_dir_all(machine.join("root/home/fixture/.local/share")).unwrap();
         fs::write(
@@ -183,7 +185,7 @@ mod live {
     #[cfg(feature = "deep")]
     #[test]
     fn a_game_copied_into_a_deep_scan_folder_is_picked_up() {
-        let temp = tempfile::tempdir().unwrap();
+        let temp = crate::fixtures::tempdir();
         let machine = temp.path().join("machine");
         let library = machine.join("root/home/fixture/Games");
         fs::create_dir_all(&library).unwrap();

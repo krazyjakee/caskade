@@ -30,7 +30,7 @@ fn exec(target: &LaunchTarget) -> (&Path, &[String]) {
 #[test]
 fn amazon_games() {
     use caskade_discovery::sources::amazon::AmazonGames;
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let c = windows(temp.path());
     let data = c.join("Users/fixture/AppData/Local/Amazon Games");
     write(&data, "App/Amazon Games.exe", "inert");
@@ -77,7 +77,7 @@ fn amazon_games() {
 
 #[test]
 fn riot_client() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let c = windows(temp.path());
     let riot = c.join("ProgramData/Riot Games");
     write(
@@ -150,7 +150,7 @@ fn riot_client() {
 
 #[test]
 fn rockstar_games_launcher() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let c = windows(temp.path());
     write(
         &c,
@@ -186,7 +186,8 @@ fn rockstar_games_launcher() {
     let (program, args) = exec(&heist.launch[0]);
     assert!(program.ends_with("Rockstar Games/Launcher/Launcher.exe"));
     assert_eq!(args[0], "-launchTitleInFolder");
-    assert!(args[1].ends_with("Rockstar Games/Fixture Heist"));
+    // A host path: compared by component, as `program` is.
+    assert!(std::path::Path::new(&args[1]).ends_with("Rockstar Games/Fixture Heist"));
     assert_eq!(heist.state, InstallState::Installed);
     assert!(matches!(games[1].state, InstallState::Broken { .. }));
     assert!(RockstarLauncher.detect(&env)[0].found);

@@ -37,6 +37,9 @@ flate2 = { version = "1", default-features = false, features = ["rust_backend"] 
 # Capability-scoped folder walks for the classifier (#79).
 cap-std = "4"
 url = "2"
+# Canonical paths without Windows' verbatim `\\?\` prefix where they have
+# an ordinary form, so launch paths stay readable and joinable.
+dunce = "1"
 percent-encoding = "2"
 # Lutris game YAML (#76); pure Rust.
 serde_yaml_ng = "=0.10.0"

@@ -24,7 +24,7 @@ pub(super) fn roots(env: &HostEnv, volume: &Path) -> io::Result<Vec<PathBuf>> {
         .map(|v| u16::from_le_bytes([v[0], v[1]]))
         .collect();
     let volume = env.resolve_path(volume)?;
-    let anchor = volume.canonicalize()?;
+    let anchor = dunce::canonicalize(&volume)?;
     let mut cursor = 0;
     let mut out = Vec::new();
     for _ in 0..count {
@@ -43,7 +43,7 @@ pub(super) fn roots(env: &HostEnv, volume: &Path) -> io::Result<Vec<PathBuf>> {
         }
         let relative = relative.trim_start_matches(['\\', '/']);
         let path = child(env, &volume, relative)?;
-        let canonical = path.canonicalize()?;
+        let canonical = dunce::canonicalize(&path)?;
         if !canonical.starts_with(&anchor) {
             return Err(invalid("GamingRoot escapes drive"));
         }
@@ -81,10 +81,10 @@ pub(super) fn child(env: &HostEnv, base: &Path, relative: &str) -> io::Result<Pa
     let path = env.resolve_path(&path)?;
     // Missing files can still produce a Broken record; check the nearest
     // existing ancestor, which catches links used to escape a package.
-    let anchor = base.canonicalize()?;
+    let anchor = dunce::canonicalize(&base)?;
     let mut ancestor = path.as_path();
     loop {
-        match ancestor.canonicalize() {
+        match dunce::canonicalize(&ancestor) {
             Ok(canonical) => {
                 if !canonical.starts_with(&anchor) {
                     return Err(invalid("package path escapes its root"));

@@ -135,7 +135,7 @@ fn steam_and_gog_entries_merge_into_the_store_groups() {
 }
 #[test]
 fn locked_wal_database_is_read_without_modifying_original() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let root = temp.path().join("machine");
     fixtures::Scenario::load(&corpus(), "lutris-linux")
         .unwrap()
@@ -156,7 +156,7 @@ fn locked_wal_database_is_read_without_modifying_original() {
 }
 #[test]
 fn malformed_database_and_yaml_do_not_hide_other_valid_installs() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let root = temp.path().join("machine");
     fixtures::Scenario::load(&corpus(), "lutris-linux")
         .unwrap()
@@ -197,7 +197,7 @@ fn malformed_database_and_yaml_do_not_hide_other_valid_installs() {
 
 #[test]
 fn stale_advertised_directory_is_broken_without_hiding_valid_installs() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let root = temp.path().join("machine");
     fixtures::Scenario::load(&corpus(), "lutris-linux")
         .unwrap()

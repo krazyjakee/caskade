@@ -7,7 +7,7 @@ use std::{
     path::{Path, PathBuf},
 };
 fn fixture(os: &str) -> (tempfile::TempDir, HostEnv) {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     fs::create_dir(temp.path().join("root")).unwrap();
     fs::write(temp.path().join("machine.toml"),format!("schema_version = 1\nos = {os:?}\n[env]\nHOME = '/home/test'\nUSERPROFILE = 'C:\\Users\\test'\n")).unwrap();
     let env = HostEnv::fixture(temp.path()).unwrap();
@@ -134,11 +134,13 @@ fn links_missing_leaves_prefix_drives_and_fixture_escape() {
             .unwrap()
             .same(&path(&env, "/games/Foo"))
     );
-    let outside = tempfile::tempdir().unwrap();
+    let outside = crate::fixtures::tempdir();
     std::os::unix::fs::symlink(outside.path(), env.fs_root().join("escape")).unwrap();
     assert!(canonical_path(&env, Path::new("/escape/payload"), &GameRuntime::Native).is_err());
 }
-#[cfg(unix)]
+// APFS and HFS+ refuse file names that aren't UTF-8 (EILSEQ), so no such
+// file can exist on macOS.
+#[cfg(all(unix, not(target_os = "macos")))]
 #[test]
 fn non_unicode_names_remain_distinct() {
     use std::os::unix::ffi::OsStringExt;

@@ -15,7 +15,7 @@ use std::{
 };
 
 fn fixture(metadata: &str) -> tempfile::TempDir {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     fs::create_dir(temp.path().join("root")).unwrap();
     fs::write(temp.path().join("machine.toml"), metadata).unwrap();
     temp
@@ -351,7 +351,7 @@ fn unknown_schemas_and_oversize_metadata_fail_without_writing() {
 #[cfg(unix)]
 #[test]
 fn fixture_metadata_and_filesystem_root_cannot_be_symlinks_outside_the_scenario() {
-    let outside = tempfile::tempdir().unwrap();
+    let outside = crate::fixtures::tempdir();
     fs::write(outside.path().join("machine.toml"), "os='windows'").unwrap();
     let metadata = fixture("");
     fs::remove_file(metadata.path().join("machine.toml")).unwrap();

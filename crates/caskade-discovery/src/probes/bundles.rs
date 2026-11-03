@@ -10,7 +10,7 @@ pub fn inspect(env: &HostEnv, ctx: &ScanCtx, bundle: &Path) -> Result<Applicatio
     ctx.check()?;
     let bundle = env
         .resolve_path(bundle)
-        .and_then(fs::canonicalize)
+        .and_then(dunce::canonicalize)
         .map_err(|e| SourceError::io(bundle, e))?;
     let bundle = env
         .resolve_path(&bundle)
@@ -28,7 +28,7 @@ pub fn inspect(env: &HostEnv, ctx: &ScanCtx, bundle: &Path) -> Result<Applicatio
     let info = bundle.join("Contents/Info.plist");
     let info = env
         .resolve_path(&info)
-        .and_then(fs::canonicalize)
+        .and_then(dunce::canonicalize)
         .map_err(|e| SourceError::io(&info, e))?;
     if !info.starts_with(&bundle)
         || !fs::metadata(&info)
@@ -65,7 +65,7 @@ pub fn inspect(env: &HostEnv, ctx: &ScanCtx, bundle: &Path) -> Result<Applicatio
         .ok_or_else(|| SourceError::parse(&info, "unsafe/missing CFBundleExecutable"))?;
     let executable = env
         .resolve_path(&bundle.join("Contents/MacOS").join(exe))
-        .and_then(fs::canonicalize)
+        .and_then(dunce::canonicalize)
         .map_err(|e| SourceError::io(&bundle, e))?;
     if !executable.starts_with(&bundle) || !executable.is_file() {
         return Err(SourceError::parse(
@@ -80,7 +80,7 @@ pub fn inspect(env: &HostEnv, ctx: &ScanCtx, bundle: &Path) -> Result<Applicatio
             if path.extension().is_none() {
                 path.set_extension("icns");
             }
-            env.resolve_path(&path).and_then(fs::canonicalize).ok()
+            env.resolve_path(&path).and_then(dunce::canonicalize).ok()
         })
         .filter(|p| p.is_file() && p.starts_with(&bundle));
     let title = text("CFBundleDisplayName")

@@ -40,7 +40,7 @@ pub fn classify_path(
             "classifier needs a directory or regular file".into(),
         ));
     };
-    let root = fs::canonicalize(root)?;
+    let root = dunce::canonicalize(&root)?;
     // Canonicalize through HostEnv too, so a fixture cannot escape its tree.
     let root = env.resolve_path(&root)?;
     let directory = cap_std::fs::Dir::open_ambient_dir(&root, cap_std::ambient_authority())?;

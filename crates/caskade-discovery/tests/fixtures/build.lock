@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_sha256": "35be739c82c530f4b8bedb02f54e36f53285e36849f145d103e67d70180d6e96",
+  "source_sha256": "2edb1cdfbe8c157466838e0adb9233a59aa369755caa2d1251a1b1ec1072aca9",
   "outputs": {
     "formats/GameInstallInfo.sqlite": {
       "size": 12288,

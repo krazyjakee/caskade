@@ -39,7 +39,7 @@ fn prefix(dir: &Path, keys: &str) {
 
 #[test]
 fn gog_galaxy_in_a_lutris_prefix() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let home = linux(temp.path());
     write(
         &home,
@@ -125,7 +125,7 @@ fn gog_galaxy_in_a_lutris_prefix() {
 #[cfg(feature = "windows-sources")]
 #[test]
 fn a_retail_game_in_wine_through_its_uninstall_key() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let home = linux(temp.path());
     let wine = home.join(".wine");
     prefix(
@@ -167,7 +167,7 @@ fn a_retail_game_in_wine_through_its_uninstall_key() {
 
 #[test]
 fn the_prefix_env_maps_drives_folders_and_case() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     let home = linux(temp.path());
     let wine = home.join(".wine");
     prefix(&wine, "");
@@ -205,7 +205,7 @@ fn the_prefix_env_maps_drives_folders_and_case() {
 
 #[test]
 fn crossover_and_whisky_bottles_on_macos() {
-    let temp = tempfile::tempdir().unwrap();
+    let temp = crate::fixtures::tempdir();
     write(
         temp.path(),
         "machine.toml",
