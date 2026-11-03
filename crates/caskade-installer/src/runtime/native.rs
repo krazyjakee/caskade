@@ -126,6 +126,12 @@ impl NativeRuntime {
         } else {
             Stdio::null()
         });
+        // A child's output is diagnostics, never the caller's: on stdout it
+        // would corrupt `caskade-install --json` (hdiutil prints its devices).
+        // Windows' GUI app may have no stderr handle to give, so there the
+        // child keeps inheriting.
+        #[cfg(unix)]
+        builder.stdout(Stdio::from(std::io::stderr()));
         #[cfg(unix)]
         std::os::unix::process::CommandExt::process_group(&mut builder, 0);
         #[cfg(windows)]

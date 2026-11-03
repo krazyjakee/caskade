@@ -420,8 +420,19 @@ async fn native_system_and_product_packages_delegate_and_clean_their_fixture_rec
         let plans = planner
             .plan(std::slice::from_ref(&node), &host, &Policy::default())
             .unwrap();
+        let selected = plans.selected.unwrap_or_else(|| {
+            panic!(
+                "no plan selected: {:?}; candidates {:?}",
+                plans.question,
+                plans
+                    .candidates
+                    .iter()
+                    .map(|candidate| (&candidate.handler, candidate.strategy))
+                    .collect::<Vec<_>>()
+            )
+        });
         assert_eq!(
-            plans.candidates[plans.selected.unwrap() as usize].strategy,
+            plans.candidates[selected as usize].strategy,
             Strategy::Delegate
         );
         let runtime = Arc::new(RootRuntime {

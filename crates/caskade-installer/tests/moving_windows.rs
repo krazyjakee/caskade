@@ -240,12 +240,12 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
             let mut planner = PlanEngine::new();
             planner.register(Box::new(InnoHandler::new())).unwrap();
             planner.register(Box::new(MsiHandler::new())).unwrap();
+            // detect() leaves the filesystem unmeasured (not writable), which
+            // rules out every candidate that writes the game folder.
+            let mut host = HostCaps::detect();
+            host.filesystem.writable = true;
             let plans = planner
-                .plan(
-                    std::slice::from_ref(&node),
-                    &HostCaps::detect(),
-                    &Policy::default(),
-                )
+                .plan(std::slice::from_ref(&node), &host, &Policy::default())
                 .unwrap();
             let candidate = plans
                 .candidates

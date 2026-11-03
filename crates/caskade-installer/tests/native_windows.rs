@@ -674,6 +674,8 @@ mod native {
             return;
         }
         for fixture in corpus() {
+            // Names the installer if one hangs until the runtime's timeout.
+            eprintln!("native silent install: {}", fixture.expected.id);
             let node = probe(&fixture);
             let code = product_code(&node);
             let custom = format!("Software\\CaskadeT7\\{}", fixture.expected.id);
