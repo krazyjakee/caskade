@@ -8,9 +8,10 @@ binary per crate. Local Cargo incremental compilation stays enabled.
 
 ## Pull requests and master
 
-The app, installer and discovery workflows run `scripts/ci-scope.py` from the
-trusted base commit before checking out a same-repository PR head. Fork guards
-still apply. The selector uses a merge-base diff with renames expanded into
+The app, installer and discovery workflows (`.github/workflows/`, on
+GitHub-hosted runners) run `scripts/ci-scope.py` in a full-history checkout of
+the pull request. They run on the `pull_request` event with a read-only token and
+no secrets, so pull requests from forks get the same checks. The selector uses a merge-base diff with renames expanded into
 deleted/added paths, and derives transitive local dependencies from Cargo
 manifests, including target, build and dev dependencies.
 
@@ -31,8 +32,7 @@ configuring required checks.
 
 Every master push and manual run retains the full native, cross-target and
 console e2e checks. PRs can opt into console e2e with the `run-e2e` label, or
-both console e2e and packaging with `run-bundle`. Labels never override the
-fork restriction. Bundles run nightly at 04:17 UTC and on manual runs with the
+both console e2e and packaging with `run-bundle`. Bundles run nightly at 04:17 UTC and on manual runs with the
 `bundle` input enabled; ordinary master pushes no longer build deb/AppImage
 packages. Signed release builds on GitHub are unchanged.
 
@@ -41,12 +41,8 @@ once. The emulation fixture step prepares the helper and tests definitions and
 fixtures; the combined suite runs the core's emulation tests once, along with
 all other core tests.
 
-The self-hosted service reports Forgejo 12, which does not honor the
-`concurrency` block. The scope job also compares the event's head to the branch
-tip fetched at checkout and skips a queued run that has already been superseded.
-It does not stop an older run that has already passed that gate. The concurrency
-settings request PR cancellation on hosts supporting it (Forgejo 14+), while
-master runs remain uncancelled.
+Each workflow's `concurrency` block cancels a pull request's superseded run when
+a new commit arrives; master runs are never cancelled.
 
 Run the selector's regression tests with:
 

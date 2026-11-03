@@ -14,7 +14,6 @@
       "!crates",
       "!xtask",
       "!scripts",
-      "!.gitea",
       "!apps/desktop/src-tauri/gen",
       "!apps/desktop/src-tauri/icons",
       "!**/storybook-static",

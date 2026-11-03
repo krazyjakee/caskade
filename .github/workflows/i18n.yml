@@ -1,9 +1,8 @@
 name: i18n
-# The translation checks (`just i18n-check`, #220) for pull requests opened
-# on GitHub. The repo there is a public release mirror (docs/RELEASING.md),
-# so outside translators are likeliest to send their PO files there, and
-# Gitea's CI (.gitea/workflows/app.yml runs the same checks) never sees
-# them. Only these checks run here: no build, no secrets, a read-only token.
+# The translation checks (`just i18n-check`, #220) on their own, for pull
+# requests that touch only the catalogs, as outside translators' do: a
+# quicker answer than app.yml, which runs the same checks among the rest.
+# No build, no secrets, a read-only token.
 # Pushes to master run it too, which keeps a cache in master's scope: the
 # only one a pull request (from a fork too) can read.
 on:

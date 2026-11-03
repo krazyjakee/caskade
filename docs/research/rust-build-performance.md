@@ -103,9 +103,10 @@ need the other formats; none was identified in this repository's desktop flow.
 
 ### 2. Reduce the CI work per change
 
-The Gitea app workflow runs workspace Clippy, native tests, console e2e, Windows
-cross-Clippy and debug AppImage/deb packaging on every master push and trusted PR
-update. App, installer and discovery workflows have no path filters and all set
+At the time, the app workflow (on Gitea; GitHub Actions since #35) ran
+workspace Clippy, native tests, console e2e, Windows cross-Clippy and debug
+AppImage/deb packaging on every master push and trusted PR update. App,
+installer and discovery workflows had no path filters and all set
 `cancel-in-progress: false`.
 
 Use an affected-area gate that understands shared crates, lockfiles, manifests,

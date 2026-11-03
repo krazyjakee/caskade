@@ -6,7 +6,7 @@ name: discovery-nightly
 # crates/caskade-discovery/fuzz/README.md.
 on:
   schedule:
-    - cron: '17 1 * * *'
+    - cron: "17 1 * * *"
   workflow_dispatch:
 permissions:
   contents: read

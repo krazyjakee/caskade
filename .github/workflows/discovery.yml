@@ -22,7 +22,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 env:
   CARGO_TERM_COLOR: always
-  INSTA_UPDATE: 'no'
+  INSTA_UPDATE: "no"
 jobs:
   changes:
     runs-on: ubuntu-latest
@@ -62,7 +62,7 @@ jobs:
       # scripts/discovery-ci.py reads Cargo.toml with tomllib (3.11+).
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       # The Linux leg also lints the Windows GNU and Apple targets; bundled
       # SQLite builds for Windows with the MinGW compiler.
       - name: Windows GNU cross compiler
@@ -156,15 +156,15 @@ jobs:
       run:
         shell: bash
     env:
-      CASKADE_DISCOVERY_LIVE: '1'
-      CASKADE_TEST_NATIVE: '1'
+      CASKADE_DISCOVERY_LIVE: "1"
+      CASKADE_TEST_NATIVE: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - name: Rust toolchain
         run: |
           rustup toolchain install stable --profile minimal

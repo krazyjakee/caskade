@@ -42,7 +42,7 @@ pnpm workspace (`apps/*`, `packages/*`), with `just` wrappers for each command:
 - `just dev` / `pnpm tauri dev`: the desktop app with hot reload. Vite serves the UI at http://localhost:1420 (`strictPort`, so only one dev server can run).
 - `just web` / `pnpm dev`: the UI alone in a browser. The sidebar shows "Browser preview" because there is no core; views use mock fixtures when started with `VITE_CASKADE_FIXTURES=1`.
 - `pnpm typecheck`: `tsc --noEmit` in every package. TypeScript is 7.x. RTK's `tsc` filter misreads its output, so run it as `rtk proxy pnpm typecheck`.
-- `pnpm lint`: `biome check .`. `pnpm format` applies fixes. Biome covers only the web projects: it ignores `docs/`, `vendor/`, `crates/`, `xtask/`, `scripts/`, `.gitea/`, Tauri's `gen/` and icons, and the generated bindings.
+- `pnpm lint`: `biome check .`. `pnpm format` applies fixes. Biome covers only the web projects: it ignores `docs/`, `vendor/`, `crates/`, `xtask/`, `scripts/`, Tauri's `gen/` and icons, and the generated bindings.
 - `pnpm test`: Vitest (jsdom, Testing Library) in every package.
 - `pnpm build`: typecheck and production build of the UI.
 - Translations (`docs/translating.md`, `docs/localization.md`): `just i18n` extracts marked text into `locales/<domain>.pot` (`ui`, `app`, `core`) and merges it into each `locales/<lang>/<domain>.po` (needs GNU gettext); commit both with the change. `just i18n-check` (also in CI) fails on a stale template, a PO file `msgfmt --check` rejects or a translation that drops or changes a placeholder or tag, and prints each language's completion. `pnpm i18n:extract --add <lang>` starts a language; adding `locales/<lang>/*.po` is all it takes to ship one.

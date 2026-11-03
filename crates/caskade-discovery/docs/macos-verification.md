@@ -46,10 +46,10 @@ to #91; its tests and prefix adapter remain independent of these native paths.
 
 ## Runner setup and default proof
 
-Register the repository-scoped `caskade-macos` runner using [ci.md](ci.md).
-Provision the pinned Rust toolchain, cargo-nextest and Python; do not share a
-user's launcher database as a build cache. The existing discovery workflow's
-ordinary macOS matrix job runs all-feature fixture tests and emits JUnit.
+The discovery workflow's macOS leg runs on GitHub's hosted `macos-latest`
+runner ([ci.md](ci.md)) with the pinned Rust toolchain, cargo-nextest and
+Python; it runs the all-feature fixture tests and emits JUnit. Never share a
+user's launcher database as a build cache.
 No account sign-in, app installation or personal launcher inventory is required
 for this job.
 
