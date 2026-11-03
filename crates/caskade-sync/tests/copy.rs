@@ -192,6 +192,65 @@ async fn an_interrupted_copy_resumes_without_starting_over() {
     same_tree(&folder, &target);
 }
 
+#[tokio::test]
+async fn revoking_stops_a_transfer_part_way() {
+    let temp = tempfile::tempdir().unwrap();
+    let folder = temp.path().join("Hades");
+    let big = 48 * 1024 * 1024;
+    game(&folder, big);
+    let offering = CopyStore::open(&temp.path().join("send")).await.unwrap();
+    let gate = CopyGate::default();
+    let endpoint = sender(&offering, &gate).await;
+    let offered = offering
+        .offer(&folder, "copy/test", |_, _| {})
+        .await
+        .unwrap();
+    let receiving = CopyStore::open(&temp.path().join("receive")).await.unwrap();
+    let dialer = DirectDialer::bind(None, true).await.unwrap();
+    gate.allow(dialer.id(), &offered.root).unwrap();
+    let connection = dialer
+        .connect(endpoint.id(), &direct(&endpoint))
+        .await
+        .unwrap();
+    let (seen, mut first) = tokio::sync::watch::channel(0u64);
+    let fetch = {
+        let receiving = receiving.clone();
+        let root = offered.root.clone();
+        tokio::spawn(async move {
+            receiving
+                .fetch(connection, &root, "copy/in", move |bytes| {
+                    let _ = seen.send(bytes);
+                })
+                .await
+        })
+    };
+    tokio::time::timeout(
+        Duration::from_secs(30),
+        first.wait_for(|bytes| *bytes > 2 * 1024 * 1024),
+    )
+    .await
+    .unwrap()
+    .unwrap();
+    // Stopped: the transfer in flight ends, not just new ones.
+    gate.revoke(dialer.id(), &offered.root);
+    let stopped = tokio::time::timeout(Duration::from_secs(10), fetch)
+        .await
+        .expect("the transfer went on after the revoke")
+        .unwrap();
+    assert!(stopped.is_err());
+    assert!(receiving.local_bytes(&offered.root).await.unwrap() < offered.size);
+    // And it can't start again.
+    let connection = dialer.connect(endpoint.id(), &direct(&endpoint)).await;
+    if let Ok(connection) = connection {
+        assert!(
+            receiving
+                .fetch(connection, &offered.root, "copy/in", |_| {})
+                .await
+                .is_err()
+        );
+    }
+}
+
 #[test]
 fn names_never_leave_the_target() {
     let target = Path::new("/games/incoming");

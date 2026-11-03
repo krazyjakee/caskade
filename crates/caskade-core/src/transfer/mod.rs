@@ -294,6 +294,83 @@ impl Transfers {
     }
 }
 
+/// What one-off shares (#246) build on: the same store, gate and direct
+/// dialer as copies. Shares fetch into the send store, so this device's one
+/// provider serves what they have to the share's other recipients, gated
+/// per collection like copies.
+impl Transfers {
+    /// The store copies are offered from (and shares fetched into).
+    pub fn send_store(&self) -> CopyStore {
+        self.inner.sending.clone()
+    }
+
+    /// Offers `folder`'s files, kept under `tag` until released.
+    pub async fn offer_folder(
+        &self,
+        folder: &Path,
+        tag: &str,
+        progress: impl Fn(u64, u64) + Send,
+    ) -> Result<Offered> {
+        self.inner
+            .sending
+            .offer(folder, tag, progress)
+            .await
+            .map_err(sync_error)
+    }
+
+    /// Lets `peer` fetch the collection `root`.
+    pub fn allow(&self, peer: EndpointId, root: &str) -> Result<()> {
+        self.inner.gate.allow(peer, root).map_err(sync_error)
+    }
+
+    /// Stops `peer` fetching `root`, a transfer in flight included.
+    pub fn revoke(&self, peer: EndpointId, root: &str) {
+        self.inner.gate.revoke(peer, root);
+    }
+
+    /// Bytes of `root` sent to `peer` so far.
+    pub fn sent(&self, peer: EndpointId, root: &str) -> u64 {
+        self.inner.gate.sent(peer, root)
+    }
+
+    /// Fetches the collection `root` from `peer` at its direct `addrs`
+    /// (never through a relay) into the send store, under `tag`.
+    pub async fn fetch_direct(
+        &self,
+        peer: EndpointId,
+        addrs: &[std::net::SocketAddr],
+        root: &str,
+        tag: &str,
+        progress: impl FnMut(u64) + Send,
+    ) -> Result<()> {
+        let dialer = self.inner.devices.direct_dialer().await?;
+        let connection = tokio::time::timeout(DIAL_WAIT, dialer.connect(peer, addrs))
+            .await
+            .map_err(|_| Error::Invalid(crate::tr!("couldn't reach the other device directly")))?
+            .map_err(sync_error)?;
+        self.inner
+            .sending
+            .fetch(connection, root, tag, progress)
+            .await
+            .map_err(sync_error)
+    }
+
+    /// Writes the collection `root`'s files under `target`, from the send
+    /// store.
+    pub async fn export(&self, root: &str, target: &Path) -> Result<()> {
+        self.inner
+            .sending
+            .export(root, target)
+            .await
+            .map_err(sync_error)
+    }
+
+    /// Lets go of what `tag` kept in the send store.
+    pub async fn release(&self, tag: &str) -> Result<()> {
+        self.inner.sending.release(tag).await.map_err(sync_error)
+    }
+}
+
 /// `copy` sessions from paired devices: they ask for a release.
 struct Serve(Weak<Inner>);
 
@@ -328,7 +405,7 @@ impl Transfers {
                         .await
                     {
                         Ok(Ok(Message::Done)) => {
-                            self.sent(&entry, peer).await;
+                            self.withdraw(&entry, peer).await;
                             break;
                         }
                         Ok(Ok(_)) => continue,
@@ -557,7 +634,7 @@ impl Transfers {
         let (key, until) = (entry.to_owned(), OFFER_LIFETIME);
         tokio::spawn(async move {
             tokio::time::sleep(until).await;
-            this.sent(&key, peer).await;
+            this.withdraw(&key, peer).await;
         });
         session
             .writer()
@@ -575,7 +652,7 @@ impl Transfers {
 
     /// `peer` has release `entry`, or its offer ran out: withdrawn, and let
     /// go once nobody else is fetching it.
-    async fn sent(&self, entry: &str, peer: EndpointId) {
+    async fn withdraw(&self, entry: &str, peer: EndpointId) {
         let released = {
             let mut offers = self.inner.offers.lock().unwrap_or_else(|e| e.into_inner());
             let Some(offer) = offers.get_mut(entry) else {

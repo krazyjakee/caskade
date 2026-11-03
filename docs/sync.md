@@ -253,10 +253,10 @@ The admission (`devices/gate.rs`) is in memory:
 
 | Purpose | Admitted when |
 | --- | --- |
-| `sync`, `copy`, `forget` | The device is paired and presents its own grant |
+| `sync`, `copy`, `forget`, `stream` | The device is paired and presents its own grant |
 | `pair` with a grant | The grant is a pairing link offered here, unused and unexpired (spent now) |
 | `pair` without a grant | No other code pairing is in progress |
-| `share` | Never yet (#246) |
+| `share` | Whoever keeps the shares says so (`Devices::set_share_admission`, #246); a paired device's grant never opens one |
 
 `Devices::connect(device_id, purpose)` opens a connection to a paired device
 with its grant: what library sync (#230) and copies (#233) start from.

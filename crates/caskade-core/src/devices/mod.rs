@@ -20,6 +20,7 @@
 //! Pairing links live in memory: a restart invalidates links not used yet.
 
 mod gate;
+pub use gate::ShareAdmission;
 
 use std::collections::HashMap;
 use std::net::SocketAddr;
@@ -265,6 +266,8 @@ struct Inner {
     copy_handler: OnceLock<Arc<dyn Sessions>>,
     /// Where streaming (#267) takes `stream` sessions.
     stream_handler: OnceLock<Arc<dyn Sessions>>,
+    /// Where one-off shares (#246) take `share` sessions.
+    share_handler: OnceLock<Arc<dyn Sessions>>,
     /// Serves the folders offered to other devices (#233), bound with the
     /// endpoint.
     copy_provider: OnceLock<caskade_sync::copy::BlobsProtocol>,
@@ -360,6 +363,7 @@ impl Devices {
                 sync_handler: OnceLock::new(),
                 copy_handler: OnceLock::new(),
                 stream_handler: OnceLock::new(),
+                share_handler: OnceLock::new(),
                 copy_provider: OnceLock::new(),
                 dialer: tokio::sync::Mutex::new(None),
                 sync: Mutex::default(),
@@ -630,6 +634,39 @@ impl Devices {
     /// handing its pairing code to the host.
     pub fn set_stream_handler(&self, handler: Arc<dyn Sessions>) {
         let _ = self.inner.stream_handler.set(handler);
+    }
+
+    /// Who a `share` session admits (#246): a share's grant belongs to a
+    /// person, so whoever keeps the shares decides; the paired devices'
+    /// grants never open one.
+    pub fn set_share_admission(&self, admission: ShareAdmission) {
+        self.inner.gate.set_share_admission(admission);
+    }
+
+    /// Where `share` sessions go (#246).
+    pub fn set_share_handler(&self, handler: Arc<dyn Sessions>) {
+        let _ = self.inner.share_handler.set(handler);
+    }
+
+    /// Opens a connection for `purpose` to a device that isn't paired (a
+    /// share link's), at `addr`, presenting `grant` (#246).
+    pub async fn connect_to(
+        &self,
+        addr: EndpointAddr,
+        purpose: Purpose,
+        grant: Option<Grant>,
+    ) -> Result<Session> {
+        let endpoint = self.inner.endpoint()?;
+        endpoint
+            .connect(addr, purpose, grant)
+            .await
+            .map_err(|error| Error::Invalid(error.to_string()))
+    }
+
+    /// This device's address for a link: every local address, plus the
+    /// relay once there is one, waiting at most `wait` (#246).
+    pub async fn link_addr(&self, wait: Duration) -> Result<EndpointAddr> {
+        Ok(self.inner.endpoint()?.shareable_addr(wait).await)
     }
 
     /// Serves folders offered to other devices (#233). Set before the
@@ -1210,8 +1247,10 @@ impl Sessions for Handler {
                 Some(handler) => handler.opened(session).await,
                 None => session.end().await,
             },
-            // Shares come with #246.
-            _ => session.end().await,
+            Purpose::Share => match inner.share_handler.get() {
+                Some(handler) => handler.opened(session).await,
+                None => session.end().await,
+            },
         }
     }
 }

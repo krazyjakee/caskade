@@ -88,6 +88,9 @@ struct Job {
     hints: DiscoveryHints,
     /// What a copy from another device brings (#233).
     peer: Option<peer::PeerCopyTarget>,
+    /// Where that copy comes from, when not the app's own copies (a
+    /// share, #246).
+    peer_fetcher: Option<Arc<dyn peer::PeerFetcher>>,
 }
 
 /// A run's input, downloaded or read, and what installing it needs.
@@ -274,6 +277,7 @@ impl InstallService {
                 update,
                 hints,
                 peer: None,
+                peer_fetcher: None,
             },
         );
         self.publish(&snapshot);

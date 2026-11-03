@@ -118,6 +118,28 @@ impl InstallService {
         root_id: Option<String>,
     ) -> Result<JobSnapshot> {
         self.peer_fetcher()?;
+        self.queue_peer_copy(target, root_id, None).await
+    }
+
+    /// [`copy_from_device`](Self::copy_from_device), with the files from
+    /// `fetcher` (a share received from someone, #246): the same job,
+    /// waiting, resume, cancel and install. The job keeps `fetcher` for its
+    /// retries.
+    pub async fn copy_with(
+        &self,
+        fetcher: Arc<dyn PeerFetcher>,
+        target: PeerCopyTarget,
+        root_id: Option<String>,
+    ) -> Result<JobSnapshot> {
+        self.queue_peer_copy(target, root_id, Some(fetcher)).await
+    }
+
+    async fn queue_peer_copy(
+        &self,
+        target: PeerCopyTarget,
+        root_id: Option<String>,
+        fetcher: Option<Arc<dyn PeerFetcher>>,
+    ) -> Result<JobSnapshot> {
         let root = self.root(root_id.as_deref()).await?;
         let snapshot = JobSnapshot {
             phase: Some(JobPhase::Download),
@@ -131,6 +153,7 @@ impl InstallService {
         let cancel = self.add_job(snapshot.clone(), None, DiscoveryHints::default());
         if let Some(job) = lock(&self.inner.jobs).get_mut(&snapshot.id) {
             job.peer = Some(target);
+            job.peer_fetcher = fetcher;
         }
         self.spawn_peer_copy(snapshot.id.clone(), root, cancel);
         Ok(snapshot)
@@ -151,11 +174,14 @@ impl InstallService {
         root: StorageRoot,
         cancel: CancellationToken,
     ) -> Result<()> {
-        let fetcher = self.peer_fetcher()?;
-        let target = lock(&self.inner.jobs)
+        let (target, own) = lock(&self.inner.jobs)
             .get(id)
-            .and_then(|job| job.peer.clone())
+            .and_then(|job| Some((job.peer.clone()?, job.peer_fetcher.clone())))
             .ok_or_else(|| Error::Invalid(crate::tr!("unknown job")))?;
+        let fetcher = match own {
+            Some(fetcher) => fetcher,
+            None => self.peer_fetcher()?,
+        };
         let service = self.clone();
         let job = id.to_owned();
         let device = target.device_name.clone();

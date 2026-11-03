@@ -183,6 +183,13 @@ impl CopyStore {
         })
     }
 
+    /// The iroh-blobs store, for this crate's other transfers (shares'
+    /// swarm, #249).
+    #[allow(dead_code, reason = "used by shares' swarm (#249), coming next")]
+    pub(crate) fn blobs(&self) -> &FsStore {
+        &self.store
+    }
+
     /// Bytes of the collection `root` this store has, verified.
     pub async fn local_bytes(&self, root: &str) -> Result<u64> {
         let root = parse(root)?;
@@ -283,7 +290,9 @@ impl CopyStore {
             get_many: RequestMode::Disabled,
             push: RequestMode::Disabled,
             observe: ObserveMode::None,
-            throttle: ThrottleMode::None,
+            // Each chunk asks first, so a revoked collection stops at once,
+            // even part-way through a transfer.
+            throttle: ThrottleMode::Intercept,
         };
         let (events, receiver) = EventSender::channel(64, mask);
         tokio::spawn(gate.clone().serve(receiver));
@@ -306,6 +315,8 @@ pub struct CopyGate {
 struct GateState {
     allowed: HashMap<EndpointId, HashSet<Hash>>,
     connections: HashMap<u64, EndpointId>,
+    /// What each request in flight fetches: (connection, request) → root.
+    requests: HashMap<(u64, u64), Hash>,
     /// Bytes sent per device and collection.
     sent: HashMap<(EndpointId, Hash), u64>,
 }
@@ -360,6 +371,22 @@ impl CopyGate {
             .then_some(peer)
     }
 
+    /// Whether the request in flight may go on: its device still has its
+    /// collection.
+    fn still_allowed(&self, connection: u64, request: u64) -> bool {
+        let state = self.inner.lock().unwrap_or_else(|e| e.into_inner());
+        let (Some(peer), Some(root)) = (
+            state.connections.get(&connection),
+            state.requests.get(&(connection, request)),
+        ) else {
+            return false;
+        };
+        state
+            .allowed
+            .get(peer)
+            .is_some_and(|roots| roots.contains(root))
+    }
+
     fn count(&self, peer: EndpointId, root: Hash, bytes: u64) {
         let mut state = self.inner.lock().unwrap_or_else(|e| e.into_inner());
         *state.sent.entry((peer, root)).or_default() += bytes;
@@ -379,11 +406,20 @@ impl CopyGate {
                 }
                 ProviderMessage::ConnectionClosed(message) => {
                     let mut state = self.inner.lock().unwrap_or_else(|e| e.into_inner());
-                    state.connections.remove(&message.inner.connection_id);
+                    let connection = message.inner.connection_id;
+                    state.connections.remove(&connection);
+                    state.requests.retain(|(c, _), _| *c != connection);
                 }
                 ProviderMessage::GetRequestReceived(message) => {
                     let root = message.inner.request.hash;
                     let peer = self.grants(message.inner.connection_id, root);
+                    if peer.is_some() {
+                        let mut state = self.inner.lock().unwrap_or_else(|e| e.into_inner());
+                        state.requests.insert(
+                            (message.inner.connection_id, message.inner.request_id),
+                            root,
+                        );
+                    }
                     let answer = if peer.is_some() {
                         Ok(())
                     } else {
@@ -420,7 +456,14 @@ impl CopyGate {
                     message.tx.send(Err(AbortReason::Permission)).await.ok();
                 }
                 ProviderMessage::Throttle(message) => {
-                    message.tx.send(Ok(())).await.ok();
+                    let ok =
+                        self.still_allowed(message.inner.connection_id, message.inner.request_id);
+                    let answer = if ok {
+                        Ok(())
+                    } else {
+                        Err(AbortReason::Permission)
+                    };
+                    message.tx.send(answer).await.ok();
                 }
                 _ => {}
             }
