@@ -62,6 +62,8 @@ pub mod link;
 pub mod link_ticket;
 pub mod opening;
 pub mod pairing;
+pub mod share;
+pub mod swarm;
 
 pub use device::{DeviceInfo, DeviceKind, DeviceOs};
 pub use endpoint::{

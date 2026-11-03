@@ -185,7 +185,6 @@ impl CopyStore {
 
     /// The iroh-blobs store, for this crate's other transfers (shares'
     /// swarm, #249).
-    #[allow(dead_code, reason = "used by shares' swarm (#249), coming next")]
     pub(crate) fn blobs(&self) -> &FsStore {
         &self.store
     }
