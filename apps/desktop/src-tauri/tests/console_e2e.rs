@@ -108,7 +108,9 @@ press confirm
 wait-event game-started
 wait-event game-exited
 # Settings opens on General, its first tab: RB to Library Discovery, LB
-# back, then a switch in the panel to the right of the tabs.
+# back, then a switch in the panel to the right of the tabs. The panel has
+# two columns at this size: right to Reset to defaults, level with the tab,
+# down to the first rows, and left to Startup's first, the switch.
 seek-section nav.left sidebar
 seek nav.up Home
 seek nav.down Settings
@@ -121,7 +123,8 @@ press tab.prev
 wait-text Launch on system startup
 focus-has General
 press nav.right
-seek nav.down Launch on system startup
+press nav.down
+seek nav.left Launch on system startup
 press confirm
 wait-event settings-changed
 # And out of console mode.
