@@ -55,6 +55,9 @@ pub enum Purpose {
     Pair,
     /// A paired device saying it forgot this one.
     Forget,
+    /// Streaming between paired devices: a client hands its pairing code to
+    /// the host.
+    Stream,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

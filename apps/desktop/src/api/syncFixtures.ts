@@ -221,6 +221,25 @@ export function createSyncFixtureApi(): SyncFixtureApi {
       changed();
     },
     copies: async (gameId) => structuredClone(copies.get(gameId) ?? []),
+    copyHere: async (gameId, deviceId) => {
+      const copy = copies.get(gameId)?.find((c) => c.deviceId === deviceId);
+      if (!copy) throw new Error("that device has no copy of the game");
+      transfers = [
+        ...transfers,
+        {
+          id: `copy:${gameId}:${deviceId}`,
+          title: gameId,
+          deviceName: copy.deviceName,
+          direction: "incoming",
+          doneBytes: 0,
+          totalBytes: copy.sizeBytes ?? 0,
+          bytesPerSecond: 0,
+          link: copy.link,
+          state: copy.link === "relay" ? "waitingDirect" : "running",
+        },
+      ];
+      changed();
+    },
     setCopies: (gameId, next) => {
       copies.set(gameId, next);
       changed();

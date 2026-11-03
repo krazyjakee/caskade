@@ -76,6 +76,10 @@ pub enum Error {
     #[error("that isn't a Caskade pairing link")]
     NotALink,
 
+    /// A game copy couldn't go on (#233): its store, a file, the transfer.
+    #[error("the copy couldn't go on: {reason}")]
+    Copy { reason: String },
+
     /// The endpoint's accept loop didn't wind down cleanly.
     #[error("the sync endpoint did not shut down cleanly")]
     Shutdown {

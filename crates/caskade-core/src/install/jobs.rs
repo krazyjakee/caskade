@@ -15,6 +15,8 @@ pub enum JobKind {
     Verify,
     /// A newer release installed over a game (`crate::updates`).
     Update,
+    /// A game copied from another of the user's devices (#233).
+    PeerCopy,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]

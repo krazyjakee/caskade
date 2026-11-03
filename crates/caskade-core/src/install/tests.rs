@@ -658,6 +658,7 @@ async fn progress_bursts_are_throttled() {
             active: true,
             update: None,
             hints: Default::default(),
+            peer: None,
         },
     );
     let event = |phase, bytes, total_bytes, message: &str| JobEvent {

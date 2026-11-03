@@ -246,6 +246,23 @@ impl Session {
         self.grant.as_ref()
     }
 
+    /// The peer's IP addresses this connection knows (the ones it uses or
+    /// could): where a direct connection can reach it. A relay isn't one.
+    pub fn direct_addrs(&self) -> Vec<std::net::SocketAddr> {
+        let mut addrs: Vec<std::net::SocketAddr> = self
+            .connection
+            .paths()
+            .iter()
+            .filter_map(|path| match path.remote_addr() {
+                iroh::TransportAddr::Ip(addr) => Some(*addr),
+                _ => None,
+            })
+            .collect();
+        addrs.sort();
+        addrs.dedup();
+        addrs
+    }
+
     pub fn connection(&self) -> &Connection {
         &self.connection
     }

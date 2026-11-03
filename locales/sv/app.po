@@ -3054,9 +3054,17 @@ msgstr ""
 msgid "Copy a pairing link"
 msgstr ""
 
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "Copy to this computer"
+msgstr "Kopiera till den här datorn"
+
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Copying the library…"
 msgstr "Kopierar biblioteket…"
+
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "Copying to this computer. Follow it in Activity."
+msgstr "Kopierar till den här datorn. Följ det under Aktivitet."
 
 #: apps/desktop/src/views/library/LibraryDrop.tsx
 msgid "Could not add the dropped file."

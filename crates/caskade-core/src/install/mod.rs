@@ -17,6 +17,7 @@ pub mod hooks;
 mod jobs;
 mod mapping;
 mod operations;
+mod peer;
 mod recovery;
 mod remove;
 mod rescan;
@@ -74,6 +75,8 @@ impl Default for InstallOptions {
     }
 }
 
+pub use peer::{FetchFailure, Fetched, PeerCopyTarget, PeerFetcher, PeerProgress};
+
 struct Job {
     snapshot: JobSnapshot,
     cancel: CancellationToken,
@@ -83,6 +86,8 @@ struct Job {
     update: Option<update::UpdateTarget>,
     /// What the caller knew about the game; a retry keeps it.
     hints: DiscoveryHints,
+    /// What a copy from another device brings (#233).
+    peer: Option<peer::PeerCopyTarget>,
 }
 
 /// A run's input, downloaded or read, and what installing it needs.
@@ -111,6 +116,8 @@ struct Inner {
     jobs: Mutex<BTreeMap<String, Job>>,
     /// Failure repeats and automatic retries (#158).
     recovery: recovery::State,
+    /// Where copies from other devices come from (#233).
+    peer_fetcher: Mutex<Option<Arc<dyn peer::PeerFetcher>>>,
 }
 
 /// The install queues; cheap to clone.
@@ -137,6 +144,7 @@ impl InstallService {
                 pending_roms: Mutex::default(),
                 tracker: Mutex::default(),
                 recovery: recovery::State::default(),
+                peer_fetcher: Mutex::new(None),
             }),
         }
     }
@@ -265,6 +273,7 @@ impl InstallService {
                 active: true,
                 update,
                 hints,
+                peer: None,
             },
         );
         self.publish(&snapshot);
@@ -292,7 +301,16 @@ impl InstallService {
             self,
             &ready.prepared,
             &input,
-            ready.preferences.source_handling,
+            // A copy's received folder is Caskade's own, never the user's to
+            // keep or bin (#233).
+            if lock(&self.inner.jobs)
+                .get(id)
+                .is_some_and(|job| job.peer.is_some())
+            {
+                crate::settings::SourceHandling::Delete
+            } else {
+                ready.preferences.source_handling
+            },
             cancel.clone(),
         )
         .await?;
@@ -463,8 +481,21 @@ impl InstallService {
                 let (cleanup, cancel) = retirement;
                 let manifest = InstallManifest::read(&root.path.join(&installed.dir))
                     .map_err(|error| Error::Invalid(error.to_string()))?;
-                let (game, entry) = from_manifest(&root.id, &installed.dir, &manifest)?;
-                let game = store.upsert_game(&game).await?;
+                let (game, mut entry) = from_manifest(&root.id, &installed.dir, &manifest)?;
+                // A copy from another device is a release of the game the
+                // user copied, while it's still here (#233).
+                let copied = lock(&self.inner.jobs)
+                    .get(id)
+                    .and_then(|job| job.peer.as_ref().map(|peer| peer.game_id.clone()));
+                let existing = match copied {
+                    Some(game_id) => store.game(&game_id).await?,
+                    None => None,
+                };
+                let game = match existing {
+                    Some(existing) => existing,
+                    None => store.upsert_game(&game).await?,
+                };
+                entry.game_id = game.id.clone();
                 let entry = store.upsert_entry(&entry).await?;
                 self.track(&entry.id, &manifest, download).await;
                 let cleanup_warning = match cleanup {

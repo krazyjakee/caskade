@@ -149,7 +149,10 @@ impl InstallService {
                 .get_mut(id)
                 .ok_or_else(|| Error::Invalid(crate::tr!("unknown job")))?;
             if job.active
-                || !matches!(job.snapshot.kind, JobKind::Install | JobKind::Update)
+                || !matches!(
+                    job.snapshot.kind,
+                    JobKind::Install | JobKind::Update | JobKind::PeerCopy
+                )
                 || revision.is_some_and(|r| r != job.snapshot.revision)
             {
                 return Err(Error::Invalid(crate::tr!(
@@ -178,6 +181,9 @@ impl InstallService {
         self.publish(&snapshot);
         if snapshot.kind == JobKind::Update {
             self.spawn_update(id.to_owned(), snapshot.input.clone(), root, cancel);
+        } else if snapshot.kind == JobKind::PeerCopy {
+            // Again from the device: what arrived before stays.
+            self.spawn_peer_copy(id.to_owned(), root, cancel);
         } else {
             self.spawn_install(id.to_owned(), snapshot.input.clone(), root, cancel);
         }
@@ -264,6 +270,7 @@ impl InstallService {
                 JobKind::Fetch => crate::tr!("Downloading game"),
                 JobKind::Move => crate::tr!("Moving game"),
                 JobKind::Update => crate::tr!("Updating game"),
+                JobKind::PeerCopy => crate::tr!("Copying game"),
             };
             let _activity = caskade_jobs::global().activity(label);
             let result = operation(service.clone(), id.clone(), cancel.clone()).await;
@@ -272,6 +279,7 @@ impl InstallService {
         snapshot
     }
     pub async fn uninstall(&self, entry_id: String, launch: LaunchService) -> Result<JobSnapshot> {
+        self.not_sending(&entry_id)?;
         let (entry, root, game) = self.managed_entry(&entry_id).await?;
         let lease = launch
             .try_game_lease(&entry.game_id)
@@ -429,6 +437,7 @@ impl InstallService {
         target_root_id: String,
         storage: crate::storage::StorageService,
     ) -> Result<JobSnapshot> {
+        self.not_sending(&entry_id)?;
         let (entry, _, from) = self.managed_entry(&entry_id).await?;
         self.root(Some(&target_root_id)).await?;
         Ok(self.queue_operation(

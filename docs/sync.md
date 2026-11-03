@@ -577,6 +577,50 @@ and the game menu's Your devices section show them; peer entries stay out of
 the page's releases. Both only tell for now: copying here is #233, and waking
 a device or playing there is #234.
 
+### Copying a game from another device
+
+Copy to this computer (#233, the On your other devices panel; command
+`game_copy_here`) brings a game from a device that has it as a
+Caskade-managed install here: an `InstallService` job of kind `peerCopy`, in
+Activity, cancellable, retried from where it stopped (`install::peer`).
+
+1. The receiver opens a `copy` session (a paired device's grant) and asks for
+   the release by its entry id there (`transfer`).
+2. The sender finds the release's folder: a managed install, or a folder of its
+   own with a program or emulator launch. A launcher's install is refused with
+   the reason ("install it from the store there"). It adds every file,
+   referenced where it is, to an iroh-blobs collection named by relative paths
+   (`caskade_sync::copy::CopyStore`, `<cache>/copies/send`; only BLAKE3
+   outboards are stored), saying how far it got, and offers the root hash, size,
+   title, the program relative to the folder and whether it's a Windows build.
+   Never a path or arguments. The offer is kept for six hours, so a copy that
+   comes back resumes without the files being read again; while it's being
+   sent, the release can't be moved or uninstalled.
+3. Its iroh-blobs provider serves only paired devices it offered something,
+   and only those collections (`CopyGate`: connections and get requests are
+   intercepted; get-many, push and observe are refused).
+4. The receiver checks there's room (what's still to come in the cache, and
+   the install in the root: twice the game on one disk), then pulls the
+   collection over a `DirectDialer`: a second endpoint with this device's key
+   and no relay transport, to the sender's direct addresses. Game files can't
+   pass through a relay. While only a relay reaches the sender, or it can't be
+   reached, the job waits and tries again ("Only a relay reaches …"), and what
+   arrived stays verified in `<cache>/copies/receive/store`.
+5. The files are exported to `<cache>/copies/receive/incoming/<job>/` (the
+   portable installer takes a folder outside the storage root) and installed
+   from there like a dropped game folder, with the sender's title and program
+   as hints: a managed install with a `caskade-install` id of its own, on the
+   game that was copied, its program relative to its folder and its runtime
+   as the files say (a Windows build runs through umu/Proton on Linux). The
+   staging folder goes afterwards, whatever the Installer's source setting
+   says.
+
+Settings → Devices lists copies going on both ways (`devices_transfers`,
+refreshed every two seconds while there are any). On loopback, a release build
+moves 256 MiB in 0.62 s (432 MB/s; the offer took 0.19 s):
+`cargo test --release -p caskade-sync --test it copy::loopback_throughput --
+--ignored --nocapture`. A relay moves about 1 MB/s.
+
 ### The default admin
 
 Each library starts with a default admin, "Player" (migration 0014). Until
@@ -860,3 +904,20 @@ Results:
 | Date | Machines | Steps passed | Notes |
 | --- | --- | --- | --- |
 | — | — | — | Not run yet: needs two machines. Library sync (#230) is in place. |
+
+### Copying a game (#233)
+
+1. On a Windows machine, add a Windows game by hand (Add game → Add a game on
+   this computer…) from a folder of its own.
+2. On a Linux machine paired with it, open the game's page: On your other
+   devices shows the Windows machine. Press Copy to this computer.
+3. Mid-copy, unplug the network cable (or turn Wi-Fi off) on either machine,
+   wait, plug it back in: the job in Activity waits ("Waiting for …"), then
+   goes on from where it was, not from zero.
+4. When it finishes, Play: the game starts through Proton.
+5. Copy a large game (tens of GB) over the local network and record the
+   speed against the disks' and the network's.
+
+| Date | Machines | Steps passed | Speed | Notes |
+| --- | --- | --- | --- | --- |
+| — | — | — | — | Not run yet: needs a Windows and a Linux machine. Loopback: 432 MB/s. |

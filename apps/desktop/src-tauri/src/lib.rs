@@ -678,6 +678,21 @@ pub fn run() {
                 std::sync::Arc::new(caskade_core::devices::Keychain),
             );
             devices.set_settings(settings.clone());
+            // Copies of games between devices (#233): served with the
+            // endpoint, so set up before it starts.
+            match tauri::async_runtime::block_on(caskade_core::transfer::Transfers::new(
+                store.clone(),
+                devices.clone(),
+                &setup_paths.cache,
+            )) {
+                Ok(transfers) => {
+                    if let Some(install) = app.try_state::<caskade_core::install::InstallService>() {
+                        install.set_peer_fetcher(std::sync::Arc::new(transfers.clone()));
+                    }
+                    app.manage(transfers);
+                }
+                Err(error) => tracing::warn!(%error, "copies between devices unavailable"),
+            }
             // Library sync with paired devices (#228–#230), in the background.
             let sync = caskade_core::sync::SyncService::new(store.clone(), devices.clone());
             sync.set_settings(settings.clone());

@@ -282,6 +282,7 @@ msgstr ""
 #: crates/caskade-core/src/install/downloads.rs
 #: crates/caskade-core/src/install/mod.rs
 #: crates/caskade-core/src/install/operations.rs
+#: crates/caskade-core/src/install/peer.rs
 #: crates/caskade-core/src/install/update.rs
 #: crates/caskade-core/src/managed/download.rs
 #: crates/caskade-core/src/managed/flatpak.rs
@@ -790,6 +791,10 @@ msgstr ""
 
 #: crates/caskade-core/src/devices/mod.rs
 msgid "couldn't reach the other device"
+msgstr ""
+
+#: crates/caskade-core/src/devices/mod.rs
+msgid "this device has no identity to connect with"
 msgstr ""
 
 #: crates/caskade-core/src/devices/mod.rs
@@ -1786,6 +1791,7 @@ msgid "question changed; refresh the job before answering"
 msgstr ""
 
 #: crates/caskade-core/src/install/operations.rs
+#: crates/caskade-core/src/install/peer.rs
 #: crates/caskade-core/src/install/recovery.rs
 #: apps/desktop/src-tauri/src/commands/install.rs
 msgid "unknown job"
@@ -1854,6 +1860,11 @@ msgid "Updating game"
 msgstr ""
 
 #: crates/caskade-core/src/install/operations.rs
+#: crates/caskade-core/src/install/peer.rs
+msgid "Copying game"
+msgstr ""
+
+#: crates/caskade-core/src/install/operations.rs
 #: crates/caskade-core/src/install/remove.rs
 #: crates/caskade-core/src/install/update.rs
 msgid "game has an open play session"
@@ -1881,6 +1892,22 @@ msgstr ""
 
 #: crates/caskade-core/src/install/operations.rs
 msgid "managed directory escapes its root"
+msgstr ""
+
+#: crates/caskade-core/src/install/peer.rs
+msgid "copies between devices aren't available"
+msgstr ""
+
+#: crates/caskade-core/src/install/peer.rs
+msgid "the game is being copied to another device; wait for it to finish or cancel it there"
+msgstr ""
+
+#: crates/caskade-core/src/install/peer.rs
+msgid "{device} is getting it ready"
+msgstr ""
+
+#: crates/caskade-core/src/install/peer.rs
+msgid "From {device}"
 msgstr ""
 
 #: crates/caskade-core/src/install/recovery.rs
@@ -2679,6 +2706,10 @@ msgstr ""
 
 #: crates/caskade-core/src/notifications/service.rs
 msgid "{game} couldn't check"
+msgstr ""
+
+#: crates/caskade-core/src/notifications/service.rs
+msgid "{game} couldn't be copied"
 msgstr ""
 
 #: crates/caskade-core/src/paths.rs
@@ -4044,6 +4075,46 @@ msgstr ""
 msgid "theme {id} can't be applied: it is invalid"
 msgstr ""
 
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "that game isn't installed on this device"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "the game isn't fully installed on this device"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "the game's storage isn't available"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "it starts through its store's launcher here; install it from the store there"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "the game's folder isn't there"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "that isn't a device"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "Waiting for {device} to be in reach"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "there isn't enough room for the copy: {short} more bytes are needed"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "Only a relay reaches {device}: the copy waits for a direct connection"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "{device} can't be reached directly yet: the copy waits for a direct connection"
+msgstr ""
+
 #: crates/caskade-core/src/updates/github.rs
 msgid "GitHub's address can't have a path"
 msgstr ""
@@ -4216,6 +4287,14 @@ msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/console.rs
 msgid "console mode isn't ready yet"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/copies.rs
+msgid "that device has no copy of the game"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/copies.rs
+msgid "that device isn't paired"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/emulation.rs

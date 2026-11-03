@@ -36,6 +36,7 @@ tracing = "0.1"
 
 [dev-dependencies]
 caskade-sync = { path = ".", features = ["test-utils"] }
+tempfile = "=3.27.0"
 iroh = "=1.0.3"
 iroh-blobs = { version = "=0.103.1", default-features = false, features = ["fs-store"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time"] }

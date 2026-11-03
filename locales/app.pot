@@ -3016,8 +3016,16 @@ msgstr ""
 msgid "Copy a pairing link"
 msgstr ""
 
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "Copy to this computer"
+msgstr ""
+
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Copying the library…"
+msgstr ""
+
+#: apps/desktop/src/views/game/OtherDevices.tsx
+msgid "Copying to this computer. Follow it in Activity."
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryDrop.tsx

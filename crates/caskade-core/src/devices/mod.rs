@@ -261,6 +261,16 @@ struct Inner {
     binding: tokio::sync::Mutex<()>,
     /// Where library sync (#230) takes `sync` sessions.
     sync_handler: OnceLock<Arc<dyn Sessions>>,
+    /// Where copies of games (#233) take `copy` sessions.
+    copy_handler: OnceLock<Arc<dyn Sessions>>,
+    /// Where streaming (#267) takes `stream` sessions.
+    stream_handler: OnceLock<Arc<dyn Sessions>>,
+    /// Serves the folders offered to other devices (#233), bound with the
+    /// endpoint.
+    copy_provider: OnceLock<caskade_sync::copy::BlobsProtocol>,
+    /// Pulls game files with no relay transport (#233), for the current
+    /// identity.
+    dialer: tokio::sync::Mutex<Option<(EndpointId, caskade_sync::copy::DirectDialer)>>,
     /// Each device's sync, as library sync reports it.
     sync: Mutex<HashMap<String, DeviceSync>>,
     /// Paired devices that came into reach (found on this network).
@@ -348,6 +358,10 @@ impl Devices {
                 revision: watch::channel(0).0,
                 binding: tokio::sync::Mutex::new(()),
                 sync_handler: OnceLock::new(),
+                copy_handler: OnceLock::new(),
+                stream_handler: OnceLock::new(),
+                copy_provider: OnceLock::new(),
+                dialer: tokio::sync::Mutex::new(None),
                 sync: Mutex::default(),
                 reachable: tokio::sync::broadcast::channel(32).0,
             }),
@@ -607,6 +621,49 @@ impl Devices {
         let _ = self.inner.sync_handler.set(handler);
     }
 
+    /// Where `copy` sessions from paired devices go (#233).
+    pub fn set_copy_handler(&self, handler: Arc<dyn Sessions>) {
+        let _ = self.inner.copy_handler.set(handler);
+    }
+
+    /// Where `stream` sessions from paired devices go (#267): a client
+    /// handing its pairing code to the host.
+    pub fn set_stream_handler(&self, handler: Arc<dyn Sessions>) {
+        let _ = self.inner.stream_handler.set(handler);
+    }
+
+    /// Serves folders offered to other devices (#233). Set before the
+    /// endpoint starts: its protocols are fixed when it binds.
+    pub fn set_copy_provider(&self, provider: caskade_sync::copy::BlobsProtocol) {
+        let _ = self.inner.copy_provider.set(provider);
+    }
+
+    /// An endpoint with this device's key and no relay transport, for
+    /// pulling game files (#233): none can pass through a relay.
+    pub async fn direct_dialer(&self) -> Result<caskade_sync::copy::DirectDialer> {
+        let key = self.inner.lock().key.clone();
+        let Some(key) = key else {
+            return Err(Error::Invalid(crate::tr!(
+                "this device has no identity to connect with"
+            )));
+        };
+        let mut dialer = self.inner.dialer.lock().await;
+        if let Some((id, dialer)) = dialer.as_ref()
+            && *id == key.id()
+        {
+            return Ok(dialer.clone());
+        }
+        let loopback = matches!(
+            self.inner.reach.as_ref().map(|reach| &reach.ip),
+            Some(caskade_sync::Ip::Loopback { .. })
+        );
+        let bound = caskade_sync::copy::DirectDialer::bind(Some(&key), loopback)
+            .await
+            .map_err(|error| Error::Invalid(error.to_string()))?;
+        *dialer = Some((key.id(), bound.clone()));
+        Ok(bound)
+    }
+
     /// Records how sync with a device is going, for the status.
     pub fn set_sync_state(&self, device_id: &str, sync: DeviceSync) {
         let changed = {
@@ -810,6 +867,7 @@ impl Inner {
             identity: Some(identity),
             reach,
             device: self.me().await,
+            blobs: self.copy_provider.get().cloned(),
             ..Config::default()
         };
         let handler = Arc::new(Handler(Arc::downgrade(self)));
@@ -1144,7 +1202,15 @@ impl Sessions for Handler {
                 Some(handler) => handler.opened(session).await,
                 None => session.end().await,
             },
-            // Copies come with #233.
+            Purpose::Copy => match inner.copy_handler.get() {
+                Some(handler) => handler.opened(session).await,
+                None => session.end().await,
+            },
+            Purpose::Stream => match inner.stream_handler.get() {
+                Some(handler) => handler.opened(session).await,
+                None => session.end().await,
+            },
+            // Shares come with #246.
             _ => session.end().await,
         }
     }

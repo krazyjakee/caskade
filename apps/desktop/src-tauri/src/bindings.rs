@@ -261,6 +261,8 @@ pub fn builder() -> Builder<tauri::Wry> {
             crate::commands::torrent_links::torrent_links_choose,
             crate::commands::sync::devices_status,
             crate::commands::sync::game_other_devices,
+            crate::commands::copies::game_copy_here,
+            crate::commands::copies::devices_transfers,
             crate::commands::sync::devices_rename,
             crate::commands::sync::devices_set_kind,
             crate::commands::sync::devices_pair_nearby,

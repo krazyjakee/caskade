@@ -50,6 +50,7 @@
 //! shipped with in `Cargo.lock`. Mismatched generations fail at resolve time
 //! with an `ed25519-dalek` error that never names iroh.
 
+pub mod copy;
 pub mod device;
 pub mod endpoint;
 pub mod error;

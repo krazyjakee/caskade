@@ -13,6 +13,7 @@ pub mod backup;
 pub mod browse;
 pub mod collections;
 pub mod console;
+pub mod copies;
 pub mod discovery;
 pub mod emulation;
 pub mod emulator_setup;

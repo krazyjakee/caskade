@@ -47,6 +47,8 @@ pub mod sync;
 pub mod system_stats;
 pub mod themes;
 pub mod tracking;
+#[cfg(feature = "net")]
+pub mod transfer;
 pub mod updates;
 pub mod web;
 

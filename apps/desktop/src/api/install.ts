@@ -102,7 +102,8 @@ export function mergeJobs(current: JobSnapshot[] = [], incoming: JobSnapshot[]):
 }
 export const isActiveJob = (job: JobSnapshot) =>
   job.status === "running" || job.status === "queued" || job.status === "needs_user";
-/** A failed or cancelled install or update can run again. */
+/** A failed or cancelled install, update or copy from another device can
+ * run again; a copy goes on from what arrived (#233). */
 export const canRetry = (job: JobSnapshot) =>
   (job.status === "failed" || job.status === "cancelled") &&
-  (job.kind === "install" || job.kind === "update");
+  (job.kind === "install" || job.kind === "update" || job.kind === "peerCopy");

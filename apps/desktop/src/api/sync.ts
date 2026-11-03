@@ -94,6 +94,9 @@ export interface SyncApi {
   syncNow(deviceId: string): Promise<void>;
   /** A game's copies on the other devices, best reached first. */
   copies(gameId: string): Promise<PeerCopy[]>;
+  /** Copies a game from another device to this computer: an install job
+   * in Activity (#233). */
+  copyHere(gameId: string, deviceId: string): Promise<void>;
   /** After the keychain lost this device's key: a new identity. */
   createIdentity(): Promise<void>;
   retryIdentity(): Promise<void>;
@@ -122,9 +125,11 @@ export const nativeSyncApi: SyncApi = {
   forget: (id) => unwrap(commands.devicesForget(id)).then(nothing),
   syncNow: (id) => unwrap(commands.devicesSyncNow(id)).then(nothing),
   copies: (gameId) => unwrap(commands.gameOtherDevices(gameId)),
+  copyHere: (gameId, deviceId) =>
+    unwrap(commands.gameCopyHere(gameId, deviceId, null)).then(nothing),
   createIdentity: () => unwrap(commands.devicesCreateIdentity()).then(nothing),
   retryIdentity: () => unwrap(commands.devicesRetryIdentity()).then(nothing),
-  transfers: async () => [],
+  transfers: () => unwrap(commands.devicesTransfers()),
   shares: async () => [],
   subscribe: (listener) => {
     const changes = effectSubscription(events.devicesChanged.listen, () => listener());
@@ -181,7 +186,17 @@ function useSyncQuery<T>(key: readonly unknown[], fetch: (api: SyncApi) => Promi
 
 export const useSyncStatus = () => useSyncQuery(["status"], (api) => api.status());
 export const useOpenedLink = () => useSyncQuery(["opened"], (api) => api.openedLink());
-export const useTransfers = () => useSyncQuery(["transfers"], (api) => api.transfers());
+export function useTransfers() {
+  const api = useSyncApi();
+  useSyncRefresh(api);
+  // Progress moves on its own: refreshed while copies go on.
+  return useQuery({
+    queryKey: [...syncKey, "transfers"],
+    queryFn: () => api.transfers(),
+    retry: false,
+    refetchInterval: (query) => ((query.state.data?.length ?? 0) > 0 ? 2000 : false),
+  });
+}
 export const useShares = () => useSyncQuery(["shares"], (api) => api.shares());
 export const usePeerCopies = (gameId: string) =>
   useSyncQuery(["copies", gameId], (api) => api.copies(gameId));

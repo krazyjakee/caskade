@@ -423,7 +423,7 @@ export function GameView({
                 primary={!game.entries.some(launchable)}
               />
             )}
-            {!running && <OtherDevices gameId={game.id} />}
+            {!running && <OtherDevices gameId={game.id} primary={!game.entries.some(launchable)} />}
             {edit && editable && (
               <UiButton
                 data-part="edit"

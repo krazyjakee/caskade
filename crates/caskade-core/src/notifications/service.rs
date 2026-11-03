@@ -343,6 +343,7 @@ impl Notifications {
                     JobKind::Uninstall => msg!("{game} couldn't uninstall", game = game),
                     JobKind::Move => msg!("{game} couldn't move", game = game),
                     JobKind::Verify => msg!("{game} couldn't check", game = game),
+                    JobKind::PeerCopy => msg!("{game} couldn't be copied", game = game),
                 };
                 // The classified failure says why in the language shown;
                 // other jobs' errors stay as they came.

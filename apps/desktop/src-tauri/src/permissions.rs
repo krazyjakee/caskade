@@ -303,6 +303,8 @@ pub fn access(command: &str) -> Option<Access> {
         | "game_actions_order"
         // Installing an owned game through its launcher (#170).
         | "owned_install"
+        // Copying a game from another of the user's devices (#233).
+        | "game_copy_here"
         | "game_action_settings_save"
         // Adding a game by hand: in effect what an install adds (#174).
         | "manual_game_add" => Install,
@@ -331,6 +333,7 @@ pub fn access(command: &str) -> Option<Access> {
         // is an admin's (pairing hands another device the library).
         "devices_status"
         | "game_other_devices"
+        | "devices_transfers"
         | "devices_opened_link"
         | "devices_dismiss_opened_link"
         | "devices_sync_now" => SignedIn,

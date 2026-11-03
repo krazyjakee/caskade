@@ -759,6 +759,13 @@ export const commands = {
 	 *  it's reached, the size, and whether the copy could come here.
 	 */
 	gameOtherDevices: (gameId: string) => typedError<PeerCopy_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("game_other_devices", { gameId })),
+	/**
+	 *  Copies `game_id` from `device_id` to this computer, into the storage
+	 *  root `root_id` (the default when absent), as an install job.
+	 */
+	gameCopyHere: (gameId: string, deviceId: string, rootId: string | null) => typedError<JobSnapshot_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_copy_here", { gameId, deviceId, rootId })),
+	/**  Copies going on to and from this device. */
+	devicesTransfers: () => typedError<TransferView[], ErrorReport_Serialize>(__TAURI_INVOKE("devices_transfers")),
 	/**  Renames this device; an empty name goes back to the host name. */
 	devicesRename: (name: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_rename", { name })),
 	devicesSetKind: (kind: DeviceKind) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("devices_set_kind", { kind })),
@@ -5035,7 +5042,9 @@ export type JobChanged_Serialize = JobSnapshot_Serialize;
 
 export type JobKind = "install" | "uninstall" | "move" | "fetch" | "verify" | 
 /**  A newer release installed over a game (`crate::updates`). */
-"update";
+"update" | 
+/**  A game copied from another of the user's devices (#233). */
+"peerCopy";
 
 export type JobPhase = "download" | "install" | "move";
 
@@ -9250,6 +9259,34 @@ export type TrackingHint_Serialize = {
 
 /**  Explicit emulator tracking; ordinary games retain automatic path/ancestry hints. */
 export type TrackingMode = "automatic" | "process_tree" | "original_process" | "folder" | "process_name";
+
+/**  Which way a copy goes. */
+export type TransferDirection = 
+/**  To this device. */
+"incoming" | 
+/**  To another device. */
+"outgoing";
+
+/**  How a copy is going. */
+export type TransferState = "running" | 
+/**
+ *  Only a relay reaches the device: game files wait for a direct
+ *  connection.
+ */
+"waitingDirect";
+
+/**  A copy between this device and another, as the app shows it. */
+export type TransferView = {
+	id: string,
+	title: string,
+	deviceName: string,
+	direction: TransferDirection,
+	doneBytes: number,
+	totalBytes: number,
+	bytesPerSecond: number,
+	link: DeviceLink,
+	state: TransferState,
+};
 
 export type UiContribution = UiContribution_Serialize | UiContribution_Deserialize;
 

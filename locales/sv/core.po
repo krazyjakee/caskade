@@ -283,6 +283,7 @@ msgstr "nedladdningsservern svarade {status}"
 #: crates/caskade-core/src/install/downloads.rs
 #: crates/caskade-core/src/install/mod.rs
 #: crates/caskade-core/src/install/operations.rs
+#: crates/caskade-core/src/install/peer.rs
 #: crates/caskade-core/src/install/update.rs
 #: crates/caskade-core/src/managed/download.rs
 #: crates/caskade-core/src/managed/flatpak.rs
@@ -792,6 +793,10 @@ msgstr ""
 #: crates/caskade-core/src/devices/mod.rs
 msgid "couldn't reach the other device"
 msgstr ""
+
+#: crates/caskade-core/src/devices/mod.rs
+msgid "this device has no identity to connect with"
+msgstr "den här enheten har ingen identitet att ansluta med"
 
 #: crates/caskade-core/src/devices/mod.rs
 msgid "sync isn't ready on this device yet"
@@ -1788,6 +1793,7 @@ msgid "question changed; refresh the job before answering"
 msgstr "frågan har ändrats; uppdatera jobbet innan du svarar"
 
 #: crates/caskade-core/src/install/operations.rs
+#: crates/caskade-core/src/install/peer.rs
 #: crates/caskade-core/src/install/recovery.rs
 #: apps/desktop/src-tauri/src/commands/install.rs
 msgid "unknown job"
@@ -1856,6 +1862,11 @@ msgid "Updating game"
 msgstr "Uppdaterar spel"
 
 #: crates/caskade-core/src/install/operations.rs
+#: crates/caskade-core/src/install/peer.rs
+msgid "Copying game"
+msgstr "Kopierar spel"
+
+#: crates/caskade-core/src/install/operations.rs
 #: crates/caskade-core/src/install/remove.rs
 #: crates/caskade-core/src/install/update.rs
 msgid "game has an open play session"
@@ -1884,6 +1895,22 @@ msgstr "posten är inte en Caskade-installation"
 #: crates/caskade-core/src/install/operations.rs
 msgid "managed directory escapes its root"
 msgstr "den hanterade mappen hamnar utanför sin rot"
+
+#: crates/caskade-core/src/install/peer.rs
+msgid "copies between devices aren't available"
+msgstr "kopior mellan enheter är inte tillgängliga"
+
+#: crates/caskade-core/src/install/peer.rs
+msgid "the game is being copied to another device; wait for it to finish or cancel it there"
+msgstr "spelet kopieras till en annan enhet; vänta tills det är klart eller avbryt det där"
+
+#: crates/caskade-core/src/install/peer.rs
+msgid "{device} is getting it ready"
+msgstr "{device} gör det klart"
+
+#: crates/caskade-core/src/install/peer.rs
+msgid "From {device}"
+msgstr "Från {device}"
 
 #: crates/caskade-core/src/install/recovery.rs
 msgid "only a failed or cancelled install or update can recover"
@@ -2682,6 +2709,10 @@ msgstr "{game} kunde inte flyttas"
 #: crates/caskade-core/src/notifications/service.rs
 msgid "{game} couldn't check"
 msgstr "{game} kunde inte kontrolleras"
+
+#: crates/caskade-core/src/notifications/service.rs
+msgid "{game} couldn't be copied"
+msgstr "{game} kunde inte kopieras"
 
 #: crates/caskade-core/src/paths.rs
 msgid "couldn't create “{dir}”: {error}"
@@ -4046,6 +4077,46 @@ msgstr "temat {id} kan inte tillämpas: {problem}"
 msgid "theme {id} can't be applied: it is invalid"
 msgstr "temat {id} kan inte tillämpas: det är ogiltigt"
 
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "that game isn't installed on this device"
+msgstr "det spelet är inte installerat på den här enheten"
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "the game isn't fully installed on this device"
+msgstr "spelet är inte helt installerat på den här enheten"
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "the game's storage isn't available"
+msgstr "spelets lagring är inte tillgänglig"
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "it starts through its store's launcher here; install it from the store there"
+msgstr "här startar det via butikens startprogram; installera det från butiken där"
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "the game's folder isn't there"
+msgstr "spelets mapp finns inte där"
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "that isn't a device"
+msgstr "det är inte en enhet"
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "Waiting for {device} to be in reach"
+msgstr "Väntar på att {device} ska gå att nå"
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "there isn't enough room for the copy: {short} more bytes are needed"
+msgstr "det finns inte plats för kopian: {short} byte till behövs"
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "Only a relay reaches {device}: the copy waits for a direct connection"
+msgstr "Bara ett relä når {device}: kopian väntar på en direkt anslutning"
+
+#: crates/caskade-core/src/transfer/mod.rs
+msgid "{device} can't be reached directly yet: the copy waits for a direct connection"
+msgstr "{device} går inte att nå direkt än: kopian väntar på en direkt anslutning"
+
 #: crates/caskade-core/src/updates/github.rs
 msgid "GitHub's address can't have a path"
 msgstr "GitHubs adress kan inte ha en sökväg"
@@ -4219,6 +4290,14 @@ msgstr "huvudfönstret finns inte längre"
 #: apps/desktop/src-tauri/src/commands/console.rs
 msgid "console mode isn't ready yet"
 msgstr "konsolläget är inte redo än"
+
+#: apps/desktop/src-tauri/src/commands/copies.rs
+msgid "that device has no copy of the game"
+msgstr "den enheten har ingen kopia av spelet"
+
+#: apps/desktop/src-tauri/src/commands/copies.rs
+msgid "that device isn't paired"
+msgstr "den enheten är inte parkopplad"
 
 #: apps/desktop/src-tauri/src/commands/emulation.rs
 msgid "unknown emulator {id}"
