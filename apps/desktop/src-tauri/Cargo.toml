@@ -54,6 +54,11 @@ tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
 tauri-plugin-deep-link = "2"
 tauri-plugin-window-state = "2"
 tauri-plugin-dialog = "2"
+# The clipboard from Rust, for the on-screen keyboard's Paste and Copy
+# buttons a pad presses (a webview allows neither without a click). Text
+# only, and X11's clipboard on Linux (XWayland passes it on), as the app
+# itself runs on X11.
+arboard = { version = "3.6", default-features = false }
 # Caskade's own updates (`commands/app_update.rs`).
 tauri-plugin-updater = "2"
 time = { version = "0.3", features = ["formatting"] }
@@ -73,6 +78,8 @@ url = "2"
 # Offline web games: the game window's MITM proxy (web_player/proxy.rs).
 hudsucker = "0.25"
 http-body-util = "0.1"
+# A share link as a QR code in console mode (#247): SVG only, no image crates.
+qrcode = { version = "=0.14.1", default-features = false, features = ["svg"] }
 
 # Reads WebKitGTK's rendering policy (`webkit.rs`); wry already builds it.
 [target.'cfg(target_os = "linux")'.dependencies]

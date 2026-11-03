@@ -11,6 +11,7 @@ pub mod addons;
 pub mod app_update;
 pub mod backup;
 pub mod browse;
+pub mod clipboard;
 pub mod collections;
 pub mod console;
 pub mod copies;

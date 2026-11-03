@@ -186,6 +186,9 @@ async fn a_shared_game_arrives_from_its_link_and_is_ready_to_play() {
     let desk = core("Desk").await;
     let friend = core("Friend's PC").await;
     let (entry, folder) = add_celeste(&desk, 6 * 1024 * 1024).await;
+    let bus = Bus::default();
+    desk.shares.set_bus(bus.clone());
+    let mut events = bus.stream();
     let (share, link) = shared(&desk, &entry).await;
     assert!(link.starts_with("caskade://receive?t="));
 
@@ -251,6 +254,26 @@ async fn a_shared_game_arrives_from_its_link_and_is_ready_to_play() {
             && record.recipients[0].finished
     })
     .await;
+    // The sharer hears it arrived: a notification.
+    let received = tokio::time::timeout(Duration::from_secs(10), async {
+        loop {
+            if let Ok(caskade_core::bus::Event::ShareReceived {
+                share_id,
+                title,
+                recipient,
+                ..
+            }) = events.recv().await
+            {
+                return (share_id, title, recipient);
+            }
+        }
+    })
+    .await
+    .expect("the sharer is told");
+    assert_eq!(
+        received,
+        (share.clone(), "Celeste".to_owned(), "Friend's PC".to_owned())
+    );
     // And once it's here, the friend no longer serves it by default.
     within("the friend stops serving", 10, || async {
         friend.shares.received().iter().all(|share| !share.serving)

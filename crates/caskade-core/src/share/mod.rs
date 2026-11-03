@@ -171,6 +171,8 @@ struct Inner {
     /// Shares being received, or served after, by install job.
     received: Mutex<HashMap<String, receive::Received>>,
     changed: broadcast::Sender<()>,
+    /// Where someone receiving a share is announced (a notification).
+    bus: std::sync::OnceLock<crate::bus::Bus>,
     /// Saves and emulator setup, for what else is shared (#248).
     items: items::Parts,
 }
@@ -200,6 +202,7 @@ impl Shares {
                 running: Mutex::default(),
                 received: Mutex::default(),
                 changed: broadcast::channel(16).0,
+                bus: std::sync::OnceLock::new(),
                 items: items::Parts::default(),
             }),
         };
@@ -219,6 +222,12 @@ impl Shares {
             }
         }
         Ok(())
+    }
+
+    /// Announces on `bus` when someone received everything of a share
+    /// (`Event::ShareReceived`, #247).
+    pub fn set_bus(&self, bus: crate::bus::Bus) {
+        let _ = self.inner.bus.set(bus);
     }
 
     /// A signal on every change to [`Shares::list`] or what's received.

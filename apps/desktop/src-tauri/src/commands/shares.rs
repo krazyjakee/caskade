@@ -51,6 +51,28 @@ pub async fn share_link(shares: State<'_, Shares>, id: String) -> Result<String,
     shares.link(&id).await.map_err(report)
 }
 
+/// A running share's link as a QR code (an SVG document), for a phone or
+/// another screen to read in console mode (#247).
+#[tauri::command]
+#[specta::specta]
+pub async fn share_qr(shares: State<'_, Shares>, id: String) -> Result<String, CommandError> {
+    let link = shares.link(&id).await.map_err(report)?;
+    qr_svg(&link).map_err(report)
+}
+
+/// `text` as a QR code's SVG, dark modules on a light ground with a quiet
+/// zone, as scanners expect whatever the theme.
+fn qr_svg(text: &str) -> caskade_core::Result<String> {
+    let code = qrcode::QrCode::with_error_correction_level(text, qrcode::EcLevel::M).map_err(|_| {
+        caskade_core::Error::Invalid(caskade_core::tr!("the link is too long for a QR code"))
+    })?;
+    Ok(code
+        .render::<qrcode::render::svg::Color>()
+        .min_dimensions(256, 256)
+        .quiet_zone(true)
+        .build())
+}
+
 /// Stops share `id`: its link fails at once.
 #[tauri::command]
 #[specta::specta]
@@ -106,6 +128,22 @@ pub fn share_keep_helping(
     shares.keep_helping(&job, on).map_err(report)
 }
 
+/// Confirms a share request (#247) whose link shares a collection: it joins
+/// the signed-in account's collections. The link never leaves the adapter.
+#[tauri::command]
+#[specta::specta]
+pub async fn confirm_share_collection(
+    requests: State<'_, super::install_requests::InstallRequests>,
+    accounts: State<'_, caskade_core::accounts::AccountService>,
+    request_id: String,
+) -> Result<caskade_core::model::Collection, CommandError> {
+    let account = accounts.require_active().map_err(report)?;
+    requests
+        .confirm_collection(&request_id, &account)
+        .await
+        .map_err(|reason| report(caskade_core::Error::Invalid(reason)))
+}
+
 /// Runs the shares that were running, and tells the UI of changes.
 pub fn setup<R: Runtime>(app: &AppHandle<R>, shares: &Shares) {
     let mut changes = shares.subscribe();
@@ -156,4 +194,16 @@ pub async fn queue_share_link<R: Runtime>(
     };
     let info = shares.inspect(&link).await.map_err(|e| e.to_string())?;
     requests.queue_share(app, link, info)
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn a_link_makes_a_qr_code() {
+        let link = format!("caskade://receive?t=caskadeshare{}", "a".repeat(400));
+        let svg = super::qr_svg(&link).unwrap();
+        assert!(svg.starts_with("<?xml"), "{}", &svg[..40]);
+        assert!(svg.contains("<svg") && svg.contains("<path"));
+        assert!(super::qr_svg(&"a".repeat(5000)).is_err());
+    }
 }

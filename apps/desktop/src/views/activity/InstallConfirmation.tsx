@@ -6,6 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import type { DropPlan, InstallRequest, PeerSend } from "../../api/installRequests";
 import { formatSize } from "../../api/presentation";
+import { ShareInfoDetails } from "../../components/shares/ShareInfoDetails";
 
 export type { InstallRequest } from "../../api/installRequests";
 
@@ -22,6 +23,7 @@ export function InstallConfirmation({
 }) {
   const { t } = useLingui();
   const title = request.plan?.title;
+  const shared = request.share?.title;
   const action = useMutation({
     mutationFn: (accept: boolean) =>
       accept ? confirm(request.requestId) : dismiss(request.requestId),
@@ -41,14 +43,29 @@ export function InstallConfirmation({
           data-focus-scope="install-confirmation"
           className="outline-none"
         >
-          {request.peer ? (
+          {request.share ? (
+            <div data-part="share">
+              <Heading slot="title" className="font-display text-xl font-semibold">
+                {t`Receive ${shared}?`}
+              </Heading>
+              <div className="mt-3">
+                <ShareInfoDetails info={request.share} />
+              </div>
+              <p className="mt-3 text-sm text-fg-muted">
+                <Trans>
+                  It comes straight from their computer and installs like any other game; nothing is
+                  written until you say so.
+                </Trans>
+              </p>
+            </div>
+          ) : request.peer ? (
             <PeerDetails peer={request.peer} />
           ) : (
             <Heading slot="title" className="font-display text-xl font-semibold">
               {title ? t`Install ${title}?` : t`Install this game?`}
             </Heading>
           )}
-          {request.peer ? null : request.plan ? (
+          {request.peer || request.share ? null : request.plan ? (
             <PlanDetails plan={request.plan} />
           ) : (
             <>
@@ -94,11 +111,15 @@ export function InstallConfirmation({
               isDisabled={action.isPending}
               onPress={() => action.mutate(true)}
             >
-              {request.peer
-                ? t`Copy here`
-                : request.plan
-                  ? t({ message: "Install", context: "button", comment: "Starts an install" })
-                  : t`Confirm installation`}
+              {request.share?.contents.kind === "collection"
+                ? t`Add to my collections`
+                : request.share
+                  ? t({ message: "Receive", context: "button" })
+                  : request.peer
+                    ? t`Copy here`
+                    : request.plan
+                      ? t({ message: "Install", context: "button", comment: "Starts an install" })
+                      : t`Confirm installation`}
             </Button>
           </div>
         </Dialog>

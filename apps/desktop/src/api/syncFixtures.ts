@@ -11,7 +11,6 @@ import type {
   PairingLinkTarget,
   PeerCopy,
   PlayRequest,
-  Share,
   SyncApi,
   Transfer,
 } from "./sync";
@@ -21,8 +20,8 @@ export interface SyncFixtureApi extends SyncApi {
   incomingPairing(name: string, code: string): void;
   /** A `caskade://pair` link is opened from outside. */
   openLink(target: PairingLinkTarget): void;
-  /** Copies and shares under way, as #233 and #246 will report them. */
-  setTransfers(transfers: Transfer[], shares?: Share[]): void;
+  /** Copies under way, as #233 reports them. */
+  setTransfers(transfers: Transfer[]): void;
   /** A game's copies on the other devices (#232). */
   setCopies(gameId: string, copies: PeerCopy[]): void;
   /** A paired device's games that can be copied here (#276); each gets a
@@ -121,7 +120,6 @@ export function createSyncFixtureApi(): SyncFixtureApi {
   const status = initial(Date.now());
   let opened: PairingLinkTarget | null = null;
   let transfers: Transfer[] = [];
-  let shares: Share[] = [];
   const copies = new Map<string, PeerCopy[]>();
   const deviceGames = new Map<string, DeviceGame[]>();
   const sent: [string, string][] = [];
@@ -311,7 +309,6 @@ export function createSyncFixtureApi(): SyncFixtureApi {
       changed();
     },
     transfers: async () => structuredClone(transfers),
-    shares: async () => structuredClone(shares),
     subscribe: (listener) => {
       listeners.add(listener);
       return () => listeners.delete(listener);
@@ -333,9 +330,8 @@ export function createSyncFixtureApi(): SyncFixtureApi {
       opened = target;
       changed(target);
     },
-    setTransfers: (next, nextShares = []) => {
+    setTransfers: (next) => {
       transfers = next;
-      shares = nextShares;
       changed();
     },
     state: () => clone(),

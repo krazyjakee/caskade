@@ -34,6 +34,8 @@ import {
 } from "./api/notificationsFixtures";
 import { createLibraryQueryClient, LibraryProvider } from "./api/provider";
 import { StorageProvider } from "./api/StorageProvider";
+import { SharesProvider } from "./api/shares";
+import { createSharesFixtureApi, FIXTURE_LINK, fixtureShare } from "./api/sharesFixtures";
 import type { RootSummary, StorageApi } from "./api/storage";
 import { SyncProvider, type Transfer } from "./api/sync";
 import { createSyncFixtureApi } from "./api/syncFixtures";
@@ -894,30 +896,56 @@ describe("the shell's catalogued anatomy, and the app-only parts of shared compo
       link: "lan",
       state,
     });
-    sync.setTransfers((["running", "waitingDirect", "done", "failed"] as const).map(transfer), [
-      {
-        id: "s1",
-        title: "Celeste",
-        createdAtMs: now,
-        expiresAtMs: null,
-        sizeBytes: 1e9,
-        recipients: 1,
-      },
-      {
-        id: "s2",
+    sync.setTransfers((["running", "waitingDirect", "done", "failed"] as const).map(transfer));
+    // Shares in every state, someone receiving one, and one received here.
+    const shares = createSharesFixtureApi({
+      shares: (["preparing", "ready", "failed", "stopped", "expired"] as const).map((state, i) =>
+        fixtureShare({
+          id: `s${i}`,
+          title: i === 0 ? "Celeste" : `Share ${i}`,
+          expiresAtMs: i % 2 === 0 ? null : now + 86_400_000,
+          state:
+            state === "preparing"
+              ? { state, done: 1, total: 2 }
+              : state === "failed"
+                ? { state, reason: "a file went" }
+                : { state },
+          recipients: [
+            { name: "Sam", done: 1, finished: false, connected: true, serving: true },
+            { name: "Kim", done: 2, finished: true, connected: false, serving: false },
+            { name: "Lee", done: 0, finished: false, connected: false, serving: false },
+          ],
+        }),
+      ),
+      received: (["receiving", "serving", "done"] as const).map((state) => ({
+        job: `j-${state}`,
         title: "Hades",
-        createdAtMs: now,
-        expiresAtMs: now + 86_400_000,
-        sizeBytes: 2e9,
-        recipients: 0,
-      },
-    ]);
-    const names = ["peer-link", "paired-device", "transfer", "share", "status-bar", "pair-device"];
+        sharer: "Alex",
+        receiving: state === "receiving",
+        keepHelping: state !== "done",
+        serving: state !== "done",
+        helping: 1,
+      })),
+    });
+    const names = [
+      "peer-link",
+      "paired-device",
+      "transfer",
+      "share",
+      "share-recipient",
+      "received-share",
+      "status-bar",
+      "pair-device",
+    ];
     const check = () => names.flatMap((name) => survey(seen, name));
     renderWholeApp("/settings?tab=devices", {
-      wrap: (children: ReactNode) => <SyncProvider api={sync}>{children}</SyncProvider>,
+      wrap: (children: ReactNode) => (
+        <SyncProvider api={sync}>
+          <SharesProvider api={shares}>{children}</SharesProvider>
+        </SyncProvider>
+      ),
     });
-    await screen.findByText("Celeste");
+    await screen.findByText(/^Celeste/);
     await waitFor(() =>
       expect(document.querySelector('[data-cs="status-bar"] [data-part="sync"]')).toBeTruthy(),
     );
@@ -931,6 +959,71 @@ describe("the shell's catalogued anatomy, and the app-only parts of shared compo
     sync.openLink({ deviceId: "7".repeat(64), expiresAtMs: now + 60_000, expired: false });
     await screen.findByRole("dialog");
     expect(check()).toEqual([]);
+  });
+
+  it("renders Share with someone… with its QR code, and Receive a shared game…", async () => {
+    // The library's grid is virtual: it needs a viewport.
+    const undoLayout = fakeLayout();
+    fakeViewport();
+    onTestFinished(() => {
+      undoLayout();
+      vi.restoreAllMocks();
+      vi.unstubAllGlobals();
+    });
+    const shares = createSharesFixtureApi();
+    const app = renderWholeApp("/library", {
+      mode: "console",
+      games: playedGames(3),
+      wrap: (children: ReactNode) => <SharesProvider api={shares}>{children}</SharesProvider>,
+    });
+    const names = ["share-game", "share-recipient", "receive-share", "share-info"];
+    const check = () => names.flatMap((name) => survey(seen, name));
+    // A game's menu → Share with someone… → Make a link; then someone opens it.
+    // Console mode opens on the first game; Start opens its menu.
+    await waitFor(() =>
+      expect(document.activeElement?.closest('[data-cs="game-card"]')).toBeTruthy(),
+    );
+    app.pad.press("menu");
+    const menu = await screen.findByRole("menu");
+    await waitFor(() =>
+      expect(
+        within(menu)
+          .getAllByRole("menuitem")
+          .map((item) => item.textContent),
+      ).toContain("Share with someone…A link for someone else's Caskade"),
+    );
+    fireEvent.click(within(menu).getByRole("menuitem", { name: /Share with someone…/ }));
+    fireEvent.click(await screen.findByRole("button", { name: "Make a link" }));
+    await screen.findByRole("img", { name: "The link as a QR code" });
+    const [share] = await shares.list();
+    shares.receivedBy(share?.id ?? "", {
+      name: "Sam",
+      done: 1,
+      finished: false,
+      connected: true,
+      serving: false,
+    });
+    await screen.findByText("Sam");
+    expect(check()).toEqual([]);
+    fireEvent.click(screen.getByRole("button", { name: "Done" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+
+    // Add game → Receive a shared game…: a link reached directly, then one
+    // only a relay reaches.
+    fireEvent.click(screen.getByRole("button", { name: "Add game" }));
+    fireEvent.click(await screen.findByRole("menuitem", { name: /Receive a shared game…/ }));
+    const field = await screen.findByRole("textbox", { name: "Share link" });
+    for (const [link, said] of [
+      [FIXTURE_LINK, "Alex's Desk shares Hades with you."],
+      [`${FIXTURE_LINK}relay`, "Alex's Desk shares Hades with you."],
+      [`${FIXTURE_LINK}save`, "Alex's Desk shares a save of Hades with you."],
+      [`${FIXTURE_LINK}collection`, "Alex's Desk shares the collection Co-op nights with you."],
+    ] as const) {
+      fireEvent.change(field, { target: { value: link } });
+      fireEvent.click(screen.getByRole("button", { name: "Look" }));
+      await screen.findByText(said);
+      expect(check()).toEqual([]);
+    }
   });
 
   it("renders a release's save locations, its warnings and a refused save", async () => {

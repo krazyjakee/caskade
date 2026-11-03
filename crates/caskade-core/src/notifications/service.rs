@@ -229,6 +229,29 @@ impl Notifications {
             }
             Event::LifecycleScriptsRan(report) => self.on_scripts(report).await,
             Event::AchievementsUnlocked(unlocks) => self.on_unlocks(unlocks).await,
+            Event::ShareReceived {
+                share_id,
+                title,
+                recipient,
+                endpoint,
+            } => {
+                self.notice(Notice {
+                    category: NotificationCategory::ShareReceived,
+                    severity: Severity::Info,
+                    key: format!("share.received:{share_id}:{endpoint}"),
+                    title: msg!(
+                        "{recipient} received {title}",
+                        recipient = recipient,
+                        title = title
+                    ),
+                    body: Text::Plain(String::new()),
+                    target: NotificationTarget::Settings {
+                        tab: "devices".into(),
+                        section: None,
+                    },
+                })
+                .await
+            }
             Event::LibraryGameAdded { .. }
             | Event::LibraryGameUpdated { .. }
             | Event::LibraryScanCompleted { .. }

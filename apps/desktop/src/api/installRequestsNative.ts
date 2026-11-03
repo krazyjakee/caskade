@@ -20,6 +20,10 @@ export const nativeInstallRequestApi: InstallRequestApi = {
     native();
     return (await unwrap(commands.confirmInstallRequest(id, rootId ?? null))).id;
   },
+  async confirmCollection(id) {
+    native();
+    await unwrap(commands.confirmShareCollection(id));
+  },
   async dismiss(id) {
     native();
     await unwrap(commands.dismissInstallRequest(id));

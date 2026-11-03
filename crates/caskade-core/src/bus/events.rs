@@ -165,6 +165,15 @@ pub enum Event {
     /// Achievements unlocked since a set's last complete fetch (#185):
     /// never the first fetch's history.
     AchievementsUnlocked(Box<crate::achievements::NewUnlocks>),
+    /// Someone received everything of a game this device shared (#247).
+    /// Not in the plugin event list: it names a person.
+    ShareReceived {
+        share_id: String,
+        title: String,
+        recipient: String,
+        /// The recipient's endpoint: one item per share and person.
+        endpoint: String,
+    },
 }
 
 impl Event {
@@ -206,6 +215,7 @@ impl Event {
             Self::LifecycleScriptsRan(_) => "lifecycle.scripts.ran",
             Self::AchievementsChanged { .. } => "achievements.changed",
             Self::AchievementsUnlocked(_) => "achievements.unlocked",
+            Self::ShareReceived { .. } => "share.received",
         }
     }
 }

@@ -132,12 +132,16 @@ export function InstallIngress({ api }: { api: InstallRequestApi }) {
     };
   }, [api, receive]);
   const finish = async (id: string, accept: boolean, rootId?: string) => {
-    if (accept && storageApi && rootId === undefined) {
+    // A shared collection is a list: nothing installs, so no storage (#247).
+    const list =
+      queue.find((request) => request.requestId === id)?.share?.contents.kind === "collection";
+    if (accept && !list && storageApi && rootId === undefined) {
       setRootError(null);
       setRootRequest(id);
       return;
     }
-    if (accept)
+    if (accept && list && api.confirmCollection) await api.confirmCollection(id);
+    else if (accept)
       // A choice it needs (an asset, an installer) opens where the user is.
       follow(rootId === undefined ? await api.confirm(id) : await api.confirm(id, rootId));
     else await api.dismiss(id);

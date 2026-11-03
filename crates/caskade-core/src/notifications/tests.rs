@@ -726,3 +726,35 @@ fn sources_are_named_for_people_even_when_stored_as_ids() {
     }]);
     assert_eq!(body.render(), "Desktop entries 5");
 }
+
+#[tokio::test]
+async fn someone_receiving_a_share_is_noted_once_per_share_and_person() {
+    let fx = Fixture::new().await;
+    let received = |endpoint: &str, recipient: &str| Event::ShareReceived {
+        share_id: "s1".into(),
+        title: "Celeste".into(),
+        recipient: recipient.into(),
+        endpoint: endpoint.into(),
+    };
+    fx.feed.on_event(&received("e1", "Sam's PC")).await;
+    // The same person again (a resumed transfer) changes nothing.
+    fx.feed.on_event(&received("e1", "Sam's PC")).await;
+    fx.feed.on_event(&received("e2", "Kim")).await;
+    let items = fx.items().await;
+    assert_eq!(items.len(), 2);
+    assert!(
+        items
+            .iter()
+            .all(|item| item.category == NotificationCategory::ShareReceived)
+    );
+    let titles: Vec<&str> = items.iter().map(|item| item.title.as_str()).collect();
+    assert!(titles.contains(&"Sam's PC received Celeste"), "{titles:?}");
+    assert!(titles.contains(&"Kim received Celeste"));
+    assert_eq!(
+        items[0].target,
+        NotificationTarget::Settings {
+            tab: "devices".into(),
+            section: None
+        }
+    );
+}

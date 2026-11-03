@@ -2689,6 +2689,10 @@ msgid "Plugin {plugin} was turned off"
 msgstr "Tillägget {plugin} stängdes av"
 
 #: crates/caskade-core/src/notifications/service.rs
+msgid "{recipient} received {title}"
+msgstr ""
+
+#: crates/caskade-core/src/notifications/service.rs
 msgid "A script after {game} started failed"
 msgstr "Ett skript efter att {game} startade misslyckades"
 
@@ -3590,6 +3594,7 @@ msgstr "det är inte ett emulerat spel"
 msgid "save it for offline play first: only an offline copy can be shared"
 msgstr "spara det för spel utan uppkoppling först: bara en offlinekopia kan delas"
 
+#: crates/caskade-core/src/share/items.rs
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "the game's storage isn't available"
 msgstr "spelets lagring är inte tillgänglig"
@@ -3614,6 +3619,7 @@ msgstr "en ROM-fil för det spelet finns inte där"
 msgid "this share's description is damaged"
 msgstr "den här delningens beskrivning är skadad"
 
+#: crates/caskade-core/src/share/items.rs
 #: crates/caskade-core/src/share/mod.rs
 msgid "this share has no game"
 msgstr ""
@@ -4522,6 +4528,14 @@ msgstr "Vänta tills installationer, flyttar och uppdateringar är klara, eller 
 msgid "That isn't a backup in the backup folder."
 msgstr "Det är ingen säkerhetskopia i mappen för säkerhetskopior."
 
+#: apps/desktop/src-tauri/src/commands/clipboard.rs
+msgid "the clipboard isn't available"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/clipboard.rs
+msgid "the clipboard couldn't be written"
+msgstr ""
+
 #: apps/desktop/src-tauri/src/commands/console.rs
 #: apps/desktop/src-tauri/src/commands/guide.rs
 msgid "the main window is gone"
@@ -4601,6 +4615,10 @@ msgid "receiving shares isn't available"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/install_requests.rs
+msgid "that request isn't a share"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/install_requests.rs
 msgid "input must be one path or HTTP(S) URL"
 msgstr "indata måste vara en sökväg eller HTTP(S)-URL"
 
@@ -4659,6 +4677,10 @@ msgstr "Den sparplatsen finns inte på den här enheten."
 #: apps/desktop/src-tauri/src/commands/scripts.rs
 msgid "the script belongs to another scope"
 msgstr "skriptet hör till en annan omfattning"
+
+#: apps/desktop/src-tauri/src/commands/shares.rs
+msgid "the link is too long for a QR code"
+msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/storage.rs
 msgid "The storage location was added, but it disappeared from the list before it could be shown. Reload Settings → Storage."

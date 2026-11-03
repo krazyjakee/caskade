@@ -17,7 +17,8 @@ export type NotificationCategory =
   | "updatesAvailable"
   | "pluginDisabled"
   | "scriptFailed"
-  | "achievementsUnlocked";
+  | "achievementsUnlocked"
+  | "shareReceived";
 export type NotificationSeverity = "info" | "warning" | "error";
 export type NotificationTarget =
   | { type: "members" }

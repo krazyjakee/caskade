@@ -152,6 +152,10 @@ pub fn access(command: &str) -> Option<Access> {
         | "console_initial_mode"
         | "locale_current"
         | "browse_dir"
+        // The on-screen keyboard's Paste and the Copy buttons (#247): the
+        // user's own clipboard, like a key press.
+        | "clipboard_read_text"
+        | "clipboard_write_text"
         | "app_update_status"
         | "torrent_links_status" => Open,
         // The notification feed and its read state (#198): one feed every
@@ -316,10 +320,12 @@ pub fn access(command: &str) -> Option<Access> {
         // games out and in, like copies.
         | "share_game"
         | "share_link"
+        | "share_qr"
         | "share_stop"
         | "share_forget"
         | "share_receive"
         | "share_keep_helping"
+        | "confirm_share_collection"
         // Something smaller shared once, and a shared collection added to
         // the account's own (#248).
         | "share_item"

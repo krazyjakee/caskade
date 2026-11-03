@@ -498,6 +498,10 @@ msgstr ""
 msgid "{device}'s copy is for {system} and can't run here."
 msgstr ""
 
+#: apps/desktop/src/components/shares/common.tsx
+msgid "{done} of {all}"
+msgstr ""
+
 #: apps/desktop/src/components/sync/common.tsx
 msgid "{done} of {total} · {speed}/s"
 msgstr ""
@@ -560,6 +564,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
 msgid "{from}, {when}"
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "{game} isn't in your library: Caskade adds it, with this save as its first version."
 msgstr ""
 
 #. js-lingui:icu=%7Bgames%2C+plural%2C+one+%7BMove+its+game+there%2C+then+remove%7D+other+%7BMove+its+%23+games+there%2C+then+remove%7D%7D&pluralize_on=games
@@ -918,12 +926,18 @@ msgstr ""
 msgid "{seconds} s"
 msgstr ""
 
-#: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
-msgid "{size} · received by {count}"
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "{sharer} shares {title} with you."
 msgstr ""
 
-#: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
-msgid "{size} · received by {count} · until {expires}"
+#. placeholder {0}: contents.game
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "{sharer} shares a save of {0} with you."
+msgstr ""
+
+#. placeholder {0}: contents.name
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "{sharer} shares the collection {0} with you."
 msgstr ""
 
 #. A size and its unit: 1.5 GiB
@@ -961,6 +975,10 @@ msgid_plural "# threads"
 msgstr[0] ""
 msgstr[1] ""
 
+#: apps/desktop/src/components/shares/SharesList.tsx
+msgid "{title} · {size}"
+msgstr ""
+
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
 msgid "{title} · {size}. Playtime and library identity are kept."
 msgstr ""
@@ -971,6 +989,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
 msgid "{title} from {device}"
+msgstr ""
+
+#: apps/desktop/src/components/shares/SharesList.tsx
+msgid "{title} from {sharer}"
 msgstr ""
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
@@ -1245,6 +1267,14 @@ msgstr ""
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 msgid "A launcher link"
+msgstr ""
+
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+msgid "A link for someone else's Caskade"
+msgstr ""
+
+#: apps/desktop/src/views/activity/AddGame.tsx
+msgid "A link someone sent you from their Caskade"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
@@ -1611,6 +1641,11 @@ msgstr ""
 msgid "Add to favourites"
 msgstr ""
 
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+#: apps/desktop/src/views/activity/InstallConfirmation.tsx
+msgid "Add to my collections"
+msgstr ""
+
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 msgid "Add to this game"
 msgstr ""
@@ -1649,6 +1684,11 @@ msgstr ""
 #: apps/desktop/src/views/activity/AddGame.tsx
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
 msgid "Adding…"
+msgstr ""
+
+#. A shared web game's address
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "Address"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
@@ -1972,6 +2012,10 @@ msgstr ""
 msgid "Arguments mode"
 msgstr ""
 
+#: apps/desktop/src/components/shares/SharesList.tsx
+msgid "Arriving: follow it in Activity."
+msgstr ""
+
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 msgid "Artwork"
 msgstr ""
@@ -2013,6 +2057,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 msgid "Asking {device}…"
+msgstr ""
+
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+msgid "Asking whoever shared it…"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
@@ -2270,6 +2318,11 @@ msgstr ""
 msgid "Browser preview"
 msgstr ""
 
+#. Which system a shared game was built for
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "Build"
+msgstr ""
+
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 msgctxt "app build"
 msgid "Build"
@@ -2335,6 +2388,8 @@ msgstr ""
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
 #: apps/desktop/src/components/saves/SaveConflictDialog.tsx
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
 #: apps/desktop/src/components/streaming/StopHostDialog.tsx
@@ -2441,6 +2496,10 @@ msgstr ""
 msgid "Card size"
 msgstr ""
 
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "Caskade adds it to your web games, ready to play offline."
+msgstr ""
+
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 msgid "Caskade can't fetch BIOS files here."
 msgstr ""
@@ -2521,6 +2580,10 @@ msgstr ""
 msgid "Caskade keeps streaming up to date when you say so, never in the middle of a game."
 msgstr ""
 
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "Caskade makes a link. Whoever opens it in their Caskade gets the game straight from this computer, on this network or over the internet."
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Caskade on this network shows here. Both devices show a code: pair when they match."
 msgstr ""
@@ -2536,6 +2599,14 @@ msgstr ""
 
 #: apps/desktop/src/shell/ErrorFallback.tsx
 msgid "Caskade ran into a problem"
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "Caskade sets up {emulator} to play it."
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "Caskade sets up an emulator to play it."
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
@@ -3097,8 +3168,17 @@ msgstr ""
 msgid "Controls manual scans, scheduled refresh and folder watching."
 msgstr ""
 
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "Copied"
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
 msgid "Copies and shares"
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgctxt "button"
+msgid "Copy"
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
@@ -3111,6 +3191,10 @@ msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
 msgid "Copy here"
+msgstr ""
+
+#: apps/desktop/src/components/shares/SharesList.tsx
+msgid "Copy link"
 msgstr ""
 
 #. Sends the game to another of the user's devices
@@ -3636,6 +3720,7 @@ msgstr ""
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
 #: apps/desktop/src/components/sync/PairingHost.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 msgid "Done"
@@ -4113,6 +4198,10 @@ msgstr ""
 msgid "Executable"
 msgstr ""
 
+#: apps/desktop/src/components/shares/common.tsx
+msgid "Expired: the link doesn't work any more."
+msgstr ""
+
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
 msgctxt "table column"
 msgid "Extensions"
@@ -4258,12 +4347,20 @@ msgstr ""
 msgid "Folder-name template"
 msgstr ""
 
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "For a day"
+msgstr ""
+
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "For a device on another network, or one that isn't found by itself."
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 msgid "For a server on your home network without a public certificate."
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "For a week"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
@@ -4278,6 +4375,7 @@ msgstr ""
 msgid "For new games only"
 msgstr ""
 
+#: apps/desktop/src/components/shares/SharesList.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Forget"
 msgstr ""
@@ -4308,6 +4406,11 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Free space and required capabilities are checked for every job."
+msgstr ""
+
+#. Who shared something
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "From"
 msgstr ""
 
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
@@ -4584,6 +4687,14 @@ msgstr ""
 msgid "Getting it from {holder}…"
 msgstr ""
 
+#: apps/desktop/src/components/shares/common.tsx
+msgid "Getting the files ready: {done} of {total}. The link works already."
+msgstr ""
+
+#: apps/desktop/src/components/shares/common.tsx
+msgid "Getting the files ready. The link works already."
+msgstr ""
+
 #: apps/desktop/src/onboarding/DeviceStep.tsx
 msgid "Getting this device ready to pair…"
 msgstr ""
@@ -4663,6 +4774,26 @@ msgstr ""
 msgid "Hashes and titles that identify games and ROMs come from Hasheous."
 msgstr ""
 
+#: apps/desktop/src/components/shares/SharesList.tsx
+msgid "Help others receive it"
+msgstr ""
+
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+msgid "Help others receive it after it's here"
+msgstr ""
+
+#: apps/desktop/src/components/shares/SharesList.tsx
+msgid "Helping {helping} others receive it."
+msgstr ""
+
+#: apps/desktop/src/components/shares/common.tsx
+msgid "Helping others receive it"
+msgstr ""
+
+#: apps/desktop/src/components/shares/SharesList.tsx
+msgid "Here."
+msgstr ""
+
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "Hidden achievement"
 msgstr ""
@@ -4719,6 +4850,10 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "How do you play?"
+msgstr ""
+
+#: apps/desktop/src/components/shares/common.tsx
+msgid "How far {name} got"
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
@@ -4919,7 +5054,9 @@ msgctxt "save version"
 msgid "In use"
 msgstr ""
 
+#. A game of a shared collection
 #. A store game the library has but isn't installed
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
 #: apps/desktop/src/views/store/StoreGameView.tsx
 msgid "In your library"
 msgstr ""
@@ -5051,8 +5188,10 @@ msgstr ""
 msgid "Installation status is checked by the backend after saving; configuration does not run an emulator."
 msgstr ""
 
+#. A game of a shared collection, on this device
 #: apps/desktop/src/api/emulatorSetup.ts
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
 msgid "Installed"
 msgstr ""
 
@@ -5209,6 +5348,10 @@ msgstr ""
 msgid "It adds"
 msgstr ""
 
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "It arrives as a new version of your saves of {game}. Your own saves stay: the next Play asks which to use."
+msgstr ""
+
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 msgid "It asks there before copying"
 msgstr ""
@@ -5216,6 +5359,14 @@ msgstr ""
 #. Heading over a plugin's permissions
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "It asks to"
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "It becomes the offline copy of the web game you have at this address."
+msgstr ""
+
+#: apps/desktop/src/views/activity/InstallConfirmation.tsx
+msgid "It comes straight from their computer and installs like any other game; nothing is written until you say so."
 msgstr ""
 
 #. placeholder {0}: failure.message
@@ -5600,8 +5751,14 @@ msgstr ""
 msgid "Line {line}: {problem}"
 msgstr ""
 
+#. How long a share link works
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
 msgid "Link"
+msgstr ""
+
+#: apps/desktop/src/components/shares/SharesList.tsx
+msgid "Link copied"
 msgstr ""
 
 #: apps/desktop/src/views/store/StoreGameView.tsx
@@ -5822,6 +5979,10 @@ msgstr ""
 msgid "logs"
 msgstr ""
 
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+msgid "Look"
+msgstr ""
+
 #. The appearance
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgctxt "settings section"
@@ -5883,6 +6044,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
 msgid "Magnet links and torrent files"
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "Make a link"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
@@ -6601,6 +6766,10 @@ msgstr ""
 msgid "Nobody entered the code on {device} in time."
 msgstr ""
 
+#: apps/desktop/src/components/shares/common.tsx
+msgid "Nobody has opened the link yet."
+msgstr ""
+
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "none"
 msgstr ""
@@ -6703,6 +6872,11 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Not found"
+msgstr ""
+
+#. A game of a shared collection
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "Not in your library"
 msgstr ""
 
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
@@ -7013,6 +7187,10 @@ msgstr ""
 msgid "Online lookups, and the setup Caskade starts with."
 msgstr ""
 
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "Only a relay reaches {sharer}'s computer right now. The game waits for a direct connection: game files don't go through relays."
+msgstr ""
+
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Only an admin can let other devices stream from this one or change the stream quality. Anyone can pair this device with another to play its games."
 msgstr ""
@@ -7216,6 +7394,11 @@ msgstr ""
 msgid "Overlay the game title on cover art."
 msgstr ""
 
+#. A game of a shared collection a store account owns
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "Owned"
+msgstr ""
+
 #: apps/desktop/src/views/game/OwnedReleases.tsx
 msgid "Owned on {provider} ({account})"
 msgstr ""
@@ -7341,6 +7524,11 @@ msgstr ""
 msgid "Passwords and sign-ins aren't in backups: sign in to RomM and your stores again afterwards."
 msgstr ""
 
+#: apps/desktop/src/input/OnScreenKeyboard.tsx
+msgctxt "on-screen keyboard"
+msgid "Paste"
+msgstr ""
+
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
 msgid "Paste a magnet link anywhere in Caskade, drop a .torrent file on it, or use Add game. Nothing downloads until you confirm, and nothing is seeded afterwards."
 msgstr ""
@@ -7403,8 +7591,10 @@ msgstr ""
 
 #. A ROM scanner's platform
 #. A column of a store game's releases
+#. A shared ROM's platform
 #. ROM scanners table column
 #. The Store's platform filter
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/store/StoreGameView.tsx
 #: apps/desktop/src/views/StoreView.tsx
@@ -7962,6 +8152,31 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Ready. Devices on this network can pair and play."
+msgstr ""
+
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+msgid "Receive"
+msgstr ""
+
+#: apps/desktop/src/views/activity/InstallConfirmation.tsx
+msgctxt "button"
+msgid "Receive"
+msgstr ""
+
+#: apps/desktop/src/views/activity/InstallConfirmation.tsx
+msgid "Receive {shared}?"
+msgstr ""
+
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+msgid "Receive a shared game"
+msgstr ""
+
+#: apps/desktop/src/views/activity/AddGame.tsx
+msgid "Receive a shared game…"
+msgstr ""
+
+#: apps/desktop/src/components/shares/common.tsx
+msgid "Received"
 msgstr ""
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
@@ -9157,6 +9372,14 @@ msgctxt "theming docs"
 msgid "Selectors"
 msgstr ""
 
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "Send this link to whoever you're sharing {title} ({size}) with. They open it, or paste it in Add game → Receive a shared game. Keep Caskade open until it arrives."
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "Send this link to whoever you're sharing {title} with. They open it, or paste it in Add game → Receive a shared game. Keep Caskade open until it arrives."
+msgstr ""
+
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgctxt "network"
 msgid "Sending"
@@ -9280,6 +9503,23 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/SetupStep.tsx
 msgid "Setup will keep running in the background."
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "Share {title}"
+msgstr ""
+
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+msgid "Share link"
+msgstr ""
+
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+msgid "Share with someone…"
+msgstr ""
+
+#. A notification's category
+#: apps/desktop/src/views/activity/NotificationFeed.tsx
+msgid "Shared"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
@@ -9420,6 +9660,7 @@ msgid "Similar games"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
 msgid "Size"
 msgstr ""
 
@@ -9726,6 +9967,11 @@ msgstr ""
 msgid "Stop refreshing"
 msgstr ""
 
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+#: apps/desktop/src/components/shares/SharesList.tsx
+msgid "Stop sharing"
+msgstr ""
+
 #: apps/desktop/src/input/GuideMenu.tsx
 msgid "Stop the game? Progress it hasn't saved is lost."
 msgstr ""
@@ -9744,6 +9990,10 @@ msgstr ""
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "Stopped by a signal"
+msgstr ""
+
+#: apps/desktop/src/components/shares/common.tsx
+msgid "Stopped: the link doesn't work any more."
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
@@ -10041,6 +10291,10 @@ msgstr ""
 msgid "The backup failed"
 msgstr ""
 
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+msgid "The caskade://receive link someone sent you."
+msgstr ""
+
 #. placeholder {0}: status.error
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 msgid "The catalogue couldn't be fetched: {0}"
@@ -10086,6 +10340,10 @@ msgstr ""
 msgid "The game with this id on igdb.com"
 msgstr ""
 
+#: apps/desktop/src/components/shares/common.tsx
+msgid "The game's files couldn't be read: {reason}"
+msgstr ""
+
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 msgid "The game's program or shortcut"
 msgstr ""
@@ -10125,6 +10383,22 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 msgid "The least recently played games are removed first. 0 is no limit."
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "The link as a QR code"
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "The link works"
+msgstr ""
+
+#: apps/desktop/src/components/shares/common.tsx
+msgid "The link works until {until}."
+msgstr ""
+
+#: apps/desktop/src/components/shares/common.tsx
+msgid "The link works until you stop sharing."
 msgstr ""
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
@@ -10311,6 +10585,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "This device can't share its games yet."
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "This device has an emulator for it."
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
@@ -10524,6 +10802,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/desktop/src/views/settings/emulators/FromDevices.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/desktop/src/views/StoreView.tsx
@@ -10702,6 +10981,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
 msgid "Untick what isn't a game, fix titles, platforms and regions, and merge or split discs. Your choices are kept for later automatic scans."
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "Until I stop sharing"
 msgstr ""
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
@@ -11026,6 +11309,10 @@ msgstr ""
 msgid "Waiting for the save from {device}"
 msgstr ""
 
+#: apps/desktop/src/components/shares/common.tsx
+msgid "Waiting for them to come back"
+msgstr ""
+
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Waiting for you to finish on the other device…"
 msgstr ""
@@ -11203,6 +11490,10 @@ msgstr ""
 msgid "Which programs are the game"
 msgstr ""
 
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+msgid "While it arrives, this computer helps the share's other recipients. After, it keeps a second copy of the files to go on helping until the share stops."
+msgstr ""
+
 #: apps/desktop/src/onboarding/AccountStep.tsx
 msgid "Who are you?"
 msgstr ""
@@ -11236,6 +11527,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Window behavior while you play."
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "Windows (runs through Proton on Linux)"
 msgstr ""
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
@@ -11279,6 +11574,14 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Working… progress and cancellation are available in Activity."
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "Works until {until}"
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "Works until it's stopped"
 msgstr ""
 
 #. A game release's region

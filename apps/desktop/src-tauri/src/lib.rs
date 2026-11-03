@@ -757,6 +757,8 @@ pub fn run() {
                         {
                             requests.set_shares(shares.clone());
                         }
+                        // Someone receiving a share is a notification.
+                        shares.set_bus(bus.clone());
                         commands::shares::setup(app.handle(), &shares);
                         app.manage(shares);
                     }

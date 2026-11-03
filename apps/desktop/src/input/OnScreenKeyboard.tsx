@@ -4,18 +4,20 @@
  * suggestions) carries on. The pad's buttons follow the app's rules: the
  * d-pad moves between keys, A types, B closes, X deletes, Y is a space,
  * LB/RB switch between letters and symbols (the keyboard's tabs), LT/RT
- * move the cursor (they page through what's there), Start is Done. Keys
- * also take taps and clicks, which leave focus in the field. */
+ * move the cursor (they page through what's there), Start is Done. Paste
+ * types what the clipboard holds (a link someone sent, #247). Keys also
+ * take taps and clicks, which leave focus in the field. */
 import { useLingui } from "@lingui/react/macro";
-import { Delete, MoveLeft, MoveRight } from "lucide-react";
+import { ClipboardPaste, Delete, MoveLeft, MoveRight } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import type { Action } from "./actions";
+import { readClipboard } from "./clipboard";
 import { useInputAction } from "./hooks";
 import { press } from "./keys";
 
 export type TextTarget = HTMLInputElement | HTMLTextAreaElement;
 
-type Special = "shift" | "layer" | "backspace" | "space" | "left" | "right" | "done";
+type Special = "shift" | "layer" | "backspace" | "space" | "paste" | "left" | "right" | "done";
 interface Key {
   /** The character it types, or what it does. */
   type: string | Special;
@@ -29,7 +31,8 @@ const chars = (row: string): Key[] => Array.from(row, (type) => ({ type }));
 const bottom: Key[] = [
   { type: "layer", width: 2 },
   { type: "left" },
-  { type: "space", width: 6 },
+  { type: "space", width: 4 },
+  { type: "paste", width: 2 },
   { type: "right" },
   { type: "done", width: 2 },
 ];
@@ -82,6 +85,7 @@ const specials: readonly string[] = [
   "layer",
   "backspace",
   "space",
+  "paste",
   "left",
   "right",
   "done",
@@ -158,6 +162,7 @@ export function OnScreenKeyboard({ target, close }: { target: TextTarget; close:
   const layers = layersOf(layoutFor(locale));
   const deleteLabel = t({ message: "Delete", context: "on-screen keyboard" });
   const spaceLabel = t({ message: "Space", context: "on-screen keyboard" });
+  const pasteLabel = t({ message: "Paste", context: "on-screen keyboard" });
   const cursorLeft = t`Cursor left`;
   const cursorRight = t`Cursor right`;
   const doneLabel = t({ message: "Done", context: "on-screen keyboard" });
@@ -166,6 +171,7 @@ export function OnScreenKeyboard({ target, close }: { target: TextTarget; close:
     layer: null,
     backspace: <Delete className="mx-auto size-5" aria-label={deleteLabel} />,
     space: spaceLabel,
+    paste: <ClipboardPaste className="mx-auto size-5" aria-label={pasteLabel} />,
     left: <MoveLeft className="mx-auto size-5" aria-label={cursorLeft} />,
     right: <MoveRight className="mx-auto size-5" aria-label={cursorRight} />,
     done: doneLabel,
@@ -211,6 +217,17 @@ export function OnScreenKeyboard({ target, close }: { target: TextTarget; close:
         return;
       case "space":
         insert(target, " ");
+        return;
+      case "paste":
+        void readClipboard().then((text) => {
+          // One line for a one-line field: no line breaks at either end, and
+          // a space for those within.
+          const pasted =
+            target instanceof HTMLTextAreaElement
+              ? text
+              : text.replace(/^[\r\n]+|[\r\n]+$/g, "").replace(/\s*[\r\n]+\s*/g, " ");
+          if (pasted && target.isConnected) insert(target, pasted);
+        });
         return;
       case "left":
         moveCaret(target, -1);

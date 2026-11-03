@@ -15,6 +15,7 @@ import {
   Play,
   Power,
   Send,
+  Share2,
   Square,
   Trash2,
   Wrench,
@@ -101,12 +102,13 @@ export function GameMenu({
   const peerNote = usePeerNote();
   // Devices it can be sent to (#235): reached directly, without a copy,
   // when this computer has one in a folder that can be copied.
-  const sendable = (game?.entries ?? []).some(
+  const copyable = (game?.entries ?? []).find(
     (entry) =>
       !/^(peer|store|stream):/.test(entry.source) &&
       entry.state === "installed" &&
       entry.location !== null,
   );
+  const sendable = copyable !== undefined;
   const paired = useSyncStatus().data?.devices ?? [];
   const targets = sendable
     ? paired.filter(
@@ -397,7 +399,7 @@ export function GameMenu({
           </MenuItem>
         )}
       </MenuSection>
-      {!scoped && (peers.length > 0 || targets.length > 0) && (
+      {!scoped && (peers.length > 0 || targets.length > 0 || copyable) && (
         <>
           <MenuSeparator />
           <MenuSection title={t({ message: "Your devices", context: "game menu section" })}>
@@ -435,6 +437,17 @@ export function GameMenu({
                 </MenuItem>
               );
             })}
+            {copyable && (
+              // Shared once with someone else, through a link (#247).
+              <MenuItem
+                id="share"
+                icon={Share2}
+                description={t`A link for someone else's Caskade`}
+                onAction={() => onDialog({ type: "share", entryId: copyable.id })}
+              >
+                {t`Share with someone…`}
+              </MenuItem>
+            )}
             {peers.map((peer) => {
               const device = peer.deviceName;
               return (

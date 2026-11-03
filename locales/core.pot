@@ -2687,6 +2687,10 @@ msgid "Plugin {plugin} was turned off"
 msgstr ""
 
 #: crates/caskade-core/src/notifications/service.rs
+msgid "{recipient} received {title}"
+msgstr ""
+
+#: crates/caskade-core/src/notifications/service.rs
 msgid "A script after {game} started failed"
 msgstr ""
 
@@ -3588,6 +3592,7 @@ msgstr ""
 msgid "save it for offline play first: only an offline copy can be shared"
 msgstr ""
 
+#: crates/caskade-core/src/share/items.rs
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "the game's storage isn't available"
 msgstr ""
@@ -3612,6 +3617,7 @@ msgstr ""
 msgid "this share's description is damaged"
 msgstr ""
 
+#: crates/caskade-core/src/share/items.rs
 #: crates/caskade-core/src/share/mod.rs
 msgid "this share has no game"
 msgstr ""
@@ -4520,6 +4526,14 @@ msgstr ""
 msgid "That isn't a backup in the backup folder."
 msgstr ""
 
+#: apps/desktop/src-tauri/src/commands/clipboard.rs
+msgid "the clipboard isn't available"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/clipboard.rs
+msgid "the clipboard couldn't be written"
+msgstr ""
+
 #: apps/desktop/src-tauri/src/commands/console.rs
 #: apps/desktop/src-tauri/src/commands/guide.rs
 msgid "the main window is gone"
@@ -4599,6 +4613,10 @@ msgid "receiving shares isn't available"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/install_requests.rs
+msgid "that request isn't a share"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/install_requests.rs
 msgid "input must be one path or HTTP(S) URL"
 msgstr ""
 
@@ -4656,6 +4674,10 @@ msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/scripts.rs
 msgid "the script belongs to another scope"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/shares.rs
+msgid "the link is too long for a QR code"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/storage.rs

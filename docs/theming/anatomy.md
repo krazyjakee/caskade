@@ -93,7 +93,12 @@ variant of the component, such as the library's card.
 - [`peer-link`](#peer-link): How another device is reached (#225, #231): an icon and a word. `data-status` is `lan` (on this network), `direct` (over the internet), `relay` (through a relay) or `offline`.
 - [`paired-device`](#paired-device): A device paired with this one: its icon, name, how it is reached, its last sync, Sync now and (for an admin) Forget. `data-status` is how it is reached.
 - [`transfer`](#transfer): A game copied between two of the user's devices (#233): its title, the other device, how it is reached and its progress. `data-status` is `running`, `waitingDirect` (game files wait for a direct path), `done` or `failed`.
-- [`share`](#share): A game shared once with someone else (#246): its title, size, how many received it and until when. `data-status` is `open` (no expiry) or `expiring`.
+- [`share`](#share): A game this device shared once with someone else (#246, #247): its title and size, Copy link and Stop sharing while it runs (Forget after), what it is doing and who received it. `data-status` is `preparing` (its files are being read; the link works already), `ready`, `failed`, `stopped` or `expired`.
+- [`share-recipient`](#share-recipient): Someone who opened a share's link (#247): their device's name, whether they help others receive it, and a bar of how far they got. `data-status` is `receiving`, `away` (not connected now) or `done`.
+- [`received-share`](#received-share): A game someone shared with this device (#249): its title and sharer, and the Help others receive it switch. `data-status` is `receiving`, `serving` (it helps the share's other recipients) or `done`.
+- [`share-game`](#share-game): Share with someone… (#247): how long the link works, then the link with Copy (and, in console mode, a QR code), what the share is doing, who received it, and Stop sharing.
+- [`receive-share`](#receive-share): Add game → Receive a shared game… (#247): the link, what its sharer says it shares, Help others receive it, and Receive.
+- [`share-info`](#share-info): What a share link shares, as its sharer says (#247, #248): who, what, its size and build, until when the link works; for a save, web game or ROM, where it goes here; for a collection, which of its games this device has. `data-status` is `direct`, or `relayOnly` when only a relay reaches the sharer and files wait for a direct connection.
 - [`pair-device`](#pair-device): Pairing over any view (#226, #231): the code both devices show, for a pairing this device or the other one started; or a `caskade://pair` link opened from outside, waiting for an admin.
 - [`account-picker`](#account-picker): Who is playing: the accounts to sign in as, at start and after Switch account, and the PIN pad for a locked one. `data-step` is `accounts` or `pin`.
 - [`pin-pad`](#pin-pad): PIN entry: a field for keys and a number pad for a controller (A types a digit, B deletes, Start confirms). A wrong PIN shakes the field and clears it; after too many, `locked` counts the wait down.
@@ -1369,13 +1374,78 @@ Contains: [`peer-link`](#peer-link)
 
 ## `share`
 
-A game shared once with someone else (#246): its title, size, how many received it and until when. `data-status` is `open` (no expiry) or `expiring`. Rendered by CopiesAndShares in Settings → Devices (app).
+A game this device shared once with someone else (#246, #247): its title and size, Copy link and Stop sharing while it runs (Forget after), what it is doing and who received it. `data-status` is `preparing` (its files are being read; the link works already), `ready`, `failed`, `stopped` or `expired`. Rendered by SharesList in Settings → Devices → Copies and shares (app).
 
 Root: `[data-cs="share"]`
 
+| Part | Selector | What it is |
+| --- | --- | --- |
+| `state` | `[data-cs="share"] [data-part="state"]` | What the share is doing: reading its files, until when the link works, or that it stopped. |
+| `recipients` | `[data-cs="share"] [data-part="recipients"]` | Who opened the link, each with how far they got. |
+
 State on the root:
 
-- `data-status`: `open`, `expiring`
+- `data-status`: `preparing`, `ready`, `failed`, `stopped`, `expired`
+
+Contains: [`share-recipient`](#share-recipient)
+
+## `share-recipient`
+
+Someone who opened a share's link (#247): their device's name, whether they help others receive it, and a bar of how far they got. `data-status` is `receiving`, `away` (not connected now) or `done`. Rendered by ShareRecipients (app).
+
+Root: `[data-cs="share-recipient"]`
+
+State on the root:
+
+- `data-status`: `receiving`, `away`, `done`
+
+## `received-share`
+
+A game someone shared with this device (#249): its title and sharer, and the Help others receive it switch. `data-status` is `receiving`, `serving` (it helps the share's other recipients) or `done`. Rendered by SharesList in Settings → Devices → Copies and shares (app).
+
+Root: `[data-cs="received-share"]`
+
+State on the root:
+
+- `data-status`: `receiving`, `serving`, `done`
+
+## `share-game`
+
+Share with someone… (#247): how long the link works, then the link with Copy (and, in console mode, a QR code), what the share is doing, who received it, and Stop sharing. Rendered by ShareGameDialog (app).
+
+Root: `[data-cs="share-game"]`
+
+| Part | Selector | What it is |
+| --- | --- | --- |
+| `link` | `[data-cs="share-game"] [data-part="link"]` | The share link, selectable. |
+| `qr` | `[data-cs="share-game"] [data-part="qr"]` | The link as a QR code, in console mode. |
+| `state` | `[data-cs="share-game"] [data-part="state"]` | What the share is doing. |
+| `recipients` | `[data-cs="share-game"] [data-part="recipients"]` | Who opened the link. |
+
+Contains: [`share-recipient`](#share-recipient)
+
+## `receive-share`
+
+Add game → Receive a shared game… (#247): the link, what its sharer says it shares, Help others receive it, and Receive. Rendered by ReceiveShareDialog (app).
+
+Root: `[data-cs="receive-share"]`
+
+Contains: [`share-info`](#share-info)
+
+## `share-info`
+
+What a share link shares, as its sharer says (#247, #248): who, what, its size and build, until when the link works; for a save, web game or ROM, where it goes here; for a collection, which of its games this device has. `data-status` is `direct`, or `relayOnly` when only a relay reaches the sharer and files wait for a direct connection. Rendered by ShareInfoDetails (app).
+
+Root: `[data-cs="share-info"]`
+
+| Part | Selector | What it is |
+| --- | --- | --- |
+| `where` | `[data-cs="share-info"] [data-part="where"]` | Where a save, web game or ROM goes on this device. |
+| `games` | `[data-cs="share-info"] [data-part="games"]` | A shared collection's games, each with whether it's here (`data-status`). |
+
+State on the root:
+
+- `data-status`: `direct`, `relayOnly`
 
 ## `pair-device`
 

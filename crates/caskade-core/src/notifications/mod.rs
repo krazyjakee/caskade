@@ -53,6 +53,8 @@ pub enum NotificationCategory {
     /// Achievements unlocked since a set was last fetched (#190); never a
     /// set's first fetch, whose unlocks are history.
     AchievementsUnlocked,
+    /// Someone received a game this device shared (#247).
+    ShareReceived,
 }
 
 impl NotificationCategory {
@@ -64,6 +66,7 @@ impl NotificationCategory {
             Self::PluginDisabled => "plugin.disabled",
             Self::ScriptFailed => "script.failed",
             Self::AchievementsUnlocked => "achievements.unlocked",
+            Self::ShareReceived => "share.received",
         }
     }
 
@@ -75,6 +78,7 @@ impl NotificationCategory {
             "plugin.disabled" => Self::PluginDisabled,
             "script.failed" => Self::ScriptFailed,
             "achievements.unlocked" => Self::AchievementsUnlocked,
+            "share.received" => Self::ShareReceived,
             _ => return None,
         })
     }

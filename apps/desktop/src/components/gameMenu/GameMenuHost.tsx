@@ -23,6 +23,7 @@ import { SaveOfflineDialog } from "../../views/library/web/SaveOffline";
 import { CollectionPicker } from "../collections/CollectionPicker";
 import { ToolRequest } from "../gameActions/ToolRequest";
 import { GameEditor } from "../gameEditor/GameEditor";
+import { ShareGameDialog } from "../shares/ShareGameDialog";
 import { MoveGameDialog } from "../storage/MoveGameAction";
 import { GameMenu, playableEntry } from "./GameMenu";
 import { QuickLook } from "./QuickLook";
@@ -55,7 +56,9 @@ export type GameMenuDialog =
   | { type: "remove-web"; keepsGame: boolean }
   /** Remove from library… for a game Caskade added; `uninstalls` when it
    * has installed files to delete first. */
-  | { type: "remove"; uninstalls: boolean };
+  | { type: "remove"; uninstalls: boolean }
+  /** Share with someone… (#247): a link to the release `entryId`. */
+  | { type: "share"; entryId: string };
 
 interface Host {
   open(target: GameMenuTarget, anchor: MenuAnchor): void;
@@ -299,6 +302,16 @@ export function GameMenuHost({ children }: { children: ReactNode }) {
           onOpenChange={(open) => {
             if (!open) close();
           }}
+        />
+      )}
+      {dialog?.dialog.type === "share" && (
+        <ShareGameDialog
+          target={{
+            kind: "game",
+            entryId: dialog.dialog.entryId,
+            title: dialog.target.title,
+          }}
+          close={close}
         />
       )}
       {dialog?.dialog.type === "uninstall" && (

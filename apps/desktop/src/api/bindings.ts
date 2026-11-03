@@ -751,6 +751,10 @@ export const commands = {
 	localeCurrent: () => __TAURI_INVOKE<LocaleInfo>("locale_current"),
 	/**  Lists `path` (home without one), hidden entries only with `show_hidden`. */
 	browseDir: (path: string | null, showHidden: boolean) => typedError<DirListing_Serialize, string>(__TAURI_INVOKE("browse_dir", { path, showHidden })),
+	/**  The clipboard's text; empty when it holds none or can't be read. */
+	clipboardReadText: () => __TAURI_INVOKE<string>("clipboard_read_text"),
+	/**  Puts `text` on the clipboard. */
+	clipboardWriteText: (text: string) => typedError<null, string>(__TAURI_INVOKE("clipboard_write_text", { text })),
 	/**  The update status: the version running, and what the last check found. */
 	appUpdateStatus: () => __TAURI_INVOKE<AppUpdateStatus_Serialize>("app_update_status"),
 	/**
@@ -806,6 +810,11 @@ export const commands = {
 	sharesList: () => typedError<ShareRecord_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("shares_list")),
 	/**  A running share's link again, to copy. */
 	shareLink: (id: string) => typedError<string, ErrorReport_Serialize>(__TAURI_INVOKE("share_link", { id })),
+	/**
+	 *  A running share's link as a QR code (an SVG document), for a phone or
+	 *  another screen to read in console mode (#247).
+	 */
+	shareQr: (id: string) => typedError<string, ErrorReport_Serialize>(__TAURI_INVOKE("share_qr", { id })),
 	/**  Stops share `id`: its link fails at once. */
 	shareStop: (id: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("share_stop", { id })),
 	/**  Forgets a stopped or expired share. */
@@ -824,6 +833,11 @@ export const commands = {
 	 *  other recipients once it's here (#249).
 	 */
 	shareKeepHelping: (job: string, on: boolean) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("share_keep_helping", { job, on })),
+	/**
+	 *  Confirms a share request (#247) whose link shares a collection: it joins
+	 *  the signed-in account's collections. The link never leaves the adapter.
+	 */
+	confirmShareCollection: (requestId: string) => typedError<Collection_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("confirm_share_collection", { requestId })),
 	/**  Shares `item` until `expiry`. A collection is the signed-in account's. */
 	shareItem: (item: ShareItem, expiry: ShareExpiry) => typedError<ShareCreated_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("share_item", { item, expiry })),
 	/**
@@ -5993,7 +6007,9 @@ export type NotificationCategory =
  *  Achievements unlocked since a set was last fetched (#190); never a
  *  set's first fetch, whose unlocks are history.
  */
-"achievementsUnlocked";
+"achievementsUnlocked" | 
+/**  Someone received a game this device shared (#247). */
+"shareReceived";
 
 /**  One thing a notification is about. */
 export type NotificationMember = NotificationMember_Serialize | NotificationMember_Deserialize;

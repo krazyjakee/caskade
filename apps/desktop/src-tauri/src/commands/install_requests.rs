@@ -215,6 +215,31 @@ impl InstallRequests {
         claim.complete = true;
         Ok(job)
     }
+    /// Adds the collection share request `id` links to to `account`'s
+    /// collections (#248): a list, so nothing downloads and no job runs.
+    pub async fn confirm_collection(
+        &self,
+        id: &str,
+        account: &str,
+    ) -> Result<caskade_core::model::Collection, String> {
+        let mut claim = self.claim(id)?;
+        let link = claim
+            .link
+            .clone()
+            .ok_or_else(|| caskade_core::tr!("that request isn't a share"))?;
+        let shares = self
+            .shares
+            .get()
+            .cloned()
+            .ok_or_else(|| caskade_core::tr!("receiving shares isn't available"))?;
+        let collection = shares
+            .receive_collection(&link, account)
+            .await
+            .map_err(|e| e.to_string())?;
+        locked(&self.pending).remove(id);
+        claim.complete = true;
+        Ok(collection)
+    }
     /// Used by the deep-link owner (#57). A path is checked on the
     /// blocking pool, never on the caller's thread: a stale network mount
     /// can hang a stat for minutes.

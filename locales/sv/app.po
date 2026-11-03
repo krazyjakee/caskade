@@ -504,6 +504,12 @@ msgstr ""
 msgid "{device}'s copy is for {system} and can't run here."
 msgstr "Kopian på {device} är för {system} och kan inte köras här."
 
+#: apps/desktop/src/components/shares/common.tsx
+#, fuzzy
+#| msgid "{used} of {total}"
+msgid "{done} of {all}"
+msgstr "{used} av {total}"
+
 #: apps/desktop/src/components/sync/common.tsx
 #, fuzzy
 #| msgid "{moved} of {total} games moved."
@@ -569,6 +575,10 @@ msgstr "{free} ledigt av {total}"
 #: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
 msgid "{from}, {when}"
 msgstr "{from}, {when}"
+
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "{game} isn't in your library: Caskade adds it, with this save as its first version."
+msgstr ""
 
 #. js-lingui:icu=%7Bgames%2C+plural%2C+one+%7BMove+its+game+there%2C+then+remove%7D+other+%7BMove+its+%23+games+there%2C+then+remove%7D%7D&pluralize_on=games
 #: apps/desktop/src/views/settings/StoragePanel.tsx
@@ -932,12 +942,18 @@ msgstr "{scanners}: {games}"
 msgid "{seconds} s"
 msgstr "{seconds} s"
 
-#: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
-msgid "{size} · received by {count}"
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "{sharer} shares {title} with you."
 msgstr ""
 
-#: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
-msgid "{size} · received by {count} · until {expires}"
+#. placeholder {0}: contents.game
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "{sharer} shares a save of {0} with you."
+msgstr ""
+
+#. placeholder {0}: contents.name
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "{sharer} shares the collection {0} with you."
 msgstr ""
 
 #. A size and its unit: 1.5 GiB
@@ -975,6 +991,12 @@ msgid_plural "# threads"
 msgstr[0] "# tråd"
 msgstr[1] "# trådar"
 
+#: apps/desktop/src/components/shares/SharesList.tsx
+#, fuzzy
+#| msgid "limit {size}"
+msgid "{title} · {size}"
+msgstr "gräns {size}"
+
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
 msgid "{title} · {size}. Playtime and library identity are kept."
 msgstr "{title} · {size}. Speltid och biblioteksidentitet behålls."
@@ -986,6 +1008,12 @@ msgstr "{title} startade inte"
 #: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
 msgid "{title} from {device}"
 msgstr ""
+
+#: apps/desktop/src/components/shares/SharesList.tsx
+#, fuzzy
+#| msgid "Copy {title} from {device}?"
+msgid "{title} from {sharer}"
+msgstr "Kopiera {title} från {device}?"
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
 msgid "{title} is running on {device}"
@@ -1259,6 +1287,14 @@ msgstr "Ett spelbibliotek och startprogram för Windows, Linux och macOS, med et
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 msgid "A launcher link"
 msgstr "En startarlänk"
+
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+msgid "A link for someone else's Caskade"
+msgstr ""
+
+#: apps/desktop/src/views/activity/AddGame.tsx
+msgid "A link someone sent you from their Caskade"
+msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "A name or path at any depth (glob)"
@@ -1632,6 +1668,13 @@ msgstr "Lägg till i samling…"
 msgid "Add to favourites"
 msgstr "Lägg till i favoriter"
 
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+#: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#, fuzzy
+#| msgid "Add to collection…"
+msgid "Add to my collections"
+msgstr "Lägg till i samling…"
+
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 msgid "Add to this game"
 msgstr "Lägg till i det här spelet"
@@ -1671,6 +1714,14 @@ msgstr ""
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
 msgid "Adding…"
 msgstr "Lägger till…"
+
+#. A shared web game's address
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+#, fuzzy
+#| msgctxt "server"
+#| msgid "Address"
+msgid "Address"
+msgstr "Adress"
 
 #: apps/desktop/src/onboarding/Questions.tsx
 msgctxt "server"
@@ -1996,6 +2047,12 @@ msgstr "Argument"
 msgid "Arguments mode"
 msgstr "Argumentläge"
 
+#: apps/desktop/src/components/shares/SharesList.tsx
+#, fuzzy
+#| msgid "Copying to this computer. Follow it in Activity."
+msgid "Arriving: follow it in Activity."
+msgstr "Kopierar till den här datorn. Följ det under Aktivitet."
+
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 msgid "Artwork"
 msgstr "Bilder"
@@ -2039,6 +2096,10 @@ msgstr "Fråga medan ett spel körs."
 #| msgid "On {device}"
 msgid "Asking {device}…"
 msgstr "På {device}"
+
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+msgid "Asking whoever shared it…"
+msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 msgid "Asks for"
@@ -2297,6 +2358,14 @@ msgstr "Bläddra…"
 msgid "Browser preview"
 msgstr "Förhandsvisning i webbläsare"
 
+#. Which system a shared game was built for
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+#, fuzzy
+#| msgctxt "app build"
+#| msgid "Build"
+msgid "Build"
+msgstr "Bygge"
+
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 msgctxt "app build"
 msgid "Build"
@@ -2364,6 +2433,8 @@ msgstr "Kan inte ansluta"
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
 #: apps/desktop/src/components/saves/SaveConflictDialog.tsx
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
 #: apps/desktop/src/components/streaming/StopHostDialog.tsx
@@ -2470,6 +2541,10 @@ msgstr "Kapacitet"
 msgid "Card size"
 msgstr "Kortstorlek"
 
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "Caskade adds it to your web games, ready to play offline."
+msgstr ""
+
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 msgid "Caskade can't fetch BIOS files here."
 msgstr "Caskade kan inte hämta BIOS-filer här."
@@ -2550,6 +2625,10 @@ msgstr "Caskade sparar en kopia av spelet. Du spelar det i en minut så att Cask
 msgid "Caskade keeps streaming up to date when you say so, never in the middle of a game."
 msgstr ""
 
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "Caskade makes a link. Whoever opens it in their Caskade gets the game straight from this computer, on this network or over the internet."
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Caskade on this network shows here. Both devices show a code: pair when they match."
 msgstr ""
@@ -2566,6 +2645,18 @@ msgstr "Caskade-plattform för {platform}"
 #: apps/desktop/src/shell/ErrorFallback.tsx
 msgid "Caskade ran into a problem"
 msgstr "Caskade stötte på ett problem"
+
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+#, fuzzy
+#| msgid "Caskade is up to date."
+msgid "Caskade sets up {emulator} to play it."
+msgstr "Caskade är uppdaterat."
+
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+#, fuzzy
+#| msgid "Caskade is up to date."
+msgid "Caskade sets up an emulator to play it."
+msgstr "Caskade är uppdaterat."
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Caskade signs out of it and stops refreshing it. Its games stay in your library, and connecting it again brings it back as it was. Remove it to take its games out."
@@ -3135,9 +3226,20 @@ msgstr "Kontroller"
 msgid "Controls manual scans, scheduled refresh and folder watching."
 msgstr "Styr manuella skanningar, schemalagd uppdatering och mappbevakning."
 
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "Copied"
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
 msgid "Copies and shares"
 msgstr ""
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+#, fuzzy
+#| msgid "Copy here"
+msgctxt "button"
+msgid "Copy"
+msgstr "Kopiera hit"
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
 msgid "Copy {title} from {device}?"
@@ -3150,6 +3252,10 @@ msgstr ""
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
 msgid "Copy here"
 msgstr "Kopiera hit"
+
+#: apps/desktop/src/components/shares/SharesList.tsx
+msgid "Copy link"
+msgstr ""
 
 #. Sends the game to another of the user's devices
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
@@ -3684,6 +3790,7 @@ msgstr "Försök inte igen automatiskt"
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
 #: apps/desktop/src/components/sync/PairingHost.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 msgid "Done"
@@ -4173,6 +4280,12 @@ msgstr "Undantag"
 msgid "Executable"
 msgstr "Programfil"
 
+#: apps/desktop/src/components/shares/common.tsx
+#, fuzzy
+#| msgid "This collection doesn't exist any more."
+msgid "Expired: the link doesn't work any more."
+msgstr "Den här samlingen finns inte längre."
+
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
 msgctxt "table column"
 msgid "Extensions"
@@ -4322,6 +4435,10 @@ msgstr "Mappens innehåll"
 msgid "Folder-name template"
 msgstr "Mall för mappnamn"
 
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "For a day"
+msgstr ""
+
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "For a device on another network, or one that isn't found by itself."
 msgstr ""
@@ -4329,6 +4446,10 @@ msgstr ""
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 msgid "For a server on your home network without a public certificate."
 msgstr "För en server i ditt hemnätverk utan ett offentligt certifikat."
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "For a week"
+msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 msgid "For each game. The newest stay, and so does any save that isn't settled between devices yet."
@@ -4342,6 +4463,7 @@ msgstr "För alla konton. Åldersgränser ställs in för varje konto."
 msgid "For new games only"
 msgstr "Bara för nya spel"
 
+#: apps/desktop/src/components/shares/SharesList.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 #, fuzzy
 #| msgid "Delete {name}"
@@ -4379,6 +4501,11 @@ msgstr "Spellagring"
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Free space and required capabilities are checked for every job."
 msgstr "Ledigt utrymme och nödvändiga funktioner kontrolleras för varje jobb."
+
+#. Who shared something
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "From"
+msgstr ""
 
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
 msgctxt "theme source"
@@ -4655,6 +4782,14 @@ msgstr "Kom igång"
 msgid "Getting it from {holder}…"
 msgstr "Hämtar den från {holder}…"
 
+#: apps/desktop/src/components/shares/common.tsx
+msgid "Getting the files ready: {done} of {total}. The link works already."
+msgstr ""
+
+#: apps/desktop/src/components/shares/common.tsx
+msgid "Getting the files ready. The link works already."
+msgstr ""
+
 #: apps/desktop/src/onboarding/DeviceStep.tsx
 msgid "Getting this device ready to pair…"
 msgstr "Gör den här enheten redo att parkoppla…"
@@ -4734,6 +4869,26 @@ msgstr "har samma titel"
 msgid "Hashes and titles that identify games and ROMs come from Hasheous."
 msgstr "Hashvärden och titlar som identifierar spel och ROM-filer kommer från Hasheous."
 
+#: apps/desktop/src/components/shares/SharesList.tsx
+msgid "Help others receive it"
+msgstr ""
+
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+msgid "Help others receive it after it's here"
+msgstr ""
+
+#: apps/desktop/src/components/shares/SharesList.tsx
+msgid "Helping {helping} others receive it."
+msgstr ""
+
+#: apps/desktop/src/components/shares/common.tsx
+msgid "Helping others receive it"
+msgstr ""
+
+#: apps/desktop/src/components/shares/SharesList.tsx
+msgid "Here."
+msgstr ""
+
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "Hidden achievement"
 msgstr "Dold prestation"
@@ -4790,6 +4945,10 @@ msgstr "Hur Caskade ser ut. Teman ändrar stilen på alla vyer via designtokens.
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "How do you play?"
 msgstr "Hur spelar du?"
+
+#: apps/desktop/src/components/shares/common.tsx
+msgid "How far {name} got"
+msgstr ""
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgid "How games are shown in grids."
@@ -4989,7 +5148,9 @@ msgctxt "save version"
 msgid "In use"
 msgstr "Används"
 
+#. A game of a shared collection
 #. A store game the library has but isn't installed
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
 #: apps/desktop/src/views/store/StoreGameView.tsx
 msgid "In your library"
 msgstr "I ditt bibliotek"
@@ -5121,8 +5282,10 @@ msgstr "Installationsdetaljer"
 msgid "Installation status is checked by the backend after saving; configuration does not run an emulator."
 msgstr "Installationsstatus kontrolleras av bakänden efter att du sparat; konfigurationen kör ingen emulator."
 
+#. A game of a shared collection, on this device
 #: apps/desktop/src/api/emulatorSetup.ts
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
 msgid "Installed"
 msgstr "Installerad"
 
@@ -5279,6 +5442,10 @@ msgstr ""
 msgid "It adds"
 msgstr "Det lägger till"
 
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "It arrives as a new version of your saves of {game}. Your own saves stay: the next Play asks which to use."
+msgstr ""
+
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 msgid "It asks there before copying"
 msgstr "Där frågar den innan kopieringen"
@@ -5287,6 +5454,16 @@ msgstr "Där frågar den innan kopieringen"
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "It asks to"
 msgstr "Det ber om att"
+
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "It becomes the offline copy of the web game you have at this address."
+msgstr ""
+
+#: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#, fuzzy
+#| msgid "{device} sends {title} to this computer. It's copied straight from {device} and installed like any other game; nothing is written until you say so."
+msgid "It comes straight from their computer and installs like any other game; nothing is written until you say so."
+msgstr "{device} skickar {title} till den här datorn. Det kopieras direkt från {device} och installeras som alla andra spel; inget skrivs förrän du säger till."
 
 #. placeholder {0}: failure.message
 #: apps/desktop/src/components/addons/AddonDetails.tsx
@@ -5674,9 +5851,15 @@ msgstr "gräns {size}"
 msgid "Line {line}: {problem}"
 msgstr "Rad {line}: {problem}"
 
+#. How long a share link works
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
 msgid "Link"
 msgstr "Länk"
+
+#: apps/desktop/src/components/shares/SharesList.tsx
+msgid "Link copied"
+msgstr ""
 
 #: apps/desktop/src/views/store/StoreGameView.tsx
 msgid "Links"
@@ -5898,6 +6081,13 @@ msgstr "Låst"
 msgid "logs"
 msgstr "loggar"
 
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+#, fuzzy
+#| msgctxt "settings section"
+#| msgid "Look"
+msgid "Look"
+msgstr "Utseende"
+
 #. The appearance
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgctxt "settings section"
@@ -5964,6 +6154,12 @@ msgstr "Görs i bakgrunden till mappen för säkerhetskopior, med samma innehål
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
 msgid "Magnet links and torrent files"
 msgstr "Magnetlänkar och torrentfiler"
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+#, fuzzy
+#| msgid "Get a key"
+msgid "Make a link"
+msgstr "Skaffa en nyckel"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #, fuzzy
@@ -6689,6 +6885,10 @@ msgstr "Inga webbspel än. Lägg till ett med Lägg till webbspel."
 msgid "Nobody entered the code on {device} in time."
 msgstr ""
 
+#: apps/desktop/src/components/shares/common.tsx
+msgid "Nobody has opened the link yet."
+msgstr ""
+
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "none"
 msgstr "inget"
@@ -6792,6 +6992,13 @@ msgstr "inte ifyllt än"
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Not found"
 msgstr "Hittades inte"
+
+#. A game of a shared collection
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+#, fuzzy
+#| msgid "In your library"
+msgid "Not in your library"
+msgstr "I ditt bibliotek"
 
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
 msgid "Not installed"
@@ -7106,6 +7313,10 @@ msgstr "online"
 msgid "Online lookups, and the setup Caskade starts with."
 msgstr "Onlineuppslag och hur Caskade startar."
 
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "Only a relay reaches {sharer}'s computer right now. The game waits for a direct connection: game files don't go through relays."
+msgstr ""
+
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Only an admin can let other devices stream from this one or change the stream quality. Anyone can pair this device with another to play its games."
 msgstr ""
@@ -7309,6 +7520,11 @@ msgstr "Utdata"
 msgid "Overlay the game title on cover art."
 msgstr "Visa speltiteln ovanpå omslagsbilden."
 
+#. A game of a shared collection a store account owns
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "Owned"
+msgstr ""
+
 #: apps/desktop/src/views/game/OwnedReleases.tsx
 msgid "Owned on {provider} ({account})"
 msgstr "Ägs på {provider} ({account})"
@@ -7454,6 +7670,11 @@ msgstr "lösenord och inloggningar"
 msgid "Passwords and sign-ins aren't in backups: sign in to RomM and your stores again afterwards."
 msgstr "Lösenord och inloggningar ingår inte i säkerhetskopior: logga in på RomM och dina butiker igen efteråt."
 
+#: apps/desktop/src/input/OnScreenKeyboard.tsx
+msgctxt "on-screen keyboard"
+msgid "Paste"
+msgstr ""
+
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
 msgid "Paste a magnet link anywhere in Caskade, drop a .torrent file on it, or use Add game. Nothing downloads until you confirm, and nothing is seeded afterwards."
 msgstr "Klistra in en magnetlänk var som helst i Caskade, släpp en .torrent-fil på fönstret eller använd Lägg till spel. Inget laddas ner förrän du bekräftar, och inget delas vidare efteråt."
@@ -7516,8 +7737,10 @@ msgstr "Platser"
 
 #. A ROM scanner's platform
 #. A column of a store game's releases
+#. A shared ROM's platform
 #. ROM scanners table column
 #. The Store's platform filter
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/store/StoreGameView.tsx
 #: apps/desktop/src/views/StoreView.tsx
@@ -8090,6 +8313,44 @@ msgstr "Redo att installera"
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Ready. Devices on this network can pair and play."
 msgstr ""
+
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+#, fuzzy
+#| msgctxt "network"
+#| msgid "Receiving"
+msgid "Receive"
+msgstr "Tar emot"
+
+#: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#, fuzzy
+#| msgctxt "network"
+#| msgid "Receiving"
+msgctxt "button"
+msgid "Receive"
+msgstr "Tar emot"
+
+#: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#, fuzzy
+#| msgid "Remove {name}?"
+msgid "Receive {shared}?"
+msgstr "Ta bort {name}?"
+
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+msgid "Receive a shared game"
+msgstr ""
+
+#: apps/desktop/src/views/activity/AddGame.tsx
+#, fuzzy
+#| msgid "Search every game…"
+msgid "Receive a shared game…"
+msgstr "Sök bland alla spel…"
+
+#: apps/desktop/src/components/shares/common.tsx
+#, fuzzy
+#| msgctxt "network"
+#| msgid "Receiving"
+msgid "Received"
+msgstr "Tar emot"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgctxt "network"
@@ -9302,6 +9563,14 @@ msgctxt "theming docs"
 msgid "Selectors"
 msgstr "Selektorer"
 
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "Send this link to whoever you're sharing {title} ({size}) with. They open it, or paste it in Add game → Receive a shared game. Keep Caskade open until it arrives."
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "Send this link to whoever you're sharing {title} with. They open it, or paste it in Add game → Receive a shared game. Keep Caskade open until it arrives."
+msgstr ""
+
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgctxt "network"
 msgid "Sending"
@@ -9430,6 +9699,29 @@ msgstr "# uppgift behöver uppmärksamhet"
 #| msgid "Keeps going in the background"
 msgid "Setup will keep running in the background."
 msgstr "Fortsätter i bakgrunden"
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+#, fuzzy
+#| msgid "{phase}: {title}"
+msgid "Share {title}"
+msgstr "{phase}: {title}"
+
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+#, fuzzy
+#| msgid "Pairing link"
+msgid "Share link"
+msgstr "Parkopplingslänk"
+
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+msgid "Share with someone…"
+msgstr ""
+
+#. A notification's category
+#: apps/desktop/src/views/activity/NotificationFeed.tsx
+#, fuzzy
+#| msgid "Pairing link"
+msgid "Shared"
+msgstr "Parkopplingslänk"
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
 msgctxt "save version"
@@ -9569,6 +9861,7 @@ msgid "Similar games"
 msgstr "Liknande spel"
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
 msgid "Size"
 msgstr "Storlek"
 
@@ -9875,6 +10168,13 @@ msgstr "Stoppa spelet"
 msgid "Stop refreshing"
 msgstr "Sluta uppdatera"
 
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+#: apps/desktop/src/components/shares/SharesList.tsx
+#, fuzzy
+#| msgid "Stop waiting"
+msgid "Stop sharing"
+msgstr "Sluta vänta"
+
 #: apps/desktop/src/input/GuideMenu.tsx
 msgid "Stop the game? Progress it hasn't saved is lost."
 msgstr "Stoppa spelet? Framsteg som inte har sparats går förlorade."
@@ -9898,6 +10198,12 @@ msgstr "Stoppa"
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "Stopped by a signal"
 msgstr "Stoppades av en signal"
+
+#: apps/desktop/src/components/shares/common.tsx
+#, fuzzy
+#| msgid "This collection doesn't exist any more."
+msgid "Stopped: the link doesn't work any more."
+msgstr "Den här samlingen finns inte längre."
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
 #: apps/desktop/src/views/game/GameView.tsx
@@ -10201,6 +10507,10 @@ msgstr "Kärnan delar upp detta i argv-token och kontrollerar variabler; inget s
 msgid "The backup failed"
 msgstr "Säkerhetskopieringen misslyckades"
 
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+msgid "The caskade://receive link someone sent you."
+msgstr ""
+
 #. placeholder {0}: status.error
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 msgid "The catalogue couldn't be fetched: {0}"
@@ -10246,6 +10556,12 @@ msgstr "Spelet finns kvar och spelas online."
 msgid "The game with this id on igdb.com"
 msgstr "Spelet med detta id på igdb.com"
 
+#: apps/desktop/src/components/shares/common.tsx
+#, fuzzy
+#| msgid "Achievements couldn't be read: {0}"
+msgid "The game's files couldn't be read: {reason}"
+msgstr "Prestationerna kunde inte läsas: {0}"
+
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 msgid "The game's program or shortcut"
 msgstr "Spelets program eller genväg"
@@ -10286,6 +10602,24 @@ msgstr "Den senaste uppdateringskontrollen misslyckades: {error}"
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 msgid "The least recently played games are removed first. 0 is no limit."
 msgstr "Spelen som spelades för längst sedan tas bort först. 0 betyder ingen gräns."
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "The link as a QR code"
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+#, fuzzy
+#| msgid "That didn't work"
+msgid "The link works"
+msgstr "Det fungerade inte"
+
+#: apps/desktop/src/components/shares/common.tsx
+msgid "The link works until {until}."
+msgstr ""
+
+#: apps/desktop/src/components/shares/common.tsx
+msgid "The link works until you stop sharing."
+msgstr ""
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 msgid "The Ludusavi manifest includes data compiled from PCGamingWiki, licensed under CC BY-NC-SA 3.0."
@@ -10476,6 +10810,12 @@ msgstr "Den här enheten"
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "This device can't share its games yet."
 msgstr ""
+
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+#, fuzzy
+#| msgid "Keep this device's emulator for {platform}"
+msgid "This device has an emulator for it."
+msgstr "Behåll den här enhetens emulator för {platform}"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #, fuzzy
@@ -10694,6 +11034,7 @@ msgstr "Pågår"
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/desktop/src/views/settings/emulators/FromDevices.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/desktop/src/views/StoreView.tsx
@@ -10873,6 +11214,10 @@ msgstr "Referensen i inställningsschemat stöds inte."
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
 msgid "Untick what isn't a game, fix titles, platforms and regions, and merge or split discs. Your choices are kept for later automatic scans."
 msgstr "Avmarkera det som inte är spel, rätta titlar, plattformar och regioner, och slå ihop eller dela upp skivor. Dina val sparas till senare automatiska skanningar."
+
+#: apps/desktop/src/components/shares/ShareGameDialog.tsx
+msgid "Until I stop sharing"
+msgstr ""
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
 msgid "Up one folder"
@@ -11208,6 +11553,12 @@ msgstr "Väntar på den första mätningen…"
 msgid "Waiting for the save from {device}"
 msgstr "Väntar på sparfilen från {device}"
 
+#: apps/desktop/src/components/shares/common.tsx
+#, fuzzy
+#| msgid "Waiting for the save from {device}"
+msgid "Waiting for them to come back"
+msgstr "Väntar på sparfilen från {device}"
+
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Waiting for you to finish on the other device…"
 msgstr "Väntar på att du blir klar på den andra enheten…"
@@ -11392,6 +11743,10 @@ msgstr "Vilken emulator varje plattform använder. En som den här enheten sakna
 msgid "Which programs are the game"
 msgstr "Vilka program som är spelet"
 
+#: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
+msgid "While it arrives, this computer helps the share's other recipients. After, it keeps a second copy of the files to go on helping until the share stops."
+msgstr ""
+
 #: apps/desktop/src/onboarding/AccountStep.tsx
 msgid "Who are you?"
 msgstr "Vem är du?"
@@ -11426,6 +11781,12 @@ msgstr "Fönster"
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Window behavior while you play."
 msgstr "Fönstrets beteende medan du spelar."
+
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+#, fuzzy
+#| msgid "A Windows game: it runs here through Proton."
+msgid "Windows (runs through Proton on Linux)"
+msgstr "Ett Windows-spel: det körs här via Proton."
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
 msgid "Windows lists Caskade in Default apps, where you choose it for magnet links and .torrent files."
@@ -11469,6 +11830,14 @@ msgstr "Arbetar…"
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Working… progress and cancellation are available in Activity."
 msgstr "Arbetar… förlopp och avbrytning finns i Aktivitet."
+
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "Works until {until}"
+msgstr ""
+
+#: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+msgid "Works until it's stopped"
+msgstr ""
 
 #. A game release's region
 #: apps/desktop/src/views/store/releases.ts

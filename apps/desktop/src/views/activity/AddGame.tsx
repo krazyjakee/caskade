@@ -8,6 +8,7 @@ import { type InstallInput, type JobSnapshot, mergeJobs } from "../../api/instal
 import { useManualGamesApi } from "../../api/manualGames";
 import { ManualGameDialog, type ManualMode } from "../../components/manualGame/ManualGameDialog";
 import { usePathPicker } from "../../components/pathBrowser/PathPicker";
+import { ReceiveShareDialog } from "../../components/shares/ReceiveShareDialog";
 import { InstallRootPicker } from "../../components/storage/InstallRootPicker";
 import { activityKey, useActivityStorage, useFollowJob, useInstallApi } from "./ActivityProvider";
 
@@ -24,6 +25,8 @@ export function AddGame() {
   // Adding a game by hand (#174), in place or as a title.
   const manual = useManualGamesApi();
   const [adding, setAdding] = useState<ManualMode | null>(null);
+  // A game someone shared through a link (#247).
+  const [receiving, setReceiving] = useState(false);
   const install = useMutation({
     mutationFn: async ({ inputs, rootId }: { inputs: InstallInput[]; rootId?: string }) => {
       const jobs: JobSnapshot[] = [];
@@ -85,6 +88,7 @@ export function AddGame() {
               if (id === "url") setUrlOpen(true);
               else if (id === "manual-target") setAdding("target");
               else if (id === "manual-title") setAdding("title");
+              else if (id === "share") setReceiving(true);
               else if (id === "file" || id === "folder") choose.mutate({ type: id });
             }}
           >
@@ -99,6 +103,11 @@ export function AddGame() {
                 id: "url",
                 title: t`Install from link…`,
                 description: t`A download link or a magnet link`,
+              },
+              {
+                id: "share",
+                title: t`Receive a shared game…`,
+                description: t`A link someone sent you from their Caskade`,
               },
               ...(manual
                 ? [
@@ -120,6 +129,7 @@ export function AddGame() {
         </MenuPopover>
       </MenuTrigger>
       {adding && <ManualGameDialog mode={adding} close={() => setAdding(null)} />}
+      {receiving && <ReceiveShareDialog close={() => setReceiving(false)} onReceived={follow} />}
       {error && !urlOpen && (
         <p role="alert" className="mt-2 max-w-sm text-sm text-danger">
           {error.message}

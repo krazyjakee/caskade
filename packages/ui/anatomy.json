@@ -1099,11 +1099,67 @@
       "interaction": []
     },
     "share": {
+      "parts": [
+        "state",
+        "recipients"
+      ],
+      "states": {
+        "data-status": [
+          "preparing",
+          "ready",
+          "failed",
+          "stopped",
+          "expired"
+        ]
+      },
+      "interaction": []
+    },
+    "share-recipient": {
       "parts": [],
       "states": {
         "data-status": [
-          "open",
-          "expiring"
+          "receiving",
+          "away",
+          "done"
+        ]
+      },
+      "interaction": []
+    },
+    "received-share": {
+      "parts": [],
+      "states": {
+        "data-status": [
+          "receiving",
+          "serving",
+          "done"
+        ]
+      },
+      "interaction": []
+    },
+    "share-game": {
+      "parts": [
+        "link",
+        "qr",
+        "state",
+        "recipients"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "receive-share": {
+      "parts": [],
+      "states": {},
+      "interaction": []
+    },
+    "share-info": {
+      "parts": [
+        "where",
+        "games"
+      ],
+      "states": {
+        "data-status": [
+          "direct",
+          "relayOnly"
         ]
       },
       "interaction": []

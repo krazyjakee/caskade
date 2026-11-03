@@ -1200,12 +1200,72 @@ export const anatomy = {
     contains: ["peer-link"],
   },
   share: {
-    rendered: "CopiesAndShares in Settings → Devices (app)",
+    rendered: "SharesList in Settings → Devices → Copies and shares (app)",
     source: "app",
     description:
-      "A game shared once with someone else (#246): its title, size, how many received it and until when. `data-status` is `open` (no expiry) or `expiring`.",
+      "A game this device shared once with someone else (#246, #247): its title and size, Copy link and Stop sharing while it runs (Forget after), what it is doing and who received it. `data-status` is `preparing` (its files are being read; the link works already), `ready`, `failed`, `stopped` or `expired`.",
+    parts: {
+      state:
+        "What the share is doing: reading its files, until when the link works, or that it stopped.",
+      recipients: "Who opened the link, each with how far they got.",
+    },
+    states: { "data-status": ["preparing", "ready", "failed", "stopped", "expired"] },
+    interaction: [],
+    contains: ["share-recipient"],
+  },
+  "share-recipient": {
+    rendered: "ShareRecipients (app)",
+    source: "app",
+    description:
+      "Someone who opened a share's link (#247): their device's name, whether they help others receive it, and a bar of how far they got. `data-status` is `receiving`, `away` (not connected now) or `done`.",
     parts: {},
-    states: { "data-status": ["open", "expiring"] },
+    states: { "data-status": ["receiving", "away", "done"] },
+    interaction: [],
+  },
+  "received-share": {
+    rendered: "SharesList in Settings → Devices → Copies and shares (app)",
+    source: "app",
+    description:
+      "A game someone shared with this device (#249): its title and sharer, and the Help others receive it switch. `data-status` is `receiving`, `serving` (it helps the share's other recipients) or `done`.",
+    parts: {},
+    states: { "data-status": ["receiving", "serving", "done"] },
+    interaction: [],
+  },
+  "share-game": {
+    rendered: "ShareGameDialog (app)",
+    source: "app",
+    description:
+      "Share with someone… (#247): how long the link works, then the link with Copy (and, in console mode, a QR code), what the share is doing, who received it, and Stop sharing.",
+    parts: {
+      link: "The share link, selectable.",
+      qr: "The link as a QR code, in console mode.",
+      state: "What the share is doing.",
+      recipients: "Who opened the link.",
+    },
+    states: {},
+    interaction: [],
+    contains: ["share-recipient"],
+  },
+  "receive-share": {
+    rendered: "ReceiveShareDialog (app)",
+    source: "app",
+    description:
+      "Add game → Receive a shared game… (#247): the link, what its sharer says it shares, Help others receive it, and Receive.",
+    parts: {},
+    states: {},
+    interaction: [],
+    contains: ["share-info"],
+  },
+  "share-info": {
+    rendered: "ShareInfoDetails (app)",
+    source: "app",
+    description:
+      "What a share link shares, as its sharer says (#247, #248): who, what, its size and build, until when the link works; for a save, web game or ROM, where it goes here; for a collection, which of its games this device has. `data-status` is `direct`, or `relayOnly` when only a relay reaches the sharer and files wait for a direct connection.",
+    parts: {
+      where: "Where a save, web game or ROM goes on this device.",
+      games: "A shared collection's games, each with whether it's here (`data-status`).",
+    },
+    states: { "data-status": ["direct", "relayOnly"] },
     interaction: [],
   },
   "pair-device": {

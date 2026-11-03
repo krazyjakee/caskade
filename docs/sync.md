@@ -841,6 +841,30 @@ expires (a day, a week, or until stopped). Only `to_url` writes a link out:
   its size, the program relative to the folder and the sharer's own direct
   addresses.
 
+**In the app** (#247, `components/shares/`, `api/shares.ts`):
+
+- **Share with someone…** in a game's menu (Your devices) opens `ShareGameDialog`. The
+  user picks how long the link works (a day, a week, until stopped), then gets the link
+  with Copy, what the share is doing, who received it, and Stop sharing. Console mode adds
+  the link as a QR code (`share_qr`, an SVG from the `qrcode` crate), for a phone to pass
+  on. The dialog also takes #248's items (`ShareTarget` `item`).
+- **Add game → Receive a shared game…** (`ReceiveShareDialog`) takes a pasted link. A pad
+  pastes on the on-screen keyboard's Paste key (`clipboard_read_text`; Copy buttons write
+  through `clipboard_write_text`, since a webview allows the clipboard only for a click or
+  a key). It asks the sharer what the link holds (`ShareInfoDetails`: who, size, build,
+  expiry, whether only a relay reaches them; for #248's kinds, where it goes and which of
+  a collection's games are here). Receive starts the copy job. Help others receive it
+  after it's here sets `keep_helping`, and a collection is added to the account's
+  collections and opens.
+- **Links from outside.** A `caskade://receive` link opened from outside waits in the
+  install confirmation with the same details. A collection's link is confirmed with
+  `confirm_share_collection`.
+- **Settings → Devices → Copies and shares** lists the shares (Copy link and Stop sharing
+  while one runs, Forget after; each recipient's progress and whether they help) and what
+  was received (the Help others receive it switch).
+- **Notification.** Someone receiving everything of a share is a notification
+  (`shareReceived`, `Event::ShareReceived`).
+
 **Off the local network.** The `share` session itself may go through a relay
 (it carries no game data), and that connection is how both ends learn each
 other's direct addresses: iroh's hole punching and the port mapping it asks

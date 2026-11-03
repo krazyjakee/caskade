@@ -212,6 +212,14 @@ impl Shares {
                         .store
                         .set_share_progress(&id, &recipient, size, Some(crate::now_ms()))
                         .await;
+                    if let Some(bus) = self.inner.bus.get() {
+                        bus.emit(crate::bus::Event::ShareReceived {
+                            share_id: id.clone(),
+                            title: row.title.clone(),
+                            recipient: name.clone(),
+                            endpoint: recipient.clone(),
+                        });
+                    }
                     self.changed();
                 }
                 Message::Serving { addrs } => {

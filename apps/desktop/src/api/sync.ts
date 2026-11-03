@@ -11,10 +11,10 @@ import { isTauri } from "@tauri-apps/api/core";
 import { createContext, createElement, type ReactNode, useContext, useEffect } from "react";
 import {
   commands,
+  type DeviceGame_Serialize,
   type DeviceKind,
   type DeviceLink,
   type DeviceOs,
-  type DeviceGame_Serialize,
   type DevicesStatus_Serialize,
   events,
   type IdentityStatus,
@@ -69,16 +69,6 @@ export interface Transfer {
   state: "running" | "waitingDirect" | "done" | "failed";
 }
 
-/** A game shared once with someone else (#246). */
-export interface Share {
-  id: string;
-  title: string;
-  createdAtMs: number;
-  expiresAtMs: number | null;
-  sizeBytes: number;
-  recipients: number;
-}
-
 export interface SyncApi {
   status(): Promise<DevicesStatus>;
   /** Renames this device; empty goes back to the host name. */
@@ -119,10 +109,9 @@ export interface SyncApi {
   /** After the keychain lost this device's key: a new identity. */
   createIdentity(): Promise<void>;
   retryIdentity(): Promise<void>;
-  /** Copies between devices (#233) and shares (#246): none until those
-   * exist, so the app shows nothing for them. */
+  /** Copies between devices going on (#233). Shares (#246) are
+   * `api/shares.ts`'s. */
   transfers(): Promise<Transfer[]>;
-  shares(): Promise<Share[]>;
   /** Called on every change, with a pairing link opened from outside. */
   subscribe(listener: (opened?: PairingLinkTarget) => void): () => void;
 }
@@ -156,7 +145,6 @@ export const nativeSyncApi: SyncApi = {
   createIdentity: () => unwrap(commands.devicesCreateIdentity()).then(nothing),
   retryIdentity: () => unwrap(commands.devicesRetryIdentity()).then(nothing),
   transfers: () => unwrap(commands.devicesTransfers()),
-  shares: async () => [],
   subscribe: (listener) => {
     const changes = effectSubscription(events.devicesChanged.listen, () => listener());
     const opened = effectSubscription(events.pairingLinkOpened.listen, ({ payload }) =>
@@ -223,7 +211,6 @@ export function useTransfers() {
     refetchInterval: (query) => ((query.state.data?.length ?? 0) > 0 ? 2000 : false),
   });
 }
-export const useShares = () => useSyncQuery(["shares"], (api) => api.shares());
 export const usePeerCopies = (gameId: string) =>
   useSyncQuery(["copies", gameId], (api) => api.copies(gameId));
 
