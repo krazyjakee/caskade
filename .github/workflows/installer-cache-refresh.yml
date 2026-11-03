@@ -1,0 +1,41 @@
+name: installer-cache-refresh
+# Replaces the umu, Steam Runtime and UMU-Proton cache that installer-linux-native
+# and installer-nightly restore. User initiated, on master only: GitHub scopes
+# caches to the branch that saved them, so master's copy is the one every run
+# (pull requests included) can read, and only master runs can write it.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: installer-cache-refresh
+  cancel-in-progress: false
+jobs:
+  refresh:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      # Deletes the cache entry it replaces.
+      actions: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Xvfb for the warm-up wineboot
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends xvfb xauth libvulkan1 libgl1 libegl1 libgl1-mesa-dri
+      - name: Download the pinned umu and let it fetch the Steam Runtime and UMU-Proton
+        run: xvfb-run -a python3 xtask/runner/warm-proton.py --cache ~/caskade-cache
+      - name: Drop the previous cache entry
+        env:
+          KEY: installer-proton-${{ hashFiles('xtask/runner/warm-proton.py') }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh cache delete "$KEY" --ref refs/heads/master || echo "no previous $KEY on master"
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/caskade-cache/native/share
+          key: installer-proton-${{ hashFiles('xtask/runner/warm-proton.py') }}

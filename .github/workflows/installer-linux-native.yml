@@ -1,0 +1,110 @@
+name: installer-linux-native
+# The installer's serial Linux native profile on a GitHub-hosted runner:
+# Proton install/launch/own-uninstaller, the Debian/Fedora delegates in the
+# runner's Docker, the Flatpak sandbox and the second-filesystem moves. Pull
+# requests run it only with the `run-native` label (only maintainers can add
+# one); forks still get a read-only token, no secrets and a hosted machine.
+on:
+  push:
+    branches: [master]
+  schedule:
+    - cron: '17 1 * * *'
+  workflow_dispatch:
+  pull_request:
+    types: [labeled, synchronize, reopened]
+permissions:
+  contents: read
+concurrency:
+  group: installer-linux-native-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  native:
+    if: >-
+      github.event_name != 'pull_request' ||
+      contains(github.event.pull_request.labels.*.name, 'run-native')
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      CARGO_TERM_COLOR: always
+      CASKADE_TEST_NATIVE: '1'
+      INSTA_UPDATE: 'no'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Room for Proton, the Steam Runtime and the build
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          df -h / /mnt
+      - name: Flatpak, D-Bus, Xvfb and the Vulkan/GL loaders Proton needs
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            flatpak dbus xvfb xauth libvulkan1 libgl1 libegl1 libgl1-mesa-dri time util-linux
+          docker info --format '{{.ServerVersion}}'
+      - name: Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustc -Vv
+      - uses: taiki-e/install-action@682ce6c3c696a4cd5168a05f98e51aa02b877941 # v2.89.1
+        with:
+          tool: cargo-nextest@0.9.114
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: installer-native
+          cache-on-failure: true
+      # The #62 moves need a second filesystem with room for a 4 GiB Proton
+      # prefix: the runner's separate /mnt disk, else a private tmpfs.
+      - name: Second filesystem for the move tests
+        run: |
+          if [ "$(findmnt -no SOURCE --target /mnt)" != "$(findmnt -no SOURCE --target "$GITHUB_WORKSPACE")" ]; then
+            sudo install -d -o "$(id -u)" -g "$(id -g)" /mnt/caskade-move
+          else
+            sudo install -d /mnt/caskade-move
+            sudo mount -t tmpfs -o rw,exec,nosuid,nodev,size=8g tmpfs /mnt/caskade-move
+            sudo chown "$(id -u):$(id -g)" /mnt/caskade-move
+          fi
+          findmnt --target /mnt/caskade-move
+          echo "CASKADE_TEST_MOVE_ROOT=/mnt/caskade-move" >> "$GITHUB_ENV"
+      - name: Provision the SHA-verified official 7-Zip sidecar
+        run: |
+          python3 scripts/7zz-download.py > sidecar.json
+          python3 -c "import json,os; d=json.load(open('sidecar.json')); f=open(os.environ['GITHUB_ENV'],'a'); f.write('CASKADE_7ZZ='+d['program']+'\n'); f.close()"
+      # installer-cache-refresh replaces this cache; a miss (GitHub evicts
+      # caches unused for 7 days) warms it here from the same pinned umu.
+      - name: Restore the umu, Steam Runtime and UMU-Proton cache
+        id: proton
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/caskade-cache/native/share
+          key: installer-proton-${{ hashFiles('xtask/runner/warm-proton.py') }}
+      - name: Warm the Proton cache after a miss
+        if: steps.proton.outputs.cache-hit != 'true'
+        run: xvfb-run -a python3 xtask/runner/warm-proton.py --cache ~/caskade-cache
+      - name: Save the warmed Proton cache
+        if: steps.proton.outputs.cache-hit != 'true' && github.event_name != 'pull_request'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/caskade-cache/native/share
+          key: installer-proton-${{ hashFiles('xtask/runner/warm-proton.py') }}
+      - name: Copy the cached tools into a private XDG tree
+        run: python3 xtask/runner/prepare-proton.py --cache ~/caskade-cache --destination "$GITHUB_WORKSPACE/target/native-home/share" --evidence target/native-cache.json
+      - name: Native Proton install, launch, registry self-check and own-uninstaller proof
+        run: python3 xtask/runner/native-profile.py --proton
+      - name: Native serial profile, including Debian, Fedora and Flatpak delegates
+        if: ${{ !cancelled() }}
+        run: python3 xtask/runner/native-profile.py
+      - name: Upload native evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: installer-linux-native-${{ github.run_id }}
+          path: |
+            sidecar.json
+            target/native-cache.json
+            target/proton-junit.xml
+            target/native-junit.xml
+            crates/caskade-installer/tests/fixtures/src/linux-mini/STEAM-DECK.md
+          retention-days: 14
+          if-no-files-found: ignore
