@@ -1,5 +1,5 @@
 use super::*;
-use crate::commands::test_ipc::invoke;
+use crate::commands::test_ipc::{assert_report, invoke};
 use caskade_core::{AppPaths, db::LibraryStore};
 use serde_json::{Value, json};
 use tauri::{
@@ -36,6 +36,7 @@ impl Run {
                 theme_resolve::<MockRuntime>,
                 appearance_safe_mode::<MockRuntime>,
                 themes_list::<MockRuntime>,
+                theme_stylesheet,
                 crate::commands::settings::settings_get,
                 crate::commands::settings::settings_set,
             ])
@@ -133,6 +134,13 @@ fn the_chosen_theme_survives_a_restart_and_a_removed_one_falls_back_with_a_notic
             .unwrap()
             .contains("isn't installed any more")
     );
+    let gone = invoke(
+        &run.window,
+        "theme_stylesheet",
+        json!({ "id": "dev.example.neon" }),
+    )
+    .unwrap_err();
+    assert_report(&gone, "invalid", &["dev.example.neon"]);
     let settings = invoke(
         &run.window,
         "settings_get",

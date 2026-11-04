@@ -100,18 +100,17 @@ async fn explicit_review_imports_retained_groups_and_never_marks_unrelated_entri
         )
         .await
         .unwrap();
-    assert!(
-        controller
-            .review(vec![id.clone()], true, snapshot.revision - 1)
-            .await
-            .is_err()
-    );
-    assert!(
-        controller
-            .review(vec!["client-authored".into()], true, snapshot.revision)
-            .await
-            .is_err()
-    );
+    let stale = controller
+        .review(vec![id.clone()], true, snapshot.revision - 1)
+        .await
+        .unwrap_err();
+    assert_eq!(stale.code, crate::error::ErrorCode::Conflict);
+    let unknown = controller
+        .review(vec!["client-authored".into()], true, snapshot.revision)
+        .await
+        .unwrap_err();
+    assert_eq!(unknown.code, crate::error::ErrorCode::Conflict);
+    assert!(!unknown.summary.contains("client-authored"));
     let accepted = controller
         .review(vec![id], true, snapshot.revision)
         .await
@@ -282,14 +281,13 @@ fn every_exposed_deep_and_source_preference_changes_the_scan_configuration() {
     let serialized = serde_json::to_value(config.sources).unwrap();
     assert!(serialized.to_string().contains("steam.shortcuts"));
     preferences.scan_paths = vec!["relative/untrusted".into()];
-    assert!(
-        config::scan_config(
-            &preferences,
-            &launchers,
-            caskade_discovery::OperatingSystem::Linux
-        )
-        .is_err()
-    );
+    let relative = config::scan_config(
+        &preferences,
+        &launchers,
+        caskade_discovery::OperatingSystem::Linux,
+    )
+    .unwrap_err();
+    assert_eq!(relative.code, crate::error::ErrorCode::Invalid);
     for (value, seconds) in [
         ("1h", 3600),
         ("6h", 21600),
@@ -336,4 +334,28 @@ async fn a_settings_change_cancels_only_a_scan_it_makes_out_of_date() {
         .unwrap();
     controller.cancel_if_outdated().await;
     assert!(running.is_cancelled());
+}
+
+#[test]
+fn wrapped_failures_are_classified_and_name_no_type() {
+    use crate::error::ErrorCode;
+    let settings = failure(caskade_sources::Error::Settings(
+        caskade_core::settings::SettingsError::Unknown("core.discovery".into()),
+    ));
+    assert_eq!(settings.code, ErrorCode::Unavailable);
+    assert!(!settings.summary.contains("core.discovery"), "{settings:?}");
+    let denied = failure(caskade_sources::Error::Core(caskade_core::Error::Io(
+        std::io::Error::from(std::io::ErrorKind::PermissionDenied),
+    )));
+    assert_eq!(denied.code, ErrorCode::AccessDenied);
+    let usage = failure(caskade_sources::Error::Discovery(
+        caskade_discovery::Error::Usage("bad source key".into()),
+    ));
+    assert_eq!(usage.code, ErrorCode::Internal);
+    assert!(!usage.summary.contains("source key"), "{usage:?}");
+    assert_eq!(usage.detail.as_deref(), Some("bad source key"));
+    assert_eq!(
+        failure(caskade_sources::Error::Cancelled).code,
+        ErrorCode::Cancelled
+    );
 }

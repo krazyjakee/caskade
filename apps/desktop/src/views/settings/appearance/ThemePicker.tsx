@@ -11,6 +11,7 @@ import { useContext, useEffect } from "react";
 import { Radio, RadioGroup } from "react-aria-components";
 import { effectSubscription } from "../../../api/subscription";
 import { useActionMenus } from "../../../components/ActionMenu";
+import { FailureNotice } from "../../../components/FailureNotice";
 import { usePathPicker } from "../../../components/pathBrowser/PathPicker";
 import { useDropZone } from "../../../drop/DropProvider";
 import { type InstalledTheme, ThemesApiContext } from "../../../themes/api";
@@ -149,7 +150,6 @@ export function ThemePicker({
   });
   const notice =
     active?.notice && (active.safeMode || active.requested === value) ? active.notice : null;
-  const error = themes.error ?? rescan.error ?? load.error;
   // A right click on a theme offers to use it.
   const menus = useActionMenus();
   // Development builds: a theme folder dropped on the picker loads too.
@@ -170,34 +170,63 @@ export function ThemePicker({
           {notice}
         </p>
       )}
-      <RadioGroup
-        aria-label={t`Theme`}
-        value={value}
-        onChange={onChange}
-        className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3"
-      >
-        {(themes.data ?? []).map((theme, index) => (
-          <ThemeOption
-            key={`${theme.source}:${theme.folder ?? theme.id}`}
-            theme={theme}
-            // Broken themes (a duplicate id among them) never match the choice.
-            value={theme.problems.length > 0 ? `unusable:${index}` : theme.id}
-            menu={menus.target(theme.name, [
-              {
-                id: "use",
-                label: t`Use this theme`,
-                icon: Check,
-                isDisabled: theme.problems.length > 0 || theme.id === value,
-                description: theme.problems.length > 0 ? t`It has problems` : undefined,
-                onAction: () => onChange(theme.id),
-              },
-            ])}
-          />
-        ))}
-      </RadioGroup>
+      {themes.isPending && (
+        <p role="status" className="text-sm text-fg-muted">
+          <Trans>Loading…</Trans>
+        </p>
+      )}
+      {themes.error && (
+        <FailureNotice
+          variant="inline"
+          error={themes.error}
+          title={t`Themes couldn't be loaded`}
+          onRetry={() => void themes.refetch()}
+        />
+      )}
+      {themes.data?.length === 0 && (
+        <p className="text-sm text-fg-muted">
+          <Trans>No themes found. Rescan themes looks for them again.</Trans>
+        </p>
+      )}
+      {themes.data && themes.data.length > 0 && (
+        <RadioGroup
+          aria-label={t`Theme`}
+          value={value}
+          onChange={onChange}
+          className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3"
+        >
+          {themes.data.map((theme, index) => (
+            <ThemeOption
+              key={`${theme.source}:${theme.folder ?? theme.id}`}
+              theme={theme}
+              // Broken themes (a duplicate id among them) never match the choice.
+              value={theme.problems.length > 0 ? `unusable:${index}` : theme.id}
+              menu={menus.target(theme.name, [
+                {
+                  id: "use",
+                  label: t`Use this theme`,
+                  icon: Check,
+                  isDisabled: theme.problems.length > 0 || theme.id === value,
+                  description: theme.problems.length > 0 ? t`It has problems` : undefined,
+                  onAction: () => onChange(theme.id),
+                },
+              ])}
+            />
+          ))}
+        </RadioGroup>
+      )}
       {menus.menu}
+      {rescan.error && (
+        <FailureNotice variant="inline" error={rescan.error} onRetry={() => rescan.mutate()} />
+      )}
+      {load.error && (
+        <FailureNotice
+          variant="inline"
+          error={load.error}
+          onRetry={() => load.mutate(load.variables)}
+        />
+      )}
       <div className="flex flex-wrap items-center justify-end gap-2">
-        {error && <span className="mr-auto text-xs text-danger">{String(error)}</span>}
         <Button
           variant="ghost"
           size="sm"

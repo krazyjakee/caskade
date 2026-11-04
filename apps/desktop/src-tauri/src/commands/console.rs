@@ -7,6 +7,7 @@
 //! (`0` keeps it out), or by the `core.console` setting: `auto` follows
 //! gamescope (Steam Deck game mode), then the mode it was last left in.
 
+use crate::tray::Tray;
 use caskade_core::settings::{ConsoleSettings, SettingsService};
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -165,6 +166,25 @@ pub fn is_on<R: Runtime>(app: &AppHandle<R>) -> bool {
         .is_some_and(|console| console.active())
 }
 
+/// Whether a close puts the desktop window back now. Not while the webview
+/// holds it: leaving console mode swaps the shell, and that remounts Settings
+/// and drops the edits it's about to ask about.
+fn restores_on_close<R: Runtime>(app: &AppHandle<R>) -> bool {
+    is_on(app) && !app.try_state::<Tray>().is_some_and(|tray| tray.held())
+}
+
+/// Puts the desktop window back before an exit that can't go through a
+/// close, and gives it the time a close would.
+pub fn restore_before_exit<R: Runtime>(app: &AppHandle<R>) {
+    if !is_on(app) {
+        return;
+    }
+    if let Err(error) = switch(app, false) {
+        tracing::warn!(%error, "couldn't leave console mode before exiting");
+    }
+    std::thread::sleep(CLOSE_AFTER_RESTORE);
+}
+
 /// Turns console mode on or off for the main window and tells the webview.
 pub fn switch<R: Runtime>(app: &AppHandle<R>, active: bool) -> Result<(), String> {
     change(app, active, None)
@@ -269,7 +289,7 @@ pub fn setup<R: Runtime>(app: &AppHandle<R>, startup: Startup, service: &Setting
         let tauri::WindowEvent::CloseRequested { api, .. } = event else {
             return;
         };
-        if !handle.state::<ConsoleWindow>().active() {
+        if !restores_on_close(&handle) {
             return;
         }
         api.prevent_close();
@@ -304,9 +324,20 @@ pub async fn set_console_mode<R: Runtime>(
     app: AppHandle<R>,
     active: bool,
     service: tauri::State<'_, SettingsService>,
-) -> Result<(), String> {
-    switch(&app, active)?;
-    remember(&service, active).await
+) -> Result<(), crate::error::CommandError> {
+    switch(&app, active).map_err(crate::error::internal)?;
+    remember(&service, active)
+        .await
+        .map_err(crate::error::internal)
+}
+
+/// Holds closes of the main window while the webview has unsaved edits, so
+/// it can ask before one quits (`tray::Tray::hold` has what each call says).
+/// Every account may call it: it asks, and the core's rules are untouched.
+#[tauri::command]
+#[specta::specta]
+pub fn close_hold(held: bool, tray: tauri::State<'_, Tray>) {
+    tray.hold(held);
 }
 
 #[cfg(test)]

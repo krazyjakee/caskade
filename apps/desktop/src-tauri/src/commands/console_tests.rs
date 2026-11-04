@@ -267,3 +267,89 @@ fn the_toggle_switches_the_window_remembers_the_choice_and_tells_the_webview() {
         tauri::async_runtime::block_on(service.read_or_default(super::SETTINGS));
     assert!(Startup::default().console(&preferences));
 }
+
+/// `close_hold` from the webview, on a console window: a held close doesn't
+/// quit or leave console mode, a release lets it through, and Stay forgets
+/// the quit.
+#[test]
+fn the_webview_holds_a_close_until_it_has_asked() {
+    use crate::tray::Close;
+
+    let store = tauri::async_runtime::block_on(LibraryStore::in_memory()).unwrap();
+    let service = SettingsService::new(store);
+    service
+        .register_core(&caskade_core::AppPaths::under(std::path::Path::new(
+            "fixture",
+        )))
+        .unwrap();
+    let specta = tauri_specta::Builder::<MockRuntime>::new()
+        .commands(tauri_specta::collect_commands![
+            close_hold,
+            set_console_mode::<MockRuntime>
+        ])
+        .events(tauri_specta::collect_events![ConsoleModeEvent]);
+    let app = mock_builder()
+        .manage(service.clone())
+        .invoke_handler(specta.invoke_handler())
+        .build(mock_context(noop_assets()))
+        .unwrap();
+    specta.mount_events(&app);
+    let window = tauri::WebviewWindowBuilder::new(&app, "main", Default::default())
+        .build()
+        .unwrap();
+    setup(app.handle(), Startup::default(), &service);
+    crate::tray::attach(app.handle(), &service);
+    let tray = app.state::<Tray>();
+    tray.set_shown(true);
+    let hold = |held: bool| {
+        invoke(&window, "close_hold", serde_json::json!({ "held": held })).unwrap();
+    };
+    let console = |active: bool| {
+        invoke(
+            &window,
+            "set_console_mode",
+            serde_json::json!({ "active": active }),
+        )
+        .unwrap();
+    };
+
+    // Nothing held: console mode restores, as ever.
+    console(true);
+    assert!(restores_on_close(app.handle()));
+
+    // Edits: the close waits, in console mode, and nothing restores.
+    hold(true);
+    assert!(!restores_on_close(app.handle()));
+    assert!(is_on(app.handle()));
+    assert!(matches!(tray.close(true), Close::Held(_)));
+
+    // Save or Discard: released, the same close goes on through the restore.
+    hold(false);
+    assert!(restores_on_close(app.handle()));
+    assert_eq!(tray.close(true), Close::Go);
+    console(false);
+
+    // The tray's Quit waits too, and hearing it doesn't forget it.
+    hold(true);
+    tray.quit();
+    let Close::Held(quit) = tray.close(false) else {
+        panic!("the quit wasn't held");
+    };
+    assert!(tray.unanswered(quit));
+    hold(true);
+    assert!(!tray.unanswered(quit));
+    assert!(!tray.hides_on_close(false), "the quit is still on");
+
+    // Stay: a fresh hold forgets the quit, so the close button hides again.
+    hold(false);
+    hold(true);
+    assert!(tray.hides_on_close(false));
+    assert_eq!(tray.close(false), Close::Hide);
+
+    // A release after hearing a quit keeps it: the next close quits.
+    tray.quit();
+    assert!(matches!(tray.close(false), Close::Held(_)));
+    hold(true);
+    hold(false);
+    assert_eq!(tray.close(false), Close::Go);
+}

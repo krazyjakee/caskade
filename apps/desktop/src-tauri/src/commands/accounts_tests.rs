@@ -2,7 +2,10 @@
 //! webview bypassed, collections follow the active account, and every
 //! change reaches the webview as `account-changed`.
 use super::*;
-use crate::commands::{collections::*, test_ipc::invoke};
+use crate::commands::{
+    collections::*,
+    test_ipc::{assert_report, invoke},
+};
 use caskade_core::{bus::Bus, db::LibraryStore};
 use serde_json::{Value, json};
 use std::{
@@ -109,7 +112,14 @@ fn accounts_sign_in_change_and_own_their_collections_over_ipc() {
     )
     .unwrap_err()
     .to_string();
-    assert!(unlock.contains("every admin needs a PIN"), "{unlock}");
+    assert!(unlock.contains("Every admin needs a PIN"), "{unlock}");
+    let gone = invoke(
+        &window,
+        "account_set_pin",
+        json!({"id": "account-1", "pin": null}),
+    )
+    .unwrap_err();
+    assert_report(&gone, "invalid", &["account-1"]);
 
     let couch = json!({"collection": {"id": null, "name": "Couch", "description": "",
         "kind": {"type": "manual"}}});

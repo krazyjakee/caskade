@@ -172,6 +172,7 @@ pub fn access(command: &str) -> Option<Access> {
         | "choose_install_folder"
         | "storage_choose_directory"
         | "set_console_mode"
+        | "close_hold"
         | "guide_return_to_game"
         | "plugin_view_opened"
         // Settings → Statistics only reads the machine (#156).
@@ -271,7 +272,13 @@ pub fn access(command: &str) -> Option<Access> {
         | "romm_server_test"
         | "romm_cache_clear" => Section("emulators"),
         "theme_load_unpacked" => Section("appearance"),
-        "storage_add" | "storage_edit" | "storage_default" | "storage_remove" => Section("storage"),
+        // Moving a location's games and removing it also needs installs:
+        // `storage_move_and_remove` checks that itself.
+        "storage_add"
+        | "storage_edit"
+        | "storage_default"
+        | "storage_remove"
+        | "storage_move_and_remove" => Section("storage"),
         "plugin_enable"
         | "plugin_disable"
         | "plugin_install_preview"
@@ -348,6 +355,8 @@ pub fn access(command: &str) -> Option<Access> {
         "streaming_accept_pairing" | "streaming_decline_pairing" | "streaming_unpair" => Admin,
         // Remembering a device to stream from changes what everyone sees.
         "streaming_add_host" => SignedIn,
+        // How games look on this device is anyone's to choose (#66).
+        "streaming_set_quality" => SignedIn,
         "streaming_set_hosting" | "streaming_use_existing" => Admin,
         // Its upkeep (#266): what's installed is anyone's to see.
         "streaming_programs" => Open,

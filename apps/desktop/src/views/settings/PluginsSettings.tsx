@@ -1,9 +1,9 @@
-import { Button, StatusDot, Switch } from "@caskade/ui";
+import { Button, SettingsSection, StatusDot, Switch } from "@caskade/ui";
 import { i18n, type MessageDescriptor } from "@lingui/core";
 import { msg, t as translate } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FolderOpen, Power, ShieldCheck, Trash2 } from "lucide-react";
+import { FolderOpen, Info, Power, Puzzle, ShieldCheck, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import {
@@ -50,6 +50,22 @@ function accessLines(plugin: PluginSummary): string[] {
   ];
 }
 
+/** A plugin's access in a few words, for its row; its details say the rest. */
+function accessSummary(plugin: PluginSummary): string {
+  if (plugin.hasUi) return translate`Same access as the app`;
+  const permissions = plugin.permissions;
+  const uses: string[] = [];
+  if (permissions?.network.length)
+    uses.push(translate({ message: "network", context: "plugin access" }));
+  if (permissions?.fs.length) uses.push(translate({ message: "files", context: "plugin access" }));
+  if (permissions?.process) uses.push(translate({ message: "programs", context: "plugin access" }));
+  if (permissions && permissions.library !== "none")
+    uses.push(translate({ message: "your library", context: "plugin access" }));
+  return uses.length > 0
+    ? translate`Uses ${{ what: uses.join(", ") }}`
+    : translate`Nothing beyond its own storage`;
+}
+
 function contributionLines(plugin: PluginSummary): string[] {
   const contributes = plugin.contributes;
   if (!contributes) return [];
@@ -89,22 +105,23 @@ const statusTone = (status: PluginSummary["status"]) =>
         ? ("danger" as const)
         : ("off" as const);
 
-/** Name, version, contributions and permissions, before anything is granted. */
+/** Name, version, contributions and permissions, before anything is
+ * granted; without `accept`, an installed plugin's details. */
 export function ReviewDialog({
   plugin,
   installedVersion,
   action,
-  busy,
+  busy = false,
   error,
   accept,
   close,
 }: {
   plugin: PluginSummary;
   installedVersion?: string | null;
-  action: string;
-  busy: boolean;
+  action?: string;
+  busy?: boolean;
   error?: string;
-  accept: () => void;
+  accept?: () => void;
   close: () => void;
 }) {
   const { t } = useLingui();
@@ -138,7 +155,11 @@ export function ReviewDialog({
           {valid ? (
             <>
               <h3 className="mt-4 text-sm font-semibold">
-                <Trans comment="Heading over a plugin's permissions">It asks to</Trans>
+                {accept ? (
+                  <Trans comment="Heading over a plugin's permissions">It asks to</Trans>
+                ) : (
+                  <Trans comment="Heading over an installed plugin's permissions">It can</Trans>
+                )}
               </h3>
               <ul aria-label={t`Permissions`} className="mt-1 list-disc pl-5 text-sm">
                 {capabilities.length > 0 ? (
@@ -178,12 +199,20 @@ export function ReviewDialog({
             </p>
           )}
           <div className="mt-6 flex justify-end gap-2">
-            <Button variant="secondary" onPress={close} isDisabled={busy}>
-              <Trans>Cancel</Trans>
-            </Button>
-            <Button onPress={accept} isDisabled={!valid || busy}>
-              {action}
-            </Button>
+            {accept ? (
+              <>
+                <Button variant="secondary" onPress={close} isDisabled={busy}>
+                  <Trans>Cancel</Trans>
+                </Button>
+                <Button onPress={accept} isDisabled={!valid || busy}>
+                  {action}
+                </Button>
+              </>
+            ) : (
+              <Button variant="secondary" onPress={close}>
+                <Trans>Close</Trans>
+              </Button>
+            )}
           </div>
         </Dialog>
       </Modal>
@@ -194,9 +223,11 @@ export function ReviewDialog({
 function PluginRow({
   plugin,
   review,
+  details,
 }: {
   plugin: PluginSummary;
   review: (plugin: PluginSummary) => void;
+  details: (plugin: PluginSummary) => void;
 }) {
   const { t } = useLingui();
   const toggle = useSetPluginEnabled();
@@ -208,7 +239,6 @@ function PluginRow({
     onSuccess: () => client.invalidateQueries({ queryKey: ["plugins"] }),
   });
   const on = plugin.status === "enabled" || plugin.status === "active";
-  const capabilities = accessLines(plugin);
   // A right click offers the row's buttons.
   const menus = useActionMenus();
   return (
@@ -228,6 +258,7 @@ function PluginRow({
               isDisabled: plugin.status === "invalid" || toggle.isPending,
               onAction: () => toggle.mutate({ id: plugin.id, enabled: !on }),
             },
+        { id: "details", label: t`Details`, icon: Info, onAction: () => details(plugin) },
         {
           id: "uninstall",
           label: t`Uninstall…`,
@@ -238,9 +269,9 @@ function PluginRow({
       ])}
       data-part="plugin"
       data-status={plugin.status}
-      className="flex flex-wrap items-start justify-between gap-4 rounded-panel border border-border bg-surface-raised p-4"
+      className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 border-t border-border py-3 first:border-t-0"
     >
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-[1_1_16rem]">
         <div className="flex flex-wrap items-center gap-3">
           <h3 className="font-semibold">{plugin.name}</h3>
           {plugin.version && (
@@ -258,20 +289,10 @@ function PluginRow({
           )}
         </div>
         {plugin.description && <p className="mt-1 text-sm text-fg-muted">{plugin.description}</p>}
-        {capabilities.length > 0 && (
-          <ul
-            aria-label={t`${{ plugin: plugin.name }} permissions`}
-            className="mt-2 flex flex-wrap gap-2"
-          >
-            {capabilities.map((line) => (
-              <li
-                key={line}
-                className="rounded-control border border-border px-2 py-0.5 text-xs text-fg-muted"
-              >
-                {line}
-              </li>
-            ))}
-          </ul>
+        {plugin.status !== "invalid" && (
+          <p data-part="access" className="mt-1 text-xs text-fg-muted">
+            {accessSummary(plugin)}
+          </p>
         )}
         {plugin.status === "invalid" && (
           <p className="mt-2 text-sm text-danger">
@@ -290,7 +311,15 @@ function PluginRow({
           </p>
         )}
       </div>
-      <div className="flex shrink-0 items-center gap-2">
+      <div data-part="plugin-actions" className="flex flex-wrap items-center gap-2">
+        <Button
+          size="sm"
+          icon={Info}
+          aria-label={t`${{ plugin: plugin.name }} details`}
+          onPress={() => details(plugin)}
+        >
+          <Trans>Details</Trans>
+        </Button>
         {confirming ? (
           <>
             <Button
@@ -306,12 +335,12 @@ function PluginRow({
             </Button>
           </>
         ) : (
-          <Button variant="ghost" size="sm" onPress={() => setConfirming(true)}>
+          <Button size="sm" icon={Trash2} onPress={() => setConfirming(true)}>
             <Trans>Uninstall</Trans>
           </Button>
         )}
         {plugin.status === "needs_consent" ? (
-          <Button variant="secondary" onPress={() => review(plugin)}>
+          <Button size="sm" onPress={() => review(plugin)}>
             <Trans>Review and allow</Trans>
           </Button>
         ) : (
@@ -340,6 +369,7 @@ export function PluginsSettings() {
     folder?: string;
     installedVersion?: string | null;
   } | null>(null);
+  const [details, setDetails] = useState<PluginSummary | null>(null);
   const picker = usePathPicker();
   const chooseFolder = () =>
     picker.pick({ kind: "folder", title: t`Plugin folder` }, () => api.chooseFolder());
@@ -376,66 +406,77 @@ export function PluginsSettings() {
   });
 
   // A plugin folder dropped on the list opens its review, like the picker.
-  const drop = useDropZone<HTMLElement>((paths) => {
+  const drop = useDropZone<HTMLDivElement>((paths) => {
     if (paths[0]) choose.mutate(paths[0]);
   });
   return (
-    <div className="flex flex-col gap-6">
-      <section ref={drop.ref} aria-labelledby="installed-plugins" className="flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-3">
-          <h2 id="installed-plugins" className="font-display text-lg font-semibold">
-            <Trans>Installed plugins</Trans>
-          </h2>
-          <Button
-            variant="secondary"
-            icon={FolderOpen}
-            onPress={() => choose.mutate(undefined)}
-            isDisabled={choose.isPending}
-          >
-            <Trans>Install from folder</Trans>
-          </Button>
-          {import.meta.env.DEV && api.loadUnpacked && (
-            <Button
-              variant="ghost"
-              icon={FolderOpen}
-              onPress={() => unpacked.mutate()}
-              isDisabled={unpacked.isPending}
-            >
-              <Trans>Load unpacked</Trans>
-            </Button>
+    <div className="flex flex-col gap-4">
+      <div ref={drop.ref}>
+        <SettingsSection
+          icon={Puzzle}
+          title={t`Installed plugins`}
+          description={t`What you've added to Caskade. Drop a plugin's folder here to install it.`}
+          aside={
+            <>
+              <Button
+                size="sm"
+                icon={FolderOpen}
+                onPress={() => choose.mutate(undefined)}
+                isDisabled={choose.isPending}
+              >
+                <Trans>Install from folder</Trans>
+              </Button>
+              {import.meta.env.DEV && api.loadUnpacked && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={FolderOpen}
+                  onPress={() => unpacked.mutate()}
+                  isDisabled={unpacked.isPending}
+                >
+                  <Trans>Load unpacked</Trans>
+                </Button>
+              )}
+            </>
+          }
+        >
+          {(choose.isError || unpacked.isError) && (
+            <p role="alert" className="mt-3 text-sm text-danger">
+              {(choose.error ?? unpacked.error)?.message}
+            </p>
           )}
-        </div>
-        {(choose.isError || unpacked.isError) && (
-          <p role="alert" className="text-sm text-danger">
-            {(choose.error ?? unpacked.error)?.message}
-          </p>
-        )}
-        {plugins.isPending && (
-          <p className="text-sm text-fg-muted">
-            <Trans>Loading plugins…</Trans>
-          </p>
-        )}
-        {plugins.isError && (
-          <p role="alert" className="text-sm text-danger">
-            {plugins.error.message}
-          </p>
-        )}
-        {plugins.data && plugins.data.length === 0 && (
-          <p className="rounded-panel border border-dashed border-border-strong p-8 text-center text-sm text-fg-muted">
-            <Trans>
-              No plugins yet. Get one from the catalogue below, install one from a folder, or drop
-              its folder here.
-            </Trans>
-          </p>
-        )}
-        {plugins.data && plugins.data.length > 0 && (
-          <ul aria-label={t`Installed plugins`} className="flex flex-col gap-3">
-            {plugins.data.map((plugin) => (
-              <PluginRow key={plugin.id} plugin={plugin} review={(p) => setReview({ plugin: p })} />
-            ))}
-          </ul>
-        )}
-      </section>
+          {plugins.isPending && (
+            <p className="mt-3 text-sm text-fg-muted">
+              <Trans>Loading plugins…</Trans>
+            </p>
+          )}
+          {plugins.isError && (
+            <p role="alert" className="mt-3 text-sm text-danger">
+              {plugins.error.message}
+            </p>
+          )}
+          {plugins.data && plugins.data.length === 0 && (
+            <p className="mt-3 rounded-control border border-dashed border-border p-5 text-sm text-fg-muted">
+              <Trans>
+                No plugins yet. Get one from the catalogue below, install one from a folder, or drop
+                its folder here.
+              </Trans>
+            </p>
+          )}
+          {plugins.data && plugins.data.length > 0 && (
+            <ul aria-label={t`Installed plugins`} className="flex flex-col">
+              {plugins.data.map((plugin) => (
+                <PluginRow
+                  key={plugin.id}
+                  plugin={plugin}
+                  review={(p) => setReview({ plugin: p })}
+                  details={setDetails}
+                />
+              ))}
+            </ul>
+          )}
+        </SettingsSection>
+      </div>
       <AddonCatalogue />
       <PluginSettingsPages />
       {review && (
@@ -452,6 +493,7 @@ export function PluginsSettings() {
           }}
         />
       )}
+      {details && <ReviewDialog plugin={details} close={() => setDetails(null)} />}
     </div>
   );
 }

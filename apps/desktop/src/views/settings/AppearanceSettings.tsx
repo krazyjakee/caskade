@@ -17,8 +17,10 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useState } from "react";
+import { ToggleButton, ToggleButtonGroup } from "react-aria-components";
 import { deriveAccent } from "../../appearance/accent";
 import { themeSurfaces } from "../../appearance/apply";
+import { useMode } from "../../shell/console/mode";
 import { DEFAULT_THEME } from "../../themes/api";
 import { useActiveTheme } from "../../themes/apply";
 import { CustomCssEditor } from "./appearance/CustomCssEditor";
@@ -66,8 +68,23 @@ interface AppearancePreferences {
   customCssEnabled?: boolean;
 }
 
+/** Accents a pad can choose (#61). The ids are the colours themselves: data,
+ * in the setting's `#rrggbb` format, kept readable by `deriveAccent`. */
+const accentSwatches = [
+  { id: "#3b82f6", label: msg({ message: "Blue", context: "accent colour" }) },
+  { id: "#06b6d4", label: msg({ message: "Cyan", context: "accent colour" }) },
+  { id: "#22c55e", label: msg({ message: "Green", context: "accent colour" }) },
+  { id: "#f59e0b", label: msg({ message: "Amber", context: "accent colour" }) },
+  { id: "#f97316", label: msg({ message: "Orange", context: "accent colour" }) },
+  { id: "#ef4444", label: msg({ message: "Red", context: "accent colour" }) },
+  { id: "#ec4899", label: msg({ message: "Pink", context: "accent colour" }) },
+  { id: "#a855f7", label: msg({ message: "Violet", context: "accent colour" }) },
+];
+
 /** The theme's accent unless the user picked one; a pick that would be hard
- * to see on this theme's surfaces is adjusted (with a note) or refused. */
+ * to see on this theme's surfaces is adjusted (with a note) or refused.
+ * Swatches for a pad and a finger, the native picker for a mouse: a pad can't
+ * drive its dialog, so it never stops there and console mode leaves it out. */
 function AccentPicker({
   value,
   onChange,
@@ -76,33 +93,66 @@ function AccentPicker({
   onChange: (accent: string | null) => void;
 }) {
   const { t } = useLingui();
+  const { mode } = useMode();
   const [note, setNote] = useState<{ text: string; refused: boolean } | null>(null);
   const shown =
     value ??
     (getComputedStyle(document.documentElement).getPropertyValue("--cs-color-accent").trim() ||
       "#5b5ff7");
+  const derive = (colour: string) => deriveAccent(colour, themeSurfaces(document.documentElement));
+  const pick = (colour: string) => {
+    const result = derive(colour);
+    if (!result.ok) {
+      setNote({ text: result.message, refused: true });
+      return;
+    }
+    setNote(result.message ? { text: result.message, refused: false } : null);
+    onChange(result.accent);
+  };
+  // A swatch adjusted for this theme is saved as its adjusted colour.
+  const chosen =
+    value === null
+      ? undefined
+      : accentSwatches.find(({ id }) => {
+          const result = derive(id);
+          return result.ok && result.accent === value;
+        });
   return (
     <div className="flex flex-col items-end gap-1.5">
+      <ToggleButtonGroup
+        data-part="accent-swatches"
+        selectionMode="single"
+        disallowEmptySelection
+        selectedKeys={chosen ? [chosen.id] : []}
+        onSelectionChange={(keys) => {
+          const swatch = accentSwatches.find(({ id }) => keys.has(id));
+          if (swatch) pick(swatch.id);
+        }}
+        className="flex flex-wrap justify-end gap-1.5"
+      >
+        {accentSwatches.map(({ id, label }) => (
+          <ToggleButton
+            key={id}
+            id={id}
+            data-part="accent-swatch"
+            aria-label={t(label)}
+            style={{ backgroundColor: id }}
+            className="size-8 rounded-control border border-border-strong outline-offset-2 data-focus-visible:focus-ring data-hovered:brightness-115 data-selected:outline-2 data-selected:outline-fg"
+          />
+        ))}
+      </ToggleButtonGroup>
       <div className="flex items-center gap-2">
-        <input
-          type="color"
-          aria-label={t`Accent colour`}
-          data-part="accent-input"
-          value={/^#[0-9a-f]{6}$/i.test(shown) ? shown : "#5b5ff7"}
-          onChange={(event) => {
-            const result = deriveAccent(
-              event.target.value,
-              themeSurfaces(document.documentElement),
-            );
-            if (!result.ok) {
-              setNote({ text: result.message, refused: true });
-              return;
-            }
-            setNote(result.message ? { text: result.message, refused: false } : null);
-            onChange(result.accent);
-          }}
-          className="size-9 cursor-pointer rounded-control border border-border bg-transparent p-0.5"
-        />
+        {mode !== "console" && (
+          <input
+            type="color"
+            aria-label={t`Custom accent colour`}
+            data-part="accent-input"
+            data-spatial="skip"
+            value={/^#[0-9a-f]{6}$/i.test(shown) ? shown : "#5b5ff7"}
+            onChange={(event) => pick(event.target.value)}
+            className="size-9 cursor-pointer rounded-control border border-border bg-transparent p-0.5"
+          />
+        )}
         <Button
           variant="ghost"
           size="sm"

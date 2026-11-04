@@ -14,7 +14,7 @@ const follows = (a: Node, b: Node) =>
   Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
 
 it.each(["desktop", "console"] as const)(
-  "credits IGDB and Hasheous first, then the app, its version and links (%s mode)",
+  "shows the app, its version and links first, then credits IGDB and Hasheous (%s mode)",
   async (mode) => {
     renderApp("/settings?tab=about", { mode });
     expect(await screen.findByRole("tab", { name: "About", selected: true })).toBeTruthy();
@@ -35,12 +35,14 @@ it.each(["desktop", "console"] as const)(
     ]);
     // The same weight: one style for both.
     expect(links[0]?.className).toBe(links[1]?.className);
-    // Right under the heading, before everything else.
+    // The version right under the heading, before the credits (#68).
     const details = screen.getByRole("heading", { name: "Caskade" });
-    expect(follows(heading, credits) && follows(credits, details)).toBe(true);
+    const version = screen.getByText(appConfig.version);
+    const build = screen.getByText("Browser preview");
+    expect(follows(heading, details) && follows(details, version)).toBe(true);
+    expect(follows(version, build) && follows(build, credits)).toBe(true);
+    expect(follows(build, screen.getByRole("link", { name: "Caskade updates" }))).toBe(true);
 
-    expect(screen.getByText(appConfig.version)).toBeTruthy();
-    expect(screen.getByText("Browser preview")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Project page" }).getAttribute("href")).toBe(
       "https://github.com/krazyjakee/caskade",
     );
@@ -48,6 +50,13 @@ it.each(["desktop", "console"] as const)(
       expect(screen.getByRole("link", { name: label.message }));
   },
 );
+
+it("links from the version to Caskade updates in General (#68)", async () => {
+  const app = renderApp("/settings?tab=about");
+  fireEvent.click(await screen.findByRole("link", { name: "Caskade updates" }));
+  await waitFor(() => expect(app.router.state.location.search).toEqual({ tab: "general" }));
+  expect(await screen.findByText("Caskade updates")).toBeTruthy();
+});
 
 it("opens each Legal section from About, links between them, and comes back", async () => {
   const app = renderApp("/settings?tab=about");

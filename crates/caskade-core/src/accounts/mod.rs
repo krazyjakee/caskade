@@ -322,7 +322,7 @@ impl AccountService {
             .store
             .account_row(id)
             .await?
-            .ok_or_else(|| Error::Invalid(crate::tr!("account {id} was not found", id = id)))?;
+            .ok_or_else(|| Error::Invalid(crate::tr!("This account no longer exists.")))?;
         let check = match row.pin_hash {
             None => PinCheck::Matched,
             Some(hash) => {
@@ -436,7 +436,7 @@ impl AccountService {
         self.store
             .get_account(id)
             .await?
-            .ok_or_else(|| Error::Invalid(crate::tr!("account {id} was not found", id = id)))
+            .ok_or_else(|| Error::Invalid(crate::tr!("This account no longer exists.")))
     }
 
     /// The signed-in account, which every change is made as.
@@ -493,8 +493,7 @@ fn name(name: &str) -> Result<String> {
 fn avatar(avatar: &str) -> Result<String> {
     if !AVATARS.contains(&avatar) {
         return Err(Error::Invalid(crate::tr!(
-            "unknown avatar {avatar}",
-            avatar = avatar
+            "Choose one of the avatars Caskade offers."
         )));
     }
     Ok(avatar.to_owned())
@@ -508,13 +507,12 @@ fn apply_access(account: &mut Account, access: AccountAccess) -> Result<()> {
         )));
     }
     let mut settings = access.permissions.settings;
-    if let Some(unknown) = settings
+    if settings
         .iter()
-        .find(|section| !SETTINGS_SECTIONS.contains(&section.as_str()))
+        .any(|section| !SETTINGS_SECTIONS.contains(&section.as_str()))
     {
         return Err(Error::Invalid(crate::tr!(
-            "unknown settings section {unknown}",
-            unknown = unknown
+            "One of the chosen settings sections doesn't exist."
         )));
     }
     settings.sort();

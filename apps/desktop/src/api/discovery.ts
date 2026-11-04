@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { type Reply, unwrap } from "./reply";
 
 /** Discovery controller projection, independent of the development fixtures. */
@@ -73,6 +74,16 @@ export interface RawDiscoverySnapshot extends Omit<DiscoverySnapshot, "os" | "so
     error: unknown;
   }[];
 }
+/** A source's failure in words: the core's `SourceError` carries a message,
+ * unless it timed out or was cancelled. */
+function sourceError(error: unknown): string | null {
+  if (!error) return null;
+  if (typeof error === "string") return error;
+  const { type, value } = error as { type?: string; value?: { message?: string } };
+  if (type === "timed_out") return t`This source took too long to answer.`;
+  if (type === "cancelled") return t`Scanning this source was cancelled.`;
+  return value?.message ?? t`Caskade couldn't read this source.`;
+}
 export function mapDiscoverySnapshot(snapshot: RawDiscoverySnapshot): DiscoverySnapshot {
   if (snapshot.os !== "linux" && snapshot.os !== "windows" && snapshot.os !== "macos")
     throw new Error("Unknown backend discovery profile.");
@@ -84,11 +95,7 @@ export function mapDiscoverySnapshot(snapshot: RawDiscoverySnapshot): DiscoveryS
       count: source.count,
       durationMs: source.duration_ms,
       warnings: source.warnings,
-      error: source.error
-        ? typeof source.error === "string"
-          ? source.error
-          : JSON.stringify(source.error)
-        : null,
+      error: sourceError(source.error),
     })),
   };
 }

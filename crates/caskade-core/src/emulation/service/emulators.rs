@@ -350,17 +350,13 @@ impl EmulationService {
             } => {
                 let definition_id = definition
                     .ok_or_else(|| crate::tr!("a built-in profile needs an emulator definition"))?;
-                let definition = catalog.emulator(definition_id).ok_or_else(|| {
-                    crate::tr!(
-                        "unknown emulator definition {definition}",
-                        definition = format!("{definition_id:?}")
-                    )
-                })?;
+                let definition = catalog
+                    .emulator(definition_id)
+                    .ok_or_else(|| crate::tr!("Caskade doesn't know this emulator."))?;
                 let base = definition.profile(definition_profile).ok_or_else(|| {
                     crate::tr!(
-                        "{emulator} has no profile {profile}",
-                        emulator = definition.name,
-                        profile = format!("{definition_profile:?}")
+                        "{emulator} no longer has this profile.",
+                        emulator = definition.name
                     )
                 })?;
                 let drift = match args {

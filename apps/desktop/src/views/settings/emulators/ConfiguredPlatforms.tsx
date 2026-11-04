@@ -6,6 +6,7 @@ import type { EmulationSnapshot, ProfileRef } from "../../../api/emulation";
 import { BiosSummary, PathField } from "./EmulationFields";
 import { useEmulationWrite } from "./EmulationProvider";
 import { FetchBios } from "./EmulatorSetup";
+import { StackedCell, StackedRow, StackedTable } from "./StackedTable";
 
 export function ConfiguredPlatforms({
   snapshot,
@@ -26,6 +27,12 @@ export function ConfiguredPlatforms({
   const platforms = snapshot.platforms.filter(
     (platform) => platform.romCount > 0 || platform.default || compatible(platform.id).length > 0,
   );
+  const columns = {
+    roms: <Trans context="table column">ROMs</Trans>,
+    emulator: <Trans context="table column">Default emulator</Trans>,
+    bios: <Trans context="table column">BIOS</Trans>,
+    extensions: <Trans context="table column">Extensions</Trans>,
+  };
 
   return (
     <SettingsSection
@@ -48,134 +55,119 @@ export function ConfiguredPlatforms({
           </Button>
         </div>
       ) : (
-        <div className="mt-4 overflow-x-auto rounded-control border border-border">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-surface-overlay text-xs text-fg-muted">
-              <tr>
-                <th className="px-4 py-3 font-medium">
-                  <Trans context="table column">Platform</Trans>
-                </th>
-                <th className="px-4 py-3 text-right font-medium">
-                  <Trans context="table column">ROMs</Trans>
-                </th>
-                <th className="min-w-64 px-4 py-3 font-medium">
-                  <Trans context="table column">Default emulator</Trans>
-                </th>
-                <th className="min-w-80 px-4 py-3 font-medium">
-                  <Trans context="table column">BIOS</Trans>
-                </th>
-                <th className="px-4 py-3 font-medium">
-                  <Trans context="table column">Extensions</Trans>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {platforms.map((platform) => {
-                const choices = compatible(platform.id);
-                const key = (selected: ProfileRef) =>
-                  `${selected.emulatorId}/${selected.profileId}`;
-                const selected = choices.find(
-                  (row) =>
-                    row.emulator.id === platform.default?.emulatorId &&
-                    row.profile.config.id === platform.default.profileId,
-                );
-                const folder = folders[platform.id] ?? platform.biosDir ?? "";
-                return (
-                  <tr
-                    data-part="platform-row"
-                    key={platform.id}
-                    className="border-t border-border align-top"
-                  >
-                    <td className="px-4 py-4">
-                      <p className="font-medium">{platform.name}</p>
-                      <p className="mt-1 font-mono text-xs text-fg-muted">{platform.short}</p>
-                    </td>
-                    <td className="px-4 py-4 text-right font-mono">{platform.romCount}</td>
-                    <td className="space-y-2 px-4 py-4">
-                      <Select
-                        aria-label={t`Default emulator for ${{ platform: platform.name }}`}
-                        value={platform.default ? key(platform.default) : "none"}
-                        options={[
-                          {
-                            id: "none",
-                            label: t({ message: "None", context: "default emulator" }),
-                          },
-                          ...choices.map((row) => ({
-                            id: key({
-                              emulatorId: row.emulator.id,
-                              profileId: row.profile.config.id,
-                            }),
-                            label: `${row.emulator.name} · ${row.profile.resolved.name}`,
-                          })),
-                        ]}
-                        isDisabled={save.isPending}
-                        onChange={(value) => {
-                          const choice = choices.find(
-                            (row) =>
-                              key({
-                                emulatorId: row.emulator.id,
-                                profileId: row.profile.config.id,
-                              }) === value,
-                          );
-                          save.mutate((api) =>
-                            api.setPlatform(
-                              platform.id,
-                              choice
-                                ? {
-                                    emulatorId: choice.emulator.id,
-                                    profileId: choice.profile.config.id,
-                                  }
-                                : null,
-                              platform.biosDir,
-                            ),
-                          );
-                        }}
-                      />
-                      {selected && !selected.profile.resolved.available && (
-                        <StatusDot tone="warning">
-                          <Trans>Default profile is unavailable</Trans>
-                        </StatusDot>
-                      )}
-                      {!selected && (
-                        <p className="text-xs text-fg-muted">
-                          <Trans>Games ask which emulator to use.</Trans>
-                        </p>
-                      )}
-                    </td>
-                    <td className="space-y-3 px-4 py-4">
-                      <BiosSummary files={platform.bios} />
-                      {platform.default &&
-                        platform.bios.some(
-                          (file) => file.found === false || file.state === "wrong_hash",
-                        ) && <FetchBios platformId={platform.id} />}
-                      {/* Saved as it's left, like the default beside it (#55). */}
-                      <PathField
-                        label={t`BIOS folder for ${{ platform: platform.short }}`}
-                        value={folder}
-                        onChange={(value) =>
-                          setFolders((old) => ({ ...old, [platform.id]: value }))
-                        }
-                        onCommit={(value) => {
-                          if (value === (platform.biosDir ?? "")) return;
-                          save.mutate((api) =>
-                            api.setPlatform(platform.id, platform.default, value || null),
-                          );
-                        }}
-                      />
-                    </td>
-                    <td className="max-w-64 px-4 py-4">
-                      <span className="font-mono text-xs text-fg-muted">
-                        {(selected?.profile.resolved.extensions ?? platform.extensions).join(
-                          ", ",
-                        ) || t({ message: "None", context: "file extensions" })}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <StackedTable
+          className="mt-4"
+          headClassName="bg-surface-overlay text-xs text-fg-muted"
+          head={
+            <>
+              <th className="px-4 py-3 font-medium">
+                <Trans context="table column">Platform</Trans>
+              </th>
+              <th className="px-4 py-3 text-right font-medium">{columns.roms}</th>
+              <th className="min-w-64 px-4 py-3 font-medium">{columns.emulator}</th>
+              <th className="min-w-80 px-4 py-3 font-medium">{columns.bios}</th>
+              <th className="px-4 py-3 font-medium">{columns.extensions}</th>
+            </>
+          }
+        >
+          {platforms.map((platform) => {
+            const choices = compatible(platform.id);
+            const key = (selected: ProfileRef) => `${selected.emulatorId}/${selected.profileId}`;
+            const selected = choices.find(
+              (row) =>
+                row.emulator.id === platform.default?.emulatorId &&
+                row.profile.config.id === platform.default.profileId,
+            );
+            const folder = folders[platform.id] ?? platform.biosDir ?? "";
+            return (
+              <StackedRow data-part="platform-row" key={platform.id} className="align-top">
+                <StackedCell className="@6xl:p-4">
+                  <p className="font-medium">{platform.name}</p>
+                  <p className="mt-1 font-mono text-xs text-fg-muted">{platform.short}</p>
+                </StackedCell>
+                <StackedCell label={columns.roms} className="@6xl:p-4 @6xl:text-right">
+                  <span className="font-mono">{platform.romCount}</span>
+                </StackedCell>
+                <StackedCell label={columns.emulator} full className="space-y-2 @6xl:p-4">
+                  <Select
+                    aria-label={t`Default emulator for ${{ platform: platform.name }}`}
+                    value={platform.default ? key(platform.default) : "none"}
+                    options={[
+                      {
+                        id: "none",
+                        label: t({ message: "None", context: "default emulator" }),
+                      },
+                      ...choices.map((row) => ({
+                        id: key({
+                          emulatorId: row.emulator.id,
+                          profileId: row.profile.config.id,
+                        }),
+                        label: `${row.emulator.name} · ${row.profile.resolved.name}`,
+                      })),
+                    ]}
+                    isDisabled={save.isPending}
+                    onChange={(value) => {
+                      const choice = choices.find(
+                        (row) =>
+                          key({
+                            emulatorId: row.emulator.id,
+                            profileId: row.profile.config.id,
+                          }) === value,
+                      );
+                      save.mutate((api) =>
+                        api.setPlatform(
+                          platform.id,
+                          choice
+                            ? {
+                                emulatorId: choice.emulator.id,
+                                profileId: choice.profile.config.id,
+                              }
+                            : null,
+                          platform.biosDir,
+                        ),
+                      );
+                    }}
+                  />
+                  {selected && !selected.profile.resolved.available && (
+                    <StatusDot tone="warning">
+                      <Trans>Default profile is unavailable</Trans>
+                    </StatusDot>
+                  )}
+                  {!selected && (
+                    <p className="text-xs text-fg-muted">
+                      <Trans>Games ask which emulator to use.</Trans>
+                    </p>
+                  )}
+                </StackedCell>
+                <StackedCell label={columns.bios} full className="space-y-3 @6xl:p-4">
+                  <BiosSummary files={platform.bios} />
+                  {platform.default &&
+                    platform.bios.some(
+                      (file) => file.found === false || file.state === "wrong_hash",
+                    ) && <FetchBios platformId={platform.id} />}
+                  {/* Saved as it's left, like the default beside it (#55). */}
+                  <PathField
+                    label={t`BIOS folder for ${{ platform: platform.short }}`}
+                    value={folder}
+                    onChange={(value) => setFolders((old) => ({ ...old, [platform.id]: value }))}
+                    onCommit={(value) => {
+                      if (value === (platform.biosDir ?? "")) return;
+                      save.mutate((api) =>
+                        api.setPlatform(platform.id, platform.default, value || null),
+                      );
+                    }}
+                  />
+                </StackedCell>
+                <StackedCell label={columns.extensions} full className="@6xl:max-w-64 @6xl:p-4">
+                  <span className="font-mono text-xs text-fg-muted">
+                    {(selected?.profile.resolved.extensions ?? platform.extensions).join(", ") ||
+                      t({ message: "None", context: "file extensions" })}
+                  </span>
+                </StackedCell>
+              </StackedRow>
+            );
+          })}
+        </StackedTable>
       )}
     </SettingsSection>
   );

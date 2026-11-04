@@ -22,7 +22,7 @@ import {
   LifeBuoy,
   type LucideIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import {
   type BackupComponent,
   type BackupExclusion,
@@ -123,6 +123,7 @@ function BackUpSection() {
   const start = useBackupAction((api) => api.start());
   const cancel = useBackupAction((api) => api.cancel());
   const reveal = useBackupAction((api, path: string) => api.reveal(path));
+  const reason = useId();
   const setDestination = (destination: string) =>
     preferences.setSettings((current) => ({ ...current, destination }));
   const drop = useDropZone<HTMLDivElement>((paths) => {
@@ -152,10 +153,13 @@ function BackUpSection() {
         : current.components.filter((c) => c !== id),
     }));
   const last = status.last;
-  const missing = plan.data && !plan.data.destinationExists;
+  // The default folder is made when needed; a chosen one has to be there.
+  const ownFolder = settings.destination && settings.destination !== status.defaultDestination;
+  const missing = Boolean(ownFolder) && plan.data?.destinationExists === false;
   const short =
     plan.data?.availableBytes != null &&
     plan.data.availableBytes < plan.data.estimatedBytes + (sizes.get("library")?.bytes ?? 0);
+  const blocked = missing || short;
 
   return (
     <SettingsSection icon={DatabaseBackup} title={title} description={description}>
@@ -187,7 +191,7 @@ function BackUpSection() {
           }
         />
       </div>
-      {missing && settings.destination && (
+      {missing && (
         <p role="alert" className="mt-2 text-sm text-warning">
           <Trans>
             This folder isn't there. Connect its drive, or choose another folder. Automatic backups
@@ -245,12 +249,33 @@ function BackUpSection() {
         ) : (
           <Button
             variant="primary"
-            isDisabled={running !== null || start.isPending}
+            isDisabled={running !== null || start.isPending || blocked}
+            aria-describedby={blocked ? reason : undefined}
             onPress={() => start.mutate(undefined)}
           >
             <DatabaseBackup className="size-4" />
             <Trans>Back up now</Trans>
           </Button>
+        )}
+        {blocked && !backingUp && (
+          <span className="flex items-center gap-2 text-sm text-fg-muted">
+            <span id={reason}>
+              {missing ? (
+                <Trans>Can't back up: the backup folder isn't there.</Trans>
+              ) : (
+                <Trans>Can't back up: the backup folder doesn't have enough free space.</Trans>
+              )}
+            </span>
+            {/* A drive plugged in or space freed tells the app nothing. */}
+            <Button
+              size="sm"
+              variant="ghost"
+              isDisabled={plan.isFetching}
+              onPress={() => void plan.refetch()}
+            >
+              <Trans>Check again</Trans>
+            </Button>
+          </span>
         )}
         {last && !backingUp && <LastOutcome status={status} onReveal={reveal.mutate} />}
       </div>
@@ -637,7 +662,13 @@ function HelpSection() {
         <li>
           <Trans>
             Backups never hold passwords or sign-ins, web games' browser data, logs, caches, or your
-            games and their saves. Back up saves with the games or their launchers.
+            games and their saves.
+          </Trans>
+        </li>
+        <li>
+          <Trans>
+            Caskade keeps versions of each game's saves and sends the newest to your paired devices.
+            Find them in Settings → Devices → Saves, and restore one from the game's page.
           </Trans>
         </li>
         <li>

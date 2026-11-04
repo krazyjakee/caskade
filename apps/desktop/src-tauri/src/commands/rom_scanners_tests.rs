@@ -1,7 +1,7 @@
 //! Typed IPC -> ScannerService -> SQLite, plus the scan events, on Tauri's
 //! mock runtime.
 use super::*;
-use crate::commands::test_ipc::invoke;
+use crate::commands::test_ipc::{assert_report, invoke};
 use caskade_core::{bus::Bus, emulation::Catalog};
 use serde_json::{Value, json};
 use std::{
@@ -201,7 +201,17 @@ fn scanners_scan_review_and_import_through_typed_ipc() {
     assert_eq!(all[0]["games"].as_array().unwrap().len(), 1);
 
     invoke(&window, "rom_scanner_delete", json!({"id": id})).unwrap();
-    assert!(invoke(&window, "rom_scanner_delete", json!({"id": id})).is_err());
+    let gone = invoke(&window, "rom_scanner_delete", json!({"id": id})).unwrap_err();
+    assert_report(&gone, "conflict", &[id.as_str()]);
+    let gone = invoke(&window, "rom_scan_cancel", json!({"id": "scan-1"})).unwrap_err();
+    assert_report(&gone, "conflict", &["scan-1"]);
+    let gone = invoke(
+        &window,
+        "rom_scan_start",
+        json!({"scannerId": "scanner-1", "mode": "review"}),
+    )
+    .unwrap_err();
+    assert_report(&gone, "invalid", &["scanner-1"]);
     assert!(invoke(&window, "rom_scanners_list", json!({})).unwrap() == json!([]));
 
     let deadline = Instant::now() + Duration::from_secs(5);

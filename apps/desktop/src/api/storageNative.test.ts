@@ -42,6 +42,7 @@ function transport(initial: JobSnapshot_Serialize): StorageTransport {
       throw new Error("not used");
     },
     storageRemove: vi.fn(async () => ok(null)),
+    storageMoveAndRemove: vi.fn(async () => ok(initial)),
     storageChooseDirectory: async () => ok(null),
     moveGame: vi.fn(async () => ok(initial)),
     uninstallGame: vi.fn(async () => ok(initial)),
@@ -72,6 +73,23 @@ describe("native storage adapter", () => {
       const api = createStorageApi(transport(job(status)));
       await expect(api.move("entry", "root")).rejects.toThrow();
     }
+  });
+  it("follows a location's move to its end, and passes on what its job says", async () => {
+    vi.useFakeTimers();
+    const native = transport(job("queued"));
+    const api = createStorageApi(native);
+    const moving = api.moveAndRemove("fast", "archive");
+    await vi.advanceTimersByTimeAsync(400);
+    await moving;
+    expect(native.storageMoveAndRemove).toHaveBeenCalledWith("fast", "archive");
+    expect(native.jobGet).toHaveBeenCalledWith("move-job");
+    vi.useRealTimers();
+
+    const error = "Cancelled. One game moved to Archive. Fast SSD was kept.";
+    const cancelled = { ...job("cancelled"), error };
+    await expect(createStorageApi(transport(cancelled)).moveAndRemove("a", "b")).rejects.toThrow(
+      error,
+    );
   });
   it("reads validated picker preferences and keeps chooser cancellation explicit", async () => {
     const api = createStorageApi(transport(job("completed")));

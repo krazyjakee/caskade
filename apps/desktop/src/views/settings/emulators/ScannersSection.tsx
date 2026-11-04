@@ -48,6 +48,7 @@ import {
   useScanners,
 } from "./EmulationProvider";
 import { ScanReview } from "./ScanReview";
+import { StackedCell, StackedRow, StackedTable } from "./StackedTable";
 
 const playlistTypes = new Set(["m3u", "cue", "gdi"]);
 const exclusionSyntax = [
@@ -198,7 +199,7 @@ function ScannerEditor({
         )
       }
     >
-      <div data-cs="scanner-editor" className="mt-3 grid gap-4 md:grid-cols-2">
+      <div data-cs="scanner-editor" className="mt-3 grid gap-4 @xl:grid-cols-2">
         <TextField
           label={t`Scanner name`}
           value={draft.name}
@@ -304,7 +305,7 @@ function ScannerEditor({
           </SettingRow>
         ))}
       </div>
-      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
+      <div className="mt-4 grid gap-4 @3xl:grid-cols-[minmax(0,1fr)_18rem]">
         <div>
           <h3 className="text-sm font-medium">
             <Trans>Exclusions</Trans>
@@ -492,7 +493,7 @@ function GlobalExclusions() {
           <Trans>Loading global exclusions…</Trans>
         </p>
       ) : (
-        <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="mt-4 grid gap-4 @3xl:grid-cols-[minmax(0,1fr)_18rem]">
           <div>
             <ExclusionList
               global
@@ -612,8 +613,21 @@ export function ScannersSection({ snapshot }: { snapshot: EmulationSnapshot }) {
       (option) => option.id === ref(row.scanner.profile.emulatorId, row.scanner.profile.profileId),
     )?.label;
   const current = selected && latest(selected.scanner.id);
+  const columns = {
+    folder: <Trans comment="ROM scanners table column">Folder</Trans>,
+    platform: <Trans comment="ROM scanners table column">Platform</Trans>,
+    profile: <Trans comment="ROM scanners table column">Emulator · Profile</Trans>,
+    launch: <Trans comment="ROM scanners table column">Launch with</Trans>,
+    games: <Trans comment="ROM scanners table column">Games</Trans>,
+    lastScan: <Trans comment="ROM scanners table column">Last scan</Trans>,
+    auto: (
+      <Trans comment="ROM scanners table column: whether library updates run the scanner">
+        Auto
+      </Trans>
+    ),
+  };
   return (
-    <div data-cs="rom-scanners" className="flex flex-col gap-4">
+    <div data-cs="rom-scanners" className="@container flex flex-col gap-4">
       <SettingsSection
         icon={FolderSearch}
         title={t`ROM scanners`}
@@ -636,148 +650,146 @@ export function ScannersSection({ snapshot }: { snapshot: EmulationSnapshot }) {
             <Trans>No ROM scanners yet. Add one for each ROM folder.</Trans>
           </p>
         ) : (
-          <div className="mt-3 overflow-x-auto rounded-control border border-border">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-surface-overlay font-mono text-[11px] tracking-wider text-fg-subtle uppercase">
-                <tr>
-                  <th className="px-4 py-2.5 font-medium">
-                    <Trans comment="ROM scanners table column">Scanner</Trans>
-                  </th>
-                  <th className="px-4 py-2.5 font-medium">
-                    <Trans comment="ROM scanners table column">Folder</Trans>
-                  </th>
-                  <th className="px-4 py-2.5 font-medium">
-                    <Trans comment="ROM scanners table column">Platform</Trans>
-                  </th>
-                  <th className="px-4 py-2.5 font-medium">
-                    <Trans comment="ROM scanners table column">Emulator · Profile</Trans>
-                  </th>
-                  <th className="px-4 py-2.5 font-medium">
-                    <Trans comment="ROM scanners table column">Launch with</Trans>
-                  </th>
-                  <th className="px-4 py-2.5 text-right font-medium">
-                    <Trans comment="ROM scanners table column">Games</Trans>
-                  </th>
-                  <th className="px-4 py-2.5 font-medium">
-                    <Trans comment="ROM scanners table column">Last scan</Trans>
-                  </th>
-                  <th className="px-4 py-2.5 font-medium">
-                    <Trans comment="ROM scanners table column: whether library updates run the scanner">
-                      Auto
-                    </Trans>
-                  </th>
-                  <th className="px-4 py-2.5">
-                    <span className="sr-only">
-                      <Trans comment="ROM scanners table column">Actions</Trans>
-                    </span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => {
-                  const { scanner } = row;
-                  const running = latest(scanner.id)?.status === "running";
-                  const launchMode = launchModes.find(
-                    (option) => option.id === scanner.launchWith.type,
-                  );
-                  return (
-                    <tr
-                      key={scanner.id}
-                      {...menus.target(scanner.name, [
-                        {
-                          id: "scan",
-                          label: t({ message: "Scan", comment: "Run the ROM scanner" }),
-                          icon: Play,
-                          isDisabled: running || Boolean(row.problem) || scan.isPending,
-                          onAction: () => startScan(scanner.id),
-                        },
-                        {
-                          id: "edit",
-                          label: t`Edit scanner`,
-                          icon: Pencil,
-                          onAction: () => open(scanner.id),
-                        },
-                        {
-                          id: "auto",
-                          label: scanner.inLibraryUpdate
-                            ? t`Leave out of library updates`
-                            : t`Include in library updates`,
-                          icon: RefreshCw,
-                          isDisabled: toggle.isPending,
-                          onAction: () =>
-                            toggle.mutate({
-                              ...scanner,
-                              inLibraryUpdate: !scanner.inLibraryUpdate,
-                            }),
-                        },
-                      ])}
-                      data-part="scanner-row"
-                      data-selected={scanner.id === selected?.scanner.id || undefined}
-                      className="border-t border-border transition-colors duration-(--cs-motion-duration-fast) data-selected:bg-accent/10"
+          <StackedTable
+            className="mt-3"
+            headClassName="bg-surface-overlay font-mono text-[11px] tracking-wider text-fg-subtle uppercase"
+            head={
+              <>
+                <th className="px-4 py-2.5 font-medium">
+                  <Trans comment="ROM scanners table column">Scanner</Trans>
+                </th>
+                <th className="px-4 py-2.5 font-medium">{columns.folder}</th>
+                <th className="px-4 py-2.5 font-medium">{columns.platform}</th>
+                <th className="px-4 py-2.5 font-medium">{columns.profile}</th>
+                <th className="px-4 py-2.5 font-medium">{columns.launch}</th>
+                <th className="px-4 py-2.5 text-right font-medium">{columns.games}</th>
+                <th className="px-4 py-2.5 font-medium">{columns.lastScan}</th>
+                <th className="px-4 py-2.5 font-medium">{columns.auto}</th>
+                <th className="px-4 py-2.5">
+                  <span className="sr-only">
+                    <Trans comment="ROM scanners table column">Actions</Trans>
+                  </span>
+                </th>
+              </>
+            }
+          >
+            {rows.map((row) => {
+              const { scanner } = row;
+              const running = latest(scanner.id)?.status === "running";
+              const launchMode = launchModes.find(
+                (option) => option.id === scanner.launchWith.type,
+              );
+              return (
+                <StackedRow
+                  key={scanner.id}
+                  {...menus.target(scanner.name, [
+                    {
+                      id: "scan",
+                      label: t({ message: "Scan", comment: "Run the ROM scanner" }),
+                      icon: Play,
+                      isDisabled: running || Boolean(row.problem) || scan.isPending,
+                      onAction: () => startScan(scanner.id),
+                    },
+                    {
+                      id: "edit",
+                      label: t`Edit scanner`,
+                      icon: Pencil,
+                      onAction: () => open(scanner.id),
+                    },
+                    {
+                      id: "auto",
+                      label: scanner.inLibraryUpdate
+                        ? t`Leave out of library updates`
+                        : t`Include in library updates`,
+                      icon: RefreshCw,
+                      isDisabled: toggle.isPending,
+                      onAction: () =>
+                        toggle.mutate({
+                          ...scanner,
+                          inLibraryUpdate: !scanner.inLibraryUpdate,
+                        }),
+                    },
+                  ])}
+                  data-part="scanner-row"
+                  data-selected={scanner.id === selected?.scanner.id || undefined}
+                  className="transition-colors duration-(--cs-motion-duration-fast) data-selected:bg-accent/10"
+                >
+                  <StackedCell full className="@6xl:px-4 @6xl:py-2.5">
+                    <AriaButton
+                      onPress={() => open(scanner.id)}
+                      aria-pressed={scanner.id === selected?.scanner.id}
+                      className="rounded-[4px] text-left font-medium data-focus-visible:focus-ring data-hovered:text-accent-alt"
                     >
-                      <td className="px-4 py-2.5">
-                        <AriaButton
-                          onPress={() => open(scanner.id)}
-                          aria-pressed={scanner.id === selected?.scanner.id}
-                          className="rounded-[4px] text-left font-medium data-focus-visible:focus-ring data-hovered:text-accent-alt"
-                        >
-                          {scanner.name}
-                        </AriaButton>
-                      </td>
-                      <td className="max-w-56 truncate px-4 py-2.5 font-mono text-xs text-fg-muted">
-                        {scanner.folder}
-                      </td>
-                      <td className="px-4 py-2.5 text-xs">
-                        {row.platforms.map((id) => platformShort(snapshot, id)).join(", ") || "—"}
-                      </td>
-                      <td className="px-4 py-2.5">
-                        {row.problem ? (
-                          <StatusDot tone="danger">{row.problem}</StatusDot>
-                        ) : (
-                          profileName(row)
-                        )}
-                      </td>
-                      <td className="px-4 py-2.5 text-xs text-fg-muted">
-                        {launchMode && t(launchMode.label)}
-                      </td>
-                      <td className="px-4 py-2.5 text-right font-mono">{row.games}</td>
-                      <td className="px-4 py-2.5 text-xs whitespace-nowrap text-fg-muted">
-                        {running ? (
-                          <StatusDot tone="warning">
-                            <Trans>Scanning…</Trans>
-                          </StatusDot>
-                        ) : row.lastScanMs ? (
-                          formatDateTime(row.lastScanMs)
-                        ) : (
-                          t({ message: "Never", comment: "A scanner's last scan" })
-                        )}
-                      </td>
-                      <td className="px-4 py-2.5">
-                        <Switch
-                          size="sm"
-                          aria-label={t`Include ${{ name: scanner.name }} in library update`}
-                          isSelected={scanner.inLibraryUpdate}
-                          isDisabled={toggle.isPending}
-                          onChange={(on) => toggle.mutate({ ...scanner, inLibraryUpdate: on })}
-                        />
-                      </td>
-                      <td className="px-4 py-2.5 text-right">
-                        <Button
-                          size="sm"
-                          icon={Play}
-                          isDisabled={running || Boolean(row.problem) || scan.isPending}
-                          onPress={() => startScan(scanner.id)}
-                          aria-label={t`Scan ${{ name: scanner.name }}`}
-                        >
-                          <Trans comment="Run the ROM scanner">Scan</Trans>
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      {scanner.name}
+                    </AriaButton>
+                  </StackedCell>
+                  <StackedCell
+                    label={columns.folder}
+                    full
+                    className="@6xl:max-w-56 @6xl:truncate @6xl:px-4 @6xl:py-2.5"
+                  >
+                    <span className="font-mono text-xs text-fg-muted">{scanner.folder}</span>
+                  </StackedCell>
+                  <StackedCell label={columns.platform} className="text-xs @6xl:px-4 @6xl:py-2.5">
+                    {row.platforms.map((id) => platformShort(snapshot, id)).join(", ") || "—"}
+                  </StackedCell>
+                  <StackedCell label={columns.profile} className="@6xl:px-4 @6xl:py-2.5">
+                    {row.problem ? (
+                      <StatusDot tone="danger">{row.problem}</StatusDot>
+                    ) : (
+                      profileName(row)
+                    )}
+                  </StackedCell>
+                  <StackedCell
+                    label={columns.launch}
+                    className="text-xs text-fg-muted @6xl:px-4 @6xl:py-2.5"
+                  >
+                    {launchMode && t(launchMode.label)}
+                  </StackedCell>
+                  <StackedCell
+                    label={columns.games}
+                    className="@6xl:px-4 @6xl:py-2.5 @6xl:text-right"
+                  >
+                    <span className="font-mono">{row.games}</span>
+                  </StackedCell>
+                  <StackedCell
+                    label={columns.lastScan}
+                    className="text-xs text-fg-muted @6xl:px-4 @6xl:py-2.5 @6xl:whitespace-nowrap"
+                  >
+                    {running ? (
+                      <StatusDot tone="warning">
+                        <Trans>Scanning…</Trans>
+                      </StatusDot>
+                    ) : row.lastScanMs ? (
+                      formatDateTime(row.lastScanMs)
+                    ) : (
+                      t({ message: "Never", comment: "A scanner's last scan" })
+                    )}
+                  </StackedCell>
+                  <StackedCell label={columns.auto} className="@6xl:px-4 @6xl:py-2.5">
+                    <Switch
+                      size="sm"
+                      aria-label={t`Include ${{ name: scanner.name }} in library update`}
+                      isSelected={scanner.inLibraryUpdate}
+                      isDisabled={toggle.isPending}
+                      onChange={(on) => toggle.mutate({ ...scanner, inLibraryUpdate: on })}
+                    />
+                  </StackedCell>
+                  <StackedCell full className="text-right @6xl:px-4 @6xl:py-2.5">
+                    <Button
+                      size="sm"
+                      icon={Play}
+                      isDisabled={running || Boolean(row.problem) || scan.isPending}
+                      onPress={() => startScan(scanner.id)}
+                      aria-label={t`Scan ${{ name: scanner.name }}`}
+                    >
+                      <Trans comment="Run the ROM scanner">Scan</Trans>
+                    </Button>
+                  </StackedCell>
+                </StackedRow>
+              );
+            })}
+          </StackedTable>
         )}
         {menus.menu}
         {(scan.error || toggle.error) && (

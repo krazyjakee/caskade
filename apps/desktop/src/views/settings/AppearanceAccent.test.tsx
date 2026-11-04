@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
 import type { SettingsApi, SettingsSnapshot } from "../../api/settings";
 import { AppearanceSettings } from "./AppearanceSettings";
@@ -55,7 +55,7 @@ function show(surfaces: [string, string]) {
 
 it("saves a readable accent, adjusting one that would vanish on the theme", async () => {
   const saved = show(["#060914", "#0d1224d9"]);
-  const input = await screen.findByLabelText("Accent colour");
+  const input = await screen.findByLabelText("Custom accent colour");
   fireEvent.change(input, { target: { value: "#e0457b" } });
   await waitFor(() => expect(saved).toEqual(["#e0457b"]));
   fireEvent.change(input, { target: { value: "#1a1f4a" } });
@@ -68,9 +68,31 @@ it("saves a readable accent, adjusting one that would vanish on the theme", asyn
 
 it("refuses an accent no adjustment can make readable, with a message", async () => {
   const saved = show(["#3a3a3a", "#c8c8c8"]);
-  fireEvent.change(await screen.findByLabelText("Accent colour"), {
+  fireEvent.change(await screen.findByLabelText("Custom accent colour"), {
     target: { value: "#e0457b" },
   });
+  expect((await screen.findByRole("alert")).textContent).toMatch(/can't be made readable/);
+  expect(saved).toEqual([]);
+});
+
+it("offers named swatches beside the picker, and marks one adjusted for the theme", async () => {
+  const saved = show(["#ffffff", "#f4f4f4"]);
+  const group = await screen.findByRole("radiogroup", { name: "Accent colour" });
+  const amber = within(group).getByRole("radio", { name: "Amber" });
+  expect(within(group).getAllByRole("radio")).toHaveLength(8);
+  expect(screen.getByLabelText("Custom accent colour")).toBeTruthy();
+  fireEvent.click(amber);
+  await screen.findByText(/#f59e0b was darkened to #[0-9a-f]{6} to stay readable/);
+  await waitFor(() => expect(saved).toHaveLength(1));
+  expect(saved[0]).not.toBe("#f59e0b");
+  await waitFor(() => expect(amber.getAttribute("aria-checked")).toBe("true"));
+  fireEvent.click(screen.getByRole("button", { name: "Theme accent" }));
+  await waitFor(() => expect(amber.getAttribute("aria-checked")).toBe("false"));
+});
+
+it("says why a refused swatch wasn't saved", async () => {
+  const saved = show(["#3a3a3a", "#c8c8c8"]);
+  fireEvent.click(await screen.findByRole("radio", { name: "Red" }));
   expect((await screen.findByRole("alert")).textContent).toMatch(/can't be made readable/);
   expect(saved).toEqual([]);
 });

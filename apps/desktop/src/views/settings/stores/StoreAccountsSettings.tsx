@@ -28,7 +28,7 @@ import {
 } from "../../../api/storeAccounts";
 import { AchievementSettings } from "../../../components/achievements/AchievementSettings";
 import { FailureNotice } from "../../../components/FailureNotice";
-import { SettingsStatus, useSettingsSection } from "../useSettings";
+import { SettingsLoading, SettingsStatus, useSettingsSection } from "../useSettings";
 
 const stateLabels: Record<StoreConnectionState, MessageDescriptor> = {
   notConnected: msg({ message: "Disconnected", context: "store account" }),
@@ -53,8 +53,9 @@ const stateTones: Record<StoreConnectionState, "ok" | "off" | "warning" | "dange
 export function StoreAccountsSettings() {
   const { t } = useLingui();
   const query = useStoreAccounts();
-  if (query.error) return <FailureNotice error={query.error} onRetry={() => query.refetch()} />;
-  if (!query.data) return null;
+  if (query.error || !query.data) {
+    return <SettingsLoading error={query.error} reload={() => void query.refetch()} />;
+  }
   const { providers, accounts, flows } = query.data;
   const unsupported = accounts.filter((a) => a.capabilities === null);
   return (

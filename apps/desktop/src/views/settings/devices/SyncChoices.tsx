@@ -1,12 +1,16 @@
 /** What syncs between paired devices (#227, `core.sync.categories`): each
  * kind of data syncs or stays on this device, and some never leave it.
  * This device's choice governs both what it sends and what it takes in;
- * turning one back on syncs it again from the change log. */
-import { SegmentedControl, SettingRow, SettingsSection } from "@caskade/ui";
+ * turning one back on syncs it again from the change log. Before any device
+ * is paired it all waits behind a disclosure (#60). */
+import { Button, SegmentedControl, SettingRow, SettingsSection } from "@caskade/ui";
 import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
-import { HardDrive, RefreshCcw } from "lucide-react";
+import { ChevronDown, ChevronRight, HardDrive, RefreshCcw } from "lucide-react";
+import { type ReactNode, useLayoutEffect, useRef, useState } from "react";
+import { Disclosure, DisclosurePanel, Heading } from "react-aria-components";
+import { flushSync } from "react-dom";
 import { SettingsStatus, useSettingsSection } from "../useSettings";
 import { useDeviceAdmin } from "./admin";
 
@@ -122,7 +126,46 @@ function stateOf(value: SyncSettingsValue, category: SyncCategory): CategoryStat
   return value.categories[category] ?? (synced.includes(category) ? "sync" : "thisDeviceOnly");
 }
 
-export function SyncChoices() {
+/** The choices behind a button. Settings search marks the row it finds
+ * `data-found` but can't reach it while it's hidden, so this opens up and
+ * finishes the job. Watching from the layout effect: search looks as soon as
+ * the panel shows the row, before a plain effect would run. */
+function ChooseAheadOfTime({ label, children }: { label: string; children: ReactNode }) {
+  const [expanded, setExpanded] = useState(false);
+  const panel = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const root = panel.current;
+    if (!root) return;
+    const observer = new MutationObserver((records) => {
+      const found = records
+        .map((record) => record.target as HTMLElement)
+        .find((target) => target.hasAttribute("data-found"));
+      if (!found) return;
+      flushSync(() => setExpanded(true));
+      found.querySelector("input")?.focus();
+      found.scrollIntoView?.({ block: "center" });
+    });
+    observer.observe(root, { subtree: true, attributes: true, attributeFilter: ["data-found"] });
+    return () => observer.disconnect();
+  }, []);
+  return (
+    <Disclosure isExpanded={expanded} onExpandedChange={setExpanded}>
+      <Heading>
+        <Button
+          slot="trigger"
+          variant="ghost"
+          size="sm"
+          icon={expanded ? ChevronDown : ChevronRight}
+        >
+          {label}
+        </Button>
+      </Heading>
+      <DisclosurePanel ref={panel}>{children}</DisclosurePanel>
+    </Disclosure>
+  );
+}
+
+export function SyncChoices({ collapsed = false }: { collapsed?: boolean }) {
   const { t } = useLingui();
   const admin = useDeviceAdmin();
   const sync = useSettingsSection<SyncSettingsValue>("core.sync");
@@ -159,32 +202,56 @@ export function SyncChoices() {
       </SettingRow>
     );
   };
+  const rows = (
+    <>
+      <div className="flex flex-col">{synced.map(row)}</div>
+      <h3 className="mt-6 text-sm font-medium">
+        <Trans>Usually different on each device</Trans>
+      </h3>
+      <p className="mb-1 text-xs text-fg-muted">
+        <Trans>These stay on each device until you choose to sync them.</Trans>
+      </p>
+      <div className="flex flex-col">{optional.map(row)}</div>
+    </>
+  );
+  const neverTitle = t`Never synced`;
+  const neverDescription = t`These belong to each device's own drives and hardware.`;
+  const never = (
+    <ul className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-x-6 gap-y-1.5 text-sm text-fg-muted">
+      {localOnly.map((label) => (
+        <li key={label.id} className="flex items-center gap-2">
+          <span aria-hidden className="size-1 rounded-full bg-fg-subtle" />
+          {t(label)}
+        </li>
+      ))}
+    </ul>
+  );
+  if (collapsed) {
+    return (
+      <SettingsSection
+        icon={RefreshCcw}
+        title={title}
+        description={t`Nothing syncs until a device is paired. Then your library, play history and saves stay in step, unless you choose otherwise.`}
+      >
+        <SettingsStatus section={sync} what={title} className="mb-3" />
+        <ChooseAheadOfTime label={admin ? t`Choose what syncs` : t`See what syncs`}>
+          <p className="mt-2 text-sm text-fg-muted">{description}</p>
+          {rows}
+          <h3 className="mt-6 text-sm font-medium">{neverTitle}</h3>
+          <p className="mb-2 text-xs text-fg-muted">{neverDescription}</p>
+          {never}
+        </ChooseAheadOfTime>
+      </SettingsSection>
+    );
+  }
   return (
     <>
       <SettingsSection icon={RefreshCcw} title={title} description={description}>
         <SettingsStatus section={sync} what={title} className="mb-3" />
-        <div className="flex flex-col">{synced.map(row)}</div>
-        <h3 className="mt-6 text-sm font-medium">
-          <Trans>Usually different on each device</Trans>
-        </h3>
-        <p className="mb-1 text-xs text-fg-muted">
-          <Trans>These stay on each device until you choose to sync them.</Trans>
-        </p>
-        <div className="flex flex-col">{optional.map(row)}</div>
+        {rows}
       </SettingsSection>
-      <SettingsSection
-        icon={HardDrive}
-        title={t`Never synced`}
-        description={t`These belong to each device's own drives and hardware.`}
-      >
-        <ul className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-x-6 gap-y-1.5 text-sm text-fg-muted">
-          {localOnly.map((label) => (
-            <li key={label.id} className="flex items-center gap-2">
-              <span aria-hidden className="size-1 rounded-full bg-fg-subtle" />
-              {t(label)}
-            </li>
-          ))}
-        </ul>
+      <SettingsSection icon={HardDrive} title={neverTitle} description={neverDescription}>
+        {never}
       </SettingsSection>
     </>
   );

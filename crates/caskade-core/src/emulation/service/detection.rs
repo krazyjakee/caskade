@@ -165,14 +165,22 @@ impl EmulationService {
         let cancel = lock(&self.inner.jobs)
             .get(id)
             .map(|state| state.cancel.clone())
-            .ok_or_else(|| Error::Invalid(crate::tr!("unknown detection {id}", id = id)))?;
+            .ok_or_else(|| {
+                Error::Invalid(crate::tr!(
+                    "This detection is no longer available. Run it again."
+                ))
+            })?;
         cancel.cancel();
         self.update_job(id, |job| {
             if job.status == DetectStatus::Running {
                 job.status = DetectStatus::Cancelled;
             }
         })
-        .ok_or_else(|| Error::Invalid(crate::tr!("unknown detection {id}", id = id)))
+        .ok_or_else(|| {
+            Error::Invalid(crate::tr!(
+                "This detection is no longer available. Run it again."
+            ))
+        })
     }
 
     /// Imports the ticked installs of a finished detection (§5 step 4),
@@ -184,9 +192,11 @@ impl EmulationService {
         revision: u32,
         keys: &[String],
     ) -> Result<DetectImport> {
-        let job = self
-            .detect_get(id)
-            .ok_or_else(|| Error::Invalid(crate::tr!("unknown detection {id}", id = id)))?;
+        let job = self.detect_get(id).ok_or_else(|| {
+            Error::Invalid(crate::tr!(
+                "This detection is no longer available. Run it again."
+            ))
+        })?;
         if job.status != DetectStatus::Done {
             return Err(Error::Invalid(crate::tr!("the detection has not finished")));
         }

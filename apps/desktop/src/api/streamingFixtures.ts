@@ -9,6 +9,7 @@ import type {
   StreamHost,
   StreamingApi,
   StreamingProgram,
+  StreamQuality,
 } from "./streaming";
 
 export interface StreamingFixtureOptions {
@@ -56,6 +57,8 @@ export function createStreamingFixtureApi(options: StreamingFixtureOptions = {})
   /** What was entered on this device for each request. */
   accepted: { id: string; code: string; name: string }[];
   hostingCalls: boolean[];
+  /** The qualities set, in order. */
+  qualityCalls: StreamQuality[];
   /** Repairs asked for. */
   repairs: number;
 } {
@@ -70,6 +73,7 @@ export function createStreamingFixtureApi(options: StreamingFixtureOptions = {})
   const listeners = new Set<(finished: PairingFinished) => void>();
   const accepted: { id: string; code: string; name: string }[] = [];
   const hostingCalls: boolean[] = [];
+  const qualityCalls: StreamQuality[] = [];
   const turnOn = (): HostOutcome => {
     status = { state: "settingUp", version: null, problem: null };
     const ready = () => {
@@ -82,6 +86,7 @@ export function createStreamingFixtureApi(options: StreamingFixtureOptions = {})
   return {
     accepted,
     hostingCalls,
+    qualityCalls,
     get repairs() {
       return repairs;
     },
@@ -144,6 +149,12 @@ export function createStreamingFixtureApi(options: StreamingFixtureOptions = {})
       }
       if (existing) return "existingFound";
       return turnOn();
+    },
+    async setQuality(quality) {
+      qualityCalls.push(quality);
+      const { settingsFixtureApi: settings } = await import("./settingsFixtures");
+      const { value, revision } = await settings.get("core.streaming");
+      return settings.set("core.streaming", { ...value, quality }, revision);
     },
     async hostThroughExisting(user, password) {
       if (!user || password !== "secret") throw new Error("That user name or password isn't right");

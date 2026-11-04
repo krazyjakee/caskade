@@ -7,9 +7,9 @@ import { FolderPlus, HardDrive, RefreshCw, Star, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Button as AriaButton } from "react-aria-components";
 import { formatPath } from "../../api/presentation";
-import { CommandFailure, toFailure } from "../../api/reply";
 import { formatBytes, type RootStatus, type RootSummary, type StorageApi } from "../../api/storage";
 import { useActionMenus } from "../../components/ActionMenu";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { usePathPicker } from "../../components/pathBrowser/PathPicker";
 import { useDropZone } from "../../drop/DropProvider";
 import { UnsavedHint, useUnsavedChanges } from "./unsavedChanges";
@@ -25,6 +25,8 @@ const statuses: Record<RootStatus, MessageDescriptor> = {
     comment: "The folder at the location's path isn't the location Caskade registered",
   }),
 };
+
+const locationName = ({ root }: RootSummary) => root.label ?? formatPath(root.path);
 
 export function StoragePanel({ api }: { api: StorageApi }) {
   const { t } = useLingui();
@@ -45,12 +47,14 @@ export function StoragePanel({ api }: { api: StorageApi }) {
   const addDrop = useDropZone<HTMLDivElement>((paths) => setPath(paths[0] ?? ""));
   const [target, setTarget] = useState("");
   const [remove, setRemove] = useState(false);
+  const [confirmMove, setConfirmMove] = useState(false);
   const [message, setMessage] = useState("");
   const roots = query.data ?? [];
   const active = roots.find((r) => r.root.id === selected) ?? roots[0];
   const operation = useMutation({
     mutationFn: async (run: () => Promise<void>) => run(),
-    onSuccess: () => {
+    // A move that stopped part way changed the locations too.
+    onSettled: () => {
       void client.invalidateQueries({ queryKey: ["storage"] });
       void client.invalidateQueries({ queryKey: ["library"] });
     },
@@ -63,41 +67,7 @@ export function StoragePanel({ api }: { api: StorageApi }) {
   const destination = destinations.some((r) => r.root.id === target)
     ? target
     : (destinations[0]?.root.id ?? "");
-  // Removing a location can first move its games to another one.
-  async function moveAllGames() {
-    if (!active || !destination) return;
-    const games = active.games;
-    let moved = 0;
-    for (const game of games) {
-      try {
-        if (game.moveBlocked) throw new Error(game.moveBlocked);
-        await api.move(game.entryId, destination);
-      } catch (error) {
-        // Say which game stopped the batch and that the ones before it
-        // moved, rather than only the last error (#160).
-        const failure = toFailure(error);
-        throw new CommandFailure({
-          code: failure.code,
-          summary: [
-            moved &&
-              t({
-                message: `${{ moved }} of ${{ total: games.length }} games moved.`,
-                comment: "How many games moved before one failed; {total} is always 2 or more",
-              }),
-            t`“${{ title: game.title }}” wasn't moved: ${{ reason: failure.message }}`,
-          ]
-            .filter(Boolean)
-            .join(" "),
-          detail: failure.detail,
-          hints: failure.hints,
-          transient: failure.transient,
-          reference: failure.reference ?? undefined,
-        });
-      }
-      moved += 1;
-    }
-    setMessage(t`Move completed. Library identity and playtime were preserved.`);
-  }
+  const destinationRoot = destinations.find((r) => r.root.id === destination);
   const error = query.error ?? operation.error;
   // A right click on a location offers its buttons.
   const menus = useActionMenus();
@@ -326,15 +296,35 @@ export function StoragePanel({ api }: { api: StorageApi }) {
           {remove && (
             <section
               data-part="remove-root"
-              className="my-3 flex flex-col gap-2 rounded-panel border border-warning/40 p-3"
+              className="my-3 flex flex-col gap-2 rounded-panel border border-danger/40 p-3"
             >
-              <p className="text-sm">
-                <Trans>
-                  Remove this location from the library? Files on disk are kept unless you move them
-                  first.
-                </Trans>
-              </p>
+              {/* What `StorageService::remove_keep_files` does (#64). */}
+              {active.games.length === 0 ? (
+                <p className="text-sm">
+                  <Trans>Remove this location from the library? Files on disk are kept.</Trans>
+                </p>
+              ) : (
+                <>
+                  <p className="text-sm">
+                    {plural(
+                      { games: active.games.length },
+                      {
+                        one: "Remove this location from the library? Its game leaves your library, with its play time, favourite and collections. If you also have that game another way, it stays, without this copy's play time.",
+                        other:
+                          "Remove this location from the library? Its # games leave your library, with their play time, favourites and collections. A game you also have another way stays, without this copy's play time.",
+                      },
+                    )}
+                  </p>
+                  <p className="text-sm">
+                    <Trans>
+                      Files on disk are kept. Add this folder again and Caskade finds them, as new
+                      games: what left the library doesn't come back.
+                    </Trans>
+                  </p>
+                </>
+              )}
               <Button
+                variant="danger"
                 isDisabled={operation.isPending}
                 onPress={() =>
                   run(async () => {
@@ -367,14 +357,7 @@ export function StoragePanel({ api }: { api: StorageApi }) {
                     isDisabled={
                       operation.isPending || active.games.some((game) => game.moveBlocked !== null)
                     }
-                    onPress={() =>
-                      run(async () => {
-                        await moveAllGames();
-                        await api.remove(active.root.id);
-                        setSelected(null);
-                        setRemove(false);
-                      })
-                    }
+                    onPress={() => setConfirmMove(true)}
                   >
                     {plural(
                       { games: active.games.length },
@@ -389,6 +372,23 @@ export function StoragePanel({ api }: { api: StorageApi }) {
               <Button onPress={() => setRemove(false)}>
                 <Trans>Cancel</Trans>
               </Button>
+              {confirmMove && destinationRoot && (
+                <MoveAndRemoveDialog
+                  root={active}
+                  to={destinationRoot}
+                  close={() => setConfirmMove(false)}
+                  onConfirm={() => {
+                    setConfirmMove(false);
+                    // One job in Activity: this waits for it to end.
+                    run(async () => {
+                      await api.moveAndRemove(active.root.id, destinationRoot.root.id);
+                      setSelected(null);
+                      setRemove(false);
+                      setMessage(t`Move completed. Library identity and playtime were preserved.`);
+                    });
+                  }}
+                />
+              )}
             </section>
           )}
           {operation.isPending && (
@@ -417,6 +417,44 @@ export function StoragePanel({ api }: { api: StorageApi }) {
         <SettingsFeedback error={prefs.error} saving={prefs.saving} />
       </SettingsSection>
     </div>
+  );
+}
+/** Asks once before a location's games move and it goes (#64). */
+function MoveAndRemoveDialog({
+  root,
+  to,
+  onConfirm,
+  close,
+}: {
+  root: RootSummary;
+  to: RootSummary;
+  onConfirm: () => void;
+  close: () => void;
+}) {
+  const { t } = useLingui();
+  const from = locationName(root);
+  const target = locationName(to);
+  const size = formatBytes(root.gamesBytes);
+  return (
+    <ConfirmDialog
+      title={plural(
+        { games: root.games.length },
+        { one: `Move its game to ${target}?`, other: `Move its # games to ${target}?` },
+      )}
+      confirmLabel={t`Move and remove`}
+      onConfirm={onConfirm}
+      close={close}
+    >
+      <p>
+        <Trans>{size} to move, as one job you can follow or cancel in Activity.</Trans>
+      </p>
+      <p>
+        <Trans>
+          {from} is removed once every game has moved. If you cancel, or a game can't move, it stays
+          and the games already moved stay on {target}.
+        </Trans>
+      </p>
+    </ConfirmDialog>
   );
 }
 function RootEditor({

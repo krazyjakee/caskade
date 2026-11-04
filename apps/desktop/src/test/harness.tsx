@@ -99,6 +99,7 @@ export const emptyStorage: StorageApi = {
   edit: refuse("edit"),
   setDefault: refuse("setDefault"),
   remove: refuse("remove"),
+  moveAndRemove: refuse("moveAndRemove"),
   chooseDirectory: async () => null,
   move: refuse("move"),
   uninstall: refuse("uninstall"),

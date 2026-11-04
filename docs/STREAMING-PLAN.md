@@ -388,7 +388,7 @@ Built (#255, `caskade_core::elevation`). Callers name a plan (`Plan::StreamingHo
 
 #### Built (#265)
 
-- **Settings → Streaming** (`views/settings/streaming/`) is shown to every account, like Devices. Hosting, accepting pairings and quality are an admin's (`useDeviceAdmin`; the core refuses anyone else). Pairing this device with another is anyone's.
+- **Settings → Streaming** (`views/settings/streaming/`) is shown to every account, like Devices. Hosting and accepting pairings are an admin's (`useDeviceAdmin`; the core refuses anyone else). Pairing this device with another is anyone's.
   - **Let other devices play:**
     - The switch "Let other devices stream games from this one".
     - The state: Off, Setting up…, Starting…, Ready, or Needs attention with the core's problem and Repair. Repair switches hosting on again, which redoes only what's missing.

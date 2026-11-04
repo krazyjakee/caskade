@@ -269,6 +269,7 @@ impl InstallService {
                 JobKind::Verify => crate::tr!("Verifying game"),
                 JobKind::Fetch => crate::tr!("Downloading game"),
                 JobKind::Move => crate::tr!("Moving game"),
+                JobKind::MoveLocation => crate::tr!("Moving games"),
                 JobKind::Update => crate::tr!("Updating game"),
                 JobKind::PeerCopy => crate::tr!("Copying game"),
             };
@@ -453,16 +454,7 @@ impl InstallService {
                     .move_entry(&entry_id, &target_root_id, &id, ctx.sink, cancel)
                     .await
                     .map_err(|e| Error::Invalid(e.to_string()))?;
-                let warning = super::hooks::notify::<super::hooks::InstallMoved>(
-                    &service.inner.bus,
-                    super::hooks::MovedGame {
-                        job_id: id.clone(),
-                        game_id: moved.game_id.clone(),
-                        from,
-                        to: moved.directory.clone(),
-                    },
-                )
-                .await;
+                let warning = service.announce_move(&id, from, &moved).await;
                 service.update(&id, |job| {
                     job.warnings.extend(warning);
                     job.status = JobStatus::Completed;
@@ -472,6 +464,24 @@ impl InstallService {
                 Ok(())
             },
         ))
+    }
+    /// Tells plugins a game moved, so they can fix references they own.
+    pub(super) async fn announce_move(
+        &self,
+        id: &str,
+        from: PathBuf,
+        moved: &crate::storage::MoveReport,
+    ) -> Option<caskade_installer::Warning> {
+        super::hooks::notify::<super::hooks::InstallMoved>(
+            &self.inner.bus,
+            super::hooks::MovedGame {
+                job_id: id.to_owned(),
+                game_id: moved.game_id.clone(),
+                from,
+                to: moved.directory.clone(),
+            },
+        )
+        .await
     }
     pub(super) fn context(&self, id: &str, cancel: CancellationToken) -> Context {
         let (control, hints) = lock(&self.inner.jobs)

@@ -110,7 +110,13 @@ fn game_igdb_commands_answer_without_the_network() {
         json!({"gameId": "nope", "igdbId": null}),
     )
     .unwrap_err();
-    assert!(missing.as_str().unwrap().contains("not found"), "{missing}");
+    assert!(
+        missing
+            .as_str()
+            .unwrap()
+            .contains("no longer in the library"),
+        "{missing}"
+    );
 
     // "No IGDB game" needs no server.
     let none = json!({

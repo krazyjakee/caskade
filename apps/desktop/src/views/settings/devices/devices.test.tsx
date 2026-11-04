@@ -2,7 +2,7 @@
  * link, forgetting, what syncs, the read-only view of a standard account,
  * pairings and opened links over any view, the status bar's entry, and the
  * same with a pad only in console mode. */
-import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
@@ -36,6 +36,22 @@ function devices(
     ...options,
     wrap: (children: ReactNode) => <SyncProvider api={sync}>{children}</SyncProvider>,
   });
+}
+
+/** The fixture before any pairing, with nobody nearby until `nearby.found`. */
+function unpaired() {
+  const sync = createSyncFixtureApi();
+  const nearby = { found: false };
+  const api: SyncFixtureApi = {
+    ...sync,
+    status: async () => {
+      const status = await sync.status();
+      return { ...status, devices: [], nearby: nearby.found ? status.nearby : [] };
+    },
+  };
+  /** The core says something changed. */
+  const changed = () => act(() => sync.setCopies("any", []));
+  return { api, nearby, changed };
 }
 
 it("shows this device, paired devices with how each is reached, and syncs one now", async () => {
@@ -99,10 +115,94 @@ it("pairs with a pasted link, makes one to copy, and forgets a device", async ()
   );
 });
 
+it("before any pairing, keeps what syncs behind a disclosure an admin can open (#60)", async () => {
+  const app = devices("/settings?tab=devices", unpaired().api);
+  const trigger = await screen.findByRole("button", { name: "Choose what syncs" });
+  expect(trigger.getAttribute("aria-expanded")).toBe("false");
+  expect(screen.queryByRole("radiogroup", { name: "Library" })).toBeNull();
+  expect(screen.queryByRole("heading", { name: "Never synced" })).toBeNull();
+
+  fireEvent.click(trigger);
+  expect(trigger.getAttribute("aria-expanded")).toBe("true");
+  expect(await screen.findByRole("heading", { name: "Never synced" })).toBeTruthy();
+  const row = screen.getByRole("radiogroup", { name: "Play history" });
+  fireEvent.click(within(row).getByRole("radio", { name: "This device only" }));
+  await waitFor(() => {
+    const value = app.settings.values["core.sync"] as { categories: Record<string, string> };
+    expect(value.categories.playSessions).toBe("thisDeviceOnly");
+  });
+});
+
+it("before any pairing, a standard account can look at what syncs but not change it (#60)", async () => {
+  devices("/settings?tab=devices", unpaired().api, { accounts: family, activeAccount: "kid" });
+  fireEvent.click(await screen.findByRole("button", { name: "See what syncs" }));
+  const row = await screen.findByRole("radiogroup", { name: "Library" });
+  expect(within(row).getByRole("radio", { name: "Sync" })).toHaveProperty("disabled", true);
+});
+
+it("a pad opens what syncs before any pairing and reaches its choices (#60)", async () => {
+  const app = devices("/settings?tab=devices", unpaired().api, { mode: "console" });
+  await screen.findByRole("button", { name: "Choose what syncs" });
+  for (let i = 0; i < 80 && focused()?.textContent !== "Choose what syncs"; i++) {
+    app.pad.press("nav.down");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+  const trigger = focused() as HTMLElement;
+  expect(trigger.textContent).toBe("Choose what syncs");
+  app.pad.press("confirm");
+  await waitFor(() => expect(trigger.getAttribute("aria-expanded")).toBe("true"));
+  const panel = document.getElementById(trigger.getAttribute("aria-controls") as string);
+  for (let i = 0; i < 20 && !focused()?.closest('[role="radiogroup"]'); i++) {
+    app.pad.press("nav.down");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+  // A row's choices, inside what just opened.
+  expect(focused()?.closest('[role="radiogroup"]')).toBeTruthy();
+  expect(panel?.contains(focused() as Node)).toBe(true);
+});
+
+it("a settings search opens what syncs to show the row it found (#60)", async () => {
+  devices("/settings?tab=general", unpaired().api);
+  fireEvent.change(await screen.findByRole("searchbox", { name: "Search settings" }), {
+    target: { value: "play history" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Play history in Devices" }));
+  const row = await screen.findByRole("radiogroup", { name: "Play history" }, { timeout: 5_000 });
+  expect(row.closest("[data-found]")).toBeTruthy();
+  expect(focused()?.closest("[data-found]")).toBeTruthy();
+});
+
+it("says when nobody turned up, points to a link, and still shows a later device (#60)", async () => {
+  vi.useFakeTimers({ shouldAdvanceTime: true, toFake: ["setTimeout", "clearTimeout"] });
+  try {
+    const { api, nearby, changed } = unpaired();
+    devices("/settings?tab=devices", api);
+    const looking = "Looking for Caskade on this network…";
+    await screen.findByText(looking);
+    act(() => vi.advanceTimersByTime(29_000));
+    expect(screen.getByText(looking)).toBeTruthy();
+    act(() => vi.advanceTimersByTime(2_000));
+    const nobody = await screen.findByText(/No devices found on this network yet/);
+    expect(nobody.getAttribute("role")).toBe("status");
+    expect(nobody.textContent).toMatch(/pair with a link below/);
+    expect(screen.queryByText(looking)).toBeNull();
+    expect(screen.getByRole("button", { name: "Copy a pairing link" })).toBeTruthy();
+
+    nearby.found = true;
+    changed();
+    expect(await screen.findByRole("button", { name: "Pair…" })).toBeTruthy();
+    expect(screen.queryByText(/No devices found/)).toBeNull();
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
 it("changes what syncs, Connect only directly and downloads from my devices", async () => {
   const sync = createSyncFixtureApi();
   const app = devices("/settings?tab=devices", sync);
   const row = (await screen.findByText("Play history")).closest('[data-cs="setting-row"]');
+  // With devices paired, it's all out in the open.
+  expect(screen.queryByRole("button", { name: "Choose what syncs" })).toBeNull();
   fireEvent.click(within(row as HTMLElement).getByRole("radio", { name: "This device only" }));
   await waitFor(async () => {
     const value = app.settings.values["core.sync"] as {

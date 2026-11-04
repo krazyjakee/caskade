@@ -280,8 +280,20 @@ impl StorageService {
         self.store.upsert_root(&root).await?;
         self.summary(root).await
     }
-    /// Explicit keep-files removal. Native/delegated installs are not deleted.
+    /// Explicit keep-files removal. The location's copies leave the library
+    /// with their play sessions, and a game with no other copy goes too,
+    /// with its favourite, notes and collections. Nothing on disk changes:
+    /// adding the folder again adopts its games, as new library games.
+    /// Native/delegated installs are not deleted.
     pub async fn remove_keep_files(&self, id: &str) -> Result<()> {
+        self.remove_root(id, false).await
+    }
+    /// Removes a location its games were moved off (#64). One that gained a
+    /// game meanwhile stays.
+    pub async fn remove_emptied(&self, id: &str) -> Result<()> {
+        self.remove_root(id, true).await
+    }
+    async fn remove_root(&self, id: &str, only_if_empty: bool) -> Result<()> {
         let _guard = self.mutation.lock().await;
         let root = self
             .store
@@ -292,6 +304,11 @@ impl StorageService {
             return Err(StorageError::DefaultRoot);
         }
         let entries = self.store.entries_for_root(id).await?;
+        if only_if_empty && !entries.is_empty() {
+            return Err(StorageError::Invalid(crate::tr!(
+                "it has games that aren't moved yet"
+            )));
+        }
         let mut leases = vec![];
         let mut games = BTreeSet::new();
         for entry in &entries {
@@ -402,7 +419,7 @@ impl StorageService {
             .unwrap_or("{title}")
             .to_owned())
     }
-    async fn summary(&self, root: StorageRoot) -> Result<RootSummary> {
+    pub(super) async fn summary(&self, root: StorageRoot) -> Result<RootSummary> {
         let (status, caps) = self.inspect(&root).await?;
         let folder_template = self.template(&root.id).await?;
         let entries = self.store.entries_with_titles_for_root(&root.id).await?;

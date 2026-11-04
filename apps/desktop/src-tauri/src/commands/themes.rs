@@ -1,6 +1,7 @@
 //! Themes IPC (#139, #140) over `caskade_core::themes::ThemeService`: the
 //! installed themes, the active one (from `core.appearance.theme`, with the
 //! default as fallback), safe mode (#142) and dev themes watched in place.
+use crate::error::{CommandError, refused, report};
 use caskade_core::settings::{AppearanceSettings, SettingsService};
 use caskade_core::themes::{DEV_DEBOUNCE, ThemeInfo, ThemeService};
 use caskade_plugin_host::PluginHost;
@@ -140,7 +141,7 @@ pub async fn theme_resolve<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     themes: tauri::State<'_, ThemeService>,
     id: Option<String>,
-) -> Result<ResolvedTheme, String> {
+) -> Result<ResolvedTheme, CommandError> {
     let requested = match id {
         Some(id) => id,
         None => selected(app.try_state::<SettingsService>()).await,
@@ -159,9 +160,7 @@ pub async fn theme_resolve<R: tauri::Runtime>(
             "Safe mode: Caskade started with the default theme and without your custom CSS."
         ));
     }
-    themes
-        .stylesheet(&active.id)
-        .map_err(|error| error.to_string())?;
+    themes.stylesheet(&active.id).map_err(report)?;
     Ok(ResolvedTheme {
         url: crate::theme_scheme::url(&active.id, "theme.css"),
         id: active.id,
@@ -187,7 +186,7 @@ pub fn appearance_safe_mode<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> bool
 pub async fn themes_list<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     themes: tauri::State<'_, ThemeService>,
-) -> Result<Vec<ThemeInfo>, String> {
+) -> Result<Vec<ThemeInfo>, CommandError> {
     sync_plugins(&app, &themes).await;
     Ok(with_urls(themes.list()))
 }
@@ -198,8 +197,8 @@ pub async fn themes_list<R: tauri::Runtime>(
 pub fn theme_stylesheet(
     themes: tauri::State<'_, ThemeService>,
     id: String,
-) -> Result<String, String> {
-    themes.stylesheet(&id).map_err(|error| error.to_string())?;
+) -> Result<String, CommandError> {
+    themes.stylesheet(&id).map_err(report)?;
     Ok(crate::theme_scheme::url(&id, "theme.css"))
 }
 
@@ -209,7 +208,7 @@ pub fn theme_stylesheet(
 pub async fn themes_reload<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     themes: tauri::State<'_, ThemeService>,
-) -> Result<Vec<ThemeInfo>, String> {
+) -> Result<Vec<ThemeInfo>, CommandError> {
     sync_plugins(&app, &themes).await;
     themes.reload();
     Ok(with_urls(themes.list()))
@@ -259,13 +258,13 @@ pub fn is_theme_folder(folder: &Path) -> bool {
 pub async fn theme_load_unpacked<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     folder: String,
-) -> Result<String, String> {
+) -> Result<String, CommandError> {
     if !cfg!(debug_assertions) {
-        return Err(caskade_core::tr!(
+        return Err(refused(caskade_core::tr!(
             "Loading a theme folder is only available in development builds; run `caskade dev <folder>`"
-        ));
+        )));
     }
-    load_dev(&app, Path::new(&folder))
+    load_dev(&app, Path::new(&folder)).map_err(CommandError::from)
 }
 
 #[cfg(test)]

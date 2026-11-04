@@ -271,6 +271,7 @@ it("passes the shared picker's chosen root ID and enqueues only after selection"
     edit: vi.fn(),
     setDefault: vi.fn(),
     remove: vi.fn(),
+    moveAndRemove: vi.fn(),
     chooseDirectory: vi.fn(),
     move: vi.fn(),
     uninstall: vi.fn(),

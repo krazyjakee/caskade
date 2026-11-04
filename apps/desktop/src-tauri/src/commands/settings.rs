@@ -1,4 +1,5 @@
 //! Thin settings IPC contract; validation/persistence/events live in core.
+use crate::error::{CommandError, report};
 use caskade_core::settings::{SettingsSection, SettingsService, SettingsSnapshot};
 use tauri::Manager;
 
@@ -9,8 +10,8 @@ use tauri::Manager;
 pub fn settings_sections<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     state: tauri::State<'_, SettingsService>,
-) -> Result<Vec<SettingsSection>, String> {
-    let mut sections = state.sections().map_err(|error| error.to_string())?;
+) -> Result<Vec<SettingsSection>, CommandError> {
+    let mut sections = state.sections().map_err(report)?;
     if let Some(plugins) = app.try_state::<caskade_plugin_host::PluginHost>() {
         for section in &mut sections {
             if let Some(id) = section.namespace.strip_prefix("plugins.") {
@@ -26,11 +27,8 @@ pub fn settings_sections<R: tauri::Runtime>(
 pub async fn settings_get(
     state: tauri::State<'_, SettingsService>,
     namespace: String,
-) -> Result<SettingsSnapshot, String> {
-    state
-        .get(&namespace)
-        .await
-        .map_err(|error| error.to_string())
+) -> Result<SettingsSnapshot, CommandError> {
+    state.get(&namespace).await.map_err(report)
 }
 
 #[tauri::command]
@@ -40,11 +38,11 @@ pub async fn settings_set(
     namespace: String,
     value: serde_json::Value,
     expected_revision: Option<u32>,
-) -> Result<SettingsSnapshot, String> {
+) -> Result<SettingsSnapshot, CommandError> {
     state
         .set(&namespace, value, expected_revision)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(report)
 }
 
 #[tauri::command]
@@ -53,17 +51,17 @@ pub async fn settings_reset(
     state: tauri::State<'_, SettingsService>,
     namespace: String,
     expected_revision: Option<u32>,
-) -> Result<SettingsSnapshot, String> {
+) -> Result<SettingsSnapshot, CommandError> {
     state
         .reset(&namespace, expected_revision)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(report)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::commands::test_ipc::invoke;
+    use crate::commands::test_ipc::{assert_report, invoke};
     use serde_json::json;
     use tauri::test::{mock_builder, mock_context, noop_assets};
 
@@ -111,8 +109,19 @@ mod tests {
         .unwrap();
         assert_eq!(changed["value"]["enabled"], false);
         assert_eq!(changed["revision"], 1);
-        assert!(invoke(&webview, "settings_set", json!({"namespace":"test.preferences","value":{"enabled":true},"expectedRevision":0})).is_err());
-        assert!(invoke(&webview, "settings_set", json!({"namespace":"test.preferences","value":{"enabled":"wrong"},"expectedRevision":1})).is_err());
+        let stale = invoke(
+            &webview,
+            "settings_set",
+            json!({"namespace":"test.preferences","value":{"enabled":true},"expectedRevision":0}),
+        )
+        .unwrap_err();
+        assert_report(&stale, "conflict", &["test.preferences"]);
+        let wrong = invoke(&webview, "settings_set", json!({"namespace":"test.preferences","value":{"enabled":"wrong"},"expectedRevision":1})).unwrap_err();
+        assert_report(&wrong, "invalid", &["test.preferences", "/enabled"]);
+        assert!(wrong["detail"].as_str().unwrap().contains("/enabled"));
+        let absent =
+            invoke(&webview, "settings_get", json!({"namespace":"core.saves"})).unwrap_err();
+        assert_report(&absent, "unavailable", &["core.saves", "section"]);
         assert_eq!(
             invoke(
                 &webview,

@@ -401,11 +401,10 @@ impl ScannerService {
             .ok_or_else(|| Error::Invalid(crate::tr!("the scanner's profile does not exist")))?;
         let ids: Vec<&String> = match &scanner.platform {
             Some(platform) if profile.platforms.contains(platform) => vec![platform],
-            Some(platform) => {
+            Some(_) => {
                 return Err(Error::Invalid(crate::tr!(
-                    "the profile `{profile}` doesn't run platform `{platform}`",
-                    profile = profile.name,
-                    platform = platform
+                    "The profile {profile} doesn't run this scanner's platform.",
+                    profile = profile.name
                 )));
             }
             None => profile.platforms.iter().collect(),

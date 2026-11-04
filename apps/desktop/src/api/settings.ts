@@ -53,7 +53,7 @@ export function createSettingsApi(
   };
 }
 
-function objectReply(reply: Reply<NativeSnapshot>): Reply<SettingsSnapshot> {
+export function objectReply(reply: Reply<NativeSnapshot>): Reply<SettingsSnapshot> {
   if (reply.status === "error") return reply;
   const value = reply.data.value;
   if (value === null || typeof value !== "object" || Array.isArray(value)) {

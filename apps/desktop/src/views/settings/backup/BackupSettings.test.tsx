@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
-import { BackupProvider, type BackupStatus } from "../../../api/backup";
+import { type BackupApi, BackupProvider, type BackupStatus } from "../../../api/backup";
 import { createBackupFixtureApi } from "../../../api/backupFixtures";
 import { DropProvider } from "../../../drop/DropProvider";
 import { fakeDrops } from "../../../drop/testing";
@@ -11,8 +11,19 @@ import { BackupSettings } from "./BackupSettings";
 
 afterEach(cleanup);
 
-function renderPanel(initial?: Partial<BackupStatus>, drop?: () => Element | null) {
+function renderPanel(
+  initial?: Partial<BackupStatus>,
+  drop?: () => Element | null,
+  plan?: (planned: Awaited<ReturnType<BackupApi["plan"]>>) => object,
+) {
   const api = createBackupFixtureApi(initial);
+  if (plan) {
+    const original = api.plan;
+    api.plan = async (...args) => {
+      const planned = await original(...args);
+      return { ...planned, ...plan(planned) };
+    };
+  }
   const settings = createSettingsFixture();
   const drops = fakeDrops(drop ?? (() => null));
   render(
@@ -76,6 +87,53 @@ it("the backup folder keeps fast typing and saves once, on leaving the field (#5
   await waitFor(() => expect(settings.values["core.backups"]?.destination).toBe("/media/usb"));
   expect(settings.writes.length).toBe(before + 1);
   expect(field.value).toBe("/media/usb");
+});
+
+it("Back up now waits, saying why, while the chosen folder isn't there (#67)", async () => {
+  const { settings, api } = renderPanel();
+  const button = await screen.findByRole("button", { name: "Back up now" });
+  await screen.findByText(/Never included/);
+  expect(button).toHaveProperty("disabled", false);
+  const field = screen.getByRole("textbox", { name: "Backup folder" });
+  fireEvent.focus(field);
+  fireEvent.change(field, { target: { value: "/media/unplugged" } });
+  fireEvent.blur(field);
+  await waitFor(() =>
+    expect(settings.values["core.backups"]?.destination).toBe("/media/unplugged"),
+  );
+  const reason = await screen.findByText("Can't back up: the backup folder isn't there.");
+  expect(button).toHaveProperty("disabled", true);
+  expect(button.getAttribute("aria-describedby")).toBe(reason.id);
+  fireEvent.click(button);
+  expect(api.calls).not.toContain("start");
+});
+
+it("Back up now waits while the folder is short of space, until Check again finds room (#67)", async () => {
+  let availableBytes = 1024;
+  renderPanel(undefined, undefined, () => ({ availableBytes }));
+  const reason = await screen.findByText(
+    "Can't back up: the backup folder doesn't have enough free space.",
+  );
+  const button = screen.getByRole("button", { name: "Back up now" });
+  expect(button).toHaveProperty("disabled", true);
+  expect(button.getAttribute("aria-describedby")).toBe(reason.id);
+  availableBytes = 1024 ** 4;
+  fireEvent.click(screen.getByRole("button", { name: "Check again" }));
+  await waitFor(() => expect(button).toHaveProperty("disabled", false));
+  expect(screen.queryByText(/Can't back up/)).toBeNull();
+});
+
+it("the default folder needn't exist yet: the backup makes it (#67)", async () => {
+  renderPanel(undefined, undefined, () => ({ destinationExists: false, availableBytes: null }));
+  await screen.findByText(/Never included/);
+  expect(screen.getByRole("button", { name: "Back up now" })).toHaveProperty("disabled", false);
+  expect(screen.queryByText(/Can't back up/)).toBeNull();
+});
+
+it("About backups says where save versions are (#67)", async () => {
+  renderPanel();
+  expect(await screen.findByText(/versions of each game's saves/)).toBeTruthy();
+  expect(screen.getByText(/Settings → Devices → Saves/)).toBeTruthy();
 });
 
 it("a failed automatic backup says why", async () => {

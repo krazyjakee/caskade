@@ -497,9 +497,11 @@ impl RommService {
     }
 
     async fn server_config(&self, id: &str) -> Result<RommServerConfig> {
-        self.settings().await?.server(id).cloned().ok_or_else(|| {
-            RommError::Config(crate::tr!("there is no RomM server {server}", server = id))
-        })
+        self.settings()
+            .await?
+            .server(id)
+            .cloned()
+            .ok_or_else(|| RommError::Config(crate::tr!("This RomM server is no longer set up.")))
     }
 
     fn validate(&self, settings: &RommSettings) -> Result<()> {
@@ -508,8 +510,7 @@ impl RommService {
         for server in &settings.servers {
             if !ids.insert(server.id.as_str()) {
                 return Err(RommError::Config(crate::tr!(
-                    "two servers have the id {server}",
-                    server = server.id
+                    "Two RomM servers are set up as one. Remove one of them."
                 )));
             }
             #[cfg(feature = "net")]
@@ -519,8 +520,7 @@ impl RommService {
                     && catalog.platform(platform).is_none()
                 {
                     return Err(RommError::Config(crate::tr!(
-                        "unknown platform {platform}",
-                        platform = platform
+                        "Caskade doesn't know one of the platforms chosen for this server."
                     )));
                 }
                 if mapping.emulator_id.is_some() != mapping.profile_id.is_some() {

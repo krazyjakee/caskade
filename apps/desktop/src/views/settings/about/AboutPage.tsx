@@ -1,9 +1,11 @@
 import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
+import { Link, useRouter } from "@tanstack/react-router";
 import {
   Bug,
   ChevronRight,
+  CircleArrowUp,
   ExternalLink as ExternalIcon,
   FileText,
   GitBranch,
@@ -15,7 +17,7 @@ import {
 import { type LegalSection, project } from "./legal";
 import { ExternalLink, SectionLink } from "./SectionLink";
 
-/** The data services Caskade credits first (#162): equal billing, side by side. */
+/** The data services Caskade credits (#162): equal billing, side by side. */
 const credits = [
   {
     name: "IGDB",
@@ -67,7 +69,8 @@ const legalLinks: { section: LegalSection; label: MessageDescriptor; icon: typeo
 const panel = "rounded-panel border border-border bg-surface-raised p-5";
 const focusRing = "focus-visible:focus-ring";
 
-/** Settings → About: credits, the app and its build, and the way into Legal. */
+/** Settings → About: the app and its build first (#68), credits, and the way
+ * into Legal. */
 export function AboutPage({ version, build }: { version: string; build: string }) {
   const { t } = useLingui();
   return (
@@ -75,6 +78,47 @@ export function AboutPage({ version, build }: { version: string; build: string }
       <h2 data-part="title" className="font-display text-2xl font-semibold tracking-wide">
         <Trans context="settings tab">About</Trans>
       </h2>
+      <section data-part="details" aria-labelledby="about-caskade" className={panel}>
+        <div className="flex items-start gap-4">
+          <img src="/caskade.svg" alt="" className="size-12 shrink-0" />
+          <div className="min-w-0">
+            <h3 id="about-caskade" className="font-display text-xl font-semibold tracking-wide">
+              Caskade
+            </h3>
+            <p className="mt-1 text-sm text-fg-muted">
+              <Trans>
+                A game library and launcher for Windows, Linux and macOS, with a desktop mode and a
+                fullscreen console mode for gamepads.
+              </Trans>
+            </p>
+          </div>
+        </div>
+        <dl data-part="version" className="mt-4 grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 text-sm">
+          <dt className="text-fg-subtle">
+            <Trans>Version</Trans>
+          </dt>
+          <dd className="font-mono text-fg">{version}</dd>
+          <dt className="text-fg-subtle">
+            <Trans context="app build">Build</Trans>
+          </dt>
+          <dd className="text-fg">{build}</dd>
+        </dl>
+        <ul data-part="links" className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+          <UpdatesLink />
+          {projectLinks.map(({ label, href, icon: Icon }) => (
+            <li key={href}>
+              <ExternalLink
+                href={href}
+                className={`inline-flex items-center gap-1.5 rounded-sm text-accent-alt underline-offset-2 hover:underline ${focusRing}`}
+              >
+                <Icon aria-hidden className="size-4" />
+                {t(label)}
+              </ExternalLink>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <ul data-part="credits" aria-label={t`Credits`} className="grid gap-4 sm:grid-cols-2">
         {credits.map((credit) => (
           <li key={credit.name} className="flex">
@@ -105,46 +149,6 @@ export function AboutPage({ version, build }: { version: string; build: string }
         ))}
       </ul>
 
-      <section data-part="details" aria-labelledby="about-caskade" className={panel}>
-        <div className="flex items-start gap-4">
-          <img src="/caskade.svg" alt="" className="size-12 shrink-0" />
-          <div className="min-w-0">
-            <h3 id="about-caskade" className="font-display text-xl font-semibold tracking-wide">
-              Caskade
-            </h3>
-            <p className="mt-1 text-sm text-fg-muted">
-              <Trans>
-                A game library and launcher for Windows, Linux and macOS, with a desktop mode and a
-                fullscreen console mode for gamepads.
-              </Trans>
-            </p>
-          </div>
-        </div>
-        <dl data-part="version" className="mt-4 grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 text-sm">
-          <dt className="text-fg-subtle">
-            <Trans>Version</Trans>
-          </dt>
-          <dd className="font-mono text-fg">{version}</dd>
-          <dt className="text-fg-subtle">
-            <Trans context="app build">Build</Trans>
-          </dt>
-          <dd className="text-fg">{build}</dd>
-        </dl>
-        <ul data-part="links" className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-          {projectLinks.map(({ label, href, icon: Icon }) => (
-            <li key={href}>
-              <ExternalLink
-                href={href}
-                className={`inline-flex items-center gap-1.5 rounded-sm text-accent-alt underline-offset-2 hover:underline ${focusRing}`}
-              >
-                <Icon aria-hidden className="size-4" />
-                {t(label)}
-              </ExternalLink>
-            </li>
-          ))}
-        </ul>
-      </section>
-
       <nav data-part="legal-links" aria-labelledby="about-legal" className={panel}>
         <h3 id="about-legal" className="font-display text-lg font-semibold tracking-wide">
           <Trans>Legal</Trans>
@@ -168,5 +172,24 @@ export function AboutPage({ version, build }: { version: string; build: string }
         </ul>
       </nav>
     </div>
+  );
+}
+
+/** To Caskade updates in General (#68); only where there is a router to follow it. */
+function UpdatesLink() {
+  const router = useRouter({ warn: false }) as ReturnType<typeof useRouter> | undefined;
+  if (!router) return null;
+  return (
+    <li>
+      <Link
+        to="/settings"
+        search={{ tab: "general" }}
+        replace
+        className={`inline-flex items-center gap-1.5 rounded-sm text-accent-alt underline-offset-2 hover:underline ${focusRing}`}
+      >
+        <CircleArrowUp aria-hidden className="size-4" />
+        <Trans>Caskade updates</Trans>
+      </Link>
+    </li>
   );
 }

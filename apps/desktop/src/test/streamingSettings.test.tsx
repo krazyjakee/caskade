@@ -138,7 +138,7 @@ it("pairs this device with another: a wrong code, then the right one", async () 
 });
 
 it("adds a device by its address, and saves the stream quality", async () => {
-  const { app } = open("/settings?tab=streaming");
+  const { streaming } = open("/settings?tab=streaming");
   fireEvent.change(await screen.findByRole("textbox", { name: "Add a device by its address" }), {
     target: { value: "10.0.0.7" },
   });
@@ -149,16 +149,15 @@ it("adds a device by its address, and saves the stream quality", async () => {
   const resolution = screen.getByRole("button", { name: /Resolution/ });
   fireEvent.click(resolution);
   fireEvent.click(await screen.findByRole("option", { name: "1920 × 1080" }));
-  await waitFor(async () => {
-    const saved = await app.settings.api.get("core.streaming");
-    expect((saved.value as { quality: { resolution: string } }).quality.resolution).toBe(
-      "1920x1080",
-    );
-  });
+  await waitFor(() =>
+    expect(streaming.qualityCalls).toEqual([
+      { resolution: "1920x1080", fps: null, bitrateKbps: null },
+    ]),
+  );
 });
 
-it("a standard account pairs to play but can't host or change quality", async () => {
-  open("/settings?tab=streaming", {
+it("a standard account pairs to play and sets the quality, but can't host (#66)", async () => {
+  const { streaming } = open("/settings?tab=streaming", {
     accounts: [
       { id: "player", name: "Player", role: "admin" },
       { id: "kid", name: "Kid", role: "standard" },
@@ -168,6 +167,15 @@ it("a standard account pairs to play but can't host or change quality", async ()
   await screen.findByText(/Only an admin can let other devices stream from this one/);
   expect((await hostingSwitch()).hasAttribute("disabled")).toBe(true);
   expect(screen.getByRole("button", { name: "Pair…" })).toBeTruthy();
+
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: /Bitrate/ }).hasAttribute("disabled")).toBe(false),
+  );
+  fireEvent.click(screen.getByRole("button", { name: /Bitrate/ }));
+  fireEvent.click(await screen.findByRole("option", { name: "5 Mbit/s" }));
+  await waitFor(() =>
+    expect(streaming.qualityCalls).toEqual([{ resolution: null, fps: null, bitrateKbps: 5000 }]),
+  );
 });
 
 it("a pad turns hosting on and pairs with a device in console mode", async () => {

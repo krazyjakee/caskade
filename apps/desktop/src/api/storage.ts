@@ -46,6 +46,10 @@ export interface StorageApi {
   edit(id: string, label: string, template: string): Promise<RootSummary>;
   setDefault(id: string): Promise<RootSummary>;
   remove(id: string): Promise<void>;
+  /** Moves every game on `id` to `targetId` and then removes it, as one job
+   * in Activity. Settles when that job ends; if it's cancelled or a game
+   * can't move, the location stays and the failure says what moved. */
+  moveAndRemove(id: string, targetId: string): Promise<void>;
   chooseDirectory(): Promise<string | null>;
   move(entryId: string, targetRootId: string): Promise<void>;
   uninstall(entryId: string): Promise<void>;

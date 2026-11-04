@@ -23,7 +23,7 @@ import {
   ShieldCheck,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatDateTime } from "../../../api/presentation";
 import {
   type DeviceKind,
@@ -76,7 +76,8 @@ export function DevicesSettings() {
           </div>
         )}
       </div>
-      <SyncChoices />
+      {/* Waits for the status, so the page doesn't start long and shrink. */}
+      {!status.isPending && <SyncChoices collapsed={unpaired} />}
       <SavesSection />
       <CopiesAndShares />
     </div>
@@ -382,9 +383,28 @@ function DeviceRow({ device }: { device: PairedDevice }) {
   );
 }
 
+/** How long Pair a device looks before saying it found nobody (#60). */
+const NEARBY_PATIENCE_MS = 30_000;
+
+/** Whether `searching` has gone on that long. The core goes on looking
+ * regardless, and the status shows whoever it finds later. */
+function useFoundNobody(searching: boolean) {
+  const [waited, setWaited] = useState(false);
+  useEffect(() => {
+    if (!searching) return;
+    const timer = setTimeout(() => setWaited(true), NEARBY_PATIENCE_MS);
+    return () => {
+      clearTimeout(timer);
+      setWaited(false);
+    };
+  }, [searching]);
+  return searching && waited;
+}
+
 function NearbySection() {
   const { t } = useLingui();
   const { data } = useSyncStatus();
+  const foundNobody = useFoundNobody(data?.nearby.length === 0);
   const pair = useSyncAction((api, id: string) => api.pair(id));
   const makeLink = useSyncAction((api, _: undefined) => api.pairingLink());
   const accept = useSyncAction((api, link: string) => api.acceptPairingLink(link));
@@ -399,7 +419,14 @@ function NearbySection() {
     >
       {data.nearby.length === 0 ? (
         <p role="status" className="text-sm text-fg-muted">
-          <Trans>Looking for Caskade on this network…</Trans>
+          {foundNobody ? (
+            <Trans>
+              No devices found on this network yet. Caskade keeps looking, and one that appears
+              shows here. Otherwise, pair with a link below.
+            </Trans>
+          ) : (
+            <Trans>Looking for Caskade on this network…</Trans>
+          )}
         </p>
       ) : (
         <ul className="flex flex-col gap-2">

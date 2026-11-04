@@ -15,6 +15,7 @@ import {
 import { commands, events } from "../../api/bindings";
 import { unwrap } from "../../api/reply";
 import { effectSubscription } from "../../api/subscription";
+import { afterUnsavedChanges } from "../../views/settings/unsavedChanges";
 
 export type Mode = "desktop" | "console";
 
@@ -97,17 +98,20 @@ export function ModeProvider({
 
   const setMode = useCallback(
     (next: Mode) => {
-      let previous: Mode = next;
-      setState((current) => {
-        previous = current;
-        return next;
-      });
-      api.set(next).catch((error: unknown) => {
-        // The window didn't change, so neither does the shell: a console
-        // shell over a desktop window (or the reverse) would strand a pad
-        // or a mouse (#160).
-        console.warn("console mode not switched", error);
-        setState((current) => (current === next ? previous : current));
+      // The other shell remounts the view, and Settings' drafts with it.
+      afterUnsavedChanges("mode", () => {
+        let previous: Mode = next;
+        setState((current) => {
+          previous = current;
+          return next;
+        });
+        api.set(next).catch((error: unknown) => {
+          // The window didn't change, so neither does the shell: a console
+          // shell over a desktop window (or the reverse) would strand a pad
+          // or a mouse (#160).
+          console.warn("console mode not switched", error);
+          setState((current) => (current === next ? previous : current));
+        });
       });
     },
     [api],

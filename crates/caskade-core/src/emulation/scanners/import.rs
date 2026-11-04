@@ -104,9 +104,11 @@ impl ScannerService {
         let _activity = caskade_jobs::global().activity(crate::tr!("Importing ROMs"));
         let busy = self.busy(scanner_id);
         let _guard = busy.lock().await;
-        let scanner = self.store.get_scanner(scanner_id).await?.ok_or_else(|| {
-            Error::Invalid(crate::tr!("no ROM scanner {scanner}", scanner = scanner_id))
-        })?;
+        let scanner = self
+            .store
+            .get_scanner(scanner_id)
+            .await?
+            .ok_or_else(|| Error::Invalid(crate::tr!("This ROM scanner no longer exists.")))?;
         let (games, warnings) = self.find(&scanner, cancel, progress).await?;
         if cancel.is_cancelled() {
             return Err(scan_error(ScanError::Cancelled));

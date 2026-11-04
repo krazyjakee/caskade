@@ -3,10 +3,10 @@
  * ones waiting to pair; the devices this one can stream from, pairing
  * with them and adding one by its address; and the stream quality.
  *
- * Every account sees the tab and can pair this device with another to
- * stream from; only an admin hosts, accepts pairings or changes quality
- * (the core refuses the rest whatever this shows). No technology's name
- * appears: Caskade does the streaming. */
+ * Every account sees the tab, can pair this device with another to stream
+ * from and sets the quality for this device (#66); only an admin hosts or
+ * accepts pairings (the core refuses the rest whatever this shows). No
+ * technology's name appears: Caskade does the streaming. */
 import {
   Button,
   Select,
@@ -17,26 +17,30 @@ import {
   TextField,
 } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Cast, Download, Gauge, MonitorPlay, Plus, RefreshCw, Trash2, Wrench } from "lucide-react";
 import { useState } from "react";
 import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+import type { SettingsSnapshot } from "../../../api/settings";
 import {
   type HostOutcome,
   type HostState,
   reachLabel,
   type StreamHost,
   type StreamingPart,
+  type StreamQuality,
   useHostStatus,
   usePairedDevices,
   usePairRequests,
   useStreamHosts,
   useStreamingAction,
+  useStreamingApi,
   useStreamingPrograms,
 } from "../../../api/streaming";
 import { FailureNotice } from "../../../components/FailureNotice";
 import { PairRequestForm } from "../../../components/streaming/PairRequestForm";
 import { useDeviceAdmin } from "../devices/admin";
-import { SettingsStatus, useSettingsSection } from "../useSettings";
+import { SettingsStatus, settingsKeys, useSettingsSection } from "../useSettings";
 import { PairDialog } from "./PairDialog";
 
 export function StreamingSettings() {
@@ -46,8 +50,8 @@ export function StreamingSettings() {
       {!admin && (
         <p role="note" className="text-sm text-fg-muted">
           <Trans>
-            Only an admin can let other devices stream from this one or change the stream quality.
-            Anyone can pair this device with another to play its games.
+            Only an admin can let other devices stream from this one. Anyone can pair this device
+            with another to play its games, and set the stream quality here.
           </Trans>
         </p>
       )}
@@ -577,22 +581,50 @@ interface StreamingSettingsValue {
   hosting: boolean;
   addresses?: string[];
   existing?: boolean;
-  quality?: { resolution?: string | null; fps?: number | null; bitrateKbps?: number | null };
+  quality?: Partial<StreamQuality>;
 }
 
 const AUTOMATIC = "auto";
+const SECTION = "core.streaming";
 
 function QualitySection() {
   const { t } = useLingui();
-  const admin = useDeviceAdmin();
-  const section = useSettingsSection<StreamingSettingsValue>("core.streaming");
+  const api = useStreamingApi();
+  const client = useQueryClient();
+  const key = settingsKeys.section(SECTION);
+  const section = useSettingsSection<StreamingSettingsValue>(SECTION);
+  // Any account's to change, through its own command: the section's other
+  // settings are an admin's (#66). Serialized with the section's writes,
+  // each change builds on the last saved.
+  const save = useMutation({
+    mutationKey: key,
+    scope: { id: `settings:${SECTION}` },
+    mutationFn: (part: Partial<StreamQuality>) => {
+      const saved = client.getQueryData<SettingsSnapshot>(key)?.value as
+        | StreamingSettingsValue
+        | undefined;
+      return api.setQuality({
+        resolution: null,
+        fps: null,
+        bitrateKbps: null,
+        ...saved?.quality,
+        ...part,
+      });
+    },
+    onSuccess: (snapshot) => client.setQueryData(key, snapshot),
+    onError: () => void client.invalidateQueries({ queryKey: key }),
+  });
+  const status = {
+    ...section,
+    saving: save.isPending,
+    saveError: save.error,
+    retry: () => {
+      if (save.variables) save.mutate(save.variables);
+    },
+  };
   const quality = section.settings?.quality ?? {};
-  const disabled = !admin || !section.settings || section.saving;
-  const change = (part: Partial<NonNullable<StreamingSettingsValue["quality"]>>) =>
-    section.setSettings((current) => ({
-      ...current,
-      quality: { ...current.quality, ...part },
-    }));
+  const disabled = !section.settings || save.isPending;
+  const change = (part: Partial<StreamQuality>) => save.mutate(part);
   const automatic = t({ message: "Automatic", context: "stream quality" });
   const resolutions = [
     { id: AUTOMATIC, label: automatic },
@@ -648,7 +680,7 @@ function QualitySection() {
           onChange={(id) => change({ bitrateKbps: number(id) })}
         />
       </SettingRow>
-      <SettingsStatus section={section} what={t`Stream quality`} />
+      <SettingsStatus section={status} what={t`Stream quality`} />
     </SettingsSection>
   );
 }

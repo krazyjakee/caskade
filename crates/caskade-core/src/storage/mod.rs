@@ -83,6 +83,13 @@ pub struct RootSummary {
     pub games_bytes: u64,
     pub other_bytes: Option<u64>,
 }
+/// Every game on a location, on its way to another (#64).
+#[derive(Debug, Clone)]
+pub struct LocationMove {
+    pub source: StorageRoot,
+    pub target: StorageRoot,
+    pub games: Vec<StorageGame>,
+}
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct MoveReport {

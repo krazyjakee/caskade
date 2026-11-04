@@ -72,13 +72,18 @@ pub fn load_in_background<R: tauri::Runtime>(app: &tauri::AppHandle<R>, folder: 
 /// Settings → Plugins "Load unpacked": debug builds only.
 #[tauri::command]
 #[specta::specta]
-pub async fn plugin_load_unpacked(app: tauri::AppHandle, folder: String) -> Result<(), String> {
+pub async fn plugin_load_unpacked(
+    app: tauri::AppHandle,
+    folder: String,
+) -> Result<(), crate::error::CommandError> {
     if !cfg!(debug_assertions) {
-        return Err(caskade_core::tr!(
+        return Err(crate::error::refused(caskade_core::tr!(
             "Load unpacked is only available in development builds"
-        ));
+        )));
     }
-    load(&app, Path::new(&folder)).await
+    load(&app, Path::new(&folder))
+        .await
+        .map_err(crate::error::CommandError::from)
 }
 
 #[cfg(test)]

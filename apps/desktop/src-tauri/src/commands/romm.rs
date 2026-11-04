@@ -2,7 +2,7 @@
 //! (credentials go to the OS keychain, never back to the webview), sync,
 //! the download cache and download progress. Launching a RomM game needs
 //! no command of its own: the launch pipeline downloads it first.
-use super::text;
+use crate::error::{CommandError, refused, report};
 use caskade_core::romm::{
     CacheStatus, ConnectionReport, DownloadProgress, RommGameStatus, RommOverview,
     RommServerConfig, RommService, RommSettings, RommSyncReport,
@@ -69,8 +69,8 @@ pub(crate) fn setup<R: tauri::Runtime>(
 /// Settings, server states, the cache and running downloads.
 #[tauri::command]
 #[specta::specta]
-pub async fn romm_overview(state: State<'_>) -> Result<RommOverview, String> {
-    state.overview().await.map_err(text)
+pub async fn romm_overview(state: State<'_>) -> Result<RommOverview, CommandError> {
+    state.overview().await.map_err(report)
 }
 
 /// Replaces `core.romm`; removed servers leave with their games and cache.
@@ -79,8 +79,8 @@ pub async fn romm_overview(state: State<'_>) -> Result<RommOverview, String> {
 pub async fn romm_settings_set(
     state: State<'_>,
     settings: RommSettings,
-) -> Result<RommOverview, String> {
-    state.save_settings(settings).await.map_err(text)
+) -> Result<RommOverview, CommandError> {
+    state.save_settings(settings).await.map_err(report)
 }
 
 /// Adds or updates a server. `secret` (password or API token) goes to the
@@ -91,17 +91,22 @@ pub async fn romm_server_save(
     state: State<'_>,
     server: RommServerConfig,
     secret: Option<String>,
-) -> Result<RommOverview, String> {
+) -> Result<RommOverview, CommandError> {
     if secret.as_ref().is_some_and(|secret| secret.len() > 4096) {
-        return Err(caskade_core::tr!("the password or token is too long"));
+        return Err(refused(caskade_core::tr!(
+            "the password or token is too long"
+        )));
     }
-    state.save_server(server, secret).await.map_err(text)
+    state.save_server(server, secret).await.map_err(report)
 }
 
 #[tauri::command]
 #[specta::specta]
-pub async fn romm_server_remove(state: State<'_>, id: String) -> Result<RommOverview, String> {
-    state.remove_server(&id).await.map_err(text)
+pub async fn romm_server_remove(
+    state: State<'_>,
+    id: String,
+) -> Result<RommOverview, CommandError> {
+    state.remove_server(&id).await.map_err(report)
 }
 
 /// "Test connection": with `secret`, before it is saved.
@@ -111,8 +116,8 @@ pub async fn romm_server_test(
     state: State<'_>,
     server: RommServerConfig,
     secret: Option<String>,
-) -> Result<ConnectionReport, String> {
-    state.test_connection(server, secret).await.map_err(text)
+) -> Result<ConnectionReport, CommandError> {
+    state.test_connection(server, secret).await.map_err(report)
 }
 
 /// Syncs one server now, or every server. Syncing every server fails when
@@ -123,39 +128,44 @@ pub async fn romm_server_test(
 pub async fn romm_sync(
     state: State<'_>,
     id: Option<String>,
-) -> Result<Vec<RommSyncReport>, String> {
+) -> Result<Vec<RommSyncReport>, CommandError> {
     match id {
-        Some(id) => Ok(vec![state.sync(&id).await.map_err(text)?]),
+        Some(id) => Ok(vec![state.sync(&id).await.map_err(report)?]),
         None => all_synced(state.sync_all().await),
     }
 }
 
 fn all_synced(
     outcomes: Vec<caskade_core::romm::Result<RommSyncReport>>,
-) -> Result<Vec<RommSyncReport>, String> {
+) -> Result<Vec<RommSyncReport>, CommandError> {
     let (reports, errors): (Vec<_>, Vec<_>) = outcomes.into_iter().partition(Result::is_ok);
-    if reports.is_empty() && !errors.is_empty() {
-        return Err(errors
-            .into_iter()
-            .filter_map(Result::err)
-            .map(text)
-            .collect::<Vec<_>>()
-            .join("\n"));
+    // The first failure's code and hints, with every server's summary.
+    let failure = errors
+        .into_iter()
+        .filter_map(Result::err)
+        .map(report)
+        .reduce(|mut first, next| {
+            first.summary.push('\n');
+            first.summary.push_str(&next.summary);
+            first
+        });
+    if let (true, Some(failure)) = (reports.is_empty(), failure) {
+        return Err(failure);
     }
     Ok(reports.into_iter().filter_map(Result::ok).collect())
 }
 
 #[tauri::command]
 #[specta::specta]
-pub async fn romm_cache_status(state: State<'_>) -> Result<CacheStatus, String> {
-    state.cache_status().await.map_err(text)
+pub async fn romm_cache_status(state: State<'_>) -> Result<CacheStatus, CommandError> {
+    state.cache_status().await.map_err(report)
 }
 
 /// Removes every download except pinned games.
 #[tauri::command]
 #[specta::specta]
-pub async fn romm_cache_clear(state: State<'_>) -> Result<CacheStatus, String> {
-    state.clear_cache().await.map_err(text)
+pub async fn romm_cache_clear(state: State<'_>) -> Result<CacheStatus, CommandError> {
+    state.clear_cache().await.map_err(report)
 }
 
 /// A RomM game's cache state; `null` for other entries.
@@ -164,8 +174,8 @@ pub async fn romm_cache_clear(state: State<'_>) -> Result<CacheStatus, String> {
 pub async fn romm_game_status(
     state: State<'_>,
     entry_id: String,
-) -> Result<Option<RommGameStatus>, String> {
-    state.game_status(&entry_id).await.map_err(text)
+) -> Result<Option<RommGameStatus>, CommandError> {
+    state.game_status(&entry_id).await.map_err(report)
 }
 
 /// "Keep downloaded".
@@ -175,15 +185,15 @@ pub async fn romm_set_pinned(
     state: State<'_>,
     entry_id: String,
     pinned: bool,
-) -> Result<RommGameStatus, String> {
-    state.set_pinned(&entry_id, pinned).await.map_err(text)
+) -> Result<RommGameStatus, CommandError> {
+    state.set_pinned(&entry_id, pinned).await.map_err(report)
 }
 
 /// Removes one game's download.
 #[tauri::command]
 #[specta::specta]
-pub async fn romm_evict(state: State<'_>, entry_id: String) -> Result<bool, String> {
-    state.evict(&entry_id).await.map_err(text)
+pub async fn romm_evict(state: State<'_>, entry_id: String) -> Result<bool, CommandError> {
+    state.evict(&entry_id).await.map_err(report)
 }
 
 /// Cancels a running download; the launch that started it fails as
@@ -197,6 +207,7 @@ pub fn romm_cancel_download(state: State<'_>, entry_id: String) -> bool {
 #[cfg(test)]
 mod tests {
     use super::all_synced;
+    use crate::error::ErrorCode;
     use caskade_core::romm::{RommError, RommSyncReport};
 
     #[test]
@@ -209,8 +220,9 @@ mod tests {
             })
         };
         let error = all_synced(vec![offline(), offline()]).unwrap_err();
-        assert_eq!(error.lines().count(), 2);
-        assert!(error.contains("can't reach the server"), "{error}");
+        assert_eq!(error.code, ErrorCode::Offline);
+        assert_eq!(error.summary.lines().count(), 2);
+        assert!(error.summary.contains("Can't reach the server"), "{error}");
         let reports = all_synced(vec![offline(), synced()]).unwrap();
         assert_eq!(reports.len(), 1);
         assert!(all_synced(Vec::new()).unwrap().is_empty());

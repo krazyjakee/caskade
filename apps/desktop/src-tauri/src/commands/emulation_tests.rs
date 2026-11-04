@@ -1,7 +1,7 @@
 //! Typed IPC -> EmulationService -> SQLite, plus the `emulation.changed`
 //! bridge, on Tauri's mock runtime.
 use super::*;
-use crate::commands::test_ipc::invoke;
+use crate::commands::test_ipc::{assert_report, invoke};
 use caskade_core::{
     bus::Bus,
     db::LibraryStore,
@@ -189,11 +189,12 @@ fn emulators_profiles_and_platform_defaults_round_trip_through_typed_ipc() {
     let mut broken = saved["emulator"].clone();
     broken["profiles"][1]["args"]["args"] = json!(["{corez}"]);
     let error = invoke(&window, "emulator_save", json!({"emulator": broken})).unwrap_err();
+    assert_report(&error, "invalid", &[]);
     assert!(
-        error
+        error["summary"]
             .as_str()
             .unwrap()
-            .contains("unknown variable `{corez}`"),
+            .contains("nknown variable `{corez}`"),
         "{error}"
     );
 
@@ -262,7 +263,8 @@ fn emulators_profiles_and_platform_defaults_round_trip_through_typed_ipc() {
     );
 
     invoke(&window, "emulator_delete", json!({"id": emulator_id})).unwrap();
-    assert!(invoke(&window, "emulator_delete", json!({"id": emulator_id})).is_err());
+    let gone = invoke(&window, "emulator_delete", json!({"id": emulator_id})).unwrap_err();
+    assert_report(&gone, "conflict", &[emulator_id.as_str()]);
     assert_eq!(
         invoke(&window, "emulators_list", json!({})).unwrap(),
         json!([])
@@ -406,7 +408,10 @@ requires = ["{cores}/snes9x_libretro{lib}"]
         snes["settings"]["default"]["emulatorId"],
         report["emulators"][0]
     );
-    assert!(invoke(&window, "emulation_detect_cancel", json!({"id": "missing"})).is_err());
+    let gone = invoke(&window, "emulation_detect_cancel", json!({"id": "det-1"})).unwrap_err();
+    assert_report(&gone, "invalid", &["det-1"]);
+    let gone = invoke(&window, "emulation_detect_get", json!({"id": "det-1"})).unwrap_err();
+    assert_report(&gone, "conflict", &["det-1"]);
 
     // The UI saw the job start, finish and get marked configured.
     let deadline = Instant::now() + Duration::from_secs(5);

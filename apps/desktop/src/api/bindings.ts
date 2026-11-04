@@ -12,11 +12,11 @@ export const commands = {
 	/**  Greets `name` and emits the `hello` event with the same greeting. */
 	hello: (name: string) => typedError<Greeting, string>(__TAURI_INVOKE("hello", { name })),
 	backgroundStatus: () => __TAURI_INVOKE<AppStatus>("background_status"),
-	discoveryStatus: () => typedError<DiscoverySnapshot_Serialize, string>(__TAURI_INVOKE("discovery_status")),
-	discoveryLaunchers: () => typedError<DiscoverySnapshot_Serialize, string>(__TAURI_INVOKE("discovery_launchers")),
-	discoveryScan: () => typedError<DiscoverySnapshot_Serialize, string>(__TAURI_INVOKE("discovery_scan")),
-	discoveryCancel: () => typedError<DiscoverySnapshot_Serialize, string>(__TAURI_INVOKE("discovery_cancel")),
-	discoveryReview: (ids: string[], accept: boolean, revision: number) => typedError<DiscoverySnapshot_Serialize, string>(__TAURI_INVOKE("discovery_review", { ids, accept, revision })),
+	discoveryStatus: () => typedError<DiscoverySnapshot_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("discovery_status")),
+	discoveryLaunchers: () => typedError<DiscoverySnapshot_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("discovery_launchers")),
+	discoveryScan: () => typedError<DiscoverySnapshot_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("discovery_scan")),
+	discoveryCancel: () => typedError<DiscoverySnapshot_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("discovery_cancel")),
+	discoveryReview: (ids: string[], accept: boolean, revision: number) => typedError<DiscoverySnapshot_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("discovery_review", { ids, accept, revision })),
 	listGames: (query: ListGames_Deserialize) => typedError<GamePage_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("list_games", { query })),
 	getGame: (id: string) => typedError<GameDetails_Serialize | null, ErrorReport_Serialize>(__TAURI_INVOKE("get_game", { id })),
 	/**
@@ -240,24 +240,24 @@ export const commands = {
 	removeFromCollection: (id: string, gameIds: string[]) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("remove_from_collection", { id, gameIds })),
 	/**  The manual collections a game is in. */
 	gameCollections: (gameId: string) => typedError<string[], ErrorReport_Serialize>(__TAURI_INVOKE("game_collections", { gameId })),
-	accountsList: () => typedError<AccountList_Serialize, string>(__TAURI_INVOKE("accounts_list")),
+	accountsList: () => typedError<AccountList_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("accounts_list")),
 	/**  Makes an account; admins only. */
-	accountCreate: (account: NewAccount_Deserialize) => typedError<Account_Serialize, string>(__TAURI_INVOKE("account_create", { account })),
+	accountCreate: (account: NewAccount_Deserialize) => typedError<Account_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("account_create", { account })),
 	/**
 	 *  Changes an account's name and avatar (an admin or the account itself)
 	 *  and its access (an admin).
 	 */
-	accountUpdate: (id: string, update: AccountUpdate_Deserialize) => typedError<Account_Serialize, string>(__TAURI_INVOKE("account_update", { id, update })),
+	accountUpdate: (id: string, update: AccountUpdate_Deserialize) => typedError<Account_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("account_update", { id, update })),
 	/**  Deletes an account and its collections; admins only. */
-	accountDelete: (id: string) => typedError<boolean, string>(__TAURI_INVOKE("account_delete", { id })),
+	accountDelete: (id: string) => typedError<boolean, ErrorReport_Serialize>(__TAURI_INVOKE("account_delete", { id })),
 	/**  Signs an account in; `pin` is needed when it has one. */
-	accountSignIn: (id: string, pin: string | null) => typedError<PinCheck, string>(__TAURI_INVOKE("account_sign_in", { id, pin })),
+	accountSignIn: (id: string, pin: string | null) => typedError<PinCheck, ErrorReport_Serialize>(__TAURI_INVOKE("account_sign_in", { id, pin })),
 	/**  Async, so the bus emits on the runtime. */
-	accountSignOut: () => typedError<null, string>(__TAURI_INVOKE("account_sign_out")),
+	accountSignOut: () => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("account_sign_out")),
 	/**  Sets an account's PIN (4–8 digits), or clears it with `null`. */
-	accountSetPin: (id: string, pin: string | null) => typedError<Account_Serialize, string>(__TAURI_INVOKE("account_set_pin", { id, pin })),
+	accountSetPin: (id: string, pin: string | null) => typedError<Account_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("account_set_pin", { id, pin })),
 	/**  Whether `pin` is any admin's; never which. */
-	accountVerifyAdminPin: (pin: string) => typedError<PinCheck, string>(__TAURI_INVOKE("account_verify_admin_pin", { pin })),
+	accountVerifyAdminPin: (pin: string) => typedError<PinCheck, ErrorReport_Serialize>(__TAURI_INVOKE("account_verify_admin_pin", { pin })),
 	installStart: (input: string, rootId: string | null) => typedError<JobSnapshot_Serialize, string>(__TAURI_INVOKE("install_start", { input, rootId })),
 	requestInstallInput: (value: string) => typedError<InstallRequest_Serialize, string>(__TAURI_INVOKE("request_install_input", { value })),
 	/**
@@ -395,6 +395,11 @@ export const commands = {
 	 */
 	streamingSetHosting: (on: boolean) => typedError<HostOutcome, ErrorReport_Serialize>(__TAURI_INVOKE("streaming_set_hosting", { on })),
 	/**
+	 *  Sets how games streamed to this device look. Any account may: unlike
+	 *  the hosting beside it in `core.streaming`, which is an admin's (#66).
+	 */
+	streamingSetQuality: (quality: StreamQuality_Deserialize) => typedError<SettingsSnapshot, ErrorReport_Serialize>(__TAURI_INVOKE("streaming_set_quality", { quality })),
+	/**
 	 *  Hosts through the streaming someone already set up on this device
 	 *  (after `streaming_set_hosting` answered `existingFound`), with its web
 	 *  user name and password, which go to the keychain once they work. Nothing
@@ -456,94 +461,100 @@ export const commands = {
 	storageEdit: (id: string, label: string | null, folderTemplate: string) => typedError<RootSummary_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("storage_edit", { id, label, folderTemplate })),
 	storageDefault: (id: string) => typedError<RootSummary_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("storage_default", { id })),
 	storageRemove: (id: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("storage_remove", { id })),
+	/**
+	 *  Moves every game on location `id` to `target_id`, then removes `id`, as
+	 *  one job (#64). The gate checks the removal; moving games needs installs
+	 *  too, like `move_game`.
+	 */
+	storageMoveAndRemove: (id: string, targetId: string) => typedError<JobSnapshot_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("storage_move_and_remove", { id, targetId })),
 	/**  Directory-only native picker, no webview filesystem capability. */
 	storageChooseDirectory: () => typedError<string | null, ErrorReport_Serialize>(__TAURI_INVOKE("storage_choose_directory")),
 	/**
 	 *  Every settings section. A plugin's (`plugins.<id>`) comes with its
 	 *  titles and descriptions from the plugin's own catalog (#219).
 	 */
-	settingsSections: () => typedError<SettingsSection[], string>(__TAURI_INVOKE("settings_sections")),
-	settingsGet: (namespace: string) => typedError<SettingsSnapshot, string>(__TAURI_INVOKE("settings_get", { namespace })),
-	settingsSet: (namespace: string, value: Value, expectedRevision: number | null) => typedError<SettingsSnapshot, string>(__TAURI_INVOKE("settings_set", { namespace, value, expectedRevision })),
-	settingsReset: (namespace: string, expectedRevision: number | null) => typedError<SettingsSnapshot, string>(__TAURI_INVOKE("settings_reset", { namespace, expectedRevision })),
+	settingsSections: () => typedError<SettingsSection[], ErrorReport_Serialize>(__TAURI_INVOKE("settings_sections")),
+	settingsGet: (namespace: string) => typedError<SettingsSnapshot, ErrorReport_Serialize>(__TAURI_INVOKE("settings_get", { namespace })),
+	settingsSet: (namespace: string, value: Value, expectedRevision: number | null) => typedError<SettingsSnapshot, ErrorReport_Serialize>(__TAURI_INVOKE("settings_set", { namespace, value, expectedRevision })),
+	settingsReset: (namespace: string, expectedRevision: number | null) => typedError<SettingsSnapshot, ErrorReport_Serialize>(__TAURI_INVOKE("settings_reset", { namespace, expectedRevision })),
 	/**  Platforms, emulator definitions and the variables reference. */
 	emulationCatalog: () => __TAURI_INVOKE<EmulationCatalog_Serialize>("emulation_catalog"),
 	/**  The Settings → Emulators header stats. */
-	emulationOverview: () => typedError<EmulationOverview_Serialize, string>(__TAURI_INVOKE("emulation_overview")),
-	emulatorsList: () => typedError<EmulatorView_Serialize[], string>(__TAURI_INVOKE("emulators_list")),
+	emulationOverview: () => typedError<EmulationOverview_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("emulation_overview")),
+	emulatorsList: () => typedError<EmulatorView_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("emulators_list")),
 	/**  Creates (empty id) or updates an emulator and its profiles. */
-	emulatorSave: (emulator: Emulator_Deserialize) => typedError<EmulatorView_Serialize, string>(__TAURI_INVOKE("emulator_save", { emulator })),
-	emulatorDelete: (id: string) => typedError<null, string>(__TAURI_INVOKE("emulator_delete", { id })),
+	emulatorSave: (emulator: Emulator_Deserialize) => typedError<EmulatorView_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("emulator_save", { emulator })),
+	emulatorDelete: (id: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("emulator_delete", { id })),
 	/**  The command line of a profile being edited, before it is saved. */
 	profilePreview: (draft: ProfileDraft_Deserialize) => __TAURI_INVOKE<ArgvPreview_Serialize>("profile_preview", { draft }),
 	/**  Splits arguments typed as one string with shell-word rules. */
-	argsSplit: (text: string) => typedError<string[], string>(__TAURI_INVOKE("args_split", { text })),
-	emulationPlatforms: () => typedError<PlatformView_Serialize[], string>(__TAURI_INVOKE("emulation_platforms")),
-	platformSettingsSet: (settings: PlatformSettings_Deserialize) => typedError<PlatformView_Serialize, string>(__TAURI_INVOKE("platform_settings_set", { settings })),
+	argsSplit: (text: string) => typedError<string[], ErrorReport_Serialize>(__TAURI_INVOKE("args_split", { text })),
+	emulationPlatforms: () => typedError<PlatformView_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("emulation_platforms")),
+	platformSettingsSet: (settings: PlatformSettings_Deserialize) => typedError<PlatformView_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("platform_settings_set", { settings })),
 	/**
 	 *  Starts detecting emulators in standard locations and, if given, a
 	 *  folder the user chose. Results arrive as `emulationDetectChanged`.
 	 */
-	emulationDetectStart: (folder: string | null) => typedError<DetectJob_Serialize, string>(__TAURI_INVOKE("emulation_detect_start", { folder })),
-	emulationDetectGet: (id: string) => typedError<DetectJob_Serialize, string>(__TAURI_INVOKE("emulation_detect_get", { id })),
+	emulationDetectStart: (folder: string | null) => typedError<DetectJob_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("emulation_detect_start", { folder })),
+	emulationDetectGet: (id: string) => typedError<DetectJob_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("emulation_detect_get", { id })),
 	/**  The most recent detection, e.g. the one the last library scan ran. */
 	emulationDetectLatest: () => __TAURI_INVOKE<DetectJob_Serialize | null>("emulation_detect_latest"),
-	emulationDetectCancel: (id: string) => typedError<DetectJob_Serialize, string>(__TAURI_INVOKE("emulation_detect_cancel", { id })),
+	emulationDetectCancel: (id: string) => typedError<DetectJob_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("emulation_detect_cancel", { id })),
 	/**  Imports the ticked results of the reviewed revision of a detection. */
-	emulationDetectImport: (id: string, revision: number, keys: string[]) => typedError<DetectImport, string>(__TAURI_INVOKE("emulation_detect_import", { id, revision, keys })),
+	emulationDetectImport: (id: string, revision: number, keys: string[]) => typedError<DetectImport, ErrorReport_Serialize>(__TAURI_INVOKE("emulation_detect_import", { id, revision, keys })),
 	/**  An emulated game's emulator, discs, BIOS and whether it can launch. */
-	emulationGame: (entryId: string) => typedError<GameEmulation_Serialize, string>(__TAURI_INVOKE("emulation_game", { entryId })),
+	emulationGame: (entryId: string) => typedError<GameEmulation_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("emulation_game", { entryId })),
 	/**  Pins, un-pins or asks for a game's emulator, and sets its arguments. */
-	emulationGameSet: (entryId: string, target: EmulatorTarget, args: ArgsOverride_Deserialize) => typedError<GameEmulation_Serialize, string>(__TAURI_INVOKE("emulation_game_set", { entryId, target, args })),
+	emulationGameSet: (entryId: string, target: EmulatorTarget, args: ArgsOverride_Deserialize) => typedError<GameEmulation_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("emulation_game_set", { entryId, target, args })),
 	/**  Every emulator Caskade can install on this system. */
-	emulatorSetupInstallable: () => typedError<Installable_Serialize[], string>(__TAURI_INVOKE("emulator_setup_installable")),
+	emulatorSetupInstallable: () => typedError<Installable_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("emulator_setup_installable")),
 	/**  Platforms with games that no emulator runs yet. */
-	emulatorSetupMissing: () => typedError<MissingPlatform_Serialize[], string>(__TAURI_INVOKE("emulator_setup_missing")),
+	emulatorSetupMissing: () => typedError<MissingPlatform_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("emulator_setup_missing")),
 	/**
 	 *  Installs (or reinstalls) an emulator; progress arrives as
 	 *  `emulationSetupChanged`.
 	 */
-	emulatorSetupInstall: (definitionId: string) => typedError<SetupJob_Serialize, string>(__TAURI_INVOKE("emulator_setup_install", { definitionId })),
+	emulatorSetupInstall: (definitionId: string) => typedError<SetupJob_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("emulator_setup_install", { definitionId })),
 	/**  Installs the platform's recommended emulator. */
-	emulatorSetupInstallFor: (platformId: string) => typedError<SetupJob_Serialize, string>(__TAURI_INVOKE("emulator_setup_install_for", { platformId })),
+	emulatorSetupInstallFor: (platformId: string) => typedError<SetupJob_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("emulator_setup_install_for", { platformId })),
 	/**  Installs since startup. */
 	emulatorSetupJobs: () => __TAURI_INVOKE<SetupJob_Serialize[]>("emulator_setup_jobs"),
-	emulatorSetupCancel: (jobId: string) => typedError<SetupJob_Serialize, string>(__TAURI_INVOKE("emulator_setup_cancel", { jobId })),
+	emulatorSetupCancel: (jobId: string) => typedError<SetupJob_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("emulator_setup_cancel", { jobId })),
 	/**  Checks a Caskade-installed emulator for a newer version now. */
-	emulatorSetupCheck: (emulatorId: string) => typedError<ManagedEmulator_Serialize, string>(__TAURI_INVOKE("emulator_setup_check", { emulatorId })),
+	emulatorSetupCheck: (emulatorId: string) => typedError<ManagedEmulator_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("emulator_setup_check", { emulatorId })),
 	/**  Stops offering the newest version found. */
-	emulatorSetupSkip: (emulatorId: string) => typedError<ManagedEmulator_Serialize, string>(__TAURI_INVOKE("emulator_setup_skip", { emulatorId })),
+	emulatorSetupSkip: (emulatorId: string) => typedError<ManagedEmulator_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("emulator_setup_skip", { emulatorId })),
 	/**
 	 *  Installs the newest version, keeping the user's files. Refused while a
 	 *  game runs in the emulator.
 	 */
-	emulatorSetupUpdate: (emulatorId: string) => typedError<SetupJob_Serialize, string>(__TAURI_INVOKE("emulator_setup_update", { emulatorId })),
+	emulatorSetupUpdate: (emulatorId: string) => typedError<SetupJob_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("emulator_setup_update", { emulatorId })),
 	/**
 	 *  Fetches the platform's missing BIOS files from RomM into the folder its
 	 *  default emulator reads.
 	 */
-	emulatorSetupFetchBios: (platformId: string) => typedError<BiosFetch_Serialize, string>(__TAURI_INVOKE("emulator_setup_fetch_bios", { platformId })),
+	emulatorSetupFetchBios: (platformId: string) => typedError<BiosFetch_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("emulator_setup_fetch_bios", { platformId })),
 	/**
 	 *  Every plugin in the plugins folders, read again from disk. No plugin
 	 *  code runs.
 	 */
-	pluginsList: () => typedError<PluginSummary_Serialize[], string>(__TAURI_INVOKE("plugins_list")),
+	pluginsList: () => typedError<PluginSummary_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("plugins_list")),
 	/**  Enables a plugin with the permissions its manifest asks for. */
-	pluginEnable: (id: string) => typedError<PluginSummary_Serialize, string>(__TAURI_INVOKE("plugin_enable", { id })),
+	pluginEnable: (id: string) => typedError<PluginSummary_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("plugin_enable", { id })),
 	/**  Disables a plugin and stops its backend. */
-	pluginDisable: (id: string) => typedError<PluginSummary_Serialize, string>(__TAURI_INVOKE("plugin_disable", { id })),
+	pluginDisable: (id: string) => typedError<PluginSummary_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("plugin_disable", { id })),
 	/**
 	 *  What installing a plugin folder would add (name, version,
 	 *  contributions, permissions). Copies and runs nothing.
 	 */
-	pluginInstallPreview: (folder: string) => typedError<PluginPreview_Serialize, string>(__TAURI_INVOKE("plugin_install_preview", { folder })),
+	pluginInstallPreview: (folder: string) => typedError<PluginPreview_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("plugin_install_preview", { folder })),
 	/**
 	 *  Installs a reviewed plugin folder and grants what it asks for. The UI
 	 *  calls this only after the user accepted the preview.
 	 */
-	pluginInstall: (folder: string) => typedError<PluginSummary_Serialize, string>(__TAURI_INVOKE("plugin_install", { folder })),
+	pluginInstall: (folder: string) => typedError<PluginSummary_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("plugin_install", { folder })),
 	/**  Removes a plugin with its settings, stored data and grants (#128). */
-	pluginUninstall: (id: string) => typedError<null, string>(__TAURI_INVOKE("plugin_uninstall", { id })),
+	pluginUninstall: (id: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("plugin_uninstall", { id })),
 	/**
 	 *  Enabled plugins whose UI half the webview should load. No plugin code
 	 *  runs here.
@@ -566,38 +577,38 @@ export const commands = {
 	 */
 	pluginMessages: (pluginId: string) => typedError<PluginMessages_Serialize, string>(__TAURI_INVOKE("plugin_messages", { pluginId })),
 	/**  Settings → Plugins "Load unpacked": debug builds only. */
-	pluginLoadUnpacked: (folder: string) => typedError<null, string>(__TAURI_INVOKE("plugin_load_unpacked", { folder })),
+	pluginLoadUnpacked: (folder: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("plugin_load_unpacked", { folder })),
 	/**  Every scanner with its last scan, what it imports and any Flatpak hint. */
-	romScannersList: () => typedError<ScannerView_Serialize[], string>(__TAURI_INVOKE("rom_scanners_list")),
+	romScannersList: () => typedError<ScannerView_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("rom_scanners_list")),
 	/**  Creates (empty id) or updates a scanner. */
-	romScannerSave: (scanner: RomScanner_Deserialize) => typedError<RomScanner_Serialize, string>(__TAURI_INVOKE("rom_scanner_save", { scanner })),
+	romScannerSave: (scanner: RomScanner_Deserialize) => typedError<RomScanner_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("rom_scanner_save", { scanner })),
 	/**  Deletes a scanner; its games stay in the library, not installed. */
-	romScannerDelete: (id: string) => typedError<null, string>(__TAURI_INVOKE("rom_scanner_delete", { id })),
+	romScannerDelete: (id: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("rom_scanner_delete", { id })),
 	/**
 	 *  Gives each platform folder in a ROM collection a scanner (first-run
 	 *  setup). Nothing is scanned until `rom_scan_all`.
 	 */
-	romFolderSetup: (folder: string) => typedError<RomFolderSetup_Serialize, string>(__TAURI_INVOKE("rom_folder_setup", { folder })),
+	romFolderSetup: (folder: string) => typedError<RomFolderSetup_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("rom_folder_setup", { folder })),
 	/**
 	 *  Starts a scan: `review` stops at a review list, `import` imports.
 	 *  Changes arrive as `emulationScanChanged`.
 	 */
-	romScanStart: (scannerId: string, mode: ScanMode) => typedError<ScanJob_Serialize, string>(__TAURI_INVOKE("rom_scan_start", { scannerId, mode })),
-	romScanGet: (id: string) => typedError<ScanJob_Serialize, string>(__TAURI_INVOKE("rom_scan_get", { id })),
+	romScanStart: (scannerId: string, mode: ScanMode) => typedError<ScanJob_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("rom_scan_start", { scannerId, mode })),
+	romScanGet: (id: string) => typedError<ScanJob_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("rom_scan_get", { id })),
 	/**  Retained scans, newest first, so a review survives a reload. */
 	romScanJobs: () => __TAURI_INVOKE<ScanJob_Serialize[]>("rom_scan_jobs"),
-	romScanCancel: (id: string) => typedError<ScanJob_Serialize, string>(__TAURI_INVOKE("rom_scan_cancel", { id })),
+	romScanCancel: (id: string) => typedError<ScanJob_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("rom_scan_cancel", { id })),
 	/**  Stores the choices of the reviewed revision and imports with them. */
-	romScanSubmit: (id: string, revision: number, choices: ReviewChoice[]) => typedError<ScanJob_Serialize, string>(__TAURI_INVOKE("rom_scan_submit", { id, revision, choices })),
+	romScanSubmit: (id: string, revision: number, choices: ReviewChoice[]) => typedError<ScanJob_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("rom_scan_submit", { id, revision, choices })),
 	/**  "Scan all": every scanner that takes part in library updates imports. */
-	romScanAll: () => typedError<ScanSummary_Serialize[], string>(__TAURI_INVOKE("rom_scan_all")),
+	romScanAll: () => typedError<ScanSummary_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("rom_scan_all")),
 	/**  Exclusions every scanner applies (EMULATION-PLAN §6.3, #135). */
-	romExclusions: () => typedError<string[], string>(__TAURI_INVOKE("rom_exclusions")),
+	romExclusions: () => typedError<string[], ErrorReport_Serialize>(__TAURI_INVOKE("rom_exclusions")),
 	/**
 	 *  Replaces the global exclusions and returns them as stored (trimmed,
 	 *  without blanks or repeats); the next scan uses them.
 	 */
-	romExclusionsSet: (patterns: string[]) => typedError<string[], string>(__TAURI_INVOKE("rom_exclusions_set", { patterns })),
+	romExclusionsSet: (patterns: string[]) => typedError<string[], ErrorReport_Serialize>(__TAURI_INVOKE("rom_exclusions_set", { patterns })),
 	/**
 	 *  The games with `ids`, from the cache or, for ids it has no answer for
 	 *  yet, the server.
@@ -683,56 +694,56 @@ export const commands = {
 	/**  Installs the newest release over the game, keeping the player's files. */
 	gameUpdateInstall: (entryId: string) => typedError<JobSnapshot_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_update_install", { entryId })),
 	/**  Settings, server states, the cache and running downloads. */
-	rommOverview: () => typedError<RommOverview_Serialize, string>(__TAURI_INVOKE("romm_overview")),
+	rommOverview: () => typedError<RommOverview_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("romm_overview")),
 	/**  Replaces `core.romm`; removed servers leave with their games and cache. */
-	rommSettingsSet: (settings: RommSettings_Deserialize) => typedError<RommOverview_Serialize, string>(__TAURI_INVOKE("romm_settings_set", { settings })),
+	rommSettingsSet: (settings: RommSettings_Deserialize) => typedError<RommOverview_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("romm_settings_set", { settings })),
 	/**
 	 *  Adds or updates a server. `secret` (password or API token) goes to the
 	 *  keychain; `null` keeps the saved one.
 	 */
-	rommServerSave: (server: RommServerConfig_Deserialize, secret: string | null) => typedError<RommOverview_Serialize, string>(__TAURI_INVOKE("romm_server_save", { server, secret })),
-	rommServerRemove: (id: string) => typedError<RommOverview_Serialize, string>(__TAURI_INVOKE("romm_server_remove", { id })),
+	rommServerSave: (server: RommServerConfig_Deserialize, secret: string | null) => typedError<RommOverview_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("romm_server_save", { server, secret })),
+	rommServerRemove: (id: string) => typedError<RommOverview_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("romm_server_remove", { id })),
 	/**  "Test connection": with `secret`, before it is saved. */
-	rommServerTest: (server: RommServerConfig_Deserialize, secret: string | null) => typedError<ConnectionReport_Serialize, string>(__TAURI_INVOKE("romm_server_test", { server, secret })),
+	rommServerTest: (server: RommServerConfig_Deserialize, secret: string | null) => typedError<ConnectionReport_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("romm_server_test", { server, secret })),
 	/**
 	 *  Syncs one server now, or every server. Syncing every server fails when
 	 *  none of them synced; otherwise it reports the ones that did, and each
 	 *  failed server's status carries its error.
 	 */
-	rommSync: (id: string | null) => typedError<RommSyncReport[], string>(__TAURI_INVOKE("romm_sync", { id })),
-	rommCacheStatus: () => typedError<CacheStatus_Serialize, string>(__TAURI_INVOKE("romm_cache_status")),
+	rommSync: (id: string | null) => typedError<RommSyncReport[], ErrorReport_Serialize>(__TAURI_INVOKE("romm_sync", { id })),
+	rommCacheStatus: () => typedError<CacheStatus_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("romm_cache_status")),
 	/**  Removes every download except pinned games. */
-	rommCacheClear: () => typedError<CacheStatus_Serialize, string>(__TAURI_INVOKE("romm_cache_clear")),
+	rommCacheClear: () => typedError<CacheStatus_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("romm_cache_clear")),
 	/**  A RomM game's cache state; `null` for other entries. */
-	rommGameStatus: (entryId: string) => typedError<RommGameStatus_Serialize | null, string>(__TAURI_INVOKE("romm_game_status", { entryId })),
+	rommGameStatus: (entryId: string) => typedError<RommGameStatus_Serialize | null, ErrorReport_Serialize>(__TAURI_INVOKE("romm_game_status", { entryId })),
 	/**  "Keep downloaded". */
-	rommSetPinned: (entryId: string, pinned: boolean) => typedError<RommGameStatus_Serialize, string>(__TAURI_INVOKE("romm_set_pinned", { entryId, pinned })),
+	rommSetPinned: (entryId: string, pinned: boolean) => typedError<RommGameStatus_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("romm_set_pinned", { entryId, pinned })),
 	/**  Removes one game's download. */
-	rommEvict: (entryId: string) => typedError<boolean, string>(__TAURI_INVOKE("romm_evict", { entryId })),
+	rommEvict: (entryId: string) => typedError<boolean, ErrorReport_Serialize>(__TAURI_INVOKE("romm_evict", { entryId })),
 	/**
 	 *  Cancels a running download; the launch that started it fails as
 	 *  cancelled and the partial file is kept for a resume.
 	 */
 	rommCancelDownload: (entryId: string) => __TAURI_INVOKE<boolean>("romm_cancel_download", { entryId }),
 	/**  Every installed theme with its problems; previews come back as URLs. */
-	themesList: () => typedError<ThemeInfo_Serialize[], string>(__TAURI_INVOKE("themes_list")),
+	themesList: () => typedError<ThemeInfo_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("themes_list")),
 	/**  The URL of a theme's compiled stylesheet, once it compiles. */
-	themeStylesheet: (id: string) => typedError<string, string>(__TAURI_INVOKE("theme_stylesheet", { id })),
+	themeStylesheet: (id: string) => typedError<string, ErrorReport_Serialize>(__TAURI_INVOKE("theme_stylesheet", { id })),
 	/**  Reads every theme folder again, e.g. after installing or editing one. */
-	themesReload: () => typedError<ThemeInfo_Serialize[], string>(__TAURI_INVOKE("themes_reload")),
+	themesReload: () => typedError<ThemeInfo_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("themes_reload")),
 	/**
 	 *  The theme to apply for `id`, or for `core.appearance.theme` without one:
 	 *  it, when it is installed and compiles, otherwise the default with a
 	 *  notice. Safe mode always gives the default.
 	 */
-	themeResolve: (id: string | null) => typedError<ResolvedTheme_Serialize, string>(__TAURI_INVOKE("theme_resolve", { id })),
+	themeResolve: (id: string | null) => typedError<ResolvedTheme_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("theme_resolve", { id })),
 	/**
 	 *  Whether Caskade started in safe mode (`--safe-mode`,
 	 *  `CASKADE_SAFE_MODE=1`): the default theme and no custom CSS.
 	 */
 	appearanceSafeMode: () => __TAURI_INVOKE<boolean>("appearance_safe_mode"),
 	/**  Appearance → "Load theme folder": development builds only. */
-	themeLoadUnpacked: (folder: string) => typedError<string, string>(__TAURI_INVOKE("theme_load_unpacked", { folder })),
+	themeLoadUnpacked: (folder: string) => typedError<string, ErrorReport_Serialize>(__TAURI_INVOKE("theme_load_unpacked", { folder })),
 	/**  The connected gamepads; the one used last is active. */
 	inputDevices: () => __TAURI_INVOKE<PadInfo[]>("input_devices"),
 	/**
@@ -748,14 +759,20 @@ export const commands = {
 	/**  Whether console mode is on (the frontend's first render). */
 	consoleInitialMode: () => __TAURI_INVOKE<boolean>("console_initial_mode"),
 	/**  Turns console mode on or off from the toggle, and remembers the choice. */
-	setConsoleMode: (active: boolean) => typedError<null, string>(__TAURI_INVOKE("set_console_mode", { active })),
+	setConsoleMode: (active: boolean) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("set_console_mode", { active })),
+	/**
+	 *  Holds closes of the main window while the webview has unsaved edits, so
+	 *  it can ask before one quits (`tray::Tray::hold` has what each call says).
+	 *  Every account may call it: it asks, and the core's rules are untouched.
+	 */
+	closeHold: (held: boolean) => __TAURI_INVOKE<void>("close_hold", { held }),
 	/**
 	 *  The language in use, what System means here, and the languages there
 	 *  are (the webview's first render).
 	 */
 	localeCurrent: () => __TAURI_INVOKE<LocaleInfo>("locale_current"),
 	/**  Lists `path` (home without one), hidden entries only with `show_hidden`. */
-	browseDir: (path: string | null, showHidden: boolean) => typedError<DirListing_Serialize, string>(__TAURI_INVOKE("browse_dir", { path, showHidden })),
+	browseDir: (path: string | null, showHidden: boolean) => typedError<DirListing_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("browse_dir", { path, showHidden })),
 	/**  The clipboard's text; empty when it holds none or can't be read. */
 	clipboardReadText: () => __TAURI_INVOKE<string>("clipboard_read_text"),
 	/**  Puts `text` on the clipboard. */
@@ -766,24 +783,24 @@ export const commands = {
 	 *  Checks the release feed now. Refused while this copy can't update,
 	 *  while a check or an install runs, and once an update is installed.
 	 */
-	appUpdateCheck: () => typedError<AppUpdateStatus_Serialize, string>(__TAURI_INVOKE("app_update_check")),
+	appUpdateCheck: () => typedError<AppUpdateStatus_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("app_update_check")),
 	/**
 	 *  Downloads and installs the release the last check found. Returns at
 	 *  once; `AppUpdateChanged` follows the download.
 	 */
-	appUpdateInstall: () => typedError<AppUpdateStatus_Serialize, string>(__TAURI_INVOKE("app_update_install")),
+	appUpdateInstall: () => typedError<AppUpdateStatus_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("app_update_install")),
 	/**  Restarts into the installed update. */
-	appUpdateRestart: () => typedError<null, string>(__TAURI_INVOKE("app_update_restart")),
+	appUpdateRestart: () => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("app_update_restart")),
 	/**  Whether the OS opens magnet links and torrent files with Caskade. */
-	torrentLinksStatus: () => typedError<TorrentLinks, string>(__TAURI_INVOKE("torrent_links_status")),
+	torrentLinksStatus: () => typedError<TorrentLinks, ErrorReport_Serialize>(__TAURI_INVOKE("torrent_links_status")),
 	/**
 	 *  Asks the OS to open them with Caskade (`open`), or hands them back to
 	 *  the apps that had them. On Windows, opening shows Default apps, where
 	 *  the user chooses Caskade.
 	 */
-	torrentLinksSet: (open: boolean) => typedError<TorrentLinks, string>(__TAURI_INVOKE("torrent_links_set", { open })),
+	torrentLinksSet: (open: boolean) => typedError<TorrentLinks, ErrorReport_Serialize>(__TAURI_INVOKE("torrent_links_set", { open })),
 	/**  Windows: opens Default apps at Caskade's page. */
-	torrentLinksChoose: () => typedError<null, string>(__TAURI_INVOKE("torrent_links_choose")),
+	torrentLinksChoose: () => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("torrent_links_choose")),
 	devicesStatus: () => typedError<DevicesStatus_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("devices_status")),
 	/**
 	 *  A game's copies on the user's other devices (#232): the device, how
@@ -5225,7 +5242,12 @@ export type JobKind = "install" | "uninstall" | "move" | "fetch" | "verify" |
 /**  A newer release installed over a game (`crate::updates`). */
 "update" | 
 /**  A game copied from another of the user's devices (#233). */
-"peerCopy";
+"peerCopy" | 
+/**
+ *  Every game on a storage location moved to another, then the location
+ *  removed (#64).
+ */
+"moveLocation";
 
 export type JobPhase = "download" | "install" | "move";
 
@@ -9346,6 +9368,38 @@ export type StreamHost_Serialize = {
 	paired: boolean,
 	/**  The games it offers this device. */
 	games: number,
+};
+
+/**
+ *  Stream quality (#264): each part `None` is the client's automatic
+ *  choice.
+ */
+export type StreamQuality = StreamQuality_Serialize | StreamQuality_Deserialize;
+
+/**
+ *  Stream quality (#264): each part `None` is the client's automatic
+ *  choice.
+ */
+export type StreamQuality_Deserialize = {
+	/**  Width and height in pixels, like 1920x1080. */
+	resolution?: string | null,
+	/**  Frames per second. */
+	fps?: number | null,
+	/**  Kilobits per second. */
+	bitrateKbps?: number | null,
+};
+
+/**
+ *  Stream quality (#264): each part `None` is the client's automatic
+ *  choice.
+ */
+export type StreamQuality_Serialize = {
+	/**  Width and height in pixels, like 1920x1080. */
+	resolution: string | null,
+	/**  Frames per second. */
+	fps: number | null,
+	/**  Kilobits per second. */
+	bitrateKbps: number | null,
 };
 
 /**  `streaming_pair_with` ended; `message` says why in Caskade's words. */

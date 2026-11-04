@@ -122,6 +122,7 @@ const storage: StorageApi = {
       "edit",
       "setDefault",
       "remove",
+      "moveAndRemove",
       "chooseDirectory",
       "move",
       "uninstall",

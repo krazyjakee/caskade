@@ -1,3 +1,4 @@
+import { SettingsSection } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -131,11 +132,11 @@ export function PluginNotices() {
 }
 
 /** Settings → Plugins: each plugin's settings page. */
-/** Settings → Plugins: one section per enabled plugin with settings. Its
- * own `settings.pages` component wins; otherwise the page is rendered from
- * its `contributes.settings` JSON Schema (#128). */
+/** Settings → Plugins: one section per enabled plugin with settings, and
+ * nothing when none has any. Its own `settings.pages` component wins;
+ * otherwise the page is rendered from its `contributes.settings` JSON Schema
+ * (#128), which brings its own section. */
 export function PluginSettingsPages() {
-  const { t } = useLingui();
   const api = usePluginApi();
   const pages = useContributions("settings.pages");
   const installed = useQuery({
@@ -153,46 +154,42 @@ export function PluginSettingsPages() {
       plugin.enabled && (plugin.hasSettings || pages.some((page) => page.plugin.id === plugin.id)),
   );
   if (plugins.length === 0)
-    return (
-      <div className="rounded-panel border border-dashed border-border-strong p-12 text-center text-fg-subtle">
-        {installed.error ? installed.error.message : t`No plugin has settings yet.`}
-      </div>
-    );
+    return installed.error ? (
+      <p data-part="plugin-settings" role="alert" className="text-sm text-danger">
+        {installed.error.message}
+      </p>
+    ) : null;
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       {plugins.map((plugin) => {
         const own = pages.filter((page) => page.plugin.id === plugin.id);
+        const schema = own.length === 0 && plugin.hasSettings && !plugin.settingsError;
         return (
-          <section
-            key={plugin.id}
-            data-part="plugin-settings"
-            data-plugin={plugin.id}
-            aria-label={plugin.name}
-            className="rounded-panel border border-border bg-surface-raised p-6"
-          >
-            <h2 className="mb-4 font-display text-lg font-semibold">{plugin.name}</h2>
-            {plugin.settingsError && (
-              <p role="alert" className="mb-3 text-sm text-danger">
-                {plugin.settingsError}
-              </p>
-            )}
-            {own.length > 0
-              ? own.map(
+          <div key={plugin.id} data-part="plugin-settings" data-plugin={plugin.id}>
+            {schema ? (
+              <SchemaSettings
+                namespace={pluginSettingsNamespace(plugin.id)}
+                title={plugin.name}
+                icon={Puzzle}
+              />
+            ) : (
+              <SettingsSection icon={Puzzle} title={plugin.name}>
+                {plugin.settingsError && (
+                  <p role="alert" className="mt-3 text-sm text-danger">
+                    {plugin.settingsError}
+                  </p>
+                )}
+                {own.map(
                   ({ plugin: owner, context, contribution: { id, title, component: Page } }) => (
                     <PluginBoundary key={id} plugin={owner} context={context}>
                       {own.length > 1 && <h3 className="mb-2 font-medium">{title}</h3>}
                       <Page />
                     </PluginBoundary>
                   ),
-                )
-              : plugin.hasSettings &&
-                !plugin.settingsError && (
-                  <SchemaSettings
-                    namespace={pluginSettingsNamespace(plugin.id)}
-                    title={plugin.name}
-                  />
                 )}
-          </section>
+              </SettingsSection>
+            )}
+          </div>
         );
       })}
     </div>

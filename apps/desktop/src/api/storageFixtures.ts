@@ -74,6 +74,9 @@ export function createStorageFixtureApi(): StorageApi {
     remove: async (id) => {
       roots.splice(roots.indexOf(find(id)), 1);
     },
+    moveAndRemove: async () => {
+      throw new Error("Moving games needs the Caskade core.");
+    },
     chooseDirectory: async () => null,
     move: async () => {
       throw new Error("Moving games needs the Caskade core.");

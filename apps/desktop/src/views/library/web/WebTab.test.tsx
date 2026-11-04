@@ -193,6 +193,7 @@ it("asks where to keep a web game played offline, then opens its capture", async
     edit: vi.fn(),
     setDefault: vi.fn(),
     remove: vi.fn(),
+    moveAndRemove: vi.fn(),
     chooseDirectory: vi.fn(),
     move: vi.fn(),
     uninstall: vi.fn(),

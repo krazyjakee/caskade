@@ -16,6 +16,7 @@ pub mod dropped;
 pub mod hooks;
 mod jobs;
 mod mapping;
+mod move_location;
 #[cfg(feature = "net")]
 pub mod nearby;
 mod operations;

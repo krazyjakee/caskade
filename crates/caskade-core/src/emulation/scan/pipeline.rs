@@ -31,8 +31,7 @@ pub fn scan_files(
         && !request.platforms.iter().any(|p| p.id == *id)
     {
         return Err(ScanError::Invalid(crate::tr!(
-            "scanner platform {platform} is not compatible with its profile",
-            platform = id
+            "This scanner's platform doesn't fit its profile."
         )));
     }
     let exclusions = Exclusions::compile(

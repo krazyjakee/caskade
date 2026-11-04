@@ -57,6 +57,7 @@ function api(data: RootSummary[]): StorageApi {
       throw new Error("not used");
     },
     remove: async () => {},
+    moveAndRemove: async () => {},
     chooseDirectory: async () => null,
     move: vi.fn(async () => {}),
     uninstall: async () => {},

@@ -17,6 +17,9 @@ pub enum JobKind {
     Update,
     /// A game copied from another of the user's devices (#233).
     PeerCopy,
+    /// Every game on a storage location moved to another, then the location
+    /// removed (#64).
+    MoveLocation,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]

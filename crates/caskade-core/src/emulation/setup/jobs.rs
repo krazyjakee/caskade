@@ -76,7 +76,9 @@ impl EmulatorSetup {
         let state = lock(&self.inner.jobs)
             .get(id)
             .map(|state| (state.cancel.clone(), state.job.clone()))
-            .ok_or_else(|| Error::Invalid(crate::tr!("unknown emulator install {id}", id = id)))?;
+            .ok_or_else(|| {
+                Error::Invalid(crate::tr!("This emulator install is no longer listed."))
+            })?;
         state.0.cancel();
         Ok(state.1)
     }
@@ -88,8 +90,7 @@ impl EmulatorSetup {
         let catalog = self.inner.emulation.catalog();
         let (definition, profile) = self.pick(catalog.recommended(platform)).ok_or_else(|| {
             Error::Invalid(crate::tr!(
-                "nothing to install for {platform} on this system",
-                platform = platform
+                "Caskade has nothing to install for this platform on this system."
             ))
         })?;
         let reuse = self.installed_emulator(&definition.id).await?.is_some();
@@ -127,12 +128,9 @@ impl EmulatorSetup {
 
     fn start(&self, definition_id: &str, platform: Option<String>, plan: Plan) -> Result<SetupJob> {
         let catalog = self.inner.emulation.catalog();
-        let definition = catalog.emulator(definition_id).ok_or_else(|| {
-            Error::Invalid(crate::tr!(
-                "unknown emulator {emulator}",
-                emulator = definition_id
-            ))
-        })?;
+        let definition = catalog
+            .emulator(definition_id)
+            .ok_or_else(|| Error::Invalid(crate::tr!("Caskade doesn't know this emulator.")))?;
         if self.source(definition).is_none() {
             return Err(Error::Invalid(crate::tr!(
                 "{emulator} can't be installed on this system",
@@ -204,12 +202,9 @@ impl EmulatorSetup {
             .map(|state| (state.job.clone(), state.plan.clone()))
             .ok_or_else(|| Error::Invalid(crate::tr!("the job is gone")))?;
         let catalog = self.inner.emulation.catalog();
-        let definition = catalog.emulator(&job.definition_id).ok_or_else(|| {
-            Error::Invalid(crate::tr!(
-                "unknown emulator {emulator}",
-                emulator = job.definition_id
-            ))
-        })?;
+        let definition = catalog
+            .emulator(&job.definition_id)
+            .ok_or_else(|| Error::Invalid(crate::tr!("Caskade doesn't know this emulator.")))?;
         let source = self
             .source(definition)
             .ok_or_else(|| Error::Invalid(crate::tr!("no install source on this system")))?

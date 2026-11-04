@@ -29,6 +29,32 @@ async function row(name: string) {
   return label.closest('[data-part="store-account"]') as HTMLElement;
 }
 
+it("says it's loading, and a failed load offers Try again (#65)", async () => {
+  const fixture = createStoreAccountsFixtureApi();
+  let finish = () => {};
+  const answered = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
+  let failing = true;
+  renderPanel({
+    ...fixture,
+    list: async () => {
+      await answered;
+      if (failing) throw new Error("the accounts didn't answer");
+      return fixture.list();
+    },
+  });
+  expect((await screen.findByRole("status")).textContent).toMatch(/^Loading/);
+  finish();
+  const notice = (await screen.findByText("the accounts didn't answer")).closest(
+    '[role="alert"]',
+  ) as HTMLElement;
+  failing = false;
+  fireEvent.click(within(notice).getByRole("button", { name: "Try again" }));
+  expect(await row("Ada")).toBeTruthy();
+  expect(screen.queryByText("the accounts didn't answer")).toBeNull();
+});
+
 it("shows every connection state with its trouble", async () => {
   renderPanel();
   for (const [name, state] of [

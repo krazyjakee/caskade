@@ -6,7 +6,8 @@ registered roots. `register_root(path, label)` creates/adopts the physical
 copies, and selects the first root as default. `resolve`, `list_roots`,
 `set_default`, `edit_root`, `capabilities` and `remove_keep_files` are the app
 boundary. The default cannot be removed. Keep-files removal explicitly drops
-its managed entries; disk files remain available for adoption.
+its managed entries with their play sessions, and any game left with no other
+copy; disk files remain, and adding the folder again adopts them as new games.
 
 `config/storage-roots.json` is an atomic independent catalogue, so losing the
 library DB does not lose custom storage paths/identities/labels/defaults.
@@ -53,8 +54,10 @@ tracked on #22.
 The frontend uses generated commands. Settings, game details and lazy library
 actions share one root inventory, refreshed on focus and periodically. An
 offline managed copy is marked unavailable without hiding its game or changing
-another launcher's copy. Moves and uninstalls wait for actual job completion
-before a move-all/remove operation proceeds; failures remain visible.
+another launcher's copy. Moving a location's games and removing it is one
+`move_location` job in Activity (`plan_location_move` refuses what can't finish
+before anything moves; the location goes only once every game moved, and a
+cancel or failure keeps it and says what moved).
 
 Evidence includes genuine fixture launch after a managed move, real Proton
 ext4-to-tmpfs install/move/self-check/own-uninstall, process-exit recovery during

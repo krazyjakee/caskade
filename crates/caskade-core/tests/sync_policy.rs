@@ -234,6 +234,14 @@ fn category_defaults_and_both_direction_gates_are_explicit() {
     );
 }
 
+/// Stream quality suits this device's screen and network (#66): it lives in
+/// `core.streaming`, which never leaves the device.
+#[test]
+fn stream_quality_stays_on_each_device() {
+    let rule = policy::setting("settings.section.core.streaming").unwrap();
+    assert_eq!(rule.classification().disposition, Disposition::Local);
+}
+
 #[tokio::test]
 async fn category_choices_are_registered_validated_and_persisted_as_device_settings() {
     let settings = settings().await;

@@ -54,6 +54,62 @@ impl StorageService {
         self.recover_pending(Arc::new(StartupSink), CancellationToken::new())
             .await
     }
+    /// What moving every game off `id` to `target_id` takes (#64). Refused
+    /// here, with nothing moved, when the plan can't finish as far as can be
+    /// told: the location can't be removed, a game can't go, or they don't
+    /// fit.
+    pub async fn plan_location_move(&self, id: &str, target_id: &str) -> Result<LocationMove> {
+        if id == target_id {
+            return Err(StorageError::Invalid(crate::tr!(
+                "choose a different storage location"
+            )));
+        }
+        let source = self
+            .store
+            .get_root(id)
+            .await?
+            .ok_or_else(|| StorageError::Invalid(crate::tr!("unknown storage location")))?;
+        if source.is_default {
+            return Err(StorageError::DefaultRoot);
+        }
+        let summary = self.summary(source).await?;
+        let target = self.resolve(Some(target_id)).await?;
+        let playing = self.store.in_flight_sessions().await?;
+        for game in &summary.games {
+            if let Some(reason) = &game.move_blocked {
+                return Err(StorageError::Invalid(crate::tr!(
+                    "“{title}” can't move: {reason}",
+                    title = game.title,
+                    reason = reason
+                )));
+            }
+            if self.launch.try_game_lease(&game.game_id).is_err()
+                || playing.iter().any(|s| s.game_id == game.game_id)
+            {
+                return Err(StorageError::Invalid(crate::tr!(
+                    "“{title}” is running. Close it, then try again.",
+                    title = game.title
+                )));
+            }
+        }
+        let caps = self.capabilities(&target.id).await?;
+        // Within one volume a move takes no new space.
+        let same_volume = caps.volume.is_some() && caps.volume == summary.capabilities.volume;
+        if !same_volume
+            && caps
+                .free_bytes
+                .is_some_and(|free| free < summary.games_bytes)
+        {
+            return Err(StorageError::Invalid(crate::tr!(
+                "not enough free space in the target location"
+            )));
+        }
+        Ok(LocationMove {
+            source: summary.root,
+            target,
+            games: summary.games,
+        })
+    }
     /// The job queue supplies its event sink/cancellation token. The shared launch
     /// lease spans root leases, durable relocation and the library update.
     pub async fn move_entry(

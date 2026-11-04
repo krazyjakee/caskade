@@ -88,7 +88,8 @@ async fn each_scope_keeps_its_own_scripts_in_order() {
     else {
         panic!("a missing profile is refused");
     };
-    assert!(why.contains("nope"), "{why}");
+    assert!(why.contains("no longer exists"), "{why}");
+    assert!(!why.contains("nope"), "{why}");
     assert!(store.delete_lifecycle_script(&vpn.id).await.unwrap());
     assert!(!store.delete_lifecycle_script(&vpn.id).await.unwrap());
 }

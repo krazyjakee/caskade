@@ -12,6 +12,7 @@
 use std::sync::{Mutex, MutexGuard};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
+use crate::error::{CommandError, refused};
 use caskade_core::settings::{AppUpdateSettings, SettingsService};
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -582,16 +583,18 @@ pub fn app_update_status(updater: State<'_, AppUpdater>) -> AppUpdateStatus {
 /// while a check or an install runs, and once an update is installed.
 #[tauri::command]
 #[specta::specta]
-pub async fn app_update_check<R: Runtime>(app: AppHandle<R>) -> Result<AppUpdateStatus, String> {
-    check(&app).await
+pub async fn app_update_check<R: Runtime>(
+    app: AppHandle<R>,
+) -> Result<AppUpdateStatus, CommandError> {
+    check(&app).await.map_err(refused)
 }
 
 /// Downloads and installs the release the last check found. Returns at
 /// once; `AppUpdateChanged` follows the download.
 #[tauri::command]
 #[specta::specta]
-pub fn app_update_install<R: Runtime>(app: AppHandle<R>) -> Result<AppUpdateStatus, String> {
-    install(app)
+pub fn app_update_install<R: Runtime>(app: AppHandle<R>) -> Result<AppUpdateStatus, CommandError> {
+    install(app).map_err(refused)
 }
 
 /// Restarts into the installed update.
@@ -600,8 +603,8 @@ pub fn app_update_install<R: Runtime>(app: AppHandle<R>) -> Result<AppUpdateStat
 pub fn app_update_restart<R: Runtime>(
     app: AppHandle<R>,
     updater: State<'_, AppUpdater>,
-) -> Result<(), String> {
-    updater.ensure_ready()?;
+) -> Result<(), CommandError> {
+    updater.ensure_ready().map_err(refused)?;
     crate::tray::restart(&app);
     Ok(())
 }

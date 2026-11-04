@@ -1,6 +1,10 @@
 //! Storage registry IPC. The source layer owns manifest adoption (#54).
 use crate::error::{CommandError, report};
-use caskade_core::storage::{CancellationToken, RootSummary, StorageService};
+use caskade_core::{
+    accounts::{AccountService, Permission},
+    install::{InstallService, JobSnapshot},
+    storage::{CancellationToken, RootSummary, StorageService},
+};
 use caskade_sources::storage::StorageSource;
 
 #[tauri::command]
@@ -75,6 +79,24 @@ pub async fn storage_remove(
     id: String,
 ) -> Result<(), CommandError> {
     state.remove_keep_files(&id).await.map_err(report)
+}
+/// Moves every game on location `id` to `target_id`, then removes `id`, as
+/// one job (#64). The gate checks the removal; moving games needs installs
+/// too, like `move_game`.
+#[tauri::command]
+#[specta::specta]
+pub async fn storage_move_and_remove(
+    accounts: tauri::State<'_, AccountService>,
+    install: tauri::State<'_, InstallService>,
+    storage: tauri::State<'_, StorageService>,
+    id: String,
+    target_id: String,
+) -> Result<JobSnapshot, CommandError> {
+    accounts.require(Permission::Install).map_err(report)?;
+    install
+        .move_location(id, target_id, storage.inner().clone())
+        .await
+        .map_err(report)
 }
 /// Directory-only native picker, no webview filesystem capability.
 #[tauri::command]

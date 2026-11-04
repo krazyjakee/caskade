@@ -130,8 +130,8 @@ impl LibraryStore {
                     && error.is_foreign_key_violation()
                 {
                     return Err(Error::Invalid(match &script.scope {
-                        ScriptScope::Profile { profile_id } => {
-                            crate::tr!("emulator profile {id} was not found", id = profile_id)
+                        ScriptScope::Profile { .. } => {
+                            crate::tr!("This emulator profile no longer exists.")
                         }
                         _ => crate::tr!("the script's game was not found"),
                     }));

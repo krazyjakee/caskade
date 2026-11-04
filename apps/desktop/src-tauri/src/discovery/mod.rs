@@ -6,6 +6,7 @@ mod lifecycle;
 mod tests;
 pub use config::OsCheck;
 
+use crate::error::{CommandError, ErrorCode, conflict, internal, logged, refused, report};
 use caskade_core::settings::{DiscoveryExclusion, SettingsService};
 use caskade_discovery::{Cancel, Config, GameGroup, LauncherStatus, ScanReport, SourceReport};
 use caskade_sources::{
@@ -167,13 +168,8 @@ impl DiscoveryController {
             .collect();
         self.0.updates.send_replace(state.snapshot.clone());
     }
-    pub async fn launchers(&self) -> Result<DiscoverySnapshot, String> {
-        let launchers = self
-            .0
-            .service
-            .detect_launchers()
-            .await
-            .map_err(|e| e.to_string())?;
+    pub async fn launchers(&self) -> Result<DiscoverySnapshot, CommandError> {
+        let launchers = self.0.service.detect_launchers().await.map_err(failure)?;
         let mut state = self.0.state.lock().await;
         state.snapshot.launchers = launchers;
         self.publish(&mut state);
@@ -183,20 +179,22 @@ impl DiscoveryController {
     async fn idle(&self) -> bool {
         self.0.state.lock().await.snapshot.phase == "idle"
     }
-    pub async fn scan(&self) -> Result<DiscoverySnapshot, String> {
+    pub async fn scan(&self) -> Result<DiscoverySnapshot, CommandError> {
         let (preferences, launchers) = config::preferences(&self.0.settings).await?;
         if !preferences.enabled {
-            return Err(caskade_core::tr!(
+            return Err(refused(caskade_core::tr!(
                 "Enable library discovery before scanning."
-            ));
+            )));
         }
         let config = config::scan_config(&preferences, &launchers, self.0.service.env().os())?;
         let options = caskade_sources::import_options(&self.0.settings)
             .await
-            .map_err(|e| e.to_string())?;
+            .map_err(failure)?;
         let mut state = self.0.state.lock().await;
         if state.cancel.is_some() {
-            return Err(caskade_core::tr!("A discovery scan is already running."));
+            return Err(conflict(caskade_core::tr!(
+                "A discovery scan is already running."
+            )));
         }
         let cancel = Cancel::new();
         state.cancel = Some(cancel.clone());
@@ -226,7 +224,7 @@ impl DiscoveryController {
                 tokio::pin!(discovery);
                 let scan = loop {
                     tokio::select! {
-                        result = &mut discovery => break result.map_err(|e| e.to_string())?,
+                        result = &mut discovery => break result.map_err(failure)?,
                         Some(update) = updates.recv() => {
                             let mut state = controller.0.state.lock().await;
                             match update {
@@ -246,7 +244,7 @@ impl DiscoveryController {
                     }
                 };
                 if cancel.is_cancelled() {
-                    return Err(caskade_core::tr!("Scan cancelled"));
+                    return Err(cancelled());
                 }
                 {
                     let mut state = controller.0.state.lock().await;
@@ -262,14 +260,14 @@ impl DiscoveryController {
                     .service
                     .import_report(&scan, &options, &cancel)
                     .await
-                    .map_err(|e| e.to_string())?;
+                    .map_err(failure)?;
                 // Launchers turned off take their games with them.
                 controller
                     .0
                     .service
                     .remove_unscanned(&config, &cancel)
                     .await
-                    .map_err(|e| e.to_string())?;
+                    .map_err(failure)?;
                 controller.authorize_reviews(import, &cancel).await
             }
             .await;
@@ -290,7 +288,7 @@ impl DiscoveryController {
                         "failed"
                     }
                     .into();
-                    state.snapshot.error = Some(error);
+                    state.snapshot.error = Some(error.summary);
                 }
             }
             controller.publish(&mut state);
@@ -305,12 +303,12 @@ impl DiscoveryController {
         let current = async {
             let (preferences, launchers) = config::preferences(&self.0.settings).await?;
             if !preferences.enabled {
-                return Err(String::new());
+                return Err(CommandError::from(""));
             }
             let config = config::scan_config(&preferences, &launchers, self.0.service.env().os())?;
             let options = caskade_sources::import_options(&self.0.settings)
                 .await
-                .map_err(|e| e.to_string())?;
+                .map_err(failure)?;
             Ok((config, options))
         }
         .await
@@ -354,9 +352,9 @@ impl DiscoveryController {
             }
         }
     }
-    async fn refresh_storage(&self, cancel: &Cancel) -> Result<(), String> {
+    async fn refresh_storage(&self, cancel: &Cancel) -> Result<(), CommandError> {
         if cancel.is_cancelled() {
-            return Err(caskade_core::tr!("Scan cancelled"));
+            return Err(cancelled());
         }
         let source = self
             .0
@@ -379,9 +377,9 @@ impl DiscoveryController {
             }
         };
         if cancel.is_cancelled() {
-            return Err(caskade_core::tr!("Scan cancelled"));
+            return Err(cancelled());
         }
-        let report = result.map_err(|e| e.to_string())?;
+        let report = result.map_err(storage_failure)?;
         let mut state = self.0.state.lock().await;
         state.snapshot.warnings = storage_warnings(&report);
         state.snapshot.storage = Some(report);
@@ -392,7 +390,7 @@ impl DiscoveryController {
         &self,
         mut outcome: ImportOutcome,
         cancel: &Cancel,
-    ) -> Result<ImportOutcome, String> {
+    ) -> Result<ImportOutcome, CommandError> {
         let (preferences, _) = config::preferences(&self.0.settings).await?;
         let (approved, pending): (Vec<_>, Vec<_>) = std::mem::take(&mut outcome.review)
             .into_iter()
@@ -407,7 +405,7 @@ impl DiscoveryController {
         if !approved.is_empty() {
             let mut options = caskade_sources::import_options(&self.0.settings)
                 .await
-                .map_err(|e| e.to_string())?;
+                .map_err(failure)?;
             options.accept_maybe = true;
             let report = ScanReport {
                 groups: approved,
@@ -418,7 +416,7 @@ impl DiscoveryController {
                 .service
                 .import_report(&report, &options, cancel)
                 .await
-                .map_err(|e| e.to_string())?;
+                .map_err(failure)?;
             if imported.imported.len() != report.groups.len() {
                 outcome.review.extend(report.groups);
             }
@@ -433,26 +431,26 @@ impl DiscoveryController {
         ids: Vec<String>,
         accept: bool,
         revision: u32,
-    ) -> Result<DiscoverySnapshot, String> {
+    ) -> Result<DiscoverySnapshot, CommandError> {
         if ids.is_empty() || ids.len() > 1000 {
-            return Err(caskade_core::tr!("Choose between 1 and 1000 review items."));
+            return Err(refused(caskade_core::tr!(
+                "Choose between 1 and 1000 review items."
+            )));
         }
         let _operation = self.0.operation.lock().await;
         let state = self.0.state.lock().await;
         if state.cancel.is_some() || state.snapshot.revision != revision {
-            return Err(caskade_core::tr!(
+            return Err(conflict(caskade_core::tr!(
                 "Discovery changed. Review the latest list."
-            ));
+            )));
         }
         let ids: BTreeSet<_> = ids.into_iter().collect();
         let groups: Vec<_> = ids
             .iter()
             .map(|id| {
-                state
-                    .review
-                    .get(id)
-                    .cloned()
-                    .ok_or_else(|| caskade_core::tr!("Review item is no longer available."))
+                state.review.get(id).cloned().ok_or_else(|| {
+                    conflict(caskade_core::tr!("Review item is no longer available."))
+                })
             })
             .collect::<Result<_, _>>()?;
         drop(state);
@@ -463,9 +461,9 @@ impl DiscoveryController {
             .settings
             .get("core.discovery")
             .await
-            .map_err(|e| e.to_string())?;
+            .map_err(report)?;
         let mut preferences: caskade_core::settings::DiscoverySettings =
-            serde_json::from_value(snapshot.value).map_err(|e| e.to_string())?;
+            serde_json::from_value(snapshot.value).map_err(report)?;
         let decisions = if accept {
             &mut preferences.accepted_entries
         } else {
@@ -489,15 +487,15 @@ impl DiscoveryController {
             .settings
             .set(
                 "core.discovery",
-                serde_json::to_value(preferences).map_err(|e| e.to_string())?,
+                serde_json::to_value(preferences).map_err(report)?,
                 Some(snapshot.revision),
             )
             .await
-            .map_err(|e| e.to_string())?;
+            .map_err(report)?;
         if accept {
             let mut options = caskade_sources::import_options(&self.0.settings)
                 .await
-                .map_err(|e| e.to_string())?;
+                .map_err(failure)?;
             options.accept_maybe = true;
             // No successful-source authority here: accepting a subset must not
             // mark unrelated library entries absent.
@@ -510,11 +508,11 @@ impl DiscoveryController {
                 .service
                 .import_report(&report, &options, &Cancel::new())
                 .await
-                .map_err(|e| e.to_string())?;
+                .map_err(failure)?;
             if !result.warnings.is_empty() || !result.skipped.is_empty() {
-                return Err(caskade_core::tr!(
+                return Err(CommandError::from(caskade_core::tr!(
                     "Some entries could not be imported; the review list was retained. Check the library before retrying."
-                ));
+                )));
             }
         }
         let mut state = self.0.state.lock().await;
@@ -523,6 +521,34 @@ impl DiscoveryController {
         }
         self.publish(&mut state);
         Ok(state.snapshot.clone())
+    }
+}
+
+fn cancelled() -> CommandError {
+    CommandError::new(ErrorCode::Cancelled, caskade_core::tr!("Scan cancelled"))
+}
+
+/// A scan's or import's failure as a command's error. These errors wrap the
+/// core's transparently, so what they wrap isn't among their causes.
+fn failure(error: caskade_sources::Error) -> CommandError {
+    use caskade_sources::Error as E;
+    match error {
+        E::Core(error) => report(error),
+        E::Settings(error) => report(error),
+        E::Discovery(caskade_discovery::Error::Io(error)) => report(error),
+        E::Cancelled => logged(cancelled()),
+        other => internal(other),
+    }
+}
+
+/// [`failure`] for the storage refresh a scan starts with.
+fn storage_failure(error: caskade_sources::storage::StorageError) -> CommandError {
+    use caskade_sources::storage::StorageError as E;
+    match error {
+        E::Core(error) => report(error),
+        E::Io(error) => report(error),
+        E::Cancelled => logged(cancelled()),
+        other => internal(other),
     }
 }
 

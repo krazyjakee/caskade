@@ -2,11 +2,14 @@
 //! state. Settings → Streaming (#265) is their UI.
 
 use crate::error::{CommandError, report};
-use caskade_core::streaming::{
-    HostOutcome, HostStatus, StreamingClient, StreamingHost,
-    api::{PairRequest, PairedClient},
-    hosts::{StreamHost, StreamHosts},
-    pairing::Paired,
+use caskade_core::{
+    settings::{SettingsService, SettingsSnapshot, StreamQuality},
+    streaming::{
+        HostOutcome, HostStatus, StreamingClient, StreamingHost,
+        api::{PairRequest, PairedClient},
+        hosts::{StreamHost, StreamHosts},
+        pairing::Paired,
+    },
 };
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -102,6 +105,17 @@ pub async fn streaming_set_hosting(
         host.disable().await
     };
     outcome.map_err(report)
+}
+
+/// Sets how games streamed to this device look. Any account may: unlike
+/// the hosting beside it in `core.streaming`, which is an admin's (#66).
+#[tauri::command]
+#[specta::specta]
+pub async fn streaming_set_quality(
+    settings: State<'_, SettingsService>,
+    quality: StreamQuality,
+) -> Result<SettingsSnapshot, CommandError> {
+    settings.set_stream_quality(&quality).await.map_err(report)
 }
 
 /// Hosts through the streaming someone already set up on this device

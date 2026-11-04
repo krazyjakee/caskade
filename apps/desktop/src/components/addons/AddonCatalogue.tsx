@@ -2,11 +2,11 @@
  * add-ons with what each means here, searchable by text and filtered by
  * kind, read offline from the last fetch. Each opens its details, where it
  * installs, updates and is removed through the shared package service. */
-import { Button, SegmentedControl, Switch, TextField } from "@caskade/ui";
+import { Button, SegmentedControl, SettingsSection, Switch, TextField } from "@caskade/ui";
 import { plural } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useMutation } from "@tanstack/react-query";
-import { CloudOff, RefreshCw, Search } from "lucide-react";
+import { CloudOff, Package, RefreshCw, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
   type AppMode,
@@ -68,108 +68,112 @@ export function AddonCatalogue() {
   ).length;
   const selected = catalogue.data?.items.find((item) => item.entry.id === open) ?? null;
   return (
-    <section
-      data-cs="addon-catalogue"
-      aria-labelledby="addon-catalogue"
-      className="flex flex-col gap-3"
+    <SettingsSection
+      icon={Package}
+      title={t`Plugin and theme catalogue`}
+      description={t`Curated plugins and themes. Each says whether it fits this device.`}
     >
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 id="addon-catalogue" className="font-display text-lg font-semibold">
-          <Trans>Plugin and theme catalogue</Trans>
-        </h2>
-        <Button
-          data-part="refresh"
-          variant="secondary"
-          icon={RefreshCw}
-          onPress={() => refresh.mutate()}
-          isDisabled={refresh.isPending}
-        >
-          {refresh.isPending ? <Trans>Checking…</Trans> : <Trans>Check for updates</Trans>}
-        </Button>
-      </div>
-      <p data-part="status" role="status" className="flex items-center gap-2 text-sm text-fg-muted">
-        {status?.offline && <CloudOff aria-hidden className="size-4" />}
-        {!status
-          ? t`Loading the catalogue…`
-          : status.fetchedAtMs === null
-            ? status.error
-              ? t`The catalogue couldn't be fetched: ${status.error}`
-              : t`The catalogue hasn't been fetched yet.`
-            : status.offline
-              ? t`Offline: showing the catalogue from ${formatDateTime(status.fetchedAtMs)}. Installing needs a connection.`
-              : status.error
-                ? t`Showing the catalogue from ${formatDateTime(status.fetchedAtMs)}; the last check failed: ${status.error}`
-                : t`Updated ${formatDateTime(status.fetchedAtMs)}.`}
-        {updates > 0 && (
-          <span data-part="updates" className="text-accent-alt">
-            {plural(updates, { one: "# update", other: "# updates" })}
-          </span>
+      <div data-cs="addon-catalogue" className="mt-3 flex flex-col gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p
+            data-part="status"
+            role="status"
+            className="flex min-w-0 flex-[1_1_16rem] items-center gap-2 text-sm text-fg-muted"
+          >
+            {status?.offline && <CloudOff aria-hidden className="size-4" />}
+            {!status
+              ? t`Loading the catalogue…`
+              : status.fetchedAtMs === null
+                ? status.error
+                  ? t`The catalogue couldn't be fetched: ${status.error}`
+                  : t`The catalogue hasn't been fetched yet.`
+                : status.offline
+                  ? t`Offline: showing the catalogue from ${formatDateTime(status.fetchedAtMs)}. Installing needs a connection.`
+                  : status.error
+                    ? t`Showing the catalogue from ${formatDateTime(status.fetchedAtMs)}; the last check failed: ${status.error}`
+                    : t`Updated ${formatDateTime(status.fetchedAtMs)}.`}
+            {updates > 0 && (
+              <span data-part="updates" className="text-accent-alt">
+                {plural(updates, { one: "# update", other: "# updates" })}
+              </span>
+            )}
+          </p>
+          <Button
+            data-part="refresh"
+            variant="secondary"
+            size="sm"
+            icon={RefreshCw}
+            onPress={() => refresh.mutate()}
+            isDisabled={refresh.isPending}
+          >
+            {refresh.isPending ? <Trans>Checking…</Trans> : <Trans>Check for updates</Trans>}
+          </Button>
+        </div>
+        {records.data && (
+          <Switch
+            data-part="update-preference"
+            isSelected={
+              preference.isPending ? preference.variables : records.data.updates === "notify"
+            }
+            isDisabled={preference.isPending}
+            onChange={(notify) => preference.mutate(notify)}
+          >
+            {t`Check for add-on updates when Settings opens`}
+          </Switch>
         )}
-      </p>
-      {records.data && (
-        <Switch
-          data-part="update-preference"
-          isSelected={
-            preference.isPending ? preference.variables : records.data.updates === "notify"
-          }
-          isDisabled={preference.isPending}
-          onChange={(notify) => preference.mutate(notify)}
-        >
-          {t`Check for add-on updates when Settings opens`}
-        </Switch>
-      )}
-      {preference.error && <FailureNotice variant="inline" error={preference.error} />}
-      <DeviceOffers items={catalogue.data?.items ?? []} open={setOpen} />
-      <div className="flex flex-wrap items-center gap-3">
-        <TextField
-          aria-label={t`Search the catalogue`}
-          placeholder={t`Search plugins and themes`}
-          icon={Search}
-          value={query}
-          onChange={setQuery}
-          className="min-w-56 flex-1"
-        />
-        <SegmentedControl
-          aria-label={t`Show`}
-          value={kind}
-          onChange={setKind}
-          options={[
-            { id: "all", label: t({ message: "All", context: "add-on kind" }) },
-            { id: "plugin", label: t`Plugins` },
-            { id: "theme", label: t`Themes` },
-          ]}
-        />
+        {preference.error && <FailureNotice variant="inline" error={preference.error} />}
+        <DeviceOffers items={catalogue.data?.items ?? []} open={setOpen} />
+        <div className="flex flex-wrap items-center gap-3">
+          <TextField
+            aria-label={t`Search the catalogue`}
+            placeholder={t`Search plugins and themes`}
+            icon={Search}
+            value={query}
+            onChange={setQuery}
+            className="min-w-56 flex-1"
+          />
+          <SegmentedControl
+            aria-label={t`Show`}
+            value={kind}
+            onChange={setKind}
+            options={[
+              { id: "all", label: t({ message: "All", context: "add-on kind" }) },
+              { id: "plugin", label: t`Plugins` },
+              { id: "theme", label: t`Themes` },
+            ]}
+          />
+        </div>
+        {catalogue.isError && (
+          <p role="alert" className="text-sm text-danger">
+            {catalogue.error.message}
+          </p>
+        )}
+        {catalogue.data && items.length === 0 && (
+          <p className="rounded-control border border-dashed border-border p-5 text-sm text-fg-muted">
+            {catalogue.data.items.length === 0
+              ? t`The catalogue is empty.`
+              : t`Nothing in the catalogue matches.`}
+          </p>
+        )}
+        {items.length > 0 && (
+          <ul aria-label={t`Catalogue`} className="grid gap-3 md:grid-cols-2">
+            {items.map((item) => (
+              <Row key={item.entry.id} item={item} open={() => setOpen(item.entry.id)} />
+            ))}
+          </ul>
+        )}
+        {selected && (
+          <AddonDetails
+            key={selected.entry.id}
+            item={selected}
+            mode={mode}
+            offline={status?.offline ?? false}
+            record={records.data?.addons?.[selected.entry.id]}
+            close={() => setOpen(null)}
+          />
+        )}
       </div>
-      {catalogue.isError && (
-        <p role="alert" className="text-sm text-danger">
-          {catalogue.error.message}
-        </p>
-      )}
-      {catalogue.data && items.length === 0 && (
-        <p className="rounded-panel border border-dashed border-border-strong p-6 text-center text-sm text-fg-muted">
-          {catalogue.data.items.length === 0
-            ? t`The catalogue is empty.`
-            : t`Nothing in the catalogue matches.`}
-        </p>
-      )}
-      {items.length > 0 && (
-        <ul aria-label={t`Catalogue`} className="grid gap-3 md:grid-cols-2">
-          {items.map((item) => (
-            <Row key={item.entry.id} item={item} open={() => setOpen(item.entry.id)} />
-          ))}
-        </ul>
-      )}
-      {selected && (
-        <AddonDetails
-          key={selected.entry.id}
-          item={selected}
-          mode={mode}
-          offline={status?.offline ?? false}
-          record={records.data?.addons?.[selected.entry.id]}
-          close={() => setOpen(null)}
-        />
-      )}
-    </section>
+    </SettingsSection>
   );
 }
 
@@ -207,7 +211,7 @@ function Row({ item, open }: { item: CatalogueItem; open: () => void }) {
     <li
       data-part="item"
       data-kind={entry.kind}
-      className="flex flex-col gap-2 rounded-panel border border-border bg-surface-raised p-4"
+      className="flex flex-col gap-2 rounded-control border border-border bg-surface-base/60 p-4"
     >
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">

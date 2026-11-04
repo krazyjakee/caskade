@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
 import {
   type PluginManagerApi,
@@ -121,7 +121,6 @@ it("installs a folder only after its permissions were reviewed and accepted", as
   show(api);
   const list = await screen.findByRole("list", { name: "Installed plugins" });
   expect(within(list).getByText("Playtime stats")).toBeTruthy();
-  expect(within(list).getByText("Read your library")).toBeTruthy();
 
   // Review, then decline: nothing is installed.
   await act(async () => {
@@ -273,4 +272,78 @@ it("loads an unpacked folder in development builds and marks dev plugins", async
     fireEvent.click(screen.getByRole("button", { name: "Load unpacked" }));
   });
   expect(calls).toEqual(["choose", "unpacked /downloads/hltb"]);
+});
+
+it("puts the installed plugins and the catalogue in Settings cards, with no settings box", async () => {
+  const { api } = fake([summary({})]);
+  show(api);
+  await screen.findByRole("list", { name: "Installed plugins" });
+  for (const name of ["Installed plugins", "Plugin and theme catalogue"])
+    expect(screen.getByRole("region", { name }).getAttribute("data-cs")).toBe("settings-section");
+  const installed = screen.getByRole("region", { name: "Installed plugins" });
+  expect(within(installed).getByRole("button", { name: "Install from folder" })).toBeTruthy();
+  // No plugin has settings: nothing says so, in a box or otherwise.
+  await waitFor(() => expect(screen.queryByText("Loading plugins…")).toBeNull());
+  expect(screen.queryByText("No plugin has settings yet.")).toBeNull();
+  expect(document.querySelector('[data-part="plugin-settings"]')).toBeNull();
+});
+
+it("keeps a plugin's actions in one group", async () => {
+  const { api } = fake([
+    summary({}),
+    summary({ id: "dev.example.grown", name: "Grown plugin", status: "needs_consent" }),
+  ]);
+  show(api);
+  const list = await screen.findByRole("list", { name: "Installed plugins" });
+  const row = within(list).getByText("Playtime stats").closest("li") as HTMLElement;
+  const group = row.querySelector('[data-part="plugin-actions"]') as HTMLElement;
+  expect(within(group).getByRole("switch", { name: "Enable Playtime stats" })).toBeTruthy();
+  const buttons = within(group).getAllByRole("button");
+  expect(buttons.map((button) => button.textContent)).toEqual(["Details", "Uninstall"]);
+  // Nothing to press outside the group.
+  expect(within(row).getAllByRole("button")).toEqual(buttons);
+
+  const grown = within(list).getByText("Grown plugin").closest("li") as HTMLElement;
+  const actions = grown.querySelector('[data-part="plugin-actions"]') as HTMLElement;
+  expect(within(actions).getByRole("button", { name: "Review and allow" })).toBeTruthy();
+});
+
+it("summarises a plugin's access once, with the rest in its details", async () => {
+  const { api, calls } = fake([
+    summary({}),
+    summary({
+      id: "dev.example.backend",
+      name: "Backend",
+      hasUi: false,
+      hasBackend: true,
+      permissions: { network: ["a.com"], fs: [], process: true, library: "none" },
+    }),
+    summary({
+      id: "dev.example.quiet",
+      name: "Quiet",
+      hasUi: false,
+      hasBackend: true,
+      permissions: { network: [], fs: [], process: false, library: "none" },
+    }),
+  ]);
+  show(api);
+  const list = await screen.findByRole("list", { name: "Installed plugins" });
+  const access = [...list.querySelectorAll('[data-part="access"]')].map((p) => p.textContent);
+  expect(access).toEqual([
+    "Same access as the app",
+    "Uses network, programs",
+    "Nothing beyond its own storage",
+  ]);
+  expect(within(list).queryByText("Read your library")).toBeNull();
+
+  fireEvent.click(within(list).getByRole("button", { name: "Playtime stats details" }));
+  const dialog = await screen.findByRole("dialog");
+  const permissions = within(dialog).getByRole("list", { name: "Permissions" });
+  expect(within(permissions).getByText("Read your library")).toBeTruthy();
+  expect(within(dialog).getByText("View: Stats")).toBeTruthy();
+  // Only a look: nothing to allow.
+  expect(within(dialog).queryByRole("button", { name: "Allow" })).toBeNull();
+  fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
+  expect(screen.queryByRole("dialog")).toBeNull();
+  expect(calls).toEqual([]);
 });

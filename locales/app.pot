@@ -24,10 +24,6 @@ msgstr ""
 msgid "“{text}”"
 msgstr ""
 
-#: apps/desktop/src/views/settings/StoragePanel.tsx
-msgid "“{title}” wasn't moved: {reason}"
-msgstr ""
-
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
 msgid "(no longer in the library)"
 msgstr ""
@@ -565,6 +561,10 @@ msgstr ""
 msgid "{free} free of {total}"
 msgstr ""
 
+#: apps/desktop/src/views/settings/StoragePanel.tsx
+msgid "{from} is removed once every game has moved. If you cancel, or a game can't move, it stays and the games already moved stay on {target}."
+msgstr ""
+
 #: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
 msgid "{from}, {when}"
 msgstr ""
@@ -577,6 +577,20 @@ msgstr ""
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Move its game there, then remove"
 msgid_plural "Move its # games there, then remove"
+msgstr[0] ""
+msgstr[1] ""
+
+#. js-lingui:icu=%7Bgames%2C+plural%2C+one+%7BMove+its+game+to+%7Btarget%7D%3F%7D+other+%7BMove+its+%23+games+to+%7Btarget%7D%3F%7D%7D&pluralize_on=games
+#: apps/desktop/src/views/settings/StoragePanel.tsx
+msgid "Move its game to {target}?"
+msgid_plural "Move its # games to {target}?"
+msgstr[0] ""
+msgstr[1] ""
+
+#. js-lingui:icu=%7Bgames%2C+plural%2C+one+%7BRemove+this+location+from+the+library%3F+Its+game+leaves+your+library%2C+with+its+play+time%2C+favourite+and+collections.+If+you+also+have+that+game+another+way%2C+it+stays%2C+without+this+copy%27s+play+time.%7D+other+%7BRemove+this+location+from+the+library%3F+Its+%23+games+leave+your+library%2C+with+their+play+time%2C+favourites+and+collections.+A+game+you+also+have+another+way+stays%2C+without+this+copy%27s+play+time.%7D%7D&pluralize_on=games
+#: apps/desktop/src/views/settings/StoragePanel.tsx
+msgid "Remove this location from the library? Its game leaves your library, with its play time, favourite and collections. If you also have that game another way, it stays, without this copy's play time."
+msgid_plural "Remove this location from the library? Its # games leave your library, with their play time, favourites and collections. A game you also have another way stays, without this copy's play time."
 msgstr[0] ""
 msgstr[1] ""
 
@@ -684,11 +698,6 @@ msgstr ""
 #. ROMs a scan no longer found
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 msgid "{missing} missing"
-msgstr ""
-
-#. How many games moved before one failed; {total} is always 2 or more
-#: apps/desktop/src/views/settings/StoragePanel.tsx
-msgid "{moved} of {total} games moved."
 msgstr ""
 
 #. A release streamed from another device, and that device's state
@@ -856,7 +865,7 @@ msgid "{plugin} couldn't start: {error}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
-msgid "{plugin} permissions"
+msgid "{plugin} details"
 msgstr ""
 
 #: apps/desktop/src/plugins/PluginProvider.tsx
@@ -951,6 +960,10 @@ msgstr ""
 #. Installed memory
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgid "{size} RAM"
+msgstr ""
+
+#: apps/desktop/src/views/settings/StoragePanel.tsx
+msgid "{size} to move, as one job you can follow or cancel in Activity."
 msgstr ""
 
 #. A rate: bytes per second
@@ -2002,6 +2015,11 @@ msgstr ""
 msgid "Always use the default location"
 msgstr ""
 
+#: apps/desktop/src/views/settings/AppearanceSettings.tsx
+msgctxt "accent colour"
+msgid "Amber"
+msgstr ""
+
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 msgid "An admin changes everything, other accounts included."
 msgstr ""
@@ -2457,7 +2475,7 @@ msgid "Backups couldn't be loaded"
 msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
-msgid "Backups never hold passwords or sign-ins, web games' browser data, logs, caches, or your games and their saves. Back up saves with the games or their launchers."
+msgid "Backups never hold passwords or sign-ins, web games' browser data, logs, caches, or your games and their saves."
 msgstr ""
 
 #. Search words for Settings → Backup, separated by commas
@@ -2515,6 +2533,11 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "bitrate, resolution, frame rate"
+msgstr ""
+
+#: apps/desktop/src/views/settings/AppearanceSettings.tsx
+msgctxt "accent colour"
+msgid "Blue"
 msgstr ""
 
 #. A game release's region
@@ -2615,6 +2638,14 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Can change {what}"
+msgstr ""
+
+#: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+msgid "Can't back up: the backup folder doesn't have enough free space."
+msgstr ""
+
+#: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+msgid "Can't back up: the backup folder isn't there."
 msgstr ""
 
 #: apps/desktop/src/api/streaming.ts
@@ -2784,6 +2815,22 @@ msgstr ""
 msgid "Caskade can't start this game: it has nothing to launch. Add a program or URI in Edit details → Actions."
 msgstr ""
 
+#: apps/desktop/src/views/settings/ResetDefaults.tsx
+msgid "Caskade can't tell what else would change. Reset also puts the rest of these settings back to their defaults."
+msgstr ""
+
+#: apps/desktop/src/views/settings/ResetDefaults.tsx
+msgid "Caskade can't tell what would change for some settings here, so those stay as they are."
+msgstr ""
+
+#: apps/desktop/src/views/settings/ResetDefaults.tsx
+msgid "Caskade can't tell what would change, so these settings can't be reset here."
+msgstr ""
+
+#: apps/desktop/src/views/settings/ResetDefaults.tsx
+msgid "Caskade can't tell what would change. Reset puts all of these settings back to their defaults."
+msgstr ""
+
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "Caskade checks the emulator is there when you save. Nothing here starts it."
 msgstr ""
@@ -2800,6 +2847,10 @@ msgstr ""
 msgid "Caskade couldn't check its version"
 msgstr ""
 
+#: apps/desktop/src/views/settings/ResetDefaults.tsx
+msgid "Caskade couldn't check what would change"
+msgstr ""
+
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Caskade couldn't check whether this device lets others play"
 msgstr ""
@@ -2810,6 +2861,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Caskade couldn't read this device's connections"
+msgstr ""
+
+#: apps/desktop/src/api/discovery.ts
+msgid "Caskade couldn't read this source."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
@@ -2862,6 +2917,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Caskade keeps streaming up to date when you say so, never in the middle of a game."
+msgstr ""
+
+#: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+msgid "Caskade keeps versions of each game's saves and sends the newest to your paired devices. Find them in Settings → Devices → Saves, and restore one from the game's page."
 msgstr ""
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
@@ -2918,6 +2977,7 @@ msgstr ""
 msgid "Caskade starts it where it is: nothing is copied, moved or installed. To install a game instead, use Install from file or drop it on the library."
 msgstr ""
 
+#: apps/desktop/src/views/settings/about/AboutPage.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Caskade updates"
@@ -3013,6 +3073,10 @@ msgstr ""
 #: apps/desktop/src/onboarding/Questions.tsx
 msgctxt "action"
 msgid "Check"
+msgstr ""
+
+#: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+msgid "Check again"
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
@@ -3236,6 +3300,10 @@ msgstr ""
 msgid "Choose the working folder"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Choose what syncs"
+msgstr ""
+
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Choose where Caskade installs games. Disconnected locations remain in your library."
 msgstr ""
@@ -3290,6 +3358,7 @@ msgstr ""
 #: apps/desktop/src/views/game/Screenshots.tsx
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
+#: apps/desktop/src/views/settings/PluginsSettings.tsx
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 msgid "Close"
@@ -3770,6 +3839,10 @@ msgctxt "keyboard key"
 msgid "CTRL K"
 msgstr ""
 
+#: apps/desktop/src/components/addons/AddonCatalogue.tsx
+msgid "Curated plugins and themes. Each says whether it fits this device."
+msgstr ""
+
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 msgid "Current match"
 msgstr ""
@@ -3780,6 +3853,10 @@ msgstr ""
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
 msgid "Cursor right"
+msgstr ""
+
+#: apps/desktop/src/views/settings/AppearanceSettings.tsx
+msgid "Custom accent colour"
 msgstr ""
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
@@ -3799,6 +3876,11 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
 msgid "Custom profile"
+msgstr ""
+
+#: apps/desktop/src/views/settings/AppearanceSettings.tsx
+msgctxt "accent colour"
+msgid "Cyan"
 msgstr ""
 
 #. How often a RomM server syncs
@@ -4021,6 +4103,7 @@ msgstr ""
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/views/library/GameActions.tsx
+#: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Details"
 msgstr ""
 
@@ -4756,6 +4839,11 @@ msgstr ""
 msgid "File types: {extensions}"
 msgstr ""
 
+#: apps/desktop/src/views/settings/PluginsSettings.tsx
+msgctxt "plugin access"
+msgid "files"
+msgstr ""
+
 #. A file type filter in the file dialog
 #: apps/desktop/src/components/pathBrowser/PathPicker.tsx
 msgid "Files"
@@ -4767,6 +4855,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "Files and folders this scanner always skips. Unticking a game in a review adds it here."
+msgstr ""
+
+#: apps/desktop/src/views/settings/StoragePanel.tsx
+msgid "Files on disk are kept. Add this folder again and Caskade finds them, as new games: what left the library doesn't come back."
 msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
@@ -5317,6 +5409,11 @@ msgstr ""
 #. The graphics card statistics card
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgid "GPU"
+msgstr ""
+
+#: apps/desktop/src/views/settings/AppearanceSettings.tsx
+msgctxt "accent colour"
+msgid "Green"
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryView.tsx
@@ -6033,6 +6130,11 @@ msgstr ""
 msgid "It becomes the offline copy of the web game you have at this address."
 msgstr ""
 
+#. Heading over an installed plugin's permissions
+#: apps/desktop/src/views/settings/PluginsSettings.tsx
+msgid "It can"
+msgstr ""
+
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
 msgid "It comes straight from their computer and installs like any other game; nothing is written until you say so."
 msgstr ""
@@ -6653,6 +6755,7 @@ msgstr ""
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
 #: apps/desktop/src/views/settings/about/AboutSettings.tsx
+#: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
 #: apps/desktop/src/views/StoreView.tsx
 msgid "Loading…"
 msgstr ""
@@ -7050,6 +7153,10 @@ msgid "Move"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+msgid "Move and remove"
+msgstr ""
+
+#: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Move completed. Library identity and playtime were preserved."
 msgstr ""
 
@@ -7073,6 +7180,12 @@ msgstr ""
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
 msgid "Move installed files…"
+msgstr ""
+
+#. Every game on a storage location moved to another, then the location removed
+#: apps/desktop/src/views/activity/jobLabels.ts
+msgctxt "job kind"
+msgid "Move location"
 msgstr ""
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
@@ -7164,6 +7277,11 @@ msgstr ""
 #. A background job's status
 #: apps/desktop/src/views/activity/JobCard.tsx
 msgid "Needs your attention"
+msgstr ""
+
+#: apps/desktop/src/views/settings/PluginsSettings.tsx
+msgctxt "plugin access"
+msgid "network"
 msgstr ""
 
 #. The network statistics card
@@ -7333,6 +7451,10 @@ msgstr ""
 msgid "No description yet."
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "No devices found on this network yet. Caskade keeps looking, and one that appears shows here. Otherwise, pair with a link below."
+msgstr ""
+
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "No devices found on this network yet. On another device running Caskade, turn on Let other devices stream games from this one, or add it by its address below."
 msgstr ""
@@ -7461,10 +7583,6 @@ msgstr ""
 msgid "No playtime is counted"
 msgstr ""
 
-#: apps/desktop/src/plugins/PluginViews.tsx
-msgid "No plugin has settings yet."
-msgstr ""
-
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "No plugins yet. Get one from the catalogue below, install one from a folder, or drop its folder here."
 msgstr ""
@@ -7539,6 +7657,10 @@ msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
 msgid "No strategy details are available yet."
+msgstr ""
+
+#: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
+msgid "No themes found. Rescan themes looks for them again."
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
@@ -7803,6 +7925,10 @@ msgstr ""
 msgid "Nothing left to show: they have all gone."
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "Nothing syncs until a device is paired. Then your library, play history and saves stay in step, unless you choose otherwise."
+msgstr ""
+
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 msgid "Nothing to launch"
 msgstr ""
@@ -8022,7 +8148,7 @@ msgid "Only a relay reaches {sharer}'s computer right now. The game waits for a 
 msgstr ""
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-msgid "Only an admin can let other devices stream from this one or change the stream quality. Anyone can pair this device with another to play its games."
+msgid "Only an admin can let other devices stream from this one. Anyone can pair this device with another to play its games, and set the stream quality here."
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
@@ -8213,6 +8339,11 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
 msgid "Or use a pairing link"
+msgstr ""
+
+#: apps/desktop/src/views/settings/AppearanceSettings.tsx
+msgctxt "accent colour"
+msgid "Orange"
 msgstr ""
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
@@ -8454,6 +8585,11 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
 msgid "Pin to the top"
+msgstr ""
+
+#: apps/desktop/src/views/settings/AppearanceSettings.tsx
+msgctxt "accent colour"
+msgid "Pink"
 msgstr ""
 
 #: apps/desktop/src/components/CollectionCard.tsx
@@ -8917,6 +9053,11 @@ msgstr ""
 msgid "Program, shortcut or URI"
 msgstr ""
 
+#: apps/desktop/src/views/settings/PluginsSettings.tsx
+msgctxt "plugin access"
+msgid "programs"
+msgstr ""
+
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 msgid "Programs by name"
 msgstr ""
@@ -9135,6 +9276,11 @@ msgstr ""
 
 #: apps/desktop/src/api/reply.ts
 msgid "Reconnect the drive or network share."
+msgstr ""
+
+#: apps/desktop/src/views/settings/AppearanceSettings.tsx
+msgctxt "accent colour"
+msgid "Red"
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
@@ -9449,7 +9595,7 @@ msgid "Remove PIN"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
-msgid "Remove this location from the library? Files on disk are kept unless you move them first."
+msgid "Remove this location from the library? Files on disk are kept."
 msgstr ""
 
 #. placeholder {0}: index + 1
@@ -9924,6 +10070,10 @@ msgstr ""
 msgid "Safe mode: Caskade started with the default theme and without your custom CSS."
 msgstr ""
 
+#: apps/desktop/src/views/settings/PluginsSettings.tsx
+msgid "Same access as the app"
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/SectionSync.tsx
 msgid "Same on your other devices"
 msgstr ""
@@ -10192,6 +10342,10 @@ msgstr ""
 msgid "Scanning installed launchers and game folders…"
 msgstr ""
 
+#: apps/desktop/src/api/discovery.ts
+msgid "Scanning this source was cancelled."
+msgstr ""
+
 #: apps/desktop/src/onboarding/run.ts
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
@@ -10329,6 +10483,10 @@ msgstr ""
 
 #: apps/desktop/src/components/addons/DeviceOffers.tsx
 msgid "See it"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+msgid "See what syncs"
 msgstr ""
 
 #. Starts choosing several games in the library
@@ -11681,6 +11839,10 @@ msgstr ""
 msgid "Themes"
 msgstr ""
 
+#: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
+msgid "Themes couldn't be loaded"
+msgstr ""
+
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
 msgid "Theming guide"
 msgstr ""
@@ -11694,7 +11856,19 @@ msgid "These belong to each device's own drives and hardware."
 msgstr ""
 
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+msgid "These changes aren't saved yet. Closing Caskade without saving loses them."
+msgstr ""
+
+#: apps/desktop/src/views/settings/unsavedChanges.tsx
 msgid "These changes aren't saved yet. Leaving this section without saving loses them."
+msgstr ""
+
+#: apps/desktop/src/views/settings/unsavedChanges.tsx
+msgid "These changes aren't saved yet. Switching accounts without saving loses them."
+msgstr ""
+
+#: apps/desktop/src/views/settings/unsavedChanges.tsx
+msgid "These changes aren't saved yet. Switching modes without saving loses them."
 msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
@@ -11839,6 +12013,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/useSettings.tsx
 msgid "This settings section is unavailable."
+msgstr ""
+
+#: apps/desktop/src/api/discovery.ts
+msgid "This source took too long to answer."
 msgstr ""
 
 #: apps/desktop/src/views/game/OwnedReleases.tsx
@@ -12395,6 +12573,10 @@ msgstr ""
 msgid "users, people, family, kids, children, parental controls, age ratings, PIN, permissions, admin"
 msgstr ""
 
+#: apps/desktop/src/views/settings/PluginsSettings.tsx
+msgid "Uses {what}"
+msgstr ""
+
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
 msgid "Using automatic locations."
 msgstr ""
@@ -12505,6 +12687,11 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "View: {title}"
+msgstr ""
+
+#: apps/desktop/src/views/settings/AppearanceSettings.tsx
+msgctxt "accent colour"
+msgid "Violet"
 msgstr ""
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
@@ -12692,6 +12879,10 @@ msgstr ""
 
 #: apps/desktop/src/views/activity/JobRecovery.tsx
 msgid "What went wrong"
+msgstr ""
+
+#: apps/desktop/src/views/settings/PluginsSettings.tsx
+msgid "What you've added to Caskade. Drop a plugin's folder here to install it."
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
@@ -12972,6 +13163,11 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
 msgid "Your image"
+msgstr ""
+
+#: apps/desktop/src/views/settings/PluginsSettings.tsx
+msgctxt "plugin access"
+msgid "your library"
 msgstr ""
 
 #: apps/desktop/src/components/collections/AddGamesDialog.tsx

@@ -58,7 +58,17 @@ it("swaps the core's compiled stylesheet in one link", async () => {
   expect(links()).toEqual([
     ["dev.example.neon", "caskade-theme://localhost/dev.example.neon/theme.css"],
   ]);
-  stylesheet.mockResolvedValueOnce({ status: "error", error: "theme dev.x isn't installed" });
+  stylesheet.mockResolvedValueOnce({
+    status: "error",
+    error: {
+      code: "missingFile",
+      summary: "That theme isn't installed.",
+      detail: null,
+      hints: [],
+      transient: false,
+      reference: "1a2b3c4d",
+    },
+  });
   await expect(applyTheme("dev.x")).rejects.toThrow("isn't installed");
   expect(document.head.querySelectorAll("link[data-cs-theme]")).toHaveLength(1);
 });

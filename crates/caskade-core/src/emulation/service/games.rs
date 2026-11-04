@@ -83,12 +83,10 @@ pub struct GameEmulation {
 impl EmulationService {
     /// An emulated library entry's settings and readiness.
     pub async fn game(&self, entry_id: &str) -> Result<GameEmulation> {
-        let entry = self.inner.store.get_entry(entry_id).await?.ok_or_else(|| {
-            Error::Invalid(crate::tr!(
-                "unknown library entry {entry}",
-                entry = entry_id
-            ))
-        })?;
+        let entry =
+            self.inner.store.get_entry(entry_id).await?.ok_or_else(|| {
+                Error::Invalid(crate::tr!("This game is no longer in the library."))
+            })?;
         self.game_of(&entry).await
     }
 
@@ -304,12 +302,10 @@ impl EmulationService {
         target: EmulatorTarget,
         args: ArgsOverride,
     ) -> Result<GameEmulation> {
-        let mut entry = self.inner.store.get_entry(entry_id).await?.ok_or_else(|| {
-            Error::Invalid(crate::tr!(
-                "unknown library entry {entry}",
-                entry = entry_id
-            ))
-        })?;
+        let mut entry =
+            self.inner.store.get_entry(entry_id).await?.ok_or_else(|| {
+                Error::Invalid(crate::tr!("This game is no longer in the library."))
+            })?;
         let Some(LaunchSpec::Emulator {
             platform_id,
             target: current,
@@ -330,8 +326,7 @@ impl EmulationService {
             }) =>
             {
                 return Err(Error::Invalid(crate::tr!(
-                    "that profile doesn't run {platform}",
-                    platform = platform_id
+                    "That profile doesn't run this platform."
                 )));
             }
             EmulatorTarget::AskProfile { emulator_id }
@@ -340,8 +335,7 @@ impl EmulationService {
                     .any(|profile| profile.emulator_id == *emulator_id) =>
             {
                 return Err(Error::Invalid(crate::tr!(
-                    "that emulator has no profile for {platform}",
-                    platform = platform_id
+                    "That emulator has no profile for this platform."
                 )));
             }
             _ => {}

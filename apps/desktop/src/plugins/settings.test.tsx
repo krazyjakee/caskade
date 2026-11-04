@@ -180,6 +180,34 @@ it("reports a refused schema without hiding the plugin, and skips disabled plugi
   expect(screen.queryByRole("region", { name: "Disabled plugin" })).toBeNull();
 });
 
+it("gives each settings page one Settings card, and shows nothing when none has settings", async () => {
+  const schemaOnly = backend([stats]);
+  mount(schemaOnly, definePlugin({ activate() {} }));
+  await screen.findByRole("switch", { name: "Show hours" });
+  const sections = screen.getAllByRole("region", { name: "Playtime stats" });
+  expect(sections.map((section) => section.getAttribute("data-cs"))).toEqual(["settings-section"]);
+  cleanup();
+
+  const ownPage = backend([stats], [{ slot: "settings.pages", id: "page", title: "Stats" }]);
+  mount(
+    ownPage,
+    definePlugin({
+      activate(ctx) {
+        ctx.slots.register("settings.pages", { id: "page", title: "Stats", component: Page });
+      },
+    }),
+  );
+  await screen.findByText("Limit 5");
+  expect(screen.getByRole("region", { name: "Playtime stats" }).getAttribute("data-cs")).toBe(
+    "settings-section",
+  );
+  cleanup();
+
+  mount(backend([{ ...stats, hasSettings: false }]), definePlugin({ activate() {} }));
+  await waitFor(() => expect(document.body.textContent).toBe(""));
+  expect(screen.queryByRole("region")).toBeNull();
+});
+
 it("delivers settings.changed only for the plugin's own section", async () => {
   const api = backend([stats]);
   const heard: unknown[] = [];

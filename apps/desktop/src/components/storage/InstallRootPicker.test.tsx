@@ -40,6 +40,7 @@ function api(roots: RootSummary[], alwaysUseDefault = false): StorageApi {
     edit: vi.fn(),
     setDefault: vi.fn(),
     remove: vi.fn(),
+    moveAndRemove: vi.fn(),
     chooseDirectory: vi.fn(),
     move: vi.fn(),
     uninstall: vi.fn(),

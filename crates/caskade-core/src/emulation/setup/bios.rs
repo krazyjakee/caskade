@@ -45,12 +45,7 @@ impl EmulatorSetup {
             .await?
             .into_iter()
             .find(|view| view.platform.id == platform)
-            .ok_or_else(|| {
-                Error::Invalid(crate::tr!(
-                    "unknown platform {platform}",
-                    platform = platform
-                ))
-            })?;
+            .ok_or_else(|| Error::Invalid(crate::tr!("Caskade doesn't know this platform.")))?;
         let default = view.settings.default.clone().ok_or_else(|| {
             Error::Invalid(crate::tr!(
                 "{platform} has no emulator yet",

@@ -14,6 +14,11 @@ const kinds: Record<string, MessageDescriptor> = {
     context: "job kind",
     comment: "A game copied from another of the user's devices",
   }),
+  moveLocation: msg({
+    message: "Move location",
+    context: "job kind",
+    comment: "Every game on a storage location moved to another, then the location removed",
+  }),
 };
 
 const job = msg({

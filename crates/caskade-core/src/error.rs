@@ -356,7 +356,12 @@ fn classify(error: &(dyn std::error::Error + 'static)) -> Option<Found> {
             match error {
                 // The store error underneath says more.
                 S::Store(_) => None,
-                S::Json(_) | S::Stored | S::Migration => found(Corrupt, Summary::Own),
+                S::Json(_) | S::Stored | S::Migration => found(
+                    Corrupt,
+                    Summary::Text(crate::tr!(
+                        "These settings can't be read; they may be damaged."
+                    )),
+                ),
                 S::Version => newer(crate::tr!(
                     "These settings were saved by a newer version of Caskade."
                 )),
@@ -366,8 +371,22 @@ fn classify(error: &(dyn std::error::Error + 'static)) -> Option<Found> {
                         "These settings changed elsewhere. Reload them and try again."
                     )),
                 ),
-                S::Unknown(_) | S::Validation { .. } | S::Limit => found(Invalid, Summary::Own),
-                S::Registration(_) | S::Internal => found(Internal, Summary::Own),
+                // The section's name and the fields stay in the detail.
+                S::Unknown(_) => found(
+                    Unavailable,
+                    Summary::Text(crate::tr!("These settings aren't available right now.")),
+                ),
+                S::Validation { .. } => found(
+                    Invalid,
+                    Summary::Text(crate::tr!(
+                        "Some of these settings aren't valid. Check them and try again."
+                    )),
+                ),
+                S::Limit => found(
+                    Invalid,
+                    Summary::Text(crate::tr!("These settings are too large to save.")),
+                ),
+                S::Registration(_) | S::Internal => found(Internal, Summary::Plain),
             }
         } else if let Some(error) = error.downcast_ref::<crate::romm::RommError>() {
             use crate::romm::RommError as R;

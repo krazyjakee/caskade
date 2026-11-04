@@ -30,7 +30,7 @@ msgstr ""
 
 #: crates/caskade-core/src/accounts/mod.rs
 #: crates/caskade-core/src/db/mod.rs
-msgid "account {id} was not found"
+msgid "This account no longer exists."
 msgstr ""
 
 #: crates/caskade-core/src/accounts/mod.rs
@@ -38,7 +38,7 @@ msgid "an account name is 1 to {max} characters"
 msgstr ""
 
 #: crates/caskade-core/src/accounts/mod.rs
-msgid "unknown avatar {avatar}"
+msgid "Choose one of the avatars Caskade offers."
 msgstr ""
 
 #: crates/caskade-core/src/accounts/mod.rs
@@ -46,7 +46,7 @@ msgid "an age limit is at most {max}"
 msgstr ""
 
 #: crates/caskade-core/src/accounts/mod.rs
-msgid "unknown settings section {unknown}"
+msgid "One of the chosen settings sections doesn't exist."
 msgstr ""
 
 #: crates/caskade-core/src/accounts/permission.rs
@@ -671,29 +671,30 @@ msgid "only a game with something to start joins another"
 msgstr ""
 
 #: crates/caskade-core/src/db/mod.rs
-msgid "collection {id} was not found"
+msgid "This collection no longer exists."
 msgstr ""
 
 #: crates/caskade-core/src/db/mod.rs
-#: apps/desktop/src-tauri/src/commands/achievements.rs
-#: apps/desktop/src-tauri/src/commands/actions.rs
-msgid "entry {id} was not found"
+#: crates/caskade-core/src/metadata/page.rs
+msgid "This copy of the game is no longer in the library."
 msgstr ""
 
 #: crates/caskade-core/src/db/mod.rs
-msgid "game {id} was not found"
+#: crates/caskade-core/src/emulation/service/games.rs
+#: crates/caskade-core/src/metadata/page.rs
+msgid "This game is no longer in the library."
 msgstr ""
 
 #: crates/caskade-core/src/db/mod.rs
-msgid "session {id} was not found"
+msgid "This play session no longer exists."
 msgstr ""
 
 #: crates/caskade-core/src/db/mod.rs
-msgid "storage root {id} was not found"
+msgid "This storage location no longer exists."
 msgstr ""
 
 #: crates/caskade-core/src/db/mod.rs
-msgid "{entity} {id} was not found"
+msgid "This {entity} no longer exists."
 msgstr ""
 
 #: crates/caskade-core/src/db/plugins.rs
@@ -745,7 +746,7 @@ msgid "a scope can have at most {count} scripts"
 msgstr ""
 
 #: crates/caskade-core/src/db/scripts.rs
-msgid "emulator profile {id} was not found"
+msgid "This emulator profile no longer exists."
 msgstr ""
 
 #: crates/caskade-core/src/db/scripts.rs
@@ -888,8 +889,7 @@ msgstr ""
 #: crates/caskade-core/src/emulation/catalog.rs
 #: crates/caskade-core/src/emulation/service/emulators.rs
 #: crates/caskade-core/src/emulation/validate.rs
-#: crates/caskade-core/src/launch/emulator.rs
-msgid "{emulator} has no profile {profile}"
+msgid "{emulator} no longer has this profile."
 msgstr ""
 
 #: crates/caskade-core/src/emulation/config.rs
@@ -937,7 +937,7 @@ msgid "scanner profile has no compatible platforms"
 msgstr ""
 
 #: crates/caskade-core/src/emulation/scan/pipeline.rs
-msgid "scanner platform {platform} is not compatible with its profile"
+msgid "This scanner's platform doesn't fit its profile."
 msgstr ""
 
 #: crates/caskade-core/src/emulation/scan/pipeline.rs
@@ -1011,7 +1011,8 @@ msgstr ""
 
 #: crates/caskade-core/src/emulation/scanners/import.rs
 #: crates/caskade-core/src/emulation/scanners/jobs.rs
-msgid "no ROM scanner {scanner}"
+#: apps/desktop/src-tauri/src/commands/rom_scanners.rs
+msgid "This ROM scanner no longer exists."
 msgstr ""
 
 #: crates/caskade-core/src/emulation/scanners/import.rs
@@ -1019,7 +1020,8 @@ msgid "{game}: skipped by {by}: {reason}"
 msgstr ""
 
 #: crates/caskade-core/src/emulation/scanners/jobs.rs
-msgid "no ROM scan {job}"
+#: apps/desktop/src-tauri/src/commands/rom_scanners.rs
+msgid "This ROM scan is no longer available."
 msgstr ""
 
 #: crates/caskade-core/src/emulation/scanners/jobs.rs
@@ -1028,6 +1030,10 @@ msgstr ""
 
 #: crates/caskade-core/src/emulation/scanners/jobs.rs
 msgid "the scan changed; review the latest results"
+msgstr ""
+
+#: crates/caskade-core/src/emulation/scanners/jobs.rs
+msgid "no ROM scanner {scanner}"
 msgstr ""
 
 #: crates/caskade-core/src/emulation/scanners/mod.rs
@@ -1043,7 +1049,7 @@ msgid "{emulator} runs as a Flatpak and can't see this folder by itself. Caskade
 msgstr ""
 
 #: crates/caskade-core/src/emulation/scanners/mod.rs
-msgid "the profile `{profile}` doesn't run platform `{platform}`"
+msgid "The profile {profile} doesn't run this scanner's platform."
 msgstr ""
 
 #: crates/caskade-core/src/emulation/scanners/mod.rs
@@ -1072,7 +1078,7 @@ msgstr ""
 
 #: crates/caskade-core/src/emulation/service/detection.rs
 #: apps/desktop/src-tauri/src/commands/emulation.rs
-msgid "unknown detection {id}"
+msgid "This detection is no longer available. Run it again."
 msgstr ""
 
 #: crates/caskade-core/src/emulation/service/detection.rs
@@ -1089,12 +1095,9 @@ msgid "a built-in profile needs an emulator definition"
 msgstr ""
 
 #: crates/caskade-core/src/emulation/service/emulators.rs
+#: crates/caskade-core/src/emulation/setup/jobs.rs
 #: crates/caskade-core/src/emulation/validate.rs
-msgid "unknown emulator definition {definition}"
-msgstr ""
-
-#: crates/caskade-core/src/emulation/service/games.rs
-msgid "unknown library entry {entry}"
+msgid "Caskade doesn't know this emulator."
 msgstr ""
 
 #: crates/caskade-core/src/emulation/service/games.rs
@@ -1131,11 +1134,11 @@ msgstr ""
 
 #: crates/caskade-core/src/emulation/service/games.rs
 #: crates/caskade-core/src/emulation/service/platforms.rs
-msgid "that profile doesn't run {platform}"
+msgid "That profile doesn't run this platform."
 msgstr ""
 
 #: crates/caskade-core/src/emulation/service/games.rs
-msgid "that emulator has no profile for {platform}"
+msgid "That emulator has no profile for this platform."
 msgstr ""
 
 #: crates/caskade-core/src/emulation/service/mod.rs
@@ -1204,8 +1207,7 @@ msgstr ""
 
 #: crates/caskade-core/src/emulation/service/platforms.rs
 #: crates/caskade-core/src/emulation/setup/bios.rs
-#: crates/caskade-core/src/romm/mod.rs
-msgid "unknown platform {platform}"
+msgid "Caskade doesn't know this platform."
 msgstr ""
 
 #: crates/caskade-core/src/emulation/setup/bios.rs
@@ -1221,15 +1223,11 @@ msgid "Couldn't prepare {emulator}'s settings: {error}"
 msgstr ""
 
 #: crates/caskade-core/src/emulation/setup/jobs.rs
-msgid "unknown emulator install {id}"
+msgid "This emulator install is no longer listed."
 msgstr ""
 
 #: crates/caskade-core/src/emulation/setup/jobs.rs
-msgid "nothing to install for {platform} on this system"
-msgstr ""
-
-#: crates/caskade-core/src/emulation/setup/jobs.rs
-msgid "unknown emulator {emulator}"
+msgid "Caskade has nothing to install for this platform on this system."
 msgstr ""
 
 #: crates/caskade-core/src/emulation/setup/jobs.rs
@@ -1273,7 +1271,7 @@ msgid "a game is running in this emulator; update it after the game"
 msgstr ""
 
 #: crates/caskade-core/src/emulation/setup/updates.rs
-msgid "{emulator} isn't installed by Caskade"
+msgid "Caskade didn't install this emulator."
 msgstr ""
 
 #: crates/caskade-core/src/emulation/validate.rs
@@ -1328,7 +1326,7 @@ msgid "app bundle"
 msgstr ""
 
 #: crates/caskade-core/src/emulation/validate.rs
-msgid "profile {profile} appears twice"
+msgid "This emulator lists the same profile twice."
 msgstr ""
 
 #: crates/caskade-core/src/emulation/validate.rs
@@ -1357,8 +1355,7 @@ msgid "environment key"
 msgstr ""
 
 #: crates/caskade-core/src/emulation/validate.rs
-#: crates/caskade-core/src/model/validation.rs
-msgid "environment key contains ="
+msgid "An environment variable's name can't contain =."
 msgstr ""
 
 #: crates/caskade-core/src/emulation/validate.rs
@@ -1427,11 +1424,27 @@ msgid "The game didn't start: no game process appeared in time."
 msgstr ""
 
 #: crates/caskade-core/src/error.rs
+msgid "These settings can't be read; they may be damaged."
+msgstr ""
+
+#: crates/caskade-core/src/error.rs
 msgid "These settings were saved by a newer version of Caskade."
 msgstr ""
 
 #: crates/caskade-core/src/error.rs
 msgid "These settings changed elsewhere. Reload them and try again."
+msgstr ""
+
+#: crates/caskade-core/src/error.rs
+msgid "These settings aren't available right now."
+msgstr ""
+
+#: crates/caskade-core/src/error.rs
+msgid "Some of these settings aren't valid. Check them and try again."
+msgstr ""
+
+#: crates/caskade-core/src/error.rs
+msgid "These settings are too large to save."
 msgstr ""
 
 #: crates/caskade-core/src/error.rs
@@ -1523,6 +1536,7 @@ msgid "This part of Caskade isn't available right now."
 msgstr ""
 
 #: crates/caskade-core/src/error.rs
+#: apps/desktop/src-tauri/src/error.rs
 msgid "Caskade ran into an unexpected problem."
 msgstr ""
 
@@ -1810,6 +1824,36 @@ msgstr ""
 msgid "unknown job {id}"
 msgstr ""
 
+#: crates/caskade-core/src/install/move_location.rs
+msgid "One game moved to {to}."
+msgid_plural "{n} games moved to {to}."
+msgstr[0] ""
+msgstr[1] ""
+
+#: crates/caskade-core/src/install/move_location.rs
+msgid "these games are already moving; follow them in Activity"
+msgstr ""
+
+#: crates/caskade-core/src/install/move_location.rs
+msgid "Games on {location}"
+msgstr ""
+
+#: crates/caskade-core/src/install/move_location.rs
+msgid "Moving “{title}” ({number} of {count})"
+msgstr ""
+
+#: crates/caskade-core/src/install/move_location.rs
+msgid "{moved} “{title}” wasn't moved: {reason} {location} was kept."
+msgstr ""
+
+#: crates/caskade-core/src/install/move_location.rs
+msgid "{moved} {location} wasn't removed: {reason}"
+msgstr ""
+
+#: crates/caskade-core/src/install/move_location.rs
+msgid "Cancelled. {moved} {location} was kept."
+msgstr ""
+
 #: crates/caskade-core/src/install/operations.rs
 msgid "question changed; refresh the job before answering"
 msgstr ""
@@ -1876,6 +1920,10 @@ msgstr ""
 
 #: crates/caskade-core/src/install/operations.rs
 msgid "Moving game"
+msgstr ""
+
+#: crates/caskade-core/src/install/operations.rs
+msgid "Moving games"
 msgstr ""
 
 #: crates/caskade-core/src/install/operations.rs
@@ -2262,6 +2310,10 @@ msgstr ""
 msgid "the emulator's definition is not available"
 msgstr ""
 
+#: crates/caskade-core/src/launch/emulator.rs
+msgid "{emulator} has no profile {profile}"
+msgstr ""
+
 #: crates/caskade-core/src/launch/resolve.rs
 msgid "entry has no launch specification"
 msgstr ""
@@ -2520,14 +2572,6 @@ msgid "Matching games with IGDB · {done}/{total} ({percent}%)"
 msgstr ""
 
 #: crates/caskade-core/src/metadata/page.rs
-msgid "entry {entry} was not found"
-msgstr ""
-
-#: crates/caskade-core/src/metadata/page.rs
-msgid "game {game} was not found"
-msgstr ""
-
-#: crates/caskade-core/src/metadata/page.rs
 msgid "IGDB has no game {id}"
 msgstr ""
 
@@ -2601,6 +2645,10 @@ msgstr ""
 
 #: crates/caskade-core/src/model/validation.rs
 msgid "launch argument/environment limit"
+msgstr ""
+
+#: crates/caskade-core/src/model/validation.rs
+msgid "environment key contains ="
 msgstr ""
 
 #: crates/caskade-core/src/model/validation.rs
@@ -2919,11 +2967,15 @@ msgid "can't unpack the download: {error}"
 msgstr ""
 
 #: crates/caskade-core/src/romm/mod.rs
-msgid "there is no RomM server {server}"
+msgid "This RomM server is no longer set up."
 msgstr ""
 
 #: crates/caskade-core/src/romm/mod.rs
-msgid "two servers have the id {server}"
+msgid "Two RomM servers are set up as one. Remove one of them."
+msgstr ""
+
+#: crates/caskade-core/src/romm/mod.rs
+msgid "Caskade doesn't know one of the platforms chosen for this server."
 msgstr ""
 
 #: crates/caskade-core/src/romm/mod.rs
@@ -3717,6 +3769,27 @@ msgid "unsupported root catalogue"
 msgstr ""
 
 #: crates/caskade-core/src/storage/moving.rs
+msgid "choose a different storage location"
+msgstr ""
+
+#: crates/caskade-core/src/storage/moving.rs
+#: crates/caskade-core/src/storage/service.rs
+msgid "unknown storage location"
+msgstr ""
+
+#: crates/caskade-core/src/storage/moving.rs
+msgid "“{title}” can't move: {reason}"
+msgstr ""
+
+#: crates/caskade-core/src/storage/moving.rs
+msgid "“{title}” is running. Close it, then try again."
+msgstr ""
+
+#: crates/caskade-core/src/storage/moving.rs
+msgid "not enough free space in the target location"
+msgstr ""
+
+#: crates/caskade-core/src/storage/moving.rs
 msgid "invalid move job id"
 msgstr ""
 
@@ -3726,10 +3799,6 @@ msgstr ""
 
 #: crates/caskade-core/src/storage/moving.rs
 msgid "only Caskade-managed installations can move"
-msgstr ""
-
-#: crates/caskade-core/src/storage/moving.rs
-msgid "choose a different storage location"
 msgstr ""
 
 #: crates/caskade-core/src/storage/moving.rs
@@ -3746,10 +3815,6 @@ msgstr ""
 
 #: crates/caskade-core/src/storage/moving.rs
 msgid "the target cannot hold this game's prefix links; choose a location with symlink support"
-msgstr ""
-
-#: crates/caskade-core/src/storage/moving.rs
-msgid "not enough free space in the target location"
 msgstr ""
 
 #: crates/caskade-core/src/storage/moving.rs
@@ -3833,7 +3898,7 @@ msgid "add a storage location in Settings before installing"
 msgstr ""
 
 #: crates/caskade-core/src/storage/service.rs
-msgid "unknown storage location"
+msgid "it has games that aren't moved yet"
 msgstr ""
 
 #: crates/caskade-core/src/storage/service.rs
@@ -4295,15 +4360,15 @@ msgid "This sample couldn't be read."
 msgstr ""
 
 #: crates/caskade-core/src/themes.rs
-msgid "theme {id} isn't installed"
+msgid "This theme isn't installed."
 msgstr ""
 
 #: crates/caskade-core/src/themes.rs
-msgid "theme {id} can't be applied: {problem}"
+msgid "The theme {name} can't be applied: {problem}"
 msgstr ""
 
 #: crates/caskade-core/src/themes.rs
-msgid "theme {id} can't be applied: it is invalid"
+msgid "The theme {name} can't be applied: it is invalid"
 msgstr ""
 
 #: crates/caskade-core/src/transfer/mod.rs
@@ -4426,13 +4491,18 @@ msgstr ""
 msgid "choose the game to link"
 msgstr ""
 
+#: apps/desktop/src-tauri/src/commands/achievements.rs
+#: apps/desktop/src-tauri/src/commands/actions.rs
+msgid "entry {id} was not found"
+msgstr ""
+
 #: apps/desktop/src-tauri/src/commands/addon_packages.rs
 #: apps/desktop/src-tauri/src/commands/addons.rs
 msgid "the add-on catalogue is unavailable"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "{id} isn't in the catalogue"
+msgid "This add-on isn't in the catalogue any more."
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/addon_packages.rs
@@ -4468,7 +4538,7 @@ msgid "only themes Caskade installed can be removed"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "{id} isn't installed"
+msgid "This add-on isn't installed."
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs
@@ -4589,7 +4659,7 @@ msgid "the game isn't installed on this computer in a folder that can be copied"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/emulation.rs
-msgid "unknown emulator {id}"
+msgid "This emulator no longer exists."
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/emulation.rs
@@ -4689,16 +4759,28 @@ msgstr ""
 msgid "Devices aren't ready on this device yet."
 msgstr ""
 
+#: apps/desktop/src-tauri/src/commands/plugins.rs
+msgid "This plugin isn't installed any more."
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/plugins.rs
+msgid "This isn't a valid plugin. The details say what's wrong."
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/plugins.rs
+msgid "This plugin is turned off."
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/plugins.rs
+msgid "This plugin has nothing to run."
+msgstr ""
+
+#: apps/desktop/src-tauri/src/commands/plugins.rs
+msgid "This plugin ran into a problem. The details say what."
+msgstr ""
+
 #: apps/desktop/src-tauri/src/commands/remote_play.rs
 msgid "it didn't start on that device"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/rom_scanners.rs
-msgid "unknown ROM scanner {id}"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/rom_scanners.rs
-msgid "unknown ROM scan {id}"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/romm.rs
@@ -4854,10 +4936,6 @@ msgid "Updating library"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Scan cancelled"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
 msgid "Choose between 1 and 1000 review items."
 msgstr ""
 
@@ -4871,6 +4949,10 @@ msgstr ""
 
 #: apps/desktop/src-tauri/src/discovery/mod.rs
 msgid "Some entries could not be imported; the review list was retained. Check the library before retrying."
+msgstr ""
+
+#: apps/desktop/src-tauri/src/discovery/mod.rs
+msgid "Scan cancelled"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/discovery/mod.rs

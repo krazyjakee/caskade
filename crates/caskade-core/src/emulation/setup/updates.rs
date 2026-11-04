@@ -148,12 +148,7 @@ impl EmulatorSetup {
             .store
             .managed_emulator(emulator_id)
             .await?
-            .ok_or_else(|| {
-                Error::Invalid(crate::tr!(
-                    "{emulator} isn't installed by Caskade",
-                    emulator = emulator_id
-                ))
-            })
+            .ok_or_else(|| Error::Invalid(crate::tr!("Caskade didn't install this emulator.")))
     }
 
     async fn update_settings(&self) -> UpdateSettings {

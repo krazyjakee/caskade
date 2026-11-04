@@ -369,3 +369,60 @@ async fn appearance_accent_is_a_hex_colour_or_the_theme_default() {
             .is_ok()
     );
 }
+
+/// Stream quality has its own call (#66): anyone may make it, hosting stays
+/// in the same section, and what was saved before stays.
+#[tokio::test]
+async fn stream_quality_changes_alone_and_keeps_a_value_saved_before() {
+    let store = LibraryStore::in_memory().await.unwrap();
+    let temp = tempfile::tempdir().unwrap();
+    let service = SettingsService::new(store);
+    service
+        .register_core(&crate::AppPaths::under(temp.path()))
+        .unwrap();
+    service
+        .set(
+            "core.streaming",
+            json!({
+                "hosting": true,
+                "addresses": ["10.0.0.7"],
+                "quality": {"resolution": "1920x1080", "fps": 60, "bitrateKbps": null}
+            }),
+            None,
+        )
+        .await
+        .unwrap();
+    let read = || service.read_or_default::<StreamingSettings>("core.streaming");
+    let saved = read().await.quality;
+    assert_eq!(saved.resolution.as_deref(), Some("1920x1080"));
+    assert_eq!(saved.fps, Some(60));
+
+    let snapshot = service
+        .set_stream_quality(&StreamQuality {
+            fps: Some(30),
+            ..saved
+        })
+        .await
+        .unwrap();
+    assert_eq!(snapshot.value["quality"]["fps"], 30);
+    let settings = read().await;
+    assert_eq!(settings.quality.fps, Some(30));
+    assert_eq!(
+        settings.quality.resolution.as_deref(),
+        Some("1920x1080"),
+        "the rest of the quality stays"
+    );
+    assert!(settings.hosting, "hosting isn't quality's to change");
+    assert_eq!(settings.addresses, ["10.0.0.7"]);
+
+    // The section's schema still checks it.
+    let wrong = StreamQuality {
+        resolution: Some("huge".into()),
+        ..StreamQuality::default()
+    };
+    assert!(matches!(
+        service.set_stream_quality(&wrong).await,
+        Err(SettingsError::Validation { .. })
+    ));
+    assert_eq!(read().await.quality.fps, Some(30));
+}

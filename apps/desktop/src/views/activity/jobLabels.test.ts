@@ -4,8 +4,8 @@ import { jobKind, jobPhase } from "./jobLabels";
 
 it("names the core's job kinds and nothing else", () => {
   expect(
-    ["install", "uninstall", "move", "fetch", "verify", "update", "peerCopy"].map((kind) =>
-      i18n._(jobKind(kind)),
+    ["install", "uninstall", "move", "fetch", "verify", "update", "peerCopy", "moveLocation"].map(
+      (kind) => i18n._(jobKind(kind)),
     ),
   ).toEqual([
     "Install",
@@ -15,6 +15,7 @@ it("names the core's job kinds and nothing else", () => {
     "Verify",
     "Update",
     "Copy from another device",
+    "Move location",
   ]);
   // A plugin's own kind, or an inherited name: the generic one.
   for (const kind of ["", "plugin.sync", "toString"]) expect(i18n._(jobKind(kind))).toBe("Job");

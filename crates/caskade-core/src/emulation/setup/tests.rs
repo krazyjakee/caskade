@@ -264,6 +264,26 @@ async fn one_click_installs_configures_and_updates_keeping_the_users_files() {
 }
 
 #[tokio::test]
+async fn refusals_name_nothing_by_id() {
+    let server = MockServer::start().await;
+    let f = fixture(&server).await;
+    let unknown = f.setup.install("def-1").await.expect_err("refused");
+    let job = f.setup.cancel("job-1").expect_err("refused");
+    let managed = f.setup.check("emu-1").await.expect_err("refused");
+    let platform = f.setup.install_for("plat-1").await.expect_err("refused");
+    for (error, id) in [
+        (unknown, "def-1"),
+        (job, "job-1"),
+        (managed, "emu-1"),
+        (platform, "plat-1"),
+    ] {
+        let report = crate::error::ErrorReport::from(error);
+        assert_eq!(report.code, crate::error::ErrorCode::Invalid, "{report:?}");
+        assert!(!report.summary.contains(id), "{report:?}");
+    }
+}
+
+#[tokio::test]
 async fn a_release_without_this_systems_file_fails_the_job() {
     let server = MockServer::start().await;
     release(&server, "v1.0", "1.0").await;

@@ -15,6 +15,7 @@ use caskade_core::{
     bus::Bus,
     db::LibraryStore,
     install::InstallOptions,
+    settings::SettingsService,
 };
 use serde_json::{Value, json};
 use std::{
@@ -108,6 +109,102 @@ fn every_registered_command_has_a_permission_group() {
     );
 }
 
+/// Stream quality is every account's, for its own device; hosting and the
+/// rest of `core.streaming` stay an admin's (#66). The real commands, behind
+/// the gate.
+#[test]
+fn a_standard_account_changes_stream_quality_and_is_refused_hosting() {
+    let (store, accounts, _admin, kid) = setup();
+    let temp = tempfile::tempdir().unwrap();
+    let settings = SettingsService::new(store);
+    settings
+        .register_core(&caskade_core::AppPaths::under(temp.path()))
+        .unwrap();
+    let app = mock_builder()
+        .manage(accounts.clone())
+        .manage(settings.clone())
+        .invoke_handler(gate(tauri::generate_handler![
+            crate::commands::settings::settings_set,
+            crate::commands::streaming::streaming_set_quality,
+        ]))
+        .build(mock_context(noop_assets()))
+        .unwrap();
+    let window = tauri::WebviewWindowBuilder::new(&app, "quality", Default::default())
+        .build()
+        .unwrap();
+    block(accounts.sign_in(&kid.id, None)).unwrap();
+
+    let quality = json!({"quality": {"resolution": "1280x720", "fps": 30, "bitrateKbps": 5000}});
+    let saved = invoke(&window, "streaming_set_quality", quality.clone()).unwrap();
+    assert_eq!(saved["value"]["quality"]["fps"], 30);
+    let streaming: caskade_core::settings::StreamingSettings =
+        block(settings.read_or_default("core.streaming"));
+    assert_eq!(streaming.quality.bitrate_kbps, Some(5000));
+    assert!(!streaming.hosting);
+
+    forbidden(invoke(
+        &window,
+        "streaming_set_hosting",
+        json!({"on": true}),
+    ));
+    forbidden(invoke(&window, "streaming_use_existing", json!({})));
+    forbidden(invoke(
+        &window,
+        "settings_set",
+        json!({"namespace": "core.streaming", "value": {"hosting": true}, "expectedRevision": null}),
+    ));
+
+    accounts.sign_out();
+    forbidden(invoke(&window, "streaming_set_quality", quality));
+}
+
+#[test]
+fn moving_a_locations_games_needs_both_storage_and_installs() {
+    let (store, accounts, admin, kid) = setup();
+    let temp = tempfile::tempdir().unwrap();
+    let paths = caskade_core::AppPaths::under(temp.path());
+    let settings = SettingsService::new(store.clone());
+    settings.register_core(&paths).unwrap();
+    let launch = caskade_core::launch::LaunchService::new(store.clone());
+    let storage = caskade_core::storage::StorageService::new(store.clone(), settings, launch)
+        .unwrap()
+        .with_paths(paths);
+    let install = InstallService::new(store, Bus::default(), InstallOptions::default());
+    let app = mock_builder()
+        .manage(accounts.clone())
+        .manage(storage)
+        .manage(install)
+        .invoke_handler(gate(tauri::generate_handler![
+            crate::commands::storage::storage_move_and_remove,
+        ]))
+        .build(mock_context(noop_assets()))
+        .unwrap();
+    let window = tauri::WebviewWindowBuilder::new(&app, "location", Default::default())
+        .build()
+        .unwrap();
+    let call = || {
+        invoke(
+            &window,
+            "storage_move_and_remove",
+            json!({"id": "a", "targetId": "b"}),
+        )
+    };
+    let granted = |settings: &[&str], install| Permissions {
+        settings: settings
+            .iter()
+            .map(|section| (*section).to_owned())
+            .collect(),
+        install,
+    };
+    grant(&accounts, &admin, &kid, granted(&["storage"], false));
+    forbidden(call());
+    grant(&accounts, &admin, &kid, granted(&[], true));
+    forbidden(call());
+    // Past both: the core answers that `a` is no location.
+    grant(&accounts, &admin, &kid, granted(&["storage"], true));
+    assert_eq!(call().unwrap_err()["code"], "invalid");
+}
+
 #[test]
 fn each_group_is_allowed_for_admins_refused_without_it_and_allowed_once_granted() {
     let (store, accounts, admin, kid) = setup();
@@ -171,6 +268,7 @@ fn each_group_is_allowed_for_admins_refused_without_it_and_allowed_once_granted(
                 ("settings_set", set("storage.roots")),
                 ("storage_add", json!({})),
                 ("storage_remove", json!({})),
+                ("storage_move_and_remove", json!({})),
             ],
         ),
         ("installer", vec![("settings_set", set("core.installer"))]),
@@ -208,6 +306,7 @@ fn each_group_is_allowed_for_admins_refused_without_it_and_allowed_once_granted(
         ("game_update_install", json!({})),
         ("game_update_before_play", json!({})),
         ("set_game_favorite", json!({})),
+        ("streaming_set_quality", json!({})),
     ];
     let ran = json!("ran");
 

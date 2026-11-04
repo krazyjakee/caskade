@@ -1,21 +1,23 @@
 //! Settings → Installer's magnet links and torrent files (#159): whether
 //! the OS opens them with Caskade (`torrent_links.rs`).
+use crate::error::{CommandError, internal};
 use crate::torrent_links::{self, TorrentLinks};
 
 /// Runs `work`, which may wait on `xdg-mime` or the registry, off the
 /// async runtime.
 async fn blocking<T: Send + 'static>(
     work: impl FnOnce() -> Result<T, String> + Send + 'static,
-) -> Result<T, String> {
+) -> Result<T, CommandError> {
     tauri::async_runtime::spawn_blocking(work)
         .await
-        .map_err(|error| error.to_string())?
+        .map_err(internal)?
+        .map_err(CommandError::from)
 }
 
 /// Whether the OS opens magnet links and torrent files with Caskade.
 #[tauri::command]
 #[specta::specta]
-pub async fn torrent_links_status() -> Result<TorrentLinks, String> {
+pub async fn torrent_links_status() -> Result<TorrentLinks, CommandError> {
     blocking(torrent_links::status).await
 }
 
@@ -24,13 +26,26 @@ pub async fn torrent_links_status() -> Result<TorrentLinks, String> {
 /// the user chooses Caskade.
 #[tauri::command]
 #[specta::specta]
-pub async fn torrent_links_set(open: bool) -> Result<TorrentLinks, String> {
+pub async fn torrent_links_set(open: bool) -> Result<TorrentLinks, CommandError> {
     blocking(move || torrent_links::set(open)).await
 }
 
 /// Windows: opens Default apps at Caskade's page.
 #[tauri::command]
 #[specta::specta]
-pub async fn torrent_links_choose() -> Result<(), String> {
+pub async fn torrent_links_choose() -> Result<(), CommandError> {
     blocking(torrent_links::choose).await
+}
+
+#[cfg(all(test, not(windows)))]
+mod tests {
+    use super::*;
+    use crate::error::ErrorCode;
+
+    #[test]
+    fn only_windows_chooses_the_app_in_its_settings() {
+        let error = tauri::async_runtime::block_on(torrent_links_choose()).unwrap_err();
+        assert_eq!(error.code, ErrorCode::Other);
+        assert!(error.summary.contains("Only Windows"), "{error:?}");
+    }
 }

@@ -2,7 +2,7 @@
 //! an install move through, and checks against a release feed served by
 //! wiremock on the mock runtime.
 use super::*;
-use crate::commands::test_ipc::invoke;
+use crate::commands::test_ipc::{assert_report, invoke};
 use tauri::test::{MockRuntime, mock_builder, mock_context, noop_assets};
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
@@ -238,6 +238,7 @@ fn the_same_version_is_up_to_date_and_a_broken_feed_fails() {
         "the error says what failed"
     );
     let refused = invoke(&window, "app_update_install", serde_json::json!({})).unwrap_err();
+    assert_report(&refused, "invalid", &[]);
     assert!(
         refused.to_string().contains("Check for updates"),
         "{refused}"

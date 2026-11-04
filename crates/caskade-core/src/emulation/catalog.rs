@@ -761,9 +761,8 @@ impl EmulatorDefinition {
     ) -> Result<Resolved, String> {
         let profile = self.profile(name).ok_or_else(|| {
             crate::tr!(
-                "{emulator} has no profile {profile}",
-                emulator = self.name,
-                profile = format!("{name:?}")
+                "{emulator} no longer has this profile.",
+                emulator = self.name
             )
         })?;
         resolve(

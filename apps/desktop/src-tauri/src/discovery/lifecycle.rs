@@ -49,7 +49,7 @@ impl DiscoveryController {
             let (preferences, launchers) = match preferences {
                 Ok(value) => value,
                 Err(error) => {
-                    self.lifecycle_error(error).await;
+                    self.lifecycle_error(error.summary).await;
                     if changes.recv().await.is_err() {
                         return;
                     }
@@ -75,17 +75,17 @@ impl DiscoveryController {
                         config::scan_config(&preferences, &launchers, self.0.service.env().os())?;
                     let options = caskade_sources::import_options(&self.0.settings)
                         .await
-                        .map_err(|e| e.to_string())?;
+                        .map_err(failure)?;
                     self.0
                         .service
                         .watch(config, options, WatchOptions::default())
                         .await
-                        .map_err(|e| e.to_string())
+                        .map_err(failure)
                 }
                 .await
                 {
                     Ok(value) => watcher = Some(value),
-                    Err(error) => self.lifecycle_error(error).await,
+                    Err(error) => self.lifecycle_error(error.summary).await,
                 }
             }
             {
@@ -121,7 +121,7 @@ impl DiscoveryController {
                                 let _operation = self.0.operation.lock().await;
                                 match self.authorize_reviews(outcome, &Cancel::new()).await {
                                     Ok(outcome) => { let mut state = self.0.state.lock().await; self.apply_import(&mut state, outcome); self.publish(&mut state); },
-                                    Err(error) => self.lifecycle_error(error).await,
+                                    Err(error) => self.lifecycle_error(error.summary).await,
                                 }
                             },
                             Ok(Some(Err(error))) => self.lifecycle_error(error).await,
@@ -154,7 +154,7 @@ impl DiscoveryController {
             && self.idle().await
         {
             tracing::warn!(%error, "background discovery scan didn't start");
-            self.lifecycle_error(error).await;
+            self.lifecycle_error(error.summary).await;
         }
     }
 

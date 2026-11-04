@@ -181,7 +181,7 @@ it.each([
           '[data-cs="schema-settings"] [data-cs="setting-row"]'
         : tab === "plugins"
           ? // Plugins' own settings pages are the plugin host's (plugins/PluginViews.tsx).
-            '[role="tabpanel"] > div > :not(section)'
+            '[data-part="plugin-settings"]'
           : undefined;
   // Checked once, after its data (`ready`): a check that may pass early
   // would pass on a tab still loading.

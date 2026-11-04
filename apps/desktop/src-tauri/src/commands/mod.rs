@@ -59,11 +59,6 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use tauri_specta::Event;
 
-/// An error as the text a command answers with.
-fn text(error: impl std::fmt::Display) -> String {
-    error.to_string()
-}
-
 /// The core's answer to `hello`: proof that typed commands and events work.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]

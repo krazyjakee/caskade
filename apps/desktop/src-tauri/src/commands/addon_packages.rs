@@ -147,10 +147,11 @@ async fn prepare<R: Runtime>(
         .try_state::<CatalogueService>()
         .ok_or_else(|| incompatible(caskade_core::tr!("the add-on catalogue is unavailable")))?;
     let catalogue = service.catalogue();
-    let entry = catalogue
-        .entry(id)
-        .cloned()
-        .ok_or_else(|| incompatible(caskade_core::tr!("{id} isn't in the catalogue", id = id)))?;
+    let entry = catalogue.entry(id).cloned().ok_or_else(|| {
+        incompatible(caskade_core::tr!(
+            "This add-on isn't in the catalogue any more."
+        ))
+    })?;
     let installed = super::addons::installed(app).await;
     let compatibility = evaluate_entry(&entry, &installed, &super::addons::host_facts(mode));
     let release = match (compatibility.state, compatibility.release) {
@@ -548,7 +549,7 @@ pub async fn addons_uninstall<R: Runtime>(
             fall_back_from(&settings, &id).await;
         }
     } else {
-        return Err(invalid(caskade_core::tr!("{id} isn't installed", id = id)));
+        return Err(invalid(caskade_core::tr!("This add-on isn't installed.")));
     }
     let mut records = AddonRecords::load(&store).await.map_err(report)?;
     records.addons.remove(&id);

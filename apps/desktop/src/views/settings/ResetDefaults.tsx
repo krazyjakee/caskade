@@ -1,5 +1,6 @@
 /** A settings page's Reset to defaults (#44): it names the group it resets,
- * lists the settings that would change, and changes nothing until confirmed.
+ * lists the settings that would change (or says it can't tell, for a section
+ * the core has no defaults for), and changes nothing until confirmed.
  * Only the fields a page lists go back to their defaults, so a page showing
  * one setting of another section (Start in, online lookups) resets that one
  * and leaves the rest of the section, such as whether first-run setup is
@@ -9,6 +10,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+import { FailureNotice } from "../../components/FailureNotice";
 import { settingsKeys, useSettingsApi } from "./useSettings";
 
 export interface ResetField {
@@ -98,20 +100,30 @@ function ResetDialog({
     })),
   });
   const loading = sections.isPending || values.some((value) => value.isPending);
+  const failure = sections.error ?? values.find((value) => value.error)?.error;
+  const defaultsOf = ({ namespace }: ResetPart) => {
+    const found = sections.data?.find((section) => section.namespace === namespace)?.defaults;
+    return found !== null && typeof found === "object"
+      ? (found as Record<string, unknown>)
+      : undefined;
+  };
 
   // What each part would change. Without its defaults a whole section can
-  // still be reset by the core; a field of another section can't.
+  // still be reset by the core, though nothing says what that changes; a
+  // field of another section can't.
   const changes = parts.flatMap((part, index): Change[] => {
     const value = values[index]?.data?.value;
-    const found = sections.data?.find((section) => section.namespace === part.namespace)?.defaults;
-    const defaults =
-      found !== null && typeof found === "object" ? (found as Record<string, unknown>) : undefined;
-    if (!defaults) return part.whole ? [{ part, fields: part.fields, defaults: {} }] : [];
+    const defaults = defaultsOf(part);
+    if (!defaults) return part.whole ? [{ part, fields: [], defaults: {} }] : [];
     if (!value) return [];
     const fields = part.fields.filter(({ key }) => !same(value[key], defaults[key]));
     return fields.length ? [{ part, fields, defaults }] : [];
   });
   const labels = changes.flatMap(({ fields }) => fields.map(({ label }) => label));
+  const unseen = parts.filter((part) => !defaultsOf(part));
+  const resetsUnseen = unseen.some((part) => part.whole);
+  const leavesUnseen = unseen.some((part) => !part.whole);
+  const canReset = !loading && !failure && changes.length > 0;
 
   const reset = useMutation({
     mutationFn: async () => {
@@ -152,30 +164,56 @@ function ResetDialog({
             <p role="status" className="text-sm text-fg-muted">
               <Trans>Checking what would change…</Trans>
             </p>
-          ) : labels.length ? (
-            <div className="space-y-2 text-sm">
-              <p className="text-fg-muted">
-                <Trans>These settings go back to their defaults:</Trans>
-              </p>
-              <ul className="list-disc space-y-1 pl-5">
-                {labels.map((label) => (
-                  <li key={label}>{label}</li>
-                ))}
-              </ul>
-            </div>
+          ) : failure ? (
+            <FailureNotice
+              variant="inline"
+              error={failure}
+              title={t`Caskade couldn't check what would change`}
+              onRetry={() => {
+                for (const query of [sections, ...values]) {
+                  if (query.error) void query.refetch();
+                }
+              }}
+            />
           ) : (
-            <p className="text-sm text-fg-muted">
-              <Trans>Every setting here already uses its default.</Trans>
-            </p>
+            <>
+              {labels.length > 0 && (
+                <div className="space-y-2 text-sm">
+                  <p className="text-fg-muted">
+                    <Trans>These settings go back to their defaults:</Trans>
+                  </p>
+                  <ul className="list-disc space-y-1 pl-5">
+                    {labels.map((label) => (
+                      <li key={label}>{label}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {resetsUnseen && (
+                <p className="text-sm text-fg-muted">
+                  {labels.length
+                    ? t`Caskade can't tell what else would change. Reset also puts the rest of these settings back to their defaults.`
+                    : t`Caskade can't tell what would change. Reset puts all of these settings back to their defaults.`}
+                </p>
+              )}
+              {leavesUnseen && (
+                <p className="text-sm text-fg-muted">
+                  {changes.length
+                    ? t`Caskade can't tell what would change for some settings here, so those stay as they are.`
+                    : t`Caskade can't tell what would change, so these settings can't be reset here.`}
+                </p>
+              )}
+              {!labels.length && !unseen.length && (
+                <p className="text-sm text-fg-muted">
+                  <Trans>Every setting here already uses its default.</Trans>
+                </p>
+              )}
+            </>
           )}
           <p className="text-sm text-fg-muted">
             {keeps ?? t`Settings on other pages stay as they are.`}
           </p>
-          {reset.error && (
-            <p role="alert" className="text-sm text-danger">
-              {reset.error.message}
-            </p>
-          )}
+          {reset.error && <FailureNotice variant="inline" error={reset.error} />}
           <div className="flex justify-end gap-2">
             <Button
               data-spatial="focusable"
@@ -183,13 +221,15 @@ function ResetDialog({
               isDisabled={reset.isPending}
               onPress={close}
             >
-              {labels.length || loading ? t`Cancel` : t`Close`}
+              {canReset || loading ? t`Cancel` : t`Close`}
             </Button>
-            {(labels.length > 0 || loading) && (
+            {/* Offered once it's known what it does: a greyed-out Reset gives
+                no reason while the check runs. */}
+            {canReset && (
               <Button
                 data-spatial="focusable"
                 variant="danger"
-                isDisabled={loading || reset.isPending}
+                isDisabled={reset.isPending}
                 onPress={() => reset.mutate()}
               >
                 {reset.isPending ? t`Resetting…` : t`Reset`}

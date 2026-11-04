@@ -53,7 +53,7 @@ export function DeviceOffers({
     <section
       data-part="from-devices"
       aria-labelledby="addons-from-devices"
-      className="flex flex-col gap-2 rounded-panel border border-border bg-surface-raised p-4"
+      className="flex flex-col gap-2 rounded-control border border-border bg-surface-base/60 p-4"
     >
       <h3 id="addons-from-devices" className="flex items-center gap-2 font-semibold">
         <MonitorSmartphone aria-hidden className="size-4 text-fg-muted" />

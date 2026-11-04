@@ -1,6 +1,8 @@
 //! Core preference schemas. Installer/discovery adapters register later
 //! sections through the same registry; storage roots themselves stay in DB.
-use super::{InstallerSettings, Result, SectionDefinition, SettingsService};
+use super::{
+    InstallerSettings, Result, SectionDefinition, SettingsError, SettingsService, SettingsSnapshot,
+};
 use crate::AppPaths;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -338,7 +340,9 @@ pub struct StreamingSettings {
 
 /// Stream quality (#264): each part `None` is the client's automatic
 /// choice.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[derive(
+    Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, specta::Type,
+)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct StreamQuality {
     #[serde(default)]
@@ -440,6 +444,26 @@ impl Default for AccountsSettings {
 }
 
 impl SettingsService {
+    /// Sets the stream quality in `core.streaming`, leaving the rest of the
+    /// section alone. It has its own call because it decides how games look
+    /// on this device, so any account may change it (#66), while the
+    /// section's hosting stays an admin's.
+    pub async fn set_stream_quality(&self, quality: &StreamQuality) -> Result<SettingsSnapshot> {
+        for _ in 0..8 {
+            let current = self.get("core.streaming").await?;
+            let mut value = current.value;
+            value["quality"] = serde_json::to_value(quality)?;
+            match self
+                .set("core.streaming", value, Some(current.revision))
+                .await
+            {
+                Err(SettingsError::Conflict) => continue,
+                result => return result,
+            }
+        }
+        Err(SettingsError::Conflict)
+    }
+
     pub fn register_core(&self, paths: &AppPaths) -> Result<()> {
         let general = GeneralSettings {
             cache_dir: paths.cache.to_string_lossy().into_owned(),

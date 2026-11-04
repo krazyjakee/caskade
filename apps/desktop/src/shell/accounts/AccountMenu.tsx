@@ -1,8 +1,8 @@
 /** The signed-in account's avatar in the top bar (#207), in both shells: it
  * opens a menu that says who is signed in and offers My profile (Settings →
- * My profile) and Switch account, which signs out to the account picker.
- * Not while a game Caskade launched is running: the session belongs to the
- * account that started it. */
+ * My profile) and Switch account, which signs out to the account picker,
+ * after asking about unsaved Settings edits. Not while a game Caskade
+ * launched is running: the session belongs to the account that started it. */
 import { Avatar, Menu, MenuItem, MenuPopover } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useNavigate } from "@tanstack/react-router";
@@ -10,6 +10,7 @@ import { UserRound, Users } from "lucide-react";
 import { Button, MenuTrigger } from "react-aria-components";
 import { useActiveAccount, useSignOut } from "../../api/accounts";
 import { useRunningCount } from "../../api/hooks";
+import { afterUnsavedChanges } from "../../views/settings/unsavedChanges";
 
 export function AccountMenu({ size }: { size: "sm" | "md" }) {
   const { t } = useLingui();
@@ -49,7 +50,7 @@ export function AccountMenu({ size }: { size: "sm" | "md" }) {
           aria-label={t`${{ name: account.name }}'s account`}
           onAction={(id) => {
             if (id === "profile") void navigate({ to: "/settings", search: { tab: "profile" } });
-            if (id === "switch") signOut.mutate(undefined);
+            if (id === "switch") afterUnsavedChanges("account", () => signOut.mutate(undefined));
           }}
         >
           <MenuItem id="profile" icon={UserRound}>

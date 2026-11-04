@@ -117,10 +117,7 @@ impl Emulator {
             .zip(catalog)
             .map(|(id, catalog)| {
                 catalog.emulator(id).ok_or_else(|| {
-                    Error::Invalid(crate::tr!(
-                        "unknown emulator definition {definition}",
-                        definition = format!("{id:?}")
-                    ))
+                    Error::Invalid(crate::tr!("Caskade doesn't know this emulator."))
                 })
             })
             .transpose()?;
@@ -130,8 +127,7 @@ impl Emulator {
             id(profile.id())?;
             if !seen.insert(profile.id()) {
                 return Err(Error::Invalid(crate::tr!(
-                    "profile {profile} appears twice",
-                    profile = profile.id()
+                    "This emulator lists the same profile twice."
                 )));
             }
             match profile {
@@ -157,9 +153,8 @@ impl Emulator {
                         Some(definition) => {
                             if definition.profile(definition_profile).is_none() {
                                 return Err(Error::Invalid(crate::tr!(
-                                    "{emulator} has no profile {profile}",
-                                    emulator = definition.name,
-                                    profile = format!("{definition_profile:?}")
+                                    "{emulator} no longer has this profile.",
+                                    emulator = definition.name
                                 )));
                             }
                             check_templates(
@@ -215,7 +210,9 @@ impl Emulator {
                             1024,
                         )?;
                         if key.contains('=') {
-                            return Err(Error::Invalid(crate::tr!("environment key contains =")));
+                            return Err(Error::Invalid(crate::tr!(
+                                "An environment variable's name can't contain =."
+                            )));
                         }
                         text(
                             value,

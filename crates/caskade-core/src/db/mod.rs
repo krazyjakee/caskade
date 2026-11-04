@@ -232,14 +232,16 @@ impl LibraryStore {
 fn decode<T: serde::de::DeserializeOwned>(text: String) -> Result<T> {
     Ok(serde_json::from_str(&text)?)
 }
+/// `entity` is gone, in the user's words; the id stays in the log.
 pub(crate) fn missing(entity: &str, id: &str) -> crate::Error {
+    tracing::debug!(entity, id, "not found");
     crate::Error::Invalid(match entity {
-        "account" => crate::tr!("account {id} was not found", id = id),
-        "collection" => crate::tr!("collection {id} was not found", id = id),
-        "entry" => crate::tr!("entry {id} was not found", id = id),
-        "game" => crate::tr!("game {id} was not found", id = id),
-        "session" => crate::tr!("session {id} was not found", id = id),
-        "storage root" => crate::tr!("storage root {id} was not found", id = id),
-        _ => crate::tr!("{entity} {id} was not found", entity = entity, id = id),
+        "account" => crate::tr!("This account no longer exists."),
+        "collection" => crate::tr!("This collection no longer exists."),
+        "entry" => crate::tr!("This copy of the game is no longer in the library."),
+        "game" => crate::tr!("This game is no longer in the library."),
+        "session" => crate::tr!("This play session no longer exists."),
+        "storage root" => crate::tr!("This storage location no longer exists."),
+        _ => crate::tr!("This {entity} no longer exists.", entity = entity),
     })
 }

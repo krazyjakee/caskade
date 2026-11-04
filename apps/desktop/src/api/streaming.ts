@@ -22,6 +22,7 @@ import {
   type StreamingProgram,
 } from "./bindings";
 import { unwrap } from "./reply";
+import { objectReply, type SettingsSnapshot } from "./settings";
 import { createStreamingFixtureApi } from "./streamingFixtures";
 
 export type {
@@ -46,6 +47,13 @@ export interface PairingFinished {
   message?: string | null;
 }
 
+/** Each part `null` is chosen automatically. */
+export interface StreamQuality {
+  resolution: string | null;
+  fps: number | null;
+  bitrateKbps: number | null;
+}
+
 export interface StreamingApi {
   /** Every device seen since Caskade started, by name. */
   hosts(): Promise<StreamHost[]>;
@@ -59,6 +67,8 @@ export interface StreamingApi {
   /** Hosting on this device. */
   hostStatus(): Promise<HostStatus>;
   setHosting(on: boolean): Promise<HostOutcome>;
+  /** Sets how games streamed to this device look: any account may (#66). */
+  setQuality(quality: StreamQuality): Promise<SettingsSnapshot>;
   /** Hosts through the streaming already set up here, with its sign-in. */
   hostThroughExisting(user: string, password: string): Promise<HostOutcome>;
   /** Devices waiting to pair with this one. */
@@ -103,6 +113,7 @@ export const nativeStreamingApi: StreamingApi = {
   forgetHost: (hostId) => unwrap(commands.streamingForgetHost(hostId)).then(nothing),
   hostStatus: async () => commands.streamingHostStatus(),
   setHosting: (on) => unwrap(commands.streamingSetHosting(on)),
+  setQuality: (quality) => unwrap(commands.streamingSetQuality(quality).then(objectReply)),
   hostThroughExisting: (user, password) => unwrap(commands.streamingUseExisting(user, password)),
   pairRequests: () => unwrap(commands.streamingPairRequests()),
   acceptPairing: (id, code, name) =>

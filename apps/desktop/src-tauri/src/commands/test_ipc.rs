@@ -7,6 +7,17 @@ use tauri::{
     webview::InvokeRequest,
 };
 
+/// Asserts that a command's `error` is a report of `code` whose summary
+/// names none of `internal` (ids, namespaces, type names).
+#[allow(dead_code)]
+pub fn assert_report(error: &Value, code: &str, internal: &[&str]) {
+    assert_eq!(error["code"], code, "{error}");
+    let summary = error["summary"].as_str().expect("a report's summary");
+    for name in internal {
+        assert!(!summary.contains(name), "{summary} names {name}");
+    }
+}
+
 /// The command's JSON reply, or its error.
 pub fn invoke(
     window: &tauri::WebviewWindow<MockRuntime>,

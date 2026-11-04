@@ -313,9 +313,7 @@ impl ThemeService {
             Ok(_) => None,
             Err(_) if requested == DEFAULT_THEME => None,
             Err(error) => Some(match self.info(requested) {
-                None => format!(
-                    "The theme {requested} isn't installed any more. Caskade is using the default theme instead."
-                ),
+                None => "The chosen theme isn't installed any more. Caskade is using the default theme instead.".to_owned(),
                 Some(info) => format!(
                     "The theme {} can't be applied: {}. Caskade is using the default theme instead.",
                     info.name,
@@ -480,7 +478,7 @@ impl ThemeService {
                 .entries
                 .iter()
                 .find(|entry| entry.info.id == id)
-                .ok_or_else(|| Error::Invalid(crate::tr!("theme {id} isn't installed", id = id)))?;
+                .ok_or_else(|| Error::Invalid(crate::tr!("This theme isn't installed.")))?;
             if entry.theme.is_none() {
                 let first = entry
                     .info
@@ -489,11 +487,14 @@ impl ThemeService {
                     .map(|problem| problem.message.as_str());
                 return Err(Error::Invalid(match first {
                     Some(problem) => crate::tr!(
-                        "theme {id} can't be applied: {problem}",
-                        id = id,
+                        "The theme {name} can't be applied: {problem}",
+                        name = entry.info.name,
                         problem = problem
                     ),
-                    None => crate::tr!("theme {id} can't be applied: it is invalid", id = id),
+                    None => crate::tr!(
+                        "The theme {name} can't be applied: it is invalid",
+                        name = entry.info.name
+                    ),
                 }));
             }
             let chain = caskade_theme::chain(id, |id| lookup(&state.entries, id))

@@ -1,5 +1,6 @@
 //! Settings-to-scan mapping. The injected host decides the platform; no live
 //! machine checks or launcher subprocesses occur at this boundary.
+use crate::error::{CommandError, refused, report};
 use caskade_core::settings::{DiscoverySettings, LauncherSettings, SettingsService};
 use caskade_discovery::{
     Config, OperatingSystem, SourceId,
@@ -72,25 +73,19 @@ pub const fn os_name(os: OperatingSystem) -> &'static str {
 }
 pub async fn preferences(
     settings: &SettingsService,
-) -> Result<(DiscoverySettings, LauncherSettings), String> {
-    let discovery = settings
-        .get("core.discovery")
-        .await
-        .map_err(|e| e.to_string())?;
-    let launchers = settings
-        .get("core.launchers")
-        .await
-        .map_err(|e| e.to_string())?;
+) -> Result<(DiscoverySettings, LauncherSettings), CommandError> {
+    let discovery = settings.get("core.discovery").await.map_err(report)?;
+    let launchers = settings.get("core.launchers").await.map_err(report)?;
     Ok((
-        serde_json::from_value(discovery.value).map_err(|e| e.to_string())?,
-        serde_json::from_value(launchers.value).map_err(|e| e.to_string())?,
+        serde_json::from_value(discovery.value).map_err(report)?,
+        serde_json::from_value(launchers.value).map_err(report)?,
     ))
 }
 pub fn scan_config(
     discovery: &DiscoverySettings,
     launchers: &LauncherSettings,
     os: OperatingSystem,
-) -> Result<Config, String> {
+) -> Result<Config, CommandError> {
     let mut config = Config::default();
     let mut disabled: Vec<_> = launchers
         .enabled
@@ -116,9 +111,9 @@ pub fn scan_config(
         for path in &discovery.scan_paths {
             let path = PathBuf::from(path);
             if !path.is_absolute() {
-                return Err(caskade_core::tr!(
+                return Err(refused(caskade_core::tr!(
                     "Custom scan folders must be absolute paths."
-                ));
+                )));
             }
             config.deep.folders.push(path);
         }

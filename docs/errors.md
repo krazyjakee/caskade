@@ -48,9 +48,12 @@ the installer's URL redaction (credentials, query and fragment go), then
   with `.map_err(report)`, which also logs the report with its reference (at
   `debug` for `invalid`/`forbidden`/`cancelled`/`conflict`, `warn`
   otherwise). `?` takes a `caskade_core::Error` or an adapter's own `String`.
+  `refused`, `conflict`, `internal` and `detailed` build a report for an
+  adapter's own check; a summary never names an id, namespace or type, which
+  go in the detail (#59).
   The permission gate refuses with a `forbidden` report. Library, launch,
-  storage, collection and game-update commands use it; the rest still return
-  strings and move over as they are touched (see the inventory).
+  storage, collection, game-update and Settings' commands use it; the rest
+  still return strings and move over as they are touched (see the inventory).
 - **Webview**: `apps/desktop/src/api/reply.ts`. `unwrap` rejects with a
   `CommandFailure` (an `Error` whose `message` is the summary, plus `code`,
   `detail`, `hints`, `transient`, `reference`). `toFailure(error)` turns
@@ -149,7 +152,7 @@ Paths are relative to the crate or app named in the area.
 
 | Area | Where | Was | Gap | Recovery / display | Policy | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| Commands | `src-tauri/src/commands/*` | `Result<T, String>` via `error.to_string()` (~170 commands) | No code, hints or detail; OS text as the message | `CommandError` (`ErrorReport`) + `report()`; library, launch, storage, collections, updates converted | – | Fixed (5 modules); Follow-up for the rest (mechanical, as touched) |
+| Commands | `src-tauri/src/commands/*` | `Result<T, String>` via `error.to_string()` (~170 commands) | No code, hints or detail; OS text as the message | `CommandError` (`ErrorReport`) + `report()`; library, launch, storage, collections, updates and every command Settings calls converted (#59) | – | Fixed for those; Follow-up for the rest (mechanical, as touched) |
 | Permission gate | `src-tauri/src/permissions.rs` | Refusal as a bare string | No code to tell "not allowed" apart | `forbidden` report with `signIn` hint | M | Fixed |
 | Webview unwrap | `src/api/reply.ts`, `igdb.ts`, `updates.ts` | `new Error(message)`, three copies | Code and details lost | `CommandFailure` + `toFailure`, one copy | – | Fixed |
 | Missing state | Tauri's "state not managed for field …" | Raw text shown | Unreadable; a subsystem failed at start | `toFailure` explains it as `unavailable` | M (restart) | Fixed (display); Follow-up: startup health record |

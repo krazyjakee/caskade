@@ -46,7 +46,7 @@ it("uses generated discovery commands, backend platform and revision-checked ret
   const result = await nativeDiscoveryApi.status();
   expect(result.os).toBe("windows");
   expect(result.sources[0]?.durationMs).toBe(12);
-  expect(result.sources[0]?.error).toContain("timed_out");
+  expect(result.sources[0]?.error).toBe("This source took too long to answer.");
   await nativeDiscoveryApi.review(["r1"], true, 7);
   expect(invoke).toHaveBeenCalledWith("discovery_review", {
     ids: ["r1"],

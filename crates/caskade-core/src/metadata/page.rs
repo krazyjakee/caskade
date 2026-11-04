@@ -13,14 +13,14 @@ impl Metadata {
         let _lock = self.inner.lock.lock().await;
         let store = &self.inner.store;
         let entry = store.get_entry(entry_id).await?.ok_or_else(|| {
-            Error::Invalid(crate::tr!("entry {entry} was not found", entry = entry_id))
-        })?;
-        let game = store.game(&entry.game_id).await?.ok_or_else(|| {
             Error::Invalid(crate::tr!(
-                "game {game} was not found",
-                game = entry.game_id
+                "This copy of the game is no longer in the library."
             ))
         })?;
+        let game = store
+            .game(&entry.game_id)
+            .await?
+            .ok_or_else(|| Error::Invalid(crate::tr!("This game is no longer in the library.")))?;
         // Emulated entries name their platform; the game's other platforms
         // are its PC (or unknown) entries'.
         let catalog = &self.inner.catalog;
@@ -126,8 +126,7 @@ impl Metadata {
         let store = &self.inner.store;
         if store.game(game_id).await?.is_none() {
             return Err(Error::Invalid(crate::tr!(
-                "game {game} was not found",
-                game = game_id
+                "This game is no longer in the library."
             )));
         }
         // Before the lock, so nothing waits for the download.
@@ -135,8 +134,7 @@ impl Metadata {
         let lock = self.inner.lock.lock().await;
         if store.game(game_id).await?.is_none() {
             return Err(Error::Invalid(crate::tr!(
-                "game {game} was not found",
-                game = game_id
+                "This game is no longer in the library."
             )));
         }
         let mut row = IgdbMatch::new(game_id, igdb_id, MatchSource::Manual, "");
@@ -215,8 +213,7 @@ impl Metadata {
             let store = &self.inner.store;
             if store.game(game_id).await?.is_none() {
                 return Err(Error::Invalid(crate::tr!(
-                    "game {game} was not found",
-                    game = game_id
+                    "This game is no longer in the library."
                 )));
             }
             if let Some(mut row) = store.igdb_match(game_id).await? {

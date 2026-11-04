@@ -104,8 +104,7 @@ impl EmulationService {
                 });
             if !fits {
                 return Err(Error::Invalid(crate::tr!(
-                    "that profile doesn't run {platform}",
-                    platform = settings.platform
+                    "That profile doesn't run this platform."
                 )));
             }
         }
@@ -115,12 +114,7 @@ impl EmulationService {
             .await?
             .into_iter()
             .find(|view| view.platform.id == settings.platform)
-            .ok_or_else(|| {
-                Error::Invalid(crate::tr!(
-                    "unknown platform {platform}",
-                    platform = settings.platform
-                ))
-            })
+            .ok_or_else(|| Error::Invalid(crate::tr!("Caskade doesn't know this platform.")))
     }
 
     pub async fn overview(&self) -> Result<EmulationOverview> {

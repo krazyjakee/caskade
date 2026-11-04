@@ -103,8 +103,16 @@ fn lists_the_default_and_installed_themes_and_a_broken_one_hides_nothing() {
         .unwrap_err()
         .to_string();
     assert!(
-        error.starts_with("theme dev.example.broken can't be applied: "),
+        error.starts_with("The theme ") && error.contains(" can't be applied: "),
         "{error}"
+    );
+    assert!(
+        !service
+            .stylesheet("dev.example.missing")
+            .unwrap_err()
+            .to_string()
+            .contains("dev.example"),
+        "no theme id in the error"
     );
     assert!(service.stylesheet("dev.example.missing").is_err());
 }
@@ -182,7 +190,7 @@ fn the_selected_theme_applies_and_falls_back_to_the_default_with_a_notice() {
     assert_eq!(
         removed.notice.as_deref(),
         Some(
-            "The theme dev.example.neon isn't installed any more. Caskade is using the default theme instead."
+            "The chosen theme isn't installed any more. Caskade is using the default theme instead."
         )
     );
 }
@@ -326,7 +334,7 @@ async fn a_dev_theme_recompiles_within_a_second_of_an_edit() {
     .await
     .expect("the broken edit is reported");
     assert!(
-        error.starts_with("theme dev.example.neon can't be applied"),
+        error.starts_with("The theme ") && error.contains(" can't be applied"),
         "{error}"
     );
     assert_eq!(service.resolve(&id).id, DEFAULT_THEME);

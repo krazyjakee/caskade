@@ -11,6 +11,7 @@ export type StorageTransport = Pick<
   | "storageEdit"
   | "storageDefault"
   | "storageRemove"
+  | "storageMoveAndRemove"
   | "storageChooseDirectory"
   | "moveGame"
   | "uninstallGame"
@@ -40,6 +41,8 @@ export function createStorageApi(transport: StorageTransport): StorageApi {
     remove: async (id) => {
       await unwrap(transport.storageRemove(id));
     },
+    moveAndRemove: async (id, target) =>
+      complete(await unwrap(transport.storageMoveAndRemove(id, target))),
     chooseDirectory: () => unwrap(transport.storageChooseDirectory()),
     preferences: async () => {
       const snapshot = await unwrap(transport.settingsGet("core.storage"));
@@ -68,6 +71,7 @@ const ipcStorageApi: StorageApi = {
     storageEdit: (id, label, template) => native(() => commands.storageEdit(id, label, template)),
     storageDefault: (id) => native(() => commands.storageDefault(id)),
     storageRemove: (id) => native(() => commands.storageRemove(id)),
+    storageMoveAndRemove: (id, target) => native(() => commands.storageMoveAndRemove(id, target)),
     storageChooseDirectory: () => native(() => commands.storageChooseDirectory()),
     moveGame: (entry, target) => native(() => commands.moveGame(entry, target)),
     uninstallGame: (entry) => native(() => commands.uninstallGame(entry)),
@@ -106,6 +110,7 @@ export const nativeStorageApi: StorageApi =
           "edit",
           "setDefault",
           "remove",
+          "moveAndRemove",
           "chooseDirectory",
           "move",
           "uninstall",

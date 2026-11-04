@@ -55,6 +55,51 @@ fn causes_are_walked_through_wrapping_errors() {
 }
 
 #[test]
+fn settings_errors_keep_namespaces_and_fields_out_of_the_summary() {
+    use crate::settings::SettingsError as S;
+    let unknown = ErrorReport::from_error(&S::Unknown("core.saves".into()));
+    assert_eq!(unknown.code, ErrorCode::Unavailable);
+    assert!(!unknown.summary.contains("core.saves"), "{unknown:?}");
+    assert!(unknown.detail.unwrap().contains("core.saves"));
+
+    let invalid = ErrorReport::from_error(&S::Validation {
+        namespace: "core.romm".into(),
+        paths: vec!["/cache/dir".into()],
+    });
+    assert_eq!(invalid.code, ErrorCode::Invalid);
+    assert!(
+        !invalid.summary.contains("core.romm") && !invalid.summary.contains("/cache"),
+        "{invalid:?}"
+    );
+    assert!(invalid.detail.unwrap().contains("/cache/dir"));
+
+    assert_eq!(ErrorReport::from_error(&S::Limit).code, ErrorCode::Invalid);
+    let stored = ErrorReport::from_error(&S::Stored);
+    assert_eq!(stored.code, ErrorCode::Corrupt);
+    assert!(!stored.summary.contains("envelope"), "{stored:?}");
+    let internal = ErrorReport::from_error(&S::Registration("duplicate namespace"));
+    assert_eq!(internal.code, ErrorCode::Internal);
+    assert!(!internal.summary.contains("namespace"), "{internal:?}");
+}
+
+#[test]
+fn a_missing_record_is_named_for_people_without_its_id() {
+    for entity in [
+        "account",
+        "collection",
+        "entry",
+        "game",
+        "session",
+        "storage root",
+        "store account",
+    ] {
+        let report = ErrorReport::from(crate::db::missing(entity, "0192-abc"));
+        assert_eq!(report.code, ErrorCode::Invalid);
+        assert!(!report.summary.contains("0192-abc"), "{report:?}");
+    }
+}
+
+#[test]
 fn launch_errors_name_what_stopped_them() {
     use crate::launch::LaunchError;
     let refused = ErrorReport::from_error(&LaunchError::Refused(

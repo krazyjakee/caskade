@@ -21,6 +21,13 @@
 //! A close in console mode quits: console mode puts the desktop window back
 //! first (`commands::console`), then closes again through [`Tray::quit`].
 //!
+//! While the webview holds closes (`close_hold`, unsaved Settings edits, #58)
+//! a close that would quit waits for its question: the window comes back
+//! ([`main_window::raise`]) and console mode stays on. Hiding to the tray goes
+//! on as ever, since the webview and its draft stay. A webview that doesn't
+//! answer within [`UNANSWERED`] is given up on ([`give_up`]), so a hold can
+//! never strand a quit.
+//!
 //! On Linux the icon is hidden a moment before Caskade exits or restarts
 //! ([`hide_before_exit`]): hiding it makes the status-notifier watcher ask
 //! for the icon's properties, and xapp's watcher (Cinnamon) crashes when
@@ -29,7 +36,7 @@
 
 use crate::main_window;
 use caskade_core::settings::{GeneralSettings, SettingsService};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::time::Duration;
 use tauri::image::Image;
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
@@ -43,6 +50,10 @@ const QUIT: &str = "tray.quit";
 /// How long Caskade keeps answering the bus after hiding its icon, before
 /// it exits: the watcher asks for the icon's properties within ~10 ms.
 const HIDDEN_BEFORE_EXIT: Duration = Duration::from_millis(500);
+
+/// How long the webview gets to say it heard a close it holds: it may be
+/// gone, or its question out of sight.
+const UNANSWERED: Duration = Duration::from_secs(5);
 
 #[cfg(target_os = "macos")]
 const ICON: Image<'_> = tauri::include_image!("icons/tray-template.png");
@@ -58,6 +69,22 @@ pub struct Tray {
     close_to_tray: AtomicBool,
     /// Something asked to quit: closes go through from now on.
     quitting: AtomicBool,
+    /// The webview asks before a close that would quit goes through.
+    held: AtomicBool,
+    /// Closes held so far, and the last of them the webview heard.
+    held_closes: AtomicU64,
+    heard: AtomicU64,
+}
+
+/// What a close of the main window does.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Close {
+    /// It goes through, or console mode's restore takes it from here.
+    Go,
+    /// The window hides to the tray.
+    Hide,
+    /// It waits for the webview; the number names it to [`Tray::unanswered`].
+    Held(u64),
 }
 
 impl Tray {
@@ -74,8 +101,45 @@ impl Tray {
             && !console
     }
 
+    /// Whether the webview holds closes.
+    pub fn held(&self) -> bool {
+        self.held.load(Ordering::Relaxed)
+    }
+
+    /// Decides a close of the main window, and counts it if it's held.
+    pub fn close(&self, console: bool) -> Close {
+        if self.hides_on_close(console) {
+            Close::Hide
+        } else if self.held() {
+            Close::Held(self.held_closes.fetch_add(1, Ordering::Relaxed) + 1)
+        } else {
+            Close::Go
+        }
+    }
+
+    /// The webview's `close_hold`. `true` while it holds says it heard the
+    /// closes so far. `true` after `false` is a fresh hold, which forgets
+    /// a quit: that's the answer Stay. `false` keeps it, so the webview's
+    /// next close goes through.
+    pub fn hold(&self, held: bool) {
+        let was = self.held.swap(held, Ordering::Relaxed);
+        if !held {
+            return;
+        }
+        if !was {
+            self.quitting.store(false, Ordering::Relaxed);
+        }
+        self.heard
+            .store(self.held_closes.load(Ordering::Relaxed), Ordering::Relaxed);
+    }
+
+    /// Whether held close number `close` still has no word from the webview.
+    pub fn unanswered(&self, close: u64) -> bool {
+        self.held() && self.heard.load(Ordering::Relaxed) < close
+    }
+
     /// Tests: as if the icon were up.
-    #[cfg(all(test, target_os = "linux"))]
+    #[cfg(test)]
     pub(crate) fn set_shown(&self, shown: bool) {
         self.shown.store(shown, Ordering::Relaxed);
     }
@@ -106,6 +170,19 @@ pub fn quit<R: Runtime>(app: &AppHandle<R>) {
         }
         None => app.exit(0),
     }
+}
+
+/// Gives up on a webview that didn't answer a held close: exits past it,
+/// through console mode's restore. `app.exit`, because a listener left by a
+/// dead webview has Tauri refuse a close; the exit still hides the icon first
+/// ([`on_run_event`]).
+fn give_up<R: Runtime>(app: &AppHandle<R>) {
+    tracing::warn!("the webview didn't answer a close: quitting anyway");
+    let tray = app.state::<Tray>();
+    tray.hold(false);
+    tray.quit();
+    crate::commands::console::restore_before_exit(app);
+    app.exit(0);
 }
 
 /// Manages [`Tray`], follows the close setting, hides the main window on
@@ -218,14 +295,29 @@ pub fn attach<R: Runtime>(app: &AppHandle<R>, settings: &SettingsService) {
             return;
         };
         let console = crate::commands::console::is_on(&handle);
-        if !handle.state::<Tray>().hides_on_close(console) {
-            return;
-        }
-        api.prevent_close();
-        if let Some(window) = handle.get_webview_window("main")
-            && let Err(error) = window.hide()
-        {
-            tracing::warn!(%error, "couldn't hide the main window");
+        match handle.state::<Tray>().close(console) {
+            Close::Go => {}
+            Close::Hide => {
+                api.prevent_close();
+                if let Some(window) = handle.get_webview_window("main")
+                    && let Err(error) = window.hide()
+                {
+                    tracing::warn!(%error, "couldn't hide the main window");
+                }
+            }
+            Close::Held(close) => {
+                api.prevent_close();
+                // The tray's Quit reaches a hidden or minimized window here,
+                // and its question has to be seen.
+                main_window::raise(&handle);
+                let handle = handle.clone();
+                std::thread::spawn(move || {
+                    std::thread::sleep(UNANSWERED);
+                    if handle.state::<Tray>().unanswered(close) {
+                        give_up(&handle);
+                    }
+                });
+            }
         }
     });
 }
@@ -366,6 +458,55 @@ mod tests {
         assert!(!tray.hides_on_close(true));
         tray.quit();
         assert!(!tray.hides_on_close(false));
+    }
+
+    #[test]
+    fn a_held_close_waits_but_hiding_to_the_tray_does_not() {
+        let tray = tray(true, "tray");
+        tray.hold(true);
+        // The webview and its draft stay in the tray.
+        assert_eq!(tray.close(false), Close::Hide);
+        // A close that would quit waits, in console mode too.
+        assert_eq!(tray.close(true), Close::Held(1));
+        tray.quit();
+        assert_eq!(tray.close(false), Close::Held(2));
+
+        tray.hold(false);
+        assert_eq!(tray.close(false), Close::Go);
+    }
+
+    #[test]
+    fn a_close_nothing_holds_is_not_counted() {
+        let tray = tray(false, "quit");
+        assert_eq!(tray.close(false), Close::Go);
+        tray.hold(true);
+        assert_eq!(tray.close(false), Close::Held(1));
+    }
+
+    #[test]
+    fn only_a_webview_that_answers_keeps_a_held_close_waiting() {
+        let tray = tray(false, "quit");
+        tray.hold(true);
+        let Close::Held(first) = tray.close(false) else {
+            panic!("not held");
+        };
+        assert!(tray.unanswered(first));
+
+        tray.hold(true);
+        assert!(!tray.unanswered(first));
+        // Another close, say a second Quit, needs an answer of its own, so
+        // a webview that stopped since can't strand it.
+        let Close::Held(second) = tray.close(false) else {
+            panic!("not held");
+        };
+        assert!(!tray.unanswered(first));
+        assert!(tray.unanswered(second));
+
+        tray.hold(false);
+        assert!(
+            !tray.unanswered(second),
+            "released: nothing left to wait for"
+        );
     }
 
     /// Polls `future` once, on this thread.

@@ -36,9 +36,11 @@ impl ScannerService {
     /// [`Self::submit`]; `Import` imports when it is done. Changes arrive as
     /// `emulation.scan.changed`.
     pub async fn start(&self, scanner_id: &str, mode: ScanMode) -> Result<ScanJob> {
-        let scanner = self.store.get_scanner(scanner_id).await?.ok_or_else(|| {
-            Error::Invalid(crate::tr!("no ROM scanner {scanner}", scanner = scanner_id))
-        })?;
+        let scanner = self
+            .store
+            .get_scanner(scanner_id)
+            .await?
+            .ok_or_else(|| Error::Invalid(crate::tr!("This ROM scanner no longer exists.")))?;
         let cancel = CancellationToken::new();
         let job = ScanJob {
             id: new_id(),
@@ -216,7 +218,7 @@ impl ScannerService {
     ) -> Result<ScanJob> {
         let job = self
             .get(job_id)
-            .ok_or_else(|| Error::Invalid(crate::tr!("no ROM scan {job}", job = job_id)))?;
+            .ok_or_else(|| Error::Invalid(crate::tr!("This ROM scan is no longer available.")))?;
         if job.status != ScanStatus::Review {
             return Err(Error::Invalid(crate::tr!(
                 "this scan is not waiting for a review"
@@ -277,6 +279,6 @@ impl ScannerService {
                 job.error = Some(error.to_string());
             }
         })
-        .ok_or_else(|| Error::Invalid(crate::tr!("no ROM scan {job}", job = job_id)))
+        .ok_or_else(|| Error::Invalid(crate::tr!("This ROM scan is no longer available.")))
     }
 }
