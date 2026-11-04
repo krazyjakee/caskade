@@ -1,4 +1,5 @@
 import { GameArt } from "@caskade/ui";
+import { useLingui } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Heart } from "lucide-react";
@@ -33,10 +34,11 @@ export function useWebGames(input: LibraryQuery, { enabled = true } = {}) {
 /** The Web tab's games as a mosaic of square tiles (WEB-GAMES-PLAN §5),
  * packed densely; favourites and games played lately or often are large. */
 export function WebMosaic({ games }: { games: GameSummary[] }) {
+  const { t } = useLingui();
   const sizes = useMemo(() => tileSizes(games), [games]);
   return (
     <ul
-      aria-label="Web games"
+      aria-label={t({ message: "Web games", comment: "The Web tab's mosaic of games" })}
       data-part="mosaic"
       className="grid grid-flow-dense auto-rows-(--tile) grid-cols-[repeat(auto-fill,var(--tile))] justify-center gap-3 pb-8 [--tile:calc(var(--cs-card-width)*0.6)]"
     >
@@ -56,6 +58,7 @@ const WebTile = memo(function WebTile({
   size: TileSize;
   index: number;
 }) {
+  const { t } = useLingui();
   const actions = useGameActions<HTMLLIElement>(game);
   return (
     <li
@@ -91,7 +94,7 @@ const WebTile = memo(function WebTile({
         {game.favorite && (
           <Heart
             data-part="favorite"
-            aria-label="Favorite"
+            aria-label={t({ message: "Favorite", comment: "A heart on a favourite game's card" })}
             className="absolute top-2.5 right-2.5 size-3.5 fill-accent-alt text-accent-alt"
           />
         )}

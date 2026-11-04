@@ -1,3 +1,5 @@
+import { plural } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react/macro";
 import { Link } from "@tanstack/react-router";
 import { Clock, Gamepad2, History } from "lucide-react";
 import type { CSSProperties } from "react";
@@ -24,9 +26,10 @@ export function PlatformGrid({
   sort: LibrarySort;
   layout: LibraryLayout;
 }) {
+  const { t } = useLingui();
   return (
     <section
-      aria-label="Platforms"
+      aria-label={t({ message: "Platforms", comment: "The library's games grouped by platform" })}
       data-focus-section="platform-grid"
       className="grid min-h-0 grow basis-0 auto-rows-min grid-cols-[repeat(auto-fill,minmax(13rem,1fr))] gap-4 overflow-auto overscroll-contain pb-4"
     >
@@ -51,7 +54,10 @@ function PlatformCard({
   index: number;
   search: { filter: LibraryFilter; sort: LibrarySort; layout: LibraryLayout; platform: string };
 }) {
+  const { t } = useLingui();
   const look = presentPlatform(platform.name);
+  const title = look.title;
+  const games = gamesLabel(platform.games);
   const lastPlayed = platform.lastPlayedAt ? formatRelativeDay(platform.lastPlayedAt) : null;
   return (
     <Link
@@ -60,7 +66,10 @@ function PlatformCard({
       data-cs="platform-card"
       data-art={look.known ? "platform" : "generic"}
       data-focus-key={`platform-card:${platform.name}`}
-      aria-label={`${look.title}, ${gamesLabel(platform.games)}`}
+      aria-label={t({
+        message: `${title}, ${games}`,
+        comment: "A platform's card: its name and how many games it has",
+      })}
       style={{ "--i": Math.min(index, 12) } as CSSProperties}
       className="group relative flex animate-enter flex-col overflow-hidden rounded-card border border-border bg-surface-raised outline-none transition-colors duration-(--cs-motion-duration-fast) hover:border-accent-alt/60 hover:bg-surface-hover focus-visible:focus-ring-over"
     >
@@ -99,7 +108,7 @@ function PlatformCard({
             data-part="count"
             className="shrink-0 rounded-full border border-border bg-surface-base/60 px-2 py-0.5 font-mono whitespace-nowrap"
           >
-            {gamesLabel(platform.games)}
+            {games}
           </span>
           <span
             data-part="meta"
@@ -124,4 +133,4 @@ function PlatformCard({
   );
 }
 
-const gamesLabel = (count: number) => `${count.toLocaleString()} ${count === 1 ? "game" : "games"}`;
+const gamesLabel = (total: number) => plural({ total }, { one: "# game", other: "# games" });

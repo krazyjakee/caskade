@@ -1,3 +1,5 @@
+import type { MessageDescriptor } from "@lingui/core";
+import { msg, t } from "@lingui/core/macro";
 import type { LibrarySort, PlatformSummary } from "../../../api/types";
 
 /** How the library shows a platform: a short title, what kind of machine it
@@ -477,6 +479,29 @@ export interface PlatformPresentation {
   known: boolean;
 }
 
+/** The kinds of machine above, translated where they're shown. */
+const kindLabels: Record<string, MessageDescriptor> = {
+  "2nd gen console": msg({ message: "2nd gen console", context: "platform kind" }),
+  "3rd gen console": msg({ message: "3rd gen console", context: "platform kind" }),
+  "8-bit console": msg({ message: "8-bit console", context: "platform kind" }),
+  "16-bit console": msg({ message: "16-bit console", context: "platform kind" }),
+  "32-bit console": msg({ message: "32-bit console", context: "platform kind" }),
+  "64-bit console": msg({ message: "64-bit console", context: "platform kind" }),
+  "6th gen console": msg({ message: "6th gen console", context: "platform kind" }),
+  "7th gen console": msg({ message: "7th gen console", context: "platform kind" }),
+  "8th gen console": msg({ message: "8th gen console", context: "platform kind" }),
+  "9th gen console": msg({ message: "9th gen console", context: "platform kind" }),
+  Cabinet: msg({ message: "Cabinet", context: "platform kind" }),
+  "CD console": msg({ message: "CD console", context: "platform kind" }),
+  "Console add-on": msg({ message: "Console add-on", context: "platform kind" }),
+  "Desktop computer": msg({ message: "Desktop computer", context: "platform kind" }),
+  Handheld: msg({ message: "Handheld", context: "platform kind" }),
+  "Home computer": msg({ message: "Home computer", context: "platform kind" }),
+  "Hybrid console": msg({ message: "Hybrid console", context: "platform kind" }),
+  "Stereoscopic console": msg({ message: "Stereoscopic console", context: "platform kind" }),
+  "Vector console": msg({ message: "Vector console", context: "platform kind" }),
+};
+
 /** How to show the platform the library calls `name`. Unknown platforms
  * keep their name and get neutral platform hardware artwork. */
 export function presentPlatform(name: string): PlatformPresentation {
@@ -484,10 +509,12 @@ export function presentPlatform(name: string): PlatformPresentation {
   const look = id ? looks[id] : undefined;
   if (!id || !look)
     return { name, title: name, subtitle: "", art: artFor("generic"), known: false };
+  const label = kindLabels[look.kind];
+  const kind = label ? t(label) : look.kind;
   return {
     name,
     title: look.title,
-    subtitle: look.maker === look.title ? look.kind : `${look.maker} · ${look.kind}`,
+    subtitle: look.maker === look.title ? kind : `${look.maker} · ${kind}`,
     art: artFor(id) ?? artFor("generic"),
     known: Boolean(artFor(id)),
   };

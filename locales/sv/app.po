@@ -1035,6 +1035,13 @@ msgstr "Förlopp för {title}"
 msgid "{title} to {device}"
 msgstr ""
 
+#. A platform's card: its name and how many games it has
+#: apps/desktop/src/views/library/platforms/PlatformGrid.tsx
+#, fuzzy
+#| msgid "{title} progress"
+msgid "{title}, {games}"
+msgstr "Förlopp för {title}"
+
 #. {title} is the game's title
 #: apps/desktop/src/views/game/Screenshots.tsx
 msgid "{title}, screenshot {number}"
@@ -1053,6 +1060,7 @@ msgstr "{title}, skärmbilder"
 #. js-lingui:icu=%7Btotal%2C+plural%2C+one+%7B%23+game%7D+other+%7B%23+games%7D%7D&pluralize_on=total
 #: apps/desktop/src/onboarding/run.ts apps/desktop/src/shell/TypeSearch.tsx
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/desktop/src/views/library/platforms/PlatformGrid.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
@@ -1218,6 +1226,11 @@ msgstr "12 timmar"
 msgid "12-hour"
 msgstr "12-timmars"
 
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "16-bit console"
+msgstr ""
+
 #. How often discovery refreshes
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "24 hours"
@@ -1227,14 +1240,61 @@ msgstr "24 timmar"
 msgid "24-hour"
 msgstr "24-timmars"
 
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "2nd gen console"
+msgstr ""
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "32-bit console"
+msgstr ""
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "3rd gen console"
+msgstr ""
+
 #. How often discovery refreshes
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "6 hours"
 msgstr "6 timmar"
 
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "64-bit console"
+msgstr ""
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "6th gen console"
+msgstr ""
+
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 msgid "7-Zip {version} licence ({platforms})"
 msgstr "Licens för 7-Zip {version} ({platforms})"
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "7th gen console"
+msgstr ""
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+#, fuzzy
+#| msgid "Console"
+msgctxt "platform kind"
+msgid "8-bit console"
+msgstr "Konsol"
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "8th gen console"
+msgstr ""
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "9th gen console"
+msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "A backup holds Caskade's library and settings in one file you can keep anywhere. Your games and their saves aren't in it."
@@ -2390,6 +2450,11 @@ msgstr "av {0}"
 msgid "By language"
 msgstr "Efter språk"
 
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "Cabinet"
+msgstr ""
+
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 msgid "Cache folder"
@@ -2703,6 +2768,13 @@ msgstr "Caskade tar reda på hur den här filen ska installeras: ett installatio
 msgid "Catalogue"
 msgstr "Katalog"
 
+#: apps/desktop/src/views/library/platforms/catalog.ts
+#, fuzzy
+#| msgid "Console"
+msgctxt "platform kind"
+msgid "CD console"
+msgstr "Konsol"
+
 #: apps/desktop/src/onboarding/Questions.tsx
 msgctxt "folder"
 msgid "Change"
@@ -2777,6 +2849,18 @@ msgstr "Sök efter uppdateringar"
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 msgid "Check now"
 msgstr "Kontrollera nu"
+
+#: apps/desktop/src/api/reply.ts
+msgid "Check that Caskade may read and write the folder."
+msgstr ""
+
+#: apps/desktop/src/api/reply.ts
+msgid "Check the network connection."
+msgstr ""
+
+#: apps/desktop/src/api/reply.ts
+msgid "Check the server address and sign-in details."
+msgstr ""
 
 #. When updates were last checked for; {checked} is a date
 #: apps/desktop/src/views/game/EntryUpdate.tsx
@@ -3187,6 +3271,13 @@ msgstr "Ansluter…"
 #: apps/desktop/src/shell/console/ConsoleSidebar.tsx
 msgid "Console"
 msgstr "Konsol"
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+#, fuzzy
+#| msgid "Console mode"
+msgctxt "platform kind"
+msgid "Console add-on"
+msgstr "Konsolläge"
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/onboarding/Questions.tsx
@@ -3637,6 +3728,13 @@ msgstr "Skrivbord"
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 msgid "Desktop and console modes"
 msgstr "Skrivbords- och konsolläge"
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+#, fuzzy
+#| msgid "Desktop mode"
+msgctxt "platform kind"
+msgid "Desktop computer"
+msgstr "Skrivbordsläge"
 
 #: apps/desktop/src/api/presentation.ts
 msgctxt "library source"
@@ -4366,8 +4464,10 @@ msgid "Failed with exit code {0}"
 msgstr "Misslyckades med slutkod {0}"
 
 #. A heart on a favourite game's card
+#. A heart on a favourite game's card
 #: apps/desktop/src/views/library/LibraryCard.tsx
 #: apps/desktop/src/views/library/LibraryRow.tsx
+#: apps/desktop/src/views/library/web/WebMosaic.tsx
 msgid "Favorite"
 msgstr "Favorit"
 
@@ -4532,6 +4632,10 @@ msgstr "Hittad"
 #| msgid "Game storage"
 msgid "Frame rate"
 msgstr "Spellagring"
+
+#: apps/desktop/src/api/reply.ts
+msgid "Free some disk space."
+msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Free space and required capabilities are checked for every job."
@@ -4881,6 +4985,11 @@ msgctxt "device kind"
 msgid "Handheld"
 msgstr ""
 
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "Handheld"
+msgstr ""
+
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "Hardcore"
 msgstr "Hardcore"
@@ -4969,6 +5078,11 @@ msgctxt "navigation"
 msgid "Home"
 msgstr "Hem"
 
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "Home computer"
+msgstr ""
+
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Hooks: {hooks}"
 msgstr "Krokar: {hooks}"
@@ -5012,6 +5126,11 @@ msgstr "Hur {0} ska ändras"
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "https://romm.example.com"
 msgstr "https://romm.example.com"
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "Hybrid console"
+msgstr ""
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
 msgid "Icon"
@@ -7007,6 +7126,12 @@ msgctxt "store account"
 msgid "Not available"
 msgstr "Inte tillgänglig"
 
+#: apps/desktop/src/views/PlaceholderView.tsx
+#, fuzzy
+#| msgid "Nothing unlocked yet."
+msgid "Not built yet."
+msgstr "Inget upplåst än."
+
 #. A BIOS file's state
 #. A BIOS file's state
 #. BIOS issues
@@ -7054,6 +7179,7 @@ msgstr "inte ifyllt än"
 
 #. A launcher wasn't found on this device
 #. An emulator's status
+#: apps/desktop/src/views/PlaceholderView.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Not found"
@@ -7840,9 +7966,11 @@ msgstr "Plattformens standard ({resolvedProfile})"
 msgid "Platform of {title}"
 msgstr "Plattform för {title}"
 
+#. The library's games grouped by platform
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/library/platforms/PlatformGrid.tsx
 msgid "Platforms"
 msgstr "Plattformar"
 
@@ -8470,6 +8598,10 @@ msgstr "Stäm av biblioteket när Caskade startar. Bevakningen kan ändå göra 
 msgid "Reconnect"
 msgstr "Anslut igen"
 
+#: apps/desktop/src/api/reply.ts
+msgid "Reconnect the drive or network share."
+msgstr ""
+
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgid "Reduce effects"
 msgstr "Minska effekter"
@@ -8642,6 +8774,10 @@ msgstr "Relevans"
 #: apps/desktop/src/shell/ErrorFallback.tsx
 msgid "Reload"
 msgstr "Läs in igen"
+
+#: apps/desktop/src/api/reply.ts
+msgid "Reload to see the current state."
+msgstr ""
 
 #. A removable drive
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
@@ -8918,6 +9054,12 @@ msgstr "Tolkad kommandorad"
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Restart and restore"
 msgstr "Starta om och återställ"
+
+#: apps/desktop/src/api/reply.ts
+#, fuzzy
+#| msgid "Restart for Caskade v{version}"
+msgid "Restart Caskade."
+msgstr "Starta om för Caskade v{version}"
 
 #: apps/desktop/src/shell/AppUpdateLink.tsx
 msgid "Restart for Caskade v{version}"
@@ -9900,6 +10042,10 @@ msgstr "Logga in på {name}"
 msgid "Sign in to {provider} as {name} again to see these achievements."
 msgstr "Logga in på {provider} som {name} igen för att se de här prestationerna."
 
+#: apps/desktop/src/api/reply.ts
+msgid "Sign in to an account that may do this."
+msgstr ""
+
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
 msgid "Sign in to change your profile."
 msgstr "Logga in för att ändra din profil."
@@ -10018,6 +10164,12 @@ msgstr "Bara softcore"
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "Some profiles missing"
 msgstr "Vissa profiler saknas"
+
+#: apps/desktop/src/api/reply.ts
+#, fuzzy
+#| msgid "What went wrong"
+msgid "Something went wrong."
+msgstr "Vad som gick fel"
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 msgid "Sort by"
@@ -10205,6 +10357,11 @@ msgstr "Steam-genvägar"
 #: apps/desktop/src/onboarding/Onboarding.tsx
 msgid "Step {step} of {total}"
 msgstr "Steg {step} av {total}"
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "Stereoscopic console"
+msgstr ""
 
 #. BIOS files
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
@@ -10713,6 +10870,10 @@ msgstr "Metadataservern har inte skickat något för det här spelet än. Förs�
 msgid "The move appears in Activity, where it can be cancelled."
 msgstr "Flytten visas i Aktivitet, där den kan avbrytas."
 
+#: apps/desktop/src/api/reply.ts
+msgid "The other side has trouble; try again in a while."
+msgstr ""
+
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "The output was long; its end is shown."
 msgstr "Utdata var lång; slutet visas."
@@ -10967,6 +11128,10 @@ msgstr "Det här behöver dig: välj vad som ska hända härnäst."
 msgid "This pairing link has expired. Make a new one on the other device (it starts with {device})."
 msgstr ""
 
+#: apps/desktop/src/api/reply.ts
+msgid "This part of Caskade didn't start this session. Restarting Caskade may fix it."
+msgstr ""
+
 #: apps/desktop/src/plugins/PluginViews.tsx
 msgid "This plugin view isn't available."
 msgstr "Den här tilläggsvyn är inte tillgänglig."
@@ -11120,6 +11285,10 @@ msgstr "Pågår"
 #: apps/desktop/src/views/StoreView.tsx
 msgid "Try again"
 msgstr "Försök igen"
+
+#: apps/desktop/src/api/reply.ts
+msgid "Trying again may work."
+msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Turn off"
@@ -11359,6 +11528,12 @@ msgstr "Uppdatera och spela"
 msgid "Update before playing?"
 msgstr "Uppdatera innan du spelar?"
 
+#: apps/desktop/src/api/reply.ts
+#, fuzzy
+#| msgid "Update {name} to {version}"
+msgid "Update Caskade to the newest version."
+msgstr "Uppdatera {name} till {version}"
+
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 msgid "Update download"
 msgstr "Nedladdning av uppdatering"
@@ -11533,6 +11708,11 @@ msgstr "Variabel {0}, namn"
 msgid "Variable {0} value"
 msgstr "Variabel {0}, värde"
 
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "Vector console"
+msgstr ""
+
 #: apps/desktop/src/views/activity/JobCard.tsx
 msgid "Verification found problems"
 msgstr "Verifieringen hittade problem"
@@ -11706,6 +11886,14 @@ msgstr "Bevakar mappar"
 msgctxt "library filter"
 msgid "Web"
 msgstr "Webb"
+
+#. The Web tab's mosaic of games
+#: apps/desktop/src/views/library/web/WebMosaic.tsx
+#, fuzzy
+#| msgctxt "library source"
+#| msgid "Web games"
+msgid "Web games"
+msgstr "Webbspel"
 
 #: apps/desktop/src/api/presentation.ts
 msgctxt "library source"

@@ -1015,6 +1015,11 @@ msgstr ""
 msgid "{title} to {device}"
 msgstr ""
 
+#. A platform's card: its name and how many games it has
+#: apps/desktop/src/views/library/platforms/PlatformGrid.tsx
+msgid "{title}, {games}"
+msgstr ""
+
 #. {title} is the game's title
 #: apps/desktop/src/views/game/Screenshots.tsx
 msgid "{title}, screenshot {number}"
@@ -1034,6 +1039,7 @@ msgstr ""
 #: apps/desktop/src/onboarding/run.ts
 #: apps/desktop/src/shell/TypeSearch.tsx
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/desktop/src/views/library/platforms/PlatformGrid.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
@@ -1199,6 +1205,11 @@ msgstr ""
 msgid "12-hour"
 msgstr ""
 
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "16-bit console"
+msgstr ""
+
 #. How often discovery refreshes
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "24 hours"
@@ -1208,13 +1219,58 @@ msgstr ""
 msgid "24-hour"
 msgstr ""
 
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "2nd gen console"
+msgstr ""
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "32-bit console"
+msgstr ""
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "3rd gen console"
+msgstr ""
+
 #. How often discovery refreshes
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "6 hours"
 msgstr ""
 
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "64-bit console"
+msgstr ""
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "6th gen console"
+msgstr ""
+
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 msgid "7-Zip {version} licence ({platforms})"
+msgstr ""
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "7th gen console"
+msgstr ""
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "8-bit console"
+msgstr ""
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "8th gen console"
+msgstr ""
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "9th gen console"
 msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
@@ -2347,6 +2403,11 @@ msgstr ""
 msgid "By language"
 msgstr ""
 
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "Cabinet"
+msgstr ""
+
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 msgid "Cache folder"
@@ -2654,6 +2715,11 @@ msgstr ""
 msgid "Catalogue"
 msgstr ""
 
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "CD console"
+msgstr ""
+
 #: apps/desktop/src/onboarding/Questions.tsx
 msgctxt "folder"
 msgid "Change"
@@ -2727,6 +2793,18 @@ msgstr ""
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 msgid "Check now"
+msgstr ""
+
+#: apps/desktop/src/api/reply.ts
+msgid "Check that Caskade may read and write the folder."
+msgstr ""
+
+#: apps/desktop/src/api/reply.ts
+msgid "Check the network connection."
+msgstr ""
+
+#: apps/desktop/src/api/reply.ts
+msgid "Check the server address and sign-in details."
 msgstr ""
 
 #. When updates were last checked for; {checked} is a date
@@ -3131,6 +3209,11 @@ msgstr ""
 #. The console-mode sidebar's navigation
 #: apps/desktop/src/shell/console/ConsoleSidebar.tsx
 msgid "Console"
+msgstr ""
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "Console add-on"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
@@ -3566,6 +3649,11 @@ msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 msgid "Desktop and console modes"
+msgstr ""
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "Desktop computer"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
@@ -4275,8 +4363,10 @@ msgid "Failed with exit code {0}"
 msgstr ""
 
 #. A heart on a favourite game's card
+#. A heart on a favourite game's card
 #: apps/desktop/src/views/library/LibraryCard.tsx
 #: apps/desktop/src/views/library/LibraryRow.tsx
+#: apps/desktop/src/views/library/web/WebMosaic.tsx
 msgid "Favorite"
 msgstr ""
 
@@ -4430,6 +4520,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Frame rate"
+msgstr ""
+
+#: apps/desktop/src/api/reply.ts
+msgid "Free some disk space."
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
@@ -4779,6 +4873,11 @@ msgctxt "device kind"
 msgid "Handheld"
 msgstr ""
 
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "Handheld"
+msgstr ""
+
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "Hardcore"
 msgstr ""
@@ -4868,6 +4967,11 @@ msgctxt "navigation"
 msgid "Home"
 msgstr ""
 
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "Home computer"
+msgstr ""
+
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Hooks: {hooks}"
 msgstr ""
@@ -4910,6 +5014,11 @@ msgstr ""
 #. An example server address
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "https://romm.example.com"
+msgstr ""
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "Hybrid console"
 msgstr ""
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
@@ -6873,6 +6982,10 @@ msgctxt "store account"
 msgid "Not available"
 msgstr ""
 
+#: apps/desktop/src/views/PlaceholderView.tsx
+msgid "Not built yet."
+msgstr ""
+
 #. A BIOS file's state
 #. A BIOS file's state
 #. BIOS issues
@@ -6920,6 +7033,7 @@ msgstr ""
 
 #. A launcher wasn't found on this device
 #. An emulator's status
+#: apps/desktop/src/views/PlaceholderView.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Not found"
@@ -7679,9 +7793,11 @@ msgstr ""
 msgid "Platform of {title}"
 msgstr ""
 
+#. The library's games grouped by platform
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/library/platforms/PlatformGrid.tsx
 msgid "Platforms"
 msgstr ""
 
@@ -8282,6 +8398,10 @@ msgstr ""
 msgid "Reconnect"
 msgstr ""
 
+#: apps/desktop/src/api/reply.ts
+msgid "Reconnect the drive or network share."
+msgstr ""
+
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgid "Reduce effects"
 msgstr ""
@@ -8453,6 +8573,10 @@ msgstr ""
 
 #: apps/desktop/src/shell/ErrorFallback.tsx
 msgid "Reload"
+msgstr ""
+
+#: apps/desktop/src/api/reply.ts
+msgid "Reload to see the current state."
 msgstr ""
 
 #. A removable drive
@@ -8725,6 +8849,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Restart and restore"
+msgstr ""
+
+#: apps/desktop/src/api/reply.ts
+msgid "Restart Caskade."
 msgstr ""
 
 #: apps/desktop/src/shell/AppUpdateLink.tsx
@@ -9684,6 +9812,10 @@ msgstr ""
 msgid "Sign in to {provider} as {name} again to see these achievements."
 msgstr ""
 
+#: apps/desktop/src/api/reply.ts
+msgid "Sign in to an account that may do this."
+msgstr ""
+
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
 msgid "Sign in to change your profile."
 msgstr ""
@@ -9801,6 +9933,10 @@ msgstr ""
 #. An emulator's status
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "Some profiles missing"
+msgstr ""
+
+#: apps/desktop/src/api/reply.ts
+msgid "Something went wrong."
 msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
@@ -9988,6 +10124,11 @@ msgstr ""
 #. First-run setup's progress dots
 #: apps/desktop/src/onboarding/Onboarding.tsx
 msgid "Step {step} of {total}"
+msgstr ""
+
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "Stereoscopic console"
 msgstr ""
 
 #. BIOS files
@@ -10478,6 +10619,10 @@ msgstr ""
 msgid "The move appears in Activity, where it can be cancelled."
 msgstr ""
 
+#: apps/desktop/src/api/reply.ts
+msgid "The other side has trouble; try again in a while."
+msgstr ""
+
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "The output was long; its end is shown."
 msgstr ""
@@ -10722,6 +10867,10 @@ msgstr ""
 msgid "This pairing link has expired. Make a new one on the other device (it starts with {device})."
 msgstr ""
 
+#: apps/desktop/src/api/reply.ts
+msgid "This part of Caskade didn't start this session. Restarting Caskade may fix it."
+msgstr ""
+
 #: apps/desktop/src/plugins/PluginViews.tsx
 msgid "This plugin view isn't available."
 msgstr ""
@@ -10872,6 +11021,10 @@ msgstr ""
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/desktop/src/views/StoreView.tsx
 msgid "Try again"
+msgstr ""
+
+#: apps/desktop/src/api/reply.ts
+msgid "Trying again may work."
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
@@ -11106,6 +11259,10 @@ msgstr ""
 msgid "Update before playing?"
 msgstr ""
 
+#: apps/desktop/src/api/reply.ts
+msgid "Update Caskade to the newest version."
+msgstr ""
+
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 msgid "Update download"
 msgstr ""
@@ -11274,6 +11431,11 @@ msgstr ""
 msgid "Variable {0} value"
 msgstr ""
 
+#: apps/desktop/src/views/library/platforms/catalog.ts
+msgctxt "platform kind"
+msgid "Vector console"
+msgstr ""
+
 #: apps/desktop/src/views/activity/JobCard.tsx
 msgid "Verification found problems"
 msgstr ""
@@ -11435,6 +11597,11 @@ msgstr ""
 #: apps/desktop/src/views/library/LibraryView.tsx
 msgctxt "library filter"
 msgid "Web"
+msgstr ""
+
+#. The Web tab's mosaic of games
+#: apps/desktop/src/views/library/web/WebMosaic.tsx
+msgid "Web games"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts

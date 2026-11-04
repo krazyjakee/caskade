@@ -21,7 +21,7 @@ import {
   rememberLibraryView,
   resolveLibraryView,
 } from "./views/library/remembered";
-import { PlaceholderView } from "./views/PlaceholderView";
+import { NotFoundView } from "./views/PlaceholderView";
 import { type SettingsTab, SettingsView } from "./views/SettingsView";
 import { StoreView, validateStoreSearch } from "./views/StoreView";
 import { rememberSettingsTab, resolveSettingsTab } from "./views/settings/rememberedTab";
@@ -37,7 +37,7 @@ function validateFrom(input: { from?: string } & SearchSchemaInput): { from?: st
 const rootRoute = createRootRoute({
   component: AppShell,
   errorComponent: AppCrash,
-  notFoundComponent: () => <PlaceholderView title="Not found" />,
+  notFoundComponent: NotFoundView,
 });
 
 const homeRoute = createRoute({

@@ -1,3 +1,6 @@
+import type { MessageDescriptor } from "@lingui/core";
+import { msg, t } from "@lingui/core/macro";
+
 /** The core's structured error (`ErrorReport` in the bindings, #160): a stable
  * code to match on, a sentence for people, redacted details and recovery
  * hints. Declared by shape here so this file doesn't depend on which commands
@@ -65,11 +68,11 @@ export function toFailure(error: unknown): CommandFailure {
   if (NOT_STARTED.test(text))
     return new CommandFailure({
       code: "unavailable",
-      summary: "This part of Caskade didn't start this session. Restarting Caskade may fix it.",
+      summary: t`This part of Caskade didn't start this session. Restarting Caskade may fix it.`,
       detail: text,
       hints: ["restart"],
     });
-  return new CommandFailure({ summary: text || "Something went wrong.", detail: null });
+  return new CommandFailure({ summary: text || t`Something went wrong.`, detail: null });
 }
 
 /** A command's data; an error reply rejects with a [`CommandFailure`]. */
@@ -79,17 +82,18 @@ export async function unwrap<T>(reply: Promise<Reply<T>>): Promise<T> {
   return settled.data;
 }
 
-/** Plain-language labels for the core's recovery hints. */
-export const hintLabels: Record<string, string> = {
-  retry: "Trying again may work.",
-  retryLater: "The other side has trouble; try again in a while.",
-  checkConnection: "Check the network connection.",
-  reconnectStorage: "Reconnect the drive or network share.",
-  freeSpace: "Free some disk space.",
-  checkPermissions: "Check that Caskade may read and write the folder.",
-  checkCredentials: "Check the server address and sign-in details.",
-  signIn: "Sign in to an account that may do this.",
-  reload: "Reload to see the current state.",
-  restart: "Restart Caskade.",
-  updateCaskade: "Update Caskade to the newest version.",
+/** Plain-language labels for the core's recovery hints, translated where
+ * they're shown. */
+export const hintLabels: Record<string, MessageDescriptor> = {
+  retry: msg`Trying again may work.`,
+  retryLater: msg`The other side has trouble; try again in a while.`,
+  checkConnection: msg`Check the network connection.`,
+  reconnectStorage: msg`Reconnect the drive or network share.`,
+  freeSpace: msg`Free some disk space.`,
+  checkPermissions: msg`Check that Caskade may read and write the folder.`,
+  checkCredentials: msg`Check the server address and sign-in details.`,
+  signIn: msg`Sign in to an account that may do this.`,
+  reload: msg`Reload to see the current state.`,
+  restart: msg`Restart Caskade.`,
+  updateCaskade: msg`Update Caskade to the newest version.`,
 };

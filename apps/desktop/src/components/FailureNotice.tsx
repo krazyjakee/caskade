@@ -32,8 +32,10 @@ export function FailureNotice({
   const hints = failure.hints
     // Try again says it already.
     .filter((hint) => !(onRetry && hint === "retry"))
-    .map((hint) => hintLabels[hint])
-    .filter((hint): hint is string => Boolean(hint));
+    .flatMap((hint) => {
+      const label = hintLabels[hint];
+      return label ? [t(label)] : [];
+    });
   return (
     <ErrorNotice
       title={title}
