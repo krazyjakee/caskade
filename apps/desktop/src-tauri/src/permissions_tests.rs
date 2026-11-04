@@ -135,6 +135,7 @@ fn each_group_is_allowed_for_admins_refused_without_it_and_allowed_once_granted(
             vec![
                 ("settings_set", set("core.general")),
                 ("settings_reset", set("core.appUpdates")),
+                ("settings_reset", set("core.updates")),
                 ("app_update_install", json!({})),
             ],
         ),
@@ -172,13 +173,7 @@ fn each_group_is_allowed_for_admins_refused_without_it_and_allowed_once_granted(
                 ("storage_remove", json!({})),
             ],
         ),
-        (
-            "installer",
-            vec![
-                ("settings_set", set("core.installer")),
-                ("settings_reset", set("core.updates")),
-            ],
-        ),
+        ("installer", vec![("settings_set", set("core.installer"))]),
         (
             "plugins",
             vec![
