@@ -281,7 +281,7 @@ export function ServerEditor({
         <Button variant="danger" size="sm" icon={Trash2} onPress={remove}>
           {isNew
             ? t({ message: "Discard", comment: "Drops a RomM server that isn't saved yet" })
-            : t({ message: "Remove", comment: "Removes a RomM server" })}
+            : t({ message: "Remove…", comment: "Asks before removing a RomM server" })}
         </Button>
       }
     >

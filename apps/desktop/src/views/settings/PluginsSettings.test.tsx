@@ -124,7 +124,7 @@ it("installs a folder only after its permissions were reviewed and accepted", as
 
   // Review, then decline: nothing is installed.
   await act(async () => {
-    fireEvent.click(screen.getByRole("button", { name: "Install from folder" }));
+    fireEvent.click(screen.getByRole("button", { name: "Install from folder…" }));
   });
   let dialog = await screen.findByRole("dialog");
   expect(within(dialog).getByText("HowLongToBeat")).toBeTruthy();
@@ -144,7 +144,7 @@ it("installs a folder only after its permissions were reviewed and accepted", as
 
   // Review, then accept.
   await act(async () => {
-    fireEvent.click(screen.getByRole("button", { name: "Install from folder" }));
+    fireEvent.click(screen.getByRole("button", { name: "Install from folder…" }));
   });
   dialog = await screen.findByRole("dialog");
   await act(async () => {
@@ -187,7 +187,7 @@ it("asks again when a plugin needs approval, and toggles the others", async () =
   show(api);
   await screen.findByText("Needs your approval");
   await act(async () => {
-    fireEvent.click(screen.getByRole("button", { name: "Review and allow" }));
+    fireEvent.click(screen.getByRole("button", { name: "Review and allow…" }));
   });
   const dialog = await screen.findByRole("dialog");
   expect(within(dialog).getByText("Run programs and change how games are launched")).toBeTruthy();
@@ -226,7 +226,7 @@ it("says a plugin can do nothing beyond its storage only without a UI half or pe
   const review = async (name: string) => {
     const row = within(list).getByText(name).closest("li") as HTMLElement;
     await act(async () => {
-      fireEvent.click(within(row).getByRole("button", { name: "Review and allow" }));
+      fireEvent.click(within(row).getByRole("button", { name: "Review and allow…" }));
     });
     const dialog = await screen.findByRole("dialog");
     const lines = within(within(dialog).getByRole("list", { name: "Permissions" }))
@@ -245,10 +245,10 @@ it("uninstalls only after a second, explicit confirmation", async () => {
   const { api, calls } = fake([summary({})]);
   show(api);
   await screen.findByText("Playtime stats");
-  fireEvent.click(screen.getByRole("button", { name: "Uninstall" }));
+  fireEvent.click(screen.getByRole("button", { name: "Uninstall…" }));
   fireEvent.click(screen.getByRole("button", { name: "Keep" }));
   expect(calls).toEqual([]);
-  fireEvent.click(screen.getByRole("button", { name: "Uninstall" }));
+  fireEvent.click(screen.getByRole("button", { name: "Uninstall…" }));
   await act(async () => {
     fireEvent.click(screen.getByRole("button", { name: "Uninstall Playtime stats" }));
   });
@@ -269,7 +269,7 @@ it("loads an unpacked folder in development builds and marks dev plugins", async
   const list = await screen.findByRole("list", { name: "Installed plugins" });
   expect(within(list).getByText("Dev")).toBeTruthy();
   await act(async () => {
-    fireEvent.click(screen.getByRole("button", { name: "Load unpacked" }));
+    fireEvent.click(screen.getByRole("button", { name: "Load unpacked…" }));
   });
   expect(calls).toEqual(["choose", "unpacked /downloads/hltb"]);
 });
@@ -281,7 +281,7 @@ it("puts the installed plugins and the catalogue in Settings cards, with no sett
   for (const name of ["Installed plugins", "Plugin and theme catalogue"])
     expect(screen.getByRole("region", { name }).getAttribute("data-cs")).toBe("settings-section");
   const installed = screen.getByRole("region", { name: "Installed plugins" });
-  expect(within(installed).getByRole("button", { name: "Install from folder" })).toBeTruthy();
+  expect(within(installed).getByRole("button", { name: "Install from folder…" })).toBeTruthy();
   // No plugin has settings: nothing says so, in a box or otherwise.
   await waitFor(() => expect(screen.queryByText("Loading plugins…")).toBeNull());
   expect(screen.queryByText("No plugin has settings yet.")).toBeNull();
@@ -299,13 +299,13 @@ it("keeps a plugin's actions in one group", async () => {
   const group = row.querySelector('[data-part="plugin-actions"]') as HTMLElement;
   expect(within(group).getByRole("switch", { name: "Enable Playtime stats" })).toBeTruthy();
   const buttons = within(group).getAllByRole("button");
-  expect(buttons.map((button) => button.textContent)).toEqual(["Details", "Uninstall"]);
+  expect(buttons.map((button) => button.textContent)).toEqual(["Details…", "Uninstall…"]);
   // Nothing to press outside the group.
   expect(within(row).getAllByRole("button")).toEqual(buttons);
 
   const grown = within(list).getByText("Grown plugin").closest("li") as HTMLElement;
   const actions = grown.querySelector('[data-part="plugin-actions"]') as HTMLElement;
-  expect(within(actions).getByRole("button", { name: "Review and allow" })).toBeTruthy();
+  expect(within(actions).getByRole("button", { name: "Review and allow…" })).toBeTruthy();
 });
 
 it("summarises a plugin's access once, with the rest in its details", async () => {

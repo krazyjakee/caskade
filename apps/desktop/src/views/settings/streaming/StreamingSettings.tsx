@@ -330,7 +330,7 @@ function PairedDevices() {
                     isDisabled={remove.isPending}
                     onPress={() => setForgetting(device.uuid)}
                   >
-                    <Trans>Forget</Trans>
+                    <Trans>Forget…</Trans>
                   </Button>
                 )}
                 {forgetting === device.uuid && (
@@ -559,7 +559,7 @@ function HostRow({ host, pair }: { host: StreamHost; pair: () => void }) {
             aria-label={t`Forget ${name}`}
             onPress={() => setConfirming(true)}
           >
-            <Trans>Forget</Trans>
+            <Trans>Forget…</Trans>
           </Button>
         )
       ) : (

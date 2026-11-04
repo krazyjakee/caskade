@@ -179,7 +179,7 @@ The catalogue sits in Settings → Plugins, above the installed plugins (`compon
   - A new plugin first opens the same permission review as a dev folder install.
   - The outcome follows: installed, off until allowed, restart for its pages, or why it failed and whether the previous version is back.
   - Offline, installing says it needs a connection.
-- **Managing:** Skip this update (or offer it again), Use this theme for an installed theme, and Remove, which asks first and, for a plugin, whether to keep its settings and data.
+- **Managing:** Skip this version (or offer it again), Use this theme for an installed theme, and Uninstall, which asks first and, for a plugin, whether to keep its settings and data.
 
 In console mode the list and the details are pad-driven: A on a row opens its details, the details take the whole screen with the install button focused, and B closes them.
 

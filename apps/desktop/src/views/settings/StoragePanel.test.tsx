@@ -150,7 +150,7 @@ describe("storage settings", () => {
   it("asks once, then moves a location's games and removes it as one job", async () => {
     const { api, settings } = setup([withGames(2), root("archive", "Archive", true)]);
     const dialog = await confirmation(
-      "Move its 2 games there, then remove",
+      "Move its 2 games there, then remove…",
       "Move its 2 games to Archive?",
     );
     expect(dialog.textContent).toContain(`${formatBytes(2048)} to move`);
@@ -170,7 +170,7 @@ describe("storage settings", () => {
   it("moves nothing when the question is cancelled", async () => {
     const { api } = setup([withGames(1), root("archive", "Archive", true)]);
     const dialog = await confirmation(
-      "Move its game there, then remove",
+      "Move its game there, then remove…",
       "Move its game to Archive?",
     );
     fireEvent.click(within(dialog).getByRole("button", { name: "Cancel" }));
@@ -183,7 +183,7 @@ describe("storage settings", () => {
       new Error("Cancelled. One game moved to Archive. Fast SSD was kept."),
     );
     const dialog = await confirmation(
-      "Move its 2 games there, then remove",
+      "Move its 2 games there, then remove…",
       "Move its 2 games to Archive?",
     );
     fireEvent.click(within(dialog).getByRole("button", { name: "Move and remove" }));

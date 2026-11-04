@@ -244,7 +244,7 @@ export function ThemePicker({
             onPress={() => load.mutate(undefined)}
             isDisabled={load.isPending}
           >
-            <Trans>Load theme folder</Trans>
+            <Trans>Load theme folder…</Trans>
           </Button>
         )}
       </div>

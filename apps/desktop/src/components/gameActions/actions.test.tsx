@@ -145,7 +145,7 @@ it("adds, edits, orders, defaults and deletes a release's actions", {
   type(textbox(dialog, "Name"), "Renamed");
   fireEvent.click(within(dialog).getByRole("button", { name: "Revert" }));
   expect(textbox(dialog, "Name").value).toBe("Configure");
-  fireEvent.click(within(dialog).getByRole("button", { name: "Delete" }));
+  fireEvent.click(within(dialog).getByRole("button", { name: "Delete…" }));
   fireEvent.click(within(dialog).getByRole("button", { name: "Delete “Configure”?" }));
   await waitFor(() =>
     expect(within(dialog).queryByRole("option", { name: /Configure/ })).toBeNull(),

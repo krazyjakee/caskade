@@ -122,7 +122,7 @@ it("a device sign-in shows its code", async () => {
 
 it("disconnecting explains the library stays, and removing previews first", async () => {
   const { api } = renderPanel(createStoreAccountsFixtureApi(fixtureAccounts().slice(0, 1)));
-  fireEvent.click(within(await row("Ada")).getByRole("button", { name: "Disconnect" }));
+  fireEvent.click(within(await row("Ada")).getByRole("button", { name: "Disconnect…" }));
   const dialog = await screen.findByRole("alertdialog");
   expect(within(dialog).getByText(/Its games stay in your library/)).toBeTruthy();
   fireEvent.click(within(dialog).getByRole("button", { name: "Disconnect" }));

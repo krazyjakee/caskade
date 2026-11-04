@@ -132,7 +132,7 @@ export function AccountsSettings() {
         description={t`Who uses Caskade here, and what each can change.`}
         aside={
           <Button size="sm" icon={Plus} onPress={() => setEditing({ type: "add" })}>
-            <Trans>Add account</Trans>
+            <Trans>Add account…</Trans>
           </Button>
         }
       >
@@ -169,7 +169,7 @@ export function AccountsSettings() {
                 aria-label={t`Edit ${{ name: account.name }}`}
                 onPress={() => setEditing({ type: "edit", id: account.id })}
               >
-                <Trans>Edit</Trans>
+                <Trans>Edit…</Trans>
               </Button>
               {deletable(account) && (
                 <Button
@@ -180,7 +180,7 @@ export function AccountsSettings() {
                   aria-label={t`Delete ${{ name: account.name }}`}
                   onPress={() => setEditing({ type: "delete", id: account.id })}
                 >
-                  <Trans>Delete</Trans>
+                  <Trans>Delete…</Trans>
                 </Button>
               )}
             </li>

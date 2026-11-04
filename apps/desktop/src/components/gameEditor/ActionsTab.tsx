@@ -305,7 +305,7 @@ export function ActionsTab({ gameId, details, onDirtyChange }: GameEditorTabProp
                       changes.remove.mutate(saved.id, { onSuccess: () => choose(null) });
                     }}
                   >
-                    {confirmDelete ? t`Delete “${saved.name}”?` : t`Delete`}
+                    {confirmDelete ? t`Delete “${saved.name}”?` : t`Delete…`}
                   </Button>
                 </>
               )}

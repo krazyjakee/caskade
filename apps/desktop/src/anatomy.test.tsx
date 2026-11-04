@@ -1210,7 +1210,7 @@ describe("the shell's catalogued anatomy, and the app-only parts of shared compo
       for (const listener of progress)
         listener({ id: "dev.caskade.howlongtobeat", phase: "downloading", received: 1, total: 2 });
     });
-    fireEvent.click(within(dialog).getByRole("button", { name: "Remove" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "Uninstall…" }));
     await within(dialog).findByRole("checkbox");
     expect(check()).toEqual([]);
     await close(dialog);

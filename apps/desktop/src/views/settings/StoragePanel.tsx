@@ -362,8 +362,8 @@ export function StoragePanel({ api }: { api: StorageApi }) {
                     {plural(
                       { games: active.games.length },
                       {
-                        one: "Move its game there, then remove",
-                        other: "Move its # games there, then remove",
+                        one: "Move its game there, then remove…",
+                        other: "Move its # games there, then remove…",
                       },
                     )}
                   </Button>

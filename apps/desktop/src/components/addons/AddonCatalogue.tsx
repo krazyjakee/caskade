@@ -231,7 +231,7 @@ function Row({ item, open }: { item: CatalogueItem; open: () => void }) {
           aria-label={t`Details of ${entry.name}`}
           onPress={open}
         >
-          <Trans>Details</Trans>
+          <Trans>Details…</Trans>
         </Button>
       </div>
     </li>

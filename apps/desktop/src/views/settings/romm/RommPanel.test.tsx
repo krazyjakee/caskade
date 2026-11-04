@@ -225,13 +225,13 @@ describe("RommPanel", () => {
     });
     renderPanel(api);
     fireEvent.click(await screen.findByRole("button", { name: "Home" }));
-    fireEvent.click(await screen.findByRole("button", { name: "Remove" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Remove…" }));
     const confirm = await screen.findByRole("alertdialog", { name: "Remove Home?" });
     expect(confirm.textContent).toContain("Its games leave your library");
     fireEvent.click(within(confirm).getByRole("button", { name: "Cancel" }));
     await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
     expect(api.removeServer).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Remove" }));
+    fireEvent.click(screen.getByRole("button", { name: "Remove…" }));
     fireEvent.click(
       within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Remove" }),
     );

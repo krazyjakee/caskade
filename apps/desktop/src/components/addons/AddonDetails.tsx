@@ -219,8 +219,8 @@ export function AddonDetails({
             >
               <p className="text-sm">
                 {entry.kind === "plugin"
-                  ? t`Remove ${entry.name}?`
-                  : t`Remove ${entry.name}? If it's the theme in use, the default theme takes over.`}
+                  ? t`Uninstall ${entry.name}?`
+                  : t`Uninstall ${entry.name}? If it's the theme in use, the default theme takes over.`}
               </p>
               {entry.kind === "plugin" && (
                 <Checkbox data-spatial="focusable" isSelected={keepData} onChange={setKeepData}>
@@ -239,7 +239,7 @@ export function AddonDetails({
                   isDisabled={remove.isPending}
                   onPress={() => remove.mutate()}
                 >
-                  <Trans>Remove</Trans>
+                  <Trans>Uninstall</Trans>
                 </Button>
               </div>
               {remove.error && (
@@ -263,7 +263,7 @@ export function AddonDetails({
                 isDisabled={busy}
                 onPress={() => setConfirmRemove(true)}
               >
-                <Trans>Remove</Trans>
+                <Trans>Uninstall…</Trans>
               </Button>
             )}
             {compatibility.state === "updateAvailable" && release && (
@@ -274,7 +274,11 @@ export function AddonDetails({
                 isDisabled={busy}
                 onPress={() => skip.mutate(skipped ? null : release.version)}
               >
-                {skipped ? <Trans>Offer this update again</Trans> : <Trans>Skip this update</Trans>}
+                {skipped ? (
+                  <Trans>Offer this version again</Trans>
+                ) : (
+                  <Trans>Skip this version</Trans>
+                )}
               </Button>
             )}
             {entry.kind === "theme" && installed && <ApplyTheme id={entry.id} />}

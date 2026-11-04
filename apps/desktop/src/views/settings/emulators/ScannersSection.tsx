@@ -52,10 +52,10 @@ import { StackedCell, StackedRow, StackedTable } from "./StackedTable";
 
 const playlistTypes = new Set(["m3u", "cue", "gdi"]);
 const exclusionSyntax = [
-  { pattern: "bios/", meaning: msg`This exact path under the scan folder` },
-  { pattern: ">*.txt", meaning: msg`A name or path at any depth (glob)` },
-  { pattern: "?^beta/.*", meaning: msg`Regex anchored at the scan folder` },
-  { pattern: ">?\\(Beta\\)", meaning: msg`Regex at any depth` },
+  { pattern: "bios/", meaning: msg`This folder or file in the scan folder` },
+  { pattern: ">*.txt", meaning: msg`This name in any folder; * stands for any text` },
+  { pattern: "?^beta/.*", meaning: msg`A regular expression, from the start of the path` },
+  { pattern: ">?\\(Beta\\)", meaning: msg`A regular expression, anywhere in the path` },
 ];
 type Toggle = "recursive" | "scanArchives" | "skipCloudPlaceholders" | "inLibraryUpdate";
 const toggles: {
@@ -194,7 +194,7 @@ function ScannerEditor({
               setConfirmingRemove(true);
             }}
           >
-            <Trans comment="Remove the ROM scanner">Remove</Trans>
+            <Trans comment="Remove the ROM scanner">Remove…</Trans>
           </Button>
         )
       }
@@ -447,8 +447,11 @@ function ExclusionSyntax() {
   return (
     <aside className="rounded-control border border-accent-alt/25 bg-accent-alt/5 p-3 text-xs text-fg-muted">
       <div className="mb-2 font-mono tracking-wider text-accent-alt uppercase">
-        <Trans comment="The exclusion patterns' syntax">Syntax</Trans>
+        <Trans comment="How to write an exclusion pattern">Patterns</Trans>
       </div>
+      <p className="mb-2">
+        {t`Type a path to skip that folder or file. Start with > to skip a name wherever it turns up: >*.txt skips every text file.`}
+      </p>
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">
         {exclusionSyntax.map((syntax) => (
           <div key={syntax.pattern} className="contents">

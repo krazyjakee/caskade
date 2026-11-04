@@ -146,21 +146,23 @@ it("installs, applies and removes a theme; skips an update; keeps plugin data on
       theme: "caskade.paper",
     }),
   );
-  fireEvent.click(within(dialog).getByRole("button", { name: "Remove" }));
-  fireEvent.click(within(dialog).getByRole("button", { name: "Remove" }));
+  fireEvent.click(within(dialog).getByRole("button", { name: "Uninstall…" }));
+  fireEvent.click(within(dialog).getByRole("button", { name: "Uninstall" }));
   await waitFor(() => expect(within(row("Paper")).getByText("Available")).toBeTruthy());
   fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
 
   const skip = vi.spyOn(addons, "skipUpdate");
   dialog = await details("HowLongToBeat");
-  fireEvent.click(within(dialog).getByRole("button", { name: "Skip this update" }));
+  fireEvent.click(within(dialog).getByRole("button", { name: "Skip this version" }));
   await waitFor(() => expect(skip).toHaveBeenCalledWith("dev.caskade.howlongtobeat", "0.2.0"));
   const uninstall = vi.spyOn(addons, "uninstall");
-  fireEvent.click(within(dialog).getByRole("button", { name: "Remove" }));
+  fireEvent.click(within(dialog).getByRole("button", { name: "Uninstall…" }));
   expect(
     within(dialog).getByRole("checkbox", { name: "Keep its settings and data for a reinstall" }),
   ).toBeTruthy();
-  fireEvent.click(within(dialog).getAllByRole("button", { name: "Remove" }).at(-1) as HTMLElement);
+  fireEvent.click(
+    within(dialog).getAllByRole("button", { name: "Uninstall" }).at(-1) as HTMLElement,
+  );
   await waitFor(() => expect(uninstall).toHaveBeenCalledWith("dev.caskade.howlongtobeat", true));
 });
 

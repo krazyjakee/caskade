@@ -252,7 +252,7 @@ function EmulatorCard({ item, snapshot }: { item: Installable; snapshot: Emulati
   );
 }
 
-/** Update and Skip for a newer version of a managed emulator. */
+/** Update and Skip this version for a newer version of a managed emulator. */
 function ManagedUpdate({ item }: { item: Installable }) {
   const { t } = useLingui();
   const action = useManagedAction();
@@ -275,13 +275,10 @@ function ManagedUpdate({ item }: { item: Installable }) {
         size="sm"
         variant="ghost"
         isDisabled={action.isPending}
-        aria-label={t({
-          message: `Skip ${{ name: item.name }} ${{ version: item.latestLabel }}`,
-          comment: "Skips this update of an emulator",
-        })}
+        aria-label={t`Skip this version of ${{ name: item.name }}`}
         onPress={() => action.mutate({ action: "skip", emulatorId })}
       >
-        <Trans comment="Skips an emulator update">Skip</Trans>
+        <Trans>Skip this version</Trans>
       </Button>
       {action.error && (
         <p role="alert" className="basis-full text-xs text-danger">

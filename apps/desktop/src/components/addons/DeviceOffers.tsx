@@ -89,7 +89,7 @@ export function DeviceOffers({
                     onPress={() => open(id)}
                     aria-label={t`See ${name}`}
                   >
-                    <Trans>See it</Trans>
+                    <Trans>See it…</Trans>
                   </Button>
                 </div>
               )}

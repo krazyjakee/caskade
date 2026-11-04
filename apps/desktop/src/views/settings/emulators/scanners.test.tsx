@@ -166,7 +166,7 @@ it("asks before removing a scanner, and says its games stay (#49)", async () => 
   const remove = vi.spyOn(api, "removeScanner");
   mount(api);
   fireEvent.click(await screen.findByRole("button", { name: "SNES collection" }));
-  fireEvent.click(await screen.findByRole("button", { name: "Remove" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Remove…" }));
   const confirm = await screen.findByRole("alertdialog", { name: "Remove SNES collection?" });
   expect(confirm.textContent).toContain("Its games stay in your library");
   expect(remove).not.toHaveBeenCalled();

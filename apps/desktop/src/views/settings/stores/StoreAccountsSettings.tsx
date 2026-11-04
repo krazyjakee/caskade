@@ -346,7 +346,7 @@ function AccountRow({ summary, flows }: { summary: StoreAccountSummary; flows: S
         )}
         {account.enabled && (
           <Button size="sm" variant="ghost" onPress={() => setDialog("disconnect")}>
-            <Trans>Disconnect</Trans>
+            <Trans>Disconnect…</Trans>
           </Button>
         )}
         <Button size="sm" variant="ghost" onPress={() => setDialog("remove")}>

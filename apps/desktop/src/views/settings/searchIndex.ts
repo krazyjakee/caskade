@@ -61,7 +61,8 @@ export const sectionWords: Readonly<Record<SettingsTab, MessageDescriptor>> = {
     comment: "Search words for Settings → Installer, separated by commas",
   }),
   plugins: msg({
-    message: "add-ons, addons, extensions, catalogue, catalog, themes, permissions",
+    message:
+      "add-ons, addons, extensions, catalogue, catalog, themes, permissions, uninstall, remove",
     comment: "Search words for Settings → Plugins, separated by commas",
   }),
   stores: msg({

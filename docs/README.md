@@ -17,6 +17,7 @@
 - [Launch actions](launch-actions.md): a release's named play and tool actions, the default or ask-at-launch choice, tracking modes and what each target supports.
 - [Lifecycle scripts](lifecycle-scripts.md): commands the user runs before a launch, after the game starts and after it exits, globally, per emulator profile and per game: order, failures, values as data, shells per OS and permissions.
 - [Localization](localization.md): gettext PO catalogs, the Rust side's runtime and `tr!` macros, Lingui in the webview and `just i18n` extraction.
+- [Words for actions](ui-wording.md): which verb a button uses, and when it ends with an ellipsis.
 - [Translating Caskade](translating.md): the domains, starting and editing a language, trying it, `just i18n-check`, and writing translator comments and contexts.
 - [Plugin contract](plugins/README.md), the [add-on catalogue](plugins/catalogue.md) and [publishing to it](plugins/publishing.md)
 - [Theming contract](theming/README.md) and [writing a theme](theming/writing-a-theme.md)

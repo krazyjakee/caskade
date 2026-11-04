@@ -573,10 +573,10 @@ msgstr ""
 msgid "{game} isn't in your library: Caskade adds it, with this save as its first version."
 msgstr ""
 
-#. js-lingui:icu=%7Bgames%2C+plural%2C+one+%7BMove+its+game+there%2C+then+remove%7D+other+%7BMove+its+%23+games+there%2C+then+remove%7D%7D&pluralize_on=games
+#. js-lingui:icu=%7Bgames%2C+plural%2C+one+%7BMove+its+game+there%2C+then+remove%E2%80%A6%7D+other+%7BMove+its+%23+games+there%2C+then+remove%E2%80%A6%7D%7D&pluralize_on=games
 #: apps/desktop/src/views/settings/StoragePanel.tsx
-msgid "Move its game there, then remove"
-msgid_plural "Move its # games there, then remove"
+msgid "Move its game there, then remove…"
+msgid_plural "Move its # games there, then remove…"
 msgstr[0] ""
 msgstr[1] ""
 
@@ -1388,10 +1388,6 @@ msgstr ""
 msgid "A link someone sent you from their Caskade"
 msgstr ""
 
-#: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
-msgid "A name or path at any depth (glob)"
-msgstr ""
-
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
 msgid "A newer save from {device} hasn't arrived yet, so the game started with the save on this device."
 msgstr ""
@@ -1444,6 +1440,14 @@ msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 msgid "A record for a game Caskade can't start, like a cartridge or a disc: it keeps your notes, artwork and collections. Add something to start later in Edit details."
+msgstr ""
+
+#: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+msgid "A regular expression, anywhere in the path"
+msgstr ""
+
+#: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+msgid "A regular expression, from the start of the path"
 msgstr ""
 
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
@@ -1697,8 +1701,11 @@ msgid "Add a storage location in Settings → Storage."
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
-#: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 msgid "Add account"
+msgstr ""
+
+#: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+msgid "Add account…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
@@ -1828,7 +1835,7 @@ msgstr ""
 
 #. Search words for Settings → Plugins, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
-msgid "add-ons, addons, extensions, catalogue, catalog, themes, permissions"
+msgid "add-ons, addons, extensions, catalogue, catalog, themes, permissions, uninstall, remove"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
@@ -2173,14 +2180,11 @@ msgstr ""
 msgid "Appearance"
 msgstr ""
 
+#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
 msgctxt "settings tab"
 msgid "Appearance"
-msgstr ""
-
-#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
-msgid "Appearance settings"
 msgstr ""
 
 #. Add arguments after the specification's
@@ -3040,11 +3044,7 @@ msgid "Change IGDB game"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
-msgid "Change PIN"
-msgstr ""
-
-#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
-msgid "Change this Settings section."
+msgid "Change PIN…"
 msgstr ""
 
 #. placeholder {0}: conflict.theirs
@@ -3985,8 +3985,6 @@ msgid "Defaults apply to compatible games that use Platform default. BIOS folder
 msgstr ""
 
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
-#: apps/desktop/src/components/gameEditor/ActionsTab.tsx
-#: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 msgid "Delete"
 msgstr ""
@@ -4018,6 +4016,9 @@ msgid "Delete {name}?"
 msgstr ""
 
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
+#: apps/desktop/src/components/gameEditor/ActionsTab.tsx
+#: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 msgid "Delete…"
 msgstr ""
 
@@ -4100,10 +4101,8 @@ msgid "Destination"
 msgstr ""
 
 #. Button hint: a pad's X opens the game's quick look
-#: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/views/library/GameActions.tsx
-#: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Details"
 msgstr ""
 
@@ -4114,6 +4113,11 @@ msgstr ""
 #. placeholder {0}: entry.name
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 msgid "Details of {0}"
+msgstr ""
+
+#: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/desktop/src/views/settings/PluginsSettings.tsx
+msgid "Details…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
@@ -4203,6 +4207,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Disconnect {name}?"
+msgstr ""
+
+#: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+msgid "Disconnect…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
@@ -4412,10 +4420,6 @@ msgstr ""
 msgid "Early access"
 msgstr ""
 
-#: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
-msgid "Edit"
-msgstr ""
-
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
@@ -4461,6 +4465,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 msgid "Edit…"
 msgstr ""
 
@@ -4492,6 +4497,7 @@ msgstr ""
 msgid "Emulation"
 msgstr ""
 
+#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/SettingsView.tsx
 msgctxt "settings tab"
 msgid "Emulation"
@@ -4503,10 +4509,6 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 msgid "Emulation section"
-msgstr ""
-
-#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
-msgid "Emulation settings"
 msgstr ""
 
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
@@ -4600,6 +4602,10 @@ msgstr ""
 #. Search words for Settings → Emulation, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "emulators, emulation, ROMs, retro, consoles, platforms, BIOS, firmware, RetroArch, cores, scanners, RomM, profiles"
+msgstr ""
+
+#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+msgid "Emulators, ROM scanners, BIOS files and RomM servers."
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
@@ -4972,7 +4978,6 @@ msgid "For new games only"
 msgstr ""
 
 #: apps/desktop/src/components/shares/SharesList.tsx
-#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Forget"
 msgstr ""
 
@@ -4987,6 +4992,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Forget them all"
+msgstr ""
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "Forget…"
 msgstr ""
 
 #. A BIOS file's state
@@ -5315,14 +5324,11 @@ msgstr ""
 msgid "Games, play time, collections, edits, launch actions, accounts and settings. Always included."
 msgstr ""
 
+#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
 msgctxt "settings tab"
 msgid "General"
-msgstr ""
-
-#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
-msgid "General settings"
 msgstr ""
 
 #. The Store's genre filter
@@ -5568,6 +5574,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgid "How games are shown in grids."
+msgstr ""
+
+#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+msgid "How games download and install, and torrent links."
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
@@ -5852,11 +5862,11 @@ msgid "Install from file…"
 msgstr ""
 
 #: apps/desktop/src/views/activity/AddGame.tsx
-#: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Install from folder"
 msgstr ""
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Install from folder…"
 msgstr ""
 
@@ -6006,13 +6016,10 @@ msgstr ""
 msgid "Installer"
 msgstr ""
 
+#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/SettingsView.tsx
 msgctxt "settings tab"
 msgid "Installer"
-msgstr ""
-
-#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
-msgid "Installer settings"
 msgstr ""
 
 #. A background job's phase
@@ -6364,6 +6371,10 @@ msgstr ""
 msgid "Language & Region"
 msgstr ""
 
+#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+msgid "Language, startup, closing and updates."
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgctxt "device kind"
 msgid "Laptop"
@@ -6434,14 +6445,11 @@ msgstr ""
 msgid "Launchers"
 msgstr ""
 
+#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
 msgctxt "settings tab"
 msgid "Launchers"
-msgstr ""
-
-#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
-msgid "Launchers settings"
 msgstr ""
 
 #. Search words for Settings → Launchers, separated by commas
@@ -6527,6 +6535,7 @@ msgctxt "plugin event"
 msgid "library changes"
 msgstr ""
 
+#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
 msgctxt "settings tab"
@@ -6535,10 +6544,6 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Library discovery is off, so the settings below don't apply until it's on."
-msgstr ""
-
-#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
-msgid "Library Discovery settings"
 msgstr ""
 
 #: apps/desktop/src/shell/LibraryNav.tsx
@@ -6631,11 +6636,11 @@ msgid "Load more"
 msgstr ""
 
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
-msgid "Load theme folder"
+msgid "Load theme folder…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
-msgid "Load unpacked"
+msgid "Load unpacked…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
@@ -6927,11 +6932,11 @@ msgid "Make your first one"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
-msgid "Manage the default location and other game storage roots."
+msgid "Manage"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
-msgid "Manage…"
+msgid "Manage the default location and other game storage roots."
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryCard.tsx
@@ -8018,7 +8023,7 @@ msgid "Offer it again"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
-msgid "Offer this update again"
+msgid "Offer this version again"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
@@ -8532,6 +8537,11 @@ msgstr ""
 msgid "Paste a pairing link from another device"
 msgstr ""
 
+#. How to write an exclusion pattern
+#: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+msgid "Patterns"
+msgstr ""
+
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "peer downloads"
 msgstr ""
@@ -8908,18 +8918,19 @@ msgctxt "game menu section"
 msgid "Plugins"
 msgstr ""
 
+#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/SettingsView.tsx
 msgctxt "settings tab"
 msgid "Plugins"
 msgstr ""
 
+#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+msgid "Plugins and add-on themes, and what they may do."
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Plugins and themes"
-msgstr ""
-
-#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
-msgid "Plugins settings"
 msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
@@ -9361,14 +9372,6 @@ msgctxt "store account"
 msgid "Refreshing…"
 msgstr ""
 
-#: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
-msgid "Regex anchored at the scan folder"
-msgstr ""
-
-#: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
-msgid "Regex at any depth"
-msgstr ""
-
 #. A column of a store game's releases
 #: apps/desktop/src/views/store/StoreGameView.tsx
 msgid "Region"
@@ -9473,10 +9476,7 @@ msgstr ""
 
 #. Confirms removing a ROM scanner
 #. Confirms removing an emulator or profile
-#. Remove the ROM scanner
 #. Removes a RomM server
-#. Removes a RomM server
-#: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
@@ -9506,16 +9506,6 @@ msgstr ""
 msgid "Remove {0}"
 msgstr ""
 
-#. placeholder {0}: entry.name
-#: apps/desktop/src/components/addons/AddonDetails.tsx
-msgid "Remove {0}?"
-msgstr ""
-
-#. placeholder {0}: entry.name
-#: apps/desktop/src/components/addons/AddonDetails.tsx
-msgid "Remove {0}? If it's the theme in use, the default theme takes over."
-msgstr ""
-
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Remove {folder}"
 msgstr ""
@@ -9535,7 +9525,7 @@ msgid "Remove {name}'s PIN?"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
-msgid "Remove {profile}"
+msgid "Remove {profile}…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
@@ -9559,7 +9549,7 @@ msgid "Remove {value}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
-msgid "Remove emulator"
+msgid "Remove emulator…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
@@ -9594,6 +9584,10 @@ msgstr ""
 msgid "Remove PIN"
 msgstr ""
 
+#: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+msgid "Remove PIN…"
+msgstr ""
+
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Remove this location from the library? Files on disk are kept."
 msgstr ""
@@ -9603,6 +9597,10 @@ msgstr ""
 msgid "Remove variable {0}"
 msgstr ""
 
+#. Asks before removing a RomM server
+#. Remove the ROM scanner
+#: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Remove…"
 msgstr ""
@@ -9877,7 +9875,7 @@ msgid "Revert"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
-msgid "Review and allow"
+msgid "Review and allow…"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
@@ -10482,7 +10480,7 @@ msgid "See all results for {input}"
 msgstr ""
 
 #: apps/desktop/src/components/addons/DeviceOffers.tsx
-msgid "See it"
+msgid "See it…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
@@ -10604,7 +10602,7 @@ msgid "Set IGDB game"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
-msgid "Set PIN"
+msgid "Set PIN…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
@@ -10683,6 +10681,11 @@ msgstr ""
 
 #: apps/desktop/src/views/SettingsView.tsx
 msgid "Settings sections"
+msgstr ""
+
+#. Over the Settings sections a standard account may change
+#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+msgid "Settings sections it can change"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
@@ -10892,15 +10895,8 @@ msgstr ""
 msgid "Size unknown"
 msgstr ""
 
-#. Skips an emulator update
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
-#: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 msgid "Skip"
-msgstr ""
-
-#. Skips this update of an emulator
-#: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
-msgid "Skip {name} {version}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
@@ -10916,13 +10912,15 @@ msgid "Skip the picker when the default location is available. A single eligible
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
-msgid "Skip this update"
-msgstr ""
-
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
+#: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Skip this version"
+msgstr ""
+
+#: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+msgid "Skip this version of {name}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
@@ -11262,6 +11260,7 @@ msgstr ""
 msgid "Storage"
 msgstr ""
 
+#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/SettingsView.tsx
 msgctxt "settings tab"
 msgid "Storage"
@@ -11305,10 +11304,6 @@ msgstr ""
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
 msgid "Storage service is unavailable"
-msgstr ""
-
-#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
-msgid "Storage settings"
 msgstr ""
 
 #: apps/desktop/src/shell/nav.ts
@@ -11480,11 +11475,6 @@ msgstr ""
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 msgid "Syncing…"
-msgstr ""
-
-#. The exclusion patterns' syntax
-#: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
-msgid "Syntax"
 msgstr ""
 
 #. Follow the operating system's reduced-motion setting
@@ -11834,6 +11824,10 @@ msgstr ""
 msgid "Theme, accent and layout."
 msgstr ""
 
+#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+msgid "Theme, look, motion and custom CSS."
+msgstr ""
+
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Themes"
@@ -11933,16 +11927,16 @@ msgstr ""
 msgid "This device's sync key is gone"
 msgstr ""
 
-#: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
-msgid "This exact path under the scan folder"
-msgstr ""
-
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
 msgid "This folder is empty."
 msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "This folder isn't there. Connect its drive, or choose another folder. Automatic backups try again later."
+msgstr ""
+
+#: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+msgid "This folder or file in the scan folder"
 msgstr ""
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
@@ -11981,6 +11975,10 @@ msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 msgid "This may already be in your library"
+msgstr ""
+
+#: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+msgid "This name in any folder; * stands for any text"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobRecovery.tsx
@@ -12209,6 +12207,10 @@ msgctxt "PIN pad"
 msgid "Type"
 msgstr ""
 
+#: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+msgid "Type a path to skip that folder or file. Start with > to skip a name wherever it turns up: >*.txt skips every text file."
+msgstr ""
+
 #: apps/desktop/src/views/activity/InstallIngress.tsx
 msgid "Unable to confirm installation."
 msgstr ""
@@ -12221,8 +12223,8 @@ msgstr ""
 msgid "unhide"
 msgstr ""
 
+#: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
-#: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Uninstall"
 msgstr ""
 
@@ -12236,10 +12238,21 @@ msgstr ""
 msgid "Uninstall {0}"
 msgstr ""
 
+#. placeholder {0}: entry.name
+#: apps/desktop/src/components/addons/AddonDetails.tsx
+msgid "Uninstall {0}?"
+msgstr ""
+
+#. placeholder {0}: entry.name
+#: apps/desktop/src/components/addons/AddonDetails.tsx
+msgid "Uninstall {0}? If it's the theme in use, the default theme takes over."
+msgstr ""
+
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
 msgid "Uninstall {title}?"
 msgstr ""
 
+#: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Uninstall…"
@@ -12857,6 +12870,10 @@ msgstr ""
 msgid "What it starts"
 msgstr ""
 
+#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+msgid "What scans look for, their folders and ignored results."
+msgstr ""
+
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "What should Caskade look for?"
 msgstr ""
@@ -12920,6 +12937,10 @@ msgstr ""
 msgid "Where games are installed"
 msgstr ""
 
+#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+msgid "Where games install, and the default location."
+msgstr ""
+
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "Where should new games go?"
 msgstr ""
@@ -12958,6 +12979,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Which launchers are scanned: <0>Launchers</0>"
+msgstr ""
+
+#: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+msgid "Which launchers' games join the library."
 msgstr ""
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx

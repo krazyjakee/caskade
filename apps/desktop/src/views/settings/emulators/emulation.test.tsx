@@ -292,7 +292,7 @@ it("offers a newer version of a Caskade-installed emulator, with Skip", async ()
   const list = await screen.findByRole("list", { name: "Emulators to install" });
   const ppsspp = itemOf(list, "PPSSPP");
   expect(within(ppsspp).getByText("Installed v1.20.3")).toBeTruthy();
-  fireEvent.click(within(ppsspp).getByRole("button", { name: "Skip PPSSPP v1.20.4" }));
+  fireEvent.click(within(ppsspp).getByRole("button", { name: "Skip this version of PPSSPP" }));
   await within(ppsspp).findByRole("button", { name: "Reinstall PPSSPP" });
   expect(update).not.toHaveBeenCalled();
 });
@@ -372,13 +372,13 @@ it("asks before removing an emulator, and says its profiles go with it (#49)", a
   const api = createEmulationFixtureApi();
   const remove = vi.spyOn(api, "removeEmulator");
   mount(api);
-  fireEvent.click(await screen.findByRole("button", { name: "Remove emulator" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Remove emulator…" }));
   const confirm = await screen.findByRole("alertdialog", { name: "Remove RetroArch?" });
   expect(confirm.textContent).toContain("Its profiles go with it");
   fireEvent.click(within(confirm).getByRole("button", { name: "Cancel" }));
   await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
   expect(remove).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole("button", { name: "Remove emulator" }));
+  fireEvent.click(screen.getByRole("button", { name: "Remove emulator…" }));
   fireEvent.click(
     within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Remove" }),
   );

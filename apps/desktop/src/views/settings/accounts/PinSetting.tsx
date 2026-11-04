@@ -69,11 +69,11 @@ export function PinSetting({
         }
       >
         <Button size="sm" onPress={() => setDialog("choose")}>
-          {hasPin ? <Trans>Change PIN</Trans> : <Trans>Set PIN</Trans>}
+          {hasPin ? <Trans>Change PIN…</Trans> : <Trans>Set PIN…</Trans>}
         </Button>
         {hasPin && (
           <Button size="sm" variant="ghost" onPress={remove}>
-            <Trans>Remove PIN</Trans>
+            <Trans>Remove PIN…</Trans>
           </Button>
         )}
       </SettingRow>

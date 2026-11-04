@@ -1424,7 +1424,7 @@ export const anatomy = {
         "Asks before removing; for a plugin, whether to keep its settings and data.",
       "remove-confirmed": "Removes it (a `button`).",
       actions: "The add-on's buttons.",
-      remove: "Remove… (a `button`).",
+      remove: "Uninstall… (a `button`).",
       skip: "Skips this update, or offers it again (a `button`).",
       apply: "Makes an installed theme the one in use (a `button`).",
       install: "Install, Update or Try again (a `button`).",

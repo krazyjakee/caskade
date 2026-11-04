@@ -117,7 +117,7 @@ it("shows and hides tabs as soon as an admin changes the account's permissions",
 
 it("shows the core's reason when a standard account needs the admin's PIN first", async () => {
   const app = renderApp("/settings?tab=accounts");
-  fireEvent.click(await screen.findByRole("button", { name: "Add account" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Add account…" }));
   const editor = await dialog("Add account");
   fireEvent.change(within(editor).getByRole("textbox", { name: "Name" }), {
     target: { value: "Kid" },
@@ -142,22 +142,22 @@ it("adds a standard account with a PIN, its permissions and an age limit", async
     accounts: [family[0] as FixtureAccount],
     activeAccount: "ada",
   });
-  fireEvent.click(await screen.findByRole("button", { name: "Add account" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Add account…" }));
   const editor = await dialog("Add account");
   fireEvent.change(within(editor).getByRole("textbox", { name: "Name" }), {
     target: { value: "Sam" },
   });
-  fireEvent.click(within(editor).getByRole("switch", { name: "Appearance settings" }));
+  fireEvent.click(within(editor).getByRole("switch", { name: "Appearance" }));
   fireEvent.click(within(editor).getByRole("switch", { name: "Install games" }));
   fireEvent.click(within(editor).getByRole("button", { name: /Maximum age rating/ }));
   fireEvent.click(await screen.findByRole("option", { name: "PEGI 16" }));
   fireEvent.click(within(editor).getByRole("switch", { name: "Unrated games need a PIN" }));
 
   // The PIN, twice, on the pad.
-  fireEvent.click(within(editor).getByRole("button", { name: "Set PIN" }));
+  fireEvent.click(within(editor).getByRole("button", { name: "Set PIN…" }));
   await enterPin("Choose a new PIN for Sam", "9753");
   await enterPin("Enter the new PIN again", "9753");
-  await within(editor).findByRole("button", { name: "Change PIN" });
+  await within(editor).findByRole("button", { name: "Change PIN…" });
 
   fireEvent.click(within(editor).getByRole("button", { name: "Add" }));
   await waitFor(() => expect(screen.queryByRole("dialog", { name: "Add account" })).toBeNull());
@@ -186,7 +186,7 @@ it("refuses to remove the admin's PIN while a standard account exists", async ()
   renderApp("/settings?tab=accounts", { accounts: family, activeAccount: "ada" });
   fireEvent.click(await screen.findByRole("button", { name: "Edit Ada" }));
   const editor = await dialog("Edit Ada");
-  fireEvent.click(within(editor).getByRole("button", { name: "Remove PIN" }));
+  fireEvent.click(within(editor).getByRole("button", { name: "Remove PIN…" }));
   // Ada is the signed-in account: her current PIN first.
   await enterPin("Enter Ada's current PIN", "2468");
   await screen.findByText("Every admin needs a PIN while there are standard accounts.");
@@ -209,13 +209,13 @@ it("asks before removing another account's PIN (#49)", async () => {
   const app = renderApp("/settings?tab=accounts", { accounts: family, activeAccount: "ada" });
   fireEvent.click(await screen.findByRole("button", { name: "Edit Kid" }));
   const editor = await dialog("Edit Kid");
-  fireEvent.click(within(editor).getByRole("button", { name: "Remove PIN" }));
+  fireEvent.click(within(editor).getByRole("button", { name: "Remove PIN…" }));
   const confirm = await screen.findByRole("alertdialog", { name: "Remove Kid's PIN?" });
   expect(confirm.textContent).toContain("Anyone can then sign in to Kid without a PIN.");
   fireEvent.click(within(confirm).getByRole("button", { name: "Cancel" }));
   await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
   expect(app.accounts.pins.get("kid")).toBe("1357");
-  fireEvent.click(within(editor).getByRole("button", { name: "Remove PIN" }));
+  fireEvent.click(within(editor).getByRole("button", { name: "Remove PIN…" }));
   fireEvent.click(
     within(await screen.findByRole("alertdialog", { name: "Remove Kid's PIN?" })).getByRole(
       "button",
@@ -236,7 +236,7 @@ it("changes your own name and PIN in My profile, after the current PIN", async (
   );
   await screen.findByText(/Signed in as Ace/);
 
-  fireEvent.click(screen.getByRole("button", { name: "Change PIN" }));
+  fireEvent.click(screen.getByRole("button", { name: "Change PIN…" }));
   await enterPin("Enter Ace's current PIN", "0000");
   await screen.findByText("That PIN isn't right.");
   await enterPin("Enter Ace's current PIN", "1357");
@@ -263,7 +263,7 @@ it("sets another account's PIN with a pad only, on the PIN pad", async () => {
   app.pad.press("confirm");
   const editor = await dialog("Edit Kid");
   await until(() => editor.contains(focused()), "the editor");
-  await walkTo(() => focused()?.textContent === "Change PIN", "Change PIN");
+  await walkTo(() => focused()?.textContent === "Change PIN…", "Change PIN…");
   app.pad.press("confirm");
 
   const type = async (pin: string) => {

@@ -343,7 +343,7 @@ export function GeneralSettings() {
                   <StorageSummary />
                 </div>
                 <Button onPress={() => navigate({ to: "/settings", search: { tab: "storage" } })}>
-                  <Trans>Manage…</Trans>
+                  <Trans>Manage</Trans>
                 </Button>
               </div>
               <span className="text-xs text-fg-muted">

@@ -1600,7 +1600,7 @@ Root: `[data-cs="addon-details"]`
 | `remove-confirm` | `[data-cs="addon-details"] [data-part="remove-confirm"]` | Asks before removing; for a plugin, whether to keep its settings and data. |
 | `remove-confirmed` | `[data-cs="addon-details"] [data-part="remove-confirmed"]` | Removes it (a `button`). |
 | `actions` | `[data-cs="addon-details"] [data-part="actions"]` | The add-on's buttons. |
-| `remove` | `[data-cs="addon-details"] [data-part="remove"]` | Remove… (a `button`). |
+| `remove` | `[data-cs="addon-details"] [data-part="remove"]` | Uninstall… (a `button`). |
 | `skip` | `[data-cs="addon-details"] [data-part="skip"]` | Skips this update, or offers it again (a `button`). |
 | `apply` | `[data-cs="addon-details"] [data-part="apply"]` | Makes an installed theme the one in use (a `button`). |
 | `install` | `[data-cs="addon-details"] [data-part="install"]` | Install, Update or Try again (a `button`). |

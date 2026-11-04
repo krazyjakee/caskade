@@ -320,7 +320,7 @@ export function ConfiguredEmulators({
                 },
                 {
                   id: "remove",
-                  label: t`Remove emulator`,
+                  label: t`Remove emulator…`,
                   icon: Trash2,
                   tone: "danger",
                   isDisabled: write.isPending,
@@ -383,7 +383,7 @@ export function ConfiguredEmulators({
                     },
                     {
                       id: "remove",
-                      label: t`Remove ${{ profile: resolved.name }}`,
+                      label: t`Remove ${{ profile: resolved.name }}…`,
                       icon: Trash2,
                       tone: "danger",
                       isDisabled: write.isPending,
@@ -486,7 +486,7 @@ export function ConfiguredEmulators({
                             })
                           }
                         >
-                          {t`Remove ${{ profile: resolved.name }}`}
+                          {t`Remove ${{ profile: resolved.name }}…`}
                         </Button>
                       </div>
                     </div>
@@ -580,7 +580,7 @@ export function ConfiguredEmulators({
               askRemove({ kind: "emulator", emulatorId: selected.id, name: selected.name })
             }
           >
-            <Trans>Remove emulator</Trans>
+            <Trans>Remove emulator…</Trans>
           </Button>
         </div>
       ) : (

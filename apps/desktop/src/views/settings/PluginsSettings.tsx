@@ -247,7 +247,7 @@ function PluginRow({
         plugin.status === "needs_consent"
           ? {
               id: "review",
-              label: t`Review and allow`,
+              label: t`Review and allow…`,
               icon: ShieldCheck,
               onAction: () => review(plugin),
             }
@@ -258,7 +258,7 @@ function PluginRow({
               isDisabled: plugin.status === "invalid" || toggle.isPending,
               onAction: () => toggle.mutate({ id: plugin.id, enabled: !on }),
             },
-        { id: "details", label: t`Details`, icon: Info, onAction: () => details(plugin) },
+        { id: "details", label: t`Details…`, icon: Info, onAction: () => details(plugin) },
         {
           id: "uninstall",
           label: t`Uninstall…`,
@@ -318,7 +318,7 @@ function PluginRow({
           aria-label={t`${{ plugin: plugin.name }} details`}
           onPress={() => details(plugin)}
         >
-          <Trans>Details</Trans>
+          <Trans>Details…</Trans>
         </Button>
         {confirming ? (
           <>
@@ -336,12 +336,12 @@ function PluginRow({
           </>
         ) : (
           <Button size="sm" icon={Trash2} onPress={() => setConfirming(true)}>
-            <Trans>Uninstall</Trans>
+            <Trans>Uninstall…</Trans>
           </Button>
         )}
         {plugin.status === "needs_consent" ? (
           <Button size="sm" onPress={() => review(plugin)}>
-            <Trans>Review and allow</Trans>
+            <Trans>Review and allow…</Trans>
           </Button>
         ) : (
           <Switch
@@ -424,7 +424,7 @@ export function PluginsSettings() {
                 onPress={() => choose.mutate(undefined)}
                 isDisabled={choose.isPending}
               >
-                <Trans>Install from folder</Trans>
+                <Trans>Install from folder…</Trans>
               </Button>
               {import.meta.env.DEV && api.loadUnpacked && (
                 <Button
@@ -434,7 +434,7 @@ export function PluginsSettings() {
                   onPress={() => unpacked.mutate()}
                   isDisabled={unpacked.isPending}
                 >
-                  <Trans>Load unpacked</Trans>
+                  <Trans>Load unpacked…</Trans>
                 </Button>
               )}
             </>

@@ -30,16 +30,49 @@ import { ageLimitOptions, NO_LIMIT } from "./ageLimits";
 import { PinSetting, sentence } from "./PinSetting";
 
 /** The Settings sections a standard account may be allowed to change
- * (`caskade_core::accounts::SETTINGS_SECTIONS`), as the tabs name them. */
+ * (`caskade_core::accounts::SETTINGS_SECTIONS`), with the tabs' own messages
+ * (`settingsTabs`) and what each covers. */
 const permissionSections = [
-  { id: "general", label: msg`General settings` },
-  { id: "library-discovery", label: msg`Library Discovery settings` },
-  { id: "launchers", label: msg`Launchers settings` },
-  { id: "emulators", label: msg`Emulation settings` },
-  { id: "appearance", label: msg`Appearance settings` },
-  { id: "storage", label: msg`Storage settings` },
-  { id: "installer", label: msg`Installer settings` },
-  { id: "plugins", label: msg`Plugins settings` },
+  {
+    id: "general",
+    label: msg({ message: "General", context: "settings tab" }),
+    note: msg`Language, startup, closing and updates.`,
+  },
+  {
+    id: "library-discovery",
+    label: msg({ message: "Library Discovery", context: "settings tab" }),
+    note: msg`What scans look for, their folders and ignored results.`,
+  },
+  {
+    id: "launchers",
+    label: msg({ message: "Launchers", context: "settings tab" }),
+    note: msg`Which launchers' games join the library.`,
+  },
+  {
+    id: "emulators",
+    label: msg({ message: "Emulation", context: "settings tab" }),
+    note: msg`Emulators, ROM scanners, BIOS files and RomM servers.`,
+  },
+  {
+    id: "appearance",
+    label: msg({ message: "Appearance", context: "settings tab" }),
+    note: msg`Theme, look, motion and custom CSS.`,
+  },
+  {
+    id: "storage",
+    label: msg({ message: "Storage", context: "settings tab" }),
+    note: msg`Where games install, and the default location.`,
+  },
+  {
+    id: "installer",
+    label: msg({ message: "Installer", context: "settings tab" }),
+    note: msg`How games download and install, and torrent links.`,
+  },
+  {
+    id: "plugins",
+    label: msg({ message: "Plugins", context: "settings tab" }),
+    note: msg`Plugins and add-on themes, and what they may do.`,
+  },
 ] as const;
 
 const roles = [
@@ -216,11 +249,16 @@ export function AccountEditor({
                     isDisabled={busy}
                   />
                 </SettingRow>
+                <p className="mt-3 text-sm font-medium">
+                  <Trans comment="Over the Settings sections a standard account may change">
+                    Settings sections it can change
+                  </Trans>
+                </p>
                 {permissionSections.map((section) => (
                   <SettingRow
                     key={section.id}
                     label={t(section.label)}
-                    description={t`Change this Settings section.`}
+                    description={t(section.note)}
                   >
                     <Switch
                       isSelected={allowed(section.id)}
