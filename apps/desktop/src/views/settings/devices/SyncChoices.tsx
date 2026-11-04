@@ -7,7 +7,7 @@ import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { HardDrive, RefreshCcw } from "lucide-react";
-import { useSettingsSection } from "../useSettings";
+import { SettingsStatus, useSettingsSection } from "../useSettings";
 import { useDeviceAdmin } from "./admin";
 
 export type SyncCategory =
@@ -125,8 +125,18 @@ function stateOf(value: SyncSettingsValue, category: SyncCategory): CategoryStat
 export function SyncChoices() {
   const { t } = useLingui();
   const admin = useDeviceAdmin();
-  const { settings, setSettings, saving } = useSettingsSection<SyncSettingsValue>("core.sync");
-  if (!settings) return null;
+  const sync = useSettingsSection<SyncSettingsValue>("core.sync");
+  const { settings, setSettings, saving } = sync;
+  const title = t`What syncs`;
+  const description = t`Changes made on any device reach the others when they next connect. Where two devices changed the same thing, the later change wins. This device only stops this device sending and taking it in.`;
+  if (!settings) {
+    // Loading says nothing; a failed load says why, with Try again.
+    return sync.loadError ? (
+      <SettingsSection icon={RefreshCcw} title={title} description={description}>
+        <SettingsStatus section={sync} what={title} className="" />
+      </SettingsSection>
+    ) : null;
+  }
   const options = [
     { id: "sync", label: t({ message: "Sync", context: "sync choice" }) },
     { id: "thisDeviceOnly", label: t`This device only` },
@@ -151,11 +161,8 @@ export function SyncChoices() {
   };
   return (
     <>
-      <SettingsSection
-        icon={RefreshCcw}
-        title={t`What syncs`}
-        description={t`Changes made on any device reach the others when they next connect. Where two devices changed the same thing, the later change wins. This device only stops this device sending and taking it in.`}
-      >
+      <SettingsSection icon={RefreshCcw} title={title} description={description}>
+        <SettingsStatus section={sync} what={title} className="mb-3" />
         <div className="flex flex-col">{synced.map(row)}</div>
         <h3 className="mt-6 text-sm font-medium">
           <Trans>Usually different on each device</Trans>

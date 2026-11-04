@@ -5,7 +5,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { Save } from "lucide-react";
 import { formatDateTime } from "../../../api/presentation";
 import { useSaveManifest } from "../../../api/saves";
-import { useSettingsSection } from "../useSettings";
+import { SettingsStatus, useSettingsSection } from "../useSettings";
 import { useDeviceAdmin } from "./admin";
 import type { SyncSettingsValue } from "./SyncChoices";
 
@@ -15,7 +15,17 @@ export function SavesSection() {
   const sync = useSettingsSection<SyncSettingsValue>("core.sync");
   const saves = useSettingsSection<{ manifestUrl: string; keep: number }>("core.saves");
   const manifest = useSaveManifest();
-  if (!sync.settings || !saves.settings) return null;
+  const title = t`Saves`;
+  const description = t`A version of a game's saves is kept each time you finish playing, and the newest goes to your other devices, so you can carry on where you left off.`;
+  if (!sync.settings || !saves.settings) {
+    // Loading says nothing; a failed load says why, with Try again.
+    return sync.loadError || saves.loadError ? (
+      <SettingsSection icon={Save} title={title} description={description}>
+        <SettingsStatus section={sync} what={t`Sync settings`} className="" />
+        <SettingsStatus section={saves} what={title} className="" />
+      </SettingsSection>
+    ) : null;
+  }
   const syncing = (sync.settings.categories.saves ?? "sync") === "sync";
   const keep = saves.settings.keep ?? 20;
   const options = [5, 10, 20, 50, 100].map((count) => ({
@@ -28,11 +38,7 @@ export function SavesSection() {
   const checked = status?.checkedAtMs ?? null;
   const when = checked === null ? "" : formatDateTime(checked);
   return (
-    <SettingsSection
-      icon={Save}
-      title={t`Saves`}
-      description={t`A version of a game's saves is kept each time you finish playing, and the newest goes to your other devices, so you can carry on where you left off.`}
-    >
+    <SettingsSection icon={Save} title={title} description={description}>
       <SettingRow
         label={t`Sync saves`}
         description={t`Off keeps every version on this device only.`}
@@ -61,6 +67,8 @@ export function SavesSection() {
           }
         />
       </SettingRow>
+      <SettingsStatus section={sync} what={t`Sync saves`} />
+      <SettingsStatus section={saves} what={t`Versions to keep`} />
       {manifest.available && (
         <SettingRow
           label={t`Save locations list`}

@@ -9,7 +9,7 @@ import { MonitorSmartphone } from "lucide-react";
 import { type DeviceBackups, useBackupApi } from "../../../api/backup";
 import { formatBytes, formatDateTime } from "../../../api/presentation";
 import { type SyncApi, syncKey, useProvidedSyncApi } from "../../../api/sync";
-import { useSettingsSection } from "../useSettings";
+import { SettingsStatus, useSettingsSection } from "../useSettings";
 
 /** Paired devices, or none without devices. */
 function usePaired(api: SyncApi) {
@@ -40,19 +40,23 @@ function KeepOn({ api }: { api: SyncApi }) {
   // A device forgotten since stays listed until changed.
   if (chosen && !options.some((option) => option.id === chosen))
     options.push({ id: chosen, label: t`A device no longer paired` });
+  const label = t`Also keep backups on`;
   return (
-    <SettingRow
-      label={t`Also keep backups on`}
-      description={t`Each backup also goes to that device the next time they sync, even when it was away. It keeps them apart from its own, as many as are kept here.`}
-    >
-      <Select
-        options={options}
-        value={chosen}
-        onChange={(device) =>
-          preferences.setSettings((current) => ({ ...current, keepOnDevice: device || null }))
-        }
-      />
-    </SettingRow>
+    <>
+      <SettingRow
+        label={label}
+        description={t`Each backup also goes to that device the next time they sync, even when it was away. It keeps them apart from its own, as many as are kept here.`}
+      >
+        <Select
+          options={options}
+          value={chosen}
+          onChange={(device) =>
+            preferences.setSettings((current) => ({ ...current, keepOnDevice: device || null }))
+          }
+        />
+      </SettingRow>
+      <SettingsStatus section={preferences} what={label} />
+    </>
   );
 }
 

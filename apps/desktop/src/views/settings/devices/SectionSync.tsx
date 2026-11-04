@@ -5,7 +5,7 @@ import { SettingRow, Switch } from "@caskade/ui";
 import { useLingui } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
 import { type SyncApi, syncKey, useProvidedSyncApi } from "../../../api/sync";
-import { useSettingsSection } from "../useSettings";
+import { SettingsStatus, useSettingsSection } from "../useSettings";
 import { useDeviceAdmin } from "./admin";
 import type { CategoryState, SyncCategory, SyncSettingsValue } from "./SyncChoices";
 
@@ -36,7 +36,9 @@ function Choice({ namespace, api }: { namespace: SyncedSection; api: SyncApi }) 
     retry: false,
   });
   const sync = useSettingsSection<Value>("core.sync");
-  if (!status.data?.devices.length || !sync.settings) return null;
+  if (!status.data?.devices.length) return null;
+  const what = t`Same on your other devices`;
+  if (!sync.settings) return <SettingsStatus section={sync} what={what} />;
   const categoryOn = (sync.settings.categories[SECTIONS[namespace]] ?? "sync") === "sync";
   const kept = sync.settings.sections?.[namespace] === "thisDeviceOnly";
   const description = !categoryOn
@@ -45,17 +47,20 @@ function Choice({ namespace, api }: { namespace: SyncedSection; api: SyncApi }) 
       ? t`Kept on this device. Changes here stay here, and other devices' don't arrive.`
       : t`Changes here reach your other devices.`;
   return (
-    <SettingRow label={t`Same on your other devices`} description={description}>
-      <Switch
-        isSelected={categoryOn && !kept}
-        isDisabled={!admin || !categoryOn || sync.saving}
-        onChange={(on) =>
-          sync.setSettings((current) => ({
-            ...current,
-            sections: { ...current.sections, [namespace]: on ? "sync" : "thisDeviceOnly" },
-          }))
-        }
-      />
-    </SettingRow>
+    <>
+      <SettingRow label={what} description={description}>
+        <Switch
+          isSelected={categoryOn && !kept}
+          isDisabled={!admin || !categoryOn || sync.saving}
+          onChange={(on) =>
+            sync.setSettings((current) => ({
+              ...current,
+              sections: { ...current.sections, [namespace]: on ? "sync" : "thisDeviceOnly" },
+            }))
+          }
+        />
+      </SettingRow>
+      <SettingsStatus section={sync} what={what} />
+    </>
   );
 }

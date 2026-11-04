@@ -14,7 +14,15 @@ import {
 import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
-import { ArchiveRestore, CalendarClock, DatabaseBackup, FolderOpen, LifeBuoy } from "lucide-react";
+import type { UseQueryResult } from "@tanstack/react-query";
+import {
+  ArchiveRestore,
+  CalendarClock,
+  DatabaseBackup,
+  FolderOpen,
+  LifeBuoy,
+  type LucideIcon,
+} from "lucide-react";
 import { useState } from "react";
 import {
   type BackupComponent,
@@ -32,7 +40,7 @@ import { FailureNotice } from "../../../components/FailureNotice";
 import { usePathPicker } from "../../../components/pathBrowser/PathPicker";
 import { useDropZone } from "../../../drop/DropProvider";
 import { ProgressLine } from "../../activity/ProgressLine";
-import { useSettingsSection } from "../useSettings";
+import { type SettingsSectionState, SettingsStatus, useSettingsSection } from "../useSettings";
 import { DeviceBackupList, KeepOnDevice } from "./DeviceBackups";
 
 type Schedule = "off" | "daily" | "weekly";
@@ -107,7 +115,8 @@ function JobProgress({ status }: { status: BackupStatus }) {
 function BackUpSection() {
   const { t } = useLingui();
   const picker = usePathPicker();
-  const { data: status } = useBackupStatus();
+  const statusQuery = useBackupStatus();
+  const status = statusQuery.data;
   const preferences = useSettingsSection<BackupSettingsValue>("core.backups");
   const settings = preferences.settings;
   const plan = useBackupPlan(settings?.destination || null, settings?.components ?? []);
@@ -119,7 +128,19 @@ function BackUpSection() {
   const drop = useDropZone<HTMLDivElement>((paths) => {
     if (paths[0]) setDestination(paths[0]);
   });
-  if (!settings || !status) return null;
+  const title = t`Back up`;
+  const description = t`A backup holds Caskade's library and settings in one file you can keep anywhere. Your games and their saves aren't in it.`;
+  if (!settings || !status) {
+    return (
+      <Unloaded
+        icon={DatabaseBackup}
+        title={title}
+        description={description}
+        preferences={preferences}
+        status={statusQuery}
+      />
+    );
+  }
   const running = status.running;
   const backingUp = running?.kind === "backup" || running?.kind === "automaticBackup";
   const sizes = new Map(plan.data?.components.map((c) => [c.id, c]));
@@ -137,11 +158,7 @@ function BackUpSection() {
     plan.data.availableBytes < plan.data.estimatedBytes + (sizes.get("library")?.bytes ?? 0);
 
   return (
-    <SettingsSection
-      icon={DatabaseBackup}
-      title={t`Back up`}
-      description={t`A backup holds Caskade's library and settings in one file you can keep anywhere. Your games and their saves aren't in it.`}
-    >
+    <SettingsSection icon={DatabaseBackup} title={title} description={description}>
       <div ref={drop.ref}>
         <TextField
           label={t`Backup folder`}
@@ -208,6 +225,7 @@ function BackUpSection() {
           );
         })}
       </fieldset>
+      <SettingsStatus section={preferences} what={t`Backup settings`} />
       {plan.data && (
         <p className="mt-3 text-xs text-fg-muted">
           <Trans>
@@ -284,21 +302,30 @@ function LastOutcome({
 
 function ScheduleSection() {
   const { t } = useLingui();
-  const { data: status } = useBackupStatus();
+  const statusQuery = useBackupStatus();
+  const status = statusQuery.data;
   const preferences = useSettingsSection<BackupSettingsValue>("core.backups");
   const settings = preferences.settings;
-  if (!settings || !status) return null;
+  const title = t`Automatic backups`;
+  const description = t`Made in the background to the backup folder, with the same contents. If Caskade isn't running when one is due, it's made soon after the next start.`;
+  if (!settings || !status) {
+    return (
+      <Unloaded
+        icon={CalendarClock}
+        title={title}
+        description={description}
+        preferences={preferences}
+        status={statusQuery}
+      />
+    );
+  }
   const next = status.nextAutomaticMs;
   const keepOptions = [3, 5, 7, 14, 30].map((n) => ({ id: String(n), label: String(n) }));
   if (!keepOptions.some((o) => o.id === String(settings.keep))) {
     keepOptions.push({ id: String(settings.keep), label: String(settings.keep) });
   }
   return (
-    <SettingsSection
-      icon={CalendarClock}
-      title={t`Automatic backups`}
-      description={t`Made in the background to the backup folder, with the same contents. If Caskade isn't running when one is due, it's made soon after the next start.`}
-    >
+    <SettingsSection icon={CalendarClock} title={title} description={description}>
       <SettingRow
         label={t`Back up automatically`}
         description={
@@ -331,6 +358,7 @@ function ScheduleSection() {
           }
         />
       </SettingRow>
+      <SettingsStatus section={preferences} what={title} />
       <KeepOnDevice />
     </SettingsSection>
   );
@@ -339,7 +367,8 @@ function ScheduleSection() {
 function RestoreSection() {
   const { t } = useLingui();
   const picker = usePathPicker();
-  const { data: status } = useBackupStatus();
+  const statusQuery = useBackupStatus();
+  const status = statusQuery.data;
   const [chosen, setChosen] = useState<{ path: string; inspection: BackupInspection } | null>(null);
   const [components, setComponents] = useState<BackupComponent[]>([]);
   const inspect = useBackupAction((api, path: string) => api.inspect(path));
@@ -360,17 +389,24 @@ function RestoreSection() {
   const drop = useDropZone<HTMLDivElement>((paths) => {
     if (paths[0]) void open(paths[0]).catch(() => {});
   });
-  if (!status) return null;
+  const title = t`Restore`;
+  const description = t`Restoring replaces this library and its settings with the backup's, then restarts Caskade. Nothing is merged, and your games' files aren't touched.`;
+  if (!status) {
+    return (
+      <Unloaded
+        icon={ArchiveRestore}
+        title={title}
+        description={description}
+        status={statusQuery}
+      />
+    );
+  }
   const staged = status.stagedRestore;
   const outcome = status.lastRestore;
   const busy = status.running !== null;
 
   return (
-    <SettingsSection
-      icon={ArchiveRestore}
-      title={t`Restore`}
-      description={t`Restoring replaces this library and its settings with the backup's, then restarts Caskade. Nothing is merged, and your games' files aren't touched.`}
-    >
+    <SettingsSection icon={ArchiveRestore} title={title} description={description}>
       {outcome && (
         <p role="status" className={`mb-3 text-sm ${outcome.error ? "text-danger" : "text-fg"}`}>
           {outcome.error ? (
@@ -443,6 +479,41 @@ function RestoreSection() {
               error={error}
             />
           ),
+      )}
+    </SettingsSection>
+  );
+}
+
+/** A section whose backup settings or backups' state didn't load (#42):
+ * why, with Try again, in place of the section. Nothing while they load. */
+function Unloaded({
+  icon,
+  title,
+  description,
+  preferences,
+  status,
+}: {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  preferences?: SettingsSectionState;
+  status: UseQueryResult<BackupStatus>;
+}) {
+  const { t } = useLingui();
+  if (!preferences?.loadError && !status.error) return null;
+  return (
+    <SettingsSection icon={icon} title={title} description={description}>
+      {preferences && (
+        <SettingsStatus section={preferences} what={t`Backup settings`} className="" />
+      )}
+      {status.error && (
+        <FailureNotice
+          variant="inline"
+          className={preferences?.loadError ? "mt-3" : ""}
+          error={status.error}
+          title={t`Backups couldn't be loaded`}
+          onRetry={() => void status.refetch()}
+        />
       )}
     </SettingsSection>
   );

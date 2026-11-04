@@ -10,10 +10,13 @@ import {
 import type { MessageDescriptor } from "@lingui/core";
 import { msg, plural } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
-import { Folder, RefreshCw, ScanSearch } from "lucide-react";
+import { Link, useRouter } from "@tanstack/react-router";
+import { Folder, FolderOpen, RefreshCw, ScanSearch } from "lucide-react";
 import { useState } from "react";
 import { type DiscoveryPreferences, scanning } from "../../api/discovery";
 import { formatPath } from "../../api/presentation";
+import { usePathPicker } from "../../components/pathBrowser/PathPicker";
+import { useDropZone } from "../../drop/DropProvider";
 import { useDiscovery } from "./discovery/DiscoveryProvider";
 import { HiddenGames } from "./discovery/HiddenGames";
 import { ReviewList } from "./discovery/ReviewList";
@@ -59,6 +62,11 @@ export function LibraryDiscoverySettings() {
   const history = useSettingsSection<{ seedPlaytime: boolean }>("discovery.import");
   const discovery = useDiscovery();
   const [path, setPath] = useState("");
+  const picker = usePathPicker();
+  // A folder dropped on the field fills it in; Add folder still adds it.
+  const drop = useDropZone<HTMLDivElement>((paths) => {
+    if (paths[0]) setPath(paths[0]);
+  });
   const settings = preferences.settings;
   if (!settings) return <SettingsLoading error={preferences.error} reload={preferences.reload} />;
   const snapshot = discovery.data;
@@ -199,6 +207,7 @@ export function LibraryDiscoverySettings() {
               : t`Waiting for the backend device profile.`
           }
         >
+          <LaunchersLink />
           <div className="my-3 grid gap-3 md:grid-cols-2">
             {[
               ...new Set(
@@ -286,7 +295,7 @@ export function LibraryDiscoverySettings() {
               />
             </SettingRow>
           ))}
-          <div className="mt-4">
+          <div ref={drop.ref} className="mt-4">
             <TextField
               label={t`Absolute custom folder`}
               value={path}
@@ -294,19 +303,35 @@ export function LibraryDiscoverySettings() {
               mono
               description={t`Enter a full path for this device. No folders are created or modified.`}
               action={
-                <Button
-                  isDisabled={!path.trim() || (settings.scanPaths?.length ?? 0) >= 64}
-                  onPress={() => {
-                    const value = path.trim();
-                    preferences.setSettings((s) => ({
-                      ...s,
-                      scanPaths: [...new Set([...(s.scanPaths ?? []), value])],
-                    }));
-                    setPath("");
-                  }}
-                >
-                  <Trans>Add folder</Trans>
-                </Button>
+                <span className="flex gap-2">
+                  <Button
+                    onPress={async () => {
+                      const chosen = await picker.pick({
+                        kind: "folder",
+                        title: t`Choose a folder to scan`,
+                        startAt: path.trim() || null,
+                      });
+                      // Cancel changes nothing.
+                      if (chosen) setPath(chosen);
+                    }}
+                  >
+                    <FolderOpen className="size-4" />
+                    <Trans>Browse…</Trans>
+                  </Button>
+                  <Button
+                    isDisabled={!path.trim() || (settings.scanPaths?.length ?? 0) >= 64}
+                    onPress={() => {
+                      const value = path.trim();
+                      preferences.setSettings((s) => ({
+                        ...s,
+                        scanPaths: [...new Set([...(s.scanPaths ?? []), value])],
+                      }));
+                      setPath("");
+                    }}
+                  >
+                    <Trans>Add folder</Trans>
+                  </Button>
+                </span>
               }
             />
             <ul className="mt-3 space-y-2">
@@ -412,5 +437,21 @@ export function LibraryDiscoverySettings() {
         <Trans>Reset discovery preferences</Trans>
       </Button>
     </div>
+  );
+}
+
+/** Launchers have their own tab too (#46); only where there is a router. */
+function LaunchersLink() {
+  const router = useRouter({ warn: false }) as ReturnType<typeof useRouter> | undefined;
+  if (!router) return null;
+  return (
+    <p className="mt-1 text-sm text-fg-muted">
+      <Trans>
+        See also:{" "}
+        <Link to="/settings" search={{ tab: "launchers" }} className="text-accent-alt">
+          Launchers
+        </Link>
+      </Trans>
+    </p>
   );
 }

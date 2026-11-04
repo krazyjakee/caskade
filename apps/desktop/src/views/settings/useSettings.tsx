@@ -60,14 +60,26 @@ export function useSettingsSection<T extends object>(namespace: string) {
     onSuccess: (snapshot: SettingsSnapshot) => {
       client.setQueryData(key, snapshot);
     },
+    // After a refused write, the controls show what the core has saved.
+    onError: () => {
+      void client.invalidateQueries({ queryKey: key });
+    },
   });
   return {
     settings: query.data?.value as T | undefined,
     loading: query.isPending,
     saving: mutation.isPending,
     error: query.error ?? mutation.error,
+    /** The section didn't load (or reload). */
+    loadError: query.error,
+    /** The last write didn't save; the controls show what is saved. */
+    saveError: mutation.error,
     reload: () => {
       void query.refetch();
+    },
+    /** Sends the last change again, after a failed write. */
+    retry: () => {
+      if (mutation.variables) mutation.mutate(mutation.variables);
     },
     setSettings: (update: (current: T) => T) => mutation.mutate({ update }),
     reset: () => mutation.mutate({ reset: true }),
@@ -104,5 +116,74 @@ export function SettingsLoading({ error, reload }: { error: unknown; reload: () 
     <p role="status" className="p-4 text-sm text-fg-muted">
       <Trans>Loading settings…</Trans>
     </p>
+  );
+}
+
+/** What `SettingsStatus` reads from a `useSettingsSection`. */
+export interface SettingsSectionState {
+  settings: object | undefined;
+  loadError: unknown;
+  saveError: unknown;
+  saving: boolean;
+  reload: () => void;
+  retry: () => void;
+}
+
+/** One section's load and writes, shown beside its controls (#42): the
+ * load failure with Try again, Saving…, and a write that didn't save with
+ * Retry, which sends the same change again. Controls keep showing the saved
+ * value meanwhile. `what` names the settings ("Automatic backups"). Renders
+ * nothing while the section loads or once everything saved. */
+export function SettingsStatus({
+  section,
+  what,
+  className = "mt-3",
+}: {
+  section: SettingsSectionState;
+  what: string;
+  className?: string;
+}) {
+  const { t } = useLingui();
+  if (!section.settings) {
+    return section.loadError ? (
+      <FailureNotice
+        variant="inline"
+        className={className}
+        error={section.loadError}
+        title={t({
+          message: `${what} couldn't be loaded`,
+          comment: "{what} names a group of settings, such as Automatic backups",
+        })}
+        onRetry={section.reload}
+      />
+    ) : null;
+  }
+  if (section.saving) {
+    return (
+      <p role="status" className={`text-sm text-fg-muted ${className}`}>
+        <Trans>Saving…</Trans>
+      </p>
+    );
+  }
+  if (!section.saveError) return null;
+  return (
+    <FailureNotice
+      variant="inline"
+      className={className}
+      error={section.saveError}
+      title={
+        <>
+          {t({
+            message: `${what}: your change didn't save`,
+            comment: "{what} names a group of settings, such as Automatic backups",
+          })}
+          <span className="block text-xs font-normal text-fg-muted">
+            <Trans>The settings here show what's saved. Retry sends your change again.</Trans>
+          </span>
+        </>
+      }
+      onRetry={section.retry}
+      retryLabel={t({ message: "Retry", context: "settings write" })}
+    />
   );
 }

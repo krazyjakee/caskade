@@ -35,7 +35,7 @@ import {
 import { FailureNotice } from "../../../components/FailureNotice";
 import { DeviceIcon, LinkBadge, osNames } from "../../../components/sync/common";
 import { DevicePlaying } from "../../game/PlayingElsewhere";
-import { useSettingsSection } from "../useSettings";
+import { SettingsStatus, useSettingsSection } from "../useSettings";
 import { useDeviceAdmin } from "./admin";
 import { CopiesAndShares } from "./CopiesAndShares";
 import { SavesSection } from "./SavesSection";
@@ -230,6 +230,7 @@ function ThisDeviceSection() {
             onChange={(on) => sync.setSettings((current) => ({ ...current, peerDownloads: on }))}
           />
         </SettingRow>
+        <SettingsStatus section={sync} what={t`Connections`} />
       </div>
     </SettingsSection>
   );
