@@ -1,4 +1,4 @@
-import { Button, SegmentedControl, SettingRow, SettingsSection, Slider, Switch } from "@caskade/ui";
+import { Button, SegmentedControl, SettingRow, SettingsSection, Switch } from "@caskade/ui";
 import { msg } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { Link, useRouter } from "@tanstack/react-router";
@@ -23,6 +23,7 @@ import { DEFAULT_THEME } from "../../themes/api";
 import { useActiveTheme } from "../../themes/apply";
 import { CustomCssEditor } from "./appearance/CustomCssEditor";
 import { ThemePicker } from "./appearance/ThemePicker";
+import { DraftSlider } from "./DraftSlider";
 import { SectionSync } from "./devices/SectionSync";
 import { ResetDefaults, type ResetPart } from "./ResetDefaults";
 import { SettingsFeedback, SettingsLoading, useSettingsSection } from "./useSettings";
@@ -191,12 +192,12 @@ export function AppearanceSettings() {
             />
           </SettingRow>
           <SettingRow icon={Scaling} label={t`Interface scale`}>
-            <Slider
+            <DraftSlider
               minValue={80}
               maxValue={150}
               step={5}
               value={settings.uiScale}
-              onChange={(v) => set("uiScale", v)}
+              commit={(v) => set("uiScale", v)}
               format={(v) => `${v}%`}
               className="w-56"
             />
@@ -222,12 +223,12 @@ export function AppearanceSettings() {
             label={t`Card size`}
             description={t`Minimum width of a game card.`}
           >
-            <Slider
+            <DraftSlider
               minValue={128}
               maxValue={288}
               step={8}
               value={settings.cardSize}
-              onChange={(v) => set("cardSize", v)}
+              commit={(v) => set("cardSize", v)}
               format={(v) => `${v}px`}
               className="w-56"
             />

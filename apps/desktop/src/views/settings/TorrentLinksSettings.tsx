@@ -7,6 +7,7 @@ import {
   useSetTorrentLinks,
   useTorrentLinks,
 } from "../../api/torrentLinks";
+import { FailureNotice } from "../../components/FailureNotice";
 
 /** Linux: Caskade takes them from the torrent client and hands them back. */
 function DirectRow({ status }: { status: TorrentLinks }) {
@@ -85,13 +86,23 @@ function ChooserRow({ status }: { status: TorrentLinks }) {
  * OS opens them with Caskade (Settings → Installer). */
 export function TorrentLinksSettings() {
   const { t } = useLingui();
-  const { data: status } = useTorrentLinks();
+  const query = useTorrentLinks();
+  const status = query.data;
   return (
     <SettingsSection
       icon={Magnet}
       title={t`Magnet links and torrent files`}
       description={t`Paste a magnet link anywhere in Caskade, drop a .torrent file on it, or use Add game. Nothing downloads until you confirm, and nothing is seeded afterwards.`}
     >
+      {query.isError && !status && (
+        // Not an empty card: say what couldn't be read (#55).
+        <FailureNotice
+          variant="inline"
+          error={query.error}
+          title={t`Caskade couldn't check how this system opens them`}
+          onRetry={() => void query.refetch()}
+        />
+      )}
       {status?.support === "direct" && <DirectRow status={status} />}
       {status?.support === "chooser" && <ChooserRow status={status} />}
       {status?.support === "unsupported" && (

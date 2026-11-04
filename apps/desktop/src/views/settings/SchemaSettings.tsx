@@ -1,8 +1,9 @@
-import { Select, SettingRow, SettingsSection, Slider, Switch } from "@caskade/ui";
+import { Select, SettingRow, SettingsSection, Switch } from "@caskade/ui";
 import { t as translate } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { LucideIcon } from "lucide-react";
 import { DraftField } from "./DraftField";
+import { DraftSlider } from "./DraftSlider";
 import { ResetDefaults } from "./ResetDefaults";
 import {
   SettingsFeedback,
@@ -146,7 +147,7 @@ export function SchemaSettings({
                 typeof value === "number" &&
                 typeof schema.minimum === "number" &&
                 typeof schema.maximum === "number" ? (
-                <Slider
+                <DraftSlider
                   value={value}
                   minValue={schema.minimum}
                   maxValue={schema.maximum}
@@ -157,7 +158,7 @@ export function SchemaSettings({
                       ? (share) => percent.format(share)
                       : undefined
                   }
-                  onChange={(next) => set(key, next)}
+                  commit={(next) => set(key, next)}
                   className="w-48"
                 />
               ) : (schema.type === "number" || schema.type === "integer") &&

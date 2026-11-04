@@ -28,7 +28,7 @@ import {
 } from "../../../api/storeAccounts";
 import { AchievementSettings } from "../../../components/achievements/AchievementSettings";
 import { FailureNotice } from "../../../components/FailureNotice";
-import { useSettingsSection } from "../useSettings";
+import { SettingsStatus, useSettingsSection } from "../useSettings";
 
 const stateLabels: Record<StoreConnectionState, MessageDescriptor> = {
   notConnected: msg({ message: "Disconnected", context: "store account" }),
@@ -520,7 +520,15 @@ function RefreshSettings() {
     playtimeImport: "never" | "newGames" | "always";
   }>("core.storeAccounts");
   const settings = preferences.settings;
-  if (!settings) return null;
+  const title = t`Refreshing`;
+  const description = t`Refresh connected accounts in the background to bring in games you buy. Failures show on the account; nothing pops up.`;
+  // Loading says nothing; a failed load says why, with Try again (#55).
+  if (!settings)
+    return preferences.loadError ? (
+      <SettingsSection icon={RefreshCw} title={title} description={description}>
+        <SettingsStatus section={preferences} what={title} />
+      </SettingsSection>
+    ) : null;
   const options = [6, 12, 24, 48, 168].map((hours) => ({
     id: String(hours),
     label: hours === 168 ? t`Weekly` : t`Every ${hours} hours`,
@@ -532,11 +540,8 @@ function RefreshSettings() {
     });
   }
   return (
-    <SettingsSection
-      icon={RefreshCw}
-      title={t`Refreshing`}
-      description={t`Refresh connected accounts in the background to bring in games you buy. Failures show on the account; nothing pops up.`}
-    >
+    <SettingsSection icon={RefreshCw} title={title} description={description}>
+      <SettingsStatus section={preferences} what={title} />
       <SettingRow label={t`Refresh in the background`}>
         <Switch
           isSelected={settings.backgroundRefresh}

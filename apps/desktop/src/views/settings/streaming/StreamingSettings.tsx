@@ -36,7 +36,7 @@ import {
 import { FailureNotice } from "../../../components/FailureNotice";
 import { PairRequestForm } from "../../../components/streaming/PairRequestForm";
 import { useDeviceAdmin } from "../devices/admin";
-import { useSettingsSection } from "../useSettings";
+import { SettingsStatus, useSettingsSection } from "../useSettings";
 import { PairDialog } from "./PairDialog";
 
 export function StreamingSettings() {
@@ -89,7 +89,18 @@ function HostingSection() {
           onChange={set}
         />
       </SettingRow>
-      <HostStateLine state={state} problem={status.data?.problem ?? null} switching={switching} />
+      {status.isError && !status.data ? (
+        // Not "Off": whether it's hosting isn't known (#55).
+        <FailureNotice
+          variant="inline"
+          className="mt-1"
+          error={status.error}
+          title={t`Caskade couldn't check whether this device lets others play`}
+          onRetry={() => void status.refetch()}
+        />
+      ) : (
+        <HostStateLine state={state} problem={status.data?.problem ?? null} switching={switching} />
+      )}
       {state === "ready" && status.data?.warning && (
         <p data-part="host-warning" role="note" className="mt-1 text-sm">
           <StatusDot tone="warning">{status.data.warning}</StatusDot>
@@ -637,7 +648,7 @@ function QualitySection() {
           onChange={(id) => change({ bitrateKbps: number(id) })}
         />
       </SettingRow>
-      {section.error && <FailureNotice variant="inline" error={section.error} />}
+      <SettingsStatus section={section} what={t`Stream quality`} />
     </SettingsSection>
   );
 }

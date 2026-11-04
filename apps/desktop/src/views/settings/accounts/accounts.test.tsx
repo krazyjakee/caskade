@@ -192,6 +192,19 @@ it("refuses to remove the admin's PIN while a standard account exists", async ()
   await screen.findByText("Every admin needs a PIN while there are standard accounts.");
 });
 
+it("an editor with changes stays open on Escape; Cancel still closes it (#55)", async () => {
+  renderApp("/settings?tab=accounts", { accounts: family, activeAccount: "ada" });
+  fireEvent.click(await screen.findByRole("button", { name: "Edit Kid" }));
+  const editor = await dialog("Edit Kid");
+  fireEvent.change(within(editor).getByRole("textbox", { name: "Name" }), {
+    target: { value: "Kiddo" },
+  });
+  fireEvent.keyDown(within(editor).getByRole("textbox", { name: "Name" }), { key: "Escape" });
+  expect(screen.getByRole("dialog", { name: "Edit Kid" })).toBeTruthy();
+  fireEvent.click(within(editor).getByRole("button", { name: "Cancel" }));
+  await waitFor(() => expect(screen.queryByRole("dialog", { name: "Edit Kid" })).toBeNull());
+});
+
 it("asks before removing another account's PIN (#49)", async () => {
   const app = renderApp("/settings?tab=accounts", { accounts: family, activeAccount: "ada" });
   fireEvent.click(await screen.findByRole("button", { name: "Edit Kid" }));

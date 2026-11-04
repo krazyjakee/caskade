@@ -12,11 +12,15 @@ export function PathField({
   label,
   value,
   onChange,
+  onCommit,
   kind = "folder",
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  /** Saves the path where the field saves itself: on leaving it, Enter, a
+   * chosen or a dropped path. Without it a form's Save does. */
+  onCommit?: (value: string) => void;
   kind?: "folder" | "file";
 }) {
   const { t } = useLingui();
@@ -29,17 +33,29 @@ export function PathField({
         () => api.choosePath(kind),
       ),
     onSuccess: (path) => {
-      if (path !== null) onChange(path);
+      if (path === null) return;
+      onChange(path);
+      onCommit?.(path);
     },
   });
   // A file or folder dropped on the field fills it in, like the picker.
-  const drop = useDropZone<HTMLDivElement>((paths) => onChange(paths[0] ?? ""));
+  const drop = useDropZone<HTMLDivElement>((paths) => {
+    onChange(paths[0] ?? "");
+    onCommit?.(paths[0] ?? "");
+  });
   return (
     <div ref={drop.ref}>
       <TextField
         label={label}
         value={formatPath(value)}
         onChange={onChange}
+        onBlur={onCommit && (() => onCommit(value))}
+        onKeyDown={
+          onCommit &&
+          ((event) => {
+            if (event.key === "Enter") onCommit(value);
+          })
+        }
         mono
         action={
           <Button

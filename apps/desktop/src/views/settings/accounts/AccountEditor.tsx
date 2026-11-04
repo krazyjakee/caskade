@@ -73,13 +73,19 @@ export function AccountEditor({
   const avatarLabel = useId();
   const [name, setName] = useState(account?.name ?? "");
   const [avatar, setAvatar] = useState(account?.avatar ?? "avatar:default");
-  const [access, setAccess] = useState<AccountAccess>(() =>
-    account ? accessOf(account) : newAccess,
-  );
+  const [initialAccess] = useState<AccountAccess>(() => (account ? accessOf(account) : newAccess));
+  const [access, setAccess] = useState<AccountAccess>(initialAccess);
   // A new account's PIN waits here until it is created.
   const [pin, setDraftPin] = useState<string | null>(null);
   const save = account ? update : create;
   const busy = save.isPending;
+  // With changes, only Cancel or Save closes it: Escape or a click beside
+  // it would drop them without a word (#55).
+  const dirty =
+    name !== (account?.name ?? "") ||
+    avatar !== (account?.avatar ?? "avatar:default") ||
+    JSON.stringify(access) !== JSON.stringify(initialAccess) ||
+    pin !== null;
   const named = name.trim().length > 0;
   const standard = access.role === "standard";
   const own = account !== undefined && account.id === activeId;
@@ -107,7 +113,8 @@ export function AccountEditor({
   return (
     <ModalOverlay
       isOpen
-      isDismissable={!busy}
+      isDismissable={!busy && !dirty}
+      isKeyboardDismissDisabled={dirty}
       onOpenChange={(open) => {
         if (!open && !busy) close();
       }}

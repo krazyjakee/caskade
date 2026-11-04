@@ -8,8 +8,9 @@ import {
   useAppUpdateAction,
 } from "../../api/appUpdate";
 import { formatDateTime, formatSize } from "../../api/presentation";
+import { FailureNotice } from "../../components/FailureNotice";
 import { ProgressLine } from "../activity/ProgressLine";
-import { useSettingsSection } from "./useSettings";
+import { SettingsStatus, useSettingsSection } from "./useSettings";
 
 /** What the status line under the version says. */
 function useDescribe() {
@@ -45,10 +46,25 @@ function useDescribe() {
 export function AppUpdateSection() {
   const { t } = useLingui();
   const describe = useDescribe();
-  const { data: status } = useAppUpdate();
+  const query = useAppUpdate();
+  const status = query.data;
   const action = useAppUpdateAction();
   const preferences = useSettingsSection<{ check: boolean }>("core.appUpdates");
-  if (!status) return null;
+  const title = t`Caskade updates`;
+  const description = t`New versions of Caskade itself. Updates are signed, and nothing installs until you ask.`;
+  // A failed status says so, with Try again, rather than leaving a gap (#55).
+  if (!status)
+    return query.isError ? (
+      <SettingsSection icon={CircleArrowUp} title={title} description={description}>
+        <FailureNotice
+          variant="inline"
+          className="mt-3"
+          error={query.error}
+          title={t`Caskade couldn't check its version`}
+          onRetry={() => void query.refetch()}
+        />
+      </SettingsSection>
+    ) : null;
   const busy =
     action.isPending ||
     status.phase === "checking" ||
@@ -59,11 +75,7 @@ export function AppUpdateSection() {
   const version = status.release?.version;
 
   return (
-    <SettingsSection
-      icon={CircleArrowUp}
-      title={t`Caskade updates`}
-      description={t`New versions of Caskade itself. Updates are signed, and nothing installs until you ask.`}
-    >
+    <SettingsSection icon={CircleArrowUp} title={title} description={description}>
       <SettingRow
         icon={RefreshCw}
         label={t`Caskade v${{ version: status.currentVersion }}`}
@@ -128,6 +140,7 @@ export function AppUpdateSection() {
           />
         </SettingRow>
       )}
+      <SettingsStatus section={preferences} what={t`Check automatically`} />
     </SettingsSection>
   );
 }

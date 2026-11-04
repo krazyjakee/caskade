@@ -175,6 +175,12 @@ export function LibraryDiscoverySettings() {
           }
         />
       )}
+      {!settings.enabled && (
+        // Why everything below is greyed out (#55).
+        <p role="note" className="text-sm text-fg-muted">
+          <Trans>Library discovery is off, so the settings below don't apply until it's on.</Trans>
+        </p>
+      )}
       <fieldset disabled={!settings.enabled} className="space-y-4 disabled:opacity-50">
         <SettingsSection
           icon={RefreshCw}

@@ -263,7 +263,12 @@ export function GeneralSettings() {
           <SettingRow
             icon={MonitorUp}
             label={t`Start minimized`}
-            description={t`Open in the system tray instead of a window.`}
+            // A disabled switch says why (#55).
+            description={
+              settings.launchOnLogin
+                ? t`Open in the system tray instead of a window.`
+                : t`Open in the system tray instead of a window. Needs Launch on system startup.`
+            }
           >
             <Switch
               isSelected={settings.startMinimized}

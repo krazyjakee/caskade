@@ -16,6 +16,7 @@ import {
 } from "../../../api/romm";
 import { formatBytes } from "../../../api/storage";
 import { useActionMenus } from "../../../components/ActionMenu";
+import { FailureNotice } from "../../../components/FailureNotice";
 import { SectionSync } from "../devices/SectionSync";
 import { useEmulation } from "../emulators/EmulationProvider";
 import { CacheSection } from "./CacheSection";
@@ -171,9 +172,12 @@ export function RommPanel() {
     );
   if (overview.isError) {
     return (
-      <p role="alert" className="text-sm text-danger">
-        {overview.error.message}
-      </p>
+      <FailureNotice
+        variant="inline"
+        error={overview.error}
+        title={t`RomM servers couldn't be loaded`}
+        onRetry={() => void overview.refetch()}
+      />
     );
   }
   const data = overview.data;

@@ -3,7 +3,6 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { Layers, ScanSearch } from "lucide-react";
 import { useState } from "react";
 import type { EmulationSnapshot, ProfileRef } from "../../../api/emulation";
-import { UnsavedHint, useUnsavedChanges } from "../unsavedChanges";
 import { BiosSummary, PathField } from "./EmulationFields";
 import { useEmulationWrite } from "./EmulationProvider";
 import { FetchBios } from "./EmulatorSetup";
@@ -27,25 +26,7 @@ export function ConfiguredPlatforms({
   const platforms = snapshot.platforms.filter(
     (platform) => platform.romCount > 0 || platform.default || compatible(platform.id).length > 0,
   );
-  /** Platforms whose BIOS folder was typed and not saved. */
-  const edited = platforms.filter(
-    (platform) =>
-      folders[platform.id] !== undefined && folders[platform.id] !== (platform.biosDir ?? ""),
-  );
-  // BIOS folders wait for their Save buttons (#43): leaving the section asks first.
-  useUnsavedChanges(edited.length > 0, {
-    label: t`BIOS folders`,
-    save: async () => {
-      for (const platform of edited) {
-        const folder = folders[platform.id] ?? "";
-        await save.mutateAsync((api) =>
-          api.setPlatform(platform.id, platform.default, folder || null),
-        );
-      }
-      return true;
-    },
-    discard: () => setFolders({}),
-  });
+
   return (
     <SettingsSection
       icon={Layers}
@@ -167,25 +148,20 @@ export function ConfiguredPlatforms({
                         platform.bios.some(
                           (file) => file.found === false || file.state === "wrong_hash",
                         ) && <FetchBios platformId={platform.id} />}
+                      {/* Saved as it's left, like the default beside it (#55). */}
                       <PathField
                         label={t`BIOS folder for ${{ platform: platform.short }}`}
                         value={folder}
                         onChange={(value) =>
                           setFolders((old) => ({ ...old, [platform.id]: value }))
                         }
-                      />
-                      {folder !== (platform.biosDir ?? "") && <UnsavedHint dirty />}
-                      <Button
-                        size="sm"
-                        isDisabled={save.isPending || folder === (platform.biosDir ?? "")}
-                        onPress={() =>
+                        onCommit={(value) => {
+                          if (value === (platform.biosDir ?? "")) return;
                           save.mutate((api) =>
-                            api.setPlatform(platform.id, platform.default, folder || null),
-                          )
-                        }
-                      >
-                        <Trans>Save BIOS folder</Trans>
-                      </Button>
+                            api.setPlatform(platform.id, platform.default, value || null),
+                          );
+                        }}
+                      />
                     </td>
                     <td className="max-w-64 px-4 py-4">
                       <span className="font-mono text-xs text-fg-muted">

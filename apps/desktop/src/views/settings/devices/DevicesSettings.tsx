@@ -34,6 +34,7 @@ import {
 } from "../../../api/sync";
 import { FailureNotice } from "../../../components/FailureNotice";
 import { DeviceIcon, LinkBadge, osNames } from "../../../components/sync/common";
+import { writeClipboard } from "../../../input/clipboard";
 import { DevicePlaying } from "../../game/PlayingElsewhere";
 import { SettingsStatus, useSettingsSection } from "../useSettings";
 import { useDeviceAdmin } from "./admin";
@@ -42,11 +43,22 @@ import { SavesSection } from "./SavesSection";
 import { SyncChoices, type SyncSettingsValue } from "./SyncChoices";
 
 export function DevicesSettings() {
+  const { t } = useLingui();
   const admin = useDeviceAdmin();
+  const status = useSyncStatus();
   // Before the first pairing, Pair a device comes before the empty list (#54).
-  const unpaired = useSyncStatus().data?.devices.length === 0;
+  const unpaired = status.data?.devices.length === 0;
   return (
     <div className="flex flex-col gap-6">
+      {/* This device, its paired devices and pairing need the status; when
+          it can't be read, say so once rather than leave them out (#55). */}
+      {status.isError && !status.data && (
+        <FailureNotice
+          error={status.error}
+          title={t`Caskade couldn't read this device's connections`}
+          onRetry={() => void status.refetch()}
+        />
+      )}
       {!admin && (
         <p role="note" className="text-sm text-fg-muted">
           <Trans>Only an admin can pair devices, forget them or change what syncs.</Trans>
@@ -160,15 +172,31 @@ function ThisDeviceSection() {
       title={t`This device`}
       description={t`Your other devices know it by this name. Devices on the same network find each other and sync without the internet.`}
     >
-      <div className="flex flex-wrap items-end gap-4">
+      <div className="flex flex-wrap items-start gap-4">
+        {/* Saved on leaving the field or Enter, and says so (#55). */}
         <TextField
           label={t`Device name`}
           value={name ?? device.name}
           isReadOnly={!admin}
-          onChange={setName}
+          onChange={(next) => {
+            rename.reset();
+            setName(next);
+          }}
           onBlur={() => {
             if (name !== null && name !== device.name) rename.mutate(name);
           }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && name !== null && name !== device.name) rename.mutate(name);
+          }}
+          description={
+            !admin
+              ? undefined
+              : rename.isPending
+                ? t`Saving…`
+                : rename.isSuccess
+                  ? t`Saved.`
+                  : t`Saved when you leave the field or press Enter.`
+          }
           className="min-w-64 flex-1"
         />
         <Select
@@ -361,7 +389,7 @@ function NearbySection() {
   const makeLink = useSyncAction((api, _: undefined) => api.pairingLink());
   const accept = useSyncAction((api, link: string) => api.acceptPairingLink(link));
   const [pasted, setPasted] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<boolean | null>(null);
   if (!data) return null;
   return (
     <SettingsSection
@@ -400,11 +428,8 @@ function NearbySection() {
             isDisabled={makeLink.isPending}
             onPress={async () => {
               const link = await makeLink.mutateAsync(undefined);
-              const wrote = await navigator.clipboard?.writeText(link.url).then(
-                () => true,
-                () => false,
-              );
-              setCopied(wrote === true);
+              // Through the core: a webview refuses a pad's press (#55).
+              setCopied(await writeClipboard(link.url));
             }}
           >
             {copied ? t`Pairing link copied` : t`Copy a pairing link`}
@@ -416,6 +441,11 @@ function NearbySection() {
             className="break-all rounded-control border border-border p-2 font-mono text-xs text-fg-muted select-all"
           >
             {makeLink.data.url}
+          </p>
+        )}
+        {makeLink.data && copied === false && (
+          <p role="alert" className="text-sm text-warning">
+            <Trans>The link couldn't be copied. Select it above and copy it yourself.</Trans>
           </p>
         )}
         {makeLink.error && <FailureNotice variant="inline" error={makeLink.error} />}

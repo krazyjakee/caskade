@@ -2574,12 +2574,6 @@ msgstr "BIOS"
 msgid "BIOS folder for {platform}"
 msgstr "BIOS-mapp för {platform}"
 
-#: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
-#, fuzzy
-#| msgid "Save BIOS folder"
-msgid "BIOS folders"
-msgstr "Spara BIOS-mapp"
-
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 msgid "BIOS issues"
 msgstr "BIOS-problem"
@@ -2874,8 +2868,32 @@ msgstr ""
 msgid "Caskade checks the profile when you save. Nothing here starts the emulator."
 msgstr ""
 
+#: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#, fuzzy
+#| msgid "Caskade couldn't check who is signed in"
+msgid "Caskade couldn't check how this system opens them"
+msgstr "Caskade kunde inte kontrollera vem som är inloggad"
+
+#: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#, fuzzy
+#| msgid "Caskade couldn't check who is signed in"
+msgid "Caskade couldn't check its version"
+msgstr "Caskade kunde inte kontrollera vem som är inloggad"
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#, fuzzy
+#| msgid "Caskade couldn't check who is signed in"
+msgid "Caskade couldn't check whether this device lets others play"
+msgstr "Caskade kunde inte kontrollera vem som är inloggad"
+
 #: apps/desktop/src/shell/accounts/AccountGate.tsx
 msgid "Caskade couldn't check who is signed in"
+msgstr "Caskade kunde inte kontrollera vem som är inloggad"
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#, fuzzy
+#| msgid "Caskade couldn't check who is signed in"
+msgid "Caskade couldn't read this device's connections"
 msgstr "Caskade kunde inte kontrollera vem som är inloggad"
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
@@ -6606,6 +6624,10 @@ msgctxt "settings tab"
 msgid "Library Discovery"
 msgstr "Biblioteksidentifiering"
 
+#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+msgid "Library discovery is off, so the settings below don't apply until it's on."
+msgstr ""
+
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 msgid "Library Discovery settings"
 msgstr "Inställningar för biblioteksidentifiering"
@@ -8323,6 +8345,12 @@ msgstr "Öppna i biblioteket"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Open in the system tray instead of a window."
+msgstr "Öppna i systemfältet i stället för i ett fönster."
+
+#: apps/desktop/src/views/settings/GeneralSettings.tsx
+#, fuzzy
+#| msgid "Open in the system tray instead of a window."
+msgid "Open in the system tray instead of a window. Needs Launch on system startup."
 msgstr "Öppna i systemfältet i stället för i ett fönster."
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
@@ -10121,6 +10149,12 @@ msgstr "RomM-servrar"
 msgid "RomM Servers"
 msgstr "RomM-servrar"
 
+#: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#, fuzzy
+#| msgid "ROM scanners could not be loaded."
+msgid "RomM servers couldn't be loaded"
+msgstr "ROM-skannrarna kunde inte läsas in."
+
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 msgctxt "RomM platform column"
 msgid "ROMs"
@@ -10258,10 +10292,6 @@ msgstr "Spara och skanna"
 msgid "Save as collection"
 msgstr "Spara som samling"
 
-#: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
-msgid "Save BIOS folder"
-msgstr "Spara BIOS-mapp"
-
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 msgid "Save Changes"
 msgstr "Spara ändringar"
@@ -10368,6 +10398,16 @@ msgstr "Sparad i nyckelringen"
 msgid "Saved scans that turn ROM folders into games. Multi-disc games and playlists import as one game."
 msgstr "Sparade skanningar som gör ROM-mappar till spel. Spel med flera skivor och spellistor importeras som ett spel."
 
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "Saved when you leave the field or press Enter."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#, fuzzy
+#| msgid "Saved"
+msgid "Saved."
+msgstr "Sparat"
+
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/components/saves/SaveConflictDialog.tsx
 #: apps/desktop/src/views/game/SavesPanel.tsx
@@ -10411,6 +10451,7 @@ msgstr ""
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
@@ -11883,6 +11924,10 @@ msgstr "Spelen som spelades för längst sedan tas bort först. 0 betyder ingen 
 
 #: apps/desktop/src/components/shares/ShareGameDialog.tsx
 msgid "The link as a QR code"
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+msgid "The link couldn't be copied. Select it above and copy it yourself."
 msgstr ""
 
 #: apps/desktop/src/components/shares/ShareGameDialog.tsx
@@ -13437,6 +13482,14 @@ msgstr "ÅÅÅÅ-MM-DD, eller tomt för inget"
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "zoom, text size, bigger"
 msgstr ""
+
+#, fuzzy
+#~| msgid "Save BIOS folder"
+#~ msgid "BIOS folders"
+#~ msgstr "Spara BIOS-mapp"
+
+#~ msgid "Save BIOS folder"
+#~ msgstr "Spara BIOS-mapp"
 
 #~ msgid "Always use default location"
 #~ msgstr "Använd alltid standardplatsen"

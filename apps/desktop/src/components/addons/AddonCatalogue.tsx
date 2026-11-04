@@ -5,6 +5,7 @@
 import { Button, SegmentedControl, Switch, TextField } from "@caskade/ui";
 import { plural } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
+import { useMutation } from "@tanstack/react-query";
 import { CloudOff, RefreshCw, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -17,6 +18,7 @@ import {
 } from "../../api/addons";
 import { formatDateTime } from "../../api/presentation";
 import { useMode } from "../../shell/console/mode";
+import { FailureNotice } from "../FailureNotice";
 import { AddonDetails } from "./AddonDetails";
 import { DeviceOffers } from "./DeviceOffers";
 
@@ -33,6 +35,11 @@ export function AddonCatalogue() {
   const refresh = useRefreshCatalogue(mode);
   const records = useAddonRecords();
   const api = useAddonsApi();
+  // Its failure shows under the switch, not nowhere (#55).
+  const preference = useMutation({
+    mutationFn: (notify: boolean) => api.setUpdatePreference(notify ? "notify" : "manual"),
+    onSettled: () => records.refetch(),
+  });
   const [query, setQuery] = useState("");
   const [kind, setKind] = useState<Kind>("all");
   const [open, setOpen] = useState<string | null>(null);
@@ -102,14 +109,16 @@ export function AddonCatalogue() {
       {records.data && (
         <Switch
           data-part="update-preference"
-          isSelected={records.data.updates === "notify"}
-          onChange={(notify) =>
-            void api.setUpdatePreference(notify ? "notify" : "manual").then(() => records.refetch())
+          isSelected={
+            preference.isPending ? preference.variables : records.data.updates === "notify"
           }
+          isDisabled={preference.isPending}
+          onChange={(notify) => preference.mutate(notify)}
         >
           {t`Check for add-on updates when Settings opens`}
         </Switch>
       )}
+      {preference.error && <FailureNotice variant="inline" error={preference.error} />}
       <DeviceOffers items={catalogue.data?.items ?? []} open={setOpen} />
       <div className="flex flex-wrap items-center gap-3">
         <TextField

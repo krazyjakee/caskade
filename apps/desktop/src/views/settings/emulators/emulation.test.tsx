@@ -193,10 +193,11 @@ it("offers compatible defaults only and saves an explicit BIOS folder", async ()
   expect(screen.queryByRole("option", { name: /Beetle/ })).toBeNull();
   fireEvent.click(screen.getByRole("option", { name: "None" }));
   await waitFor(() => expect(save).toHaveBeenCalledWith("snes", null, null));
-  fireEvent.change(within(row).getByRole("textbox", { name: "BIOS folder for SNES" }), {
-    target: { value: "/fixture/firmware" },
-  });
-  fireEvent.click(within(row).getByRole("button", { name: "Save BIOS folder" }));
+  const bios = within(row).getByRole("textbox", { name: "BIOS folder for SNES" });
+  fireEvent.change(bios, { target: { value: "/fixture/firmware" } });
+  // Saved on leaving the field, like the default beside it (#55).
+  expect(save).not.toHaveBeenLastCalledWith("snes", null, "/fixture/firmware");
+  fireEvent.blur(bios);
   await waitFor(() => expect(save).toHaveBeenLastCalledWith("snes", null, "/fixture/firmware"));
 });
 it("adds an available built-in profile and reports unknown BIOS status honestly", async () => {
