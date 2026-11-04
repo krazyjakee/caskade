@@ -12474,10 +12474,6 @@ msgstr ""
 msgid "You're the admin: you'll add the others' accounts and choose what they can do."
 msgstr ""
 
-#: apps/desktop/src/views/SettingsView.tsx
-msgid "Your account can't change these settings. Ask an admin."
-msgstr ""
-
 #: apps/desktop/src/onboarding/AccountStep.tsx
 msgid "Your account has a PIN. Type a new one to change it."
 msgstr ""

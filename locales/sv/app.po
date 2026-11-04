@@ -12892,10 +12892,6 @@ msgstr "Allt är klart"
 msgid "You're the admin: you'll add the others' accounts and choose what they can do."
 msgstr "Du är administratör: du lägger till de andras konton och väljer vad de får göra."
 
-#: apps/desktop/src/views/SettingsView.tsx
-msgid "Your account can't change these settings. Ask an admin."
-msgstr "Ditt konto kan inte ändra de här inställningarna. Fråga en administratör."
-
 #: apps/desktop/src/onboarding/AccountStep.tsx
 msgid "Your account has a PIN. Type a new one to change it."
 msgstr "Ditt konto har en PIN. Skriv en ny för att ändra den."
@@ -13007,6 +13003,9 @@ msgstr "ÅÅÅÅ-MM-DD, eller tomt för inget"
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "zoom, text size, bigger"
 msgstr ""
+
+#~ msgid "Your account can't change these settings. Ask an admin."
+#~ msgstr "Ditt konto kan inte ändra de här inställningarna. Fråga en administratör."
 
 #, fuzzy
 #~| msgid "Remove {0}"

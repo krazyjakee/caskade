@@ -20,7 +20,7 @@ import {
   UserRound,
   Users,
 } from "lucide-react";
-import { Fragment, type ReactNode, useCallback, useRef, useState } from "react";
+import { Fragment, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { Header, Tab, TabList, TabPanel, Tabs } from "react-aria-components";
 import { useActiveAccount } from "../api/accounts";
 import { useScreenTabs } from "../input";
@@ -230,21 +230,17 @@ function useEditable() {
     (account?.permissions.settings.includes(id) ?? false);
 }
 
-function Forbidden() {
-  return (
-    <p className="text-fg-muted">
-      <Trans>Your account can't change these settings. Ask an admin.</Trans>
-    </p>
-  );
-}
-
-function SettingsContent({ tab }: { tab: SettingsTab }) {
+function SettingsContent({ tab: asked }: { tab: SettingsTab }) {
   const { t } = useLingui();
   const navigate = useNavigate();
   const tablist = useRef<HTMLDivElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   const editable = useEditable();
   const tabs = settingsTabs.filter(({ id }) => editable(id));
+  // A section this account doesn't have (the remembered one was another
+  // account's, or a link pointed into it) opens the first it has (#50).
+  // About is everyone's, so there always is one.
+  const tab = editable(asked) ? asked : (tabs[0]?.id ?? "about");
   const groups = settingsGroups
     .map((group) => ({ ...group, tabs: tabs.filter((section) => section.group === group.id) }))
     .filter((group) => group.tabs.length > 0);
@@ -267,7 +263,10 @@ function SettingsContent({ tab }: { tab: SettingsTab }) {
     go,
     { tabs: tablist },
   );
-  const Panel = editable(tab) ? panels[tab] : Forbidden;
+  useEffect(() => {
+    if (tab !== asked) void navigate({ to: "/settings", search: { tab }, replace: true });
+  }, [tab, asked, navigate]);
+  const Panel = panels[tab];
   const searching = query.trim() !== "";
   return (
     <div data-view="settings">

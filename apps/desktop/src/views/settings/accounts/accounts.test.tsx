@@ -69,12 +69,16 @@ it("shows an admin Accounts and My profile, and a standard account only what it 
   ]);
 });
 
-it("asks an admin for a hidden tab's link", async () => {
+it("opens the first section it has for a hidden tab's link (#50)", async () => {
   const app = renderApp("/settings?tab=accounts", { accounts: family, activeAccount: "kid" });
-  await screen.findByText("Your account can't change these settings. Ask an admin.");
+  await screen.findByRole("tab", { name: "Appearance", selected: true });
   expect(screen.queryByRole("list", { name: "Accounts" })).toBeNull();
-  await act(() => app.router.navigate({ to: "/settings", search: { tab: "storage" } }));
-  await screen.findByText("Your account can't change these settings. Ask an admin.");
+  await waitFor(() => expect(app.router.state.location.search).toEqual({ tab: "appearance" }));
+  await act(() =>
+    app.router.navigate({ to: "/settings", search: { tab: "storage", section: "x" } }),
+  );
+  await waitFor(() => expect(app.router.state.location.search).toEqual({ tab: "appearance" }));
+  expect(screen.getByRole("tab", { name: "Appearance", selected: true })).toBeTruthy();
 });
 
 it("shows and hides tabs as soon as an admin changes the account's permissions", async () => {
@@ -107,7 +111,8 @@ it("shows and hides tabs as soon as an admin changes the account's permissions",
     }),
   );
   await waitFor(() => expect(sections()).not.toContain("Appearance"));
-  await screen.findByText("Your account can't change these settings. Ask an admin.");
+  // The open section went away: the first one left opens.
+  await screen.findByRole("tab", { name: "Devices", selected: true });
 });
 
 it("shows the core's reason when a standard account needs the admin's PIN first", async () => {
