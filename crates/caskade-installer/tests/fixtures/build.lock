@@ -1,5 +1,5 @@
 schema_version = 1
-source_sha256 = "16374727ab6b31c84253983e8d220c44b93d17cf5eccbe23342729bf2817d54b"
+source_sha256 = "9f62f94c2ae4b50d2d5230ac337b780b4bbda8bf49e72cc4b0c3e7b66f68a8ce"
 
 [builders]
 appimage = "appimagetool 1.9.1 + type2-runtime 20251108, SHA-pinned (src/appimage/builder.json)"
@@ -352,11 +352,11 @@ sha256 = "067000e21a588fd354267bd663a676411ba3ad03c623ec019af7fba7628c7916"
 
 [outputs."bin/windows/msi-plus-cab/fixture.cab"]
 bytes = 285881
-sha256 = "2cabdeee2d60aa6dad7c1b4f4d9a362367730a245be69b7f0f12fbbd7f21f166"
+sha256 = "cd7f403d9c55ff2ae009b49f94695b2a52de4393ff5b1e17e49c8b4efa149e9b"
 
 [outputs."bin/windows/msi-plus-cab/setup.msi"]
 bytes = 11264
-sha256 = "65f3a44cd3eff3a69546874be93fa94fd58af718b0e46fcb110052585f04395d"
+sha256 = "27831df01a46cdd25fa8039503cab5842eb51c0137e0a58a7689fa3b29632734"
 
 [outputs."bin/windows/nsis-indie/setup.exe"]
 bytes = 156707

@@ -264,8 +264,12 @@ def msi(work):
                  Action='createLine', Section='Game', Key='InstallPath', Value='[INSTALLDIR]')
             node(feature, 'ComponentRef', Id='InstallPath')
             node(product, 'CustomAction', Id='RecordFixturePath', Property='CASKADE_FIXTURE_PATH', Value='[INSTALLDIR]')
+            # Its Uninstall registration names the folder, as the other MSI
+            # fixtures' do, so detection can own it after a move (#38).
+            node(product, 'CustomAction', Id='SetArpInstallLocation', Property='ARPINSTALLLOCATION', Value='[INSTALLDIR]')
             sequence = node(product, 'InstallExecuteSequence')
             node(sequence, 'Custom', Action='RecordFixturePath', After='CostFinalize').text = 'NOT Installed'
+            node(sequence, 'Custom', Action='SetArpInstallLocation', After='RecordFixturePath').text = 'NOT Installed'
         script = job / 'installer.wxs'; ET.ElementTree(root).write(script, encoding='utf-8', xml_declaration=True)
         run([local / 'bin/wixl', *(['-a', 'x64'] if custom else []), '-o', 'setup.msi', script], job, env)
         if not embedded:

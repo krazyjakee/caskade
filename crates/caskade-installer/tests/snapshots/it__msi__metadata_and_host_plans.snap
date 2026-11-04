@@ -1603,6 +1603,13 @@ expression: snapshots
           "Source": "CASKADE_FIXTURE_PATH",
           "Target": "[INSTALLDIR]",
           "Type": 51
+        },
+        {
+          "Action": "SetArpInstallLocation",
+          "ExtendedType": null,
+          "Source": "ARPINSTALLLOCATION",
+          "Target": "[INSTALLDIR]",
+          "Type": 51
         }
       ],
       "omitted_files": []
