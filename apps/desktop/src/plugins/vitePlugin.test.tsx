@@ -84,4 +84,5 @@ it("builds a UI plugin without React and loads it through the import map", async
   // Hooks only work if the plugin uses the app's React instance.
   fireEvent.click(await screen.findByRole("button", { name: "dev.example.counter clicked 0" }));
   await screen.findByRole("button", { name: "dev.example.counter clicked 1" });
-});
+  // A real Vite build: over 5 s in a loaded full run.
+}, 60_000);
