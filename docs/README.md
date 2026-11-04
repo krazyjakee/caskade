@@ -28,6 +28,7 @@
 - [Discovery CI](../crates/caskade-discovery/docs/ci.md), [hardening](../crates/caskade-discovery/tests/HARDENING.md), and [third-party notices](../crates/caskade-discovery/THIRD-PARTY.md)
 - [Emulation catalogue and managed setup](../crates/caskade-sources/emulation/README.md)
 - [Console hardware checklist](console-native-checklist.md)
+- [Manual checks still open](manual-checks.md): the real-hardware, network and account checks left on GitHub issues, grouped by the machines they need.
 - [Platform support and deferred checks](platform-support.md): what runs on Linux, Windows and macOS, how each part was verified, and what is left for native hardware and real accounts.
 - [Security policy](../SECURITY.md) and the [October 2026 security audit](security/audit-2026-10.md): reporting vulnerabilities, findings and residual risks.
 - [Releasing](RELEASING.md): the tag-built draft release, the updater signing key and testing an update before publishing.
