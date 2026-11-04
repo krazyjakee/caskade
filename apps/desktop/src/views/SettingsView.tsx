@@ -43,7 +43,6 @@ import { StatisticsSettings } from "./settings/statistics/StatisticsSettings";
 import { StoreAccountsSettings } from "./settings/stores/StoreAccountsSettings";
 import { StreamingSettings } from "./settings/streaming/StreamingSettings";
 import { TorrentLinksSettings } from "./settings/TorrentLinksSettings";
-import { UpdateSettings } from "./settings/UpdateSettings";
 import { UnsavedChangesGuard } from "./settings/unsavedChanges";
 import { SettingsProvider } from "./settings/useSettings";
 
@@ -186,7 +185,6 @@ const panels: Record<SettingsTab, () => ReactNode> = {
     <>
       <InstallerSettings />
       <TorrentLinksSettings />
-      <UpdateSettings />
     </>
   ),
   plugins: PluginsSettings,
@@ -274,7 +272,7 @@ function SettingsContent({ tab: asked }: { tab: SettingsTab }) {
         <Trans>Settings</Trans>
       </h1>
       <p className="mt-1 text-fg-muted">
-        <Trans>Configure library discovery, launchers, emulation and system integration.</Trans>
+        <Trans>How Caskade finds, installs and plays your games, and how it looks and syncs.</Trans>
       </p>
       <Tabs
         orientation="vertical"

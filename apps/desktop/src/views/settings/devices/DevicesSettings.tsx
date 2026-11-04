@@ -43,6 +43,8 @@ import { SyncChoices, type SyncSettingsValue } from "./SyncChoices";
 
 export function DevicesSettings() {
   const admin = useDeviceAdmin();
+  // Before the first pairing, Pair a device comes before the empty list (#54).
+  const unpaired = useSyncStatus().data?.devices.length === 0;
   return (
     <div className="flex flex-col gap-6">
       {!admin && (
@@ -52,8 +54,16 @@ export function DevicesSettings() {
       )}
       <IdentityNotice />
       <ThisDeviceSection />
-      <PairedSection />
-      {admin && <NearbySection />}
+      {/* Reordered, not remounted: a pairing that just finished keeps its
+          dialog when the list gains its first device. */}
+      <div className="flex flex-col gap-6">
+        <PairedSection />
+        {admin && (
+          <div className={unpaired ? "order-first" : undefined}>
+            <NearbySection />
+          </div>
+        )}
+      </div>
       <SyncChoices />
       <SavesSection />
       <CopiesAndShares />

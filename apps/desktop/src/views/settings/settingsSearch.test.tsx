@@ -58,12 +58,13 @@ it("finds saves in Devices and opens it", async () => {
 });
 
 it("tells app updates from game updates, and highlights the one chosen", async () => {
-  const app = renderApp("/settings?tab=general");
+  const app = renderApp("/settings?tab=appearance");
   await search("updates");
   const list = within(results());
   expect(list.getByRole("button", { name: "Caskade updates in General" })).toBeTruthy();
-  fireEvent.click(list.getByRole("button", { name: "Game updates in Installer" }));
-  await waitFor(() => expect(app.router.state.location.search).toEqual({ tab: "installer" }));
+  // Both live in General (#54).
+  fireEvent.click(list.getByRole("button", { name: "Game updates in General" }));
+  await waitFor(() => expect(app.router.state.location.search).toEqual({ tab: "general" }));
   await waitFor(() =>
     expect(document.querySelector("[data-found]")?.textContent).toMatch(/^Game updates/),
   );

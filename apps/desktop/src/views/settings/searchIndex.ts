@@ -24,7 +24,7 @@ export interface SettingsSearchEntry {
 export const sectionWords: Readonly<Record<SettingsTab, MessageDescriptor>> = {
   general: msg({
     message:
-      "app, language, region, startup, start, close, tray, minimize, quit, time format, cache, first-run setup, console mode, desktop mode, app updates, Caskade updates, self-update, new version",
+      "app, language, region, startup, start, close, tray, minimize, quit, time format, cache, first-run setup, console mode, desktop mode, app updates, Caskade updates, self-update, new version, game updates, update games, GitHub releases",
     comment: "Search words for Settings → General, separated by commas",
   }),
   "library-discovery": msg({
@@ -57,8 +57,7 @@ export const sectionWords: Readonly<Record<SettingsTab, MessageDescriptor>> = {
     comment: "Search words for Settings → Storage, separated by commas",
   }),
   installer: msg({
-    message:
-      "install, installers, downloads, torrents, magnet links, Wine, Proton, compatibility, game updates, update games, GitHub releases",
+    message: "install, installers, downloads, torrents, magnet links, Wine, Proton, compatibility",
     comment: "Search words for Settings → Installer, separated by commas",
   }),
   plugins: msg({
@@ -225,7 +224,7 @@ export const settingsSearchIndex: readonly SettingsSearchEntry[] = [
     words: msg`torrents, magnet, BitTorrent`,
   },
   {
-    tab: "installer",
+    tab: "general",
     label: msg`Game updates`,
     words: msg({
       message: "update games, game patches, GitHub releases",
@@ -233,11 +232,11 @@ export const settingsSearchIndex: readonly SettingsSearchEntry[] = [
     }),
   },
   {
-    tab: "installer",
+    tab: "general",
     label: msg({ message: "Check for game updates", context: "settings" }),
   },
   {
-    tab: "installer",
+    tab: "general",
     label: msg({ message: "Offer updates before playing", context: "settings" }),
   },
   // Plugins
@@ -251,7 +250,6 @@ export const settingsSearchIndex: readonly SettingsSearchEntry[] = [
   { tab: "devices", label: msg`Your devices`, words: msg`paired devices` },
   { tab: "devices", label: msg`Pair a device`, words: msg`pairing, link, add device` },
   { tab: "devices", label: msg`Saves`, words: msg`save games, cloud saves, save sync` },
-  { tab: "devices", label: msg`Sync saves` },
   { tab: "devices", label: msg`Versions to keep`, words: msg`save versions, save history` },
   {
     tab: "devices",

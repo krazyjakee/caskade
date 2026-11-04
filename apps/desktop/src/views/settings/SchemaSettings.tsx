@@ -101,25 +101,30 @@ export function SchemaSettings({
     setSettings((current) => ({ ...current, [key]: value }));
   return (
     <div data-settings={namespace} data-cs="schema-settings" className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-3">
-        <SettingsFeedback error={error} saving={saving} />
-        <ResetDefaults
-          group={title}
-          label={resetLabel ?? t`Reset ${{ section: title }} settings`}
-          parts={[
-            {
-              namespace,
-              whole: true,
-              fields: fields.map(([key, schema]) => ({
-                key,
-                label: typeof schema.title === "string" ? schema.title : label(key),
-              })),
-            },
-          ]}
-          isDisabled={saving}
-        />
-      </div>
-      <SettingsSection icon={icon} title={title} description={description}>
+      <SettingsFeedback error={error} saving={saving} />
+      <SettingsSection
+        icon={icon}
+        title={title}
+        description={description}
+        // In the card it resets, so two on one page can't be confused (#54).
+        aside={
+          <ResetDefaults
+            group={title}
+            label={resetLabel ?? t`Reset ${{ section: title }} settings`}
+            parts={[
+              {
+                namespace,
+                whole: true,
+                fields: fields.map(([key, schema]) => ({
+                  key,
+                  label: typeof schema.title === "string" ? schema.title : label(key),
+                })),
+              },
+            ]}
+            isDisabled={saving}
+          />
+        }
+      >
         {fields.map(([key, schema]) => {
           const title = typeof schema.title === "string" ? schema.title : label(key);
           const description =

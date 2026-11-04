@@ -13,6 +13,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { useNavigate } from "@tanstack/react-router";
 import {
   Clock,
+  Cloud,
   FolderOpen,
   Gamepad2,
   Globe,
@@ -34,6 +35,7 @@ import { StorageSummary } from "../../components/storage/StorageSummary";
 import { LanguageSelect } from "../../locale/LanguageSelect";
 import { AppUpdateSection } from "./AppUpdateSection";
 import { ResetDefaults, type ResetPart } from "./ResetDefaults";
+import { UpdateSettings } from "./UpdateSettings";
 import {
   SettingsFeedback,
   SettingsLoading,
@@ -135,15 +137,16 @@ interface GeneralPreferences {
 
 /** `core.metadata` and `core.onboarding`: what goes online, and first-run
  * setup again. */
-function SetupSection() {
+/** Looking games up online, in a card of its own rather than under Setup
+ * (#54). */
+function OnlineSection() {
   const { t } = useLingui();
   const metadata = useSettingsSection<{ online: boolean }>("core.metadata");
-  const onboarding = useSettingsSection<{ completed: boolean; sounds: boolean }>("core.onboarding");
   return (
     <SettingsSection
-      icon={Sparkles}
-      title={t({ message: "Setup", context: "settings section" })}
-      description={t`Online lookups, and the setup Caskade starts with.`}
+      icon={Cloud}
+      title={t({ message: "Online", context: "settings section" })}
+      description={t`What Caskade looks up on the internet.`}
     >
       {metadata.settings && (
         <SettingRow
@@ -157,6 +160,20 @@ function SetupSection() {
           />
         </SettingRow>
       )}
+      <SettingsStatus section={metadata} what={t`Online lookups`} />
+    </SettingsSection>
+  );
+}
+
+function SetupSection() {
+  const { t } = useLingui();
+  const onboarding = useSettingsSection<{ completed: boolean; sounds: boolean }>("core.onboarding");
+  return (
+    <SettingsSection
+      icon={Sparkles}
+      title={t({ message: "Setup", context: "settings section" })}
+      description={t`The setup Caskade starts with.`}
+    >
       {onboarding.settings && (
         <SettingRow
           icon={RotateCcw}
@@ -171,7 +188,6 @@ function SetupSection() {
           </Button>
         </SettingRow>
       )}
-      <SettingsStatus section={metadata} what={t`Online lookups`} />
       <SettingsStatus section={onboarding} what={t`First-run setup`} />
     </SettingsSection>
   );
@@ -331,7 +347,7 @@ export function GeneralSettings() {
             </div>
             <TextField
               label={t`Cache folder`}
-              description={t`Artwork, thumbnails and metadata. Safe to clear.`}
+              description={t`Artwork, thumbnails and game details that Caskade can download again.`}
               icon={FolderOpen}
               mono
               value={settings.cacheDir}
@@ -358,6 +374,9 @@ export function GeneralSettings() {
         </SettingsSection>
 
         <AppUpdateSection />
+        {/* Beside Caskade's own updates, not under Installer (#54). */}
+        <UpdateSettings />
+        <OnlineSection />
         <SetupSection />
       </div>
     </div>

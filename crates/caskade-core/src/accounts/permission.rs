@@ -25,14 +25,15 @@ impl Permission {
     /// namespace no section owns is for admins.
     pub fn for_namespace(namespace: &str) -> Self {
         let section = match namespace {
+            // Game updates sit beside Caskade's own in General (#54).
             "core.general" | "core.console" | "core.onboarding" | "core.metadata"
-            | "core.appUpdates" => "general",
+            | "core.appUpdates" | "core.updates" => "general",
             "core.discovery" | "discovery.import" => "library-discovery",
             "core.launchers" => "launchers",
             "core.emulation" | "core.romm" => "emulators",
             "core.appearance" => "appearance",
             "core.storage" | "storage.roots" => "storage",
-            "core.installer" | "core.updates" => "installer",
+            "core.installer" => "installer",
             _ if namespace.starts_with("plugins.") => "plugins",
             _ => return Self::Admin,
         };
@@ -111,7 +112,7 @@ mod tests {
             ("core.romm", "emulators"),
             ("core.appearance", "appearance"),
             ("storage.roots", "storage"),
-            ("core.updates", "installer"),
+            ("core.updates", "general"),
             ("plugins.example.pack", "plugins"),
         ] {
             assert_eq!(

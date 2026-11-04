@@ -135,7 +135,7 @@ describe("storage settings", () => {
     fireEvent.click(screen.getByRole("button", { name: "Move its game there, then remove" }));
     await waitFor(() => expect(api.move).toHaveBeenCalledWith("entry-1", "archive"));
     await waitFor(() => expect(api.remove).toHaveBeenCalledWith("fast"));
-    fireEvent.click(screen.getByRole("checkbox", { name: "Always use default location" }));
+    fireEvent.click(screen.getByRole("switch", { name: "Always use the default location" }));
     await waitFor(() =>
       expect(settings.set).toHaveBeenCalledWith("core.storage", { alwaysUseDefault: true }, 0),
     );

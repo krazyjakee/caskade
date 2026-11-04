@@ -2,7 +2,7 @@ import { useLingui } from "@lingui/react/macro";
 import { RefreshCw } from "lucide-react";
 import { SchemaSettings } from "./SchemaSettings";
 
-/** Game updates (`core.updates`), shown under the installer's settings. */
+/** Game updates (`core.updates`), in General beside Caskade's own (#54). */
 export function UpdateSettings() {
   const { t } = useLingui();
   return (

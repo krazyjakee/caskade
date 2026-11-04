@@ -1,4 +1,4 @@
-import { Button, Checkbox, Select, SettingRow, SettingsSection, TextField } from "@caskade/ui";
+import { Button, Select, SettingRow, SettingsSection, Switch, TextField } from "@caskade/ui";
 import type { MessageDescriptor } from "@lingui/core";
 import { msg, plural } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
@@ -270,25 +270,12 @@ export function StoragePanel({ api }: { api: StorageApi }) {
           </Button>
         </div>
       </SettingsSection>
-      <SettingsSection
-        title={t`Install location preference`}
-        description={t`Free space and required capabilities are checked for every job.`}
-      >
-        <SettingRow
-          label={t`Always use the default location`}
-          description={t`Skip the picker when the default location is available. A single eligible location is selected automatically.`}
-        >
-          <Checkbox
-            aria-label={t`Always use default location`}
-            isDisabled={!prefs.settings || prefs.saving}
-            isSelected={prefs.settings?.alwaysUseDefault ?? false}
-            onChange={(value) =>
-              prefs.setSettings((current) => ({ ...current, alwaysUseDefault: value }))
-            }
-          />
-        </SettingRow>
-        <SettingsFeedback error={prefs.error} saving={prefs.saving} />
-      </SettingsSection>
+      {/* Beside the locations it's about (#54). */}
+      {message && (
+        <p role="status" className="text-sm text-fg-muted">
+          {message}
+        </p>
+      )}
       {active && (
         <SettingsSection
           title={active.root.label ?? t`Selected location`}
@@ -411,11 +398,24 @@ export function StoragePanel({ api }: { api: StorageApi }) {
           )}
         </SettingsSection>
       )}
-      {message && (
-        <p role="status" className="text-sm text-fg-muted">
-          {message}
-        </p>
-      )}
+      <SettingsSection
+        title={t`Install location preference`}
+        description={t`Free space and required capabilities are checked for every job.`}
+      >
+        <SettingRow
+          label={t`Always use the default location`}
+          description={t`Skip the picker when the default location is available. A single eligible location is selected automatically.`}
+        >
+          <Switch
+            isDisabled={!prefs.settings || prefs.saving}
+            isSelected={prefs.settings?.alwaysUseDefault ?? false}
+            onChange={(value) =>
+              prefs.setSettings((current) => ({ ...current, alwaysUseDefault: value }))
+            }
+          />
+        </SettingRow>
+        <SettingsFeedback error={prefs.error} saving={prefs.saving} />
+      </SettingsSection>
     </div>
   );
 }

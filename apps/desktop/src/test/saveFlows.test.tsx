@@ -151,10 +151,13 @@ it("Settings → Devices → Saves with a pad: sync, versions to keep, Update no
   const app = renderApp("/settings?tab=devices", { mode: "console" });
   app.library.saves.seedManifest({ available: true, checkedAtMs: Date.UTC(2026, 10, 1, 9) });
   await screen.findByRole("heading", { name: "Saves" });
+  // Whether saves sync is What syncs' Saves row (#54).
   const toggle = await walkTo(app, (element) => {
     const row = element.closest('[data-cs="setting-row"]');
     return (
-      element.getAttribute("role") === "switch" && Boolean(row?.textContent?.includes("Sync saves"))
+      element.getAttribute("role") === "radio" &&
+      element.textContent === "This device only" &&
+      row?.querySelector('[data-part="label"]')?.textContent === "Saves"
     );
   });
   expect(toggle).not.toBeNull();

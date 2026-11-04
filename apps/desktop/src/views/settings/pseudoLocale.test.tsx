@@ -176,10 +176,13 @@ it.each([
     tab === "installer"
       ? // Rows filled in from the core's schema are its to translate (#214).
         '[data-cs="setting-row"]'
-      : tab === "plugins"
-        ? // Plugins' own settings pages are the plugin host's (plugins/PluginViews.tsx).
-          '[role="tabpanel"] > div > :not(section)'
-        : undefined;
+      : tab === "general"
+        ? // Game updates' rows come from the core's schema too (#54).
+          '[data-cs="schema-settings"] [data-cs="setting-row"]'
+        : tab === "plugins"
+          ? // Plugins' own settings pages are the plugin host's (plugins/PluginViews.tsx).
+            '[role="tabpanel"] > div > :not(section)'
+          : undefined;
   // Checked once, after its data (`ready`): a check that may pass early
   // would pass on a tab still loading.
   expect(shown('[role="tabpanel"]', { skip })).toEqual([]);

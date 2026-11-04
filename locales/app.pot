@@ -1984,10 +1984,6 @@ msgid "Always allow this game for this account"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
-msgid "Always use default location"
-msgstr ""
-
-#: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Always use the default location"
 msgstr ""
 
@@ -2136,7 +2132,7 @@ msgstr ""
 
 #. Search words for Settings → General, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
-msgid "app, language, region, startup, start, close, tray, minimize, quit, time format, cache, first-run setup, console mode, desktop mode, app updates, Caskade updates, self-update, new version"
+msgid "app, language, region, startup, start, close, tray, minimize, quit, time format, cache, first-run setup, console mode, desktop mode, app updates, Caskade updates, self-update, new version, game updates, update games, GitHub releases"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
@@ -2214,7 +2210,7 @@ msgid "Artwork and game info"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
-msgid "Artwork, thumbnails and metadata. Safe to clear."
+msgid "Artwork, thumbnails and game details that Caskade can download again."
 msgstr ""
 
 #. A game release's region
@@ -3377,10 +3373,6 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 msgid "Configure emulators, choose platform defaults and find your ROM collection."
-msgstr ""
-
-#: apps/desktop/src/views/SettingsView.tsx
-msgid "Configure library discovery, launchers, emulation and system integration."
 msgstr ""
 
 #: apps/desktop/src/components/accounts/PinPad.tsx
@@ -5377,12 +5369,20 @@ msgstr ""
 msgid "How and when games are scanned: <0>Library Discovery</0>"
 msgstr ""
 
+#: apps/desktop/src/views/SettingsView.tsx
+msgid "How Caskade finds, installs and plays your games, and how it looks and syncs."
+msgstr ""
+
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgid "How Caskade looks. Themes restyle every view through design tokens."
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "How do you play?"
+msgstr ""
+
+#: apps/desktop/src/views/settings/EmulatorSettings.tsx
+msgid "How emulated games open."
 msgstr ""
 
 #: apps/desktop/src/components/shares/common.tsx
@@ -5730,7 +5730,7 @@ msgstr ""
 
 #. Search words for Settings → Installer, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
-msgid "install, installers, downloads, torrents, magnet links, Wine, Proton, compatibility, game updates, update games, GitHub releases"
+msgid "install, installers, downloads, torrents, magnet links, Wine, Proton, compatibility"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
@@ -7778,10 +7778,6 @@ msgctxt "plugin status"
 msgid "Off"
 msgstr ""
 
-#: apps/desktop/src/views/settings/devices/SavesSection.tsx
-msgid "Off keeps every version on this device only."
-msgstr ""
-
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Off stops every scan, Scan now included, and watching folders."
 msgstr ""
@@ -7916,11 +7912,12 @@ msgid "online"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
-msgid "Online lookups"
+msgctxt "settings section"
+msgid "Online"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
-msgid "Online lookups, and the setup Caskade starts with."
+msgid "Online lookups"
 msgstr ""
 
 #: apps/desktop/src/components/shares/ShareInfoDetails.tsx
@@ -8556,6 +8553,7 @@ msgstr ""
 #. The game is running
 #: apps/desktop/src/shell/console/GameCurtain.tsx
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/settings/EmulatorSettings.tsx
 msgid "Playing"
 msgstr ""
 
@@ -9945,8 +9943,16 @@ msgstr ""
 msgid "Saves"
 msgstr ""
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Saves go to your other devices. Saves in What syncs above changes that."
+msgstr ""
+
 #: apps/desktop/src/views/game/SavesPanel.tsx
 msgid "Saves stay on this device: syncing them is off in Settings → Devices."
+msgstr ""
+
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Saves stay on this device. Saves in What syncs above changes that."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
@@ -11157,11 +11163,6 @@ msgid "Sync on startup"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
-#: apps/desktop/src/views/settings/searchIndex.ts
-msgid "Sync saves"
-msgstr ""
-
-#: apps/desktop/src/views/settings/devices/SavesSection.tsx
 msgid "Sync settings"
 msgstr ""
 
@@ -11462,6 +11463,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/useSettings.tsx
 msgid "The settings here show what's saved. Retry sends your change again."
+msgstr ""
+
+#: apps/desktop/src/views/settings/GeneralSettings.tsx
+msgid "The setup Caskade starts with."
 msgstr ""
 
 #. placeholder {0}: formatDateTime(new Date(flow.expiresAtMs))
@@ -12466,6 +12471,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "What Caskade does with its window."
+msgstr ""
+
+#: apps/desktop/src/views/settings/GeneralSettings.tsx
+msgid "What Caskade looks up on the internet."
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx

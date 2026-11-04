@@ -2047,10 +2047,6 @@ msgid "Always allow this game for this account"
 msgstr "Tillåt alltid det här spelet för det här kontot"
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
-msgid "Always use default location"
-msgstr "Använd alltid standardplatsen"
-
-#: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Always use the default location"
 msgstr "Använd alltid standardplatsen"
 
@@ -2206,7 +2202,7 @@ msgstr ""
 
 #. Search words for Settings → General, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
-msgid "app, language, region, startup, start, close, tray, minimize, quit, time format, cache, first-run setup, console mode, desktop mode, app updates, Caskade updates, self-update, new version"
+msgid "app, language, region, startup, start, close, tray, minimize, quit, time format, cache, first-run setup, console mode, desktop mode, app updates, Caskade updates, self-update, new version, game updates, update games, GitHub releases"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
@@ -2290,7 +2286,9 @@ msgid "Artwork and game info"
 msgstr "Bilder och spelinformation"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
-msgid "Artwork, thumbnails and metadata. Safe to clear."
+#, fuzzy
+#| msgid "Artwork, thumbnails and metadata. Safe to clear."
+msgid "Artwork, thumbnails and game details that Caskade can download again."
 msgstr "Bilder, miniatyrer och metadata. Säkert att rensa."
 
 #. A game release's region
@@ -3510,10 +3508,6 @@ msgstr "Konfigurera"
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 msgid "Configure emulators, choose platform defaults and find your ROM collection."
 msgstr "Konfigurera emulatorer, välj standardval för plattformar och hitta din ROM-samling."
-
-#: apps/desktop/src/views/SettingsView.tsx
-msgid "Configure library discovery, launchers, emulation and system integration."
-msgstr "Konfigurera biblioteksupptäckt, startprogram, emulering och systemintegration."
 
 #: apps/desktop/src/components/accounts/PinPad.tsx
 msgctxt "PIN pad"
@@ -5608,6 +5602,10 @@ msgstr ""
 msgid "How and when games are scanned: <0>Library Discovery</0>"
 msgstr ""
 
+#: apps/desktop/src/views/SettingsView.tsx
+msgid "How Caskade finds, installs and plays your games, and how it looks and syncs."
+msgstr ""
+
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgid "How Caskade looks. Themes restyle every view through design tokens."
 msgstr "Hur Caskade ser ut. Teman ändrar stilen på alla vyer via designtokens."
@@ -5615,6 +5613,10 @@ msgstr "Hur Caskade ser ut. Teman ändrar stilen på alla vyer via designtokens.
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "How do you play?"
 msgstr "Hur spelar du?"
+
+#: apps/desktop/src/views/settings/EmulatorSettings.tsx
+msgid "How emulated games open."
+msgstr ""
 
 #: apps/desktop/src/components/shares/common.tsx
 msgid "How far {name} got"
@@ -5965,7 +5967,7 @@ msgstr "Installera med {0}"
 
 #. Search words for Settings → Installer, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
-msgid "install, installers, downloads, torrents, magnet links, Wine, Proton, compatibility, game updates, update games, GitHub releases"
+msgid "install, installers, downloads, torrents, magnet links, Wine, Proton, compatibility"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
@@ -8084,10 +8086,6 @@ msgctxt "plugin status"
 msgid "Off"
 msgstr "Av"
 
-#: apps/desktop/src/views/settings/devices/SavesSection.tsx
-msgid "Off keeps every version on this device only."
-msgstr "Av behåller alla versioner bara på den här enheten."
-
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Off stops every scan, Scan now included, and watching folders."
 msgstr ""
@@ -8229,12 +8227,16 @@ msgid "online"
 msgstr "online"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
-msgid "Online lookups"
-msgstr ""
+#, fuzzy
+#| msgctxt "storage location status"
+#| msgid "online"
+msgctxt "settings section"
+msgid "Online"
+msgstr "online"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
-msgid "Online lookups, and the setup Caskade starts with."
-msgstr "Onlineuppslag och hur Caskade startar."
+msgid "Online lookups"
+msgstr ""
 
 #: apps/desktop/src/components/shares/ShareInfoDetails.tsx
 msgid "Only a relay reaches {sharer}'s computer right now. The game waits for a direct connection: game files don't go through relays."
@@ -8903,6 +8905,7 @@ msgstr "Spelare"
 #. The game is running
 #: apps/desktop/src/shell/console/GameCurtain.tsx
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/settings/EmulatorSettings.tsx
 msgid "Playing"
 msgstr "Spelar"
 
@@ -10374,9 +10377,17 @@ msgstr "Sparade skanningar som gör ROM-mappar till spel. Spel med flera skivor 
 msgid "Saves"
 msgstr "Sparfiler"
 
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Saves go to your other devices. Saves in What syncs above changes that."
+msgstr ""
+
 #: apps/desktop/src/views/game/SavesPanel.tsx
 msgid "Saves stay on this device: syncing them is off in Settings → Devices."
 msgstr "Sparfilerna stannar på den här enheten: synkning av dem är avstängd i Inställningar → Enheter."
+
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+msgid "Saves stay on this device. Saves in What syncs above changes that."
+msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #, fuzzy
@@ -11636,11 +11647,6 @@ msgid "Sync on startup"
 msgstr "Synka vid start"
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
-#: apps/desktop/src/views/settings/searchIndex.ts
-msgid "Sync saves"
-msgstr "Synka sparfiler"
-
-#: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #, fuzzy
 #| msgid "Open settings"
 msgid "Sync settings"
@@ -11951,6 +11957,12 @@ msgstr "Skriptet läser startens värden från CASKADE_-variabler, som \"$CASKAD
 #: apps/desktop/src/views/settings/useSettings.tsx
 msgid "The settings here show what's saved. Retry sends your change again."
 msgstr ""
+
+#: apps/desktop/src/views/settings/GeneralSettings.tsx
+#, fuzzy
+#| msgid "Online lookups, and the setup Caskade starts with."
+msgid "The setup Caskade starts with."
+msgstr "Onlineuppslag och hur Caskade startar."
 
 #. placeholder {0}: formatDateTime(new Date(flow.expiresAtMs))
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
@@ -13000,6 +13012,12 @@ msgstr "Välkommen tillbaka"
 msgid "What Caskade does with its window."
 msgstr "Vad Caskade gör med sitt fönster."
 
+#: apps/desktop/src/views/settings/GeneralSettings.tsx
+#, fuzzy
+#| msgid "What Caskade does with its window."
+msgid "What Caskade looks up on the internet."
+msgstr "Vad Caskade gör med sitt fönster."
+
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "What changes"
 msgstr "Vad som ändras"
@@ -13419,6 +13437,18 @@ msgstr "ÅÅÅÅ-MM-DD, eller tomt för inget"
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "zoom, text size, bigger"
 msgstr ""
+
+#~ msgid "Always use default location"
+#~ msgstr "Använd alltid standardplatsen"
+
+#~ msgid "Configure library discovery, launchers, emulation and system integration."
+#~ msgstr "Konfigurera biblioteksupptäckt, startprogram, emulering och systemintegration."
+
+#~ msgid "Off keeps every version on this device only."
+#~ msgstr "Av behåller alla versioner bara på den här enheten."
+
+#~ msgid "Sync saves"
+#~ msgstr "Synka sparfiler"
 
 #~ msgid "{source}: {games} · {duration} ms"
 #~ msgstr "{source}: {games} · {duration} ms"

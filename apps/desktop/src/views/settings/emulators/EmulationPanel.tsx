@@ -78,7 +78,7 @@ export function EmulationPanel({
   section: EmulationSection;
   setSection: (section: EmulationSection) => void;
   renderExtra?: (section: "romm") => ReactNode;
-  /** Settings shown under the header's stats. */
+  /** Settings for all of emulation, in their own card under the overview (#54). */
   header?: ReactNode;
 }) {
   const { t } = useLingui();
@@ -209,7 +209,6 @@ export function EmulationPanel({
             </div>
           ))}
         </div>
-        {header}
         {automatic === 0 && (
           <p className="text-xs text-fg-subtle">
             <Trans>
@@ -234,6 +233,7 @@ export function EmulationPanel({
           </p>
         )}
       </section>
+      {header}
       {detecting && <DetectionReview close={() => setDetecting(false)} />}
       <SegmentedControl
         aria-label={t`Emulation section`}

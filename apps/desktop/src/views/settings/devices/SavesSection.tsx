@@ -1,6 +1,6 @@
-/** Settings → Devices → Saves (#241): whether saves sync, how many versions
+/** Settings → Devices → Saves (#241): whether saves sync (set in What syncs), how many versions
  * each game keeps, and the save-location manifest's last update. */
-import { Button, Select, SettingRow, SettingsSection, Switch } from "@caskade/ui";
+import { Button, Select, SettingRow, SettingsSection } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { Save } from "lucide-react";
 import { formatDateTime } from "../../../api/presentation";
@@ -39,21 +39,14 @@ export function SavesSection() {
   const when = checked === null ? "" : formatDateTime(checked);
   return (
     <SettingsSection icon={Save} title={title} description={description}>
-      <SettingRow
-        label={t`Sync saves`}
-        description={t`Off keeps every version on this device only.`}
-      >
-        <Switch
-          isSelected={syncing}
-          isDisabled={!admin || sync.saving}
-          onChange={(on) =>
-            sync.setSettings((current) => ({
-              ...current,
-              categories: { ...current.categories, saves: on ? "sync" : "thisDeviceOnly" },
-            }))
-          }
-        />
-      </SettingRow>
+      {/* Whether saves sync is What syncs' Saves row; one control (#54). */}
+      <p data-part="saves-sync" className="mt-1 text-sm text-fg-muted">
+        {syncing ? (
+          <Trans>Saves go to your other devices. Saves in What syncs above changes that.</Trans>
+        ) : (
+          <Trans>Saves stay on this device. Saves in What syncs above changes that.</Trans>
+        )}
+      </p>
       <SettingRow
         label={t`Versions to keep`}
         description={t`For each game. The newest stay, and so does any save that isn't settled between devices yet.`}
@@ -67,7 +60,7 @@ export function SavesSection() {
           }
         />
       </SettingRow>
-      <SettingsStatus section={sync} what={t`Sync saves`} />
+      <SettingsStatus section={sync} what={t`Sync settings`} />
       <SettingsStatus section={saves} what={t`Versions to keep`} />
       {manifest.available && (
         <SettingRow

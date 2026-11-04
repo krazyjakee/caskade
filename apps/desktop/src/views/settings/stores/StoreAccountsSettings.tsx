@@ -545,6 +545,17 @@ function RefreshSettings() {
           }
         />
       </SettingRow>
+      <SettingRow label={t`How often`}>
+        <Select
+          isDisabled={!settings.backgroundRefresh}
+          options={options}
+          value={String(settings.intervalHours)}
+          onChange={(hours) =>
+            preferences.setSettings((current) => ({ ...current, intervalHours: Number(hours) }))
+          }
+        />
+      </SettingRow>
+      {/* After the two refresh rows it doesn't belong between (#54). */}
       <SettingRow
         label={t`Import play time`}
         description={t`Play time a store reports is added to what Caskade tracked, counting time played through Caskade once. A store that lowers its total never lowers yours.`}
@@ -558,16 +569,6 @@ function RefreshSettings() {
           value={settings.playtimeImport ?? "always"}
           onChange={(playtimeImport) =>
             preferences.setSettings((current) => ({ ...current, playtimeImport }))
-          }
-        />
-      </SettingRow>
-      <SettingRow label={t`How often`}>
-        <Select
-          isDisabled={!settings.backgroundRefresh}
-          options={options}
-          value={String(settings.intervalHours)}
-          onChange={(hours) =>
-            preferences.setSettings((current) => ({ ...current, intervalHours: Number(hours) }))
           }
         />
       </SettingRow>

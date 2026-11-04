@@ -165,6 +165,16 @@ export function LibraryDiscoverySettings() {
           </p>
         )}
       </SettingsSection>
+      {/* The decision first; the settings and reports below don't need one (#54). */}
+      {snapshot && (
+        <ReviewList
+          snapshot={snapshot}
+          busy={busy}
+          decide={(ids, accept) =>
+            discovery.action.mutate({ type: "review", ids, accept, revision: snapshot.revision })
+          }
+        />
+      )}
       <fieldset disabled={!settings.enabled} className="space-y-4 disabled:opacity-50">
         <SettingsSection
           icon={RefreshCw}
@@ -329,47 +339,37 @@ export function LibraryDiscoverySettings() {
         </SettingsSection>
       </fieldset>
       {snapshot && (
-        <>
-          <SettingsSection
-            title={t`Last source reports`}
-            description={t`What each source found in the last scan, and any problems.`}
-          >
-            <ul className="mt-3 space-y-3">
-              {snapshot.sources.map((source) => {
-                const games = plural({ total: source.count }, { one: "# game", other: "# games" });
-                return (
-                  <li key={source.source} className="rounded-control border border-border p-3">
-                    <p className="text-sm font-medium">
-                      {t({
-                        message: `${{ source: sourceName(source.source) }}: ${{ games }}`,
-                        comment:
-                          "A discovery source's last report: its name and the games it found",
-                      })}
-                    </p>
-                    {source.error && <p className="mt-1 text-sm text-danger">{source.error}</p>}
-                    <ul className="mt-1 text-xs text-fg-muted">
-                      {source.warnings.map((warning) => (
-                        <li key={warning}>{warning}</li>
-                      ))}
-                    </ul>
-                  </li>
-                );
-              })}
-            </ul>
-            {snapshot.warnings.map((warning) => (
-              <p key={warning} className="mt-2 text-sm text-fg-muted">
-                {warning}
-              </p>
-            ))}
-          </SettingsSection>
-          <ReviewList
-            snapshot={snapshot}
-            busy={busy}
-            decide={(ids, accept) =>
-              discovery.action.mutate({ type: "review", ids, accept, revision: snapshot.revision })
-            }
-          />
-        </>
+        <SettingsSection
+          title={t`Last source reports`}
+          description={t`What each source found in the last scan, and any problems.`}
+        >
+          <ul className="mt-3 space-y-3">
+            {snapshot.sources.map((source) => {
+              const games = plural({ total: source.count }, { one: "# game", other: "# games" });
+              return (
+                <li key={source.source} className="rounded-control border border-border p-3">
+                  <p className="text-sm font-medium">
+                    {t({
+                      message: `${{ source: sourceName(source.source) }}: ${{ games }}`,
+                      comment: "A discovery source's last report: its name and the games it found",
+                    })}
+                  </p>
+                  {source.error && <p className="mt-1 text-sm text-danger">{source.error}</p>}
+                  <ul className="mt-1 text-xs text-fg-muted">
+                    {source.warnings.map((warning) => (
+                      <li key={warning}>{warning}</li>
+                    ))}
+                  </ul>
+                </li>
+              );
+            })}
+          </ul>
+          {snapshot.warnings.map((warning) => (
+            <p key={warning} className="mt-2 text-sm text-fg-muted">
+              {warning}
+            </p>
+          ))}
+        </SettingsSection>
       )}
       <HiddenGames />
       <SettingsSection
