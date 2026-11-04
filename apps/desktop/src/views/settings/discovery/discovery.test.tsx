@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import type { DiscoveryApi, DiscoverySnapshot } from "../../../api/discovery";
 import { createFixtureApi, createFixtureGames } from "../../../api/fixtures";
@@ -100,7 +100,13 @@ function backend() {
   const defaults = structuredClone(values);
   const revisions: Record<string, number> = {};
   const settings: SettingsApi = {
-    sections: async () => [],
+    sections: async () =>
+      Object.keys(values).map((namespace) => ({
+        namespace,
+        version: 1,
+        schema: {},
+        defaults: defaults[namespace],
+      })),
     get: async (namespace) => ({
       namespace,
       version: 1,
@@ -236,7 +242,16 @@ it("persists the refresh interval, re-allows ignored entries and resets discover
   expect((screen.getByRole("button", { name: "Scan now" }) as HTMLButtonElement).disabled).toBe(
     true,
   );
-  fireEvent.click(screen.getByRole("button", { name: "Reset discovery preferences" }));
+  // The reset names what goes back, and asks first (#49).
+  fireEvent.click(screen.getByRole("button", { name: "Reset discovery settings" }));
+  const confirm = await screen.findByRole("alertdialog", {
+    name: "Reset Library Discovery settings?",
+  });
+  await within(confirm).findByText("Refresh interval");
+  expect(within(confirm).getByText("Enable library discovery")).toBeTruthy();
+  expect(within(confirm).queryByText("Full scan on startup")).toBeNull();
+  expect(api.values["core.discovery"]?.enabled).toBe(false);
+  fireEvent.click(within(confirm).getByRole("button", { name: "Reset" }));
   await waitFor(() => expect(api.values["core.discovery"]?.enabled).toBe(true));
   expect(api.values["core.discovery"]?.refreshInterval).toBe("24h");
 });

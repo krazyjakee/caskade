@@ -257,6 +257,8 @@ function PairedDevices() {
   const remove = useStreamingAction((api, uuid: string) => api.unpair(uuid));
   const removeAll = useStreamingAction((api, _: undefined) => api.unpairAll());
   const [confirming, setConfirming] = useState(false);
+  // One device's Forget asks in its row, as Forget all does (#49).
+  const [forgetting, setForgetting] = useState<string | null>(null);
   return (
     <div data-part="paired" className="mt-4 flex flex-col gap-2">
       <h3 className="text-sm font-semibold">
@@ -277,19 +279,42 @@ function PairedDevices() {
               <li
                 key={device.uuid}
                 data-cs="streaming-client"
-                className="flex items-center justify-between gap-3 rounded-control border border-border p-3"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-control border border-border p-3"
               >
                 <span className="font-medium">{name}</span>
-                <Button
-                  size="sm"
-                  variant="danger"
-                  icon={Trash2}
-                  aria-label={t`Remove ${name}`}
-                  isDisabled={remove.isPending}
-                  onPress={() => remove.mutate(device.uuid)}
-                >
-                  <Trans>Remove</Trans>
-                </Button>
+                {forgetting === device.uuid ? (
+                  <span className="flex flex-wrap items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      isDisabled={remove.isPending}
+                      onPress={() =>
+                        remove.mutate(device.uuid, { onSuccess: () => setForgetting(null) })
+                      }
+                    >
+                      <Trans>Forget {name}</Trans>
+                    </Button>
+                    <Button size="sm" variant="ghost" autoFocus onPress={() => setForgetting(null)}>
+                      <Trans>Keep</Trans>
+                    </Button>
+                  </span>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    icon={Trash2}
+                    aria-label={t`Forget ${name}`}
+                    isDisabled={remove.isPending}
+                    onPress={() => setForgetting(device.uuid)}
+                  >
+                    <Trans>Forget</Trans>
+                  </Button>
+                )}
+                {forgetting === device.uuid && (
+                  <p className="w-full text-xs text-fg-muted">
+                    <Trans>It needs a new code to play from this device again.</Trans>
+                  </p>
+                )}
               </li>
             );
           })}

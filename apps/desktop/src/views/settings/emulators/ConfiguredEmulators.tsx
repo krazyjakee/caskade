@@ -34,6 +34,7 @@ import {
   profileEdit,
 } from "../../../api/emulation";
 import { useActionMenus } from "../../../components/ActionMenu";
+import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { UnsavedHint, useUnsavedChanges } from "../unsavedChanges";
 import { BiosSummary, PathField, PreviewTokens } from "./EmulationFields";
 import { useEmulationWrite } from "./EmulationProvider";
@@ -261,7 +262,18 @@ export function ConfiguredEmulators({
   const noExtensions = t({ message: "None", context: "file extensions" });
   const selected = snapshot.emulators.find((row) => row.id === selectedId) ?? snapshot.emulators[0];
   const [edit, setEdit] = useState<{ emulatorId: string; value: ProfileEdit } | null>(null);
+  // A removal asks first (#49): an emulator takes its profiles and the
+  // platform defaults that chose it.
+  const [removing, setRemoving] = useState<
+    | { kind: "emulator"; emulatorId: string; name: string }
+    | { kind: "profile"; emulatorId: string; profileId: string; name: string }
+    | null
+  >(null);
   const write = useEmulationWrite();
+  const askRemove = (next: NonNullable<typeof removing>) => {
+    write.reset();
+    setRemoving(next);
+  };
   const definition = snapshot.definitions.find((row) => row.id === selected?.definition);
   // A right click on an emulator or a profile offers its buttons.
   const menus = useActionMenus();
@@ -313,9 +325,7 @@ export function ConfiguredEmulators({
                   tone: "danger",
                   isDisabled: write.isPending,
                   onAction: () =>
-                    write.mutate((api) => api.removeEmulator(emulator.id), {
-                      onSuccess: () => setEdit(null),
-                    }),
+                    askRemove({ kind: "emulator", emulatorId: emulator.id, name: emulator.name }),
                 },
               ])}
               data-cs="emulator-item"
@@ -378,7 +388,12 @@ export function ConfiguredEmulators({
                       tone: "danger",
                       isDisabled: write.isPending,
                       onAction: () =>
-                        write.mutate((api) => api.removeProfile(selected.id, config.id)),
+                        askRemove({
+                          kind: "profile",
+                          emulatorId: selected.id,
+                          profileId: config.id,
+                          name: resolved.name,
+                        }),
                     },
                   ])}
                   data-cs="emulator-profile"
@@ -463,7 +478,12 @@ export function ConfiguredEmulators({
                           variant="danger"
                           isDisabled={write.isPending}
                           onPress={() =>
-                            write.mutate((api) => api.removeProfile(selected.id, config.id))
+                            askRemove({
+                              kind: "profile",
+                              emulatorId: selected.id,
+                              profileId: config.id,
+                              name: resolved.name,
+                            })
                           }
                         >
                           {t`Remove ${{ profile: resolved.name }}`}
@@ -557,9 +577,7 @@ export function ConfiguredEmulators({
             icon={Trash2}
             isDisabled={write.isPending}
             onPress={() =>
-              write.mutate((api) => api.removeEmulator(selected.id), {
-                onSuccess: () => setEdit(null),
-              })
+              askRemove({ kind: "emulator", emulatorId: selected.id, name: selected.name })
             }
           >
             <Trans>Remove emulator</Trans>
@@ -571,6 +589,46 @@ export function ConfiguredEmulators({
         </div>
       )}
       {menus.menu}
+      {removing && (
+        <ConfirmDialog
+          title={t`Remove ${{ name: removing.name }}?`}
+          confirmLabel={t({
+            message: "Remove",
+            comment: "Confirms removing an emulator or profile",
+          })}
+          pendingLabel={t`Removing…`}
+          isPending={write.isPending}
+          error={write.error}
+          onConfirm={() =>
+            write.mutate(
+              (api) =>
+                removing.kind === "emulator"
+                  ? api.removeEmulator(removing.emulatorId)
+                  : api.removeProfile(removing.emulatorId, removing.profileId),
+              {
+                onSuccess: () => {
+                  if (removing.kind === "emulator") setEdit(null);
+                  setRemoving(null);
+                },
+              },
+            )
+          }
+          close={() => setRemoving(null)}
+        >
+          {removing.kind === "emulator" ? (
+            <p>
+              <Trans>
+                Its profiles go with it, and platforms that played with it need another emulator.
+                Its own files stay where they are.
+              </Trans>
+            </p>
+          ) : (
+            <p>
+              <Trans>Games that play with this profile need another one.</Trans>
+            </p>
+          )}
+        </ConfirmDialog>
+      )}
     </div>
   );
 }

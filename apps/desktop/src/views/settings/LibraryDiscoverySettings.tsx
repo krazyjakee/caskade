@@ -20,6 +20,7 @@ import { useDropZone } from "../../drop/DropProvider";
 import { useDiscovery } from "./discovery/DiscoveryProvider";
 import { HiddenGames } from "./discovery/HiddenGames";
 import { ReviewList } from "./discovery/ReviewList";
+import { ResetDefaults } from "./ResetDefaults";
 import { SettingsFeedback, SettingsLoading, useSettingsSection } from "./useSettings";
 
 const intervals = [
@@ -79,10 +80,36 @@ export function LibraryDiscoverySettings() {
   const error = discovery.error ?? discovery.action.error;
   return (
     <div data-settings="library-discovery" data-cs="discovery-settings" className="space-y-4">
-      <SettingsFeedback
-        error={preferences.error ?? launchers.error ?? history.error}
-        saving={preferences.saving || launchers.saving || history.saving}
-      />
+      <div className="flex items-center justify-between gap-3">
+        <SettingsFeedback
+          error={preferences.error ?? launchers.error ?? history.error}
+          saving={preferences.saving || launchers.saving || history.saving}
+        />
+        {/* Names what goes back and asks first (#44, #49). */}
+        <ResetDefaults
+          group={t({ message: "Library Discovery", context: "settings tab" })}
+          label={t`Reset discovery settings`}
+          parts={[
+            {
+              namespace: "core.discovery",
+              whole: true,
+              fields: [
+                { key: "enabled", label: t`Enable library discovery` },
+                { key: "scanOnStartup", label: t`Full scan on startup` },
+                { key: "backgroundRefresh", label: t`Background refresh` },
+                { key: "refreshInterval", label: t`Refresh interval` },
+                { key: "watchFolders", label: t`Watch library folders` },
+                { key: "osChecks", label: t`Operating-system checks` },
+                { key: "deepScans", label: t`Optional deep scans` },
+                { key: "scanPaths", label: t`Custom folders` },
+                { key: "ignoredEntries", label: t`Ignored results` },
+              ],
+            },
+          ]}
+          keeps={t`Launchers, play history import and settings on other pages stay as they are.`}
+          isDisabled={preferences.saving}
+        />
+      </div>
       <SettingsSection
         icon={ScanSearch}
         title={t`Automatic Library Discovery`}
@@ -433,9 +460,6 @@ export function LibraryDiscoverySettings() {
           ))}
         </ul>
       </SettingsSection>
-      <Button variant="ghost" isDisabled={preferences.saving} onPress={preferences.reset}>
-        <Trans>Reset discovery preferences</Trans>
-      </Button>
     </div>
   );
 }

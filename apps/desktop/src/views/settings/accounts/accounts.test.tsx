@@ -192,6 +192,27 @@ it("refuses to remove the admin's PIN while a standard account exists", async ()
   await screen.findByText("Every admin needs a PIN while there are standard accounts.");
 });
 
+it("asks before removing another account's PIN (#49)", async () => {
+  const app = renderApp("/settings?tab=accounts", { accounts: family, activeAccount: "ada" });
+  fireEvent.click(await screen.findByRole("button", { name: "Edit Kid" }));
+  const editor = await dialog("Edit Kid");
+  fireEvent.click(within(editor).getByRole("button", { name: "Remove PIN" }));
+  const confirm = await screen.findByRole("alertdialog", { name: "Remove Kid's PIN?" });
+  expect(confirm.textContent).toContain("Anyone can then sign in to Kid without a PIN.");
+  fireEvent.click(within(confirm).getByRole("button", { name: "Cancel" }));
+  await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+  expect(app.accounts.pins.get("kid")).toBe("1357");
+  fireEvent.click(within(editor).getByRole("button", { name: "Remove PIN" }));
+  fireEvent.click(
+    within(await screen.findByRole("alertdialog", { name: "Remove Kid's PIN?" })).getByRole(
+      "button",
+      { name: "Remove PIN" },
+    ),
+  );
+  await waitFor(() => expect(app.accounts.pins.has("kid")).toBe(false));
+  await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+});
+
 it("changes your own name and PIN in My profile, after the current PIN", async () => {
   const app = renderApp("/settings?tab=profile", { accounts: family, activeAccount: "kid" });
   const name = await screen.findByRole("textbox", { name: "Name" });

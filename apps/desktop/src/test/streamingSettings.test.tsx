@@ -76,10 +76,14 @@ it("an admin lets other devices play, and pairs one that asks", async () => {
     expect(streaming.accepted).toEqual([{ id: "r1", code: "4831", name: "Deck" }]),
   );
   const paired = await screen.findByText("Deck");
-  // Removing it ends its pairing.
-  fireEvent.click(
-    within(paired.closest("li") as HTMLElement).getByRole("button", { name: "Remove Deck" }),
-  );
+  // Forgetting it asks first (#49), then ends its pairing.
+  const row = paired.closest("li") as HTMLElement;
+  fireEvent.click(within(row).getByRole("button", { name: "Forget Deck" }));
+  within(row).getByText("It needs a new code to play from this device again.");
+  fireEvent.click(within(row).getByRole("button", { name: "Keep" }));
+  expect(screen.getByText("Deck")).toBeTruthy();
+  fireEvent.click(within(row).getByRole("button", { name: "Forget Deck" }));
+  fireEvent.click(await within(row).findByRole("button", { name: "Forget Deck" }));
   await waitFor(() => expect(screen.queryByText("Deck")).toBeNull());
 });
 

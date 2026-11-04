@@ -367,3 +367,19 @@ it("offers the emulator another device uses for a platform, installing nothing u
     expect(screen.queryByRole("region", { name: "From your other devices" })).toBeNull(),
   );
 });
+it("asks before removing an emulator, and says its profiles go with it (#49)", async () => {
+  const api = createEmulationFixtureApi();
+  const remove = vi.spyOn(api, "removeEmulator");
+  mount(api);
+  fireEvent.click(await screen.findByRole("button", { name: "Remove emulator" }));
+  const confirm = await screen.findByRole("alertdialog", { name: "Remove RetroArch?" });
+  expect(confirm.textContent).toContain("Its profiles go with it");
+  fireEvent.click(within(confirm).getByRole("button", { name: "Cancel" }));
+  await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+  expect(remove).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole("button", { name: "Remove emulator" }));
+  fireEvent.click(
+    within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Remove" }),
+  );
+  await waitFor(() => expect(remove).toHaveBeenCalledTimes(1));
+});

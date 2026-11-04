@@ -36,6 +36,7 @@ import type {
 } from "../../../api/emulation";
 import { formatDateTime } from "../../../api/presentation";
 import { useActionMenus } from "../../../components/ActionMenu";
+import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { UnsavedHint, useUnsavedChanges } from "../unsavedChanges";
 import { PathField } from "./EmulationFields";
 import {
@@ -156,6 +157,7 @@ function ScannerEditor({
     mutationFn: () => api.removeScanner(initial.id),
     onSuccess: removed,
   });
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
   const profiles = profileOptions(snapshot);
   const profile = profiles.find(
     (option) => option.id === ref(draft.profile.emulatorId, draft.profile.profileId),
@@ -186,7 +188,10 @@ function ScannerEditor({
             size="sm"
             icon={Trash2}
             isDisabled={remove.isPending}
-            onPress={() => remove.mutate()}
+            onPress={() => {
+              remove.reset();
+              setConfirmingRemove(true);
+            }}
           >
             <Trans comment="Remove the ROM scanner">Remove</Trans>
           </Button>
@@ -317,10 +322,28 @@ function ScannerEditor({
         </div>
         <ExclusionSyntax />
       </div>
-      {(save.error || remove.error) && (
+      {save.error && (
         <p role="alert" className="mt-3 text-sm text-danger">
-          {(save.error ?? remove.error)?.message}
+          {save.error.message}
         </p>
+      )}
+      {confirmingRemove && (
+        <ConfirmDialog
+          title={t`Remove ${{ scanner: title }}?`}
+          confirmLabel={t({ message: "Remove", comment: "Confirms removing a ROM scanner" })}
+          pendingLabel={t`Removing…`}
+          isPending={remove.isPending}
+          error={remove.error}
+          onConfirm={() => remove.mutate()}
+          close={() => setConfirmingRemove(false)}
+        >
+          <p>
+            <Trans>
+              Its games stay in your library as not installed, because Caskade no longer looks for
+              their ROMs. Your ROM files aren't touched.
+            </Trans>
+          </p>
+        </ConfirmDialog>
       )}
       <div className="mt-4 flex items-center justify-end gap-2">
         <UnsavedHint dirty={dirty} className="mr-auto" />

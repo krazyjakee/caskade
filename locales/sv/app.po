@@ -1808,6 +1808,10 @@ msgstr "Tillagt för hand"
 msgid "Adding discovered games — {count} found"
 msgstr ""
 
+#: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+msgid "Adding it again brings its games back, to download again."
+msgstr ""
+
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/views/activity/AddGame.tsx
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
@@ -2072,6 +2076,10 @@ msgstr "Valfri titel"
 #: apps/desktop/src/views/StoreView.tsx
 msgid "Any year"
 msgstr "Valfritt år"
+
+#: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+msgid "Anyone can then sign in to {name} without a PIN. You can set a new one later."
+msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "API key"
@@ -2602,6 +2610,7 @@ msgstr "Kan inte ansluta"
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
+#: apps/desktop/src/components/ConfirmDialog.tsx
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/components/gameMenu/RemoveGameDialog.tsx
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
@@ -5115,6 +5124,10 @@ msgstr "Spel som lämnar biblioteket"
 msgid "Games that match every rule, as the library changes"
 msgstr "Spel som uppfyller alla regler, allteftersom biblioteket ändras"
 
+#: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+msgid "Games that play with this profile need another one."
+msgstr ""
+
 #: apps/desktop/src/onboarding/GamesStep.tsx
 msgid "Games to copy"
 msgstr "Spel att kopiera"
@@ -5958,6 +5971,10 @@ msgstr "Spelet tas bort från ditt bibliotek tillsammans med dess spelsessioner.
 msgid "It leaves your library: the offline copy and the progress saved in the game window are deleted, with its play sessions. Add its page again to play it again."
 msgstr "Det tas bort från biblioteket: offlinekopian och framstegen som sparats i spelfönstret raderas, tillsammans med dess spelsessioner. Lägg till sidan igen för att spela det igen."
 
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "It needs a new code to play from this device again."
+msgstr ""
+
 #: apps/desktop/src/views/game/OtherDevices.tsx
 msgid "It starts through its store's launcher there. Install it from the store here."
 msgstr "Där startar det via butikens startprogram. Installera det från butiken här."
@@ -5982,6 +5999,14 @@ msgstr "Den gjordes på ett annat operativsystem: spel och lagringsplatser vars 
 msgid "It's checked once a day while online."
 msgstr "Den kontrolleras en gång om dagen när du är uppkopplad."
 
+#: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+msgid "Its games leave your library, the ROMs downloaded from it are deleted and its sign-in is forgotten. Devices that sync RomM servers remove it too."
+msgstr ""
+
+#: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+msgid "Its games stay in your library as not installed, because Caskade no longer looks for their ROMs. Your ROM files aren't touched."
+msgstr ""
+
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
 msgid "Its installed files are deleted from {location}, with the play sessions recorded for this install. The game stays in your library. The uninstall shows in Activity."
 msgstr "De installerade filerna raderas från {location}, tillsammans med de spelsessioner som registrerats för den här installationen. Spelet finns kvar i ditt bibliotek. Avinstallationen visas i Aktivitet."
@@ -5993,6 +6018,10 @@ msgstr "De installerade filerna raderas, tillsammans med de spelsessioner som re
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "Its name and description are a spoiler until you unlock it."
 msgstr "Namnet och beskrivningen avslöjar för mycket tills du låser upp den."
+
+#: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+msgid "Its profiles go with it, and platforms that played with it need another emulator. Its own files stay where they are."
+msgstr ""
 
 #: apps/desktop/src/plugins/loader.ts
 msgid "its UI module has no definePlugin() default export"
@@ -6226,6 +6255,10 @@ msgstr "Inställningar för startprogram"
 msgid "launchers, launcher discovery, Steam, GOG, Epic, Heroic, Lutris, itch, Battle.net, sources, detect games"
 msgstr ""
 
+#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+msgid "Launchers, play history import and settings on other pages stay as they are."
+msgstr ""
+
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "launchers, Steam, GOG, Epic"
 msgstr ""
@@ -6303,6 +6336,7 @@ msgstr "Bibliotek"
 msgid "Library and settings"
 msgstr "Bibliotek och inställningar"
 
+#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
 msgctxt "settings tab"
 msgid "Library Discovery"
@@ -8041,6 +8075,12 @@ msgstr "Öppnar"
 msgid "Opens the web game in its game window."
 msgstr "Öppnar webbspelet i dess spelfönster."
 
+#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#, fuzzy
+#| msgid "Launchers and operating-system checks"
+msgid "Operating-system checks"
+msgstr "Startprogram och kontroller i operativsystemet"
+
 #. A BIOS file the platform can do without
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 msgid "optional"
@@ -9262,15 +9302,18 @@ msgstr "Inte spelat"
 msgid "Removable"
 msgstr "Flyttbar"
 
+#. Confirms removing a ROM scanner
+#. Confirms removing an emulator or profile
 #. Remove the ROM scanner
+#. Removes a RomM server
 #. Removes a RomM server
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
-#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Remove"
 msgstr "Ta bort"
 
@@ -9315,19 +9358,32 @@ msgstr "Ta bort {folder}"
 msgid "Remove {label} {0}"
 msgstr "Ta bort {label} {0}"
 
-#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#, fuzzy
-#| msgid "Remove {name}?"
-msgid "Remove {name}"
-msgstr "Ta bort {name}?"
-
+#: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Remove {name}?"
+msgstr "Ta bort {name}?"
+
+#: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#, fuzzy
+#| msgid "Remove {name}?"
+msgid "Remove {name}'s PIN?"
 msgstr "Ta bort {name}?"
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "Remove {profile}"
 msgstr "Ta bort {profile}"
+
+#: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#, fuzzy
+#| msgid "Remove {name}?"
+msgid "Remove {scanner}?"
+msgstr "Ta bort {name}?"
+
+#: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#, fuzzy
+#| msgid "Remove {0}?"
+msgid "Remove {server}?"
+msgstr "Ta bort {0}?"
 
 #: apps/desktop/src/components/gameMenu/RemoveGameDialog.tsx
 msgid "Remove {title} from your library?"
@@ -9401,6 +9457,10 @@ msgstr "Det går inte att ta bort spel här"
 
 #: apps/desktop/src/components/gameMenu/RemoveGameDialog.tsx
 #: apps/desktop/src/views/library/web/RemoveWebGame.tsx
+#: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 msgid "Removing…"
 msgstr "Tar bort…"
 
@@ -9493,8 +9553,10 @@ msgid "Reset appearance settings"
 msgstr "Återställ utseendeinställningar"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
-msgid "Reset discovery preferences"
-msgstr "Återställ inställningar för biblioteksupptäckt"
+#, fuzzy
+#| msgid "Reset installer settings"
+msgid "Reset discovery settings"
+msgstr "Återställ installationsinställningar"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Reset general settings"
@@ -13003,6 +13065,14 @@ msgstr "ÅÅÅÅ-MM-DD, eller tomt för inget"
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "zoom, text size, bigger"
 msgstr ""
+
+#, fuzzy
+#~| msgid "Remove {name}?"
+#~ msgid "Remove {name}"
+#~ msgstr "Ta bort {name}?"
+
+#~ msgid "Reset discovery preferences"
+#~ msgstr "Återställ inställningar för biblioteksupptäckt"
 
 #~ msgid "Your account can't change these settings. Ask an admin."
 #~ msgstr "Ditt konto kan inte ändra de här inställningarna. Fråga en administratör."

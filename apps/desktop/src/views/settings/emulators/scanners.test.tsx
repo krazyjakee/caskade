@@ -160,3 +160,16 @@ it("global exclusions apply to every scanner from the next scan (#135)", async (
   await waitFor(() => expect(list.textContent).toContain("No exclusions."));
   expect(await api.globalExclusions()).toEqual([]);
 });
+
+it("asks before removing a scanner, and says its games stay (#49)", async () => {
+  const api = createEmulationFixtureApi();
+  const remove = vi.spyOn(api, "removeScanner");
+  mount(api);
+  fireEvent.click(await screen.findByRole("button", { name: "SNES collection" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Remove" }));
+  const confirm = await screen.findByRole("alertdialog", { name: "Remove SNES collection?" });
+  expect(confirm.textContent).toContain("Its games stay in your library");
+  expect(remove).not.toHaveBeenCalled();
+  fireEvent.click(within(confirm).getByRole("button", { name: "Remove" }));
+  await waitFor(() => expect(remove).toHaveBeenCalledTimes(1));
+});

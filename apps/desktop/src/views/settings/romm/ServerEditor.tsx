@@ -36,6 +36,7 @@ import {
   type RommSyncReport,
   syncIntervals,
 } from "../../../api/romm";
+import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { useRommApi, useRommWrite } from "./useRomm";
 
 const authLabels: Record<RommAuth, MessageDescriptor> = {
@@ -248,15 +249,16 @@ export function ServerEditor({
       setSyncing(false);
     }
   };
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
   const remove = () => {
     if (isNew) {
       onRemoved();
       return;
     }
-    write.mutate((api) => api.removeServer(server.id), {
-      onSuccess: onRemoved,
-      onError: (failure) => setError(errorMessage(failure)),
-    });
+    // It takes the server's games and downloads with it (#49). A save's
+    // failure shows above; only the removal's shows in the dialog.
+    write.reset();
+    setConfirmingRemove(true);
   };
 
   const platforms = rows(server, report);
@@ -601,6 +603,37 @@ export function ServerEditor({
           </span>
         )}
       </div>
+      {confirmingRemove && (
+        <ConfirmDialog
+          title={t`Remove ${{ server: initial.name || t`Unnamed server` }}?`}
+          confirmLabel={t({ message: "Remove", comment: "Removes a RomM server" })}
+          pendingLabel={t`Removing…`}
+          isPending={write.isPending}
+          error={write.error}
+          onConfirm={() =>
+            write.mutate((api) => api.removeServer(server.id), {
+              onSuccess: () => {
+                setConfirmingRemove(false);
+                onRemoved();
+              },
+            })
+          }
+          close={() => {
+            write.reset();
+            setConfirmingRemove(false);
+          }}
+        >
+          <p>
+            <Trans>
+              Its games leave your library, the ROMs downloaded from it are deleted and its sign-in
+              is forgotten. Devices that sync RomM servers remove it too.
+            </Trans>
+          </p>
+          <p>
+            <Trans>Adding it again brings its games back, to download again.</Trans>
+          </p>
+        </ConfirmDialog>
+      )}
     </SettingsSection>
   );
 }

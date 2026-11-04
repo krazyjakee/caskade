@@ -6,6 +6,7 @@ import { KeyRound } from "lucide-react";
 import { useState } from "react";
 import type { PinCheck } from "../../../api/accounts";
 import { errorMessage } from "../../../api/reply";
+import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { PinDialog } from "./PinDialog";
 
 /** The core's reason as a sentence: "Every admin needs a PIN…." */
@@ -33,8 +34,9 @@ export function PinSetting({
   description?: string;
 }) {
   const { t } = useLingui();
-  const [dialog, setDialog] = useState<"choose" | "remove" | null>(null);
+  const [dialog, setDialog] = useState<"choose" | "remove" | "confirm-remove" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [removing, setRemoving] = useState(false);
   const save = async (pin: string | null) => {
     try {
       await set(pin);
@@ -43,13 +45,18 @@ export function PinSetting({
       throw new Error(sentence(refused));
     }
   };
+  // Your own PIN goes once you enter it; another account's asks first, as
+  // it opens that account to anyone at once (#49).
   const remove = () => {
-    if (own) {
-      setDialog("remove");
-      return;
-    }
     setError(null);
-    save(null).catch((refused: Error) => setError(refused.message));
+    setDialog(own ? "remove" : "confirm-remove");
+  };
+  const confirmRemove = () => {
+    setRemoving(true);
+    save(null)
+      .then(() => setDialog(null))
+      .catch((refused: Error) => setError(refused.message))
+      .finally(() => setRemoving(false));
   };
   return (
     <>
@@ -70,12 +77,32 @@ export function PinSetting({
           </Button>
         )}
       </SettingRow>
-      {error && (
+      {error && dialog !== "confirm-remove" && (
         <p role="alert" className="pb-2 text-sm text-danger">
           {error}
         </p>
       )}
-      {dialog && (
+      {dialog === "confirm-remove" && (
+        <ConfirmDialog
+          title={t`Remove ${{ name }}'s PIN?`}
+          confirmLabel={t`Remove PIN`}
+          pendingLabel={t`Removing…`}
+          isPending={removing}
+          error={error}
+          onConfirm={confirmRemove}
+          close={() => {
+            setError(null);
+            setDialog(null);
+          }}
+        >
+          <p>
+            <Trans>
+              Anyone can then sign in to {name} without a PIN. You can set a new one later.
+            </Trans>
+          </p>
+        </ConfirmDialog>
+      )}
+      {(dialog === "choose" || dialog === "remove") && (
         <PinDialog
           name={name}
           current={hasPin ? own : undefined}

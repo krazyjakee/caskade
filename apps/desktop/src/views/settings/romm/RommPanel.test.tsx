@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createEmulationFixtureApi } from "../../../api/emulationFixtures";
 import type {
@@ -214,6 +214,28 @@ describe("RommPanel", () => {
     expect(JSON.stringify(api.saveServer.mock.calls[0]?.[0])).not.toContain("hunter2");
     await screen.findByRole("button", { name: "Home" });
     expect(screen.getByRole("button", { name: "Save Changes" })).toBeTruthy();
+  });
+
+  it("asks before removing a server, naming what goes with it (#49)", async () => {
+    const { api } = backend({
+      settings: {
+        servers: [home],
+        cache: { dir: "", limitGb: 100, keepFavorites: true, verify: true },
+      },
+    });
+    renderPanel(api);
+    fireEvent.click(await screen.findByRole("button", { name: "Home" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Remove" }));
+    const confirm = await screen.findByRole("alertdialog", { name: "Remove Home?" });
+    expect(confirm.textContent).toContain("Its games leave your library");
+    fireEvent.click(within(confirm).getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+    expect(api.removeServer).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Remove" }));
+    fireEvent.click(
+      within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Remove" }),
+    );
+    await waitFor(() => expect(api.removeServer).toHaveBeenCalledWith("home"));
   });
 
   it("syncs a server on request", async () => {
