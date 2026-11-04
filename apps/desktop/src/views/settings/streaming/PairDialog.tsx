@@ -87,8 +87,10 @@ export function PairDialog({ host, close }: { host: StreamHost; close: () => voi
           {step.type === "code" && !step.started.automatic && (
             <>
               <p className="mt-3 text-sm text-fg-muted">
+                {/* Only an admin there sees where it goes (#52). */}
                 <Trans>
-                  On {device}, open Settings → Streaming in Caskade and enter this code:
+                  On {device}, someone signed in to Caskade as an admin enters this code in Settings
+                  → Streaming:
                 </Trans>
               </p>
               <p
@@ -116,7 +118,9 @@ export function PairDialog({ host, close }: { host: StreamHost; close: () => voi
               ) : outcome === "declined" ? (
                 <Trans>{device} declined.</Trans>
               ) : outcome === "expired" ? (
-                <Trans>Nobody entered the code on {device} in time.</Trans>
+                <Trans>
+                  Nobody entered the code on {device} in time. It takes an admin signed in there.
+                </Trans>
               ) : (
                 (step.finished.message ?? <Trans>Pairing with {device} didn't work.</Trans>)
               )}

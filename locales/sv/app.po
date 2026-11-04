@@ -7490,7 +7490,7 @@ msgid "No web games yet. Add one with Add web game."
 msgstr "Inga webbspel än. Lägg till ett med Lägg till webbspel."
 
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
-msgid "Nobody entered the code on {device} in time."
+msgid "Nobody entered the code on {device} in time. It takes an admin signed in there."
 msgstr ""
 
 #: apps/desktop/src/components/shares/common.tsx
@@ -7898,7 +7898,7 @@ msgid "On {device}"
 msgstr "På {device}"
 
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
-msgid "On {device}, open Settings → Streaming in Caskade and enter this code:"
+msgid "On {device}, someone signed in to Caskade as an admin enters this code in Settings → Streaming:"
 msgstr ""
 
 #: apps/desktop/src/components/addons/DeviceOffers.tsx
@@ -12774,6 +12774,10 @@ msgstr "När"
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "When a game launches"
 msgstr "När ett spel startar"
+
+#: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+msgid "When another device asks to play from this one, it shows a code. An admin signs in here to enter it."
+msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Where Caskade installs games and keeps its data."

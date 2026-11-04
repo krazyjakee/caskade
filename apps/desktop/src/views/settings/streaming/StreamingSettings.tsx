@@ -124,6 +124,14 @@ function HostingSection() {
       )}
       {outcome === "existingFound" && <ExistingDialog close={() => setOutcome(null)} />}
       {admin && state === "ready" && <WaitingRequests />}
+      {!admin && state === "ready" && (
+        <p role="note" className="mt-2 text-sm text-fg-muted">
+          <Trans>
+            When another device asks to play from this one, it shows a code. An admin signs in here
+            to enter it.
+          </Trans>
+        </p>
+      )}
       {admin && on(state) && <PairedDevices />}
     </SettingsSection>
   );

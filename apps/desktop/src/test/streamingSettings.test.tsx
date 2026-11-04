@@ -114,8 +114,9 @@ it("pairs this device with another: a wrong code, then the right one", async () 
   fireEvent.click(within(study).getByRole("button", { name: "Pair…" }));
   const dialog = await screen.findByRole("dialog", { name: "Pair with Study" });
   await within(dialog).findByText("4831");
+  // Only an admin on Study sees where the code goes (#52).
   expect(dialog.textContent).toContain(
-    "On Study, open Settings → Streaming in Caskade and enter this code:",
+    "On Study, someone signed in to Caskade as an admin enters this code in Settings → Streaming:",
   );
   streaming.finishPairing("fixture-study", "wrongCode");
   await within(dialog).findByText(
@@ -317,4 +318,18 @@ it("says when controllers or a screen won't work on this host (#260)", async () 
     ),
   ).toBeTruthy();
   expect(screen.getByRole("button", { name: "Repair" })).toBeTruthy();
+});
+
+it("tells a standard account on a host that an admin enters pairing codes (#52)", async () => {
+  open("/settings?tab=streaming", {
+    accounts: [
+      { id: "player", name: "Player", role: "admin" },
+      { id: "kid", name: "Kid", role: "standard" },
+    ],
+    activeAccount: "kid",
+    hosting: { state: "ready", version: "2025.1", problem: null },
+  });
+  await screen.findByText(
+    "When another device asks to play from this one, it shows a code. An admin signs in here to enter it.",
+  );
 });
