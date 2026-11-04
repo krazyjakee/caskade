@@ -131,6 +131,13 @@ pub trait NativeRegistry: Send + Sync {
     fn uninstall_entries(&self) -> io::Result<Vec<UninstallRegistration>>;
     fn remove_uninstall_entry(&self, entry: &UninstallRegistration) -> io::Result<()>;
     fn undo_effect(&self, effect: &RegistryEffect) -> io::Result<()>;
+    /// Whether Windows Installer still holds its own product record for this
+    /// ProductCode (`Installer\Products\<packed code>`), which the manifest
+    /// route never touches. Registries without one answer false.
+    fn windows_installer_product(&self, product_code: &str) -> io::Result<bool> {
+        let _ = product_code;
+        Ok(false)
+    }
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -141,12 +148,19 @@ pub struct NativeUninstallReport {
     pub succeeded: bool,
     pub manifest_fallback: bool,
     pub diagnostics: Vec<String>,
+    /// After the manifest route removed an MSI game, `msiexec /x` dropped
+    /// Windows Installer's own record of the product (#40).
+    #[serde(default)]
+    pub windows_installer_removed: bool,
 }
 pub(crate) struct PreparedNative {
     pub steps: Vec<Step>,
     pub recognized: bool,
     pub registrations: Vec<UninstallRegistration>,
     pub report: NativeUninstallReport,
+    /// The ProductCode whose Windows Installer records `msiexec /x` drops
+    /// once the manifest route has removed the game.
+    pub forget_product: Option<String>,
 }
 #[derive(Debug, Clone)]
 pub struct NativeUninstaller {
@@ -173,6 +187,27 @@ impl NativeUninstaller {
     }
 }
 
+/// Windows Installer's packed form of a ProductCode, as its registry keys
+/// name products (`Installer\Products\<packed>`): the first three groups
+/// reversed, then each byte of the last two with its hex digits swapped.
+pub fn packed_product_code(code: &str) -> Option<String> {
+    crate::plan::presets::build_uninstall_args(InstallerFamily::Msi, Some(code)).ok()?;
+    let hex: Vec<char> = code
+        .chars()
+        .filter(char::is_ascii_hexdigit)
+        .map(|digit| digit.to_ascii_uppercase())
+        .collect();
+    let mut packed = String::with_capacity(32);
+    for group in [0..8, 8..12, 12..16] {
+        packed.extend(hex[group].iter().rev());
+    }
+    for pair in hex[16..].chunks(2) {
+        packed.push(pair[1]);
+        packed.push(pair[0]);
+    }
+    Some(packed)
+}
+
 pub(super) fn uninstall_location(location: &ExternalLocation) -> bool {
     registry_address(location).is_ok()
         && location
@@ -194,5 +229,27 @@ pub(super) fn registration_fingerprint(entry: &UninstallRegistration) -> Sha256D
 impl UninstallRegistration {
     pub fn fingerprint(&self) -> Sha256Digest {
         registration_fingerprint(self)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::packed_product_code;
+
+    #[test]
+    fn product_codes_pack_as_windows_installer_names_them() {
+        assert_eq!(
+            packed_product_code("{F78B4949-77EC-441F-B1E9-9673F41E1A18}").as_deref(),
+            Some("9494B87FCE77F1441B9E69374FE1A181")
+        );
+        assert_eq!(
+            packed_product_code("{90140000-0011-0000-0000-0000000ff1ce}").as_deref(),
+            Some("00004109110000000000000000F01FEC")
+        );
+        assert_eq!(
+            packed_product_code("90140000-0011-0000-0000-0000000FF1CE"),
+            None
+        );
+        assert_eq!(packed_product_code("{not-a-product-code}"), None);
     }
 }

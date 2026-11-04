@@ -398,6 +398,26 @@ mod windows {
                 root(machine).open_subkey_with_flags(parent, KEY_ALL_ACCESS | view(bits64))?;
             parent.delete_subkey_all(name).or_else(absent)
         }
+        /// A per-machine product's record lives in HKLM's Classes, a per-user
+        /// one's in HKCU. Neither tree is redirected between the views.
+        fn windows_installer_product(&self, product_code: &str) -> io::Result<bool> {
+            let Some(packed) = packed_product_code(product_code) else {
+                return Ok(false);
+            };
+            for (machine, products) in [
+                (true, "Software\\Classes\\Installer\\Products"),
+                (false, "Software\\Microsoft\\Installer\\Products"),
+            ] {
+                match root(machine)
+                    .open_subkey_with_flags(format!("{products}\\{packed}"), KEY_READ)
+                {
+                    Ok(_) => return Ok(true),
+                    Err(error) if error.kind() == io::ErrorKind::NotFound => {}
+                    Err(error) => return Err(error),
+                }
+            }
+            Ok(false)
+        }
         fn undo_effect(&self, effect: &RegistryEffect) -> io::Result<()> {
             effect.validate()?;
             match effect {

@@ -10,7 +10,7 @@ pub use detection::detect_native_uninstaller;
 pub(super) use model::PreparedNative;
 pub use model::{
     NativeFamily, NativeRegistry, NativeUninstallPolicy, NativeUninstallReport, NativeUninstaller,
-    RegistryEffect, UninstallRegistration,
+    RegistryEffect, UninstallRegistration, packed_product_code,
 };
 pub use registry::PlatformRegistry;
 #[cfg(windows)]
@@ -32,6 +32,7 @@ pub(super) fn prepare(
             recognized: false,
             registrations: vec![],
             report: NativeUninstallReport::default(),
+            forget_product: None,
         });
     }
     if recorded.is_none()
@@ -45,6 +46,7 @@ pub(super) fn prepare(
             recognized: false,
             registrations: vec![],
             report: NativeUninstallReport::default(),
+            forget_product: None,
         });
     }
     let native_registry = matches!(
@@ -75,6 +77,14 @@ pub(super) fn prepare(
     let recognized = recorded.is_some() || candidate.is_some();
     let mut report = NativeUninstallReport::default();
     let mut steps = vec![];
+    // The recorded or detected MSI, before `candidate` moves into the report.
+    let msi = candidate
+        .as_ref()
+        .or(recorded.as_ref())
+        .filter(|native| {
+            native.family == NativeFamily::Msi && native.runtime == RuntimeSpec::Native
+        })
+        .and_then(|native| native.product_code.clone());
     if let Some(candidate) = candidate {
         report.family = Some(candidate.family);
         report.program = Some(candidate.program.clone());
@@ -128,11 +138,46 @@ pub(super) fn prepare(
         report.attempted = false;
         report.manifest_fallback = recognized;
     }
+    // When the manifest route removes an MSI game in msiexec's place (after a
+    // move, #40), Windows Installer still lists the product; `msiexec /x` runs
+    // afterwards to drop its records. Only on the host's own registry: other
+    // hosts' `PlatformRegistry` is unavailable, and a Wine/Proton prefix is
+    // not the Native runtime.
+    let forget_product = match msi {
+        Some(code)
+            if steps.is_empty()
+                && policy == NativeUninstallPolicy::PreferNative
+                && registry.available() =>
+        {
+            let registered = entries.iter().any(|entry| {
+                entry.windows_installer
+                    && entry
+                        .location
+                        .path
+                        .as_str()
+                        .rsplit('/')
+                        .next()
+                        .is_some_and(|key| key.eq_ignore_ascii_case(&code))
+            });
+            let listed = registered
+                || registry
+                    .windows_installer_product(&code)
+                    .unwrap_or_else(|error| {
+                        report.diagnostics.push(format!(
+                            "Could not check Windows Installer's record of {code}: {error}"
+                        ));
+                        false
+                    });
+            listed.then_some(code)
+        }
+        _ => None,
+    };
     Ok(PreparedNative {
         steps,
         recognized,
         registrations,
         report,
+        forget_product,
     })
 }
 

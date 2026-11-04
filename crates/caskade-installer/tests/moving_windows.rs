@@ -10,7 +10,9 @@ use caskade_installer::{
     manifest::{
         ExternalEffect, InstallManifest, InstalledFile, ManifestPath, ManifestSource,
         RelocationVerdict, RootManifest, Sha256Digest, UninstallRequest, Uninstaller,
-        native::{PlatformRegistry, RegistryEffect, uninstall_registration_effects},
+        native::{
+            PlatformRegistry, RegistryEffect, packed_product_code, uninstall_registration_effects,
+        },
     },
     plan::{PlanEngine, Policy},
     probe::ProbeEngine,
@@ -96,6 +98,28 @@ impl Drop for Cleanup {
             }
         }
     }
+}
+/// Whether Windows Installer still holds its product record for `code`
+/// (per-machine in HKLM's Classes, per-user in HKCU), named by the packed code.
+fn windows_installer_knows(code: &str) -> bool {
+    use winreg::{
+        RegKey,
+        enums::{HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, KEY_READ},
+    };
+    let packed = packed_product_code(code).expect("the MSI's ProductCode");
+    [
+        (HKEY_LOCAL_MACHINE, "Software\\Classes\\Installer\\Products"),
+        (
+            HKEY_CURRENT_USER,
+            "Software\\Microsoft\\Installer\\Products",
+        ),
+    ]
+    .into_iter()
+    .any(|(hive, products)| {
+        RegKey::predef(hive)
+            .open_subkey_with_flags(format!("{products}\\{packed}"), KEY_READ)
+            .is_ok()
+    })
 }
 struct NotRunning;
 impl RunningCheck for NotRunning {
@@ -288,6 +312,12 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
                 .unwrap();
             cleanup.alias = report.alias.clone();
             assert!(report.failures.is_empty());
+            if let Some(code) = &cleanup.product_code {
+                assert!(
+                    windows_installer_knows(code),
+                    "Windows Installer must list the installed {code}"
+                );
+            }
             assert_eq!(report.alias.is_some(), aliased);
             let alias_path = report.alias.as_ref().map(|id| aliases.path(id).unwrap());
             self_check(
@@ -556,6 +586,18 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
                 scan::registry::read_keys(&keys, 4096).is_empty(),
                 "uninstall left fixture registry state"
             );
+            // Checked before the guard below could clear it: the uninstall
+            // itself, native or manifest route, leaves Windows Installer
+            // without the product (#40), so the same MSI installs fresh.
+            if let Some(code) = &cleanup.product_code {
+                assert!(
+                    !windows_installer_knows(code),
+                    "{id} (alias: {aliased}): Windows Installer still lists {code}: {removed:?}"
+                );
+                if !aliased {
+                    assert!(native.windows_installer_removed, "{removed:?}");
+                }
+            }
             evidence.push(serde_json::json!({
                 "fixture": id,
                 "alias": aliased,
@@ -565,16 +607,16 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
                 "native_attempted": native.attempted,
                 "native_succeeded": native.succeeded,
                 "manifest_fallback": native.manifest_fallback,
+                "windows_installer_removed": native.windows_installer_removed,
                 "native_diagnostics": &native.diagnostics,
                 "root_clean": removed.is_clean(),
             }));
             if let Some(id) = report.alias {
                 assert!(aliases.target(&id).unwrap().is_none());
             }
-            // A no-alias MSI intentionally used manifest cleanup. The test
-            // teardown also unregisters its cached MSI product, whose private
-            // component database is outside the manifest's recorded effects.
-            cleanup.armed = !aliased && id == "msi-plus-cab";
+            // Nothing is left for the failure guard: a no-alias MSI's manifest
+            // cleanup also had msiexec drop Windows Installer's records.
+            cleanup.armed = false;
         }
     }
     let output = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/native-windows");

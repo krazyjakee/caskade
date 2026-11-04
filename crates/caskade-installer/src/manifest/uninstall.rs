@@ -8,6 +8,8 @@ use super::{
     RootManifest,
 };
 use crate::exec::{CancellationToken, ExecError, Executor};
+use crate::plan::presets::{InstallerFamily, build_uninstall_args};
+use crate::runtime::{ProcessCommand, Runtime};
 use cap_std::fs::{Dir, OpenOptions};
 use serde::{Deserialize, Serialize};
 use std::{
@@ -17,6 +19,7 @@ use std::{
         Arc,
         atomic::{AtomicU64, Ordering},
     },
+    time::Duration,
 };
 
 #[derive(Debug, Clone)]
@@ -422,7 +425,66 @@ impl Uninstaller {
                 }),
             }
         }
+        if report.game_removed
+            && report.failures.is_empty()
+            && !cancellation.is_cancelled()
+            && let Some(code) = native.forget_product
+            && let Some(native_report) = report.native.as_mut()
+        {
+            match self.executor.runtime(&crate::RuntimeSpec::Native) {
+                Some(runtime) => forget_msi_product(&*runtime, &code, native_report),
+                None => native_report
+                    .diagnostics
+                    .push("Windows Installer still lists the product: no native runtime".into()),
+            }
+        }
         report
+    }
+}
+
+/// msiexec's exit codes that leave Windows Installer without the product:
+/// done, unknown product (already gone) and done but a restart is pending.
+const MSI_FORGOTTEN: [i32; 3] = [0, 1605, 3010];
+
+/// Drop Windows Installer's own records of an MSI product (its `Products`,
+/// `UserData` and cached package) after the manifest route removed the game
+/// (#40). The game's files are gone by now, so a failure is only a note.
+///
+/// msiexec cannot touch the moved files: it removes only what its component
+/// records name, and those still hold the paths the MSI installed to. A move
+/// rewrites the game's own files and registry values, never Windows
+/// Installer's component records, so they name the old location, which the
+/// move emptied. And Caskade has already deleted the moved folder itself.
+fn forget_msi_product(runtime: &dyn Runtime, code: &str, report: &mut NativeUninstallReport) {
+    let args = match build_uninstall_args(InstallerFamily::Msi, Some(code)) {
+        Ok(args) => args,
+        Err(error) => {
+            report.diagnostics.push(format!(
+                "Windows Installer still lists the product: {error}"
+            ));
+            return;
+        }
+    };
+    let command = ProcessCommand {
+        program: "msiexec".into(),
+        args,
+        env: Default::default(),
+        cwd: std::env::temp_dir(),
+    };
+    let exit = runtime.spawn(&command).and_then(|process| {
+        let exit = runtime.wait(process, Duration::from_secs(120));
+        let _ = runtime.kill(process);
+        exit
+    });
+    match exit {
+        Ok(exit) if MSI_FORGOTTEN.contains(&exit.code) => report.windows_installer_removed = true,
+        Ok(exit) => report.diagnostics.push(format!(
+            "Windows Installer still lists the product: msiexec /x {code} exited with {}",
+            exit.code
+        )),
+        Err(error) => report.diagnostics.push(format!(
+            "Windows Installer still lists the product: msiexec /x {code} failed: {error}"
+        )),
     }
 }
 

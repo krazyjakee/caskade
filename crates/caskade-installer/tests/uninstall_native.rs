@@ -57,6 +57,8 @@ fn registration(game: &Path, family: NativeFamily) -> UninstallRegistration {
 struct Registry {
     entries: Mutex<Vec<UninstallRegistration>>,
     values: Mutex<BTreeMap<String, RegistryValue>>,
+    /// ProductCodes Windows Installer holds a product record for.
+    products: Mutex<Vec<String>>,
     refuse: bool,
 }
 impl NativeRegistry for Registry {
@@ -122,6 +124,14 @@ impl NativeRegistry for Registry {
                 }
             }
         }
+    }
+    fn windows_installer_product(&self, product_code: &str) -> io::Result<bool> {
+        Ok(self
+            .products
+            .lock()
+            .unwrap()
+            .iter()
+            .any(|code| code.eq_ignore_ascii_case(product_code)))
     }
 }
 fn worker(runtime: Arc<FakeRuntime>) -> Executor {
@@ -581,5 +591,90 @@ async fn recorded_uninstall_key_survives_a_move_without_recording_an_absolute_pa
             root.assert_clean();
         }
         assert!(runtime.processes().is_empty());
+    }
+}
+
+/// #40: once the manifest route has removed a moved MSI game, `msiexec /x`
+/// drops Windows Installer's own records of the product, if it still has any.
+#[tokio::test]
+async fn moved_msi_game_is_dropped_from_windows_installer_after_the_manifest_route() {
+    // (family, where Windows Installer lists the product, msiexec's exit code)
+    for (family, listed, exit) in [
+        (NativeFamily::Msi, "registration", 0),
+        (NativeFamily::Msi, "registration", 1605),
+        (NativeFamily::Msi, "record", 3010),
+        (NativeFamily::Msi, "registration", 1603),
+        (NativeFamily::Msi, "nowhere", 0),
+        (NativeFamily::Inno, "registration", 0),
+    ] {
+        let case = format!("{family:?} listed in {listed}, exit {exit}");
+        let root = TestRoot::new().unwrap();
+        let runtime = Arc::new(FakeRuntime::new([FakeScript {
+            actions: vec![FakeAction::Exit { code: exit }],
+        }]));
+        let executor = worker(runtime.clone());
+        let mut record = install(&root, &executor, family).await.into_record();
+        let registry = Arc::new(Registry::default());
+        match listed {
+            "registration" => registry
+                .entries
+                .lock()
+                .unwrap()
+                .push(registration(&root.path().join("Fixture Game"), family)),
+            "record" => registry.products.lock().unwrap().push(CODE.into()),
+            _ => {}
+        }
+        record.external_effects =
+            caskade_installer::manifest::native::uninstall_registration_effects(
+                &root.path().join("Fixture Game"),
+                &*registry,
+            )
+            .unwrap();
+        record.relocation.verdict = RelocationVerdict::Fragile;
+        fs::rename(
+            root.path().join("Fixture Game"),
+            root.path().join("Moved Game"),
+        )
+        .unwrap();
+        record.plan.relative_dir = "Moved Game".into();
+        let manifest = InstallManifest::new(record).unwrap();
+        manifest.write(&root.path().join("Moved Game")).unwrap();
+        let mut uninstall_request = request(&root, manifest);
+        uninstall_request.relative_dir = "Moved Game".into();
+        let report = Uninstaller::new(executor)
+            .with_native_registry(registry.clone())
+            .uninstall(uninstall_request, CancellationToken::new())
+            .await
+            .unwrap();
+        // Whatever msiexec answers, the uninstall itself is done.
+        assert!(report.is_clean(), "{case}: {report:?}");
+        root.assert_clean();
+        assert!(registry.entries.lock().unwrap().is_empty(), "{case}");
+        let native = report.native.unwrap();
+        assert!(!native.attempted && native.manifest_fallback, "{case}");
+        let processes = runtime.processes();
+        if family == NativeFamily::Msi && listed != "nowhere" {
+            assert_eq!(processes.len(), 1, "{case}");
+            assert_eq!(processes[0].command.program, Path::new("msiexec"), "{case}");
+            assert_eq!(
+                processes[0].command.args,
+                ["/x", CODE, "/qn", "/norestart"],
+                "{case}"
+            );
+            let done = exit != 1603;
+            assert_eq!(native.windows_installer_removed, done, "{case}");
+            assert_eq!(
+                native
+                    .diagnostics
+                    .iter()
+                    .any(|note| note.contains("exited with 1603")),
+                !done,
+                "{case}: {:?}",
+                native.diagnostics
+            );
+        } else {
+            assert!(processes.is_empty(), "{case}: {processes:?}");
+            assert!(!native.windows_installer_removed, "{case}");
+        }
     }
 }

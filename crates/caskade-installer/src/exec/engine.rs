@@ -90,6 +90,14 @@ impl Executor {
         self.runtimes.retain(|(existing, _)| *existing != spec);
         self.runtimes.push((spec, runtime));
     }
+    /// The runtime registered for `spec`, for a process an owner runs beside
+    /// its steps (the uninstaller's Windows Installer cleanup, #40).
+    pub(crate) fn runtime(&self, spec: &RuntimeSpec) -> Option<Arc<dyn Runtime>> {
+        self.runtimes
+            .iter()
+            .find(|(candidate, _)| candidate == spec)
+            .map(|(_, runtime)| runtime.clone())
+    }
 
     /// Dropping this future cancels the blocking worker. Its root lock remains
     /// held until the worker has stopped and rolled back; cleanup can safely wait

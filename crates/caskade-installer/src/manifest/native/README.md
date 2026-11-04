@@ -38,6 +38,17 @@ preserved and reported for retry. Stable alias targets are canonicalized for
 ownership checks. The Windows adapter rechecks an owned registration before
 removing that exact Uninstall subtree; unrelated registrations remain intact.
 
+When the manifest route removes an MSI game in msiexec's place (after a move
+without an alias), Windows Installer still holds its own product records
+(`Installer\Products\<packed code>`, `UserData`, the cached package). Once the
+game is gone, the uninstaller runs `msiexec /x {ProductCode} /qn /norestart`
+through the Native runtime if the host registry still lists the product (its
+`WindowsInstaller` Uninstall registration or its product record, #40). Exit
+codes 0, 1605 and 3010 set `NativeUninstallReport.windows_installer_removed`;
+any other outcome is a diagnostic, never a failure. msiexec removes only what
+its component records name, the location it installed to, which the move
+emptied.
+
 Uninstall cleanup runs under the executor's root exclusion through native steps,
 recorded out-of-root and registry effects, alias cleanup, and tree removal.
 Native Windows acceptance is `tests/uninstall_native/windows.rs`, opt-in via
