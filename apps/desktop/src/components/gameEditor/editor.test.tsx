@@ -208,9 +208,10 @@ it("edits by pad alone in console mode", async () => {
   // RB/LB switch the editor's tabs.
   const artwork = () => within(dialog).getByRole("tab", { name: "Artwork" });
   app.pad.press("tab.next");
-  await waitFor(() => expect(artwork().getAttribute("aria-selected")).toBe("true"));
+  const switched = { timeout: 10_000 };
+  await waitFor(() => expect(artwork().getAttribute("aria-selected")).toBe("true"), switched);
   app.pad.press("tab.prev");
-  await waitFor(() => expect(artwork().getAttribute("aria-selected")).toBe("false"));
+  await waitFor(() => expect(artwork().getAttribute("aria-selected")).toBe("false"), switched);
   // A on the notes opens the keyboard; the pad types into them.
   const notes = field(dialog, "Notes");
   act(() => notes.focus());

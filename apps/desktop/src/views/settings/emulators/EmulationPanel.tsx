@@ -240,26 +240,28 @@ export function EmulationPanel({
         options={sections.map((row) => ({ ...row, label: t(row.label) }))}
         value={section}
         onChange={setSection}
-        className="self-start"
+        className="max-w-full flex-wrap self-start"
       />
       {section === "emulators" && <EmulatorsFromDevices />}
       {section === "emulators" && <MissingEmulators />}
       {section === "emulators" && (
-        <ConfiguredEmulators
-          snapshot={snapshot}
-          selectedId={selectedId}
-          adding={adding}
-          select={(id) => {
-            select(id);
-            setAdding(false);
-          }}
-          add={add}
-          added={(id) => {
-            select(id);
-            setAdding(false);
-          }}
-          cancelAdd={() => setAdding(false)}
-        />
+        <div className="@container">
+          <ConfiguredEmulators
+            snapshot={snapshot}
+            selectedId={selectedId}
+            adding={adding}
+            select={(id) => {
+              select(id);
+              setAdding(false);
+            }}
+            add={add}
+            added={(id) => {
+              select(id);
+              setAdding(false);
+            }}
+            cancelAdd={() => setAdding(false)}
+          />
+        </div>
       )}
       {section === "browse" && <BrowseEmulators snapshot={snapshot} />}
       {section === "platforms" && <ConfiguredPlatforms snapshot={snapshot} detect={detect} />}

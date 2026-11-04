@@ -130,7 +130,7 @@ function EmulatorForm({
       title={emulator ? emulator.name : t`Add emulator`}
       description={t`Caskade checks the emulator is there when you save. Nothing here starts it.`}
     >
-      <div className="mt-4 grid gap-4 md:grid-cols-2">
+      <div className="mt-4 grid gap-4 @xl:grid-cols-2">
         <TextField
           label={t`Emulator name`}
           value={draft.name}
@@ -280,7 +280,7 @@ export function ConfiguredEmulators({
   return (
     <div
       data-cs="configured-emulators"
-      className="grid items-start gap-4 lg:grid-cols-[19rem_minmax(0,1fr)]"
+      className="grid items-start gap-4 @4xl:grid-cols-[19rem_minmax(0,1fr)]"
     >
       <SettingsSection
         icon={Cpu}

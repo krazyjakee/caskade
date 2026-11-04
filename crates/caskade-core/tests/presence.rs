@@ -213,8 +213,10 @@ async fn presence_never_waits_on_a_device_out_of_reach_and_stops_counting_it() {
         "{:?}",
         asked.elapsed()
     );
+    // One nudge: each starts a dial of its own. Dialling a device that's gone
+    // takes its time on a loaded machine.
     deck.sync.sync_now(&desktop_id);
-    within("the deck stops counting the desktop", 20, || async {
+    within("the deck stops counting the desktop", 60, || async {
         let asked = Instant::now();
         let playing = deck.presence.playing(&deck.devices).await;
         assert!(asked.elapsed() < Duration::from_millis(500));

@@ -146,7 +146,7 @@ export function ProfileEditor({
       <div data-cs="emulation-profile-editor" className="mt-4 space-y-4">
         {profile.type === "custom" ? (
           <>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 @xl:grid-cols-2">
               <TextField
                 label={t`Profile name`}
                 value={profile.name}
@@ -486,7 +486,7 @@ export function ProfileEditor({
             </Button>
           </fieldset>
         )}
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 @xl:grid-cols-2">
           <TextField
             label={t`Before launch`}
             description={t`Optional. A command to run first; if it fails, the game doesn't start.`}
