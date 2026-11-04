@@ -1554,11 +1554,17 @@ msgid "Accounts"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Accounts and PINs"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Achievement links you made"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "achievement notifications"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
@@ -1983,6 +1989,7 @@ msgstr ""
 msgid "Always allow this game for this account"
 msgstr ""
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Always use the default location"
 msgstr ""
@@ -2136,6 +2143,7 @@ msgid "app, language, region, startup, start, close, tray, minimize, quit, time 
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Appearance"
 msgstr ""
 
@@ -2300,6 +2308,7 @@ msgid "Automatic backups"
 msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Automatic backups to keep"
 msgstr ""
 
@@ -2384,6 +2393,7 @@ msgid "Back up"
 msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Back up automatically"
 msgstr ""
 
@@ -2490,6 +2500,7 @@ msgstr ""
 msgid "BIOS, firmware, default emulator, consoles"
 msgstr ""
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Bitrate"
 msgstr ""
@@ -2576,6 +2587,10 @@ msgstr ""
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Cache folder"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "cache size"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
@@ -3001,6 +3016,11 @@ msgstr ""
 msgid "Check each file against the hash RomM reports."
 msgstr ""
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgctxt "settings"
+msgid "Check every (hours)"
+msgstr ""
+
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 msgid "Check for add-on updates when Settings opens"
 msgstr ""
@@ -3089,6 +3109,10 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Checking…"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "checksum"
 msgstr ""
 
 #. A game release's region
@@ -3752,6 +3776,7 @@ msgid "Custom CSS wasn't saved:"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Custom folders"
 msgstr ""
 
@@ -3763,6 +3788,10 @@ msgstr ""
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 msgid "Daily"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "daily, weekly, schedule"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
@@ -3846,6 +3875,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
 msgid "Default profile is unavailable"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "default torrent app"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
@@ -4039,6 +4072,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Disable custom CSS"
 msgstr ""
 
@@ -4391,6 +4425,7 @@ msgid "emulator changes"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Emulator configuration"
 msgstr ""
 
@@ -4631,6 +4666,7 @@ msgid "Extensions"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "External drives"
 msgstr ""
 
@@ -4851,6 +4887,11 @@ msgstr ""
 msgid "Found"
 msgstr ""
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "fps"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Frame rate"
 msgstr ""
@@ -4903,6 +4944,7 @@ msgid "Full"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Full disk scan"
 msgstr ""
 
@@ -4986,6 +5028,7 @@ msgid "Game saves, with every version kept."
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Game scripts"
 msgstr ""
 
@@ -5374,6 +5417,10 @@ msgid "Home computer"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+msgid "host"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "host, hosting, Sunshine"
 msgstr ""
 
@@ -5414,6 +5461,7 @@ msgstr ""
 msgid "How games streamed to this device look. Automatic suits this screen and the network."
 msgstr ""
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "How often"
 msgstr ""
@@ -5725,6 +5773,10 @@ msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
 msgid "Install location unknown"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "install picker"
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
@@ -6239,6 +6291,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Launch actions"
 msgstr ""
 
@@ -6317,6 +6370,7 @@ msgstr ""
 msgid "Let other devices play"
 msgstr ""
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Let other devices stream games from this one"
 msgstr ""
@@ -6332,6 +6386,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Library"
 msgstr ""
 
@@ -7767,6 +7822,7 @@ msgid "Notifications"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Notify new unlocks"
 msgstr ""
 
@@ -8055,6 +8111,7 @@ msgstr ""
 msgid "Open the sign-in page"
 msgstr ""
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
 msgid "Open them with Caskade"
 msgstr ""
@@ -8499,6 +8556,7 @@ msgid "Play from your library"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Play history"
 msgstr ""
 
@@ -8691,6 +8749,7 @@ msgid "Plugins"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Plugins and themes"
 msgstr ""
 
@@ -8718,6 +8777,7 @@ msgid "Popular games"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Portable executables"
 msgstr ""
 
@@ -8726,6 +8786,7 @@ msgid "Preferences apply to the next install job. Jobs already running keep thei
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Preferred emulators"
 msgstr ""
 
@@ -9090,6 +9151,10 @@ msgstr ""
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Refresh in the background"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "refresh interval"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
@@ -9504,6 +9569,7 @@ msgstr ""
 msgid "Resetting…"
 msgstr ""
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Resolution"
 msgstr ""
@@ -9595,6 +9661,10 @@ msgstr ""
 
 #: apps/desktop/src/views/home/HomeView.tsx
 msgid "Resume · View details"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "retention"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
@@ -9717,6 +9787,7 @@ msgid "RomM Server"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "RomM servers"
 msgstr ""
 
@@ -9911,11 +9982,16 @@ msgid "Save locations from {title}."
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Save locations list"
 msgstr ""
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
 msgid "Save locations saved."
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "save manifest"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
@@ -10504,6 +10580,7 @@ msgid "Show {title} again"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Show achievements"
 msgstr ""
 
@@ -10633,6 +10710,7 @@ msgid "Size"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Size limit"
 msgstr ""
 
@@ -11160,6 +11238,10 @@ msgctxt "on-screen keyboard"
 msgid "Symbols"
 msgstr ""
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "sync"
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 msgctxt "sync choice"
 msgid "Sync"
@@ -11195,9 +11277,29 @@ msgstr ""
 msgid "Sync settings"
 msgstr ""
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "sync, add-ons"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "sync, covers"
+msgstr ""
+
 #. Search words for Settings → Devices, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "sync, pair, pairing, other computers, saves, save games, save sync, cloud saves, save versions, copies, shares, relays, network, downloads from devices"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "sync, play time"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "sync, RetroArch config"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "sync, theme"
 msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
@@ -12131,6 +12233,10 @@ msgstr ""
 msgid "update games, game patches, GitHub releases"
 msgstr ""
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "update interval"
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 msgid "Update now"
 msgstr ""
@@ -12206,6 +12312,10 @@ msgstr ""
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgctxt "statistics"
 msgid "Usage"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "USB, removable"
 msgstr ""
 
 #. Button: makes this the game's IGDB match
@@ -12319,6 +12429,7 @@ msgid "Verify"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Verify downloads"
 msgstr ""
 
@@ -12700,6 +12811,7 @@ msgid "Windows opens magnet links and .torrent files with Caskade."
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Wine and Proton prefixes"
 msgstr ""
 
@@ -12809,6 +12921,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Your artwork"
 msgstr ""
 

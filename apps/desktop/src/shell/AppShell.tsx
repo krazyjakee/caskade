@@ -18,7 +18,7 @@ import { useMode } from "./console/mode";
 import { Sidebar } from "./Sidebar";
 import { StatusBar } from "./StatusBar";
 import { Topbar } from "./Topbar";
-import { TypeSearchProvider, useTypeSearch } from "./TypeSearch";
+import { settingsSearchField, TypeSearchProvider, useTypeSearch } from "./TypeSearch";
 
 /** Actions that work everywhere: View (Select) switches between the shells
  * (#148), Y goes to the search (#150): the search box and the on-screen
@@ -34,6 +34,14 @@ function ShellActions() {
   useInputAction(
     "search",
     () => {
+      // Settings searches its own sections (#56).
+      const settings = settingsSearchField();
+      if (settings) {
+        settings.focus();
+        settings.select();
+        if (input?.typesOnScreen()) input.keyboard(settings);
+        return true;
+      }
       if (typeSearch && !input?.typesOnScreen()) {
         typeSearch.open("");
         return true;

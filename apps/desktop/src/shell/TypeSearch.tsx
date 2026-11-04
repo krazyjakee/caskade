@@ -45,6 +45,11 @@ interface TypeSearchState {
 const Context = createContext<TypeSearchState | null>(null);
 export const useTypeSearch = () => useContext(Context);
 
+/** Settings' own search field, when Settings is open: typing there searches
+ * settings, not games (#56). */
+export const settingsSearchField = () =>
+  document.querySelector<HTMLInputElement>('[data-view="settings"] input[type="search"]');
+
 interface LibrarySearch {
   filter?: LibraryFilter;
   q?: string;
@@ -110,6 +115,13 @@ export function TypeSearchProvider({ children }: { children: ReactNode }) {
     if (isOpen) return;
     const onKey = (event: globalThis.KeyboardEvent) => {
       if (!startsTyping(event)) return;
+      const settings = settingsSearchField();
+      if (settings) {
+        // Focused while the key is down, the field takes its character.
+        if (event.key === "/") event.preventDefault();
+        settings.focus();
+        return;
+      }
       event.preventDefault();
       // `/` is the search key; anything else is the first character.
       open(event.key === "/" ? "" : event.key);

@@ -118,6 +118,11 @@ export const settingsSearchIndex: readonly SettingsSearchEntry[] = [
   { tab: "general", label: msg`Cache folder` },
   {
     tab: "general",
+    label: msg({ message: "Check every (hours)", context: "settings" }),
+    words: msg`update interval`,
+  },
+  {
+    tab: "general",
     label: msg`Fetch artwork and game info online`,
     words: msg`metadata, IGDB, covers, offline`,
   },
@@ -147,6 +152,11 @@ export const settingsSearchIndex: readonly SettingsSearchEntry[] = [
     words: msg`desktop entries, Flatpak, Start Menu, Wine, Proton`,
   },
   { tab: "library-discovery", label: msg`Optional deep scans` },
+  { tab: "library-discovery", label: msg`Custom folders` },
+  { tab: "library-discovery", label: msg`External drives`, words: msg`USB, removable` },
+  { tab: "library-discovery", label: msg`Portable executables` },
+  { tab: "library-discovery", label: msg`Wine and Proton prefixes` },
+  { tab: "library-discovery", label: msg`Full disk scan` },
   {
     tab: "library-discovery",
     label: msg`Folder to search`,
@@ -191,6 +201,8 @@ export const settingsSearchIndex: readonly SettingsSearchEntry[] = [
   { tab: "emulators", section: "scanners", label: msg`Global exclusions` },
   { tab: "emulators", section: "romm", label: msg`RomM Servers`, words: msg`RomM` },
   { tab: "emulators", section: "romm", label: msg`Download Cache` },
+  { tab: "emulators", section: "romm", label: msg`Size limit`, words: msg`cache size` },
+  { tab: "emulators", section: "romm", label: msg`Verify downloads`, words: msg`checksum` },
   // Appearance
   { tab: "appearance", label: msg`Theme`, words: msg`dark, light, skin` },
   { tab: "appearance", label: msg`Accent colour`, words: msg`color, colour` },
@@ -201,10 +213,12 @@ export const settingsSearchIndex: readonly SettingsSearchEntry[] = [
   { tab: "appearance", label: msg`Animations`, words: msg`motion` },
   { tab: "appearance", label: msg`Reduce effects`, words: msg`performance, motion` },
   { tab: "appearance", label: msg`Custom CSS`, words: msg`style, stylesheet` },
+  { tab: "appearance", label: msg`Disable custom CSS` },
   // Storage
   { tab: "storage", label: msg`Storage locations`, words: msg`drives, disks, folders` },
   { tab: "storage", label: msg`Install location preference`, words: msg`default location` },
   { tab: "storage", label: msg`Folder-name template` },
+  { tab: "storage", label: msg`Always use the default location`, words: msg`install picker` },
   // Installer
   {
     tab: "installer",
@@ -223,6 +237,7 @@ export const settingsSearchIndex: readonly SettingsSearchEntry[] = [
     label: msg`Magnet links and torrent files`,
     words: msg`torrents, magnet, BitTorrent`,
   },
+  { tab: "installer", label: msg`Open them with Caskade`, words: msg`default torrent app` },
   {
     tab: "general",
     label: msg`Game updates`,
@@ -243,8 +258,11 @@ export const settingsSearchIndex: readonly SettingsSearchEntry[] = [
   { tab: "plugins", label: msg`Installed plugins`, words: msg`add-ons, extensions` },
   // Store accounts
   { tab: "stores", label: msg`Refresh in the background` },
+  { tab: "stores", label: msg`How often`, words: msg`refresh interval` },
   { tab: "stores", label: msg`Import play time`, words: msg`playtime, hours played` },
   { tab: "stores", label: msg`Games that leave the library` },
+  { tab: "stores", label: msg`Show achievements` },
+  { tab: "stores", label: msg`Notify new unlocks`, words: msg`achievement notifications` },
   // Devices
   { tab: "devices", label: msg`This device`, words: msg`device name` },
   { tab: "devices", label: msg`Your devices`, words: msg`paired devices` },
@@ -260,6 +278,20 @@ export const settingsSearchIndex: readonly SettingsSearchEntry[] = [
   { tab: "devices", label: msg`Accept copies from my devices` },
   { tab: "devices", label: msg`Play requests from my devices`, words: msg`remote play` },
   { tab: "devices", label: msg`Copies and shares`, words: msg`share a game` },
+  // What syncs, one row per kind.
+  { tab: "devices", label: msg`Library`, words: msg`sync` },
+  { tab: "devices", label: msg`Play history`, words: msg`sync, play time` },
+  { tab: "devices", label: msg`Accounts and PINs`, words: msg`sync` },
+  { tab: "devices", label: msg`Your artwork`, words: msg`sync, covers` },
+  { tab: "devices", label: msg`Achievement links you made`, words: msg`sync` },
+  { tab: "devices", label: msg`RomM servers`, words: msg`sync` },
+  { tab: "devices", label: msg`Appearance`, words: msg`sync, theme` },
+  { tab: "devices", label: msg`Launch actions`, words: msg`sync` },
+  { tab: "devices", label: msg`Game scripts`, words: msg`sync` },
+  { tab: "devices", label: msg`Preferred emulators`, words: msg`sync` },
+  { tab: "devices", label: msg`Emulator configuration`, words: msg`sync, RetroArch config` },
+  { tab: "devices", label: msg`Plugins and themes`, words: msg`sync, add-ons` },
+  { tab: "devices", label: msg`Save locations list`, words: msg`save manifest` },
   // Streaming
   {
     tab: "streaming",
@@ -274,9 +306,15 @@ export const settingsSearchIndex: readonly SettingsSearchEntry[] = [
   { tab: "streaming", label: msg`Stream quality`, words: msg`bitrate, resolution, frame rate` },
   { tab: "streaming", label: msg`Streaming updates` },
   { tab: "streaming", label: msg`Add a device by its address`, words: msg`IP address` },
+  { tab: "streaming", label: msg`Let other devices stream games from this one`, words: msg`host` },
+  { tab: "streaming", label: msg`Resolution` },
+  { tab: "streaming", label: msg`Frame rate`, words: msg`fps` },
+  { tab: "streaming", label: msg`Bitrate` },
   // Backup
   { tab: "backup", label: msg`Back up`, words: msg`backup now` },
   { tab: "backup", label: msg`Backup folder` },
+  { tab: "backup", label: msg`Back up automatically`, words: msg`daily, weekly, schedule` },
+  { tab: "backup", label: msg`Automatic backups to keep`, words: msg`retention` },
   {
     tab: "backup",
     label: msg`Automatic backups`,

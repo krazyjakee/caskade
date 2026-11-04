@@ -70,16 +70,17 @@ it("Enter goes to the results; Escape puts the earlier search back", async () =>
 
 it("anywhere else, it counts the whole library and Enter opens the Library on the results", async () => {
   fakeViewport();
-  const app = renderApp("/settings?tab=general");
-  await screen.findByRole("heading", { name: "Settings" });
+  // Not Settings, which searches its own sections (#56).
+  const app = renderApp("/collections");
+  await screen.findByRole("heading", { name: "Your Collections" });
   // `/` opens it empty.
   fireEvent.keyDown(document.body, { key: "/" });
   const input = await screen.findByRole<HTMLInputElement>("textbox", { name: "Search games" });
   expect(input.value).toBe("");
   fireEvent.change(input, { target: { value: "Game 0002" } });
   await waitFor(() => expect(count()).toBe("1 game"));
-  // Typing here doesn't leave Settings.
-  expect(app.router.state.location.pathname).toBe("/settings");
+  // Typing here doesn't leave the page.
+  expect(app.router.state.location.pathname).toBe("/collections");
   fireEvent.keyDown(input, { key: "Enter" });
   await waitFor(() => expect(app.router.state.location.pathname).toBe("/library"));
   expect(app.router.state.location.search).toMatchObject({ filter: "all", q: "Game 0002" });

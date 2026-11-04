@@ -118,3 +118,19 @@ it("finds only what a standard account may open", async () => {
   expect(within(results()).getByRole("button", { name: "Devices" })).toBeTruthy();
   expect(within(results()).queryByRole("button", { name: /Backup/ })).toBeNull();
 });
+
+it("typing on Settings searches settings, not games (#56)", async () => {
+  renderApp("/settings?tab=general");
+  await screen.findByRole("tab", { name: "General", selected: true });
+  fireEvent.keyDown(document.body, { key: "t" });
+  expect(document.activeElement).toBe(field());
+  // The games' type-search overlay stays shut.
+  expect(screen.queryByRole("dialog", { name: /search/i })).toBeNull();
+});
+
+it("a pad's Search opens Settings' search on Settings (#56)", async () => {
+  const app = renderApp("/settings?tab=general", { mode: "console" });
+  await screen.findByRole("tab", { name: "General", selected: true });
+  app.pad.press("search");
+  await waitFor(() => expect(document.activeElement).toBe(field()));
+});
