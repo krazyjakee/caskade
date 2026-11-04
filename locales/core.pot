@@ -323,6 +323,10 @@ msgid "the package has no readable {file}"
 msgstr ""
 
 #: crates/caskade-core/src/addons/package.rs
+msgid "the package provides metadata, which the catalogue doesn't offer"
+msgstr ""
+
+#: crates/caskade-core/src/addons/package.rs
 msgid "the package is {id} {version}, not {expected} {expected_version}"
 msgstr ""
 
