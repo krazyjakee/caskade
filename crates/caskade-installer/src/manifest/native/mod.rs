@@ -14,7 +14,7 @@ pub use model::{
 };
 pub use registry::PlatformRegistry;
 #[cfg(windows)]
-pub(crate) use registry::{VIEWS, created_effects, software_keys};
+pub(crate) use registry::{Owner, VIEWS, created_effects, software_keys};
 use std::{io, path::Path};
 pub(super) fn prepare(
     game: &Path,

@@ -434,6 +434,16 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
             cleanup.game = moved.game_dir.clone();
             assert!(moved.copied, "C: to D: must use actual cross-volume copy");
             assert!(!report.dir.exists());
+            // Shown if the self-check below fails: where the game is now and
+            // what its registry says.
+            eprintln!(
+                "{id} (alias: {aliased}): {:?}, rewrote {} files and {} values; now {}; InstallPath {:?}",
+                scan.verdict,
+                moved.rewritten_files,
+                moved.rewritten_values,
+                moved.game_dir.display(),
+                scan::registry::read_keys(&[("HKLM".into(), CUSTOM_KEY.into())], 16)
+            );
             self_check(
                 &*runtime,
                 &moved.game_dir,

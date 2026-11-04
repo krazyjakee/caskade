@@ -26,7 +26,7 @@ impl NativeRegistry for PlatformRegistry {
     }
 }
 #[cfg(windows)]
-pub(crate) use windows::{VIEWS, created_effects, software_keys};
+pub(crate) use windows::{Owner, VIEWS, created_effects, software_keys};
 #[cfg(windows)]
 mod windows {
     use super::*;
@@ -148,13 +148,97 @@ mod windows {
         }
         Ok(keys)
     }
+    /// What ties a created key to the game being installed: its folder (as
+    /// the installer was given it and as it really is) and the names of its
+    /// own Uninstall registrations (Inno's AppId, an MSI's ProductCode).
+    pub(crate) struct Owner {
+        paths: Vec<String>,
+        names: Vec<String>,
+    }
+    impl Owner {
+        pub(crate) fn new(game: &std::path::Path, args: &[String]) -> Self {
+            let mut paths = Vec::new();
+            let mut add = |path: &str| {
+                let path = normalized(path.trim_matches('"'));
+                if path.len() > 3 && !paths.contains(&path) {
+                    paths.push(path);
+                }
+            };
+            add(&game.to_string_lossy());
+            if let Ok(real) = dunce::canonicalize(game) {
+                add(&real.to_string_lossy());
+            }
+            // /DIR=, /D=, INSTALLDIR=...: the path the installer wrote with,
+            // an alias's included.
+            for arg in args {
+                if let Some((_, value)) = arg.split_once('=')
+                    && (value.contains(":\\") || value.contains(":/") || value.starts_with("\\\\"))
+                {
+                    add(value);
+                }
+            }
+            let names = PlatformRegistry
+                .uninstall_entries()
+                .unwrap_or_default()
+                .into_iter()
+                .filter(|entry| super::super::detection::owned(game, entry))
+                .filter_map(|entry| {
+                    let name = entry
+                        .location
+                        .path
+                        .as_str()
+                        .rsplit('/')
+                        .next()?
+                        .to_ascii_lowercase();
+                    Some(name.trim_end_matches("_is1").to_owned())
+                })
+                .filter(|name| !name.is_empty())
+                .collect();
+            Self { paths, names }
+        }
+        /// Whether `text` names the game's folder or something inside it.
+        pub(crate) fn mentions(&self, text: &str) -> bool {
+            let text = normalized(text);
+            self.paths.iter().any(|path| {
+                text.match_indices(path.as_str()).any(|(at, _)| {
+                    matches!(
+                        text[at + path.len()..].chars().next(),
+                        None | Some('\\' | '"' | ';' | ' ')
+                    )
+                })
+            })
+        }
+        fn owns(&self, key: &str, values: &[(String, String, RegistryValue)]) -> bool {
+            key.split('\\').any(|part| {
+                self.names
+                    .iter()
+                    .any(|name| part.eq_ignore_ascii_case(name))
+            }) || values.iter().any(|(_, _, data)| match data {
+                RegistryValue::String(text) | RegistryValue::ExpandString(text) => {
+                    self.mentions(text)
+                }
+                RegistryValue::MultiString(texts) => texts.iter().any(|text| self.mentions(text)),
+                _ => false,
+            })
+        }
+    }
+    fn normalized(path: &str) -> String {
+        path.trim_start_matches("\\\\?\\")
+            .replace('/', "\\")
+            .trim_end_matches('\\')
+            .to_lowercase()
+    }
     /// Effects that undo the keys an install created below Software in one
     /// view: every created key (parents first), then each value with the data
-    /// it holds now, so removal keeps what the user changed since.
+    /// it holds now, so removal keeps what the user changed since. A key is
+    /// the game's only when its name or one of its values says so (see
+    /// `Owner`): anything else that appeared meanwhile belongs to whatever
+    /// else ran, and is never recorded.
     pub(crate) fn created_effects(
         machine: bool,
         bits64: bool,
         created: &BTreeSet<String>,
+        owner: &Owner,
     ) -> io::Result<Vec<RegistryEffect>> {
         let scope = format!(
             "registry.{}.{}",
@@ -168,14 +252,22 @@ mod windows {
             !key.rsplit_once('\\')
                 .is_some_and(|(parent, _)| created.contains(parent))
         }) {
+            let path = format!("Software\\{key}");
+            let (mut subtree_keys, mut subtree_values) = (Vec::new(), Vec::new());
             walk(
                 machine,
                 bits64,
-                &format!("Software\\{key}"),
+                &path,
                 0,
-                &mut keys,
-                &mut values,
+                &mut subtree_keys,
+                &mut subtree_values,
             )?;
+            if owner.owns(key, &subtree_values) {
+                keys.extend(subtree_keys);
+                values.extend(subtree_values);
+            } else {
+                tracing::info!(key = %path, "registry key created during the install isn't the game's; not recorded");
+            }
         }
         let location = |path: &str| -> io::Result<ExternalLocation> {
             Ok(ExternalLocation {
@@ -411,29 +503,25 @@ mod tests {
     use std::collections::BTreeSet;
     use winreg::{RegKey, enums::*};
 
-    /// A per-user key named for this process, removed whatever the outcome.
-    struct Scratch(String);
+    /// Per-user keys named for this process, removed whatever the outcome.
+    struct Scratch(Vec<String>);
     impl Drop for Scratch {
         fn drop(&mut self) {
-            let _ = RegKey::predef(HKEY_CURRENT_USER)
-                .open_subkey_with_flags("Software", KEY_ALL_ACCESS)
-                .and_then(|software| software.delete_subkey_all(&self.0));
+            if let Ok(software) =
+                RegKey::predef(HKEY_CURRENT_USER).open_subkey_with_flags("Software", KEY_ALL_ACCESS)
+            {
+                for name in &self.0 {
+                    let _ = software.delete_subkey_all(name);
+                }
+            }
         }
     }
 
-    fn install(name: &str) -> Vec<RegistryEffect> {
+    fn set(path: &str, name: &str, data: &str) {
         let (key, _) = RegKey::predef(HKEY_CURRENT_USER)
-            .create_subkey(format!("Software\\{name}\\Game"))
+            .create_subkey(format!("Software\\{path}"))
             .unwrap();
-        key.set_value("InstallPath", &String::from("C:\\Games\\Game"))
-            .unwrap();
-        let effects = created_effects(false, true, &BTreeSet::from([name.to_owned()])).unwrap();
-        assert!(effects.iter().any(|effect| matches!(
-            effect,
-            RegistryEffect::Value { name, installed: Some(RegistryValue::String(data)), .. }
-                if name == "InstallPath" && data == "C:\\Games\\Game"
-        )));
-        effects
+        key.set_value(name, &String::from(data)).unwrap();
     }
 
     fn exists(name: &str) -> bool {
@@ -442,24 +530,50 @@ mod tests {
             .is_ok()
     }
 
+    /// The game's installer writes `name\Game`; meanwhile another program
+    /// creates `other`. Only the game's key is recorded.
+    fn install(name: &str, other: &str) -> Vec<RegistryEffect> {
+        set(&format!("{name}\\Game"), "InstallPath", "C:\\Games\\Game");
+        set(other, "LastRun", "today");
+        let owner = Owner::new(std::path::Path::new("C:\\Games\\Game"), &[]);
+        let effects = created_effects(
+            false,
+            true,
+            &BTreeSet::from([name.to_owned(), other.to_owned()]),
+            &owner,
+        )
+        .unwrap();
+        assert!(effects.iter().any(|effect| matches!(
+            effect,
+            RegistryEffect::Value { name, installed: Some(RegistryValue::String(data)), .. }
+                if name == "InstallPath" && data == "C:\\Games\\Game"
+        )));
+        assert!(
+            effects
+                .iter()
+                .all(|effect| !effect.location().path.as_str().contains(other)),
+            "another program's key was claimed: {effects:?}"
+        );
+        effects
+    }
+
     #[test]
     fn created_keys_go_and_values_the_user_changed_stay() {
         let name = format!("CaskadeRegistryWatchTest{}", std::process::id());
-        let _scratch = Scratch(name.clone());
+        let other = format!("CaskadeUnrelatedTest{}", std::process::id());
+        let _scratch = Scratch(vec![name.clone(), other.clone()]);
 
-        // Unchanged since the install: everything goes, values first.
-        for effect in install(&name).iter().rev() {
+        // Unchanged since the install: the game's keys go, values first; the
+        // key another program made meanwhile stays.
+        for effect in install(&name, &other).iter().rev() {
             PlatformRegistry.undo_effect(effect).unwrap();
         }
         assert!(!exists(&name));
+        assert!(exists(&other));
 
         // Changed by the user: the value, and so its keys, stay.
-        let effects = install(&name);
-        RegKey::predef(HKEY_CURRENT_USER)
-            .open_subkey_with_flags(format!("Software\\{name}\\Game"), KEY_WRITE)
-            .unwrap()
-            .set_value("InstallPath", &String::from("D:\\Mine"))
-            .unwrap();
+        let effects = install(&name, &other);
+        set(&format!("{name}\\Game"), "InstallPath", "D:\\Mine");
         let failures = effects
             .iter()
             .rev()
@@ -472,5 +586,23 @@ mod tests {
             .get_value("InstallPath")
             .unwrap();
         assert_eq!(kept, "D:\\Mine");
+    }
+
+    #[test]
+    fn a_key_mentions_the_game_only_by_its_folder_or_below() {
+        let owner = Owner::new(
+            std::path::Path::new("C:\\Games\\Game"),
+            &["/D=E:\\Alias\\G".into()],
+        );
+        for (text, mentions) in [
+            ("C:\\Games\\Game", true),
+            ("c:/games/game/bin/game.exe", true),
+            ("\"C:\\Games\\Game\\game.exe\" -fullscreen", true),
+            ("E:\\Alias\\G\\save", true),
+            ("C:\\Games\\Gamebox", false),
+            ("C:\\Games", false),
+        ] {
+            assert_eq!(owner.mentions(text), mentions, "{text}");
+        }
     }
 }
