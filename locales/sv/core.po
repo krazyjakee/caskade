@@ -32,7 +32,7 @@ msgstr "inget konto är inloggat"
 #: crates/caskade-core/src/accounts/mod.rs
 #: crates/caskade-core/src/db/mod.rs
 msgid "This account no longer exists."
-msgstr ""
+msgstr "Det här kontot finns inte längre."
 
 #: crates/caskade-core/src/accounts/mod.rs
 msgid "an account name is 1 to {max} characters"
@@ -40,7 +40,7 @@ msgstr "ett kontonamn är 1 till {max} tecken"
 
 #: crates/caskade-core/src/accounts/mod.rs
 msgid "Choose one of the avatars Caskade offers."
-msgstr ""
+msgstr "Välj en av de avatarer som Caskade erbjuder."
 
 #: crates/caskade-core/src/accounts/mod.rs
 msgid "an age limit is at most {max}"
@@ -48,7 +48,7 @@ msgstr "en åldersgräns är högst {max}"
 
 #: crates/caskade-core/src/accounts/mod.rs
 msgid "One of the chosen settings sections doesn't exist."
-msgstr ""
+msgstr "Ett av de valda inställningsavsnitten finns inte."
 
 #: crates/caskade-core/src/accounts/permission.rs
 msgid "sign in to an account first"
@@ -325,7 +325,7 @@ msgstr "paketet har ingen läsbar {file}"
 
 #: crates/caskade-core/src/addons/package.rs
 msgid "the package provides metadata, which the catalogue doesn't offer"
-msgstr ""
+msgstr "paketet tillhandahåller metadata, vilket katalogen inte erbjuder"
 
 #: crates/caskade-core/src/addons/package.rs
 msgid "the package is {id} {version}, not {expected} {expected_version}"
@@ -673,30 +673,30 @@ msgstr "bara ett spel med något att starta kan gå med i ett annat"
 
 #: crates/caskade-core/src/db/mod.rs
 msgid "This collection no longer exists."
-msgstr ""
+msgstr "Den här samlingen finns inte längre."
 
 #: crates/caskade-core/src/db/mod.rs
 #: crates/caskade-core/src/metadata/page.rs
 msgid "This copy of the game is no longer in the library."
-msgstr ""
+msgstr "Den här kopian av spelet finns inte längre i biblioteket."
 
 #: crates/caskade-core/src/db/mod.rs
 #: crates/caskade-core/src/emulation/service/games.rs
 #: crates/caskade-core/src/metadata/page.rs
 msgid "This game is no longer in the library."
-msgstr ""
+msgstr "Det här spelet finns inte längre i biblioteket."
 
 #: crates/caskade-core/src/db/mod.rs
 msgid "This play session no longer exists."
-msgstr ""
+msgstr "Den här spelsessionen finns inte längre."
 
 #: crates/caskade-core/src/db/mod.rs
 msgid "This storage location no longer exists."
-msgstr ""
+msgstr "Den här lagringsplatsen finns inte längre."
 
 #: crates/caskade-core/src/db/mod.rs
 msgid "This {entity} no longer exists."
-msgstr ""
+msgstr "Det här objektet ({entity}) finns inte längre."
 
 #: crates/caskade-core/src/db/plugins.rs
 msgid "invalid plugin id"
@@ -748,7 +748,7 @@ msgstr "en omfattning kan ha högst {count} skript"
 
 #: crates/caskade-core/src/db/scripts.rs
 msgid "This emulator profile no longer exists."
-msgstr ""
+msgstr "Den här emulatorprofilen finns inte längre."
 
 #: crates/caskade-core/src/db/scripts.rs
 msgid "the script's game was not found"
@@ -789,27 +789,27 @@ msgstr "ett butikskonto behöver sitt id hos leverantören"
 
 #: crates/caskade-core/src/devices/mod.rs
 msgid "another pairing is in progress"
-msgstr ""
+msgstr "en annan parkoppling pågår"
 
 #: crates/caskade-core/src/devices/mod.rs
 msgid "pairing was cancelled"
-msgstr ""
+msgstr "parkopplingen avbröts"
 
 #: crates/caskade-core/src/devices/mod.rs
 msgid "that pairing link is this device's own"
-msgstr ""
+msgstr "den parkopplingslänken är den här enhetens egen"
 
 #: crates/caskade-core/src/devices/mod.rs
 msgid "the system keychain is unavailable"
-msgstr ""
+msgstr "systemets nyckelring är inte tillgänglig"
 
 #: crates/caskade-core/src/devices/mod.rs
 msgid "the other device refused the connection"
-msgstr ""
+msgstr "den andra enheten nekade anslutningen"
 
 #: crates/caskade-core/src/devices/mod.rs
 msgid "couldn't reach the other device"
-msgstr ""
+msgstr "kunde inte nå den andra enheten"
 
 #: crates/caskade-core/src/devices/mod.rs
 msgid "the other device turned the connection down"
@@ -821,67 +821,67 @@ msgstr "den här enheten har ingen identitet att ansluta med"
 
 #: crates/caskade-core/src/devices/mod.rs
 msgid "sync isn't ready on this device yet"
-msgstr ""
+msgstr "synkning är inte redo på den här enheten än"
 
 #: crates/caskade-core/src/devices/mod.rs
 msgid "no pairing with that device"
-msgstr ""
+msgstr "ingen parkoppling med den enheten"
 
 #: crates/caskade-core/src/devices/mod.rs
 msgid "that isn't a Caskade pairing link"
-msgstr ""
+msgstr "det där är inte en parkopplingslänk från Caskade"
 
 #: crates/caskade-core/src/devices/mod.rs
 msgid "this pairing link has expired; make a new one on the other device"
-msgstr ""
+msgstr "den här parkopplingslänken har gått ut; skapa en ny på den andra enheten"
 
 #: crates/caskade-core/src/devices/mod.rs
 msgid "this pairing link was already used or has expired; make a new one on the other device"
-msgstr ""
+msgstr "den här parkopplingslänken har redan använts eller gått ut; skapa en ny på den andra enheten"
 
 #: crates/caskade-core/src/devices/mod.rs
 msgid "the other device isn't accepting a pairing right now"
-msgstr ""
+msgstr "den andra enheten tar inte emot parkoppling just nu"
 
 #: crates/caskade-core/src/devices/mod.rs
 msgid "that isn't a device id"
-msgstr ""
+msgstr "det där är inte ett enhets-id"
 
 #: crates/caskade-core/src/elevation/linux.rs
 msgid "the administrator step failed and was undone: {error}"
-msgstr ""
+msgstr "administratörssteget misslyckades och ångrades: {error}"
 
 #: crates/caskade-core/src/elevation/linux.rs
 msgid "couldn't ask for an administrator (pkexec): {error}"
-msgstr ""
+msgstr "kunde inte fråga efter en administratör (pkexec): {error}"
 
 #: crates/caskade-core/src/elevation/mod.rs
 msgid "The administrator step was cancelled, so nothing changed."
-msgstr ""
+msgstr "Administratörssteget avbröts, så inget ändrades."
 
 #: crates/caskade-core/src/elevation/mod.rs
 msgid "The administrator step wasn't allowed, so nothing changed. It needs an administrator's password."
-msgstr ""
+msgstr "Administratörssteget tilläts inte, så inget ändrades. Det kräver en administratörs lösenord."
 
 #: crates/caskade-core/src/elevation/mod.rs
 msgid "the record of administrator steps is unreadable: {error}"
-msgstr ""
+msgstr "registret över administratörssteg går inte att läsa: {error}"
 
 #: crates/caskade-core/src/elevation/mod.rs
 msgid "this system doesn't need or support these administrator steps"
-msgstr ""
+msgstr "det här systemet behöver inte eller stöder inte de här administratörsstegen"
 
 #: crates/caskade-core/src/elevation/windows.rs
 msgid "the streaming host isn't installed where Caskade keeps it"
-msgstr ""
+msgstr "streamingvärden är inte installerad där Caskade förvarar den"
 
 #: crates/caskade-core/src/elevation/windows.rs
 msgid "the administrator step failed and was undone"
-msgstr ""
+msgstr "administratörssteget misslyckades och ångrades"
 
 #: crates/caskade-core/src/elevation/windows.rs
 msgid "Caskade can't find its own program"
-msgstr ""
+msgstr "Caskade hittar inte sitt eget program"
 
 #: crates/caskade-core/src/emulation/catalog.rs
 msgid "the ROM file name {file} starts with `-`, which the emulator would read as an option; rename the file"
@@ -891,7 +891,7 @@ msgstr "ROM-filnamnet {file} börjar med `-`, vilket emulatorn skulle läsa som 
 #: crates/caskade-core/src/emulation/service/emulators.rs
 #: crates/caskade-core/src/emulation/validate.rs
 msgid "{emulator} no longer has this profile."
-msgstr ""
+msgstr "{emulator} har inte längre den här profilen."
 
 #: crates/caskade-core/src/emulation/config.rs
 msgid "the game's ROM scanner no longer exists"
@@ -939,7 +939,7 @@ msgstr "skannerns profil har inga kompatibla plattformar"
 
 #: crates/caskade-core/src/emulation/scan/pipeline.rs
 msgid "This scanner's platform doesn't fit its profile."
-msgstr ""
+msgstr "Den här skannerns plattform passar inte dess profil."
 
 #: crates/caskade-core/src/emulation/scan/pipeline.rs
 msgid "duplicate ROM path in file list"
@@ -1014,7 +1014,7 @@ msgstr "Importerar ROM-filer"
 #: crates/caskade-core/src/emulation/scanners/jobs.rs
 #: apps/desktop/src-tauri/src/commands/rom_scanners.rs
 msgid "This ROM scanner no longer exists."
-msgstr ""
+msgstr "Den här ROM-skannern finns inte längre."
 
 #: crates/caskade-core/src/emulation/scanners/import.rs
 msgid "{game}: skipped by {by}: {reason}"
@@ -1023,7 +1023,7 @@ msgstr "{game}: hoppades över av {by}: {reason}"
 #: crates/caskade-core/src/emulation/scanners/jobs.rs
 #: apps/desktop/src-tauri/src/commands/rom_scanners.rs
 msgid "This ROM scan is no longer available."
-msgstr ""
+msgstr "Den här ROM-skanningen är inte längre tillgänglig."
 
 #: crates/caskade-core/src/emulation/scanners/jobs.rs
 msgid "this scan is not waiting for a review"
@@ -1051,7 +1051,7 @@ msgstr "{emulator} körs som Flatpak och kan inte se den här mappen på egen ha
 
 #: crates/caskade-core/src/emulation/scanners/mod.rs
 msgid "The profile {profile} doesn't run this scanner's platform."
-msgstr ""
+msgstr "Profilen {profile} kör inte den här skannerns plattform."
 
 #: crates/caskade-core/src/emulation/scanners/mod.rs
 msgid "the scanner has no known platform"
@@ -1080,7 +1080,7 @@ msgstr "Identifierar emulatorer"
 #: crates/caskade-core/src/emulation/service/detection.rs
 #: apps/desktop/src-tauri/src/commands/emulation.rs
 msgid "This detection is no longer available. Run it again."
-msgstr ""
+msgstr "Den här identifieringen är inte längre tillgänglig. Kör den igen."
 
 #: crates/caskade-core/src/emulation/service/detection.rs
 msgid "the detection has not finished"
@@ -1099,7 +1099,7 @@ msgstr "en inbyggd profil behöver en emulatordefinition"
 #: crates/caskade-core/src/emulation/setup/jobs.rs
 #: crates/caskade-core/src/emulation/validate.rs
 msgid "Caskade doesn't know this emulator."
-msgstr ""
+msgstr "Caskade känner inte till den här emulatorn."
 
 #: crates/caskade-core/src/emulation/service/games.rs
 msgid "No emulator for {platform} — configure"
@@ -1136,11 +1136,11 @@ msgstr "ROM-filen saknas: {path}"
 #: crates/caskade-core/src/emulation/service/games.rs
 #: crates/caskade-core/src/emulation/service/platforms.rs
 msgid "That profile doesn't run this platform."
-msgstr ""
+msgstr "Den profilen kör inte den här plattformen."
 
 #: crates/caskade-core/src/emulation/service/games.rs
 msgid "That emulator has no profile for this platform."
-msgstr ""
+msgstr "Den emulatorn har ingen profil för den här plattformen."
 
 #: crates/caskade-core/src/emulation/service/mod.rs
 msgid "Full path of the ROM being launched"
@@ -1210,7 +1210,7 @@ msgstr "obalanserade citattecken eller ett avslutande omvänt snedstreck"
 #: crates/caskade-core/src/emulation/service/platforms.rs
 #: crates/caskade-core/src/emulation/setup/bios.rs
 msgid "Caskade doesn't know this platform."
-msgstr ""
+msgstr "Caskade känner inte till den här plattformen."
 
 #: crates/caskade-core/src/emulation/setup/bios.rs
 msgid "{platform} has no emulator yet"
@@ -1226,11 +1226,11 @@ msgstr "Kunde inte förbereda inställningarna för {emulator}: {error}"
 
 #: crates/caskade-core/src/emulation/setup/jobs.rs
 msgid "This emulator install is no longer listed."
-msgstr ""
+msgstr "Den här emulatorinstallationen finns inte längre i listan."
 
 #: crates/caskade-core/src/emulation/setup/jobs.rs
 msgid "Caskade has nothing to install for this platform on this system."
-msgstr ""
+msgstr "Caskade har inget att installera för den här plattformen på det här systemet."
 
 #: crates/caskade-core/src/emulation/setup/jobs.rs
 msgid "{emulator} can't be installed on this system"
@@ -1274,7 +1274,7 @@ msgstr "ett spel körs i den här emulatorn; uppdatera den efter spelet"
 
 #: crates/caskade-core/src/emulation/setup/updates.rs
 msgid "Caskade didn't install this emulator."
-msgstr ""
+msgstr "Caskade har inte installerat den här emulatorn."
 
 #: crates/caskade-core/src/emulation/validate.rs
 msgid "{name} must be an absolute path"
@@ -1329,7 +1329,7 @@ msgstr "programpaket"
 
 #: crates/caskade-core/src/emulation/validate.rs
 msgid "This emulator lists the same profile twice."
-msgstr ""
+msgstr "Den här emulatorn listar samma profil två gånger."
 
 #: crates/caskade-core/src/emulation/validate.rs
 msgctxt "field name"
@@ -1358,7 +1358,7 @@ msgstr "miljönyckel"
 
 #: crates/caskade-core/src/emulation/validate.rs
 msgid "An environment variable's name can't contain =."
-msgstr ""
+msgstr "Namnet på en miljövariabel får inte innehålla =."
 
 #: crates/caskade-core/src/emulation/validate.rs
 msgctxt "field name"
@@ -1387,7 +1387,7 @@ msgstr "undantag"
 
 #: crates/caskade-core/src/emulation/vars.rs
 msgid "Save variable {variable} is unavailable for this release."
-msgstr ""
+msgstr "Sparvariabeln {variable} är inte tillgänglig för den här utgåvan."
 
 #: crates/caskade-core/src/error.rs
 msgid "the server"
@@ -1415,7 +1415,7 @@ msgstr "Starten avbröts."
 
 #: crates/caskade-core/src/error.rs
 msgid "{device} is playing another game."
-msgstr ""
+msgstr "{device} spelar ett annat spel."
 
 #: crates/caskade-core/src/error.rs
 msgid "Caskade has nothing that can start this game ({runner})."
@@ -1427,7 +1427,7 @@ msgstr "Spelet startade inte: ingen spelprocess dök upp i tid."
 
 #: crates/caskade-core/src/error.rs
 msgid "These settings can't be read; they may be damaged."
-msgstr ""
+msgstr "De här inställningarna kan inte läsas; de kan vara skadade."
 
 #: crates/caskade-core/src/error.rs
 msgid "These settings were saved by a newer version of Caskade."
@@ -1439,15 +1439,15 @@ msgstr "De här inställningarna har ändrats någon annanstans. Läs in dem ige
 
 #: crates/caskade-core/src/error.rs
 msgid "These settings aren't available right now."
-msgstr ""
+msgstr "De här inställningarna är inte tillgängliga just nu."
 
 #: crates/caskade-core/src/error.rs
 msgid "Some of these settings aren't valid. Check them and try again."
-msgstr ""
+msgstr "Vissa av de här inställningarna är ogiltiga. Kontrollera dem och försök igen."
 
 #: crates/caskade-core/src/error.rs
 msgid "These settings are too large to save."
-msgstr ""
+msgstr "De här inställningarna är för stora för att sparas."
 
 #: crates/caskade-core/src/error.rs
 msgid "The storage location is offline, or a different drive is mounted in its place. Reconnect its drive, then try again."
@@ -1829,32 +1829,32 @@ msgstr "okänt jobb {id}"
 #: crates/caskade-core/src/install/move_location.rs
 msgid "One game moved to {to}."
 msgid_plural "{n} games moved to {to}."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Ett spel flyttades till {to}."
+msgstr[1] "{n} spel flyttades till {to}."
 
 #: crates/caskade-core/src/install/move_location.rs
 msgid "these games are already moving; follow them in Activity"
-msgstr ""
+msgstr "de här spelen flyttas redan; följ dem under Aktivitet"
 
 #: crates/caskade-core/src/install/move_location.rs
 msgid "Games on {location}"
-msgstr ""
+msgstr "Spel på {location}"
 
 #: crates/caskade-core/src/install/move_location.rs
 msgid "Moving “{title}” ({number} of {count})"
-msgstr ""
+msgstr "Flyttar ”{title}” ({number} av {count})"
 
 #: crates/caskade-core/src/install/move_location.rs
 msgid "{moved} “{title}” wasn't moved: {reason} {location} was kept."
-msgstr ""
+msgstr "{moved} ”{title}” flyttades inte: {reason} {location} behölls."
 
 #: crates/caskade-core/src/install/move_location.rs
 msgid "{moved} {location} wasn't removed: {reason}"
-msgstr ""
+msgstr "{moved} {location} togs inte bort: {reason}"
 
 #: crates/caskade-core/src/install/move_location.rs
 msgid "Cancelled. {moved} {location} was kept."
-msgstr ""
+msgstr "Avbrutet. {moved} {location} behölls."
 
 #: crates/caskade-core/src/install/operations.rs
 msgid "question changed; refresh the job before answering"
@@ -1926,7 +1926,7 @@ msgstr "Flyttar spel"
 
 #: crates/caskade-core/src/install/operations.rs
 msgid "Moving games"
-msgstr ""
+msgstr "Flyttar spel"
 
 #: crates/caskade-core/src/install/operations.rs
 #: crates/caskade-core/src/install/update.rs
@@ -2163,7 +2163,7 @@ msgstr "en emulatoråtgärd behöver spelets ROM-filer"
 
 #: crates/caskade-core/src/launch/actions.rs
 msgid "an action can't stream a game: streamed games come from the device that offers them"
-msgstr ""
+msgstr "en åtgärd kan inte streama ett spel: streamade spel kommer från enheten som erbjuder dem"
 
 #: crates/caskade-core/src/launch/actions.rs
 msgid "an emulator action is tracked as its emulator profile says; keep Automatic"
@@ -2175,7 +2175,7 @@ msgstr "ett webbspel följs via sitt spelfönster; behåll Automatisk"
 
 #: crates/caskade-core/src/launch/actions.rs
 msgid "a streamed game is followed by its stream; keep Automatic"
-msgstr ""
+msgstr "ett streamat spel följs via sin stream; behåll Automatiskt"
 
 #: crates/caskade-core/src/launch/actions.rs
 msgid "a link opens through the system, which hands it on at once: track the game by its folder or its process names"
@@ -2430,19 +2430,19 @@ msgstr "spelets processer är inte kända än"
 
 #: crates/caskade-core/src/launch/stream.rs
 msgid "Another game is streaming. End that stream first."
-msgstr ""
+msgstr "Ett annat spel streamas. Avsluta den streamen först."
 
 #: crates/caskade-core/src/launch/stream.rs
 msgid "couldn't start streaming: {error}"
-msgstr ""
+msgstr "kunde inte starta streaming: {error}"
 
 #: crates/caskade-core/src/launch/stream.rs
 msgid "The stream didn't start within {seconds} s."
-msgstr ""
+msgstr "Streamen startade inte inom {seconds} s."
 
 #: crates/caskade-core/src/launch/stream.rs
 msgid "The stream ended before it started."
-msgstr ""
+msgstr "Streamen avslutades innan den startade."
 
 #: crates/caskade-core/src/managed/download.rs
 msgid "the download was cut short"
@@ -2458,7 +2458,7 @@ msgstr "flatpak kunde inte installera {app}: {error}"
 
 #: crates/caskade-core/src/managed/flatpak.rs
 msgid "flatpak couldn't remove {app}: {error}"
-msgstr ""
+msgstr "flatpak kunde inte ta bort {app}: {error}"
 
 #: crates/caskade-core/src/managed/source.rs
 msgid "{url} names no file"
@@ -2494,35 +2494,35 @@ msgstr "Dolphins uppdateringstjänst angav en {scheme}-nedladdning"
 
 #: crates/caskade-core/src/managed/tools.rs
 msgid "Game streaming from this device"
-msgstr ""
+msgstr "Spelstreaming från den här enheten"
 
 #: crates/caskade-core/src/managed/tools.rs
 msgid "Game streaming to this device"
-msgstr ""
+msgstr "Spelstreaming till den här enheten"
 
 #: crates/caskade-core/src/managed/tools.rs
 msgid "unknown tool {tool}"
-msgstr ""
+msgstr "okänt verktyg {tool}"
 
 #: crates/caskade-core/src/managed/tools.rs
 msgid "{tool} is already being changed"
-msgstr ""
+msgstr "{tool} håller redan på att ändras"
 
 #: crates/caskade-core/src/managed/tools.rs
 msgid "{tool} can't be installed on this system"
-msgstr ""
+msgstr "{tool} kan inte installeras på det här systemet"
 
 #: crates/caskade-core/src/managed/tools.rs
 msgid "the download for {tool} doesn't contain it"
-msgstr ""
+msgstr "nedladdningen för {tool} innehåller det inte"
 
 #: crates/caskade-core/src/managed/tools.rs
 msgid "{tool} isn't where Caskade put it"
-msgstr ""
+msgstr "{tool} finns inte där Caskade lade det"
 
 #: crates/caskade-core/src/managed/tools.rs
 msgid "{tool} isn't installed by Caskade"
-msgstr ""
+msgstr "{tool} är inte installerat av Caskade"
 
 #: crates/caskade-core/src/managed/unpack.rs
 msgid "no file name"
@@ -2746,11 +2746,11 @@ msgstr "Tillägget {plugin} stängdes av"
 
 #: crates/caskade-core/src/notifications/service.rs
 msgid "{recipient} received {title}"
-msgstr ""
+msgstr "{recipient} tog emot {title}"
 
 #: crates/caskade-core/src/notifications/service.rs
 msgid "{title} arrived from {sharer}"
-msgstr ""
+msgstr "{title} kom från {sharer}"
 
 #: crates/caskade-core/src/notifications/service.rs
 msgid "A script after {game} started failed"
@@ -2970,15 +2970,15 @@ msgstr "det går inte att packa upp nedladdningen: {error}"
 
 #: crates/caskade-core/src/romm/mod.rs
 msgid "This RomM server is no longer set up."
-msgstr ""
+msgstr "Den här RomM-servern är inte längre konfigurerad."
 
 #: crates/caskade-core/src/romm/mod.rs
 msgid "Two RomM servers are set up as one. Remove one of them."
-msgstr ""
+msgstr "Två RomM-servrar är konfigurerade som en. Ta bort en av dem."
 
 #: crates/caskade-core/src/romm/mod.rs
 msgid "Caskade doesn't know one of the platforms chosen for this server."
-msgstr ""
+msgstr "Caskade känner inte till en av plattformarna som valts för den här servern."
 
 #: crates/caskade-core/src/romm/mod.rs
 msgid "choose both an emulator and a profile, or neither"
@@ -3028,71 +3028,71 @@ msgstr "biblioteksimporten sparade ingen post"
 
 #: crates/caskade-core/src/saves/context.rs
 msgid "Could not read the game's Wine or Proton prefix: {error}"
-msgstr ""
+msgstr "Kunde inte läsa spelets Wine- eller Proton-prefix: {error}"
 
 #: crates/caskade-core/src/saves/context.rs
 msgid "This release has no recorded Wine or Proton prefix."
-msgstr ""
+msgstr "Den här utgåvan har inget registrerat Wine- eller Proton-prefix."
 
 #: crates/caskade-core/src/saves/context.rs
 msgid "The save path contains an unclosed placeholder."
-msgstr ""
+msgstr "Sparsökvägen innehåller en platshållare som inte är stängd."
 
 #: crates/caskade-core/src/saves/context.rs
 msgid "Save placeholder <{name}> is unavailable for this release."
-msgstr ""
+msgstr "Sparplatshållaren <{name}> är inte tillgänglig för den här utgåvan."
 
 #: crates/caskade-core/src/saves/context.rs
 msgid "A Windows save path needs a recorded Wine or Proton prefix on this device."
-msgstr ""
+msgstr "En Windows-sparsökväg kräver ett registrerat Wine- eller Proton-prefix på den här enheten."
 
 #: crates/caskade-core/src/saves/files.rs
 msgid "The save scan exceeded its file or folder limit."
-msgstr ""
+msgstr "Sparskanningen överskred sin gräns för filer eller mappar."
 
 #: crates/caskade-core/src/saves/files.rs
 msgid "The network save path has no server or share."
-msgstr ""
+msgstr "Nätverkssökvägen för sparfiler saknar server eller resurs."
 
 #: crates/caskade-core/src/saves/files.rs
 msgid "Save paths must resolve to an absolute location."
-msgstr ""
+msgstr "Sparsökvägar måste leda till en absolut plats."
 
 #: crates/caskade-core/src/saves/files.rs
 msgid "Invalid save glob {pattern}: {error}"
-msgstr ""
+msgstr "Ogiltigt sparmönster {pattern}: {error}"
 
 #: crates/caskade-core/src/saves/registry.rs
 msgid "The save scan exceeded its registry key limit."
-msgstr ""
+msgstr "Sparskanningen överskred sin gräns för registernycklar."
 
 #: crates/caskade-core/src/saves/service.rs
 msgid "This release is not installed on this device."
-msgstr ""
+msgstr "Den här utgåvan är inte installerad på den här enheten."
 
 #: crates/caskade-core/src/saves/store.rs
 msgid "Save settings changed elsewhere. Reload them and try again."
-msgstr ""
+msgstr "Sparinställningarna ändrades på annat håll. Läs in dem igen och försök på nytt."
 
 #: crates/caskade-core/src/saves/store.rs
 msgid "The manifest game name is invalid."
-msgstr ""
+msgstr "Manifestets spelnamn är ogiltigt."
 
 #: crates/caskade-core/src/saves/store.rs
 msgid "Choose at most 256 save locations."
-msgstr ""
+msgstr "Välj högst 256 sparplatser."
 
 #: crates/caskade-core/src/saves/store.rs
 msgid "The save location is invalid."
-msgstr ""
+msgstr "Sparplatsen är ogiltig."
 
 #: crates/caskade-core/src/saves/store.rs
 msgid "Registry save locations must start with HKEY_CURRENT_USER or HKEY_LOCAL_MACHINE."
-msgstr ""
+msgstr "Sparplatser i registret måste börja med HKEY_CURRENT_USER eller HKEY_LOCAL_MACHINE."
 
 #: crates/caskade-core/src/saves/store.rs
 msgid "Choose an absolute file or folder path for saves."
-msgstr ""
+msgstr "Välj en absolut sökväg till en fil eller mapp för sparfiler."
 
 #: crates/caskade-core/src/saves/versions/blobs.rs
 #: crates/caskade-core/src/saves/versions/mod.rs
@@ -3294,72 +3294,72 @@ msgstr "Ladda ner Hasheous speldatabaser och matcha spel mot IGDB i bakgrunden, 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Let other devices stream games from this one"
-msgstr ""
+msgstr "Låt andra enheter streama spel från den här"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Other devices on the local network can play this device's games."
-msgstr ""
+msgstr "Andra enheter i det lokala nätverket kan spela den här enhetens spel."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Devices added by address"
-msgstr ""
+msgstr "Enheter tillagda via adress"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Devices to stream from that aren't found on the network by themselves."
-msgstr ""
+msgstr "Enheter att streama från som inte hittas i nätverket av sig själva."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Use the streaming already set up on this device"
-msgstr ""
+msgstr "Använd den streaming som redan är konfigurerad på den här enheten"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Host through the streaming program someone already installed here, changing only Caskade's games in it."
-msgstr ""
+msgstr "Var värd via streamingprogrammet som någon redan har installerat här, och ändra bara Caskades spel i det."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Stream quality"
-msgstr ""
+msgstr "Streamingkvalitet"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "How games streamed from other devices look; each part left empty is chosen automatically."
-msgstr ""
+msgstr "Hur spel som streamas från andra enheter ser ut; varje del som lämnas tom väljs automatiskt."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Resolution"
-msgstr ""
+msgstr "Upplösning"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Width and height in pixels, like 1920x1080."
-msgstr ""
+msgstr "Bredd och höjd i pixlar, som 1920x1080."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Frame rate"
-msgstr ""
+msgstr "Bildfrekvens"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Frames per second."
-msgstr ""
+msgstr "Bilder per sekund."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Bitrate"
-msgstr ""
+msgstr "Bithastighet"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Kilobits per second."
-msgstr ""
+msgstr "Kilobit per sekund."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
@@ -3489,7 +3489,7 @@ msgstr "Packa upp filerna"
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Running installers"
-msgstr ""
+msgstr "Körning av installationsprogram"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
@@ -3509,27 +3509,27 @@ msgstr "Tillåt"
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Let installers run, ask before each one, or only install games that need no installer program."
-msgstr ""
+msgstr "Låt installationsprogram köras, fråga före vart och ett, eller installera bara spel som inte behöver något installationsprogram."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Running installers from downloads"
-msgstr ""
+msgstr "Körning av installationsprogram från nedladdningar"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "For games downloaded from a link (deep links, pasted or dropped addresses, magnet links and torrents, updates). The stricter of this and Running installers applies."
-msgstr ""
+msgstr "För spel som laddas ner från en länk (djuplänkar, inklistrade eller släppta adresser, magnetlänkar och torrenter, uppdateringar). Den striktare av den här inställningen och Körning av installationsprogram gäller."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Ask when less sure than"
-msgstr ""
+msgstr "Fråga vid lägre säkerhet än"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Ask before installing when Caskade is less sure than this of how a game installs."
-msgstr ""
+msgstr "Fråga innan installation när Caskade är mindre säker än så här på hur ett spel installeras."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
@@ -3539,7 +3539,7 @@ msgstr "Språk för installationsprogram"
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Leave empty for the installer's default. Caskade says when an installer can't switch language."
-msgstr ""
+msgstr "Lämna tomt för installationsprogrammets standard. Caskade säger till när ett installationsprogram inte kan byta språk."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
@@ -3549,7 +3549,7 @@ msgstr "Låt installationsprogram skapa genvägar"
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Let installers add their own shortcuts, where they offer the choice."
-msgstr ""
+msgstr "Låt installationsprogram lägga till sina egna genvägar, där de erbjuder valet."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
@@ -3559,7 +3559,7 @@ msgstr "Kompatibilitetslager"
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Proton uses umu. GE-Proton and Steam Proton use detected builds; system Wine uses the detected Wine executable. Applies to installs started after a change."
-msgstr ""
+msgstr "Proton använder umu. GE-Proton och Steam Proton använder identifierade versioner; system-Wine använder den identifierade körbara Wine-filen. Gäller installationer som startas efter en ändring."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
@@ -3584,17 +3584,17 @@ msgstr "Systemets Wine"
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "After installing from a file"
-msgstr ""
+msgstr "Efter installation från en fil"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Keep the file you installed from, move it to the system trash, or delete it. Downloads have their own setting."
-msgstr ""
+msgstr "Behåll filen du installerade från, flytta den till systemets papperskorg eller radera den. Nedladdningar har en egen inställning."
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Keep the file"
-msgstr ""
+msgstr "Behåll filen"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
@@ -3604,7 +3604,7 @@ msgstr "Flytta till papperskorgen"
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
 msgid "Delete the file"
-msgstr ""
+msgstr "Radera filen"
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
@@ -3667,7 +3667,7 @@ msgstr "den här delningens beskrivning är skadad"
 #: crates/caskade-core/src/share/items.rs
 #: crates/caskade-core/src/share/mod.rs
 msgid "this share has no game"
-msgstr ""
+msgstr "den här delningen har inget spel"
 
 #: crates/caskade-core/src/share/items.rs
 msgid "a file of that save isn't on this device any more"
@@ -3696,39 +3696,39 @@ msgstr "det spelet är inte installerat på den här enheten"
 
 #: crates/caskade-core/src/share/mod.rs
 msgid "this share has stopped; share the game again for a new link"
-msgstr ""
+msgstr "den här delningen har stoppats; dela spelet igen för en ny länk"
 
 #: crates/caskade-core/src/share/mod.rs
 msgid "this share's link is damaged"
-msgstr ""
+msgstr "den här delningens länk är skadad"
 
 #: crates/caskade-core/src/share/mod.rs
 msgid "stop sharing it first"
-msgstr ""
+msgstr "sluta dela det först"
 
 #: crates/caskade-core/src/share/mod.rs
 msgid "there's no such share"
-msgstr ""
+msgstr "det finns ingen sådan delning"
 
 #: crates/caskade-core/src/share/receive.rs
 msgid "This link expired on {date}. Ask whoever shared it for a new one."
-msgstr ""
+msgstr "Den här länken gick ut {date}. Be den som delade den om en ny."
 
 #: crates/caskade-core/src/share/receive.rs
 msgid "This link doesn't work any more: the share was stopped or has expired. Ask whoever shared it for a new one."
-msgstr ""
+msgstr "Den här länken fungerar inte längre: delningen stoppades eller har gått ut. Be den som delade den om en ny."
 
 #: crates/caskade-core/src/share/receive.rs
 msgid "Can't reach whoever shared this: their Caskade may be closed or offline. Caskade keeps trying."
-msgstr ""
+msgstr "Kan inte nå den som delade det här: personens Caskade kan vara stängt eller offline. Caskade fortsätter att försöka."
 
 #: crates/caskade-core/src/share/receive.rs
 msgid "Only a relay reaches {sharer}'s computer: the game waits for a direct connection"
-msgstr ""
+msgstr "Bara ett relä når {sharer}s dator: spelet väntar på en direkt anslutning"
 
 #: crates/caskade-core/src/share/receive.rs
 msgid "that isn't a Caskade share link"
-msgstr ""
+msgstr "det där är inte en delningslänk från Caskade"
 
 #: crates/caskade-core/src/share/receive.rs
 msgid "This Caskade can't receive what that link shares. Update Caskade, then try again."
@@ -3740,15 +3740,15 @@ msgstr "Länken delar en samling: lägg till den bland dina samlingar i stället
 
 #: crates/caskade-core/src/share/receive.rs
 msgid "that share isn't here any more"
-msgstr ""
+msgstr "den delningen finns inte här längre"
 
 #: crates/caskade-core/src/share/receive.rs
 msgid "it's here already: it can help others only if that's chosen while it arrives"
-msgstr ""
+msgstr "det finns redan här: det kan bara hjälpa andra om det väljs medan det kommer fram"
 
 #: crates/caskade-core/src/share/receive.rs
 msgid "there isn't enough room for the game: {short} more bytes are needed"
-msgstr ""
+msgstr "det finns inte tillräckligt med plats för spelet: {short} byte till behövs"
 
 #: crates/caskade-core/src/storage/catalogue.rs
 msgid "storage catalogue supports at most 128 locations"
@@ -3781,11 +3781,11 @@ msgstr "okänd lagringsplats"
 
 #: crates/caskade-core/src/storage/moving.rs
 msgid "“{title}” can't move: {reason}"
-msgstr ""
+msgstr "”{title}” kan inte flyttas: {reason}"
 
 #: crates/caskade-core/src/storage/moving.rs
 msgid "“{title}” is running. Close it, then try again."
-msgstr ""
+msgstr "”{title}” körs. Stäng det och försök sedan igen."
 
 #: crates/caskade-core/src/storage/moving.rs
 msgid "not enough free space in the target location"
@@ -3901,7 +3901,7 @@ msgstr "lägg till en lagringsplats i Inställningar innan du installerar"
 
 #: crates/caskade-core/src/storage/service.rs
 msgid "it has games that aren't moved yet"
-msgstr ""
+msgstr "den har spel som inte har flyttats än"
 
 #: crates/caskade-core/src/storage/service.rs
 msgid "unknown storage root"
@@ -4096,175 +4096,175 @@ msgstr "Steam har ingen profil med det SteamID:t"
 
 #: crates/caskade-core/src/streaming/api.rs
 msgid "the streaming host's certificate is unreadable: {error}"
-msgstr ""
+msgstr "streamingvärdens certifikat går inte att läsa: {error}"
 
 #: crates/caskade-core/src/streaming/api.rs
 msgid "the streaming host refused Caskade's sign-in"
-msgstr ""
+msgstr "streamingvärden nekade Caskades inloggning"
 
 #: crates/caskade-core/src/streaming/api.rs
 msgid "the streaming host answered {status}"
-msgstr ""
+msgstr "streamingvärden svarade {status}"
 
 #: crates/caskade-core/src/streaming/api.rs
 msgid "the streaming host didn't say its version"
-msgstr ""
+msgstr "streamingvärden angav inte sin version"
 
 #: crates/caskade-core/src/streaming/client.rs
 msgid "Getting streaming ready"
-msgstr ""
+msgstr "Gör streaming redo"
 
 #: crates/caskade-core/src/streaming/client.rs
 msgid "streaming couldn't be set up"
-msgstr ""
+msgstr "streaming kunde inte konfigureras"
 
 #: crates/caskade-core/src/streaming/client.rs
 msgid "{address} isn't answering"
-msgstr ""
+msgstr "{address} svarar inte"
 
 #: crates/caskade-core/src/streaming/client.rs
 msgid "This device is streaming. Update once the game ends."
-msgstr ""
+msgstr "Den här enheten streamar. Uppdatera när spelet är slut."
 
 #: crates/caskade-core/src/streaming/client.rs
 msgid "Updating streaming to this device"
-msgstr ""
+msgstr "Uppdaterar streaming till den här enheten"
 
 #: crates/caskade-core/src/streaming/gamepads.rs
 msgid "the controller driver's download wasn't the expected file"
-msgstr ""
+msgstr "nedladdningen av handkontrollsdrivrutinen var inte den förväntade filen"
 
 #: crates/caskade-core/src/streaming/gamestream.rs
 msgid "the device didn't stop its game"
-msgstr ""
+msgstr "enheten stoppade inte sitt spel"
 
 #: crates/caskade-core/src/streaming/gamestream.rs
 msgid "the device no longer knows this one"
-msgstr ""
+msgstr "enheten känner inte längre till den här enheten"
 
 #: crates/caskade-core/src/streaming/gamestream.rs
 msgid "the wake-up message couldn't be sent"
-msgstr ""
+msgstr "väckningsmeddelandet kunde inte skickas"
 
 #: crates/caskade-core/src/streaming/host/mod.rs
 msgid "This device has no screen for other devices to see. Connect a monitor or a display dummy plug."
-msgstr ""
+msgstr "Den här enheten har ingen skärm som andra enheter kan se. Anslut en bildskärm eller en dummykontakt för skärm."
 
 #: crates/caskade-core/src/streaming/host/mod.rs
 msgid "Controllers on other devices won't work here: the controller driver isn't answering. Repair may fix it."
-msgstr ""
+msgstr "Handkontroller på andra enheter fungerar inte här: handkontrollsdrivrutinen svarar inte. Reparera kan lösa det."
 
 #: crates/caskade-core/src/streaming/host/mod.rs
 msgid "Controllers on other devices won't work here until Repair sets them up."
-msgstr ""
+msgstr "Handkontroller på andra enheter fungerar inte här förrän Reparera har konfigurerat dem."
 
 #: crates/caskade-core/src/streaming/host/mod.rs
 msgid "Streaming isn't working on this device"
-msgstr ""
+msgstr "Streaming fungerar inte på den här enheten"
 
 #: crates/caskade-core/src/streaming/host/mod.rs
 msgid "this system's streaming host can't be run by Caskade yet"
-msgstr ""
+msgstr "Caskade kan inte köra det här systemets streamingvärd än"
 
 #: crates/caskade-core/src/streaming/host/mod.rs
 msgid "the streaming host's sign-in couldn't be set"
-msgstr ""
+msgstr "streamingvärdens inloggning kunde inte ställas in"
 
 #: crates/caskade-core/src/streaming/host/mod.rs
 msgid "this device can't host game streams"
-msgstr ""
+msgstr "den här enheten kan inte vara värd för spelstreaming"
 
 #: crates/caskade-core/src/streaming/host/mod.rs
 msgid "Setting up streaming from this device"
-msgstr ""
+msgstr "Konfigurerar streaming från den här enheten"
 
 #: crates/caskade-core/src/streaming/host/mod.rs
 msgid "The streaming set up on this device before Caskade is updated the way it was installed."
-msgstr ""
+msgstr "Streamingen som konfigurerades på den här enheten före Caskade uppdateras på det sätt den installerades."
 
 #: crates/caskade-core/src/streaming/host/mod.rs
 msgid "A device is streaming from this one. Update once the game ends."
-msgstr ""
+msgstr "En enhet streamar från den här. Uppdatera när spelet är slut."
 
 #: crates/caskade-core/src/streaming/host/mod.rs
 msgid "Updating streaming from this device"
-msgstr ""
+msgstr "Uppdaterar streaming från den här enheten"
 
 #: crates/caskade-core/src/streaming/host/mod.rs
 msgid "Repairing streaming from this device"
-msgstr ""
+msgstr "Reparerar streaming från den här enheten"
 
 #: crates/caskade-core/src/streaming/host/mod.rs
 msgid "Caskade can't find the certificate of the streaming already set up here"
-msgstr ""
+msgstr "Caskade hittar inte certifikatet för den streaming som redan är konfigurerad här"
 
 #: crates/caskade-core/src/streaming/host/mod.rs
 msgid "That user name and password didn't work"
-msgstr ""
+msgstr "Användarnamnet och lösenordet fungerade inte"
 
 #: crates/caskade-core/src/streaming/host/mod.rs
 msgid "The code is four digits"
-msgstr ""
+msgstr "Koden består av fyra siffror"
 
 #: crates/caskade-core/src/streaming/host/process.rs
 msgid "the streaming host didn't start"
-msgstr ""
+msgstr "streamingvärden startade inte"
 
 #: crates/caskade-core/src/streaming/hosts.rs
 msgid "{address} isn't a device's address"
-msgstr ""
+msgstr "{address} är inte en enhets adress"
 
 #: crates/caskade-core/src/streaming/linked.rs
 msgid "the pairing request didn't arrive"
-msgstr ""
+msgstr "parkopplingsbegäran kom inte fram"
 
 #: crates/caskade-core/src/streaming/pairing.rs
 msgid "the device that answered isn't the one asked to pair"
-msgstr ""
+msgstr "enheten som svarade är inte den som ombads parkoppla"
 
 #: crates/caskade-core/src/streaming/play.rs
 msgid "{device} no longer knows this device. Pair them again in Settings → Streaming."
-msgstr ""
+msgstr "{device} känner inte längre till den här enheten. Parkoppla dem igen i Inställningar → Streaming."
 
 #: crates/caskade-core/src/streaming/play.rs
 msgid "{device} no longer offers {game}."
-msgstr ""
+msgstr "{device} erbjuder inte längre {game}."
 
 #: crates/caskade-core/src/streaming/play.rs
 msgid "{device} isn't answering. Check that it's switched on and on this network."
-msgstr ""
+msgstr "{device} svarar inte. Kontrollera att den är påslagen och i det här nätverket."
 
 #: crates/caskade-core/src/streaming/play.rs
 msgid "{device} didn't wake up. Check that it's plugged in and on this network."
-msgstr ""
+msgstr "{device} vaknade inte. Kontrollera att den är ansluten till ström och i det här nätverket."
 
 #: crates/caskade-core/src/streaming/play.rs
 msgid "The other device"
-msgstr ""
+msgstr "Den andra enheten"
 
 #: crates/caskade-core/src/streaming/play.rs
 msgid "{device} couldn't start {game}."
-msgstr ""
+msgstr "{device} kunde inte starta {game}."
 
 #: crates/caskade-core/src/streaming/play.rs
 msgid "{device} is playing a game another device started. Stop it there first."
-msgstr ""
+msgstr "{device} spelar ett spel som en annan enhet startade. Stoppa det där först."
 
 #: crates/caskade-core/src/streaming/play.rs
 msgid "Streaming from {device} failed."
-msgstr ""
+msgstr "Streaming från {device} misslyckades."
 
 #: crates/caskade-core/src/streaming/play.rs
 msgid "Streaming is busy with another device. Try again in a moment."
-msgstr ""
+msgstr "Streaming är upptagen med en annan enhet. Försök igen om en stund."
 
 #: crates/caskade-core/src/streaming/play.rs
 msgid "{device} stopped answering. Try again in a moment."
-msgstr ""
+msgstr "{device} slutade svara. Försök igen om en stund."
 
 #: crates/caskade-core/src/streaming/play.rs
 msgid "{device} didn't stop its game. Try again in a moment."
-msgstr ""
+msgstr "{device} stoppade inte sitt spel. Försök igen om en stund."
 
 #: crates/caskade-core/src/sync/blobs.rs
 #: crates/caskade-core/src/sync/exchange.rs
@@ -4278,7 +4278,7 @@ msgstr "den andra enheten skickade något i fel ordning"
 
 #: crates/caskade-core/src/sync/exchange.rs
 msgid "the other device didn't finish"
-msgstr ""
+msgstr "den andra enheten blev inte klar"
 
 #: crates/caskade-core/src/system_stats/aggregate.rs
 msgctxt "disk name"
@@ -4363,15 +4363,15 @@ msgstr "Det här provet kunde inte läsas."
 
 #: crates/caskade-core/src/themes.rs
 msgid "This theme isn't installed."
-msgstr ""
+msgstr "Det här temat är inte installerat."
 
 #: crates/caskade-core/src/themes.rs
 msgid "The theme {name} can't be applied: {problem}"
-msgstr ""
+msgstr "Temat {name} kan inte användas: {problem}"
 
 #: crates/caskade-core/src/themes.rs
 msgid "The theme {name} can't be applied: it is invalid"
-msgstr ""
+msgstr "Temat {name} kan inte användas: det är ogiltigt"
 
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "the other device didn't take the copy"
@@ -4505,7 +4505,7 @@ msgstr "tilläggskatalogen är inte tillgänglig"
 
 #: apps/desktop/src-tauri/src/commands/addon_packages.rs
 msgid "This add-on isn't in the catalogue any more."
-msgstr ""
+msgstr "Det här tillägget finns inte längre i katalogen."
 
 #: apps/desktop/src-tauri/src/commands/addon_packages.rs
 msgid "plugins are unavailable"
@@ -4541,7 +4541,7 @@ msgstr "bara teman som Caskade har installerat kan tas bort"
 
 #: apps/desktop/src-tauri/src/commands/addon_packages.rs
 msgid "This add-on isn't installed."
-msgstr ""
+msgstr "Det här tillägget är inte installerat."
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "Caskade was installed as a system package: update it with your package manager."
@@ -4601,23 +4601,23 @@ msgstr "Det gick inte att installera uppdateringen: {error}"
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "the download isn't a Debian package"
-msgstr ""
+msgstr "nedladdningen är inte ett Debian-paket"
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "pkexec isn't installed, so Caskade can't ask for permission. Install the new .deb from the release page yourself."
-msgstr ""
+msgstr "pkexec är inte installerat, så Caskade kan inte be om tillåtelse. Installera den nya .deb-filen från utgåvosidan själv."
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "the password prompt was dismissed"
-msgstr ""
+msgstr "lösenordsfrågan stängdes"
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "this account may not install packages, or no password prompt could be shown"
-msgstr ""
+msgstr "det här kontot får inte installera paket, eller så kunde ingen lösenordsfråga visas"
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "the package manager failed: {detail}"
-msgstr ""
+msgstr "pakethanteraren misslyckades: {detail}"
 
 #: apps/desktop/src-tauri/src/commands/backup.rs
 msgid "No restore is waiting for a restart."
@@ -4637,11 +4637,11 @@ msgstr "Det är ingen säkerhetskopia i mappen för säkerhetskopior."
 
 #: apps/desktop/src-tauri/src/commands/clipboard.rs
 msgid "the clipboard isn't available"
-msgstr ""
+msgstr "urklipp är inte tillgängligt"
 
 #: apps/desktop/src-tauri/src/commands/clipboard.rs
 msgid "the clipboard couldn't be written"
-msgstr ""
+msgstr "det gick inte att skriva till urklipp"
 
 #: apps/desktop/src-tauri/src/commands/console.rs
 #: apps/desktop/src-tauri/src/commands/guide.rs
@@ -4662,7 +4662,7 @@ msgstr "spelet är inte installerat på den här datorn i en mapp som kan kopier
 
 #: apps/desktop/src-tauri/src/commands/emulation.rs
 msgid "This emulator no longer exists."
-msgstr ""
+msgstr "Den här emulatorn finns inte längre."
 
 #: apps/desktop/src-tauri/src/commands/emulation.rs
 msgid "choose a folder"
@@ -4719,11 +4719,11 @@ msgstr "begäran har gått ut eller håller redan på att bekräftas"
 #: apps/desktop/src-tauri/src/commands/install_requests.rs
 #: apps/desktop/src-tauri/src/commands/shares.rs
 msgid "receiving shares isn't available"
-msgstr ""
+msgstr "mottagning av delningar är inte tillgänglig"
 
 #: apps/desktop/src-tauri/src/commands/install_requests.rs
 msgid "that request isn't a share"
-msgstr ""
+msgstr "den begäran är inte en delning"
 
 #: apps/desktop/src-tauri/src/commands/install_requests.rs
 msgid "input must be one path or HTTP(S) URL"
@@ -4763,23 +4763,23 @@ msgstr "Enheter är inte redo på den här enheten än."
 
 #: apps/desktop/src-tauri/src/commands/plugins.rs
 msgid "This plugin isn't installed any more."
-msgstr ""
+msgstr "Det här tillägget är inte längre installerat."
 
 #: apps/desktop/src-tauri/src/commands/plugins.rs
 msgid "This isn't a valid plugin. The details say what's wrong."
-msgstr ""
+msgstr "Det här är inte ett giltigt tillägg. Detaljerna visar vad som är fel."
 
 #: apps/desktop/src-tauri/src/commands/plugins.rs
 msgid "This plugin is turned off."
-msgstr ""
+msgstr "Det här tillägget är avstängt."
 
 #: apps/desktop/src-tauri/src/commands/plugins.rs
 msgid "This plugin has nothing to run."
-msgstr ""
+msgstr "Det här tillägget har inget att köra."
 
 #: apps/desktop/src-tauri/src/commands/plugins.rs
 msgid "This plugin ran into a problem. The details say what."
-msgstr ""
+msgstr "Det här tillägget stötte på ett problem. Detaljerna visar vad."
 
 #: apps/desktop/src-tauri/src/commands/remote_play.rs
 msgid "it didn't start on that device"
@@ -4799,7 +4799,7 @@ msgstr "skriptet hör till en annan omfattning"
 
 #: apps/desktop/src-tauri/src/commands/shares.rs
 msgid "the link is too long for a QR code"
-msgstr ""
+msgstr "länken är för lång för en QR-kod"
 
 #: apps/desktop/src-tauri/src/commands/storage.rs
 msgid "The storage location was added, but it disappeared from the list before it could be shown. Reload Settings → Storage."
@@ -4815,23 +4815,23 @@ msgstr "Mappväljaren stängdes utan svar."
 
 #: apps/desktop/src-tauri/src/commands/streaming.rs
 msgid "The code entered on {device} didn't match. Try again with a new code."
-msgstr ""
+msgstr "Koden som angavs på {device} stämde inte. Försök igen med en ny kod."
 
 #: apps/desktop/src-tauri/src/commands/streaming.rs
 msgid "{device} declined."
-msgstr ""
+msgstr "{device} avböjde."
 
 #: apps/desktop/src-tauri/src/commands/streaming.rs
 msgid "Nobody entered the code on {device} in time. Try again."
-msgstr ""
+msgstr "Ingen angav koden på {device} i tid. Försök igen."
 
 #: apps/desktop/src-tauri/src/commands/streaming.rs
 msgid "that device isn't on the network"
-msgstr ""
+msgstr "den enheten finns inte i nätverket"
 
 #: apps/desktop/src-tauri/src/commands/sync.rs
 msgid "no pairing link is waiting"
-msgstr ""
+msgstr "ingen parkopplingslänk väntar"
 
 #: apps/desktop/src-tauri/src/commands/themes.rs
 msgid "Safe mode: Caskade started with the default theme and without your custom CSS."
@@ -4967,43 +4967,43 @@ msgstr "Lagring {root} / {folder} kräver ett beslut"
 
 #: apps/desktop/src-tauri/src/launch_cli/mod.rs
 msgid "Caskade couldn't start: {error}"
-msgstr ""
+msgstr "Caskade kunde inte starta: {error}"
 
 #: apps/desktop/src-tauri/src/launch_cli/mod.rs
 msgid "Caskade couldn't start"
-msgstr ""
+msgstr "Caskade kunde inte starta"
 
 #: apps/desktop/src-tauri/src/launch_cli/mod.rs
 msgid "Caskade didn't start in time"
-msgstr ""
+msgstr "Caskade startade inte i tid"
 
 #: apps/desktop/src-tauri/src/launch_cli/mod.rs
 msgid "Caskade closed"
-msgstr ""
+msgstr "Caskade stängdes"
 
 #: apps/desktop/src-tauri/src/launch_cli/mod.rs
 msgid "the launch request was incomplete"
-msgstr ""
+msgstr "startbegäran var ofullständig"
 
 #: apps/desktop/src-tauri/src/launch_cli/server.rs
 msgid "the library isn't open"
-msgstr ""
+msgstr "biblioteket är inte öppet"
 
 #: apps/desktop/src-tauri/src/launch_cli/server.rs
 msgid "no game {id} in the library"
-msgstr ""
+msgstr "inget spel {id} i biblioteket"
 
 #: apps/desktop/src-tauri/src/launch_cli/server.rs
 msgid "{game} has no release {id}"
-msgstr ""
+msgstr "{game} har ingen utgåva {id}"
 
 #: apps/desktop/src-tauri/src/launch_cli/server.rs
 msgid "{game} has no release to play on this device"
-msgstr ""
+msgstr "{game} har ingen utgåva att spela på den här enheten"
 
 #: apps/desktop/src-tauri/src/launch_cli/server.rs
 msgid "{game} asks what to start; choose in Caskade, or name an action with --action"
-msgstr ""
+msgstr "{game} frågar vad som ska startas; välj i Caskade, eller ange en åtgärd med --action"
 
 #: apps/desktop/src-tauri/src/lib.rs
 msgid ""
@@ -5088,7 +5088,10 @@ msgid ""
 "\n"
 "Diagnostic logs: {logs}"
 msgstr ""
+"Caskades fönster slutade fungera och kunde inte återställas av sig självt. Starta om Caskade för att försöka igen, eller avsluta.\n"
+"\n"
+"Diagnostikloggar: {logs}"
 
 #: apps/desktop/src-tauri/src/webview_recovery.rs
 msgid "Restart Caskade"
-msgstr ""
+msgstr "Starta om Caskade"
