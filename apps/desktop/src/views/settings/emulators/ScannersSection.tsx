@@ -36,6 +36,7 @@ import type {
 } from "../../../api/emulation";
 import { formatDateTime } from "../../../api/presentation";
 import { useActionMenus } from "../../../components/ActionMenu";
+import { UnsavedHint, useUnsavedChanges } from "../unsavedChanges";
 import { PathField } from "./EmulationFields";
 import {
   emulationKey,
@@ -161,10 +162,22 @@ function ScannerEditor({
   );
   const set = <K extends keyof RomScanner>(key: K, value: RomScanner[K]) =>
     setDraft((old) => ({ ...old, [key]: value }));
+  const title = created ? t`New ROM scanner` : draft.name || t`Unnamed scanner`;
+  const dirty = JSON.stringify(draft) !== JSON.stringify(base);
+  // The scanner waits for its Save button (#43): leaving the section asks first.
+  useUnsavedChanges(dirty, {
+    label: title,
+    save: async () => {
+      if (!profile) return false;
+      await save.mutateAsync();
+      return true;
+    },
+    discard: () => setDraft(base),
+  });
   return (
     <SettingsSection
       icon={FolderSearch}
-      title={created ? t`New ROM scanner` : draft.name || t`Unnamed scanner`}
+      title={title}
       description={t`The profile decides which files match. Imported games launch with the choice below.`}
       aside={
         created ? undefined : (
@@ -309,7 +322,8 @@ function ScannerEditor({
           {(save.error ?? remove.error)?.message}
         </p>
       )}
-      <div className="mt-4 flex justify-end gap-2">
+      <div className="mt-4 flex items-center justify-end gap-2">
+        <UnsavedHint dirty={dirty} className="mr-auto" />
         <Button
           variant="primary"
           isDisabled={save.isPending || !profile}

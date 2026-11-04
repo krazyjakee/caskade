@@ -628,6 +628,7 @@
     },
     "settings-nav": {
       "parts": [
+        "group",
         "tab",
         "icon",
         "label"

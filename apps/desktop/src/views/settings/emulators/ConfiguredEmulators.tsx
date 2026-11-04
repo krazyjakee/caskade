@@ -34,6 +34,7 @@ import {
   profileEdit,
 } from "../../../api/emulation";
 import { useActionMenus } from "../../../components/ActionMenu";
+import { UnsavedHint, useUnsavedChanges } from "../unsavedChanges";
 import { BiosSummary, PathField, PreviewTokens } from "./EmulationFields";
 import { useEmulationWrite } from "./EmulationProvider";
 import { ManagedEmulatorInfo } from "./EmulatorSetup";
@@ -102,6 +103,24 @@ function EmulatorForm({
           install: emptyInstall("folder"),
         },
   );
+  const [start] = useState(() => JSON.stringify(draft));
+  const dirty = JSON.stringify(draft) !== start;
+  const submit = async () => {
+    const next = await save.mutateAsync((api) => api.saveEmulator(draft));
+    if (!emulator) {
+      const added = next.emulators.find(
+        (row) => !snapshot.emulators.some((old) => old.id === row.id) && row.name === draft.name,
+      );
+      if (added) created(added.id);
+    }
+    return true;
+  };
+  // The emulator's fields wait for Save emulator (#43): leaving the section asks first.
+  useUnsavedChanges(dirty, {
+    label: emulator ? emulator.name : t`Add emulator`,
+    save: submit,
+    discard: () => setDraft(JSON.parse(start) as EmulatorEdit),
+  });
   const setInstall = (install: EmulatorInstall) => setDraft((old) => ({ ...old, install }));
   const install = draft.install;
   return (
@@ -201,7 +220,8 @@ function EmulatorForm({
           {save.error.message}
         </p>
       )}
-      <div className="mt-4 flex justify-end gap-2">
+      <div className="mt-4 flex items-center justify-end gap-2">
+        <UnsavedHint dirty={dirty} className="mr-auto" />
         {!emulator && (
           <Button isDisabled={save.isPending} onPress={close}>
             <Trans>Cancel</Trans>
@@ -210,20 +230,8 @@ function EmulatorForm({
         <Button
           variant="primary"
           isDisabled={save.isPending}
-          onPress={() =>
-            save.mutate((api) => api.saveEmulator(draft), {
-              onSuccess: (next) => {
-                if (!emulator) {
-                  const added = next.emulators.find(
-                    (row) =>
-                      !snapshot.emulators.some((old) => old.id === row.id) &&
-                      row.name === draft.name,
-                  );
-                  if (added) created(added.id);
-                }
-              },
-            })
-          }
+          // A failure shows above the buttons.
+          onPress={() => void submit().catch(() => {})}
         >
           {save.isPending ? t`Saving…` : t`Save emulator`}
         </Button>

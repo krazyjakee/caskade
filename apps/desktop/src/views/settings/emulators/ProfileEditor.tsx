@@ -18,6 +18,7 @@ import {
   type ProfileEdit,
 } from "../../../api/emulation";
 import { ScriptsPanel } from "../../../components/scripts/ScriptsPanel";
+import { UnsavedHint, useUnsavedChanges } from "../unsavedChanges";
 import { PathField, PreviewTokens } from "./EmulationFields";
 import { useEmulationApi, useEmulationWrite } from "./EmulationProvider";
 
@@ -76,10 +77,28 @@ export function ProfileEditor({
   const save = useEmulationWrite();
   const [draft, setDraft] = useState(() => structuredClone(initial));
   const [debounced, setDebounced] = useState(draft);
+  const [start] = useState(() => JSON.stringify(initial));
+  const dirty = JSON.stringify(draft) !== start;
+  const submit = async () => {
+    await save.mutateAsync((api) => api.saveProfile(emulator.id, draft));
+    close();
+    return true;
+  };
   const profile = draft.profile;
   const [extensions, setExtensions] = useState(
     profile.type === "custom" ? profile.extensions.join(", ") : "",
   );
+  const title = profile.type === "custom" ? t`Custom profile` : profile.definitionProfile;
+  // The profile waits for Save profile (#43): leaving the section asks first.
+  useUnsavedChanges(dirty, {
+    label: `${emulator.name}: ${title}`,
+    save: submit,
+    discard: () => {
+      const reset = structuredClone(initial);
+      setDraft(reset);
+      setExtensions(reset.profile.type === "custom" ? reset.profile.extensions.join(", ") : "");
+    },
+  });
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(draft), 200);
     return () => clearTimeout(timer);
@@ -111,7 +130,7 @@ export function ProfileEditor({
   ];
   return (
     <SettingsSection
-      title={profile.type === "custom" ? t`Custom profile` : profile.definitionProfile}
+      title={title}
       description={t`Save validates the profile in the backend. Editing or previewing does not launch an emulator.`}
       aside={
         <Button
@@ -492,16 +511,16 @@ export function ProfileEditor({
             {save.error.message}
           </p>
         )}
-        <div className="flex justify-end gap-2">
+        <div className="flex items-center justify-end gap-2">
+          <UnsavedHint dirty={dirty} className="mr-auto" />
           <Button isDisabled={save.isPending} onPress={close}>
             <Trans>Cancel</Trans>
           </Button>
           <Button
             variant="primary"
             isDisabled={save.isPending}
-            onPress={() =>
-              save.mutate((api) => api.saveProfile(emulator.id, draft), { onSuccess: close })
-            }
+            // A failure shows above the buttons.
+            onPress={() => void submit().catch(() => {})}
           >
             {save.isPending ? t`Saving…` : t`Save profile`}
           </Button>

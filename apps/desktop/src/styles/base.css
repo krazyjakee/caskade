@@ -80,3 +80,10 @@ body {
   outline-offset: 4px;
   border-radius: var(--cs-radius-control);
 }
+
+/* A preference a settings search led to (views/settings/SettingsSearch.tsx). */
+[data-found] {
+  outline: 2px solid var(--cs-color-accent-strong);
+  outline-offset: 4px;
+  border-radius: var(--cs-radius-control);
+}

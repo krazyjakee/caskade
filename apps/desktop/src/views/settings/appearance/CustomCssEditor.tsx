@@ -14,6 +14,7 @@ import {
   problemText,
   USER_CSS_MAX,
 } from "../../../appearance/userCss";
+import { UnsavedHint, useUnsavedChanges } from "../unsavedChanges";
 
 /** The theming contract's documentation (`docs/theming/`). */
 const THEMING_DOCS = "https://github.com/krazyjakee/caskade/blob/master/docs/theming/";
@@ -53,11 +54,21 @@ export function CustomCssEditor({
   useEffect(() => {
     if (draft !== null && draft === css) setDraft(null);
   }, [css, draft]);
+  const dirty = draft !== null && draft !== css;
+  /** Saves the draft unless it has problems, which show under the editor. */
   const save = () => {
     const found = checkUserCss(text);
     setProblems(found);
-    if (found.length === 0 && !tooLong) onSave(text);
+    if (found.length > 0 || tooLong) return false;
+    onSave(text);
+    return true;
   };
+  const revert = () => {
+    setDraft(null);
+    setProblems([]);
+  };
+  // The CSS waits for Save CSS (#43): leaving the section asks first.
+  useUnsavedChanges(dirty, { label: t`Custom CSS`, save, discard: revert });
   return (
     <div className="flex flex-col gap-3">
       <SettingRow
@@ -106,15 +117,8 @@ export function CustomCssEditor({
         <span className={`mr-auto font-mono text-xs ${tooLong ? "text-danger" : "text-fg-subtle"}`}>
           {t`${{ length: formatNumber(text.length) }} / ${{ max: formatNumber(USER_CSS_MAX) }} characters`}
         </span>
-        <Button
-          variant="ghost"
-          size="sm"
-          isDisabled={draft === null}
-          onPress={() => {
-            setDraft(null);
-            setProblems([]);
-          }}
-        >
+        <UnsavedHint dirty={dirty} />
+        <Button variant="ghost" size="sm" isDisabled={draft === null} onPress={revert}>
           <Trans>Revert</Trans>
         </Button>
         <Button

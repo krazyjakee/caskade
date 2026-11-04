@@ -54,31 +54,34 @@ it("opens a section in place on a click, so Back leaves Settings", async () => {
   await waitFor(() => expect(app.router.state.location.pathname).toBe("/"));
 });
 
-it("moves through the list with the up and down arrow keys", async () => {
-  const app = renderApp("/settings?tab=general");
-  const general = await screen.findByRole("tab", { name: "General", selected: true });
-  act(() => general.focus());
-  fireEvent.keyDown(general, { key: "ArrowDown" });
+it("moves through the list with the up and down arrow keys, over the group headings", async () => {
+  const app = renderApp("/settings?tab=plugins");
+  const plugins = await screen.findByRole("tab", { name: "Plugins", selected: true });
+  // Plugins ends the App group; Library Discovery starts Library.
+  act(() => plugins.focus());
+  fireEvent.keyDown(plugins, { key: "ArrowDown" });
   await waitFor(() =>
     expect(app.router.state.location.search).toMatchObject({ tab: "library-discovery" }),
   );
   await waitFor(() => expect(focused()).toBe(tab("Library Discovery")));
   fireEvent.keyDown(focused() as HTMLElement, { key: "ArrowUp" });
-  await waitFor(() => expect(app.router.state.location.search).toMatchObject({ tab: "general" }));
-  await waitFor(() => expect(focused()).toBe(tab("General")));
+  await waitFor(() => expect(app.router.state.location.search).toMatchObject({ tab: "plugins" }));
+  await waitFor(() => expect(focused()).toBe(tab("Plugins")));
 });
 
-/** jsdom has no layout: the section list as a column at the left, and
- * everything else in the view as a column beside it. */
+/** jsdom has no layout: the search field over the section list as a column
+ * at the left, and everything else in the view as a column beside it. */
 function sideBySide() {
   const main = document.querySelector('[data-focus-section="main"]') as HTMLElement;
+  const nav = document.querySelector('[data-focus-section="settings-nav"]') as HTMLElement;
+  nav.querySelector("input")?.setAttribute("data-rect", "40 40 160 36");
   for (const [i, element] of within(sectionList()).getAllByRole("tab").entries())
     element.setAttribute("data-rect", `40 ${100 + i * 40} 160 36`);
   const rest = Array.from(
     main.querySelectorAll(
       'a[href], button, input, select, textarea, [tabindex], [role], [data-cs="setting-row"]',
     ),
-  ).filter((element) => !sectionList().contains(element));
+  ).filter((element) => !nav.contains(element));
   for (const [i, element] of rest.entries())
     element.setAttribute("data-rect", `300 ${100 + i * 40} 600 36`);
 }
@@ -86,15 +89,16 @@ function sideBySide() {
 it("walks the list with a pad, opens a section, and goes into the panel and back", async () => {
   undoLayout = fakeLayout();
   fakeViewport();
-  const app = renderApp("/settings?tab=general", { mode: "console" });
-  const general = await screen.findByRole("tab", { name: "General", selected: true });
+  const app = renderApp("/settings?tab=plugins", { mode: "console" });
+  const plugins = await screen.findByRole("tab", { name: "Plugins", selected: true });
   // A pad starts on the open section.
-  await waitFor(() => expect(focused()).toBe(general));
+  await waitFor(() => expect(focused()).toBe(plugins));
 
-  // Down moves focus along the list without opening anything; A opens.
+  // Down moves focus along the list, past a group's heading, without
+  // opening anything; A opens.
   app.pad.press("nav.down");
   expect(focused()).toBe(tab("Library Discovery"));
-  expect(app.router.state.location.search).toMatchObject({ tab: "general" });
+  expect(app.router.state.location.search).toMatchObject({ tab: "plugins" });
   app.pad.press("confirm");
   await waitFor(() =>
     expect(app.router.state.location.search).toMatchObject({ tab: "library-discovery" }),

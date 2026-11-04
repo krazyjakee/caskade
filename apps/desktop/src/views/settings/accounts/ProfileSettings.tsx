@@ -11,6 +11,7 @@ import {
   useSetPin,
   useUpdateAccount,
 } from "../../../api/accounts";
+import { UnsavedHint, useUnsavedChanges } from "../unsavedChanges";
 import { PinSetting, sentence } from "./PinSetting";
 
 function Profile({ account }: { account: Account }) {
@@ -26,6 +27,23 @@ function Profile({ account }: { account: Account }) {
   useEffect(() => setAvatar(account.avatar), [account.avatar]);
   const named = name.trim().length > 0;
   const changed = name.trim() !== account.name || avatar !== account.avatar;
+  const save = async () => {
+    if (!named) return false;
+    await update.mutateAsync({
+      id: account.id,
+      update: { name: name.trim(), avatar, access: null },
+    });
+    return true;
+  };
+  // Name and avatar wait for Save (#43): leaving the section asks first.
+  useUnsavedChanges(changed, {
+    label: t({ message: "My profile", context: "settings tab" }),
+    save,
+    discard: () => {
+      setName(account.name);
+      setAvatar(account.avatar);
+    },
+  });
   return (
     <SettingsSection
       icon={UserRound}
@@ -41,11 +59,8 @@ function Profile({ account }: { account: Account }) {
           className="flex flex-col gap-4"
           onSubmit={(event) => {
             event.preventDefault();
-            if (named && changed)
-              update.mutate({
-                id: account.id,
-                update: { name: name.trim(), avatar, access: null },
-              });
+            // A failure shows below the fields.
+            if (named && changed) save().catch(() => {});
           }}
         >
           <TextField
@@ -73,7 +88,8 @@ function Profile({ account }: { account: Account }) {
               {sentence(update.error)}
             </p>
           )}
-          <div className="flex justify-end">
+          <div className="flex items-center justify-end gap-3">
+            <UnsavedHint dirty={changed} />
             <Button
               type="submit"
               variant="primary"

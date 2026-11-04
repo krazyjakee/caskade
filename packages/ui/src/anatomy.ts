@@ -669,8 +669,9 @@ export const anatomy = {
     rendered: "SettingsView (app)",
     source: "app",
     description:
-      "Settings' sections: a vertical tab list beside the open section's panel, in desktop and console modes. It stays in view while the panel scrolls, and scrolls on its own when the sections don't fit.",
+      "Settings' sections: a vertical tab list beside the open section's panel, in desktop and console modes, grouped under headings, with the settings search above it. It stays in view while the panel scrolls, and scrolls on its own when the sections don't fit.",
     parts: {
+      group: "A group's heading, before its sections (App, Library, …); not a stop for focus.",
       tab: "A section; the open one carries `data-selected`, and each `data-hovered`, `data-pressed` and `data-focus-visible`.",
       icon: "A section's icon.",
       label: "A section's name; long names wrap.",

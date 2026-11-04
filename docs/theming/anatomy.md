@@ -62,7 +62,7 @@ variant of the component, such as the library's card.
 - [`search`](#search): The game search; suggestions open in a `search-popover`.
 - [`search-popover`](#search-popover): The search suggestions, rendered in a portal.
 - [`view`](#view): The scrolling area that shows the current page.
-- [`settings-nav`](#settings-nav): Settings' sections: a vertical tab list beside the open section's panel, in desktop and console modes. It stays in view while the panel scrolls, and scrolls on its own when the sections don't fit.
+- [`settings-nav`](#settings-nav): Settings' sections: a vertical tab list beside the open section's panel, in desktop and console modes, grouped under headings, with the settings search above it. It stays in view while the panel scrolls, and scrolls on its own when the sections don't fit.
 - [`about`](#about): Settings → About: the IGDB and Hasheous credits first, side by side, then the app, its version and build, project links, and the links into `legal`.
 - [`legal`](#legal): Settings → About → Legal: licences, open-source packages, terms and privacy policy, bundled for offline reading. One section shows at a time, at `/settings?tab=about&section=<id>`.
 - [`system-stats`](#system-stats): Settings → Statistics: this machine's CPU, GPUs, memory, network and storage capacity, live, as the same cards in desktop and console modes. `data-status` says whether readings are coming in.
@@ -815,12 +815,13 @@ Container: its content comes from the caller, which may add parts of its own.
 
 ## `settings-nav`
 
-Settings' sections: a vertical tab list beside the open section's panel, in desktop and console modes. It stays in view while the panel scrolls, and scrolls on its own when the sections don't fit. Rendered by SettingsView (app).
+Settings' sections: a vertical tab list beside the open section's panel, in desktop and console modes, grouped under headings, with the settings search above it. It stays in view while the panel scrolls, and scrolls on its own when the sections don't fit. Rendered by SettingsView (app).
 
 Root: `[data-cs="settings-nav"]`
 
 | Part | Selector | What it is |
 | --- | --- | --- |
+| `group` | `[data-cs="settings-nav"] [data-part="group"]` | A group's heading, before its sections (App, Library, …); not a stop for focus. |
 | `tab` | `[data-cs="settings-nav"] [data-part="tab"]` | A section; the open one carries `data-selected`, and each `data-hovered`, `data-pressed` and `data-focus-visible`. |
 | `icon` | `[data-cs="settings-nav"] [data-part="icon"]` | A section's icon. |
 | `label` | `[data-cs="settings-nav"] [data-part="label"]` | A section's name; long names wrap. |

@@ -1,5 +1,6 @@
 import { Button, SettingsSection, StatusDot, Switch } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
+import { Link, useRouter } from "@tanstack/react-router";
 import { Gamepad2, RotateCcw } from "lucide-react";
 import { launcherSources } from "../../mocks/settings";
 import { SettingsFeedback, SettingsLoading, useSettingsSection } from "./useSettings";
@@ -25,6 +26,7 @@ export function LaunchersSettings() {
         title={t`Launcher Sources`}
         description={t`Detect games from your installed launchers. Turning one off removes the games only it found at the next scan.`}
       >
+        <DiscoveryLink />
         <ul className="mt-1 flex flex-col">
           {launchers.map((launcher) => (
             <li
@@ -72,5 +74,23 @@ export function LaunchersSettings() {
         </Button>
       </SettingsSection>
     </div>
+  );
+}
+
+/** Scans, folders and the operating system's checks are Library Discovery's
+ * (#46); it links back here. Without a router (a panel on its own) there is
+ * nothing to link through. */
+function DiscoveryLink() {
+  const router = useRouter({ warn: false }) as ReturnType<typeof useRouter> | undefined;
+  if (!router) return null;
+  return (
+    <p className="mt-1 text-sm text-fg-muted">
+      <Trans>
+        How and when games are scanned:{" "}
+        <Link to="/settings" search={{ tab: "library-discovery" }} className="text-accent-alt">
+          Library Discovery
+        </Link>
+      </Trans>
+    </p>
   );
 }

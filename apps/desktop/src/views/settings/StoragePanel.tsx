@@ -12,6 +12,7 @@ import { formatBytes, type RootStatus, type RootSummary, type StorageApi } from 
 import { useActionMenus } from "../../components/ActionMenu";
 import { usePathPicker } from "../../components/pathBrowser/PathPicker";
 import { useDropZone } from "../../drop/DropProvider";
+import { UnsavedHint, useUnsavedChanges } from "./unsavedChanges";
 import { SettingsFeedback, useSettingsSection } from "./useSettings";
 
 const statuses: Record<RootStatus, MessageDescriptor> = {
@@ -297,11 +298,18 @@ export function StoragePanel({ api }: { api: StorageApi }) {
             key={active.root.id}
             root={active}
             disabled={operation.isPending}
-            onSave={(name, template) =>
-              run(async () => {
-                await api.edit(active.root.id, name, template);
-              })
-            }
+            onSave={async (name, template) => {
+              setMessage("");
+              try {
+                await operation.mutateAsync(async () => {
+                  await api.edit(active.root.id, name, template);
+                });
+                return true;
+              } catch {
+                // The failure shows with the location's other operations.
+                return false;
+              }
+            }}
           />
           <div className="my-4 flex flex-wrap gap-2">
             <Button
@@ -418,11 +426,22 @@ function RootEditor({
 }: {
   root: RootSummary;
   disabled: boolean;
-  onSave: (label: string, template: string) => void;
+  /** Resolves to whether the change was saved. */
+  onSave: (label: string, template: string) => Promise<boolean>;
 }) {
   const [label, setLabel] = useState(root.root.label ?? "");
   const [template, setTemplate] = useState(root.folderTemplate);
   const { t } = useLingui();
+  const dirty = label !== (root.root.label ?? "") || template !== root.folderTemplate;
+  // Label and template wait for Save location (#43): leaving the section asks first.
+  useUnsavedChanges(dirty, {
+    label: root.root.label ?? t`Selected location`,
+    save: () => onSave(label, template),
+    discard: () => {
+      setLabel(root.root.label ?? "");
+      setTemplate(root.folderTemplate);
+    },
+  });
   return (
     <div className="mt-3 grid items-end gap-3 md:grid-cols-3">
       <TextField label={t`Location label`} value={label} onChange={setLabel} />
@@ -435,9 +454,12 @@ function RootEditor({
         value={template}
         onChange={setTemplate}
       />
-      <Button isDisabled={disabled} onPress={() => onSave(label, template)}>
-        <Trans>Save location</Trans>
-      </Button>
+      <div className="flex flex-col items-start gap-1">
+        {dirty && <UnsavedHint dirty />}
+        <Button isDisabled={disabled} onPress={() => void onSave(label, template)}>
+          <Trans>Save location</Trans>
+        </Button>
+      </div>
     </div>
   );
 }

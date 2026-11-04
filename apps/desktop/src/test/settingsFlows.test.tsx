@@ -22,6 +22,18 @@ afterEach(() => {
 type App = ReturnType<typeof renderApp>;
 const main = () => document.querySelector<HTMLElement>('[data-focus-section="main"]');
 
+/** Focus after a press: whatever it moved to, or `from` when it stayed put
+ * for 250 ms. A loaded machine can take more than one tick to move focus,
+ * which once ended a walk early (#37). */
+async function moved(from: Element | null): Promise<Element | null> {
+  const until = Date.now() + 250;
+  do {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    if (focused() !== from) return focused();
+  } while (Date.now() < until);
+  return from;
+}
+
 /** Presses down until `found` holds for the focused element; null when
  * focus stops moving first. */
 async function walkTo(app: App, found: (element: HTMLElement) => boolean, limit = 80) {
@@ -29,8 +41,7 @@ async function walkTo(app: App, found: (element: HTMLElement) => boolean, limit 
     const at = focused();
     if (at && at !== document.body && found(at)) return at;
     app.pad.press("nav.down");
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    if (focused() === at && i > 0) return null;
+    if ((await moved(at)) === at && i > 0) return null;
   }
   return null;
 }
@@ -66,8 +77,7 @@ async function walk(app: App): Promise<Set<HTMLElement>> {
     const at = focused();
     if (at) visited.add(at);
     app.pad.press("nav.down");
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    if (focused() === at) break;
+    if ((await moved(at)) === at) break;
   }
   return visited;
 }
@@ -111,7 +121,8 @@ it("RB walks every Settings tab, and a switch in each changes a setting that per
   // RB wraps around to the first tab.
   app.pad.press("tab.next");
   await waitFor(() => expect(app.router.state.location.search).toMatchObject({ tab: "general" }));
-});
+  // Seventeen tabs: about 9 s alone, over 30 s in a loaded full run.
+}, 90_000);
 
 const views = [
   ...settingsTabs.map((tab) => `/settings?tab=${tab.id}`),

@@ -1015,6 +1015,13 @@ msgstr ""
 msgid "{title} from {sharer}"
 msgstr "Kopiera {title} från {device}?"
 
+#. A settings search result: a preference and its section
+#: apps/desktop/src/views/settings/SettingsSearch.tsx
+#, fuzzy
+#| msgid "limit {size}"
+msgid "{title} in {section}"
+msgstr "gräns {size}"
+
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
 msgid "{title} is running on {device}"
 msgstr "{title} körs på {device}"
@@ -1187,6 +1194,18 @@ msgid "# task needs attention"
 msgid_plural "# tasks need attention"
 msgstr[0] "# uppgift behöver uppmärksamhet"
 msgstr[1] "# uppgifter behöver uppmärksamhet"
+
+#. {what} names a group of settings, such as Automatic backups
+#: apps/desktop/src/views/settings/useSettings.tsx
+#, fuzzy
+#| msgid "Settings couldn't be loaded"
+msgid "{what} couldn't be loaded"
+msgstr "Inställningarna kunde inte läsas in"
+
+#. {what} names a group of settings, such as Automatic backups
+#: apps/desktop/src/views/settings/useSettings.tsx
+msgid "{what}: your change didn't save"
+msgstr ""
 
 #: apps/desktop/src/appearance/userCss.ts
 msgid "@import isn't supported in custom CSS: paste the rules in instead."
@@ -1474,10 +1493,12 @@ msgid "About store accounts"
 msgstr "Om butikskonton"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Absolute custom folder"
 msgstr "Absolut anpassad mapp"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Accent colour"
 msgstr "Accentfärg"
 
@@ -1487,6 +1508,7 @@ msgid "Accept"
 msgstr "Godkänn"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Accept copies from my devices"
 msgstr "Ta emot kopior från mina enheter"
 
@@ -1583,6 +1605,7 @@ msgstr "Aktivitet"
 msgid "Add"
 msgstr "Lägg till"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 #, fuzzy
 #| msgid "Add a game by title"
@@ -1755,6 +1778,18 @@ msgstr "Lägg till variabel"
 msgid "Add web game"
 msgstr "Lägg till webbspel"
 
+#. Search words for Settings → Plugins, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "add-ons, addons, extensions, catalogue, catalog, themes, permissions"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgctxt "table column"
+#| msgid "Extensions"
+msgid "add-ons, extensions"
+msgstr "Filändelser"
+
 #: apps/desktop/src/components/gameEditor/fields.tsx
 msgid "Add, separated by commas"
 msgstr "Lägg till, åtskilda med kommatecken"
@@ -1847,6 +1882,7 @@ msgid "After the game starts"
 msgstr "Efter att spelet startat"
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Age ratings"
 msgstr "Åldersgränser"
 
@@ -1983,6 +2019,7 @@ msgid "And {0} more."
 msgstr "Och {0} till."
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Animations"
 msgstr "Animationer"
 
@@ -2046,12 +2083,29 @@ msgstr "API-nyckel"
 msgid "API token"
 msgstr "API-token"
 
+#: apps/desktop/src/views/SettingsView.tsx
+#, fuzzy
+#| msgid "Apply"
+msgctxt "settings group"
+msgid "App"
+msgstr "Verkställ"
+
 #. A macOS app bundle's path
 #. How an emulator is installed: a macOS app
 #: apps/desktop/src/api/emulation.ts
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "App bundle"
 msgstr "Appaket"
+
+#. Search words for Caskade's own updates, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "app updates, update Caskade, new version, self-update"
+msgstr ""
+
+#. Search words for Settings → General, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "app, language, region, startup, start, close, tray, minimize, quit, time format, cache, first-run setup, console mode, desktop mode, app updates, Caskade updates, self-update, new version"
+msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #, fuzzy
@@ -2060,6 +2114,7 @@ msgstr "Appaket"
 msgid "Appearance"
 msgstr "Utseende"
 
+#: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
 msgctxt "settings tab"
 msgid "Appearance"
@@ -2215,6 +2270,7 @@ msgid "Automatic ({platform})"
 msgstr "Automatiskt ({platform})"
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Automatic backups"
 msgstr "Automatiska säkerhetskopior"
 
@@ -2227,12 +2283,17 @@ msgid "Automatic details refreshed"
 msgstr "Automatiska detaljer uppdaterade"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Automatic Library Discovery"
 msgstr "Automatisk biblioteksupptäckt"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Automatic opens console mode in Steam Deck game mode (gamescope), otherwise the mode you last used."
 msgstr "Automatiskt öppnar konsolläge i Steam Decks spelläge (gamescope), annars läget du använde senast."
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "autostart, login"
+msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "Availability, required files and command lines come from the backend for this installation."
@@ -2258,6 +2319,7 @@ msgstr "Tillgängliga definitionsprofiler"
 #: apps/desktop/src/onboarding/AccountStep.tsx
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Avatar"
 msgstr "Avatar"
 
@@ -2292,6 +2354,7 @@ msgid "Back to About"
 msgstr "Tillbaka till Om"
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Back up"
 msgstr "Säkerhetskopiera"
 
@@ -2312,6 +2375,7 @@ msgid "Background"
 msgstr "Bakgrund"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Background refresh"
 msgstr "Uppdatering i bakgrunden"
 
@@ -2325,20 +2389,44 @@ msgid "Backup"
 msgstr "Säkerhetskopiering"
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Backup folder"
 msgstr "Mapp för säkerhetskopior"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Back up now"
+msgid "backup now"
+msgstr "Säkerhetskopiera nu"
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Backup progress"
 msgstr "Säkerhetskopieringens förlopp"
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+#, fuzzy
+#| msgid "Open settings"
+msgid "Backup settings"
+msgstr "Öppna inställningar"
+
+#: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Backup to restore"
 msgstr "Säkerhetskopia att återställa"
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+#, fuzzy
+#| msgid "Settings couldn't be loaded"
+msgid "Backups couldn't be loaded"
+msgstr "Inställningarna kunde inte läsas in"
+
+#: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Backups never hold passwords or sign-ins, web games' browser data, logs, caches, or your games and their saves. Back up saves with the games or their launchers."
 msgstr "Säkerhetskopior innehåller aldrig lösenord eller inloggningar, webbspels webbläsardata, loggar, cacheminnen eller dina spel och deras sparfiler. Säkerhetskopiera sparfiler med spelen eller deras startprogram."
+
+#. Search words for Settings → Backup, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "backups, back up, restore, archive, export, snapshot, recovery"
+msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
 msgctxt "save version"
@@ -2352,6 +2440,12 @@ msgstr "Före start"
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgctxt "script phase"
 msgid "Before launch"
+msgstr "Före start"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Before launch"
+msgid "before launch, after exit"
 msgstr "Före start"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
@@ -2371,12 +2465,26 @@ msgstr "BIOS"
 msgid "BIOS folder for {platform}"
 msgstr "BIOS-mapp för {platform}"
 
+#: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
+#, fuzzy
+#| msgid "Save BIOS folder"
+msgid "BIOS folders"
+msgstr "Spara BIOS-mapp"
+
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 msgid "BIOS issues"
 msgstr "BIOS-problem"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "BIOS, firmware, default emulator, consoles"
+msgstr ""
+
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Bitrate"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "bitrate, resolution, frame rate"
 msgstr ""
 
 #. A game release's region
@@ -2414,6 +2522,7 @@ msgstr "Bläddra i biblioteket →"
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Browse…"
 msgstr "Bläddra…"
@@ -2457,6 +2566,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Cache folder"
 msgstr "Cachemapp"
 
@@ -2519,6 +2629,7 @@ msgstr "Kan inte ansluta"
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/desktop/src/views/settings/ResetDefaults.tsx
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
@@ -2607,6 +2718,7 @@ msgid "Capacity"
 msgstr "Kapacitet"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Card size"
 msgstr "Kortstorlek"
 
@@ -2744,6 +2856,7 @@ msgid "Caskade starts it where it is: nothing is copied, moved or installed. To 
 msgstr "Caskade startar det där det ligger: inget kopieras, flyttas eller installeras. Vill du installera ett spel i stället, använd Installera från fil eller släpp det på biblioteket."
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Caskade updates"
 msgstr "Caskade-uppdateringar"
 
@@ -2829,6 +2942,7 @@ msgid "Check"
 msgstr "Kontrollera"
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Check automatically"
 msgstr "Kontrollera automatiskt"
 
@@ -2839,6 +2953,13 @@ msgstr "Kontrollera varje fil mot hashen som RomM rapporterar."
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 msgid "Check for add-on updates when Settings opens"
 msgstr "Sök efter tilläggsuppdateringar när Inställningar öppnas"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Check for updates"
+msgctxt "settings"
+msgid "Check for game updates"
+msgstr "Sök efter uppdateringar"
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
@@ -2906,6 +3027,7 @@ msgstr "Kontrollerar IGDB-spelet…"
 msgid "Checking the install"
 msgstr "Kontroll av installationen"
 
+#: apps/desktop/src/views/settings/ResetDefaults.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Checking what would change…"
 msgstr "Kontrollerar vad som skulle ändras…"
@@ -2954,6 +3076,12 @@ msgstr "Välj en skiva"
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "Choose a folder for your games."
 msgstr "Välj en mapp för dina spel."
+
+#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#, fuzzy
+#| msgid "Choose folder"
+msgid "Choose a folder to scan"
+msgstr "Välj mapp"
 
 #: apps/desktop/src/views/settings/accounts/PinDialog.tsx
 msgid "Choose a new PIN for {name}"
@@ -3077,6 +3205,14 @@ msgstr "Rensa cache"
 msgid "Clear search"
 msgstr "Rensa sökning"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "client, Moonlight, pair"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "clock, 24-hour, 12-hour"
+msgstr ""
+
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
@@ -3084,6 +3220,7 @@ msgstr "Rensa sökning"
 #: apps/desktop/src/views/game/Screenshots.tsx
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
+#: apps/desktop/src/views/settings/ResetDefaults.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 msgid "Close"
 msgstr "Stäng"
@@ -3099,6 +3236,7 @@ msgid "Close"
 msgstr "Stäng"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Close button"
 msgstr "Stängknappen"
 
@@ -3143,6 +3281,12 @@ msgstr "Samlingar är inte tillgängliga här."
 msgid "Collections for {title}"
 msgstr "Samlingar för {title}"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Accent colour"
+msgid "color, colour"
+msgstr "Accentfärg"
+
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgctxt "density"
 msgid "Comfortable"
@@ -3167,8 +3311,22 @@ msgctxt "density"
 msgid "Compact"
 msgstr "Kompakt"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgctxt "density"
+#| msgid "Comfortable"
+msgid "compact, comfortable"
+msgstr "Bekväm"
+
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 msgid "Compatibility"
+msgstr "Kompatibilitet"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Compatibility"
+msgctxt "settings"
+msgid "Compatibility runner"
 msgstr "Kompatibilitet"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
@@ -3184,6 +3342,13 @@ msgstr "Slutfört"
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Completion counts, warnings and errors from the backend."
 msgstr "Antal slutförda, varningar och fel från backend."
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Cancel download"
+msgctxt "settings"
+msgid "Concurrent downloads"
+msgstr "Avbryt nedladdning"
 
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 msgid "Configure"
@@ -3203,6 +3368,7 @@ msgid "Confirm"
 msgstr "Bekräfta"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Confirm before quitting"
 msgstr "Bekräfta innan avslut"
 
@@ -3267,6 +3433,12 @@ msgstr "Anslut ett till"
 msgid "Connecting…"
 msgstr "Ansluter…"
 
+#: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#, fuzzy
+#| msgid "Collections"
+msgid "Connections"
+msgstr "Samlingar"
+
 #. The console-mode sidebar's navigation
 #: apps/desktop/src/shell/console/ConsoleSidebar.tsx
 msgid "Console"
@@ -3286,6 +3458,10 @@ msgstr "Konsolläge"
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Console mode"
 msgstr "Konsolläge"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "console mode, desktop mode, big picture"
+msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 msgid "Console mode, window and start-up choices"
@@ -3334,6 +3510,7 @@ msgid "Copied"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Copies and shares"
 msgstr ""
 
@@ -3510,6 +3687,7 @@ msgstr "Omslag, beskrivningar och genrer, hämtade online."
 msgid "CPU"
 msgstr "CPU"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgid "CPU usage"
 msgstr "CPU-användning"
@@ -3525,6 +3703,7 @@ msgid "Credentials are kept in the system keychain."
 msgstr "Inloggningsuppgifterna sparas i systemets nyckelring."
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Credits"
 msgstr "Medverkande"
 
@@ -3548,6 +3727,7 @@ msgstr "Markör höger"
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Custom CSS"
 msgstr "Anpassad CSS"
 
@@ -3568,6 +3748,10 @@ msgstr "Egen profil"
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 msgid "Daily"
 msgstr "Dagligen"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "dark, light, skin"
+msgstr ""
 
 #. A column of a store game's releases
 #: apps/desktop/src/views/store/StoreGameView.tsx
@@ -3638,6 +3822,12 @@ msgstr "Standardemulator"
 msgid "Default emulator for {platform}"
 msgstr "Standardemulator för {platform}"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Always use default location"
+msgid "default location"
+msgstr "Använd alltid standardplatsen"
+
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
 msgid "Default profile is unavailable"
 msgstr "Standardprofilen är inte tillgänglig"
@@ -3689,6 +3879,7 @@ msgid "Deleting…"
 msgstr "Raderar…"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Density"
 msgstr "Täthet"
 
@@ -3742,6 +3933,7 @@ msgid "Desktop entries"
 msgstr "Skrivbordsposter"
 
 #: apps/desktop/src/views/settings/EmulatorSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Desktop full screen"
 msgstr "Helskärm i skrivbordsläge"
 
@@ -3796,6 +3988,12 @@ msgctxt "theme source"
 msgid "Dev folder"
 msgstr "Utvecklingsmapp"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Delete {name}"
+msgid "device name"
+msgstr "Radera {name}"
+
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #, fuzzy
 #| msgid "Delete {name}"
@@ -3810,6 +4008,13 @@ msgstr ""
 msgctxt "settings tab"
 msgid "Devices"
 msgstr ""
+
+#: apps/desktop/src/views/SettingsView.tsx
+#, fuzzy
+#| msgid "Delete {name}"
+msgctxt "settings group"
+msgid "Devices & streaming"
+msgstr "Radera {name}"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Devices connect only directly: on this network, or over the internet where the routers allow it. Some devices away from home may then not connect."
@@ -3832,6 +4037,7 @@ msgid "Didn't start"
 msgstr "Startade inte"
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
+#: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgid "Disable custom CSS"
 msgstr "Stäng av egen CSS"
 
@@ -3845,8 +4051,10 @@ msgid "Disc"
 msgstr "Skiva"
 
 #. Drops a RomM server that isn't saved yet
+#. Leave a settings section without saving its changes
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/desktop/src/views/settings/unsavedChanges.tsx
 msgid "Discard"
 msgstr "Kasta"
 
@@ -3883,6 +4091,11 @@ msgstr ""
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 msgid "Discs"
 msgstr "Skivor"
+
+#. Search words for Settings → Storage, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "disk, drive, space, install location, install folder, library folders, move games, default location"
+msgstr ""
 
 #. Closes a plugin's notice
 #: apps/desktop/src/plugins/PluginViews.tsx
@@ -3957,6 +4170,7 @@ msgid "Download and install"
 msgstr "Ladda ner och installera"
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Download Cache"
 msgstr "Nedladdningscache"
 
@@ -4032,8 +4246,13 @@ msgid "Downloads"
 msgstr "Nedladdningar"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Downloads from my devices"
 msgstr "Nedladdningar från mina enheter"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "drives, disks, folders"
+msgstr ""
 
 #: apps/desktop/src/views/library/LibraryDrop.tsx
 msgid "Drop to install into your library"
@@ -4236,6 +4455,7 @@ msgstr "Emulatorer"
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgctxt "emulation section"
 msgid "Emulators"
 msgstr "Emulatorer"
@@ -4258,11 +4478,17 @@ msgstr "Emulatorerna kunde inte läsas in."
 msgid "Emulators to install"
 msgstr "Emulatorer att installera"
 
+#. Search words for Settings → Emulation, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "emulators, emulation, ROMs, retro, consoles, platforms, BIOS, firmware, RetroArch, cores, scanners, RomM, profiles"
+msgstr ""
+
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Enable {plugin}"
 msgstr "Aktivera {plugin}"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Enable library discovery"
 msgstr "Aktivera biblioteksidentifiering"
 
@@ -4391,6 +4617,10 @@ msgstr "Varje timme"
 msgid "Every session from every device, so play time adds up wherever you play."
 msgstr ""
 
+#: apps/desktop/src/views/settings/ResetDefaults.tsx
+msgid "Every setting here already uses its default."
+msgstr ""
+
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "Everything is unlocked."
 msgstr "Allt är upplåst."
@@ -4412,6 +4642,11 @@ msgstr "Undantag"
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
 msgid "Executable"
 msgstr "Programfil"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgctxt "settings"
+msgid "Execution policy"
+msgstr ""
 
 #: apps/desktop/src/components/shares/common.tsx
 #, fuzzy
@@ -4478,6 +4713,7 @@ msgid "Favorites"
 msgstr "Favoriter"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Fetch artwork and game info online"
 msgstr "Hämta bilder och spelinformation på nätet"
 
@@ -4535,7 +4771,14 @@ msgstr "Klart"
 msgid "Finishing"
 msgstr "Slutför"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "The first view you see."
+msgid "first view, home page"
+msgstr "Den första vyn du ser."
+
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "First-run setup"
 msgstr "Första konfigurationen"
 
@@ -4566,6 +4809,7 @@ msgstr "Mapp"
 msgid "Folder contents"
 msgstr "Mappens innehåll"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Folder-name template"
 msgstr "Mall för mappnamn"
@@ -4685,12 +4929,19 @@ msgid "Full disk scan"
 msgstr "Genomsök hela disken"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Full scan on startup"
 msgstr "Fullständig genomsökning vid start"
 
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "Full screen, made for a controller and a TV."
 msgstr "Helskärm, gjord för handkontroll och tv."
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Desktop full screen"
+msgid "fullscreen"
+msgstr "Helskärm i skrivbordsläge"
 
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
 msgid "Future scans skip it"
@@ -4758,6 +5009,7 @@ msgstr "Spellagring"
 msgid "Game streaming was set up on this device before. Caskade can use it, adding only its own games. Enter the user name and password it was set up with."
 msgstr ""
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/UpdateSettings.tsx
 msgid "Game updates"
 msgstr "Speluppdateringar"
@@ -4784,6 +5036,13 @@ msgstr "Spel ({count})"
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Games {games}, other files {other}, free {free}"
 msgstr "Spel {games}, andra filer {other}, ledigt {free}"
+
+#: apps/desktop/src/views/SettingsView.tsx
+#, fuzzy
+#| msgid "Games to copy"
+msgctxt "settings group"
+msgid "Games & play"
+msgstr "Spel att kopiera"
 
 #. A notification's category
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
@@ -4847,6 +5106,7 @@ msgstr "Spel med högre åldersgräns kräver en administratörs PIN."
 msgid "Games SSD"
 msgstr "Spel-SSD"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Games that leave the library"
 msgstr "Spel som lämnar biblioteket"
@@ -4875,6 +5135,7 @@ msgstr "Spel, konton, samlingar och spelhistorik kom från {name}. Ställ nu in 
 msgid "Games, play time, collections, edits, launch actions, accounts and settings. Always included."
 msgstr "Spel, speltid, samlingar, ändringar, startåtgärder, konton och inställningar. Ingår alltid."
 
+#: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
 msgctxt "settings tab"
 msgid "General"
@@ -4905,6 +5166,7 @@ msgstr "Skaffa en nyckel"
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Get emulators"
 msgstr "Skaffa emulatorer"
 
@@ -4944,10 +5206,12 @@ msgid "Global"
 msgstr "Globalt"
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Global exclusions"
 msgstr "Globala undantag"
 
 #: apps/desktop/src/views/settings/ScriptsSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Global scripts"
 msgstr "Globala skript"
 
@@ -5042,6 +5306,7 @@ msgid "Hidden from the library. Scans that find them again leave them hidden."
 msgstr "Dolda i biblioteket. Genomsökningar som hittar dem igen låter dem förbli dolda."
 
 #: apps/desktop/src/views/settings/discovery/HiddenGames.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Hidden games"
 msgstr "Dolda spel"
 
@@ -5086,6 +5351,14 @@ msgstr ""
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Hooks: {hooks}"
 msgstr "Krokar: {hooks}"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "host, hosting, Sunshine"
+msgstr ""
+
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
+msgid "How and when games are scanned: <0>Library Discovery</0>"
+msgstr ""
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgid "How Caskade looks. Themes restyle every view through design tokens."
@@ -5215,6 +5488,7 @@ msgid "Ignore selected"
 msgstr "Ignorera markerade"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Ignored results"
 msgstr "Ignorerade resultat"
 
@@ -5241,6 +5515,7 @@ msgid "Import everything, including platforms added later"
 msgstr "Importera allt, även plattformar som läggs till senare"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Import existing play history"
 msgstr "Importera befintlig spelhistorik"
 
@@ -5252,6 +5527,7 @@ msgstr "Importera bild…"
 msgid "Import new ROMs whenever the library updates, without a review."
 msgstr "Importera nya ROM-filer varje gång biblioteket uppdateras, utan granskning."
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Import play time"
 msgstr "Importera speltid"
@@ -5365,6 +5641,10 @@ msgstr "Installera {title}?"
 msgid "Install and allow"
 msgstr "Installera och tillåt"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "install emulators, download emulators, RetroArch"
+msgstr ""
+
 #: apps/desktop/src/views/activity/AddGame.tsx
 msgid "Install from file"
 msgstr "Installera från fil"
@@ -5406,6 +5686,7 @@ msgstr "Installera här"
 msgid "Install location"
 msgstr "Installationsplats"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Install location preference"
 msgstr "Önskad installationsplats"
@@ -5426,6 +5707,11 @@ msgstr "Installationstyp"
 #: apps/desktop/src/views/game/OwnedReleases.tsx
 msgid "Install with {0}"
 msgstr "Installera med {0}"
+
+#. Search words for Settings → Installer, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "install, installers, downloads, torrents, magnet links, Wine, Proton, compatibility, game updates, update games, GitHub releases"
+msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 msgid "Install, uninstall and move games. Updates run for everyone."
@@ -5497,6 +5783,7 @@ msgid "Installed by Caskade"
 msgstr "Installerad av Caskade"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Installed plugins"
 msgstr "Installerade tillägg"
 
@@ -5573,6 +5860,7 @@ msgid "installs under way"
 msgstr "pågående installationer"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Interface scale"
 msgstr "Gränssnittets skala"
 
@@ -5584,6 +5872,13 @@ msgstr ""
 msgctxt "plugin status"
 msgid "Invalid"
 msgstr "Ogiltigt"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgctxt "server"
+#| msgid "Address"
+msgid "IP address"
+msgstr "Adress"
 
 #: apps/desktop/src/components/collections/rules.ts
 msgctxt "smart collection rule"
@@ -5744,6 +6039,13 @@ msgstr "Hoppa till bokstav"
 msgid "Keep"
 msgstr "Behåll"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Verify downloads"
+msgctxt "settings"
+msgid "Keep downloads"
+msgstr "Verifiera nedladdningar"
+
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 msgid "Keep editing"
 msgstr "Fortsätt redigera"
@@ -5828,6 +6130,7 @@ msgstr "Etikett"
 
 #: apps/desktop/src/onboarding/LanguageStep.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Language"
 msgstr "Språk"
 
@@ -5889,6 +6192,7 @@ msgid "Launch actions"
 msgstr "Startåtgärder"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Launch on system startup"
 msgstr "Starta när datorn startar"
 
@@ -5899,6 +6203,7 @@ msgid "Launch with"
 msgstr "Starta med"
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Launcher Sources"
 msgstr "Startprogramkällor"
 
@@ -5908,12 +6213,28 @@ msgid "Launchers"
 msgstr "Startprogram"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Launchers and operating-system checks"
 msgstr "Startprogram och kontroller i operativsystemet"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 msgid "Launchers settings"
 msgstr "Inställningar för startprogram"
+
+#. Search words for Settings → Launchers, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "launchers, launcher discovery, Steam, GOG, Epic, Heroic, Lutris, itch, Battle.net, sources, detect games"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "launchers, Steam, GOG, Epic"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "From Steam, Epic, GOG, Heroic, Lutris and more."
+msgid "launchers, Steam, GOG, Epic, Heroic, Lutris"
+msgstr "Från Steam, Epic, GOG, Heroic, Lutris med flera."
 
 #. The command an installed game launches with
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
@@ -5946,6 +6267,7 @@ msgstr "Juridiskt"
 msgid "Legal sections"
 msgstr "Juridiska avsnitt"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 #, fuzzy
 #| msgctxt "playing on"
@@ -5967,6 +6289,13 @@ msgstr "Bokstäver"
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+msgid "Library"
+msgstr "Bibliotek"
+
+#: apps/desktop/src/views/SettingsView.tsx
+#, fuzzy
+#| msgid "Library"
+msgctxt "settings group"
 msgid "Library"
 msgstr "Bibliotek"
 
@@ -5995,6 +6324,12 @@ msgstr "Bibliotekets spel"
 msgid "Library refreshed {refreshed}."
 msgstr "Biblioteket uppdaterades {refreshed}."
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Licences"
+msgid "licences"
+msgstr "Licenser"
+
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 msgid "Licences"
 msgstr "Licenser"
@@ -6002,12 +6337,18 @@ msgstr "Licenser"
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 #: apps/desktop/src/views/settings/about/legal.ts
 #: apps/desktop/src/views/settings/about/LegalView.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Licenses"
 msgstr "Licenser"
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 msgid "Licenses, terms and privacy. They read offline."
 msgstr "Licenser, villkor och integritet. De går att läsa offline."
+
+#. Search words for Settings → Scripts, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "lifecycle scripts, before launch, after exit, hooks, commands, shell"
+msgstr ""
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 msgid "Like org.example.Game."
@@ -6287,6 +6628,11 @@ msgstr "Sök i alla mappar under genomsökningsmappen."
 msgid "Look inside archives"
 msgstr "Sök i arkiv"
 
+#. Search words for Settings → Appearance, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "look, theme, colour, color, accent, dark, light, density, card size, scale, zoom, animations, motion, effects, custom CSS, style"
+msgstr ""
+
 #: apps/desktop/src/onboarding/GamesStep.tsx
 msgid "Looking at what it has…"
 msgstr "Tittar på vad den har…"
@@ -6322,6 +6668,7 @@ msgstr "Gjord {made} av Caskade {version}, med {games} spel."
 msgid "Made in the background to the backup folder, with the same contents. If Caskade isn't running when one is due, it's made soon after the next start."
 msgstr "Görs i bakgrunden till mappen för säkerhetskopior, med samma innehåll. Om Caskade inte körs när det är dags görs den strax efter nästa start."
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
 msgid "Magnet links and torrent files"
 msgstr "Magnetlänkar och torrentfiler"
@@ -6475,6 +6822,7 @@ msgstr "Minne"
 msgid "Memory usage couldn't be read on this system."
 msgstr "Minnesanvändningen kunde inte läsas på det här systemet."
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgid "Memory used"
 msgstr "Använt minne"
@@ -6482,6 +6830,10 @@ msgstr "Använt minne"
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
 msgid "Merge into one game"
 msgstr "Slå ihop till ett spel"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "metadata, IGDB, covers, offline"
+msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
 msgctxt "byte unit"
@@ -6493,6 +6845,10 @@ msgstr "MiB"
 msgctxt "window"
 msgid "Minimize"
 msgstr "Minimera"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "minimize, hide window"
+msgstr ""
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgid "Minimum width of a game card."
@@ -6556,6 +6912,12 @@ msgstr "Flest betyg"
 #: apps/desktop/src/views/StoreView.tsx
 msgid "Most rated this past year"
 msgstr "Flest betyg det senaste året"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "optional"
+msgid "motion"
+msgstr "valfri"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgid "Motion & Effects"
@@ -6625,6 +6987,7 @@ msgstr "–"
 #: apps/desktop/src/onboarding/AccountStep.tsx
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgctxt "account"
 msgid "Name"
 msgstr "Namn"
@@ -6649,6 +7012,11 @@ msgstr "Namn"
 msgctxt "script"
 msgid "Name"
 msgstr "Namn"
+
+#. Search words for Settings → My profile, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "name, avatar, picture, PIN, me, my account"
+msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
 msgid "Nearby"
@@ -6683,9 +7051,16 @@ msgstr "Kräver din uppmärksamhet"
 msgid "Network"
 msgstr "Nätverk"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgid "Network traffic"
 msgstr "Nätverkstrafik"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "No network interfaces found."
+msgid "network, internet"
+msgstr "Inga nätverksgränssnitt hittades."
 
 #. A scanner's last scan
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
@@ -6713,6 +7088,7 @@ msgid "Never synced"
 msgstr "Aldrig spelat"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 #, fuzzy
 #| msgid "Never played"
 msgid "Never use relays"
@@ -7045,6 +7421,12 @@ msgstr "Inga valbara alternativ angavs. Låt jobbet vänta eller avbryt det i Ak
 #: apps/desktop/src/views/home/HomeView.tsx
 msgid "No sessions yet. Pick something from your library."
 msgstr "Inga sessioner än. Välj något från ditt bibliotek."
+
+#: apps/desktop/src/views/settings/SettingsSearch.tsx
+#, fuzzy
+#| msgid "No games match “{query}”."
+msgid "No settings match “{query}”."
+msgstr "Inga spel matchar ”{query}”."
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "No store can be connected in this version of Caskade yet. Games your launchers have installed are still found by Library Discovery."
@@ -7392,6 +7774,13 @@ msgstr "Erbjud den igen"
 msgid "Offer this update again"
 msgstr "Erbjud den här uppdateringen igen"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Update before playing?"
+msgctxt "settings"
+msgid "Offer updates before playing"
+msgstr "Uppdatera innan du spelar?"
+
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #, fuzzy
 #| msgid "Parts you leave unticked stay as they are now. Plugins restored without their files ask for their permissions again."
@@ -7495,11 +7884,19 @@ msgstr "På dina andra enheter"
 msgid "On-screen keyboard"
 msgstr "Skärmtangentbord"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "onboarding, welcome"
+msgstr ""
+
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgctxt "storage location status"
 msgid "online"
 msgstr "online"
+
+#: apps/desktop/src/views/settings/GeneralSettings.tsx
+msgid "Online lookups"
+msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Online lookups, and the setup Caskade starts with."
@@ -7625,12 +8022,14 @@ msgid "Open them with Caskade"
 msgstr "Öppna dem med Caskade"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Open to"
 msgstr "Öppna på"
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 #: apps/desktop/src/views/settings/about/legal.ts
 #: apps/desktop/src/views/settings/about/LegalView.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Open-source packages"
 msgstr "Paket med öppen källkod"
 
@@ -7657,6 +8056,7 @@ msgid "Optional argv command; a non-zero exit cancels launch."
 msgstr "Valfritt argv-kommando; en slutkod som inte är noll avbryter starten."
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Optional deep scans"
 msgstr "Valfria djupsökningar"
 
@@ -7741,6 +8141,7 @@ msgid "Pair"
 msgstr "Parkoppla"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Pair a device"
 msgstr ""
 
@@ -7778,6 +8179,12 @@ msgstr ""
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Pair…"
 msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Nearby devices"
+msgid "paired devices"
+msgstr "Enheter i närheten"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Paired devices keep your library, play history and collections in step. Each keeps its own games, folders and emulators."
@@ -7833,11 +8240,19 @@ msgstr "Skanningen blev inte klar."
 msgid "Pairing with {name} was cancelled"
 msgstr "Uppdateringen av speldetaljer avbröts"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "pairing, link, add device"
+msgstr ""
+
 #: apps/desktop/src/components/streaming/PairRequestForm.tsx
 #, fuzzy
 #| msgid "Waiting…"
 msgid "Pairing…"
 msgstr "Väntar…"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "parental controls, PEGI, ESRB"
+msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
 msgctxt "release state"
@@ -7852,6 +8267,12 @@ msgstr "Delar som du lämnar omarkerade förblir som de är nu. Tillägg som åt
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Password"
+msgstr "Lösenord"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Password"
+msgid "password, lock"
 msgstr "Lösenord"
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
@@ -7873,6 +8294,21 @@ msgstr "Klistra in en magnetlänk var som helst i Caskade, släpp en .torrent-fi
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "Paste a pairing link from another device"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Verify downloads"
+msgid "peer downloads"
+msgstr "Verifiera nedladdningar"
+
+#: apps/desktop/src/views/SettingsView.tsx
+msgctxt "settings group"
+msgid "People"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "performance, motion"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
@@ -7898,8 +8334,13 @@ msgstr "PiB"
 msgid "Pick up new and changed ROMs when Caskade opens."
 msgstr "Hämta nya och ändrade ROM:ar när Caskade öppnas."
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "picture"
+msgstr ""
+
 #: apps/desktop/src/onboarding/AccountStep.tsx
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "PIN"
 msgstr "PIN"
 
@@ -7977,6 +8418,7 @@ msgstr "Plattformar"
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgctxt "emulation section"
 msgid "Platforms"
 msgstr "Plattformar"
@@ -8030,6 +8472,7 @@ msgstr "Spela ändå"
 msgid "Play emulated games fullscreen in desktop mode too. Console mode always does."
 msgstr "Spela emulerade spel i helskärm även i skrivbordsläge. Konsolläget gör det alltid."
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 #, fuzzy
 #| msgid "On your other devices"
@@ -8072,6 +8515,7 @@ msgid "Play Random"
 msgstr "Spela slumpmässigt"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Play requests from my devices"
 msgstr "Spelförfrågningar från mina enheter"
 
@@ -8085,6 +8529,12 @@ msgstr "Spela startar"
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Play time a store reports is added to what Caskade tracked, counting time played through Caskade once. A store that lowers its total never lowers yours."
 msgstr "Speltid som en butik rapporterar läggs till det Caskade har mätt, och tid som spelats genom Caskade räknas en gång. En butik som sänker sin summa sänker aldrig din."
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Keep my play time"
+msgid "play time, playtime"
+msgstr "Behåll min speltid"
 
 #. Starts the game with one of its launch actions
 #. placeholder {0}: action.name
@@ -8186,6 +8636,12 @@ msgstr "Speltid räknas medan programmet eller något det startade körs."
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
 msgid "Playtime tracking"
 msgstr "Speltidsmätning"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "{played} played"
+msgid "playtime, hours played"
+msgstr "{played} spelat"
 
 #. A notification's category
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
@@ -8314,6 +8770,7 @@ msgstr "Föregående flik"
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 #: apps/desktop/src/views/settings/about/legal.ts
 #: apps/desktop/src/views/settings/about/LegalView.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Privacy policy"
 msgstr "Integritetspolicy"
 
@@ -8343,6 +8800,12 @@ msgstr "Profilskript"
 msgctxt "emulator profiles"
 msgid "Profiles"
 msgstr "Profiler"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Replacement arguments"
+msgid "profiles, arguments"
+msgstr "Ersättningsargument"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
@@ -8423,6 +8886,12 @@ msgstr "Avsluta spelet först"
 msgid "Quit this game before moving its files."
 msgstr "Avsluta spelet innan du flyttar dess filer."
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "ROM"
+msgid "RAM"
+msgstr "ROM"
+
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "Ran out of time"
 msgstr "Fick slut på tid"
@@ -8433,6 +8902,7 @@ msgid "Rated"
 msgstr "Betygsatt"
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Rating board"
 msgstr "Klassificeringsorgan"
 
@@ -8603,6 +9073,7 @@ msgid "Reconnect the drive or network share."
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Reduce effects"
 msgstr "Minska effekter"
 
@@ -8641,6 +9112,7 @@ msgid "Refresh details…"
 msgstr "Uppdatera detaljer…"
 
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Refresh in the background"
 msgstr "Uppdatera i bakgrunden"
@@ -8778,6 +9250,12 @@ msgstr "Läs in igen"
 #: apps/desktop/src/api/reply.ts
 msgid "Reload to see the current state."
 msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Not played"
+msgid "remote play"
+msgstr "Inte spelat"
 
 #. A removable drive
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
@@ -8978,14 +9456,25 @@ msgstr "Krävs"
 msgid "Requires: {path}"
 msgstr "Kräver: {path}"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "rescan"
+msgstr ""
+
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
 msgid "Rescan themes"
 msgstr "Sök efter teman igen"
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
 #: apps/desktop/src/components/gameEditor/fields.tsx
+#: apps/desktop/src/views/settings/ResetDefaults.tsx
 msgid "Reset"
 msgstr "Återställ"
+
+#: apps/desktop/src/views/settings/ResetDefaults.tsx
+#, fuzzy
+#| msgid "Reset update settings"
+msgid "Reset {group} settings?"
+msgstr "Återställ uppdateringsinställningar"
 
 #: apps/desktop/src/components/gameEditor/fields.tsx
 msgid "Reset {label} to automatic"
@@ -9024,15 +9513,21 @@ msgstr "Återställ inställningar för startprogram"
 msgid "Reset to automatic"
 msgstr "Återställ till automatiskt"
 
-#: apps/desktop/src/views/settings/AppearanceSettings.tsx
-#: apps/desktop/src/views/settings/GeneralSettings.tsx
-#: apps/desktop/src/views/settings/SchemaSettings.tsx
-msgid "Reset to defaults"
+#: apps/desktop/src/views/settings/ResetDefaults.tsx
+#, fuzzy
+#| msgid "Reset to defaults"
+msgid "Reset to defaults…"
 msgstr "Återställ till standard"
 
 #: apps/desktop/src/views/settings/UpdateSettings.tsx
 msgid "Reset update settings"
 msgstr "Återställ uppdateringsinställningar"
+
+#: apps/desktop/src/views/settings/ResetDefaults.tsx
+#, fuzzy
+#| msgid "Testing…"
+msgid "Resetting…"
+msgstr "Testar…"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Resolution"
@@ -9071,6 +9566,7 @@ msgstr "Starta om nu"
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Restore"
 msgstr "Återställ"
 
@@ -9078,6 +9574,12 @@ msgstr "Återställ"
 msgctxt "window"
 msgid "Restore"
 msgstr "Återställ"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Choose a backup folder"
+msgid "restore a backup, recover"
+msgstr "Välj en mapp för säkerhetskopior"
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Restore and restart"
@@ -9133,6 +9635,14 @@ msgstr "Retrospel"
 
 #: apps/desktop/src/views/activity/JobCard.tsx
 msgctxt "job"
+msgid "Retry"
+msgstr "Försök igen"
+
+#: apps/desktop/src/views/settings/useSettings.tsx
+#, fuzzy
+#| msgctxt "job"
+#| msgid "Retry"
+msgctxt "settings write"
 msgid "Retry"
 msgstr "Försök igen"
 
@@ -9208,14 +9718,26 @@ msgctxt "library source"
 msgid "ROM folders"
 msgstr "ROM-mappar"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgctxt "library source"
+#| msgid "ROM folders"
+msgid "ROM folders, scan ROMs"
+msgstr "ROM-mappar"
+
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "ROM Scanners"
 msgstr "ROM-skannrar"
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "ROM scanners could not be loaded."
 msgstr "ROM-skannrarna kunde inte läsas in."
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "RomM"
+msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 msgid "RomM downloads"
@@ -9241,6 +9763,7 @@ msgid "RomM servers"
 msgstr "RomM-servrar"
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "RomM Servers"
 msgstr "RomM-servrar"
 
@@ -9358,6 +9881,7 @@ msgstr "Exempel-ROM: {0}"
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
+#: apps/desktop/src/views/settings/unsavedChanges.tsx
 msgid "Save"
 msgstr "Spara"
 
@@ -9391,6 +9915,10 @@ msgstr "Spara emulator"
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 msgid "Save file and registry locations come from the Ludusavi manifest, an MIT-licensed project."
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "save games, cloud saves, save sync"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
@@ -9459,6 +9987,18 @@ msgstr "Spara server"
 msgid "Save validates the profile in the backend. Editing or previewing does not launch an emulator."
 msgstr "När du sparar validerar kärnan profilen. Redigering och förhandsvisning startar ingen emulator."
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Session history"
+msgid "save versions, save history"
+msgstr "Sessionshistorik"
+
+#: apps/desktop/src/views/settings/unsavedChanges.tsx
+#, fuzzy
+#| msgid "Discard your changes?"
+msgid "Save your changes?"
+msgstr "Vill du slänga dina ändringar?"
+
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "Saved"
 msgstr "Sparat"
@@ -9476,6 +10016,7 @@ msgstr "Sparade skanningar som gör ROM-mappar till spel. Spel med flera skivor 
 #: apps/desktop/src/views/game/SavesPanel.tsx
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Saves"
 msgstr "Sparfiler"
 
@@ -9506,6 +10047,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/desktop/src/views/settings/unsavedChanges.tsx
 #: apps/desktop/src/views/settings/useSettings.tsx
 msgid "Saving…"
 msgstr "Sparar…"
@@ -9548,6 +10090,12 @@ msgstr "Skanningen misslyckades: {error}"
 msgid "Scan failed: unknown error"
 msgstr "Skanningen misslyckades: okänt fel"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Scan subfolders"
+msgid "scan folder"
+msgstr "Skanna undermappar"
+
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Scan now"
 msgstr "Skanna nu"
@@ -9555,6 +10103,17 @@ msgstr "Skanna nu"
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "Scan subfolders"
 msgstr "Skanna undermappar"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "{scanners}: {games}"
+msgid "scan, find games"
+msgstr "{scanners}: {games}"
+
+#. Search words for Settings → Library Discovery, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "scan, scanning, discovery, find games, detect games, import, launchers, folders, watch folders, hidden games, ignored games, play history, deep scan"
+msgstr ""
 
 #. ROM scanners table column
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
@@ -9587,6 +10146,10 @@ msgstr "Skannar…"
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 msgid "Scans won't bring it back. Show it again in Settings → Library Discovery."
 msgstr "Skanningar tar inte tillbaka det. Visa det igen i Inställningar → Biblioteksupptäckt."
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "schedule, daily, weekly, backups to keep"
+msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 msgid "Screenshot"
@@ -9676,6 +10239,12 @@ msgstr "Sök plugins och teman"
 msgid "Search removable volumes reported by this device."
 msgstr "Sök på flyttbara volymer som enheten rapporterar."
 
+#: apps/desktop/src/views/settings/SettingsSearch.tsx
+#, fuzzy
+#| msgid "Show settings"
+msgid "Search settings"
+msgstr "Visa inställningar"
+
 #: apps/desktop/src/views/StoreView.tsx
 msgid "Search the catalog"
 msgstr "Sök i katalogen"
@@ -9703,6 +10272,10 @@ msgstr "Visa {name}"
 #: apps/desktop/src/shell/SearchBox.tsx
 msgid "See all results for {input}"
 msgstr "Visa alla resultat för {input}"
+
+#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+msgid "See also: <0>Launchers</0>"
+msgstr ""
 
 #: apps/desktop/src/components/addons/DeviceOffers.tsx
 msgid "See it"
@@ -9882,9 +10455,23 @@ msgstr "Inställningar"
 msgid "Settings couldn't be loaded"
 msgstr "Inställningarna kunde inte läsas in"
 
+#: apps/desktop/src/views/settings/ResetDefaults.tsx
+msgid "Settings on other pages stay as they are."
+msgstr ""
+
+#: apps/desktop/src/views/settings/GeneralSettings.tsx
+msgid "Settings on other pages, and whether first-run setup is done, stay as they are."
+msgstr ""
+
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Settings page"
 msgstr "Inställningssida"
+
+#: apps/desktop/src/views/settings/SettingsSearch.tsx
+#, fuzzy
+#| msgid "Settings sections"
+msgid "Settings search results"
+msgstr "Inställningsavsnitt"
 
 #: apps/desktop/src/views/SettingsView.tsx
 msgid "Settings sections"
@@ -9913,6 +10500,12 @@ msgstr "Fortsätter i bakgrunden"
 #| msgid "{phase}: {title}"
 msgid "Share {title}"
 msgstr "{phase}: {title}"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Change IGDB game"
+msgid "share a game"
+msgstr "Byt IGDB-spel"
 
 #: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
 #, fuzzy
@@ -9999,6 +10592,7 @@ msgid "Show settings"
 msgstr "Visa inställningar"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Show titles on artwork"
 msgstr "Visa titlar på bilder"
 
@@ -10160,6 +10754,10 @@ msgstr "Sociala medier"
 msgid "Softcore only"
 msgstr "Bara softcore"
 
+#: apps/desktop/src/views/settings/unsavedChanges.tsx
+msgid "Some changes couldn't be saved. Stay to fix them, or discard them and leave."
+msgstr ""
+
 #. An emulator's status
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "Some profiles missing"
@@ -10252,10 +10850,12 @@ msgid "Start from the new arguments"
 msgstr "Utgå från de nya argumenten"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Start in"
 msgstr "Starta i"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Start minimized"
 msgstr "Starta minimerad"
 
@@ -10330,6 +10930,11 @@ msgstr "Statistik"
 msgid "Statistics aren't available: {reason}. Trying again."
 msgstr "Statistik är inte tillgänglig: {reason}. Försöker igen."
 
+#. Search words for Settings → Statistics, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "stats, CPU, memory, RAM, network, performance, usage, system monitor"
+msgstr ""
+
 #. A column of a store game's releases
 #: apps/desktop/src/views/store/StoreGameView.tsx
 msgid "Status"
@@ -10344,6 +10949,13 @@ msgstr "Status"
 msgctxt "RomM server column"
 msgid "Status"
 msgstr "Status"
+
+#. Keep editing the unsaved settings
+#: apps/desktop/src/views/settings/unsavedChanges.tsx
+#, fuzzy
+#| msgid "Stay open"
+msgid "Stay"
+msgstr "Håll öppet"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Stay open"
@@ -10472,6 +11084,7 @@ msgid "Storage location"
 msgstr "Lagringsplats"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 msgid "Storage locations"
 msgstr "Lagringsplatser"
@@ -10521,6 +11134,11 @@ msgstr "Butikskonton"
 msgid "Store sign-ins (connect each device)"
 msgstr ""
 
+#. Search words for Settings → Store accounts, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "stores, Steam, GOG, Epic, sign in, log in, owned games, library import, play time, achievements"
+msgstr ""
+
 #. Button: streams the game from another device
 #: apps/desktop/src/views/game/GameView.tsx
 msgid "Stream"
@@ -10535,8 +11153,14 @@ msgstr ""
 msgid "Stream from another device"
 msgstr ""
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Stream quality"
+msgstr ""
+
+#. Search words for Settings → Streaming, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "stream, remote play, play on TV, Moonlight, Sunshine, host, quality, bitrate, resolution, frame rate"
 msgstr ""
 
 #. The game is streaming from another device
@@ -10558,11 +11182,16 @@ msgstr ""
 msgid "Streaming is already set up"
 msgstr ""
 
+#: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 #, fuzzy
 #| msgid "Game updates"
 msgid "Streaming updates"
 msgstr "Speluppdateringar"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "style, stylesheet"
+msgstr ""
 
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
 msgid "Submitting…"
@@ -10618,8 +11247,20 @@ msgid "Sync on startup"
 msgstr "Synka vid start"
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Sync saves"
 msgstr "Synka sparfiler"
+
+#: apps/desktop/src/views/settings/devices/SavesSection.tsx
+#, fuzzy
+#| msgid "Open settings"
+msgid "Sync settings"
+msgstr "Öppna inställningar"
+
+#. Search words for Settings → Devices, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "sync, pair, pairing, other computers, saves, save games, save sync, cloud saves, save versions, copies, shares, relays, network, downloads from devices"
+msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
 msgid "Syncing with {name}…"
@@ -10641,6 +11282,14 @@ msgstr "Syntax"
 #. Follow the operating system's reduced-motion setting
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgctxt "animations setting"
+msgid "System"
+msgstr "System"
+
+#: apps/desktop/src/views/SettingsView.tsx
+#, fuzzy
+#| msgctxt "animations setting"
+#| msgid "System"
+msgctxt "settings group"
 msgid "System"
 msgstr "System"
 
@@ -10678,6 +11327,7 @@ msgstr "Tekniska detaljer"
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 #: apps/desktop/src/views/settings/about/legal.ts
 #: apps/desktop/src/views/settings/about/LegalView.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Terms and conditions"
 msgstr "Allmänna villkor"
 
@@ -10913,6 +11563,10 @@ msgstr "Skanningen blev inte klar."
 msgid "The script reads the launch's values from CASKADE_ variables, like \"$CASKADE_INSTALL_DIR\". Nothing is pasted into its text."
 msgstr "Skriptet läser startens värden från CASKADE_-variabler, som \"$CASKADE_INSTALL_DIR\". Inget klistras in i texten."
 
+#: apps/desktop/src/views/settings/useSettings.tsx
+msgid "The settings here show what's saved. Retry sends your change again."
+msgstr ""
+
 #. placeholder {0}: formatDateTime(new Date(flow.expiresAtMs))
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "The sign-in expires {0}. Caskade keeps it in your system's keychain, never in its settings or backups."
@@ -10966,6 +11620,7 @@ msgstr "Deras butiker är inte tillgängliga i den här versionen av Caskade. De
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Theme"
 msgstr "Tema"
 
@@ -11001,6 +11656,10 @@ msgstr "Det finns inte tillräckligt med ledigt utrymme i den här mappen för e
 msgid "These belong to each device's own drives and hardware."
 msgstr ""
 
+#: apps/desktop/src/views/settings/unsavedChanges.tsx
+msgid "These changes aren't saved yet. Leaving this section without saving loses them."
+msgstr ""
+
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
 msgid "These results need your decision. Accept adds them to the library. Ignore saves a source exclusion for future scans."
 msgstr "De här resultaten behöver ditt beslut. Godkänn lägger till dem i biblioteket. Ignorera sparar ett källundantag för framtida skanningar."
@@ -11008,6 +11667,10 @@ msgstr "De här resultaten behöver ditt beslut. Godkänn lägger till dem i bib
 #: apps/desktop/src/views/settings/SchemaSettings.tsx
 msgid "These settings are unavailable."
 msgstr "De här inställningarna är inte tillgängliga."
+
+#: apps/desktop/src/views/settings/ResetDefaults.tsx
+msgid "These settings go back to their defaults:"
+msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "These source records are excluded from later discovery scans."
@@ -11040,6 +11703,7 @@ msgid "This collection is empty. Add games here, or from a game's menu."
 msgstr "Den här samlingen är tom. Lägg till spel här, eller från ett spels meny."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "This device"
 msgstr ""
 
@@ -11182,6 +11846,7 @@ msgid "Tick what to change. Everything else stays as each game has it."
 msgstr "Kryssa i det som ska ändras. Allt annat förblir som varje spel har det."
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Time format"
 msgstr "Tidsformat"
 
@@ -11243,6 +11908,10 @@ msgctxt "game menu section"
 msgid "Tools"
 msgstr "Verktyg"
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "torrents, magnet, BitTorrent"
+msgstr ""
+
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgctxt "memory"
 msgid "Total"
@@ -11261,6 +11930,14 @@ msgstr "Spårningsmapp"
 #| msgid "In progress"
 msgid "Transfer progress"
 msgstr "Pågår"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "translation, locale"
+msgstr ""
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "tray, quit, close to tray"
+msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 #: apps/desktop/src/components/addons/AddonDetails.tsx
@@ -11342,6 +12019,10 @@ msgstr "Det gick inte att bekräfta installationen."
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 msgid "Under an age limit, games without a rating need an admin's PIN too."
 msgstr "Med en åldersgräns behöver även spel utan klassificering en administratörs PIN."
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "unhide"
+msgstr ""
 
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
@@ -11459,6 +12140,12 @@ msgstr "Kan inte nås"
 msgid "Unread"
 msgstr "Olästa"
 
+#: apps/desktop/src/views/settings/unsavedChanges.tsx
+#, fuzzy
+#| msgid "Save Changes"
+msgid "Unsaved changes"
+msgstr "Spara ändringar"
+
 #: apps/desktop/src/views/settings/SchemaSettings.tsx
 msgid "Unsupported setting type."
 msgstr "Inställningstypen stöds inte."
@@ -11541,6 +12228,11 @@ msgstr "Nedladdning av uppdatering"
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 msgid "Update failed: {error}"
 msgstr "Uppdateringen misslyckades: {error}"
+
+#. Search words for updates to installed games, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "update games, game patches, GitHub releases"
+msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 msgid "Update now"
@@ -11680,6 +12372,11 @@ msgstr "Användarnamn"
 msgid "Username & password"
 msgstr "Användarnamn och lösenord"
 
+#. Search words for Settings → Accounts, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "users, people, family, kids, children, parental controls, age ratings, PIN, permissions, admin"
+msgstr ""
+
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #, fuzzy
 #| msgid "Checking storage locations…"
@@ -11755,7 +12452,13 @@ msgstr "Version {version} är tillgänglig."
 msgid "Version {version} is installed. Restart Caskade to use it."
 msgstr "Version {version} är installerad. Starta om Caskade för att använda den."
 
+#. Search words for Settings → About, separated by commas
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "version, licenses, licences, legal, credits, privacy, terms, open source, IGDB, Hasheous"
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Versions to keep"
 msgstr "Versioner att behålla"
 
@@ -11872,6 +12575,7 @@ msgid "Warnings"
 msgstr "Varningar"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Watch library folders"
 msgstr "Bevaka biblioteksmappar"
 
@@ -11992,6 +12696,7 @@ msgid "When"
 msgstr "När"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "When a game launches"
 msgstr "När ett spel startar"
 
@@ -12078,6 +12783,13 @@ msgstr "Fönstrets beteende medan du spelar."
 msgid "Windows (runs through Proton on Linux)"
 msgstr "Ett Windows-spel: det körs här via Proton."
 
+#: apps/desktop/src/views/settings/searchIndex.ts
+#, fuzzy
+#| msgid "Not installed"
+msgctxt "settings"
+msgid "Windows install method"
+msgstr "Inte installerat"
+
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
 msgid "Windows lists Caskade in Default apps, where you choose it for magnet links and .torrent files."
 msgstr "Windows visar Caskade under Standardappar, där du väljer det för magnetlänkar och .torrent-filer."
@@ -12089,6 +12801,10 @@ msgstr "Windows öppnar magnetlänkar och .torrent-filer med Caskade."
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Wine and Proton prefixes"
 msgstr "Wine- och Proton-prefix"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "Wine, Proton, umu"
+msgstr ""
 
 #. A running job with no phase
 #: apps/desktop/src/views/activity/jobLabels.ts
@@ -12202,6 +12918,7 @@ msgid "Your Collections"
 msgstr "Dina samlingar"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Your devices"
 msgstr "Dina enheter"
 
@@ -12286,6 +13003,10 @@ msgstr "ÅÅÅÅ-MM-DD"
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "YYYY-MM-DD, or empty for none"
 msgstr "ÅÅÅÅ-MM-DD, eller tomt för inget"
+
+#: apps/desktop/src/views/settings/searchIndex.ts
+msgid "zoom, text size, bigger"
+msgstr ""
 
 #, fuzzy
 #~| msgid "Remove {0}"

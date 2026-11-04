@@ -20,8 +20,8 @@ import {
   UserRound,
   Users,
 } from "lucide-react";
-import { type ReactNode, useRef } from "react";
-import { Tab, TabList, TabPanel, Tabs } from "react-aria-components";
+import { Fragment, type ReactNode, useCallback, useRef, useState } from "react";
+import { Header, Tab, TabList, TabPanel, Tabs } from "react-aria-components";
 import { useActiveAccount } from "../api/accounts";
 import { useScreenTabs } from "../input";
 import { AppearanceSettings } from "./settings/AppearanceSettings";
@@ -37,52 +37,91 @@ import { LaunchersSettings } from "./settings/LaunchersSettings";
 import { LibraryDiscoverySettings } from "./settings/LibraryDiscoverySettings";
 import { PluginsSettings } from "./settings/PluginsSettings";
 import { ScriptsSettings } from "./settings/ScriptsSettings";
+import { type SettingsFind, SettingsSearch, useFindInPanel } from "./settings/SettingsSearch";
 import { StorageSettings } from "./settings/StorageSettings";
 import { StatisticsSettings } from "./settings/statistics/StatisticsSettings";
 import { StoreAccountsSettings } from "./settings/stores/StoreAccountsSettings";
 import { StreamingSettings } from "./settings/streaming/StreamingSettings";
 import { TorrentLinksSettings } from "./settings/TorrentLinksSettings";
 import { UpdateSettings } from "./settings/UpdateSettings";
+import { UnsavedChangesGuard } from "./settings/unsavedChanges";
 import { SettingsProvider } from "./settings/useSettings";
 
-/** Labels are translated where they're shown (`t(tab.label)`). */
+/** Groups of sections under a heading in the list (#46), in order. */
+export const settingsGroups = [
+  { id: "app", label: msg({ message: "App", context: "settings group" }) },
+  { id: "library", label: msg({ message: "Library", context: "settings group" }) },
+  { id: "play", label: msg({ message: "Games & play", context: "settings group" }) },
+  { id: "devices", label: msg({ message: "Devices & streaming", context: "settings group" }) },
+  { id: "people", label: msg({ message: "People", context: "settings group" }) },
+  { id: "system", label: msg({ message: "System", context: "settings group" }) },
+] as const;
+
+/** Labels are translated where they're shown (`t(tab.label)`). Listed by
+ * group, in the order the list shows them. */
 export const settingsTabs = [
-  { id: "general", label: msg({ message: "General", context: "settings tab" }), icon: Settings2 },
+  {
+    id: "general",
+    label: msg({ message: "General", context: "settings tab" }),
+    icon: Settings2,
+    group: "app",
+  },
+  {
+    id: "appearance",
+    label: msg({ message: "Appearance", context: "settings tab" }),
+    icon: Palette,
+    group: "app",
+  },
+  {
+    id: "plugins",
+    label: msg({ message: "Plugins", context: "settings tab" }),
+    icon: Puzzle,
+    group: "app",
+  },
   {
     id: "library-discovery",
     label: msg({ message: "Library Discovery", context: "settings tab" }),
     icon: ScanSearch,
+    group: "library",
   },
-  { id: "launchers", label: msg({ message: "Launchers", context: "settings tab" }), icon: Rocket },
-  // Admins only (#180): global scripts run with every game.
   {
-    id: "scripts",
-    label: msg({ message: "Scripts", context: "settings tab" }),
-    icon: TerminalSquare,
+    id: "launchers",
+    label: msg({ message: "Launchers", context: "settings tab" }),
+    icon: Rocket,
+    group: "library",
+  },
+  // Admins only (#165): stores' sign-ins.
+  {
+    id: "stores",
+    label: msg({ message: "Store accounts", context: "settings tab" }),
+    icon: Store,
+    group: "library",
+  },
+  {
+    id: "storage",
+    label: msg({ message: "Storage", context: "settings tab" }),
+    icon: HardDrive,
+    group: "library",
+  },
+  {
+    id: "installer",
+    label: msg({ message: "Installer", context: "settings tab" }),
+    icon: PackageOpen,
+    group: "library",
   },
   // The id stays `emulators`: it is in saved selections and links.
   {
     id: "emulators",
     label: msg({ message: "Emulation", context: "settings tab" }),
     icon: Gamepad2,
+    group: "play",
   },
+  // Admins only (#180): global scripts run with every game.
   {
-    id: "appearance",
-    label: msg({ message: "Appearance", context: "settings tab" }),
-    icon: Palette,
-  },
-  { id: "storage", label: msg({ message: "Storage", context: "settings tab" }), icon: HardDrive },
-  {
-    id: "installer",
-    label: msg({ message: "Installer", context: "settings tab" }),
-    icon: PackageOpen,
-  },
-  { id: "plugins", label: msg({ message: "Plugins", context: "settings tab" }), icon: Puzzle },
-  // Admins only (#165): stores' sign-ins.
-  {
-    id: "stores",
-    label: msg({ message: "Store accounts", context: "settings tab" }),
-    icon: Store,
+    id: "scripts",
+    label: msg({ message: "Scripts", context: "settings tab" }),
+    icon: TerminalSquare,
+    group: "play",
   },
   // Paired devices and what syncs (#231): every account sees them; only an
   // admin changes them.
@@ -90,6 +129,7 @@ export const settingsTabs = [
     id: "devices",
     label: msg({ message: "Devices", context: "settings tab" }),
     icon: MonitorSmartphone,
+    group: "devices",
   },
   // Game streaming (#265): every account pairs to play from other devices;
   // only an admin lets others play from this one.
@@ -97,26 +137,40 @@ export const settingsTabs = [
     id: "streaming",
     label: msg({ message: "Streaming", context: "settings tab" }),
     icon: Cast,
+    group: "devices",
+  },
+  {
+    id: "profile",
+    label: msg({ message: "My profile", context: "settings tab" }),
+    icon: UserRound,
+    group: "people",
+  },
+  // Admins only (#208): standard accounts are never given it.
+  {
+    id: "accounts",
+    label: msg({ message: "Accounts", context: "settings tab" }),
+    icon: Users,
+    group: "people",
   },
   // Admins only (#193): a backup holds every account's data.
   {
     id: "backup",
     label: msg({ message: "Backup", context: "settings tab" }),
     icon: DatabaseBackup,
-  },
-  // Admins only (#208): standard accounts are never given it.
-  { id: "accounts", label: msg({ message: "Accounts", context: "settings tab" }), icon: Users },
-  {
-    id: "profile",
-    label: msg({ message: "My profile", context: "settings tab" }),
-    icon: UserRound,
+    group: "system",
   },
   {
     id: "statistics",
     label: msg({ message: "Statistics", context: "settings tab" }),
     icon: Activity,
+    group: "system",
   },
-  { id: "about", label: msg({ message: "About", context: "settings tab" }), icon: Info },
+  {
+    id: "about",
+    label: msg({ message: "About", context: "settings tab" }),
+    icon: Info,
+    group: "system",
+  },
 ] as const;
 export type SettingsTab = (typeof settingsTabs)[number]["id"];
 
@@ -149,7 +203,9 @@ const panels: Record<SettingsTab, () => ReactNode> = {
 export function SettingsView({ tab }: { tab: SettingsTab }) {
   return (
     <SettingsProvider>
-      <SettingsContent tab={tab} />
+      <UnsavedChangesGuard>
+        <SettingsContent tab={tab} />
+      </UnsavedChangesGuard>
     </SettingsProvider>
   );
 }
@@ -186,10 +242,24 @@ function SettingsContent({ tab }: { tab: SettingsTab }) {
   const { t } = useLingui();
   const navigate = useNavigate();
   const tablist = useRef<HTMLDivElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
   const editable = useEditable();
   const tabs = settingsTabs.filter(({ id }) => editable(id));
-  const go = (next: SettingsTab) =>
-    void navigate({ to: "/settings", search: { tab: next }, replace: true });
+  const groups = settingsGroups
+    .map((group) => ({ ...group, tabs: tabs.filter((section) => section.group === group.id) }))
+    .filter((group) => group.tabs.length > 0);
+  const [query, setQuery] = useState("");
+  const [find, setFind] = useState<SettingsFind | null>(null);
+  const found = useCallback(() => setFind(null), []);
+  useFindInPanel(panel, tab, find, found);
+  // Replaces the open panel, so a form with unsaved edits asks first
+  // (`UnsavedChangesGuard`), whichever way the section was chosen.
+  const go = (next: SettingsTab, section?: string) =>
+    void navigate({
+      to: "/settings",
+      search: { tab: next, ...(section && { section }) },
+      replace: true,
+    });
   // LB/RB move between the sections (#151), in place: Back leaves Settings.
   useScreenTabs(
     tabs.map((section) => section.id),
@@ -198,6 +268,7 @@ function SettingsContent({ tab }: { tab: SettingsTab }) {
     { tabs: tablist },
   );
   const Panel = editable(tab) ? panels[tab] : Forbidden;
+  const searching = query.trim() !== "";
   return (
     <div data-view="settings">
       <h1 className="font-display text-3xl font-semibold tracking-wide">
@@ -210,40 +281,84 @@ function SettingsContent({ tab }: { tab: SettingsTab }) {
         orientation="vertical"
         selectedKey={tab}
         onSelectionChange={(key) => go(key as SettingsTab)}
+        // The group headings sit in the list; arrow keys pass over them.
+        disabledKeys={groups.map((group) => groupKey(group.id))}
         className="mt-6 flex items-start gap-4 sm:gap-6"
       >
-        {/* Sticky beside a long panel; scrolls on its own once the sections
-            outgrow the window, and focus scrolls it along. */}
-        <TabList
-          ref={tablist}
-          aria-label={t`Settings sections`}
-          data-cs="settings-nav"
-          // Its own focus section: a pad going left out of the panel comes
-          // back to the section it left from.
+        {/* Sticky beside a long panel; the list scrolls on its own once the
+            sections outgrow the window, and focus scrolls it along. Its own
+            focus section: a pad going left out of the panel comes back to
+            the section it left from. */}
+        <div
           data-focus-section="settings-nav"
-          className="sticky top-0 flex max-h-[calc(100dvh-12rem)] w-40 shrink-0 flex-col gap-1 overflow-x-hidden overflow-y-auto overscroll-contain p-2 sm:w-48 lg:w-56"
+          className="sticky top-0 flex max-h-[calc(100dvh-12rem)] w-40 shrink-0 flex-col gap-2 sm:w-48 lg:w-56"
         >
-          {tabs.map(({ id, label, icon: Icon }) => (
-            <Tab
-              key={id}
-              id={id}
-              data-part="tab"
-              // A pad starts on the open section.
-              data-focus-default={id === tab || undefined}
-              className="flex cursor-pointer items-center gap-2 rounded-control border border-transparent px-3 py-2 text-sm text-fg-muted transition-colors duration-(--cs-motion-duration-fast) data-hovered:bg-surface-raised data-hovered:text-fg data-selected:border-accent-alt/50 data-selected:bg-accent/20 data-selected:text-fg data-selected:shadow-[0_0_16px_-6px] data-selected:shadow-accent-alt"
+          <SettingsSearch
+            query={query}
+            onQueryChange={setQuery}
+            sections={tabs}
+            onOpen={(result) => {
+              setQuery("");
+              setFind(
+                result.label
+                  ? { tab: result.tab, label: result.label, from: tab, at: Date.now() }
+                  : null,
+              );
+              go(result.tab, result.section);
+            }}
+          />
+          {/* Out of the way while search results stand in for it. */}
+          <div hidden={searching} className="flex min-h-0 flex-col">
+            <TabList
+              ref={tablist}
+              aria-label={t`Settings sections`}
+              data-cs="settings-nav"
+              className="flex min-h-0 flex-col gap-1 overflow-x-hidden overflow-y-auto overscroll-contain p-2"
             >
-              <Icon data-part="icon" aria-hidden className="size-4 shrink-0" />
-              <span data-part="label" className="min-w-0 break-words">
-                {t(label)}
-              </span>
-            </Tab>
-          ))}
-        </TabList>
+              {groups.map((group) => (
+                <Fragment key={group.id}>
+                  <Header
+                    id={groupKey(group.id)}
+                    role="presentation"
+                    data-part="group"
+                    className="px-3 pt-3 pb-1 font-mono text-xs tracking-wider text-fg-subtle uppercase first:pt-0"
+                  >
+                    {t(group.label)}
+                  </Header>
+                  {group.tabs.map(({ id, label, icon: Icon }) => (
+                    <Tab
+                      key={id}
+                      id={id}
+                      data-part="tab"
+                      // A pad starts on the open section.
+                      data-focus-default={id === tab || undefined}
+                      className="flex cursor-pointer items-center gap-2 rounded-control border border-transparent px-3 py-2 text-sm text-fg-muted transition-colors duration-(--cs-motion-duration-fast) data-hovered:bg-surface-raised data-hovered:text-fg data-selected:border-accent-alt/50 data-selected:bg-accent/20 data-selected:text-fg data-selected:shadow-[0_0_16px_-6px] data-selected:shadow-accent-alt"
+                    >
+                      <Icon data-part="icon" aria-hidden className="size-4 shrink-0" />
+                      <span data-part="label" className="min-w-0 break-words">
+                        {t(label)}
+                      </span>
+                    </Tab>
+                  ))}
+                </Fragment>
+              ))}
+            </TabList>
+          </div>
+        </div>
         {/* Not a stop of its own for a pad while a panel is loading. */}
-        <TabPanel id={tab} key={tab} data-spatial="skip" className="min-w-0 flex-1 animate-enter">
+        <TabPanel
+          id={tab}
+          key={tab}
+          ref={panel}
+          data-spatial="skip"
+          className="min-w-0 flex-1 animate-enter"
+        >
           <Panel />
         </TabPanel>
       </Tabs>
     </div>
   );
 }
+
+/** A group heading's key in the section list. */
+const groupKey = (group: string) => `group:${group}`;
