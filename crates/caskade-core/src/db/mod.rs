@@ -98,12 +98,44 @@ impl Opening {
     pub const QUICK: Self = Self {
         wait: Duration::from_secs(30),
     };
-    /// The library, at startup and after a restore: a slow disk, where one
-    /// write can stall for minutes, is waited out rather than refusing to
-    /// start (#36).
-    pub const LIBRARY: Self = Self {
+    /// Caskade's own databases: the library at startup and after a restore,
+    /// and the caches (#37). A slow disk, where one write can stall for
+    /// minutes, is waited out rather than refusing to start (#36).
+    pub const PATIENT: Self = Self {
         wait: Duration::from_secs(300),
     };
+
+    /// Opens `pool` within this bound: after `before` (a slow disk, in
+    /// tests), its first connection, then `ready` (migrations, a schema).
+    /// A pool waits the same for every connection, a query's included, so
+    /// the first, which creates or opens the file, is tried again for as
+    /// long as this allows; back in the pool, it's the one `ready`, then the
+    /// first query, take at once. The pool is closed if opening fails.
+    pub(crate) async fn open(
+        self,
+        pool: &SqlitePool,
+        before: impl std::future::Future<Output = ()>,
+        ready: impl std::future::Future<Output = Result<()>>,
+    ) -> Result<()> {
+        let opening = async {
+            before.await;
+            loop {
+                match pool.acquire().await {
+                    Err(sqlx::Error::PoolTimedOut) => continue,
+                    acquired => drop(acquired?),
+                }
+                break;
+            }
+            ready.await
+        };
+        let opened = tokio::time::timeout(self.wait, opening)
+            .await
+            .unwrap_or_else(|_| Err(sqlx::Error::PoolTimedOut.into()));
+        if opened.is_err() {
+            pool.close().await;
+        }
+        opened
+    }
 }
 
 #[cfg(test)]
@@ -146,34 +178,13 @@ impl LibraryStore {
         let pool = SqlitePoolOptions::new()
             .max_connections(4)
             .connect_lazy_with(options);
-        // A pool waits the same for every connection, a query's included. Its
-        // first, which creates the file and switches it to WAL, tries again
-        // for as long as `opening` allows; back in the pool, it's the one the
-        // migrations, then the first query, take at once.
-        let first = async {
-            before.await;
-            loop {
-                match pool.acquire().await {
-                    Err(sqlx::Error::PoolTimedOut) => continue,
-                    acquired => drop(acquired?),
-                }
-                break;
-            }
-            MIGRATOR.run(&pool).await?;
-            Ok::<(), crate::Error>(())
-        };
-        let opened = tokio::time::timeout(opening.wait, first)
-            .await
-            .unwrap_or_else(|_| Err(sqlx::Error::PoolTimedOut.into()));
-        if let Err(error) = opened {
-            pool.close().await;
-            return Err(error);
-        }
+        let migrate = async { Ok(MIGRATOR.run(&pool).await?) };
+        opening.open(&pool, before, migrate).await?;
         Ok(Self { pool, titles })
     }
-    /// The library, waited for as `Opening::LIBRARY` allows.
+    /// The library, waited for as `Opening::PATIENT` allows.
     pub async fn open_default(paths: &AppPaths) -> Result<Self> {
-        Self::open_with(&paths.database(), Opening::LIBRARY).await
+        Self::open_with(&paths.database(), Opening::PATIENT).await
     }
     pub async fn in_memory() -> Result<Self> {
         Self::in_memory_sorted(None).await

@@ -47,6 +47,6 @@ async fn an_open_slower_than_its_bound_fails() {
 
 #[test]
 fn the_library_waits_longer_than_a_query() {
-    assert!(Opening::LIBRARY.wait >= Duration::from_secs(180));
+    assert!(Opening::PATIENT.wait >= Duration::from_secs(180));
     assert_eq!(Opening::QUICK.wait, Duration::from_secs(30));
 }

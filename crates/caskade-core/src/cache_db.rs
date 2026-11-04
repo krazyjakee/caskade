@@ -6,6 +6,7 @@
 
 use crate::{
     Result,
+    db::Opening,
     error::{ErrorCode, ErrorReport},
 };
 use sqlx::{
@@ -58,9 +59,8 @@ pub(crate) async fn pool(
         .disable_statement_logging();
     let pool = SqlitePoolOptions::new()
         .max_connections(2)
-        .connect_with(options)
-        .await?;
-    let ready: Result<()> = async {
+        .connect_lazy_with(options);
+    let ready = async {
         let current: i64 = sqlx::query_scalar("PRAGMA user_version")
             .fetch_one(&pool)
             .await?;
@@ -73,12 +73,11 @@ pub(crate) async fn pool(
             .await?;
         }
         Ok(())
-    }
-    .await;
-    if let Err(error) = ready {
-        pool.close().await;
-        return Err(error);
-    }
+    };
+    // Opened as patiently as the library: a slow disk is waited out.
+    Opening::PATIENT
+        .open(&pool, std::future::ready(()), ready)
+        .await?;
     Ok(pool)
 }
 

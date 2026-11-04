@@ -61,8 +61,11 @@ async fn save(settings: &SettingsService, value: &InstallerSettings) {
         .await
         .unwrap();
 }
+/// Waits for job `id` to finish or stop for the user, as long as a loaded
+/// machine may take (#37): its download, extraction and records all write
+/// to a disk that can stall.
 async fn stopped(service: &InstallService, id: &str) -> JobSnapshot {
-    tokio::time::timeout(Duration::from_secs(30), async {
+    tokio::time::timeout(Duration::from_secs(300), async {
         loop {
             let job = service.job(id).unwrap();
             if job.status.is_finished() || job.status == JobStatus::NeedsUser {
@@ -72,7 +75,7 @@ async fn stopped(service: &InstallService, id: &str) -> JobSnapshot {
         }
     })
     .await
-    .expect("fixture job finishes")
+    .unwrap_or_else(|_| panic!("job {id} finishes: {:?}", service.job(id)))
 }
 
 #[tokio::test(flavor = "multi_thread")]

@@ -295,17 +295,22 @@ fn owned_games_import_install_through_their_launcher_and_play_with_accurate_time
     // A library scan finds what Steam and Heroic have installed here: the
     // owned games and those copies become one game each.
     runtime.block_on(controller_scan(&app));
-    wait(|| titles(&window, "installed").contains(&"Portal 2".to_owned()));
-    let installed = titles(&window, "installed");
-    assert!(
-        installed.contains(&"Unreal Tournament 2004 Editor's Choice Edition".to_owned()),
-        "{installed:?}"
-    );
-    let all = titles(&window, "all");
-    assert_eq!(
-        all.iter().filter(|t| t.as_str() == "Portal 2").count(),
-        1,
-        "{all:?}"
+    // The scan imports as it goes and the owned games reconcile after it:
+    // done when both copies are in and Portal 2 is one game.
+    let scanned = ["Portal 2", "Unreal Tournament 2004 Editor's Choice Edition"];
+    wait(
+        "both installed copies, Portal 2 joined to the owned one",
+        || {
+            let installed = titles(&window, "installed");
+            scanned
+                .iter()
+                .all(|title| installed.iter().any(|t| t == title))
+                && titles(&window, "all")
+                    .iter()
+                    .filter(|t| t.as_str() == "Portal 2")
+                    .count()
+                    == 1
+        },
     );
 
     // Install Portal, owned on Steam, through the Steam client.
@@ -363,7 +368,7 @@ fn owned_games_import_install_through_their_launcher_and_play_with_accurate_time
             &caskade_discovery::Cancel::new(),
         ))
         .unwrap();
-    wait(|| {
+    wait("Portal's owned release installed", || {
         invoke(&window, "game_owned_releases", json!({"gameId": portal})).unwrap()[0]["state"]["type"]
             == "installed"
     });
@@ -428,13 +433,12 @@ fn game_id(window: &tauri::WebviewWindow<MockRuntime>, title: &str) -> String {
         .to_owned()
 }
 
-/// Waits for the background reconcile.
-fn wait(done: impl Fn() -> bool) {
-    for _ in 0..200 {
-        if done() {
-            return;
-        }
+/// Waits for `what`, the background import and reconcile, as long as a
+/// loaded machine may take (#37).
+fn wait(what: &str, done: impl Fn() -> bool) {
+    let deadline = std::time::Instant::now() + Duration::from_secs(60);
+    while !done() {
+        assert!(std::time::Instant::now() < deadline, "{what} within 60 s");
         std::thread::sleep(Duration::from_millis(25));
     }
-    panic!("timed out");
 }

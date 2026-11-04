@@ -22,16 +22,20 @@ fn normalized(title: &str) -> String {
         .collect()
 }
 
+/// The built index, read-only, opened as patiently as the library.
 pub(super) async fn open(path: &Path) -> Result<SqlitePool> {
-    Ok(SqlitePoolOptions::new()
+    let pool = SqlitePoolOptions::new()
         .max_connections(2)
-        .connect_with(
+        .connect_lazy_with(
             SqliteConnectOptions::new()
                 .filename(path)
                 .read_only(true)
                 .disable_statement_logging(),
-        )
-        .await?)
+        );
+    crate::db::Opening::PATIENT
+        .open(&pool, std::future::ready(()), std::future::ready(Ok(())))
+        .await?;
+    Ok(pool)
 }
 
 pub(super) async fn build(dir: &Path, bytes: Vec<u8>) -> Result<u32> {

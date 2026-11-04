@@ -506,7 +506,7 @@ fn extract_one(
 /// grants dropped unless their files come back too, out of WAL and checked.
 async fn prepare(file: &Path, components: &BTreeSet<Component>) -> Result<(), BackupError> {
     // The library it will be: opened as patiently as the library is.
-    let store = LibraryStore::open_with(file, crate::db::Opening::LIBRARY).await?;
+    let store = LibraryStore::open_with(file, crate::db::Opening::PATIENT).await?;
     store.close().await;
     let mut connection = snapshot::open(file).await?;
     let result = async {

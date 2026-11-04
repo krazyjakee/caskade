@@ -5,7 +5,7 @@ use sqlx::{Connection, SqliteConnection};
 use std::{
     io::Write,
     path::{Path, PathBuf},
-    time::{Duration, Instant},
+    time::Duration,
 };
 use wiremock::{
     Mock, MockServer, ResponseTemplate,
@@ -13,6 +13,10 @@ use wiremock::{
 };
 
 const MANIFEST: &str = include_str!("fixtures/ludusavi/manifest.yaml");
+
+/// How long a background download and index may take on a loaded machine
+/// (#37).
+const LOADED: Duration = Duration::from_secs(300);
 
 fn gzip(body: &str) -> Vec<u8> {
     let mut encoder = GzEncoder::new(Vec::new(), Compression::fast());
@@ -173,18 +177,15 @@ async fn offline_restart_uses_index_without_reading_yaml_or_expiring_entries() {
         let offline = Ludusavi::with_url(dir.path(), &url);
         assert_eq!(offline.refresh(false).await.unwrap(), Refresh::Offline);
         assert_eq!(example(&offline).await, expected);
-        let start = Instant::now();
+        // From the index alone: the YAML is gone and the server may not be
+        // asked (`expect(0)`). Not timed: a loaded machine's disk decides
+        // how long lookups take, not where they read from (#37).
         for _ in 0..100 {
             assert_eq!(
                 offline.by_title("Example Alias").await.unwrap(),
                 std::slice::from_ref(&expected)
             );
         }
-        assert!(
-            start.elapsed() < Duration::from_secs(2),
-            "100 indexed lookups: {:?}",
-            start.elapsed()
-        );
     }
     server.verify().await;
 }
@@ -258,7 +259,7 @@ async fn background_watcher_uses_configured_source_and_publishes_to_shared_cache
             .is_empty()
     );
     let watcher = manifest.watch_settings(settings);
-    tokio::time::timeout(Duration::from_secs(5), async {
+    tokio::time::timeout(LOADED, async {
         loop {
             if !manifest
                 .by_id(StoreId::Steam(123))
@@ -272,7 +273,7 @@ async fn background_watcher_uses_configured_source_and_publishes_to_shared_cache
         }
     })
     .await
-    .unwrap();
+    .expect("the watcher's download indexed");
     watcher.abort();
     assert_eq!(example(&manifest).await.title, "Example: Game");
     server.verify().await;

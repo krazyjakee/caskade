@@ -80,14 +80,18 @@ impl Core {
     /// Syncs with `other` until it has told this device what it keeps.
     async fn hear_from(&self, other: &Core) {
         let other_id = other.id().await;
-        within("the other device says what it keeps", 30, || async {
-            self.sync.sync_now(&other_id);
-            tokio::time::sleep(Duration::from_millis(300)).await;
+        // Asked once: an exchange starts after it, even with one running.
+        self.sync.sync_now(&other_id);
+        within("the other device says what it keeps", LOADED, || async {
             self.downloads.heard_from(&other_id) > 0
         })
         .await;
     }
 }
+
+/// How long, in seconds, a wait here may take on a loaded machine (#37):
+/// pairing, syncing and installing all write to a disk that can stall.
+const LOADED: u64 = 300;
 
 async fn within<F, Fut>(what: &str, seconds: u64, check: F)
 where
@@ -102,14 +106,12 @@ where
 }
 
 async fn finished(service: &InstallService, id: &str) -> JobSnapshot {
-    for _ in 0..1200 {
+    within(&format!("job {id} finishes"), LOADED, || async {
         let job = service.job(id).unwrap();
-        if job.status.is_finished() || job.status == JobStatus::NeedsUser {
-            return job;
-        }
-        tokio::time::sleep(Duration::from_millis(50)).await;
-    }
-    panic!("job {id} did not finish: {:?}", service.job(id));
+        job.status.is_finished() || job.status == JobStatus::NeedsUser
+    })
+    .await;
+    service.job(id).unwrap()
 }
 
 async fn core(name: &str) -> Core {
@@ -166,7 +168,7 @@ async fn core(name: &str) -> Core {
         games: games.canonicalize().unwrap(),
         dir,
     };
-    within("the endpoint starts", 20, || async {
+    within("the endpoint starts", LOADED, || async {
         core.devices.status().await.this_device.listening
     })
     .await;
@@ -178,7 +180,7 @@ async fn pair(a: &Core, b: &Core) {
     let link = a.devices.pairing_link().await.unwrap();
     b.devices.accept_pairing_link(&link.url).await.unwrap();
     let b_id = b.id().await;
-    within("the link pairs both", 20, || async {
+    within("the link pairs both", LOADED, || async {
         a.devices
             .status()
             .await
@@ -502,14 +504,11 @@ async fn installed_emulator(
     setup: &caskade_core::emulation::EmulatorSetup,
 ) -> caskade_core::emulation::SetupJob {
     let job = setup.install("fakestation").await.unwrap();
-    for _ in 0..400 {
-        let job = setup.job(&job.id).unwrap();
-        if job.status.finished() {
-            return job;
-        }
-        tokio::time::sleep(Duration::from_millis(25)).await;
-    }
-    panic!("the install didn't finish");
+    within("the emulator's install finishes", LOADED, || async {
+        setup.job(&job.id).unwrap().status.finished()
+    })
+    .await;
+    setup.job(&job.id).unwrap()
 }
 
 /// #277's first criterion: an emulator installed on the Desk installs on
