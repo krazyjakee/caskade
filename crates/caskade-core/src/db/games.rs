@@ -151,34 +151,38 @@ impl LibraryStore {
             .map(decode)
             .transpose()
     }
-    /// The folder an entry's files are in, to show in the file manager:
-    /// its managed folder under its storage root, its external folder, or
-    /// the folder holding its external file.
-    pub async fn entry_folder(&self, id: &str) -> Result<PathBuf> {
+    /// Where an entry's files are on this device: its managed folder under
+    /// its storage root, or its external folder or file.
+    pub async fn entry_path(&self, id: &str) -> Result<PathBuf> {
         let entry = self
             .get_entry(id)
             .await?
             .ok_or_else(|| missing("entry", id))?;
-        let folder = match entry.location {
+        match entry.location {
             Some(InstallLocation::Managed { root_id, rel_dir }) => {
                 let root = self
                     .get_root(&root_id)
                     .await?
                     .ok_or_else(|| missing("storage root", &root_id))?;
-                root.path.join(rel_dir)
+                Ok(root.path.join(rel_dir))
             }
-            Some(InstallLocation::External { path }) if path.is_file() => {
-                path.parent().map(Path::to_path_buf).ok_or_else(|| {
-                    Error::Invalid(crate::tr!("{path} has no folder", path = path.display()))
-                })?
-            }
-            Some(InstallLocation::External { path }) => path,
-            None => {
-                return Err(Error::Invalid(crate::tr!(
-                    "entry {id} has no install location",
-                    id = id
-                )));
-            }
+            Some(InstallLocation::External { path }) => Ok(path),
+            None => Err(Error::Invalid(crate::tr!(
+                "entry {id} has no install location",
+                id = id
+            ))),
+        }
+    }
+    /// The folder an entry's files are in, to show in the file manager:
+    /// [`Self::entry_path`], or the folder holding it when that's a file.
+    pub async fn entry_folder(&self, id: &str) -> Result<PathBuf> {
+        let path = self.entry_path(id).await?;
+        let folder = if path.is_file() {
+            path.parent().map(Path::to_path_buf).ok_or_else(|| {
+                Error::Invalid(crate::tr!("{path} has no folder", path = path.display()))
+            })?
+        } else {
+            path
         };
         if !folder.is_dir() {
             return Err(Error::Invalid(crate::tr!(

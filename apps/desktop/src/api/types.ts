@@ -250,6 +250,8 @@ export interface LibraryApi {
   setDefaultEntry?(gameId: string, entryId: string | null): Promise<void>;
   /** Opens the folder an entry's files are in, in the file manager. */
   revealEntry?(entryId: string): Promise<void>;
+  /** Where an entry's files are on this device. */
+  entryPath?(entryId: string): Promise<string>;
   /** How many games are running now, without loading the session history. */
   runningCount?(): Promise<number>;
   /** Ends a running game; its session keeps the playtime so far. */

@@ -65,6 +65,7 @@ pub fn builder() -> Builder<tauri::Wry> {
             crate::commands::game_edit::games_refresh_cancel,
             crate::commands::game_edit::games_refresh_status,
             crate::commands::library::reveal_game_entry,
+            crate::commands::library::game_entry_path,
             crate::commands::web::add_web_game,
             crate::commands::web::save_web_game_offline,
             crate::commands::web::remove_web_game,

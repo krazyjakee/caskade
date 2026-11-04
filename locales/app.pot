@@ -3595,6 +3595,11 @@ msgstr ""
 msgid "Copy link"
 msgstr ""
 
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+msgctxt "game action"
+msgid "Copy path"
+msgstr ""
+
 #. Sends the game to another of the user's devices
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 msgid "Copy to {name}"
@@ -3686,6 +3691,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 msgid "Couldn't check which platforms need an emulator: {error}"
+msgstr ""
+
+#: apps/desktop/src/api/hooks.ts
+msgid "Couldn't copy to the clipboard"
 msgstr ""
 
 #. placeholder {0}: games.error.message
@@ -8099,6 +8108,10 @@ msgstr ""
 msgid "Open in the system tray instead of a window. Needs Launch on system startup."
 msgstr ""
 
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+msgid "Open installation folder"
+msgstr ""
+
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
 msgid "Open jobs"
 msgstr ""
@@ -10598,7 +10611,6 @@ msgstr ""
 msgid "Show games"
 msgstr ""
 
-#: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/views/game/SavesPanel.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Show in folder"

@@ -77,6 +77,15 @@ async fn an_entrys_folder_is_its_managed_folder_its_external_folder_or_its_files
     };
     let file = entry_at(&store, file).await;
     assert_eq!(store.entry_folder(&file).await.unwrap(), dir.path());
+    // Its path stays the file; a managed install's is its real folder.
+    assert_eq!(
+        store.entry_path(&file).await.unwrap(),
+        dir.path().join("quake.exe")
+    );
+    assert_eq!(
+        store.entry_path(&managed).await.unwrap(),
+        store.entry_folder(&managed).await.unwrap()
+    );
 
     let gone = InstallLocation::External {
         path: dir.path().join("gone"),

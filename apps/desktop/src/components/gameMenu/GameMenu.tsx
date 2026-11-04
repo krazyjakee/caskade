@@ -2,6 +2,7 @@ import { ContextMenu, type MenuAnchor, MenuItem, MenuSection, MenuSeparator } fr
 import { useLingui } from "@lingui/react/macro";
 import {
   CloudOff,
+  Copy,
   Download,
   EyeOff,
   FolderInput,
@@ -23,6 +24,7 @@ import {
 import { useGameActions } from "../../api/actions";
 import { useCollectionsApi } from "../../api/collections";
 import {
+  useCopyEntryPath,
   useGame,
   useRevealEntry,
   useSessions,
@@ -94,6 +96,7 @@ export function GameMenu({
   // pad can't reach it.
   const consoleMode = useMode().mode === "console";
   const reveal = useRevealEntry();
+  const copyPath = useCopyEntryPath();
   const api = useLibraryApi();
   const removeOffline = useRemoveOffline();
   const plugins = useGameActionContributions();
@@ -166,6 +169,7 @@ export function GameMenu({
     of.length > 1 ? (entry.location ?? entry.source) : undefined;
   const failure =
     reveal?.error?.message ??
+    copyPath?.error?.message ??
     setFavorite?.error?.message ??
     removeOffline?.error?.message ??
     send.error?.message ??
@@ -290,7 +294,22 @@ export function GameMenu({
               shouldCloseOnSelect={false}
               onAction={() => reveal.mutate(entry.id, { onSuccess: onClose })}
             >
-              {t`Show in folder`}
+              {t`Open installation folder`}
+            </MenuItem>
+          ))}
+        {copyPath &&
+          located.map((entry) => (
+            <MenuItem
+              key={`copy-path:${entry.id}`}
+              id={`copy-path:${entry.id}`}
+              icon={Copy}
+              description={which(entry, located)}
+              isDisabled={copyPath.isPending}
+              // A failure shows in the menu.
+              shouldCloseOnSelect={false}
+              onAction={() => copyPath.mutate(entry.id, { onSuccess: onClose })}
+            >
+              {t({ message: "Copy path", context: "game action" })}
             </MenuItem>
           ))}
         {managed.length > 0 && (

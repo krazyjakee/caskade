@@ -3761,6 +3761,13 @@ msgstr "Kopiera hit"
 msgid "Copy link"
 msgstr ""
 
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#, fuzzy
+#| msgid "Copy here"
+msgctxt "game action"
+msgid "Copy path"
+msgstr "Kopiera hit"
+
 #. Sends the game to another of the user's devices
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 msgid "Copy to {name}"
@@ -3853,6 +3860,12 @@ msgstr "Kunde inte granska den släppta filen."
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 msgid "Couldn't check which platforms need an emulator: {error}"
 msgstr "Kunde inte kontrollera vilka plattformar som behöver en emulator: {error}"
+
+#: apps/desktop/src/api/hooks.ts
+#, fuzzy
+#| msgid "Couldn't load your library"
+msgid "Couldn't copy to the clipboard"
+msgstr "Kunde inte läsa in ditt bibliotek"
 
 #. placeholder {0}: games.error.message
 #: apps/desktop/src/views/settings/discovery/HiddenGames.tsx
@@ -8444,6 +8457,12 @@ msgstr "Öppna i systemfältet i stället för i ett fönster."
 msgid "Open in the system tray instead of a window. Needs Launch on system startup."
 msgstr "Öppna i systemfältet i stället för i ett fönster."
 
+#: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#, fuzzy
+#| msgid "Choose installation storage"
+msgid "Open installation folder"
+msgstr "Välj lagring för installationen"
+
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
 msgid "Open jobs"
 msgstr "Öppna jobb"
@@ -11104,7 +11123,6 @@ msgstr "Visa alla spel"
 msgid "Show games"
 msgstr "Visa spel"
 
-#: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/views/game/SavesPanel.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Show in folder"

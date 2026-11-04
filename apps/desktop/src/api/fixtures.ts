@@ -328,6 +328,11 @@ export function createFixtureApi(
       if (!records.some((g) => g.entries.some((entry) => entry.id === entryId)))
         throw new Error("No such fixture entry");
     },
+    async entryPath(entryId) {
+      const entry = records.flatMap((g) => g.entries).find((each) => each.id === entryId);
+      if (!entry?.location) throw new Error("No such fixture entry");
+      return entry.location;
+    },
     async hiddenGames() {
       return structuredClone(
         records.filter((g) => hidden.has(g.id)).toSorted((a, b) => compareTitles(a.title, b.title)),

@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import {
   keepPreviousData,
   useInfiniteQuery,
@@ -7,6 +8,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { writeClipboard } from "../input/clipboard";
 import { libraryKeys, useLibraryApi } from "./provider";
 import type { GamePage, LaunchChoice, LibraryFilter, LibraryQuery } from "./types";
 
@@ -209,6 +211,19 @@ export function useRevealEntry() {
     },
   });
   return api.revealEntry ? mutation : null;
+}
+/** Puts where an entry's files are on the clipboard; `null` where it can't. */
+export function useCopyEntryPath() {
+  const { t } = useLingui();
+  const api = useLibraryApi();
+  const mutation = useMutation({
+    mutationFn: async (entryId: string) => {
+      if (!api.entryPath) throw new Error("Copying paths isn't available here");
+      if (!(await writeClipboard(await api.entryPath(entryId))))
+        throw new Error(t`Couldn't copy to the clipboard`);
+    },
+  });
+  return api.entryPath ? mutation : null;
 }
 /** Where each initial letter starts in `input`'s games sorted by title;
  * `enabled: false` skips asking. */

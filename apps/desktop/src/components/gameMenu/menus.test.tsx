@@ -4,7 +4,14 @@ import { createFixtureGames } from "../../api/fixtures";
 import type { GameDetails } from "../../api/types";
 import { emptyStorage, renderApp } from "../../test/harness";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  Reflect.deleteProperty(navigator, "clipboard");
+});
+
+/** jsdom has no clipboard. */
+const stubClipboard = (writeText: (text: string) => Promise<void>) =>
+  Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });
 
 /** Right-clicks `element` at a point, as a mouse does. */
 const rightClick = (element: Element) =>
@@ -62,8 +69,55 @@ it("marks a favourite and opens the folder from a game's menu", async () => {
   await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
   rightClick(hero);
   await item("Remove from favourites");
-  fireEvent.click(await item("Show in folder"));
+  fireEvent.click(await item("Open installation folder"));
   await waitFor(() => expect(reveal).toHaveBeenCalledWith("managed"));
+});
+
+it("copies an entry's real path, not the label a managed install shows", async () => {
+  const writeText = vi.fn(async () => {});
+  stubClipboard(writeText);
+  const app = renderApp("/games/fixture-0", { games: games() });
+  const entryPath = vi.spyOn(app.library, "entryPath").mockResolvedValue("/mnt/games/Fixture");
+  rightClick(await screen.findByRole("heading", { level: 1, name: "Fixture Game 0001" }));
+  fireEvent.click(await item("Copy path"));
+  await waitFor(() => expect(writeText).toHaveBeenCalledWith("/mnt/games/Fixture"));
+  expect(entryPath).toHaveBeenCalledWith("managed");
+  await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+});
+
+it("says so when the path can't reach the clipboard", async () => {
+  const writeText = vi.fn(async () => {
+    throw new Error("denied");
+  });
+  stubClipboard(writeText);
+  renderApp("/games/fixture-0", { games: games() });
+  rightClick(await screen.findByRole("heading", { level: 1, name: "Fixture Game 0001" }));
+  fireEvent.click(await item("Copy path"));
+  expect(await within(await menu()).findByText("Couldn't copy to the clipboard")).toBeTruthy();
+});
+
+it("offers neither folder item for a game with no files here", async () => {
+  const list = games();
+  const [first] = list;
+  if (!first) throw new Error("fixture missing");
+  first.entries = [
+    {
+      id: "owned",
+      source: "store:steam",
+      state: "uninstalled",
+      location: null,
+      canLaunch: false,
+      emulated: false,
+    },
+  ];
+  renderApp("/games/fixture-0", { games: list });
+  rightClick(await screen.findByRole("heading", { level: 1, name: "Fixture Game 0001" }));
+  await item("Open game details");
+  const names = within(await menu())
+    .getAllByRole("menuitem")
+    .map((each) => each.textContent);
+  expect(names).not.toContain("Open installation folder");
+  expect(names).not.toContain("Copy path");
 });
 
 it("shows a folder two entries share once", async () => {
@@ -78,9 +132,11 @@ it("shows a folder two entries share once", async () => {
   const app = renderApp("/games/fixture-0", { games: list });
   const reveal = vi.spyOn(app.library, "revealEntry");
   rightClick(await screen.findByRole("heading", { level: 1, name: "Fixture Game 0001" }));
-  const folders = within(await menu()).getAllByRole("menuitem", { name: /Show in folder/ });
+  const folders = within(await menu()).getAllByRole("menuitem", {
+    name: /Open installation folder/,
+  });
   expect(folders).toHaveLength(1);
-  expect(folders[0]?.textContent).toBe("Show in folder");
+  expect(folders[0]?.textContent).toBe("Open installation folder");
   fireEvent.click(folders[0] as Element);
   await waitFor(() => expect(reveal).toHaveBeenCalledWith("lutris"));
 });
@@ -92,7 +148,13 @@ it("scopes an entry's menu to the entry, and asks before uninstalling it", async
   const names = (await within(await menu()).findAllByRole("menuitem")).map(
     (each) => each.textContent,
   );
-  expect(names).toEqual(["Play", "Show in folder", "Move installed files…", "Uninstall…"]);
+  expect(names).toEqual([
+    "Play",
+    "Open installation folder",
+    "Copy path",
+    "Move installed files…",
+    "Uninstall…",
+  ]);
   fireEvent.click(await item("Uninstall…"));
   const confirm = await screen.findByRole("alertdialog", { name: "Uninstall Fixture Game 0001?" });
   expect(uninstall).not.toHaveBeenCalled();

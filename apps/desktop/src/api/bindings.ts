@@ -200,6 +200,11 @@ export const commands = {
 	 */
 	revealGameEntry: (entryId: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("reveal_game_entry", { entryId })),
 	/**
+	 *  Where an entry's files are, for Copy path: a managed install's real
+	 *  folder, which the entry's own location doesn't spell out.
+	 */
+	gameEntryPath: (entryId: string) => typedError<string, ErrorReport_Serialize>(__TAURI_INVOKE("game_entry_path", { entryId })),
+	/**
 	 *  Adds the game at `url`, a page address, and returns its game id. A page
 	 *  already in the library returns its game.
 	 */

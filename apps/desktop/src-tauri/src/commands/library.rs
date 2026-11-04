@@ -185,6 +185,18 @@ pub async fn reveal_game_entry(
     open_file_manager([&folder], &folder)
 }
 
+/// Where an entry's files are, for Copy path: a managed install's real
+/// folder, which the entry's own location doesn't spell out.
+#[tauri::command]
+#[specta::specta]
+pub async fn game_entry_path(
+    store: State<'_, LibraryStore>,
+    entry_id: String,
+) -> Result<String, CommandError> {
+    let path = store.entry_path(&entry_id).await.map_err(report)?;
+    Ok(path.display().to_string())
+}
+
 const FILE_MANAGER: &str = if cfg!(target_os = "windows") {
     "explorer"
 } else if cfg!(target_os = "macos") {

@@ -616,11 +616,11 @@ msgid "source entry belongs to another game; merge the games first"
 msgstr ""
 
 #: crates/caskade-core/src/db/games.rs
-msgid "{path} has no folder"
+msgid "entry {id} has no install location"
 msgstr ""
 
 #: crates/caskade-core/src/db/games.rs
-msgid "entry {id} has no install location"
+msgid "{path} has no folder"
 msgstr ""
 
 #: crates/caskade-core/src/db/games.rs

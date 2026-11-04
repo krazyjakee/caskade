@@ -182,6 +182,7 @@ pub fn access(command: &str) -> Option<Access> {
         | "set_game_favorite"
         | "set_game_default_entry"
         | "reveal_game_entry"
+        | "game_entry_path"
         | "save_collection"
         | "set_collection_pinned"
         | "delete_collection"

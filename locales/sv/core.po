@@ -617,12 +617,12 @@ msgid "source entry belongs to another game; merge the games first"
 msgstr "källposten tillhör ett annat spel; slå ihop spelen först"
 
 #: crates/caskade-core/src/db/games.rs
-msgid "{path} has no folder"
-msgstr "{path} har ingen mapp"
-
-#: crates/caskade-core/src/db/games.rs
 msgid "entry {id} has no install location"
 msgstr "posten {id} har ingen installationsplats"
+
+#: crates/caskade-core/src/db/games.rs
+msgid "{path} has no folder"
+msgstr "{path} har ingen mapp"
 
 #: crates/caskade-core/src/db/games.rs
 msgid "{folder} is not there"

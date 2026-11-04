@@ -96,6 +96,10 @@ export function createNativeApi(): LibraryApi {
       native();
       await unwrap(commands.revealGameEntry(entryId));
     },
+    async entryPath(entryId) {
+      native();
+      return unwrap(commands.gameEntryPath(entryId));
+    },
     async hiddenGames() {
       native();
       const page = await unwrap(commands.hiddenGames(0, HIDDEN_LIMIT));
