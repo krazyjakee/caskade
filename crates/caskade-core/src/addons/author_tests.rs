@@ -216,11 +216,11 @@ fn a_built_catalogue_reads_as_valid_and_keeps_earlier_releases() {
     assert_eq!(stats.releases[0].permissions.len(), 3);
     assert_eq!(
         stats.screenshots[0].url.as_str(),
-        "https://example.org/media/dev.example.stats/1.png"
+        "https://example.org/dev.example.stats-1.png"
     );
-    let archive = out.join("packages/dev.example.stats-0.1.0.zip");
+    let archive = out.join("dev.example.stats-0.1.0.zip");
     package::verify(&archive, &stats.releases[0]).unwrap();
-    assert!(out.join("media/dev.example.stats/1.png").exists());
+    assert!(out.join("dev.example.stats-1.png").exists());
     let ember = catalogue.entry("dev.example.ember").unwrap();
     assert!(ember.releases[0].api.is_none());
 
@@ -312,10 +312,10 @@ async fn check_reads_a_staged_catalogue_as_the_app_does_and_finds_broken_assets(
     // A changed archive, a missing one and a screenshot that isn't one.
     std::fs::write(&source, spec("media/broken.png")).unwrap();
     author::build(&source, &out, None).unwrap();
-    let mut archive = std::fs::read(out.join("packages/dev.example.stats-0.1.0.zip")).unwrap();
+    let mut archive = std::fs::read(out.join("dev.example.stats-0.1.0.zip")).unwrap();
     *archive.last_mut().unwrap() ^= 1;
-    std::fs::write(out.join("packages/dev.example.stats-0.1.0.zip"), archive).unwrap();
-    std::fs::remove_file(out.join("packages/dev.example.ember-1.0.0.zip")).unwrap();
+    std::fs::write(out.join("dev.example.stats-0.1.0.zip"), archive).unwrap();
+    std::fs::remove_file(out.join("dev.example.ember-1.0.0.zip")).unwrap();
     let checked = author::check(location, None, &temp.path().join("work2"))
         .await
         .unwrap();
@@ -433,9 +433,9 @@ async fn check_fetches_every_asset_and_names_what_is_unreachable_or_not_the_rele
     let out = temp.path().join("out");
     author::build(&source, &out, None).unwrap();
     let file = |name: &str| std::fs::read(out.join(name)).unwrap();
-    let stats_zip = "/packages/dev.example.stats-0.1.0.zip";
-    let ember_zip = "/packages/dev.example.ember-1.0.0.zip";
-    let shot = "/media/dev.example.stats/1.png";
+    let stats_zip = "/dev.example.stats-0.1.0.zip";
+    let ember_zip = "/dev.example.ember-1.0.0.zip";
+    let shot = "/dev.example.stats-1.png";
 
     // Everything served: no problems.
     let server = MockServer::start().await;

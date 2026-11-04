@@ -17,7 +17,7 @@ cargo run -p caskade-desktop --bin caskade-catalogue -- check <dir>/catalogue.js
 
 ### `build`
 
-Reads a source file and writes `<dir>/catalogue.json`, `<dir>/packages/<id>-<version>.zip` and `<dir>/media/<id>/<n>.<ext>`.
+Reads a source file and writes `<dir>/catalogue.json`, each package as `<dir>/<id>-<version>.zip` and its screenshots as `<dir>/<id>-<n>.<ext>`. The folder is flat because a GitHub release's assets are: it uploads as it is.
 
 What a package holds is decided by its kind. A plugin package holds `plugin.json`, `dist/`, `locales/`, `assets/`, a README, a LICENSE and a CHANGELOG. A theme package holds `theme.json`, `tokens.json`, `theme.css`, `assets/`, `previews/`, `locales/`, a README and a LICENSE. Sources, tests, `node_modules` and hidden files stay out.
 
@@ -127,7 +127,7 @@ Every step after building is the maintainer's. Nothing in the repository uploads
    - Install it from Settings → Plugins.
    - Or run the ignored test `starter_collection_installs_in_a_clean_profile` with `CASKADE_STARTER_DIR=<dir>`.
 4. Sign `catalogue.json` with the release key: `pnpm tauri signer sign -f ~/.tauri/caskade-updater.key catalogue.json`.
-5. Upload `catalogue.json`, `catalogue.json.sig`, `packages/` and `media/` as assets of the `catalogue` release on `krazyjakee/caskade` (the [origin](catalogue.md#origin-and-trust)).
+5. Upload every file in the folder, `catalogue.json.sig` included, as assets of the `catalogue` release on `krazyjakee/caskade` (the [origin](catalogue.md#origin-and-trust)): `gh release upload catalogue <dir>/* --clobber`.
 6. Check the published copy: `check https://github.com/krazyjakee/caskade/releases/download/catalogue/catalogue.json --release-key`.
 
 **Update a package:**

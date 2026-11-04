@@ -46,7 +46,7 @@ Publishing the curated origin is a release step for the maintainer; see [Publish
           "provides": [],
           "notes": "First release.",
           "published": "2026-10-01",
-          "artifact": { "url": "packages/dev.caskade.playtime-stats-0.1.0.zip", "sha256": "…", "size": 12345 }
+          "artifact": { "url": "dev.caskade.playtime-stats-0.1.0.zip", "sha256": "…", "size": 12345 }
         }
       ]
     }
@@ -189,7 +189,7 @@ The maintainer's steps; nothing in the repo does these on its own. [publishing.m
 
 1. Build and check the catalogue and its packages: `just starter-catalogue <dir>`, or `caskade-catalogue build` and `check`.
 2. Sign `catalogue.json` with the release key: `pnpm tauri signer sign -f ~/.tauri/caskade-updater.key catalogue.json`.
-3. Upload `catalogue.json`, `catalogue.json.sig`, `packages/` and `media/` as assets of the `catalogue` release on `krazyjakee/caskade`.
+3. Upload every file in the folder, `catalogue.json.sig` included, as assets of the `catalogue` release on `krazyjakee/caskade`.
 4. Check the published copy: `caskade-catalogue check <origin> --release-key`.
 
 ## The starter collection (#184)

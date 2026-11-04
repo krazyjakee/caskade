@@ -387,8 +387,10 @@ pub struct Built {
     pub carried: usize,
 }
 
-/// Packs every package `source` lists into `<out>/packages/`, copies their
-/// screenshots to `<out>/media/<id>/` and writes `<out>/catalogue.json`.
+/// Packs every package `source` lists into `<out>/<id>-<version>.zip`,
+/// copies their screenshots to `<out>/<id>-<n>.<ext>` and writes
+/// `<out>/catalogue.json`: one flat folder, as a GitHub release holds its
+/// assets, so the folder uploads as it is.
 /// With `previous` (the published `catalogue.json`), each package keeps
 /// its earlier releases, newest first, so installed copies can still be
 /// matched; a version already published with other bytes is refused.
@@ -420,7 +422,7 @@ pub fn build(source: &Path, out: &Path, previous: Option<&Path>) -> Result<Built
         }
         None => Map::new(),
     };
-    std::fs::create_dir_all(out.join("packages")).map_err(|e| e.to_string())?;
+    std::fs::create_dir_all(out).map_err(|e| e.to_string())?;
     let mut built = Built::default();
     let mut packages = Vec::new();
     let mut ids = std::collections::HashSet::new();
@@ -431,8 +433,7 @@ pub fn build(source: &Path, out: &Path, previous: Option<&Path>) -> Result<Built
             return Err(format!("{} is listed twice", packed.id));
         }
         let file = packed.file_name();
-        std::fs::write(out.join("packages").join(&file), &packed.archive)
-            .map_err(|e| e.to_string())?;
+        std::fs::write(out.join(&file), &packed.archive).map_err(|e| e.to_string())?;
         let mut screenshots = Vec::new();
         for (index, shot) in package.screenshots.iter().enumerate() {
             let from = base.join(&shot.file);
@@ -447,9 +448,7 @@ pub fn build(source: &Path, out: &Path, previous: Option<&Path>) -> Result<Built
                     from.display()
                 ));
             }
-            let name = format!("media/{}/{}.{extension}", packed.id, index + 1);
-            std::fs::create_dir_all(out.join("media").join(&packed.id))
-                .map_err(|e| e.to_string())?;
+            let name = format!("{}-{}.{extension}", packed.id, index + 1);
             std::fs::copy(&from, out.join(&name))
                 .map_err(|e| format!("{}: {e}", from.display()))?;
             screenshots.push(json!({"url": name, "alt": shot.alt}));
@@ -462,7 +461,7 @@ pub fn build(source: &Path, out: &Path, previous: Option<&Path>) -> Result<Built
             "provides": packed.provides,
             "notes": package.notes,
             "artifact": {
-                "url": format!("packages/{file}"),
+                "url": file,
                 "sha256": packed.sha256(),
                 "size": packed.archive.len(),
             },

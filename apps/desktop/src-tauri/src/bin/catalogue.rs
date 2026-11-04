@@ -75,7 +75,7 @@ fn build(args: &[String]) -> Result<(), String> {
     let previous = parsed.flag("--previous").map(PathBuf::from);
     let built = caskade_core::addons::author::build(source.as_ref(), &out, previous.as_deref())?;
     for (id, version, file, sha256) in &built.packages {
-        println!("{id} {version}  packages/{file}  sha256 {sha256}");
+        println!("{id} {version}  {file}  sha256 {sha256}");
     }
     if built.carried > 0 {
         println!("kept {} earlier releases", built.carried);
