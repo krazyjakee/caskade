@@ -40,6 +40,8 @@ const data = [
   /hasheous\.org/g,
   /github\.com\/mtkennerly\/ludusavi-manifest/g,
   /Ludusavi manifest|PCGamingWiki|pcgamingwiki\.com/g,
+  // Where a launcher was found on the device.
+  /\/fixture\/[\w/.-]+/g,
   // Launchers and rating boards.
   /Steam|Heroic|Lutris|Epic Games|GOG Galaxy|EA App|Ubisoft Connect|Battle\.net|itch\.io|Amazon Games/g,
   /PEGI|ESRB|USK|CERO|ACB|GRAC|ClassInd/g,

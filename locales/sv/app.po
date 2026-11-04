@@ -2815,6 +2815,12 @@ msgstr "Caskade sparar en kopia av spelet. Du spelar det i en minut så att Cask
 msgid "Caskade keeps streaming up to date when you say so, never in the middle of a game."
 msgstr ""
 
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#, fuzzy
+#| msgid "Caskade can't install emulators on this system yet."
+msgid "Caskade knows no launchers for this device's system."
+msgstr "Caskade kan inte installera emulatorer på det här systemet än."
+
 #: apps/desktop/src/components/shares/ShareGameDialog.tsx
 msgid "Caskade makes a link. Whoever opens it in their Caskade gets it straight from this computer, on this network or over the internet."
 msgstr "Caskade gör en länk. Den som öppnar den i sin Caskade får det direkt från den här datorn, på det här nätverket eller över internet."
@@ -3050,11 +3056,6 @@ msgstr "Kontrollerar vad som skulle ändras…"
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Checking…"
 msgstr "Kontrollerar…"
-
-#. {os} is the operating system's id: linux, windows or macos
-#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
-msgid "Checks use the backend {os} profile."
-msgstr "Kontrollerna använder backends {os}-profil."
 
 #. A game release's region
 #: apps/desktop/src/views/store/releases.ts
@@ -3978,15 +3979,6 @@ msgstr "Detaljer om {0}"
 msgid "Detect emulators"
 msgstr "Hitta emulatorer"
 
-#: apps/desktop/src/views/settings/LaunchersSettings.tsx
-msgid "Detect games from your installed launchers. Turning one off removes the games only it found at the next scan."
-msgstr "Hitta spel från dina installerade startprogram. Stänger du av ett tas spelen som bara det hittade bort vid nästa genomsökning."
-
-#. A launcher was found on this device
-#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
-msgid "Detected"
-msgstr "Hittad"
-
 #. Badge on a plugin loaded from its development folder
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Dev"
@@ -4049,10 +4041,6 @@ msgstr "Startade inte"
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgid "Disable custom CSS"
 msgstr "Stäng av egen CSS"
-
-#: apps/desktop/src/views/settings/LaunchersSettings.tsx
-msgid "Disabled for scans"
-msgstr "Av vid genomsökningar"
 
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
 msgctxt "launch choice"
@@ -4500,10 +4488,6 @@ msgstr "Aktivera {plugin}"
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Enable library discovery"
 msgstr "Aktivera biblioteksidentifiering"
-
-#: apps/desktop/src/views/settings/LaunchersSettings.tsx
-msgid "Enabled for scans"
-msgstr "På vid genomsökningar"
 
 #. Button: ends a stream from another device
 #: apps/desktop/src/input/GuideMenu.tsx
@@ -5086,6 +5070,12 @@ msgstr "Spel från {name}"
 msgid "Games from a server you can't reach stay in your library. Downloaded ones still play; the rest show as unavailable until the server is back."
 msgstr "Spel från en server du inte når finns kvar i ditt bibliotek. Nedladdade spel går fortfarande att spela; resten visas som otillgängliga tills servern är tillbaka."
 
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#, fuzzy
+#| msgid "Detect games from your installed launchers. Turning one off removes the games only it found at the next scan."
+msgid "Games from the launchers turned on here join your library. Turning one off removes the games only it found at the next scan."
+msgstr "Hitta spel från dina installerade startprogram. Stänger du av ett tas spelen som bara det hittade bort vid nästa genomsökning."
+
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "Games from your own RomM server."
 msgstr "Spel från din egen RomM-server."
@@ -5126,6 +5116,10 @@ msgstr "Spel som uppfyller alla regler, allteftersom biblioteket ändras"
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "Games that play with this profile need another one."
+msgstr ""
+
+#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+msgid "Games the system itself keeps a record of, besides launchers' own."
 msgstr ""
 
 #: apps/desktop/src/onboarding/GamesStep.tsx
@@ -6231,17 +6225,23 @@ msgstr "Starta när datorn startar"
 msgid "Launch with"
 msgstr "Starta med"
 
-#: apps/desktop/src/views/settings/LaunchersSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Launcher Sources"
 msgstr "Startprogramkällor"
 
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#, fuzzy
+#| msgctxt "settings tab"
+#| msgid "Launchers"
+msgid "Launchers"
+msgstr "Startprogram"
+
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
 msgctxt "settings tab"
 msgid "Launchers"
 msgstr "Startprogram"
 
-#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Launchers and operating-system checks"
 msgstr "Startprogram och kontroller i operativsystemet"
@@ -6593,7 +6593,7 @@ msgstr "Platsen registrerades; befintliga installationsmanifest söktes igenom."
 msgid "Location unavailable"
 msgstr "Platsen är inte tillgänglig"
 
-#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
 msgid "Location unknown"
 msgstr "Okänd plats"
 
@@ -6640,6 +6640,7 @@ msgctxt "settings section"
 msgid "Look"
 msgstr "Utseende"
 
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 #, fuzzy
 #| msgid "Show again"
@@ -6681,6 +6682,12 @@ msgstr "Letar efter Caskade på det här nätverket…"
 #| msgid "Loading emulators…"
 msgid "Looking for installed emulators…"
 msgstr "Läser in emulatorer…"
+
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#, fuzzy
+#| msgid "Looking for Caskade on this network…"
+msgid "Looking for launchers on this device…"
+msgstr "Letar efter Caskade på det här nätverket…"
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 msgid "Looking on RomM…"
@@ -7593,13 +7600,17 @@ msgstr "Inte hämtade än. Uppdatera prestationerna för att se dem."
 msgid "not filled in yet"
 msgstr "inte ifyllt än"
 
-#. A launcher wasn't found on this device
 #. An emulator's status
 #: apps/desktop/src/views/PlaceholderView.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
-#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Not found"
 msgstr "Hittades inte"
+
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#, fuzzy
+#| msgid "Not on this device yet"
+msgid "Not found on this device"
+msgstr "Inte på den här enheten än"
 
 #. A game of a shared collection
 #: apps/desktop/src/components/shares/ShareInfoDetails.tsx
@@ -7665,6 +7676,12 @@ msgstr "Inte uppdaterat ännu."
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "Not saved"
+msgstr "Inte sparat"
+
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#, fuzzy
+#| msgid "Not saved"
+msgid "Not scanned"
 msgstr "Inte sparat"
 
 #: apps/desktop/src/views/settings/devices/SectionSync.tsx
@@ -9161,10 +9178,6 @@ msgstr "Uppdatera i bakgrunden"
 msgid "Refresh interval"
 msgstr "Uppdateringsintervall"
 
-#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
-msgid "Refresh launcher detection"
-msgstr "Sök efter startprogram igen"
-
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Refreshing"
 msgstr "Uppdatering"
@@ -9567,8 +9580,10 @@ msgid "Reset installer settings"
 msgstr "Återställ installationsinställningar"
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
-msgid "Reset launcher preferences"
-msgstr "Återställ inställningar för startprogram"
+#, fuzzy
+#| msgid "Reset general settings"
+msgid "Reset launcher settings"
+msgstr "Återställ allmänna inställningar"
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
@@ -10177,6 +10192,12 @@ msgstr "{scanners}: {games}"
 msgid "scan, scanning, discovery, find games, detect games, import, launchers, folders, watch folders, hidden games, ignored games, play history, deep scan"
 msgstr ""
 
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#, fuzzy
+#| msgid "Scanner"
+msgid "Scanned"
+msgstr "Skanner"
+
 #. ROM scanners table column
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "Scanner"
@@ -10334,10 +10355,6 @@ msgstr "Visa {name}"
 #: apps/desktop/src/shell/SearchBox.tsx
 msgid "See all results for {input}"
 msgstr "Visa alla resultat för {input}"
-
-#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
-msgid "See also: <0>Launchers</0>"
-msgstr ""
 
 #: apps/desktop/src/components/addons/DeviceOffers.tsx
 msgid "See it"
@@ -12588,10 +12605,6 @@ msgstr "Väntar på identifieringsresultat…"
 msgid "Waiting for progress"
 msgstr "Väntar på förlopp"
 
-#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
-msgid "Waiting for the backend device profile."
-msgstr "Väntar på enhetsprofilen från kärnan."
-
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgid "Waiting for the first reading…"
 msgstr "Väntar på den första mätningen…"
@@ -12795,6 +12808,14 @@ msgstr "Var spelet ska sparas"
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 msgid "Which emulator each platform uses. One this device doesn't have is offered in Settings → Emulation."
 msgstr "Vilken emulator varje plattform använder. En som den här enheten saknar erbjuds i Inställningar → Emulering."
+
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
+msgid "Which launchers are scanned"
+msgstr ""
+
+#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+msgid "Which launchers are scanned: <0>Launchers</0>"
+msgstr ""
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 msgid "Which programs are the game"
@@ -13065,6 +13086,27 @@ msgstr "ÅÅÅÅ-MM-DD, eller tomt för inget"
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "zoom, text size, bigger"
 msgstr ""
+
+#~ msgid "Refresh launcher detection"
+#~ msgstr "Sök efter startprogram igen"
+
+#~ msgid "Checks use the backend {os} profile."
+#~ msgstr "Kontrollerna använder backends {os}-profil."
+
+#~ msgid "Detected"
+#~ msgstr "Hittad"
+
+#~ msgid "Disabled for scans"
+#~ msgstr "Av vid genomsökningar"
+
+#~ msgid "Enabled for scans"
+#~ msgstr "På vid genomsökningar"
+
+#~ msgid "Reset launcher preferences"
+#~ msgstr "Återställ inställningar för startprogram"
+
+#~ msgid "Waiting for the backend device profile."
+#~ msgstr "Väntar på enhetsprofilen från kärnan."
 
 #, fuzzy
 #~| msgid "Remove {name}?"

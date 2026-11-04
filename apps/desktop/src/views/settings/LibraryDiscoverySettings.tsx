@@ -14,7 +14,6 @@ import { Link, useRouter } from "@tanstack/react-router";
 import { Folder, FolderOpen, RefreshCw, ScanSearch } from "lucide-react";
 import { useState } from "react";
 import { type DiscoveryPreferences, scanning } from "../../api/discovery";
-import { formatPath } from "../../api/presentation";
 import { usePathPicker } from "../../components/pathBrowser/PathPicker";
 import { useDropZone } from "../../drop/DropProvider";
 import { useDiscovery } from "./discovery/DiscoveryProvider";
@@ -59,7 +58,6 @@ const phases: Record<string, MessageDescriptor> = {
 export function LibraryDiscoverySettings() {
   const { t } = useLingui();
   const preferences = useSettingsSection<DiscoveryPreferences>("core.discovery");
-  const launchers = useSettingsSection<{ enabled: Record<string, boolean> }>("core.launchers");
   const history = useSettingsSection<{ seedPlaytime: boolean }>("discovery.import");
   const discovery = useDiscovery();
   const [path, setPath] = useState("");
@@ -82,8 +80,8 @@ export function LibraryDiscoverySettings() {
     <div data-settings="library-discovery" data-cs="discovery-settings" className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <SettingsFeedback
-          error={preferences.error ?? launchers.error ?? history.error}
-          saving={preferences.saving || launchers.saving || history.saving}
+          error={preferences.error ?? history.error}
+          saving={preferences.saving || history.saving}
         />
         {/* Names what goes back and asks first (#44, #49). */}
         <ResetDefaults
@@ -137,12 +135,6 @@ export function LibraryDiscoverySettings() {
             onPress={() => discovery.action.mutate({ type: "cancel" })}
           >
             <Trans>Cancel scan</Trans>
-          </Button>
-          <Button
-            isDisabled={discovery.action.isPending}
-            onPress={() => discovery.action.mutate({ type: "launchers" })}
-          >
-            <Trans>Refresh launcher detection</Trans>
           </Button>
           <p role="status" className="text-sm text-fg-muted">
             {snapshot
@@ -224,66 +216,10 @@ export function LibraryDiscoverySettings() {
           )}
         </SettingsSection>
         <SettingsSection
-          title={t`Launchers and operating-system checks`}
-          description={
-            snapshot
-              ? t({
-                  message: `Checks use the backend ${{ os: snapshot.os }} profile.`,
-                  comment: "{os} is the operating system's id: linux, windows or macos",
-                })
-              : t`Waiting for the backend device profile.`
-          }
+          title={t`Operating-system checks`}
+          description={t`Games the system itself keeps a record of, besides launchers' own.`}
         >
           <LaunchersLink />
-          <div className="my-3 grid gap-3 md:grid-cols-2">
-            {[
-              ...new Set(
-                snapshot?.launchers.map((launcher) =>
-                  launcher.source === "rare" ? "legendary" : launcher.source,
-                ) ?? [],
-              ),
-            ].map((id) => {
-              const matches =
-                snapshot?.launchers.filter(
-                  (launcher) =>
-                    launcher.source === id || (id === "legendary" && launcher.source === "rare"),
-                ) ?? [];
-              return (
-                <div key={id} className="rounded-control border border-border p-3">
-                  <Checkbox
-                    isSelected={launchers.settings?.enabled[id] !== false}
-                    onChange={(enabled) =>
-                      launchers.setSettings((s) => ({
-                        ...s,
-                        enabled: { ...s.enabled, [id]: enabled },
-                      }))
-                    }
-                  >
-                    {id}
-                  </Checkbox>
-                  <p className="mt-1 text-xs text-fg-muted">
-                    {matches.some((launcher) => launcher.found)
-                      ? t({ message: "Detected", comment: "A launcher was found on this device" })
-                      : t({
-                          message: "Not found",
-                          comment: "A launcher wasn't found on this device",
-                        })}
-                  </p>
-                  {matches
-                    .filter((launcher) => launcher.found)
-                    .map((launcher) => (
-                      <p
-                        key={`${launcher.path}:${launcher.version}`}
-                        className="mt-1 break-all font-mono text-xs text-fg-subtle"
-                      >
-                        {launcher.path ? formatPath(launcher.path) : t`Location unknown`}
-                        {launcher.version ? ` · ${launcher.version}` : ""}
-                      </p>
-                    ))}
-                </div>
-              );
-            })}
-          </div>
           <div className="space-y-3">
             {snapshot?.checks.map((check) => (
               <Checkbox
@@ -471,7 +407,7 @@ function LaunchersLink() {
   return (
     <p className="mt-1 text-sm text-fg-muted">
       <Trans>
-        See also:{" "}
+        Which launchers are scanned:{" "}
         <Link to="/settings" search={{ tab: "launchers" }} className="text-accent-alt">
           Launchers
         </Link>

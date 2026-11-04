@@ -139,8 +139,8 @@ function panel(fixture: ReturnType<typeof backend>, library: LibraryApi = create
 it("renders actual backend device/detection, reports and classifier evidence", async () => {
   panel(backend());
   await screen.findByText("Possible Fixture Game");
-  expect(screen.getByText("Checks use the backend linux profile.")).toBeTruthy();
-  expect(screen.getByText("/fixture/Steam · 1")).toBeTruthy();
+  // Launchers are switched on their own page (#48); this one links there.
+  expect(screen.queryByRole("checkbox", { name: "steam" })).toBeNull();
   expect(screen.getByText("desktop: 1 game · 12 ms")).toBeTruthy();
   expect(screen.getByText("Skipped malformed fixture")).toBeTruthy();
   expect(screen.getByText("Unity engine: +70")).toBeTruthy();
@@ -159,8 +159,6 @@ it("runs and cancels actual controller operations with phase feedback", async ()
   );
   fireEvent.click(screen.getByRole("button", { name: "Cancel scan" }));
   await waitFor(() => expect(api.discovery.cancel).toHaveBeenCalledOnce());
-  fireEvent.click(screen.getByRole("button", { name: "Refresh launcher detection" }));
-  await waitFor(() => expect(api.discovery.launchers).toHaveBeenCalledOnce());
 });
 it("bulk accepts or ignores only selected retained IDs with the snapshot revision", async () => {
   const api = backend();
@@ -181,7 +179,7 @@ it("accepts selected records explicitly without requiring all candidates", async
     expect(api.discovery.review).toHaveBeenCalledExactlyOnceWith(["review-1"], true, 4),
   );
 });
-it("saves every visible scheduling, deep-scan, source and history switch through settings", async () => {
+it("saves every visible scheduling, deep-scan, system check and history switch through settings", async () => {
   const api = backend();
   panel(api);
   await screen.findByText("Possible Fixture Game");
@@ -203,16 +201,12 @@ it("saves every visible scheduling, deep-scan, source and history switch through
     );
   }
   fireEvent.click(screen.getByRole("checkbox", { name: "Desktop entries" }));
-  fireEvent.click(screen.getByRole("checkbox", { name: "steam" }));
   await waitFor(() =>
-    expect(((api.values["core.launchers"]?.enabled ?? {}) as Record<string, boolean>).steam).toBe(
-      false,
-    ),
+    expect(
+      ((api.values["core.discovery"]?.osChecks ?? {}) as Record<string, Record<string, boolean>>)
+        .linux?.desktop,
+    ).toBe(false),
   );
-  expect(
-    ((api.values["core.discovery"]?.osChecks ?? {}) as Record<string, Record<string, boolean>>)
-      .linux?.desktop,
-  ).toBe(false);
   expect(api.values["discovery.import"]?.seedPlaytime).toBe(false);
   fireEvent.change(screen.getByRole("textbox", { name: "Absolute custom folder" }), {
     target: { value: "/fixture/custom-games" },

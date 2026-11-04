@@ -2747,6 +2747,10 @@ msgstr ""
 msgid "Caskade keeps streaming up to date when you say so, never in the middle of a game."
 msgstr ""
 
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
+msgid "Caskade knows no launchers for this device's system."
+msgstr ""
+
 #: apps/desktop/src/components/shares/ShareGameDialog.tsx
 msgid "Caskade makes a link. Whoever opens it in their Caskade gets it straight from this computer, on this network or over the internet."
 msgstr ""
@@ -2973,11 +2977,6 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Checking…"
-msgstr ""
-
-#. {os} is the operating system's id: linux, windows or macos
-#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
-msgid "Checks use the backend {os} profile."
 msgstr ""
 
 #. A game release's region
@@ -3862,15 +3861,6 @@ msgstr ""
 msgid "Detect emulators"
 msgstr ""
 
-#: apps/desktop/src/views/settings/LaunchersSettings.tsx
-msgid "Detect games from your installed launchers. Turning one off removes the games only it found at the next scan."
-msgstr ""
-
-#. A launcher was found on this device
-#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
-msgid "Detected"
-msgstr ""
-
 #. Badge on a plugin loaded from its development folder
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Dev"
@@ -3926,10 +3916,6 @@ msgstr ""
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgid "Disable custom CSS"
-msgstr ""
-
-#: apps/desktop/src/views/settings/LaunchersSettings.tsx
-msgid "Disabled for scans"
 msgstr ""
 
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
@@ -4362,10 +4348,6 @@ msgstr ""
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Enable library discovery"
-msgstr ""
-
-#: apps/desktop/src/views/settings/LaunchersSettings.tsx
-msgid "Enabled for scans"
 msgstr ""
 
 #. Button: ends a stream from another device
@@ -4927,6 +4909,10 @@ msgstr ""
 msgid "Games from a server you can't reach stay in your library. Downloaded ones still play; the rest show as unavailable until the server is back."
 msgstr ""
 
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
+msgid "Games from the launchers turned on here join your library. Turning one off removes the games only it found at the next scan."
+msgstr ""
+
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "Games from your own RomM server."
 msgstr ""
@@ -4968,6 +4954,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "Games that play with this profile need another one."
+msgstr ""
+
+#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+msgid "Games the system itself keeps a record of, besides launchers' own."
 msgstr ""
 
 #: apps/desktop/src/onboarding/GamesStep.tsx
@@ -6061,17 +6051,20 @@ msgstr ""
 msgid "Launch with"
 msgstr ""
 
-#: apps/desktop/src/views/settings/LaunchersSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Launcher Sources"
 msgstr ""
 
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
+msgid "Launchers"
+msgstr ""
+
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
 msgctxt "settings tab"
 msgid "Launchers"
 msgstr ""
 
-#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Launchers and operating-system checks"
 msgstr ""
@@ -6413,7 +6406,7 @@ msgstr ""
 msgid "Location unavailable"
 msgstr ""
 
-#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
 msgid "Location unknown"
 msgstr ""
 
@@ -6457,6 +6450,7 @@ msgctxt "settings section"
 msgid "Look"
 msgstr ""
 
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Look again"
 msgstr ""
@@ -6493,6 +6487,10 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
 msgid "Looking for installed emulators…"
+msgstr ""
+
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
+msgid "Looking for launchers on this device…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
@@ -7384,12 +7382,14 @@ msgstr ""
 msgid "not filled in yet"
 msgstr ""
 
-#. A launcher wasn't found on this device
 #. An emulator's status
 #: apps/desktop/src/views/PlaceholderView.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
-#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Not found"
+msgstr ""
+
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
+msgid "Not found on this device"
 msgstr ""
 
 #. A game of a shared collection
@@ -7454,6 +7454,10 @@ msgstr ""
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "Not saved"
+msgstr ""
+
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
+msgid "Not scanned"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SectionSync.tsx
@@ -8880,10 +8884,6 @@ msgstr ""
 msgid "Refresh interval"
 msgstr ""
 
-#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
-msgid "Refresh launcher detection"
-msgstr ""
-
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Refreshing"
 msgstr ""
@@ -9272,7 +9272,7 @@ msgid "Reset installer settings"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
-msgid "Reset launcher preferences"
+msgid "Reset launcher settings"
 msgstr ""
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
@@ -9845,6 +9845,10 @@ msgstr ""
 msgid "scan, scanning, discovery, find games, detect games, import, launchers, folders, watch folders, hidden games, ignored games, play history, deep scan"
 msgstr ""
 
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
+msgid "Scanned"
+msgstr ""
+
 #. ROM scanners table column
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "Scanner"
@@ -10000,10 +10004,6 @@ msgstr ""
 
 #: apps/desktop/src/shell/SearchBox.tsx
 msgid "See all results for {input}"
-msgstr ""
-
-#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
-msgid "See also: <0>Launchers</0>"
 msgstr ""
 
 #: apps/desktop/src/components/addons/DeviceOffers.tsx
@@ -12178,10 +12178,6 @@ msgstr ""
 msgid "Waiting for progress"
 msgstr ""
 
-#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
-msgid "Waiting for the backend device profile."
-msgstr ""
-
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgid "Waiting for the first reading…"
 msgstr ""
@@ -12372,6 +12368,14 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 msgid "Which emulator each platform uses. One this device doesn't have is offered in Settings → Emulation."
+msgstr ""
+
+#: apps/desktop/src/views/settings/LaunchersSettings.tsx
+msgid "Which launchers are scanned"
+msgstr ""
+
+#: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+msgid "Which launchers are scanned: <0>Launchers</0>"
 msgstr ""
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
