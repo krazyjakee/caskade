@@ -63,20 +63,21 @@ const installerSchema = {
       $ref: "#/$defs/WindowsMethod",
     },
     execution: {
-      title: "Execution policy",
+      title: "Running installers",
       description:
         "Allow installer processes, ask before running them, or only use plans that do not execute code.",
       $ref: "#/$defs/ExecutionPolicy",
     },
     downloadExecution: {
-      title: "Execution policy for downloads",
+      title: "Running installers from downloads",
       description:
         "For games downloaded from a link (deep links, pasted or dropped URLs, magnet links and torrents, updates). The stricter of this and the execution policy applies.",
       $ref: "#/$defs/ExecutionPolicy",
     },
     askBelowConfidence: {
-      title: "Ask below confidence",
-      description: "Pause a job when its best plan scores below this probability.",
+      title: "Ask when less sure than",
+      description:
+        "Ask before installing when Caskade is less sure than this of how a game installs.",
       type: "number",
       format: "float",
       minimum: 0,
@@ -102,7 +103,7 @@ const installerSchema = {
       $ref: "#/$defs/CompatibilityRunner",
     },
     sourceHandling: {
-      title: "Source handling after install",
+      title: "After installing from a file",
       description:
         "Keep, move to the system trash, or delete the selected local source after a successful managed install. Downloads have their own setting.",
       $ref: "#/$defs/SourceHandling",
@@ -148,9 +149,9 @@ const installerSchema = {
     },
     SourceHandling: {
       oneOf: [
-        { type: "string", const: "keep", title: "Keep source" },
+        { type: "string", const: "keep", title: "Keep the file" },
         { type: "string", const: "trash", title: "Move to trash" },
-        { type: "string", const: "delete", title: "Delete source" },
+        { type: "string", const: "delete", title: "Delete the file" },
       ],
     },
   },

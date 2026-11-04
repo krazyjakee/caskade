@@ -475,8 +475,13 @@ impl DiscoveryController {
             let decision = DiscoveryExclusion {
                 source: entry.source.to_string(),
                 key: entry.key.clone(),
+                title: Some(entry.title.chars().take(512).collect())
+                    .filter(|t: &String| !t.is_empty()),
             };
-            if !decisions.contains(&decision) {
+            if !decisions
+                .iter()
+                .any(|d| d.source == decision.source && d.key == decision.key)
+            {
                 decisions.push(decision);
             }
         }

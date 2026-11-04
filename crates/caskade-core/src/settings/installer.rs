@@ -10,11 +10,11 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "snake_case")]
 pub enum SourceHandling {
     #[default]
-    #[schemars(title = "Keep source")]
+    #[schemars(title = "Keep the file")]
     Keep,
     #[schemars(title = "Move to trash")]
     Trash,
-    #[schemars(title = "Delete source")]
+    #[schemars(title = "Delete the file")]
     Delete,
 }
 
@@ -24,30 +24,30 @@ pub struct InstallerSettings {
     #[schemars(title = "Windows install method")]
     /// Run supported installers on Windows, or prefer extracting their files.
     pub windows_method: WindowsMethod,
-    #[schemars(title = "Execution policy")]
-    /// Allow installer processes, ask before running them, or only use plans that do not execute code.
+    #[schemars(title = "Running installers")]
+    /// Let installers run, ask before each one, or only install games that need no installer program.
     pub execution: ExecutionPolicy,
-    #[schemars(title = "Execution policy for downloads")]
-    /// For games downloaded from a link (deep links, pasted or dropped URLs, magnet links and torrents, updates). The stricter of this and the execution policy applies.
+    #[schemars(title = "Running installers from downloads")]
+    /// For games downloaded from a link (deep links, pasted or dropped addresses, magnet links and torrents, updates). The stricter of this and Running installers applies.
     pub download_execution: ExecutionPolicy,
-    #[schemars(title = "Ask below confidence", range(min = 0, max = 1))]
-    /// Pause a job when its best plan scores below this probability.
+    #[schemars(title = "Ask when less sure than", range(min = 0, max = 1))]
+    /// Ask before installing when Caskade is less sure than this of how a game installs.
     pub ask_below_confidence: f32,
     #[schemars(
         title = "Installer language",
         length(max = 64),
         regex(pattern = "^[A-Za-z0-9_-]*$")
     )]
-    /// Leave empty for the installer's default. Unsupported language switches are reported by its handler.
+    /// Leave empty for the installer's default. Caskade says when an installer can't switch language.
     pub language: String,
     #[schemars(title = "Let installers create shortcuts")]
-    /// Allow installer-created shortcuts where the package supports this preference.
+    /// Let installers add their own shortcuts, where they offer the choice.
     pub let_installers_create_shortcuts: bool,
     #[schemars(title = "Compatibility runner")]
-    /// Proton uses umu. GE-Proton and Steam Proton use detected builds; system Wine uses the detected Wine executable. Applies to new jobs.
+    /// Proton uses umu. GE-Proton and Steam Proton use detected builds; system Wine uses the detected Wine executable. Applies to installs started after a change.
     pub compatibility_runner: CompatibilityRunner,
-    #[schemars(title = "Source handling after install")]
-    /// Keep, move to the system trash, or delete the selected local source after a successful managed install. Downloads have their own setting.
+    #[schemars(title = "After installing from a file")]
+    /// Keep the file you installed from, move it to the system trash, or delete it. Downloads have their own setting.
     pub source_handling: SourceHandling,
     #[schemars(title = "Keep downloads")]
     /// Retain downloaded installers after successful installation.

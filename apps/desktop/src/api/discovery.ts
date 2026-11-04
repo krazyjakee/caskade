@@ -50,7 +50,7 @@ export interface DiscoveryPreferences {
   };
   osChecks: Record<string, Record<string, boolean>>;
   scanPaths?: string[];
-  ignoredEntries?: { source: string; key: string }[];
+  ignoredEntries?: { source: string; key: string; title?: string }[];
 }
 export interface DiscoveryApi {
   status(): Promise<DiscoverySnapshot>;

@@ -165,51 +165,51 @@ fn marked() -> Vec<crate::i18n::Message> {
         ),
         msgp!("settings", "Run the installer"),
         msgp!("settings", "Extract the files"),
-        msgp!("settings", "Execution policy"),
+        msgp!("settings", "Running installers"),
         msgp!("settings", "Never run installers"),
         msgp!("settings", "Ask first"),
         msgp!("settings", "Allow"),
         msgp!(
             "settings",
-            "Allow installer processes, ask before running them, or only use plans that do not execute code."
+            "Let installers run, ask before each one, or only install games that need no installer program."
         ),
-        msgp!("settings", "Execution policy for downloads"),
+        msgp!("settings", "Running installers from downloads"),
         msgp!(
             "settings",
-            "For games downloaded from a link (deep links, pasted or dropped URLs, magnet links and torrents, updates). The stricter of this and the execution policy applies."
+            "For games downloaded from a link (deep links, pasted or dropped addresses, magnet links and torrents, updates). The stricter of this and Running installers applies."
         ),
-        msgp!("settings", "Ask below confidence"),
+        msgp!("settings", "Ask when less sure than"),
         msgp!(
             "settings",
-            "Pause a job when its best plan scores below this probability."
+            "Ask before installing when Caskade is less sure than this of how a game installs."
         ),
         msgp!("settings", "Installer language"),
         msgp!(
             "settings",
-            "Leave empty for the installer's default. Unsupported language switches are reported by its handler."
+            "Leave empty for the installer's default. Caskade says when an installer can't switch language."
         ),
         msgp!("settings", "Let installers create shortcuts"),
         msgp!(
             "settings",
-            "Allow installer-created shortcuts where the package supports this preference."
+            "Let installers add their own shortcuts, where they offer the choice."
         ),
         msgp!("settings", "Compatibility runner"),
         msgp!(
             "settings",
-            "Proton uses umu. GE-Proton and Steam Proton use detected builds; system Wine uses the detected Wine executable. Applies to new jobs."
+            "Proton uses umu. GE-Proton and Steam Proton use detected builds; system Wine uses the detected Wine executable. Applies to installs started after a change."
         ),
         msgp!("settings", "Proton via umu"),
         msgp!("settings", "GE-Proton via umu"),
         msgp!("settings", "Steam Proton via umu"),
         msgp!("settings", "System Wine"),
-        msgp!("settings", "Source handling after install"),
+        msgp!("settings", "After installing from a file"),
         msgp!(
             "settings",
-            "Keep, move to the system trash, or delete the selected local source after a successful managed install. Downloads have their own setting."
+            "Keep the file you installed from, move it to the system trash, or delete it. Downloads have their own setting."
         ),
-        msgp!("settings", "Keep source"),
+        msgp!("settings", "Keep the file"),
         msgp!("settings", "Move to trash"),
-        msgp!("settings", "Delete source"),
+        msgp!("settings", "Delete the file"),
         msgp!("settings", "Keep downloads"),
         msgp!(
             "settings",

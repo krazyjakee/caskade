@@ -128,7 +128,7 @@ function EmulatorForm({
     <SettingsSection
       icon={Cpu}
       title={emulator ? emulator.name : t`Add emulator`}
-      description={t`Installation status is checked by the backend after saving; configuration does not run an emulator.`}
+      description={t`Caskade checks the emulator is there when you save. Nothing here starts it.`}
     >
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <TextField
@@ -137,7 +137,7 @@ function EmulatorForm({
           onChange={(name) => setDraft((old) => ({ ...old, name }))}
         />
         <Select
-          label={t`Emulator specification`}
+          label={t`Which emulator`}
           value={draft.definition ?? "none"}
           options={[
             { id: "none", label: t`None (custom)` },
@@ -206,8 +206,8 @@ function EmulatorForm({
       {emulator && emulator.definition !== draft.definition && (
         <p className="mt-3 text-sm text-warning">
           <Trans>
-            Saving a different specification removes its old built-in profiles. Custom profiles are
-            kept.
+            Saving another emulator here removes the old one's built-in profiles. Your own profiles
+            are kept.
           </Trans>
         </p>
       )}
@@ -360,7 +360,7 @@ export function ConfiguredEmulators({
           <SettingsSection
             icon={Layers}
             title={t({ message: "Profiles", context: "emulator profiles" })}
-            description={t`Availability, required files and command lines come from the backend for this installation.`}
+            description={t`Whether each profile can play, the files it needs and the command it runs.`}
           >
             {!selected.profiles.length && (
               <p className="mt-3 rounded-control border border-dashed border-border p-5 text-sm text-fg-subtle">
@@ -457,8 +457,8 @@ export function ConfiguredEmulators({
                       {resolved.drift && (
                         <p data-part="drift" className="text-sm text-warning">
                           <Trans>
-                            The specification's arguments changed since this Replace override was
-                            saved. Edit the profile to review them.
+                            Caskade's arguments for this emulator changed since you replaced them.
+                            Edit the profile to review them.
                           </Trans>
                         </p>
                       )}
@@ -502,7 +502,7 @@ export function ConfiguredEmulators({
                   </Button>
                   <MenuPopover>
                     <Menu
-                      aria-label={t`Available definition profiles`}
+                      aria-label={t`Available built-in profiles`}
                       onAction={(name) =>
                         setEdit({
                           emulatorId: selected.id,

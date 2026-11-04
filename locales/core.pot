@@ -3434,7 +3434,7 @@ msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
-msgid "Execution policy"
+msgid "Running installers"
 msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
@@ -3454,27 +3454,27 @@ msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
-msgid "Allow installer processes, ask before running them, or only use plans that do not execute code."
+msgid "Let installers run, ask before each one, or only install games that need no installer program."
 msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
-msgid "Execution policy for downloads"
+msgid "Running installers from downloads"
 msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
-msgid "For games downloaded from a link (deep links, pasted or dropped URLs, magnet links and torrents, updates). The stricter of this and the execution policy applies."
+msgid "For games downloaded from a link (deep links, pasted or dropped addresses, magnet links and torrents, updates). The stricter of this and Running installers applies."
 msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
-msgid "Ask below confidence"
+msgid "Ask when less sure than"
 msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
-msgid "Pause a job when its best plan scores below this probability."
+msgid "Ask before installing when Caskade is less sure than this of how a game installs."
 msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
@@ -3484,7 +3484,7 @@ msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
-msgid "Leave empty for the installer's default. Unsupported language switches are reported by its handler."
+msgid "Leave empty for the installer's default. Caskade says when an installer can't switch language."
 msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
@@ -3494,7 +3494,7 @@ msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
-msgid "Allow installer-created shortcuts where the package supports this preference."
+msgid "Let installers add their own shortcuts, where they offer the choice."
 msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
@@ -3504,7 +3504,7 @@ msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
-msgid "Proton uses umu. GE-Proton and Steam Proton use detected builds; system Wine uses the detected Wine executable. Applies to new jobs."
+msgid "Proton uses umu. GE-Proton and Steam Proton use detected builds; system Wine uses the detected Wine executable. Applies to installs started after a change."
 msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
@@ -3529,17 +3529,17 @@ msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
-msgid "Source handling after install"
+msgid "After installing from a file"
 msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
-msgid "Keep, move to the system trash, or delete the selected local source after a successful managed install. Downloads have their own setting."
+msgid "Keep the file you installed from, move it to the system trash, or delete it. Downloads have their own setting."
 msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
-msgid "Keep source"
+msgid "Keep the file"
 msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
@@ -3549,7 +3549,7 @@ msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs
 msgctxt "settings"
-msgid "Delete source"
+msgid "Delete the file"
 msgstr ""
 
 #: crates/caskade-core/src/settings/schema_text.rs

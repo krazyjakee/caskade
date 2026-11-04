@@ -21,7 +21,7 @@ import type { DeviceKind, DeviceOs, PeerLink, Transfer } from "../../api/sync";
 const links: Record<PeerLink, { label: MessageDescriptor; icon: LucideIcon; tone: string }> = {
   lan: { label: msg`Local network`, icon: Network, tone: "text-status-installed" },
   direct: { label: msg`Internet, direct`, icon: Globe, tone: "text-accent-alt" },
-  relay: { label: msg`Through a relay`, icon: RadioTower, tone: "text-warning" },
+  relay: { label: msg`Internet, through a server`, icon: RadioTower, tone: "text-warning" },
   offline: { label: msg`Offline`, icon: Moon, tone: "text-fg-subtle" },
 };
 
@@ -75,7 +75,7 @@ export function TransferProgress({ transfer }: { transfer: Transfer }) {
   const speed = formatSize(transfer.bytesPerSecond);
   const note =
     transfer.state === "waitingDirect"
-      ? t`Waiting for a direct connection. Game files don't go through relays.`
+      ? t`Waiting for a direct connection. Game files only travel directly between devices.`
       : transfer.state === "done"
         ? t`Done: ${total}`
         : transfer.state === "failed"

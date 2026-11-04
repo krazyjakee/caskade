@@ -99,7 +99,7 @@ it("pairs with a pasted link, makes one to copy, and forgets a device", async ()
   );
 });
 
-it("changes what syncs, Never use relays and downloads from my devices", async () => {
+it("changes what syncs, Connect only directly and downloads from my devices", async () => {
   const sync = createSyncFixtureApi();
   const app = devices("/settings?tab=devices", sync);
   const row = (await screen.findByText("Play history")).closest('[data-cs="setting-row"]');
@@ -110,7 +110,7 @@ it("changes what syncs, Never use relays and downloads from my devices", async (
     };
     expect(value.categories.playSessions).toBe("thisDeviceOnly");
   });
-  fireEvent.click(screen.getByRole("switch", { name: "Never use relays" }));
+  fireEvent.click(screen.getByRole("switch", { name: "Connect only directly" }));
   await waitFor(async () => {
     const value = app.settings.values["core.sync"] as { neverRelay: boolean };
     expect(value.neverRelay).toBe(true);
@@ -136,7 +136,10 @@ it("shows a standard account the devices without the changes", async () => {
   );
   expect(screen.queryByText("Pair a device")).toBeNull();
   expect(screen.queryByRole("button", { name: /Forget/ })).toBeNull();
-  expect(screen.getByRole("switch", { name: "Never use relays" })).toHaveProperty("disabled", true);
+  expect(screen.getByRole("switch", { name: "Connect only directly" })).toHaveProperty(
+    "disabled",
+    true,
+  );
   for (const radio of screen.getAllByRole("radio", { name: "This device only" })) {
     expect(radio).toHaveProperty("disabled", true);
   }

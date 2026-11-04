@@ -262,7 +262,7 @@ export function StoragePanel({ api }: { api: StorageApi }) {
                 setSelected(root.root.id);
                 setPath("");
                 setLabel("");
-                setMessage(t`Location registered; existing install manifests were scanned.`);
+                setMessage(t`Location added. Caskade looked there for games it installed before.`);
               })
             }
           >

@@ -147,7 +147,7 @@ it("Browse fills the custom folder field, a cancel changes nothing, and Add fold
   const settings = settingsBackend("core.discovery");
   renderPanel(settings, <LibraryDiscoverySettings />);
   const field = (await screen.findByRole("textbox", {
-    name: "Absolute custom folder",
+    name: "Folder to search",
   })) as HTMLInputElement;
   dialogOpen.mockResolvedValueOnce(null);
   fireEvent.click(screen.getByRole("button", { name: "Browse…" }));
@@ -170,10 +170,10 @@ it("Browse fills the custom folder field, a cancel changes nothing, and Add fold
 it("a folder dropped on the custom folder field fills it in", async () => {
   const settings = settingsBackend("core.discovery");
   const drops = renderPanel(settings, <LibraryDiscoverySettings />, () =>
-    screen.getByRole("textbox", { name: "Absolute custom folder" }),
+    screen.getByRole("textbox", { name: "Folder to search" }),
   );
   const field = (await screen.findByRole("textbox", {
-    name: "Absolute custom folder",
+    name: "Folder to search",
   })) as HTMLInputElement;
   drops.drop("/run/media/player/SD Card/Games");
   await waitFor(() => expect(field.value).toBe("/run/media/player/SD Card/Games"));

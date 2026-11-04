@@ -144,17 +144,21 @@ export const settingsSearchIndex: readonly SettingsSearchEntry[] = [
   },
   {
     tab: "library-discovery",
-    label: msg`Launchers and operating-system checks`,
-    words: msg`launchers, Steam, GOG, Epic`,
+    label: msg`Operating-system checks`,
+    words: msg`desktop entries, Flatpak, Start Menu, Wine, Proton`,
   },
   { tab: "library-discovery", label: msg`Optional deep scans` },
-  { tab: "library-discovery", label: msg`Absolute custom folder`, words: msg`scan folder` },
+  {
+    tab: "library-discovery",
+    label: msg`Folder to search`,
+    words: msg`scan folder, custom folder`,
+  },
   { tab: "library-discovery", label: msg`Ignored results` },
   { tab: "library-discovery", label: msg`Hidden games`, words: msg`unhide` },
   // Launchers
   {
     tab: "launchers",
-    label: msg`Launcher Sources`,
+    label: msg`Launchers`,
     words: msg`launchers, Steam, GOG, Epic, Heroic, Lutris`,
   },
   // Scripts
@@ -214,7 +218,7 @@ export const settingsSearchIndex: readonly SettingsSearchEntry[] = [
     tab: "installer",
     label: msg({ message: "Windows install method", context: "settings" }),
   },
-  { tab: "installer", label: msg({ message: "Execution policy", context: "settings" }) },
+  { tab: "installer", label: msg({ message: "Running installers", context: "settings" }) },
   {
     tab: "installer",
     label: msg`Magnet links and torrent files`,
@@ -249,7 +253,11 @@ export const settingsSearchIndex: readonly SettingsSearchEntry[] = [
   { tab: "devices", label: msg`Saves`, words: msg`save games, cloud saves, save sync` },
   { tab: "devices", label: msg`Sync saves` },
   { tab: "devices", label: msg`Versions to keep`, words: msg`save versions, save history` },
-  { tab: "devices", label: msg`Never use relays`, words: msg`network, internet` },
+  {
+    tab: "devices",
+    label: msg`Connect only directly`,
+    words: msg`network, internet, relay, server`,
+  },
   { tab: "devices", label: msg`Downloads from my devices`, words: msg`peer downloads` },
   { tab: "devices", label: msg`Accept copies from my devices` },
   { tab: "devices", label: msg`Play requests from my devices`, words: msg`remote play` },

@@ -1,3 +1,6 @@
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react/macro";
 import type { DiscoverySnapshot } from "../../api/discovery";
 
 type Detected = DiscoverySnapshot["launchers"][number];
@@ -72,3 +75,29 @@ export const withLauncher = (
   ...enabled,
   ...Object.fromEntries(launcher.sources.map((source) => [source, on])),
 });
+
+/** The system's own records, which discovery reads besides launchers'. */
+const systemSources: Record<string, MessageDescriptor> = {
+  desktop: msg({ message: "Desktop entries", context: "discovery source" }),
+  flatpak: msg({ message: "Flatpak apps", context: "discovery source" }),
+  snap: msg({ message: "Snap apps", context: "discovery source" }),
+  prefixes: msg({ message: "Wine and Proton prefixes", context: "discovery source" }),
+  startmenu: msg({ message: "Start Menu shortcuts", context: "discovery source" }),
+  uninstall: msg({ message: "Installed programs", context: "discovery source" }),
+  gameux: msg({ message: "Game Explorer", context: "discovery source" }),
+  xbox: msg({ message: "Xbox and packaged apps", context: "discovery source" }),
+  "macos.apps": msg({ message: "Applications", context: "discovery source" }),
+  "steam.shortcuts": msg({ message: "Steam shortcuts", context: "discovery source" }),
+  deep: msg({ message: "Deep scans", context: "discovery source" }),
+};
+
+/** A discovery source's name for people: its launcher's, or the system
+ * record's. An unknown id shows as it is. */
+export function useSourceName() {
+  const { t } = useLingui();
+  return (source: string) => {
+    const system = systemSources[source];
+    if (system) return t(system);
+    return known.find((launcher) => launcher.sources.includes(source))?.name ?? source;
+  };
+}

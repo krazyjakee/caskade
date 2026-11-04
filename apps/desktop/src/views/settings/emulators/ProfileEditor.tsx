@@ -70,7 +70,7 @@ export function ProfileEditor({
   close: () => void;
 }) {
   const { t } = useLingui();
-  const unknownProfile = t`Unknown specification profile`;
+  const unknownProfile = t`Unknown built-in profile`;
   const noExtensions = t({ message: "None", context: "file extensions" });
   const noArgs = t({ message: "(none)", comment: "No arguments" });
   const api = useEmulationApi();
@@ -126,12 +126,12 @@ export function ProfileEditor({
     ...snapshot.variables,
     ...(snapshot.definitions.find((row) => row.id === emulator.definition)?.vars ?? [])
       .filter((name) => !snapshot.variables.some((row) => row.name === name))
-      .map((name) => ({ name, description: t`Emulator specification variable` })),
+      .map((name) => ({ name, description: t`Set by Caskade for this emulator` })),
   ];
   return (
     <SettingsSection
       title={title}
-      description={t`Save validates the profile in the backend. Editing or previewing does not launch an emulator.`}
+      description={t`Caskade checks the profile when you save. Nothing here starts the emulator.`}
       aside={
         <Button
           variant="ghost"
@@ -327,7 +327,7 @@ export function ProfileEditor({
               >
                 <p>
                   <Trans>
-                    The specification's arguments changed since this Replace override was saved.
+                    Caskade's arguments for this emulator changed since you replaced them.
                   </Trans>
                 </p>
                 <p className="break-all font-mono text-xs text-fg-muted">
@@ -340,10 +340,10 @@ export function ProfileEditor({
                 </p>
                 <p className="break-all font-mono text-xs text-fg-muted">
                   {t({
-                    message: `Specification now: ${{
+                    message: `Caskade's now: ${{
                       args: argvText(drift.definitionArgs) || noArgs,
                     }}`,
-                    comment: "The emulator specification's arguments now",
+                    comment: "The arguments Caskade's definition of the emulator gives now",
                   })}
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -394,7 +394,7 @@ export function ProfileEditor({
               mono
               value={draft.argsText}
               onChange={(argsText) => setDraft((old) => ({ ...old, argsText }))}
-              description={t`The backend splits this into argv tokens and validates variables; no shell is invoked.`}
+              description={t`Split into arguments as a shell would, but no shell runs. Quote a value that has spaces.`}
             />
             <div data-part="variables" className="flex flex-wrap gap-1.5">
               {variables.map((variable) => (
@@ -489,7 +489,7 @@ export function ProfileEditor({
         <div className="grid gap-4 md:grid-cols-2">
           <TextField
             label={t`Before launch`}
-            description={t`Optional argv command; a non-zero exit cancels launch.`}
+            description={t`Optional. A command to run first; if it fails, the game doesn't start.`}
             mono
             value={draft.beforeText}
             onChange={(beforeText) => setDraft((old) => ({ ...old, beforeText }))}

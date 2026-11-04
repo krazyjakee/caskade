@@ -191,6 +191,11 @@ pub struct DiscoveryExclusion {
     pub source: String,
     #[schemars(length(min = 1, max = 4096))]
     pub key: String,
+    /// The game's title when the decision was made, so Settings can name
+    /// it (#53). Decisions from before it have none.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(length(max = 512))]
+    pub title: Option<String>,
 }
 impl Default for DiscoverySettings {
     fn default() -> Self {

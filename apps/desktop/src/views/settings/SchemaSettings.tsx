@@ -68,7 +68,8 @@ export function SchemaSettings({
   icon?: LucideIcon;
   resetLabel?: string;
 }) {
-  const { t } = useLingui();
+  const { t, i18n } = useLingui();
+  const percent = new Intl.NumberFormat(i18n.locale, { style: "percent" });
   const definition = useSettingsDefinition(namespace);
   const { settings, setSettings, saving, error, reload } =
     useSettingsSection<Record<string, unknown>>(namespace);
@@ -145,6 +146,12 @@ export function SchemaSettings({
                   minValue={schema.minimum}
                   maxValue={schema.maximum}
                   step={schema.type === "integer" ? 1 : 0.05}
+                  // A share from 0 to 1 reads as a percentage (#53).
+                  format={
+                    schema.type === "number" && schema.minimum === 0 && schema.maximum === 1
+                      ? (share) => percent.format(share)
+                      : undefined
+                  }
                   onChange={(next) => set(key, next)}
                   className="w-48"
                 />
@@ -157,6 +164,11 @@ export function SchemaSettings({
                     const parsed = Number(next);
                     if (next.trim() && Number.isFinite(parsed)) set(key, parsed);
                   }}
+                  // What isn't a number isn't saved, and says so.
+                  validationBehavior="aria"
+                  validate={(next) =>
+                    next.trim() && Number.isFinite(Number(next)) ? null : t`Enter a number.`
+                  }
                   className="w-48"
                 />
               ) : schema.type === "string" && typeof value === "string" ? (

@@ -19,6 +19,7 @@ import { useDropZone } from "../../drop/DropProvider";
 import { useDiscovery } from "./discovery/DiscoveryProvider";
 import { HiddenGames } from "./discovery/HiddenGames";
 import { ReviewList } from "./discovery/ReviewList";
+import { useSourceName } from "./launchers";
 import { ResetDefaults } from "./ResetDefaults";
 import { SettingsFeedback, SettingsLoading, useSettingsSection } from "./useSettings";
 
@@ -60,6 +61,7 @@ export function LibraryDiscoverySettings() {
   const preferences = useSettingsSection<DiscoveryPreferences>("core.discovery");
   const history = useSettingsSection<{ seedPlaytime: boolean }>("discovery.import");
   const discovery = useDiscovery();
+  const sourceName = useSourceName();
   const [path, setPath] = useState("");
   const picker = usePathPicker();
   // A folder dropped on the field fills it in; Add folder still adds it.
@@ -111,11 +113,11 @@ export function LibraryDiscoverySettings() {
       <SettingsSection
         icon={ScanSearch}
         title={t`Automatic Library Discovery`}
-        description={t`Read launcher and system metadata without running launcher commands.`}
+        description={t`Finds the games your launchers and your system already know about. It reads their records and never starts a launcher.`}
       >
         <SettingRow
           label={t`Enable library discovery`}
-          description={t`Controls manual scans, scheduled refresh and folder watching.`}
+          description={t`Off stops every scan, Scan now included, and watching folders.`}
         >
           <Switch
             isSelected={settings.enabled}
@@ -141,7 +143,7 @@ export function LibraryDiscoverySettings() {
               ? [
                   phase ? t(phase) : snapshot.phase,
                   t({
-                    message: `${{ found: snapshot.found }} groups found`,
+                    message: `${{ found: snapshot.found }} games found`,
                     comment: "Games discovery found, counting each game's copies once",
                   }),
                   t`${{ imported: snapshot.imported }} imported`,
@@ -167,11 +169,11 @@ export function LibraryDiscoverySettings() {
         <SettingsSection
           icon={RefreshCw}
           title={t`Scan behaviour`}
-          description={t`A full scan reconciles missing records; incremental watching picks up local changes.`}
+          description={t`A full scan looks everywhere again and notices games that were removed. Watching picks up changes as they happen.`}
         >
           <SettingRow
             label={t`Full scan on startup`}
-            description={t`Reconcile the library when Caskade starts. Watching may still perform its own initial check.`}
+            description={t`Look everywhere again each time Caskade starts.`}
           >
             <Switch
               isSelected={settings.scanOnStartup}
@@ -196,7 +198,7 @@ export function LibraryDiscoverySettings() {
           </SettingRow>
           <SettingRow
             label={t`Watch library folders`}
-            description={t`Monitor metadata paths, including locations for launchers installed later.`}
+            description={t`Notice games installed or removed while Caskade runs, in launchers installed later too.`}
           >
             <Switch
               isSelected={settings.watchFolders}
@@ -206,7 +208,7 @@ export function LibraryDiscoverySettings() {
           {history.settings && (
             <SettingRow
               label={t`Import existing play history`}
-              description={t`Seed known launcher playtime on first import, without duplicating later sessions.`}
+              description={t`When a game joins your library, bring in the play time its launcher recorded. Time is never counted twice.`}
             >
               <Switch
                 isSelected={history.settings.seedPlaytime}
@@ -243,7 +245,7 @@ export function LibraryDiscoverySettings() {
         <SettingsSection
           icon={Folder}
           title={t`Optional deep scans`}
-          description={t`All deep scans are off by default. Canonical identity merging always remains enabled.`}
+          description={t`Slower searches for games that no launcher knows about. Each is off until you turn it on.`}
         >
           {deepOptions.map(([key, label, description]) => (
             <SettingRow key={key} label={t(label)} description={t(description)}>
@@ -260,11 +262,15 @@ export function LibraryDiscoverySettings() {
           ))}
           <div ref={drop.ref} className="mt-4">
             <TextField
-              label={t`Absolute custom folder`}
+              label={t`Folder to search`}
               value={path}
               onChange={setPath}
               mono
-              description={t`Enter a full path for this device. No folders are created or modified.`}
+              description={
+                settings.deepScans.customFolders
+                  ? t`A full path on this device. Caskade only reads it.`
+                  : t`A full path on this device. Folders are searched while Custom folders is on.`
+              }
               action={
                 <span className="flex gap-2">
                   <Button
@@ -326,7 +332,7 @@ export function LibraryDiscoverySettings() {
         <>
           <SettingsSection
             title={t`Last source reports`}
-            description={t`Completion counts, warnings and errors from the backend.`}
+            description={t`What each source found in the last scan, and any problems.`}
           >
             <ul className="mt-3 space-y-3">
               {snapshot.sources.map((source) => {
@@ -335,9 +341,9 @@ export function LibraryDiscoverySettings() {
                   <li key={source.source} className="rounded-control border border-border p-3">
                     <p className="text-sm font-medium">
                       {t({
-                        message: `${{ source: source.source }}: ${{ games }} · ${{ duration: source.durationMs }} ms`,
+                        message: `${{ source: sourceName(source.source) }}: ${{ games }}`,
                         comment:
-                          "A discovery source's last report: its name, the games it found and how long it took",
+                          "A discovery source's last report: its name and the games it found",
                       })}
                     </p>
                     {source.error && <p className="mt-1 text-sm text-danger">{source.error}</p>}
@@ -368,16 +374,23 @@ export function LibraryDiscoverySettings() {
       <HiddenGames />
       <SettingsSection
         title={t`Ignored results`}
-        description={t`These source records are excluded from later discovery scans.`}
+        description={t`Games you chose to ignore. Scans leave them out of your library.`}
       >
+        {!settings.ignoredEntries?.length && (
+          <p className="mt-3 text-sm text-fg-muted">
+            <Trans>Nothing ignored.</Trans>
+          </p>
+        )}
         <ul className="mt-3 space-y-2">
           {settings.ignoredEntries?.map((item) => (
             <li
               key={`${item.source}:${item.key}`}
               className="flex items-center justify-between gap-3"
             >
-              <span className="break-all font-mono text-xs">
-                {item.source}: {item.key}
+              {/* Decisions from before titles were kept show the record's key. */}
+              <span className="min-w-0">
+                <span className="block text-sm">{item.title ?? item.key}</span>
+                <span className="block text-xs text-fg-muted">{sourceName(item.source)}</span>
               </span>
               <Button
                 size="sm"

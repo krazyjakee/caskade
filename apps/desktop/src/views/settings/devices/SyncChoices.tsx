@@ -128,7 +128,7 @@ export function SyncChoices() {
   const sync = useSettingsSection<SyncSettingsValue>("core.sync");
   const { settings, setSettings, saving } = sync;
   const title = t`What syncs`;
-  const description = t`Changes made on any device reach the others when they next connect. Where two devices changed the same thing, the later change wins. This device only stops this device sending and taking it in.`;
+  const description = t`Changes made on any device reach the others when they next connect. Where two devices changed the same thing, the later change wins. This device only keeps a kind out of sync here: this device neither sends its changes nor takes the others'.`;
   if (!settings) {
     // Loading says nothing; a failed load says why, with Try again.
     return sync.loadError ? (

@@ -139,7 +139,7 @@ export function PreviewTokens({
           <p className="mb-2 break-all text-xs text-fg-subtle">
             <Trans>Sample ROM: {preview.sampleRom}</Trans>
           </p>
-          <ol aria-label={t`Resolved argv`} className="flex flex-wrap gap-1.5 font-mono text-xs">
+          <ol aria-label={t`Command line`} className="flex flex-wrap gap-1.5 font-mono text-xs">
             {[preview.program, ...preview.args].map((token, index) => (
               <li
                 // biome-ignore lint/suspicious/noArrayIndexKey: position is the identity of an argv token.

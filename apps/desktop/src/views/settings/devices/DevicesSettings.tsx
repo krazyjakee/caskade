@@ -188,8 +188,8 @@ function ThisDeviceSection() {
       <div className="mt-4">
         <SettingRow
           icon={ShieldCheck}
-          label={t`Never use relays`}
-          description={t`Devices connect only directly: on this network, or over the internet where the routers allow it. Some devices away from home may then not connect.`}
+          label={t`Connect only directly`}
+          description={t`Away from home, devices that can't reach each other directly go through a server that can't read what passes. On, they connect only directly: on this network, or over the internet where the routers allow it, and some may then not connect.`}
         >
           <Switch
             isSelected={neverRelay}
@@ -222,7 +222,7 @@ function ThisDeviceSection() {
         <SettingRow
           icon={Network}
           label={t`Downloads from my devices`}
-          description={t`Get a download from another of your devices on this network when it has the same file, before the internet. Game files never go through a relay.`}
+          description={t`Get a download from another of your devices on this network when it has the same file, before the internet. Game files only ever travel directly between your devices.`}
         >
           <Switch
             isSelected={sync.settings?.peerDownloads ?? true}

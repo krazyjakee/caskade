@@ -1,5 +1,5 @@
 import { Button, StatusDot, Switch } from "@caskade/ui";
-import type { MessageDescriptor } from "@lingui/core";
+import { i18n, type MessageDescriptor } from "@lingui/core";
 import { msg, t as translate } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -17,6 +17,7 @@ import { AddonCatalogue } from "../../components/addons/AddonCatalogue";
 import { usePathPicker } from "../../components/pathBrowser/PathPicker";
 import { useDropZone } from "../../drop/DropProvider";
 import { PluginSettingsPages } from "../../plugins/PluginViews";
+import { hookNames, providerName, slotName } from "./pluginTerms";
 
 type Permissions = NonNullable<PluginSummary["permissions"]>;
 
@@ -53,12 +54,20 @@ function contributionLines(plugin: PluginSummary): string[] {
   const contributes = plugin.contributes;
   if (!contributes) return [];
   const lines: string[] = [];
+  // Ids in words (#53); `i18n._` because this runs while rendering.
+  const say = (descriptor: MessageDescriptor) => i18n._(descriptor);
   for (const view of contributes.views) lines.push(translate`View: ${{ title: view.title }}`);
-  for (const slot of contributes.slots) lines.push(`${slot.slot}: ${slot.title ?? slot.id}`);
-  if (contributes.hooks.length > 0)
-    lines.push(translate`Hooks: ${{ hooks: contributes.hooks.join(", ") }}`);
+  for (const slot of contributes.slots)
+    lines.push(`${slotName(say, slot.slot)}: ${slot.title ?? slot.id}`);
+  const { changes, hears } = hookNames(say, contributes.hooks);
+  if (changes.length > 0) lines.push(translate`Can change ${{ what: changes.join(", ") }}`);
+  if (hears.length > 0) lines.push(translate`Is told about ${{ what: hears.join(", ") }}`);
   if (contributes.providers.length > 0)
-    lines.push(translate`Provides: ${{ providers: contributes.providers.join(", ") }}`);
+    lines.push(
+      translate`Provides ${{
+        providers: contributes.providers.map((id) => providerName(say, id)).join(", "),
+      }}`,
+    );
   if (contributes.settings) lines.push(translate`Settings page`);
   return lines;
 }

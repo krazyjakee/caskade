@@ -141,7 +141,7 @@ it("renders actual backend device/detection, reports and classifier evidence", a
   await screen.findByText("Possible Fixture Game");
   // Launchers are switched on their own page (#48); this one links there.
   expect(screen.queryByRole("checkbox", { name: "steam" })).toBeNull();
-  expect(screen.getByText("desktop: 1 game · 12 ms")).toBeTruthy();
+  expect(screen.getByText("Desktop entries: 1 game")).toBeTruthy();
   expect(screen.getByText("Skipped malformed fixture")).toBeTruthy();
   expect(screen.getByText("Unity engine: +70")).toBeTruthy();
   expect(screen.queryByText("Merge duplicate entries")).toBeNull();
@@ -208,7 +208,7 @@ it("saves every visible scheduling, deep-scan, system check and history switch t
     ).toBe(false),
   );
   expect(api.values["discovery.import"]?.seedPlaytime).toBe(false);
-  fireEvent.change(screen.getByRole("textbox", { name: "Absolute custom folder" }), {
+  fireEvent.change(screen.getByRole("textbox", { name: "Folder to search" }), {
     target: { value: "/fixture/custom-games" },
   });
   fireEvent.click(screen.getByRole("button", { name: "Add folder" }));
@@ -223,14 +223,24 @@ it("persists the refresh interval, re-allows ignored entries and resets discover
   const api = backend();
   const preferences = api.values["core.discovery"];
   if (!preferences) throw new Error("fixture preferences missing");
-  preferences.ignoredEntries = [{ source: "desktop", key: "ignored.desktop" }];
+  preferences.ignoredEntries = [
+    { source: "desktop", key: "ignored.desktop", title: "Old Tool" },
+    { source: "steam", key: "440" },
+  ];
   panel(api);
   await screen.findByText("Possible Fixture Game");
+  // Named by title where the decision kept one, else by its key (#53).
+  const ignored = screen.getByText("Old Tool").closest("li") as HTMLElement;
+  expect(within(ignored).getByText("Desktop entries")).toBeTruthy();
+  const older = screen.getByText("440").closest("li") as HTMLElement;
+  expect(within(older).getByText("Steam")).toBeTruthy();
   fireEvent.click(screen.getByRole("button", { name: /Refresh interval/ }));
   fireEvent.click(await screen.findByRole("option", { name: "Weekly" }));
   await waitFor(() => expect(api.values["core.discovery"]?.refreshInterval).toBe("7d"));
-  fireEvent.click(screen.getByRole("button", { name: "Allow again" }));
+  fireEvent.click(within(ignored).getByRole("button", { name: "Allow again" }));
+  fireEvent.click(within(older).getByRole("button", { name: "Allow again" }));
   await waitFor(() => expect(api.values["core.discovery"]?.ignoredEntries).toEqual([]));
+  await screen.findByText("Nothing ignored.");
   fireEvent.click(screen.getByRole("switch", { name: "Enable library discovery" }));
   await waitFor(() => expect(api.values["core.discovery"]?.enabled).toBe(false));
   expect((screen.getByRole("button", { name: "Scan now" }) as HTMLButtonElement).disabled).toBe(
