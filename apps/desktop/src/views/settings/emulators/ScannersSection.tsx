@@ -260,7 +260,7 @@ function ScannerEditor({
         </p>
       )}
       {profile && (
-        <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-fg-subtle">
+        <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-fg-muted">
           <Trans comment="Followed by the file extensions the scanner's profile matches">
             Matches
           </Trans>
@@ -309,7 +309,7 @@ function ScannerEditor({
           <h3 className="text-sm font-medium">
             <Trans>Exclusions</Trans>
           </h3>
-          <p className="text-xs text-fg-subtle">
+          <p className="text-xs text-fg-muted">
             <Trans>
               Files and folders this scanner always skips. Unticking a game in a review adds it
               here.
@@ -407,7 +407,7 @@ function ExclusionList({
           </li>
         ))}
         {patterns.length === 0 && (
-          <li className="text-xs text-fg-subtle italic">
+          <li className="text-xs text-fg-muted italic">
             <Trans>No exclusions.</Trans>
           </li>
         )}
@@ -616,7 +616,7 @@ export function ScannersSection({ snapshot }: { snapshot: EmulationSnapshot }) {
     <div data-cs="rom-scanners" className="flex flex-col gap-4">
       <SettingsSection
         icon={FolderSearch}
-        title={t`ROM Scanners`}
+        title={t`ROM scanners`}
         description={t`Saved scans that turn ROM folders into games. Multi-disc games and playlists import as one game.`}
         aside={
           <Button
@@ -632,7 +632,7 @@ export function ScannersSection({ snapshot }: { snapshot: EmulationSnapshot }) {
         }
       >
         {rows.length === 0 ? (
-          <p className="mt-3 rounded-control border border-dashed border-border p-5 text-sm text-fg-subtle">
+          <p className="mt-3 rounded-control border border-dashed border-border p-5 text-sm text-fg-muted">
             <Trans>No ROM scanners yet. Add one for each ROM folder.</Trans>
           </p>
         ) : (

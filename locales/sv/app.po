@@ -112,6 +112,16 @@ msgid_plural "# games saved"
 msgstr[0] "# spel sparat"
 msgstr[1] "# spel sparade"
 
+#. placeholder {0}: inspection.missingGames
+#. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+game%27s+folder+isn%27t+on+this+computer%3B+the+next+scan+finds+it+if+it%27s+elsewhere.%7D+other+%7B%23+games%27+folders+aren%27t+on+this+computer%3B+the+next+scan+finds+those+that+are+elsewhere.%7D%7D&pluralize_on=0
+#: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+#, fuzzy
+#| msgid "{0} games' folders aren't on this computer; the next scan finds those that are elsewhere."
+msgid "# game's folder isn't on this computer; the next scan finds it if it's elsewhere."
+msgid_plural "# games' folders aren't on this computer; the next scan finds those that are elsewhere."
+msgstr[0] "{0} spels mappar finns inte på den här datorn; nästa sökning hittar dem som finns någon annanstans."
+msgstr[1] "{0} spels mappar finns inte på den här datorn; nästa sökning hittar dem som finns någon annanstans."
+
 #. placeholder {0}: missing.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+is+no+longer+in+the+library%7D+other+%7B%23+are+no+longer+in+the+library%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
@@ -242,11 +252,6 @@ msgstr ""
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "{0} (copy)"
 msgstr "{0} (kopia)"
-
-#. placeholder {0}: inspection.missingGames
-#: apps/desktop/src/views/settings/backup/BackupSettings.tsx
-msgid "{0} games' folders aren't on this computer; the next scan finds those that are elsewhere."
-msgstr "{0} spels mappar finns inte på den här datorn; nästa sökning hittar dem som finns någon annanstans."
 
 #. placeholder {0}: set.hardcoreUnlocked
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
@@ -1072,6 +1077,7 @@ msgstr "{title}, skärmbilder"
 #: apps/desktop/src/onboarding/run.ts apps/desktop/src/shell/TypeSearch.tsx
 #: apps/desktop/src/views/CollectionView.tsx
 #: apps/desktop/src/views/library/platforms/PlatformGrid.tsx
+#: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
@@ -1605,6 +1611,12 @@ msgstr "Konton"
 msgid "Accounts and PINs"
 msgstr "Konton"
 
+#: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#, fuzzy
+#| msgid "Settings couldn't be loaded"
+msgid "Accounts couldn't be loaded"
+msgstr "Inställningarna kunde inte läsas in"
+
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 #, fuzzy
@@ -1826,7 +1838,9 @@ msgid "Add script"
 msgstr "Lägg till skript"
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
-msgid "Add Server"
+#, fuzzy
+#| msgid "Add Server"
+msgid "Add server"
 msgstr "Lägg till server"
 
 #: apps/desktop/src/components/gameEditor/fields.tsx
@@ -2570,7 +2584,9 @@ msgid "before launch, after exit"
 msgstr "Före start"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
-msgid "Behavior"
+#, fuzzy
+#| msgid "Behavior"
+msgid "Behaviour"
 msgstr "Beteende"
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
@@ -3575,7 +3591,9 @@ msgid "Connect a RomM server to add its ROMs to your library. Each game download
 msgstr "Anslut en RomM-server för att lägga till dess ROM i ditt bibliotek. Varje spel laddas ner första gången du spelar det och körs med dina emulatorer."
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
-msgid "Connect a Server"
+#, fuzzy
+#| msgid "Connect a Server"
+msgid "Connect a server"
 msgstr "Anslut en server"
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
@@ -4383,7 +4401,9 @@ msgstr "Ladda ner och installera"
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-msgid "Download Cache"
+#, fuzzy
+#| msgid "Download Cache"
+msgid "Download cache"
 msgstr "Nedladdningscache"
 
 #. How an emulator Caskade installs is updated
@@ -6793,6 +6813,12 @@ msgstr "Läs in uppackat"
 msgid "Loaded in place from its folder and reloaded on change; not installed"
 msgstr "Läses in direkt från sin mapp och läses in igen vid ändringar; inte installerat"
 
+#: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#, fuzzy
+#| msgid "Loading collections…"
+msgid "Loading accounts…"
+msgstr "Läser in samlingar…"
+
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "Loading achievements…"
 msgstr "Läser in prestationer…"
@@ -7050,7 +7076,9 @@ msgid "Loopback, not counted"
 msgstr "Loopback, räknas inte"
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
-msgid "Made {made} by Caskade {version}, with {games} games."
+#, fuzzy
+#| msgid "Made {made} by Caskade {version}, with {games} games."
+msgid "Made {made} by Caskade {version}, with {gameCount}."
 msgstr "Gjord {made} av Caskade {version}, med {games} spel."
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
@@ -7744,7 +7772,9 @@ msgid "No plugin has settings yet."
 msgstr "Inget tillägg har inställningar än."
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
-msgid "No plugins yet. Install one from a folder, or drop its folder here."
+#, fuzzy
+#| msgid "No plugins yet. Install one from a folder, or drop its folder here."
+msgid "No plugins yet. Get one from the catalogue below, install one from a folder, or drop its folder here."
 msgstr "Inga tillägg än. Installera ett från en mapp, eller släpp dess mapp här."
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
@@ -9722,10 +9752,8 @@ msgctxt "web game"
 msgid "Remove"
 msgstr "Ta bort"
 
-#. placeholder {0}: plugin.name
 #. placeholder {0}: spec.path
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
-#: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Remove {0}"
 msgstr "Ta bort {0}"
 
@@ -9997,10 +10025,6 @@ msgstr "Löst"
 msgid "Resolved command line"
 msgstr "Tolkad kommandorad"
 
-#: apps/desktop/src/views/settings/backup/BackupSettings.tsx
-msgid "Restart and restore"
-msgstr "Starta om och återställ"
-
 #: apps/desktop/src/api/reply.ts
 #, fuzzy
 #| msgid "Restart for Caskade v{version}"
@@ -10185,7 +10209,9 @@ msgstr "ROM-mappar"
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-msgid "ROM Scanners"
+#, fuzzy
+#| msgid "ROM Scanners"
+msgid "ROM scanners"
 msgstr "ROM-skannrar"
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
@@ -10210,19 +10236,17 @@ msgid "RomM platform"
 msgstr "RomM-plattform"
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
-msgid "RomM Server"
-msgstr "RomM-server"
+#, fuzzy
+#| msgid "RomM Servers"
+msgid "RomM server"
+msgstr "RomM-servrar"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 #, fuzzy
 #| msgid "RomM Servers"
 msgid "RomM servers"
-msgstr "RomM-servrar"
-
-#: apps/desktop/src/views/settings/romm/RommPanel.tsx
-#: apps/desktop/src/views/settings/searchIndex.ts
-msgid "RomM Servers"
 msgstr "RomM-servrar"
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
@@ -10369,7 +10393,9 @@ msgid "Save as collection"
 msgstr "Spara som samling"
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
-msgid "Save Changes"
+#, fuzzy
+#| msgid "Save Changes"
+msgid "Save changes"
 msgstr "Spara ändringar"
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
@@ -10454,7 +10480,9 @@ msgid "Save script"
 msgstr "Spara skript"
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
-msgid "Save Server"
+#, fuzzy
+#| msgid "Save Server"
+msgid "Save server"
 msgstr "Spara server"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
@@ -11767,12 +11795,8 @@ msgstr "Inloggningsuppgifterna sparas i systemets nyckelring."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
-msgid "Sync now"
-msgstr "Synka nu"
-
-#: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
-msgid "Sync Now"
+msgid "Sync now"
 msgstr "Synka nu"
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
@@ -11888,7 +11912,9 @@ msgid "Test"
 msgstr "Testa"
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
-msgid "Test Connection"
+#, fuzzy
+#| msgid "Test Connection"
+msgid "Test connection"
 msgstr "Testa anslutningen"
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
@@ -12578,6 +12604,13 @@ msgctxt "job kind"
 msgid "Uninstall"
 msgstr "Avinstallera"
 
+#. placeholder {0}: plugin.name
+#: apps/desktop/src/views/settings/PluginsSettings.tsx
+#, fuzzy
+#| msgid "Uninstall"
+msgid "Uninstall {0}"
+msgstr "Avinstallera"
+
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
 msgid "Uninstall {title}?"
 msgstr "Avinstallera {title}?"
@@ -13239,6 +13272,12 @@ msgstr "Vad ska Caskade leta efter?"
 msgid "What syncs"
 msgstr "Senaste synk"
 
+#: apps/desktop/src/views/settings/GeneralSettings.tsx
+#, fuzzy
+#| msgid "Window behavior while you play."
+msgid "What the window does while you play."
+msgstr "Fönstrets beteende medan du spelar."
+
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "What to back up"
 msgstr "Vad som ska säkerhetskopieras"
@@ -13368,10 +13407,6 @@ msgstr "Wikipedia"
 #: apps/desktop/src/shell/Topbar.tsx
 msgid "Window"
 msgstr "Fönster"
-
-#: apps/desktop/src/views/settings/GeneralSettings.tsx
-msgid "Window behavior while you play."
-msgstr "Fönstrets beteende medan du spelar."
 
 #: apps/desktop/src/components/shares/ShareInfoDetails.tsx
 #, fuzzy
@@ -13611,6 +13646,18 @@ msgstr "ÅÅÅÅ-MM-DD, eller tomt för inget"
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "zoom, text size, bigger"
 msgstr ""
+
+#~ msgid "Restart and restore"
+#~ msgstr "Starta om och återställ"
+
+#~ msgid "RomM Server"
+#~ msgstr "RomM-server"
+
+#~ msgid "RomM Servers"
+#~ msgstr "RomM-servrar"
+
+#~ msgid "Sync Now"
+#~ msgstr "Synka nu"
 
 #, fuzzy
 #~| msgid "Save BIOS folder"

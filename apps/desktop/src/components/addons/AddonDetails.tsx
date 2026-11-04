@@ -106,7 +106,7 @@ export function AddonDetails({
               <p className="text-sm text-fg-muted">
                 {entry.kind === "plugin" ? t`Plugin` : t`Theme`} · {entry.author} · {entry.license}
               </p>
-              <p className="font-mono text-xs text-fg-subtle">{entry.id}</p>
+              <p className="font-mono text-xs text-fg-muted">{entry.id}</p>
             </div>
             <StateBadge item={item} />
           </div>

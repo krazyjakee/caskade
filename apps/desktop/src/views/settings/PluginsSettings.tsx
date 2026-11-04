@@ -128,7 +128,7 @@ export function ReviewDialog({
               <span className="ml-2 font-mono text-sm text-fg-muted">{plugin.version}</span>
             )}
           </Heading>
-          <p className="mt-1 font-mono text-xs text-fg-subtle">{plugin.id}</p>
+          <p className="mt-1 font-mono text-xs text-fg-muted">{plugin.id}</p>
           {plugin.description && <p className="mt-3 text-sm">{plugin.description}</p>}
           {installedVersion && (
             <p className="mt-2 text-sm text-fg-muted">
@@ -299,7 +299,7 @@ function PluginRow({
               isDisabled={remove.isPending}
               onPress={() => remove.mutate()}
             >
-              <Trans>Remove {plugin.name}</Trans>
+              <Trans>Uninstall {plugin.name}</Trans>
             </Button>
             <Button variant="ghost" size="sm" onPress={() => setConfirming(false)}>
               <Trans comment="Cancels uninstalling a plugin">Keep</Trans>
@@ -421,8 +421,11 @@ export function PluginsSettings() {
           </p>
         )}
         {plugins.data && plugins.data.length === 0 && (
-          <p className="rounded-panel border border-dashed border-border-strong p-8 text-center text-sm text-fg-subtle">
-            <Trans>No plugins yet. Install one from a folder, or drop its folder here.</Trans>
+          <p className="rounded-panel border border-dashed border-border-strong p-8 text-center text-sm text-fg-muted">
+            <Trans>
+              No plugins yet. Get one from the catalogue below, install one from a folder, or drop
+              its folder here.
+            </Trans>
           </p>
         )}
         {plugins.data && plugins.data.length > 0 && (

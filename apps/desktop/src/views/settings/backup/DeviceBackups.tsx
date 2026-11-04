@@ -100,7 +100,7 @@ function List({ open, busy }: { open: (path: string) => Promise<void>; busy: boo
         const holder = device.deviceName;
         return (
           <section key={device.deviceId} aria-label={t`Kept on ${holder}`}>
-            <p className="text-xs text-fg-subtle">{t`Kept on ${holder}`}</p>
+            <p className="text-xs text-fg-muted">{t`Kept on ${holder}`}</p>
             <ul className="mt-1 flex flex-col gap-1">
               {device.backups.map((backup) => {
                 const from =

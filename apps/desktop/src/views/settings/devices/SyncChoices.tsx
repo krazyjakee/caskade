@@ -167,7 +167,7 @@ export function SyncChoices() {
         <h3 className="mt-6 text-sm font-medium">
           <Trans>Usually different on each device</Trans>
         </h3>
-        <p className="mb-1 text-xs text-fg-subtle">
+        <p className="mb-1 text-xs text-fg-muted">
           <Trans>These stay on each device until you choose to sync them.</Trans>
         </p>
         <div className="flex flex-col">{optional.map(row)}</div>

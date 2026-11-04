@@ -125,7 +125,7 @@ export function MissingEmulators() {
             >
               <div className="min-w-48 flex-1">
                 <p className="font-medium">{platform.name}</p>
-                <p className="text-xs text-fg-subtle">
+                <p className="text-xs text-fg-muted">
                   {plural({ total: platform.games }, { one: "# game", other: "# games" })}
                   {platform.recommended &&
                     ` · ${t({
@@ -208,7 +208,7 @@ function EmulatorCard({ item, snapshot }: { item: Installable; snapshot: Emulati
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-display font-semibold">{item.name}</p>
-          <p className="mt-1 text-xs text-fg-subtle">{platforms.join(", ")}</p>
+          <p className="mt-1 text-xs text-fg-muted">{platforms.join(", ")}</p>
         </div>
         <Pill tone={source.tone} icon={item.updates ? RefreshCw : CloudDownload}>
           {t(source.label)}
@@ -315,7 +315,7 @@ export function ManagedEmulatorInfo({ emulatorId }: { emulatorId: string }) {
           {t`Installed by Caskade`}
           {item.installedLabel && ` · ${item.installedLabel}`}
         </p>
-        <p className="text-xs text-fg-subtle">
+        <p className="text-xs text-fg-muted">
           {!item.updates
             ? item.source === "flatpak"
               ? t`Flatpak keeps it up to date.`

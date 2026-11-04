@@ -1,4 +1,4 @@
-/** RomM servers (#1): the view contract for Settings → Emulators → RomM Server.
+/** RomM servers (#1): the view contract for Settings → Emulators → RomM server.
  * The core signs in, syncs, downloads and caches; passwords and tokens go
  * straight to the OS keychain and never come back to the webview. */
 import { t } from "@lingui/core/macro";

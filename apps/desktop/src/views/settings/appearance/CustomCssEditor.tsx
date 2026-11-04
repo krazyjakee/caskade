@@ -138,7 +138,7 @@ export function CustomCssEditor({
           <p className="font-mono whitespace-pre-line">{problemText(problems)}</p>
         </div>
       )}
-      <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-fg-subtle">
+      <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-fg-muted">
         <BookOpen className="size-3.5" />
         <Trans>Your rules beat the theme and every component. Style through the contract:</Trans>
         {docs.map((doc) => (

@@ -127,7 +127,7 @@ export function SettingsSearch({
                 >
                   <span className="min-w-0 break-words text-fg">{result.title}</span>
                   {result.within && (
-                    <span aria-hidden className="text-xs text-fg-subtle">
+                    <span aria-hidden className="text-xs text-fg-muted">
                       {result.within}
                     </span>
                   )}

@@ -81,7 +81,7 @@ export function BiosSummary({ files }: { files: BiosStatus[] }) {
   const { t } = useLingui();
   if (!files.length)
     return (
-      <span className="text-xs text-fg-subtle">
+      <span className="text-xs text-fg-muted">
         <Trans comment="No BIOS files are needed">Not needed</Trans>
       </span>
     );
@@ -152,7 +152,7 @@ export function PreviewTokens({
       )}
       {preview && (
         <>
-          <p className="mb-2 break-all text-xs text-fg-subtle">
+          <p className="mb-2 break-all text-xs text-fg-muted">
             <Trans>Sample ROM: {preview.sampleRom}</Trans>
           </p>
           <ol aria-label={t`Command line`} className="flex flex-wrap gap-1.5 font-mono text-xs">
@@ -169,7 +169,7 @@ export function PreviewTokens({
             ))}
           </ol>
           {preview.cwd && (
-            <p className="mt-2 break-all font-mono text-xs text-fg-subtle">
+            <p className="mt-2 break-all font-mono text-xs text-fg-muted">
               <Trans>Working directory: {preview.cwd}</Trans>
             </p>
           )}

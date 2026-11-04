@@ -38,8 +38,8 @@ export const sections = [
     label: msg({ message: "Platforms", context: "emulation section" }),
     icon: Layers,
   },
-  { id: "scanners", label: msg`ROM Scanners`, icon: FolderSearch },
-  { id: "romm", label: msg`RomM Server`, icon: Server },
+  { id: "scanners", label: msg`ROM scanners`, icon: FolderSearch },
+  { id: "romm", label: msg`RomM server`, icon: Server },
 ] as const;
 export type EmulationSection = (typeof sections)[number]["id"];
 /** "Scan all" outcome in one line. */
@@ -204,13 +204,13 @@ export function EmulationPanel({
               <Icon className="size-6 text-accent-alt" />
               <div>
                 <p className="font-mono text-lg font-semibold">{value}</p>
-                <p className="text-xs text-fg-subtle">{label}</p>
+                <p className="text-xs text-fg-muted">{label}</p>
               </div>
             </div>
           ))}
         </div>
         {automatic === 0 && (
-          <p className="text-xs text-fg-subtle">
+          <p className="text-xs text-fg-muted">
             <Trans>
               Scan all runs the ROM scanners included in library updates. Add one under ROM
               Scanners.

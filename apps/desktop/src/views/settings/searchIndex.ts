@@ -195,12 +195,12 @@ export const settingsSearchIndex: readonly SettingsSearchEntry[] = [
   {
     tab: "emulators",
     section: "scanners",
-    label: msg`ROM Scanners`,
+    label: msg`ROM scanners`,
     words: msg`ROM folders, scan ROMs`,
   },
   { tab: "emulators", section: "scanners", label: msg`Global exclusions` },
-  { tab: "emulators", section: "romm", label: msg`RomM Servers`, words: msg`RomM` },
-  { tab: "emulators", section: "romm", label: msg`Download Cache` },
+  { tab: "emulators", section: "romm", label: msg`RomM servers`, words: msg`RomM` },
+  { tab: "emulators", section: "romm", label: msg`Download cache` },
   { tab: "emulators", section: "romm", label: msg`Size limit`, words: msg`cache size` },
   { tab: "emulators", section: "romm", label: msg`Verify downloads`, words: msg`checksum` },
   // Appearance

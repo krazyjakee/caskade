@@ -116,7 +116,7 @@ function HostingSection() {
           >
             {repair.isPending ? t`Repairing…` : t`Repair`}
           </Button>
-          <span className="text-xs text-fg-subtle">
+          <span className="text-xs text-fg-muted">
             <Trans>Sets it up again where something went missing or changed.</Trans>
           </span>
         </div>
@@ -402,7 +402,7 @@ function UpdatesSection() {
             >
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <span className="font-medium">{program.label}</span>
-                <span data-part="version" className="text-xs text-fg-subtle">
+                <span data-part="version" className="text-xs text-fg-muted">
                   {program.update ? (
                     <Trans>A newer version, {latest}, is ready.</Trans>
                   ) : (
@@ -522,7 +522,7 @@ function HostRow({ host, pair }: { host: StreamHost; pair: () => void }) {
     >
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="font-medium">{name}</span>
-        <span data-part="state" className="text-xs text-fg-subtle">
+        <span data-part="state" className="text-xs text-fg-muted">
           {host.paired ? (
             <Trans>
               {reachLabel(host.reach)} · Paired · {games} games

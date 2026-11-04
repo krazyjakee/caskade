@@ -178,7 +178,7 @@ describe("RommPanel", () => {
   it("adds a server, tests it and hands the password to the keychain", async () => {
     const { api } = backend();
     renderPanel(api);
-    fireEvent.click(await screen.findByRole("button", { name: "Connect a Server" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Connect a server" }));
     fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Home" } });
     fireEvent.change(screen.getByLabelText("Server address"), {
       target: { value: "https://romm.local" },
@@ -186,7 +186,7 @@ describe("RommPanel", () => {
     fireEvent.change(screen.getByLabelText("Username"), { target: { value: "admin" } });
     fireEvent.change(screen.getByLabelText("Password"), { target: { value: "hunter2" } });
 
-    fireEvent.click(screen.getByRole("button", { name: "Test Connection" }));
+    fireEvent.click(screen.getByRole("button", { name: "Test connection" }));
     await screen.findByText("Connected · v4.4.0");
     expect(api.testServer).toHaveBeenCalledWith(
       expect.objectContaining({ url: "https://romm.local", username: "admin" }),
@@ -198,7 +198,7 @@ describe("RommPanel", () => {
     expect(screen.getByText("2 platforms · 316 ROMs on the server")).toBeTruthy();
     expect(screen.getByText("Match a platform to import these ROMs.")).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Save Server" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save server" }));
     await waitFor(() =>
       expect(api.saveServer).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -213,7 +213,7 @@ describe("RommPanel", () => {
     // The password itself never appears in settings.
     expect(JSON.stringify(api.saveServer.mock.calls[0]?.[0])).not.toContain("hunter2");
     await screen.findByRole("button", { name: "Home" });
-    expect(screen.getByRole("button", { name: "Save Changes" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Save changes" })).toBeTruthy();
   });
 
   it("asks before removing a server, naming what goes with it (#49)", async () => {

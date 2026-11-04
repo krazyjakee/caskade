@@ -15,6 +15,7 @@ import {
   boardName,
   DEFAULT_BOARD,
 } from "../../../components/AgeRatingLabel";
+import { FailureNotice } from "../../../components/FailureNotice";
 import { SectionSync } from "../devices/SectionSync";
 import { useSettingsSection } from "../useSettings";
 import { AccountEditor } from "./AccountEditor";
@@ -104,7 +105,25 @@ export function AccountsSettings() {
   const target =
     editing && editing.type !== "add" ? list.find((account) => account.id === editing.id) : null;
   const close = () => setEditing(null);
-  if (accounts.error) return <p className="text-danger">{sentence(accounts.error)}</p>;
+  // A failed list says so with Try again; a loading one says it's loading (#57).
+  if (accounts.error)
+    return (
+      <FailureNotice
+        error={accounts.error}
+        title={t`Accounts couldn't be loaded`}
+        onRetry={() => void accounts.refetch()}
+      />
+    );
+  if (accounts.isPending)
+    return (
+      <p role="status" className="text-sm text-fg-muted">
+        <Trans>Loading accounts…</Trans>
+      </p>
+    );
+  const admins = list.filter((account) => account.role === "admin").length;
+  /** Deleting yourself or the last admin is refused: not offered. */
+  const deletable = (account: Account) =>
+    account.id !== activeId && !(account.role === "admin" && admins === 1);
   return (
     <div data-settings="accounts" className="flex flex-col gap-4">
       <SettingsSection
@@ -139,7 +158,7 @@ export function AccountsSettings() {
                     </span>
                   )}
                 </div>
-                <div data-part="details" className="text-xs text-fg-subtle">
+                <div data-part="details" className="text-xs text-fg-muted">
                   {details(account, board)}
                 </div>
               </div>
@@ -152,16 +171,18 @@ export function AccountsSettings() {
               >
                 <Trans>Edit</Trans>
               </Button>
-              <Button
-                data-part="delete"
-                size="sm"
-                variant="ghost"
-                icon={Trash2}
-                aria-label={t`Delete ${{ name: account.name }}`}
-                onPress={() => setEditing({ type: "delete", id: account.id })}
-              >
-                <Trans>Delete</Trans>
-              </Button>
+              {deletable(account) && (
+                <Button
+                  data-part="delete"
+                  size="sm"
+                  variant="ghost"
+                  icon={Trash2}
+                  aria-label={t`Delete ${{ name: account.name }}`}
+                  onPress={() => setEditing({ type: "delete", id: account.id })}
+                >
+                  <Trans>Delete</Trans>
+                </Button>
+              )}
             </li>
           ))}
         </ul>

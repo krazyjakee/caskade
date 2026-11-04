@@ -110,7 +110,7 @@ function PackageGroup({ group }: { group: Group }) {
         <span className="min-w-0 flex-1 font-mono text-sm break-words text-fg">
           {group.license}
         </span>
-        <span className="shrink-0 text-xs text-fg-subtle">
+        <span className="shrink-0 text-xs text-fg-muted">
           {t({ message: plural(count, { one: "# package", other: "# packages" }) })}
         </span>
         <ChevronDown
@@ -127,7 +127,7 @@ function PackageGroup({ group }: { group: Group }) {
                   <span className="font-mono text-fg">
                     {item.name} {item.version}
                   </span>
-                  <span className="text-xs text-fg-subtle">
+                  <span className="text-xs text-fg-muted">
                     {" "}
                     · {item.ecosystem === "rust" ? t`Rust crate` : t`JavaScript package`}
                   </span>
@@ -137,7 +137,7 @@ function PackageGroup({ group }: { group: Group }) {
                     </span>
                   )}
                   {item.repository && (
-                    <span className="block font-mono text-xs break-all text-fg-subtle">
+                    <span className="block font-mono text-xs break-all text-fg-muted">
                       {item.repository}
                     </span>
                   )}

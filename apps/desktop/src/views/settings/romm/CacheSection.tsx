@@ -30,7 +30,7 @@ export function CacheSection({ overview }: { overview: RommOverview }) {
   return (
     <SettingsSection
       icon={HardDrive}
-      title={t`Download Cache`}
+      title={t`Download cache`}
       description={t`ROMs download the first time you play them and stay here, so they start instantly and work offline.`}
       aside={
         <Button

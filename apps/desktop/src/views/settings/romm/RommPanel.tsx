@@ -2,7 +2,7 @@ import { Button, SettingsSection, StatusDot } from "@caskade/ui";
 import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
-import { Download, Info, Pencil, Play, Plus, RefreshCw, Server, X } from "lucide-react";
+import { Download, Info, Pencil, Plus, RefreshCw, Server, X } from "lucide-react";
 import { useState } from "react";
 import { Button as AriaButton } from "react-aria-components";
 import { formatDateTime, formatNumber } from "../../../api/presentation";
@@ -120,7 +120,7 @@ function Downloads({ downloads }: { downloads: RommDownload[] }) {
             >
               <div className="flex items-center gap-3 text-sm">
                 <span className="font-medium">{download.title}</span>
-                <span className="font-mono text-xs text-fg-subtle">
+                <span className="font-mono text-xs text-fg-muted">
                   {t(phases[download.phase])}
                   {shown} · {formatBytes(download.received)}
                 </span>
@@ -149,7 +149,7 @@ function Downloads({ downloads }: { downloads: RommDownload[] }) {
   );
 }
 
-/** Settings → Emulation → RomM Server (#1): remote ROM libraries. */
+/** Settings → Emulation → RomM server (#1): remote ROM libraries. */
 export function RommPanel() {
   const { t } = useLingui();
   const overview = useRommOverview();
@@ -166,7 +166,7 @@ export function RommPanel() {
 
   if (overview.isPending)
     return (
-      <p className="text-sm text-fg-subtle">
+      <p className="text-sm text-fg-muted">
         <Trans>Loading RomM servers…</Trans>
       </p>
     );
@@ -215,11 +215,11 @@ export function RommPanel() {
     <div data-cs="romm" className="flex flex-col gap-4">
       <SettingsSection
         icon={Server}
-        title={t`RomM Servers`}
+        title={t`RomM servers`}
         description={t`Connect a RomM server to add its ROMs to your library. Each game downloads when you first play it and runs with your emulators.`}
         aside={
           <Button size="sm" icon={Plus} onPress={add} isDisabled={draft !== null}>
-            <Trans>Add Server</Trans>
+            <Trans>Add server</Trans>
           </Button>
         }
       >
@@ -233,7 +233,7 @@ export function RommPanel() {
               </Trans>
             </p>
             <Button variant="primary" icon={Plus} onPress={add}>
-              <Trans>Connect a Server</Trans>
+              <Trans>Connect a server</Trans>
             </Button>
           </div>
         ) : (
@@ -304,12 +304,12 @@ export function RommPanel() {
                             {server.name ||
                               t({ message: "Unnamed", comment: "A RomM server without a name" })}
                           </AriaButton>
-                          <div className="font-mono text-xs text-fg-subtle">{server.url}</div>
+                          <div className="font-mono text-xs text-fg-muted">{server.url}</div>
                         </td>
                         <td className="px-4 py-2.5">
                           <ServerState status={state} />
                           {state?.error && (
-                            <div className="mt-1 text-xs text-fg-subtle">{state.error}</div>
+                            <div className="mt-1 text-xs text-fg-muted">{state.error}</div>
                           )}
                           {syncErrors[server.id] && (
                             <div role="alert" className="mt-1 text-xs text-danger">
@@ -326,12 +326,12 @@ export function RommPanel() {
                         <td className="px-4 py-2.5 text-right">
                           <Button
                             size="sm"
-                            icon={busy ? RefreshCw : Play}
+                            icon={RefreshCw}
                             isDisabled={busy}
                             onPress={() => sync(server.id)}
                             aria-label={t`Sync ${{ server: server.name || server.url }}`}
                           >
-                            <Trans>Sync Now</Trans>
+                            <Trans>Sync now</Trans>
                           </Button>
                         </td>
                       </tr>
@@ -348,7 +348,7 @@ export function RommPanel() {
             {write.error.message}
           </p>
         )}
-        <p className="mt-3 flex gap-2 text-xs text-fg-subtle">
+        <p className="mt-3 flex gap-2 text-xs text-fg-muted">
           <Info className="size-4 shrink-0" />
           <Trans>
             Games from a server you can't reach stay in your library. Downloaded ones still play;

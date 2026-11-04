@@ -98,7 +98,7 @@ export function ScanReview({ job, platforms }: { job: ScanJob; platforms: Emulat
           </p>
         ))}
         {rows.length === 0 ? (
-          <p className="rounded-control border border-dashed border-border p-5 text-sm text-fg-subtle">
+          <p className="rounded-control border border-dashed border-border p-5 text-sm text-fg-muted">
             <Trans>No ROMs matched this scanner's profile.</Trans>
           </p>
         ) : (
@@ -114,7 +114,7 @@ export function ScanReview({ job, platforms }: { job: ScanJob; platforms: Emulat
               >
                 <Trans>Select all</Trans>
               </Checkbox>
-              <span className="text-xs text-fg-subtle">
+              <span className="text-xs text-fg-muted">
                 <Trans comment="How many games of the scan review are selected">
                   {picked.length} selected
                 </Trans>
@@ -188,7 +188,7 @@ export function ScanReview({ job, platforms }: { job: ScanJob; platforms: Emulat
                     />
                     <ol aria-label={t`ROMs of ${{ title: row.title }}`} className="space-y-0.5">
                       {row.roms.map((rom) => (
-                        <li key={rom} className="break-all font-mono text-xs text-fg-subtle">
+                        <li key={rom} className="break-all font-mono text-xs text-fg-muted">
                           {rom}
                           {row.names[rom] ? ` · ${row.names[rom]}` : ""}
                         </li>

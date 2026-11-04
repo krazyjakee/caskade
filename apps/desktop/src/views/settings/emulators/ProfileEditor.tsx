@@ -286,7 +286,7 @@ export function ProfileEditor({
                 comment: "An emulator profile's platforms",
               })}
             </p>
-            <p className="font-mono text-xs text-fg-subtle">
+            <p className="font-mono text-xs text-fg-muted">
               {t({
                 message: `File types: ${{
                   extensions: definition?.extensions.join(", ") || noExtensions,

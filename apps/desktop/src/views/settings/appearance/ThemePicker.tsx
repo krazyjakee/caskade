@@ -73,7 +73,7 @@ function ThemeOption({
       <span className="flex items-baseline justify-between gap-2">
         <span className="truncate font-display font-semibold tracking-wide">{theme.name}</span>
         {theme.version && (
-          <span className="shrink-0 font-mono text-xs text-fg-subtle">{theme.version}</span>
+          <span className="shrink-0 font-mono text-xs text-fg-muted">{theme.version}</span>
         )}
       </span>
       {theme.author && (

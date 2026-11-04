@@ -38,7 +38,7 @@ function Results({ snapshot, close }: { snapshot: EmulationDetection; close: () 
   return (
     <div className="mt-4 space-y-3">
       {snapshot.candidates.length === 0 && (
-        <p className="rounded-control border border-dashed border-border p-5 text-sm text-fg-subtle">
+        <p className="rounded-control border border-dashed border-border p-5 text-sm text-fg-muted">
           {snapshot.status === "searching"
             ? t`Waiting for detection results…`
             : t`No matching emulators found. Try a portable emulator folder.`}
@@ -61,10 +61,10 @@ function Results({ snapshot, close }: { snapshot: EmulationDetection; close: () 
             >
               <span className="font-medium">{row.name}</span>
               {row.version && (
-                <span className="font-mono text-xs text-fg-subtle"> · {row.version}</span>
+                <span className="font-mono text-xs text-fg-muted"> · {row.version}</span>
               )}
               {row.configuredAs && (
-                <span className="text-xs text-fg-subtle">
+                <span className="text-xs text-fg-muted">
                   {" · "}
                   <Trans comment="A detected emulator Caskade already has">
                     Already configured
@@ -75,7 +75,7 @@ function Results({ snapshot, close }: { snapshot: EmulationDetection; close: () 
             <p className="mt-1 break-all font-mono text-xs text-fg-muted">
               {installKindLabel(row.install)} · {installLocation(row.install)}
             </p>
-            <ul className="mt-2 flex flex-wrap gap-2 text-xs text-fg-subtle">
+            <ul className="mt-2 flex flex-wrap gap-2 text-xs text-fg-muted">
               {row.profiles.map((profile) => (
                 <li key={profile.name}>
                   {profile.name}:{" "}

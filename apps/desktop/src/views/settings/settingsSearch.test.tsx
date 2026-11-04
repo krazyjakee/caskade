@@ -73,7 +73,7 @@ it("tells app updates from game updates, and highlights the one chosen", async (
 it("opens a preference's sub-section", async () => {
   const app = renderApp("/settings?tab=general");
   await search("rom scanners");
-  fireEvent.click(within(results()).getByRole("button", { name: "ROM Scanners in Emulation" }));
+  fireEvent.click(within(results()).getByRole("button", { name: "ROM scanners in Emulation" }));
   await waitFor(() =>
     expect(app.router.state.location.search).toEqual({ tab: "emulators", section: "scanners" }),
   );

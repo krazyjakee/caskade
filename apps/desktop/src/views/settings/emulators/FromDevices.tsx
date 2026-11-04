@@ -55,7 +55,7 @@ export function EmulatorsFromDevices() {
             >
               <div className="min-w-48 flex-1">
                 <p className="font-medium">{platform}</p>
-                <p className="text-xs text-fg-subtle">
+                <p className="text-xs text-fg-muted">
                   {device
                     ? t`${device} uses ${emulator}`
                     : t`Another of your devices uses ${emulator}`}

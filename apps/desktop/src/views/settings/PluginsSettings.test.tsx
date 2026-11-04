@@ -251,11 +251,13 @@ it("uninstalls only after a second, explicit confirmation", async () => {
   expect(calls).toEqual([]);
   fireEvent.click(screen.getByRole("button", { name: "Uninstall" }));
   await act(async () => {
-    fireEvent.click(screen.getByRole("button", { name: "Remove Playtime stats" }));
+    fireEvent.click(screen.getByRole("button", { name: "Uninstall Playtime stats" }));
   });
   expect(calls).toEqual(["uninstall dev.example.stats"]);
   expect(
-    await screen.findByText("No plugins yet. Install one from a folder, or drop its folder here."),
+    await screen.findByText(
+      "No plugins yet. Get one from the catalogue below, install one from a folder, or drop its folder here.",
+    ),
   ).toBeTruthy();
 });
 

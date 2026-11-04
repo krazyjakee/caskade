@@ -149,7 +149,7 @@ export function AboutPage({ version, build }: { version: string; build: string }
         <h3 id="about-legal" className="font-display text-lg font-semibold tracking-wide">
           <Trans>Legal</Trans>
         </h3>
-        <p className="text-sm text-fg-subtle">
+        <p className="text-sm text-fg-muted">
           <Trans>Licenses, terms and privacy. They read offline.</Trans>
         </p>
         <ul className="mt-3 flex flex-col">

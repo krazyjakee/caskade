@@ -50,7 +50,7 @@ export function ConfiguredPlatforms({
       ) : (
         <div className="mt-4 overflow-x-auto rounded-control border border-border">
           <table className="w-full text-left text-sm">
-            <thead className="bg-surface-overlay text-xs text-fg-subtle">
+            <thead className="bg-surface-overlay text-xs text-fg-muted">
               <tr>
                 <th className="px-4 py-3 font-medium">
                   <Trans context="table column">Platform</Trans>
@@ -88,7 +88,7 @@ export function ConfiguredPlatforms({
                   >
                     <td className="px-4 py-4">
                       <p className="font-medium">{platform.name}</p>
-                      <p className="mt-1 font-mono text-xs text-fg-subtle">{platform.short}</p>
+                      <p className="mt-1 font-mono text-xs text-fg-muted">{platform.short}</p>
                     </td>
                     <td className="px-4 py-4 text-right font-mono">{platform.romCount}</td>
                     <td className="space-y-2 px-4 py-4">
@@ -137,7 +137,7 @@ export function ConfiguredPlatforms({
                         </StatusDot>
                       )}
                       {!selected && (
-                        <p className="text-xs text-fg-subtle">
+                        <p className="text-xs text-fg-muted">
                           <Trans>Games ask which emulator to use.</Trans>
                         </p>
                       )}

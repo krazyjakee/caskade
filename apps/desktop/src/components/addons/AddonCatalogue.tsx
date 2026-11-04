@@ -146,7 +146,7 @@ export function AddonCatalogue() {
         </p>
       )}
       {catalogue.data && items.length === 0 && (
-        <p className="rounded-panel border border-dashed border-border-strong p-6 text-center text-sm text-fg-subtle">
+        <p className="rounded-panel border border-dashed border-border-strong p-6 text-center text-sm text-fg-muted">
           {catalogue.data.items.length === 0
             ? t`The catalogue is empty.`
             : t`Nothing in the catalogue matches.`}
@@ -212,7 +212,7 @@ function Row({ item, open }: { item: CatalogueItem; open: () => void }) {
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold">{entry.name}</p>
-          <p className="text-xs text-fg-subtle">
+          <p className="text-xs text-fg-muted">
             {entry.kind === "plugin" ? t`Plugin` : t`Theme`} · {entry.author}
           </p>
         </div>

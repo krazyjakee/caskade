@@ -356,14 +356,14 @@ function NetworkCard({ samples, frame }: { samples: SystemSample[]; frame: Frame
                 className="flex flex-wrap items-baseline gap-x-4 gap-y-1 py-1.5 data-[kind=loopback]:text-fg-muted data-[kind=virtual]:text-fg-muted"
               >
                 <span className="min-w-0 truncate font-mono">{item.name}</span>
-                <span className="text-xs text-fg-subtle">{t(kinds[item.kind])}</span>
+                <span className="text-xs text-fg-muted">{t(kinds[item.kind])}</span>
                 <span className="ml-auto font-mono tabular-nums">
                   ↓ {formatRate(item.received)} · ↑ {formatRate(item.transmitted)}
                 </span>
               </li>
             ))}
           </ul>
-          <p className="text-xs text-fg-subtle">
+          <p className="text-xs text-fg-muted">
             <Trans>
               Totals add up physical interfaces only, so traffic through a VPN, a container or
               loopback isn't counted twice. — means no rate yet.

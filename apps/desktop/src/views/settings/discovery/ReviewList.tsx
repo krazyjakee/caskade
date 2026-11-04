@@ -107,7 +107,7 @@ export function ReviewList({
                 >
                   {item.title}
                 </Checkbox>
-                <p className="mt-2 text-xs text-fg-subtle">
+                <p className="mt-2 text-xs text-fg-muted">
                   <Trans comment="The discovery sources that found a game">
                     Sources: {item.sources.join(", ")}
                   </Trans>

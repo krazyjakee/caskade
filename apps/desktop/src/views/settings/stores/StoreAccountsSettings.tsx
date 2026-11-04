@@ -140,7 +140,7 @@ function ProviderSection({
         <AccountRow key={summary.account.id} summary={summary} flows={flows} />
       ))}
       {accounts.length === 0 && !flow && (
-        <p className="text-sm text-fg-subtle">
+        <p className="text-sm text-fg-muted">
           <Trans>No {name} account is connected.</Trans>
         </p>
       )}
@@ -280,7 +280,7 @@ function SignIn({ flow, provider }: { flow: StoreAuthFlow; provider: StoreProvid
           <Trans>Cancel sign-in</Trans>
         </Button>
       </div>
-      <p className="text-xs text-fg-subtle">
+      <p className="text-xs text-fg-muted">
         <Trans>
           The sign-in expires {formatDateTime(new Date(flow.expiresAtMs))}. Caskade keeps it in your
           system's keychain, never in its settings or backups.
@@ -360,7 +360,7 @@ function AccountRow({ summary, flows }: { summary: StoreAccountSummary; flows: S
         </p>
       )}
       {summary.lost > 0 && (
-        <p className="text-xs text-fg-subtle">
+        <p className="text-xs text-fg-muted">
           {plural(summary.lost, {
             one: "# game is no longer in this account; it stays in your library.",
             other: "# games are no longer in this account; they stay in your library.",

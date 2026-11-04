@@ -332,7 +332,7 @@ export function ConfiguredEmulators({
               className="cursor-default rounded-control border border-border p-3 outline-none data-selected:border-accent-alt data-selected:bg-accent/10 data-focus-visible:focus-ring"
             >
               <p className="font-medium">{emulator.name}</p>
-              <p className="mt-1 break-all font-mono text-xs text-fg-subtle">
+              <p className="mt-1 break-all font-mono text-xs text-fg-muted">
                 {installLocation(emulator.install)}
               </p>
               <div className="mt-2">
@@ -363,7 +363,7 @@ export function ConfiguredEmulators({
             description={t`Whether each profile can play, the files it needs and the command it runs.`}
           >
             {!selected.profiles.length && (
-              <p className="mt-3 rounded-control border border-dashed border-border p-5 text-sm text-fg-subtle">
+              <p className="mt-3 rounded-control border border-dashed border-border p-5 text-sm text-fg-muted">
                 <Trans>
                   No profiles yet. Add a built-in or custom profile before launching games.
                 </Trans>
@@ -435,7 +435,7 @@ export function ConfiguredEmulators({
                           comment: "An emulator profile's platforms",
                         })}
                       </p>
-                      <p className="font-mono text-xs text-fg-subtle">
+                      <p className="font-mono text-xs text-fg-muted">
                         {t({
                           message: `File types: ${{
                             extensions: resolved.extensions.join(", ") || noExtensions,

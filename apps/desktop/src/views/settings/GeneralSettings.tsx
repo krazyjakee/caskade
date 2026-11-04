@@ -289,8 +289,8 @@ export function GeneralSettings() {
 
         <SettingsSection
           icon={Gamepad2}
-          title={t`Behavior`}
-          description={t`Window behavior while you play.`}
+          title={t`Behaviour`}
+          description={t`What the window does while you play.`}
         >
           <SettingRow
             icon={Play}

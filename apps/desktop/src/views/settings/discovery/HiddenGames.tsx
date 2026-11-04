@@ -40,7 +40,7 @@ export function HiddenGames() {
               <span className="min-w-0 truncate text-sm">
                 {game.title}
                 {game.platform && (
-                  <span className="ml-2 text-xs text-fg-subtle">{game.platform}</span>
+                  <span className="ml-2 text-xs text-fg-muted">{game.platform}</span>
                 )}
               </span>
               <Button

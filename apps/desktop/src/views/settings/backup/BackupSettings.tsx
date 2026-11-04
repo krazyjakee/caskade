@@ -11,7 +11,7 @@ import {
   SettingsSection,
 } from "@caskade/ui";
 import type { MessageDescriptor } from "@lingui/core";
-import { msg } from "@lingui/core/macro";
+import { msg, plural } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { UseQueryResult } from "@tanstack/react-query";
 import {
@@ -217,12 +217,12 @@ function BackUpSection() {
                 <span className="text-sm">
                   {t(componentLabels[id])}
                   {size && (
-                    <span className="ml-2 font-mono text-xs text-fg-subtle">
+                    <span className="ml-2 font-mono text-xs text-fg-muted">
                       {formatSize(size.bytes)}
                     </span>
                   )}
                 </span>
-                <span className="text-xs text-fg-subtle">{t(componentDescriptions[id])}</span>
+                <span className="text-xs text-fg-muted">{t(componentDescriptions[id])}</span>
               </span>
             </Checkbox>
           );
@@ -431,7 +431,8 @@ function RestoreSection() {
           </p>
           <div className="flex gap-3">
             <Button variant="primary" isDisabled={busy} onPress={() => restart.mutate(undefined)}>
-              <Trans>Restart and restore</Trans>
+              {/* The same words as the restore it finishes (#57). */}
+              <Trans>Restore and restart</Trans>
             </Button>
             <Button isDisabled={busy} onPress={() => discard.mutate(undefined)}>
               <Trans>Don't restore</Trans>
@@ -540,6 +541,7 @@ function RestorePreview({
   const { t } = useLingui();
   const manifest = inspection.manifest;
   const games = manifest.tables.find((table) => table.name === "games")?.rows ?? 0;
+  const gameCount = plural({ total: games }, { one: "# game", other: "# games" });
   const made = formatDateTime(new Date(manifest.createdAtMs));
   const version = manifest.appVersion;
   return (
@@ -549,7 +551,7 @@ function RestorePreview({
     >
       <p className="text-sm">
         <Trans>
-          Made {made} by Caskade {version}, with {games} games.
+          Made {made} by Caskade {version}, with {gameCount}.
         </Trans>
       </p>
       <fieldset className="flex flex-col gap-2">
@@ -566,7 +568,7 @@ function RestorePreview({
             }
           >
             {t(componentLabels[id])}
-            <span className="ml-2 font-mono text-xs text-fg-subtle">{formatSize(bytes)}</span>
+            <span className="ml-2 font-mono text-xs text-fg-muted">{formatSize(bytes)}</span>
           </Checkbox>
         ))}
       </fieldset>
@@ -606,10 +608,11 @@ function RestorePreview({
         )}
         {inspection.missingGames > 0 && (
           <li className="text-warning">
-            <Trans>
-              {inspection.missingGames} games' folders aren't on this computer; the next scan finds
-              those that are elsewhere.
-            </Trans>
+            {plural(inspection.missingGames, {
+              one: "# game's folder isn't on this computer; the next scan finds it if it's elsewhere.",
+              other:
+                "# games' folders aren't on this computer; the next scan finds those that are elsewhere.",
+            })}
           </li>
         )}
       </ul>

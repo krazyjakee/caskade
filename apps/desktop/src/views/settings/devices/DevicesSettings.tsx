@@ -208,7 +208,7 @@ function ThisDeviceSection() {
           className="w-44"
         />
       </div>
-      <p className="mt-2 text-xs text-fg-subtle">
+      <p className="mt-2 text-xs text-fg-muted">
         {addresses ? (
           <Trans>On this network at {addresses}.</Trans>
         ) : (
@@ -320,7 +320,7 @@ function DeviceRow({ device }: { device: PairedDevice }) {
           <span className="font-medium">{name}</span>
           <LinkBadge link={device.link} />
         </span>
-        <span data-part="sync" className="text-xs text-fg-subtle">
+        <span data-part="sync" className="text-xs text-fg-muted">
           {device.syncing ? (
             <Trans>{os} · Syncing…</Trans>
           ) : last ? (
@@ -490,7 +490,7 @@ function NearbyRow({
       <DeviceIcon kind={device.kind} className="size-6 shrink-0 text-fg-muted" />
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="font-medium">{device.name}</span>
-        <span className="font-mono text-xs text-fg-subtle">
+        <span className="font-mono text-xs text-fg-muted">
           {os} · {address}
         </span>
       </div>

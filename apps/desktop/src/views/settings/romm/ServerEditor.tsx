@@ -355,7 +355,7 @@ export function ServerEditor({
         <Button icon={Plug} onPress={() => void test()} isDisabled={testing || !server.url}>
           {testing
             ? t({ message: "Connecting…", comment: "A RomM server's status" })
-            : t`Test Connection`}
+            : t`Test connection`}
         </Button>
         <Connection status={status} busy={testing} report={report} error={error} />
         {error && (
@@ -364,7 +364,7 @@ export function ServerEditor({
           </span>
         )}
         {report && (
-          <span className="text-xs text-fg-subtle">
+          <span className="text-xs text-fg-muted">
             {plural(platforms.length, { one: "# platform", other: "# platforms" })} ·{" "}
             {plural(
               { roms: romsOnServer },
@@ -372,7 +372,7 @@ export function ServerEditor({
             )}
           </span>
         )}
-        <span className="ml-auto flex items-center gap-1.5 text-xs text-fg-subtle">
+        <span className="ml-auto flex items-center gap-1.5 text-xs text-fg-muted">
           <KeyRound className="size-3.5" />{" "}
           <Trans>Credentials are kept in the system keychain.</Trans>
         </span>
@@ -392,7 +392,7 @@ export function ServerEditor({
         </Switch>
       </div>
       {platforms.length === 0 ? (
-        <p className="mt-3 rounded-control border border-dashed border-border-strong p-6 text-center text-sm text-fg-subtle">
+        <p className="mt-3 rounded-control border border-dashed border-border-strong p-6 text-center text-sm text-fg-muted">
           {report
             ? t`This server has no ROMs yet.`
             : t`Test the connection to see this server's platforms.`}
@@ -503,7 +503,7 @@ export function ServerEditor({
                           className="w-full max-w-96 min-w-64"
                         />
                       ) : (
-                        <span className="text-xs text-fg-subtle">
+                        <span className="text-xs text-fg-muted">
                           <Trans>Match a platform to import these ROMs.</Trans>
                         </span>
                       )}
@@ -521,7 +521,7 @@ export function ServerEditor({
           <h3 className="font-display font-semibold tracking-wide">
             <Trans context="RomM server">Collections</Trans>
           </h3>
-          <p className="text-xs text-fg-subtle">
+          <p className="text-xs text-fg-muted">
             <Trans>Their ROMs are imported even when their platform is off.</Trans>
           </p>
           <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2">
@@ -540,7 +540,7 @@ export function ServerEditor({
                 }
               >
                 {collection.name}
-                <span className="font-mono text-xs text-fg-subtle">{collection.romIds.length}</span>
+                <span className="font-mono text-xs text-fg-muted">{collection.romIds.length}</span>
               </Checkbox>
             ))}
           </div>
@@ -577,11 +577,11 @@ export function ServerEditor({
           onPress={save}
           isDisabled={write.isPending || unchanged || !server.url}
         >
-          {isNew ? t`Save Server` : t`Save Changes`}
+          {isNew ? t`Save server` : t`Save changes`}
         </Button>
         {!isNew && (
           <Button icon={RefreshCw} onPress={() => void sync()} isDisabled={syncing}>
-            {syncing ? t({ message: "Syncing…", comment: "A RomM server's status" }) : t`Sync Now`}
+            {syncing ? t({ message: "Syncing…", comment: "A RomM server's status" }) : t`Sync now`}
           </Button>
         )}
         {synced && (
