@@ -154,12 +154,15 @@ jobs:
       # common crates for each package. Includes the bindings, emulation,
       # plugin guest/schema, gamepad and theme checks, and devices and sync
       # (#250): two or more cores on loopback, and the relay paths through a
-      # local relay (iroh's test-utils), never the internet.
+      # local relay (iroh's test-utils), never the internet. caskade-i18n's
+      # own tests (PO parsing, lint, plural rules, the extractor) back the
+      # catalog checks.
       - name: Rust app suites
         run: >-
           cargo test -p caskade-core -p caskade-desktop -p caskade-input
           -p caskade-plugin-host -p caskade-theme -p caskade-component-cache
-          -p caskade-jobs -p caskade-plugin-sdk -p caskade-sync --locked --timings
+          -p caskade-jobs -p caskade-plugin-sdk -p caskade-sync -p caskade-i18n
+          --features caskade-i18n/extract --locked --timings
       - name: Upload fixtures report and build timings
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
