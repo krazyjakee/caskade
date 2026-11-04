@@ -163,6 +163,12 @@ jobs:
           -p caskade-plugin-host -p caskade-theme -p caskade-component-cache
           -p caskade-jobs -p caskade-plugin-sdk -p caskade-sync -p caskade-i18n
           --features caskade-i18n/extract --locked --timings
+      # The starter add-on catalogue builds reproducibly from the examples
+      # above and passes the checks a published one must (#7).
+      - name: Starter add-on catalogue
+        run: |
+          cargo run -q -p caskade-desktop --bin caskade-catalogue --locked -- build scripts/addons/starter.json --out target/starter-catalogue
+          cargo run -q -p caskade-desktop --bin caskade-catalogue --locked -- check target/starter-catalogue/catalogue.json
       - name: Upload fixtures report and build timings
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
