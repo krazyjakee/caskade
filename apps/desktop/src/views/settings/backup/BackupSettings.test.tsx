@@ -57,6 +57,27 @@ it("components and the schedule are saved to core.backups", async () => {
   await waitFor(() => expect(settings.values["core.backups"]?.schedule).toBe("daily"));
 });
 
+it("the backup folder keeps fast typing and saves once, on leaving the field (#51)", async () => {
+  const { settings } = renderPanel();
+  const field = (await screen.findByRole("textbox", { name: "Backup folder" })) as HTMLInputElement;
+  const before = settings.writes.length;
+  fireEvent.focus(field);
+  let typed = "";
+  for (const letter of "/media/usb") {
+    typed += letter;
+    fireEvent.change(field, { target: { value: typed } });
+  }
+  expect(field.value).toBe("/media/usb");
+  // Nothing saved, and so no "isn't there" for a half-typed path.
+  await new Promise((resolve) => setTimeout(resolve, 700));
+  expect(settings.writes.length).toBe(before);
+  expect(screen.queryByText(/This folder isn't there/)).toBeNull();
+  fireEvent.blur(field);
+  await waitFor(() => expect(settings.values["core.backups"]?.destination).toBe("/media/usb"));
+  expect(settings.writes.length).toBe(before + 1);
+  expect(field.value).toBe("/media/usb");
+});
+
 it("a failed automatic backup says why", async () => {
   renderPanel({
     last: {

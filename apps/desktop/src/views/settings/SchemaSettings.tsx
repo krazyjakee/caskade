@@ -1,8 +1,8 @@
-import { Select, SettingRow, SettingsSection, Slider, Switch, TextField } from "@caskade/ui";
+import { Select, SettingRow, SettingsSection, Slider, Switch } from "@caskade/ui";
 import { t as translate } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { LucideIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { DraftField } from "./DraftField";
 import { ResetDefaults } from "./ResetDefaults";
 import {
   SettingsFeedback,
@@ -50,52 +50,6 @@ function options(schema: ObjectSchema, root: ObjectSchema) {
       ? []
       : [{ id, label: typeof item.title === "string" ? item.title : label(id) }];
   });
-}
-
-/** A text field that keeps what the user types. It saves after a short
- * pause or on blur, and takes the stored value only while it isn't focused:
- * saving every keystroke and showing the stored value lost characters typed
- * faster than a save round trip. */
-function DraftField({
-  value,
-  commit,
-  ...props
-}: {
-  value: string;
-  commit: (next: string) => void;
-  inputMode?: "decimal";
-  maxLength?: number;
-  className?: string;
-}) {
-  const [draft, setDraft] = useState(value);
-  const focused = useRef(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  useEffect(() => {
-    if (!focused.current) setDraft(value);
-  }, [value]);
-  useEffect(() => () => clearTimeout(timer.current), []);
-  const save = (next: string) => {
-    clearTimeout(timer.current);
-    if (next !== value) commit(next);
-  };
-  return (
-    <TextField
-      {...props}
-      value={draft}
-      onFocus={() => {
-        focused.current = true;
-      }}
-      onBlur={() => {
-        focused.current = false;
-        save(draft);
-      }}
-      onChange={(next) => {
-        setDraft(next);
-        clearTimeout(timer.current);
-        timer.current = setTimeout(() => save(next), 600);
-      }}
-    />
-  );
 }
 
 /** A settings section rendered from its JSON Schema (#59, #128): controls,

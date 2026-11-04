@@ -9,7 +9,6 @@ import {
   Select,
   SettingRow,
   SettingsSection,
-  TextField,
 } from "@caskade/ui";
 import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
@@ -40,6 +39,7 @@ import { FailureNotice } from "../../../components/FailureNotice";
 import { usePathPicker } from "../../../components/pathBrowser/PathPicker";
 import { useDropZone } from "../../../drop/DropProvider";
 import { ProgressLine } from "../../activity/ProgressLine";
+import { DraftField } from "../DraftField";
 import { type SettingsSectionState, SettingsStatus, useSettingsSection } from "../useSettings";
 import { DeviceBackupList, KeepOnDevice } from "./DeviceBackups";
 
@@ -160,11 +160,14 @@ function BackUpSection() {
   return (
     <SettingsSection icon={DatabaseBackup} title={title} description={description}>
       <div ref={drop.ref}>
-        <TextField
+        {/* Saved on blur or Enter: each save checks the folder on disk, so
+            a half-typed path would flash "isn't there". */}
+        <DraftField
           label={t`Backup folder`}
           value={settings.destination}
           placeholder={status.defaultDestination}
-          onChange={setDestination}
+          commit={setDestination}
+          pause={null}
           mono
           action={
             <Button
