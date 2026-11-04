@@ -405,30 +405,46 @@ where
         }
     }
     drop(sender);
+    let mut disconnected = false;
     while pending.iter().any(Option::is_some) {
-        match receiver.recv_timeout(POLL) {
-            Ok(SourceMessage::Started(index, at)) => source_started[index] = Some(at),
-            Ok(SourceMessage::Finished(index, result, warnings, elapsed)) => {
-                if pending[index].take().is_none() {
-                    continue;
-                }
-                let (result, error) = match result {
-                    Ok(value) => (Ok(value), None),
-                    Err(error) => {
-                        tracing::warn!(source = %sources[index].id(), %error, "source failed");
-                        (Err(()), Some(error))
+        // Read every message already sent before judging deadlines: a source
+        // that finished in time stays finished even when this thread was
+        // descheduled and reads its result late.
+        let mut next = receiver.recv_timeout(POLL);
+        loop {
+            match next {
+                Ok(SourceMessage::Started(index, at)) => source_started[index] = Some(at),
+                Ok(SourceMessage::Finished(index, result, warnings, elapsed)) => {
+                    if pending[index].take().is_some() {
+                        let (result, error) = match result {
+                            Ok(value) => (Ok(value), None),
+                            Err(error) => {
+                                tracing::warn!(source = %sources[index].id(), %error, "source failed");
+                                (Err(()), Some(error))
+                            }
+                        };
+                        runs[index] = Some(Run {
+                            id: sources[index].id(),
+                            result,
+                            error,
+                            warnings,
+                            duration_ms: millis(elapsed),
+                        });
                     }
-                };
-                runs[index] = Some(Run {
-                    id: sources[index].id(),
-                    result,
-                    error,
-                    warnings,
-                    duration_ms: millis(elapsed),
-                });
+                }
+                Err(mpsc::RecvTimeoutError::Timeout) => break,
+                Err(mpsc::RecvTimeoutError::Disconnected) => {
+                    disconnected = true;
+                    break;
+                }
             }
-            Err(mpsc::RecvTimeoutError::Timeout) => {}
-            Err(mpsc::RecvTimeoutError::Disconnected) => break,
+            next = receiver.try_recv().map_err(|error| match error {
+                mpsc::TryRecvError::Empty => mpsc::RecvTimeoutError::Timeout,
+                mpsc::TryRecvError::Disconnected => mpsc::RecvTimeoutError::Disconnected,
+            });
+        }
+        if disconnected {
+            break;
         }
         let now = Instant::now();
         for (index, slot) in pending.iter_mut().enumerate() {

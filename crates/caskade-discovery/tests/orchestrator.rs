@@ -99,13 +99,15 @@ fn failing_panicking_and_hanging_sources_do_not_affect_others() {
         fake("omega", Behaviour::Games(1)),
     ];
     let started = Instant::now();
-    let report = scan_with_sources(&env(), &config(300), &Cancel::new(), &sources).unwrap();
+    // A second per source: a panic on a busy Windows runner took over the
+    // 300 ms this once allowed. The hang still outlasts the limit below.
+    let report = scan_with_sources(&env(), &config(1_000), &Cancel::new(), &sources).unwrap();
     // On a single-core host the sole worker waits for the uncooperative
     // source to stop before later sources can run; it must not oversubscribe.
     let limit = if std::thread::available_parallelism().map_or(1, usize::from) == 1 {
         Duration::from_secs(5)
     } else {
-        Duration::from_secs(2)
+        Duration::from_millis(2_500)
     };
     assert!(started.elapsed() < limit, "{:?}", started.elapsed());
 
