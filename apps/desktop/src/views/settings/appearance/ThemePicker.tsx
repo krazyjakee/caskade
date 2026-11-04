@@ -81,7 +81,7 @@ function ThemeOption({
           <Trans comment="A theme's author">by {theme.author}</Trans>
         </span>
       )}
-      {theme.description && <span className="text-xs text-fg-subtle">{theme.description}</span>}
+      {theme.description && <span className="text-xs text-fg-muted">{theme.description}</span>}
       {source && (
         <span className="font-mono text-[0.7rem] tracking-wider text-accent-alt uppercase">
           {t(source)}

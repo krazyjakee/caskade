@@ -1,16 +1,9 @@
-import {
-  Button,
-  Select,
-  SettingRow,
-  SettingsSection,
-  Slider,
-  Switch,
-  TextField,
-} from "@caskade/ui";
+import { Select, SettingRow, SettingsSection, Slider, Switch, TextField } from "@caskade/ui";
 import { t as translate } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { ResetDefaults } from "./ResetDefaults";
 import {
   SettingsFeedback,
   SettingsLoading,
@@ -123,7 +116,7 @@ export function SchemaSettings({
 }) {
   const { t } = useLingui();
   const definition = useSettingsDefinition(namespace);
-  const { settings, setSettings, saving, error, reload, reset } =
+  const { settings, setSettings, saving, error, reload } =
     useSettingsSection<Record<string, unknown>>(namespace);
   if (!settings || !definition.data)
     return (
@@ -155,15 +148,21 @@ export function SchemaSettings({
     <div data-settings={namespace} data-cs="schema-settings" className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
         <SettingsFeedback error={error} saving={saving} />
-        <Button
-          variant="ghost"
-          size="sm"
+        <ResetDefaults
+          group={title}
+          label={resetLabel ?? t`Reset ${{ section: title }} settings`}
+          parts={[
+            {
+              namespace,
+              whole: true,
+              fields: fields.map(([key, schema]) => ({
+                key,
+                label: typeof schema.title === "string" ? schema.title : label(key),
+              })),
+            },
+          ]}
           isDisabled={saving}
-          onPress={reset}
-          aria-label={resetLabel ?? t`Reset ${{ section: title }} settings`}
-        >
-          <Trans>Reset to defaults</Trans>
-        </Button>
+        />
       </div>
       <SettingsSection icon={icon} title={title} description={description}>
         {fields.map(([key, schema]) => {

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { StrictMode } from "react";
 import { afterEach, expect, it, vi } from "vitest";
 import type { SettingsApi, SettingsChanged, SettingsSnapshot } from "../../api/settings";
@@ -88,6 +88,9 @@ it("the appearance panel saves through the backend, survives remount and resets"
     ((await screen.findByRole("switch", { name: "Reduce effects" })) as HTMLInputElement).checked,
   ).toBe(true);
   fireEvent.click(screen.getByRole("button", { name: "Reset appearance settings" }));
+  const dialog = await screen.findByRole("alertdialog");
+  await within(dialog).findByText("Reduce effects");
+  fireEvent.click(within(dialog).getByRole("button", { name: "Reset" }));
   await waitFor(() => expect(backend.value.reduceEffects).toBe(false));
   await waitFor(() =>
     expect(

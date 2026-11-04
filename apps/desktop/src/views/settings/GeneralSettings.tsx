@@ -33,7 +33,13 @@ import {
 import { StorageSummary } from "../../components/storage/StorageSummary";
 import { LanguageSelect } from "../../locale/LanguageSelect";
 import { AppUpdateSection } from "./AppUpdateSection";
-import { SettingsFeedback, SettingsLoading, useSettingsSection } from "./useSettings";
+import { ResetDefaults, type ResetPart } from "./ResetDefaults";
+import {
+  SettingsFeedback,
+  SettingsLoading,
+  SettingsStatus,
+  useSettingsSection,
+} from "./useSettings";
 
 /** A choice's label, translated where it is shown (`useOptions`). */
 interface Option<K extends string> {
@@ -92,21 +98,25 @@ interface ConsolePreferences {
 function ConsoleStartRow() {
   const { t } = useLingui();
   const options = useOptions(consoleStarts);
-  const { settings, setSettings } = useSettingsSection<ConsolePreferences>("core.console");
-  if (!settings) return null;
+  const section = useSettingsSection<ConsolePreferences>("core.console");
+  const { settings, setSettings } = section;
+  if (!settings) return <SettingsStatus section={section} what={t`Start in`} />;
   return (
-    <SettingRow
-      icon={MonitorPlay}
-      label={t`Start in`}
-      description={t`Automatic opens console mode in Steam Deck game mode (gamescope), otherwise the mode you last used.`}
-    >
-      <Select
-        options={options}
-        value={settings.start}
-        onChange={(start) => setSettings((current) => ({ ...current, start }))}
-        className="w-44"
-      />
-    </SettingRow>
+    <>
+      <SettingRow
+        icon={MonitorPlay}
+        label={t`Start in`}
+        description={t`Automatic opens console mode in Steam Deck game mode (gamescope), otherwise the mode you last used.`}
+      >
+        <Select
+          options={options}
+          value={settings.start}
+          onChange={(start) => setSettings((current) => ({ ...current, start }))}
+          className="w-44"
+        />
+      </SettingRow>
+      <SettingsStatus section={section} what={t`Start in`} />
+    </>
   );
 }
 
@@ -161,6 +171,8 @@ function SetupSection() {
           </Button>
         </SettingRow>
       )}
+      <SettingsStatus section={metadata} what={t`Online lookups`} />
+      <SettingsStatus section={onboarding} what={t`First-run setup`} />
     </SettingsSection>
   );
 }
@@ -172,153 +184,182 @@ export function GeneralSettings() {
   const onLaunch = useOptions(onLaunchOptions);
   const onClose = useOptions(closeOptions);
   const times = useOptions(timeFormats);
-  const { settings, setSettings, saving, error, reload, reset } =
+  const { settings, setSettings, saving, error, reload } =
     useSettingsSection<GeneralPreferences>("core.general");
   const set = <K extends keyof GeneralPreferences>(key: K, value: GeneralPreferences[K]) =>
     setSettings((s) => ({ ...s, [key]: value }));
   if (!settings) return <SettingsLoading error={error} reload={reload} />;
 
+  // Every preference on this page, from whichever section keeps it (#44);
+  // first-run setup's completion and the console's last mode stay.
+  const resetParts: ResetPart[] = [
+    {
+      namespace: "core.general",
+      whole: true,
+      fields: [
+        { key: "launchOnLogin", label: t`Launch on system startup` },
+        { key: "startMinimized", label: t`Start minimized` },
+        { key: "startView", label: t`Open to` },
+        { key: "onLaunch", label: t`When a game launches` },
+        { key: "onClose", label: t`Close button` },
+        { key: "confirmQuit", label: t`Confirm before quitting` },
+        { key: "cacheDir", label: t`Cache folder` },
+        { key: "language", label: t`Language` },
+        { key: "timeFormat", label: t`Time format` },
+      ],
+    },
+    { namespace: "core.console", fields: [{ key: "start", label: t`Start in` }] },
+    { namespace: "core.appUpdates", fields: [{ key: "check", label: t`Check automatically` }] },
+    {
+      namespace: "core.metadata",
+      fields: [{ key: "online", label: t`Fetch artwork and game info online` }],
+    },
+  ];
+
+  // Two columns only where the panel itself has room for them beside both
+  // navigation columns: a container query, in rem, so the interface scale
+  // counts too (#41).
   return (
-    <div data-settings="general" className="grid items-start gap-4 xl:grid-cols-2">
-      <div className="col-span-full flex items-center justify-between gap-3">
-        <SettingsFeedback error={error} saving={saving} />
-        <Button
-          variant="ghost"
-          size="sm"
-          onPress={reset}
-          isDisabled={saving}
-          aria-label={t`Reset general settings`}
-        >
-          <Trans>Reset to defaults</Trans>
-        </Button>
-      </div>
-      <SettingsSection
-        icon={Power}
-        title={t`Startup`}
-        description={t`What happens when Caskade opens.`}
-      >
-        <SettingRow
-          icon={Rocket}
-          label={t`Launch on system startup`}
-          description={t`Start Caskade when you log in.`}
-        >
-          <Switch isSelected={settings.launchOnLogin} onChange={(v) => set("launchOnLogin", v)} />
-        </SettingRow>
-        <SettingRow
-          icon={MonitorUp}
-          label={t`Start minimized`}
-          description={t`Open in the system tray instead of a window.`}
-        >
-          <Switch
-            isSelected={settings.startMinimized}
-            onChange={(v) => set("startMinimized", v)}
-            isDisabled={!settings.launchOnLogin}
-          />
-        </SettingRow>
-        <SettingRow icon={House} label={t`Open to`} description={t`The first view you see.`}>
-          <Select
-            options={views}
-            value={settings.startView}
-            onChange={(v) => set("startView", v)}
-            className="w-44"
-          />
-        </SettingRow>
-        <ConsoleStartRow />
-      </SettingsSection>
-
-      <SettingsSection
-        icon={Gamepad2}
-        title={t`Behavior`}
-        description={t`Window behavior while you play.`}
-      >
-        <SettingRow
-          icon={Play}
-          label={t`When a game launches`}
-          description={t`What Caskade does with its window.`}
-        >
-          <Select
-            options={onLaunch}
-            value={settings.onLaunch}
-            onChange={(v) => set("onLaunch", v)}
-            className="w-44"
-          />
-        </SettingRow>
-        <SettingRow
-          icon={LogOut}
-          label={t`Close button`}
-          description={t`Hiding keeps the guide button and downloads working.`}
-        >
-          <SegmentedControl
-            options={onClose}
-            value={settings.onClose}
-            onChange={(v) => set("onClose", v)}
-          />
-        </SettingRow>
-        <SettingRow
-          icon={MessageSquareWarning}
-          label={t`Confirm before quitting`}
-          description={t`Ask while a game is running.`}
-        >
-          <Switch isSelected={settings.confirmQuit} onChange={(v) => set("confirmQuit", v)} />
-        </SettingRow>
-      </SettingsSection>
-
-      <SettingsSection
-        icon={HardDrive}
-        title={t`Locations`}
-        description={t`Where Caskade installs games and keeps its data.`}
-      >
-        <div className="mt-3 flex flex-col gap-4">
-          <div data-part="storage-summary" className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium">
-              <Trans>Game storage</Trans>
-            </span>
-            <div className="flex gap-2">
-              <div className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-control border border-border bg-surface-base/30 px-3">
-                <HardDrive className="size-4 shrink-0 text-fg-subtle" />
-                <span className="truncate text-sm">
-                  <Trans>Storage locations</Trans>
-                </span>
-                <StorageSummary />
-              </div>
-              <Button onPress={() => navigate({ to: "/settings", search: { tab: "storage" } })}>
-                <Trans>Manage…</Trans>
-              </Button>
-            </div>
-            <span className="text-xs text-fg-subtle">
-              <Trans>Manage the default location and other game storage roots.</Trans>
-            </span>
-          </div>
-          <TextField
-            label={t`Cache folder`}
-            description={t`Artwork, thumbnails and metadata. Safe to clear.`}
-            icon={FolderOpen}
-            mono
-            value={settings.cacheDir}
-            isReadOnly
+    <div data-settings="general" className="@container">
+      <div className="grid items-start gap-4 @6xl:grid-cols-2">
+        <div className="col-span-full flex items-center justify-between gap-3">
+          <SettingsFeedback error={error} saving={saving} />
+          <ResetDefaults
+            group={t({ message: "General", context: "settings tab" })}
+            label={t`Reset general settings`}
+            parts={resetParts}
+            keeps={t`Settings on other pages, and whether first-run setup is done, stay as they are.`}
+            isDisabled={saving}
           />
         </div>
-      </SettingsSection>
+        <SettingsSection
+          icon={Power}
+          title={t`Startup`}
+          description={t`What happens when Caskade opens.`}
+        >
+          <SettingRow
+            icon={Rocket}
+            label={t`Launch on system startup`}
+            description={t`Start Caskade when you log in.`}
+          >
+            <Switch isSelected={settings.launchOnLogin} onChange={(v) => set("launchOnLogin", v)} />
+          </SettingRow>
+          <SettingRow
+            icon={MonitorUp}
+            label={t`Start minimized`}
+            description={t`Open in the system tray instead of a window.`}
+          >
+            <Switch
+              isSelected={settings.startMinimized}
+              onChange={(v) => set("startMinimized", v)}
+              isDisabled={!settings.launchOnLogin}
+            />
+          </SettingRow>
+          <SettingRow icon={House} label={t`Open to`} description={t`The first view you see.`}>
+            <Select
+              options={views}
+              value={settings.startView}
+              onChange={(v) => set("startView", v)}
+              className="w-44"
+            />
+          </SettingRow>
+          <ConsoleStartRow />
+        </SettingsSection>
 
-      <SettingsSection
-        icon={Globe}
-        title={t`Language & Region`}
-        description={t`How text, dates and times are shown.`}
-      >
-        <SettingRow icon={Languages} label={t`Language`}>
-          <LanguageSelect value={settings.language} onChange={(v) => set("language", v)} />
-        </SettingRow>
-        <SettingRow icon={Clock} label={t`Time format`}>
-          <SegmentedControl
-            options={times}
-            value={settings.timeFormat}
-            onChange={(v) => set("timeFormat", v)}
-          />
-        </SettingRow>
-      </SettingsSection>
+        <SettingsSection
+          icon={Gamepad2}
+          title={t`Behavior`}
+          description={t`Window behavior while you play.`}
+        >
+          <SettingRow
+            icon={Play}
+            label={t`When a game launches`}
+            description={t`What Caskade does with its window.`}
+          >
+            <Select
+              options={onLaunch}
+              value={settings.onLaunch}
+              onChange={(v) => set("onLaunch", v)}
+              className="w-44"
+            />
+          </SettingRow>
+          <SettingRow
+            icon={LogOut}
+            label={t`Close button`}
+            description={t`Hiding keeps the guide button and downloads working.`}
+          >
+            <SegmentedControl
+              options={onClose}
+              value={settings.onClose}
+              onChange={(v) => set("onClose", v)}
+            />
+          </SettingRow>
+          <SettingRow
+            icon={MessageSquareWarning}
+            label={t`Confirm before quitting`}
+            description={t`Ask while a game is running.`}
+          >
+            <Switch isSelected={settings.confirmQuit} onChange={(v) => set("confirmQuit", v)} />
+          </SettingRow>
+        </SettingsSection>
 
-      <AppUpdateSection />
-      <SetupSection />
+        <SettingsSection
+          icon={HardDrive}
+          title={t`Locations`}
+          description={t`Where Caskade installs games and keeps its data.`}
+        >
+          <div className="mt-3 flex flex-col gap-4">
+            <div data-part="storage-summary" className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium">
+                <Trans>Game storage</Trans>
+              </span>
+              <div className="flex gap-2">
+                <div className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-control border border-border bg-surface-base/30 px-3">
+                  <HardDrive className="size-4 shrink-0 text-fg-subtle" />
+                  <span className="truncate text-sm">
+                    <Trans>Storage locations</Trans>
+                  </span>
+                  <StorageSummary />
+                </div>
+                <Button onPress={() => navigate({ to: "/settings", search: { tab: "storage" } })}>
+                  <Trans>Manage…</Trans>
+                </Button>
+              </div>
+              <span className="text-xs text-fg-muted">
+                <Trans>Manage the default location and other game storage roots.</Trans>
+              </span>
+            </div>
+            <TextField
+              label={t`Cache folder`}
+              description={t`Artwork, thumbnails and metadata. Safe to clear.`}
+              icon={FolderOpen}
+              mono
+              value={settings.cacheDir}
+              isReadOnly
+            />
+          </div>
+        </SettingsSection>
+
+        <SettingsSection
+          icon={Globe}
+          title={t`Language & Region`}
+          description={t`How text, dates and times are shown.`}
+        >
+          <SettingRow icon={Languages} label={t`Language`}>
+            <LanguageSelect value={settings.language} onChange={(v) => set("language", v)} />
+          </SettingRow>
+          <SettingRow icon={Clock} label={t`Time format`}>
+            <SegmentedControl
+              options={times}
+              value={settings.timeFormat}
+              onChange={(v) => set("timeFormat", v)}
+            />
+          </SettingRow>
+        </SettingsSection>
+
+        <AppUpdateSection />
+        <SetupSection />
+      </div>
     </div>
   );
 }

@@ -24,6 +24,7 @@ import { useActiveTheme } from "../../themes/apply";
 import { CustomCssEditor } from "./appearance/CustomCssEditor";
 import { ThemePicker } from "./appearance/ThemePicker";
 import { SectionSync } from "./devices/SectionSync";
+import { ResetDefaults, type ResetPart } from "./ResetDefaults";
 import { SettingsFeedback, SettingsLoading, useSettingsSection } from "./useSettings";
 
 const densities = [
@@ -127,140 +128,160 @@ function AccentPicker({
 
 export function AppearanceSettings() {
   const { t } = useLingui();
-  const { settings, setSettings, saving, error, reload, reset } =
+  const { settings, setSettings, saving, error, reload } =
     useSettingsSection<AppearancePreferences>("core.appearance");
   const set = <K extends keyof AppearancePreferences>(key: K, value: AppearancePreferences[K]) =>
     setSettings((s) => ({ ...s, [key]: value }));
   const active = useActiveTheme();
   if (!settings) return <SettingsLoading error={error} reload={reload} />;
 
+  // The page shows the whole section, custom CSS included (#44).
+  const resetParts: ResetPart[] = [
+    {
+      namespace: "core.appearance",
+      whole: true,
+      fields: [
+        { key: "theme", label: t`Theme` },
+        { key: "density", label: t`Density` },
+        { key: "uiScale", label: t`Interface scale` },
+        { key: "accent", label: t`Accent colour` },
+        { key: "cardSize", label: t`Card size` },
+        { key: "showArtTitles", label: t`Show titles on artwork` },
+        { key: "motion", label: t`Animations` },
+        { key: "reduceEffects", label: t`Reduce effects` },
+        { key: "customCss", label: t`Custom CSS` },
+        { key: "customCssEnabled", label: t`Disable custom CSS` },
+      ],
+    },
+  ];
+
+  // Two columns only where the panel itself has room for them (#41).
   return (
-    <div data-settings="appearance" className="grid items-start gap-4 xl:grid-cols-2">
-      <div className="col-span-full flex items-center justify-between gap-3">
-        <SettingsFeedback error={error} saving={saving} />
-        <Button
-          variant="ghost"
-          size="sm"
-          onPress={reset}
-          isDisabled={saving}
-          aria-label={t`Reset appearance settings`}
-        >
-          <Trans>Reset to defaults</Trans>
-        </Button>
-      </div>
-      <SettingsSection
-        icon={Palette}
-        title={t`Theme`}
-        description={t`How Caskade looks. Themes restyle every view through design tokens.`}
-        className="col-span-full"
-      >
-        <ThemePicker value={settings.theme || DEFAULT_THEME} onChange={(v) => set("theme", v)} />
-        <MoreThemes />
-      </SettingsSection>
-
-      <SettingsSection
-        icon={Sparkles}
-        title={t({ message: "Look", context: "settings section", comment: "The appearance" })}
-        description={t`Adjust the theme to taste.`}
-      >
-        <SettingRow icon={LayoutGrid} label={t`Density`}>
-          <SegmentedControl
-            options={densities.map((option) => ({ ...option, label: t(option.label) }))}
-            value={settings.density}
-            onChange={(v) => set("density", v)}
+    <div data-settings="appearance" className="@container">
+      <div className="grid items-start gap-4 @6xl:grid-cols-2">
+        <div className="col-span-full flex items-center justify-between gap-3">
+          <SettingsFeedback error={error} saving={saving} />
+          <ResetDefaults
+            group={t({ message: "Appearance", context: "settings tab" })}
+            label={t`Reset appearance settings`}
+            parts={resetParts}
+            isDisabled={saving}
           />
-        </SettingRow>
-        <SettingRow icon={Scaling} label={t`Interface scale`}>
-          <Slider
-            minValue={80}
-            maxValue={150}
-            step={5}
-            value={settings.uiScale}
-            onChange={(v) => set("uiScale", v)}
-            format={(v) => `${v}%`}
-            className="w-56"
-          />
-        </SettingRow>
-        <SettingRow
-          icon={Droplet}
-          label={t`Accent colour`}
-          description={t`Buttons, selection and glows; kept readable on the theme.`}
+        </div>
+        <SettingsSection
+          icon={Palette}
+          title={t`Theme`}
+          description={t`How Caskade looks. Themes restyle every view through design tokens.`}
+          className="col-span-full"
         >
-          <AccentPicker value={settings.accent ?? null} onChange={(v) => set("accent", v)} />
-        </SettingRow>
-        {/* The interface scale suits each screen and always stays here. */}
-        <SectionSync namespace="core.appearance" />
-      </SettingsSection>
+          <ThemePicker value={settings.theme || DEFAULT_THEME} onChange={(v) => set("theme", v)} />
+          <MoreThemes />
+        </SettingsSection>
 
-      <SettingsSection
-        icon={Image}
-        title={t`Library`}
-        description={t`How games are shown in grids.`}
-      >
-        <SettingRow
-          icon={RectangleHorizontal}
-          label={t`Card size`}
-          description={t`Minimum width of a game card.`}
+        <SettingsSection
+          icon={Sparkles}
+          title={t({ message: "Look", context: "settings section", comment: "The appearance" })}
+          description={t`Adjust the theme to taste.`}
         >
-          <Slider
-            minValue={128}
-            maxValue={288}
-            step={8}
-            value={settings.cardSize}
-            onChange={(v) => set("cardSize", v)}
-            format={(v) => `${v}px`}
-            className="w-56"
-          />
-        </SettingRow>
-        <SettingRow
-          icon={Captions}
-          label={t`Show titles on artwork`}
-          description={t`Overlay the game title on cover art.`}
-        >
-          <Switch isSelected={settings.showArtTitles} onChange={(v) => set("showArtTitles", v)} />
-        </SettingRow>
-      </SettingsSection>
+          <SettingRow icon={LayoutGrid} label={t`Density`}>
+            <SegmentedControl
+              options={densities.map((option) => ({ ...option, label: t(option.label) }))}
+              value={settings.density}
+              onChange={(v) => set("density", v)}
+            />
+          </SettingRow>
+          <SettingRow icon={Scaling} label={t`Interface scale`}>
+            <Slider
+              minValue={80}
+              maxValue={150}
+              step={5}
+              value={settings.uiScale}
+              onChange={(v) => set("uiScale", v)}
+              format={(v) => `${v}%`}
+              className="w-56"
+            />
+          </SettingRow>
+          <SettingRow
+            icon={Droplet}
+            label={t`Accent colour`}
+            description={t`Buttons, selection and glows; kept readable on the theme.`}
+          >
+            <AccentPicker value={settings.accent ?? null} onChange={(v) => set("accent", v)} />
+          </SettingRow>
+          {/* The interface scale suits each screen and always stays here. */}
+          <SectionSync namespace="core.appearance" />
+        </SettingsSection>
 
-      <SettingsSection
-        icon={Activity}
-        title={t`Motion & Effects`}
-        description={t`Turn these down on slower machines.`}
-      >
-        <SettingRow
+        <SettingsSection
+          icon={Image}
+          title={t`Library`}
+          description={t`How games are shown in grids.`}
+        >
+          <SettingRow
+            icon={RectangleHorizontal}
+            label={t`Card size`}
+            description={t`Minimum width of a game card.`}
+          >
+            <Slider
+              minValue={128}
+              maxValue={288}
+              step={8}
+              value={settings.cardSize}
+              onChange={(v) => set("cardSize", v)}
+              format={(v) => `${v}px`}
+              className="w-56"
+            />
+          </SettingRow>
+          <SettingRow
+            icon={Captions}
+            label={t`Show titles on artwork`}
+            description={t`Overlay the game title on cover art.`}
+          >
+            <Switch isSelected={settings.showArtTitles} onChange={(v) => set("showArtTitles", v)} />
+          </SettingRow>
+        </SettingsSection>
+
+        <SettingsSection
           icon={Activity}
-          label={t`Animations`}
-          description={t`System follows your OS reduced-motion setting.`}
+          title={t`Motion & Effects`}
+          description={t`Turn these down on slower machines.`}
         >
-          <SegmentedControl
-            options={motionOptions.map((option) => ({ ...option, label: t(option.label) }))}
-            value={settings.motion}
-            onChange={(v) => set("motion", v)}
-          />
-        </SettingRow>
-        <SettingRow
-          icon={Contrast}
-          label={t`Reduce effects`}
-          description={t`Turn off blur, glow, scanlines and the backdrop grid.`}
-        >
-          <Switch isSelected={settings.reduceEffects} onChange={(v) => set("reduceEffects", v)} />
-        </SettingRow>
-      </SettingsSection>
+          <SettingRow
+            icon={Activity}
+            label={t`Animations`}
+            description={t`System follows your OS reduced-motion setting.`}
+          >
+            <SegmentedControl
+              options={motionOptions.map((option) => ({ ...option, label: t(option.label) }))}
+              value={settings.motion}
+              onChange={(v) => set("motion", v)}
+            />
+          </SettingRow>
+          <SettingRow
+            icon={Contrast}
+            label={t`Reduce effects`}
+            description={t`Turn off blur, glow, scanlines and the backdrop grid.`}
+          >
+            <Switch isSelected={settings.reduceEffects} onChange={(v) => set("reduceEffects", v)} />
+          </SettingRow>
+        </SettingsSection>
 
-      <SettingsSection
-        icon={Code}
-        title={t`Custom CSS`}
-        description={t`Your own rules, applied over the theme without a reload.`}
-        className="col-span-full"
-      >
-        <CustomCssEditor
-          css={settings.customCss ?? ""}
-          enabled={settings.customCssEnabled !== false}
-          safeMode={active?.safeMode ?? false}
-          saving={saving}
-          onSave={(css) => set("customCss", css)}
-          onEnabledChange={(enabled) => set("customCssEnabled", enabled)}
-        />
-      </SettingsSection>
+        <SettingsSection
+          icon={Code}
+          title={t`Custom CSS`}
+          description={t`Your own rules, applied over the theme without a reload.`}
+          className="col-span-full"
+        >
+          <CustomCssEditor
+            css={settings.customCss ?? ""}
+            enabled={settings.customCssEnabled !== false}
+            safeMode={active?.safeMode ?? false}
+            saving={saving}
+            onSave={(css) => set("customCss", css)}
+            onEnabledChange={(enabled) => set("customCssEnabled", enabled)}
+          />
+        </SettingsSection>
+      </div>
     </div>
   );
 }

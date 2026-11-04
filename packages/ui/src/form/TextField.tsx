@@ -61,7 +61,7 @@ export function TextField({
         )}
       </div>
       {description && (
-        <Text slot="description" data-part="description" className="text-xs text-fg-subtle">
+        <Text slot="description" data-part="description" className="text-xs text-fg-muted">
           {description}
         </Text>
       )}

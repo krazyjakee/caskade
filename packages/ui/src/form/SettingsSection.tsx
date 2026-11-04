@@ -43,7 +43,7 @@ export function SettingsSection({
             {title}
           </h2>
           {description && (
-            <p data-part="description" className="text-sm text-fg-subtle">
+            <p data-part="description" className="text-sm text-fg-muted">
               {description}
             </p>
           )}
@@ -62,8 +62,12 @@ export function SettingsSection({
 /**
  * One setting: label and description, then its controls. The text grows to a
  * fixed width and no further, so on a wide panel the controls stay beside their
- * label, in a column shared by the rows above and below. Controls inside are labelled by the row through React Aria contexts, so they
- * need no label of their own.
+ * label, in a column shared by the rows above and below. Where the row is too
+ * narrow for the text's minimum width beside the controls (a narrow column, a
+ * larger interface scale, a longer translation), the controls wrap onto their
+ * own line under the label instead of squeezing it (#41). Controls inside are
+ * labelled by the row through React Aria contexts, so they need no label of
+ * their own.
  */
 export function SettingRow({
   icon: Icon,
@@ -85,18 +89,23 @@ export function SettingRow({
   return (
     <div
       data-cs="setting-row"
-      className="flex items-center gap-3 border-t border-border py-3 first-of-type:border-t-0"
+      className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-border py-3 first-of-type:border-t-0"
     >
-      {Icon && <Icon data-part="icon" className="size-5 shrink-0 text-fg-muted" />}
-      <div className="max-w-md min-w-0 flex-1">
-        <div id={labelId} data-part="label" className="text-sm font-medium">
-          {label}
-        </div>
-        {description && (
-          <div id={descriptionId} data-part="description" className="text-xs text-fg-subtle">
-            {description}
+      {/* The icon stays with the text when the controls wrap. The basis is
+          the text's minimum width beside the controls, in rem, so it follows
+          the interface scale. */}
+      <div className="flex max-w-md min-w-0 flex-[1_1_16rem] items-center gap-3">
+        {Icon && <Icon data-part="icon" className="size-5 shrink-0 text-fg-muted" />}
+        <div className="min-w-0 flex-1 break-words">
+          <div id={labelId} data-part="label" className="text-sm font-medium">
+            {label}
           </div>
-        )}
+          {description && (
+            <div id={descriptionId} data-part="description" className="text-xs text-fg-muted">
+              {description}
+            </div>
+          )}
+        </div>
       </div>
       <Provider
         values={[
@@ -109,7 +118,7 @@ export function SettingRow({
           [ToggleButtonGroupContext, labelling],
         ]}
       >
-        <div data-part="controls" className="flex shrink-0 items-center gap-3">
+        <div data-part="controls" className="flex max-w-full min-w-0 flex-wrap items-center gap-3">
           {children}
         </div>
       </Provider>

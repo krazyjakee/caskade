@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
 import type { SettingsApi, SettingsSnapshot } from "../../api/settings";
 import { InstallerSettings } from "./InstallerSettings";
@@ -98,6 +98,12 @@ it("renders authoritative schema labels, references and numeric limits and persi
       .checked,
   ).toBe(true);
   fireEvent.click(screen.getByRole("button", { name: "Reset installer settings" }));
+  // Nothing changes until the reset is confirmed, which names what changes (#44).
+  const dialog = await screen.findByRole("alertdialog");
+  await within(dialog).findByText("Shortcuts from schema");
+  expect(within(dialog).getByText("Language from schema")).toBeTruthy();
+  expect(fixture.value.shortcuts).toBe(true);
+  fireEvent.click(within(dialog).getByRole("button", { name: "Reset" }));
   await waitFor(() => expect(fixture.value).toEqual(defaults));
 });
 it("shows backend rejection and retains the committed preference", async () => {
