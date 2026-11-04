@@ -57,10 +57,14 @@ Publishing the curated origin is a release step for the maintainer; see [Publish
 ### Fields
 
 - **`kind`:** `plugin` or `theme`.
-- **`id`:** the manifest id (`plugin.json` or `theme.json`). Lowercase letters, digits, `-` and `_`, in dot-separated parts.
+- **`id`:** the manifest id (`plugin.json` or `theme.json`). Lowercase letters, digits, `-` and `_`, in dot-separated parts. Unique in the catalogue, across plugins and themes.
+- **`author`:** required.
+- **`license`:** required, an [SPDX license expression](https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/) covering everything the package ships: `MIT`, `MIT OR Apache-2.0`, `GPL-2.0-or-later WITH Classpath-exception-2.0`, `LicenseRef-<name>` for terms SPDX doesn't list. Ids aren't checked against SPDX's list, but free text, `NONE` and `NOASSERTION` are refused.
+- **`version`:** a semantic version, unique within the package. Versions that differ only in build metadata (`1.0.0+a`, `1.0.0+b`) are the same version.
 - **`api`:** the plugin API range the release needs, as its `plugin.json` has it. Required for plugins and absent for themes.
-- **`os`:** the OSes the release runs on. Empty or missing means all of them.
-- **`modes`:** the app modes the release's UI supports. Empty or missing means both. A missing mode is a limit the app shows, not a refusal.
+- **`os`:** the OSes the release runs on: `linux`, `windows`, `macos`. Empty or missing means all of them.
+- **`modes`:** the app modes the release's UI supports: `desktop`, `console`. Empty or missing means both. A missing mode is a limit the app shows, not a refusal.
+- **`artifact`:** the archive's address, its lowercase hex SHA-256 (64 digits) and its size in bytes (1 byte to 512 MiB).
 - **`permissions`:** what the manifest asks for, shown in the review. The manifest in the archive is what decides.
 - **`deprecated`:** a reason. The entry stays listed for those who have it installed.
 
@@ -80,12 +84,19 @@ Within a valid catalogue, a record that breaks a rule is **left out with the rea
 - a bad id
 - a duplicate id (the first record stays)
 - an unknown kind
-- an unreadable version or range
-- a release without a usable artifact
+- a missing name, author or summary
+- a missing license, or one that isn't an SPDX license expression
 - control characters in text
 - a non-HTTPS address
 
-A release that breaks a rule is left out of its entry. An entry left with no releases is left out.
+A release that breaks a rule is left out of its entry. An entry left with no releases is left out. Releases are left out for:
+
+- a version that isn't semantic, or one listed twice (the first stays)
+- a plugin release without a readable API range, or a theme release with one
+- an unknown OS or mode
+- an artifact without an address, a 64-digit SHA-256 or a size within the limit
+
+The catalogue itself can't show that its artifacts exist or are what they claim; `caskade-catalogue check` fetches every one before publishing ([publishing.md](publishing.md#check)), and every install checks the archive again.
 
 ## In the app
 

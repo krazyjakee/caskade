@@ -335,3 +335,160 @@ async fn check_reads_a_staged_catalogue_as_the_app_does_and_finds_broken_assets(
             .is_err()
     );
 }
+
+#[test]
+fn build_refuses_what_the_catalogue_would_leave_out() {
+    let temp = tempfile::tempdir().unwrap();
+    let src = temp.path().join("src");
+    plugin_folder(&src.join("stats"), "0.1.0");
+    theme_folder(&src.join("ember"));
+    let source = src.join("catalogue.json");
+    let build = |packages: Value| {
+        std::fs::write(
+            &source,
+            json!({"format": 1, "generated": "2026-10-30T00:00:00Z", "packages": packages})
+                .to_string(),
+        )
+        .unwrap();
+        author::build(&source, &temp.path().join("out"), None)
+    };
+    let stats = |extra: Value| {
+        let mut record = json!({"path": "stats", "kind": "plugin", "summary": "Charts.",
+            "license": "MIT"});
+        if let (Some(record), Some(extra)) = (record.as_object_mut(), extra.as_object()) {
+            record.extend(extra.clone());
+        }
+        record
+    };
+    build(json!([stats(json!({}))])).unwrap();
+    let refused = |packages: Value, reason: &str| {
+        let error = build(packages).unwrap_err();
+        assert!(error.contains(reason), "{reason}: {error}");
+    };
+    refused(json!([stats(json!({})), stats(json!({}))]), "listed twice");
+    refused(
+        json!([stats(json!({"os": ["linux", "beos"]}))]),
+        "unknown OS",
+    );
+    refused(json!([stats(json!({"modes": ["tv"]}))]), "unknown mode");
+    refused(
+        json!([stats(json!({"license": "All rights reserved"}))]),
+        "isn't an SPDX license expression",
+    );
+    refused(json!([stats(json!({"license": ""}))]), "“license” is empty");
+    // The manifest gives the author and the version.
+    let manifest = src.join("ember/theme.json");
+    std::fs::write(
+        &manifest,
+        br#"{"id": "dev.example.ember", "name": "Ember", "version": "1.0.0", "extends": "caskade.default"}"#,
+    )
+    .unwrap();
+    let ember = json!({"path": "ember", "kind": "theme", "summary": "Warm.", "license": "MIT"});
+    refused(json!([ember.clone()]), "“author” is empty");
+    std::fs::write(
+        &manifest,
+        br#"{"id": "dev.example.ember", "name": "Ember", "version": "1", "author": "Example"}"#,
+    )
+    .unwrap();
+    refused(json!([ember]), "isn't a semantic version");
+}
+
+#[cfg(feature = "net")]
+#[tokio::test]
+async fn check_fetches_every_asset_and_names_what_is_unreachable_or_not_the_release() {
+    use wiremock::{
+        Mock, MockServer, ResponseTemplate,
+        matchers::{method, path},
+    };
+    async fn serve(server: &MockServer, route: &str, body: Vec<u8>) {
+        Mock::given(method("GET"))
+            .and(path(route))
+            .respond_with(ResponseTemplate::new(200).set_body_bytes(body))
+            .mount(server)
+            .await;
+    }
+    let temp = tempfile::tempdir().unwrap();
+    let src = temp.path().join("src");
+    plugin_folder(&src.join("stats"), "0.1.0");
+    theme_folder(&src.join("ember"));
+    let mut png = Vec::new();
+    image::RgbImage::new(4, 3)
+        .write_to(&mut std::io::Cursor::new(&mut png), image::ImageFormat::Png)
+        .unwrap();
+    write(&src, &[("media/stats.png", &png)]);
+    let source = src.join("catalogue.json");
+    std::fs::write(
+        &source,
+        json!({
+            "format": 1, "generated": "2026-10-30T00:00:00Z",
+            "packages": [
+                {"path": "stats", "kind": "plugin", "summary": "Charts.", "license": "MIT",
+                 "screenshots": [{"file": "media/stats.png", "alt": "The chart"}]},
+                {"path": "ember", "kind": "theme", "summary": "Warm.", "license": "MIT"}
+            ]
+        })
+        .to_string(),
+    )
+    .unwrap();
+    let out = temp.path().join("out");
+    author::build(&source, &out, None).unwrap();
+    let file = |name: &str| std::fs::read(out.join(name)).unwrap();
+    let stats_zip = "/packages/dev.example.stats-0.1.0.zip";
+    let ember_zip = "/packages/dev.example.ember-1.0.0.zip";
+    let shot = "/media/dev.example.stats/1.png";
+
+    // Everything served: no problems.
+    let server = MockServer::start().await;
+    serve(&server, "/catalogue.json", file("catalogue.json")).await;
+    serve(&server, stats_zip, file(&stats_zip[1..])).await;
+    serve(&server, ember_zip, file(&ember_zip[1..])).await;
+    serve(&server, shot, file(&shot[1..])).await;
+    let origin = format!("{}/catalogue.json", server.uri());
+    let checked = author::check(&origin, None, &temp.path().join("work1"))
+        .await
+        .unwrap();
+    assert!(checked.problems.is_empty(), "{:?}", checked.problems);
+    assert_eq!(checked.releases.len(), 2);
+    let asked: Vec<String> = server
+        .received_requests()
+        .await
+        .unwrap()
+        .iter()
+        .map(|request| request.url.path().to_owned())
+        .collect();
+    for route in [stats_zip, ember_zip, shot] {
+        assert!(asked.iter().any(|path| path == route), "{route}: {asked:?}");
+    }
+
+    // The record claims a version the archive isn't, and the theme's
+    // archive and the screenshot are gone (404).
+    server.reset().await;
+    let mut catalogue: Value = serde_json::from_slice(&file("catalogue.json")).unwrap();
+    catalogue["packages"][0]["releases"][0]["version"] = json!("0.1.1");
+    serve(
+        &server,
+        "/catalogue.json",
+        catalogue.to_string().into_bytes(),
+    )
+    .await;
+    serve(&server, stats_zip, file(&stats_zip[1..])).await;
+    let checked = author::check(&origin, None, &temp.path().join("work2"))
+        .await
+        .unwrap();
+    assert!(checked.releases.is_empty());
+    let problems = checked.problems.join("\n");
+    assert!(
+        problems.contains(
+            "dev.example.stats 0.1.1: the package is dev.example.stats 0.1.0, not dev.example.stats 0.1.1"
+        ),
+        "{problems}"
+    );
+    assert!(
+        problems.contains("dev.example.ember 1.0.0: the server answered 404"),
+        "{problems}"
+    );
+    assert!(
+        problems.contains("dev.example.stats: screenshot 1: the server answered 404"),
+        "{problems}"
+    );
+}

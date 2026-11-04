@@ -29,7 +29,7 @@ The package is refused if:
 
 Archives are reproducible: entries are in name order under one top folder named for the id, with fixed times and modes. The same files give the same SHA-256. `generated` comes from the source, else `SOURCE_DATE_EPOCH`, else the time of the build.
 
-The manifest supplies the id, name, version, author, plugin API range and permissions; the source supplies the rest. The catalogue is then read with the app's own validation, and any record the app would leave out fails the build.
+The manifest supplies the id, name, version, author, plugin API range and permissions; the source supplies the rest. The catalogue is then read with the app's own validation, and any record the app would leave out fails the build: a package listed twice, a version that isn't semantic, an unknown OS or mode, a manifest without an author, or a license that isn't an SPDX expression.
 
 With `--previous`, each package keeps the releases already published, newest first, so copies installed from them still match. A version already published with other contents is refused; raise the version.
 
@@ -38,12 +38,22 @@ With `--previous`, each package keeps the releases already published, newest fir
 Reads a staged folder or a published address the way the app does, then checks everything an install would. It fails on any problem:
 
 - **Signature:** checked against `--key`, or Caskade's release key with `--release-key`. Without either it only warns.
-- **Records:** every record must be valid. The app leaves an invalid record out; here it is a problem. Ids must be unique, versions semantic, API ranges readable, and OSes and modes known.
-- **Artifacts:** every release's archive must be reachable and match its size and SHA-256.
+- **Records:** every record must be valid ([the rules](catalogue.md#limits)). The app leaves an invalid record out; here it is a problem. Ids must be unique, versions semantic and unique within a package, API ranges readable, OSes and modes known, and every package needs an author and an SPDX license.
+- **Artifacts:** every release's archive is downloaded. It must be reachable (a missing file or an HTTP error such as 404 is a problem) and match its size and SHA-256.
   - It must unpack safely and hold the manifest of its id and version.
   - A plugin must pass the plugin host's checks and start in a scratch host. Its API range and permissions must be the manifest's.
   - A theme must pass the theme service's checks and not take a built-in theme's id.
-- **Listing:** every screenshot must be a reachable PNG, JPEG or WebP image, and every package needs an author and a license. A package without screenshots gets a warning.
+- **Listing:** every screenshot is downloaded and must be a reachable PNG, JPEG or WebP image. Screenshots are optional: a package without them gets a warning.
+
+### Licenses and attribution
+
+Plugin and theme manifests have no license or attribution fields, so the catalogue's `author` and `license` are a package's attribution. The license is an SPDX expression that covers **everything the package ships**, its code and any bundled fonts, images or sounds:
+
+- When everything is under one license, name it: `MIT`.
+- When bundled assets come under other terms, combine them: `MIT AND OFL-1.1`, `MIT AND CC-BY-4.0`. Credit their authors and sources in the package's README or a LICENSE file, which a package may ship, as their licenses ask.
+- Terms SPDX doesn't list are `LicenseRef-<name>`, with the text in the package's LICENSE file.
+
+`build` and `check` refuse a package without an author or with a license that isn't an SPDX expression. Whether the license is true and allows redistribution is for the [review](#review).
 
 ## The source file
 
@@ -148,7 +158,7 @@ A maintainer can pull a broken release by publishing the catalogue without it, o
 Before a package goes into the curated catalogue, a maintainer checks:
 
 - **`check` passes** for the staged catalogue.
-- **Sources:** the package's sources are public, and its license allows redistribution.
+- **Sources:** the package's sources are public, and its license allows redistribution. Bundled third-party assets are covered by the license expression and credited in the README or LICENSE.
 - **Listing:** the description and screenshots match what it does.
 - **Permissions:** they are explained, and no broader than needed.
 - **Behaviour:** it installs, works and uninstalls in a clean profile on each OS it lists.

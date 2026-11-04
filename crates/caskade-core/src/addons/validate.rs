@@ -99,6 +99,85 @@ fn valid_id(id: &str) -> bool {
         })
 }
 
+/// An SPDX license expression, by its syntax: `MIT`, `MIT OR Apache-2.0`,
+/// `(MIT OR Apache-2.0) AND CC-BY-4.0`, `GPL-2.0-or-later WITH
+/// Classpath-exception-2.0`, `LicenseRef-Art`. Ids aren't checked against
+/// SPDX's list, but free text, `NONE` and `NOASSERTION` are refused: a
+/// package says under what terms it may be redistributed.
+pub(crate) fn license_expression(text: &str) -> bool {
+    let spaced = text.replace('(', " ( ").replace(')', " ) ");
+    let tokens: Vec<&str> = spaced.split_whitespace().collect();
+    let mut at = 0;
+    license_terms(&tokens, &mut at, 0) && at == tokens.len()
+}
+
+fn license_operator(token: &str, name: &str) -> bool {
+    token == name || token == name.to_ascii_lowercase()
+}
+
+/// Terms joined by `AND` or `OR`.
+fn license_terms(tokens: &[&str], at: &mut usize, depth: u8) -> bool {
+    loop {
+        if !license_term(tokens, at, depth) {
+            return false;
+        }
+        match tokens.get(*at) {
+            Some(token) if license_operator(token, "AND") || license_operator(token, "OR") => {
+                *at += 1;
+            }
+            _ => return true,
+        }
+    }
+}
+
+/// A license id, optionally `WITH` an exception, or a bracketed expression.
+fn license_term(tokens: &[&str], at: &mut usize, depth: u8) -> bool {
+    match tokens.get(*at) {
+        Some(&"(") if depth < 8 => {
+            *at += 1;
+            if !license_terms(tokens, at, depth + 1) || tokens.get(*at) != Some(&")") {
+                return false;
+            }
+            *at += 1;
+            true
+        }
+        Some(token) if license_id(token) => {
+            *at += 1;
+            if !tokens
+                .get(*at)
+                .is_some_and(|token| license_operator(token, "WITH"))
+            {
+                return true;
+            }
+            *at += 1;
+            let exception = tokens.get(*at).is_some_and(|token| license_id(token));
+            *at += 1;
+            exception
+        }
+        _ => false,
+    }
+}
+
+/// An SPDX id (`MIT`, `GPL-2.0+`, `LicenseRef-x`, `DocumentRef-y:LicenseRef-x`).
+fn license_id(token: &str) -> bool {
+    let idstring = |id: &str| {
+        id.starts_with(|c: char| c.is_ascii_alphanumeric())
+            && id
+                .chars()
+                .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '.')
+    };
+    let id = match token.split_once(':') {
+        Some((document, id)) if document.strip_prefix("DocumentRef-").is_some_and(idstring) => id,
+        Some(_) => return false,
+        None => token,
+    };
+    let id = id.strip_suffix('+').unwrap_or(id);
+    idstring(id)
+        && !["AND", "OR", "WITH", "NONE", "NOASSERTION"]
+            .iter()
+            .any(|word| id.eq_ignore_ascii_case(word))
+}
+
 /// `url` resolved against the catalogue's address: HTTPS, or the
 /// catalogue's own scheme and host (a local server while developing).
 fn resolve(base: &Url, url: &str) -> std::result::Result<String, Fail> {
@@ -244,7 +323,12 @@ fn entry(
     let mut releases: Vec<(semver::Version, CatalogueRelease)> = Vec::new();
     for value in list(record, "releases", MAX_RELEASES).map_err(fail)? {
         match release(kind, value, base) {
-            Ok((version, release)) if releases.iter().any(|(known, _)| *known == version) => {
+            // Versions differing only in build metadata are one version.
+            Ok((version, release))
+                if releases
+                    .iter()
+                    .any(|(known, _)| known.cmp_precedence(&version).is_eq()) =>
+            {
                 problems.push(CatalogueProblem {
                     id: Some(id.clone()),
                     message: format!("release {} is listed twice", release.version),
@@ -261,6 +345,12 @@ fn entry(
         return Err(fail("it has no usable release".into()));
     }
     releases.sort_by(|a, b| b.0.cmp(&a.0));
+    let license = text(record, "license", 64, true).map_err(fail)?;
+    if !license_expression(&license) {
+        return Err(fail(format!(
+            "license “{license}” isn't an SPDX license expression"
+        )));
+    }
     let deprecated = match record.get("deprecated") {
         Some(Value::String(why)) if !why.trim().is_empty() => {
             Some(why.trim().chars().take(500).collect())
@@ -273,7 +363,7 @@ fn entry(
         author: text(record, "author", 80, true).map_err(fail)?,
         summary: text(record, "summary", 200, true).map_err(fail)?,
         description: text(record, "description", 8000, false).map_err(fail)?,
-        license: text(record, "license", 64, true).map_err(fail)?,
+        license,
         homepage,
         categories,
         screenshots,

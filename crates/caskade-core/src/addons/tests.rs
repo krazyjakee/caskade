@@ -121,6 +121,160 @@ fn metadata_sources_are_never_offered() {
 }
 
 #[test]
+fn ids_versions_declarations_artifacts_and_attribution_are_checked() {
+    use serde_json::json;
+    let release = |extra: serde_json::Value| {
+        let mut release = json!({"version": "1.0.0", "api": "^0.1",
+            "artifact": {"url": "p.zip", "sha256": "ab".repeat(32), "size": 10}});
+        if let (Some(release), Some(extra)) = (release.as_object_mut(), extra.as_object()) {
+            release.extend(extra.clone());
+        }
+        release
+    };
+    let one =
+        |id: &str, extra: serde_json::Value| package(id, json!({"releases": [release(extra)]}));
+    let refused = [
+        (
+            one("dev.example.version", json!({"version": "1.0"})),
+            "isn't a semantic version",
+        ),
+        (
+            one("dev.example.api", json!({"api": "about 0.1"})),
+            "plugin API range",
+        ),
+        (
+            one("dev.example.os", json!({"os": ["linux", "beos"]})),
+            "unknown OS",
+        ),
+        (
+            one("dev.example.mode", json!({"modes": ["desktop", "tv"]})),
+            "unknown mode",
+        ),
+        (
+            one(
+                "dev.example.sha",
+                json!({"artifact": {"url": "p.zip", "sha256": "xyz", "size": 10}}),
+            ),
+            "64 hex digits",
+        ),
+        (
+            one(
+                "dev.example.size",
+                json!({"artifact": {"url": "p.zip", "sha256": "ab".repeat(32), "size": 0}}),
+            ),
+            "size is missing",
+        ),
+        (
+            one(
+                "dev.example.url",
+                json!({"artifact": {"sha256": "ab".repeat(32), "size": 10}}),
+            ),
+            "“url” is missing",
+        ),
+        (
+            package(
+                "dev.example.free-text",
+                json!({"license": "All rights reserved"}),
+            ),
+            "isn't an SPDX",
+        ),
+        (
+            package("dev.example.noassertion", json!({"license": "NOASSERTION"})),
+            "isn't an SPDX",
+        ),
+        (
+            package("dev.example.no-license", json!({"license": " "})),
+            "“license” is empty",
+        ),
+        (
+            package("dev.example.unlicensed", json!({"license": null})),
+            "“license” is missing",
+        ),
+        (
+            package("dev.example.no-author", json!({"author": ""})),
+            "“author” is empty",
+        ),
+        (
+            package("dev.example.anonymous", json!({"author": null})),
+            "“author” is missing",
+        ),
+    ];
+    // One version twice, even with other build metadata: the first stays.
+    let twice = package(
+        "dev.example.twice",
+        json!({"releases": [release(json!({})), release(json!({"version": "1.0.0+build.2"}))]}),
+    );
+    // The same id as a plugin and as a theme: the first stays.
+    let theme = json!({"id": "dev.example.ok", "kind": "theme", "name": "T", "author": "A",
+        "summary": "S", "license": "MIT",
+        "releases": [{"version": "1.0.0", "artifact": {"url": "t.zip", "sha256": "ab".repeat(32), "size": 10}}]});
+    let mut packages: Vec<_> = refused.iter().map(|(record, _)| record.clone()).collect();
+    packages.extend([
+        twice,
+        package(
+            "dev.example.ok",
+            json!({"license": "(MIT OR Apache-2.0) AND CC-BY-4.0"}),
+        ),
+        theme,
+    ]);
+    let doc = json!({"format": 1, "packages": packages}).to_string();
+    let catalogue = parse(doc.as_bytes(), &base()).unwrap();
+    let problem = |id: &str, text: &str| {
+        catalogue
+            .problems
+            .iter()
+            .any(|p| p.id.as_deref() == Some(id) && p.message.contains(text))
+    };
+    for (record, reason) in &refused {
+        let id = record["id"].as_str().unwrap();
+        assert!(catalogue.entry(id).is_none(), "{id} was kept");
+        assert!(problem(id, reason), "{id}: {:?}", catalogue.problems);
+    }
+    let twice = catalogue.entry("dev.example.twice").unwrap();
+    assert_eq!(twice.releases.len(), 1);
+    assert_eq!(twice.releases[0].version, "1.0.0");
+    assert!(problem("dev.example.twice", "listed twice"));
+    let ok = catalogue.entry("dev.example.ok").unwrap();
+    assert_eq!(ok.kind, AddonKind::Plugin);
+    assert!(problem("dev.example.ok", "the id is listed twice"));
+    assert_eq!(catalogue.entries.len(), 2, "{:?}", catalogue.entries);
+}
+
+#[test]
+fn licenses_are_spdx_expressions() {
+    use super::validate::license_expression;
+    for valid in [
+        "MIT",
+        "MIT OR Apache-2.0",
+        "(MIT OR Apache-2.0) AND CC-BY-4.0",
+        "GPL-2.0-or-later WITH Classpath-exception-2.0",
+        "GPL-2.0+",
+        "LicenseRef-Caskade-Art",
+        "DocumentRef-assets:LicenseRef-Font",
+        "mit or apache-2.0",
+    ] {
+        assert!(license_expression(valid), "{valid}");
+    }
+    for invalid in [
+        "",
+        "MIT OR",
+        "OR MIT",
+        "(MIT",
+        "MIT)",
+        "MIT AND AND Apache-2.0",
+        "MIT, Apache-2.0",
+        "MIT WITH",
+        "see LICENSE",
+        "NONE",
+        "NOASSERTION",
+        "Other:LicenseRef-x",
+        "-MIT",
+    ] {
+        assert!(!license_expression(invalid), "{invalid}");
+    }
+}
+
+#[test]
 fn records_are_bounded() {
     let many: Vec<_> = (0..1005)
         .map(|i| package(&format!("dev.example.p{i}"), serde_json::json!({})))
