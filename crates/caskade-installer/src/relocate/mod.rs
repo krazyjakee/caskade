@@ -3,9 +3,11 @@
 //! every real-path reference the scanner recorded, as one transaction. Every
 //! change is undone, newest first, on any failure or cancellation.
 pub mod backends;
+mod effects;
 mod files;
 mod journal;
 mod spelling;
+pub use effects::wow64_32bit_key;
 use files::*;
 use journal::UndoLog;
 pub use spelling::{plain_windows, replace_all, spelling_pairs};
@@ -429,14 +431,21 @@ impl Relocator {
         }
         if !registry.is_empty() {
             check()?;
-            let (originals, writes): (Vec<_>, Vec<_>) = registry.into_iter().unzip();
+            let (originals, writes): (Vec<_>, Vec<_>) = registry.iter().cloned().unzip();
             report.rewritten_values = writes.len();
             // Recorded before applying: a partially applied batch is undone.
             undo.record(Undo::Registry(originals))?;
             self.registry.apply(&writes)?;
         }
         check()?;
-        self.update_manifest(destination, &spellings, request, &rewritten, undo)?;
+        self.update_manifest(
+            destination,
+            &spellings,
+            request,
+            &rewritten,
+            &registry,
+            undo,
+        )?;
         Ok(report)
     }
 
@@ -482,6 +491,7 @@ impl Relocator {
         spellings: &[(String, String)],
         request: &RepairRequest,
         rewritten: &std::collections::BTreeSet<String>,
+        registry: &[(RegistryWrite, RegistryWrite)],
         undo: &mut UndoLog,
     ) -> Result<(), RelocateError> {
         let path = game.join(crate::manifest::INSTALL_MANIFEST_PATH);
@@ -501,6 +511,17 @@ impl Relocator {
             }
         }
         record.relocation.last_path = Some(game.to_string_lossy().into_owned());
+        // Uninstall compares the host registry with the recorded effects:
+        // they follow the values rewritten here. A prefix keeps its own
+        // registry, which no recorded effect describes.
+        if record.runtime == crate::RuntimeSpec::Native {
+            effects::follow_rewrites(
+                &mut record.external_effects,
+                registry,
+                spellings,
+                &*self.registry,
+            )?;
+        }
         // Only files rewritten by this transaction get a new size and hash;
         // anything else changed on disk must stay detectable (e.g. a tampered
         // uninstaller is never re-blessed).

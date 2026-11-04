@@ -405,6 +405,18 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
                 .unwrap()
                 .write(&report.dir)
                 .unwrap();
+            // Shown with the move's outcome: the registry values the move
+            // should rewrite (Real) or leave to the alias.
+            let registry_references: Vec<String> = scan
+                .references
+                .iter()
+                .filter_map(|reference| match &reference.location {
+                    scan::Location::Registry {
+                        hive, key, name, ..
+                    } => Some(format!("{:?} {hive}\\{key}\\{name}", reference.via)),
+                    _ => None,
+                })
+                .collect();
             let mover = Relocator {
                 disk: Arc::new(FileSystemDiskSpace),
                 sink: Arc::new(RecordingSink::default()),
@@ -436,13 +448,33 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
             assert!(!report.dir.exists());
             // Shown if the self-check below fails: where the game is now and
             // what its registry says.
+            let install_path: Vec<String> =
+                scan::registry::read_keys(&[("HKLM".into(), CUSTOM_KEY.into())], 16)
+                    .iter()
+                    .map(|value| {
+                        let units: Vec<u16> = value
+                            .data
+                            .as_chunks::<2>()
+                            .0
+                            .iter()
+                            .map(|pair| u16::from_le_bytes(*pair))
+                            .collect();
+                        format!(
+                            "{}\\{}\\{} = {:?}",
+                            value.hive,
+                            value.key,
+                            value.name,
+                            String::from_utf16_lossy(&units).trim_end_matches('\0')
+                        )
+                    })
+                    .collect();
             eprintln!(
-                "{id} (alias: {aliased}): {:?}, rewrote {} files and {} values; now {}; InstallPath {:?}",
+                "{id} (alias: {aliased}): {:?}, rewrote {} files and {} values; now {}; \
+                 registry references {registry_references:?}; now {install_path:?}",
                 scan.verdict,
                 moved.rewritten_files,
                 moved.rewritten_values,
                 moved.game_dir.display(),
-                scan::registry::read_keys(&[("HKLM".into(), CUSTOM_KEY.into())], 16)
             );
             self_check(
                 &*runtime,

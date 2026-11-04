@@ -7,9 +7,12 @@ use winreg::{
 };
 
 /// Read every value under each recorded `(hive, key)` and its subkeys, in
-/// both registry views for HKLM. Hive spellings from Inno (`HKeyLocalMachine`),
-/// MSI and `.reg` files (`HKEY_CURRENT_USER`, `HKCU`) are accepted; unknown
-/// hives and missing keys are skipped. At most `max_values` values are read.
+/// both registry views for HKLM. A value of HKLM's 32-bit view below
+/// `Software` is reported at its `Software\WOW6432Node\…` path, where the
+/// 64-bit view (and a move rewriting it) finds it. Hive spellings from Inno
+/// (`HKeyLocalMachine`), MSI and `.reg` files (`HKEY_CURRENT_USER`, `HKCU`)
+/// are accepted; unknown hives and missing keys are skipped. At most
+/// `max_values` values are read.
 pub fn read_keys(keys: &[(String, String)], max_values: usize) -> Vec<RegistryValue> {
     let mut values = vec![];
     for (hive, key) in keys {
@@ -27,11 +30,20 @@ pub fn read_keys(keys: &[(String, String)], max_values: usize) -> Vec<RegistryVa
                 continue;
             };
         for view in views {
-            let Ok(opened) = RegKey::predef(root).open_subkey_with_flags(key, KEY_READ | view)
+            let physical = if *view == KEY_WOW64_32KEY {
+                crate::relocate::wow64_32bit_key(key)
+            } else {
+                None
+            };
+            let (path, view) = match physical {
+                Some(physical) => (physical, KEY_WOW64_64KEY),
+                None => (key.clone(), *view),
+            };
+            let Ok(opened) = RegKey::predef(root).open_subkey_with_flags(&path, KEY_READ | view)
             else {
                 continue;
             };
-            walk(&opened, name, key, *view, &mut values, max_values);
+            walk(&opened, name, &path, view, &mut values, max_values);
         }
     }
     values.sort_by(|a, b| (&a.hive, &a.key, &a.name).cmp(&(&b.hive, &b.key, &b.name)));

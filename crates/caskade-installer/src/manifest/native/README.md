@@ -28,7 +28,12 @@ After a native install, call `uninstall_registration_effects(game, registry)`
 and append the returned effects to the manifest. This stores the exact logical
 Uninstall key and an identity hash, without persisting absolute game paths.
 It supports manifest cleanup after `Rewritable`/`Fragile` relocation, when the
-native uninstall log may refer to a stale location. Changed registrations are
+native uninstall log may refer to a stale location. A move that rewrites
+registry values (in the view they live in: HKLM's 32-bit view through its
+`Software\WOW6432Node` path) updates, in the same transaction, the installed
+data of the values it rewrote and the fingerprint of a registration that
+still matched its record, so the manifest route still recognizes them as the
+install's (`relocate::effects`). Changed registrations are
 preserved and reported for retry. Stable alias targets are canonicalized for
 ownership checks. The Windows adapter rechecks an owned registration before
 removing that exact Uninstall subtree; unrelated registrations remain intact.

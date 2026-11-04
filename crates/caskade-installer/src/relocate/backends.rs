@@ -172,13 +172,52 @@ impl ShortcutEditor for NoShortcuts {
     }
 }
 
-/// The host registry on Windows. HKCU values are written directly; every
-/// HKLM value of a batch goes into one `.reg` imported by a single elevated
-/// `reg import` (one OS prompt). Caskade never elevates otherwise.
+/// The host registry on Windows, always in its 64-bit view: HKLM's 32-bit
+/// view is addressed at its `Software\WOW6432Node` path, as the reference
+/// scan reports it. Values are written directly; HKLM values this process
+/// may not write go into one `.reg` imported by a single elevated
+/// `reg import` (one OS prompt). Caskade never elevates otherwise. Every
+/// write is read back: the elevated import's exit status is not evidence
+/// that it wrote anything (#38).
 #[cfg(windows)]
 pub struct WindowsRegistry {
     pub runtime: Arc<dyn Runtime>,
     pub scratch: PathBuf,
+}
+
+#[cfg(windows)]
+impl WindowsRegistry {
+    fn import_elevated(&self, entries: &[RegistryEntry]) -> io::Result<()> {
+        fs::create_dir_all(&self.scratch)?;
+        let file = self.scratch.join("caskade-relocate-hklm.reg");
+        fs::write(&file, registry::reg_file(entries))?;
+        // One argument string with the path quoted ([char]34): Start-Process
+        // joins an argument array with spaces and quotes nothing, so a path
+        // with a space reached reg.exe as several arguments.
+        let script = "$p = Start-Process -FilePath reg.exe \
+                      -ArgumentList ('import ' + [char]34 + $env:CASKADE_REG + [char]34 + ' /reg:64') \
+                      -Verb RunAs -Wait -WindowStyle Hidden -PassThru; exit $p.ExitCode";
+        let result = run(
+            &*self.runtime,
+            &ProcessCommand {
+                program: "powershell.exe".into(),
+                args: vec![
+                    "-NoProfile".into(),
+                    "-NonInteractive".into(),
+                    "-Command".into(),
+                    script.into(),
+                ],
+                env: BTreeMap::from([(
+                    "CASKADE_REG".to_owned(),
+                    file.to_string_lossy().into_owned(),
+                )]),
+                cwd: self.scratch.clone(),
+            },
+            "elevated reg import",
+        );
+        let removed = fs::remove_file(&file);
+        result.and(removed)
+    }
 }
 
 #[cfg(windows)]
@@ -215,60 +254,63 @@ impl RegistryStore for WindowsRegistry {
         use winreg::{
             RegKey, RegValue,
             enums::{
-                HKEY_CURRENT_USER, KEY_WOW64_64KEY, KEY_WRITE, REG_BINARY, REG_EXPAND_SZ,
-                REG_MULTI_SZ, REG_SZ,
+                HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, KEY_WOW64_64KEY, KEY_WRITE, REG_BINARY,
+                REG_DWORD, REG_EXPAND_SZ, REG_MULTI_SZ, REG_QWORD, REG_SZ,
             },
         };
-        let mut machine = vec![];
+        let mut elevated = vec![];
         for write in writes {
-            if hive(&write.hive)? == RegistryHive::LocalMachine {
-                machine.push(typed_entry(write)?);
-                continue;
-            }
-            let (key, _) = RegKey::predef(HKEY_CURRENT_USER)
-                .create_subkey_with_flags(&write.key, KEY_WRITE | KEY_WOW64_64KEY)?;
+            let machine = hive(&write.hive)? == RegistryHive::LocalMachine;
+            let root = RegKey::predef(if machine {
+                HKEY_LOCAL_MACHINE
+            } else {
+                HKEY_CURRENT_USER
+            });
             let vtype = match write.value_type.as_str() {
                 "REG_SZ" => REG_SZ,
                 "REG_EXPAND_SZ" => REG_EXPAND_SZ,
                 "REG_MULTI_SZ" => REG_MULTI_SZ,
+                "REG_DWORD" => REG_DWORD,
+                "REG_QWORD" => REG_QWORD,
                 _ => REG_BINARY,
             };
-            key.set_raw_value(
-                &write.name,
-                &RegValue {
-                    bytes: write.data.clone().into(),
-                    vtype,
-                },
-            )?;
+            let written = root
+                .create_subkey_with_flags(&write.key, KEY_WRITE | KEY_WOW64_64KEY)
+                .and_then(|(key, _)| {
+                    key.set_raw_value(
+                        &write.name,
+                        &RegValue {
+                            bytes: write.data.clone().into(),
+                            vtype,
+                        },
+                    )
+                });
+            match written {
+                Ok(()) => {}
+                // Not elevated: HKLM goes to the one elevated import.
+                Err(error) if machine && error.kind() == io::ErrorKind::PermissionDenied => {
+                    elevated.push(typed_entry(write)?)
+                }
+                Err(error) => return Err(error),
+            }
         }
-        if machine.is_empty() {
-            return Ok(());
+        if !elevated.is_empty() {
+            self.import_elevated(&elevated)?;
         }
-        fs::create_dir_all(&self.scratch)?;
-        let file = self.scratch.join("caskade-relocate-hklm.reg");
-        fs::write(&file, registry::reg_file(&machine))?;
-        let script = "Start-Process -FilePath reg.exe -ArgumentList 'import',$env:CASKADE_REG,'/reg:64' \
-                      -Verb RunAs -Wait -WindowStyle Hidden -PassThru | ForEach-Object { exit $_.ExitCode }";
-        let result = run(
-            &*self.runtime,
-            &ProcessCommand {
-                program: "powershell.exe".into(),
-                args: vec![
-                    "-NoProfile".into(),
-                    "-NonInteractive".into(),
-                    "-Command".into(),
-                    script.into(),
-                ],
-                env: BTreeMap::from([(
-                    "CASKADE_REG".to_owned(),
-                    file.to_string_lossy().into_owned(),
-                )]),
-                cwd: self.scratch.clone(),
-            },
-            "elevated reg import",
-        );
-        let removed = fs::remove_file(&file);
-        result.and(removed)
+        for write in writes {
+            let now = self.read(&write.hive, &write.key, &write.name)?;
+            let written = match &now {
+                Some(now) => typed_entry(now)?.value == typed_entry(write)?.value,
+                None => false,
+            };
+            if !written {
+                return Err(io::Error::other(format!(
+                    "registry value {}\\{}\\{} was not written",
+                    write.hive, write.key, write.name
+                )));
+            }
+        }
+        Ok(())
     }
 }
 
