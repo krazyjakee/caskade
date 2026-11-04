@@ -107,11 +107,10 @@ seek nav.down Play
 press confirm
 wait-event game-started
 wait-event game-exited
-# Settings opens on General, its first tab: RB to Library Discovery, LB
+# Settings opens on General, its first tab: RB to Appearance, LB
 # back, then a switch in the panel to the right of the tabs. The panel has
-# two columns at this size: into it, up to Reset to defaults (the full-width
-# row at its top), down to the first rows, and left to Startup's first, the
-# switch.
+# one column at this size (two from a 72rem panel, #41): into it, up to
+# Reset to defaults at its top, down to Startup's first row, the switch.
 seek-section nav.left sidebar
 seek nav.up Home
 seek nav.down Settings
@@ -119,7 +118,7 @@ press confirm
 wait-text Launch on system startup
 focus-has General
 press tab.next
-wait-text Automatic Library Discovery
+wait-text Interface scale
 press tab.prev
 wait-text Launch on system startup
 focus-has General
