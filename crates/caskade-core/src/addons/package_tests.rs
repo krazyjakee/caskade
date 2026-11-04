@@ -177,6 +177,35 @@ fn the_package_must_be_the_release_it_claims() {
     );
 }
 
+#[test]
+fn a_package_providing_metadata_is_refused_whatever_its_record_says() {
+    let dir = tempfile::tempdir().unwrap();
+    let release = release_for(b"", "1.2.0", "https://x/a.zip");
+    let manifest = |providers: &str| {
+        format!(
+            r#"{{"id": "dev.example.stats", "version": "1.2.0", "api": "^0.1",
+                "contributes": {{"providers": {providers}}}}}"#
+        )
+    };
+    std::fs::write(
+        dir.path().join("plugin.json"),
+        manifest(r#"["metadata-provider"]"#),
+    )
+    .unwrap();
+    assert_eq!(
+        check_identity(&entry("dev.example.stats"), &release, dir.path())
+            .unwrap_err()
+            .kind,
+        AddonFailure::Incompatible
+    );
+    std::fs::write(
+        dir.path().join("plugin.json"),
+        manifest(r#"["library-source"]"#),
+    )
+    .unwrap();
+    check_identity(&entry("dev.example.stats"), &release, dir.path()).unwrap();
+}
+
 fn folder(path: &Path, marker: &str) {
     std::fs::create_dir_all(path).unwrap();
     std::fs::write(path.join("marker"), marker).unwrap();

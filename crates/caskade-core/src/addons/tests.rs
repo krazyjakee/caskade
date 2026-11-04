@@ -79,6 +79,48 @@ fn package(id: &str, extra: serde_json::Value) -> serde_json::Value {
 }
 
 #[test]
+fn metadata_sources_are_never_offered() {
+    let category = package(
+        "dev.example.meta",
+        serde_json::json!({"categories": ["Metadata"]}),
+    );
+    let provider = package(
+        "dev.example.provider",
+        serde_json::json!({"releases": [{"version": "1.0.0", "api": "^0.1",
+            "provides": ["metadata-provider"],
+            "artifact": {"url": "p.zip", "sha256": "ab".repeat(32), "size": 10}}]}),
+    );
+    let doc = serde_json::json!({"format": 1, "packages": [category, provider,
+        package("dev.example.ok", serde_json::json!({}))]})
+    .to_string();
+    let catalogue = parse(doc.as_bytes(), &base()).unwrap();
+    assert!(catalogue.entry("dev.example.meta").is_none());
+    assert!(
+        catalogue
+            .entry("dev.example.provider")
+            .is_none_or(|entry| entry.releases.is_empty()),
+        "{:?}",
+        catalogue.entries
+    );
+    assert!(catalogue.entry("dev.example.ok").is_some());
+    let problems: Vec<_> = catalogue
+        .problems
+        .iter()
+        .map(|p| p.message.as_str())
+        .collect();
+    assert!(
+        problems
+            .iter()
+            .any(|p| p.contains("metadata sources aren't offered")),
+        "{problems:?}"
+    );
+    assert!(
+        problems.iter().any(|p| p.contains("provides metadata")),
+        "{problems:?}"
+    );
+}
+
+#[test]
 fn records_are_bounded() {
     let many: Vec<_> = (0..1005)
         .map(|i| package(&format!("dev.example.p{i}"), serde_json::json!({})))

@@ -25,7 +25,7 @@ const MAX_PERMISSIONS: usize = 32;
 const MAX_ARTIFACT_BYTES: u64 = 512 << 20;
 /// The provider interface the catalogue never offers (custom metadata
 /// sources are out of scope).
-const RESERVED_PROVIDER: &str = "metadata-provider";
+pub(crate) const RESERVED_PROVIDER: &str = "metadata-provider";
 
 type Fail = String;
 

@@ -148,6 +148,25 @@ fn credentials_unbuilt_plugins_and_links_are_refused() {
 }
 
 #[test]
+fn a_plugin_providing_metadata_is_refused_and_other_providers_are_declared() {
+    let temp = tempfile::tempdir().unwrap();
+    let folder = temp.path().join("stats");
+    plugin_folder(&folder, "0.1.0");
+    let with = |providers: Value| {
+        let mut manifest: Value =
+            serde_json::from_slice(&std::fs::read(folder.join("plugin.json")).unwrap()).unwrap();
+        manifest["contributes"] = json!({"providers": providers});
+        write(&folder, &[("plugin.json", manifest.to_string().as_bytes())]);
+    };
+    with(json!(["library-source", "metadata-provider"]));
+    let refused = author::pack(&folder, AddonKind::Plugin).unwrap_err();
+    assert!(refused.contains("metadata-provider"), "{refused}");
+    with(json!(["library-source"]));
+    let packed = author::pack(&folder, AddonKind::Plugin).unwrap();
+    assert_eq!(packed.provides, ["library-source"]);
+}
+
+#[test]
 fn permission_words_follow_the_manifest() {
     assert_eq!(
         permission_words(&json!({"permissions": {

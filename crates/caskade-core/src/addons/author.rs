@@ -86,6 +86,8 @@ pub struct Packed {
     pub api: Option<String>,
     /// What a plugin asks for, as the catalogue shows it.
     pub permissions: Vec<String>,
+    /// The provider contracts a plugin's manifest contributes.
+    pub provides: Vec<String>,
     pub archive: Vec<u8>,
 }
 
@@ -181,6 +183,13 @@ pub fn pack(folder: &Path, kind: AddonKind) -> Result<Packed, String> {
     for name in allowed {
         collect(folder, Path::new(name), &mut files, &mut total)?;
     }
+    if kind == AddonKind::Plugin && super::package::contributes_metadata(&manifest) {
+        return Err(format!(
+            "{}: it contributes {}, and the catalogue doesn't offer metadata sources",
+            manifest_path.display(),
+            super::validate::RESERVED_PROVIDER
+        ));
+    }
     if kind == AddonKind::Plugin {
         // What the manifest points at must be in the package.
         for key in ["ui", "backend"] {
@@ -207,6 +216,13 @@ pub fn pack(folder: &Path, kind: AddonKind) -> Result<Packed, String> {
         } else {
             Vec::new()
         },
+        provides: manifest
+            .pointer("/contributes/providers")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter_map(|provider| provider.as_str().map(str::to_owned))
+            .collect(),
         id,
         version,
         archive,
@@ -443,7 +459,7 @@ pub fn build(source: &Path, out: &Path, previous: Option<&Path>) -> Result<Built
             "os": package.os,
             "modes": package.modes,
             "permissions": packed.permissions,
-            "provides": [],
+            "provides": packed.provides,
             "notes": package.notes,
             "artifact": {
                 "url": format!("packages/{file}"),

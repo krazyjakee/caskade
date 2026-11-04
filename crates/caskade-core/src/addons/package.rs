@@ -289,6 +289,33 @@ pub fn extract(archive: &Path, into: &Path) -> std::result::Result<PathBuf, Pack
     })
 }
 
+/// Whether a plugin manifest contributes the provider interface the
+/// catalogue never offers (custom metadata sources, #6).
+pub fn contributes_metadata(manifest: &serde_json::Value) -> bool {
+    manifest
+        .pointer("/contributes/providers")
+        .and_then(serde_json::Value::as_array)
+        .into_iter()
+        .flatten()
+        .any(|provider| provider.as_str() == Some(super::validate::RESERVED_PROVIDER))
+}
+
+/// A package folder's manifest, read as JSON.
+fn manifest(kind: AddonKind, root: &Path) -> std::result::Result<serde_json::Value, PackageError> {
+    let file = match kind {
+        AddonKind::Plugin => "plugin.json",
+        AddonKind::Theme => "theme.json",
+    };
+    let wrong = || {
+        PackageError::new(
+            AddonFailure::Identity,
+            crate::tr!("the package has no readable {file}", file = file),
+        )
+    };
+    let bytes = std::fs::read(root.join(file)).map_err(|_| wrong())?;
+    serde_json::from_slice(&bytes).map_err(|_| wrong())
+}
+
 /// The id and version a package folder's manifest declares.
 pub fn identity(
     kind: AddonKind,
@@ -304,8 +331,7 @@ pub fn identity(
             crate::tr!("the package has no readable {file}", file = file),
         )
     };
-    let bytes = std::fs::read(root.join(file)).map_err(|_| wrong())?;
-    let manifest: serde_json::Value = serde_json::from_slice(&bytes).map_err(|_| wrong())?;
+    let manifest = manifest(kind, root)?;
     let field = |key: &str| {
         manifest
             .get(key)
@@ -318,13 +344,21 @@ pub fn identity(
     Ok((id, version))
 }
 
-/// Checks the package holds `entry` at `release`'s version.
+/// Checks the package holds `entry` at `release`'s version, and that a
+/// plugin doesn't contribute the metadata provider the catalogue keeps out,
+/// whatever its record declares.
 pub fn check_identity(
     entry: &CatalogueEntry,
     release: &CatalogueRelease,
     root: &Path,
 ) -> std::result::Result<(), PackageError> {
     let (id, version) = identity(entry.kind, root)?;
+    if entry.kind == AddonKind::Plugin && contributes_metadata(&manifest(entry.kind, root)?) {
+        return Err(PackageError::new(
+            AddonFailure::Incompatible,
+            crate::tr!("the package provides metadata, which the catalogue doesn't offer"),
+        ));
+    }
     let same_version = semver::Version::parse(&version)
         .ok()
         .zip(semver::Version::parse(&release.version).ok())
