@@ -97,7 +97,21 @@ impl InstallService {
             control.answers.push((question, index));
             control
         };
+        self.task_stopped(id).await;
         self.restart(id, Some(revision), control).await
+    }
+
+    /// A job shows its question just before its task ends, so an answer can
+    /// arrive while the task is still stopping. Waits that out, with a bound:
+    /// `restart` refuses a job that's still active.
+    async fn task_stopped(&self, id: &str) {
+        for _ in 0..500 {
+            let active = lock(&self.inner.jobs).get(id).is_some_and(|job| job.active);
+            if !active {
+                return;
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+        }
     }
     /// Runs a stopped install or update again from the start: with the
     /// alternative at `candidate_index`, or without one as it ran before,
