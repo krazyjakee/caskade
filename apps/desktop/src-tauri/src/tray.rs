@@ -20,10 +20,17 @@
 //!
 //! A close in console mode quits: console mode puts the desktop window back
 //! first (`commands::console`), then closes again through [`Tray::quit`].
+//!
+//! On Linux the icon is hidden a moment before Caskade exits or restarts
+//! ([`hide_before_exit`]): hiding it makes the status-notifier watcher ask
+//! for the icon's properties, and xapp's watcher (Cinnamon) crashes when
+//! the icon's owner leaves the bus before answering, taking Cinnamon's tray
+//! applet, and sometimes Cinnamon itself, down with it.
 
 use crate::main_window;
 use caskade_core::settings::{GeneralSettings, SettingsService};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::time::Duration;
 use tauri::image::Image;
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
@@ -32,6 +39,10 @@ use tokio::sync::watch;
 
 const SHOW: &str = "tray.show";
 const QUIT: &str = "tray.quit";
+
+/// How long Caskade keeps answering the bus after hiding its icon, before
+/// it exits: the watcher asks for the icon's properties within ~10 ms.
+const HIDDEN_BEFORE_EXIT: Duration = Duration::from_millis(500);
 
 #[cfg(target_os = "macos")]
 const ICON: Image<'_> = tauri::include_image!("icons/tray-template.png");
@@ -115,18 +126,66 @@ pub fn setup<R: Runtime>(app: &AppHandle<R>, settings: &SettingsService) {
 }
 
 /// The app's run events: on macOS, a click on the Dock icon while the
-/// window is in the tray shows it.
+/// window is in the tray shows it; on Linux, an exit waits for the icon to
+/// be hidden ([`hide_before_exit`]).
 pub fn on_run_event<R: Runtime>(app: &AppHandle<R>, event: RunEvent) {
-    #[cfg(target_os = "macos")]
-    if let RunEvent::Reopen {
-        has_visible_windows: false,
-        ..
-    } = event
-    {
-        main_window::raise(app);
+    match event {
+        #[cfg(target_os = "macos")]
+        RunEvent::Reopen {
+            has_visible_windows: false,
+            ..
+        } => main_window::raise(app),
+        // A restart can't be held back: its callers hide the icon first
+        // ([`restart`]).
+        RunEvent::ExitRequested { code, api, .. }
+            if code != Some(tauri::RESTART_EXIT_CODE) && hide_before_exit(app) =>
+        {
+            api.prevent_exit();
+            let app = app.clone();
+            std::thread::spawn(move || {
+                std::thread::sleep(HIDDEN_BEFORE_EXIT);
+                app.exit(code.unwrap_or(0));
+            });
+        }
+        _ => {}
     }
-    #[cfg(not(target_os = "macos"))]
-    let _ = (app, event);
+}
+
+/// Restarts Caskade, after hiding the icon on Linux ([`hide_before_exit`]).
+pub fn restart<R: Runtime>(app: &AppHandle<R>) {
+    if !hide_before_exit(app) {
+        app.restart();
+    }
+    let app = app.clone();
+    std::thread::spawn(move || {
+        std::thread::sleep(HIDDEN_BEFORE_EXIT);
+        app.restart();
+    });
+}
+
+/// Linux: hides the icon while the event loop still answers the bus, so
+/// the watcher's request for its properties gets an answer before Caskade
+/// leaves. The icon's own drop at exit would hide it with no one left to
+/// answer: xapp 3.2.3's watcher then reads the item it already freed
+/// (`sn-item.c`: dispose drops the request's cancellable without
+/// cancelling it). Returns whether the icon was up, so the caller waits
+/// [`HIDDEN_BEFORE_EXIT`] before exiting; elsewhere it never is.
+fn hide_before_exit<R: Runtime>(app: &AppHandle<R>) -> bool {
+    if !cfg!(target_os = "linux") {
+        return false;
+    }
+    let Some(tray) = app.try_state::<Tray>() else {
+        return false;
+    };
+    if !tray.shown.swap(false, Ordering::Relaxed) {
+        return false;
+    }
+    if let Some(icon) = app.tray_by_id("main")
+        && let Err(error) = icon.set_visible(false)
+    {
+        tracing::warn!(%error, "couldn't hide the tray icon");
+    }
+    true
 }
 
 /// Everything but the icon: the state, the setting and the close handler.

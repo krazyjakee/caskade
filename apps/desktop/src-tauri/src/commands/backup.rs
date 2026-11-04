@@ -167,7 +167,8 @@ pub async fn backup_restart<R: Runtime>(
     if backups.status().await.running.is_some() {
         return Err(report(caskade_core::backup::BackupError::Busy));
     }
-    app.restart()
+    crate::tray::restart(&app);
+    Ok(())
 }
 
 /// Shows a backup in the file manager: only a file named like one, in the

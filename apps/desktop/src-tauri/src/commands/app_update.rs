@@ -602,7 +602,8 @@ pub fn app_update_restart<R: Runtime>(
     updater: State<'_, AppUpdater>,
 ) -> Result<(), String> {
     updater.ensure_ready()?;
-    app.restart()
+    crate::tray::restart(&app);
+    Ok(())
 }
 
 #[cfg(test)]
