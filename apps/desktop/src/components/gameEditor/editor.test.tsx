@@ -206,11 +206,11 @@ it("edits by pad alone in console mode", async () => {
   // The editor's buttons apply once focus is in it.
   await until(() => dialog.contains(focused()), "focus in the editor");
   // RB/LB switch the editor's tabs.
+  const artwork = () => within(dialog).getByRole("tab", { name: "Artwork" });
   app.pad.press("tab.next");
-  expect(within(dialog).getByRole("tab", { name: "Artwork" }).getAttribute("aria-selected")).toBe(
-    "true",
-  );
+  await waitFor(() => expect(artwork().getAttribute("aria-selected")).toBe("true"));
   app.pad.press("tab.prev");
+  await waitFor(() => expect(artwork().getAttribute("aria-selected")).toBe("false"));
   // A on the notes opens the keyboard; the pad types into them.
   const notes = field(dialog, "Notes");
   act(() => notes.focus());
