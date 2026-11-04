@@ -244,7 +244,7 @@ export function GeneralSettings() {
             group={t({ message: "General", context: "settings tab" })}
             label={t`Reset general settings`}
             parts={resetParts}
-            keeps={t`Settings on other pages, and whether first-run setup is done, stay as they are.`}
+            keeps={t`Game updates, which has its own reset, settings on other pages and whether first-run setup is done stay as they are.`}
             isDisabled={saving}
           />
         </div>

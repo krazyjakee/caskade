@@ -5054,6 +5054,10 @@ msgstr ""
 msgid "Game updates"
 msgstr ""
 
+#: apps/desktop/src/views/settings/GeneralSettings.tsx
+msgid "Game updates, which has its own reset, settings on other pages and whether first-run setup is done stay as they are."
+msgstr ""
+
 #. ROM scanners table column
 #: apps/desktop/src/views/library/VirtualLibrary.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
@@ -10496,10 +10500,6 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
 msgid "Settings on other pages stay as they are."
-msgstr ""
-
-#: apps/desktop/src/views/settings/GeneralSettings.tsx
-msgid "Settings on other pages, and whether first-run setup is done, stay as they are."
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
