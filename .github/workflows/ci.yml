@@ -212,6 +212,39 @@ jobs:
       - name: Windows GNU cross Clippy
         run: cargo clippy -p caskade-core -p caskade-desktop -p caskade-plugin-host -p caskade-input -p caskade-sync --all-targets --locked --target x86_64-pc-windows-gnu -- -D warnings
 
+  # `caskade --launch` on real Windows (#22): the named pipe, and WM_CLOSE to
+  # the real caller's hidden window. The first job to run the app's tests on
+  # Windows, so a failure here doesn't fail the run yet, and `ci result`
+  # doesn't need it: drop `continue-on-error` and add the job there once it
+  # has passed on GitHub.
+  windows-launch:
+    needs: changes
+    if: needs.changes.outputs.cross == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 90
+    continue-on-error: true
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustc -Vv
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: windows-launch
+          cache-on-failure: true
+          save-if: ${{ env.SAVE_CACHE }}
+      - name: Prepare SHA-pinned 7-Zip sidecar
+        run: python scripts/tauri-sidecar.py
+      - name: Launch caller tests
+        run: cargo test -p caskade-desktop --lib --test it --locked launch_cli::
+
   # The M5 exit (#153): the built app in console mode, driven by a pad only,
   # under Xvfb. The `e2e` feature embeds the built UI.
   e2e:

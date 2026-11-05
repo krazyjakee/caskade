@@ -400,5 +400,5 @@ async fn read_request<R: tokio::io::AsyncRead + Unpin>(
     serde_json::from_str(&line).map_err(|error| error.to_string())
 }
 
-#[cfg(all(test, target_os = "linux"))]
+#[cfg(all(test, any(target_os = "linux", windows)))]
 mod tests;

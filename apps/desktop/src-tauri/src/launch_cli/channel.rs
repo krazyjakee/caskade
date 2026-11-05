@@ -28,17 +28,24 @@ impl Endpoint {
         }
         #[cfg(windows)]
         {
-            let hash = fnv1a(paths.cache.to_string_lossy().as_bytes());
+            Self::at(paths.cache.clone())
+        }
+    }
+
+    /// A socket at `path`, whose folder only the user may open, or on
+    /// Windows a pipe named after `path`.
+    pub fn at(path: std::path::PathBuf) -> Self {
+        #[cfg(unix)]
+        {
+            Self { path }
+        }
+        #[cfg(windows)]
+        {
+            let hash = fnv1a(path.to_string_lossy().as_bytes());
             Self {
                 name: format!(r"\\.\pipe\caskade-launch-{hash:016x}"),
             }
         }
-    }
-
-    /// A socket at `path`, whose folder only the user may open.
-    #[cfg(unix)]
-    pub fn at(path: std::path::PathBuf) -> Self {
-        Self { path }
     }
 }
 

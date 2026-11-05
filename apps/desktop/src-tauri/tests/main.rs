@@ -14,6 +14,9 @@ mod hello;
 mod igdb;
 #[path = "../src/commands/test_ipc.rs"]
 mod ipc;
+// `launch_cli::`: the real caller and its hidden window; Linux has neither.
+#[cfg(windows)]
+mod launch_cli;
 mod library;
 mod m4_exit;
 mod plugin_settings;

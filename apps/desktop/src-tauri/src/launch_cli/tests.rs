@@ -12,16 +12,65 @@ use caskade_core::{
     launch::{LaunchConfig, LaunchService},
     model::{Game, GameEntry, InstallLocation, InstallState, LaunchSpec, SourceId},
 };
-use std::{
-    path::Path,
-    sync::{
-        Arc,
-        atomic::{AtomicUsize, Ordering},
-    },
+use std::sync::{
+    Arc,
+    atomic::{AtomicUsize, Ordering},
 };
 use tauri::test::{MockRuntime, mock_builder, mock_context, noop_assets};
 
 const ADMIN_PIN: &str = "2468";
+
+/// The test games as `sh` scripts.
+#[cfg(unix)]
+mod game {
+    use std::{path::Path, process::Command};
+
+    pub const FILE: &str = "game.sh";
+    pub const HEADER: &str = "#!/bin/sh\n";
+    pub const RUNS_ON: &str = "exec sleep 30";
+    pub const CRASHES_LATER: &str = "sleep 0.3; exit 7";
+
+    /// Writes the client's width and HDR, and a variable that must not
+    /// arrive, to `out`.
+    pub fn writes_env(out: &Path) -> String {
+        format!(
+            "printf '%s|%s|%s' \"$SUNSHINE_CLIENT_WIDTH\" \"$SUNSHINE_CLIENT_HDR\" \"$SUNSHINE_CLIENT_SECRET\" > '{}'",
+            out.display()
+        )
+    }
+
+    pub fn failing_program() -> Command {
+        let mut command = Command::new("sh");
+        command.args(["-c", "exit 3"]);
+        command
+    }
+}
+
+/// The test games as batch files. `ping` waits: `timeout` needs a console.
+#[cfg(windows)]
+mod game {
+    use std::{path::Path, process::Command};
+
+    pub const FILE: &str = "game.cmd";
+    pub const HEADER: &str = "@echo off\r\n";
+    pub const RUNS_ON: &str = "ping -n 31 127.0.0.1 > nul";
+    pub const CRASHES_LATER: &str = "ping -n 2 127.0.0.1 > nul\r\nexit 7";
+
+    /// Writes the client's width and HDR, and a variable that must not
+    /// arrive, to `out`.
+    pub fn writes_env(out: &Path) -> String {
+        format!(
+            "echo %SUNSHINE_CLIENT_WIDTH%^|%SUNSHINE_CLIENT_HDR%^|%SUNSHINE_CLIENT_SECRET%> \"{}\"",
+            out.display()
+        )
+    }
+
+    pub fn failing_program() -> Command {
+        let mut command = Command::new("cmd");
+        command.args(["/c", "exit 3"]);
+        command
+    }
+}
 
 struct Harness {
     app: tauri::App<MockRuntime>,
@@ -80,12 +129,13 @@ impl Harness {
         }
     }
 
-    /// An installed game running `script` with `sh`, in its own folder.
+    /// An installed game running `script` ([`game`]), in its own folder.
     fn game(&self, title: &str, script: &str) -> (Game, GameEntry) {
         let folder = self.temp.path().join(title.replace(' ', "-"));
         std::fs::create_dir_all(&folder).unwrap();
-        let program = folder.join("game.sh");
-        std::fs::write(&program, format!("#!/bin/sh\n{script}\n")).unwrap();
+        let program = folder.join(game::FILE);
+        std::fs::write(&program, format!("{}{script}\n", game::HEADER)).unwrap();
+        #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
             std::fs::set_permissions(&program, std::fs::Permissions::from_mode(0o755)).unwrap();
@@ -205,13 +255,7 @@ fn a_launch_is_forwarded_plays_through_the_pipeline_and_ends_with_the_game() {
     let h = harness();
     h.listen();
     let out = h.temp.path().join("seen");
-    let (game, _) = h.game(
-        "Short Game",
-        &format!(
-            "printf '%s|%s|%s' \"$SUNSHINE_CLIENT_WIDTH\" \"$SUNSHINE_CLIENT_HDR\" \"$SUNSHINE_CLIENT_SECRET\" > '{}'",
-            out.display()
-        ),
-    );
+    let (game, _) = h.game("Short Game", &game::writes_env(&out));
     let mut request = h.request(&game);
     request.env = BTreeMap::from([
         ("SUNSHINE_CLIENT_WIDTH".into(), "1920".into()),
@@ -227,7 +271,10 @@ fn a_launch_is_forwarded_plays_through_the_pipeline_and_ends_with_the_game() {
             message: None
         }
     );
-    assert_eq!(std::fs::read_to_string(&out).unwrap(), "1920|true|");
+    assert_eq!(
+        std::fs::read_to_string(&out).unwrap().trim_end(),
+        "1920|true|"
+    );
     let sessions = h.sessions(&game);
     assert_eq!(sessions.len(), 1, "one recorded session");
     assert!(sessions[0].ended_at_ms.is_some());
@@ -263,12 +310,7 @@ fn a_caskade_that_wont_start_fails_the_caller() {
     let outcome = block_on(run(
         &h.endpoint,
         &h.request(&game),
-        || {
-            std::process::Command::new("sh")
-                .args(["-c", "exit 3"])
-                .spawn()
-                .map(Some)
-        },
+        || game::failing_program().spawn().map(Some),
         Duration::from_secs(10),
     ));
     assert_eq!(outcome.code, code::FAILED);
@@ -279,7 +321,7 @@ fn a_caskade_that_wont_start_fails_the_caller() {
 fn the_caller_lives_as_long_as_the_session_and_a_crash_says_so() {
     let h = harness();
     h.listen();
-    let (game, _) = h.game("Crashing Game", "sleep 0.3; exit 7");
+    let (game, _) = h.game("Crashing Game", game::CRASHES_LATER);
     let started = Instant::now();
     let outcome = h.call(&h.request(&game));
     assert_eq!(outcome.code, code::CRASHED);
@@ -291,7 +333,7 @@ fn the_caller_lives_as_long_as_the_session_and_a_crash_says_so() {
 fn ending_the_caller_stops_the_game() {
     let h = harness();
     h.listen();
-    let (game, _) = h.game("Long Game", "exec sleep 30");
+    let (game, _) = h.game("Long Game", game::RUNS_ON);
     let caller = std::thread::spawn({
         let endpoint = h.endpoint.clone();
         let request = h.request(&game);
@@ -328,7 +370,7 @@ fn ending_the_caller_stops_the_game() {
 fn caskades_stop_ends_the_caller_as_stopped() {
     let h = harness();
     h.listen();
-    let (game, _) = h.game("Stopped Game", "exec sleep 30");
+    let (game, _) = h.game("Stopped Game", game::RUNS_ON);
     let caller = std::thread::spawn({
         let endpoint = h.endpoint.clone();
         let request = h.request(&game);
@@ -403,7 +445,7 @@ fn nobody_signed_in_unknown_games_and_releases_are_refused() {
 fn a_game_already_running_is_refused() {
     let h = harness();
     h.listen();
-    let (game, _) = h.game("Busy Game", "exec sleep 30");
+    let (game, _) = h.game("Busy Game", game::RUNS_ON);
     let first = std::thread::spawn({
         let endpoint = h.endpoint.clone();
         let request = h.request(&game);
@@ -480,9 +522,10 @@ fn only_the_clients_display_reaches_the_game() {
     );
 }
 
+#[cfg(unix)]
 #[test]
 fn the_socket_is_the_users_alone() {
-    use std::os::unix::fs::PermissionsExt;
+    use std::{os::unix::fs::PermissionsExt, path::Path};
     let h = harness();
     h.listen();
     let mode = |path: &Path| std::fs::metadata(path).unwrap().permissions().mode() & 0o777;
@@ -496,4 +539,12 @@ fn the_socket_is_the_users_alone() {
             .map(|error| error.kind()),
         Some(io::ErrorKind::AddrInUse)
     );
+}
+
+#[cfg(windows)]
+#[test]
+fn a_second_caskade_doesnt_take_over_the_pipe() {
+    let h = harness();
+    h.listen();
+    assert!(block_on(channel::Listener::bind(&h.endpoint)).is_err());
 }
