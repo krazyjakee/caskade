@@ -170,14 +170,15 @@ is Swedish. On Linux, the `sv_SE.UTF-8` locale must be installed.
 
 ## A handheld, a TV and pads
 
-About 1 hour. Needs: a Steam Deck (or ROG Ally or Legion Go) with a fresh
-install, a desktop PC with a fresh install, and a DualSense paired over
-Bluetooth to a Linux desktop.
+About 1 hour. Needs: a Steam Deck (or a ROG Ally or Legion Go, on Linux or
+Windows) with a fresh install, a desktop PC with a fresh install, and a
+DualSense paired over Bluetooth to a Linux desktop.
 
 - [ ] **H1.** Start Caskade for the first time on the handheld, then on the
   desktop. **Pass:** the handheld starts in console mode and Settings →
   Devices calls it a Handheld; the desktop starts in the desktop shell.
-  (#16)
+  Use a Windows handheld too if you have one: CI proves the registry reads on
+  a virtual machine, not a real handheld's names. (#16)
 - [ ] **H2.** Work through "Steam Deck game mode" in
   `docs/console-native-checklist.md`. **Pass:** every step as written. (Clears
   no box: #8 lets this stay deferred.)

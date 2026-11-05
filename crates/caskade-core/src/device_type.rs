@@ -6,14 +6,18 @@
 //! Detection reads the machine where it can: Linux's DMI names known
 //! handhelds (Steam Deck, ROG Ally, Legion Go, …) and laptop chassis, and a
 //! session inside gamescope is a handheld when it has a battery and a TV
-//! otherwise. Anything else is a desktop; Settings → Devices can say
-//! otherwise.
+//! otherwise. Windows keeps the same firmware names in the registry, where a
+//! battery without a handheld's name is a laptop. Anything else is a desktop;
+//! Settings → Devices can say otherwise.
 //!
 //! First defaults go only into sections never saved here (revision 0), so
 //! they never replace a choice, and only once.
 
 use std::path::Path;
 
+use caskade_discovery::registry::{
+    Registry, RegistryHive, RegistryKey, RegistryValue, RegistryView,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use specta::Type;
@@ -81,6 +85,17 @@ const LAPTOP_CHASSIS: &[u32] = &[8, 9, 10, 14, 31, 32];
 /// A tablet chassis.
 const TABLET_CHASSIS: u32 = 30;
 
+/// Where Windows keeps the firmware's names for this machine.
+const WINDOWS_BIOS: &str = r"HARDWARE\DESCRIPTION\System\BIOS";
+/// The firmware names that can say a handheld. A Legion Go's product is only
+/// a code, and a new model's only its family names. `BaseBoardProduct` stays
+/// out: HP's are four hex digits, and `83E1` would make one a Legion Go.
+const WINDOWS_NAMES: &[&str] = &["SystemProductName", "SystemFamily"];
+/// ACPI batteries, one subkey per battery Windows has ever seen here. Its
+/// volatile `Control` subkey exists only while the battery is present, so a
+/// drive moved out of a laptop doesn't make a desktop one.
+const WINDOWS_BATTERIES: &str = r"SYSTEM\CurrentControlSet\Enum\ACPI\PNP0C0A";
+
 /// This device, detected once per run.
 pub fn detected() -> DeviceType {
     static DETECTED: std::sync::OnceLock<DeviceType> = std::sync::OnceLock::new();
@@ -88,6 +103,13 @@ pub fn detected() -> DeviceType {
 }
 
 /// This device, as far as it can be told.
+#[cfg(windows)]
+pub fn detect() -> DeviceType {
+    detect_windows(&caskade_discovery::registry::NativeRegistry::default())
+}
+
+/// This device, as far as it can be told.
+#[cfg(not(windows))]
 pub fn detect() -> DeviceType {
     detect_in(
         Path::new("/"),
@@ -107,10 +129,7 @@ pub fn detect_in(root: &Path, gamescope: bool) -> DeviceType {
         read("sys/class/dmi/id/product_family"),
         read("sys/class/dmi/id/board_name"),
     ];
-    if names
-        .iter()
-        .any(|name| !name.is_empty() && HANDHELDS.iter().any(|known| name.contains(known)))
-    {
+    if names.iter().any(|name| names_a_handheld(name)) {
         return DeviceType::Handheld;
     }
     let battery = std::fs::read_dir(root.join("sys/class/power_supply")).is_ok_and(|entries| {
@@ -130,6 +149,58 @@ pub fn detect_in(root: &Path, gamescope: bool) -> DeviceType {
         Ok(chassis) if LAPTOP_CHASSIS.contains(&chassis) => DeviceType::Laptop,
         _ => DeviceType::Desktop,
     }
+}
+
+/// Detection against a Windows registry (tests use one in memory). Windows
+/// has no gamescope, and a battery alone makes a laptop: a Windows tablet
+/// keeps the desktop shell until the user says otherwise.
+pub fn detect_windows(registry: &dyn Registry) -> DeviceType {
+    if windows_names(registry)
+        .iter()
+        .any(|name| names_a_handheld(name))
+    {
+        DeviceType::Handheld
+    } else if windows_battery(registry) {
+        DeviceType::Laptop
+    } else {
+        DeviceType::Desktop
+    }
+}
+
+/// The firmware's names for this machine, as far as they can be read.
+pub fn windows_names(registry: &dyn Registry) -> Vec<String> {
+    let bios = RegistryKey::new(
+        RegistryHive::LocalMachine,
+        RegistryView::Native,
+        WINDOWS_BIOS,
+    );
+    WINDOWS_NAMES
+        .iter()
+        .filter_map(|name| match registry.value(&bios, name) {
+            Ok(Some(RegistryValue::String(text))) if !text.trim().is_empty() => Some(text),
+            _ => None,
+        })
+        .collect()
+}
+
+/// Whether a battery is present now.
+pub fn windows_battery(registry: &dyn Registry) -> bool {
+    let key =
+        |path: String| RegistryKey::new(RegistryHive::LocalMachine, RegistryView::Native, path);
+    registry
+        .subkeys(&key(WINDOWS_BATTERIES.to_owned()))
+        .unwrap_or_default()
+        .iter()
+        .any(|battery| {
+            registry
+                .key_exists(&key(format!(r"{WINDOWS_BATTERIES}\{battery}\Control")))
+                .unwrap_or(false)
+        })
+}
+
+fn names_a_handheld(name: &str) -> bool {
+    let name = name.to_ascii_lowercase();
+    HANDHELDS.iter().any(|known| name.contains(known))
 }
 
 /// gamescope sets `GAMESCOPE_WAYLAND_DISPLAY` for its clients; Steam's game

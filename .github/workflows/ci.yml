@@ -255,7 +255,7 @@ jobs:
   # and Program Files folder, from stand-in files, on and off. The runner is an
   # administrator with no UAC, so this proves the commands, not the prompt.
   # caskade-core has no Tauri, so its test binary needs no Common Controls
-  # manifest.
+  # manifest. The same binary reads this machine's firmware names (#16).
   windows-elevation:
     needs: changes
     if: needs.changes.outputs.cross == 'true'
@@ -282,6 +282,8 @@ jobs:
         env:
           CASKADE_TEST_NATIVE: "1"
         run: "cargo test -p caskade-core --test it --locked windows_elevation:: -- --ignored --nocapture"
+      - name: Device detection from the real registry
+        run: "cargo test -p caskade-core --test it --locked device_defaults::windows_ -- --nocapture"
 
   # The M5 exit (#153): the built app in console mode, driven by a pad only,
   # under Xvfb. The `e2e` feature embeds the built UI.

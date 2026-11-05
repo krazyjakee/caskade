@@ -583,8 +583,10 @@ interface scale (`uiScale`) never syncs: it suits each screen.
 `caskade_core::device_type` (#244) tells a desktop, laptop, handheld or TV
 apart: Linux's DMI names known handhelds (Steam Deck, ROG Ally, Legion Go,
 AYANEO, …) and laptop chassis, and a session inside gamescope is a handheld
-with a battery or a TV without one. Anything else is a desktop. A device's
-record starts with what was detected, and Settings → Devices changes it.
+with a battery or a TV without one. Windows checks the same names against the
+firmware's in the registry (`SystemProductName`, `SystemFamily`), and a battery
+without one of them is a laptop. Anything else is a desktop. A device's record
+starts with what was detected, and Settings → Devices changes it.
 
 A new install (first-run setup never saved, no games) starts with its kind's
 first settings, written only into sections never saved: a handheld or a TV
