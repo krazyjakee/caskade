@@ -243,7 +243,7 @@ jobs:
       - name: Prepare SHA-pinned 7-Zip sidecar
         run: python scripts/tauri-sidecar.py
       - name: Launch caller tests
-        run: 'cargo test -p caskade-desktop --lib --test it --locked launch_cli::'
+        run: "cargo test -p caskade-desktop --lib --test it --locked launch_cli::"
 
   # The M5 exit (#153): the built app in console mode, driven by a pad only,
   # under Xvfb. The `e2e` feature embeds the built UI.
