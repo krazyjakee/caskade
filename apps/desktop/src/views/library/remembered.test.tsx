@@ -1,5 +1,6 @@
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
+import { createFixtureGames } from "../../api/fixtures";
 import { fakeViewport, playedGames, renderApp } from "../../test/harness";
 import { rememberedLibraryView, resolveLibraryView } from "./remembered";
 
@@ -79,3 +80,66 @@ it.each([undefined, "console"] as const)(
     expect(rememberedLibraryView().sort).toBe("popular");
   },
 );
+
+const modes = [undefined, "console"] as const;
+const filterLink = (name: RegExp) =>
+  within(screen.getByRole("navigation", { name: "Library filters" })).getByRole("link", { name });
+
+it.each(modes)("opens on All Games while nothing has been played, in %s mode", async (mode) => {
+  fakeViewport();
+  const app = renderApp("/library", { games: createFixtureGames(4), mode });
+  await screen.findByRole("link", { name: /Fixture Game 0003/ });
+  await waitFor(() =>
+    expect(app.router.state.location.search).toMatchObject({ filter: "all", sort: "recent" }),
+  );
+  expect(filterLink(/^All Games/).getAttribute("aria-current")).toBe("page");
+  expect(screen.queryByText("You haven't played anything yet.")).toBeNull();
+
+  // It was the Library's doing, so it isn't remembered as the user's: with a
+  // game played, the Library opens on Recently Played.
+  cleanup();
+  renderApp("/library", { games: playedGames(4), mode });
+  await screen.findByRole("heading", { name: "Library" });
+  expect(rememberedLibraryView().filter).toBe("recent");
+  await waitFor(() =>
+    expect(filterLink(/^Recently Played/).getAttribute("aria-current")).toBe("page"),
+  );
+});
+
+it.each(modes)("keeps Recently Played for a user with recent games, in %s mode", async (mode) => {
+  fakeViewport();
+  const app = renderApp("/library", { games: playedGames(4), mode });
+  await screen.findByRole("link", { name: /Fixture Game 0003/ });
+  expect(app.router.state.location.search).toMatchObject({ filter: "recent" });
+  expect(filterLink(/^Recently Played/).getAttribute("aria-current")).toBe("page");
+});
+
+it.each(modes)("stays on Recently Played when it's pressed, in %s mode", async (mode) => {
+  fakeViewport();
+  const app = renderApp("/library", { games: createFixtureGames(4), mode });
+  await waitFor(() => expect(app.router.state.location.search).toMatchObject({ filter: "all" }));
+  fireEvent.click(filterLink(/^Recently Played/));
+  await screen.findByText("You haven't played anything yet.");
+  expect(app.router.state.location.search).toMatchObject({ filter: "recent" });
+  expect(app.router.state.location.search).not.toHaveProperty("opening");
+});
+
+it("opens on a filter the user chose, even with nothing played", async () => {
+  fakeViewport();
+  localStorage.setItem("caskade.library.view", JSON.stringify({ filter: "installed" }));
+  const app = renderApp("/library", { games: createFixtureGames(4) });
+  await screen.findByRole("heading", { name: "Library" });
+  // Long enough for the library's counts, which is what could move it.
+  await waitFor(() => expect(filterLink(/^All Games/).textContent).toMatch(/\d/));
+  expect(app.router.state.location.search).toMatchObject({ filter: "installed" });
+  expect(rememberedLibraryView().filter).toBe("installed");
+});
+
+it("remembers All Games once the user presses it", async () => {
+  fakeViewport();
+  const app = renderApp("/library", { games: createFixtureGames(4) });
+  await waitFor(() => expect(app.router.state.location.search).toMatchObject({ filter: "all" }));
+  expect(rememberedLibraryView().filter).toBe("recent");
+  fireEvent.click(filterLink(/^All Games/));
+  await waitFor(() => expect(rememberedLibraryView().filter).toBe("all"));
+});

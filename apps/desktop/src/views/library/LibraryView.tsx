@@ -32,7 +32,8 @@ import { useWebGames, WebMosaic } from "./web/WebMosaic";
 /** Lists sorted by title get an alphabet bar from this many games. */
 const ALPHABET_BAR_MIN_GAMES = 50;
 
-/** In the sidebar's order. Recently played is the default; All Games comes last. */
+/** In the sidebar's order. Recently played is the default once something has
+ * been played, All Games until then (`router.tsx`); All Games comes last. */
 export const libraryFilters = [
   "recent",
   "installed",

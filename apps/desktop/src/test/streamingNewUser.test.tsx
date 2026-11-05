@@ -110,7 +110,6 @@ it("hosts, pairs and streams without leaving Caskade or reading a name", async (
   // From the Library to the game, and Stream from Study.
   fireEvent.click(screen.getByRole("link", { name: "Library" }));
   await screen.findByRole("heading", { name: "Library" });
-  fireEvent.click(await screen.findByRole("link", { name: /All Games/ }));
   fireEvent.click(await screen.findByRole("link", { name: /Fixture Game 0003/ }));
   fireEvent.click(await screen.findByRole("button", { name: "View more" }));
   fireEvent.click(await screen.findByRole("button", { name: "Stream from Study" }));

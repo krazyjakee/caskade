@@ -5,6 +5,7 @@ import {
   type SearchSchemaInput,
 } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { useLibraryStats } from "./api/hooks";
 import type { LibraryLayout, LibrarySort } from "./api/types";
 import { PluginViewPage } from "./plugins/PluginViews";
 import { AppShell } from "./shell/AppShell";
@@ -51,6 +52,8 @@ const libraryRoute = createRoute({
   path: "/library",
   // Library filters live in the URL (TECH-PLAN §1, Routing). A link may
   // leave out the filter, sort and layout to come back to the remembered ones.
+  // `opening` marks a filter no link named, which the user therefore didn't
+  // choose here; every link that names one drops it.
   validateSearch: (
     input: {
       filter?: LibraryFilter;
@@ -58,6 +61,7 @@ const libraryRoute = createRoute({
       sort?: LibrarySort;
       layout?: LibraryLayout;
       platform?: string;
+      opening?: boolean;
     } & SearchSchemaInput,
   ): {
     filter: LibraryFilter;
@@ -65,6 +69,7 @@ const libraryRoute = createRoute({
     sort: LibrarySort;
     layout: LibraryLayout;
     platform?: string;
+    opening?: true;
   } => {
     const search = input as Record<string, unknown>;
     const q = typeof search.q === "string" && search.q.trim() ? search.q.trim() : undefined;
@@ -72,17 +77,39 @@ const libraryRoute = createRoute({
       typeof search.platform === "string" && search.platform.trim()
         ? search.platform.trim()
         : undefined;
-    return { ...resolveLibraryView(search), q, ...(platform && { platform }) };
+    const opening = search.filter === undefined || search.opening === true;
+    return {
+      ...resolveLibraryView(search),
+      q,
+      ...(platform && { platform }),
+      ...(opening && { opening: true as const }),
+    };
   },
   component: function Library() {
-    const { filter, q, sort, layout, platform } = libraryRoute.useSearch();
-    // A search is a detour: it doesn't replace the remembered filter.
+    const { filter, q, sort, layout, platform, opening } = libraryRoute.useSearch();
+    const navigate = libraryRoute.useNavigate();
+    const stats = useLibraryStats();
+    // With nothing played, the Library opens on every game. Pressing Recently
+    // Played names the filter, so that stays.
+    const nothingRecent = opening && filter === "recent" && stats.data?.recent === 0;
     useEffect(() => {
-      const kept = q ? rememberedLibraryView().filter : filter;
+      if (nothingRecent)
+        void navigate({ search: (search) => ({ ...search, filter: "all" }), replace: true });
+    }, [nothingRecent, navigate]);
+    // A search is a detour, and so is a view the user didn't choose: neither
+    // replaces the remembered filter, so a first game brings Recently Played back.
+    useEffect(() => {
+      const kept = q || opening ? rememberedLibraryView().filter : filter;
       rememberLibraryView({ filter: kept, sort, layout });
-    }, [filter, q, sort, layout]);
+    }, [filter, q, opening, sort, layout]);
     return (
-      <LibraryView filter={filter} query={q} sort={sort} layout={layout} platform={platform} />
+      <LibraryView
+        filter={nothingRecent ? "all" : filter}
+        query={q}
+        sort={sort}
+        layout={layout}
+        platform={platform}
+      />
     );
   },
 });
