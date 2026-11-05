@@ -253,7 +253,7 @@ jobs:
             cp apps/desktop/src-tauri/tests/windows-test.manifest "$test.manifest"
           done
       - name: Launch caller tests
-        run: "cargo test -p caskade-desktop --lib --test it --locked launch_cli::"
+        run: "cargo test -p caskade-desktop --lib --test it --locked --no-fail-fast launch_cli::"
 
   # The M5 exit (#153): the built app in console mode, driven by a pad only,
   # under Xvfb. The `e2e` feature embeds the built UI.

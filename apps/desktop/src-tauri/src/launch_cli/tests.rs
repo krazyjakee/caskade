@@ -27,7 +27,6 @@ mod game {
 
     pub const FILE: &str = "game.sh";
     pub const HEADER: &str = "#!/bin/sh\n";
-    pub const RUNS_ON: &str = "exec sleep 30";
     pub const CRASHES_LATER: &str = "sleep 0.3; exit 7";
 
     /// Writes the client's width and HDR, and a variable that must not
@@ -53,7 +52,6 @@ mod game {
 
     pub const FILE: &str = "game.cmd";
     pub const HEADER: &str = "@echo off\r\n";
-    pub const RUNS_ON: &str = "ping -n 31 127.0.0.1 > nul";
     pub const CRASHES_LATER: &str = "ping -n 2 127.0.0.1 > nul\r\nexit 7";
 
     /// Writes the client's width and HDR, and a variable that must not
@@ -131,8 +129,7 @@ impl Harness {
 
     /// An installed game running `script` ([`game`]), in its own folder.
     fn game(&self, title: &str, script: &str) -> (Game, GameEntry) {
-        let folder = self.temp.path().join(title.replace(' ', "-"));
-        std::fs::create_dir_all(&folder).unwrap();
+        let folder = self.folder(title);
         let program = folder.join(game::FILE);
         std::fs::write(&program, format!("{}{script}\n", game::HEADER)).unwrap();
         #[cfg(unix)]
@@ -140,6 +137,42 @@ impl Harness {
             use std::os::unix::fs::PermissionsExt;
             std::fs::set_permissions(&program, std::fs::Permissions::from_mode(0o755)).unwrap();
         }
+        self.install(title, folder, program, Vec::new())
+    }
+
+    /// A game of one process that runs for 30 s, so a test that stops it
+    /// isn't about which of a game's processes Stop knows yet.
+    #[cfg(unix)]
+    fn long_game(&self, title: &str) -> (Game, GameEntry) {
+        self.game(title, "exec sleep 30")
+    }
+
+    /// A game of one process that runs for 30 s, so a test that stops it
+    /// isn't about which of a game's processes Stop knows yet. A batch file
+    /// can't `exec`: its wait would be a child.
+    #[cfg(windows)]
+    fn long_game(&self, title: &str) -> (Game, GameEntry) {
+        let folder = self.folder(title);
+        let program = folder.join("ping.exe");
+        let system = std::path::PathBuf::from(std::env::var_os("SystemRoot").unwrap());
+        std::fs::copy(system.join("System32").join("PING.EXE"), &program).unwrap();
+        let args = ["-n", "31", "127.0.0.1"].map(str::to_owned).to_vec();
+        self.install(title, folder, program, args)
+    }
+
+    fn folder(&self, title: &str) -> std::path::PathBuf {
+        let folder = self.temp.path().join(title.replace(' ', "-"));
+        std::fs::create_dir_all(&folder).unwrap();
+        folder
+    }
+
+    fn install(
+        &self,
+        title: &str,
+        folder: std::path::PathBuf,
+        program: std::path::PathBuf,
+        args: Vec<String>,
+    ) -> (Game, GameEntry) {
         block_on(async {
             let game = Game::new(title);
             self.store.upsert_game(&game).await.unwrap();
@@ -150,7 +183,7 @@ impl Harness {
             });
             entry.launch = Some(LaunchSpec::Executable {
                 path: program,
-                args: Vec::new(),
+                args,
                 cwd: Some(folder),
                 env: BTreeMap::new(),
             });
@@ -333,7 +366,7 @@ fn the_caller_lives_as_long_as_the_session_and_a_crash_says_so() {
 fn ending_the_caller_stops_the_game() {
     let h = harness();
     h.listen();
-    let (game, _) = h.game("Long Game", game::RUNS_ON);
+    let (game, _) = h.long_game("Long Game");
     let caller = std::thread::spawn({
         let endpoint = h.endpoint.clone();
         let request = h.request(&game);
@@ -370,7 +403,7 @@ fn ending_the_caller_stops_the_game() {
 fn caskades_stop_ends_the_caller_as_stopped() {
     let h = harness();
     h.listen();
-    let (game, _) = h.game("Stopped Game", game::RUNS_ON);
+    let (game, _) = h.long_game("Stopped Game");
     let caller = std::thread::spawn({
         let endpoint = h.endpoint.clone();
         let request = h.request(&game);
@@ -445,7 +478,7 @@ fn nobody_signed_in_unknown_games_and_releases_are_refused() {
 fn a_game_already_running_is_refused() {
     let h = harness();
     h.listen();
-    let (game, _) = h.game("Busy Game", game::RUNS_ON);
+    let (game, _) = h.long_game("Busy Game");
     let first = std::thread::spawn({
         let endpoint = h.endpoint.clone();
         let request = h.request(&game);
