@@ -328,17 +328,19 @@ async fn epic_catalogue(server: &MockServer) {
         .await;
 }
 
+/// The ids of an Epic game in `namespace`.
+fn epic(namespace: &str) -> Vec<ExternalId> {
+    vec![ExternalId::Epic {
+        namespace: namespace.to_owned(),
+        catalog_item: format!("item-{namespace}"),
+        app_name: format!("app-{namespace}"),
+    }]
+}
+
 #[tokio::test]
 async fn epic_games_match_by_their_store_offer() {
     let fixture = Fixture::new().await;
     epic_catalogue(&fixture.server).await;
-    let epic = |namespace: &str| {
-        vec![ExternalId::Epic {
-            namespace: namespace.to_owned(),
-            catalog_item: format!("item-{namespace}"),
-            app_name: format!("app-{namespace}"),
-        }]
-    };
     let found = fixture.add("Satisfactory", epic("crab")).await;
     let gone = fixture.add("Gone", epic("gone")).await;
     let offline = fixture.add("Offline", epic("offline")).await;
@@ -1590,6 +1592,122 @@ async fn a_cancelled_refresh_leaves_the_rest_and_a_failed_one_can_be_retried() {
         .unwrap();
     assert_eq!(status.failed, std::slice::from_ref(&game.id));
     assert_eq!(offline.game(&game.id).await.title, "Portal 2");
+}
+
+impl Fixture {
+    /// Refreshes the missing details of `ids`, as Retry does for `failed`.
+    async fn refresh(&self, ids: &[String]) -> RefreshStatus {
+        self.metadata
+            .refresh_games(ids, RefreshMode::Missing, &CancellationToken::new(), |_| {})
+            .await
+            .unwrap()
+    }
+
+    async fn igdb_id(&self, game_id: &str) -> Option<u64> {
+        let found = self.metadata.game(game_id).await.unwrap().unwrap();
+        found.igdb_id
+    }
+}
+
+#[tokio::test]
+async fn a_failed_epic_read_fails_the_game_in_a_refresh_and_a_retry_matches_it() {
+    let fixture = Fixture::new().await;
+    epic_catalogue(&fixture.server).await;
+    let found = fixture.add("Satisfactory", epic("crab")).await;
+    let gone = fixture.add("Gone", epic("gone")).await;
+    let offline = fixture.add("Offline", epic("offline")).await;
+
+    let status = fixture
+        .refresh(&[found.id.clone(), gone.id.clone(), offline.id.clone()])
+        .await;
+    // Epic's own "no such namespace" is still not found; only the game it
+    // never answered for is failed.
+    assert_eq!(
+        (status.updated, status.unmatched, status.unchanged),
+        (1, 1, 0)
+    );
+    assert_eq!(status.failed, std::slice::from_ref(&offline.id));
+    assert!(
+        fixture
+            .store
+            .igdb_match(&offline.id)
+            .await
+            .unwrap()
+            .is_none()
+    );
+
+    // Epic answers again, and Retry takes what the status listed.
+    Mock::given(method("GET"))
+        .and(path(
+            "/epic/catalog/catalog/api/shared/namespace/offline/offers",
+        ))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_json(json!({"elements": [
+                {"id": "offer-crab", "categories": [{"path": "games/edition/base"}]},
+            ]})),
+        )
+        .with_priority(1)
+        .mount(&fixture.server)
+        .await;
+    let status = fixture.refresh(&status.failed).await;
+    assert_eq!((status.updated, status.unmatched), (1, 0));
+    assert!(status.failed.is_empty());
+    assert_eq!(fixture.igdb_id(&offline.id).await, Some(1942));
+}
+
+#[tokio::test]
+async fn an_expired_epic_token_fails_the_game_in_a_refresh_and_a_retry_renews_it() {
+    let fixture = Fixture::new().await;
+    epic_catalogue(&fixture.server).await;
+    Mock::given(method("GET"))
+        .and(path(
+            "/epic/catalog/catalog/api/shared/namespace/crab/offers",
+        ))
+        .respond_with(ResponseTemplate::new(401))
+        .up_to_n_times(1)
+        .with_priority(1)
+        .mount(&fixture.server)
+        .await;
+    let game = fixture.add("Satisfactory", epic("crab")).await;
+
+    let status = fixture.refresh(std::slice::from_ref(&game.id)).await;
+    assert_eq!(status.unmatched, 0);
+    assert_eq!(status.failed, std::slice::from_ref(&game.id));
+
+    let status = fixture.refresh(&status.failed).await;
+    assert_eq!((status.updated, status.failed.len()), (1, 0));
+    assert_eq!(fixture.igdb_id(&game.id).await, Some(1942));
+    // The refused token was dropped, not sent again.
+    assert_eq!(
+        fixture
+            .requests("/epic/account/account/api/oauth/token")
+            .await,
+        2
+    );
+}
+
+#[tokio::test]
+async fn dumps_that_cannot_be_searched_fail_the_game_in_a_refresh_and_a_retry_matches_it() {
+    let dir = tempfile::tempdir().unwrap();
+    // A file where the cache's folder goes: not damage it can start again
+    // from, so every search of the dumps fails.
+    let folder = dir.path().join("hasheous");
+    std::fs::write(&folder, "").unwrap();
+    let server = server().await;
+    let hasheous = Hasheous::with_base_url(&folder, server.uri());
+    let fixture = Fixture::with_hasheous(dir, server, hasheous).await;
+    let worms = fixture.add("Worms", Vec::new()).await;
+
+    let status = fixture.refresh(std::slice::from_ref(&worms.id)).await;
+    assert_eq!(status.unmatched, 0);
+    assert_eq!(status.failed, std::slice::from_ref(&worms.id));
+    assert!(fixture.store.igdb_match(&worms.id).await.unwrap().is_none());
+
+    std::fs::remove_file(&folder).unwrap();
+    let _dumps = hasheous_with_worms(&folder, &fixture.server).await;
+    let status = fixture.refresh(&status.failed).await;
+    assert_eq!((status.updated, status.failed.len()), (1, 0));
+    assert_eq!(fixture.igdb_id(&worms.id).await, Some(9331));
 }
 
 #[tokio::test]

@@ -183,6 +183,9 @@ pub struct RunReport {
     /// Games left for the next run: the server couldn't be reached or
     /// sent no game, or an image failed to download and may come later.
     pub deferred: usize,
+    /// The deferred games with nothing recorded to show it: Epic's offers
+    /// couldn't be read or the dumps searched, so "not found" isn't known.
+    pub unanswered: Vec<String>,
     /// The metadata server failed or an image host couldn't be reached,
     /// so the run stopped there.
     pub unreachable: bool,
@@ -417,6 +420,7 @@ impl Metadata {
                 // Nothing else to ask, and the dumps couldn't answer: left
                 // for the next run instead of recorded as none (#160).
                 report.deferred += 1;
+                report.unanswered.push(game_id.clone());
                 continue;
             }
             match local {
@@ -490,6 +494,7 @@ impl Metadata {
                 let igdb_id = ids.iter().find_map(|id| found.get(id).copied());
                 if igdb_id.is_none() && !complete {
                     report.deferred += 1;
+                    report.unanswered.push(game_id);
                     continue;
                 }
                 let source = if igdb_id.is_some() {

@@ -291,6 +291,7 @@ Either way the user's fields (#171) and artwork choices (#175) stay, and so do g
 
 - Games go in batches of 50, with one request per batch, so the cache, the server's cooldown and `Retry-After` stay authoritative.
 - When the server or an image host can't be reached, that batch and the rest are listed as failed, and keep what they had.
+- A game whose Epic offers couldn't be read, or whose dumps couldn't be searched, is listed as failed on its own, not as not found: nothing was learned about it. The rest of the batch goes on.
 - Cancelling stops after the current batch and lists the games left.
 
 One refresh runs at a time (`start_refresh`, `cancel_refresh`). Its `RefreshStatus` goes to the webview as `GamesRefreshChanged`:

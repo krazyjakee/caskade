@@ -45,8 +45,9 @@ pub struct RefreshStatus {
     pub unmatched: u32,
     /// Games set to "not on IGDB", or gone from the library.
     pub skipped: u32,
-    /// Games that couldn't be refreshed (the server or an image host
-    /// couldn't be reached, or the server is cooling down): retry these.
+    /// Games that couldn't be refreshed (the server, an image host or
+    /// Epic's catalogue couldn't be reached, the dumps couldn't be searched,
+    /// or the server is cooling down): retry these.
     pub failed: Vec<String>,
     /// Cancelled: `remaining` weren't looked at.
     pub cancelled: bool,
@@ -173,7 +174,8 @@ impl Metadata {
                 let now = self.snapshot(&id).await?;
                 let row = store.igdb_match(&id).await?;
                 let pending = row.as_ref().is_some_and(|row| row.pending);
-                if failed_batch && (pending || now == earlier) {
+                if (failed_batch && (pending || now == earlier)) || report.unanswered.contains(&id)
+                {
                     status.failed.push(id);
                 } else if now != earlier {
                     status.updated += 1;

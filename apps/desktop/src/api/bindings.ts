@@ -7321,8 +7321,9 @@ export type RefreshStatus = {
 	/**  Games set to "not on IGDB", or gone from the library. */
 	skipped: number,
 	/**
-	 *  Games that couldn't be refreshed (the server or an image host
-	 *  couldn't be reached, or the server is cooling down): retry these.
+	 *  Games that couldn't be refreshed (the server, an image host or
+	 *  Epic's catalogue couldn't be reached, the dumps couldn't be searched,
+	 *  or the server is cooling down): retry these.
 	 */
 	failed: string[],
 	/**  Cancelled: `remaining` weren't looked at. */
