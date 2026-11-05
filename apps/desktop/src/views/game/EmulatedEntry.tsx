@@ -233,8 +233,11 @@ export function EmulatedEntry({ entryId }: { entryId: string }) {
           )}
           {game.bios.length > 0 && (
             <div>
-              <h4 className="font-semibold">BIOS</h4>
-              <ul className="mt-1 grid gap-1" aria-label="BIOS">
+              <h4 className="font-semibold">{t({ message: "BIOS", context: "table column" })}</h4>
+              <ul
+                className="mt-1 grid gap-1"
+                aria-label={t({ message: "BIOS", context: "table column" })}
+              >
                 {game.bios.map((bios) => (
                   <li key={bios.file} data-part="bios" className="flex items-center gap-2">
                     <StatusDot tone={biosTone(bios.state, bios.required)}>

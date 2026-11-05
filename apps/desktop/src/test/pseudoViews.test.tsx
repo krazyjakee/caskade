@@ -6,16 +6,21 @@
  * accounts, Streaming, Backup). Then what opens over them: console mode's
  * quick look, a game's menu, Add game and its dialogs, the game editor's
  * tabs, the move, uninstall and remove dialogs, and what the app draws
- * around a plugin's tabs and views. Views that differ by shell are checked
- * in both. Every text, aria-label, title and placeholder they show comes
- * from a catalog; what the fixtures name is data. Each view is checked once
- * its data has loaded: a check that may pass early would pass on a view
- * still loading. */
-import { loadCatalog, pseudoLocale } from "@caskade/i18n";
+ * around a plugin's tabs and views. Then what stands in for them or comes up
+ * on its own: signing in, the guide menu and the curtain, every question
+ * Play can ask, install requests, selection and the bulk editor, the search
+ * overlays, pairing, and what shows when something fails. Views that differ
+ * by shell are checked in both. Every text, aria-label, title and
+ * placeholder they show comes from a catalog; what the fixtures name is
+ * data. Each view is checked once its data has loaded: a check that may pass
+ * early would pass on a view still loading. */
+import { i18n, loadCatalog, pseudoLocale } from "@caskade/i18n";
 import type { PluginContext } from "@caskade/sdk";
-import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { I18nProvider } from "@lingui/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import type { FixtureAccount } from "../api/accountsFixtures";
 import { AchievementsProvider } from "../api/achievements";
 import {
   createAchievementsFixture,
@@ -23,17 +28,23 @@ import {
   staleGogSet,
   steamSet,
 } from "../api/achievementsFixtures";
+import { fixtureCatalogueItems } from "../api/addonsFixtures";
 import { BackupProvider } from "../api/backup";
 import { createBackupFixtureApi } from "../api/backupFixtures";
 import { BrowseApiContext } from "../api/browse";
 import { createBrowseFixtureApi } from "../api/browseFixtures";
 import { createCatalogFixtureApi, fixtureCatalog } from "../api/catalogFixtures";
+import { createEmulationFixtureApi } from "../api/emulationFixtures";
 import { createEmulatedFixtureGames, createFixtureGames } from "../api/fixtures";
+import { type GameEmulation, GameEmulationProvider } from "../api/gameEmulation";
 import { CatalogProvider, type GameIgdbApi, GameIgdbProvider, type IgdbGame } from "../api/igdb";
+import type { JobQuestion } from "../api/install";
 import { fixtureJob } from "../api/installFixtures";
+import type { InstallRequest, InstallRequestApi } from "../api/installRequests";
 import { NotificationsProvider } from "../api/notifications";
 import { createNotificationsFixtureApi, fixtureNotifications } from "../api/notificationsFixtures";
-import { FIXTURE_LINK } from "../api/sharesFixtures";
+import type { BeforePlay, PlayingElsewhere, SaveVersion } from "../api/saves";
+import { FIXTURE_LINK, fixtureShareInfo } from "../api/sharesFixtures";
 import { createStorageFixtureApi } from "../api/storageFixtures";
 import { StoreAccountsProvider } from "../api/storeAccounts";
 import {
@@ -43,12 +54,27 @@ import {
 } from "../api/storeAccountsFixtures";
 import { StreamingApiProvider } from "../api/streaming";
 import { createStreamingFixtureApi, fixtureStreamHosts } from "../api/streamingFixtures";
-import type { GameDetails } from "../api/types";
+import { type SyncApi, SyncProvider, type Transfer } from "../api/sync";
+import { createSyncFixtureApi } from "../api/syncFixtures";
+import type { GameDetails, LaunchPrompt } from "../api/types";
+import { type GameUpdate, type GameUpdatesApi, GameUpdatesProvider } from "../api/updates";
+import { InputProvider } from "../input";
+import { type GuideApi, GuideMenu, type RunningGame } from "../input/GuideMenu";
 import { PluginRegistry } from "../plugins/registry";
 import type { UiPlugin } from "../plugins/types";
 import type { Mode } from "../shell/console/mode";
+import { AppErrorBoundary } from "../shell/ErrorFallback";
+import { InstallIngress } from "../views/activity/InstallIngress";
 import { presentPlatform } from "../views/library/platforms/catalog";
-import { type AppOptions, fakeViewport, focused, playedGames, renderApp, until } from "./harness";
+import {
+  type AppOptions,
+  fakePad,
+  fakeViewport,
+  focused,
+  playedGames,
+  renderApp,
+  until,
+} from "./harness";
 import { untranslated } from "./untranslated";
 
 beforeEach(() => {
@@ -536,10 +562,10 @@ const overlays = [
 /** Not Caskade's text. Pad buttons keep the names printed on them
  * (`glyphs.ts`), and these come from React Aria's own catalogs, which
  * `LocaleProvider` gives the app's language (`ariaLocale.test.tsx`) but
- * which have no pseudo-locale: an empty Select and a popover's hidden
- * dismiss button. */
+ * which have no pseudo-locale: an empty Select, a search box's list and a
+ * popover's hidden dismiss button. */
 const padGlyphs = '[data-part="glyph"]';
-const reactAria = ["Select an item", "Dismiss"];
+const reactAria = ["Select an item", "Suggestions", "Dismiss"];
 
 const over = (data: (RegExp | string)[] = []) =>
   shown(overlays, [...data, ...reactAria], padGlyphs);
@@ -916,4 +942,1230 @@ it.each(modes)("shows a plugin's view in the pseudo-locale (%s)", async (mode) =
     expect(pluginShown(["main"])).toEqual([]);
     cleanup();
   }
+});
+
+// Whole windows: the shells around a view.
+
+it.each(modes)("shows the whole window in the pseudo-locale (%s)", async (mode) => {
+  await open("/", { mode, games: playedGames(8) });
+  const shell = `[data-cs="${mode === "console" ? "console-shell" : "app-shell"}"]`;
+  await ready(`${shell} [data-view="home"] [data-cs="game-card"]`);
+  if (mode === "desktop")
+    await waitFor(() => expect(one(shell)?.textContent).toContain("Fixture installation"));
+  expect(shown([shell], ["Fixture installation", /\bPlayer\b/g], padGlyphs)).toEqual([]);
+});
+
+// Signing in.
+
+const family: FixtureAccount[] = [
+  { id: "ada", name: "Ada", role: "admin", avatar: "avatar:rocket", pin: "2468" },
+  { id: "kid", name: "Kid", avatar: "avatar:moon" },
+];
+
+const picker = '[data-cs="account-picker"]';
+const pinPad = '[data-cs="pin-pad"]';
+
+/** Accounts' names, as their tiles show them. */
+const signIn = () => shown([picker], [/\b(?:Ada|Kid)\b/g], padGlyphs);
+
+const enterPin = (pin: string) => {
+  const field = one(`${pinPad} [data-part="field"]`) as HTMLInputElement;
+  fireEvent.change(field, { target: { value: pin } });
+  fireEvent.submit(field.closest("form") as Element);
+};
+
+it.each(modes)("shows who's playing and the PIN pad in the pseudo-locale (%s)", async (mode) => {
+  await open("/", { mode, accounts: family });
+  await ready(`${picker} [data-part="account"]`);
+  if (mode === "console") await ready(`${picker} [data-cs="hint-bar"] [data-part="hint"]`);
+  expect(signIn()).toEqual([]);
+
+  fireEvent.click(one(`${picker} [data-part="account"][data-status="locked"]`) as Element);
+  await ready(pinPad);
+  if (mode === "console") await ready(`${picker} [data-cs="hint-bar"] [data-part="hint"]`);
+  expect(signIn()).toEqual([]);
+
+  // Too short, then wrong.
+  enterPin("12");
+  await waitFor(() => expect(one(`${pinPad} [data-part="message"]`)?.textContent).not.toBe(""));
+  expect(signIn()).toEqual([]);
+  enterPin("1357");
+  await waitFor(() => expect(one(pinPad)?.getAttribute("data-status")).toBe("wrong"));
+  expect(signIn()).toEqual([]);
+});
+
+it("shows a locked PIN pad in the pseudo-locale", async () => {
+  await open("/", {
+    accounts: [
+      { ...(family[0] as FixtureAccount), lockedUntilMs: Date.now() + 90_000 },
+      family[1] as FixtureAccount,
+    ],
+  });
+  await ready(`${picker} [data-part="account"]`);
+  fireEvent.click(one(`${picker} [data-part="account"][data-status="locked"]`) as Element);
+  await waitFor(() => expect(one(pinPad)?.getAttribute("data-status")).toBe("locked"));
+  expect(signIn()).toEqual([]);
+});
+
+// Console mode's curtain and guide menu.
+
+it("shows the curtain over a running game in the pseudo-locale", async () => {
+  const app = await open("/games/fixture-1", { mode: "console" });
+  await gameHeading();
+  await app.library.launchGame("entry-1");
+  await waitFor(() =>
+    expect(one('[data-cs="game-curtain"]')?.getAttribute("data-state")).toBe("covered"),
+  );
+  await waitFor(() =>
+    expect(one('[data-cs="game-curtain"] [data-part="title"]')?.textContent).toMatch(/Fixture/),
+  );
+  // The guide button's name is printed on the pad, as in the hint bar.
+  expect(shown(['[data-cs="game-curtain"]', '[role="dialog"]'], [], "kbd")).toEqual([]);
+});
+
+it("shows the curtain before a game's title is known in the pseudo-locale", async () => {
+  const app = await open("/", { mode: "console" });
+  await ready('[data-cs="game-curtain"]');
+  act(() =>
+    app.library.emit({
+      type: "game.started",
+      sessionId: "s1",
+      entryId: "gone",
+      gameId: "not-in-the-library",
+    }),
+  );
+  await ready('[data-cs="game-curtain"] [data-part="title"]');
+  expect(shown(['[data-cs="game-curtain"]'], [], "kbd")).toEqual([]);
+});
+
+/** The guide menu, as the shell mounts it, for `game`. */
+async function guide(game: RunningGame, stop?: () => Promise<void>) {
+  i18n.loadAndActivate({ locale, messages: await loadCatalog(locale) });
+  const pad = fakePad();
+  const api: GuideApi = {
+    running: async () => [game],
+    returnToGame: async () => {},
+    stop: stop ?? (async () => {}),
+  };
+  render(
+    <I18nProvider i18n={i18n}>
+      <InputProvider console onBack={() => {}} subscribe={pad.subscribe}>
+        <GuideMenu api={api} openDetails={() => {}} />
+      </InputProvider>
+    </I18nProvider>,
+  );
+  pad.press("guide");
+  await ready('[data-cs="guide-menu"]');
+}
+
+const guideButton = (index: number) =>
+  all('[data-cs="guide-menu"] button')[index] as HTMLButtonElement;
+
+it.each([false, true])("shows the guide menu in the pseudo-locale (stream: %s)", async (stream) => {
+  await guide({ sessionId: "s1", gameId: "fixture-1", title: "Fixture Game 0002", stream }, () =>
+    Promise.reject(new Error("The game won't stop")),
+  );
+  expect(shown(['[data-cs="guide-menu"]'])).toEqual([]);
+  // Stop asks first, and may fail. The reason is the core's (#214).
+  fireEvent.click(guideButton(1));
+  await waitFor(() => expect(all('[data-cs="guide-menu"] button')).toHaveLength(2));
+  expect(shown(['[data-cs="guide-menu"]'])).toEqual([]);
+  fireEvent.click(guideButton(0));
+  await ready('[data-cs="guide-menu"] [role="alert"]');
+  expect(shown(['[data-cs="guide-menu"]'], ["The game won't stop"])).toEqual([]);
+});
+
+it("shows the Library's alphabet bar in the pseudo-locale", async () => {
+  await open("/library?filter=all&sort=title", { games: createFixtureGames(60) });
+  await ready('[data-cs="alphabet-bar"] [data-part="letter"]');
+  expect(shown(['[data-cs="alphabet-bar"]'])).toEqual([]);
+});
+
+// What Play asks first.
+
+const play = async () => {
+  const [button] = await screen.findAllByRole("button", { name: /Ƥĺàŷ/ });
+  fireEvent.click(button as Element);
+};
+
+const dialogOf = (name: string) => ready(`[data-cs="${name}"]`);
+
+it.each(modes)("asks how to play in the pseudo-locale (%s)", async (mode) => {
+  const prompt: LaunchPrompt = {
+    entryId: "entry-1",
+    platformId: "nintendo_snes",
+    actions: [
+      { id: "story", name: "Story", default: true },
+      { id: "mods", name: "Mods", default: false },
+    ],
+    profiles: [
+      {
+        emulatorId: "ra",
+        emulatorName: "RetroArch",
+        profileId: "snes",
+        profileName: "Snes9x",
+        installed: true,
+      },
+      {
+        emulatorId: "bsnes",
+        emulatorName: "bsnes",
+        profileId: "default",
+        profileName: "Accuracy",
+        installed: false,
+      },
+    ],
+    discs: [{ index: 0, name: "Disc 1.chd" }],
+  };
+  const app = await open("/games/fixture-1", { mode });
+  await gameHeading();
+  const launch = vi.spyOn(app.library, "launchGame");
+  launch.mockResolvedValueOnce({ type: "choose", prompt });
+  await play();
+  await dialogOf("launch-choice");
+  const data = [/Story|Mods|RetroArch|Snes9x|bsnes|Accuracy|Disc 1/g, ...paths];
+  expect(over(data)).toEqual([]);
+  cleanup();
+
+  const discs = await open("/games/fixture-1", { mode });
+  await gameHeading();
+  vi.spyOn(discs.library, "launchGame").mockResolvedValueOnce({
+    type: "choose",
+    prompt: { ...prompt, actions: [], profiles: [] },
+  });
+  await play();
+  await dialogOf("launch-choice");
+  expect(over(data)).toEqual([]);
+});
+
+const update: GameUpdate = {
+  entryId: "entry-1",
+  gameId: "fixture-1",
+  provider: "github",
+  project: "owner/game",
+  projectUrl: "https://github.com/owner/game/releases",
+  installed: "v1.0",
+  latest: "v1.1",
+  latestUrl: "https://github.com/owner/game/releases/tag/v1.1",
+  available: true,
+  skipped: null,
+  prereleases: false,
+  checkedAtMs: Date.UTC(2026, 9, 28),
+  error: null,
+};
+
+const updatesApi = (offer: GameUpdate): GameUpdatesApi => ({
+  game: async () => [offer],
+  check: async () => offer,
+  beforePlay: async () => offer,
+  skip: async () => offer,
+  setPrereleases: async () => offer,
+  install: async () => "fixture-job",
+});
+
+it.each(modes)("offers an update before playing in the pseudo-locale (%s)", async (mode) => {
+  // Known installed release, and not known.
+  for (const offer of [update, { ...update, installed: null, latestUrl: null }]) {
+    await open("/games/fixture-1", {
+      mode,
+      wrap: (children: ReactNode) => (
+        <GameUpdatesProvider api={updatesApi(offer)}>{children}</GameUpdatesProvider>
+      ),
+    });
+    await gameHeading();
+    await play();
+    await dialogOf("update-offer");
+    expect(over([...dialogData])).toEqual([]);
+    cleanup();
+  }
+});
+
+it("follows the update it offered in the pseudo-locale", async () => {
+  const app = await open("/games/fixture-1", {
+    wrap: (children: ReactNode) => (
+      <GameUpdatesProvider api={updatesApi(update)}>{children}</GameUpdatesProvider>
+    ),
+  });
+  await gameHeading();
+  await play();
+  await dialogOf("update-offer");
+  const dialog = one('[data-cs="update-offer"]') as Element;
+  fireEvent.click([...all('[data-cs="update-offer"] button')].at(-1) as Element);
+  await waitFor(() => expect(dialog.textContent).toContain("40"));
+  expect(over()).toEqual([]);
+  const states = [
+    { status: "needs_user" },
+    { status: "cancelled" },
+    { status: "failed", error: "The disk is full" },
+  ] as const;
+  for (const [index, state] of states.entries()) {
+    const before = dialog.textContent;
+    act(() => app.installs.emit(fixtureJob({ ...state, revision: index + 2 })));
+    await waitFor(() => expect(dialog.textContent).not.toBe(before));
+    // The job's error is the core's (#214).
+    expect(over(["The disk is full"])).toEqual([]);
+  }
+});
+
+/** A save made on another device, and one made here. */
+const version = (id: string, local: boolean, hour: number): SaveVersion => ({
+  id,
+  gameId: "fixture-1",
+  accountId: "",
+  deviceId: local ? "here" : "b".repeat(64),
+  sessionId: null,
+  createdAtMs: Date.UTC(2026, 10, 2, hour),
+  contentHash: `sha256:${id}`,
+  sizeBytes: 4096,
+  fileCount: 1,
+  parents: [],
+  reason: "session",
+  local,
+});
+
+const there = version("there", false, 18);
+const here = version("here", true, 17);
+
+async function playChecked(mode: Mode, check: BeforePlay) {
+  const app = await open("/games/fixture-1", { mode });
+  app.library.saves.seedCheck("entry-1", check);
+  await gameHeading();
+  await play();
+  return app;
+}
+
+it.each(modes)("asks which save to play with in the pseudo-locale (%s)", async (mode) => {
+  await playChecked(mode, {
+    check: { type: "conflict", versions: [there, here] },
+    checked: true,
+    warnings: [],
+  });
+  await dialogOf("save-conflict");
+  expect(over([devices])).toEqual([]);
+});
+
+it.each(modes)("waits for a save on its way in the pseudo-locale (%s)", async (mode) => {
+  await playChecked(mode, {
+    check: { type: "notArrived", version: there },
+    checked: true,
+    warnings: [],
+  });
+  await dialogOf("save-arriving");
+  expect(over([devices])).toEqual([]);
+});
+
+it("says what the save check did in the pseudo-locale", async () => {
+  const warning = "A save folder couldn't be read";
+  const checks: BeforePlay[] = [
+    { check: { type: "restored", version: there }, checked: false, warnings: [warning] },
+    { check: { type: "upToDate" }, checked: false, warnings: [] },
+  ];
+  for (const check of checks) {
+    await playChecked("desktop", check);
+    await dialogOf("save-note");
+    // A warning's words are the core's (#214).
+    expect(shown(['[data-cs="save-note"]'], [warning, devices])).toEqual([]);
+    cleanup();
+  }
+
+  // Skipped the wait: the game started without the newer save.
+  await playChecked("desktop", {
+    check: { type: "notArrived", version: there },
+    checked: true,
+    warnings: [],
+  });
+  await dialogOf("save-arriving");
+  fireEvent.click(all('[data-cs="save-arriving"] button')[1] as Element);
+  await dialogOf("save-note");
+  expect(shown(['[data-cs="save-note"]'], [devices])).toEqual([]);
+});
+
+const onDeck: PlayingElsewhere = {
+  deviceId: "b".repeat(64),
+  deviceName: "Steam Deck",
+  gameId: "fixture-1",
+  title: "Fixture Game 0002",
+  accountId: "",
+  startedAtMs: Date.UTC(2026, 10, 2, 19),
+};
+
+it.each(modes)("warns about a game running elsewhere in the pseudo-locale (%s)", async (mode) => {
+  // A device by its name, and one that has none.
+  for (const deviceName of ["Steam Deck", ""]) {
+    const app = await open("/games/fixture-1", { mode });
+    app.library.saves.setPlaying([{ ...onDeck, deviceName }]);
+    await gameHeading();
+    await ready('[data-view="game"] [data-part="playing-elsewhere"]');
+    expect(shown(['[data-part="playing-elsewhere"]'], [devices])).toEqual([]);
+    await play();
+    await dialogOf("playing-elsewhere");
+    expect(over([devices])).toEqual([]);
+    cleanup();
+  }
+});
+
+/** A game only the living room's device has. */
+function streamedGames(): GameDetails[] {
+  const games = createFixtureGames(3);
+  (games[2] as GameDetails).entries = [
+    {
+      id: "stream-2",
+      source: "stream:fixture-living-room",
+      state: "partial",
+      location: null,
+      canLaunch: true,
+      emulated: false,
+    },
+  ];
+  return games;
+}
+
+it.each(modes)("asks before stopping a busy device in the pseudo-locale (%s)", async (mode) => {
+  // Its game by name, and one it can't name.
+  for (const playing of ["Hades", null]) {
+    const app = await open("/games/fixture-2", {
+      mode,
+      games: streamedGames(),
+      wrap: (children: ReactNode) => (
+        <StreamingApiProvider api={createStreamingFixtureApi()}>{children}</StreamingApiProvider>
+      ),
+    });
+    app.library.busyHosts.set("stream-2", { device: "Living room", playing });
+    await screen.findByRole("heading", { level: 1, name: "Fixture Game 0003" });
+    fireEvent.click(await screen.findByRole("button", { name: /Śţŕēàḿ ƒŕōḿ/ }));
+    await dialogOf("stop-host");
+    expect(over([devices, "Hades"])).toEqual([]);
+    cleanup();
+  }
+});
+
+// Install requests. The app mounts these beside the router.
+
+const requestsApi = (pending: InstallRequest[]): InstallRequestApi => ({
+  pending: async () => structuredClone(pending),
+  request: async () => pending[0] as InstallRequest,
+  requestDrop: async () => pending[0] as InstallRequest,
+  confirm: async () => "fixture-job",
+  confirmCollection: async () => {},
+  dismiss: async () => {},
+  subscribe: async () => () => {},
+});
+
+const withRequests = (api: InstallRequestApi) => (children: ReactNode) => (
+  <>
+    {children}
+    <InstallIngress api={api} />
+  </>
+);
+
+const dropped = (kind: "shortcut" | "executable" | "folder" | "file"): InstallRequest => ({
+  requestId: kind,
+  kind: "path",
+  value: "/home/me/game",
+  plan: {
+    kind,
+    title: "Fixture Game 0002",
+    dropped: "/home/me/game.desktop",
+    input: "/home/me/game",
+    launch: { path: "/home/me/game/run.sh", args: ["--windowed"], workingDir: null },
+  },
+});
+
+const peer = (sizeBytes: number | null): InstallRequest => ({
+  requestId: "peer",
+  kind: "peer",
+  value: "Fixture Game 0002",
+  peer: {
+    deviceId: "b".repeat(64),
+    deviceName: "Steam Deck",
+    entryId: "entry-1",
+    gameId: null,
+    title: "Fixture Game 0002",
+    sizeBytes,
+  },
+});
+
+const shared = (share = fixtureShareInfo()): InstallRequest => ({
+  requestId: "share",
+  kind: "share",
+  value: FIXTURE_LINK,
+  share,
+});
+
+const installRequests: [string, InstallRequest][] = [
+  ["a link", { requestId: "url", kind: "url", value: "https://example.com/game.zip" }],
+  ["a path", { requestId: "path", kind: "path", value: "/home/me/game.zip" }],
+  ["a dropped shortcut", dropped("shortcut")],
+  ["a dropped program", dropped("executable")],
+  ["a dropped folder", dropped("folder")],
+  ["a dropped file", dropped("file")],
+  ["a copy from another device", peer(1_200_000_000)],
+  ["a copy of unknown size", peer(null)],
+  ["a shared game", shared()],
+  [
+    "a shared save",
+    shared(
+      fixtureShareInfo({ contents: { kind: "save", game: "Hades", here: "hades", files: 3 } }),
+    ),
+  ],
+  [
+    "a shared web game",
+    shared(
+      fixtureShareInfo({ contents: { kind: "web", url: "https://example.com/game", here: null } }),
+    ),
+  ],
+  [
+    "a shared ROM",
+    shared(
+      fixtureShareInfo({
+        contents: { kind: "rom", platform: "Super Nintendo", emulator: "RetroArch", ready: false },
+      }),
+    ),
+  ],
+  [
+    "a shared collection",
+    shared(
+      fixtureShareInfo({
+        title: "Co-op nights",
+        contents: {
+          kind: "collection",
+          name: "Co-op nights",
+          games: [
+            { title: "Hades", igdbId: "113112", here: "installed", gameId: "fixture-1" },
+            { title: "It Takes Two", igdbId: "119171", here: "missing", gameId: null },
+          ],
+        },
+      }),
+    ),
+  ],
+];
+
+const sharedWords = /Alex's Desk|Hades|Co-op nights|It Takes Two|Super Nintendo|RetroArch/g;
+
+it.each(installRequests)("asks before installing %s in the pseudo-locale", async (_, request) => {
+  await open("/", {
+    storage: createStorageFixtureApi(),
+    wrap: withRequests(requestsApi([request])),
+  });
+  await dialogOf("install-confirmation");
+  const data = [/https?:\/\/\S+/g, ...paths, devices, sharedWords, "--windowed"];
+  expect(over(data)).toEqual([]);
+});
+
+it("shows console mode's hints over an install request in the pseudo-locale", async () => {
+  await open("/", {
+    mode: "console",
+    wrap: withRequests(requestsApi(installRequests.map(([, request]) => request).slice(0, 1))),
+  });
+  await dialogOf("install-confirmation");
+  await ready('[data-cs="hint-bar"] [data-part="hint"]');
+  expect(over([/https?:\/\/\S+/g, ...paths])).toEqual([]);
+});
+
+it("says when install requests can't be read in the pseudo-locale", async () => {
+  const api = { ...requestsApi([]), pending: () => Promise.reject("gone") };
+  await open("/", { wrap: withRequests(api) });
+  await dialogOf("install-input-error");
+  expect(shown(['[data-cs="install-input-error"]'])).toEqual([]);
+});
+
+const question: JobQuestion = {
+  id: "7",
+  kind: "launch_target",
+  title: "Choose a launch target",
+  message: "Several executable files were found.",
+  choices: [
+    { id: "0", label: "Fixture game", detail: "Game.exe" },
+    { id: "1", label: "Level editor", detail: "Editor.exe" },
+  ],
+};
+
+it.each(modes)("shows a job's question in the pseudo-locale (%s)", async (mode) => {
+  // To answer, only to read, and with nothing to choose.
+  for (const asked of [question, { ...question, canAnswer: false }, { ...question, choices: [] }]) {
+    await open("/activity", {
+      mode,
+      jobs: [fixtureJob({ status: "needs_user", question: asked })],
+    });
+    fireEvent.click(await screen.findByRole("button", { name: /Ŕēvĩēŵ ćĥōĩćēś/ }));
+    await dialogOf("job-question");
+    // The job's words are the core's (#214).
+    const data = strings([
+      question.title,
+      question.message,
+      ...question.choices.flatMap((choice) => [choice.label, choice.detail]),
+    ]);
+    expect(over(data)).toEqual([]);
+    cleanup();
+  }
+});
+
+it.each(modes)("shows Add web game in the pseudo-locale (%s)", async (mode) => {
+  await open("/library?filter=web", {
+    mode,
+    games: [webGame("alpha")],
+    storage: createStorageFixtureApi(),
+  });
+  fireEvent.click(await screen.findByRole("button", { name: /Àďď ŵēƀ ĝàḿē/ }));
+  await dialogOf("add-web-game");
+  const dialog = one('[data-cs="add-web-game"]') as Element;
+  expect(over(["https://"])).toEqual([]);
+  // Then where to keep the offline copy.
+  fireEvent.change(dialog.querySelector('input[type="url"]') as Element, {
+    target: { value: "https://example.com/game" },
+  });
+  fireEvent.click(dialog.querySelector('input[type="checkbox"]') as Element);
+  fireEvent.submit(dialog.querySelector("form") as Element);
+  await ready('[data-cs="install-root-picker"] input[type="radio"]');
+  expect(over([...paths, /\b(?:Games|External)\b/g, /\bext4\b/g])).toEqual([]);
+});
+
+/** What the fixture emulators and platforms name, and how the core
+ * describes its own variables. */
+async function emulationWords() {
+  const snapshot = await createEmulationFixtureApi().snapshot();
+  return [
+    ...strings([
+      ...snapshot.emulators.flatMap((emulator) => [
+        emulator.name,
+        ...emulator.profiles.map(({ config }) =>
+          config.type === "custom" ? config.name : config.definitionProfile,
+        ),
+        ...emulator.definitionProfiles.map((profile) => profile.name),
+      ]),
+      ...snapshot.definitions.flatMap((definition) => [
+        definition.name,
+        ...definition.profiles.map((profile) => profile.name),
+      ]),
+      ...snapshot.platforms.flatMap((platform) => [platform.name, platform.short]),
+      ...snapshot.variables.flatMap((variable) => [variable.name, variable.description]),
+    ]),
+    ...paths,
+  ];
+}
+
+it("shows a manual scan's review in the pseudo-locale", async () => {
+  await open("/settings?tab=emulators&section=scanners");
+  fireEvent.click(await screen.findByRole("button", { name: /Śćàń.*SNES collection/ }));
+  await ready('[data-cs="rom-review"] [data-part="review-game"]');
+  const data = [
+    ...(await emulationWords()),
+    /Chrono Trigger|Super Metroid|Final Fantasy III|Star Ocean(?: Bonus)?/g,
+    /\b(?:USA|Japan|Rev 1|Disc \d)\b/g,
+  ];
+  expect(shown(['[data-cs="rom-review"]'], data)).toEqual([]);
+});
+
+it("shows the emulator profile editor in the pseudo-locale", async () => {
+  await open("/settings?tab=emulators");
+  fireEvent.click(await screen.findByRole("button", { name: /Àďď ćũśţōḿ ƥŕōƒĩĺē/ }));
+  await dialogOf("emulation-profile-editor");
+  // The preview shows a sample ROM's command, word by word.
+  const data = [
+    "Sample Game (USA).rom",
+    ...(await emulationWords()),
+    /\{\w+\}/g,
+    /CASKADE_\w+/g,
+    ...reactAria,
+  ];
+  const editor = '[data-cs="emulation-profile-editor"]';
+  expect(shown([editor], data, 'code, [data-part="token"]')).toEqual([]);
+});
+
+// Choosing several games.
+
+async function selecting(mode: Mode) {
+  await open("/library?filter=all&sort=title", { mode });
+  await ready('[data-view="library"] [data-cs="game-card"]');
+  fireEvent.click(one('[data-view="library"] [data-part="select"]') as Element);
+  await ready('[data-cs="selection-bar"]');
+}
+
+const bar = (part: string) => one(`[data-cs="selection-bar"] [data-part="${part}"]`) as Element;
+
+/** Selects what's loaded and waits for the bar to say so. */
+async function selectLoaded() {
+  const before = bar("count").textContent;
+  fireEvent.click(bar("select-loaded"));
+  await waitFor(() => expect(bar("count").textContent).not.toBe(before));
+}
+
+it.each(modes)("shows the selection bar in the pseudo-locale (%s)", async (mode) => {
+  await selecting(mode);
+  expect(shown(['[data-cs="selection-bar"]'], [], padGlyphs)).toEqual([]);
+  await selectLoaded();
+  expect(shown(['[data-cs="selection-bar"]'], [], padGlyphs)).toEqual([]);
+});
+
+it.each(modes)("shows the bulk editor's steps in the pseudo-locale (%s)", async (mode) => {
+  await selecting(mode);
+  await selectLoaded();
+  fireEvent.click(bar("edit"));
+  await dialogOf("bulk-editor");
+  const editor = one('[data-cs="bulk-editor"]') as Element;
+  expect(over()).toEqual([]);
+
+  // Every field ticked shows what it changes with.
+  for (const box of editor.querySelectorAll('[data-part="field"] input[type="checkbox"]'))
+    fireEvent.click(box);
+  await waitFor(() => expect(editor.querySelector("textarea")).not.toBeNull());
+  expect(over()).toEqual([]);
+
+  const description = editor.querySelector("textarea") as Element;
+  type(description, "Changed");
+  const apply = () => one('[data-cs="bulk-editor"] [data-part="apply"]') as Element;
+  fireEvent.click(apply());
+  await ready('[data-cs="bulk-editor"] [data-part="results"]');
+  // The games' values, and what the core says about them (#214).
+  const data = [...dialogData, "Changed", /\bFixture Game\b/g];
+  expect(over(data)).toEqual([]);
+  fireEvent.click(apply());
+  await ready('[data-cs="bulk-editor"] section[aria-label]');
+  await waitFor(() => expect(one('[data-cs="bulk-editor"] [data-part="cancel"]')).toBeNull());
+  expect(over(data)).toEqual([]);
+});
+
+it.each(modes)("shows Refresh details in the pseudo-locale (%s)", async (mode) => {
+  await selecting(mode);
+  await selectLoaded();
+  fireEvent.click(bar("refresh"));
+  await dialogOf("games-refresh-start");
+  expect(over()).toEqual([]);
+  const dialog = one('[data-cs="games-refresh-start"]') as Element;
+  const paragraph = () => dialog.querySelector("p")?.textContent;
+  const missing = paragraph();
+  fireEvent.click(dialog.querySelectorAll('[role="radio"], input[type="radio"]')[1] as Element);
+  await waitFor(() => expect(paragraph()).not.toBe(missing));
+  expect(over()).toEqual([]);
+  fireEvent.click(dialog.querySelector('[data-part="start"]') as Element);
+  await ready('[data-cs="games-refresh-start"] a[href]');
+  expect(over()).toEqual([]);
+});
+
+it("shows a refresh's card in Activity in the pseudo-locale", async () => {
+  const refreshing = '[data-cs="games-refresh"]';
+  const status = () => one(refreshing)?.getAttribute("data-status");
+  // A run, how it ends with a game that failed, and a cancelled one.
+  const app = await open("/activity");
+  await ready('[data-view="activity"]');
+  await act(() => app.library.edits.refreshStart(["fixture-1", "fail-2"], "missing"));
+  await waitFor(() => expect(status()).toBe("running"));
+  expect(shown([refreshing])).toEqual([]);
+  act(() => app.library.edits.finishRefresh());
+  await waitFor(() => expect(status()).toBe("done"));
+  await ready(`${refreshing} [data-part="retry"]`);
+  expect(shown([refreshing])).toEqual([]);
+  cleanup();
+
+  const cancelled = await open("/activity");
+  await ready('[data-view="activity"]');
+  await act(() => cancelled.library.edits.refreshStart(["fixture-1", "fixture-2"], "automatic"));
+  await waitFor(() => expect(status()).toBe("running"));
+  await act(() => cancelled.library.edits.refreshCancel().then(() => {}));
+  act(() => cancelled.library.edits.finishRefresh());
+  await waitFor(() => expect(status()).toBe("cancelled"));
+  await ready(`${refreshing} [data-part="continue"]`);
+  expect(shown([refreshing])).toEqual([]);
+});
+
+it.each(modes)(
+  "shows a new and a smart collection's dialog in the pseudo-locale (%s)",
+  async (mode) => {
+    await open("/collections", { mode });
+    fireEvent.click(await screen.findByRole("button", { name: /Ńēŵ ćōĺĺēćţĩōń|Ḿàńũàĺ ĺĩśţ/ }));
+    await dialogOf("collection-dialog");
+    expect(over(collectionData)).toEqual([]);
+    const dialog = one('[data-cs="collection-dialog"]') as Element;
+    fireEvent.click(dialog.querySelectorAll('[role="radio"], input[type="radio"]')[1] as Element);
+    await ready('[data-cs="collection-dialog"] [data-part="rules"]');
+    await waitFor(() =>
+      expect(one('[data-cs="collection-dialog"] [data-part="matches"]')?.textContent).toMatch(/\d/),
+    );
+    expect(over([...collectionData, /\bPC\b/g])).toEqual([]);
+  },
+);
+
+it.each(modes)("shows Edit Rules on a smart collection in the pseudo-locale (%s)", async (mode) => {
+  await open("/collections/collection-favourites", { mode });
+  fireEvent.click(await screen.findByRole("button", { name: /Ēďĩţ Ŕũĺēś/ }));
+  await dialogOf("collection-dialog");
+  await ready('[data-cs="collection-dialog"] [data-part="rules"]');
+  expect(over(collectionData)).toEqual([]);
+});
+
+it.each(modes)("shows Add Games on a collection in the pseudo-locale (%s)", async (mode) => {
+  await open("/collections/collection-weekend", { mode });
+  fireEvent.click(await screen.findByRole("button", { name: /Àďď Ĝàḿēś/ }));
+  await dialogOf("add-games");
+  await ready('[data-cs="add-games"] [data-part="games"] input[type="checkbox"]');
+  expect(over(collectionData)).toEqual([]);
+  // Nothing found.
+  type(one('[data-cs="add-games"] input'), "nothing-like-it");
+  await waitFor(() =>
+    expect(one('[data-cs="add-games"] [data-part="games"] input[type="checkbox"]')).toBeNull(),
+  );
+  await waitFor(() => expect(one('[data-cs="add-games"] [data-part="games"] p')).not.toBeNull());
+  expect(over([...collectionData, "nothing-like-it"])).toEqual([]);
+});
+
+it.each(modes)("shows a game's screenshots in the pseudo-locale (%s)", async (mode) => {
+  const games = createFixtureGames(2).map((game) => ({
+    ...game,
+    screenshots: [1, 2, 3].map((n) => ({
+      thumb: `asset://shot-${n}/thumb.webp`,
+      full: `asset://shot-${n}/full.webp`,
+    })),
+  }));
+  await open("/games/fixture-1", { mode, games });
+  await gameHeading();
+  await ready('[data-part="screenshots"] button');
+  expect(shown(['[data-part="screenshots"]'])).toEqual([]);
+  fireEvent.click(one('[data-part="screenshots"] button') as Element);
+  await dialogOf("screenshot-viewer");
+  expect(over()).toEqual([]);
+});
+
+it.each(modes)("shows a game's saves in the pseudo-locale (%s)", async (mode) => {
+  const app = await open("/games/fixture-1", { mode });
+  const location = { kind: "folder", path: "/home/player/Saves/Fixture" } as const;
+  app.library.saves.seed({
+    entryId: "entry-1",
+    revision: 0,
+    preferences: { manifestTitle: null, locations: null },
+    matched: { type: "unknown" },
+    automatic: [],
+    locations: [{ spec: location, tags: [], fileCount: 1 }],
+    warnings: [],
+  });
+  const state = (each: SaveVersion, current = false) => ({
+    version: each,
+    current,
+    complete: true,
+  });
+  // Saves that disagree, on a game whose saves don't sync.
+  app.library.saves.seedHistory("fixture-1", {
+    accountId: "",
+    syncing: false,
+    conflict: ["here", "there"],
+    versions: [
+      state(there),
+      state(here, true),
+      { ...state(version("old", true, 12)), complete: false },
+    ],
+  });
+  await gameHeading();
+  await ready('[data-cs="saves-panel"] [data-part="versions"]');
+  expect(shown(['[data-cs="saves-panel"]'], [...paths, devices], padGlyphs)).toEqual([]);
+});
+
+// Searching.
+
+it.each(modes)("shows the search box's suggestions in the pseudo-locale (%s)", async (mode) => {
+  await open("/", { mode });
+  const input = await waitFor(() => {
+    const found = one('[data-cs="search"] input');
+    expect(found).not.toBeNull();
+    return found as HTMLInputElement;
+  });
+  // A suggestion's match is marked, in the middle of its title.
+  const search = () =>
+    shown(
+      ['[data-cs="search"]', '[data-cs="search-popover"]'],
+      ["Fixture", /Game \d+/g, ...reactAria],
+      padGlyphs,
+    );
+  act(() => input.focus());
+  fireEvent.change(input, { target: { value: "Fixture" } });
+  // Arrow down opens the list once the suggestions are in.
+  await waitFor(() => {
+    fireEvent.keyDown(input, { key: "ArrowDown" });
+    expect(one('[data-cs="search-popover"] [data-part="suggestion"]')).not.toBeNull();
+  });
+  await ready('[data-cs="search-popover"] [data-part="see-all"]');
+  expect(search()).toEqual([]);
+  // Nothing matches.
+  fireEvent.change(input, { target: { value: "nothing-like-it" } });
+  await waitFor(() =>
+    expect(one('[data-cs="search-popover"] [data-part="suggestion"]')).toBeNull(),
+  );
+  await ready('[data-cs="search-popover"] [data-part="see-all"]');
+  await waitFor(() =>
+    expect(one('[data-cs="search-popover"] [data-part="see-all"]')?.textContent).toContain(
+      "nothing-like-it",
+    ),
+  );
+  expect(
+    shown(['[data-cs="search-popover"]'], ["nothing-like-it", ...reactAria], padGlyphs),
+  ).toEqual([]);
+});
+
+it.each(modes)("shows the search overlay in the pseudo-locale (%s)", async (mode) => {
+  await open("/library?filter=all&sort=title", { mode });
+  await ready('[data-view="library"] [data-cs="game-card"]');
+  fireEvent.keyDown(document.body, { key: "/", bubbles: true });
+  await dialogOf("type-search");
+  type(one('[data-cs="type-search"] input'), "0002");
+  await waitFor(() =>
+    expect(one('[data-cs="type-search"] [data-part="count"]')?.textContent).toMatch(/1/),
+  );
+  expect(shown(['[data-cs="type-search"]'], [], padGlyphs)).toEqual([]);
+});
+
+it("shows a Select's list in the pseudo-locale", async () => {
+  await open("/library?filter=all&sort=title");
+  await ready('[data-view="library"] [data-cs="select"] button');
+  fireEvent.click(one('[data-view="library"] [data-cs="select"] button') as Element);
+  await dialogOf("select-popover");
+  await ready('[data-cs="select-popover"] [role="option"]');
+  expect(shown(['[data-cs="select-popover"]'], reactAria)).toEqual([]);
+});
+
+// Pairing.
+
+const withStreaming = (options: Parameters<typeof createStreamingFixtureApi>[0] = {}) => {
+  const api = createStreamingFixtureApi(options);
+  return {
+    api,
+    wrap: (children: ReactNode) => (
+      <StreamingApiProvider api={api}>{children}</StreamingApiProvider>
+    ),
+  };
+};
+
+const pairingData = [devices, /\d+\.\d+\.\d+\.\d+(?::\d+)?/g, /Sunshine|Moonlight/g];
+
+const pairStudy = async () => {
+  const row = (await screen.findByText("Study")).closest("li") as HTMLElement;
+  fireEvent.click(await within(row).findByRole("button", { name: /Ƥàĩŕ/ }));
+  await dialogOf("pair-dialog");
+};
+
+it.each(["paired", "wrongCode", "declined", "expired", "failed"] as const)(
+  "shows pairing to stream ending %s in the pseudo-locale",
+  async (outcome) => {
+    const { api, wrap } = withStreaming();
+    await open("/settings?tab=streaming", { wrap });
+    await pairStudy();
+    await ready('[data-cs="pair-dialog"] [data-part="code"]');
+    expect(over(pairingData)).toEqual([]);
+    act(() => api.finishPairing("fixture-study", outcome));
+    await waitFor(() =>
+      expect(one('[data-cs="pair-dialog"]')?.getAttribute("data-status")).toBe(outcome),
+    );
+    expect(over(pairingData)).toEqual([]);
+  },
+);
+
+it("shows pairing a device of your own, and one that can't be asked, in the pseudo-locale", async () => {
+  const linked = withStreaming({ linked: ["fixture-study"] });
+  await open("/settings?tab=streaming", { wrap: linked.wrap });
+  await pairStudy();
+  await waitFor(() =>
+    expect(one('[data-cs="pair-dialog"]')?.getAttribute("data-status")).toBe("code"),
+  );
+  expect(over(pairingData)).toEqual([]);
+  cleanup();
+
+  const failing = withStreaming();
+  vi.spyOn(failing.api, "pairWith").mockRejectedValue("gone");
+  await open("/settings?tab=streaming", { wrap: failing.wrap });
+  await pairStudy();
+  await waitFor(() =>
+    expect(one('[data-cs="pair-dialog"]')?.getAttribute("data-status")).toBe("failed"),
+  );
+  // The reason is the core's (#214).
+  expect(over([...pairingData, "gone"])).toEqual([]);
+});
+
+it.each(modes)("asks to let a device stream from here in the pseudo-locale (%s)", async (mode) => {
+  const { wrap } = withStreaming({
+    hosting: { state: "ready", version: "2026.914.233613", problem: null, warning: null },
+    requests: [{ id: "r1", name: "Steam Deck", address: "192.168.1.40" }],
+  });
+  await open("/", { mode, wrap });
+  await dialogOf("stream-pair-prompt");
+  expect(over(pairingData)).toEqual([]);
+});
+
+it("asks whether to use streaming set up by someone else in the pseudo-locale", async () => {
+  const { wrap } = withStreaming({ existing: true });
+  await open("/settings?tab=streaming", { wrap });
+  await ready(
+    '[role="tabpanel"] [data-cs="streaming-settings"] [role="switch"], [role="tabpanel"] [data-cs="streaming-settings"] input[role="switch"]',
+  );
+  fireEvent.click(one('[data-cs="streaming-settings"] [role="switch"]') as Element);
+  await dialogOf("streaming-existing");
+  expect(over(pairingData)).toEqual([]);
+});
+
+/** Each with its name, as the core words it (#214). */
+const programs = () => [
+  { part: "host" as const, label: "Hosting", installed: "v1.0", latest: "v1.1", update: true },
+  { part: "client" as const, label: "Client", installed: "v6", latest: "v6", update: false },
+];
+
+it("shows Streaming updates in the pseudo-locale", async () => {
+  const { wrap } = withStreaming({
+    hosting: { state: "ready", version: "2026.914.233613", problem: null, warning: null },
+    programs: programs(),
+  });
+  await open("/settings?tab=streaming", { wrap });
+  await waitFor(() => expect(all('[data-cs="streaming-program"]')).toHaveLength(2));
+  expect(shown(['[data-cs="streaming-program"]'], [...pairingData, /Hosting|Client/g])).toEqual([]);
+});
+
+const pairing = (state: string, overrides: object = {}) => ({
+  deviceId: "9".repeat(64),
+  name: "Office laptop",
+  kind: "laptop",
+  os: "mac",
+  code: "123456",
+  incoming: true,
+  confirmed: false,
+  state,
+  ...overrides,
+});
+
+/** The devices fixture with this pairing under way. */
+function pairingWith(current: ReturnType<typeof pairing>): SyncApi {
+  const api = createSyncFixtureApi();
+  return {
+    ...api,
+    status: async () => ({ ...(await api.status()), pairing: current }) as never,
+  };
+}
+
+const withSync = (api: SyncApi) => (children: ReactNode) => (
+  <SyncProvider api={api}>{children}</SyncProvider>
+);
+
+/** One account, not an admin. */
+const standard: FixtureAccount[] = [{ id: "kid", name: "Kid" }];
+
+it.each(modes)("shows pairing a device in the pseudo-locale (%s)", async (mode) => {
+  const states = [
+    pairing("waiting"),
+    pairing("waiting", { incoming: false, confirmed: true }),
+    pairing("paired"),
+    pairing("cancelled"),
+    pairing("failed"),
+  ];
+  for (const current of states) {
+    await open("/", { mode, wrap: withSync(pairingWith(current)) });
+    await dialogOf("pair-device");
+    expect(over([devices])).toEqual([]);
+    cleanup();
+  }
+});
+
+it("tells someone who isn't an admin who can pair in the pseudo-locale", async () => {
+  await open("/", { accounts: standard, wrap: withSync(pairingWith(pairing("waiting"))) });
+  await dialogOf("pair-device");
+  expect(over([devices])).toEqual([]);
+  cleanup();
+
+  const link = createSyncFixtureApi();
+  link.openLink({ deviceId: "c".repeat(64), expiresAtMs: Date.UTC(2026, 10, 9), expired: false });
+  await open("/", { accounts: standard, wrap: withSync(link) });
+  await dialogOf("pair-device");
+  expect(over([devices, /\bc{8}\b/g])).toEqual([]);
+});
+
+it.each(modes)("asks about a pairing link in the pseudo-locale (%s)", async (mode) => {
+  const deviceId = "c".repeat(64);
+  const link = /\bc{8}\b/g;
+  // One that has expired.
+  const old = createSyncFixtureApi();
+  old.openLink({ deviceId, expiresAtMs: Date.UTC(2026, 9, 9), expired: true });
+  await open("/", { mode, wrap: withSync(old) });
+  await dialogOf("pair-device");
+  expect(over([devices, link])).toEqual([]);
+  cleanup();
+
+  // One to accept.
+  const sync = createSyncFixtureApi();
+  sync.openLink({ deviceId, expiresAtMs: Date.UTC(2026, 10, 9), expired: false });
+  await open("/", { mode, wrap: withSync(sync) });
+  await dialogOf("pair-device");
+  expect(over([devices, link])).toEqual([]);
+  fireEvent.click([...all('[data-cs="pair-device"] button')].at(-1) as Element);
+  await waitFor(() => expect(all('[data-cs="pair-device"] button')).toHaveLength(1));
+  expect(over([devices, /Office desktop/g])).toEqual([]);
+});
+
+it("shows games moving between devices in the pseudo-locale", async () => {
+  const transfer = (state: Transfer["state"], direction: Transfer["direction"]): Transfer => ({
+    id: `${state}-${direction}`,
+    title: "Fixture Game 0002",
+    deviceName: "Steam Deck",
+    direction,
+    doneBytes: 1024 ** 3,
+    totalBytes: 2 * 1024 ** 3,
+    bytesPerSecond: 20 * 1024 ** 2,
+    link: state === "waitingDirect" ? "relay" : "lan",
+    state,
+  });
+  const sync = createSyncFixtureApi();
+  sync.setTransfers([
+    transfer("running", "incoming"),
+    transfer("waitingDirect", "outgoing"),
+    transfer("done", "incoming"),
+    transfer("failed", "outgoing"),
+  ]);
+  await open("/settings?tab=devices", { wrap: withSync(sync) });
+  await waitFor(() => expect(all('[data-cs="transfer"]')).toHaveLength(4));
+  expect(shown(['[data-cs="transfer"]'], [devices])).toEqual([]);
+});
+
+// Add-ons and emulated releases.
+
+it.each(modes)("shows an add-on's details in the pseudo-locale (%s)", async (mode) => {
+  const items = fixtureCatalogueItems();
+  const data = [
+    ...strings(
+      items.flatMap(({ entry }) => [
+        entry.name,
+        entry.author,
+        entry.summary,
+        entry.description,
+        entry.license,
+        entry.homepage,
+      ]),
+    ),
+    /\d+\.\d+\.\d+/g,
+    /https?:\/\/\S+/g,
+    /\bcaskade\.\w+/g,
+  ];
+  await open("/settings?tab=plugins", { mode });
+  fireEvent.click(await screen.findByRole("button", { name: /Paper/ }));
+  await dialogOf("addon-details");
+  expect(over(data)).toEqual([]);
+});
+
+/** A release that can't play yet, as the core describes it. */
+const emulated: GameEmulation = {
+  entryId: "entry-1",
+  platformId: "nintendo_snes",
+  platform: {
+    id: "nintendo_snes",
+    name: "Super Nintendo",
+    short: "SNES",
+    extensions: ["sfc"],
+    bios: [],
+  },
+  target: { type: "platform_default" },
+  args: { type: "default" },
+  discs: [
+    { name: "Disc 1", path: "/roms/Game (Disc 1).cue", exists: true, size: 10 },
+    { name: "Disc 2", path: "/roms/Game (Disc 2).cue", exists: false, size: 10 },
+  ],
+  profile: null,
+  compatible: [
+    {
+      emulatorId: "ra",
+      profileId: "snes",
+      emulatorName: "RetroArch",
+      profileName: "Snes9x",
+      available: true,
+    },
+  ],
+  bios: [
+    {
+      file: "scph5501.bin",
+      required: true,
+      found: false,
+      state: "missing",
+      path: null,
+      platform: "sony_playstation",
+    },
+    {
+      file: "dc/optional.bin",
+      required: false,
+      found: null,
+      state: null,
+      path: null,
+      platform: null,
+    },
+  ],
+  readiness: { type: "no_emulator" },
+  message: "No emulator for SNES",
+};
+
+it.each(modes)("shows an emulated release in the pseudo-locale (%s)", async (mode) => {
+  const games = createFixtureGames(2).map((game) => ({
+    ...game,
+    entries: game.entries.map((entry) => ({ ...entry, emulated: true })),
+  }));
+  const api = {
+    gameEmulation: async () => structuredClone(emulated),
+    setGameEmulation: async () => structuredClone(emulated),
+    splitArgs: async (text: string) => [text],
+  };
+  await open("/games/fixture-1", {
+    mode,
+    games,
+    wrap: (children: ReactNode) => (
+      <GameEmulationProvider api={api}>{children}</GameEmulationProvider>
+    ),
+  });
+  await gameHeading();
+  await dialogOf("emulation");
+  const data = [
+    /\{\w+\}/g,
+    /RetroArch|Snes9x|Super Nintendo|SNES|No emulator for/g,
+    /\bDisc \d\b/g,
+    /scph5501|optional|\bdc\b/g,
+    ...paths,
+    ...reactAria,
+  ];
+  expect(shown(['[data-cs="emulation"]'], data)).toEqual([]);
+});
+
+// When things fail.
+
+it.each(modes)("says a view couldn't be shown in the pseudo-locale (%s)", async (mode) => {
+  vi.spyOn(console, "error").mockImplementation(() => {});
+  const [game] = createFixtureGames(1);
+  await open("/games/fixture-0", {
+    mode,
+    games: [{ ...(game as GameDetails), entries: undefined as never }],
+  });
+  await dialogOf("view-error");
+  // What threw says it in the language it was written in.
+  const message = one('[data-cs="view-error"] [data-part="message"]')?.textContent ?? "";
+  expect(shown(['[data-cs="view-error"]'], [message])).toEqual([]);
+});
+
+function Crash(): ReactNode {
+  throw new Error("provider failed");
+}
+
+it("says the app crashed in the pseudo-locale", async () => {
+  vi.spyOn(console, "error").mockImplementation(() => {});
+  await open("/", {
+    wrap: () => (
+      <AppErrorBoundary>
+        <Crash />
+      </AppErrorBoundary>
+    ),
+  });
+  await dialogOf("view-error");
+  expect(shown(['[data-cs="view-error"]'], ["provider failed"])).toEqual([]);
+});
+
+it.each(modes)("says a tool didn't start in the pseudo-locale (%s)", async (mode) => {
+  const app = await managed(mode);
+  await app.library.actions.save("fixture-1", {
+    id: "",
+    entryId: "entry-1",
+    name: "Mod manager",
+    kind: "utility",
+    target: { type: "executable", path: "/fixture/mods", args: [], cwd: null, env: {} },
+    tracking: { mode: "automatic", folder: null, names: [] },
+  });
+  vi.spyOn(app.library.actions, "runTool").mockRejectedValue(new Error("The tool is missing"));
+  await gameHeading();
+  await gameMenu();
+  fireEvent.click(await menuItem(/Mod manager/));
+  await dialogOf("tool-failed");
+  expect(over(["Mod manager", "The tool is missing"])).toEqual([]);
 });

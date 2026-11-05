@@ -31,6 +31,7 @@ import { PluginRegistry, PluginRegistryContext } from "../plugins/registry";
 import { routeTree } from "../router";
 import { type AppWindow, AppWindowContext } from "../shell/appWindow";
 import { type ConsoleApi, type Mode, ModeProvider } from "../shell/console/mode";
+import { ViewError } from "../shell/ErrorFallback";
 import { fakeWindow } from "../shell/windowFixture";
 import { ActivityProvider } from "../views/activity/ActivityProvider";
 import { DiscoveryProvider } from "../views/settings/discovery/DiscoveryProvider";
@@ -205,6 +206,7 @@ export function renderApp(path: string, options: AppOptions = {}) {
   const window = { ...fakeWindow(), frame: options.frame ?? "custom" };
   const router = createRouter({
     routeTree,
+    defaultErrorComponent: ViewError,
     history: createMemoryHistory({ initialEntries: [path] }),
   });
   const app = <RouterProvider router={router} />;

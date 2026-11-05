@@ -2518,6 +2518,7 @@ msgstr ""
 msgid "Binary name"
 msgstr ""
 
+#: apps/desktop/src/views/game/EmulatedEntry.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
 msgctxt "table column"
 msgid "BIOS"
