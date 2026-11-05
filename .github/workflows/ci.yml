@@ -212,17 +212,13 @@ jobs:
       - name: Windows GNU cross Clippy
         run: cargo clippy -p caskade-core -p caskade-desktop -p caskade-plugin-host -p caskade-input -p caskade-sync --all-targets --locked --target x86_64-pc-windows-gnu -- -D warnings
 
-  # `caskade --launch` on real Windows (#22): the named pipe, and WM_CLOSE to
-  # the real caller's hidden window. The first job to run the app's tests on
-  # Windows, so a failure here doesn't fail the run yet, and `ci result`
-  # doesn't need it: drop `continue-on-error` and add the job there once it
-  # has passed on GitHub.
+  # `caskade --launch` on real Windows (#22): the named pipe, a game of two
+  # processes stopped whole, and WM_CLOSE to the real caller's hidden window.
   windows-launch:
     needs: changes
     if: needs.changes.outputs.cross == 'true'
     runs-on: windows-latest
     timeout-minutes: 90
-    continue-on-error: true
     defaults:
       run:
         shell: bash
@@ -670,6 +666,7 @@ jobs:
       - frontend
       - rust
       - windows-cross
+      - windows-launch
       - e2e
       - installer
       - installer-linux-native
@@ -689,7 +686,8 @@ jobs:
           assert needs['changes']['result'] == 'success', 'scope selection failed'
           scope = needs['changes']['outputs']
           selected = {'frontend': 'frontend', 'rust': 'rust', 'windows-cross': 'cross',
-                      'e2e': 'e2e', 'installer': 'installer', 'discovery': 'discovery'}
+                      'windows-launch': 'cross', 'e2e': 'e2e', 'installer': 'installer',
+                      'discovery': 'discovery'}
           failed = []
           for job, output in selected.items():
               assert scope.get(output) in ('true', 'false'), f'scope output {output} is missing'
