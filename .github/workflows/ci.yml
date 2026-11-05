@@ -253,9 +253,7 @@ jobs:
 
   # The administrator step on real Windows (#21, #31): the real service, rules
   # and Program Files folder, from stand-in files, on and off. The runner is an
-  # administrator with no UAC, so this proves the commands, not the prompt. A
-  # failure here doesn't fail the run yet, and `ci result` doesn't need it: drop
-  # `continue-on-error` and add the job there once it has passed on GitHub.
+  # administrator with no UAC, so this proves the commands, not the prompt.
   # caskade-core has no Tauri, so its test binary needs no Common Controls
   # manifest.
   windows-elevation:
@@ -263,7 +261,6 @@ jobs:
     if: needs.changes.outputs.cross == 'true'
     runs-on: windows-latest
     timeout-minutes: 90
-    continue-on-error: true
     defaults:
       run:
         shell: bash
@@ -702,6 +699,7 @@ jobs:
       - rust
       - windows-cross
       - windows-launch
+      - windows-elevation
       - e2e
       - installer
       - installer-linux-native
@@ -721,8 +719,8 @@ jobs:
           assert needs['changes']['result'] == 'success', 'scope selection failed'
           scope = needs['changes']['outputs']
           selected = {'frontend': 'frontend', 'rust': 'rust', 'windows-cross': 'cross',
-                      'windows-launch': 'cross', 'e2e': 'e2e', 'installer': 'installer',
-                      'discovery': 'discovery'}
+                      'windows-launch': 'cross', 'windows-elevation': 'cross', 'e2e': 'e2e',
+                      'installer': 'installer', 'discovery': 'discovery'}
           failed = []
           for job, output in selected.items():
               assert scope.get(output) in ('true', 'false'), f'scope output {output} is missing'
