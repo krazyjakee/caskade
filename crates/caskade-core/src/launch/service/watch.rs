@@ -5,7 +5,7 @@ use crate::{
     model::PlaySession,
     now_ms,
     sessions::{RecoveryState, SessionPhase},
-    tracking::{ProcessTracker, TrackingMode},
+    tracking::{LiveTracker, ProcessTracker, TrackingMode},
 };
 use std::time::{Duration, Instant};
 use tokio::{process::Child, sync::oneshot};
@@ -44,6 +44,7 @@ impl LaunchService {
                     .saturating_add(now_ms().saturating_sub(session.heartbeat_at_ms).max(0) as u64);
             }
             state.processes = active;
+            let tracker = LiveTracker::new(tracker, session.started_at_ms);
             handles.push(self.follow(Watch {
                 session,
                 state,
@@ -71,8 +72,12 @@ impl LaunchService {
         let ticket = ticket(&watch.session);
         let (tx, rx) = oneshot::channel();
         let service = self.clone();
+        let id = watch.session.id.clone();
+        crate::lock(&self.live).insert(id.clone(), watch.tracker.clone());
         tokio::spawn(async move {
-            let _ = tx.send(service.watch(watch).await);
+            let result = service.watch(watch).await;
+            crate::lock(&service.live).remove(&id);
+            let _ = tx.send(result);
         });
         LaunchHandle {
             ticket,
@@ -84,7 +89,7 @@ impl LaunchService {
         let Watch {
             mut session,
             mut state,
-            mut tracker,
+            tracker,
             mut child,
             direct,
             lease,
@@ -98,12 +103,6 @@ impl LaunchService {
         let mut last_heartbeat = Instant::now();
         let mut child_status = None;
         let mut child_ended = None;
-        // The baseline was taken just before `started_at_ms` (or before this
-        // recovery); only processes started since then can join the session.
-        // Two seconds of slack cover sysinfo's whole-second start times.
-        let since = u64::try_from(session.started_at_ms.min(now_ms()) / 1000)
-            .unwrap_or_default()
-            .saturating_sub(2);
         if state.phase == SessionPhase::Playing {
             started = Some(Instant::now());
             last_seen = started;
@@ -129,9 +128,7 @@ impl LaunchService {
                 child_ended = Some(Instant::now());
                 child = None;
             }
-            let snapshot = self.monitor.snapshot_since(since).await?;
-            let (updated, active) = tracker.observe_async(snapshot).await?;
-            tracker = updated;
+            let active = tracker.poll(&self.monitor).await?;
             let alive = !active.is_empty() || (direct && child.is_some());
             // Very short direct executables (including fixture-game) can exit
             // before the first sysinfo poll. The child handle is proof of launch.
@@ -237,7 +234,7 @@ impl LaunchService {
 pub(super) struct Watch {
     pub session: PlaySession,
     pub state: RecoveryState,
-    pub tracker: ProcessTracker,
+    pub tracker: LiveTracker,
     /// The process Caskade started, when this launch started one.
     pub child: Option<Child>,
     /// The started process is the game (`PreparedLaunch::direct`).

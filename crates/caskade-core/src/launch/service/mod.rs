@@ -8,7 +8,7 @@ use crate::{
     now_ms,
     scripts::{ScriptContext, ScriptPhase, ScriptRunner, ScriptSet, ScriptStatus},
     sessions::{RecoveryState, ScriptState, SessionRepository},
-    tracking::{ProcessMonitor, ProcessTracker},
+    tracking::{LiveTracker, ProcessMonitor, ProcessTracker},
 };
 use caskade_installer::runtime::alias::AliasStore;
 use std::{
@@ -89,7 +89,7 @@ impl LaunchHandle {
 #[derive(Clone)]
 pub struct LaunchService {
     pub(super) repository: Arc<dyn SessionRepository>,
-    monitor: ProcessMonitor,
+    pub(super) monitor: ProcessMonitor,
     pub(super) hooks: Arc<dyn LaunchHooks>,
     plugins: Arc<dyn PluginRunner>,
     aliases: Option<AliasStore>,
@@ -104,6 +104,9 @@ pub struct LaunchService {
     running: Arc<Mutex<BTreeMap<String, CancellationToken>>>,
     script_runner: ScriptRunner,
     starting: Arc<Mutex<BTreeMap<String, CancellationToken>>>,
+    /// The trackers of the sessions being followed: what [`Self::stop`]
+    /// asks for processes newer than the stored ones.
+    pub(super) live: Arc<Mutex<BTreeMap<String, LiveTracker>>>,
     /// Sessions [`Self::stop`] ended, until [`Self::take_stopped`] asks.
     pub(super) stopped: Arc<Mutex<std::collections::BTreeSet<String>>>,
     /// Streams releases from other devices (#264), once the client exists.
@@ -133,6 +136,7 @@ impl LaunchService {
             running: Arc::default(),
             script_runner: ScriptRunner::default(),
             starting: Arc::default(),
+            live: Arc::default(),
             stopped: Arc::default(),
             streamer: Arc::default(),
             streams: Arc::default(),
@@ -461,6 +465,7 @@ impl LaunchService {
         }
         session.tracking = Some(serde_json::to_value(&state).map_err(store_error)?);
         self.repository.heartbeat(&session).await?;
+        let tracker = LiveTracker::new(tracker, session.started_at_ms);
         Ok(self.follow(watch::Watch {
             session,
             state,

@@ -11,6 +11,7 @@ use caskade_core::{
     igdb::IgdbAgeRating,
     launch::{LaunchConfig, LaunchService},
     model::{Game, GameEntry, InstallLocation, InstallState, LaunchSpec, SourceId},
+    tracking::ProcessMonitor,
 };
 use std::sync::{
     Arc,
@@ -20,6 +21,9 @@ use tauri::test::{MockRuntime, mock_builder, mock_context, noop_assets};
 
 const ADMIN_PIN: &str = "2468";
 
+/// Written in its folder by a [`game::RUNS_ON`] game's second process.
+const JOINED: &str = "joined";
+
 /// The test games as `sh` scripts.
 #[cfg(unix)]
 mod game {
@@ -28,6 +32,10 @@ mod game {
     pub const FILE: &str = "game.sh";
     pub const HEADER: &str = "#!/bin/sh\n";
     pub const CRASHES_LATER: &str = "sleep 0.3; exit 7";
+    /// A second process that writes [`super::JOINED`] and runs for 30 s. It
+    /// starts a moment after launch, so the session stored its processes
+    /// without it and only the next heartbeat would add it.
+    pub const RUNS_ON: &str = "sleep 0.3\n(: > joined; exec sleep 30) & wait";
 
     /// Writes the client's width and HDR, and a variable that must not
     /// arrive, to `out`.
@@ -53,6 +61,11 @@ mod game {
     pub const FILE: &str = "game.cmd";
     pub const HEADER: &str = "@echo off\r\n";
     pub const CRASHES_LATER: &str = "ping -n 2 127.0.0.1 > nul\r\nexit 7";
+    /// A second process that writes [`super::JOINED`] and runs for 30 s. It
+    /// starts a moment after launch, so the session stored its processes
+    /// without it and only the next heartbeat would add it.
+    pub const RUNS_ON: &str = "ping -n 2 127.0.0.1 > nul\r\n\
+        cmd /c \"echo joined> joined & ping -n 31 127.0.0.1 > nul\"";
 
     /// Writes the client's width and HDR, and a variable that must not
     /// arrive, to `out`.
@@ -130,6 +143,7 @@ impl Harness {
     /// An installed game running `script` ([`game`]), in its own folder.
     fn game(&self, title: &str, script: &str) -> (Game, GameEntry) {
         let folder = self.folder(title);
+        std::fs::create_dir_all(&folder).unwrap();
         let program = folder.join(game::FILE);
         std::fs::write(&program, format!("{}{script}\n", game::HEADER)).unwrap();
         #[cfg(unix)]
@@ -137,42 +151,6 @@ impl Harness {
             use std::os::unix::fs::PermissionsExt;
             std::fs::set_permissions(&program, std::fs::Permissions::from_mode(0o755)).unwrap();
         }
-        self.install(title, folder, program, Vec::new())
-    }
-
-    /// A game of one process that runs for 30 s, so a test that stops it
-    /// isn't about which of a game's processes Stop knows yet.
-    #[cfg(unix)]
-    fn long_game(&self, title: &str) -> (Game, GameEntry) {
-        self.game(title, "exec sleep 30")
-    }
-
-    /// A game of one process that runs for 30 s, so a test that stops it
-    /// isn't about which of a game's processes Stop knows yet. A batch file
-    /// can't `exec`: its wait would be a child.
-    #[cfg(windows)]
-    fn long_game(&self, title: &str) -> (Game, GameEntry) {
-        let folder = self.folder(title);
-        let program = folder.join("ping.exe");
-        let system = std::path::PathBuf::from(std::env::var_os("SystemRoot").unwrap());
-        std::fs::copy(system.join("System32").join("PING.EXE"), &program).unwrap();
-        let args = ["-n", "31", "127.0.0.1"].map(str::to_owned).to_vec();
-        self.install(title, folder, program, args)
-    }
-
-    fn folder(&self, title: &str) -> std::path::PathBuf {
-        let folder = self.temp.path().join(title.replace(' ', "-"));
-        std::fs::create_dir_all(&folder).unwrap();
-        folder
-    }
-
-    fn install(
-        &self,
-        title: &str,
-        folder: std::path::PathBuf,
-        program: std::path::PathBuf,
-        args: Vec<String>,
-    ) -> (Game, GameEntry) {
         block_on(async {
             let game = Game::new(title);
             self.store.upsert_game(&game).await.unwrap();
@@ -183,13 +161,17 @@ impl Harness {
             });
             entry.launch = Some(LaunchSpec::Executable {
                 path: program,
-                args,
+                args: Vec::new(),
                 cwd: Some(folder),
                 env: BTreeMap::new(),
             });
             self.store.upsert_entry(&entry).await.unwrap();
             (game, entry)
         })
+    }
+
+    fn folder(&self, title: &str) -> std::path::PathBuf {
+        self.temp.path().join(title.replace(' ', "-"))
     }
 
     fn request(&self, game: &Game) -> Request {
@@ -213,8 +195,25 @@ impl Harness {
         block_on(self.store.sessions_for_game(&game.id, 10)).unwrap()
     }
 
-    /// Waits for `game`'s session to be running with known processes.
+    /// How many processes run in `game`'s folder, which is all of the game's
+    /// and nothing else's. Checking the session alone would miss a survivor:
+    /// on Linux a child whose parent was killed can drop out of tracking, and
+    /// the session ends with it still running.
+    fn processes(&self, game: &Game) -> usize {
+        let folder = self.folder(&game.title).canonicalize().unwrap();
+        block_on(ProcessMonitor::default().snapshot())
+            .unwrap()
+            .processes
+            .iter()
+            .filter_map(|process| process.cwd.as_ref())
+            .filter(|cwd| cwd.canonicalize().is_ok_and(|cwd| cwd == folder))
+            .count()
+    }
+
+    /// Waits for the session of a [`game::RUNS_ON`] game to be running with
+    /// known processes and for its second process to have started.
     fn running(&self, game: &Game) -> String {
+        let joined = self.folder(&game.title).join(JOINED);
         let deadline = Instant::now() + Duration::from_secs(10);
         loop {
             let running = block_on(self.launches.running_sessions()).unwrap();
@@ -230,13 +229,21 @@ impl Harness {
                             .ok()
                     })
                     .is_some_and(|state| !state.processes.is_empty());
-                if known {
+                if known && joined.exists() {
+                    assert!(self.processes(game) >= 2, "a game of two processes");
                     return ticket.session_id.clone();
                 }
             }
             assert!(Instant::now() < deadline, "the game never ran");
             std::thread::sleep(Duration::from_millis(20));
         }
+    }
+
+    /// Waits for every process of `game` to end.
+    fn all_stopped(&self, game: &Game) {
+        wait_until("a process of the game survived", || {
+            self.processes(game) == 0
+        });
     }
 
     fn ended(&self, game: &Game) -> bool {
@@ -366,7 +373,7 @@ fn the_caller_lives_as_long_as_the_session_and_a_crash_says_so() {
 fn ending_the_caller_stops_the_game() {
     let h = harness();
     h.listen();
-    let (game, _) = h.long_game("Long Game");
+    let (game, _) = h.game("Long Game", game::RUNS_ON);
     let caller = std::thread::spawn({
         let endpoint = h.endpoint.clone();
         let request = h.request(&game);
@@ -391,6 +398,7 @@ fn ending_the_caller_stops_the_game() {
     assert!(!h.ended(&game));
     drop((lines, write));
     wait_until("the game was never stopped", || h.ended(&game));
+    h.all_stopped(&game);
     assert!(block_on(h.launches.running_sessions()).unwrap().is_empty());
     // The server takes its own stop's record, once the session has ended.
     wait_until("the server took its stop's record", || {
@@ -403,7 +411,7 @@ fn ending_the_caller_stops_the_game() {
 fn caskades_stop_ends_the_caller_as_stopped() {
     let h = harness();
     h.listen();
-    let (game, _) = h.long_game("Stopped Game");
+    let (game, _) = h.game("Stopped Game", game::RUNS_ON);
     let caller = std::thread::spawn({
         let endpoint = h.endpoint.clone();
         let request = h.request(&game);
@@ -419,6 +427,7 @@ fn caskades_stop_ends_the_caller_as_stopped() {
     let session = h.running(&game);
     block_on(h.launches.stop(&session, Duration::from_secs(2))).unwrap();
     assert_eq!(caller.join().unwrap().code, code::STOPPED);
+    h.all_stopped(&game);
 }
 
 #[test]
@@ -478,7 +487,7 @@ fn nobody_signed_in_unknown_games_and_releases_are_refused() {
 fn a_game_already_running_is_refused() {
     let h = harness();
     h.listen();
-    let (game, _) = h.long_game("Busy Game");
+    let (game, _) = h.game("Busy Game", game::RUNS_ON);
     let first = std::thread::spawn({
         let endpoint = h.endpoint.clone();
         let request = h.request(&game);
@@ -495,6 +504,7 @@ fn a_game_already_running_is_refused() {
     assert_eq!(h.call(&h.request(&game)).code, code::REFUSED);
     block_on(h.launches.stop(&session, Duration::from_secs(2))).unwrap();
     assert_eq!(first.join().unwrap().code, code::STOPPED);
+    h.all_stopped(&game);
 }
 
 #[test]

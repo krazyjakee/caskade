@@ -7,7 +7,7 @@ mod monitor;
 mod system;
 
 pub use matching::{ProcessTracker, TrackingMode, TrackingTarget};
-pub use monitor::{ProcessMonitor, TrackingError};
+pub use monitor::{LiveTracker, ProcessMonitor, TrackingError};
 pub use system::SystemProcesses;
 
 use serde::{Deserialize, Serialize};
