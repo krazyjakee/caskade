@@ -508,8 +508,10 @@ jobs:
         with:
           path: ~/caskade-cache/native/share
           key: installer-proton-${{ hashFiles('xtask/runner/warm-proton.py') }}
+      # Outside target/, which rust-cache saves: it drops a tree's files there
+      # but keeps its links, and those would come back in the next job.
       - name: Copy the cached tools into a private XDG tree
-        run: python3 xtask/runner/prepare-proton.py --cache ~/caskade-cache --destination "$GITHUB_WORKSPACE/target/native-home/share" --evidence target/native-cache.json
+        run: python3 xtask/runner/prepare-proton.py --cache ~/caskade-cache --destination "$RUNNER_TEMP/native-home/share" --evidence target/native-cache.json
       - name: Native Proton install, launch, registry self-check and own-uninstaller proof
         run: python3 xtask/runner/native-profile.py --proton
       - name: Native serial profile, including Debian, Fedora and Flatpak delegates

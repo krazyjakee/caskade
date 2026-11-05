@@ -5,15 +5,40 @@ Cache contract: <cache>/native/share/{caskade/umu,umu,Steam/compatibilitytools.d
 Provision cache on the trusted runner once using pinned UmuBootstrap and umu's
 UMU-Proton download. A missing cache fails loudly instead of silently rerunning
 a multi-gigabyte first-download during every installer test.
+
+The trees copied are this script's own: whatever is at those paths is replaced,
+so a leftover run cannot fail the copy or mix with the cache. Nothing else under
+--destination is removed, and links are unlinked, never followed.
 """
 import argparse
 import json
 import os
 from pathlib import Path
 import shutil
+import stat
 import re
 
 DIRECTORIES = ['caskade/umu', 'umu', 'Steam/compatibilitytools.d']
+
+def writable(path):
+    path.chmod(stat.S_IMODE(path.lstat().st_mode) | stat.S_IRWXU)
+
+def clear(share, relative):
+    """Remove share/relative. A stale link anywhere on the way is itself removed:
+    following it could reach the source cache, and chmod and mkdir both would."""
+    path = share
+    for part in ('.', *Path(relative).parts):
+        path = path / part
+        if path.is_symlink() or (path.exists() and not path.is_dir()):
+            path.unlink()
+        elif path.exists():
+            writable(path)
+    if path.exists():
+        for root, directories, _ in os.walk(path):
+            for name in directories:
+                if not Path(root, name).is_symlink():
+                    writable(Path(root, name))
+        shutil.rmtree(path)
 
 def prepare(cache, destination):
     source = cache / 'native/share'
@@ -29,10 +54,16 @@ def prepare(cache, destination):
         raise ValueError('cache has no UMU-Proton build; GE-Proton is not the native acceptance default')
     if not (source / 'umu/steamrt3').is_dir():
         raise ValueError('cache has no warmed umu Steam Runtime (steamrt3)')
-    share = destination.resolve()
-    share.mkdir(parents=True, exist_ok=True)
+    # The last component stays unresolved: if it is a stale link, clear() removes
+    # the link instead of the tree it points at.
+    absolute = Path(os.path.abspath(destination))
+    share = absolute.parent.resolve() / absolute.name
+    origin = source.resolve()
+    if share == origin or share in origin.parents or origin in share.parents:
+        raise ValueError(f'destination {share} overlaps the native runner cache {origin}')
     for relative in DIRECTORIES:
-        shutil.copytree(source / relative, share / relative, symlinks=True, dirs_exist_ok=True)
+        clear(share, relative)
+        shutil.copytree(source / relative, share / relative, symlinks=True)
     proton = share / 'Steam/compatibilitytools.d' / builds[-1].name
     environment = {'XDG_DATA_HOME':str(share), 'PROTONPATH':str(proton),
                    'XDG_CACHE_HOME':str(share.parent / 'cache'), 'XDG_CONFIG_HOME':str(share.parent / 'config')}

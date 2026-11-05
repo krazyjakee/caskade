@@ -29,6 +29,8 @@ pressure-vessel (bwrap) and Flatpak need them.
 `prepare-proton.py` checks for the warmed cache and copies it to a private
 writable job-local XDG tree; HOME is never overwritten. Missing cache is a hard,
 actionable setup error. A JSON receipt records the source/build and environment.
+It replaces the trees it copies, so anything already at the destination is safe;
+keep the destination out of `target/`, which CI caches.
 Tests use fresh per-game prefixes. `native-profile.py` runs Proton under Xvfb
 as the runner's unprivileged user (Steam Runtime refuses UID 0; the quiet Windows
 installers still need a display). Run as root, it only proceeds inside a fresh
