@@ -18,6 +18,52 @@ use tauri::{
 };
 use tauri_specta::Event;
 
+/// `reply` without the ids, times and log references the app generates: random
+/// digits that spell a four-digit PIN by chance, about one run in 800.
+fn without_generated(reply: &Value) -> Value {
+    match reply {
+        Value::Object(fields) => fields
+            .iter()
+            .filter(|(name, _)| {
+                !matches!(name.as_str(), "id" | "activeId" | "reference") && !name.ends_with("Ms")
+            })
+            .map(|(name, value)| (name.clone(), without_generated(value)))
+            .collect(),
+        Value::Array(items) => items.iter().map(without_generated).collect(),
+        other => other.clone(),
+    }
+}
+
+/// Whether `reply` carries the tests' PIN or a hash of one.
+fn leaks_pin(reply: &Value) -> bool {
+    let text = without_generated(reply).to_string();
+    text.contains("2468") || text.contains("argon2")
+}
+
+#[test]
+fn only_what_the_app_generates_may_spell_the_pin() {
+    let by_chance = [
+        // CI run 42069074708's two attempts, then an error report's reference.
+        json!({"accounts": [{"id": "08526c24-aadd-1725-1d92-3863999dd210",
+            "createdAtMs": 1793898246833_u64}]}),
+        json!({"accounts": [{"id": "af694205-112f-86e2-5f55-9ced332468ea"}],
+            "activeId": "af694205-112f-86e2-5f55-9ced332468ea"}),
+        json!({"code": "forbidden", "summary": "Not allowed.", "reference": "a2468b0c"}),
+    ];
+    for reply in by_chance {
+        assert!(!leaks_pin(&reply), "{reply}");
+    }
+    let leaks = [
+        json!({"accounts": [{"id": "a", "pin": "2468"}]}),
+        json!({"accounts": [{"id": "a", "pinHash": "$argon2id$v=19$m=1,t=1,p=1$c2FsdA$aGFzaA"}]}),
+        json!({"code": "invalid", "summary": "2468 is wrong.", "reference": "0"}),
+        json!({"code": "invalid", "summary": "Wrong.", "detail": "pin=2468", "reference": "0"}),
+    ];
+    for reply in leaks {
+        assert!(leaks_pin(&reply), "{reply}");
+    }
+}
+
 #[test]
 fn accounts_sign_in_change_and_own_their_collections_over_ipc() {
     let store = tauri::async_runtime::block_on(LibraryStore::in_memory()).unwrap();
@@ -63,8 +109,7 @@ fn accounts_sign_in_change_and_own_their_collections_over_ipc() {
         .unwrap();
     let mut errors = Vec::new();
     let mut fails = |command: &str, body: Value| {
-        let error = invoke(&window, command, body).unwrap_err();
-        errors.push(error.to_string());
+        errors.push(invoke(&window, command, body).unwrap_err());
     };
 
     // The migrated admin, signed in without a PIN.
@@ -220,11 +265,13 @@ fn accounts_sign_in_change_and_own_their_collections_over_ipc() {
     );
 
     // Neither PIN nor hash ever reaches the webview.
-    let replies = invoke(&window, "accounts_list", json!({}))
-        .unwrap()
-        .to_string();
-    for text in errors.iter().chain([&replies]) {
-        assert!(!text.contains("2468") && !text.contains("argon2"), "{text}");
+    let list = invoke(&window, "accounts_list", json!({})).unwrap();
+    // The ids it skips are still the one read before there was a PIN.
+    assert_eq!(list["activeId"], json!(admin));
+    assert_eq!(list["accounts"].as_array().unwrap().len(), 1);
+    assert_eq!(list["accounts"][0]["id"], json!(admin));
+    for reply in errors.iter().chain([&list]) {
+        assert!(!leaks_pin(reply), "{reply}");
     }
 
     for _ in 0..100 {
