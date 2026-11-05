@@ -100,7 +100,7 @@ The catalogue itself can't show that its artifacts exist or are what they claim;
 
 ## In the app
 
-`CatalogueService` keeps the last catalogue that verified and validated in `<cache>/addons/`. It shows that catalogue offline and after a restart, and sets a damaged or other-origin cache aside without stopping startup.
+`CatalogueService` keeps the last catalogue that verified and validated in `<cache>/addons/`. It shows that catalogue offline and after a restart, and sets a damaged or other-origin cache aside without stopping startup. The catalogue, its signature and when it was fetched are one file, `catalogue.snapshot.json`, replaced by a single rename, so a stop or a disk failure during a save leaves the last good catalogue or the new one. Older versions kept three files, which still load until the next save clears them.
 
 `addons_catalogue(mode)` reads the catalogue, and `addons_catalogue_refresh(mode)` fetches it again. Each entry comes with its `compatibility`, worked out by `caskade_core::addons::evaluate` against what is installed and what this build accepts:
 

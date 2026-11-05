@@ -1175,6 +1175,7 @@ dependencies = [
  "jsonschema",
  "keyring",
  "md-5 0.10.6",
+ "minisign",
  "minisign-verify",
  "netdev 0.46.3",
  "notify",

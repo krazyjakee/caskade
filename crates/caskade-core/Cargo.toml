@@ -114,6 +114,8 @@ wiremock = "0.6"
 # A TLS front for wiremock, with certificates made per test (streaming::api).
 rcgen = { version = "0.14", default-features = false, features = ["ring", "pem"] }
 tokio-rustls = { version = "0.26", default-features = false, features = ["ring", "tls12"] }
+# Signs two versions of a catalogue with a throwaway key; the adapter's pin.
+minisign = "=0.10.0"
 
 [lints]
 workspace = true

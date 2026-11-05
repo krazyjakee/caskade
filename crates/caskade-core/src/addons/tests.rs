@@ -413,9 +413,190 @@ async fn only_a_signed_catalogue_replaces_the_last_good_one_and_it_stays_offline
         .unwrap();
     assert!(other.catalogue().entries.is_empty());
     // A damaged snapshot is set aside, and startup goes on.
-    std::fs::write(dir.path().join("catalogue.json"), b"{broken").unwrap();
+    std::fs::write(dir.path().join("catalogue.snapshot.json"), b"{broken").unwrap();
     let damaged = CatalogueService::new(dir.path(), base().as_str(), Some(PUBLIC_KEY)).unwrap();
     assert!(damaged.catalogue().entries.is_empty());
+}
+
+/// Two versions of the catalogue, signed with a throwaway key.
+struct Versions {
+    public_key: String,
+    old: (Vec<u8>, Vec<u8>),
+    new: (Vec<u8>, Vec<u8>),
+}
+
+impl Versions {
+    fn new() -> Self {
+        let key = minisign::KeyPair::generate_unencrypted_keypair().unwrap();
+        let sign = |bytes: Vec<u8>| {
+            let signature =
+                minisign::sign(Some(&key.pk), &key.sk, bytes.as_slice(), None, None).unwrap();
+            (bytes, signature.to_string().into_bytes())
+        };
+        let mut new: serde_json::Value = serde_json::from_slice(CATALOGUE).unwrap();
+        new["generated"] = "2099-01-01T00:00:00Z".into();
+        Self {
+            public_key: key.pk.to_box().unwrap().to_string(),
+            old: sign(CATALOGUE.to_vec()),
+            new: sign(serde_json::to_vec(&new).unwrap()),
+        }
+    }
+
+    fn open(&self, dir: &std::path::Path) -> CatalogueService {
+        CatalogueService::new(dir, base().as_str(), Some(&self.public_key)).unwrap()
+    }
+
+    /// The old version as versions before the snapshot file saved it.
+    fn lay_out_three_files(&self, dir: &std::path::Path) {
+        let meta = serde_json::json!({ "origin": base(), "fetchedAtMs": 1000 });
+        std::fs::write(dir.join("catalogue.json"), &self.old.0).unwrap();
+        std::fs::write(dir.join("catalogue.json.sig"), &self.old.1).unwrap();
+        std::fs::write(
+            dir.join("catalogue.meta.json"),
+            serde_json::to_vec(&meta).unwrap(),
+        )
+        .unwrap();
+    }
+}
+
+/// `accept` stopped before each of its disk changes in turn, as a crash or a
+/// failing disk would, starting from a catalogue saved by this version or
+/// laid out as older versions left it.
+#[tokio::test]
+async fn a_stop_anywhere_in_a_save_leaves_the_last_good_catalogue_or_the_new_one() {
+    let versions = Versions::new();
+    let (old, old_signature) = &versions.old;
+    let (new, new_signature) = &versions.new;
+    let mut failures = Vec::new();
+
+    for three_files in [false, true] {
+        let mut stops = 0;
+        loop {
+            let dir = tempfile::tempdir().unwrap();
+            if three_files {
+                versions.lay_out_three_files(dir.path());
+            } else {
+                versions
+                    .open(dir.path())
+                    .accept(old, Some(old_signature), 1000)
+                    .await
+                    .unwrap();
+            }
+            let running = versions.open(dir.path());
+            assert_eq!(running.status().fetched_at_ms, Some(1000));
+            let last_good = running.catalogue();
+
+            running.stop_after(stops);
+            let saved = running.accept(new, Some(new_signature), 2000).await;
+            let reopened = versions.open(dir.path());
+            if saved.is_ok() {
+                assert_eq!(reopened.status().fetched_at_ms, Some(2000));
+                assert_eq!(reopened.catalogue(), running.catalogue());
+                assert!(reopened.status().verified);
+                break;
+            }
+            // What was running keeps showing the last good one.
+            assert_eq!(running.catalogue(), last_good);
+
+            let status = reopened.status();
+            let intact = match status.fetched_at_ms {
+                Some(1000) => reopened.catalogue() == last_good,
+                Some(2000) => {
+                    reopened.catalogue().generated.as_deref() == Some("2099-01-01T00:00:00Z")
+                }
+                _ => false,
+            };
+            if !intact || !status.verified {
+                failures.push(format!(
+                    "three_files={three_files} stop={stops}: fetched {:?}, {} entries, generated {:?}",
+                    status.fetched_at_ms,
+                    reopened.catalogue().entries.len(),
+                    reopened.catalogue().generated,
+                ));
+            }
+
+            // The next fetch still lands, whatever the stop left behind.
+            reopened
+                .accept(new, Some(new_signature), 3000)
+                .await
+                .unwrap();
+            assert_eq!(versions.open(dir.path()).status().fetched_at_ms, Some(3000));
+            stops += 1;
+        }
+        assert!(stops > 1, "only {stops} stops were tried");
+    }
+    assert!(failures.is_empty(), "{}", failures.join("\n"));
+}
+
+/// A cache from a version that kept three files is read, and its first save
+/// clears them. What a stop left there on such a version can't be repaired,
+/// since the signature that matched is gone: it waits for the next fetch.
+#[tokio::test]
+async fn a_catalogue_saved_in_three_files_still_loads() {
+    let versions = Versions::new();
+    let dir = tempfile::tempdir().unwrap();
+    let (old, old_signature) = &versions.old;
+    let (new, new_signature) = &versions.new;
+    versions.lay_out_three_files(dir.path());
+
+    let reopened = versions.open(dir.path());
+    assert_eq!(reopened.status().fetched_at_ms, Some(1000));
+    assert!(reopened.status().verified);
+    assert_eq!(reopened.catalogue().entries.len(), 2);
+    let other = CatalogueService::new(
+        dir.path(),
+        "https://other.example/c.json",
+        Some(&versions.public_key),
+    )
+    .unwrap();
+    assert!(other.catalogue().entries.is_empty());
+
+    // Files a save stopped short of clearing don't outrank it.
+    reopened
+        .accept(new, Some(new_signature), 2000)
+        .await
+        .unwrap();
+    for name in [
+        "catalogue.json",
+        "catalogue.json.sig",
+        "catalogue.meta.json",
+    ] {
+        assert!(!dir.path().join(name).exists(), "{name}");
+    }
+    versions.lay_out_three_files(dir.path());
+    assert_eq!(versions.open(dir.path()).status().fetched_at_ms, Some(2000));
+
+    // A new signature beside the old catalogue, as a stop there left it.
+    std::fs::remove_file(dir.path().join("catalogue.snapshot.json")).unwrap();
+    std::fs::write(dir.path().join("catalogue.json.sig"), new_signature).unwrap();
+    let torn = versions.open(dir.path());
+    assert!(torn.catalogue().entries.is_empty());
+    torn.accept(old, Some(old_signature), 3000).await.unwrap();
+    assert_eq!(versions.open(dir.path()).status().fetched_at_ms, Some(3000));
+}
+
+/// A catalogue that can't be saved stays out, on disk and on screen.
+#[tokio::test]
+async fn a_failed_save_keeps_the_last_good_catalogue() {
+    let versions = Versions::new();
+    let dir = tempfile::tempdir().unwrap();
+    let (old, old_signature) = &versions.old;
+    let (new, new_signature) = &versions.new;
+    let service = versions.open(dir.path());
+    service
+        .accept(old, Some(old_signature), 1000)
+        .await
+        .unwrap();
+
+    std::fs::create_dir(dir.path().join("catalogue.snapshot.partial")).unwrap();
+    assert!(
+        service
+            .accept(new, Some(new_signature), 2000)
+            .await
+            .is_err()
+    );
+    assert_eq!(service.status().fetched_at_ms, Some(1000));
+    assert_eq!(versions.open(dir.path()).status().fetched_at_ms, Some(1000));
 }
 
 #[cfg(feature = "net")]

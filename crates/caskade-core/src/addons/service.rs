@@ -15,6 +15,8 @@ use std::{
 };
 use url::Url;
 
+const SNAPSHOT_FILE: &str = "catalogue.snapshot.json";
+/// Where older versions kept the same things, in three files.
 const CATALOGUE_FILE: &str = "catalogue.json";
 const SIGNATURE_FILE: &str = "catalogue.json.sig";
 const META_FILE: &str = "catalogue.meta.json";
@@ -37,7 +39,20 @@ pub struct CatalogueStatus {
     pub left_out: u32,
 }
 
+/// The last good catalogue. It is one file so that one rename replaces all
+/// of it: a signature beside a catalogue it doesn't match fails verification,
+/// which would leave nothing to show until the next fetch.
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct Snapshot {
+    origin: String,
+    fetched_at_ms: i64,
+    /// The bytes that were signed.
+    catalogue: String,
+    signature: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Meta {
     origin: String,
@@ -57,6 +72,10 @@ struct Inner {
     /// One refresh at a time.
     #[cfg_attr(not(feature = "net"), allow(dead_code))]
     refresh: tokio::sync::Mutex<()>,
+    /// How many more disk changes a save may make before it stops, leaving
+    /// the files as a crash there would.
+    #[cfg(test)]
+    stop_after: std::sync::Mutex<Option<usize>>,
 }
 
 /// The add-on catalogue. Cheap to clone.
@@ -122,15 +141,49 @@ fn verify(
     Ok(true)
 }
 
-/// Writes `bytes` to `path` whole or not at all.
-async fn write_atomically(path: &Path, bytes: &[u8]) -> Result<()> {
-    let temp = path.with_extension("partial");
-    tokio::fs::write(&temp, bytes).await?;
-    tokio::fs::rename(&temp, path).await?;
-    Ok(())
+#[cfg(test)]
+impl CatalogueService {
+    pub(super) fn stop_after(&self, changes: usize) {
+        *self.inner.stop_after.lock().unwrap() = Some(changes);
+    }
+
+    /// Before each disk change of a save.
+    fn step(&self) -> Result<()> {
+        match self.inner.stop_after.lock().unwrap().as_mut() {
+            Some(0) => Err(Error::Invalid("stopped".to_owned())),
+            Some(left) => {
+                *left -= 1;
+                Ok(())
+            }
+            None => Ok(()),
+        }
+    }
 }
 
 impl CatalogueService {
+    /// Writes `bytes` to `path` whole or not at all, on disk before it
+    /// returns: the rename can't outrun the bytes it publishes.
+    async fn write_atomically(&self, path: &Path, bytes: &[u8]) -> Result<()> {
+        use tokio::io::AsyncWriteExt;
+        let temp = path.with_extension("partial");
+        #[cfg(test)]
+        self.step()?;
+        let mut file = tokio::fs::File::create(&temp).await?;
+        file.write_all(bytes).await?;
+        file.sync_all().await?;
+        drop(file);
+        #[cfg(test)]
+        self.step()?;
+        tokio::fs::rename(&temp, path).await?;
+        #[cfg(unix)]
+        if let Some(dir) = path.parent()
+            && let Ok(dir) = tokio::fs::File::open(dir).await
+        {
+            let _ = dir.sync_all().await;
+        }
+        Ok(())
+    }
+
     /// The catalogue at `origin`, cached in `dir`; checked against
     /// `public_key` (minisign, as is or base64) when there is one. Reads the
     /// cached catalogue, if one is there and still verifies.
@@ -163,32 +216,53 @@ impl CatalogueService {
                     status,
                 }),
                 refresh: tokio::sync::Mutex::new(()),
+                #[cfg(test)]
+                stop_after: std::sync::Mutex::new(None),
             }),
         };
         service.load_cached();
         Ok(service)
     }
 
+    /// The snapshot on disk, or what older versions left. A snapshot wins:
+    /// those files only outlive one when a stop came right after it landed.
+    fn read_snapshot(&self) -> Option<Snapshot> {
+        let inner = &self.inner;
+        let read = |name: &str| std::fs::read(inner.dir.join(name)).ok();
+        if let Some(snapshot) = read(SNAPSHOT_FILE) {
+            return serde_json::from_slice(&snapshot)
+                .inspect_err(|error| {
+                    tracing::warn!(%error, "the cached add-on catalogue was set aside");
+                })
+                .ok();
+        }
+        let catalogue = String::from_utf8(read(CATALOGUE_FILE)?).ok()?;
+        let meta = serde_json::from_slice::<Meta>(&read(META_FILE)?).ok()?;
+        Some(Snapshot {
+            origin: meta.origin,
+            fetched_at_ms: meta.fetched_at_ms,
+            catalogue,
+            signature: read(SIGNATURE_FILE).and_then(|bytes| String::from_utf8(bytes).ok()),
+        })
+    }
+
     /// The cached catalogue, when it is this origin's and verifies.
     fn load_cached(&self) {
         let inner = &self.inner;
-        let read = |name: &str| std::fs::read(inner.dir.join(name)).ok();
-        let (Some(bytes), Some(meta)) = (read(CATALOGUE_FILE), read(META_FILE)) else {
+        let Some(snapshot) = self.read_snapshot() else {
             return;
         };
-        let Ok(meta) = serde_json::from_slice::<Meta>(&meta) else {
-            return;
-        };
-        if meta.origin != inner.origin.as_str() {
+        if snapshot.origin != inner.origin.as_str() {
             return;
         }
-        let signature = read(SIGNATURE_FILE);
-        let outcome = verify(inner.key.as_ref(), &bytes, signature.as_deref())
-            .and_then(|verified| Ok((verified, parse(&bytes, &inner.origin)?)));
+        let bytes = snapshot.catalogue.as_bytes();
+        let signature = snapshot.signature.as_deref().map(str::as_bytes);
+        let outcome = verify(inner.key.as_ref(), bytes, signature)
+            .and_then(|verified| Ok((verified, parse(bytes, &inner.origin)?)));
         match outcome {
             Ok((verified, catalogue)) => {
                 let mut state = crate::write(&inner.state);
-                state.status.fetched_at_ms = Some(meta.fetched_at_ms);
+                state.status.fetched_at_ms = Some(snapshot.fetched_at_ms);
                 state.status.verified = verified;
                 state.status.left_out = catalogue.problems.len() as u32;
                 state.catalogue = catalogue;
@@ -223,19 +297,28 @@ impl CatalogueService {
         for problem in &catalogue.problems {
             tracing::warn!(id = ?problem.id, problem = %problem.message, "catalogue record left out");
         }
-        tokio::fs::create_dir_all(&inner.dir).await?;
-        match signature {
-            Some(signature) => write_atomically(&inner.dir.join(SIGNATURE_FILE), signature).await?,
-            None => {
-                let _ = tokio::fs::remove_file(inner.dir.join(SIGNATURE_FILE)).await;
-            }
-        }
-        write_atomically(&inner.dir.join(CATALOGUE_FILE), bytes).await?;
-        let meta = Meta {
+        let snapshot = Snapshot {
             origin: inner.origin.to_string(),
             fetched_at_ms,
+            // Text, since it parsed; a load verifies these bytes again. A
+            // signature that isn't text can only be one no key has checked.
+            catalogue: String::from_utf8_lossy(bytes).into_owned(),
+            signature: signature
+                .and_then(|bytes| std::str::from_utf8(bytes).ok())
+                .map(str::to_owned),
         };
-        write_atomically(&inner.dir.join(META_FILE), &serde_json::to_vec(&meta)?).await?;
+        tokio::fs::create_dir_all(&inner.dir).await?;
+        self.write_atomically(
+            &inner.dir.join(SNAPSHOT_FILE),
+            &serde_json::to_vec(&snapshot)?,
+        )
+        .await?;
+        // The new catalogue is saved; what older versions left is out of date.
+        for name in [SIGNATURE_FILE, CATALOGUE_FILE, META_FILE] {
+            #[cfg(test)]
+            self.step()?;
+            let _ = tokio::fs::remove_file(inner.dir.join(name)).await;
+        }
         let mut state = crate::write(&inner.state);
         state.status.fetched_at_ms = Some(fetched_at_ms);
         state.status.verified = verified;
