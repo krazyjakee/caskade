@@ -596,6 +596,14 @@ impl DirectDialer {
         self.endpoint.id()
     }
 
+    /// Bytes it took off the wire, overhead included: what really moved,
+    /// which a provider's count can't say (it counts a resumed file from its
+    /// start).
+    #[cfg(feature = "test-utils")]
+    pub fn received(&self) -> u64 {
+        self.endpoint.metrics().socket.recv_data_ipv4.get()
+    }
+
     /// Connects to `peer` for iroh-blobs at its direct `addrs` only.
     pub async fn connect(&self, peer: EndpointId, addrs: &[SocketAddr]) -> Result<Connection> {
         if addrs.is_empty() {

@@ -4,17 +4,23 @@
 //! its own, its program relative to its folder and a Windows runtime (Proton
 //! on Linux); a launcher's install is refused; the sender can't move or
 //! uninstall it while sending. Sent from the Desk (#235), it waits on the TV
-//! until confirmed there.
+//! until confirmed there. Cut part-way (#11), the job waits for the Desk and
+//! the rest comes when it's back.
 
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
+use caskade_core::accounts::AccountService;
+use caskade_core::bus::Bus;
+use caskade_core::devices::{Devices, Reach};
 use caskade_core::install::{InstallService, JobSnapshot, JobStatus, PeerCopyTarget};
 use caskade_core::model::{
     Game, GameEntry, GameRuntime, InstallLocation, InstallState, LaunchSpec,
 };
+use caskade_core::transfer::Transfers;
+use caskade_sync::Ip;
 
-use crate::cores::{Core, core, pair, within};
+use crate::cores::{Core, core, core_with, pair, within};
 
 fn fixture_exe() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -129,6 +135,153 @@ async fn a_windows_game_added_by_hand_arrives_as_a_managed_install_of_the_same_g
         !caskade_core::install::PeerFetcher::sending(&desk.transfers, &desk_entry)
     })
     .await;
+}
+
+/// A device on `127.0.0.1:<port>`: it comes back where it was.
+fn on_a_port_of_its_own() -> Reach {
+    let port = std::net::UdpSocket::bind("127.0.0.1:0")
+        .and_then(|socket| socket.local_addr())
+        .unwrap()
+        .port();
+    Reach {
+        ip: Ip::Loopback { port: Some(port) },
+        ..Reach::loopback()
+    }
+}
+
+/// `device` started again after its devices service was shut down: its key,
+/// library and `reach`, a new endpoint, and copies that remember no offer.
+/// Its old store of received copies is still open, so the cache is a new
+/// one; the receiver gets nothing from it but what the files are.
+async fn started_again(device: &Core, reach: Reach) -> Transfers {
+    let accounts = AccountService::open(device.store.clone(), Bus::default())
+        .await
+        .unwrap();
+    let devices = Devices::with_reach(device.store.clone(), accounts, device.keys.clone(), reach);
+    devices.set_settings(device.settings.clone());
+    let cache = device.dir.path().join("cache after the restart");
+    let transfers = Transfers::new(device.store.clone(), devices.clone(), &cache)
+        .await
+        .unwrap();
+    devices.start();
+    within("it's back", 20, || async {
+        devices.status().await.this_device.listening
+    })
+    .await;
+    transfers
+}
+
+/// The job's bytes and message, while it has them.
+fn progress(service: &InstallService, id: &str) -> Option<(u64, String)> {
+    let progress = service.job(id).unwrap().progress?;
+    Some((progress.bytes, progress.message))
+}
+
+/// #11: the sender stops part-way. The job says it's waiting, keeps waiting
+/// through its retries, and takes only what was missing once the sender is
+/// back. What moved is read off the TV's wire.
+#[tokio::test(flavor = "multi_thread")]
+async fn a_copy_cut_part_way_waits_for_its_device_and_moves_only_what_was_missing() {
+    const MIB: u64 = 1024 * 1024;
+    const FROM_DESK: &str = "From Desk";
+    const WAITING: &str = "Waiting for Desk to be in reach";
+    let reach = on_a_port_of_its_own();
+    let desk = core_with("Desk", reach.clone()).await;
+    let tv = core("TV").await;
+    pair(&desk, &tv).await;
+    let (_, desk_entry, folder) = add_celeste(&desk).await;
+    std::fs::write(
+        folder.join("Content/Celeste.pak"),
+        vec![5u8; 64 * MIB as usize],
+    )
+    .unwrap();
+    let tv_game = tv.store.upsert_game(&Game::new("Celeste")).await.unwrap();
+    let job = tv
+        .install
+        .copy_from_device(
+            PeerCopyTarget {
+                device_id: id(&desk).await,
+                device_name: "Desk".into(),
+                entry_id: desk_entry,
+                game_id: tv_game.id,
+                title: "Celeste".into(),
+            },
+            None,
+        )
+        .await
+        .unwrap();
+
+    // The Desk goes away with a good part of the game across.
+    let deadline = Instant::now() + Duration::from_secs(60);
+    while !progress(&tv.install, &job.id)
+        .is_some_and(|(bytes, message)| message == FROM_DESK && bytes >= 16 * MIB)
+    {
+        assert!(Instant::now() < deadline, "the copy got going");
+        tokio::time::sleep(Duration::from_millis(1)).await;
+    }
+    desk.devices.shutdown().await;
+    within("the job says it's waiting", 30, || async {
+        progress(&tv.install, &job.id).is_some_and(|(_, message)| message == WAITING)
+    })
+    .await;
+    let (kept, _) = progress(&tv.install, &job.id).unwrap();
+    let job_now = tv.install.job(&job.id).unwrap();
+    let size = job_now.progress.unwrap().total_bytes.unwrap();
+    assert!((16 * MIB..size).contains(&kept), "cut at {kept} of {size}");
+
+    // Its first retry finds nobody: the job goes on waiting, keeping its place.
+    tokio::time::sleep(Duration::from_secs(3)).await;
+    let waiting = tv.install.job(&job.id).unwrap();
+    assert_eq!(waiting.status, JobStatus::Downloading, "{waiting:?}");
+    assert_eq!(
+        progress(&tv.install, &job.id),
+        Some((kept, WAITING.to_owned()))
+    );
+
+    // Back, the rest comes.
+    let wire = tv.devices.direct_dialer().await.unwrap();
+    let before = wire.received();
+    let _desk_back = started_again(&desk, reach).await;
+    let mut lowest = u64::MAX;
+    let deadline = Instant::now() + Duration::from_secs(60);
+    let done = loop {
+        if let Some((bytes, message)) = progress(&tv.install, &job.id)
+            && message == FROM_DESK
+        {
+            lowest = lowest.min(bytes);
+        }
+        let job = tv.install.job(&job.id).unwrap();
+        if job.status.is_finished() || job.status == JobStatus::NeedsUser {
+            break job;
+        }
+        assert!(Instant::now() < deadline, "the copy came back: {job:?}");
+        tokio::time::sleep(Duration::from_millis(1)).await;
+    };
+    assert_eq!(done.status, JobStatus::Completed, "{done:?}");
+    let moved = wire.received() - before;
+    let missing = size - kept;
+    eprintln!("{size} bytes: {kept} kept, {missing} missing, {moved} moved, shown from {lowest}");
+    assert!(lowest + MIB >= kept, "shown from {lowest} with {kept} kept");
+    // What was missing, give or take a chunk, and the protocol's overhead.
+    assert!(moved + MIB >= missing, "{moved} moved of {missing} missing");
+    assert!(
+        moved <= missing + missing / 10 + MIB,
+        "moved {moved} with {missing} missing"
+    );
+
+    let game = done.game_id.unwrap();
+    let entries = tv.store.entries_for_game(&game).await.unwrap();
+    let Some(InstallLocation::Managed { rel_dir, .. }) = &entries[0].location else {
+        panic!("not managed: {:?}", entries[0].location)
+    };
+    let installed = tv.games.join(rel_dir);
+    for file in ["Celeste.exe", "Content/Levels/1.bin", "Content/Celeste.pak"] {
+        assert!(
+            std::fs::read(installed.join(file)).unwrap()
+                == std::fs::read(folder.join(file)).unwrap(),
+            "{file}"
+        );
+    }
 }
 
 /// #279: an emulated game whose folder is a ROM folder holding other games

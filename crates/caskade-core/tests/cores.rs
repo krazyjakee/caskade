@@ -37,6 +37,8 @@ pub struct Core {
     pub shares: Shares,
     /// The storage root installs land in.
     pub games: PathBuf,
+    /// Where its device key is, for starting it again.
+    pub keys: Arc<MemoryKeyStore>,
     pub dir: tempfile::TempDir,
 }
 
@@ -74,12 +76,8 @@ pub async fn core_with(name: &str, reach: Reach) -> Core {
     settings
         .register_core(&AppPaths::under(&dir.path().join("app")))
         .unwrap();
-    let devices = Devices::with_reach(
-        store.clone(),
-        accounts,
-        Arc::new(MemoryKeyStore::default()),
-        reach,
-    );
+    let keys = Arc::new(MemoryKeyStore::default());
+    let devices = Devices::with_reach(store.clone(), accounts, keys.clone(), reach);
     devices.set_settings(settings.clone());
     let cache = dir.path().join("cache");
     let games = dir.path().join("Games");
@@ -123,6 +121,7 @@ pub async fn core_with(name: &str, reach: Reach) -> Core {
         install,
         shares,
         games,
+        keys,
         dir,
     };
     within("the endpoint starts", 20, || async {
