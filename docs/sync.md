@@ -2,14 +2,18 @@
 
 How a household's Caskade devices reach each other, keep the library in
 step, carry saves, copy and share games and start them on each other.
-Milestone: Devices, sync and sharing (#252).
+Milestone: Devices, sync and sharing (tracked in #20).
+
+The manual-check sections use GitHub issue numbers. Three-digit numbers
+elsewhere on this page are archived Gitea issues, the numbers old commits and
+code comments cite; `docs/manual-checks.md` maps the ones behind open checks.
 
 ## At a glance
 
 - **Connections.** Devices find each other on the local network first
   (mDNS), connect directly over the internet where the routers allow it, and
-  use n0's relays only when allowed and nothing direct works; *Never use
-  relays* turns relays off. Everything works with no internet on one network.
+  use n0's relays only when allowed and nothing direct works; *Connect only
+  directly* turns relays off. Everything works with no internet on one network.
   Game files never go through a relay. ("Reaching devices", "Link state".)
 - **Pairing.** By matching codes on one network, or by a one-time link that
   works for ten minutes; an admin confirms either. Forgetting a device tells
@@ -36,7 +40,7 @@ Milestone: Devices, sync and sharing (#252).
   sleeping desktop with Wake-on-LAN first. ("Playing a game on another
   device".)
 - **Settings → Devices** explains every switch ("Settings → Devices"), and
-  "Manual checklist (#250)" is what only real machines can show.
+  "Manual checklist (#19)" is what only real machines can show.
 
 ## The crate
 
@@ -169,7 +173,7 @@ the app uses:
   user data stays empty, so n0's DNS never sees a device name.
 - **n0's address lookup** (DNS/pkarr) through the `N0` preset: this endpoint's
   addresses, and other devices' over the internet.
-- **n0's relays** only when Never use relays is off. On, it's the
+- **n0's relays** only when Connect only directly is off. On, it's the
   `N0DisableRelay` preset: the endpoint has no relay transport at all, direct
   paths over the internet still work, and a device only a relay could reach
   stays offline.
@@ -220,8 +224,8 @@ as `DevicesChanged`. Settings → Devices itself is #231.
 
 Its endpoint id, name and kind are in the settings table under `sync.device`
 (not a section). The name defaults to the host name. Name and kind go into
-the mDNS announcement and are exchanged while pairing. `core.sync` holds Never
-use relays (`neverRelay`) and the listening port (`port`) next to #227's
+the mDNS announcement and are exchanged while pairing. `core.sync` holds Connect
+only directly (`neverRelay`) and the listening port (`port`) next to #227's
 category choices; changing either rebinds the endpoint. The app starts the
 service in the background (`Devices::start`): the identity loads off the main
 thread, so a locked keychain holds only sync. `IdentityStatus` reports
@@ -904,7 +908,7 @@ addresses). The sharer names the recipients that serve to each new one
 (`Providers`), after asking them to let it in (`Allow`, answered `Allowed`;
 each recipient's gate allows only that collection, only to recipients the
 sharer named). Once the game is here it stops serving, unless the user chose
-**Help others receive this** (`Shares::keep_helping`) while it arrived: then
+**Help others receive it** (`Shares::keep_helping`) while it arrived: then
 the store keeps its own copy of the files (`Transfers::export_copy`, so the
 game takes its space twice while it helps) and serves them until the share
 stops, the session with the sharer ends, or the switch goes off. A recipient
@@ -1043,7 +1047,7 @@ own protocol isn't used: it serves any blob to anyone who knows its hash, with
 no grant.
 
 Save files ride the sync session, so they go through a relay only when relays
-are allowed and nothing direct works; Never use relays keeps them direct. Game
+are allowed and nothing direct works; Connect only directly keeps them direct. Game
 files never go through a relay.
 
 ### On the game page and in Settings
@@ -1162,7 +1166,7 @@ real devices:
 | Check | Result |
 | --- | --- |
 | A new device on a network with no internet set up from another: same library, accounts and collections; its own storage, emulators and settings | not yet run |
-| Games chosen during setup copy from the other device over the local network (#276) | not yet run |
+| Games chosen during setup copy from the other device over the local network (Gitea #276) | not yet run |
 
 ## Settings → Devices
 
@@ -1178,8 +1182,8 @@ Every control, section by section:
   - *Kind*: desktop, laptop, handheld or TV, for its icon elsewhere; until
     the user picks one, what the device looks like (`device_type`, #244).
   - Its addresses on this network, and whether the internet answers (a relay
-    is connected; unknown with Never use relays on).
-  - *Never use relays* (`core.sync.neverRelay`, off): connect only directly,
+    is connected; unknown with Connect only directly on).
+  - *Connect only directly* (`core.sync.neverRelay`, off): connections stay
     on this network or over the internet where the routers allow it; a
     device only a relay could reach shows offline. Game files never use a
     relay whatever this says.
@@ -1259,7 +1263,7 @@ endpoint for the process lifetime and calls `SyncEndpoint::shutdown` at exit.
   holds nothing), a silent dialler, the identity across a restart, and
   iroh-blobs on the same endpoint. `tests/network.rs` covers reaching devices
   against a local relay server (iroh's test relay, so nothing reaches the
-  internet): Never use relays leaving a relay-only device (IP transports
+  internet): Connect only directly leaving a relay-only device (IP transports
   cleared) offline, the same device reached through the relay when allowed,
   a connection dialled through the relay alone switching to a direct path
   with link events following it, a typed address with no discovery, a link
@@ -1313,7 +1317,7 @@ endpoint for the process lifetime and calls `SyncEndpoint::shutdown` at exit.
     --target x86_64-apple-darwin -- -D warnings
   ```
 
-## What iroh costs the build (#250)
+## What iroh costs the build (#19)
 
 Measured on 2026-11-03 on the development machine (Linux x86-64, a warm
 `~/.cargo` registry, the shared target's release profile cold):
@@ -1333,7 +1337,7 @@ Measure again with the same command; the timing report is under
 `<target>/cargo-timings/`, and `nm -S --size-sort -C` on the binary groups
 code by crate.
 
-## Manual checklist (#250)
+## Manual checklist (#19)
 
 CI covers what one machine can (below, and in `## Checks`): two or more
 cores on loopback, relay paths through a local relay, no internet. What only
@@ -1343,23 +1347,24 @@ Linux, Windows and macOS, each pair of them:
 
 1. **Pairing and sync**, with the router's internet unplugged: the procedure
    in "Two machines on one network, internet unplugged" below.
-2. **A large copy over Wi-Fi, then over Ethernet**: "Copying a game (#233)"
+2. **A large copy over Wi-Fi, then over Ethernet**: "Copying a game (#11)"
    below, with a game of tens of GB. Record the speed each way against the
    disks' and the network's.
 3. **Downloads from a device nearby**: "Downloads from a device nearby
-   (#236)" below.
-4. **Wake-on-LAN**: "Waking a device to play (#234)" below (the desktop of
+   (#13)" below.
+4. **Wake-on-LAN**: "Waking a device to play (#12)" below (the desktop of
    the pair).
-5. **A share across two networks** (#246), between two people: share a
+5. **A share across two networks** (#17), between two people: share a
    game from one machine on the home network; open the link on a machine on
    another network (a phone's hotspot). The files come straight from the
    sharer (a direct path through the routers, or the port the sharer's router
    mapped), or the receiver says it waits for a direct connection; never
    through a relay. The game installs and plays. Stop the share: the link
    fails at once, mid-copy too. With a third machine receiving after the
-   second chose Help others receive this, both serve it (#249).
+   second chose Help others receive it, both serve it (#18).
 6. **Everything with the internet unplugged**: steps 1 to 4 again with the
-   router's internet unplugged (and step 5 shows "can't reach directly").
+   router's internet unplugged (and step 5's receiver says "Can't reach whoever
+   shared this: their Caskade may be closed or offline. Caskade keeps trying.").
 
 | Pair | 1 Pairing, sync | 2 Copy (Wi-Fi / Ethernet) | 3 Nearby downloads | 4 Wake-on-LAN | 5 Share across networks | 6 Offline | Date, notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -1373,11 +1378,11 @@ The in-process tests share one host, so they can't show two routers' worth of
 network. This check needs two machines on one network, with the router's
 internet unplugged:
 
-1. Start Caskade on both; open Settings → Devices (#231) or call the commands.
+1. Start Caskade on both; open Settings → Devices (Gitea #231) or call the commands.
 2. Each lists the other as nearby within a few seconds.
-3. Pair them by code (#226); the link state is `lan`.
-4. Make an edit on one and see it on the other (#230).
-5. Turn on Never use relays on one and plug the internet back in: the link
+3. Pair them by code (Gitea #226); the link state is `lan`.
+4. Make an edit on one and see it on the other (Gitea #230).
+5. Turn on Connect only directly on one and plug the internet back in: the link
    stays `lan`.
 6. Block multicast between them (or use client isolation) and pair with a
    pairing link instead.
@@ -1386,9 +1391,9 @@ Results:
 
 | Date | Machines | Steps passed | Notes |
 | --- | --- | --- | --- |
-| — | — | — | Not run yet: needs two machines. Library sync (#230) is in place. |
+| — | — | — | Not run yet: needs two machines. Library sync (Gitea #230) is in place. |
 
-### Copying a game (#233)
+### Copying a game (#11)
 
 1. On a Windows machine, add a Windows game by hand (Add game → Add a game on
    this computer…) from a folder of its own.
@@ -1405,7 +1410,7 @@ Results:
 | --- | --- | --- | --- | --- |
 | — | — | — | — | Not run yet: needs a Windows and a Linux machine. Loopback: 432 MB/s. |
 
-### Downloads from a device nearby (#236)
+### Downloads from a device nearby (#13)
 
 1. On two paired machines on one network, install the same older release of
    a game from a link (a GitHub release, say) on both.
@@ -1421,17 +1426,19 @@ Results:
 | --- | --- | --- | --- |
 | — | — | — | Not run yet: needs two machines. Loopback with a wiremock source passes. |
 
-Emulators, dumps and the manifest (#277): with the first machine's emulator
+Emulators, dumps and the manifest (#34): with the first machine's emulator
 installed through Get emulators and its Hasheous dumps and save manifest
 downloaded, set up the second with the router's internet unplugged. Install
-the same emulator there, then check Settings → Emulation's game database and a
-game's Saves tab.
+the same emulator there, then check that `hasheous/dumps/` in the cache folder
+holds the dumps' `.zip` files (no screen in the app lists them), that Settings →
+Devices → Saves no longer calls the Save locations list "Not downloaded yet",
+and that a game's Saves tab in its editor names save locations.
 
 | Date | Machines | Steps passed | Notes |
 | --- | --- | --- | --- |
 | — | — | — | Not run yet: needs two machines. Loopback with a fake GitHub, Hasheous and manifest server passes. |
 
-### Waking a device to play (#234)
+### Waking a device to play (#12)
 
 1. On a desktop with Wake-on-LAN on in its firmware and network settings, sync
    once with the other device (it learns the MAC addresses), then put the

@@ -2,7 +2,7 @@
 
 These are the checks that tests can't do: real machines, real networks, real
 accounts and real hardware. Each one closes an unchecked box on a GitHub
-issue. They are grouped by what you need set up, simplest first.
+issue, unless it says it clears no box. They are grouped by what you need set up, simplest first.
 
 How to report:
 
@@ -11,9 +11,10 @@ How to report:
 - When a check fails, comment on the issue with what you saw: the machines,
   what you pressed, and what happened instead.
 - Some issues also want the result in a table in the docs. The check says
-  where. `docs/sync.md` and `docs/STREAMING-PLAN.md` §9 still use the old
-  Gitea numbers (Gitea #233 is GitHub #11, Gitea #255 is #21); the table at
-  the end of this page maps them.
+  where. Those tables and `docs/STREAMING-PLAN.md` §9 use GitHub numbers.
+  Three-digit numbers elsewhere in those two docs are archived Gitea issues
+  (Gitea #233 is GitHub #11, Gitea #255 is #21); the table at the end of this
+  page maps the ones behind open checks.
 
 Use a build of the current `master` on every machine. Caskade's data folder
 is `~/.local/share/caskade` on Linux and `%APPDATA%\Caskade\Caskade\data` on
@@ -23,7 +24,7 @@ Devices first, unless the check is about pairing.
 ## One Linux PC
 
 About 1½ hours. Needs: a Linux PC with no Sunshine installed (L3–L5), a
-debug build for L1 (`just dev`), and Sunshine installed by you for L6.
+debug build for L1 and L7 (`just dev`), and Sunshine installed by you for L6.
 
 - [ ] **L1.** In a debug build, choose the pseudo-locale (`en-XA`) in
   Settings → General → Language. Go through every view in desktop and console
@@ -59,10 +60,18 @@ debug build for L1 (`just dev`), and Sunshine installed by you for L6.
   nothing; a wrong password is refused and the right one works; Caskade's
   games appear in Sunshine's app list beside yours. Turn hosting off: only
   Caskade's apps go. (#24)
-- [ ] **L7.** Once the starter catalogue is published (#7's publish step),
-  open Settings → Plugins, install a plugin and a theme, update one, and make
-  an update fail. **Pass:** the failed update rolls back, settings are kept,
-  and an update never adds permissions without asking. (#8)
+- [ ] **L7.** Open Settings → Plugins and install Playtime stats and the Ember
+  theme from the published catalogue. It holds one version of each add-on, so
+  the update needs a test catalogue: in a clean profile, point a debug build at
+  a local one with a test key (`scripts/addons/README.md`) and install an
+  add-on from it. Publish a newer release to it ("Update a package" in
+  `docs/plugins/publishing.md`), press Check for updates and update. Then
+  publish a release that can't start (a backend that isn't a component, as in
+  `commands/addon_smoke_tests.rs`) and update to that. **Pass:** the published
+  catalogue lists Playtime stats, GameMode and Ember, and both install; the
+  good update installs; the failed one says the previous version is back,
+  settings are kept, and an update never adds permissions without asking.
+  (#8)
 
 ## One Windows PC
 
@@ -88,7 +97,10 @@ Sunshine installed (W8 installs one). To find a game's id, open
   `netsh advfirewall firewall show rule name="Caskade streaming (TCP)"` finds
   nothing. After allowing, `sc qc CaskadeStreaming` shows `DEMAND_START`, the
   standard user can `sc start` and `sc stop` it, and both firewall rules point
-  at the host's `sunshine.exe`. (#21)
+  at the host's `sunshine.exe`. (#21) On a PC that never had ViGEmBus, also run
+  `sc query ViGEmBus` after allowing and comment on #26 what it says and whether
+  an installer window showed: it should be running with none shown, but its
+  silent install has never been tried.
 - [ ] **W4.** With hosting on, look around Windows. **Pass:** no Start menu
   entry, tray icon or browser page for Sunshine; Services shows only
   "Caskade streaming"; firewall rules only "Caskade streaming (TCP)" and
@@ -114,10 +126,11 @@ Sunshine installed (W8 installs one). To find a game's id, open
 - [ ] **W9.** Look over the game editor, selection and bulk edit, the
   achievements panel and the shell in this WebView2 build. **Pass:** a
   plugin's stylesheet loads, and scrolling or tabbing never pushes the shell
-  out of the window. (#8)
+  out of the window. (Clears no box: #8 lets this stay deferred.)
 - [ ] **W10.** Work through "Windows: a real XInput pad" in
   `docs/console-native-checklist.md`. **Pass:** every step as written; note
-  whether the Xbox button brings Caskade to the front. (#8)
+  whether the Xbox button brings Caskade to the front. (Clears no box: #8 lets
+  this stay deferred.)
 
 ## One PC with your store accounts
 
@@ -166,9 +179,11 @@ Bluetooth to a Linux desktop.
   Devices calls it a Handheld; the desktop starts in the desktop shell.
   (#16)
 - [ ] **H2.** Work through "Steam Deck game mode" in
-  `docs/console-native-checklist.md`. **Pass:** every step as written. (#8)
+  `docs/console-native-checklist.md`. **Pass:** every step as written. (Clears
+  no box: #8 lets this stay deferred.)
 - [ ] **H3.** Work through "Linux: a DualSense over Bluetooth" in the same
-  file. **Pass:** every step as written. (#8)
+  file. **Pass:** every step as written. (Clears no box: #8 lets this stay
+  deferred.)
 
 ## Two PCs on the same network
 
@@ -195,7 +210,7 @@ Caskade (not by a launcher), and a standard account with an age limit.
 
 About 2 hours. Needs: two PCs on one router with the router's internet
 cable unplugged. PC A has been online: an emulator installed through
-Settings → Emulation → Get emulators, its game database and save data
+Settings → Emulation → Get emulators, its Hasheous dumps and save manifest
 downloaded. PC B is a fresh install that has never been online. For O7, both
 need the same older release of a game installed from a link (a GitHub
 release, say), with A updated to the newer one while online.
@@ -205,9 +220,13 @@ release, say), with A updated to the newer one while online.
   accounts (it asks for the admin's PIN if there is one) and collections,
   and keeps its own storage folder, emulators and settings. Fill in the table
   in `docs/sync.md`, "Setting up a new device". (#15)
-- [ ] **O2.** On B, still never online, look at Settings → Emulation's game
-  database and a game's Saves tab. **Pass:** the dumps and the save data are
-  there, from A. (#34)
+- [ ] **O2.** After O3 (an emulator's dump comes once it's installed), on B,
+  still never online, look in the cache folder's `hasheous/dumps/`
+  (`~/.cache/caskade` on Linux, `%LOCALAPPDATA%\Caskade\Caskade\cache` on
+  Windows), at Save locations list in Settings → Devices → Saves, and at a
+  game's Saves tab in its editor. **Pass:** the dumps' `.zip` files are there
+  (no screen in the app lists them), the list doesn't say "Not downloaded
+  yet", and the tab names save locations, all from A. (#34)
 - [ ] **O3.** On B, install the same emulator through Get emulators. **Pass:**
   it installs, from A. (#34)
 - [ ] **O4.** Take two PCs that aren't paired (or Forget the pairing on both).
@@ -217,8 +236,9 @@ release, say), with A updated to the newer one while online.
   local network, every change arrives the other way, and the copy finishes.
   Fill in `docs/sync.md`, "Two machines on one network, internet unplugged".
   (#10, #20)
-- [ ] **O5.** Turn on Never use relays on one PC and plug the internet back
-  in. **Pass:** the link stays on the local network. (#10)
+- [ ] **O5.** Turn on Connect only directly in Settings → Devices on one PC
+  (#10's box calls it Never use relays) and plug the internet back in.
+  **Pass:** the link stays on the local network. (#10)
 - [ ] **O6.** Block local discovery (a guest Wi-Fi that blocks multicast, or
   a firewall rule dropping UDP port 5353 on one PC) and pair with a pairing
   link instead. **Pass:** they pair and sync. (#10)
@@ -333,8 +353,8 @@ hotspot. For T3, the two PCs paired.
 - [ ] **T2.** Share again, and while it copies, Stop sharing (Settings →
   Devices → Copies and shares). **Pass:** the copy fails at once, and the
   link is refused after. (#17, #20)
-- [ ] **T3.** With Never use relays on, check how Settings → Devices shows the
-  other PC. Turn it off; if the other PC shows as reached through a relay,
+- [ ] **T3.** With Connect only directly on, check how Settings → Devices
+  shows the other PC. Turn it off; if the other PC shows as reached through a relay,
   press Copy to this computer. **Pass:** with it on, the link is direct or
   offline, never relay. With it off, a copy over a relay waits ("Only a relay
   reaches …") and moves nothing. (#11, #20)
@@ -346,7 +366,7 @@ About 2 hours. Needs: a Mac, plus the Linux and Windows PCs.
 - [ ] **M1.** Fill in the Linux ↔ macOS and Windows ↔ macOS rows of
   `docs/sync.md`'s "Manual checklist". (#19)
 - [ ] **M2.** Do W9's look-over in the Mac app (WKWebView). **Pass:** as W9.
-  (#8)
+  (Clears no box: #8 lets this stay deferred.)
 - [ ] **M3.** Use the Mac as a streaming client: S2, S3 and S8. **Pass:** as
   those. (#27, #28, #29)
 
@@ -354,9 +374,10 @@ About 2 hours. Needs: a Mac, plus the Linux and Windows PCs.
 
 Tick or decide these on the issue itself:
 
-- #8: "All 30 implementation issues…" closes with #6 and #7. "Record
-  offline, rate-limited… operations" is in the issue's 30 Oct comments, and
-  "Confirm no backlog… was added" in eng1's audit there.
+- #8: "All 30 implementation issues…" can be ticked: all 30 are ticked in the
+  issue, and #6 and #7 closed on 4 Nov. "Record offline, rate-limited…
+  operations" is in the issue's 30 Oct comments, and "Confirm no backlog… was
+  added" in eng1's audit there.
 - #10: boxes 2–4 were met by tests (the 2 Nov comment); O5 and O6 repeat
   them on real machines.
 - #20: "Every rule holds with the webview bypassed" is met by the adapter
@@ -367,12 +388,14 @@ Tick or decide these on the issue itself:
   `host::tests::repair_fixes_each_breakage`; L5 and W7 try it for real.
 - Trackers #8, #20 and #33: their sub-issue boxes tick when the sub-issues
   close.
+- Gitea #262 (finding hosts): it has no GitHub issue, so its check in
+  `docs/STREAMING-PLAN.md` §9 clears no box and isn't listed on this page.
 
 ## Which checks finish each issue
 
 | Issue | Gitea | Checks |
 | --- | --- | --- |
-| #8 Library, store and plugin milestone | 194 | A1, A2, A3, L2, L7, W9, W10, H2, H3, M2 |
+| #8 Library, store and plugin milestone | 194 | A1, A2, A3, L2, L7 |
 | #9 Localization | 221 | L1, SV1, SV2 |
 | #10 Local network first | 225 | O4, O5, O6 |
 | #11 Copy a game | 233 | N1, N2, WL1, T3 |
@@ -398,3 +421,7 @@ Tick or decide these on the issue itself:
 | #32 Pairing through sync | 267 | S15 |
 | #33 Streaming milestone | 268 | closes with #21–#32 |
 | #34 Nearby downloads for emulators and data | 277 | O2, O3 |
+
+W9, W10, H2, H3 and M2 finish no issue: #8's keyboard, mouse and controller box
+lets native checks stay deferred, so they only look for regressions on real
+hardware.

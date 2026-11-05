@@ -1,8 +1,10 @@
 # Console mode: the native checklist (#153)
 
 CI proves console mode with a synthetic pad (`apps/desktop/src-tauri/tests/console_e2e.rs`,
-under Xvfb). These checks need real hardware and are deferred to the native list
-(#22, #71). Record each result with the commit you tested.
+under Xvfb). These checks need real hardware and stay deferred: they are W10, H2
+and H3 in [the manual checks](manual-checks.md). Record each result with the
+commit you tested. Issue numbers on this page are archived Gitea issues, which
+old commits cite.
 
 Build: `pnpm tauri build --debug` (the AppImage or deb), or `just dev` on the device.
 
