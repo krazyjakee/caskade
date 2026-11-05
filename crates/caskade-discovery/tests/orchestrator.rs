@@ -63,7 +63,7 @@ impl Source for Fake {
             Behaviour::Panic => panic!("{} exploded", self.id),
             Behaviour::Fail => Err(SourceError::parse("/x/library.vdf", "bad header")),
             Behaviour::Hang => {
-                std::thread::sleep(Duration::from_secs(3));
+                std::thread::sleep(Duration::from_secs(12));
                 Ok(vec![DetectedGame::new(self.id(), "late", "Late")])
             }
             Behaviour::Cooperative => loop {
@@ -105,9 +105,11 @@ fn failing_panicking_and_hanging_sources_do_not_affect_others() {
     // On a single-core host the sole worker waits for the uncooperative
     // source to stop before later sources can run; it must not oversubscribe.
     let limit = if std::thread::available_parallelism().map_or(1, usize::from) == 1 {
-        Duration::from_secs(5)
+        Duration::from_secs(20)
     } else {
-        Duration::from_millis(2_500)
+        // Well under the hang, with room for a panic that takes seconds on
+        // a hosted Windows runner (ci.yml run 42011142277).
+        Duration::from_secs(9)
     };
     assert!(started.elapsed() < limit, "{:?}", started.elapsed());
 
