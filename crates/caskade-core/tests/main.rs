@@ -46,3 +46,5 @@ mod sync_network;
 mod sync_policy;
 mod sync_romm;
 mod sync_sections;
+#[cfg(windows)]
+mod windows_elevation;

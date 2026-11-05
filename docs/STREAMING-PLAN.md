@@ -291,6 +291,7 @@ Once devices are paired through sync (#226) and exchange changes (#230), the cli
 - **Tests.**
   - Host: an update refused during a stream, then keeping pairings, published games and settings with no prompt (`host::tests`). Repair fixing a missing program file, drifted configuration, removed rules, credentials lost from the keychain and a drifted sign-in. Off leaving no program, rule or record, and on again with the same pairing and sign-in.
   - Windows elevated side (`elevation::tests`): a new copy keeping pairings, identity and games with a new sign-in; off keeping them aside with no program file; on again restoring them; a changed or damaged copy copied again behind one prompt.
+  - Windows for real (CI's `windows-elevation` job, `tests/windows_elevation.rs`, ignored, `CASKADE_TEST_NATIVE=1`): `windows::perform` with stand-in files makes and removes the real service, firewall rules and Program Files folder, and spares a neighbouring service, rule and app. The runner is an administrator with no UAC, so it proves the commands, not the prompt.
   - Client: an update refused during a stream, then keeping its state.
   - UI (`test/streamingSettings.test.tsx`): Update refused during a stream, Update and Skip, Repair, Forget all.
   - Live (`caskade-sources` `streaming::live_linux_pairing_survives_hosting_off_and_on`, Xvfb): the real host, paired natively, switched off (the program gone, nothing answering) and on, then the device paired before streams with no new code.

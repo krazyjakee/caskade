@@ -251,6 +251,41 @@ jobs:
       - name: Launch caller tests
         run: "cargo test -p caskade-desktop --lib --test it --locked --no-fail-fast launch_cli::"
 
+  # The administrator step on real Windows (#21, #31): the real service, rules
+  # and Program Files folder, from stand-in files, on and off. The runner is an
+  # administrator with no UAC, so this proves the commands, not the prompt. A
+  # failure here doesn't fail the run yet, and `ci result` doesn't need it: drop
+  # `continue-on-error` and add the job there once it has passed on GitHub.
+  # caskade-core has no Tauri, so its test binary needs no Common Controls
+  # manifest.
+  windows-elevation:
+    needs: changes
+    if: needs.changes.outputs.cross == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 90
+    continue-on-error: true
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustc -Vv
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: windows-elevation
+          cache-on-failure: true
+          save-if: ${{ env.SAVE_CACHE }}
+      - name: Administrator step on and off
+        env:
+          CASKADE_TEST_NATIVE: "1"
+        run: "cargo test -p caskade-core --test it --locked windows_elevation:: -- --ignored --nocapture"
+
   # The M5 exit (#153): the built app in console mode, driven by a pad only,
   # under Xvfb. The `e2e` feature embeds the built UI.
   e2e:
