@@ -677,6 +677,8 @@ msgstr "Den här samlingen finns inte längre."
 
 #: crates/caskade-core/src/db/mod.rs
 #: crates/caskade-core/src/metadata/page.rs
+#: apps/desktop/src-tauri/src/commands/achievements.rs
+#: apps/desktop/src-tauri/src/commands/actions.rs
 msgid "This copy of the game is no longer in the library."
 msgstr "Den här kopian av spelet finns inte längre i biblioteket."
 
@@ -1822,9 +1824,13 @@ msgid "the ROM's game is missing"
 msgstr "ROM-filens spel saknas"
 
 #: crates/caskade-core/src/install/mod.rs
+#: crates/caskade-core/src/install/operations.rs
+#: crates/caskade-core/src/install/peer.rs
+#: crates/caskade-core/src/install/recovery.rs
 #: crates/caskade-core/src/install/roms.rs
-msgid "unknown job {id}"
-msgstr "okänt jobb {id}"
+#: apps/desktop/src-tauri/src/commands/install.rs
+msgid "This job is no longer in Activity."
+msgstr "Det här jobbet finns inte längre i Aktivitet."
 
 #: crates/caskade-core/src/install/move_location.rs
 msgid "One game moved to {to}."
@@ -1859,13 +1865,6 @@ msgstr "Avbrutet. {moved} {location} behölls."
 #: crates/caskade-core/src/install/operations.rs
 msgid "question changed; refresh the job before answering"
 msgstr "frågan har ändrats; uppdatera jobbet innan du svarar"
-
-#: crates/caskade-core/src/install/operations.rs
-#: crates/caskade-core/src/install/peer.rs
-#: crates/caskade-core/src/install/recovery.rs
-#: apps/desktop/src-tauri/src/commands/install.rs
-msgid "unknown job"
-msgstr "okänt jobb"
 
 #: crates/caskade-core/src/install/operations.rs
 msgid "job has no question"
@@ -4492,11 +4491,6 @@ msgstr "spelet går inte att spela i en webbläsare: sidan erbjuder det som en n
 #: apps/desktop/src-tauri/src/commands/achievements.rs
 msgid "choose the game to link"
 msgstr "välj spelet att koppla"
-
-#: apps/desktop/src-tauri/src/commands/achievements.rs
-#: apps/desktop/src-tauri/src/commands/actions.rs
-msgid "entry {id} was not found"
-msgstr "posten {id} hittades inte"
 
 #: apps/desktop/src-tauri/src/commands/addon_packages.rs
 #: apps/desktop/src-tauri/src/commands/addons.rs

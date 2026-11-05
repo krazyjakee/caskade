@@ -183,7 +183,7 @@ function UpdatesLink() {
     <li>
       <Link
         to="/settings"
-        search={{ tab: "general" }}
+        search={{ tab: "general", section: "updates" }}
         replace
         className={`inline-flex items-center gap-1.5 rounded-sm text-accent-alt underline-offset-2 hover:underline ${focusRing}`}
       >

@@ -23,6 +23,14 @@ pub struct ConsoleModeEvent {
     pub active: bool,
 }
 
+/// A second `caskade --console` while the webview has unsaved edits: it asks
+/// about them first, then switches (#70).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type, tauri_specta::Event)]
+#[serde(rename_all = "camelCase")]
+pub struct ConsoleRequestEvent {
+    pub active: bool,
+}
+
 /// How Caskade was started, for the first mode.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct Startup {
@@ -190,6 +198,17 @@ pub fn switch<R: Runtime>(app: &AppHandle<R>, active: bool) -> Result<(), String
     change(app, active, None)
 }
 
+/// `caskade --console` while Caskade runs: switches at once, unless the
+/// shell swap would drop unsaved edits, which the webview asks about first.
+pub fn requested<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
+    if app.try_state::<Tray>().is_some_and(|tray| tray.held()) {
+        return ConsoleRequestEvent { active: true }
+            .emit(app)
+            .map_err(|error| error.to_string());
+    }
+    switch(app, true)
+}
+
 fn change<R: Runtime>(
     app: &AppHandle<R>,
     active: bool,
@@ -317,15 +336,20 @@ pub fn console_initial_mode(state: tauri::State<'_, ConsoleWindow>) -> bool {
     state.active()
 }
 
-/// Turns console mode on or off from the toggle, and remembers the choice.
+/// Turns console mode on or off. `keep` remembers it, as the toggle does; a
+/// one-off `--console` doesn't.
 #[tauri::command]
 #[specta::specta]
 pub async fn set_console_mode<R: Runtime>(
     app: AppHandle<R>,
     active: bool,
+    keep: bool,
     service: tauri::State<'_, SettingsService>,
 ) -> Result<(), crate::error::CommandError> {
     switch(&app, active).map_err(crate::error::internal)?;
+    if !keep {
+        return Ok(());
+    }
     remember(&service, active)
         .await
         .map_err(crate::error::internal)

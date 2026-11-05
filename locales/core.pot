@@ -676,6 +676,8 @@ msgstr ""
 
 #: crates/caskade-core/src/db/mod.rs
 #: crates/caskade-core/src/metadata/page.rs
+#: apps/desktop/src-tauri/src/commands/achievements.rs
+#: apps/desktop/src-tauri/src/commands/actions.rs
 msgid "This copy of the game is no longer in the library."
 msgstr ""
 
@@ -1820,8 +1822,12 @@ msgid "the ROM's game is missing"
 msgstr ""
 
 #: crates/caskade-core/src/install/mod.rs
+#: crates/caskade-core/src/install/operations.rs
+#: crates/caskade-core/src/install/peer.rs
+#: crates/caskade-core/src/install/recovery.rs
 #: crates/caskade-core/src/install/roms.rs
-msgid "unknown job {id}"
+#: apps/desktop/src-tauri/src/commands/install.rs
+msgid "This job is no longer in Activity."
 msgstr ""
 
 #: crates/caskade-core/src/install/move_location.rs
@@ -1856,13 +1862,6 @@ msgstr ""
 
 #: crates/caskade-core/src/install/operations.rs
 msgid "question changed; refresh the job before answering"
-msgstr ""
-
-#: crates/caskade-core/src/install/operations.rs
-#: crates/caskade-core/src/install/peer.rs
-#: crates/caskade-core/src/install/recovery.rs
-#: apps/desktop/src-tauri/src/commands/install.rs
-msgid "unknown job"
 msgstr ""
 
 #: crates/caskade-core/src/install/operations.rs
@@ -4489,11 +4488,6 @@ msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/achievements.rs
 msgid "choose the game to link"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/achievements.rs
-#: apps/desktop/src-tauri/src/commands/actions.rs
-msgid "entry {id} was not found"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/addon_packages.rs

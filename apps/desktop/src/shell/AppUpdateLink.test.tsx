@@ -56,7 +56,7 @@ const release = { version: "0.2.0", notes: null, date: null };
 it("offers a release a check found, linking to the General settings", async () => {
   renderLink({ ...base, phase: "available", release });
   const link = await screen.findByRole("link", { name: "Caskade v0.2.0 available" });
-  expect(link.getAttribute("href")).toBe("/settings?tab=general");
+  expect(link.getAttribute("href")).toBe("/settings?tab=general&section=updates");
 });
 
 it("asks for the restart once the update is installed", async () => {

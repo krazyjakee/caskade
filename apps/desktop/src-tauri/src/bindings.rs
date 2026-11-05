@@ -344,6 +344,7 @@ pub fn builder() -> Builder<tauri::Wry> {
             crate::events::JobChanged,
             crate::commands::input::InputActionEvent,
             crate::commands::console::ConsoleModeEvent,
+            crate::commands::console::ConsoleRequestEvent,
             crate::commands::i18n::LocaleChanged,
             crate::commands::themes::ThemeReloaded,
             crate::commands::install_requests::InstallRequested,

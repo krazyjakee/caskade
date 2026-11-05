@@ -54,7 +54,9 @@ it.each(["desktop", "console"] as const)(
 it("links from the version to Caskade updates in General (#68)", async () => {
   const app = renderApp("/settings?tab=about");
   fireEvent.click(await screen.findByRole("link", { name: "Caskade updates" }));
-  await waitFor(() => expect(app.router.state.location.search).toEqual({ tab: "general" }));
+  await waitFor(() =>
+    expect(app.router.state.location.search).toEqual({ tab: "general", section: "updates" }),
+  );
   expect(await screen.findByText("Caskade updates")).toBeTruthy();
 });
 

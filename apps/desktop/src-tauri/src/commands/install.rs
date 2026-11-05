@@ -97,7 +97,7 @@ pub fn jobs_list(state: tauri::State<'_, InstallService>) -> Vec<JobSnapshot> {
 pub fn job_get(state: tauri::State<'_, InstallService>, id: String) -> Result<JobSnapshot, String> {
     state
         .job(&id)
-        .ok_or_else(|| caskade_core::tr!("unknown job"))
+        .ok_or_else(|| caskade_core::tr!("This job is no longer in Activity."))
 }
 
 #[tauri::command]

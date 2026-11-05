@@ -213,7 +213,7 @@ impl InstallService {
     pub async fn recover(&self, id: &str, recovery: Recovery) -> Result<JobSnapshot> {
         let snapshot = self
             .job(id)
-            .ok_or_else(|| Error::Invalid(crate::tr!("unknown job")))?;
+            .ok_or_else(|| Error::Invalid(crate::tr!("This job is no longer in Activity.")))?;
         if !matches!(snapshot.status, JobStatus::Failed | JobStatus::Cancelled)
             || !matches!(snapshot.kind, JobKind::Install | JobKind::Update)
         {
@@ -248,9 +248,9 @@ impl InstallService {
                 }
                 // Nothing chosen for the old input applies to the new one.
                 let mut jobs = lock(&self.inner.jobs);
-                let job = jobs
-                    .get_mut(id)
-                    .ok_or_else(|| Error::Invalid(crate::tr!("unknown job")))?;
+                let job = jobs.get_mut(id).ok_or_else(|| {
+                    Error::Invalid(crate::tr!("This job is no longer in Activity."))
+                })?;
                 job.snapshot.input = input;
                 job.control = pipeline::RunControl::default();
             }
@@ -267,9 +267,9 @@ impl InstallService {
                     self.discard_download(id, &old).await;
                 }
                 let mut jobs = lock(&self.inner.jobs);
-                let job = jobs
-                    .get_mut(id)
-                    .ok_or_else(|| Error::Invalid(crate::tr!("unknown job")))?;
+                let job = jobs.get_mut(id).ok_or_else(|| {
+                    Error::Invalid(crate::tr!("This job is no longer in Activity."))
+                })?;
                 job.snapshot.root_id = Some(target.id);
             }
         }

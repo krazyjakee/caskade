@@ -61,7 +61,7 @@ impl InstallService {
             let jobs = lock(&self.inner.jobs);
             let job = jobs
                 .get(id)
-                .ok_or_else(|| Error::Invalid(crate::tr!("unknown job")))?;
+                .ok_or_else(|| Error::Invalid(crate::tr!("This job is no longer in Activity.")))?;
             if job.snapshot.revision != revision || job.snapshot.status != JobStatus::NeedsUser {
                 return Err(Error::Invalid(crate::tr!(
                     "question changed; refresh the job before answering"
@@ -122,7 +122,7 @@ impl InstallService {
             let jobs = lock(&self.inner.jobs);
             let job = jobs
                 .get(id)
-                .ok_or_else(|| Error::Invalid(crate::tr!("unknown job")))?;
+                .ok_or_else(|| Error::Invalid(crate::tr!("This job is no longer in Activity.")))?;
             if !matches!(
                 job.snapshot.status,
                 JobStatus::Failed | JobStatus::Cancelled | JobStatus::NeedsUser
@@ -161,7 +161,7 @@ impl InstallService {
             let mut jobs = lock(&self.inner.jobs);
             let job = jobs
                 .get_mut(id)
-                .ok_or_else(|| Error::Invalid(crate::tr!("unknown job")))?;
+                .ok_or_else(|| Error::Invalid(crate::tr!("This job is no longer in Activity.")))?;
             if job.active
                 || !matches!(
                     job.snapshot.kind,

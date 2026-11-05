@@ -185,7 +185,7 @@ impl InstallService {
             });
         }
         self.job(id)
-            .ok_or_else(|| Error::Invalid(crate::tr!("unknown job {id}", id = id)))
+            .ok_or_else(|| Error::Invalid(crate::tr!("This job is no longer in Activity.")))
     }
 
     async fn scan_roms(

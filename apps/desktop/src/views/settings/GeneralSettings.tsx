@@ -10,7 +10,7 @@ import {
 import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import {
   Clock,
   Cloud,
@@ -31,6 +31,7 @@ import {
   RotateCcw,
   Sparkles,
 } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { StorageSummary } from "../../components/storage/StorageSummary";
 import { LanguageSelect } from "../../locale/LanguageSelect";
 import { AppUpdateSection } from "./AppUpdateSection";
@@ -119,6 +120,22 @@ function ConsoleStartRow() {
       </SettingRow>
       <SettingsStatus section={section} what={t`Start in`} />
     </>
+  );
+}
+
+/** Caskade updates, scrolled to when a link asks for them (#68). */
+function AppUpdates() {
+  const anchor = useRef<HTMLDivElement>(null);
+  const router = useRouter({ warn: false }) as ReturnType<typeof useRouter> | undefined;
+  const search = router?.state.location.search as { section?: string } | undefined;
+  const wanted = search?.section === "updates";
+  useEffect(() => {
+    if (wanted) anchor.current?.scrollIntoView?.({ block: "start" });
+  }, [wanted]);
+  return (
+    <div ref={anchor} className="scroll-mt-4">
+      <AppUpdateSection />
+    </div>
   );
 }
 
@@ -378,7 +395,7 @@ export function GeneralSettings() {
           </SettingRow>
         </SettingsSection>
 
-        <AppUpdateSection />
+        <AppUpdates />
         {/* Beside Caskade's own updates, not under Installer (#54). */}
         <UpdateSettings />
         <OnlineSection />

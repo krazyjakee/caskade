@@ -698,7 +698,7 @@ impl InstallService {
         let (cancel, active) = lock(&self.inner.jobs)
             .get(id)
             .map(|job| (job.cancel.clone(), job.active))
-            .ok_or_else(|| Error::Invalid(crate::tr!("unknown job {id}", id = id)))?;
+            .ok_or_else(|| Error::Invalid(crate::tr!("This job is no longer in Activity.")))?;
         cancel.cancel();
         self.update(id, |job| {
             if !active && !job.status.is_finished() {
@@ -710,7 +710,7 @@ impl InstallService {
                 failure.retry_at_ms = None;
             }
         })
-        .ok_or_else(|| Error::Invalid(crate::tr!("unknown job {id}", id = id)))
+        .ok_or_else(|| Error::Invalid(crate::tr!("This job is no longer in Activity.")))
     }
 
     pub fn jobs(&self) -> Vec<JobSnapshot> {

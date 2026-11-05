@@ -189,7 +189,7 @@ impl InstallService {
         let (target, own) = lock(&self.inner.jobs)
             .get(id)
             .and_then(|job| Some((job.peer.clone()?, job.peer_fetcher.clone())))
-            .ok_or_else(|| Error::Invalid(crate::tr!("unknown job")))?;
+            .ok_or_else(|| Error::Invalid(crate::tr!("This job is no longer in Activity.")))?;
         let fetcher = match own {
             Some(fetcher) => fetcher,
             None => self.peer_fetcher()?,

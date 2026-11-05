@@ -129,6 +129,22 @@ it("asks for the custom CSS's draft", async () => {
   await waitFor(() => expect(app.settings.writes).toContain("core.appearance"));
 });
 
+it("asks before a second caskade --console swaps the shell (#70)", async () => {
+  const app = await editedProfile();
+  app.console.request();
+  const dialog = await question();
+  fireEvent.click(within(dialog).getByRole("button", { name: "Stay" }));
+  await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+  expect(app.console.calls).toEqual([]);
+  expect((await nameField()).value).toBe("Ace");
+
+  app.console.request();
+  fireEvent.click(within(await question()).getByRole("button", { name: "Discard" }));
+  await waitFor(() => expect(app.console.calls).toEqual(["console"]));
+  // A one-off start, which `auto` mustn't remember as the last mode.
+  expect(app.console.kept).toEqual([false]);
+});
+
 describe("switching accounts", () => {
   const switchAccount = async () => {
     fireEvent.click(await screen.findByRole("button", { name: /, account$/ }));

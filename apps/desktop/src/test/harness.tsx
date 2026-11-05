@@ -123,18 +123,31 @@ export function fakePad(glyphs: GlyphFamily = "xbox") {
 /** Records console mode switches and can announce one from "the core". */
 export function fakeConsoleApi() {
   const calls: Mode[] = [];
+  const kept: boolean[] = [];
   let announce: (mode: Mode) => void = () => {};
+  let ask: () => void = () => {};
   const api: ConsoleApi = {
     initial: async () => "desktop",
-    set: async (mode) => {
+    set: async (mode, keep = true) => {
       calls.push(mode);
+      kept.push(keep);
     },
     subscribe: async (listener) => {
       announce = listener;
       return () => {};
     },
+    requests: async (listener) => {
+      ask = listener;
+      return () => {};
+    },
   };
-  return { api, calls, announce: (mode: Mode) => act(() => announce(mode)) };
+  return {
+    api,
+    calls,
+    kept,
+    announce: (mode: Mode) => act(() => announce(mode)),
+    request: () => act(() => ask()),
+  };
 }
 
 /** Fixture games, each played a day after the one before (the last most

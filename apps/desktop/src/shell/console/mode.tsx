@@ -10,6 +10,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { commands, events } from "../../api/bindings";
@@ -22,11 +23,13 @@ export type Mode = "desktop" | "console";
 export interface ConsoleApi {
   /** The mode to start in: the `--console` flag, the setting, gamescope. */
   initial(): Promise<Mode>;
-  /** Switches the window (fullscreen, or back to its desktop size) and
-   * remembers the choice. */
-  set(mode: Mode): Promise<void>;
+  /** Switches the window (fullscreen, or back to its desktop size) and, with
+   * `keep`, remembers the choice. */
+  set(mode: Mode, keep?: boolean): Promise<void>;
   /** Mode changes from elsewhere, e.g. a second `caskade --console`. */
   subscribe(listener: (mode: Mode) => void): Promise<() => void>;
+  /** A second `caskade --console` that waits on unsaved edits (#70). */
+  requests?(listener: () => void): Promise<() => void>;
 }
 
 const toMode = (console: boolean): Mode => (console ? "console" : "desktop");
@@ -36,16 +39,20 @@ export const nativeConsoleApi: ConsoleApi = {
     if (!isTauri()) return previewMode();
     return toMode(await commands.consoleInitialMode());
   },
-  async set(mode) {
+  async set(mode, keep = true) {
     if (!isTauri()) {
       sessionStorage.setItem(PREVIEW_KEY, mode);
       return;
     }
-    await unwrap(commands.setConsoleMode(mode === "console"));
+    await unwrap(commands.setConsoleMode(mode === "console", keep));
   },
   async subscribe(listener) {
     if (!isTauri()) return () => {};
     return events.consoleModeEvent.listen(({ payload }) => listener(toMode(payload.active)));
+  },
+  async requests(listener) {
+    if (!isTauri()) return () => {};
+    return events.consoleRequestEvent.listen(() => listener());
   },
 };
 
@@ -95,6 +102,26 @@ export function ModeProvider({
   useEffect(() => applyMode(mode, root), [mode, root]);
 
   useEffect(() => effectSubscription(api.subscribe, setState), [api]);
+
+  const current = useRef(mode);
+  useEffect(() => {
+    current.current = mode;
+  }, [mode]);
+  useEffect(() => {
+    if (!api.requests) return;
+    return effectSubscription(
+      (listener) => api.requests?.(listener) ?? Promise.resolve(() => {}),
+      () => {
+        if (current.current === "console") return;
+        afterUnsavedChanges("mode", () => {
+          // Not remembered: a one-off start, not the toggle.
+          api.set("console", false).catch((error: unknown) => {
+            console.warn("console mode not switched", error);
+          });
+        });
+      },
+    );
+  }, [api]);
 
   const setMode = useCallback(
     (next: Mode) => {

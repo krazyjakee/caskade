@@ -117,7 +117,7 @@ pub fn run() {
         main_window::raise(app);
         // `caskade --console` while Caskade runs switches it (#148).
         if commands::console::wants_console(&args)
-            && let Err(error) = commands::console::switch(app, true)
+            && let Err(error) = commands::console::requested(app)
         {
             tracing::warn!(%error, "couldn't switch to console mode");
         }

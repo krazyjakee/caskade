@@ -144,8 +144,7 @@ async fn release_of(
     match store.get_entry(entry_id).await.map_err(report)? {
         Some(entry) if entry.game_id == game_id => Ok(()),
         _ => Err(report(caskade_core::Error::Invalid(caskade_core::tr!(
-            "entry {id} was not found",
-            id = entry_id
+            "This copy of the game is no longer in the library."
         )))),
     }
 }

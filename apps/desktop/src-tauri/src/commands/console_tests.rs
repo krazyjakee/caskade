@@ -232,7 +232,7 @@ fn the_toggle_switches_the_window_remembers_the_choice_and_tells_the_webview() {
     invoke(
         &window,
         "set_console_mode",
-        serde_json::json!({ "active": true }),
+        serde_json::json!({ "active": true, "keep": true }),
     )
     .unwrap();
     assert_eq!(
@@ -246,13 +246,13 @@ fn the_toggle_switches_the_window_remembers_the_choice_and_tells_the_webview() {
     invoke(
         &window,
         "set_console_mode",
-        serde_json::json!({ "active": true }),
+        serde_json::json!({ "active": true, "keep": true }),
     )
     .unwrap();
     invoke(
         &window,
         "set_console_mode",
-        serde_json::json!({ "active": false }),
+        serde_json::json!({ "active": false, "keep": true }),
     )
     .unwrap();
     let stored = tauri::async_runtime::block_on(service.get("core.console")).unwrap();
@@ -308,7 +308,7 @@ fn the_webview_holds_a_close_until_it_has_asked() {
         invoke(
             &window,
             "set_console_mode",
-            serde_json::json!({ "active": active }),
+            serde_json::json!({ "active": active, "keep": true }),
         )
         .unwrap();
     };
@@ -352,4 +352,69 @@ fn the_webview_holds_a_close_until_it_has_asked() {
     hold(true);
     hold(false);
     assert_eq!(tray.close(false), Close::Go);
+}
+
+#[test]
+fn a_second_start_waits_on_unsaved_edits_and_one_off_switches_stay_unremembered() {
+    let store = tauri::async_runtime::block_on(LibraryStore::in_memory()).unwrap();
+    let service = SettingsService::new(store);
+    service
+        .register_core(&caskade_core::AppPaths::under(std::path::Path::new(
+            "fixture",
+        )))
+        .unwrap();
+    let specta = tauri_specta::Builder::<MockRuntime>::new()
+        .commands(tauri_specta::collect_commands![
+            close_hold,
+            set_console_mode::<MockRuntime>
+        ])
+        .events(tauri_specta::collect_events![
+            ConsoleModeEvent,
+            ConsoleRequestEvent
+        ]);
+    let app = mock_builder()
+        .manage(service.clone())
+        .invoke_handler(specta.invoke_handler())
+        .build(mock_context(noop_assets()))
+        .unwrap();
+    specta.mount_events(&app);
+    let window = tauri::WebviewWindowBuilder::new(&app, "main", Default::default())
+        .build()
+        .unwrap();
+    setup(app.handle(), Startup::default(), &service);
+    crate::tray::attach(app.handle(), &service);
+    let asked = Arc::new(StdMutex::new(0));
+    let count = asked.clone();
+    app.listen(ConsoleRequestEvent::NAME, move |_| {
+        *count.lock().unwrap() += 1;
+    });
+
+    // Edits: the webview is asked, and the window stays as it is.
+    invoke(&window, "close_hold", serde_json::json!({ "held": true })).unwrap();
+    requested(app.handle()).unwrap();
+    assert_eq!(*asked.lock().unwrap(), 1);
+    assert!(!is_on(app.handle()));
+
+    // Its answer switches without becoming the remembered mode.
+    invoke(
+        &window,
+        "set_console_mode",
+        serde_json::json!({ "active": true, "keep": false }),
+    )
+    .unwrap();
+    assert!(is_on(app.handle()));
+    let stored = tauri::async_runtime::block_on(service.get("core.console")).unwrap();
+    assert_eq!(stored.value["active"], false);
+
+    // No edits: it switches at once, as before.
+    invoke(
+        &window,
+        "set_console_mode",
+        serde_json::json!({ "active": false, "keep": false }),
+    )
+    .unwrap();
+    invoke(&window, "close_hold", serde_json::json!({ "held": false })).unwrap();
+    requested(app.handle()).unwrap();
+    assert_eq!(*asked.lock().unwrap(), 1);
+    assert!(is_on(app.handle()));
 }

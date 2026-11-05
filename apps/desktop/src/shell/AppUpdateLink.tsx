@@ -15,7 +15,7 @@ export function AppUpdateLink() {
   return (
     <Link
       to="/settings"
-      search={{ tab: "general" }}
+      search={{ tab: "general", section: "updates" }}
       data-part="update"
       data-status={status.phase}
       className="flex shrink-0 items-center gap-1.5 rounded-sm text-accent-alt hover:text-fg focus-visible:focus-ring"

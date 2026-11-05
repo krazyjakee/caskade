@@ -758,8 +758,11 @@ export const commands = {
 	guideStopGame: (sessionId: string) => typedError<number, string>(__TAURI_INVOKE("guide_stop_game", { sessionId })),
 	/**  Whether console mode is on (the frontend's first render). */
 	consoleInitialMode: () => __TAURI_INVOKE<boolean>("console_initial_mode"),
-	/**  Turns console mode on or off from the toggle, and remembers the choice. */
-	setConsoleMode: (active: boolean) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("set_console_mode", { active })),
+	/**
+	 *  Turns console mode on or off. `keep` remembers it, as the toggle does; a
+	 *  one-off `--console` doesn't.
+	 */
+	setConsoleMode: (active: boolean, keep: boolean) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("set_console_mode", { active, keep })),
 	/**
 	 *  Holds closes of the main window while the webview has unsaved edits, so
 	 *  it can ask before one quits (`tray::Tray::hold` has what each call says).
@@ -1024,6 +1027,7 @@ export const events = {
 	backgroundChanged: makeEvent<BackgroundChanged, BackgroundChanged>("background-changed"),
 	backupChanged: makeEvent<BackupChanged_Serialize, BackupChanged_Deserialize>("backup-changed"),
 	consoleModeEvent: makeEvent<ConsoleModeEvent, ConsoleModeEvent>("console-mode-event"),
+	consoleRequestEvent: makeEvent<ConsoleRequestEvent, ConsoleRequestEvent>("console-request-event"),
 	devicesChanged: makeEvent<DevicesChanged_Serialize, DevicesChanged_Deserialize>("devices-changed"),
 	discoveryChanged: makeEvent<DiscoveryChanged_Serialize, DiscoveryChanged_Deserialize>("discovery-changed"),
 	emulationChanged: makeEvent<EmulationChanged, EmulationChanged>("emulation-changed"),
@@ -2753,6 +2757,14 @@ export type ConnectionState = "untested" | "connected" |
 
 /**  Console mode went on or off. */
 export type ConsoleModeEvent = {
+	active: boolean,
+};
+
+/**
+ *  A second `caskade --console` while the webview has unsaved edits: it asks
+ *  about them first, then switches (#70).
+ */
+export type ConsoleRequestEvent = {
 	active: boolean,
 };
 
