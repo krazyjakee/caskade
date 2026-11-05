@@ -3,13 +3,17 @@
  * layouts and its quick look, a game's page, the Store and a catalog game's
  * page, Collections and a collection, Activity's jobs and notifications,
  * and the Settings tabs the settings tests leave out (Scripts, Store
- * accounts, Streaming, Backup). Views that differ by shell are checked in
- * both. Every text, aria-label, title and placeholder they show comes from
- * a catalog; what the fixtures name is data. Each view is checked once its
- * data has loaded: a check that may pass early would pass on a view still
- * loading. */
+ * accounts, Streaming, Backup). Then what opens over them: console mode's
+ * quick look, a game's menu, Add game and its dialogs, the game editor's
+ * tabs, the move, uninstall and remove dialogs, and what the app draws
+ * around a plugin's tabs and views. Views that differ by shell are checked
+ * in both. Every text, aria-label, title and placeholder they show comes
+ * from a catalog; what the fixtures name is data. Each view is checked once
+ * its data has loaded: a check that may pass early would pass on a view
+ * still loading. */
 import { loadCatalog, pseudoLocale } from "@caskade/i18n";
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import type { PluginContext } from "@caskade/sdk";
+import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { AchievementsProvider } from "../api/achievements";
@@ -21,12 +25,16 @@ import {
 } from "../api/achievementsFixtures";
 import { BackupProvider } from "../api/backup";
 import { createBackupFixtureApi } from "../api/backupFixtures";
+import { BrowseApiContext } from "../api/browse";
+import { createBrowseFixtureApi } from "../api/browseFixtures";
 import { createCatalogFixtureApi, fixtureCatalog } from "../api/catalogFixtures";
 import { createEmulatedFixtureGames, createFixtureGames } from "../api/fixtures";
 import { CatalogProvider, type GameIgdbApi, GameIgdbProvider, type IgdbGame } from "../api/igdb";
 import { fixtureJob } from "../api/installFixtures";
 import { NotificationsProvider } from "../api/notifications";
 import { createNotificationsFixtureApi, fixtureNotifications } from "../api/notificationsFixtures";
+import { FIXTURE_LINK } from "../api/sharesFixtures";
+import { createStorageFixtureApi } from "../api/storageFixtures";
 import { StoreAccountsProvider } from "../api/storeAccounts";
 import {
   createStoreAccountsFixtureApi,
@@ -36,9 +44,11 @@ import {
 import { StreamingApiProvider } from "../api/streaming";
 import { createStreamingFixtureApi, fixtureStreamHosts } from "../api/streamingFixtures";
 import type { GameDetails } from "../api/types";
+import { PluginRegistry } from "../plugins/registry";
+import type { UiPlugin } from "../plugins/types";
 import type { Mode } from "../shell/console/mode";
 import { presentPlatform } from "../views/library/platforms/catalog";
-import { type AppOptions, fakeViewport, playedGames, renderApp } from "./harness";
+import { type AppOptions, fakeViewport, focused, playedGames, renderApp, until } from "./harness";
 import { untranslated } from "./untranslated";
 
 beforeEach(() => {
@@ -511,4 +521,399 @@ it("shows Settings → Backup in the pseudo-locale", async () => {
   // The last backup's outcome, with its size.
   await waitFor(() => expect(one('[role="tabpanel"]')?.textContent).toContain("71.0 MB"));
   expect(shown(settings(), [...paths, devices])).toEqual([]);
+});
+
+// What opens over the views. These sit in portals, outside every view.
+
+/** Menus and dialogs, and console mode's hints for them. */
+const overlays = [
+  '[role="menu"]',
+  '[role="dialog"]',
+  '[role="alertdialog"]',
+  '[data-cs="hint-bar"]',
+];
+
+/** Not Caskade's text. Pad buttons keep the names printed on them
+ * (`glyphs.ts`), and these come from React Aria's own catalogs, which
+ * `LocaleProvider` gives the app's language (`ariaLocale.test.tsx`) but
+ * which have no pseudo-locale: an empty Select and a popover's hidden
+ * dismiss button. */
+const padGlyphs = '[data-part="glyph"]';
+const reactAria = ["Select an item", "Dismiss"];
+
+const over = (data: (RegExp | string)[] = []) =>
+  shown(overlays, [...data, ...reactAria], padGlyphs);
+
+const rightClick = (element: Element) =>
+  fireEvent.contextMenu(element, { clientX: 120, clientY: 80, button: 2 });
+
+/** The open menu's item named `name`, as pseudo text. */
+const menuItem = async (name: RegExp) =>
+  within(await screen.findByRole("menu")).findByRole("menuitem", { name });
+
+/** The game the storage fixture installed, and one with no entries. */
+function managedGames(): GameDetails[] {
+  return createFixtureGames(2).map((game, index) =>
+    index === 1
+      ? {
+          ...game,
+          status: "installed",
+          entries: [
+            {
+              id: "entry-1",
+              source: "caskade-storage",
+              state: "installed",
+              location: "/fixture/Games/Fixture Game 0002",
+              canLaunch: true,
+              emulated: false,
+            },
+          ],
+        }
+      : game,
+  );
+}
+
+const managed = (mode: Mode = "desktop") =>
+  open("/games/fixture-1", { mode, games: managedGames(), storage: createStorageFixtureApi() });
+
+const gameHeading = () => screen.findByRole("heading", { level: 1, name: "Fixture Game 0002" });
+
+// Console mode's quick look.
+
+it("shows console mode's quick look from the pad in the pseudo-locale", async () => {
+  const app = await open("/library?filter=installed&sort=title", {
+    mode: "console",
+    games: playedGames(8),
+  });
+  await until(() => Boolean(focused()?.closest('[data-cs="game-card"]')), "the first game");
+  app.pad.press("details");
+  await ready('[data-cs="quick-look"] [data-part="facts"]');
+  await ready('[data-cs="hint-bar"] [data-part="hint"]');
+  expect(over()).toEqual([]);
+});
+
+// A game's menu.
+
+/** Opens the managed game's menu and waits for the items that need its
+ * details and the other devices. */
+async function gameMenu() {
+  rightClick(await gameHeading());
+  await menuItem(/Ĥĩďē ƒŕōḿ ĺĩƀŕàŕŷ/);
+  await menuItem(/Śĥàŕē ŵĩţĥ śōḿēōńē/);
+}
+
+/** Opens the game menu's `item`. */
+async function fromMenu(item: RegExp) {
+  await gameMenu();
+  fireEvent.click(await menuItem(item));
+}
+
+const dialogData = ["/fixture/Games/Fixture Game 0002", ...paths, devices];
+
+it.each(modes)("shows a game's menu in the pseudo-locale (%s)", async (mode) => {
+  await managed(mode);
+  await gameMenu();
+  expect(over(dialogData)).toEqual([]);
+});
+
+it.each(modes)("shows a running game's menu in the pseudo-locale (%s)", async (mode) => {
+  const app = await managed(mode);
+  await gameHeading();
+  await app.library.launchGame("entry-1");
+  await gameMenu();
+  await menuItem(/Śţōƥ/);
+  expect(over(dialogData)).toEqual([]);
+});
+
+it("shows a web game's menu and its Remove dialog in the pseudo-locale", async () => {
+  await open("/games/alpha", { games: [webGame("alpha")], storage: createStorageFixtureApi() });
+  rightClick(await screen.findByRole("heading", { level: 1, name: "Web alpha" }));
+  await menuItem(/Ƥĺàŷ ōƒƒĺĩńē/);
+  expect(over([/Web alpha/g])).toEqual([]);
+  fireEvent.click(await menuItem(/Ŕēḿōvē…/));
+  await screen.findByRole("alertdialog");
+  expect(over([/Web alpha/g])).toEqual([]);
+});
+
+// The dialogs a game's menu opens.
+
+it.each(modes)("shows the move dialog in the pseudo-locale (%s)", async (mode) => {
+  const roots = await createStorageFixtureApi().list();
+  // Another location to go to, none, and a game Caskade didn't install.
+  for (const list of [roots, roots.slice(0, 1), []]) {
+    await open("/games/fixture-1", {
+      mode,
+      games: managedGames(),
+      storage: { ...createStorageFixtureApi(), list: async () => structuredClone(list) },
+    });
+    await fromMenu(/Ḿōvē ĩńśţàĺĺēď ƒĩĺēś/);
+    await ready('[role="dialog"] [data-cs="select"]');
+    expect(over([...dialogData, /\bExternal\b/g])).toEqual([]);
+    cleanup();
+  }
+});
+
+it.each(modes)("shows the uninstall dialog in the pseudo-locale (%s)", async (mode) => {
+  await managed(mode);
+  await fromMenu(/Ũńĩńśţàĺĺ…/);
+  await screen.findByRole("alertdialog");
+  expect(over(dialogData)).toEqual([]);
+});
+
+it.each(modes)("shows the remove dialog in the pseudo-locale (%s)", async (mode) => {
+  // With Caskade's install to delete, and without.
+  for (const source of ["caskade-storage", "manual"]) {
+    const games = managedGames().map((game) => ({
+      ...game,
+      entries: game.entries.map((entry) => ({ ...entry, source })),
+    }));
+    await open("/games/fixture-1", { mode, games, storage: createStorageFixtureApi() });
+    rightClick(await gameHeading());
+    fireEvent.click(await menuItem(/Ŕēḿōvē ƒŕōḿ ĺĩƀŕàŕŷ/));
+    await screen.findByRole("alertdialog");
+    expect(over(dialogData)).toEqual([]);
+    cleanup();
+  }
+});
+
+it.each(modes)("shows the collection picker in the pseudo-locale (%s)", async (mode) => {
+  await managed(mode);
+  await fromMenu(/Àďď ţō ćōĺĺēćţĩōń/);
+  await ready('[role="dialog"] [role="checkbox"], [role="dialog"] input[type="checkbox"]');
+  expect(over([...dialogData, ...collectionData])).toEqual([]);
+});
+
+it.each(modes)("shows Share with someone in the pseudo-locale (%s)", async (mode) => {
+  await managed(mode);
+  await fromMenu(/Śĥàŕē ŵĩţĥ śōḿēōńē/);
+  const dialog = await screen.findByRole("dialog");
+  expect(over(dialogData)).toEqual([]);
+  // The link it makes.
+  fireEvent.click(await within(dialog).findByRole("button", { name: /Ḿàķē à ĺĩńķ/ }));
+  await ready('[data-cs="share-game"] [data-part="link"]');
+  expect(over([/caskade:\/\/\S+/g, ...dialogData])).toEqual([]);
+});
+
+it("says a game didn't start in the pseudo-locale", async () => {
+  const app = await managed();
+  vi.spyOn(app.library, "launchGame").mockRejectedValue(new Error("The emulator is missing"));
+  await fromMenu(/Ƥĺàŷ/);
+  await screen.findByRole("alertdialog");
+  // The reason is the core's (#214).
+  expect(over([...dialogData, "The emulator is missing"])).toEqual([]);
+});
+
+// The game editor.
+
+it.each(modes)("shows the game editor's tabs in the pseudo-locale (%s)", async (mode) => {
+  const app = await managed(mode);
+  const location = { kind: "folder", path: "/home/me/.local/share/fixture" } as const;
+  const found = [{ spec: location, tags: ["save"], fileCount: 2 }];
+  app.library.saves.seed({
+    entryId: "entry-1",
+    revision: 1,
+    preferences: { manifestTitle: null, locations: null },
+    matched: { type: "matched", title: "Fixture Game", method: "steam" },
+    automatic: found,
+    locations: found,
+    warnings: [],
+  });
+  await fromMenu(/Ēďĩţ…/);
+  // Every tab stays mounted, hidden, so all five are in the dialog at once.
+  await ready('[data-cs="game-editor"] [data-part="field"]');
+  await ready('[data-cs="game-editor"] [data-part="artwork"] [data-part="slot"]');
+  await ready('[data-cs="game-editor"] [data-cs="game-actions"] [data-part="action"]');
+  await ready('[data-cs="game-editor"] [data-cs="scripts"] [data-part="order"]');
+  await ready('[data-cs="game-editor"] [data-cs="game-saves"] [data-part="location"]');
+  // The built-in action's name is the core's (#214), as is the save match's.
+  const data = [...dialogData, /CASKADE_\w+/g, /\{\w+\}/g, /^Play$/, "Fixture Game"];
+  expect(over(data)).toEqual([]);
+
+  // Unsaved work asks first.
+  const title = one('[data-cs="game-editor"] input') as HTMLInputElement;
+  fireEvent.change(title, { target: { value: "Changed" } });
+  fireEvent.click(one('[data-cs="game-editor"] [data-part="cancel"]') as Element);
+  await ready('[data-cs="game-editor-discard"]');
+  expect(over(data)).toEqual([]);
+});
+
+// Add game.
+
+async function openAddGame() {
+  await ready('[data-cs="add-game"] button');
+  fireEvent.click(one('[data-cs="add-game"] button') as Element);
+}
+
+/** Opens one of Add game's items. */
+async function addGame(item: RegExp) {
+  await openAddGame();
+  fireEvent.click(await menuItem(item));
+  return screen.findByRole("dialog");
+}
+
+const addGameTo = (mode: Mode) =>
+  open("/library?filter=all&sort=title", { mode, storage: createStorageFixtureApi() });
+
+const type = (field: Element | null, value: string) =>
+  fireEvent.change(field as Element, { target: { value } });
+
+it.each(modes)("shows Add game's menu in the pseudo-locale (%s)", async (mode) => {
+  await addGameTo(mode);
+  await openAddGame();
+  await menuItem(/ƀŷ ţĩţĺē/);
+  expect(over()).toEqual([]);
+});
+
+it.each(modes)(
+  "shows Install from link and its storage in the pseudo-locale (%s)",
+  async (mode) => {
+    await addGameTo(mode);
+    const dialog = await addGame(/ĺĩńķ…/);
+    expect(over()).toEqual([]);
+    type(dialog.querySelector("input"), "https://example.com/game.zip");
+    fireEvent.submit(dialog.querySelector("form") as Element);
+    await ready('[data-cs="install-root-picker"] input[type="radio"]');
+    expect(over([...paths, /\b(?:Games|External)\b/g, /\bext4\b/g])).toEqual([]);
+  },
+);
+
+it.each(modes)("shows Add a game on this computer in the pseudo-locale (%s)", async (mode) => {
+  await addGameTo(mode);
+  const dialog = await addGame(/ţĥĩś ćōḿƥũţēŕ/);
+  expect(over()).toEqual([]);
+  const [target, title] = dialog.querySelectorAll("input");
+  // A shortcut, so the summary has all its rows, under a title already there.
+  type(target ?? null, "/home/me/Desktop/celeste.desktop");
+  fireEvent.blur(target as Element);
+  await ready('[data-cs="manual-game"] [data-part="summary"]');
+  type(title ?? null, "Fixture Game 0001");
+  fireEvent.click(one('[data-cs="manual-game"] [data-part="add"]') as Element);
+  await ready('[data-cs="manual-game"] [data-part="duplicate"]');
+  expect(over([...paths, "--windowed"])).toEqual([]);
+});
+
+it.each(modes)("shows Add a game by title in the pseudo-locale (%s)", async (mode) => {
+  await addGameTo(mode);
+  await addGame(/ƀŷ ţĩţĺē/);
+  expect(over()).toEqual([]);
+});
+
+it.each(modes)("shows Receive a shared game in the pseudo-locale (%s)", async (mode) => {
+  await addGameTo(mode);
+  const dialog = await addGame(/Ŕēćēĩvē à śĥàŕēď ĝàḿē/);
+  expect(over()).toEqual([]);
+  type(dialog.querySelector("input"), `${FIXTURE_LINK}hades`);
+  fireEvent.click(await within(dialog).findByRole("button", { name: /Ĺōōķ/ }));
+  await within(dialog).findByRole("button", { name: /Ŕēćēĩvē/ });
+  expect(over([/Alex's Desk|Hades/g, /caskade:\/\/\S+/g])).toEqual([]);
+});
+
+it("shows the on-screen keyboard over Add game's field in the pseudo-locale", async () => {
+  const app = await addGameTo("console");
+  const dialog = await addGame(/ĺĩńķ…/);
+  const field = dialog.querySelector("input");
+  await until(() => focused() === field, "the link field");
+  app.pad.press("confirm");
+  await ready('[data-cs="osk"]');
+  await ready('[data-cs="hint-bar"] [data-part="hint"][data-action="back"]');
+  expect(shown(['[data-cs="osk"]', ...overlays], reactAria, padGlyphs)).toEqual([]);
+});
+
+it("shows console mode's folder browser from Add game in the pseudo-locale", async () => {
+  await open("/library?filter=all&sort=title", {
+    mode: "console",
+    wrap: (children: ReactNode) => (
+      <BrowseApiContext value={createBrowseFixtureApi()}>{children}</BrowseApiContext>
+    ),
+  });
+  await addGame(/ƒōĺďēŕ…/);
+  await ready('[data-cs="folder-browser"] [data-part="entry"]');
+  // Files' names, and places the core names (#214).
+  expect(over([/^(?:Home|File system|SD Card|Downloads|Emulators|Games|ROMs)$/, ...paths])).toEqual(
+    [],
+  );
+});
+
+// Plugins: their own words are theirs (a language they don't ship shows
+// their English); what the app draws around them is not.
+
+const hours: UiPlugin = {
+  id: "dev.fixture.hours",
+  name: "Hours",
+  version: "0.1.0",
+  entry: "caskade-plugin://dev.fixture.hours/ui.js",
+  contributes: [
+    { slot: "game.details.tabs", id: "hours", title: "How long" },
+    { slot: "game.details.tabs", id: "broken", title: "Broken" },
+    { slot: "game.actions", id: "repack", title: "Repack" },
+    { slot: "views", id: "shelf", title: "Shelf" },
+    { slot: "views", id: "couch", title: "Couch", modes: ["console"] },
+    { slot: "views", id: "desk", title: "Desk", modes: ["desktop"] },
+  ],
+};
+
+const pluginData = [/Hours|How long|Broken|Repack|Shelf|Couch|Desk|Twelve hours|no pack/g];
+
+const HoursTab = () => <p>Twelve hours</p>;
+
+function Broken(): ReactNode {
+  throw new Error("broken on purpose");
+}
+
+function pluginRegistry() {
+  const context = { plugin: { id: hours.id, name: hours.name } } as unknown as PluginContext;
+  const registry = new PluginRegistry();
+  registry.register(
+    hours,
+    "game.details.tabs",
+    { id: "hours", title: "How long", component: HoursTab },
+    context,
+  );
+  registry.register(
+    hours,
+    "game.details.tabs",
+    { id: "broken", title: "Broken", component: Broken },
+    context,
+  );
+  const run = () => Promise.reject(new Error("no pack"));
+  registry.register(hours, "game.actions", { id: "repack", title: "Repack", run }, context);
+  for (const [id, title] of [
+    ["shelf", "Shelf"],
+    ["couch", "Couch"],
+    ["desk", "Desk"],
+  ] as const)
+    registry.register(hours, "views", { id, title, component: () => <p>{title}</p> }, context);
+  return registry;
+}
+
+const pluginShown = (selectors: string[]) => shown(selectors, pluginData);
+
+it.each(modes)("shows a plugin's tab on a game's page in the pseudo-locale (%s)", async (mode) => {
+  // The crashed tab's placeholder logs what crashed.
+  vi.spyOn(console, "error").mockImplementation(() => {});
+  await open("/games/fixture-1", { mode, registry: pluginRegistry() });
+  await ready('[data-part="plugin-details"] [role="tabpanel"]');
+  const around = ['[data-part="plugin-details"]', '[data-part="plugin-nav"]'];
+  expect(pluginShown(around)).toEqual([]);
+
+  const tabs = all('[data-part="plugin-tabs"] [role="tab"]');
+  fireEvent.click(tabs[1] as Element);
+  await ready('[data-cs="plugin-error"]');
+  expect(pluginShown(around)).toEqual([]);
+
+  // An action that fails says so in the app's words.
+  fireEvent.click(one('[data-part="plugin-actions"] button') as Element);
+  await ready('[data-cs="plugin-notices"] [role="alert"]');
+  expect(pluginShown(['[data-cs="plugin-notices"]'])).toEqual([]);
+});
+
+it.each(modes)("shows a plugin's view in the pseudo-locale (%s)", async (mode) => {
+  // Its own, one the other mode hides, and one that isn't there.
+  const hidden = mode === "console" ? "desk" : "couch";
+  for (const view of ["shelf", hidden, "gone"]) {
+    await open(`/plugins/${hours.id}/${view}`, { mode, registry: pluginRegistry() });
+    await ready(view === "shelf" ? '[data-view="plugin"]' : 'main [role="status"]');
+    expect(pluginShown(["main"])).toEqual([]);
+    cleanup();
+  }
 });

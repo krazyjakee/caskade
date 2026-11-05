@@ -1,6 +1,11 @@
 import { i18n, sourceLocale } from "@caskade/i18n";
 import { beforeEach, vi } from "vitest";
 
+// React Aria scrolls a menu to its focused item, on an animation frame that
+// can outlive the test; jsdom's elements have no scrollTo. Not a spy, so it
+// is still here then.
+Element.prototype.scrollTo = () => {};
+
 beforeEach(() => {
   // Components render in English (the source text) unless a test switches
   // language, and a switch doesn't leak into the next test.
