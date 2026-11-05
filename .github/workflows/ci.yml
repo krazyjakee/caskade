@@ -242,6 +242,16 @@ jobs:
           save-if: ${{ env.SAVE_CACHE }}
       - name: Prepare SHA-pinned 7-Zip sidecar
         run: python scripts/tauri-sidecar.py
+      # Tauri gives only the app's own binaries a manifest asking for Common
+      # Controls 6, and a test binary without one dies before its first test
+      # (STATUS_ENTRYPOINT_NOT_FOUND). One beside each leaves what ships alone.
+      - name: Build the launch caller tests
+        run: cargo test -p caskade-desktop --lib --test it --locked --no-run
+      - name: Common Controls 6 for the test binaries
+        run: |
+          for test in target/debug/deps/caskade_desktop-*.exe target/debug/deps/it-*.exe; do
+            cp apps/desktop/src-tauri/tests/windows-test.manifest "$test.manifest"
+          done
       - name: Launch caller tests
         run: "cargo test -p caskade-desktop --lib --test it --locked launch_cli::"
 
