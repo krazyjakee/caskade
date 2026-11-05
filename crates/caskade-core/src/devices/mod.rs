@@ -253,8 +253,11 @@ struct Inner {
     accounts: AccountService,
     keys: Arc<dyn KeyStore>,
     settings: OnceLock<SettingsService>,
-    /// Tests bind on loopback instead of the network.
-    reach: Option<Reach>,
+    /// Turns the reach the settings ask for into the one the endpoint binds:
+    /// unchanged in the app; tests stay off the network with it.
+    reach: Box<dyn Fn(Reach) -> Reach + Send + Sync>,
+    /// Direct dialers stay on 127.0.0.1, as a test's endpoint does.
+    loopback: bool,
     gate: Arc<Gate>,
     state: Mutex<State>,
     revision: watch::Sender<u64>,
@@ -327,7 +330,7 @@ impl Devices {
     /// The service over `store`, with the device key in `keys` (the OS
     /// keychain in the app). Nothing runs until [`Devices::start`].
     pub fn new(store: LibraryStore, accounts: AccountService, keys: Arc<dyn KeyStore>) -> Self {
-        Self::build(store, accounts, keys, None)
+        Self::build(store, accounts, keys, |network| network, false)
     }
 
     /// Binds on `reach` instead of the network, whatever the settings say:
@@ -338,14 +341,28 @@ impl Devices {
         keys: Arc<dyn KeyStore>,
         reach: Reach,
     ) -> Self {
-        Self::build(store, accounts, keys, Some(reach))
+        let loopback = matches!(reach.ip, caskade_sync::Ip::Loopback { .. });
+        Self::build(store, accounts, keys, move |_| reach.clone(), loopback)
+    }
+
+    /// Binds on what `reach` makes of the reach the settings ask for, at
+    /// every bind: for tests following a setting to the endpoint. `reach` has
+    /// to keep the endpoint off the network, on loopback.
+    pub fn with_reach_from(
+        store: LibraryStore,
+        accounts: AccountService,
+        keys: Arc<dyn KeyStore>,
+        reach: impl Fn(Reach) -> Reach + Send + Sync + 'static,
+    ) -> Self {
+        Self::build(store, accounts, keys, reach, true)
     }
 
     fn build(
         store: LibraryStore,
         accounts: AccountService,
         keys: Arc<dyn KeyStore>,
-        reach: Option<Reach>,
+        reach: impl Fn(Reach) -> Reach + Send + Sync + 'static,
+        loopback: bool,
     ) -> Self {
         Self {
             inner: Arc::new(Inner {
@@ -353,7 +370,8 @@ impl Devices {
                 accounts,
                 keys,
                 settings: OnceLock::new(),
-                reach,
+                reach: Box::new(reach),
+                loopback,
                 gate: Arc::default(),
                 state: Mutex::new(State {
                     identity: IdentityStatus::Starting,
@@ -710,11 +728,7 @@ impl Devices {
         {
             return Ok(dialer.clone());
         }
-        let loopback = matches!(
-            self.inner.reach.as_ref().map(|reach| &reach.ip),
-            Some(caskade_sync::Ip::Loopback { .. })
-        );
-        let bound = caskade_sync::copy::DirectDialer::bind(Some(&key), loopback)
+        let bound = caskade_sync::copy::DirectDialer::bind(Some(&key), self.inner.loopback)
             .await
             .map_err(|error| Error::Invalid(error.to_string()))?;
         *dialer = Some((key.id(), bound.clone()));
@@ -737,11 +751,7 @@ impl Devices {
         {
             return Ok(dialer.clone());
         }
-        let loopback = matches!(
-            self.inner.reach.as_ref().map(|reach| &reach.ip),
-            Some(caskade_sync::Ip::Loopback { .. })
-        );
-        let bound = caskade_sync::swarm::SwarmDialer::bind(Some(&key), loopback)
+        let bound = caskade_sync::swarm::SwarmDialer::bind(Some(&key), self.inner.loopback)
             .await
             .map_err(|error| Error::Invalid(error.to_string()))?;
         *swarm = Some((key.id(), bound.clone()));
@@ -943,10 +953,7 @@ impl Inner {
         };
         let settings = self.settings().await;
         self.lock().bound_with = Some((settings.never_relay, settings.port));
-        let reach = self
-            .reach
-            .clone()
-            .unwrap_or_else(|| Reach::network(settings.never_relay, settings.port));
+        let reach = (self.reach)(Reach::network(settings.never_relay, settings.port));
         let config = Config {
             identity: Some(identity),
             reach,

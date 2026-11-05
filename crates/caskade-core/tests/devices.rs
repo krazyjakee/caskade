@@ -6,7 +6,7 @@
 //! with no internet; set `CASKADE_TEST_NO_MULTICAST=1` where the platform has
 //! no multicast.
 
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use caskade_core::accounts::{
@@ -15,7 +15,10 @@ use caskade_core::accounts::{
 use caskade_core::bus::Bus;
 use caskade_core::db::LibraryStore;
 use caskade_core::devices::{DEVICE_KEY, Devices, DevicesStatus, IdentityStatus, PairingState};
+use caskade_core::paths::AppPaths;
+use caskade_core::settings::SettingsService;
 use caskade_sync::{Ip, KeyStore, MemoryKeyStore, Purpose, Reach, Relays};
+use serde_json::json;
 
 struct Node {
     devices: Devices,
@@ -324,6 +327,87 @@ async fn no_key_or_grant_reaches_the_settings_or_the_status() {
         );
         assert!(!format!("{:?}", rows[0]).contains(grant.as_str()));
     }
+}
+
+/// Connect only directly (`core.sync.neverRelay`), from the setting to the
+/// endpoint. Every bind asks for the real `Reach::network`; the test keeps
+/// what it asked for and binds on loopback with its relay choice, n0's relays
+/// swapped for a local one, so nothing reaches the internet.
+#[tokio::test(flavor = "multi_thread")]
+async fn connect_only_directly_rebinds_the_endpoint_without_relays() {
+    let dir = tempfile::tempdir().unwrap();
+    let store = LibraryStore::in_memory().await.unwrap();
+    let accounts = AccountService::open(store.clone(), Bus::default())
+        .await
+        .unwrap();
+    let settings = SettingsService::new(store.clone());
+    settings
+        .register_core(&AppPaths::under(dir.path()))
+        .unwrap();
+    let (local_relay, _relay) = caskade_sync::testing::local_relay().await;
+    let asked = Arc::new(Mutex::new(Vec::<Reach>::new()));
+    let binds = asked.clone();
+    let devices = Devices::with_reach_from(
+        store,
+        accounts,
+        Arc::new(MemoryKeyStore::default()),
+        move |network| {
+            let relays = match network.relays {
+                Relays::N0 => local_relay.clone(),
+                _ => Relays::Never,
+            };
+            binds.lock().unwrap().push(network);
+            Reach {
+                relays,
+                ..Reach::loopback()
+            }
+        },
+    );
+    devices.set_settings(settings.clone());
+    devices.start();
+    let set = async |sync| settings.set("core.sync", sync, None).await.unwrap();
+    let last_asked = || {
+        asked
+            .lock()
+            .unwrap()
+            .last()
+            .map(|reach| reach.relays.clone())
+    };
+    let binds = || asked.lock().unwrap().len();
+
+    // Off by default: the endpoint has relays, and its relay answers.
+    eventually("the relay answers", || async {
+        devices.status().await.this_device.internet == Some(true)
+    })
+    .await;
+    assert!(matches!(last_asked(), Some(Relays::N0)));
+    assert_eq!(binds(), 1);
+    let id = devices.status().await.this_device.id;
+
+    set(json!({ "categories": {}, "neverRelay": true, "port": null })).await;
+    eventually("the endpoint rebinds without relays", || async {
+        let this_device = devices.status().await.this_device;
+        binds() == 2 && this_device.listening && this_device.internet.is_none()
+    })
+    .await;
+    assert!(matches!(last_asked(), Some(Relays::Never)));
+    assert_eq!(devices.status().await.this_device.id, id, "the same device");
+
+    // A category choice shares the section but doesn't rebind; the change
+    // after it does, and relays come back. Changes apply in order.
+    set(json!({
+        "categories": { "library": "thisDeviceOnly" },
+        "neverRelay": true,
+        "port": null,
+    }))
+    .await;
+    set(json!({ "categories": {}, "neverRelay": false, "port": null })).await;
+    eventually("the relay answers again", || async {
+        devices.status().await.this_device.internet == Some(true)
+    })
+    .await;
+    assert!(matches!(last_asked(), Some(Relays::N0)));
+    assert_eq!(binds(), 3, "only changes to the connection rebind");
 }
 
 #[tokio::test(flavor = "multi_thread")]
