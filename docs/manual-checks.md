@@ -31,7 +31,9 @@ desktop dialog, UAC, the Windows service and firewall, Sunshine, Moonlight,
 `caskade --launch`, `/dev/uinput`, ACPI S3 sleep. Not real: GPUs (libx264 and
 software decoding), Wi-Fi, routers, sound on Windows, physical pads (a
 `uinput` pad on the client). Screens were Xvfb on Linux with Openbox as the
-window manager, not Cinnamon, GNOME or KDE.
+window manager, not Cinnamon, GNOME or KDE. A kernel without
+`linux-modules-extra` has no `uhid`, so turning hosting on fails cleanly
+there: the administrator step undoes itself and hosting stays off.
 
 These runs are enough for the issues closed on them on 6 Nov: #10, #12, #21,
 #22, #23, #25 and #31. Each closing comment gives its limits, and those
@@ -95,14 +97,18 @@ debug build for L1 and L7 (`just dev`), and Sunshine installed by you for L6.
   bulk edit and Refresh details, then restart Caskade and let it scan.
   **Pass:** your values, play sessions, installed games' folders and
   collections are all still there. (#8)
-- [ ] **L3.** Settings → Streaming: turn hosting on and cancel the password
-  prompt. Then turn it on again and allow it. **Pass:** each time there is
-  exactly one prompt, which names Caskade game streaming and shows none of a
-  script. After the cancel, hosting is off and
+- [ ] **L3.** Settings → Streaming: turn hosting on and dismiss the password
+  prompt. Then turn it on again and answer it with your real password. **Pass:**
+  each time there is exactly one prompt, which names Caskade game streaming
+  and shows none of a script. Dismissing it reports a cancel ("Nothing changed:
+  the administrator's permission wasn't given."), not an error or a refusal;
+  hosting is off and
   `/etc/udev/rules.d` and `/etc/modules-load.d` are unchanged. After
   allowing, `60-caskade-streaming.rules` and `60-caskade-streaming.conf` are
   there, `ls -l /dev/uinput /dev/uhid` shows group `input`, `getfacl` shows
-  your user on them, and `lsmod | grep uhid` lists uhid. (#21)
+  your user on them, and `lsmod | grep uhid` lists uhid. The VM proof of
+  today's pkexec command answered through a polkit rule, so a typed password
+  and a dismissed prompt are this check's to confirm. (#21)
 - [ ] **L4.** Put a file of your own in `/etc/udev/rules.d` first, then turn
   hosting off. **Pass:** one prompt; both Caskade files are gone, your file
   is still there, and `~/.local/share/caskade/streaming/host` holds no
