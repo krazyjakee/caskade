@@ -4632,6 +4632,11 @@ export type HostStatus_Deserialize = {
 	 *  that won't work. Streaming works otherwise.
 	 */
 	warning?: string | null,
+	/**
+	 *  Running, but other devices can't reach it, and the warning says why.
+	 *  It stays ready, so it works as soon as they can.
+	 */
+	unreachable?: boolean,
 };
 
 export type HostStatus_Serialize = {
@@ -4645,6 +4650,11 @@ export type HostStatus_Serialize = {
 	 *  that won't work. Streaming works otherwise.
 	 */
 	warning: string | null,
+	/**
+	 *  Running, but other devices can't reach it, and the warning says why.
+	 *  It stays ready, so it works as soon as they can.
+	 */
+	unreachable: boolean,
 };
 
 /**  Where this device's identity stands. */

@@ -81,6 +81,10 @@ pub struct HostStatus {
     /// that won't work. Streaming works otherwise.
     #[serde(default)]
     pub warning: Option<String>,
+    /// Running, but other devices can't reach it, and the warning says why.
+    /// It stays ready, so it works as soon as they can.
+    #[serde(default)]
+    pub unreachable: bool,
 }
 
 /// The categories Windows gives the networks this machine is on, one a
@@ -328,6 +332,7 @@ impl StreamingHost {
                     version: None,
                     problem: None,
                     warning: None,
+                    unreachable: false,
                 }),
                 watch: Mutex::default(),
                 switching: tokio::sync::Mutex::new(()),
@@ -351,21 +356,20 @@ impl StreamingHost {
             version,
             problem,
             warning: None,
+            unreachable: false,
         };
     }
 
     /// Ready, with what this machine can't do (§4.5): looked at now.
     async fn set_ready(&self, version: Option<String>) {
         let (checks, os) = (self.inner.checks.clone(), self.inner.os);
-        let warning = tokio::task::spawn_blocking(move || checks(os).warning(os))
-            .await
-            .ok()
-            .flatten();
+        let looked = tokio::task::spawn_blocking(move || checks(os)).await.ok();
         *crate::lock(&self.inner.status) = HostStatus {
             state: HostState::Ready,
             version,
             problem: None,
-            warning,
+            warning: looked.and_then(|checks| checks.warning(os)),
+            unreachable: looked.is_some_and(|checks| !checks.reachable),
         };
     }
 

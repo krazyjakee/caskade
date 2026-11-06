@@ -968,7 +968,32 @@ async fn a_ready_host_says_when_pads_or_a_screen_wont_work() {
     fine.start().await;
     until("ready", || fine.status().state == HostState::Ready).await;
     assert_eq!(fine.status().warning, None);
+    assert!(!fine.status().unreachable);
     fine.shutdown();
+
+    // Ready above "nobody can reach this" would disagree with it: the status
+    // says so, and the host goes on running for when somebody can. A warning
+    // that leaves it reachable doesn't.
+    let cut_off = host(|os| HostChecks {
+        reachable: false,
+        ..HostChecks::fine(os)
+    });
+    cut_off.start().await;
+    until("ready", || cut_off.status().state == HostState::Ready).await;
+    let status = cut_off.status();
+    assert!(status.unreachable, "{status:?}");
+    assert!(status.warning.unwrap().contains("public"));
+    cut_off.shutdown();
+    assert!(!cut_off.status().unreachable);
+
+    let no_screen = host(|os| HostChecks {
+        screen: false,
+        ..HostChecks::fine(os)
+    });
+    no_screen.start().await;
+    until("ready", || no_screen.status().state == HostState::Ready).await;
+    assert!(!no_screen.status().unreachable);
+    no_screen.shutdown();
     assert!(
         HostChecks {
             screen: true,

@@ -62,9 +62,10 @@ real hardware, but they say what is already known to work.
 | S13 | Passed |
 
 Fixed since: a host no longer lists itself under Play from other devices; a
-link that has just dropped no longer shows "Internet, through a server".
+link that has just dropped no longer shows "Internet, through a server";
+"Ready" no longer shows above the public-network warning.
 
-Not fixed, and worth a look: "Ready" still shows above the public-network warning; the polkit
+Not fixed, and worth a look: the polkit
 dialog prints the script's first lines. A system clock that stepped while a game
 ran left Stop unable to match its process by start time, retrying until restart
 (seen after a VM paused for hours, whose clock then jumped); fixed since:

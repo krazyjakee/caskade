@@ -341,6 +341,20 @@ it("says when controllers or a screen won't work on this host (#260)", async () 
   expect(screen.getByRole("button", { name: "Repair" })).toBeTruthy();
 });
 
+it("doesn't call a host nobody can reach ready", async () => {
+  const warning =
+    "Other devices can't reach this PC while Windows treats its network as public. Set the network to private in Windows Settings → Network & internet.";
+  open("/settings?tab=streaming", {
+    hosting: { state: "ready", version: "1", problem: null, warning, unreachable: true },
+  });
+  expect(await screen.findByText(warning)).toBeTruthy();
+  expect(screen.getByText("Needs attention.")).toBeTruthy();
+  expect(screen.queryByText("Ready. Devices on this network can pair and play.")).toBeNull();
+  expect(document.querySelector("[data-part=host-state]")?.getAttribute("data-status")).toBe(
+    "needsAttention",
+  );
+});
+
 it("tells a standard account on a host that an admin enters pairing codes (#52)", async () => {
   open("/settings?tab=streaming", {
     accounts: [

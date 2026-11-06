@@ -109,7 +109,12 @@ function HostingSection() {
           onRetry={() => void status.refetch()}
         />
       ) : (
-        <HostStateLine state={state} problem={status.data?.problem ?? null} switching={switching} />
+        <HostStateLine
+          state={state}
+          problem={status.data?.problem ?? null}
+          unreachable={status.data?.unreachable ?? false}
+          switching={switching}
+        />
       )}
       {state === "ready" && status.data?.warning && (
         <p
@@ -165,13 +170,21 @@ function HostingSection() {
 function HostStateLine({
   state,
   problem,
+  unreachable,
   switching,
 }: {
   state: HostState | undefined;
   problem: string | null;
+  /** Running, but the warning below says nobody can reach it. */
+  unreachable: boolean;
   switching: boolean;
 }) {
-  const shown = switching && (state === "off" || state === undefined) ? "settingUp" : state;
+  const shown =
+    switching && (state === "off" || state === undefined)
+      ? "settingUp"
+      : state === "ready" && unreachable
+        ? "needsAttention"
+        : state;
   return (
     <p data-part="host-state" data-status={shown} role="status" className="mt-1 text-sm">
       {shown === "ready" ? (

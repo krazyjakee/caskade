@@ -154,9 +154,9 @@ On Windows, `dd_configuration_option = ensure_active` with resolution, refresh r
   - LizardByte's Virtual HID Driver isn't detected yet; `gamepad_driver = all` for its users is open.
 - **Checks at Ready** (`HostChecks::here`, `HostStatus.warning`):
   - Linux: a desktop session (`DISPLAY` or `WAYLAND_DISPLAY`), and `/dev/uinput` writable (the #255 rule).
-  - Windows: the `ViGEmBus` service running.
+  - Windows: the `ViGEmBus` service running, and a network the firewall rules cover (private or domain).
 
-  A host with no screen ("Connect a monitor or a display dummy plug") or pads that won't work says so in Settings → Streaming. It is reported, not hidden, and Repair re-runs the administrator step.
+  On a public network nobody can reach the host: `HostStatus.unreachable` makes Settings → Streaming read Needs attention above the warning, and the host stays `Ready` so publishing and pairing work once the network changes. A host with no screen ("Connect a monitor or a display dummy plug") or pads that won't work says so in Settings → Streaming. It is reported, not hidden, and Repair re-runs the administrator step.
 - **Tests.**
   - The configuration per OS.
   - The driver joining the Windows prompt, staying after the undo, and not asked for when already there.
