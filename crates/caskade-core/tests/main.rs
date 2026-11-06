@@ -29,6 +29,10 @@ mod peer_backups;
 mod peer_downloads;
 #[cfg(feature = "net")]
 mod presence;
+#[cfg(all(feature = "net", any(target_os = "linux", windows)))]
+mod proof_game;
+#[cfg(all(feature = "net", target_os = "linux"))]
+mod proton_real;
 mod rom_scan;
 #[cfg(feature = "net")]
 mod romm;
