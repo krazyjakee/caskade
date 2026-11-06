@@ -13,7 +13,7 @@ use caskade_core::{
 };
 use std::{
     process::{Child, Command, Stdio},
-    time::{Duration, SystemTime, UNIX_EPOCH},
+    time::{Duration, SystemTime},
 };
 use sysinfo::{Pid, ProcessRefreshKind, ProcessesToUpdate, System};
 
@@ -30,7 +30,9 @@ fn step(seconds: i64) {
         .status();
     #[cfg(unix)]
     let status = {
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+        let now = SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap();
         let then = now.as_secs().checked_add_signed(seconds).unwrap();
         Command::new("sudo")
             .args(["-n", "date", "-u", "-s"])
