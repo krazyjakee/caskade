@@ -439,7 +439,9 @@ impl CopyGate {
         state.sent.remove(&(peer, root));
     }
 
-    /// Bytes sent to `peer` of `root` so far, by the provider's count.
+    /// Bytes sent to `peer` of `root` so far, by the provider's count. Bytes
+    /// a dropped connection took with it were sent, and are sent again when
+    /// the copy resumes, so this can pass the collection's size.
     pub fn sent(&self, peer: EndpointId, root: &str) -> u64 {
         let Ok(root) = parse(root) else { return 0 };
         let state = self.inner.lock().unwrap_or_else(|e| e.into_inner());

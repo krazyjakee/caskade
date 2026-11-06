@@ -215,6 +215,20 @@ async fn a_folder_received_again_after_its_files_moved_arrives_whole() {
     }
 }
 
+/// What `gate` counted for `peer`, once a closed connection's last progress
+/// has come in.
+async fn settled(gate: &CopyGate, peer: EndpointId, root: &str) -> u64 {
+    let mut sent = gate.sent(peer, root);
+    loop {
+        tokio::time::sleep(Duration::from_millis(200)).await;
+        let now = gate.sent(peer, root);
+        if now == sent {
+            return sent;
+        }
+        sent = now;
+    }
+}
+
 #[tokio::test]
 async fn an_interrupted_copy_resumes_without_starting_over() {
     let temp = tempfile::tempdir().unwrap();
@@ -266,6 +280,8 @@ async fn an_interrupted_copy_resumes_without_starting_over() {
         "the first try finished before it was cut"
     );
 
+    let first_sent = settled(&gate, dialer.id(), &offered.root).await;
+
     // Back: only what's missing comes.
     let connection = dialer
         .connect(endpoint.id(), &direct(&endpoint))
@@ -282,12 +298,15 @@ async fn an_interrupted_copy_resumes_without_starting_over() {
         offered.size
     );
     // Only what went counts as sent: what the first try left behind isn't
-    // sent again, or a sender would say 100 % with this much still to go.
+    // counted again, or a sender would say 100 % with this much still to go.
+    // The limit starts from what the first try counted, not from the size:
+    // bytes the connection took down with it were sent, and go again, as
+    // many as the timing makes them.
     let sent = gate.sent(dialer.id(), &offered.root);
+    let missing = offered.size - kept;
     assert!(
-        sent <= offered.size + 1024 * 1024,
-        "the sender counted {sent} of {}",
-        offered.size
+        sent <= first_sent + missing + 1024 * 1024,
+        "the sender counted {sent}: {first_sent} before the cut, {missing} were missing"
     );
     let target = temp.path().join("installed");
     receiving.export(&offered.root, &target).await.unwrap();
