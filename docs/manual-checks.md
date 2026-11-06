@@ -443,12 +443,22 @@ Tick or decide these on the issue itself:
   issue, and #6 and #7 closed on 4 Nov. "Record offline, rate-limited…
   operations" is in the issue's 30 Oct comments, and "Confirm no backlog… was
   added" in eng1's audit there.
-- #10: boxes 2–4 were met by tests (the 2 Nov comment); O5 and O6 repeat
-  them on real machines.
+- #10: nothing left to tick. It closed on 6 Nov with all four boxes ticked:
+  box 1 on the virtual machine run and `lan_unplugged::two_devices_pair_sync_and_copy`,
+  boxes 2–4 on the tests named at the end of the issue's body. O4–O6 repeat
+  them on real machines and are optional.
 - #20: "Every rule holds with the webview bypassed" is met by the adapter
   tests listed in its 3 Nov comment.
-- #21: "No webview-supplied string reaches the elevated process" is met by the
-  tests listed in its evidence comment.
+- #21: nothing left to tick. It closed on 6 Nov with all three boxes ticked.
+  "No webview-supplied string reaches the elevated process" is met by
+  `elevation::tests::the_linux_command_is_constants_and_step_names`,
+  `the_windows_launcher_passes_names_and_caskades_own_paths` and
+  `a_tampered_record_never_reaches_a_prompt`, as the issue's body says. Its
+  2 Nov evidence comment also names
+  `the_windows_elevated_side_takes_names_and_rolls_back`, which no longer
+  exists: `a_changed_file_or_manifest_is_refused_and_a_failure_undoes_everything`
+  now proves unknown steps and foreign folders run nothing. That comment's
+  `/bin/sh -c` is now `/bin/sh -s`, with the script on standard input.
 - #31: "Repair fixes each listed breakage in a test" is
   `host::tests::repair_fixes_each_breakage`; L5 and W7 try it for real.
 - Trackers #8, #20 and #33: their sub-issue boxes tick when the sub-issues
