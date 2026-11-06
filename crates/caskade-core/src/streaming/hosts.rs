@@ -31,6 +31,9 @@ use std::{
 /// The port hosts answer `/serverinfo` on.
 pub const HTTP_PORT: u16 = 47989;
 const SETTINGS: &str = "core.streaming";
+/// Where the id of this device's own host stays across restarts. Never in a
+/// backup: restored on another PC, it would hide this one from it.
+pub const OWN_HOST_KEY: &str = "streaming.ownHost";
 
 /// Whether a host can be streamed from now.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
@@ -280,7 +283,8 @@ struct Inner {
     devices: std::sync::OnceLock<crate::devices::Devices>,
     /// The port this device's own host would answer on, over loopback.
     own_port: u16,
-    /// The id of this device's own host, once it has answered.
+    /// The id of this device's own host, once it has answered, here or
+    /// before a restart ([`OWN_HOST_KEY`]).
     own: Mutex<Option<String>>,
 }
 
@@ -462,12 +466,33 @@ impl StreamHosts {
         hosts
     }
 
-    /// Whether `id` is this device's own host, as far as it has answered.
-    /// By id: another device can have this device's name.
+    /// Whether `id` is this device's own host, as far as it has answered,
+    /// now or before a restart. By id: another device can have this device's
+    /// name.
     fn is_own(&self, id: &str) -> bool {
         crate::lock(&self.inner.own)
             .as_ref()
             .is_some_and(|own| own.eq_ignore_ascii_case(id))
+    }
+
+    /// Learns this device's own host: asked on loopback, else as it last
+    /// answered, which a host switched off can't say itself.
+    async fn find_own(&self) {
+        let store = &self.inner.store;
+        if let Some(own) = self.ask("127.0.0.1", self.inner.own_port).await {
+            if !self.is_own(&own.id)
+                && let Err(error) = store
+                    .set_setting(OWN_HOST_KEY, &serde_json::json!(own.id))
+                    .await
+            {
+                tracing::debug!(%error, "this device's host id not kept");
+            }
+            *crate::lock(&self.inner.own) = Some(own.id);
+        } else if crate::lock(&self.inner.own).is_none()
+            && let Ok(Some(serde_json::Value::String(own))) = store.get_setting(OWN_HOST_KEY).await
+        {
+            *crate::lock(&self.inner.own) = Some(own);
+        }
     }
 
     /// Looks for hosts once: mDNS, typed addresses and paired hosts, each
@@ -476,9 +501,7 @@ impl StreamHosts {
         let _refreshing = self.inner.refreshing.lock().await;
         // A host on this device answers on loopback, and is remembered once
         // it stops: it's found on the network like any other.
-        if let Some(own) = self.ask("127.0.0.1", self.inner.own_port).await {
-            *crate::lock(&self.inner.own) = Some(own.id);
-        }
+        self.find_own().await;
         let mut candidates: Vec<(String, u16)> = Vec::new();
         match mdns::browse(self.inner.mdns, self.inner.timing.listen).await {
             Ok(found) => candidates.extend(

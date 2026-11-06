@@ -242,6 +242,13 @@ fn stream_quality_stays_on_each_device() {
     assert_eq!(rule.classification().disposition, Disposition::Local);
 }
 
+/// Which host is this device's own means nothing on another device.
+#[test]
+fn a_devices_own_host_stays_on_it() {
+    let rule = policy::setting("streaming.ownHost").unwrap();
+    assert_eq!(rule.classification().disposition, Disposition::Local);
+}
+
 #[tokio::test]
 async fn category_choices_are_registered_validated_and_persisted_as_device_settings() {
     let settings = settings().await;

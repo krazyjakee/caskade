@@ -79,6 +79,10 @@ pub(super) async fn fill(profile: &Profile) {
         .await
         .unwrap();
     store
+        .set_setting("streaming.ownHost", &serde_json::json!(SECRET))
+        .await
+        .unwrap();
+    store
         .set_setting("app.kept", &serde_json::json!("kept"))
         .await
         .unwrap();
@@ -237,11 +241,9 @@ async fn a_backup_holds_the_library_and_chosen_components_without_secrets() {
         .await
         .unwrap();
     assert!(keys.contains(&"app.kept".to_owned()), "{keys:?}");
-    assert!(
-        !keys
-            .iter()
-            .any(|k| k.starts_with("plugins.") || k.starts_with("storage."))
-    );
+    assert!(!keys.iter().any(|k| k.starts_with("plugins.")
+        || k.starts_with("storage.")
+        || k.starts_with("streaming.")));
     let raw = std::fs::read(temp.path().join("restored.sqlite")).unwrap();
     assert!(!raw.windows(SECRET.len()).any(|w| w == SECRET.as_bytes()));
 }

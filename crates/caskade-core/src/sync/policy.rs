@@ -848,6 +848,10 @@ pub const SETTINGS: &[Rule] = &[
         "this device's endpoint id, name and kind belong to it; peers learn them while pairing",
     ),
     local(
+        "streaming.ownHost",
+        "this device's own streaming host is no other device's",
+    ),
+    local(
         "backup.state",
         "backup scheduler state and archive locations are local",
     ),

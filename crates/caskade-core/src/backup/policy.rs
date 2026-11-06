@@ -43,6 +43,10 @@ pub const EXCLUDED_SETTINGS: &[(&str, &str)] = &[
         "this device's endpoint id and name, which a restore on another machine mustn't take over",
     ),
     (
+        "streaming.ownHost",
+        "this device's own streaming host: on another machine it would hide this one from it",
+    ),
+    (
         "storage.move.",
         "moves under way, which belong to this machine's folders",
     ),

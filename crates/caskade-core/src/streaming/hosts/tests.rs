@@ -303,6 +303,35 @@ async fn a_host_paired_with_itself_is_left_out_with_its_games() {
     let _ = &f.temp;
 }
 
+/// A restart with hosting off: nothing answers on loopback, and a device
+/// paired with itself stays away all the same.
+#[tokio::test]
+async fn a_host_paired_with_itself_stays_left_out_after_a_restart() {
+    let f = fixture(Some(PAIRED)).await;
+    let inner = &f.hosts.inner;
+    let restarted = StreamHosts::with(
+        f.store.clone(),
+        Bus::default(),
+        inner.settings.clone(),
+        inner.client.clone(),
+        inner.mdns,
+        inner.timing,
+    )
+    .unwrap()
+    .with_own_port(f.serverinfo.address().port())
+    .with_client_state(f.temp.path().join("client-state"));
+    let hosts = f.hosts.with_own_port(f.serverinfo.address().port());
+    hosts.refresh().await.unwrap();
+    assert_eq!(hosts.hosts(), []);
+
+    f.on.store(false, std::sync::atomic::Ordering::SeqCst);
+    f.serverinfo.reset().await;
+    restarted.refresh().await.unwrap();
+    assert_eq!(restarted.hosts(), []);
+    assert!(restarted.paired().await.is_empty());
+    let _ = &f.temp;
+}
+
 #[tokio::test]
 async fn a_typed_address_is_kept_and_asked() {
     let f = fixture(None).await;
