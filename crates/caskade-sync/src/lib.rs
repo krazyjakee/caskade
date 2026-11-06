@@ -62,6 +62,7 @@ pub mod link;
 pub mod link_ticket;
 pub mod opening;
 pub mod pairing;
+pub mod punch;
 pub mod share;
 pub mod swarm;
 #[cfg(feature = "test-utils")]

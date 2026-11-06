@@ -46,6 +46,22 @@ pub enum Relays {
     Local(iroh::RelayMap),
 }
 
+impl Relays {
+    /// `builder` with these relays; `None` with none to use.
+    pub(crate) fn on(&self, builder: iroh::endpoint::Builder) -> Option<iroh::endpoint::Builder> {
+        match self {
+            Self::N0 => Some(builder.relay_mode(RelayMode::Default)),
+            Self::Never => None,
+            #[cfg(feature = "test-utils")]
+            Self::Local(map) => Some(
+                builder
+                    .relay_mode(RelayMode::Custom(map.clone()))
+                    .ca_tls_config(iroh::tls::CaTlsConfig::insecure_skip_verify()),
+            ),
+        }
+    }
+}
+
 /// Which IP sockets an endpoint binds.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Ip {
@@ -261,6 +277,28 @@ impl Session {
         addrs.sort();
         addrs.dedup();
         addrs
+    }
+
+    /// The IP address this connection has settled on, waiting at most `wait`
+    /// for one: `None` while only a relay carries it. A session often starts
+    /// through a relay, and hole punching takes a moment.
+    pub async fn direct_path(&self, wait: Duration) -> Option<std::net::SocketAddr> {
+        let deadline = tokio::time::Instant::now() + wait;
+        loop {
+            let selected = self
+                .connection
+                .paths()
+                .iter()
+                .find(|path| path.is_selected())
+                .and_then(|path| match path.remote_addr() {
+                    iroh::TransportAddr::Ip(addr) => Some(*addr),
+                    _ => None,
+                });
+            if selected.is_some() || tokio::time::Instant::now() >= deadline {
+                return selected;
+            }
+            tokio::time::sleep(Duration::from_millis(50)).await;
+        }
     }
 
     pub fn connection(&self) -> &Connection {

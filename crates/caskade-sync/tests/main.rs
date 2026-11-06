@@ -3,4 +3,5 @@ mod ending;
 mod loopback;
 mod network;
 mod pairing;
+mod punch;
 mod swarm;

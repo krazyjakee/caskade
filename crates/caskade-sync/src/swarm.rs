@@ -14,6 +14,7 @@
 
 use std::net::SocketAddr;
 use std::str::FromStr;
+use std::time::Duration;
 
 use futures_util::StreamExt as _;
 use iroh::address_lookup::MemoryLookup;
@@ -24,6 +25,7 @@ use iroh_blobs::{Hash, HashAndFormat};
 use crate::copy::CopyStore;
 use crate::error::{Error, Result};
 use crate::identity::Identity;
+use crate::punch::{OpenPort, addrs_of, bind_again, on_port};
 
 fn swarm_error(error: impl std::fmt::Display) -> Error {
     Error::Copy {
@@ -74,8 +76,37 @@ impl SwarmDialer {
         Ok(Self { endpoint, lookup })
     }
 
+    /// Binds one for `identity` on `open`'s port, for a transfer through two
+    /// routers (`crate::punch`), and what to tell the other device.
+    pub async fn bind_on(identity: &Identity, open: &OpenPort) -> Result<(Self, Vec<SocketAddr>)> {
+        let lookup = MemoryLookup::new();
+        let endpoint =
+            bind_again(|| on_port(identity, open.port).address_lookup(lookup.clone())).await?;
+        let addrs = addrs_of(&endpoint, open).await;
+        Ok((Self { endpoint, lookup }, addrs))
+    }
+
     pub fn id(&self) -> EndpointId {
         self.endpoint.id()
+    }
+
+    /// Whether `peer` answers at `addrs`, within `wait`. The fetch itself
+    /// gives a provider a second to answer, too little for a router's hole
+    /// to open.
+    pub async fn reaches(&self, peer: EndpointId, addrs: &[SocketAddr], wait: Duration) -> bool {
+        if addrs.is_empty() {
+            return false;
+        }
+        let addr =
+            EndpointAddr::from_parts(peer, addrs.iter().map(|addr| TransportAddr::Ip(*addr)));
+        let connecting = self.endpoint.connect(addr, iroh_blobs::ALPN);
+        match tokio::time::timeout(wait, connecting).await {
+            Ok(Ok(connection)) => {
+                connection.close(0u32.into(), b"done");
+                true
+            }
+            _ => false,
+        }
     }
 
     /// Remembers where `providers` are: their direct addresses only.
@@ -122,11 +153,7 @@ pub async fn fetch_from(
     store.settle(content).await.map_err(swarm_error)?;
     let blobs = store.blobs();
     // Kept from the start, so a stopped fetch keeps what arrived.
-    blobs
-        .tags()
-        .set(tag, content)
-        .await
-        .map_err(swarm_error)?;
+    blobs.tags().set(tag, content).await.map_err(swarm_error)?;
     let downloader = blobs.downloader(&dialer.endpoint);
     let request = DownloadRequest::new(content, Shuffled::new(reachable), SplitStrategy::Split);
     let mut items = downloader
@@ -143,11 +170,7 @@ pub async fn fetch_from(
             _ => {}
         }
     }
-    let have = blobs
-        .remote()
-        .local(content)
-        .await
-        .map_err(swarm_error)?;
+    let have = blobs.remote().local(content).await.map_err(swarm_error)?;
     if !have.is_complete() {
         return Err(swarm_error("the transfer ended early"));
     }

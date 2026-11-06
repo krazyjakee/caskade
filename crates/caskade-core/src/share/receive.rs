@@ -12,6 +12,7 @@ use std::time::{Duration, SystemTime};
 use async_trait::async_trait;
 use caskade_installer::exec::CancellationToken as InstallCancel;
 use caskade_sync::share::ShareLink;
+use caskade_sync::swarm::SwarmDialer;
 use caskade_sync::{EndpointId, Purpose, Session};
 use serde::{Deserialize, Serialize};
 use tokio_util::sync::CancellationToken;
@@ -22,6 +23,7 @@ use super::wire::{MAX_ABOUT, MAX_LINE, Message};
 use crate::install::{
     FetchFailure, Fetched, JobSnapshot, PeerCopyTarget, PeerFetcher, PeerProgress,
 };
+use crate::transfer::{PLAIN_WAIT, PUNCH_WAIT};
 use crate::{Error, Result, lock};
 
 /// How long the sharer gets for each frame: reading a large game takes a
@@ -29,6 +31,8 @@ use crate::{Error, Result, lock};
 const FRAME_WAIT: Duration = Duration::from_secs(300);
 /// How long the sharer gets to answer a look at its link.
 const ABOUT_WAIT: Duration = Duration::from_secs(30);
+/// How long a dial through a hole made for it gets.
+const DIAL_WAIT: Duration = Duration::from_secs(15);
 
 /// How the link reached the sharer.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
@@ -205,10 +209,9 @@ impl Shares {
             return Err(Error::Invalid(unreachable()));
         }
         let about = tokio::time::timeout(ABOUT_WAIT, session.reader().read(MAX_ABOUT)).await;
-        let reach = if session.direct_addrs().is_empty() {
-            ShareReach::RelayOnly
-        } else {
-            ShareReach::Direct
+        let reach = match session.direct_path(PUNCH_WAIT).await {
+            Some(_) => ShareReach::Direct,
+            None => ShareReach::RelayOnly,
         };
         session.end().await;
         match about {
@@ -443,6 +446,61 @@ struct Offered {
 }
 
 impl ShareFetcher {
+    /// Makes a way through both routers for `session`'s files: a port of its
+    /// own at each end, each dialling the other (`caskade_sync::punch`).
+    /// Answers the dialer on this end and where the sharer's end is; `None`
+    /// when no way opens. `session` also carries what the share needs of this
+    /// recipient meanwhile.
+    async fn through_routers(
+        &self,
+        session: &mut Session,
+        job: &str,
+    ) -> std::result::Result<Option<(SwarmDialer, Vec<SocketAddr>)>, FetchFailure> {
+        let shares = &self.shares;
+        let Some((dialer, addrs)) = shares.inner.devices.punched_swarm().await else {
+            return Ok(None);
+        };
+        let closing = |dialer: SwarmDialer| async move {
+            dialer.close().await;
+            Ok(None)
+        };
+        if session
+            .writer()
+            .write(&Message::Punch { addrs })
+            .await
+            .is_err()
+        {
+            return closing(dialer).await;
+        }
+        let deadline = tokio::time::Instant::now() + PUNCH_WAIT * 2;
+        let theirs = loop {
+            let frame = tokio::time::timeout_at(deadline, session.reader().read(MAX_LINE)).await;
+            match frame {
+                Ok(Ok(Message::Punch { addrs })) => break addrs,
+                Ok(Ok(Message::Allow { peers })) => {
+                    if let Some(root) = lock(&shares.inner.received)
+                        .get(job)
+                        .and_then(|share| share.root.clone())
+                    {
+                        shares.let_in(job, &root, &peers);
+                    }
+                    let _ = session.writer().write(&Message::Allowed).await;
+                }
+                Ok(Ok(Message::Stopped)) => {
+                    dialer.close().await;
+                    return Err(FetchFailure::Failed(stopped()));
+                }
+                Ok(Ok(_)) => {}
+                _ => return closing(dialer).await,
+            }
+        };
+        if dialer.reaches(self.link.peer(), &theirs, DIAL_WAIT).await {
+            Ok(Some((dialer, theirs)))
+        } else {
+            closing(dialer).await
+        }
+    }
+
     /// Reads frames until the offer, reporting the sharer's reading.
     async fn offered(
         &self,
@@ -540,28 +598,44 @@ impl PeerFetcher for ShareFetcher {
             .min(offered.size);
         self.room(offered.size, have, root)?;
 
+        if session.direct_path(PUNCH_WAIT).await.is_none() {
+            session.close();
+            return Err(FetchFailure::Waiting(relay_only(&self.sharer)));
+        }
         // The sharer at every direct address known for it; never a relay.
         let mut addrs = session.direct_addrs();
         addrs.extend(offered.addrs.iter().copied());
         addrs.extend(self.link.addr().ip_addrs().copied());
         addrs.sort();
         addrs.dedup();
-        if session.direct_addrs().is_empty() && offered.addrs.is_empty() {
-            session.close();
-            return Err(FetchFailure::Waiting(relay_only(&self.sharer)));
-        }
-        let mut providers = vec![(self.link.peer(), addrs)];
-        providers.extend(
-            others
-                .into_iter()
-                .filter_map(|(id, addrs)| Some((id.parse::<EndpointId>().ok()?, addrs))),
-        );
         let dialer = shares
             .inner
             .devices
             .swarm_dialer()
             .await
             .map_err(FetchFailure::Failed)?;
+        let sharer = self.link.peer();
+        let (dialer, addrs, punched) = if dialer.reaches(sharer, &addrs, PLAIN_WAIT).await {
+            (dialer, addrs, false)
+        } else {
+            match self.through_routers(&mut session, job).await {
+                Ok(Some((dialer, addrs))) => (dialer, addrs, true),
+                Ok(None) => {
+                    session.close();
+                    return Err(FetchFailure::Waiting(relay_only(&self.sharer)));
+                }
+                Err(failure) => {
+                    session.close();
+                    return Err(failure);
+                }
+            }
+        };
+        let mut providers = vec![(sharer, addrs)];
+        providers.extend(
+            others
+                .into_iter()
+                .filter_map(|(id, addrs)| Some((id.parse::<EndpointId>().ok()?, addrs))),
+        );
 
         // Serves what it has to the share's other recipients meanwhile.
         {
@@ -635,6 +709,9 @@ impl PeerFetcher for ShareFetcher {
                 }
             }
         };
+        if punched {
+            dialer.close().await;
+        }
         if let Err(error) = outcome {
             tracing::debug!(%error, "a share stopped arriving; what arrived stays");
             // Stopped, or gone: the next frame says which.

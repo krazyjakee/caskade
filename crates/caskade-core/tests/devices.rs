@@ -329,6 +329,59 @@ async fn no_key_or_grant_reaches_the_settings_or_the_status() {
     }
 }
 
+/// A change of connection options closes the endpoint and binds again. With a
+/// fixed port the old socket can still hold it for a moment, and a device
+/// that gave up there would stay unreachable until it restarted.
+#[tokio::test(flavor = "multi_thread")]
+async fn rebinding_outlasts_a_port_still_held() {
+    let dir = tempfile::tempdir().unwrap();
+    let store = LibraryStore::in_memory().await.unwrap();
+    let accounts = AccountService::open(store.clone(), Bus::default())
+        .await
+        .unwrap();
+    let settings = SettingsService::new(store.clone());
+    settings
+        .register_core(&AppPaths::under(dir.path()))
+        .unwrap();
+    let devices = Devices::with_reach_from(
+        store,
+        accounts,
+        Arc::new(MemoryKeyStore::default()),
+        |network| Reach {
+            ip: match network.ip {
+                Ip::Any { port } => Ip::Loopback { port },
+                other => other,
+            },
+            ..Reach::loopback()
+        },
+    );
+    devices.set_settings(settings.clone());
+    devices.start();
+    eventually("it listens", || async {
+        devices.status().await.this_device.listening
+    })
+    .await;
+
+    let held = std::net::UdpSocket::bind("127.0.0.1:0").unwrap();
+    let port = held.local_addr().unwrap().port();
+    settings
+        .set(
+            "core.sync",
+            json!({ "categories": {}, "neverRelay": false, "port": port }),
+            None,
+        )
+        .await
+        .unwrap();
+    tokio::time::sleep(Duration::from_millis(500)).await;
+    assert!(!devices.status().await.this_device.listening);
+    drop(held);
+    eventually("it listens on that port", || async {
+        let this_device = devices.status().await.this_device;
+        this_device.listening && this_device.port == Some(port)
+    })
+    .await;
+}
+
 /// Connect only directly (`core.sync.neverRelay`), from the setting to the
 /// endpoint. Every bind asks for the real `Reach::network`; the test keeps
 /// what it asked for and binds on loopback with its relay choice, n0's relays

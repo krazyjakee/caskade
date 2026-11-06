@@ -121,6 +121,55 @@ async fn a_folder_arrives_whole_and_only_for_who_was_allowed() {
     assert!(gate.sent(dialer.id(), &offered.root) >= 3 * 1024 * 1024);
 }
 
+/// A collection holds no file modes: what a file is says whether it runs, so
+/// a Linux or macOS game arrives able to start, and its data doesn't.
+#[cfg(unix)]
+#[tokio::test]
+async fn programs_arrive_able_to_run() {
+    use std::os::unix::fs::PermissionsExt as _;
+    let temp = tempfile::tempdir().unwrap();
+    let folder = temp.path().join("Game");
+    std::fs::create_dir_all(folder.join("bin")).unwrap();
+    std::fs::write(folder.join("run.sh"), b"#!/bin/sh\nexec bin/game\n").unwrap();
+    std::fs::write(folder.join("bin/game"), b"\x7fELF and the rest").unwrap();
+    std::fs::write(folder.join("bin/mac"), b"\xcf\xfa\xed\xfe and the rest").unwrap();
+    std::fs::write(folder.join("data.pak"), vec![7u8; 4096]).unwrap();
+    std::fs::write(folder.join("empty"), b"").unwrap();
+    let offering = CopyStore::open(&temp.path().join("send")).await.unwrap();
+    let gate = CopyGate::default();
+    let endpoint = sender(&offering, &gate).await;
+    let offered = offering
+        .offer(&folder, "copy/test", |_, _| {})
+        .await
+        .unwrap();
+    let receiving = CopyStore::open(&temp.path().join("receive")).await.unwrap();
+    let dialer = DirectDialer::bind(None, true).await.unwrap();
+    gate.allow(dialer.id(), &offered.root).unwrap();
+    let connection = dialer
+        .connect(endpoint.id(), &direct(&endpoint))
+        .await
+        .unwrap();
+    receiving
+        .fetch(connection, &offered.root, "copy/in", |_| {})
+        .await
+        .unwrap();
+    let target = temp.path().join("installed");
+    receiving.export(&offered.root, &target).await.unwrap();
+    let runs = |name: &str| {
+        std::fs::metadata(target.join(name))
+            .unwrap()
+            .permissions()
+            .mode()
+            & 0o111
+            == 0o111
+    };
+    assert!(runs("run.sh"));
+    assert!(runs("bin/game"));
+    assert!(runs("bin/mac"));
+    assert!(!runs("data.pak"));
+    assert!(!runs("empty"));
+}
+
 /// #278: what a copy left in the store after its files moved on (an install
 /// takes them from the folder they were exported to) never stands in for
 /// the files when the same folder comes again.

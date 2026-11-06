@@ -48,6 +48,11 @@ where
 }
 
 async fn core(name: &str) -> Core {
+    // Loopback only, and no relay: whatever arrives came directly.
+    core_with(name, Reach::loopback()).await
+}
+
+async fn core_with(name: &str, reach: Reach) -> Core {
     let dir = tempfile::tempdir().unwrap();
     let store = LibraryStore::in_memory().await.unwrap();
     let accounts = AccountService::open(store.clone(), Bus::default())
@@ -57,12 +62,11 @@ async fn core(name: &str) -> Core {
     settings
         .register_core(&AppPaths::under(&dir.path().join("app")))
         .unwrap();
-    // Loopback only, and no relay: whatever arrives came directly.
     let devices = Devices::with_reach(
         store.clone(),
         accounts,
         Arc::new(MemoryKeyStore::default()),
-        Reach::loopback(),
+        reach,
     );
     devices.set_settings(settings.clone());
     let cache = dir.path().join("cache");
@@ -352,6 +356,56 @@ async fn stopping_a_share_fails_its_link_at_once_also_part_way() {
     // Forgotten once stopped.
     desk.shares.forget(&share).await.unwrap();
     assert!(desk.shares.list().await.unwrap().is_empty());
+}
+
+/// A sharer reached only through a relay always offers addresses of its
+/// own, and those say nothing about reaching it: the session decides, the
+/// job says so and no game comes. `scripts/two-networks.sh` has it behind
+/// real routers.
+#[tokio::test(flavor = "multi_thread")]
+async fn a_sharer_only_a_relay_reaches_is_waited_for() {
+    use caskade_core::devices::Reach;
+    use caskade_sync::Ip;
+    let (relays, _relay) = caskade_sync::testing::local_relay().await;
+    let desk = core_with(
+        "Desk",
+        Reach {
+            relays: relays.clone(),
+            ..Reach::loopback()
+        },
+    )
+    .await;
+    let friend = core_with(
+        "Friend's PC",
+        Reach {
+            relays,
+            ip: Ip::Off,
+            ..Reach::loopback()
+        },
+    )
+    .await;
+    let (entry, _) = add_celeste(&desk, 1024 * 1024).await;
+    within("the Desk has its relay", 20, || async {
+        desk.devices.status().await.this_device.internet == Some(true)
+    })
+    .await;
+    let (_, link) = shared(&desk, &entry).await;
+    let info = friend.shares.inspect(&link).await.unwrap();
+    assert_eq!(info.reach, ShareReach::RelayOnly);
+
+    let job = friend.shares.receive(&link, None).await.unwrap();
+    within("the job says why it waits", 20, || async {
+        friend
+            .install
+            .job(&job.id)
+            .and_then(|job| job.progress)
+            .is_some_and(|progress| progress.message.contains("Only a relay reaches"))
+    })
+    .await;
+    let waiting = friend.install.job(&job.id).unwrap();
+    assert!(!waiting.status.is_finished(), "{waiting:?}");
+    assert_eq!(waiting.progress.unwrap().bytes, 0);
+    friend.install.cancel(&job.id).unwrap();
 }
 
 #[tokio::test(flavor = "multi_thread")]

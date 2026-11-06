@@ -24,11 +24,13 @@ pub use gate::ShareAdmission;
 
 use std::collections::HashMap;
 use std::net::SocketAddr;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, OnceLock, Weak};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use async_trait::async_trait;
 use caskade_sync::pairing::{accept_link, pair_with_link};
+use caskade_sync::punch::OpenPort;
 use caskade_sync::{
     CodePairing, Config, DeviceInfo, EndpointAddr, EndpointId, Grant, Identity, KeyStore,
     LINK_LIFETIME, Link, Loaded, Lost, Paired, PairingLink, Purpose, Session, Sessions,
@@ -70,6 +72,9 @@ const FORGET_RETRY: Duration = Duration::from_secs(5 * 60);
 /// last exchange: library sync reaches each one every minute, so three
 /// minutes without a failure means it's still in reach.
 const LAST_LINK_FOR_MS: i64 = 3 * 60 * 1000;
+/// How often an endpoint that won't bind is tried again, and how long apart.
+const BIND_TRIES: u32 = 20;
+const BIND_RETRY: Duration = Duration::from_millis(250);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
@@ -256,8 +261,9 @@ struct Inner {
     /// Turns the reach the settings ask for into the one the endpoint binds:
     /// unchanged in the app; tests stay off the network with it.
     reach: Box<dyn Fn(Reach) -> Reach + Send + Sync>,
-    /// Direct dialers stay on 127.0.0.1, as a test's endpoint does.
-    loopback: bool,
+    /// The endpoint is on 127.0.0.1, as a test's is: direct dialers stay
+    /// there too.
+    loopback: AtomicBool,
     gate: Arc<Gate>,
     state: Mutex<State>,
     revision: watch::Sender<u64>,
@@ -306,6 +312,8 @@ struct State {
     forwarders: Vec<Forwarder>,
     /// Never use relays and the port the endpoint was bound with.
     bound_with: Option<(bool, Option<u16>)>,
+    /// The relays the endpoint was bound with.
+    relays: Option<caskade_sync::Relays>,
 }
 
 struct ActivePairing {
@@ -330,7 +338,7 @@ impl Devices {
     /// The service over `store`, with the device key in `keys` (the OS
     /// keychain in the app). Nothing runs until [`Devices::start`].
     pub fn new(store: LibraryStore, accounts: AccountService, keys: Arc<dyn KeyStore>) -> Self {
-        Self::build(store, accounts, keys, |network| network, false)
+        Self::build(store, accounts, keys, |network| network)
     }
 
     /// Binds on `reach` instead of the network, whatever the settings say:
@@ -341,20 +349,18 @@ impl Devices {
         keys: Arc<dyn KeyStore>,
         reach: Reach,
     ) -> Self {
-        let loopback = matches!(reach.ip, caskade_sync::Ip::Loopback { .. });
-        Self::build(store, accounts, keys, move |_| reach.clone(), loopback)
+        Self::build(store, accounts, keys, move |_| reach.clone())
     }
 
     /// Binds on what `reach` makes of the reach the settings ask for, at
-    /// every bind: for tests following a setting to the endpoint. `reach` has
-    /// to keep the endpoint off the network, on loopback.
+    /// every bind: for tests following a setting to the endpoint.
     pub fn with_reach_from(
         store: LibraryStore,
         accounts: AccountService,
         keys: Arc<dyn KeyStore>,
         reach: impl Fn(Reach) -> Reach + Send + Sync + 'static,
     ) -> Self {
-        Self::build(store, accounts, keys, reach, true)
+        Self::build(store, accounts, keys, reach)
     }
 
     fn build(
@@ -362,7 +368,6 @@ impl Devices {
         accounts: AccountService,
         keys: Arc<dyn KeyStore>,
         reach: impl Fn(Reach) -> Reach + Send + Sync + 'static,
-        loopback: bool,
     ) -> Self {
         Self {
             inner: Arc::new(Inner {
@@ -371,7 +376,7 @@ impl Devices {
                 keys,
                 settings: OnceLock::new(),
                 reach: Box::new(reach),
-                loopback,
+                loopback: AtomicBool::new(false),
                 gate: Arc::default(),
                 state: Mutex::new(State {
                     identity: IdentityStatus::Starting,
@@ -380,6 +385,7 @@ impl Devices {
                     pairing: None,
                     forwarders: Vec::new(),
                     bound_with: None,
+                    relays: None,
                 }),
                 revision: watch::channel(0).0,
                 binding: tokio::sync::Mutex::new(()),
@@ -728,7 +734,7 @@ impl Devices {
         {
             return Ok(dialer.clone());
         }
-        let bound = caskade_sync::copy::DirectDialer::bind(Some(&key), self.inner.loopback)
+        let bound = caskade_sync::copy::DirectDialer::bind(Some(&key), self.inner.on_loopback())
             .await
             .map_err(|error| Error::Invalid(error.to_string()))?;
         *dialer = Some((key.id(), bound.clone()));
@@ -751,11 +757,60 @@ impl Devices {
         {
             return Ok(dialer.clone());
         }
-        let bound = caskade_sync::swarm::SwarmDialer::bind(Some(&key), self.inner.loopback)
+        let bound = caskade_sync::swarm::SwarmDialer::bind(Some(&key), self.inner.on_loopback())
             .await
             .map_err(|error| Error::Invalid(error.to_string()))?;
         *swarm = Some((key.id(), bound.clone()));
         Ok(bound)
+    }
+
+    /// A port of its own for one transfer through two routers
+    /// (`caskade_sync::punch`), with a relay's word on its public address.
+    /// `None` with no relay to ask (Connect only directly), or none that
+    /// answers.
+    async fn open_port(&self) -> Option<(Identity, OpenPort)> {
+        let (key, relays) = {
+            let state = self.inner.lock();
+            (state.key.clone()?, state.relays.clone()?)
+        };
+        Some((key, caskade_sync::punch::open_port(&relays).await?))
+    }
+
+    /// [`Devices::direct_dialer`] on a port of its own, and the addresses to
+    /// tell the other device: for a device no plain dial reaches. Close it
+    /// after the transfer.
+    pub async fn punched_dialer(
+        &self,
+    ) -> Option<(caskade_sync::copy::DirectDialer, Vec<SocketAddr>)> {
+        let (key, open) = self.open_port().await?;
+        caskade_sync::copy::DirectDialer::bind_on(&key, &open)
+            .await
+            .ok()
+    }
+
+    /// [`Devices::swarm_dialer`] on a port of its own: see
+    /// [`Devices::punched_dialer`].
+    pub async fn punched_swarm(
+        &self,
+    ) -> Option<(caskade_sync::swarm::SwarmDialer, Vec<SocketAddr>)> {
+        let (key, open) = self.open_port().await?;
+        caskade_sync::swarm::SwarmDialer::bind_on(&key, &open)
+            .await
+            .ok()
+    }
+
+    /// What this device serves, on a port of its own for `peer`, who dials
+    /// from `theirs`. Close it after the transfer.
+    pub async fn file_server(
+        &self,
+        peer: EndpointId,
+        theirs: &[SocketAddr],
+    ) -> Option<caskade_sync::punch::FileServer> {
+        let blobs = self.inner.copy_provider.get()?.clone();
+        let (key, open) = self.open_port().await?;
+        caskade_sync::punch::FileServer::bind(&key, &open, blobs, peer, theirs)
+            .await
+            .ok()
     }
 
     /// Records how sync with a device is going, for the status.
@@ -814,6 +869,10 @@ impl Devices {
 impl Inner {
     fn lock(&self) -> std::sync::MutexGuard<'_, State> {
         self.state.lock().unwrap_or_else(|e| e.into_inner())
+    }
+
+    fn on_loopback(&self) -> bool {
+        self.loopback.load(Ordering::Relaxed)
     }
 
     fn changed(&self) {
@@ -954,6 +1013,11 @@ impl Inner {
         let settings = self.settings().await;
         self.lock().bound_with = Some((settings.never_relay, settings.port));
         let reach = (self.reach)(Reach::network(settings.never_relay, settings.port));
+        self.loopback.store(
+            matches!(reach.ip, caskade_sync::Ip::Loopback { .. }),
+            Ordering::Relaxed,
+        );
+        self.lock().relays = Some(reach.relays.clone());
         let config = Config {
             identity: Some(identity),
             reach,
@@ -962,7 +1026,17 @@ impl Inner {
             ..Config::default()
         };
         let handler = Arc::new(Handler(Arc::downgrade(self)));
-        match SyncEndpoint::bind(config, self.gate.clone(), handler).await {
+        // The endpoint just closed may hold a fixed port a moment longer.
+        let mut tries = 0;
+        let bound = loop {
+            let bound = SyncEndpoint::bind(config.clone(), self.gate.clone(), handler.clone());
+            match bound.await {
+                Err(_) if tries < BIND_TRIES => tries += 1,
+                bound => break bound,
+            }
+            tokio::time::sleep(BIND_RETRY).await;
+        };
+        match bound {
             Ok(endpoint) => {
                 let forwarders = self.forward(&endpoint);
                 let mut state = self.lock();

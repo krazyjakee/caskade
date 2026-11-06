@@ -16,7 +16,8 @@
 //! Game files never pass through a relay: the receiver pulls them over a
 //! [`DirectDialer`], an endpoint with this device's key and no relay
 //! transport at all, to the sender's direct addresses. Whatever paths iroh
-//! would choose, that connection has no relay path to choose.
+//! would choose, that connection has no relay path to choose. A device behind
+//! a router needs a way made for it first: [`crate::punch`].
 
 use std::collections::{HashMap, HashSet};
 use std::net::SocketAddr;
@@ -25,7 +26,7 @@ use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 
 use futures_util::StreamExt as _;
-use iroh::endpoint::Connection;
+pub use iroh::endpoint::Connection;
 use iroh::{Endpoint, EndpointAddr, EndpointId, RelayMode, TransportAddr, endpoint::presets};
 use iroh_blobs::api::blobs::{AddPathOptions, ExportMode, ExportOptions, ImportMode};
 use iroh_blobs::api::remote::GetProgressItem;
@@ -43,6 +44,7 @@ pub use iroh_blobs::BlobsProtocol;
 
 use crate::error::{Error, Result};
 use crate::identity::Identity;
+use crate::punch::{OpenPort, addrs_of, bind_again, on_port};
 
 /// Files one collection may hold.
 pub const MAX_FILES: usize = 1_000_000;
@@ -358,11 +360,13 @@ impl CopyStore {
                 .export_with_opts(ExportOptions {
                     hash: *hash,
                     mode,
-                    target: path,
+                    target: path.clone(),
                 })
                 .finish()
                 .await
                 .map_err(store_error)?;
+            #[cfg(unix)]
+            mark_program(&path).map_err(store_error)?;
         }
         Ok(())
     }
@@ -562,6 +566,39 @@ impl CopyGate {
     }
 }
 
+/// Whether a file starting with `start` runs by itself: a script, or a
+/// Linux or macOS program.
+#[cfg(unix)]
+fn is_program(start: &[u8]) -> bool {
+    const STARTS: [&[u8]; 7] = [
+        b"#!",
+        b"\x7fELF",
+        b"\xfe\xed\xfa\xce",
+        b"\xfe\xed\xfa\xcf",
+        b"\xce\xfa\xed\xfe",
+        b"\xcf\xfa\xed\xfe",
+        b"\xca\xfe\xba\xbe",
+    ];
+    STARTS.iter().any(|program| start.starts_with(program))
+}
+
+/// Lets a program at `path` run. A collection holds names and bytes, not
+/// modes, and a sender on Windows has none to give, so what a file is says
+/// whether it needs it: without this, a Linux game arrives and can't start.
+#[cfg(unix)]
+fn mark_program(path: &Path) -> std::io::Result<()> {
+    use std::io::Read as _;
+    use std::os::unix::fs::PermissionsExt as _;
+    let mut start = [0; 4];
+    let read = std::fs::File::open(path)?.read(&mut start)?;
+    if is_program(&start[..read]) {
+        let mut permissions = std::fs::metadata(path)?.permissions();
+        permissions.set_mode(permissions.mode() | 0o111);
+        std::fs::set_permissions(path, permissions)?;
+    }
+    Ok(())
+}
+
 /// An endpoint with this device's key and no relay transport: game files
 /// travel over it, so none can pass through a relay.
 #[derive(Debug, Clone)]
@@ -593,6 +630,14 @@ impl DirectDialer {
             .await
             .map_err(|source| Error::Bind { source })?;
         Ok(Self { endpoint })
+    }
+
+    /// Binds one for `identity` on `open`'s port, for a transfer through two
+    /// routers (`crate::punch`), and what to tell the other device.
+    pub async fn bind_on(identity: &Identity, open: &OpenPort) -> Result<(Self, Vec<SocketAddr>)> {
+        let endpoint = bind_again(|| on_port(identity, open.port)).await?;
+        let addrs = addrs_of(&endpoint, open).await;
+        Ok((Self { endpoint }, addrs))
     }
 
     /// Its endpoint id: this device's, unless it was bound for a test.

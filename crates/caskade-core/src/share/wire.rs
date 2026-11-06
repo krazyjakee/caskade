@@ -58,4 +58,7 @@ pub(super) enum Message {
     Serving { addrs: Vec<SocketAddr> },
     /// Recipient: everything arrived.
     Done,
+    /// Both ways: no plain dial reaches the sharer, so this side opened a
+    /// port for these files at `addrs`. Empty: it couldn't.
+    Punch { addrs: Vec<SocketAddr> },
 }

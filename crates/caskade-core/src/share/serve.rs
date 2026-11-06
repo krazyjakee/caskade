@@ -171,6 +171,7 @@ impl Shares {
             }
         }
 
+        let mut server = None;
         let stopped = loop {
             let step = tokio::select! {
                 _ = stop.cancelled() => Step::Stop,
@@ -232,10 +233,24 @@ impl Shares {
                     self.changed();
                 }
                 Message::Allowed => self.allowed(&id, peer),
+                Message::Punch { addrs } => {
+                    // One per session: a recipient may be a stranger with a link.
+                    if server.is_none() {
+                        server = self.inner.devices.file_server(peer, &addrs).await;
+                    }
+                    let addrs = server
+                        .as_ref()
+                        .map(caskade_sync::punch::FileServer::addrs)
+                        .unwrap_or_default();
+                    let _ = session.writer().write(&Message::Punch { addrs }).await;
+                }
                 _ => {}
             }
         };
         self.leave(&id, peer, &ready).await;
+        if let Some(server) = server {
+            server.close().await;
+        }
         if stopped {
             session.end().await;
         } else {

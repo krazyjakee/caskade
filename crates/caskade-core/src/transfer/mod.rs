@@ -10,8 +10,9 @@
 //!
 //! The receiver checks there's room, then pulls the collection over a
 //! [`caskade_sync::copy::DirectDialer`] to the sender's direct addresses: no
-//! relay can carry game files. While only a relay reaches the sender, or it
-//! can't be reached, the copy waits (`FetchFailure::Waiting`) and what
+//! relay can carry game files. Behind routers no plain dial gets through, and
+//! the two make a way first (`caskade_sync::punch`). While only a relay
+//! reaches the sender, or it can't be reached, the copy waits (`FetchFailure::Waiting`) and what
 //! arrived stays verified in a store in Caskade's cache, so it resumes where
 //! it stopped. The files are then exported to
 //! `<cache>/copies/receive/incoming/<job>/` (the installer takes a folder
@@ -56,6 +57,11 @@ const MAX_LINE: usize = 64 * 1024;
 const FRAME_WAIT: Duration = Duration::from_secs(300);
 /// How long a direct connection gets to open.
 const DIAL_WAIT: Duration = Duration::from_secs(15);
+/// How long hole punching gets to move a session off a relay.
+pub(crate) const PUNCH_WAIT: Duration = Duration::from_secs(5);
+/// How long a dial with no hole made for it gets. Past that the other
+/// device is behind a router, and the two make one (`caskade_sync::punch`).
+pub(crate) const PLAIN_WAIT: Duration = Duration::from_secs(3);
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
@@ -83,6 +89,9 @@ enum Message {
     Refused { reason: String },
     /// Receiver: everything arrived.
     Done,
+    /// Both ways: no plain dial reaches you, so I opened a port for this copy
+    /// at `addrs`. Empty: this side couldn't.
+    Punch { addrs: Vec<std::net::SocketAddr> },
     /// A device that has the game: copy it from me (#235). `game` is its id
     /// there.
     Send {
@@ -438,6 +447,7 @@ impl Transfers {
         };
         match self.offer(&entry, peer, &mut session).await {
             Ok(()) => {
+                let mut server = None;
                 // Until the device says it has everything, or goes.
                 loop {
                     match tokio::time::timeout(OFFER_LIFETIME, session.reader().read(MAX_LINE))
@@ -447,12 +457,25 @@ impl Transfers {
                             self.withdraw(&entry, peer).await;
                             break;
                         }
+                        Ok(Ok(Message::Punch { addrs })) => {
+                            if server.is_none() {
+                                server = self.inner.devices.file_server(peer, &addrs).await;
+                            }
+                            let addrs = server
+                                .as_ref()
+                                .map(caskade_sync::punch::FileServer::addrs)
+                                .unwrap_or_default();
+                            let _ = session.writer().write(&Message::Punch { addrs }).await;
+                        }
                         Ok(Ok(_)) => continue,
                         // Gone: the offer stays a while, to resume.
                         _ => break,
                     }
                 }
                 session.end().await;
+                if let Some(server) = server {
+                    server.close().await;
+                }
             }
             Err(reason) => {
                 let _ = session
@@ -761,6 +784,46 @@ fn waiting(why: String) -> FetchFailure {
     FetchFailure::Waiting(why)
 }
 
+impl Transfers {
+    /// Makes a way through both routers for `session`'s copy: a port of its
+    /// own at each end, and each dialling the other (`caskade_sync::punch`).
+    async fn through_routers(
+        &self,
+        session: &mut Session,
+        peer: EndpointId,
+    ) -> Option<(
+        caskade_sync::copy::DirectDialer,
+        caskade_sync::copy::Connection,
+    )> {
+        let (dialer, addrs) = self.inner.devices.punched_dialer().await?;
+        let answer = async {
+            session
+                .writer()
+                .write(&Message::Punch { addrs })
+                .await
+                .ok()?;
+            match tokio::time::timeout(PUNCH_WAIT * 2, session.reader().read(MAX_LINE)).await {
+                Ok(Ok(Message::Punch { addrs })) if !addrs.is_empty() => Some(addrs),
+                _ => None,
+            }
+        };
+        let connection = match answer.await {
+            Some(theirs) => tokio::time::timeout(DIAL_WAIT, dialer.connect(peer, &theirs))
+                .await
+                .ok()
+                .and_then(std::result::Result::ok),
+            None => None,
+        };
+        match connection {
+            Some(connection) => Some((dialer, connection)),
+            None => {
+                dialer.close().await;
+                None
+            }
+        }
+    }
+}
+
 #[async_trait]
 impl PeerFetcher for Transfers {
     async fn fetch(
@@ -835,27 +898,31 @@ impl PeerFetcher for Transfers {
                 short = short
             ))));
         }
-        let addrs = session.direct_addrs();
-        if addrs.is_empty() {
+        if session.direct_path(PUNCH_WAIT).await.is_none() {
             return Err(waiting(crate::tr!(
                 "Only a relay reaches {device}: the copy waits for a direct connection",
                 device = device
             )));
         }
+        let addrs = session.direct_addrs();
         let dialer = self
             .inner
             .devices
             .direct_dialer()
             .await
             .map_err(FetchFailure::Failed)?;
-        let connection = match tokio::time::timeout(DIAL_WAIT, dialer.connect(peer, &addrs)).await {
-            Ok(Ok(connection)) => connection,
-            _ => {
-                return Err(waiting(crate::tr!(
-                    "{device} can't be reached directly yet: the copy waits for a direct connection",
-                    device = device
-                )));
-            }
+        let plain = tokio::time::timeout(PLAIN_WAIT, dialer.connect(peer, &addrs)).await;
+        let (connection, punched) = match plain {
+            Ok(Ok(connection)) => (connection, None),
+            _ => match self.through_routers(&mut session, peer).await {
+                Some((dialer, connection)) => (connection, Some(dialer)),
+                None => {
+                    return Err(waiting(crate::tr!(
+                        "{device} can't be reached directly yet: the copy waits for a direct connection",
+                        device = device
+                    )));
+                }
+            },
         };
         self.inner
             .incoming
@@ -897,6 +964,9 @@ impl PeerFetcher for Transfers {
             _ = cancel.cancelled() => Err(caskade_sync::Error::Copy { reason: "cancelled".into() }),
             fetched = fetching => fetched,
         };
+        if let Some(dialer) = punched {
+            dialer.close().await;
+        }
         let finished = |this: &Self| {
             this.inner
                 .incoming
