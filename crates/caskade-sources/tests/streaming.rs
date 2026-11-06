@@ -205,7 +205,7 @@ async fn live_linux_client_keeps_its_own_state() {
     for quiet in [
         "richpresence=false",
         "confwarnings=false",
-        "uidisplaymode=2",
+        "uidisplaymode=0",
     ] {
         assert!(ours.contains(quiet), "{quiet}");
     }

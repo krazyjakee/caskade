@@ -460,17 +460,17 @@ Tick or decide these on the issue itself:
 | #17 Share a game once | 246 | T1, T2 |
 | #19 Sync on every platform | 250 | WL3, M1 |
 | #20 Sync milestone | 252 | O4, WL1, WL2, N4, WK1, T1, T2, T3 |
-| #21 Administrator steps | 255 | L3, L4, W3, W5, W6 |
-| #22 `caskade --launch` | 256 | W1, W2 |
-| #23 Hidden host | 257 | S1, W4, S3, S7 |
+| #21 Administrator steps (closed; optional) | 255 | L3, L4, W3, W5, W6 |
+| #22 `caskade --launch` (closed; optional) | 256 | W1, W2 |
+| #23 Hidden host (closed; optional) | 257 | S1, W4, S3, S7 |
 | #24 The user's own Sunshine (closed; optional) | 258 | L6, W8 |
-| #25 Games on the host | 259 | S4 |
+| #25 Games on the host (closed; optional) | 259 | S4 |
 | #26 Display, pads, capture | 260 | S9, S10, S11 |
 | #27 Client on first stream | 261 | S3, S8, M3 |
 | #28 Pairing with a code | 263 | S2, M3 |
 | #29 Stream from Play | 264 | S3, S4, S5, S6, WK2, M3 |
 | #30 Settings → Streaming (closed; optional) | 265 | S2, S12 |
-| #31 Update, repair, remove | 266 | L4, L5, W6, W7, S13, S14 |
+| #31 Update, repair, remove (closed; optional) | 266 | L4, L5, W6, W7, S13, S14 |
 | #32 Pairing through sync (closed; optional) | 267 | S15 |
 | #33 Streaming milestone | 268 | closes with #21–#32 |
 | #34 Nearby downloads for emulators and data (closed; optional) | 277 | O2, O3 |
