@@ -14,7 +14,7 @@ use caskade_core::db::LibraryStore;
 use caskade_core::devices::{ConnectionPurpose, Devices, MemoryKeyStore, Reach};
 use caskade_core::ludusavi::Ludusavi;
 use caskade_core::model::{
-    ExternalId, Game, GameEntry, GameRuntime, InstallLocation, InstallState, SourceId,
+    ExternalId, Game, GameEntry, GameRuntime, InstallLocation, InstallState, SourceId, StorageRoot,
 };
 use caskade_core::paths::AppPaths;
 use caskade_core::saves::Saves;
@@ -24,7 +24,8 @@ use caskade_core::saves::versions::{
 use caskade_core::settings::SettingsService;
 use caskade_core::sync::SyncService;
 use caskade_core::sync::exchange::{self, Options};
-use caskade_discovery::{HostEnv, Prefix};
+use caskade_discovery::{HostEnv, Prefix, RunnerHint, RunnerKind};
+use caskade_installer::manifest::RootManifest;
 use serde_json::json;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -310,6 +311,74 @@ async fn a_windows_save_starts_the_game_on_a_proton_device_and_comes_back() {
         deck.versions.before_play(&deck.entry).await.unwrap().check,
         SaveCheck::UpToDate
     );
+}
+
+/// A copied game that never started here has no prefix yet: the save waits
+/// in it for Proton or Wine to build the rest around (#14). The real thing is
+/// in `proton_real`.
+#[tokio::test(flavor = "multi_thread")]
+async fn a_save_reaches_a_managed_game_whose_prefix_isnt_built_yet() {
+    for (kind, user) in [(RunnerKind::Umu, "steamuser"), (RunnerKind::Wine, "player")] {
+        let manifest = manifest_server().await;
+        let desktop = core("Desktop", true, &manifest).await;
+        let deck = core("Deck", false, &manifest).await;
+        pair(&desktop, &deck).await;
+
+        let store = deck.versions.store();
+        let root = deck._dir.path().join("machine/root/Games");
+        fs::create_dir_all(root.join("Fixture")).unwrap();
+        let identity = RootManifest::new("deck-root").unwrap();
+        identity.write(&root).unwrap();
+        store
+            .upsert_root(&StorageRoot::from_manifest(root.clone(), &identity))
+            .await
+            .unwrap();
+        let mut entry = store.get_entry(&deck.entry).await.unwrap().unwrap();
+        entry.location = Some(InstallLocation::Managed {
+            root_id: identity.root_id().into(),
+            rel_dir: "Fixture".into(),
+        });
+        entry.runtime = GameRuntime::Windows {
+            prefix: Some(Prefix {
+                path: ".caskade/prefix".into(),
+                arch: None,
+                owner: None,
+            }),
+            runner: Some(RunnerHint {
+                kind,
+                name: None,
+                path: None,
+            }),
+        };
+        store.upsert_entry(&entry).await.unwrap();
+
+        write(desktop.documents.join("Fixture/slot1.sav"), "from windows");
+        let played = session(&desktop).await;
+        exchange_now(&desktop, &deck).await;
+        within("the files arrive", 20, || async {
+            deck.versions
+                .store()
+                .save_version(&played.id)
+                .await
+                .unwrap()
+                .is_some_and(|version| deck.versions.complete(&version))
+        })
+        .await;
+
+        let check = deck.versions.before_play(&deck.entry).await.unwrap();
+        assert!(
+            matches!(&check.check, SaveCheck::Restored { version } if version.id == played.id),
+            "{check:?}"
+        );
+        assert!(check.warnings.is_empty(), "{check:?}");
+        let home = root.join("Fixture/.caskade/prefix/drive_c/users");
+        assert_eq!(
+            read(home.join(user).join("Documents/Fixture/slot1.sav")),
+            "from windows"
+        );
+        // Not a whole prefix: wineboot still has to run.
+        assert!(!root.join("Fixture/.caskade/prefix/dosdevices").exists());
+    }
 }
 
 #[tokio::test(flavor = "multi_thread")]

@@ -229,6 +229,47 @@ fn os_and_store_constraints_are_conjunctive_with_alternatives() {
     assert!(!context.applies(&unknown));
 }
 
+/// Proton's prefixes keep `My Documents` and `Application Data` as links to
+/// the current folders: one file, not two with different names (#14).
+#[cfg(unix)]
+#[test]
+fn a_prefix_links_older_folder_names_to_the_same_files() {
+    let dir = tempfile::tempdir().unwrap();
+    let host = host(dir.path());
+    let prefix = prefix(host.fs_root());
+    let user = prefix.join("drive_c/users/steamuser");
+    write(user.join("Documents/Game/slot.sav"), "save");
+    fs::create_dir_all(user.join("AppData/Roaming")).unwrap();
+    std::os::unix::fs::symlink("./Documents", user.join("My Documents")).unwrap();
+    std::os::unix::fs::symlink("./AppData/Roaming", user.join("Application Data")).unwrap();
+    let mut entry = GameEntry::new("g", SourceId::new("steam"), "steam:620");
+    entry.runtime = GameRuntime::Windows {
+        prefix: Some(Prefix {
+            path: prefix.clone(),
+            arch: None,
+            owner: None,
+        }),
+        runner: None,
+    };
+    let base = host.fs_root().join("games/Fixture");
+    let context = Context::for_release(&host, &entry, &base, host.fs_root());
+    for template in ["<winDocuments>/Game/*.sav", "<winAppData>/Game"] {
+        assert_eq!(expand(template, &context).unwrap().len(), 1, "{template}");
+    }
+    // A folder of that name of its own is still looked in.
+    write(
+        user.join("Local Settings/Application Data/Game/old.sav"),
+        "old",
+    );
+    fs::create_dir_all(user.join("AppData/Local")).unwrap();
+    assert_eq!(
+        expand("<winLocalAppData>/Game/*.sav", &context)
+            .unwrap()
+            .len(),
+        2
+    );
+}
+
 #[test]
 fn prefix_shell_folders_honor_redirected_documents_and_local_low() {
     let dir = tempfile::tempdir().unwrap();

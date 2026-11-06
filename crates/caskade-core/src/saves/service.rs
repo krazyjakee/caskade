@@ -6,9 +6,9 @@ use crate::{
     Result,
     db::LibraryStore,
     ludusavi::{self, Ludusavi, StoreId},
-    model::{ExternalId, Game, GameEntry, InstallLocation},
+    model::{ExternalId, Game, GameEntry, GameRuntime, InstallLocation},
 };
-use caskade_discovery::{HostEnv, OperatingSystem};
+use caskade_discovery::{HostEnv, OperatingSystem, RunnerKind};
 use std::{
     collections::{BTreeMap, BTreeSet},
     path::{Path, PathBuf},
@@ -166,6 +166,47 @@ impl Saves {
         self.state(entry_id).await
     }
 
+    /// Gives a managed Windows release that hasn't started on this device
+    /// its prefix's user folder, so a save from another device has somewhere
+    /// to go before the first launch. Proton and Wine build the rest of the
+    /// prefix around what's there. Prefixes that belong to a launcher are
+    /// left for it to make.
+    pub(crate) async fn ensure_prefix(&self, entry_id: &str) -> Result<()> {
+        let entry = self
+            .store
+            .get_entry(entry_id)
+            .await?
+            .ok_or_else(|| crate::db::missing("entry", entry_id))?;
+        let GameRuntime::Windows {
+            prefix: Some(prefix),
+            runner,
+        } = &entry.runtime
+        else {
+            return Ok(());
+        };
+        if self.environment.os() == OperatingSystem::Windows
+            || !matches!(entry.location, Some(InstallLocation::Managed { .. }))
+        {
+            return Ok(());
+        }
+        let Some((base, _)) = self.release_paths(&entry).await? else {
+            return Ok(());
+        };
+        let drive = base.join(&prefix.path).join("drive_c");
+        if drive.is_dir() {
+            return Ok(());
+        }
+        let wine = runner
+            .as_ref()
+            .is_some_and(|runner| matches!(runner.kind, RunnerKind::Wine | RunnerKind::CrossOver));
+        let user = wine
+            .then(|| self.environment.var("USER"))
+            .flatten()
+            .map(|user| user.to_string_lossy().into_owned())
+            .unwrap_or_else(|| "steamuser".into());
+        Ok(tokio::fs::create_dir_all(drive.join("users").join(user)).await?)
+    }
+
     async fn release_paths(&self, entry: &GameEntry) -> Result<Option<(PathBuf, PathBuf)>> {
         Ok(match &entry.location {
             Some(InstallLocation::Managed { root_id, rel_dir }) => {
@@ -317,7 +358,7 @@ fn ids(entry: &GameEntry) -> Vec<ExternalId> {
 }
 fn store_name(entry: &GameEntry, ids: &[ExternalId]) -> Option<String> {
     let owner = match &entry.runtime {
-        crate::model::GameRuntime::Windows {
+        GameRuntime::Windows {
             prefix: Some(prefix),
             ..
         } => prefix.owner.as_ref().map(|owner| owner.as_str()),

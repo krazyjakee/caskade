@@ -3,7 +3,7 @@
 //! `C:/Users/me/AppData/Roaming` on Windows and the Proton prefix's
 //! `drive_c/users/steamuser/AppData/Roaming` on Linux.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// This device's named folders for one release: the manifest's placeholders
 /// (`<home>`, `<winDocuments>`, …) or an emulator's variables
@@ -76,7 +76,11 @@ impl Roots {
     pub fn place(&self, root: &str, relative: &str) -> Option<PathBuf> {
         let relative = normal(relative);
         if root.is_empty() {
-            return is_absolute(&relative).then(|| PathBuf::from(relative));
+            // Absolute here, not just on the device that made it: `D:/x`
+            // on Linux would land in the app's working folder.
+            return Path::new(&relative)
+                .is_absolute()
+                .then(|| PathBuf::from(relative));
         }
         if relative.is_empty()
             || is_absolute(&relative)
@@ -150,5 +154,11 @@ mod tests {
         assert!(roots.place("<home>", "../other/x.sav").is_none());
         assert!(roots.place("<home>", "/etc/passwd").is_none());
         assert!(roots.place("<xdgData>", "Game/x.sav").is_none());
+        // No folder named, and that path means nothing on this device.
+        assert_eq!(
+            roots.place("", "D:/Saves/slot.sav").is_some(),
+            cfg!(windows)
+        );
+        assert_eq!(roots.place("", "/mnt/saves/slot.sav").is_some(), cfg!(unix));
     }
 }

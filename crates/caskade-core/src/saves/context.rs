@@ -187,7 +187,12 @@ pub fn expand(template: &str, context: &Context) -> Result<Vec<String>, String> 
             ("winAppData", "Application Data"),
             ("winLocalAppData", "Local Settings/Application Data"),
         ] {
-            legacy.insert(name.into(), format!("{home}/{tail}"));
+            let older = format!("{home}/{tail}");
+            // Prefixes keep these names as links to the current folders:
+            // the same files, which mustn't count twice.
+            if !same_folder(&older, context.values.get(name)) {
+                legacy.insert(name.into(), older);
+            }
         }
         variants.push(legacy);
     }
@@ -234,6 +239,11 @@ pub fn expand(template: &str, context: &Context) -> Result<Vec<String>, String> 
         }
     }
     Ok(result)
+}
+
+fn same_folder(older: &str, current: Option<&String>) -> bool {
+    let folder = |path: &str| std::fs::canonicalize(path).ok();
+    current.is_some_and(|current| folder(older).is_some_and(|older| Some(older) == folder(current)))
 }
 
 pub(crate) fn text(path: &Path) -> String {

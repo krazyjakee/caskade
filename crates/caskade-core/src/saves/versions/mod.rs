@@ -594,6 +594,7 @@ impl SaveVersions {
         let manifest = self
             .manifest(&version.content_hash)
             .ok_or_else(|| Error::Invalid(crate::tr!("A save file hasn't arrived yet.")))?;
+        self.inner.saves.ensure_prefix(entry_id).await?;
         let (_, roots) = self.inner.saves.resolve(entry_id).await?;
         let blobs = self.inner.blobs.clone();
         let warnings = tokio::task::spawn_blocking(move || {
