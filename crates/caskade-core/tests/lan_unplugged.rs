@@ -44,8 +44,12 @@ impl Peer {
     }
 
     pub async fn heard(&self, step: &str) -> String {
+        self.heard_within(step, 120).await
+    }
+
+    async fn heard_within(&self, step: &str, seconds: u64) -> String {
         let note = self.dir.join(format!("{}-{step}", self.other));
-        let deadline = Instant::now() + Duration::from_secs(120);
+        let deadline = Instant::now() + Duration::from_secs(seconds);
         loop {
             if let Ok(value) = std::fs::read_to_string(&note) {
                 return value;
@@ -209,4 +213,118 @@ async fn two_devices_pair_sync_and_copy() {
         peer.say("copied", "yes");
     }
     eprintln!("{}: paired, synced both ways and copied", peer.me);
+}
+
+/// N1 without two PCs: a large game copied from one device's process to the
+/// other's over a virtual network, timed as Copy to this computer's job runs.
+/// `scripts/lan-unplugged.sh --speed`, in release. `CASKADE_COPY_MIB` sizes
+/// it: a big archive and a thousand small files, as a game has.
+#[tokio::test(flavor = "multi_thread")]
+#[ignore = "one device of two, on a network of its own: scripts/lan-unplugged.sh --speed"]
+async fn copy_speed() {
+    let mebibyte = 1024 * 1024;
+    let total: usize = std::env::var("CASKADE_COPY_MIB")
+        .ok()
+        .and_then(|size| size.parse().ok())
+        .unwrap_or(2048);
+    let peer = Peer::from_env();
+    let is_desk = peer.me == "Desk";
+    let device = core_with(&peer.me, Reach::network(false, None)).await;
+    let other = pair_by_code(&device.devices, &peer, is_desk).await;
+    let _sync = device.sync();
+    within("a first sync", 60, || async {
+        let status = device.devices.status().await;
+        status
+            .devices
+            .iter()
+            .any(|d| d.id == other && d.last_sync_ms.is_some())
+    })
+    .await;
+    let link = device.devices.status().await.devices[0].link;
+    assert_eq!(link, DeviceLink::Lan);
+
+    if is_desk {
+        let (_, entry, folder) = add_celeste(&device).await;
+        let pack = folder.join("Content/Data.pak");
+        let mut file = std::fs::File::create(pack).unwrap();
+        for block in 0..total.saturating_sub(100) {
+            let bytes: Vec<u8> = (0..mebibyte).map(|i| ((i ^ block) % 251) as u8).collect();
+            std::io::Write::write_all(&mut file, &bytes).unwrap();
+        }
+        for index in 0..1000 {
+            let name = folder.join(format!("Content/Levels/{index}.bin"));
+            std::fs::write(name, vec![(index % 251) as u8; 100 * 1024]).unwrap();
+        }
+        peer.say("game", &entry);
+        peer.heard_within("copied", 1800).await;
+    } else {
+        let entry_id = peer.heard_within("game", 300).await;
+        let game = device
+            .store
+            .upsert_game(&Game::new("Celeste"))
+            .await
+            .unwrap();
+        let started = Instant::now();
+        let job = device
+            .install
+            .copy_from_device(
+                PeerCopyTarget {
+                    device_id: other.clone(),
+                    device_name: peer.other.clone(),
+                    entry_id,
+                    game_id: game.id.clone(),
+                    title: "Celeste".into(),
+                },
+                None,
+            )
+            .await
+            .unwrap();
+        // Three parts: the sender reading and hashing, the transfer, and
+        // moving what arrived into the install.
+        let (mut receiving, mut placing) = (None, None);
+        let done = loop {
+            let job = device.install.job(&job.id).unwrap();
+            if job.status.is_finished() || job.status == JobStatus::NeedsUser {
+                break job;
+            }
+            let from = job
+                .progress
+                .as_ref()
+                .is_some_and(|progress| progress.message.starts_with("From"));
+            if receiving.is_none() && from {
+                receiving = Some(Instant::now());
+            }
+            if receiving.is_some() && placing.is_none() && !from {
+                placing = Some(Instant::now());
+            }
+            tokio::time::sleep(Duration::from_millis(20)).await;
+        };
+        let finished_at = Instant::now();
+        assert_eq!(done.status, JobStatus::Completed, "{done:?}");
+        let entries = device.store.entries_for_game(&game.id).await.unwrap();
+        let copy = entries
+            .iter()
+            .find(|entry| entry.source_id.as_str() == "caskade-storage")
+            .expect("a managed release");
+        let Some(InstallLocation::Managed { rel_dir, .. }) = &copy.location else {
+            panic!("not managed: {:?}", copy.location)
+        };
+        let size = std::fs::metadata(device.games.join(rel_dir).join("Content/Data.pak"))
+            .unwrap()
+            .len();
+        let bytes = size as f64 + 106.0 * mebibyte as f64;
+        let receiving = receiving.expect("the transfer was seen");
+        let placing = placing.unwrap_or(finished_at);
+        let transfer = placing.duration_since(receiving).as_secs_f64();
+        eprintln!(
+            "copy_speed: {:.0} MiB; sender preparing {:.1} s; transfer {transfer:.1} s = {:.0} MB/s; placing {:.1} s; whole job {:.1} s = {:.0} MB/s",
+            bytes / mebibyte as f64,
+            receiving.duration_since(started).as_secs_f64(),
+            bytes / transfer / 1e6,
+            finished_at.duration_since(placing).as_secs_f64(),
+            finished_at.duration_since(started).as_secs_f64(),
+            bytes / finished_at.duration_since(started).as_secs_f64() / 1e6,
+        );
+        peer.say("copied", "yes");
+    }
 }

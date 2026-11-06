@@ -662,7 +662,9 @@ Activity, cancellable, retried from where it stopped (`install::peer`).
    the release by its entry id there (`transfer`).
 2. The sender finds the release's folder: a managed install, or a folder of its
    own with a program or emulator launch. A launcher's install is refused with
-   the reason ("install it from the store there"). It adds every file,
+   the reason ("install it from the store there"). It adds every file but the
+   folder's own `.caskade` (this device's install record, and its Wine or
+   Proton prefix with the saves in it, none of which the receiver wants),
    referenced where it is, to an iroh-blobs collection named by relative paths
    (`caskade_sync::copy::CopyStore`, `<cache>/copies/send`; only BLAKE3
    outboards are stored), saying how far it got, and offers the root hash, size,
@@ -718,10 +720,8 @@ devices; off by default, kept on each device), it starts at once into the
 default storage.
 
 Settings → Devices lists copies going on both ways (`devices_transfers`,
-refreshed every two seconds while there are any). On loopback, a release build
-moves 256 MiB in 0.62 s (432 MB/s; the offer took 0.19 s):
-`cargo test --release -p caskade-sync --test it copy::loopback_throughput --
---ignored --nocapture`. A relay moves about 1 MB/s.
+refreshed every two seconds while there are any). Speeds measured so far are
+in "Copying a game (#11)" under Manual checklist. A relay moves about 1 MB/s.
 
 ### Downloads from a device nearby
 
@@ -1024,7 +1024,9 @@ them for 4 seconds at most, then:
 - keeps the files here as a version when they changed;
 - **one tip, another device's:** puts its files in place and makes it the head
   (`restored`); when its files haven't arrived, the game starts with the save
-  here (`notArrived`);
+  here (`notArrived`). A managed Windows game that hasn't started here has no
+  prefix yet: it gets the prefix's user folder first, and Proton or Wine builds
+  the rest around the save;
 - **more than one tip:** both devices played since they last agreed. Nothing
   is restored, and Play asks which save to use (`SaveConflictDialog`). The
   choice becomes a new version descending from every tip, so it settles the
@@ -1123,12 +1125,28 @@ prefix. The tests cover a save made on one starting the game on the other and
 back, both devices playing offline being asked and keeping both, Saves set to
 This device only, and an unreachable device. `tests/save_versions.rs` covers
 one device: versions, restoring an older one, pruning, and the after-session
-snapshot. Not yet checked on real machines:
+snapshot.
+
+Two more run a real program, `tests/fixtures/saves/proof_game.rs`, which asks
+Windows for its folders, reads its saves there and writes the next ones:
+
+- `tests/proton_real.rs` (`scripts/proton-real.sh`, see "Copying a game (#11)")
+  does it under real Proton in a copied game's prefix. The other device is a
+  fixture Windows machine: its Windows folders are folders standing in for
+  them, and the test writes its save.
+- `tests/windows_saves.rs` does it on Windows, with the real `%APPDATA%`,
+  `%LOCALAPPDATA%`, Documents and Saved Games. The other device is again a
+  fixture Windows machine, as a fixture Linux machine can't run on a host whose
+  paths have drive letters; a version names its files by those folders on
+  every device. CI's `windows-elevation` job runs it as a step that can't fail
+  the job yet. So far that binary has run only cross-compiled under Proton
+  (rehearsed with `CASKADE_PROOF_WINE=1`), never on Windows.
 
 | Check | Result |
 | --- | --- |
-| Play on Windows, quit, start on a Linux device through Proton: the Windows save is there | not yet run |
-| Play on the Linux device, quit, start on Windows: the Linux save is there | not yet run |
+| Play on Windows, quit, start on a Linux device through Proton: the Windows save is there | 2026-11-06, one PC: passed under real Proton from a fixture Windows device, first launch included (the prefix didn't exist yet), and the game read the save. No Windows machine involved. |
+| Play on the Linux device, quit, start on Windows: the Linux save is there | 2026-11-06, one PC: the version kept from the real prefix (four files, each once) restored to the fixture Windows device's folders, and nothing else. Reading it back on real Windows not yet run. |
+| Two real machines, Windows and Linux (WL2) | not yet run |
 
 ## Setting up a new device
 
@@ -1411,7 +1429,46 @@ Results:
 
 | Date | Machines | Steps passed | Speed | Notes |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | Not run yet: needs a Windows and a Linux machine. Loopback: 432 MB/s. |
+| 2026-11-06 | One Linux PC, both devices (`scripts/proton-real.sh`) | 1 and 4 in part | — | Not a Windows machine and not two machines: see below. |
+| — | A Windows and a Linux machine | — | — | Not run yet. |
+
+**Step 4 on one PC (2026-11-06).** `scripts/proton-real.sh` needs umu, umu's
+Steam Runtime and a UMU-Proton build where Caskade and umu keep them, copies
+them to a scratch home under `/tmp/caskade-proton`, and runs
+`tests/proton_real.rs` on an Xvfb of its own in a namespace with loopback and
+no internet (`--keep` keeps the scratch home between runs).
+
+- Real: a Windows PE program (`tests/fixtures/saves/proof_game.rs`) that opens
+  its data by a relative path and asks Windows for its folders; umu-launcher
+  1.4.4, pressure-vessel, the Steam Runtime, UMU-Proton-10.0-4 and the prefix it
+  builds; the copy job, the install and the launch pipeline with
+  `InstallerRunnerResolver`, as the app wires them. The program's own log says
+  it ran on Wine 10.0 from `G:\Game` with its data found. The first play took
+  23–28 s with the prefix to build.
+- Not real: the sender is a Linux process holding a game added by hand with a
+  Windows runtime, so no Windows machine sent anything. Both cores share one
+  process, on loopback. The game is a small program, not a commercial one, and
+  no video or input was exercised.
+
+**Speed, without two PCs (2026-11-06).** `scripts/lan-unplugged.sh --speed
+[rate]` copies a 2,054 MiB game (one archive and a thousand small files) in a
+release build, between two processes in network namespaces joined by veth pairs
+and a bridge. The 256 MiB test is `cargo test --release -p caskade-sync --test
+it copy::loopback_throughput -- --ignored --nocapture`. The PC has 24 threads,
+and other builds kept its load between 15 and 30 throughout.
+
+| Path | Transfer | Whole job | Runs |
+| --- | --- | --- | --- |
+| veth and bridge, no limit | 94, 129, 142 MB/s | 51, 83, 84 MB/s | 3 |
+| veth and bridge, `tc` limit of 1 Gbit/s | 94 MB/s | 72 MB/s | 1 |
+| Loopback, 256 MiB, transfer alone | 154, 177, 224 MB/s (432 MB/s on a quieter day) | not measured | 3 |
+
+The whole job adds the sender reading and hashing the folder (1–2 s) and
+placing what arrived in the install (6–18 s). This shows the transfer isn't
+held to a relay's speed on one PC, and that it filled about three quarters of a
+limited 1 Gbit/s link (125 MB/s) on a busy machine. It doesn't clear N1: no
+real network, Wi-Fi, second disk or tens of GB were involved, the sender read
+files still in the page cache, and the veth link has no real latency or loss.
 
 ### Downloads from a device nearby (#13)
 
