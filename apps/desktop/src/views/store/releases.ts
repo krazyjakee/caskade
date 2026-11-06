@@ -56,6 +56,24 @@ export function releaseKind(release: IgdbReleaseDate): ReleaseKind | null {
   return "other";
 }
 
+const STATUSES: Record<string, MessageDescriptor> = {
+  released: msg({ message: "Released", comment: "A game's or release's status on IGDB" }),
+  "full release": msg({ message: "Full release", comment: "A game's or release's status on IGDB" }),
+  alpha: msg({ message: "Alpha", comment: "A game's or release's status on IGDB" }),
+  beta: msg({ message: "Beta", comment: "A game's or release's status on IGDB" }),
+  "early access": msg({ message: "Early access", comment: "A game release's status" }),
+  offline: msg({ message: "Offline", comment: "A game's or release's status on IGDB" }),
+  cancelled: msg({ message: "Cancelled", comment: "A game release's status" }),
+  rumored: msg({ message: "Rumoured", comment: "A game's or release's status on IGDB" }),
+  delisted: msg({ message: "Delisted", comment: "A game's or release's status on IGDB" }),
+};
+
+/** IGDB's status in the language in use; one Caskade doesn't know as it came. */
+export function statusName(status: string): string {
+  const known = STATUSES[status.trim().toLowerCase()];
+  return known ? t(known) : status;
+}
+
 const REGIONS: Record<string, MessageDescriptor> = {
   worldwide: msg({ message: "Worldwide", comment: "A game release's region" }),
   europe: msg({ message: "Europe", comment: "A game release's region" }),

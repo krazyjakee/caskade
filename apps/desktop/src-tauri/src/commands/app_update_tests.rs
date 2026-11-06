@@ -31,11 +31,35 @@ fn only_an_rpm_or_a_development_build_cant_update() {
     }
     #[cfg(target_os = "linux")]
     assert_eq!(unavailable_reason(Some(BundleType::Deb)), None);
-    let rpm = unavailable_reason(Some(BundleType::Rpm)).unwrap();
+    let rpm = unavailable_reason(Some(BundleType::Rpm)).unwrap().render();
     assert!(rpm.contains("package manager"), "{rpm}");
     assert!(unavailable_reason(Some(BundleType::Dmg)).is_some());
-    let dev = unavailable_reason(None).unwrap();
+    let dev = unavailable_reason(None).unwrap().render();
     assert!(dev.contains("Development"), "{dev}");
+}
+
+#[test]
+fn why_a_copy_cant_update_follows_the_language() {
+    let updater = AppUpdater::<()>::new("0.1.0".into(), unavailable_reason(None), ENDPOINT);
+    assert_eq!(
+        updater.status().unavailable.as_deref(),
+        Some("Development builds don't update themselves.")
+    );
+    let _sv = caskade_core::i18n::scope_catalog(
+        "sv",
+        r#"msgid ""
+msgstr ""
+"Language: sv\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Development builds don't update themselves."
+msgstr "Utvecklingsversioner uppdaterar sig inte själva."
+"#,
+    );
+    assert_eq!(
+        updater.status().unavailable.as_deref(),
+        Some("Utvecklingsversioner uppdaterar sig inte själva.")
+    );
 }
 
 #[test]

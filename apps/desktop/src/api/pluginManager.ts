@@ -41,7 +41,7 @@ export function createNativePluginManager(): PluginManagerApi {
     async chooseFolder() {
       native();
       const { open } = await import("@tauri-apps/plugin-dialog");
-      const folder = await open({ directory: true, multiple: false, title: "Plugin folder" });
+      const folder = await open({ directory: true, multiple: false, title: t`Plugin folder` });
       return typeof folder === "string" ? folder : null;
     },
     async preview(folder) {

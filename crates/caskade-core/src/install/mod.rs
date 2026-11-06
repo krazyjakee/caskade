@@ -16,6 +16,7 @@ pub use attach::{AttachTo, PlacedFile};
 pub use failure_text::failure_message;
 pub mod dropped;
 pub mod hooks;
+mod job_text;
 mod jobs;
 mod mapping;
 mod move_location;
@@ -863,12 +864,14 @@ impl InstallService {
     }
 }
 
-/// A job as people see it: its failure's summary in the language in use,
-/// so a language switch changes jobs already listed (#214).
+/// A job as people see it: its failure's summary and the installer's text
+/// in the language in use, so a language switch changes jobs already listed
+/// (#214).
 fn shown(mut snapshot: JobSnapshot) -> JobSnapshot {
     if let Some(failure) = &mut snapshot.failure {
         failure_text::translate(failure);
     }
+    job_text::translate(&mut snapshot);
     snapshot
 }
 

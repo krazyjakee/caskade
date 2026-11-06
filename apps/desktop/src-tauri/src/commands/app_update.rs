@@ -13,6 +13,7 @@ use std::sync::{Mutex, MutexGuard};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use crate::error::{CommandError, refused};
+use caskade_core::i18n::Message;
 use caskade_core::settings::{AppUpdateSettings, SettingsService};
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -94,17 +95,17 @@ pub struct AppUpdateStatus {
 pub struct AppUpdateChanged(pub AppUpdateStatus);
 
 /// Why a copy of Caskade from `bundle` can't replace itself.
-pub fn unavailable_reason(bundle: Option<BundleType>) -> Option<String> {
+pub fn unavailable_reason(bundle: Option<BundleType>) -> Option<Message> {
     match bundle {
         Some(BundleType::AppImage | BundleType::Nsis | BundleType::Msi | BundleType::App) => None,
         Some(BundleType::Deb) if cfg!(target_os = "linux") => None,
-        Some(BundleType::Deb | BundleType::Rpm) => Some(caskade_core::tr!(
+        Some(BundleType::Deb | BundleType::Rpm) => Some(caskade_core::msg!(
             "Caskade was installed as a system package: update it with your package manager."
         )),
-        Some(_) => Some(caskade_core::tr!(
+        Some(_) => Some(caskade_core::msg!(
             "This copy of Caskade can't update itself: download the new version instead."
         )),
-        None => Some(caskade_core::tr!(
+        None => Some(caskade_core::msg!(
             "Development builds don't update themselves."
         )),
     }
@@ -120,17 +121,20 @@ struct Inner<P> {
 /// plugin's `Update`, except in tests.
 pub struct AppUpdater<P = Update> {
     endpoint: String,
+    /// Why this copy can't replace itself: the reason, not its text, so the
+    /// status follows a language switch.
+    unavailable: Option<Message>,
     inner: Mutex<Inner<P>>,
 }
 
 impl<P> AppUpdater<P> {
-    pub fn new(current_version: String, unavailable: Option<String>, endpoint: &str) -> Self {
+    pub fn new(current_version: String, unavailable: Option<Message>, endpoint: &str) -> Self {
         Self {
             endpoint: endpoint.into(),
             inner: Mutex::new(Inner {
                 status: AppUpdateStatus {
                     current_version,
-                    unavailable,
+                    unavailable: unavailable.as_ref().map(Message::render),
                     phase: AppUpdatePhase::Idle,
                     release: None,
                     checked_at: None,
@@ -140,11 +144,16 @@ impl<P> AppUpdater<P> {
                 },
                 pending: None,
             }),
+            unavailable,
         }
     }
 
+    /// The state, its text in the language in use: every status goes out
+    /// through here.
     fn lock(&self) -> MutexGuard<'_, Inner<P>> {
-        self.inner.lock().unwrap_or_else(|error| error.into_inner())
+        let mut inner = self.inner.lock().unwrap_or_else(|error| error.into_inner());
+        inner.status.unavailable = self.unavailable.as_ref().map(Message::render);
+        inner
     }
 
     pub fn status(&self) -> AppUpdateStatus {

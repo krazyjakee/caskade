@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { originalPath, thumbnailPath } from "./artwork";
 import type {
   CollectionKind,
@@ -130,7 +131,7 @@ export function mapDetails(
         entry.location?.type === "external"
           ? entry.location.path
           : entry.location?.type === "managed"
-            ? `Storage root ${entry.location.rootId} · ${entry.location.relDir}`
+            ? t`${{ folder: entry.location.relDir }} in game storage`
             : null,
       canLaunch:
         // Streamed from another device (#264): nothing is installed here.

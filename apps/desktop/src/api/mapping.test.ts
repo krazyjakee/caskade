@@ -56,7 +56,7 @@ it("converts real DTO milliseconds and exact thumbnail projections without stori
       full: `caskade-asset://localhost/${hash}/original.webp`,
     },
   ]);
-  expect(details.entries[0]?.location).toBe("Storage root stable-root · Original");
+  expect(details.entries[0]?.location).toBe("Original in game storage");
   expect(details.entries[0]?.canLaunch).toBe(true);
   const summary = mapSummary(
     { ...game, installed: false, cover: null, playtimeMs: 0, lastPlayedAtMs: null },

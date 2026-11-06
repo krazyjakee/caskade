@@ -72,6 +72,14 @@ msgid_plural "# changed"
 msgstr[0] ""
 msgstr[1] ""
 
+#. placeholder {0}: value.results.length
+#. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+emulator+installation+found%7D+other+%7B%23+emulator+installations+found%7D%7D&pluralize_on=0
+#: apps/desktop/src/api/emulationTransport.ts
+msgid "# emulator installation found"
+msgid_plural "# emulator installations found"
+msgstr[0] ""
+msgstr[1] ""
+
 #. placeholder {0}: status.failed.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+failed%7D+other+%7B%23+failed%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/RefreshCard.tsx
@@ -537,6 +545,10 @@ msgstr[1] ""
 msgid "{first}–{last} of {total}"
 msgstr ""
 
+#: apps/desktop/src/api/mapping.ts
+msgid "{folder} in game storage"
+msgstr ""
+
 #. Games discovery found, counting each game's copies once
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "{found} games found"
@@ -848,6 +860,10 @@ msgstr ""
 msgid "{percent}, high"
 msgstr ""
 
+#: apps/desktop/src/api/installMapping.ts
+msgid "{percent}% confidence"
+msgstr ""
+
 #. The status bar's running job: its phase, then the game
 #: apps/desktop/src/shell/StatusBar.tsx
 msgid "{phase}: {title}"
@@ -905,6 +921,18 @@ msgstr ""
 #. A rating out of 100
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 msgid "{rating} / 100"
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "{reason} · Arguments: {args}"
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "{reason} Start a new installation from the retained source after reviewing the moved game."
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "{reason} This folder requires explicit adoption or a new installation. It will not be moved automatically."
 msgstr ""
 
 #. js-lingui:icu=%7Bremoved%2C+plural%2C+one+%7B%23+game+only+this+account+brought+leaves+your+library.%7D+other+%7B%23+games+only+this+account+brought+leave+your+library.%7D%7D&pluralize_on=removed
@@ -2005,6 +2033,11 @@ msgstr ""
 msgid "Allow self-signed certificates"
 msgstr ""
 
+#. A game's or release's status on IGDB
+#: apps/desktop/src/views/store/releases.ts
+msgid "Alpha"
+msgstr ""
+
 #. A detected emulator Caskade already has
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
 msgid "Already configured"
@@ -2514,6 +2547,11 @@ msgstr ""
 msgid "Behaviour"
 msgstr ""
 
+#. A game's or release's status on IGDB
+#: apps/desktop/src/views/store/releases.ts
+msgid "Beta"
+msgstr ""
+
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 msgid "Binary name"
 msgstr ""
@@ -2758,8 +2796,10 @@ msgid "Cancel test"
 msgstr ""
 
 #. A game release's status
+#. A game release's status
 #: apps/desktop/src/api/emulatorSetup.ts
 #: apps/desktop/src/views/store/CatalogCard.tsx
+#: apps/desktop/src/views/store/releases.ts
 msgid "Cancelled"
 msgstr ""
 
@@ -3232,12 +3272,28 @@ msgstr ""
 msgid "Choose a disc"
 msgstr ""
 
+#: apps/desktop/src/api/installMapping.ts
+msgid "Choose a download asset"
+msgstr ""
+
+#: apps/desktop/src/api/emulationNative.ts
+msgid "Choose a file"
+msgstr ""
+
+#: apps/desktop/src/api/emulationNative.ts
+msgid "Choose a folder"
+msgstr ""
+
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "Choose a folder for your games."
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Choose a folder to scan"
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "Choose a launch target"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/PinDialog.tsx
@@ -3258,6 +3314,14 @@ msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
 msgid "Choose a save…"
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "Choose an installation strategy"
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "Choose an installer"
 msgstr ""
 
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
@@ -3301,6 +3365,10 @@ msgstr ""
 msgid "Choose installation storage"
 msgstr ""
 
+#: apps/desktop/src/api/emulationNative.ts
+msgid "Choose one path."
+msgstr ""
+
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 msgid "Choose the game's folder"
 msgstr ""
@@ -3309,9 +3377,17 @@ msgstr ""
 msgid "Choose the games to copy here over your network. They copy in the background while you finish setting up. Nothing copies unless you choose it."
 msgstr ""
 
+#: apps/desktop/src/api/installMapping.ts
+msgid "Choose the installed folder"
+msgstr ""
+
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "Choose the program"
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "Choose the release file to download and install."
 msgstr ""
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
@@ -3321,6 +3397,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 msgid "Choose what syncs"
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "Choose what to download"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
@@ -3688,6 +3768,10 @@ msgctxt "game action"
 msgid "Copy path"
 msgstr ""
 
+#: apps/desktop/src/api/installMapping.ts
+msgid "Copy the files"
+msgstr ""
+
 #. Sends the game to another of the user's devices
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 msgid "Copy to {name}"
@@ -3893,6 +3977,7 @@ msgstr ""
 msgid "Custom folders"
 msgstr ""
 
+#: apps/desktop/src/api/emulation.ts
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
 msgid "Custom profile"
 msgstr ""
@@ -4050,6 +4135,11 @@ msgstr ""
 msgid "Deleting…"
 msgstr ""
 
+#. A game's or release's status on IGDB
+#: apps/desktop/src/views/store/releases.ts
+msgid "Delisted"
+msgstr ""
+
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Density"
@@ -4147,6 +4237,10 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 msgid "Detect emulators"
+msgstr ""
+
+#: apps/desktop/src/api/emulationTransport.ts
+msgid "Detection cancelled · {found} found"
 msgstr ""
 
 #. Badge on a plugin loaded from its development folder
@@ -4265,6 +4359,10 @@ msgstr ""
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
 #: apps/desktop/src/views/library/LibraryView.tsx
 msgid "Dismiss"
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "Does not run installer code"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
@@ -4439,7 +4537,9 @@ msgid "Each backup also goes to that device the next time they sync, even when i
 msgstr ""
 
 #. A game release's status
+#. A game release's status
 #: apps/desktop/src/views/store/CatalogCard.tsx
+#: apps/desktop/src/views/store/releases.ts
 msgid "Early access"
 msgstr ""
 
@@ -4552,6 +4652,10 @@ msgstr ""
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Emulator configuration"
+msgstr ""
+
+#: apps/desktop/src/api/emulationTransport.ts
+msgid "Emulator detection failed."
 msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
@@ -4702,6 +4806,10 @@ msgstr ""
 msgid "Environment variables"
 msgstr ""
 
+#: apps/desktop/src/api/installMapping.ts
+msgid "equivalent result"
+msgstr ""
+
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "Errors"
 msgstr ""
@@ -4774,6 +4882,10 @@ msgstr ""
 #. The reasons discovery thinks a result is a game
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
 msgid "Evidence for {title}"
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "exact result"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
@@ -5095,6 +5207,11 @@ msgstr ""
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "Full disk scan"
+msgstr ""
+
+#. A game's or release's status on IGDB
+#: apps/desktop/src/views/store/releases.ts
+msgid "Full release"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
@@ -5462,6 +5579,10 @@ msgctxt "pad button"
 msgid "Guide"
 msgstr ""
 
+#: apps/desktop/src/api/installMapping.ts
+msgid "Hand it to another program"
+msgstr ""
+
 #: apps/desktop/src/views/CollectionsView.tsx
 msgid "Hand-pick games into lists, or save a filter as a smart collection that keeps itself up to date."
 msgstr ""
@@ -5779,6 +5900,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
 msgid "Import selected ({count})"
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "Imported from where they are now"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
@@ -6100,6 +6225,10 @@ msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 msgid "Installing the update… {percent}%"
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "Installing this game means running its installer program on this computer, with your account's access to your files. Run it only if you trust where it came from, or choose a way that doesn't run it."
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
@@ -6576,6 +6705,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 msgid "Legal sections"
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "Let its package manager install it"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
@@ -7125,6 +7258,10 @@ msgstr ""
 msgid "Maximum age rating"
 msgstr ""
 
+#: apps/desktop/src/api/installMapping.ts
+msgid "May request elevation"
+msgstr ""
+
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 msgid "Maybe already in your library"
 msgstr ""
@@ -7540,6 +7677,10 @@ msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
 msgid "No description yet."
+msgstr ""
+
+#: apps/desktop/src/api/emulationTransport.ts
+msgid "No detection run yet."
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
@@ -8147,7 +8288,9 @@ msgctxt "storage location status"
 msgid "offline"
 msgstr ""
 
+#. A game's or release's status on IGDB
 #: apps/desktop/src/components/sync/common.tsx
+#: apps/desktop/src/views/store/releases.ts
 msgid "Offline"
 msgstr ""
 
@@ -8596,6 +8739,10 @@ msgstr ""
 msgid "parental controls, PEGI, ESRB"
 msgstr ""
 
+#: apps/desktop/src/api/installMapping.ts
+msgid "partial result"
+msgstr ""
+
 #: apps/desktop/src/api/presentation.ts
 msgctxt "release state"
 msgid "Partly installed"
@@ -8993,6 +9140,7 @@ msgstr ""
 msgid "Plugin and theme catalogue"
 msgstr ""
 
+#: apps/desktop/src/api/pluginManager.ts
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Plugin folder"
 msgstr ""
@@ -9141,6 +9289,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
 msgid "Profile scripts"
+msgstr ""
+
+#: apps/desktop/src/api/emulationTransport.ts
+msgid "Profile status is missing for {profile}. Refresh the list."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
@@ -9514,6 +9666,14 @@ msgstr ""
 msgid "Reinstall {name}"
 msgstr ""
 
+#: apps/desktop/src/api/installMapping.ts
+msgid "Reinstall {title}?"
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "Reinstall from the retained source"
+msgstr ""
+
 #. Picks which of the game's releases Play starts
 #. Picks which release's actions to edit
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
@@ -9541,8 +9701,10 @@ msgstr ""
 msgid "Release year"
 msgstr ""
 
+#. A game's or release's status on IGDB
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
 #: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/store/releases.ts
 msgid "Released"
 msgstr ""
 
@@ -10104,8 +10266,17 @@ msgstr ""
 msgid "ROMs on this server appear in your library. They download the first time you play them."
 msgstr ""
 
+#. A game's or release's status on IGDB
+#: apps/desktop/src/views/store/releases.ts
+msgid "Rumoured"
+msgstr ""
+
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 msgid "Run a full scan on the selected schedule."
+msgstr ""
+
+#: apps/desktop/src/api/emulationTransport.ts
+msgid "Run emulator detection before importing."
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
@@ -10118,6 +10289,18 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Run setup again"
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "Run the installer"
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "Run the installer program?"
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "Run the installer silently"
 msgstr ""
 
 #. The Play button while the game runs
@@ -10137,6 +10320,10 @@ msgstr ""
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 msgid "Runs beside the game once it is found. A failure is noted; the game carries on."
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "Runs installer code"
 msgstr ""
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
@@ -10587,6 +10774,10 @@ msgstr ""
 msgid "Searching…"
 msgstr ""
 
+#: apps/desktop/src/api/emulationTransport.ts
+msgid "Searching… {found} found so far"
+msgstr ""
+
 #: apps/desktop/src/components/addons/DeviceOffers.tsx
 msgid "See {name}"
 msgstr ""
@@ -10815,6 +11006,14 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/SetupStep.tsx
 msgid "Setup will keep running in the background."
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "Several installers were found in this input."
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "Several possible launch targets were found. Choose the game you want to launch."
 msgstr ""
 
 #: apps/desktop/src/components/shares/ShareGameDialog.tsx
@@ -11788,6 +11987,18 @@ msgstr ""
 msgid "The install was cancelled."
 msgstr ""
 
+#: apps/desktop/src/api/installMapping.ts
+msgid "The installer could not confidently select a strategy. Review its requirements before continuing."
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "the installer's own result"
+msgstr ""
+
+#: apps/desktop/src/api/installNative.ts
+msgid "The job choice is invalid. Refresh Activity."
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 msgid "The keychain didn't answer. Unlock it, then try again. Everything else works meanwhile."
 msgstr ""
@@ -12069,6 +12280,10 @@ msgstr ""
 msgid "This device's sync key is gone"
 msgstr ""
 
+#: apps/desktop/src/api/emulationTransport.ts
+msgid "This emulator no longer exists. Refresh the list."
+msgstr ""
+
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
 msgid "This folder is empty."
 msgstr ""
@@ -12109,6 +12324,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
 msgid "This GPU is gone."
+msgstr ""
+
+#: apps/desktop/src/api/storageNative.ts
+msgid "This job needs a response in Activity before it can continue."
 msgstr ""
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
@@ -12169,6 +12388,10 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
 msgid "This takes a moment on the same network, with or without the internet."
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "This torrent holds more than one game or installer. Choose the one to download and install."
 msgstr ""
 
 #: apps/desktop/src/shell/ErrorFallback.tsx
@@ -12422,6 +12645,10 @@ msgstr ""
 msgid "Unknown built-in profile"
 msgstr ""
 
+#: apps/desktop/src/api/installMapping.ts
+msgid "Unknown confidence"
+msgstr ""
+
 #: apps/desktop/src/shell/ErrorFallback.tsx
 msgid "Unknown error"
 msgstr ""
@@ -12459,6 +12686,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 msgid "Unnamed server"
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "Unpack the files"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
@@ -13085,6 +13316,10 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "Where should new games go?"
+msgstr ""
+
+#: apps/desktop/src/api/installMapping.ts
+msgid "Where should these ROMs go?"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx

@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { isTauri } from "@tauri-apps/api/core";
 import { commands, events, type JobSnapshot_Serialize } from "./bindings";
 import { lazyApi } from "./lazyApi";
@@ -28,7 +29,7 @@ export function createStorageApi(transport: StorageTransport): StorageApi {
       if (job.status === "failed" || job.status === "cancelled")
         throw new Error(job.error ?? `Job ${job.status}`);
       if (job.status === "needsUser")
-        throw new Error("This job needs a response in Activity before it can continue.");
+        throw new Error(t`This job needs a response in Activity before it can continue.`);
       await new Promise((resolve) => setTimeout(resolve, 400));
       job = await unwrap(transport.jobGet(job.id));
     }

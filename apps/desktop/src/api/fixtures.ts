@@ -281,10 +281,10 @@ export function createFixtureApi(
       emit({ type: "library.changed" });
       return id;
     },
-    async saveWebGameOffline(gameId, rootId) {
+    async saveWebGameOffline(gameId) {
       const entry = webEntry(gameId);
       if (entry.location) throw new Error("This game is already saved for offline play");
-      entry.location = `Storage root ${rootId} · ${records.find((g) => g.id === gameId)?.title}`;
+      entry.location = `${records.find((g) => g.id === gameId)?.title} in game storage`;
       emit({ type: "library.changed" });
     },
     async removeWebGame(gameId) {

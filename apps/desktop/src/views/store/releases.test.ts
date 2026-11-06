@@ -1,4 +1,4 @@
-import { i18n } from "@caskade/i18n";
+import { activateLocale, i18n, pseudoLocale, sourceLocale } from "@caskade/i18n";
 import { expect, it } from "vitest";
 import { catalogGame, release } from "../../api/catalogFixtures";
 import type { CatalogPage } from "../../api/igdb";
@@ -10,6 +10,7 @@ import {
   releaseWhen,
   releaseWhere,
   sortedReleases,
+  statusName,
 } from "./releases";
 
 it("shows only as much of a date as IGDB knows", () => {
@@ -90,4 +91,14 @@ it("lists a game's dated releases first, by date", () => {
     releaseDates: [release(null), release("2027-01-01"), release("2024-01-01")],
   });
   expect(sortedReleases(game).map((r) => r.date)).toEqual(["2024-01-01", "2027-01-01", null]);
+});
+
+it("says IGDB's statuses in the language in use, and others as they came", async () => {
+  await activateLocale(pseudoLocale ?? "en-XA");
+  for (const status of ["Early Access", "Full Release", "Alpha", "Cancelled", "Rumored"]) {
+    expect(statusName(status), status).toMatch(/^\[/);
+  }
+  expect(statusName("Something new")).toBe("Something new");
+  await activateLocale(sourceLocale);
+  expect(statusName("Rumored")).toBe("Rumoured");
 });

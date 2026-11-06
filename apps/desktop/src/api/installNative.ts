@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { isTauri } from "@tauri-apps/api/core";
 import { commands, events } from "./bindings";
 import type { InstallApi, JobRecovery } from "./install";
@@ -21,7 +22,7 @@ export interface InstallTransport {
 function index(value: string): number {
   const number = Number(value);
   if (!Number.isInteger(number) || number < 0 || number > 0xffffffff || String(number) !== value)
-    throw new Error("The job choice is invalid. Refresh Activity.");
+    throw new Error(t`The job choice is invalid. Refresh Activity.`);
   return number;
 }
 /** Only an index/revision crosses the answer boundary. Plans and paths remain

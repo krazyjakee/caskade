@@ -22,7 +22,9 @@ export function PlaytimeSources({
 }) {
   const { t } = useLingui();
   const { data } = useGamePlaytime(gameId, totalSeconds);
-  if (!data || data.sources.length === 0) return null;
+  // Nothing beyond Caskade's own sessions: a source that reported no time
+  // has nothing to add to the line above.
+  if (!data || data.sources.length === 0 || data.reportedMs === 0) return null;
   const tracked = formatPlaytime(data.trackedMs / 1000);
   const reported = formatPlaytime(data.reportedMs / 1000);
   const names = [

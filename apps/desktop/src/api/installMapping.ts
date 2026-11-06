@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import type { JobFailure, JobQuestion, JobSnapshot } from "./install";
 import { formatSize } from "./presentation";
 
@@ -90,11 +91,53 @@ function mapFailure(failure: RawFailure): JobFailure {
   };
 }
 const readable = (value: string) => value.replaceAll("_", " ");
+function strategyName(strategy: string) {
+  const comment = "A way to install a game, offered when there is more than one";
+  switch (strategy) {
+    case "copy":
+      return t({ message: "Copy the files", comment });
+    case "extract":
+      return t({ message: "Unpack the files", comment });
+    case "run_silent":
+      return t({ message: "Run the installer silently", comment });
+    case "run_interactive":
+      return t({ message: "Run the installer", comment });
+    case "delegate":
+      return t({ message: "Let its package manager install it", comment });
+    case "hand_off":
+      return t({ message: "Hand it to another program", comment });
+    default:
+      return readable(strategy);
+  }
+}
+function fidelityName(fidelity: string) {
+  const comment = "How close an install way comes to the installer's own result";
+  switch (fidelity) {
+    case "exact":
+      return t({ message: "exact result", comment });
+    case "equivalent":
+      return t({ message: "equivalent result", comment });
+    case "partial":
+      return t({ message: "partial result", comment });
+    case "native":
+      return t({ message: "the installer's own result", comment });
+    default:
+      return readable(fidelity);
+  }
+}
 function candidateLabel(candidate: RawCandidate) {
-  return `${readable(candidate.strategy)} · ${candidate.handler}`;
+  return `${strategyName(candidate.strategy)} · ${candidate.handler}`;
 }
 function candidateReason(candidate: RawCandidate) {
-  return `${candidate.confidence === null ? "Unknown confidence" : `${Math.round(candidate.confidence * 100)}% confidence`} · ${candidate.fidelity} · ${candidate.requires.executes_code ? "Runs installer code" : "Does not run installer code"}${candidate.requires.may_prompt_elevation ? " · May request elevation" : ""}`;
+  const confidence =
+    candidate.confidence === null
+      ? t`Unknown confidence`
+      : t`${{ percent: Math.round(candidate.confidence * 100) }}% confidence`;
+  const code = candidate.requires.executes_code
+    ? t`Runs installer code`
+    : t`Does not run installer code`;
+  const elevation = candidate.requires.may_prompt_elevation ? ` · ${t`May request elevation`}` : "";
+  return `${confidence} · ${fidelityName(candidate.fidelity)} · ${code}${elevation}`;
 }
 export function mapJobQuestion(question: RawQuestion, revision: number): JobQuestion {
   const base = { id: String(revision), kind: question.type };
@@ -102,19 +145,21 @@ export function mapJobQuestion(question: RawQuestion, revision: number): JobQues
     case "choose_launch_target":
       return {
         ...base,
-        title: "Choose a launch target",
-        message: "Several possible launch targets were found. Choose the game you want to launch.",
+        title: t`Choose a launch target`,
+        message: t`Several possible launch targets were found. Choose the game you want to launch.`,
         choices: question.value.targets.map((target, index) => ({
           id: String(index),
           label: target.path,
-          detail: `${target.reason}${target.args.length ? ` · Arguments: ${JSON.stringify(target.args)}` : ""}`,
+          detail: target.args.length
+            ? t`${{ reason: target.reason }} · Arguments: ${{ args: JSON.stringify(target.args) }}`
+            : target.reason,
         })),
       };
     case "choose_installer":
       return {
         ...base,
-        title: "Choose an installer",
-        message: "Several installers were found in this input.",
+        title: t`Choose an installer`,
+        message: t`Several installers were found in this input.`,
         choices: question.value.artifacts.map((artifact, index) => ({
           id: String(index),
           label: artifact,
@@ -127,10 +172,10 @@ export function mapJobQuestion(question: RawQuestion, revision: number): JobQues
       const size = (bytes: number | null) => (bytes !== null ? formatSize(bytes) : "");
       return {
         ...base,
-        title: torrent ? "Choose what to download" : "Choose a download asset",
+        title: torrent ? t`Choose what to download` : t`Choose a download asset`,
         message: torrent
-          ? "This torrent holds more than one game or installer. Choose the one to download and install."
-          : "Choose the release file to download and install.",
+          ? t`This torrent holds more than one game or installer. Choose the one to download and install.`
+          : t`Choose the release file to download and install.`,
         choices: question.value.assets.map((asset, index) => ({
           id: String(index),
           label: asset.name,
@@ -144,27 +189,27 @@ export function mapJobQuestion(question: RawQuestion, revision: number): JobQues
       return {
         ...base,
         canAnswer: false,
-        title: "Choose the installed folder",
-        message: `${question.value.reason} This folder requires explicit adoption or a new installation. It will not be moved automatically.`,
+        title: t`Choose the installed folder`,
+        message: t`${{ reason: question.value.reason }} This folder requires explicit adoption or a new installation. It will not be moved automatically.`,
         choices: question.value.paths.map((path, index) => ({ id: String(index), label: path })),
       };
     case "reinstall_after_move":
       return {
         ...base,
         canAnswer: false,
-        title: `Reinstall ${question.value.title}?`,
-        message: `${question.value.reason} Start a new installation from the retained source after reviewing the moved game.`,
-        choices: [{ id: "0", label: "Reinstall from the retained source" }],
+        title: t`Reinstall ${{ title: question.value.title }}?`,
+        message: t`${{ reason: question.value.reason }} Start a new installation from the retained source after reviewing the moved game.`,
+        choices: [{ id: "0", label: t`Reinstall from the retained source` }],
       };
     case "choose_destination":
       return {
         ...base,
-        title: "Where should these ROMs go?",
+        title: t`Where should these ROMs go?`,
         message: question.value.reason,
         choices: question.value.options.map((option, index) => ({
           id: String(index),
           label: option.label,
-          detail: option.folder ?? "Imported from where they are now",
+          detail: option.folder ?? t`Imported from where they are now`,
         })),
       };
     case "low_confidence":
@@ -173,12 +218,12 @@ export function mapJobQuestion(question: RawQuestion, revision: number): JobQues
         ...base,
         title:
           question.type === "low_confidence"
-            ? "Choose an installation strategy"
-            : "Run the installer program?",
+            ? t`Choose an installation strategy`
+            : t`Run the installer program?`,
         message:
           question.type === "low_confidence"
-            ? "The installer could not confidently select a strategy. Review its requirements before continuing."
-            : "Installing this game means running its installer program on this computer, with your account's access to your files. Run it only if you trust where it came from, or choose a way that doesn't run it.",
+            ? t`The installer could not confidently select a strategy. Review its requirements before continuing.`
+            : t`Installing this game means running its installer program on this computer, with your account's access to your files. Run it only if you trust where it came from, or choose a way that doesn't run it.`,
         choices: question.value.candidates.map((candidate, index) => ({
           id: String(index),
           label: candidateLabel(candidate),

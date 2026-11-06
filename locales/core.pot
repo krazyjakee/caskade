@@ -1809,6 +1809,278 @@ msgstr ""
 msgid "{plugin} found nothing to download"
 msgstr ""
 
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Top-level macOS app bundle"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Unity executable with matching _Data directory"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Unreal root bootstrapper"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Unreal shipping executable fallback"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Windows GUI executable"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Windows executable"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "ELF executable matching host architecture"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Conventional game start script"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Mach-O executable"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "GOG playTasks"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "itch.io manifest action"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Desktop Entry Exec"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Info.plist CFBundleExecutable"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "AppImage desktop entry"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Installer produced no identifiable payload in the requested folder; choose its installed folder."
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Expected payload was not installed in the requested folder; observed matching folders are retained for an explicit choice."
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "The moved Fragile installation has no previous-path anchor. Select its kept source or URL to reinstall; no paths were inferred or changed."
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "The legacy manifest has no previous real-path anchor. Supply its old location explicitly; it cannot be inferred safely."
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Both the previous and observed locations exist. Choose the authoritative installation before retargeting its alias or references."
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "The alias already names another existing installation."
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Some recorded references cannot be rewritten safely. Known text/registry references were repaired; manifest-based uninstall remains required."
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "A ROM scanner keeps these ROMs with the rest of the platform's games."
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Unreferenced package script archive is skipped without execution"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Uses macOS installer; receipts are recorded, installed files require native uninstall tracking"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "The disk image licence agreement is accepted while mounting read-only"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Embedded MSI payload extraction skips bundle prerequisites, custom actions and registration."
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Best-effort 7-Zip overlay extraction; authored installer actions are skipped."
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "No verified silent contract for this installer variant; run the wizard with supported presets only."
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Static extraction does not execute Code, Registry, INI or custom install actions"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Table extraction omits custom actions, external shortcuts and files outside the application directory"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Flatpak manages this user installation outside the storage root"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "All discs are retained together. Insert-next-disc requests use the interactive installer fallback; automatic mounting is not enabled."
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Delegated installations cannot be repaired by moving their manifest folder."
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Metadata launch target is missing or outside the game directory"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "The discovered target needs a runner that is not currently available"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Presets have not yet been hand-checked against a native installer version."
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Install directory cannot be preset without a package-specific recipe."
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Installer language cannot be preset without a package-specific recipe."
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Shortcut suppression needs a package-specific recipe."
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Launch-at-finish suppression needs a package-specific recipe."
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Starting…"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Resuming…"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Trying again…"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Verifying…"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Extracting…"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Moving…"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Copying…"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Copied"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Moved"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Updating paths…"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Trying another way…"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Finishing…"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Done"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Downloading from a device nearby…"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Reading the torrent"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Connecting to peers"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Verifying downloaded pieces"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Checking downloaded files"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Finding peers for the torrent's metadata"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Download complete"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Installed successfully, but download cleanup failed: {error}"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Extraction skips package scripts: {scripts}"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "One file exceeded the reference scan limit; relocation remains Fragile."
+msgid_plural "{n} files exceeded the reference scan limit; relocation remains Fragile."
+msgstr[0] ""
+msgstr[1] ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Did not descend into {folder}"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Ignored non-file manifest in {folder}"
+msgstr ""
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Downloading from one peer at {rate}/s"
+msgid_plural "Downloading from {n} peers at {rate}/s"
+msgstr[0] ""
+msgstr[1] ""
+
 #: crates/caskade-core/src/install/mapping.rs
 msgid "install manifest has no valid {key} id"
 msgstr ""

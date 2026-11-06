@@ -51,6 +51,15 @@ pub fn os_checks(os: OperatingSystem) -> Vec<OsCheck> {
         })
         .collect()
 }
+/// Writes each check's name in the language in use: a snapshot outlives
+/// the language it was made in.
+pub fn relabel(checks: &mut [OsCheck]) {
+    for check in checks {
+        if let Some(label) = os_check_label(&check.id) {
+            check.label = label;
+        }
+    }
+}
 /// An OS check's name in the core's language.
 fn os_check_label(id: &str) -> Option<String> {
     Some(match id {

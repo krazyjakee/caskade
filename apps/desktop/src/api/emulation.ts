@@ -267,7 +267,7 @@ export const emptyCustomProfile = (): ProfileEdit => ({
   profile: {
     type: "custom",
     id: "",
-    name: "Custom profile",
+    name: t`Custom profile`,
     executable: null,
     args: [],
     workingDir: null,

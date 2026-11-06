@@ -1,4 +1,5 @@
-import { expect, it } from "vitest";
+import { activateLocale, pseudoLocale, sourceLocale } from "@caskade/i18n";
+import { afterEach, expect, it } from "vitest";
 import {
   mapJob,
   mapJobQuestion,
@@ -40,6 +41,33 @@ it.each<RawQuestion>([
   expect(mapped.kind).toBe(question.type);
   expect(mapped.choices).toHaveLength(1);
   expect(mapped.choices[0]?.id).toBe("0");
+});
+afterEach(() => activateLocale(sourceLocale));
+it("says every question in the language in use", async () => {
+  await activateLocale(pseudoLocale ?? "en-XA");
+  const questions: RawQuestion[] = [
+    { type: "choose_launch_target", value: { targets: [{ path: "g", args: [], reason: "r" }] } },
+    { type: "choose_installer", value: { artifacts: ["source:0"] } },
+    { type: "choose_asset", value: { assets: [{ name: "n", url: "u", size: null }] } },
+    { type: "choose_install_directory", value: { paths: ["/g"], reason: "r" } },
+    { type: "reinstall_after_move", value: { title: "Fixture", reason: "r" } },
+    { type: "low_confidence", value: { candidates: [candidate] } },
+    { type: "confirm_execution", value: { candidates: [candidate] } },
+    {
+      type: "choose_destination",
+      value: { reason: "r", options: [{ label: "here", folder: null, copy: false }] },
+    },
+  ];
+  // The pseudo-locale brackets all it translates.
+  for (const question of questions) {
+    const mapped = mapJobQuestion(question, 1);
+    expect(mapped.title, question.type).toMatch(/^\[/);
+    if (question.type !== "choose_destination") expect(mapped.message).toMatch(/\[/);
+  }
+  const strategy = mapJobQuestion({ type: "low_confidence", value: { candidates: [candidate] } }, 1)
+    .choices[0];
+  expect(strategy?.label).toMatch(/^\[/);
+  expect(strategy?.detail).not.toMatch(/confidence|exact|installer code/);
 });
 it("names a torrent's payloads by name and size, not by magnet link", () => {
   const mapped = mapJobQuestion(

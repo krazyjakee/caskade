@@ -19,7 +19,14 @@ import { STORE_GAMES, useOpenGame, useOpenStoreGame } from "../game/origin";
 import { Screenshots } from "../game/Screenshots";
 import { Videos } from "../game/Videos";
 import { CatalogCard } from "./CatalogCard";
-import { platformsLine, regionName, releaseKind, releaseWhen, sortedReleases } from "./releases";
+import {
+  platformsLine,
+  regionName,
+  releaseKind,
+  releaseWhen,
+  sortedReleases,
+  statusName,
+} from "./releases";
 import { WhereToBuy } from "./WhereToBuy";
 
 const SIMILAR = 12;
@@ -99,7 +106,7 @@ function CatalogGame({ game }: { game: IgdbGame }) {
               className="font-mono text-xs tracking-widest text-accent-alt uppercase"
             >
               {game.status && game.status !== "Released"
-                ? game.status
+                ? statusName(game.status)
                 : t({
                     message: "IGDB catalog",
                     comment: "The eyebrow above a store game's title: where the page comes from",
@@ -225,7 +232,9 @@ function Releases({ game }: { game: IgdbGame }) {
                 <td className="py-1.5">{release.platform?.name ?? "—"}</td>
                 <td className="py-1.5 text-fg-muted">{regionName(release.region) ?? "—"}</td>
                 <td className="py-1.5 font-mono">{releaseWhen(release)}</td>
-                <td className="py-1.5 text-fg-muted">{release.status ?? ""}</td>
+                <td className="py-1.5 text-fg-muted">
+                  {release.status ? statusName(release.status) : ""}
+                </td>
               </tr>
             ))}
           </tbody>

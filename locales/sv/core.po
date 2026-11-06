@@ -74,7 +74,7 @@ msgstr "Allmänt"
 #: crates/caskade-core/src/accounts/permission.rs
 msgctxt "settings section"
 msgid "Library Discovery"
-msgstr "Biblioteksupptäckt"
+msgstr "Biblioteksidentifiering"
 
 #: crates/caskade-core/src/accounts/permission.rs
 msgctxt "settings section"
@@ -1662,7 +1662,7 @@ msgstr "{title} kör Wine utan något spel"
 
 #: crates/caskade-core/src/install/dropped.rs
 msgid "{title} is the Flatpak app {app_id}. Caskade finds Flatpak games with library discovery (Settings → Library Discovery)."
-msgstr "{title} är Flatpak-appen {app_id}. Caskade hittar Flatpak-spel med biblioteksupptäckt (Inställningar → Biblioteksupptäckt)."
+msgstr "{title} är Flatpak-appen {app_id}. Caskade hittar Flatpak-spel med biblioteksidentifiering (Inställningar → Biblioteksidentifiering)."
 
 #: crates/caskade-core/src/install/dropped.rs
 msgid "{path} doesn't exist any more"
@@ -1810,6 +1810,278 @@ msgstr "{failure} {note}"
 #: crates/caskade-core/src/install/hooks.rs
 msgid "{plugin} found nothing to download"
 msgstr "{plugin} hittade inget att ladda ner"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Top-level macOS app bundle"
+msgstr "macOS-appaket högst upp i mappen"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Unity executable with matching _Data directory"
+msgstr "Unity-program med tillhörande _Data-mapp"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Unreal root bootstrapper"
+msgstr "Unreal-startprogram i spelets rotmapp"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Unreal shipping executable fallback"
+msgstr "Unreal-programfil (reservval)"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Windows GUI executable"
+msgstr "Windows-program med fönster"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Windows executable"
+msgstr "Windows-program"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "ELF executable matching host architecture"
+msgstr "ELF-program för den här datorns arkitektur"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Conventional game start script"
+msgstr "Vanligt startskript för spel"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Mach-O executable"
+msgstr "Mach-O-program"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "GOG playTasks"
+msgstr "GOG:s playTasks"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "itch.io manifest action"
+msgstr "Åtgärd i itch.io-manifestet"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Desktop Entry Exec"
+msgstr "Exec-raden i skrivbordsposten"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Info.plist CFBundleExecutable"
+msgstr "CFBundleExecutable i Info.plist"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "AppImage desktop entry"
+msgstr "AppImagens skrivbordspost"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Installer produced no identifiable payload in the requested folder; choose its installed folder."
+msgstr "Installationsprogrammet skapade inget igenkännbart innehåll i den begärda mappen. Välj mappen där spelet installerades."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Expected payload was not installed in the requested folder; observed matching folders are retained for an explicit choice."
+msgstr "Det väntade innehållet installerades inte i den begärda mappen. Mappar som stämmer behålls så att du kan välja."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "The moved Fragile installation has no previous-path anchor. Select its kept source or URL to reinstall; no paths were inferred or changed."
+msgstr "Den flyttade installationen saknar uppgift om sin tidigare sökväg. Välj dess sparade källa eller URL för att installera om. Inga sökvägar har gissats eller ändrats."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "The legacy manifest has no previous real-path anchor. Supply its old location explicitly; it cannot be inferred safely."
+msgstr "Det gamla manifestet saknar uppgift om den tidigare sökvägen. Ange den gamla platsen själv, den kan inte härledas säkert."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Both the previous and observed locations exist. Choose the authoritative installation before retargeting its alias or references."
+msgstr "Både den tidigare och den hittade platsen finns. Välj vilken installation som gäller innan alias och referenser pekas om."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "The alias already names another existing installation."
+msgstr "Aliaset pekar redan på en annan befintlig installation."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Some recorded references cannot be rewritten safely. Known text/registry references were repaired; manifest-based uninstall remains required."
+msgstr "Vissa sparade referenser kan inte skrivas om säkert. Kända referenser i text och register har reparerats, men avinstallation via manifestet krävs fortfarande."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "A ROM scanner keeps these ROMs with the rest of the platform's games."
+msgstr "En ROM-skanner håller de här ROM-filerna tillsammans med plattformens andra spel."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Unreferenced package script archive is skipped without execution"
+msgstr "Paketskriptarkiv som inget refererar till hoppas över utan att köras"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Uses macOS installer; receipts are recorded, installed files require native uninstall tracking"
+msgstr "Använder macOS installationsprogram. Kvitton sparas, men installerade filer kräver macOS egen avinstallationsspårning"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "The disk image licence agreement is accepted while mounting read-only"
+msgstr "Skivavbildens licensavtal godkänns när den monteras skrivskyddad"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted"
+msgstr "Statisk uppackning skapar inga genvägar och hoppar över register-, INI-, plugin- och startåtgärder. Externa mål som inte kan lösas upp utelämnas"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Embedded MSI payload extraction skips bundle prerequisites, custom actions and registration."
+msgstr "Uppackning av inbäddat MSI-innehåll hoppar över paketets förutsättningar, anpassade åtgärder och registrering."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Best-effort 7-Zip overlay extraction; authored installer actions are skipped."
+msgstr "Uppackning med 7-Zip så långt det går. Installationsprogrammets egna åtgärder hoppas över."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "No verified silent contract for this installer variant; run the wizard with supported presets only."
+msgstr "Det finns inget verifierat tyst läge för den här varianten av installationsprogrammet. Kör guiden med enbart de förval som stöds."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Static extraction does not execute Code, Registry, INI or custom install actions"
+msgstr "Statisk uppackning kör inte Code-, Registry-, INI- eller anpassade installationsåtgärder"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Table extraction omits custom actions, external shortcuts and files outside the application directory"
+msgstr "Tabelluppackning hoppar över anpassade åtgärder, externa genvägar och filer utanför programmappen"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Flatpak manages this user installation outside the storage root"
+msgstr "Flatpak hanterar den här användarinstallationen utanför lagringsplatsen"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "All discs are retained together. Insert-next-disc requests use the interactive installer fallback; automatic mounting is not enabled."
+msgstr "Alla skivor behålls tillsammans. Uppmaningar om nästa skiva använder det interaktiva installationsprogrammet, automatisk montering är inte aktiverad."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Delegated installations cannot be repaired by moving their manifest folder."
+msgstr "Installationer som sköts av något annat kan inte repareras genom att flytta deras manifestmapp."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Metadata launch target is missing or outside the game directory"
+msgstr "Startfilen i metadata saknas eller ligger utanför spelets mapp"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "The discovered target needs a runner that is not currently available"
+msgstr "Det hittade programmet behöver en körmiljö som inte finns just nu"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Presets have not yet been hand-checked against a native installer version."
+msgstr "Förvalen har ännu inte kontrollerats för hand mot en äkta version av installationsprogrammet."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Install directory cannot be preset without a package-specific recipe."
+msgstr "Installationsmappen kan inte förväljas utan ett recept för just det här paketet."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Installer language cannot be preset without a package-specific recipe."
+msgstr "Installationsspråket kan inte förväljas utan ett recept för just det här paketet."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Shortcut suppression needs a package-specific recipe."
+msgstr "Att slippa genvägar kräver ett recept för just det här paketet."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Launch-at-finish suppression needs a package-specific recipe."
+msgstr "Att hindra start efter installationen kräver ett recept för just det här paketet."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Starting…"
+msgstr "Startar…"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Resuming…"
+msgstr "Återupptar…"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Trying again…"
+msgstr "Försöker igen…"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Verifying…"
+msgstr "Kontrollerar…"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Extracting…"
+msgstr "Packar upp…"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Moving…"
+msgstr "Flyttar…"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Copying…"
+msgstr "Kopierar…"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Copied"
+msgstr "Kopierat"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Moved"
+msgstr "Flyttat"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Updating paths…"
+msgstr "Uppdaterar sökvägar…"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Trying another way…"
+msgstr "Provar ett annat sätt…"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Finishing…"
+msgstr "Slutför…"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Done"
+msgstr "Klart"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Downloading from a device nearby…"
+msgstr "Laddar ner från en enhet i närheten…"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Reading the torrent"
+msgstr "Läser torrenten"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Connecting to peers"
+msgstr "Ansluter till källor"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Verifying downloaded pieces"
+msgstr "Kontrollerar nedladdade delar"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Checking downloaded files"
+msgstr "Kontrollerar nedladdade filer"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Finding peers for the torrent's metadata"
+msgstr "Letar efter källor för torrentens metadata"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Download complete"
+msgstr "Nedladdningen är klar"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Installed successfully, but download cleanup failed: {error}"
+msgstr "Installationen lyckades, men nedladdningen kunde inte städas bort: {error}"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Extraction skips package scripts: {scripts}"
+msgstr "Uppackningen hoppar över paketskript: {scripts}"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "One file exceeded the reference scan limit; relocation remains Fragile."
+msgid_plural "{n} files exceeded the reference scan limit; relocation remains Fragile."
+msgstr[0] "En fil överskred gränsen för referensskanning. Flytten är fortfarande osäker."
+msgstr[1] "{n} filer överskred gränsen för referensskanning. Flytten är fortfarande osäker."
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Did not descend into {folder}"
+msgstr "Gick inte ner i {folder}"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Ignored non-file manifest in {folder}"
+msgstr "Hoppade över manifest som inte är en fil i {folder}"
+
+#: crates/caskade-core/src/install/job_text.rs
+msgid "Downloading from one peer at {rate}/s"
+msgid_plural "Downloading from {n} peers at {rate}/s"
+msgstr[0] "Laddar ner från en källa med {rate}/s"
+msgstr[1] "Laddar ner från {n} källor med {rate}/s"
 
 #: crates/caskade-core/src/install/mapping.rs
 msgid "install manifest has no valid {key} id"
@@ -4979,7 +5251,7 @@ msgstr "Register: {key}"
 
 #: apps/desktop/src-tauri/src/discovery/mod.rs
 msgid "Enable library discovery before scanning."
-msgstr "Aktivera biblioteksupptäckt innan du skannar."
+msgstr "Aktivera biblioteksidentifiering innan du skannar."
 
 #: apps/desktop/src-tauri/src/discovery/mod.rs
 msgid "A discovery scan is already running."

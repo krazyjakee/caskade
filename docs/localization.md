@@ -4,7 +4,7 @@ Caskade is translated with gettext (the decisions are in the Localization milest
 
 ## Rust crates: the `core` domain
 
-The `core` domain covers the text the Rust side makes for people: `caskade-core`, the Tauri adapter (`apps/desktop/src-tauri`) and the tray. `caskade-installer` and `caskade-discovery` stay out of it: their messages are for developers, or the core maps them by code (#214).
+The `core` domain covers the text the Rust side makes for people: `caskade-core`, the Tauri adapter (`apps/desktop/src-tauri`) and the tray. `caskade-installer` and `caskade-discovery` stay out of it: their messages are for developers, or the core maps them by code (#214). The installer's questions, warnings and progress reach Activity, so `install/job_text.rs` says them again from the core's catalog each time a job is read, by the installer's English; a test fails when the installer stops saying a text it knows.
 
 ### Runtime
 
@@ -57,7 +57,7 @@ The translator's guide is [Translating Caskade](translating.md): starting a lang
 
 ### Not yet covered
 
-Launch errors (`LaunchError`, #214), native dialog titles, OS notifications and the macOS app menu, and the bundles' translated `.desktop` entries, `CFBundleLocalizations` and NSIS and WiX installer languages.
+The native dialogs the Rust side opens itself, OS notifications and the macOS app menu, and the bundles' translated `.desktop` entries, `CFBundleLocalizations` and NSIS and WiX installer languages.
 
 ## Webview: the `ui` and `app` domains
 

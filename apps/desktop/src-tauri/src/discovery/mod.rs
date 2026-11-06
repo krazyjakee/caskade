@@ -123,13 +123,16 @@ impl DiscoveryController {
         self
     }
     pub async fn snapshot(&self) -> DiscoverySnapshot {
-        self.0.state.lock().await.snapshot.clone()
+        let mut snapshot = self.0.state.lock().await.snapshot.clone();
+        config::relabel(&mut snapshot.checks);
+        snapshot
     }
     pub fn subscribe(&self) -> watch::Receiver<DiscoverySnapshot> {
         self.0.updates.subscribe()
     }
     fn publish(&self, state: &mut State) {
         state.snapshot.revision = state.snapshot.revision.saturating_add(1);
+        config::relabel(&mut state.snapshot.checks);
         state.snapshot.review = state
             .review
             .iter()

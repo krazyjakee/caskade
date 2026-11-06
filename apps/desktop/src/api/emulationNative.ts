@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { isTauri } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { commands, events } from "./bindings";
@@ -59,10 +60,10 @@ export function createNativeEmulationApi(): EmulationApi {
           const selected = await open({
             directory: kind === "folder",
             multiple: false,
-            title: kind === "folder" ? "Choose a folder" : "Choose a file",
+            title: kind === "folder" ? t`Choose a folder` : t`Choose a file`,
           });
           if (selected !== null && typeof selected !== "string")
-            throw new Error("Choose one path.");
+            throw new Error(t`Choose one path.`);
           return selected;
         }),
       setup: createNativeEmulatorSetupApi(),

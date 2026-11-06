@@ -1,3 +1,4 @@
+import { plural, t } from "@lingui/core/macro";
 import type {
   DetectImport,
   DetectJob_Serialize,
@@ -83,7 +84,7 @@ export function createEmulationApi(
     const emulator = (await unwrap(transport.emulatorsList())).find(
       (row) => row.emulator.id === id,
     );
-    if (!emulator) throw new Error("This emulator no longer exists. Refresh the list.");
+    if (!emulator) throw new Error(t`This emulator no longer exists. Refresh the list.`);
     return structuredClone(emulator.emulator);
   }
   async function profile(draft: ProfileEdit): Promise<EmulatorProfile> {
@@ -132,13 +133,16 @@ export function createEmulationApi(
             profiles: row.profiles.map((item) => ({ ...item, missing: [] })),
           })),
           warnings: [],
-          error: value.error ?? (value.status === "failed" ? "Emulator detection failed." : null),
+          error: value.error ?? (value.status === "failed" ? t`Emulator detection failed.` : null),
           message:
             value.status === "running"
-              ? `Searching… ${value.results.length} found so far`
+              ? t`Searching… ${{ found: value.results.length }} found so far`
               : value.status === "cancelled"
-                ? `Detection cancelled · ${value.results.length} found`
-                : `${value.results.length} emulator installation${value.results.length === 1 ? "" : "s"} found`,
+                ? t`Detection cancelled · ${{ found: value.results.length }} found`
+                : plural(value.results.length, {
+                    one: "# emulator installation found",
+                    other: "# emulator installations found",
+                  }),
         }
       : {
           id: null,
@@ -148,7 +152,7 @@ export function createEmulationApi(
           candidates: [],
           warnings: [],
           error: null,
-          message: "No detection run yet.",
+          message: t`No detection run yet.`,
         };
   const api: EmulationApi = {
     async snapshot() {
@@ -186,7 +190,9 @@ export function createEmulationApi(
           profiles: row.emulator.profiles.map((config) => {
             const state = row.profiles.find((item) => item.id === config.id);
             if (!state)
-              throw new Error(`Profile status is missing for ${config.id}. Refresh the list.`);
+              throw new Error(
+                t`Profile status is missing for ${{ profile: config.id }}. Refresh the list.`,
+              );
             return {
               config,
               resolved: {
@@ -285,7 +291,7 @@ export function createEmulationApi(
       return detection(job);
     },
     async importDetected(ids, revision) {
-      if (!job) throw new Error("Run emulator detection before importing.");
+      if (!job) throw new Error(t`Run emulator detection before importing.`);
       await unwrap(transport.emulationDetectImport(job.id, revision, ids));
       return api.snapshot();
     },

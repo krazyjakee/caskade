@@ -359,3 +359,22 @@ fn wrapped_failures_are_classified_and_name_no_type() {
         ErrorCode::Cancelled
     );
 }
+
+#[test]
+fn check_names_follow_the_language() {
+    let mut checks = config::os_checks(caskade_discovery::OperatingSystem::Linux);
+    assert_eq!(checks[0].label, "Desktop entries");
+    let _sv = caskade_core::i18n::scope_catalog(
+        "sv",
+        r#"msgid ""
+msgstr ""
+"Language: sv\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Desktop entries"
+msgstr "Skrivbordsposter"
+"#,
+    );
+    config::relabel(&mut checks);
+    assert_eq!(checks[0].label, "Skrivbordsposter");
+}
