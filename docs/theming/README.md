@@ -319,4 +319,5 @@ Screenshots (`<view>-<theme>.png`) and the coverage report
 themes: `--base <dir> --theme <dir>`; precompiled sheets:
 `--css <dir>=<file>`; a running fixture server: `--url <origin>`. The fixture
 build has no plugins, so the plugin route shows only the shell. The runs
-cover Chromium on Linux; WebView2 and WKWebView are deferred (#22).
+cover Chromium on Linux; WebView2 and WKWebView are deferred, to W9 and M2 in
+`docs/manual-checks.md` (#8 lets them wait).
