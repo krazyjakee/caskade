@@ -153,7 +153,8 @@ Sunshine installed (W8 installs one). To find a game's id, open
   an installer window showed: it should be running with none shown, but its
   silent install has never been tried.
   On a network Windows calls Public, the firewall rules don't apply, so other
-  devices can't connect, and Settings → Streaming says so.
+  devices can't connect, and Settings → Streaming says so. Set the network to
+  Private: the warning goes within about a minute, with no Repair or restart.
 - [ ] **W4.** With hosting on, look around Windows. **Pass:** no Start menu
   entry, tray icon or browser page for Sunshine; Services shows only
   "Caskade streaming"; firewall rules only "Caskade streaming (TCP)" and

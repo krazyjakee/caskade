@@ -201,6 +201,7 @@ fn fast() -> Timing {
     Timing {
         ready_wait: Duration::from_secs(10),
         watch_every: Duration::from_millis(50),
+        look_every: Duration::from_millis(50),
         restart_after: Duration::from_millis(50),
     }
 }
@@ -913,28 +914,129 @@ async fn off_leaves_no_program_or_rules_and_on_again_pairs_with_no_new_code() {
     f.host.shutdown();
 }
 
+/// `f`'s host, looking at this machine with `checks`.
+fn host_with(
+    f: &Fixture,
+    checks: impl Fn(OperatingSystem) -> HostChecks + Send + Sync + 'static,
+) -> StreamingHost {
+    StreamingHost::with(
+        f.host.inner.tools.clone(),
+        f.host.inner.elevation.clone(),
+        f.settings.clone(),
+        Parts {
+            existing: Arc::new(|| None),
+            os: OperatingSystem::Linux,
+            runner: Arc::new(process::ChildRunner::new(
+                f.temp.path().join("data/streaming/run.json"),
+            )),
+            secrets: f.secrets.clone(),
+            timing: fast(),
+            api_base: f.host.inner.api_base.clone(),
+            http_port: f.host.inner.http_port,
+            checks: Arc::new(checks),
+        },
+    )
+}
+
+/// Turns `host` on and waits for it to be ready.
+async fn hosting(f: &Fixture, host: &StreamingHost) {
+    let enabling = tokio::spawn({
+        let host = host.clone();
+        async move { host.enable().await }
+    });
+    until("credentials made", || at_once(f.secrets.get()).is_some()).await;
+    answer(f).await;
+    enabling.await.unwrap().unwrap();
+    until("ready", || host.status().state == HostState::Ready).await;
+}
+
+/// A PC that moved from a public network to a private one: it stops saying
+/// nobody can reach it by itself, with no Repair or restart, and says so
+/// again when it moves back. The host stays ready all along.
+#[tokio::test(flavor = "multi_thread")]
+async fn the_warning_follows_the_network_while_hosting_runs() {
+    let f = fixture(fast()).await;
+    let public = Arc::new(std::sync::atomic::AtomicBool::new(true));
+    let network = public.clone();
+    let host = host_with(&f, move |os| HostChecks {
+        reachable: !network.load(std::sync::atomic::Ordering::SeqCst),
+        ..HostChecks::fine(os)
+    });
+    hosting(&f, &host).await;
+    assert!(host.status().unreachable);
+
+    public.store(false, std::sync::atomic::Ordering::SeqCst);
+    until("the warning gone", || {
+        let status = host.status();
+        !status.unreachable && status.warning.is_none()
+    })
+    .await;
+    assert_eq!(host.status().state, HostState::Ready);
+
+    public.store(true, std::sync::atomic::Ordering::SeqCst);
+    until("the warning back", || host.status().unreachable).await;
+    assert!(host.status().warning.unwrap().contains("public"));
+    assert_eq!(host.status().state, HostState::Ready);
+    host.shutdown();
+}
+
+/// A look can take a while, and on Windows it runs programs: one that never
+/// ends leaves the status alone, isn't joined by more, and doesn't stop a
+/// crash being noticed.
+#[tokio::test(flavor = "multi_thread")]
+async fn a_look_that_hangs_holds_nothing_up() {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    let f = fixture(fast()).await;
+    let looks = Arc::new(AtomicUsize::new(0));
+    let (release, stuck) = std::sync::mpsc::channel::<()>();
+    let stuck = Mutex::new(stuck);
+    let counted = looks.clone();
+    let host = host_with(&f, move |os| {
+        if counted.fetch_add(1, Ordering::SeqCst) == 1 {
+            let _ = crate::lock(&stuck).recv();
+        }
+        HostChecks::fine(os)
+    });
+    hosting(&f, &host).await;
+    until("the second look", || looks.load(Ordering::SeqCst) == 2).await;
+    tokio::time::sleep(fast().look_every * 6).await;
+    assert_eq!(looks.load(Ordering::SeqCst), 2, "one look at a time");
+    assert_eq!(host.status().state, HostState::Ready);
+
+    let record: serde_json::Value = serde_json::from_slice(
+        &std::fs::read(f.temp.path().join("data/streaming/run.json")).unwrap(),
+    )
+    .unwrap();
+    std::process::Command::new("kill")
+        .args(["-KILL", &record["pid"].as_u64().unwrap().to_string()])
+        .status()
+        .unwrap();
+    until("the crash noticed", || looks.load(Ordering::SeqCst) > 2).await;
+    release.send(()).unwrap();
+    until("ready after the crash", || {
+        host.status().state == HostState::Ready
+    })
+    .await;
+    host.shutdown();
+}
+
+/// A look that ends after the host stopped has nothing to say.
+#[tokio::test(flavor = "multi_thread")]
+async fn a_late_look_leaves_a_stopped_host_alone() {
+    let f = fixture(fast()).await;
+    f.host.show_checks(HostChecks {
+        reachable: false,
+        ..HostChecks::fine(OperatingSystem::Linux)
+    });
+    assert_eq!(f.host.status().state, HostState::Off);
+    assert!(!f.host.status().unreachable);
+    assert_eq!(f.host.status().warning, None);
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn a_ready_host_says_when_pads_or_a_screen_wont_work() {
     let f = fixture(fast()).await;
-    let host = |checks: fn(OperatingSystem) -> HostChecks| {
-        StreamingHost::with(
-            f.host.inner.tools.clone(),
-            f.host.inner.elevation.clone(),
-            f.settings.clone(),
-            Parts {
-                existing: Arc::new(|| None),
-                os: OperatingSystem::Linux,
-                runner: Arc::new(process::ChildRunner::new(
-                    f.temp.path().join("data/streaming/run.json"),
-                )),
-                secrets: f.secrets.clone(),
-                timing: fast(),
-                api_base: f.host.inner.api_base.clone(),
-                http_port: f.host.inner.http_port,
-                checks: Arc::new(checks),
-            },
-        )
-    };
+    let host = |checks: fn(OperatingSystem) -> HostChecks| host_with(&f, checks);
     let no_pads = host(|_| HostChecks {
         screen: true,
         pads: false,

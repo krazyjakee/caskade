@@ -118,7 +118,8 @@ fn network_lets_others_in(categories: &str) -> bool {
         .any(|category| matches!(category.trim(), "Private" | "DomainAuthenticated"))
 }
 
-/// What this machine lets a host do (§4.4–4.5), looked at when it is ready.
+/// What this machine lets a host do (§4.4–4.5), looked at when it is ready
+/// and every [`Timing::look_every`] while it runs.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct HostChecks {
     /// A screen to capture: a desktop session (Linux), always on Windows.
@@ -219,6 +220,10 @@ pub struct Timing {
     pub ready_wait: Duration,
     /// How often a running host is looked at.
     pub watch_every: Duration,
+    /// How often this machine is looked at again while a host runs
+    /// ([`HostChecks`]). Long, as on Windows that starts programs, a game
+    /// may be streaming, and a network seldom changes.
+    pub look_every: Duration,
     /// The first wait before a restart; doubled after each crash.
     pub restart_after: Duration,
 }
@@ -228,6 +233,7 @@ impl Default for Timing {
         Self {
             ready_wait: Duration::from_secs(45),
             watch_every: Duration::from_secs(2),
+            look_every: Duration::from_secs(60),
             restart_after: Duration::from_secs(1),
         }
     }
@@ -362,15 +368,26 @@ impl StreamingHost {
 
     /// Ready, with what this machine can't do (§4.5): looked at now.
     async fn set_ready(&self, version: Option<String>) {
+        let looked = self.look().await.ok();
+        self.set_status(HostState::Ready, version, None);
+        if let Some(checks) = looked {
+            self.show_checks(checks);
+        }
+    }
+
+    /// What a look at this machine found, on a host that is still ready.
+    fn show_checks(&self, checks: HostChecks) {
+        let mut status = crate::lock(&self.inner.status);
+        if status.state == HostState::Ready {
+            status.warning = checks.warning(self.inner.os);
+            status.unreachable = !checks.reachable;
+        }
+    }
+
+    /// Looks at this machine on a thread of its own.
+    fn look(&self) -> tokio::task::JoinHandle<HostChecks> {
         let (checks, os) = (self.inner.checks.clone(), self.inner.os);
-        let looked = tokio::task::spawn_blocking(move || checks(os)).await.ok();
-        *crate::lock(&self.inner.status) = HostStatus {
-            state: HostState::Ready,
-            version,
-            problem: None,
-            warning: looked.and_then(|checks| checks.warning(os)),
-            unreachable: looked.is_some_and(|checks| !checks.reachable),
-        };
+        tokio::task::spawn_blocking(move || checks(os))
     }
 
     /// Windows: downloads the gamepad driver's pinned installer when the
@@ -893,8 +910,22 @@ impl StreamingHost {
                     return;
                 }
             }
+            // The network can change under a running host. A look is never
+            // waited for here, so a slow one can't hide a crash, and there
+            // is one at a time. Status reads get what the last one found.
+            let mut look: Option<tokio::task::JoinHandle<HostChecks>> = None;
+            let mut looked = Instant::now();
             while self.inner.runner.running() {
                 tokio::time::sleep(self.inner.timing.watch_every).await;
+                if let Some(finished) = look.take_if(|look| look.is_finished())
+                    && let Ok(checks) = finished.await
+                {
+                    self.show_checks(checks);
+                }
+                if look.is_none() && looked.elapsed() >= self.inner.timing.look_every {
+                    looked = Instant::now();
+                    look = Some(self.look());
+                }
             }
             let now = Instant::now();
             crashes.push_back(now);

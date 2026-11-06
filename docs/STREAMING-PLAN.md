@@ -152,11 +152,11 @@ On Windows, `dd_configuration_option = ensure_active` with resolution, refresh r
   - **Best effort:** a failed install never fails the step; hosting then warns that pads won't work.
   - **Kept:** a driver that was there before is never touched, and the undo leaves Caskade's install in place too (`Change::kept_on_undo`), because other programs use it.
   - LizardByte's Virtual HID Driver isn't detected yet; `gamepad_driver = all` for its users is open.
-- **Checks at Ready** (`HostChecks::here`, `HostStatus.warning`):
+- **Checks at Ready and every minute while the host runs** (`HostChecks::here`, `HostStatus.warning`, on a thread of their own, so a status read never waits):
   - Linux: a desktop session (`DISPLAY` or `WAYLAND_DISPLAY`), and `/dev/uinput` writable (the #255 rule).
   - Windows: the `ViGEmBus` service running, and a network the firewall rules cover (private or domain).
 
-  On a public network nobody can reach the host: `HostStatus.unreachable` makes Settings → Streaming read Needs attention above the warning, and the host stays `Ready` so publishing and pairing work once the network changes. A host with no screen ("Connect a monitor or a display dummy plug") or pads that won't work says so in Settings → Streaming. It is reported, not hidden, and Repair re-runs the administrator step.
+  On a public network nobody can reach the host: `HostStatus.unreachable` makes Settings → Streaming read Needs attention above the warning, and the host stays `Ready` so publishing and pairing work once the network changes. The warning goes by itself within about a minute of that. A host with no screen ("Connect a monitor or a display dummy plug") or pads that won't work says so in Settings → Streaming. It is reported, not hidden, and Repair re-runs the administrator step.
 - **Tests.**
   - The configuration per OS.
   - The driver joining the Windows prompt, staying after the undo, and not asked for when already there.
