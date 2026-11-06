@@ -93,7 +93,9 @@ pub fn place(target: &Path, name: &str) -> Option<PathBuf> {
 }
 
 /// Every regular file under `folder`, with its relative path. Symbolic
-/// links are left out: they may point outside the folder.
+/// links are left out: they may point outside the folder. So is the game's
+/// own `.caskade`: this device's install record and its Wine or Proton prefix,
+/// with the saves in it. The receiving device makes its own.
 fn files_of(folder: &Path) -> Result<Vec<(PathBuf, String, u64)>> {
     let mut found = Vec::new();
     let mut stack = vec![folder.to_path_buf()];
@@ -104,7 +106,9 @@ fn files_of(folder: &Path) -> Result<Vec<(PathBuf, String, u64)>> {
             let kind = entry.file_type().map_err(store_error)?;
             let path = entry.path();
             if kind.is_dir() {
-                stack.push(path);
+                if dir != folder || entry.file_name() != ".caskade" {
+                    stack.push(path);
+                }
             } else if kind.is_file() {
                 let Some(name) = path.strip_prefix(folder).ok().and_then(name_of) else {
                     continue;

@@ -137,6 +137,85 @@ async fn a_windows_game_added_by_hand_arrives_as_a_managed_install_of_the_same_g
     .await;
 }
 
+/// A game Caskade installed has its record and, on Linux, its prefix in
+/// `.caskade`, and neither is the next device's: the prefix holds the save
+/// and all of Windows, and a folder with a record isn't one to install (#233).
+#[tokio::test(flavor = "multi_thread")]
+async fn a_managed_install_copies_on_without_its_prefix_or_record() {
+    let desk = core("Desk").await;
+    let tv = core("TV").await;
+    let deck = core("Deck").await;
+    pair(&desk, &tv).await;
+    pair(&tv, &deck).await;
+    let (_, desk_entry, folder) = add_celeste(&desk).await;
+    let tv_game = tv.store.upsert_game(&Game::new("Celeste")).await.unwrap();
+    let job = tv
+        .install
+        .copy_from_device(
+            PeerCopyTarget {
+                device_id: id(&desk).await,
+                device_name: "Desk".into(),
+                entry_id: desk_entry,
+                game_id: tv_game.id.clone(),
+                title: "Celeste".into(),
+            },
+            None,
+        )
+        .await
+        .unwrap();
+    assert_eq!(
+        finished(&tv.install, &job.id).await.status,
+        JobStatus::Completed
+    );
+    let entries = tv.store.entries_for_game(&tv_game.id).await.unwrap();
+    let copy = entries
+        .iter()
+        .find(|entry| entry.source_id.as_str() == "caskade-storage")
+        .expect("a managed release");
+    let Some(InstallLocation::Managed { rel_dir, .. }) = &copy.location else {
+        panic!("not managed: {:?}", copy.location)
+    };
+    // It has been played here: Proton's prefix, with a save in it.
+    let installed = tv.games.join(rel_dir);
+    assert!(installed.join(".caskade/install.json").is_file());
+    let save = ".caskade/prefix/drive_c/users/steamuser/AppData/Roaming/Celeste/save.dat";
+    std::fs::create_dir_all(installed.join(save).parent().unwrap()).unwrap();
+    std::fs::write(installed.join(save), "the TV's save").unwrap();
+
+    let deck_game = deck.store.upsert_game(&Game::new("Celeste")).await.unwrap();
+    let job = deck
+        .install
+        .copy_from_device(
+            PeerCopyTarget {
+                device_id: id(&tv).await,
+                device_name: "TV".into(),
+                entry_id: copy.id.clone(),
+                game_id: deck_game.id.clone(),
+                title: "Celeste".into(),
+            },
+            None,
+        )
+        .await
+        .unwrap();
+    let done = finished(&deck.install, &job.id).await;
+    assert_eq!(done.status, JobStatus::Completed, "{done:?}");
+    let entries = deck.store.entries_for_game(&deck_game.id).await.unwrap();
+    let copy = entries
+        .iter()
+        .find(|entry| entry.source_id.as_str() == "caskade-storage")
+        .expect("a managed release");
+    let Some(InstallLocation::Managed { rel_dir, .. }) = &copy.location else {
+        panic!("not managed: {:?}", copy.location)
+    };
+    let installed = deck.games.join(rel_dir);
+    assert_eq!(
+        std::fs::read(installed.join("Content/Celeste.pak")).unwrap(),
+        std::fs::read(folder.join("Content/Celeste.pak")).unwrap()
+    );
+    assert!(installed.join(".caskade/install.json").is_file());
+    assert!(!installed.join(".caskade/prefix").exists());
+}
+
 /// A device on `127.0.0.1:<port>`: it comes back where it was.
 fn on_a_port_of_its_own() -> Reach {
     let port = std::net::UdpSocket::bind("127.0.0.1:0")
