@@ -15,6 +15,8 @@ mod game_copy;
 mod i18n;
 mod installer_settings;
 #[cfg(feature = "net")]
+mod lan_unplugged;
+#[cfg(feature = "net")]
 mod ludusavi;
 #[cfg(feature = "net")]
 mod milestone_editing;

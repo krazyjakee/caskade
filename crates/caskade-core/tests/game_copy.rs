@@ -28,7 +28,7 @@ fn fixture_exe() -> PathBuf {
 }
 
 /// Celeste, a Windows game added by hand on `core` from a folder of its own.
-async fn add_celeste(core: &Core) -> (String, String, PathBuf) {
+pub async fn add_celeste(core: &Core) -> (String, String, PathBuf) {
     let folder = core.dir.path().join("My Games").join("Celeste");
     std::fs::create_dir_all(folder.join("Content/Levels")).unwrap();
     std::fs::copy(fixture_exe(), folder.join("Celeste.exe")).unwrap();
@@ -55,7 +55,7 @@ async fn add_celeste(core: &Core) -> (String, String, PathBuf) {
     (game.id, entry.id, folder)
 }
 
-async fn finished(service: &InstallService, id: &str) -> JobSnapshot {
+pub async fn finished(service: &InstallService, id: &str) -> JobSnapshot {
     for _ in 0..1200 {
         let job = service.job(id).unwrap();
         if job.status.is_finished() || job.status == JobStatus::NeedsUser {

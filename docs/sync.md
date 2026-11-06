@@ -1167,7 +1167,7 @@ real devices:
 
 | Check | Result |
 | --- | --- |
-| A new device on a network with no internet set up from another: same library, accounts and collections; its own storage, emulators and settings | not yet run |
+| A new device on a network with no internet set up from another: same library, accounts and collections; its own storage, emulators and settings | passed 2026-11-06 in `scripts/lan-unplugged.sh` (two processes in network namespaces, the core's steps, no setup screens); not yet run on two machines |
 | Games chosen during setup copy from the other device over the local network (Gitea #276) | not yet run |
 
 ## Settings → Devices
@@ -1393,7 +1393,8 @@ Results:
 
 | Date | Machines | Steps passed | Notes |
 | --- | --- | --- | --- |
-| — | — | — | Not run yet: needs two machines. Library sync (Gitea #230) is in place. |
+| 2026-11-06 | One PC: two processes in network namespaces on a bridge with no uplink (`scripts/lan-unplugged.sh`) | 1–4, plus a copy | Not two machines. Real mDNS, pairing by code, an edit, a collection and a session both ways, link `lan`, a copy of a fixture game. No real router, Wi-Fi or Windows. Steps 5–6 not run. With the bridge's ports isolated it fails at discovery, as it should. |
+| — | Two machines | — | Not run yet. |
 
 ### Copying a game (#11)
 

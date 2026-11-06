@@ -401,27 +401,34 @@ Tick or decide these on the issue itself:
 | #10 Local network first | 225 | O4, O5, O6 |
 | #11 Copy a game | 233 | N1, N2, WL1, T3 |
 | #12 Play on another device | 234 | N3, N4, WK1 |
-| #13 Downloads from a device nearby | 236 | O7 |
+| #13 Downloads from a device nearby (closed; optional) | 236 | O7 |
 | #14 Save versions and sync | 239 | WL2 |
-| #15 Set up a new device | 242 | O1 |
-| #16 Per-device settings | 244 | H1 |
+| #15 Set up a new device (closed; optional) | 242 | O1 |
+| #16 Per-device settings (closed; optional) | 244 | H1 |
 | #17 Share a game once | 246 | T1, T2 |
 | #19 Sync on every platform | 250 | WL3, M1 |
 | #20 Sync milestone | 252 | O4, WL1, WL2, N4, WK1, T1, T2, T3 |
 | #21 Administrator steps | 255 | L3, L4, W3, W5, W6 |
 | #22 `caskade --launch` | 256 | W1, W2 |
 | #23 Hidden host | 257 | S1, W4, S3, S7 |
-| #24 The user's own Sunshine | 258 | L6, W8 |
+| #24 The user's own Sunshine (closed; optional) | 258 | L6, W8 |
 | #25 Games on the host | 259 | S4 |
 | #26 Display, pads, capture | 260 | S9, S10, S11 |
 | #27 Client on first stream | 261 | S3, S8, M3 |
 | #28 Pairing with a code | 263 | S2, M3 |
 | #29 Stream from Play | 264 | S3, S4, S5, S6, WK2, M3 |
-| #30 Settings → Streaming | 265 | S2, S12 |
+| #30 Settings → Streaming (closed; optional) | 265 | S2, S12 |
 | #31 Update, repair, remove | 266 | L4, L5, W6, W7, S13, S14 |
-| #32 Pairing through sync | 267 | S15 |
+| #32 Pairing through sync (closed; optional) | 267 | S15 |
 | #33 Streaming milestone | 268 | closes with #21–#32 |
-| #34 Nearby downloads for emulators and data | 277 | O2, O3 |
+| #34 Nearby downloads for emulators and data (closed; optional) | 277 | O2, O3 |
+
+Issues marked closed were met by the tests their Validation sections ask for,
+so their checks now only confirm them on real machines.
+
+`scripts/lan-unplugged.sh` runs O1 and most of O4 at the core on one PC, in
+network namespaces with no uplink. It needs no root and doesn't replace two
+real machines.
 
 W9, W10, H2, H3 and M2 finish no issue: #8's keyboard, mouse and controller box
 lets native checks stay deferred, so they only look for regressions on real

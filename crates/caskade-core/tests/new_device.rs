@@ -63,6 +63,10 @@ impl Core {
 }
 
 async fn core(name: &str) -> Core {
+    core_with(name, Reach::loopback()).await
+}
+
+async fn core_with(name: &str, reach: Reach) -> Core {
     let temp = tempfile::tempdir().unwrap();
     let store = LibraryStore::in_memory().await.unwrap();
     let accounts = AccountService::open(store.clone(), Bus::default())
@@ -76,7 +80,7 @@ async fn core(name: &str) -> Core {
         store.clone(),
         accounts.clone(),
         Arc::new(MemoryKeyStore::default()),
-        Reach::loopback(),
+        reach,
     );
     devices.set_settings(settings.clone());
     devices.start();
@@ -119,7 +123,11 @@ where
 /// The household's desktop: a library, two accounts (the admin with a
 /// PIN), a collection, and its own storage, emulator and hardware settings.
 async fn desktop() -> Core {
-    let desk = core("Desktop").await;
+    desktop_with(Reach::loopback()).await
+}
+
+async fn desktop_with(reach: Reach) -> Core {
+    let desk = core_with("Desktop", reach).await;
     let player = desk.accounts.list().await.unwrap().remove(0);
     desk.accounts
         .update(
@@ -295,6 +303,55 @@ async fn a_new_device_set_up_from_another_has_its_library_and_keeps_its_own_hard
     assert!(deck.store.emulators().await.unwrap().is_empty());
     assert_eq!(deck.setting("core.console", "active").await, false);
     assert_eq!(deck.setting("core.appearance", "uiScale").await, 100);
+}
+
+/// One device of two on a network with no internet, pairing by code as
+/// setup does, each in a process of its own: `scripts/lan-unplugged.sh`.
+#[cfg(feature = "net")]
+#[tokio::test(flavor = "multi_thread")]
+#[ignore = "one device of two, on a network of its own: scripts/lan-unplugged.sh"]
+async fn set_up_from_another_with_no_internet() {
+    use crate::lan_unplugged::{Peer, pair_by_code};
+
+    let peer = Peer::from_env();
+    let reach = Reach::network(false, None);
+    if peer.me == "Desktop" {
+        let desk = desktop_with(reach).await;
+        pair_by_code(&desk.devices, &peer, false).await;
+        let _sync = desk.sync.start();
+        peer.heard("set up").await;
+        return;
+    }
+    let deck = core_with(&peer.me, reach).await;
+    let desk_id = pair_by_code(&deck.devices, &peer, true).await;
+    let _sync = deck.sync.start();
+    deck.sync.sync_now(&desk_id);
+    within("the library arrives", 60, || async {
+        deck.titles().await == ["Celeste", "Hades", "Outer Wilds"]
+    })
+    .await;
+    within("the accounts arrive and ask for the PIN", 60, || async {
+        let accounts = deck.accounts.list().await.unwrap();
+        let has = |name: &str| accounts.iter().any(|a| a.name == name);
+        has("Ada") && has("Kid") && deck.accounts.active_id().is_none()
+    })
+    .await;
+    let accounts = deck.accounts.list().await.unwrap();
+    let ada = accounts.iter().find(|a| a.name == "Ada").unwrap();
+    assert!(ada.has_pin);
+    within("the collection arrives", 60, || async {
+        let summaries = deck.store.collection_summaries(&ada.id).await.unwrap();
+        summaries
+            .iter()
+            .any(|collection| collection.name == "Roguelikes" && collection.games == 1)
+    })
+    .await;
+    assert!(deck.store.roots().await.unwrap().is_empty());
+    assert!(deck.store.emulators().await.unwrap().is_empty());
+    assert_eq!(deck.setting("core.console", "active").await, false);
+    assert_eq!(deck.setting("core.appearance", "uiScale").await, 100);
+    peer.say("set up", "yes");
+    eprintln!("{}: set up with no internet", peer.me);
 }
 
 /// #276: after the first sync, the new device lists the other device's
