@@ -3,6 +3,56 @@ use super::*;
 use caskade_discovery::{Prefix, RunnerHint, SourceId};
 use std::collections::BTreeMap;
 
+/// Wine names a start folder that's on no drive `unix\\…`, where a game's
+/// relative paths find nothing, and a managed prefix has no `z:` (#11).
+#[tokio::test]
+async fn a_managed_windows_game_starts_on_its_game_drive() {
+    let t = tempfile::tempdir().unwrap();
+    let root = t.path().canonicalize().unwrap();
+    let identity = caskade_installer::manifest::RootManifest::new("root").unwrap();
+    identity.write(&root).unwrap();
+    let game = root.join("Fixture");
+    std::fs::create_dir_all(game.join("bin")).unwrap();
+    std::fs::write(game.join("bin/game.exe"), b"inert fixture").unwrap();
+    let mut entry = GameEntry::new("game", SourceId::new("fixture"), "windows");
+    entry.state = InstallState::Installed;
+    entry.location = Some(InstallLocation::Managed {
+        root_id: identity.root_id().into(),
+        rel_dir: "Fixture".into(),
+    });
+    entry.runtime = GameRuntime::Windows {
+        prefix: Some(Prefix {
+            path: ".caskade/prefix".into(),
+            arch: None,
+            owner: None,
+        }),
+        runner: Some(RunnerHint {
+            kind: RunnerKind::Umu,
+            path: Some("/bin/true".into()),
+            name: None,
+        }),
+    };
+    entry.launch = Some(LaunchSpec::Executable {
+        path: "bin/game.exe".into(),
+        args: Vec::new(),
+        cwd: Some("bin".into()),
+        env: BTreeMap::new(),
+    });
+    let storage = StorageRoot::from_manifest(root.clone(), &identity);
+    let prepared = resolve(
+        &entry,
+        Some(storage),
+        None,
+        Arc::new(super::super::NoPluginRunner),
+    )
+    .await
+    .unwrap();
+    let drive = game.join(".caskade/prefix/dosdevices/g:/Game/bin");
+    assert_eq!(prepared.command.args, vec![r"G:\Game\bin\game.exe"]);
+    assert_eq!(prepared.command.cwd.as_deref(), Some(drive.as_path()));
+    assert_eq!(prepared.command.env["PWD"], drive.to_string_lossy());
+}
+
 #[tokio::test]
 async fn external_wine_prefix_keeps_its_own_drive_mappings() {
     let t = tempfile::tempdir().unwrap();

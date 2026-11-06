@@ -8,7 +8,7 @@ use caskade_discovery::{GameRuntime, InstallState, Prefix, RunnerHint, RunnerKin
 use caskade_installer::runtime::{
     ProcessCommand,
     alias::AliasStore,
-    proton::{Launcher, PrefixRuntime},
+    proton::{Launcher, PrefixRuntime, start_on_game_drive},
 };
 use std::{
     path::{Component, Path, PathBuf},
@@ -324,7 +324,10 @@ fn windows_command(
         env: command.env,
     };
     let mut wrapped = runtime.wrap(&pc, &prefix, alias.unwrap_or(real));
-    if !managed {
+    if managed {
+        // `prepare` sets up the prefix before this starts.
+        start_on_game_drive(&mut wrapped, &prefix, alias.unwrap_or(real));
+    } else {
         // External launcher prefixes do not own Caskade's G: mapping. Use
         // their existing drive mappings without adding or retargeting links.
         wrapped.args[0] = external_windows_path(&prefix, &pc.program)?;

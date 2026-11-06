@@ -186,6 +186,23 @@ pub fn windows_program(program: &Path, game_dir: &Path) -> String {
     }
 }
 
+/// Starts a wrapped game program from `G:\\Game`. Wine names a process's
+/// start folder from its Unix path, and with `z:` gone a game's real folder
+/// is on no drive: Wine gives it the relative `unix\\tmp\\…`, and the game
+/// can't open its own data by a relative path. Through the prefix's `g:`
+/// link the folder is on the drive; `$PWD` keeps that name past `getcwd`,
+/// which would resolve the link. Only for a prefix [`isolate`] has set up, at
+/// the latest before `command` is spawned. Other folders stay as they are.
+pub fn start_on_game_drive(command: &mut ProcessCommand, prefix: &Path, game_dir: &Path) {
+    if let Ok(inside) = command.cwd.strip_prefix(game_dir) {
+        let cwd = prefix.join("dosdevices/g:/Game").join(inside);
+        command
+            .env
+            .insert("PWD".into(), cwd.to_string_lossy().into_owned());
+        command.cwd = cwd;
+    }
+}
+
 /// Windows path of the game directory inside a prefix. Installers refuse a
 /// bare drive root by default (Inno `AllowRootDirectory`, NSIS
 /// `AllowRootDirInstall`), so the game is the `Game` folder on drive `G:`.
@@ -246,7 +263,9 @@ impl Runtime for PrefixRuntime {
             .or_else(|| command.env.get("CASKADE_GAME_DIR").map(PathBuf::from))
             .unwrap_or_else(|| command.cwd.clone());
         self.prepare(&prefix, &game_dir)?;
-        self.native.spawn(&self.wrap(command, &prefix, &game_dir))
+        let mut wrapped = self.wrap(command, &prefix, &game_dir);
+        start_on_game_drive(&mut wrapped, &prefix, &game_dir);
+        self.native.spawn(&wrapped)
     }
     fn wait(&self, process: ProcessId, timeout: Duration) -> Result<ProcessExit, RuntimeError> {
         self.native.wait(process, timeout)
@@ -290,6 +309,26 @@ mod tests {
         fs::create_dir_all(blocked.path().join("dosdevices/z:/keep")).unwrap();
         assert!(isolate(blocked.path(), game.path()).is_err());
         assert!(blocked.path().join("dosdevices/z:/keep").is_dir());
+    }
+
+    #[test]
+    fn a_game_starts_on_its_drive_and_other_folders_stay() {
+        let command = |cwd: &str| ProcessCommand {
+            program: "/game/game.exe".into(),
+            args: vec![],
+            env: BTreeMap::new(),
+            cwd: cwd.into(),
+        };
+        let prefix = Path::new("/game/.caskade/prefix");
+        let mut game = command("/game/bin");
+        start_on_game_drive(&mut game, prefix, Path::new("/game"));
+        let drive = "/game/.caskade/prefix/dosdevices/g:/Game/bin";
+        assert_eq!(game.cwd, Path::new(drive));
+        assert_eq!(game.env["PWD"], drive);
+        let mut installer = command("/downloads");
+        start_on_game_drive(&mut installer, prefix, Path::new("/game"));
+        assert_eq!(installer.cwd, Path::new("/downloads"));
+        assert!(!installer.env.contains_key("PWD"));
     }
 
     #[test]
