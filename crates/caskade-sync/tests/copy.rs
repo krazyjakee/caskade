@@ -281,6 +281,14 @@ async fn an_interrupted_copy_resumes_without_starting_over() {
         "the second try fetched {again} of {} with {kept} kept",
         offered.size
     );
+    // Only what went counts as sent: what the first try left behind isn't
+    // sent again, or a sender would say 100 % with this much still to go.
+    let sent = gate.sent(dialer.id(), &offered.root);
+    assert!(
+        sent <= offered.size + 1024 * 1024,
+        "the sender counted {sent} of {}",
+        offered.size
+    );
     let target = temp.path().join("installed");
     receiving.export(&offered.root, &target).await.unwrap();
     same_tree(&folder, &target);

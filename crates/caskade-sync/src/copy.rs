@@ -31,6 +31,7 @@ use iroh::{Endpoint, EndpointAddr, EndpointId, RelayMode, TransportAddr, endpoin
 use iroh_blobs::api::blobs::{AddPathOptions, ExportMode, ExportOptions, ImportMode};
 use iroh_blobs::api::remote::GetProgressItem;
 use iroh_blobs::format::collection::Collection;
+use iroh_blobs::protocol::ChunkRanges;
 use iroh_blobs::provider::events::{
     AbortReason, ConnectMode, EventMask, EventSender, ObserveMode, ProviderMessage, RequestMode,
     RequestUpdate, ThrottleMode,
@@ -523,16 +524,20 @@ impl CopyGate {
                     message.tx.send(answer).await.ok();
                     if let Some(peer) = peer {
                         let gate = self.clone();
+                        let asked = message.inner.request.ranges.clone();
                         let mut updates = message.rx;
                         tokio::spawn(async move {
-                            let mut current = 0;
+                            let (mut wanted, mut current) = (ChunkRanges::empty(), 0);
                             while let Ok(Some(update)) = updates.recv().await {
                                 match update {
-                                    RequestUpdate::Started(_) => current = 0,
+                                    RequestUpdate::Started(started) => {
+                                        wanted = asked[started.index].clone();
+                                        current = 0;
+                                    }
                                     RequestUpdate::Progress(progress) => {
-                                        let delta = progress.end_offset.saturating_sub(current);
-                                        current = progress.end_offset;
-                                        gate.count(peer, root, delta);
+                                        let sent = wanted_below(&wanted, progress.end_offset);
+                                        gate.count(peer, root, sent.saturating_sub(current));
+                                        current = sent;
                                     }
                                     RequestUpdate::Completed(_) | RequestUpdate::Aborted(_) => {}
                                 }
@@ -564,6 +569,21 @@ impl CopyGate {
             }
         }
     }
+}
+
+/// Bytes of `wanted` below offset `end`. Progress gives a place in a file,
+/// and a resumed or shared one is only asked for in parts: the rest was
+/// never sent by this request, however far along the file it has got.
+fn wanted_below(wanted: &ChunkRanges, end: u64) -> u64 {
+    wanted
+        .boundaries()
+        .chunks(2)
+        .map(|range| {
+            let start = range[0].to_bytes().min(end);
+            let stop = range.get(1).map_or(end, |stop| stop.to_bytes().min(end));
+            stop - start
+        })
+        .sum()
 }
 
 /// Whether a file starting with `start` runs by itself: a script, or a
