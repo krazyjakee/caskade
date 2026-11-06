@@ -4,6 +4,7 @@ fn process(pid: u32, parent: Option<u32>, exe: &str) -> ProcessInfo {
         identity: ProcessIdentity {
             pid,
             started_at: 100,
+            boot: 0,
         },
         parent,
         name: None,
@@ -106,6 +107,7 @@ fn recovery_never_attaches_to_reused_pid() {
     let id = ProcessIdentity {
         pid: 1,
         started_at: 90,
+        boot: 0,
     };
     let mut t = ProcessTracker::new(target(), &ProcessSnapshot::default());
     t.recover(&[id]);

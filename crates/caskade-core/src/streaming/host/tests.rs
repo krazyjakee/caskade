@@ -10,6 +10,7 @@ use crate::{
     elevation::{Change, Prompt, Request, Runner, Step},
     managed::{Hosts, ToolCatalog, ToolDefinition},
     streaming::testing::{Apps, cert, tls_front},
+    tracking::ProcessIdentity,
     updates::GitHub,
 };
 use std::{collections::BTreeSet, io::Write};
@@ -401,36 +402,66 @@ async fn macos_does_not_host_in_this_milestone() {
     assert!(crate::lock(&f.system.prompts).is_empty());
 }
 
-#[test]
-fn a_host_left_running_by_a_crash_is_stopped_at_the_next_start() {
-    let temp = tempfile::tempdir().unwrap();
-    let record = temp.path().join("run.json");
-    // A host an earlier Caskade started and never stopped.
-    let mut orphan = std::process::Command::new("sh")
+/// A host an earlier Caskade started and never stopped, and the file naming it.
+fn left_behind(
+    temp: &std::path::Path,
+    record: impl FnOnce(ProcessIdentity) -> ProcessIdentity,
+) -> (std::process::Child, process::ChildRunner) {
+    let file = temp.join("run.json");
+    let orphan = std::process::Command::new("sh")
         .args(["-c", "exec sleep 60"])
         .process_group(0)
         .spawn()
         .unwrap();
     std::thread::sleep(Duration::from_millis(100));
-    let started_at = process::start_time(orphan.id()).unwrap();
-    std::fs::write(
-        &record,
-        serde_json::json!({ "pid": orphan.id(), "started_at": started_at }).to_string(),
-    )
-    .unwrap();
-    let runner = process::ChildRunner::new(record.clone());
-    runner
-        .start(&HostLaunch {
-            program: "/bin/sh".into(),
-            args: vec!["-c".into(), "exec sleep 60".into()],
-            env: Vec::new(),
-            cwd: temp.path().into(),
-        })
-        .unwrap();
+    let identity = ProcessIdentity::lookup(orphan.id()).unwrap();
+    std::fs::write(&file, serde_json::to_string(&record(identity)).unwrap()).unwrap();
+    (orphan, process::ChildRunner::new(file))
+}
+
+fn next_host(temp: &std::path::Path) -> HostLaunch {
+    HostLaunch {
+        program: "/bin/sh".into(),
+        args: vec!["-c".into(), "exec sleep 60".into()],
+        env: Vec::new(),
+        cwd: temp.into(),
+    }
+}
+
+#[test]
+fn a_host_left_running_by_a_crash_is_stopped_at_the_next_start() {
+    let temp = tempfile::tempdir().unwrap();
+    let (mut orphan, runner) = left_behind(temp.path(), |identity| identity);
+    runner.start(&next_host(temp.path())).unwrap();
     assert!(orphan.wait().is_ok(), "the orphan was ended");
     assert!(runner.running());
     runner.stop().unwrap();
     assert!(!runner.running());
+}
+
+#[cfg(target_os = "linux")]
+#[test]
+fn a_host_left_running_is_still_known_after_the_clock_steps() {
+    let temp = tempfile::tempdir().unwrap();
+    let (mut orphan, runner) = left_behind(temp.path(), |identity| identity);
+    let _stepped = crate::tracking::ClockStep::by(7200);
+    runner.start(&next_host(temp.path())).unwrap();
+    assert!(orphan.wait().is_ok(), "the orphan was ended");
+    runner.stop().unwrap();
+}
+
+#[test]
+fn a_process_reusing_a_left_host_s_id_is_left_alone() {
+    let temp = tempfile::tempdir().unwrap();
+    let (mut bystander, runner) = left_behind(temp.path(), |identity| ProcessIdentity {
+        started_at: identity.started_at + 1,
+        ..identity
+    });
+    runner.start(&next_host(temp.path())).unwrap();
+    runner.stop().unwrap();
+    assert!(bystander.try_wait().unwrap().is_none());
+    let _ = bystander.kill();
+    let _ = bystander.wait();
 }
 
 use std::os::unix::process::CommandExt;

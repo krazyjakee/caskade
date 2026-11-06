@@ -465,7 +465,7 @@ impl LaunchService {
         }
         session.tracking = Some(serde_json::to_value(&state).map_err(store_error)?);
         self.repository.heartbeat(&session).await?;
-        let tracker = LiveTracker::new(tracker, session.started_at_ms);
+        let tracker = LiveTracker::new(tracker);
         Ok(self.follow(watch::Watch {
             session,
             state,

@@ -206,6 +206,11 @@ impl ProcessTracker {
         }
     }
 
+    /// What was running before this session, by identity.
+    pub(super) fn baseline(&self) -> &BTreeSet<ProcessIdentity> {
+        &self.baseline
+    }
+
     /// Seed the spawned launcher; it is not counted as game time unless it
     /// independently matches the target. Recovery seeds only recorded games.
     pub fn launcher(&mut self, identity: ProcessIdentity) {
@@ -272,6 +277,9 @@ impl ProcessTracker {
             }
             for process in children.get(&parent.pid).into_iter().flatten() {
                 let id = process.identity;
+                // A child older than its parent is a reused parent PID. On
+                // Windows and macOS a clock set back can make a real child
+                // look like that: it then joins only by matching the target.
                 if id == parent || id.started_at < parent.started_at {
                     continue;
                 }

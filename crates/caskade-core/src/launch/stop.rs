@@ -4,8 +4,8 @@
 //! those its tracker finds at that moment, as the stored list is as old as
 //! the last heartbeat and the tracker's own view as old as its last poll. It
 //! looks again while the game quits, because a game can start a process until
-//! its last one ends. All are matched by PID and start time so a reused PID
-//! is never hit. The launcher is left alone: it can be a store client (Steam)
+//! its last one ends. All are matched exactly by [`ProcessIdentity`], which a
+//! stepped clock doesn't change, so a reused PID is never hit. The launcher is left alone: it can be a store client (Steam)
 //! that must keep running. The tracker sees the processes exit and ends the
 //! session as usual, so playtime is recorded.
 
@@ -92,7 +92,7 @@ fn signal(identities: &[ProcessIdentity], signal: Option<Signal>) -> Vec<Process
             let Some(process) = system.process(Pid::from_u32(id.pid)) else {
                 return false;
             };
-            if process.start_time() != id.started_at
+            if ProcessIdentity::of(id.pid, process) != **id
                 || matches!(
                     process.status(),
                     ProcessStatus::Zombie | ProcessStatus::Dead
@@ -176,17 +176,7 @@ mod tests {
     use std::sync::Arc;
 
     fn identity(pid: u32) -> ProcessIdentity {
-        let mut system = System::new();
-        let pids = [Pid::from_u32(pid)];
-        system.refresh_processes_specifics(
-            ProcessesToUpdate::Some(&pids),
-            true,
-            ProcessRefreshKind::nothing(),
-        );
-        ProcessIdentity {
-            pid,
-            started_at: system.process(pids[0]).unwrap().start_time(),
-        }
+        ProcessIdentity::lookup(pid).unwrap()
     }
 
     async fn session(store: &LibraryStore, processes: Vec<ProcessIdentity>) -> PlaySession {
@@ -254,14 +244,58 @@ mod tests {
 
         // A reused PID (same pid, another start time) is never touched.
         let reused = ProcessIdentity {
-            pid: bystander,
             started_at: identity(bystander).started_at + 1,
+            ..identity(bystander)
         };
         let other = session(&store, vec![reused]).await;
         assert_eq!(service.stop(&other.id, Duration::ZERO).await.unwrap(), 0);
         assert!(children.0[2].try_wait().unwrap().is_none());
 
         assert!(service.stop("missing", Duration::ZERO).await.is_err());
+    }
+
+    /// A stepped clock must not cost Stop the game it is stopping.
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn stop_still_knows_its_game_after_the_clock_steps() {
+        for seconds in [7200, -7200] {
+            let mut game = Children(vec![spawn("exec sleep 30")]);
+            std::thread::sleep(Duration::from_millis(200));
+            let recorded = identity(game.0[0].id());
+
+            let _stepped = crate::tracking::ClockStep::by(seconds);
+            assert_eq!(
+                terminate(vec![recorded], Duration::from_secs(5), Vec::new),
+                1,
+                "Stop lost the game after a step of {seconds} s"
+            );
+            assert!(game.0[0].wait().is_ok());
+        }
+    }
+
+    /// What replaces the wall clock must be as exact as it was: however the
+    /// clock moves, a record of another process isn't this one.
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn a_stepped_clock_never_brings_a_reused_pid_into_stop() {
+        let mut children = Children(vec![spawn("exec sleep 30")]);
+        std::thread::sleep(Duration::from_millis(200));
+        let now = identity(children.0[0].id());
+        let earlier_process = ProcessIdentity {
+            started_at: now.started_at - 1,
+            ..now
+        };
+        let earlier_boot = ProcessIdentity {
+            boot: now.boot ^ 1,
+            ..now
+        };
+        for seconds in [0, 7200, -7200] {
+            let _stepped = crate::tracking::ClockStep::by(seconds);
+            for record in [earlier_process, earlier_boot] {
+                assert_eq!(terminate(vec![record], Duration::ZERO, Vec::new), 0);
+            }
+        }
+        assert!(children.0[0].try_wait().unwrap().is_none());
     }
 
     fn alive(pid: u32) -> bool {

@@ -9,8 +9,7 @@
 //! - Windows: the on-demand `CaskadeStreaming` service, started and stopped
 //!   with `sc.exe` (the interactive user may, without a prompt).
 
-use crate::Result;
-use serde::{Deserialize, Serialize};
+use crate::{Result, tracking::ProcessIdentity};
 use std::{
     ffi::OsString,
     path::{Path, PathBuf},
@@ -43,25 +42,6 @@ pub trait HostRunner: Send + Sync {
     fn stop(&self) -> Result<()>;
     /// Whether it is running now.
     fn running(&self) -> bool;
-}
-
-/// The record of a running host: its process, by id and start time.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-struct Record {
-    pid: u32,
-    started_at: u64,
-}
-
-pub(super) fn start_time(pid: u32) -> Option<u64> {
-    use sysinfo::{Pid, ProcessRefreshKind, ProcessesToUpdate, System};
-    let pid = Pid::from_u32(pid);
-    let mut system = System::new();
-    system.refresh_processes_specifics(
-        ProcessesToUpdate::Some(&[pid]),
-        true,
-        ProcessRefreshKind::nothing(),
-    );
-    system.process(pid).map(sysinfo::Process::start_time)
 }
 
 /// Sends `signal` to process group `pid`.
@@ -103,10 +83,11 @@ impl ChildRunner {
             return;
         };
         let _ = std::fs::remove_file(&self.record);
-        let Ok(record) = serde_json::from_slice::<Record>(&bytes) else {
+        let Ok(record) = serde_json::from_slice::<ProcessIdentity>(&bytes) else {
             return;
         };
-        if start_time(record.pid) != Some(record.started_at) {
+        let record = record.current();
+        if ProcessIdentity::lookup(record.pid) != Some(record) {
             return;
         }
         tracing::info!(pid = record.pid, "stopping a streaming host left running");
@@ -114,10 +95,10 @@ impl ChildRunner {
         {
             signal_group(record.pid, "TERM");
             let deadline = Instant::now() + STOP_GRACE;
-            while start_time(record.pid) == Some(record.started_at) && Instant::now() < deadline {
+            while ProcessIdentity::lookup(record.pid) == Some(record) && Instant::now() < deadline {
                 std::thread::sleep(Duration::from_millis(100));
             }
-            if start_time(record.pid) == Some(record.started_at) {
+            if ProcessIdentity::lookup(record.pid) == Some(record) {
                 signal_group(record.pid, "KILL");
             }
         }
@@ -177,11 +158,11 @@ impl HostRunner for ChildRunner {
                         }
                     };
                     let pid = child.id();
-                    if let Some(started_at) = start_time(pid) {
+                    if let Some(identity) = ProcessIdentity::lookup(pid) {
                         let _ = std::fs::create_dir_all(record.parent().unwrap_or(&record));
                         let _ = std::fs::write(
                             &record,
-                            serde_json::to_vec(&Record { pid, started_at }).unwrap_or_default(),
+                            serde_json::to_vec(&identity).unwrap_or_default(),
                         );
                     }
                     let _ = started.send(Ok(pid));

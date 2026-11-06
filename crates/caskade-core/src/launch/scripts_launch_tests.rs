@@ -495,6 +495,7 @@ async fn a_game_that_ended_while_caskade_was_closed_cleans_up_in_the_background(
     state.processes = vec![crate::tracking::ProcessIdentity {
         pid: u32::MAX,
         started_at: 1,
+        boot: 0,
     }];
     state.scripts = Some(crate::sessions::ScriptState {
         context: crate::scripts::ScriptContext {

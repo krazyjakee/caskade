@@ -27,9 +27,10 @@ impl LaunchService {
                 continue;
             };
             let mut tracker = ProcessTracker::new(state.target.clone(), &snapshot);
-            tracker.recover(&state.processes);
+            let recorded: Vec<_> = state.processes.iter().map(|id| id.current()).collect();
+            tracker.recover(&recorded);
             if let Some(launcher) = state.launcher {
-                tracker.launcher(launcher);
+                tracker.launcher(launcher.current());
             }
             let (tracker, active) = tracker.observe_async(snapshot.clone()).await?;
             if active.is_empty() {
@@ -44,7 +45,7 @@ impl LaunchService {
                     .saturating_add(now_ms().saturating_sub(session.heartbeat_at_ms).max(0) as u64);
             }
             state.processes = active;
-            let tracker = LiveTracker::new(tracker, session.started_at_ms);
+            let tracker = LiveTracker::new(tracker);
             handles.push(self.follow(Watch {
                 session,
                 state,

@@ -1,5 +1,8 @@
 use super::{ProcessIdentity, ProcessSnapshot, ProcessTracker, SystemProcesses};
-use std::sync::{Arc, Mutex};
+use std::{
+    collections::BTreeSet,
+    sync::{Arc, Mutex},
+};
 
 #[derive(Debug, thiserror::Error)]
 pub enum TrackingError {
@@ -18,9 +21,13 @@ impl ProcessMonitor {
         self.run(|source| source.snapshot()).await
     }
 
-    /// A tracking poll: see [`SystemProcesses::snapshot_since`].
-    pub async fn snapshot_since(&self, since: u64) -> Result<ProcessSnapshot, TrackingError> {
-        self.run(move |source| source.snapshot_since(since)).await
+    /// A tracking poll: see [`SystemProcesses::snapshot_past`].
+    pub async fn snapshot_past(
+        &self,
+        baseline: Arc<BTreeSet<ProcessIdentity>>,
+    ) -> Result<ProcessSnapshot, TrackingError> {
+        self.run(move |source| source.snapshot_past(&baseline))
+            .await
     }
 
     async fn run(
@@ -44,19 +51,15 @@ impl ProcessMonitor {
 #[derive(Clone)]
 pub struct LiveTracker {
     tracker: Arc<Mutex<ProcessTracker>>,
-    since: u64,
+    baseline: Arc<BTreeSet<ProcessIdentity>>,
 }
 impl LiveTracker {
-    /// The baseline was taken just before `started_at_ms` (or before a
-    /// recovery); only processes started since then can join the session.
-    /// Two seconds of slack cover sysinfo's whole-second start times.
-    pub fn new(tracker: ProcessTracker, started_at_ms: i64) -> Self {
-        let since = u64::try_from(started_at_ms.min(crate::now_ms()) / 1000)
-            .unwrap_or_default()
-            .saturating_sub(2);
+    /// `tracker` as it is now: its launcher and recovered processes are in,
+    /// and only what is outside its baseline can join the session.
+    pub fn new(tracker: ProcessTracker) -> Self {
         Self {
+            baseline: Arc::new(tracker.baseline().clone()),
             tracker: Arc::new(Mutex::new(tracker)),
-            since,
         }
     }
 
@@ -65,7 +68,7 @@ impl LiveTracker {
         &self,
         monitor: &ProcessMonitor,
     ) -> Result<Vec<ProcessIdentity>, TrackingError> {
-        let snapshot = monitor.snapshot_since(self.since).await?;
+        let snapshot = monitor.snapshot_past(self.baseline.clone()).await?;
         let tracker = Arc::clone(&self.tracker);
         // Path canonicalization may touch a disconnected mount.
         tokio::task::spawn_blocking(move || crate::lock(&tracker).observe(&snapshot))

@@ -4,6 +4,8 @@
 mod addon_offers;
 mod appimage_env;
 #[cfg(feature = "net")]
+#[cfg(any(target_os = "linux", windows))]
+mod clock_step;
 mod cores;
 mod device_defaults;
 #[cfg(feature = "net")]

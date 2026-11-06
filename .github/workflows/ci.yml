@@ -163,6 +163,18 @@ jobs:
           -p caskade-plugin-host -p caskade-theme -p caskade-component-cache
           -p caskade-jobs -p caskade-plugin-sdk -p caskade-sync -p caskade-i18n
           --features caskade-i18n/extract --locked --timings
+      # The system clock stepped for real, here where nothing else is running:
+      # Stop and session recovery still know the game. The same selection as
+      # above, so nothing is built again.
+      - name: A real clock step
+        env:
+          CASKADE_TEST_NATIVE: "1"
+        run: >-
+          cargo test -p caskade-core -p caskade-desktop -p caskade-input
+          -p caskade-plugin-host -p caskade-theme -p caskade-component-cache
+          -p caskade-jobs -p caskade-plugin-sdk -p caskade-sync -p caskade-i18n
+          --features caskade-i18n/extract --locked --tests
+          clock_step:: -- --ignored --nocapture
       # The starter add-on catalogue builds reproducibly from the examples
       # above and passes the checks a published one must (#7).
       - name: Starter add-on catalogue
@@ -283,6 +295,10 @@ jobs:
         env:
           CASKADE_TEST_NATIVE: "1"
         run: "cargo test -p caskade-core --test it --locked windows_elevation:: -- --ignored --nocapture"
+      - name: A real clock step
+        env:
+          CASKADE_TEST_NATIVE: "1"
+        run: "cargo test -p caskade-core --test it --locked clock_step:: -- --ignored --nocapture"
       - name: Device detection from the real registry
         run: "cargo test -p caskade-core --test it --locked device_defaults::windows_ -- --nocapture"
       # A real program's saves in the real %APPDATA% and Documents, to a

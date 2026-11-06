@@ -1,5 +1,8 @@
 use super::{ProcessIdentity, ProcessInfo, ProcessSnapshot};
-use std::path::PathBuf;
+use std::{
+    collections::{BTreeSet, HashMap},
+    path::PathBuf,
+};
 use sysinfo::{Pid, ProcessRefreshKind, ProcessStatus, ProcessesToUpdate, System, UpdateKind};
 
 /// The system's processes over a reused sysinfo cache. Its reads block, so
@@ -31,27 +34,26 @@ impl SystemProcesses {
             true,
             metadata(UpdateKind::Always),
         );
-        self.collect()
+        self.collect(&self.identities())
     }
 
-    /// A tracking poll. Only processes started at or after `since` (Unix
-    /// seconds) can join a session; the rest are in its baseline.
+    /// A tracking poll, past the session's `baseline`.
     ///
     /// Lists every process from its `stat` alone (identity, parent, status),
-    /// then re-reads the metadata of processes started since the session's
-    /// baseline. Older processes are in the baseline, which the matcher skips,
-    /// so the hundreds of unrelated system processes cost one read each.
-    pub fn snapshot_since(&mut self, since: u64) -> ProcessSnapshot {
+    /// then re-reads the metadata of those outside the baseline, which the
+    /// matcher skips, so the hundreds of unrelated system processes cost little.
+    /// Age is no test for this: a start read from sysinfo can sit on the wrong
+    /// side of a session's start once the clock has stepped.
+    pub fn snapshot_past(&mut self, baseline: &BTreeSet<ProcessIdentity>) -> ProcessSnapshot {
         self.system.refresh_processes_specifics(
             ProcessesToUpdate::All,
             true,
             ProcessRefreshKind::nothing().without_tasks(),
         );
-        let fresh: Vec<Pid> = self
-            .system
-            .processes()
+        let identities = self.identities();
+        let fresh: Vec<Pid> = identities
             .iter()
-            .filter(|(_, process)| process.start_time() >= since)
+            .filter(|(_, identity)| !baseline.contains(identity))
             .map(|(pid, _)| *pid)
             .collect();
         if !fresh.is_empty() {
@@ -61,10 +63,18 @@ impl SystemProcesses {
                 metadata(UpdateKind::Always),
             );
         }
-        self.collect()
+        self.collect(&identities)
     }
 
-    fn collect(&self) -> ProcessSnapshot {
+    fn identities(&self) -> HashMap<Pid, ProcessIdentity> {
+        self.system
+            .processes()
+            .iter()
+            .map(|(pid, process)| (*pid, ProcessIdentity::of(pid.as_u32(), process)))
+            .collect()
+    }
+
+    fn collect(&self, identities: &HashMap<Pid, ProcessIdentity>) -> ProcessSnapshot {
         ProcessSnapshot {
             processes: self
                 .system
@@ -87,10 +97,7 @@ impl SystemProcesses {
                         })
                         .find_map(|s| s.parse::<u32>().ok().filter(|id| *id > 0));
                     Some(ProcessInfo {
-                        identity: ProcessIdentity {
-                            pid: pid.as_u32(),
-                            started_at: process.start_time(),
-                        },
+                        identity: *identities.get(pid)?,
                         parent: process.parent().map(|pid| pid.as_u32()),
                         name: process.name().to_str().map(str::to_owned),
                         executable: process.exe().map(PathBuf::from),

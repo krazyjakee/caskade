@@ -64,9 +64,10 @@ real hardware, but they say what is already known to work.
 Not fixed, and worth a look: a host lists itself under Play from other
 devices; a link that has just dropped shows "Internet, through a server" with
 no internet; "Ready" still shows above the public-network warning; the polkit
-dialog prints the script's first lines; if the system clock steps while a game
-runs, Stop can't match its process by start time and retries until restart
-(seen after a VM paused for hours, whose clock then jumped).
+dialog prints the script's first lines. A system clock that stepped while a game
+ran left Stop unable to match its process by start time, retrying until restart
+(seen after a VM paused for hours, whose clock then jumped); fixed since:
+`tracking::ProcessIdentity`, and `tests/clock_step.rs` steps a real clock in CI.
 
 ## One Linux PC
 

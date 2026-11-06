@@ -134,6 +134,7 @@ async fn dead_recovered_identity_stops_at_last_heartbeat() {
     state.processes = vec![crate::tracking::ProcessIdentity {
         pid: u32::MAX,
         started_at: 1,
+        boot: 0,
     }];
     s.tracking = Some(serde_json::to_value(state).unwrap());
     store.sessions.lock().unwrap().insert(s.id.clone(), s);
