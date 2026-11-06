@@ -8,8 +8,8 @@
 //! appeared is the [`Record`] the undo removes. A change that was there
 //! before is never touched, by either step. The elevated side gets only
 //! names from [`Step`] and paths Caskade works out itself, never text from
-//! the webview: on Linux `pkexec /bin/sh -c <constant script> <step names>`
-//! ([`linux`]), on Windows Caskade itself started with `runas` and a fixed
+//! the webview: on Linux `pkexec /bin/sh -s <constant name> <step names>`
+//! with a constant script on its input ([`linux`]), on Windows Caskade itself started with `runas` and a fixed
 //! `--elevated` subcommand ([`windows`]). The elevated side rolls back its
 //! own steps when one fails, so a failure, like a cancelled or refused
 //! prompt, leaves the system as it was.

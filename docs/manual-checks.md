@@ -63,12 +63,10 @@ real hardware, but they say what is already known to work.
 
 Fixed since: a host no longer lists itself under Play from other devices; a
 link that has just dropped no longer shows "Internet, through a server";
-"Ready" no longer shows above the public-network warning.
-
-Not fixed, and worth a look: the polkit
-dialog prints the script's first lines. A system clock that stepped while a game
-ran left Stop unable to match its process by start time, retrying until restart
-(seen after a VM paused for hours, whose clock then jumped); fixed since:
+"Ready" no longer shows above the public-network warning; the polkit dialog no
+longer prints the script's first lines (L3 looks at it). A system clock that
+stepped while a game ran left Stop unable to match its process by start time,
+retrying until restart (seen after a VM paused for hours, whose clock then jumped); fixed since:
 `tracking::ProcessIdentity`, and `tests/clock_step.rs` steps a real clock in CI.
 
 ## One Linux PC
@@ -89,7 +87,8 @@ debug build for L1 and L7 (`just dev`), and Sunshine installed by you for L6.
   collections are all still there. (#8)
 - [ ] **L3.** Settings → Streaming: turn hosting on and cancel the password
   prompt. Then turn it on again and allow it. **Pass:** each time there is
-  exactly one prompt. After the cancel, hosting is off and
+  exactly one prompt, which names Caskade game streaming and shows none of a
+  script. After the cancel, hosting is off and
   `/etc/udev/rules.d` and `/etc/modules-load.d` are unchanged. After
   allowing, `60-caskade-streaming.rules` and `60-caskade-streaming.conf` are
   there, `ls -l /dev/uinput /dev/uhid` shows group `input`, `getfacl` shows

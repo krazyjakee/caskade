@@ -1,11 +1,19 @@
-//! Linux: `pkexec /bin/sh -c <SCRIPT> caskade <steps…>`. The script is a
-//! constant of this binary, passed as an argument (no file anyone could
-//! change between writing and running it), and the steps are names from
-//! [`token`]. Anything else makes it exit 64 before changing anything.
+//! Linux: `pkexec /bin/sh -s "Caskade game streaming" <steps…>`, with the
+//! script on the shell's standard input. The script is a constant of this
+//! binary (no file anyone could change between writing and running it), and
+//! the steps are names from [`token`]. Anything else makes it exit 64 before
+//! changing anything.
+//!
+//! The prompt shows the start of pkexec's command line, which is why the
+//! script isn't an argument: it would print its first lines. No installed
+//! polkit policy is needed for this, and only such a policy could give the
+//! prompt a sentence of its own.
 
 use super::{Change, Prompt, Request, Runner, Step};
 use crate::{Error, Result};
+use std::io::Write as _;
 use std::path::Path;
+use std::process::{Command, Output, Stdio};
 
 /// The udev rules (§4.5): uinput and uhid, and the virtual pads Sunshine
 /// creates, for the `input` group and the user at the seat.
@@ -13,9 +21,16 @@ pub const RULES_FILE: &str = "/etc/udev/rules.d/60-caskade-streaming.rules";
 /// Loads uhid at boot.
 pub const MODULES_FILE: &str = "/etc/modules-load.d/60-caskade-streaming.conf";
 
+/// What the prompt calls the script: `$1`, in front of the steps.
+pub const NAME: &str = "Caskade game streaming";
+
 /// The elevated script. `$R` prefixes every path it writes; it is empty
-/// here, and only tests set it (to a temp folder) by editing the text.
+/// here, and only tests set it (to a temp folder) by editing the text. It
+/// is one function called on the last line, so a script cut short changes
+/// nothing, and what it runs doesn't read the rest of it from the shell's
+/// input.
 pub const SCRIPT: &str = r#"set -u
+steps() {
 R=""
 umask 022
 rules="$R/etc/udev/rules.d/60-caskade-streaming.rules"
@@ -71,6 +86,9 @@ if [ "$reload" = 1 ]; then
   udevadm trigger --subsystem-match=misc 2>/dev/null || true
 fi
 exit 0
+}
+shift
+steps "$@" </dev/null
 "#;
 
 /// The script's name for a step.
@@ -92,9 +110,8 @@ pub fn command(request: &Request) -> Result<Vec<String>> {
     let mut argv = vec![
         "pkexec".to_owned(),
         "/bin/sh".to_owned(),
-        "-c".to_owned(),
-        SCRIPT.to_owned(),
-        "caskade".to_owned(),
+        "-s".to_owned(),
+        NAME.to_owned(),
     ];
     for step in &request.steps {
         let token = token(*step).ok_or_else(|| {
@@ -103,6 +120,22 @@ pub fn command(request: &Request) -> Result<Vec<String>> {
         argv.push(token.to_owned());
     }
     Ok(argv)
+}
+
+/// Runs `command` with `script` on its standard input, and waits. The pipe
+/// holds the whole script, so this never waits for the prompt; pkexec may
+/// end without reading it when the prompt is dismissed, and its exit code
+/// says so.
+pub fn with_script(mut command: Command, script: &str) -> std::io::Result<Output> {
+    let mut child = command
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()?;
+    if let Some(mut stdin) = child.stdin.take() {
+        let _ = stdin.write_all(script.as_bytes());
+    }
+    child.wait_with_output()
 }
 
 /// How pkexec ended: 126 when the prompt was dismissed, 127 when the
@@ -140,16 +173,14 @@ impl Runner for LinuxRunner {
 
     fn run(&self, request: &Request) -> Result<Prompt> {
         let argv = command(request)?;
-        let output = std::process::Command::new(&argv[0])
-            .args(&argv[1..])
-            .stdin(std::process::Stdio::null())
-            .output()
-            .map_err(|error| {
-                Error::Invalid(crate::tr!(
-                    "couldn't ask for an administrator (pkexec): {error}",
-                    error = error.to_string()
-                ))
-            })?;
+        let mut command = Command::new(&argv[0]);
+        command.args(&argv[1..]);
+        let output = with_script(command, SCRIPT).map_err(|error| {
+            Error::Invalid(crate::tr!(
+                "couldn't ask for an administrator (pkexec): {error}",
+                error = error.to_string()
+            ))
+        })?;
         prompt(
             output.status.code(),
             &String::from_utf8_lossy(&output.stderr),

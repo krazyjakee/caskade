@@ -225,15 +225,33 @@ fn the_linux_command_is_constants_and_step_names() {
         [
             "pkexec",
             "/bin/sh",
-            "-c",
-            linux::SCRIPT,
-            "caskade",
+            "-s",
+            linux::NAME,
             "add-rules",
             "add-modules",
             "load-uhid"
         ]
     );
     assert!(!argv.iter().any(|arg| arg.contains("/home/u")));
+    // The longest run there is, as the prompt shows it: pkexec prints the
+    // start of the command line, so Caskade's name has to come first and
+    // none of the script may be in it.
+    let removal = Request {
+        steps: vec![
+            Step::Remove(Change::UdevRules),
+            Step::Remove(Change::ModulesLoad),
+            Step::Remove(Change::UhidLoaded),
+        ],
+        host_dir: "/x".into(),
+        manifest: None,
+    };
+    let shown = linux::command(&removal).unwrap()[1..].join(" ");
+    assert!(shown.starts_with("/bin/sh -s Caskade"), "{shown}");
+    assert!(shown.len() <= 80, "pkexec cuts it short: {shown}");
+    assert!(
+        !shown.contains('\n') && !shown.contains("set -u"),
+        "{shown}"
+    );
     // A Windows change has no Linux step.
     let wrong = Request {
         steps: vec![Step::Add(Change::Service)],
@@ -280,23 +298,30 @@ mod script {
             Self { temp }
         }
 
+        /// The script on its standard input, as pkexec hands it over.
         fn run(&self, steps: &[&str]) -> i32 {
             let script = linux::SCRIPT.replacen(
                 "R=\"\"",
                 &format!("R=\"{}\"", self.temp.path().join("root").display()),
                 1,
             );
-            Command::new("/bin/sh")
-                .arg("-c")
-                .arg(script)
-                .arg("caskade")
+            self.feed(&script, steps)
+        }
+
+        fn feed(&self, script: &str, steps: &[&str]) -> i32 {
+            let mut command = Command::new("/bin/sh");
+            command
+                .arg("-s")
+                .arg(linux::NAME)
                 .args(steps)
                 .env(
                     "PATH",
                     format!("{}:/usr/bin:/bin", self.temp.path().join("bin").display()),
                 )
-                .status()
+                .stderr(std::process::Stdio::null());
+            linux::with_script(command, script)
                 .unwrap()
+                .status
                 .code()
                 .unwrap()
         }
@@ -311,6 +336,21 @@ mod script {
         fn log(&self) -> String {
             std::fs::read_to_string(self.temp.path().join("log")).unwrap_or_default()
         }
+    }
+
+    /// A script cut off on its way in is a shell error, never half a run.
+    #[test]
+    fn half_a_script_changes_nothing() {
+        let root = Root::new(false);
+        let script = linux::SCRIPT.replacen(
+            "R=\"\"",
+            &format!("R=\"{}\"", root.temp.path().join("root").display()),
+            1,
+        );
+        let cut = script.find("load-uhid) modprobe uhid").unwrap();
+        assert_ne!(root.feed(&script[..cut], &["add-rules", "load-uhid"]), 0);
+        assert!(!root.file(linux::RULES_FILE).exists());
+        assert_eq!(root.log(), "");
     }
 
     #[test]
