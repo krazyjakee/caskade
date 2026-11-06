@@ -437,6 +437,8 @@ Built (#255, `caskade_core::elevation`). Callers name a plan (`Plan::StreamingHo
 
 Each item names its GitHub issue; record the date and result here.
 
+VM runs on 6 Nov 2026 (Linux and Windows hosts, Linux and Windows clients) are recorded in `docs/manual-checks.md`, "What ran in virtual machines". Boxes below stay for real hardware.
+
 - [ ] #21 Linux: switching hosting on shows one pkexec prompt, and cancelling it leaves `/etc/udev/rules.d` and `/etc/modules-load.d` unchanged. After allowing it, the rules and module list are there, `/dev/uinput` and `/dev/uhid` belong to group `input` with a seat ACL, and uhid is loaded. Switching hosting off removes exactly those, with one prompt.
 - [ ] #21 Windows: one UAC prompt (Caskade, verified publisher); cancelling changes nothing (`sc query CaskadeStreaming` fails, `netsh advfirewall firewall show rule name="Caskade streaming (TCP)"` finds none). After allowing it, the service is demand-start, a standard user can `sc start` and `sc stop` it, and both firewall rules name the host's `sunshine.exe`. A host path with a space and an apostrophe works. Switching hosting off removes the service and both rules, with one prompt.
 - [ ] #23 Linux, clean machine: switching hosting on shows one prompt, and Moonlight on another device pairs (§6.2) and streams a game. No `~/.config/sunshine`, desktop entry, tray icon or browser page appears. Closing Caskade to the tray keeps the stream available; Quit ends it; killing Caskade (`kill -9`) ends the host too.

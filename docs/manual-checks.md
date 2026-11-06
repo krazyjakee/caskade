@@ -21,6 +21,53 @@ is `~/.local/share/caskade` on Linux and `%APPDATA%\Caskade\Caskade\data` on
 Windows. Sync and streaming checks need the devices paired in Settings →
 Devices first, unless the check is about pairing.
 
+## What ran in virtual machines (6 Nov 2026)
+
+These ran on one PC, in KVM guests built from `master`: two Ubuntu 24.04 cloud
+images and Windows Server 2022 Evaluation, on a QEMU multicast LAN with the
+default route pointing at a dead gateway. Real here: kernels, udev, polkit's
+desktop dialog, UAC, the Windows service and firewall, Sunshine, Moonlight,
+`caskade --launch`, `/dev/uinput`, ACPI S3 sleep. Not real: GPUs (libx264 and
+software decoding), Wi-Fi, routers, sound on Windows, physical pads (a
+`uinput` pad on the client). Screens were Xvfb on Linux with Openbox as the
+window manager, not Cinnamon, GNOME or KDE. So these boxes stay unticked for
+real hardware, but they say what is already known to work.
+
+| Check | Result |
+| --- | --- |
+| L3 | Passed: one dialog; cancel left `/etc` unchanged and said so; allowing gave the rules, module and groups. `getfacl` shows no user entry, as there's no seat over SSH |
+| L4 | Passed: one dialog, both files gone, a file of our own kept, no program left |
+| L5 | Passed, all four breakages; only the deleted rules asked for a password |
+| W1 | Passed, Caskade running and not running, exit 0, sessions recorded |
+| W2 | Passed: `WM_CLOSE` to the hidden window and a real Sunshine stop both gave exit 5 and stopped the game |
+| W3 | Passed: one UAC prompt each way. A standard user can stop the service but can't change its files. ViGEmBus's installer ran silently and refused Windows Server, so the driver is still untried on a client edition |
+| W4 | Passed |
+| W5 | Passed as `Jo O'Neil` |
+| W6 | Passed: one prompt, only `kept\` left |
+| W7 | Passed: firewall rule, service and host file, one prompt each |
+| O4 | Passed with two VMs, no internet: nearby, code, link `lan`, library and sessions both ways |
+| N1 | Finished, hashes equal, 3 GB. About 11 MB/s on a link TCP measured at 77 MB/s, in a debug build on a loaded PC, so this doesn't pass; see `docs/sync.md` for release figures |
+| N2 | Passed: held at 100 MB for 60 s, carried on from there. "Waiting for…" wasn't seen |
+| N3 | Passed: "Started on lanhost", session on both |
+| WK1 | Passed with real S3 sleep and a real magic packet. A script on the PC stood in for the NIC: it read the frame off the LAN and woke the VM |
+| WK2 | Passed the same way, streaming within 7 s of Stream |
+| S1 | Passed on Linux and Windows |
+| S2 | Passed for Linux → Linux, Linux → Windows and Windows → Linux, a wrong code included. The unanswered request wasn't timed |
+| S3 | Linux host to Linux client, Windows host to Linux client, Linux host to Windows client. Page and Play button; the game menu wasn't tried. Openbox only |
+| S4 | Passed on Linux hosts and a Windows host, from a Linux client's guide button. No pad on the Windows client, so End stream is untried there |
+| S5 | Passed: 719 s on the host, none on the client until sync carried the host's session |
+| S7 | Passed for `kill -9` and for the service restarting. Without a tray in the VM, closing to the tray wasn't tried |
+| S8 | Passed on Linux: the user's file unchanged, no Moonlight page or toast in frame-by-frame capture |
+| S9 | Passed on Linux with a `uinput` pad: buttons and rumble both ways, X11 only. Windows needs ViGEmBus |
+| S13 | Passed |
+
+Not fixed, and worth a look: a host lists itself under Play from other
+devices; a link that has just dropped shows "Internet, through a server" with
+no internet; "Ready" still shows above the public-network warning; the polkit
+dialog prints the script's first lines; if the system clock steps while a game
+runs, Stop can't match its process by start time and retries until restart
+(seen after a VM paused for hours, whose clock then jumped).
+
 ## One Linux PC
 
 About 1½ hours. Needs: a Linux PC with no Sunshine installed (L3–L5), a

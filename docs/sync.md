@@ -1506,7 +1506,8 @@ Results:
 | --- | --- | --- | --- |
 | 2026-11-06 | One PC: two processes in network namespaces on a bridge with no uplink (`scripts/lan-unplugged.sh`) | 1–4, plus a copy | Not two machines. Real mDNS, pairing by code, an edit, a collection and a session both ways, link `lan`, a copy of a fixture game. No real router, Wi-Fi or Windows. Steps 5–6 not run. With the bridge's ports isolated it fails at discovery, as it should. |
 | 2026-11-06 | One PC: two processes in network namespaces on one bridge (`scripts/two-networks.sh`) | 5, 6 | Not two machines. Step 5: Connect only directly on one, then the router's uplink brought up to a local relay; the other device's relay answered, and the link and each session's real path stayed on 192.168.10.x both ways for 20 s while edits crossed. With the LAN cut instead, it fails. Step 6: `mcast_flood off` on the bridge's ports; neither saw the other nearby in 10 s, a pairing link paired, an edit crossed each way, link `lan`. With multicast passing, they see each other. No real router, Wi-Fi or guest network. |
-| — | Two machines | — | Not run yet. |
+| 2026-11-06 | Two Ubuntu VMs on a virtual LAN, dead gateway, app built from master | 1–4 | Real mDNS between kernels, pairing by code, link `lan`, library and sessions both ways. No real router or Wi-Fi. Discovery needs a default route: with none at all, `swarm_discovery` can't send. |
+| — | Two physical machines | — | Not run yet. |
 
 ### Copying a game (#11)
 
@@ -1606,4 +1607,5 @@ and that a game's Saves tab in its editor names save locations.
 
 | Date | Machines | Steps passed | Notes |
 | --- | --- | --- | --- |
+| 2026-11-06 | Two Ubuntu VMs, real S3 sleep | Wake and play; Stream from a sleeping host | Real magic packets. A script on the PC stood in for the NIC. No physical Wake-on-LAN. |
 | — | — | — | Not run yet: needs a sleeping desktop with Wake-on-LAN. |
