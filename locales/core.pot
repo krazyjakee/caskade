@@ -1594,6 +1594,143 @@ msgstr ""
 msgid "built without network support"
 msgstr ""
 
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Importing library"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Updating metadata"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Scanning library"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Scanning library source"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Merging library sources"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Starting library watch"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Detecting launchers"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Checking storage"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Finding storage"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Remembering storage"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Backing up"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Planning a backup"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Checking a backup"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Checking the backup"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Restoring a backup"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Removing old backups"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Starting plugin"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Running plugin"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Reloading plugin"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Preparing plugin"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Installing plugin"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Reading plugin files"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Reading installer"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Reading game manifest"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Reading disc image"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Preparing portable game"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Preparing compatibility tools"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+#: crates/caskade-core/src/install/operations.rs
+msgid "Installing game"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Updating game files"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Checking game files"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Moving game files"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Cleaning install files"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Recovering installs"
+msgstr ""
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Verifying download"
+msgstr ""
+
 #: crates/caskade-core/src/igdb/catalog.rs
 msgid "at most {max} genres at a time"
 msgstr ""
@@ -2014,10 +2151,6 @@ msgid "Updating paths…"
 msgstr ""
 
 #: crates/caskade-core/src/install/job_text.rs
-msgid "Trying another way…"
-msgstr ""
-
-#: crates/caskade-core/src/install/job_text.rs
 msgid "Finishing…"
 msgstr ""
 
@@ -2185,10 +2318,6 @@ msgstr ""
 
 #: crates/caskade-core/src/install/operations.rs
 msgid "job is still stopping or changed; refresh before retrying"
-msgstr ""
-
-#: crates/caskade-core/src/install/operations.rs
-msgid "Installing game"
 msgstr ""
 
 #: crates/caskade-core/src/install/operations.rs
@@ -4371,6 +4500,10 @@ msgstr ""
 
 #: crates/caskade-core/src/store_accounts/mod.rs
 msgid "Caskade can't refresh {provider} accounts this session"
+msgstr ""
+
+#: crates/caskade-core/src/store_accounts/mod.rs
+msgid "Refreshing {account}"
 msgstr ""
 
 #: crates/caskade-core/src/store_accounts/mod.rs

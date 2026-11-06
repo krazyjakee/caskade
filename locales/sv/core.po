@@ -1596,6 +1596,143 @@ msgstr "Kontrollerar speldatabasen"
 msgid "built without network support"
 msgstr "byggd utan nätverksstöd"
 
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Importing library"
+msgstr "Importerar biblioteket"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Updating metadata"
+msgstr "Uppdaterar metadata"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Scanning library"
+msgstr "Skannar biblioteket"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Scanning library source"
+msgstr "Skannar en bibliotekskälla"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Merging library sources"
+msgstr "Slår ihop bibliotekskällor"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Starting library watch"
+msgstr "Startar bevakning av biblioteket"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Detecting launchers"
+msgstr "Identifierar startprogram"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Checking storage"
+msgstr "Kontrollerar lagring"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Finding storage"
+msgstr "Letar efter lagringsplatser"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Remembering storage"
+msgstr "Sparar lagringsplatser"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Backing up"
+msgstr "Säkerhetskopierar"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Planning a backup"
+msgstr "Planerar en säkerhetskopia"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Checking a backup"
+msgstr "Kontrollerar en säkerhetskopia"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Checking the backup"
+msgstr "Kontrollerar säkerhetskopian"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Restoring a backup"
+msgstr "Återställer en säkerhetskopia"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Removing old backups"
+msgstr "Tar bort gamla säkerhetskopior"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Starting plugin"
+msgstr "Startar tillägg"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Running plugin"
+msgstr "Kör tillägg"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Reloading plugin"
+msgstr "Läser in tillägg igen"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Preparing plugin"
+msgstr "Förbereder tillägg"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Installing plugin"
+msgstr "Installerar tillägg"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Reading plugin files"
+msgstr "Läser tilläggsfiler"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Reading installer"
+msgstr "Läser installationsprogrammet"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Reading game manifest"
+msgstr "Läser spelets manifest"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Reading disc image"
+msgstr "Läser skivavbilden"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Preparing portable game"
+msgstr "Förbereder portabelt spel"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Preparing compatibility tools"
+msgstr "Förbereder kompatibilitetsverktyg"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+#: crates/caskade-core/src/install/operations.rs
+msgid "Installing game"
+msgstr "Installerar spel"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Updating game files"
+msgstr "Uppdaterar spelfiler"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Checking game files"
+msgstr "Kontrollerar spelfiler"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Moving game files"
+msgstr "Flyttar spelfiler"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Cleaning install files"
+msgstr "Städar installationsfiler"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Recovering installs"
+msgstr "Återställer avbrutna installationer"
+
+#: crates/caskade-core/src/i18n/tasks.rs
+msgid "Verifying download"
+msgstr "Kontrollerar nedladdningen"
+
 #: crates/caskade-core/src/igdb/catalog.rs
 msgid "at most {max} genres at a time"
 msgstr "högst {max} genrer åt gången"
@@ -2016,10 +2153,6 @@ msgid "Updating paths…"
 msgstr "Uppdaterar sökvägar…"
 
 #: crates/caskade-core/src/install/job_text.rs
-msgid "Trying another way…"
-msgstr "Provar ett annat sätt…"
-
-#: crates/caskade-core/src/install/job_text.rs
 msgid "Finishing…"
 msgstr "Slutför…"
 
@@ -2188,10 +2321,6 @@ msgstr "jobbet väntar på ett val; besvara det i stället"
 #: crates/caskade-core/src/install/operations.rs
 msgid "job is still stopping or changed; refresh before retrying"
 msgstr "jobbet håller fortfarande på att stoppas eller har ändrats; uppdatera innan du försöker igen"
-
-#: crates/caskade-core/src/install/operations.rs
-msgid "Installing game"
-msgstr "Installerar spel"
 
 #: crates/caskade-core/src/install/operations.rs
 msgid "Uninstalling game"
@@ -4374,6 +4503,10 @@ msgstr "{account} är frånkopplat; anslut det för att uppdatera dess bibliotek
 #: crates/caskade-core/src/store_accounts/mod.rs
 msgid "Caskade can't refresh {provider} accounts this session"
 msgstr "Caskade kan inte uppdatera {provider}-konton under den här sessionen"
+
+#: crates/caskade-core/src/store_accounts/mod.rs
+msgid "Refreshing {account}"
+msgstr "Uppdaterar {account}"
 
 #: crates/caskade-core/src/store_accounts/mod.rs
 msgid "the store sent part of the library; nothing was marked as no longer owned"

@@ -33,8 +33,10 @@ pub use caskade_i18n::locale::SOURCE;
 
 mod message;
 mod scope;
+mod tasks;
 pub use message::{Message, Text, TextError, ToText};
 pub use scope::{Scope, scope, scope_catalog};
+pub use tasks::translated_tasks;
 
 /// The language setting's value for the OS's languages.
 pub const SYSTEM: &str = "system";

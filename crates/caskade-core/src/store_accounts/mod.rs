@@ -557,8 +557,10 @@ impl StoreAccounts {
                 )),
             }));
         }
-        let _activity =
-            caskade_jobs::global().activity(format!("Refreshing {}", account.display_name));
+        let _activity = caskade_jobs::global().activity(crate::tr!(
+            "Refreshing {account}",
+            account = account.display_name
+        ));
         account.sync.last_attempt_ms = Some(now);
         if let Some(refresher) = refresher {
             let refreshed = tokio::select! {
