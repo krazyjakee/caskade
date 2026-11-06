@@ -33,14 +33,15 @@ pub const PORTABLE: &str = "portable.dat";
 const FLATPAK_STATE: &str = "caskade";
 
 /// Settings written before every start (§5.2): no warning toasts or
-/// overlays, no Discord presence naming it, its own window full screen
-/// (dark under Caskade's curtain), and hosts found on the network.
+/// overlays, no Discord presence naming it, its own window at the size
+/// Caskade gives it (full screen, it fills the screen with its "Starting…"
+/// page and a tip about its buttons), and hosts found on the network.
 pub const QUIET: [(&str, &str); 6] = [
     ("confwarnings", "false"),
     ("connwarnings", "false"),
     ("detectnetblocking", "false"),
     ("richpresence", "false"),
-    ("uidisplaymode", "2"),
+    ("uidisplaymode", "0"),
     ("mdns", "true"),
 ];
 

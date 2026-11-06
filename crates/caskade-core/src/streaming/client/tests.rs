@@ -180,7 +180,7 @@ async fn caskades_client_keeps_its_own_state_and_never_touches_the_users() {
     );
     let ours = std::fs::read_to_string(ready.state.join(SETTINGS_DIR).join(SETTINGS_FILE)).unwrap();
     assert!(ours.contains("host=10.0.0.2"), "{ours}");
-    assert!(ours.contains("richpresence=false") && ours.contains("uidisplaymode=2"));
+    assert!(ours.contains("richpresence=false") && ours.contains("uidisplaymode=0"));
 
     // Again, from its install: the state and what it learnt stay.
     let again = client.ensure(&CancellationToken::new()).await.unwrap();

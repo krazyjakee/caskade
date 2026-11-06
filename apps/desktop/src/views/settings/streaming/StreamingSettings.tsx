@@ -112,7 +112,11 @@ function HostingSection() {
         <HostStateLine state={state} problem={status.data?.problem ?? null} switching={switching} />
       )}
       {state === "ready" && status.data?.warning && (
-        <p data-part="host-warning" role="note" className="mt-1 text-sm">
+        <p
+          data-part="host-warning"
+          role="note"
+          className="mt-1 text-sm [&_[data-cs=status-dot]]:whitespace-normal"
+        >
           <StatusDot tone="warning">{status.data.warning}</StatusDot>
         </p>
       )}

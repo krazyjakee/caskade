@@ -176,7 +176,7 @@ Moonlight runs in portable mode: a `portable.dat` in its **working directory** m
 
 - `confwarnings=false`, `connwarnings=false`, `detectnetblocking=false` (no warning toasts or overlays);
 - `richpresence=false` (Windows and macOS builds announce "Moonlight" on Discord otherwise);
-- `uidisplaymode=2` (Moonlight's own window, shown briefly before and after a stream, is fullscreen and dark under Caskade's curtain);
+- `uidisplaymode=0` (Moonlight's own window keeps the 1×1 size Caskade gives it. Full screen, it showed its grey "Starting…" page and a button tip for about 1.5 s on a real desktop, 6 Nov 2026);
 - `mdns=true`.
 
 *Unverified:* the Flatpak's working directory (`flatpak run --cwd=` inside `~/.var/app/com.moonlight_stream.Moonlight/`).

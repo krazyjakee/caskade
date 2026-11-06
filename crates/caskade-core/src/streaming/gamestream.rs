@@ -241,14 +241,33 @@ pub fn magic_packet(mac: [u8; 6]) -> [u8; 102] {
 /// streaming ports, which a router may forward.
 pub const WAKE_PORTS: [u16; 6] = [7, 9, 47998, 47999, 48000, 48010];
 
-/// Where the magic packet for a host at `addresses` goes: the local
-/// network's broadcast address and each address, on each of
-/// [`WAKE_PORTS`].
+/// Where the magic packet for a host at `addresses` goes: every network's
+/// broadcast address and each address, on each of [`WAKE_PORTS`]. The
+/// all-networks address alone leaves by the default route, which on a machine
+/// with a second card or a VPN isn't the network the host sleeps on.
 pub fn wake_targets(addresses: &[IpAddr]) -> Vec<SocketAddr> {
-    std::iter::once(IpAddr::V4(Ipv4Addr::BROADCAST))
+    targets_through(&network_broadcasts(), addresses)
+}
+
+fn targets_through(broadcasts: &[Ipv4Addr], addresses: &[IpAddr]) -> Vec<SocketAddr> {
+    std::iter::once(Ipv4Addr::BROADCAST)
+        .chain(broadcasts.iter().copied())
+        .map(IpAddr::V4)
         .chain(addresses.iter().copied().filter(IpAddr::is_ipv4))
         .flat_map(|address| WAKE_PORTS.map(|port| SocketAddr::new(address, port)))
         .collect()
+}
+
+/// The broadcast address of each network this machine is on.
+fn network_broadcasts() -> Vec<Ipv4Addr> {
+    let mut broadcasts: Vec<Ipv4Addr> = netdev::get_interfaces()
+        .iter()
+        .filter(|interface| !interface.is_loopback())
+        .flat_map(|interface| interface.ipv4.iter().map(|net| net.broadcast()))
+        .collect();
+    broadcasts.sort();
+    broadcasts.dedup();
+    broadcasts
 }
 
 /// Sends the magic packet for `mac` to `targets`.
@@ -324,5 +343,21 @@ mod tests {
         assert_eq!(&packet[..6], &[0xff; 6]);
         assert!(packet[6..].chunks(6).all(|chunk| chunk == mac));
         assert_eq!(packet[6..].chunks(6).count(), 16);
+    }
+
+    #[test]
+    fn a_wake_up_leaves_by_every_network_not_just_the_default_route() {
+        let targets = targets_through(
+            &[Ipv4Addr::new(192, 168, 77, 255)],
+            &[IpAddr::from([192, 168, 77, 12])],
+        );
+        for address in [
+            [255, 255, 255, 255],
+            [192, 168, 77, 255],
+            [192, 168, 77, 12],
+        ] {
+            let target = SocketAddr::new(IpAddr::from(address), 9);
+            assert!(targets.contains(&target), "{target} in {targets:?}");
+        }
     }
 }

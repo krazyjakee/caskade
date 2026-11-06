@@ -270,6 +270,8 @@ struct Inner {
     hosts: Mutex<BTreeMap<String, StreamHost>>,
     /// When each host's apps were last fetched.
     apps_at: Mutex<HashMap<String, Instant>>,
+    /// What each host last said it offers, asked directly.
+    apps: Mutex<HashMap<String, Vec<StreamApp>>>,
     /// The client's state folder, when a test gives one.
     state: Option<std::path::PathBuf>,
     refreshing: tokio::sync::Mutex<()>,
@@ -327,6 +329,7 @@ impl StreamHosts {
                 http,
                 hosts: Mutex::default(),
                 apps_at: Mutex::default(),
+                apps: Mutex::default(),
                 state: None,
                 refreshing: tokio::sync::Mutex::new(()),
                 devices: std::sync::OnceLock::new(),
@@ -499,7 +502,7 @@ impl StreamHosts {
                     HostReach::Ready
                 },
                 paired: paired.is_some(),
-                games: paired.map_or(0, |host| host.apps.len() as u32),
+                games: paired.map_or(0, |host| self.apps_of(host).len() as u32),
                 id: info.id,
             });
         }
@@ -538,7 +541,7 @@ impl StreamHosts {
                                 HostReach::Unreachable
                             },
                             paired: true,
-                            games: host.apps.len() as u32,
+                            games: self.apps_of(host).len() as u32,
                         },
                     );
                 }
@@ -552,6 +555,38 @@ impl StreamHosts {
             self.inner.bus.emit(Event::StreamHostsChanged);
         }
         self.library(&paired).await
+    }
+
+    /// What `host` offers, from the host itself with the client's identity.
+    /// `moonlight list` can wait on box art for good, and only a clean quit
+    /// saves what it found, which Windows gives no way to ask of it.
+    async fn ask_for_apps(&self, host: &PairedHost, address: &str) -> Option<Vec<StreamApp>> {
+        let state = match &self.inner.state {
+            Some(state) => state.clone(),
+            None => self.inner.client.state().await.ok()??,
+        };
+        let settings =
+            std::fs::read_to_string(state.join(SETTINGS_DIR).join(SETTINGS_FILE)).ok()?;
+        let identity = super::pairing::Identity::from_settings(&settings)?;
+        let endpoint = super::pairing::Endpoint::new(address).ok()?;
+        let link =
+            super::gamestream::HostLink::new(endpoint, &identity, host.server_cert_pem.as_deref()?)
+                .ok()?;
+        match link.apps().await {
+            Ok(apps) => Some(apps),
+            Err(error) => {
+                tracing::debug!(%error, host = host.name, "the host didn't list its games");
+                None
+            }
+        }
+    }
+
+    /// `host`'s games: what it last said itself, else the client's record.
+    fn apps_of(&self, host: &PairedHost) -> Vec<StreamApp> {
+        crate::lock(&self.inner.apps)
+            .get(&host.id)
+            .cloned()
+            .unwrap_or_else(|| host.apps.clone())
     }
 
     /// Paired hosts' apps as library releases; a reachable host's list is
@@ -572,8 +607,15 @@ impl StreamHosts {
                 .is_none_or(|at| at.elapsed() >= self.inner.timing.apps_every);
             if let (true, Some(address)) = (due, &host.address) {
                 crate::lock(&self.inner.apps_at).insert(host.id.clone(), Instant::now());
-                if let Err(error) = self.inner.client.list(address).await {
-                    tracing::debug!(%error, host = host.name, "app list not refreshed");
+                match self.ask_for_apps(host, address).await {
+                    Some(apps) => {
+                        crate::lock(&self.inner.apps).insert(host.id.clone(), apps);
+                    }
+                    None => {
+                        if let Err(error) = self.inner.client.list(address).await {
+                            tracing::debug!(%error, host = host.name, "app list not refreshed");
+                        }
+                    }
                 }
                 fetched = true;
             }
@@ -595,7 +637,7 @@ impl StreamHosts {
             let sync = self
                 .inner
                 .store
-                .sync_stream_apps_from(&host.id, &host.apps, device.as_deref())
+                .sync_stream_apps_from(&host.id, &self.apps_of(host), device.as_deref())
                 .await?;
             for game_id in sync.added {
                 self.inner.bus.emit(Event::LibraryGameAdded { game_id });
