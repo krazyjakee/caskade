@@ -82,7 +82,9 @@ export function HintBar() {
           message: "Controls",
           comment: "The console hint bar's list of buttons and what they do",
         })}
-        className="flex min-w-0 flex-1 items-center gap-6 overflow-hidden"
+        // One row, with what doesn't fit wrapped out of sight: a whole hint goes
+        // rather than half of one, and hintOrder decides which.
+        className="flex h-7 min-w-0 flex-1 flex-wrap content-start items-center gap-x-6 overflow-hidden"
       >
         {hints.map(({ action, label, text }) => (
           <li

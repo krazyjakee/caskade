@@ -33,7 +33,9 @@ export function ConsoleSidebar() {
     <aside
       data-cs="console-sidebar"
       data-focus-section="sidebar"
-      className="relative z-10 flex w-sidebar shrink-0 flex-col border-r border-border bg-surface-raised/80 px-4 pb-6"
+      // Scrolls: with the Library's filters open, a 1280×800 screen (a Steam
+      // Deck) is shorter than the list, and a pad's focus has to reach the end.
+      className="relative z-10 flex w-sidebar shrink-0 flex-col overflow-y-auto border-r border-border bg-surface-raised/80 px-4 pb-6"
     >
       <div data-part="brand" className="flex h-topbar shrink-0 items-center gap-3 px-3">
         <img src="/caskade.svg" alt="" className="size-10" />

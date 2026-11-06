@@ -69,17 +69,18 @@ export function glyph(action: Action, family: HintFamily): string | null {
   }
 }
 
-/** Hints read left to right in this order. */
+/** Hints read left to right in this order, most useful first: a bar too
+ * narrow for them all shows what fits from the left. */
 export const hintOrder: Action[] = [
   "confirm",
   "back",
   "details",
   "search",
+  "menu",
   "tab.prev",
   "tab.next",
   "page.prev",
   "page.next",
-  "menu",
   "view",
   "guide",
 ];

@@ -87,8 +87,8 @@ About 1½ hours. Needs: a Linux PC with no Sunshine installed (L3–L5), a
 debug build for L1 and L7 (`just dev`), and Sunshine installed by you for L6.
 
 - [ ] **L1.** The core's language list has no pseudo-locale, so this needs the
-  browser preview (`VITE_CASKADE_FIXTURES=1 just web`), where Settings → General
-  → Language offers `en-XA`. Go through every view in desktop and console
+  browser preview: run `VITE_CASKADE_FIXTURES=1 just web` and open a page with
+  `?lang=en-XA`. Go through every view in desktop and console
   mode, open the dialogs (game menu, Add game, editor, move, uninstall,
   share), a card's quick look in console mode (X on a pad) and a plugin's
   tab. **Pass:** every text is accented and bracketed; nothing is plain

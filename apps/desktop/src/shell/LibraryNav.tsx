@@ -34,7 +34,11 @@ export function LibraryNav({ console = false }: { console?: boolean }) {
             data-part="sub-item"
             className={`flex items-center gap-2 rounded-control px-3 text-fg-muted transition-colors duration-(--cs-motion-duration-fast) hover:bg-surface-hover hover:text-fg focus-visible:bg-surface-hover focus-visible:text-fg data-[status=active]:bg-accent/15 data-[status=active]:text-fg ${console ? "py-2 text-base" : "py-1.5 text-sm"}`}
           >
-            <span data-part="label" className="flex-1 truncate">
+            <span
+              data-part="label"
+              // Console mode's text is larger: a long name takes two lines.
+              className={console ? "min-w-0 flex-1 leading-tight" : "flex-1 truncate"}
+            >
               {t(filterLabels[filter])}
             </span>
             <span data-part="count" className="font-mono text-xs text-fg-subtle">
