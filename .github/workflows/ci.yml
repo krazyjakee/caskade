@@ -289,7 +289,6 @@ jobs:
       # Proton-shaped prefix and back (#14). Not required until it has passed
       # here: the first run has only been through Wine (docs/sync.md, "Saves").
       - name: Saves in the real Windows folders
-        continue-on-error: true
         run: "cargo test -p caskade-core --test it --locked windows_saves:: -- --ignored --nocapture"
 
   # The M5 exit (#153): the built app in console mode, driven by a pad only,

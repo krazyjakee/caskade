@@ -322,9 +322,9 @@ mod tests {
         let prefix = Path::new("/game/.caskade/prefix");
         let mut game = command("/game/bin");
         start_on_game_drive(&mut game, prefix, Path::new("/game"));
-        let drive = "/game/.caskade/prefix/dosdevices/g:/Game/bin";
-        assert_eq!(game.cwd, Path::new(drive));
-        assert_eq!(game.env["PWD"], drive);
+        let drive = prefix.join("dosdevices/g:/Game").join("bin");
+        assert_eq!(game.cwd, drive);
+        assert_eq!(game.env["PWD"], drive.to_string_lossy());
         let mut installer = command("/downloads");
         start_on_game_drive(&mut installer, prefix, Path::new("/game"));
         assert_eq!(installer.cwd, Path::new("/downloads"));
