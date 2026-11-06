@@ -204,12 +204,24 @@ of its best open connection:
 | --- | --- |
 | `lan` | An IP address on the local network: private, link-local or loopback; announced by the device over mDNS here; or an IPv6 address in the same /64 as one of this device's own |
 | `direct` | Any other IP address |
-| `relay` | Through a relay |
-| `offline` | No open connection |
+| `relay` | Through a relay, heard from in the last 12 s |
+| `offline` | No open connection, or a relay path that has gone quiet |
 
 `Links` follows every session's connection through its path events and sends
 a `LinkChanged` whenever a device's state changes, including a connection that
 started through a relay switching to a direct path once holepunching succeeds.
+
+A selected relay path also has to be hearing something. A direct path that
+stops answering times out after 15 s and iroh falls back to the relay path,
+however long that has been silent, then keeps it selected until the whole
+connection times out at 30 s. After a pulled cable that read as "Internet,
+through a server" with no internet, and stayed as the device's last link. Each
+end sends a keep-alive on every open path about every 5 s, so `Links` looks at
+what relay paths have received every 2 s: after 12 s of nothing the link is
+`offline` and the last link is forgotten, and anything received brings it back.
+Measured on two namespaces with a local relay (`tests/network.rs` keeps the
+in-process half): the state went from `lan` to `offline` when the direct path
+timed out, 17 s after the cable went, for either end's cable.
 Relays carry data at roughly 1 MB/s (wobu measured 512 KiB in 504 ms against
 22 ms direct), which is why game files require a direct path (#233).
 

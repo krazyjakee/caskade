@@ -130,6 +130,51 @@ async fn a_relay_only_device_is_reached_through_the_relay_when_allowed() {
     }
 }
 
+/// A cable pulled: nothing comes over the relay path any more, and iroh keeps
+/// it selected until the connection times out (30 s). That's no link, and
+/// what's left of it mustn't read as one afterwards.
+#[tokio::test(flavor = "multi_thread")]
+async fn a_relay_path_that_hears_nothing_is_offline() {
+    let (map, _url, relay) = iroh::test_utils::run_relay_server().await.unwrap();
+    let server = bind(reach(Relays::Local(map.clone()), Ip::Off)).await;
+    let addr = relay_only_addr(&server).await;
+    let client = bind(reach(Relays::Local(map), Ip::Loopback { port: None })).await;
+    let session = client.connect(addr, Purpose::Sync, None).await.unwrap();
+    assert_eq!(client.link(server.id()), Link::Relay);
+
+    relay.shutdown().await.unwrap();
+    let deadline = Instant::now() + Duration::from_secs(20);
+    while client.link(server.id()) != Link::Offline {
+        assert!(
+            Instant::now() < deadline,
+            "still {:?} with nothing coming back",
+            client.link(server.id())
+        );
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+    assert!(
+        session.connection().close_reason().is_none(),
+        "the connection itself hasn't timed out yet"
+    );
+    assert_ne!(client.last_link(server.id()), Some(Link::Relay));
+}
+
+/// An idle relay connection is a real one: keep-alives come back, and it keeps
+/// its state past the time a silent one loses it.
+#[tokio::test(flavor = "multi_thread")]
+async fn an_idle_relay_connection_stays_a_relay_link() {
+    let (map, _relay) = relay().await;
+    let server = bind(reach(Relays::Local(map.clone()), Ip::Off)).await;
+    let addr = relay_only_addr(&server).await;
+    let client = bind(reach(Relays::Local(map), Ip::Loopback { port: None })).await;
+    let _session = client.connect(addr, Purpose::Sync, None).await.unwrap();
+    let until = Instant::now() + Duration::from_secs(16);
+    while Instant::now() < until {
+        assert_eq!(client.link(server.id()), Link::Relay);
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn a_relayed_connection_moves_to_a_direct_path_and_the_state_follows() {
     let (map, _relay) = relay().await;
