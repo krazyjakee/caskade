@@ -504,6 +504,10 @@ msgid "there is no home folder"
 msgstr ""
 
 #: crates/caskade-core/src/browse.rs
+msgid "{path} isn't answering. If it's a network drive, check that it's reachable."
+msgstr ""
+
+#: crates/caskade-core/src/browse.rs
 msgid "{path} is not a UTF-8 path"
 msgstr ""
 

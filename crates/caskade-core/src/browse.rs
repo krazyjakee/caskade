@@ -5,6 +5,8 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::path::{Component, Path, PathBuf};
+use std::sync::mpsc;
+use std::time::{Duration, Instant};
 
 /// One folder's contents and the places to jump to.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
@@ -26,6 +28,54 @@ pub struct DirEntry {
     pub path: String,
     /// A folder, or a link to one.
     pub is_dir: bool,
+}
+
+/// How long a folder, or the list of places, gets to answer. A network drive
+/// whose server has gone blocks every call into it, in the kernel where
+/// nothing can cancel it, so the browser mustn't wait on one.
+const FOLDER_WAIT: Duration = Duration::from_secs(5);
+/// How long one listing's links get to answer, together.
+const LINKS_WAIT: Duration = Duration::from_secs(1);
+
+/// What `work` answers within `wait`. Past that it carries on alone, in a
+/// thread that ends when the call it's stuck in does.
+fn within<T: Send + 'static>(
+    wait: Duration,
+    work: impl FnOnce() -> T + Send + 'static,
+) -> Option<T> {
+    let (sent, answer) = mpsc::channel();
+    std::thread::Builder::new()
+        .name("browse".into())
+        .spawn(move || {
+            let _ = sent.send(work());
+        })
+        .ok()?;
+    answer.recv_timeout(wait).ok()
+}
+
+/// Whether `path` is a folder, following links, by `deadline`. `None` for
+/// something broken or that doesn't answer in time.
+fn follow(path: PathBuf, deadline: Instant) -> Option<bool> {
+    let left = deadline.saturating_duration_since(Instant::now());
+    if left.is_zero() {
+        return None;
+    }
+    within(left, move || {
+        std::fs::metadata(path).map(|metadata| metadata.is_dir())
+    })?
+    .ok()
+}
+
+/// Whether an entry is a folder, asking as little as it can. A mount point
+/// is a plain folder in the folder above it, so only a link needs following,
+/// and a drive that has gone doesn't hold up the listing it shows in.
+fn is_folder(entry: &std::fs::DirEntry, follow: &dyn Fn(PathBuf) -> Option<bool>) -> Option<bool> {
+    let kind = entry.file_type().ok()?;
+    if kind.is_symlink() {
+        follow(entry.path())
+    } else {
+        Some(kind.is_dir())
+    }
 }
 
 /// Home, the filesystem roots and mounted drives.
@@ -50,7 +100,13 @@ pub fn browse_dir(path: Option<&Path>, show_hidden: bool) -> Result<DirListing, 
         Some(path) => normalize(path),
         None => home().ok_or_else(|| crate::tr!("there is no home folder"))?,
     };
-    let entries = list(&dir, show_hidden)?;
+    let entries = answered(&dir, FOLDER_WAIT, {
+        let dir = dir.clone();
+        move || {
+            let links = Instant::now() + LINKS_WAIT;
+            list(&dir, show_hidden, &|path| follow(path, links))
+        }
+    })?;
     Ok(DirListing {
         path: text(&dir)?,
         parent: dir
@@ -58,7 +114,21 @@ pub fn browse_dir(path: Option<&Path>, show_hidden: bool) -> Result<DirListing, 
             .and_then(|parent| parent.to_str())
             .map(Into::into),
         entries,
-        places: places(),
+        places: within(FOLDER_WAIT, places).unwrap_or_else(home_place),
+    })
+}
+
+/// `work`'s result, or that `dir` isn't answering.
+fn answered<T: Send + 'static>(
+    dir: &Path,
+    wait: Duration,
+    work: impl FnOnce() -> Result<T, String> + Send + 'static,
+) -> Result<T, String> {
+    within(wait, work).unwrap_or_else(|| {
+        Err(crate::tr!(
+            "{path} isn't answering. If it's a network drive, check that it's reachable.",
+            path = dir.display()
+        ))
     })
 }
 
@@ -88,7 +158,11 @@ fn normalize(path: &Path) -> PathBuf {
     out
 }
 
-fn list(dir: &Path, show_hidden: bool) -> Result<Vec<DirEntry>, String> {
+fn list(
+    dir: &Path,
+    show_hidden: bool,
+    follow: &dyn Fn(PathBuf) -> Option<bool>,
+) -> Result<Vec<DirEntry>, String> {
     let read = std::fs::read_dir(dir).map_err(|error| match error.kind() {
         std::io::ErrorKind::NotFound => crate::tr!("{path} does not exist", path = dir.display()),
         std::io::ErrorKind::NotADirectory => {
@@ -104,16 +178,15 @@ fn list(dir: &Path, show_hidden: bool) -> Result<Vec<DirEntry>, String> {
         .filter_map(|entry| {
             let entry = entry.ok()?;
             let name = entry.file_name().into_string().ok()?;
-            let path = entry.path();
-            // Follows links; a broken one has no metadata and is left out.
-            let metadata = std::fs::metadata(&path).ok()?;
             if !show_hidden && hidden(&name, &entry) {
                 return None;
             }
+            // A broken link, or one that doesn't answer, is left out.
+            let is_dir = is_folder(&entry, follow)?;
             Some(DirEntry {
-                path: path.into_os_string().into_string().ok()?,
+                path: entry.path().into_os_string().into_string().ok()?,
                 name,
-                is_dir: metadata.is_dir(),
+                is_dir,
             })
         })
         .collect();
@@ -143,13 +216,7 @@ fn hidden(name: &str, _entry: &std::fs::DirEntry) -> bool {
 
 /// Home, the filesystem root(s), then mounted drives.
 pub fn places() -> Vec<Place> {
-    let mut places = Vec::new();
-    if let Some(home) = home().as_deref().and_then(Path::to_str) {
-        places.push(Place {
-            label: crate::trp!("folder browser place", "Home"),
-            path: home.into(),
-        });
-    }
+    let mut places = home_place();
     places.extend(roots());
     for place in mounts() {
         if !places.iter().any(|known| known.path == place.path) {
@@ -159,11 +226,26 @@ pub fn places() -> Vec<Place> {
     places
 }
 
+/// Home alone: all there is to offer when the drives don't answer.
+fn home_place() -> Vec<Place> {
+    home()
+        .as_deref()
+        .and_then(Path::to_str)
+        .map(|home| Place {
+            label: crate::trp!("folder browser place", "Home"),
+            path: home.into(),
+        })
+        .into_iter()
+        .collect()
+}
+
 #[cfg(windows)]
 fn roots() -> Vec<Place> {
+    let links = Instant::now() + LINKS_WAIT;
     (b'A'..=b'Z')
         .map(|letter| format!("{}:\\", letter as char))
-        .filter(|root| Path::new(root).is_dir())
+        // A mapped drive whose server has gone doesn't answer.
+        .filter(|root| follow(root.into(), links) == Some(true))
         .map(|root| Place {
             label: root.trim_end_matches('\\').into(),
             path: root,
@@ -213,17 +295,17 @@ fn folders_in(dir: &Path) -> Vec<Place> {
     let Ok(read) = std::fs::read_dir(dir) else {
         return Vec::new();
     };
+    let links = Instant::now() + LINKS_WAIT;
     let mut found: Vec<Place> = read
         .filter_map(|entry| {
             let entry = entry.ok()?;
             let label = entry.file_name().into_string().ok()?;
-            let path = entry.path();
-            if label.starts_with('.') || !path.is_dir() {
+            if label.starts_with('.') || !is_folder(&entry, &|path| follow(path, links))? {
                 return None;
             }
             Some(Place {
                 label,
-                path: path.into_os_string().into_string().ok()?,
+                path: entry.path().into_os_string().into_string().ok()?,
             })
         })
         .collect();
@@ -286,6 +368,61 @@ mod tests {
                 "zeta.iso"
             ]
         );
+    }
+
+    #[test]
+    fn only_links_are_followed_so_a_gone_drive_holds_nothing_up() {
+        let dir = tree();
+        let asked = std::sync::Mutex::new(Vec::new());
+        let follow = |path: PathBuf| {
+            asked.lock().unwrap().push(path);
+            None
+        };
+        #[cfg(unix)]
+        std::os::unix::fs::symlink("/nowhere", dir.path().join("away")).unwrap();
+        let entries = list(dir.path(), false, &follow).unwrap();
+        // The link that didn't answer is left out and the rest are there.
+        let names: Vec<&str> = entries.iter().map(|entry| entry.name.as_str()).collect();
+        assert_eq!(names, ["Alpha", "beta", "Setup.exe", "zeta.iso"]);
+        #[cfg(unix)]
+        assert_eq!(*asked.lock().unwrap(), [dir.path().join("away")]);
+    }
+
+    /// The call that never comes back, as into a drive whose server has gone.
+    fn stuck() -> (std::sync::mpsc::Sender<()>, impl FnOnce() + Send + 'static) {
+        let (release, wait) = std::sync::mpsc::channel::<()>();
+        (release, move || {
+            let _ = wait.recv();
+        })
+    }
+
+    #[test]
+    fn a_folder_that_doesnt_answer_says_so_and_nothing_waits_for_it() {
+        let (_release, block) = stuck();
+        let started = Instant::now();
+        let error = answered::<()>(
+            Path::new("/mnt/nas"),
+            Duration::from_millis(50),
+            move || {
+                block();
+                Ok(())
+            },
+        )
+        .unwrap_err();
+        assert!(error.contains("/mnt/nas"), "{error}");
+        assert!(error.contains("isn't answering"), "{error}");
+        assert!(started.elapsed() < Duration::from_secs(4), "it waited");
+    }
+
+    #[test]
+    fn a_link_gets_only_what_is_left_of_the_time() {
+        let dir = tree();
+        let started = Instant::now();
+        assert_eq!(follow(dir.path().join("Alpha"), started), None);
+        let soon = Instant::now() + Duration::from_secs(4);
+        assert_eq!(follow(dir.path().join("Alpha"), soon), Some(true));
+        assert_eq!(follow(dir.path().join("zeta.iso"), soon), Some(false));
+        assert_eq!(follow(dir.path().join("nothing"), soon), None);
     }
 
     #[test]
