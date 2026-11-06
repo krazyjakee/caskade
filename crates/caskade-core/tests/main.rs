@@ -54,3 +54,5 @@ mod sync_romm;
 mod sync_sections;
 #[cfg(windows)]
 mod windows_elevation;
+#[cfg(all(feature = "net", windows))]
+mod windows_saves;

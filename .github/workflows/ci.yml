@@ -255,7 +255,8 @@ jobs:
   # and Program Files folder, from stand-in files, on and off. The runner is an
   # administrator with no UAC, so this proves the commands, not the prompt.
   # caskade-core has no Tauri, so its test binary needs no Common Controls
-  # manifest. The same binary reads this machine's firmware names (#16).
+  # manifest. The same binary reads this machine's firmware names (#16) and
+  # runs a real program's saves through the real Windows folders (#14).
   windows-elevation:
     needs: changes
     if: needs.changes.outputs.cross == 'true'
@@ -284,6 +285,12 @@ jobs:
         run: "cargo test -p caskade-core --test it --locked windows_elevation:: -- --ignored --nocapture"
       - name: Device detection from the real registry
         run: "cargo test -p caskade-core --test it --locked device_defaults::windows_ -- --nocapture"
+      # A real program's saves in the real %APPDATA% and Documents, to a
+      # Proton-shaped prefix and back (#14). Not required until it has passed
+      # here: the first run has only been through Wine (docs/sync.md, "Saves").
+      - name: Saves in the real Windows folders
+        continue-on-error: true
+        run: "cargo test -p caskade-core --test it --locked windows_saves:: -- --ignored --nocapture"
 
   # The M5 exit (#153): the built app in console mode, driven by a pad only,
   # under Xvfb. The `e2e` feature embeds the built UI.
