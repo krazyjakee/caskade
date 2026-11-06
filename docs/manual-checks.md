@@ -2,7 +2,8 @@
 
 These are the checks that tests can't do: real machines, real networks, real
 accounts and real hardware. Each one closes an unchecked box on a GitHub
-issue, unless it says it clears no box. They are grouped by what you need set up, simplest first.
+issue, unless it says it clears no box or its issue is marked closed in the
+table at the end, which makes it optional. They are grouped by what you need set up, simplest first.
 
 How to report:
 
@@ -30,8 +31,17 @@ desktop dialog, UAC, the Windows service and firewall, Sunshine, Moonlight,
 `caskade --launch`, `/dev/uinput`, ACPI S3 sleep. Not real: GPUs (libx264 and
 software decoding), Wi-Fi, routers, sound on Windows, physical pads (a
 `uinput` pad on the client). Screens were Xvfb on Linux with Openbox as the
-window manager, not Cinnamon, GNOME or KDE. So these boxes stay unticked for
-real hardware, but they say what is already known to work.
+window manager, not Cinnamon, GNOME or KDE.
+
+These runs are enough for the issues closed on them on 6 Nov: #10, #12, #21,
+#22, #23, #25 and #31. Each closing comment gives its limits, and those
+issues' checks below are optional on real hardware. The issues still open wait
+on real hardware: #11 needs a real Windows sender and speeds from a real
+network, #26 a Windows client edition with ViGEmBus, a 1440p host and a Wayland
+session, #27 a Windows client after its display fix, real desktops and a Mac,
+#28 a Mac, and #29 the game menu on real desktops, a Steam Deck and a Mac. The
+table at the end lists the checks each one needs. The boxes on this page stay
+for real machines, so a result here doesn't tick one.
 
 | Check | Result |
 | --- | --- |
@@ -452,9 +462,9 @@ Tick or decide these on the issue itself:
 | --- | --- | --- |
 | #8 Library, store and plugin milestone | 194 | A1, A2, A3, L2, L7 |
 | #9 Localization | 221 | L1, SV1, SV2 |
-| #10 Local network first | 225 | O4, O5, O6 |
+| #10 Local network first (closed; optional) | 225 | O4, O5, O6 |
 | #11 Copy a game | 233 | N1, N2, WL1, T3 |
-| #12 Play on another device | 234 | N3, N4, WK1 |
+| #12 Play on another device (closed; optional) | 234 | N3, N4, WK1 |
 | #13 Downloads from a device nearby (closed; optional) | 236 | O7 |
 | #14 Save versions and sync | 239 | WL2 |
 | #15 Set up a new device (closed; optional) | 242 | O1 |
@@ -477,8 +487,9 @@ Tick or decide these on the issue itself:
 | #33 Streaming milestone | 268 | closes with #21–#32 |
 | #34 Nearby downloads for emulators and data (closed; optional) | 277 | O2, O3 |
 
-Issues marked closed were met by the tests their Validation sections ask for,
-so their checks now only confirm them on real machines.
+Issues marked closed were met by the tests their Validation sections ask for
+or by the virtual machine runs above, so their checks now only confirm them on
+real machines.
 
 `scripts/lan-unplugged.sh` runs O1 and most of O4 at the core on one PC, in
 network namespaces with no uplink. `scripts/two-networks.sh` runs T1, T2, T3,
