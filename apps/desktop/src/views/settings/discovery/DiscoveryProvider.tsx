@@ -5,8 +5,10 @@ import { effectSubscription } from "../../../api/subscription";
 
 const Context = createContext<DiscoveryApi | null>(null);
 const discoveryKey = ["discovery", "controller"] as const;
-function newest(current: DiscoverySnapshot | undefined, next: DiscoverySnapshot) {
-  return current && current.revision >= next.revision ? current : next;
+/** The later snapshot. The same revision takes the new one: a language
+ * switch changes its text and not its revision. */
+export function newest(current: DiscoverySnapshot | undefined, next: DiscoverySnapshot) {
+  return current && current.revision > next.revision ? current : next;
 }
 export function DiscoveryProvider({ api, children }: { api: DiscoveryApi; children: ReactNode }) {
   const client = useQueryClient();

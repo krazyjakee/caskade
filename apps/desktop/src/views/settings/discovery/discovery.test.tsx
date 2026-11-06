@@ -7,7 +7,7 @@ import type { SettingsApi, SettingsSnapshot } from "../../../api/settings";
 import type { LibraryApi } from "../../../api/types";
 import { LibraryDiscoverySettings } from "../LibraryDiscoverySettings";
 import { SettingsProvider } from "../useSettings";
-import { DiscoveryProvider } from "./DiscoveryProvider";
+import { DiscoveryProvider, newest } from "./DiscoveryProvider";
 
 afterEach(cleanup);
 function backend() {
@@ -273,4 +273,15 @@ it("lists hidden games and shows one again", async () => {
   expect((await library.hiddenGames?.())?.map((game) => game.id)).toEqual(["fixture-2"]);
   const page = await library.listGames({ filter: "all", sort: "title", offset: 0, limit: 10 });
   expect(page.items.map((game) => game.id)).toEqual(["fixture-0", "fixture-1"]);
+});
+
+it("keeps the later snapshot, and takes the same revision again for its text", async () => {
+  const shown = await backend().discovery.status();
+  const older = { ...shown, revision: shown.revision - 1 };
+  expect(newest(shown, older)).toBe(shown);
+  const relabelled = {
+    ...shown,
+    checks: [{ id: "desktop", label: "Skrivbordsposter", sources: ["desktop"] }],
+  };
+  expect(newest(shown, relabelled)).toBe(relabelled);
 });
