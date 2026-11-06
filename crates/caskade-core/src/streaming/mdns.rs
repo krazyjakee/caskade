@@ -94,15 +94,77 @@ pub fn hosts(answers: &[(Vec<u8>, IpAddr)]) -> Vec<Found> {
         .collect()
 }
 
-/// Asks `target` (the mDNS group, or a test's responder) and listens for
-/// `wait`.
+/// Asks `target` (the mDNS group, or a test's responder) from every network
+/// this machine is on, and listens for `wait`. A socket left to the OS asks
+/// only over the default route, so a PC with a second network card, a VPN
+/// or Docker would never find the hosts on its LAN.
 pub async fn browse(target: SocketAddr, wait: Duration) -> Result<Vec<Found>> {
-    let bind = if target.ip().is_loopback() {
-        SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 0)
+    let from = if target.ip().is_loopback() {
+        vec![Ipv4Addr::LOCALHOST]
     } else {
-        SocketAddr::new(IpAddr::V4(Ipv4Addr::UNSPECIFIED), 0)
+        networks()
     };
-    let socket = tokio::net::UdpSocket::bind(bind).await?;
+    browse_from(target, &from, wait).await
+}
+
+/// This machine's addresses on the networks a question can leave by.
+fn networks() -> Vec<Ipv4Addr> {
+    let mut addresses: Vec<Ipv4Addr> = netdev::get_interfaces()
+        .iter()
+        .filter(|interface| interface.is_up() && !interface.is_loopback())
+        .flat_map(|interface| interface.ipv4.iter().map(|net| net.addr()))
+        .collect();
+    addresses.sort();
+    addresses.dedup();
+    addresses
+}
+
+/// Asks from each of `addresses`, or as the OS chooses without any. An
+/// address that can't ask leaves the others to; only all failing is an error.
+async fn browse_from(
+    target: SocketAddr,
+    addresses: &[Ipv4Addr],
+    wait: Duration,
+) -> Result<Vec<Found>> {
+    let mut asking = tokio::task::JoinSet::new();
+    let any = [Ipv4Addr::UNSPECIFIED];
+    let addresses = if addresses.is_empty() {
+        &any
+    } else {
+        addresses
+    };
+    for address in addresses {
+        asking.spawn(ask(*address, target, wait));
+    }
+    let mut answers = Vec::new();
+    let mut failure = None;
+    let mut asked = false;
+    while let Some(result) = asking.join_next().await {
+        match result {
+            Ok(Ok(mut heard)) => {
+                asked = true;
+                answers.append(&mut heard);
+            }
+            Ok(Err(error)) => failure = Some(error),
+            Err(error) => tracing::debug!(%error, "an mDNS question stopped"),
+        }
+    }
+    match failure {
+        Some(error) if !asked => Err(error),
+        _ => Ok(hosts(&answers)),
+    }
+}
+
+/// One question from `address`, and what comes back within `wait`.
+async fn ask(
+    address: Ipv4Addr,
+    target: SocketAddr,
+    wait: Duration,
+) -> Result<Vec<(Vec<u8>, IpAddr)>> {
+    let socket = tokio::net::UdpSocket::bind(SocketAddr::new(IpAddr::V4(address), 0)).await?;
+    if !address.is_unspecified() && target.ip().is_multicast() {
+        socket2::SockRef::from(&socket).set_multicast_if_v4(&address)?;
+    }
     socket.send_to(&query()?, target).await?;
     let deadline = Instant::now() + wait;
     let mut answers = Vec::new();
@@ -118,5 +180,34 @@ pub async fn browse(target: SocketAddr, wait: Duration) -> Result<Vec<Found>> {
             Err(_) => break,
         }
     }
-    Ok(hosts(&answers))
+    Ok(answers)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// An unusable address leaves the question to the others, and when
+    /// nothing can ask, that's the error.
+    #[tokio::test]
+    async fn one_network_that_cant_ask_leaves_it_to_the_others() {
+        let responder = tokio::net::UdpSocket::bind("127.0.0.1:0").await.unwrap();
+        let target = responder.local_addr().unwrap();
+        let unusable = Ipv4Addr::new(192, 0, 2, 1);
+        tokio::spawn(async move {
+            let mut buffer = [0_u8; 512];
+            while let Ok((_, from)) = responder.recv_from(&mut buffer).await {
+                let _ = responder.send_to(b"heard", from).await;
+            }
+        });
+        let wait = Duration::from_millis(200);
+        let heard = browse_from(target, &[unusable, Ipv4Addr::LOCALHOST], wait).await;
+        assert!(heard.unwrap().is_empty(), "no hosts in that answer");
+        assert!(browse_from(target, &[unusable], wait).await.is_err());
+    }
+
+    #[test]
+    fn networks_leave_out_loopback() {
+        assert!(!networks().contains(&Ipv4Addr::LOCALHOST));
+    }
 }

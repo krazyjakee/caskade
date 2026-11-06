@@ -4609,6 +4609,10 @@ msgid "the wake-up message couldn't be sent"
 msgstr "väckningsmeddelandet kunde inte skickas"
 
 #: crates/caskade-core/src/streaming/host/mod.rs
+msgid "Other devices can't reach this PC while Windows treats its network as public. Set the network to private in Windows Settings → Network & internet."
+msgstr "Andra enheter kan inte nå den här datorn så länge Windows behandlar nätverket som offentligt. Ändra nätverket till privat i Windows-inställningar → Nätverk och internet."
+
+#: crates/caskade-core/src/streaming/host/mod.rs
 msgid "This device has no screen for other devices to see. Connect a monitor or a display dummy plug."
 msgstr "Den här enheten har ingen skärm som andra enheter kan se. Anslut en bildskärm eller en dummykontakt för skärm."
 

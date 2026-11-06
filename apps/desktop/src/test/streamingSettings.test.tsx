@@ -44,6 +44,18 @@ function open(
 const hostingSwitch = () =>
   screen.findByRole("switch", { name: "Let other devices stream games from this one" });
 
+it("trying again clears what the last try said", async () => {
+  const { streaming } = open("/settings?tab=streaming");
+  const answers = [Promise.resolve("cancelled" as const), Promise.reject(new Error("no uhid"))];
+  answers[1].catch(() => {});
+  streaming.setHosting = () => answers.shift() as Promise<"cancelled">;
+  fireEvent.click(await hostingSwitch());
+  const cancelled = "Nothing changed: the administrator's permission wasn't given.";
+  await screen.findByText(cancelled);
+  fireEvent.click(await hostingSwitch());
+  await waitFor(() => expect(screen.queryByText(cancelled)).toBeNull());
+});
+
 it("an admin lets other devices play, and pairs one that asks", async () => {
   const { streaming } = open("/settings?tab=streaming");
   fireEvent.click(await hostingSwitch());

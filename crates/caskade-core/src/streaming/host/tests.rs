@@ -907,6 +907,7 @@ async fn a_ready_host_says_when_pads_or_a_screen_wont_work() {
     let no_pads = host(|_| HostChecks {
         screen: true,
         pads: false,
+        reachable: true,
     });
     let enabling = tokio::spawn({
         let host = no_pads.clone();
@@ -925,6 +926,7 @@ async fn a_ready_host_says_when_pads_or_a_screen_wont_work() {
     let headless = host(|_| HostChecks {
         screen: false,
         pads: true,
+        reachable: true,
     });
     headless.start().await;
     until("ready", || headless.status().state == HostState::Ready).await;
@@ -939,10 +941,24 @@ async fn a_ready_host_says_when_pads_or_a_screen_wont_work() {
     assert!(
         HostChecks {
             screen: true,
-            pads: false
+            pads: false,
+            reachable: true,
         }
         .warning(OperatingSystem::Windows)
         .unwrap()
         .contains("controller driver")
     );
+}
+
+#[test]
+fn a_windows_pc_only_on_public_networks_is_told_nobody_can_reach_it() {
+    assert!(network_lets_others_in("Public\r\nPrivate\r\n"));
+    assert!(network_lets_others_in("DomainAuthenticated\r\n"));
+    assert!(!network_lets_others_in("Public\r\nPublic\r\n"));
+    let checks = HostChecks {
+        reachable: false,
+        ..HostChecks::fine(OperatingSystem::Windows)
+    };
+    let warning = checks.warning(OperatingSystem::Windows).unwrap();
+    assert!(warning.contains("public"), "{warning}");
 }

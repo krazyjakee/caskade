@@ -4607,6 +4607,10 @@ msgid "the wake-up message couldn't be sent"
 msgstr ""
 
 #: crates/caskade-core/src/streaming/host/mod.rs
+msgid "Other devices can't reach this PC while Windows treats its network as public. Set the network to private in Windows Settings → Network & internet."
+msgstr ""
+
+#: crates/caskade-core/src/streaming/host/mod.rs
 msgid "This device has no screen for other devices to see. Connect a monitor or a display dummy plug."
 msgstr ""
 

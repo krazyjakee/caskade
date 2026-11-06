@@ -83,6 +83,37 @@ pub struct HostStatus {
     pub warning: Option<String>,
 }
 
+/// The categories Windows gives the networks this machine is on, one a
+/// line; `None` when it can't say.
+fn windows_network_category() -> Option<String> {
+    let mut command = std::process::Command::new("powershell.exe");
+    command
+        .args([
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            "(Get-NetConnectionProfile).NetworkCategory",
+        ])
+        .stdin(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null());
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        command.creation_flags(CREATE_NO_WINDOW);
+    }
+    let output = command.output().ok()?;
+    let text = String::from_utf8_lossy(&output.stdout).into_owned();
+    (output.status.success() && !text.trim().is_empty()).then_some(text)
+}
+
+/// Whether any of these networks is one the firewall rules cover.
+fn network_lets_others_in(categories: &str) -> bool {
+    categories
+        .lines()
+        .any(|category| matches!(category.trim(), "Private" | "DomainAuthenticated"))
+}
+
 /// What this machine lets a host do (§4.4–4.5), looked at when it is ready.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct HostChecks {
@@ -91,6 +122,9 @@ pub struct HostChecks {
     /// Virtual pads: `/dev/uinput` writable (Linux), ViGEmBus running
     /// (Windows).
     pub pads: bool,
+    /// Windows lets other devices in: the firewall rules cover private and
+    /// domain networks, so a machine only on a public one can't be reached.
+    pub reachable: bool,
 }
 
 impl HostChecks {
@@ -108,6 +142,8 @@ impl HostChecks {
                         out.status.success()
                             && String::from_utf8_lossy(&out.stdout).contains("RUNNING")
                     }),
+                reachable: windows_network_category()
+                    .is_none_or(|categories| network_lets_others_in(&categories)),
             },
             _ => Self {
                 screen: ["DISPLAY", "WAYLAND_DISPLAY"]
@@ -117,6 +153,7 @@ impl HostChecks {
                     .write(true)
                     .open("/dev/uinput")
                     .is_ok(),
+                reachable: true,
             },
         }
     }
@@ -126,11 +163,17 @@ impl HostChecks {
         Self {
             screen: true,
             pads: true,
+            reachable: true,
         }
     }
 
     /// What people are told, when anything is missing.
     pub fn warning(self, os: OperatingSystem) -> Option<String> {
+        if !self.reachable {
+            return Some(crate::tr!(
+                "Other devices can't reach this PC while Windows treats its network as public. Set the network to private in Windows Settings → Network & internet."
+            ));
+        }
         if !self.screen {
             return Some(crate::tr!(
                 "This device has no screen for other devices to see. Connect a monitor or a display dummy plug."

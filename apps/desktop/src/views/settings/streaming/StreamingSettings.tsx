@@ -75,8 +75,14 @@ function HostingSection() {
   const hosting = useStreamingAction((api, next: boolean) => api.setHosting(next));
   const repair = useStreamingAction((api, _: undefined) => api.repair());
   const switching = hosting.isPending || repair.isPending;
-  const set = (next: boolean) =>
+  const set = (next: boolean) => {
+    setOutcome(null);
     hosting.mutate(next, { onSuccess: (result) => setOutcome(result) });
+  };
+  const fix = () => {
+    setOutcome(null);
+    repair.mutate(undefined, { onSuccess: (result) => setOutcome(result) });
+  };
   return (
     <SettingsSection
       icon={Cast}
@@ -116,7 +122,7 @@ function HostingSection() {
             variant={state === "needsAttention" ? "primary" : "secondary"}
             icon={Wrench}
             isDisabled={switching}
-            onPress={() => repair.mutate(undefined, { onSuccess: (result) => setOutcome(result) })}
+            onPress={fix}
           >
             {repair.isPending ? t`Repairing…` : t`Repair`}
           </Button>

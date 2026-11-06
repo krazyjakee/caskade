@@ -11,7 +11,7 @@ rust-version.workspace = true
 autotests = false
 [features]
 default = ["net"]
-net = ["dep:caskade-sync", "dep:base64", "dep:netdev", "dep:reqwest", "dep:rustls", "dep:hickory-proto", "dep:aes", "dep:ring", "dep:x509-parser", "dep:flate2", "dep:scraper", "caskade-installer/fetch", "caskade-installer/torrent"]
+net = ["dep:caskade-sync", "dep:base64", "dep:netdev", "dep:socket2", "dep:reqwest", "dep:rustls", "dep:hickory-proto", "dep:aes", "dep:ring", "dep:x509-parser", "dep:flate2", "dep:scraper", "caskade-installer/fetch", "caskade-installer/torrent"]
 
 [dependencies]
 caskade-jobs = { path = "../caskade-jobs" }
@@ -27,6 +27,7 @@ caskade-sync = { path = "../caskade-sync", optional = true }
 # Save files travel as base64 chunks on the sync session (#239).
 base64 = { version = "0.22", optional = true }
 # Network interfaces: Wake-on-LAN addresses and broadcasts (#234).
+socket2 = { version = "0.6", optional = true }
 netdev = { version = "=0.46.3", default-features = false, optional = true }
 # Dev themes (#140) are watched like dev plugins (#131); same pin.
 notify = { version = "8", default-features = false, features = ["macos_kqueue"] }

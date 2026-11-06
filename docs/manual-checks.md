@@ -86,10 +86,11 @@ Sunshine installed (W8 installs one). To find a game's id, open
   again with Caskade already running. **Pass:** both times the game starts,
   the command returns when the game exits (`echo %ERRORLEVEL%` gives 0), and
   the game page shows the session. (#22)
-- [ ] **W2.** Start a game with `caskade.exe --launch <game id>`, then end the
-  caller with `taskkill /PID <pid>` (no `/F`; find the pid in Task Manager →
-  Details with the Command line column). **Pass:** the game quits, its
-  session ends, and the caller's exit code is 5. (#22)
+- [ ] **W2.** Start a stream of a game from a Windows host, or start one with
+  `caskade.exe --launch <game id>` and post `WM_CLOSE` to the caller's hidden
+  window. `taskkill /PID <pid>` without `/F` won't do: it reports success but
+  doesn't reach hidden windows. Sunshine's own stop does reach them. **Pass:**
+  the game quits, its session ends, and the caller's exit code is 5. (#22)
 - [ ] **W3.** Settings → Streaming: turn hosting on and cancel the UAC
   prompt; then turn it on and allow it. **Pass:** one prompt each time, naming
   Caskade. After the cancel, hosting is off, `sc query CaskadeStreaming` says
@@ -101,6 +102,8 @@ Sunshine installed (W8 installs one). To find a game's id, open
   `sc query ViGEmBus` after allowing and comment on #26 what it says and whether
   an installer window showed: it should be running with none shown, but its
   silent install has never been tried.
+  On a network Windows calls Public, the firewall rules don't apply, so other
+  devices can't connect, and Settings → Streaming says so.
 - [ ] **W4.** With hosting on, look around Windows. **Pass:** no Start menu
   entry, tray icon or browser page for Sunshine; Services shows only
   "Caskade streaming"; firewall rules only "Caskade streaming (TCP)" and
@@ -427,8 +430,10 @@ Issues marked closed were met by the tests their Validation sections ask for,
 so their checks now only confirm them on real machines.
 
 `scripts/lan-unplugged.sh` runs O1 and most of O4 at the core on one PC, in
-network namespaces with no uplink. It needs no root and doesn't replace two
-real machines.
+network namespaces with no uplink. `scripts/two-networks.sh` runs T1, T2, T3,
+O5 and O6 the same way, behind router namespaces doing NAT with a relay between
+them (results in `docs/sync.md`). Neither needs root, and neither replaces real
+machines, routers, Wi-Fi or a phone's hotspot.
 
 W9, W10, H2, H3 and M2 finish no issue: #8's keyboard, mouse and controller box
 lets native checks stay deferred, so they only look for regressions on real

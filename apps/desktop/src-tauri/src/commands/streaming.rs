@@ -377,13 +377,15 @@ pub async fn streaming_pair_with<R: Runtime>(
                 )
                 .await;
             let (outcome, message) = pairing_outcome(&result, &host.name);
-            let _ = hosts.refresh().await;
             let _ = StreamingPairingFinished {
                 host_id: host.id,
                 outcome,
                 message,
             }
             .emit(&app);
+            // Fetching the host's games can take 25 s, too long to leave
+            // someone on "Waiting for…" after the host said yes.
+            let _ = hosts.refresh().await;
         })
     };
     drop(pairing);
