@@ -213,6 +213,36 @@ started through a relay switching to a direct path once holepunching succeeds.
 Relays carry data at roughly 1 MB/s (wobu measured 512 KiB in 504 ms against
 22 ms direct), which is why game files require a direct path (#233).
 
+### Through two routers
+
+Game files travel on endpoints with no relay transport, so none can fall back
+to a relay. That also means they don't use the sockets hole punching opened: a
+router lets in what answers the port that wrote out, and the transfer's
+endpoint has a port of its own. So a dial from it reaches a device with a
+public address, a mapped port or a full-cone router, and nothing behind an
+ordinary one. When the plain dial fails, both ends make a way
+(`caskade_sync::punch`, frame `Punch` on the `copy` or `share` session):
+
+1. Each opens a UDP port of its own for this transfer (`open_port`). A
+   throwaway endpoint with a key of its own, so the device's connection to its
+   relay stays undisturbed, asks a relay what public address the port has,
+   then closes. With Connect only directly on there's no relay to ask, and no
+   way is made.
+2. The receiver binds its relay-free dialer on that port and sends its
+   addresses. The sender binds a relay-free `FileServer` on its port, with the
+   device's own provider and gate, starts dialling the receiver from it, and
+   answers with its addresses. The session may be on a relay: it carries no
+   game data.
+3. The receiver dials. Each side's first packet leaves a hole in its own
+   router, so the dial gets through once the sender's has gone out. The
+   `FileServer` closes with the session.
+
+A session on a relay gets `PUNCH_WAIT` (5 s) to move to a direct path
+(`Session::direct_path`). If it doesn't, nothing is tried: the job waits and
+says only a relay reaches the device. A router that picks a new port per
+destination (symmetric) defeats iroh's punching and this alike, whichever end
+it's on, and a relay-free dial can't be told where the mapping is.
+
 ## Pairing and devices
 
 `caskade_core::devices::Devices` (only with the core's `net` feature) keeps
@@ -687,9 +717,11 @@ Activity, cancellable, retried from where it stopped (`install::peer`).
    the install in the root: twice the game on one disk), then pulls the
    collection over a `DirectDialer`: a second endpoint with this device's key
    and no relay transport, to the sender's direct addresses. Game files can't
-   pass through a relay. While only a relay reaches the sender, or it can't be
-   reached, the job waits and tries again ("Only a relay reaches …"), and what
-   arrived stays verified in `<cache>/copies/receive/store`.
+   pass through a relay. Behind routers no plain dial gets through, and the
+   two make a way first ("Through two routers"). While only a relay reaches
+   the sender, or it can't be reached, the job waits and tries again ("Only a
+   relay reaches …"), and what arrived stays verified in
+   `<cache>/copies/receive/store`.
 5. The files are exported to `<cache>/copies/receive/incoming/<job>/` (the
    portable installer takes a folder outside the storage root) and installed
    from there like a dropped game folder, with the sender's title and program
@@ -698,7 +730,11 @@ Activity, cancellable, retried from where it stopped (`install::peer`).
    as the files say (a Windows build runs through umu/Proton on Linux). The
    staging folder goes afterwards, whatever the Installer's source setting
    says.
-6. Everything in a copy store is kept by a tag (an offer's, a fetch's from
+6. A collection holds names and bytes, not file modes. On export a file that
+   starts like a script or a Linux or macOS program is made executable, so a
+   Linux game arrives able to start (a sender on Windows has no modes to give
+   anyway).
+7. Everything in a copy store is kept by a tag (an offer's, a fetch's from
    its start, a temporary one while files are added), and the store collects
    what no tag keeps every 10 s (#278). Exports leave the store pointing at
    files that then move on into an install, and reading those would spoil
@@ -891,14 +927,18 @@ expires (a day, a week, or until stopped). Only `to_url` writes a link out:
 (it carries no game data), and that connection is how both ends learn each
 other's direct addresses: iroh's hole punching and the port mapping it asks
 the router for (UPnP, NAT-PMP, PCP) put the sharer's public address on the
-session's paths. The files then come only over the relay-free dialer, to
-those addresses. When none is known, or none answers, the job waits and
-says so ("Only a relay reaches …"); game files never take the relay. So a
-share works across networks when the sharer's router maps a port or the two
-ends punch a direct path; between two strict NATs it waits. Tested on
-loopback with the relay transport removed (`Reach::loopback`): `cargo test -p
-caskade-core --test it shares::`. Two people on different networks is the
-manual check (step 5 of the manual checklist below).
+session's paths. `inspect` gives hole punching 5 s before it says the sharer
+is `RelayOnly`. The files then come only over a relay-free endpoint: straight
+to the sharer when a plain dial reaches it, or through a way the two make
+("Through two routers"). When the session stays on the relay, or no way opens,
+the job waits and says so ("Only a relay reaches …"); game files never take
+the relay. So a share works across networks when the routers let the two punch
+a path or the sharer's router maps a port; a symmetric router at either end
+waits. A share's other recipients behind routers aren't made a way to: the
+game comes from the sharer. Tested on loopback with the relay transport removed
+(`Reach::loopback`): `cargo test -p caskade-core --test it shares::`, and
+behind routers in namespaces: `scripts/two-networks.sh`. Two people on
+different networks is the manual check (step 5 of the manual checklist below).
 
 **Recipients help each other** (#249, `caskade_sync::swarm`). A recipient
 fetches with iroh-blobs' downloader from several providers at once: the
@@ -1317,6 +1357,13 @@ endpoint for the process lifetime and calls `SyncEndpoint::shutdown` at exit.
   (`caskade_sync::testing::local_relay`, the `test-utils` feature): the
   library syncs, the link says `relay`, and a copy waits for a direct
   connection with no game bytes moved.
+- Networks of their own (`scripts/lan-unplugged.sh`, `scripts/two-networks.sh`,
+  no root): a process per device in a network namespace of its own, on a
+  bridge with no uplink, or behind router namespaces doing NAT with a real iroh
+  relay on an "internet" bridge between them. `two-networks.sh` measures the
+  routers' NAT before using it, counts the relay's traffic with iptables rather
+  than taking iroh's word, and runs each scenario's negative control, which has
+  to fail with the failure it names. CI doesn't run either.
 - CI: the Rust app suites in `.github/workflows/ci.yml` run
   `caskade-sync`'s tests with the core's on Linux on every change to either,
   and its Windows GNU cross Clippy builds them for Windows. No test reaches
@@ -1392,6 +1439,52 @@ Linux, Windows and macOS, each pair of them:
 | Linux ↔ macOS | — | — | — | — | — | — | Not run yet |
 | Windows ↔ macOS | — | — | — | — | — | — | Not run yet |
 
+Step 5 on one PC, in network namespaces (`scripts/two-networks.sh`, no root,
+2026-11-06). This isn't two networks: every device is a process on one Linux
+kernel, the "routers" are namespaces running iptables, the "internet" is a
+bridge with a real iroh relay (a local one, not n0's) and no latency or loss
+but the rate limit T2 sets, the link crosses as a note between processes, and
+n0's address lookup is off. A 32 MiB fixture game; the relay's traffic counted
+by iptables, both ways, for the whole transfer or wait.
+
+| Network (sharer / recipient) | Result | Through the relay |
+| --- | --- | --- |
+| cone / cone | Hole punched, the link `direct`; the game arrived, installed and its program ran | 95 KB |
+| full cone / cone | Arrived by a plain dial and ran | 42 KB |
+| symmetric / symmetric | `RelayOnly`; the job waited 40 s saying "Only a relay reaches …", 0 bytes | 301 KB |
+| symmetric / cone | The same | 296 KB |
+| cone / symmetric | The same | 301 KB |
+| cone / cone, Stop sharing part-way (limited to 64 Mbit/s) | The copy failed "stopped" within one 100 ms poll of the stop returning, and the link was refused after | not measured |
+| A copy between paired devices, cone / cone | `direct`, arrived and ran | 44 KB |
+
+"Cone" is plain `MASQUERADE`: one mapping per inside port, the port kept, and
+only what the device wrote to gets back in. "Symmetric" is `MASQUERADE
+--random-fully`, a new port per destination; "full cone" adds a `DNAT` of
+everything else to the device. A probe measures each before it's used. The
+meter's control: 8 MiB sent through the relay counted 17.5 MB. Each scenario's
+negative control fails with the failure it names (a share arriving between
+symmetric NATs, one waiting between cones, the same copy left alone finishing).
+
+Limits: no real router, carrier NAT, hotspot, Wi-Fi, IPv6 path, UPnP or NAT-PMP
+mapping, Windows or macOS. A port that keeps its mapping after the throwaway
+endpoint closes is what `caskade_sync::punch` relies on: Linux does; a real
+router that doesn't makes the job wait. With a router that accepted
+unsolicited packets on its WAN side (its conntrack entry then collides with the
+device's mapping) hole punching failed and the link stayed `relay`, so the
+routers here drop them, as home routers do. Recipients helping each other
+across routers isn't covered, and a share's other recipients aren't made a way
+to.
+
+T3 the same way (#11, #20), paired through the relay first:
+
+| Network | Connect only directly | Result |
+| --- | --- | --- |
+| symmetric / symmetric | Off | The link `relay`; a copy waited 40 s ("Only a relay reaches …"), 0 bytes, 319 KB through the relay |
+| symmetric / symmetric | On, both | Never `relay` in 30 s of samples every 100 ms; `offline`, and no session opens |
+| symmetric / symmetric | On, one device | Never `relay` on that device; no session opens from the other, which goes on showing its last link for up to 3 minutes |
+| cone / cone | On, both | Never `relay`; `offline`: with no relay nothing punches |
+| Public address and fixed port / cone | On, both | Never `relay`; `direct` |
+
 ## Two machines on one network, internet unplugged
 
 The in-process tests share one host, so they can't show two routers' worth of
@@ -1412,6 +1505,7 @@ Results:
 | Date | Machines | Steps passed | Notes |
 | --- | --- | --- | --- |
 | 2026-11-06 | One PC: two processes in network namespaces on a bridge with no uplink (`scripts/lan-unplugged.sh`) | 1–4, plus a copy | Not two machines. Real mDNS, pairing by code, an edit, a collection and a session both ways, link `lan`, a copy of a fixture game. No real router, Wi-Fi or Windows. Steps 5–6 not run. With the bridge's ports isolated it fails at discovery, as it should. |
+| 2026-11-06 | One PC: two processes in network namespaces on one bridge (`scripts/two-networks.sh`) | 5, 6 | Not two machines. Step 5: Connect only directly on one, then the router's uplink brought up to a local relay; the other device's relay answered, and the link and each session's real path stayed on 192.168.10.x both ways for 20 s while edits crossed. With the LAN cut instead, it fails. Step 6: `mcast_flood off` on the bridge's ports; neither saw the other nearby in 10 s, a pairing link paired, an edit crossed each way, link `lan`. With multicast passing, they see each other. No real router, Wi-Fi or guest network. |
 | — | Two machines | — | Not run yet. |
 
 ### Copying a game (#11)

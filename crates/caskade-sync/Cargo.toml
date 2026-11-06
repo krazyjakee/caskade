@@ -8,7 +8,7 @@ autotests = false
 
 [features]
 # Local relays with self-signed certificates (`Relays::Local`), for tests.
-test-utils = ["iroh/test-utils"]
+test-utils = ["iroh/test-utils", "dep:iroh-relay"]
 
 [dependencies]
 async-trait = "0.1"
@@ -19,6 +19,8 @@ futures-util = "0.3"
 iroh = "=1.0.3"
 iroh-blobs = { version = "=0.103.1", default-features = false, features = ["fs-store"] }
 iroh-tickets = "=1.0.0"
+# A relay bound to a test network's address (`testing::relay_on`).
+iroh-relay = { version = "=1.0.3", default-features = false, features = ["server", "test-utils"], optional = true }
 # mDNS for iroh 1.0: released with iroh 1.0.0 and the version iroh-blobs
 # 0.103 tests against.
 iroh-mdns-address-lookup = "=0.4.0"

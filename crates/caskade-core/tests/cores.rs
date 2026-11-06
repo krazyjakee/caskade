@@ -66,6 +66,18 @@ pub async fn core(name: &str) -> Core {
 /// A device named `name` reached as `reach` says (loopback, a local relay),
 /// with Hades (Steam) discovered.
 pub async fn core_with(name: &str, reach: Reach) -> Core {
+    core_on(name, move |store, accounts, keys| {
+        Devices::with_reach(store, accounts, keys, reach)
+    })
+    .await
+}
+
+/// A device named `name` whose device service `devices` makes, with Hades
+/// (Steam) discovered.
+pub async fn core_on(
+    name: &str,
+    devices: impl FnOnce(LibraryStore, AccountService, Arc<MemoryKeyStore>) -> Devices,
+) -> Core {
     let dir = tempfile::tempdir().unwrap();
     let store = LibraryStore::in_memory().await.unwrap();
     let accounts = AccountService::open(store.clone(), Bus::default())
@@ -77,7 +89,7 @@ pub async fn core_with(name: &str, reach: Reach) -> Core {
         .register_core(&AppPaths::under(&dir.path().join("app")))
         .unwrap();
     let keys = Arc::new(MemoryKeyStore::default());
-    let devices = Devices::with_reach(store.clone(), accounts, keys.clone(), reach);
+    let devices = devices(store.clone(), accounts, keys.clone());
     devices.set_settings(settings.clone());
     let cache = dir.path().join("cache");
     let games = dir.path().join("Games");

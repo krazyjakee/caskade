@@ -1502,6 +1502,7 @@ dependencies = [
  "iroh",
  "iroh-blobs",
  "iroh-mdns-address-lookup",
+ "iroh-relay",
  "iroh-tickets",
  "keyring",
  "n0-future",
