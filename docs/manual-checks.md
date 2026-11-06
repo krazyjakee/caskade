@@ -61,9 +61,10 @@ real hardware, but they say what is already known to work.
 | S9 | Passed on Linux with a `uinput` pad: buttons and rumble both ways, X11 only. Windows needs ViGEmBus |
 | S13 | Passed |
 
-Not fixed, and worth a look: a host lists itself under Play from other
-devices; a link that has just dropped shows "Internet, through a server" with
-no internet; "Ready" still shows above the public-network warning; the polkit
+Fixed since: a host no longer lists itself under Play from other devices.
+
+Not fixed, and worth a look: a link that has just dropped shows "Internet,
+through a server" with no internet; "Ready" still shows above the public-network warning; the polkit
 dialog prints the script's first lines. A system clock that stepped while a game
 ran left Stop unable to match its process by start time, retrying until restart
 (seen after a VM paused for hours, whose clock then jumped); fixed since:

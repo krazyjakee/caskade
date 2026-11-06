@@ -246,6 +246,63 @@ async fn a_host_on_the_network_appears_and_one_that_leaves_is_unreachable() {
     let _ = &f.temp;
 }
 
+/// This device's own host found on the network, as a VM run showed: it's
+/// the same host that answers on loopback, so it's left out by its id.
+#[tokio::test]
+async fn a_host_is_not_listed_on_its_own_device() {
+    let f = fixture(None).await;
+    let hosts = f.hosts.with_own_port(f.serverinfo.address().port());
+    hosts.refresh().await.unwrap();
+    assert_eq!(hosts.hosts(), [], "this device is no other device");
+
+    // Stopping it doesn't bring it back as a device that can't be reached.
+    f.on.store(false, std::sync::atomic::Ordering::SeqCst);
+    f.serverinfo.reset().await;
+    hosts.refresh().await.unwrap();
+    assert_eq!(hosts.hosts(), []);
+    let _ = &f.temp;
+}
+
+/// Names aren't identities: another device called the same still shows.
+#[tokio::test]
+async fn another_device_with_this_devices_name_still_shows() {
+    let f = fixture(None).await;
+    let own = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/serverinfo"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_string(SERVERINFO.replace(
+                "A466B6A4-3EC7-8C2E-629E-021AC1F5E209",
+                "11111111-2222-3333-4444-555555555555",
+            )),
+        )
+        .mount(&own)
+        .await;
+    let hosts = f.hosts.with_own_port(own.address().port());
+    hosts.refresh().await.unwrap();
+    let hosts = hosts.hosts();
+    assert_eq!(hosts.len(), 1, "{hosts:?}");
+    assert_eq!(hosts[0].name, "Den");
+    assert_eq!(hosts[0].id, "A466B6A4-3EC7-8C2E-629E-021AC1F5E209");
+    let _ = &f.temp;
+}
+
+/// Paired with itself before this was filtered, and in the client's own
+/// spelling of the id: its games don't stream from itself either.
+#[tokio::test]
+async fn a_host_paired_with_itself_is_left_out_with_its_games() {
+    let lower = PAIRED.replace(
+        "A466B6A4-3EC7-8C2E-629E-021AC1F5E209",
+        "a466b6a4-3ec7-8c2e-629e-021ac1f5e209",
+    );
+    let f = fixture(Some(&lower)).await;
+    let hosts = f.hosts.with_own_port(f.serverinfo.address().port());
+    hosts.refresh().await.unwrap();
+    assert_eq!(hosts.hosts(), []);
+    assert!(hosts.paired().await.is_empty());
+    let _ = &f.temp;
+}
+
 #[tokio::test]
 async fn a_typed_address_is_kept_and_asked() {
     let f = fixture(None).await;

@@ -278,6 +278,10 @@ struct Inner {
     /// The devices paired through sync (#267): a host on one of them names
     /// its games by that device's copies.
     devices: std::sync::OnceLock<crate::devices::Devices>,
+    /// The port this device's own host would answer on, over loopback.
+    own_port: u16,
+    /// The id of this device's own host, once it has answered.
+    own: Mutex<Option<String>>,
 }
 
 /// The hosts this device can stream from; cheap to clone.
@@ -333,8 +337,20 @@ impl StreamHosts {
                 state: None,
                 refreshing: tokio::sync::Mutex::new(()),
                 devices: std::sync::OnceLock::new(),
+                own_port: HTTP_PORT,
+                own: Mutex::default(),
             }),
         })
+    }
+
+    /// Looks for this device's own host on `port` (tests).
+    pub fn with_own_port(self, port: u16) -> Self {
+        let mut inner = Arc::try_unwrap(self.inner)
+            .unwrap_or_else(|_| panic!("with_own_port before the service is shared"));
+        inner.own_port = port;
+        Self {
+            inner: Arc::new(inner),
+        }
     }
 
     /// Reads paired hosts from `state` instead of the installed client's
@@ -439,15 +455,30 @@ impl StreamHosts {
                 _ => return Vec::new(),
             },
         };
-        std::fs::read_to_string(state.join(SETTINGS_DIR).join(SETTINGS_FILE))
+        let mut hosts = std::fs::read_to_string(state.join(SETTINGS_DIR).join(SETTINGS_FILE))
             .map(|text| paired_hosts(&text))
-            .unwrap_or_default()
+            .unwrap_or_default();
+        hosts.retain(|host| !self.is_own(&host.id));
+        hosts
+    }
+
+    /// Whether `id` is this device's own host, as far as it has answered.
+    /// By id: another device can have this device's name.
+    fn is_own(&self, id: &str) -> bool {
+        crate::lock(&self.inner.own)
+            .as_ref()
+            .is_some_and(|own| own.eq_ignore_ascii_case(id))
     }
 
     /// Looks for hosts once: mDNS, typed addresses and paired hosts, each
     /// asked whether it is there; a paired host's apps go into the library.
     pub async fn refresh(&self) -> Result<()> {
         let _refreshing = self.inner.refreshing.lock().await;
+        // A host on this device answers on loopback, and is remembered once
+        // it stops: it's found on the network like any other.
+        if let Some(own) = self.ask("127.0.0.1", self.inner.own_port).await {
+            *crate::lock(&self.inner.own) = Some(own.id);
+        }
         let mut candidates: Vec<(String, u16)> = Vec::new();
         match mdns::browse(self.inner.mdns, self.inner.timing.listen).await {
             Ok(found) => candidates.extend(
@@ -547,6 +578,7 @@ impl StreamHosts {
                 }
             }
             next.extend(seen);
+            next.retain(|id, _| !self.is_own(id));
             let changed = *hosts != next;
             *hosts = next;
             changed
