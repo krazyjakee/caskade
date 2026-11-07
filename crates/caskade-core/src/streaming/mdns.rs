@@ -107,8 +107,27 @@ pub async fn browse(target: SocketAddr, wait: Duration) -> Result<Vec<Found>> {
     browse_from(target, &from, wait).await
 }
 
-/// This machine's addresses on the networks a question can leave by.
+/// How long [`networks`]' answer is reused. Hosts are looked for every few
+/// seconds, and listing the interfaces reads several files for each one (a
+/// machine running Docker has dozens), megabytes of allocations a time.
+const NETWORKS_FOR: Duration = Duration::from_secs(30);
+
+/// This machine's addresses on the networks a question can leave by, as
+/// listed at most [`NETWORKS_FOR`] ago.
 fn networks() -> Vec<Ipv4Addr> {
+    static LISTED: std::sync::Mutex<Option<(Instant, Vec<Ipv4Addr>)>> = std::sync::Mutex::new(None);
+    let mut listed = LISTED.lock().unwrap_or_else(|e| e.into_inner());
+    if let Some((at, addresses)) = listed.as_ref()
+        && at.elapsed() < NETWORKS_FOR
+    {
+        return addresses.clone();
+    }
+    let addresses = list_networks();
+    *listed = Some((Instant::now(), addresses.clone()));
+    addresses
+}
+
+fn list_networks() -> Vec<Ipv4Addr> {
     let mut addresses: Vec<Ipv4Addr> = netdev::get_interfaces()
         .iter()
         .filter(|interface| interface.is_up() && !interface.is_loopback())
