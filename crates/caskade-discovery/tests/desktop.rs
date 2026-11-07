@@ -349,6 +349,42 @@ fn flatpak_runtime_non_game_and_bad_metadata_never_become_games() {
 }
 
 #[test]
+fn flatpak_watches_app_folders_not_whole_installations() {
+    let machine = Machine::new();
+    machine.flatpak("org.example.Game", "Game");
+    let env = machine.env();
+    let system = env.resolve_path(Path::new("/var/lib/flatpak")).unwrap();
+    let user = env
+        .resolve_path(Path::new("/home/fixture/.local/share/flatpak"))
+        .unwrap();
+    let watch = Flatpak.watch_paths(&env);
+    // A recursive watch on an installation takes a watch for every folder
+    // of every app and runtime in it.
+    for root in [&system, &user] {
+        assert!(
+            watch.iter().all(|w| w.path != *root),
+            "{} watched whole",
+            root.display()
+        );
+    }
+    assert!(
+        watch
+            .iter()
+            .any(|w| w.path == user.join("app") && !w.recursive)
+    );
+    let app = watch
+        .iter()
+        .find(|w| w.path == system.join("app"))
+        .expect("the system installation's apps are watched");
+    assert!(!app.recursive);
+    assert!(
+        watch
+            .iter()
+            .any(|w| w.path == system.join("exports/share/applications") && w.recursive)
+    );
+}
+
+#[test]
 fn extra_flatpak_installation_is_read_without_a_flatpak_process() {
     let machine = Machine::new();
     machine.file(

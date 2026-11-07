@@ -97,11 +97,14 @@ impl Source for Flatpak {
         vec![]
     }
     fn watch_paths(&self, env: &HostEnv) -> Vec<WatchPath> {
+        // An install or removal adds or drops `app/<id>`; its launcher lands
+        // in the exports below. Never the whole installation: its apps and
+        // runtimes hold tens of thousands of folders, a watch each.
         let mut paths: Vec<_> = installation_paths(env)
             .into_iter()
-            .map(|path| WatchPath {
-                path,
-                recursive: true,
+            .map(|root| WatchPath {
+                path: root.join("app"),
+                recursive: false,
             })
             .collect();
         paths.extend(
