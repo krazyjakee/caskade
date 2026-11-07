@@ -143,6 +143,17 @@ pub fn streaming_hosts(hosts: State<'_, StreamHosts>) -> Vec<StreamHost> {
     hosts.hosts()
 }
 
+/// Looks for devices now, and asks the paired ones for their games.
+#[tauri::command]
+#[specta::specta]
+pub async fn streaming_look_again(
+    hosts: State<'_, StreamHosts>,
+) -> Result<Vec<StreamHost>, CommandError> {
+    let hosts = hosts.inner().clone();
+    hosts.look_again().await.map_err(report)?;
+    Ok(hosts.hosts())
+}
+
 /// Adds a device to stream from by its address (a name or an IP), for
 /// networks where it isn't found by itself, and looks for it at once.
 #[tauri::command]

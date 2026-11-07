@@ -59,6 +59,8 @@ export interface StreamingApi {
   hosts(): Promise<StreamHost[]>;
   /** Adds a device by its address and looks for it at once. */
   addHost(address: string): Promise<StreamHost[]>;
+  /** Looks for devices now, and asks the paired ones for their games. */
+  lookAgain(): Promise<StreamHost[]>;
   /** Starts pairing with a device: the code to enter on it. */
   pairWith(hostId: string): Promise<PairingStarted>;
   /** Hears how pairings end. */
@@ -95,6 +97,7 @@ const nothing = async () => {};
 export const nativeStreamingApi: StreamingApi = {
   hosts: () => commands.streamingHosts(),
   addHost: (address) => unwrap(commands.streamingAddHost(address)),
+  lookAgain: () => unwrap(commands.streamingLookAgain()),
   pairWith: (hostId) => unwrap(commands.streamingPairWith(hostId)),
   onPairingFinished: (listener) => {
     let stop: (() => void) | undefined;

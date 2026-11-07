@@ -475,6 +475,7 @@ function StreamFromSection() {
   const hosts = useStreamHosts();
   const [pairing, setPairing] = useState<StreamHost | null>(null);
   const [address, setAddress] = useState("");
+  const look = useStreamingAction((api, _: undefined) => api.lookAgain());
   const add = useStreamingAction((api, value: string) => api.addHost(value));
   const list = hosts.data ?? [];
   return (
@@ -487,8 +488,8 @@ function StreamFromSection() {
           size="sm"
           variant="ghost"
           icon={RefreshCw}
-          isDisabled={hosts.isFetching}
-          onPress={() => void hosts.refetch()}
+          isDisabled={look.isPending}
+          onPress={() => look.mutate(undefined)}
         >
           <Trans>Look again</Trans>
         </Button>

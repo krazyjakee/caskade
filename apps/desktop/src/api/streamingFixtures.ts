@@ -102,6 +102,9 @@ export function createStreamingFixtureApi(options: StreamingFixtureOptions = {})
     async hosts() {
       return structuredClone(hosts);
     },
+    async lookAgain() {
+      return structuredClone(hosts);
+    },
     async addHost(address) {
       if (!/^[\w.-]+$/.test(address)) throw new Error(`${address} isn't a device's address`);
       if (!hosts.some((host) => host.address === address)) {

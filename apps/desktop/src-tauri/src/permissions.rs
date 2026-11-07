@@ -357,7 +357,7 @@ pub fn access(command: &str) -> Option<Access> {
         // Who may stream from this device is an admin's choice.
         "streaming_accept_pairing" | "streaming_decline_pairing" | "streaming_unpair" => Admin,
         // Remembering a device to stream from changes what everyone sees.
-        "streaming_add_host" => SignedIn,
+        "streaming_add_host" | "streaming_look_again" => SignedIn,
         // How games look on this device is anyone's to choose (#66).
         "streaming_set_quality" => SignedIn,
         "streaming_set_hosting" | "streaming_use_existing" => Admin,

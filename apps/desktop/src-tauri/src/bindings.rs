@@ -140,6 +140,7 @@ pub fn builder() -> Builder<tauri::Wry> {
             crate::commands::streaming::streaming_use_existing,
             crate::commands::streaming::streaming_hosts,
             crate::commands::streaming::streaming_add_host,
+            crate::commands::streaming::streaming_look_again,
             crate::commands::streaming::streaming_pair_requests,
             crate::commands::streaming::streaming_accept_pairing,
             crate::commands::streaming::streaming_decline_pairing,

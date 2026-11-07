@@ -416,6 +416,8 @@ export const commands = {
 	 *  networks where it isn't found by itself, and looks for it at once.
 	 */
 	streamingAddHost: (address: string) => typedError<StreamHost_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("streaming_add_host", { address })),
+	/**  Looks for devices now, and asks the paired ones for their games. */
+	streamingLookAgain: () => typedError<StreamHost_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("streaming_look_again")),
 	/**
 	 *  Devices waiting to pair with this host; a request expires after five
 	 *  minutes and is gone from the list.
