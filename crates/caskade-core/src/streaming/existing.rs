@@ -154,7 +154,7 @@ pub fn detect(probe: &Probe<'_>) -> Option<Existing> {
 /// This system's probe.
 pub fn detect_here() -> Option<Existing> {
     let runs = |program: &str, args: &[&str]| {
-        std::process::Command::new(program)
+        crate::quiet::command(program)
             .args(args)
             .stdin(std::process::Stdio::null())
             .stdout(std::process::Stdio::null())

@@ -233,7 +233,7 @@ impl Drop for ChildRunner {
 pub struct ServiceRunner;
 
 fn sc(args: &[&str]) -> Option<std::process::Output> {
-    std::process::Command::new("sc.exe")
+    crate::quiet::command("sc.exe")
         .args(args)
         .stdin(std::process::Stdio::null())
         .stderr(std::process::Stdio::null())

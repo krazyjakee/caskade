@@ -57,6 +57,7 @@ pub(crate) mod remote_file {
     }
 }
 #[cfg(feature = "net")]
+mod quiet;
 pub mod remote_play;
 pub mod romm;
 pub mod saves;

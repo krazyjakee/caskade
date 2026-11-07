@@ -90,7 +90,7 @@ pub struct HostStatus {
 /// The categories Windows gives the networks this machine is on, one a
 /// line; `None` when it can't say.
 fn windows_network_category() -> Option<String> {
-    let mut command = std::process::Command::new("powershell.exe");
+    let mut command = crate::quiet::command("powershell.exe");
     command
         .args([
             "-NoProfile",
@@ -100,12 +100,6 @@ fn windows_network_category() -> Option<String> {
         ])
         .stdin(std::process::Stdio::null())
         .stderr(std::process::Stdio::null());
-    #[cfg(windows)]
-    {
-        use std::os::windows::process::CommandExt;
-        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
-        command.creation_flags(CREATE_NO_WINDOW);
-    }
     let output = command.output().ok()?;
     let text = String::from_utf8_lossy(&output.stdout).into_owned();
     (output.status.success() && !text.trim().is_empty()).then_some(text)
@@ -138,7 +132,7 @@ impl HostChecks {
         match os {
             OperatingSystem::Windows => Self {
                 screen: true,
-                pads: std::process::Command::new("sc.exe")
+                pads: crate::quiet::command("sc.exe")
                     .args(["query", crate::elevation::windows::GAMEPAD_DRIVER_SERVICE])
                     .stdin(std::process::Stdio::null())
                     .stderr(std::process::Stdio::null())

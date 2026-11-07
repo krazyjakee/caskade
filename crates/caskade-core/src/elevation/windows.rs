@@ -463,7 +463,7 @@ pub fn remove_host(target: &Path) -> Result<()> {
 /// HKLM's 64-bit view (an environment variable the caller set could point
 /// anywhere).
 pub fn target() -> Option<PathBuf> {
-    let output = std::process::Command::new("reg.exe")
+    let output = crate::quiet::command("reg.exe")
         .args([
             "query",
             r"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion",
@@ -607,7 +607,7 @@ pub fn perform(args: &[String]) -> i32 {
         return USAGE;
     };
     perform_with(args, &target, &mut |program, args| {
-        std::process::Command::new(program)
+        crate::quiet::command(program)
             .args(args)
             .stdin(std::process::Stdio::null())
             .stdout(std::process::Stdio::null())
@@ -720,7 +720,7 @@ impl Default for WindowsRunner {
 }
 
 fn quietly(program: &str, args: &[&str]) -> bool {
-    std::process::Command::new(program)
+    crate::quiet::command(program)
         .args(args)
         .stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::null())
@@ -759,7 +759,7 @@ impl Runner for WindowsRunner {
             .as_deref()
             .ok_or_else(|| Error::Invalid(crate::tr!("Caskade can't find its own program")))?;
         let argv = launcher(exe, request)?;
-        let status = std::process::Command::new(&argv[0])
+        let status = crate::quiet::command(&argv[0])
             .args(&argv[1..])
             .stdin(std::process::Stdio::null())
             .status()?;
