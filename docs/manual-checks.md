@@ -536,7 +536,7 @@ Tick or decide these on the issue itself:
 | #26 Display, pads, capture (closed; optional) | 260 | S9, S10, S11 |
 | #27 Client on first stream | 261 | M3 (S3, S8 passed in VMs) |
 | #28 Pairing with a code | 263 | M3 (S2 passed in VMs) |
-| #29 Stream from Play | 264 | H2's stream on a Steam Deck, M3 (the rest passed in VMs) |
+| #29 Stream from Play | 264 | S3 on a Steam Deck, M3 (the rest passed in VMs) |
 | #30 Settings → Streaming (closed; optional) | 265 | S2, S12 |
 | #31 Update, repair, remove (closed; optional) | 266 | L4, L5, W6, W7, S13, S14 |
 | #32 Pairing through sync (closed; optional) | 267 | S15 |

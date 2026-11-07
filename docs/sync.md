@@ -1450,7 +1450,7 @@ Linux, Windows and macOS, each pair of them:
 | Pair | 1 Pairing, sync | 2 Copy (Wi-Fi / Ethernet) | 3 Nearby downloads | 4 Wake-on-LAN | 5 Share across networks | 6 Offline | Date, notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Linux ↔ Windows | KVM guests, internet on | QEMU LAN: 23 MB/s, no Wi-Fi or Ethernet | — | Linux only, 6 Nov | — | — | 2026-11-07, not physical machines; see the sections below |
-| Linux ↔ macOS | — | — | — | — | — | — | Not run yet |
+| Linux ↔ macOS | — | — | — | — | Mac to Linux, core only | — | 2026-11-07: a GitHub macOS runner shared with this PC, `Direct`, 256 MiB, and a stop failed the copy at 27 MB. No app, no other step |
 | Windows ↔ macOS | — | — | — | — | — | — | Not run yet |
 
 Step 5 between two real networks (`scripts/across-networks.sh`, 2026-11-07): a
