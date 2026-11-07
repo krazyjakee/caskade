@@ -300,12 +300,18 @@ async fn the_endpoint_presents_the_stored_identity_across_restarts() {
 
 #[tokio::test(flavor = "multi_thread")]
 async fn blobs_share_the_endpoint() {
-    let store = iroh_blobs::store::mem::MemStore::new();
-    let blobs = iroh_blobs::BlobsProtocol::new(&store, None);
+    use caskade_sync::copy::{CopyGate, CopyStore};
+    let temp = tempfile::tempdir().unwrap();
+    let game = temp.path().join("game");
+    std::fs::create_dir_all(&game).unwrap();
+    std::fs::write(game.join("game.bin"), b"caskade").unwrap();
+    let store_dir = temp.path().join("send");
+    let store = CopyStore::open(&store_dir).await.unwrap();
+    let gate = CopyGate::default();
     let (tx, _rx) = mpsc::unbounded_channel();
     let server = SyncEndpoint::bind(
         Config {
-            blobs: Some(blobs),
+            blobs: Some(store.protocol(&gate)),
             ..Config::loopback()
         },
         Arc::new(Nobody),
@@ -313,22 +319,23 @@ async fn blobs_share_the_endpoint() {
     )
     .await
     .unwrap();
+    // Serving opens nothing until a device asks.
+    assert!(!store_dir.join("blobs.db").exists());
     let (client, _) = bind(Arc::new(Nobody)).await;
 
-    let tag = store.add_slice(b"caskade").await.unwrap();
-    let downloaded = iroh_blobs::store::mem::MemStore::new();
+    let offered = store.offer(&game, "offer", |_, _| {}).await.unwrap();
+    gate.allow(client.id(), &offered.root).unwrap();
+    let received = CopyStore::open(&temp.path().join("receive")).await.unwrap();
     let connection = client
         .endpoint()
         .connect(server.addr(), iroh_blobs::ALPN)
         .await
         .expect("the server speaks iroh-blobs on the same endpoint");
-    downloaded
-        .remote()
-        .fetch(connection, tag.hash)
+    received
+        .fetch(connection, &offered.root, "fetch", |_| {})
         .await
         .unwrap();
-    assert_eq!(
-        downloaded.get_bytes(tag.hash).await.unwrap().as_ref(),
-        b"caskade"
-    );
+    let target = temp.path().join("placed");
+    received.export_copy(&offered.root, &target).await.unwrap();
+    assert_eq!(std::fs::read(target.join("game.bin")).unwrap(), b"caskade");
 }

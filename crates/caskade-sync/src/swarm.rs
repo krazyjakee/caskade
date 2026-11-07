@@ -151,7 +151,7 @@ pub async fn fetch_from(
     dialer.know(providers);
     let content = HashAndFormat::hash_seq(root);
     store.settle(content).await.map_err(swarm_error)?;
-    let blobs = store.blobs();
+    let blobs = store.blobs().await.map_err(swarm_error)?;
     // Kept from the start, so a stopped fetch keeps what arrived.
     blobs.tags().set(tag, content).await.map_err(swarm_error)?;
     let downloader = blobs.downloader(&dialer.endpoint);

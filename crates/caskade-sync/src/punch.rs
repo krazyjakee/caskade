@@ -30,7 +30,7 @@ use iroh::endpoint::{Builder, PortmapperConfig, presets};
 use iroh::protocol::Router;
 use iroh::{Endpoint, EndpointAddr, EndpointId, RelayMode, TransportAddr, Watcher as _};
 
-use crate::copy::{BlobsProtocol, OnRouter};
+use crate::copy::{CopyProtocol, OnRouter};
 use crate::endpoint::Relays;
 use crate::error::{Error, Result};
 use crate::identity::Identity;
@@ -147,7 +147,7 @@ impl FileServer {
     pub async fn bind(
         identity: &Identity,
         open: &OpenPort,
-        blobs: BlobsProtocol,
+        blobs: CopyProtocol,
         peer: EndpointId,
         theirs: &[SocketAddr],
     ) -> Result<Self> {

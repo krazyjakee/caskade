@@ -142,9 +142,13 @@ const COLLECT_EVERY: std::time::Duration = std::time::Duration::from_secs(10);
 /// collected every few seconds. A fetch of such a collection waits for that
 /// first ([`CopyStore::settle`]), since the store would read the moved
 /// files as its own.
+///
+/// The store opens on first use: iroh-blobs gives each one a runtime with a
+/// thread per core, which a device that never copies a game shouldn't keep.
 #[derive(Debug, Clone)]
 pub struct CopyStore {
-    store: FsStore,
+    opened: Arc<tokio::sync::OnceCell<FsStore>>,
+    dir: PathBuf,
     /// Counts collections started.
     collections: Arc<tokio::sync::watch::Sender<u64>>,
     every: std::time::Duration,
@@ -157,26 +161,42 @@ impl CopyStore {
     }
 
     /// [`open`](Self::open), collecting what no tag keeps every `every`.
+    /// The store itself opens on first use.
     pub async fn open_collecting(dir: &Path, every: std::time::Duration) -> Result<Self> {
         std::fs::create_dir_all(dir).map_err(store_error)?;
-        let collections = Arc::new(tokio::sync::watch::channel(0u64).0);
-        let started = collections.clone();
-        let mut options = StoreOptions::new(dir);
-        options.gc = Some(GcConfig {
-            interval: every,
-            add_protected: Some(Arc::new(move |_: &mut HashSet<Hash>| {
-                started.send_modify(|count| *count += 1);
-                Box::pin(async { ProtectOutcome::Continue })
-            })),
-        });
-        let store = FsStore::load_with_opts(dir.join("blobs.db"), options)
-            .await
-            .map_err(store_error)?;
         Ok(Self {
-            store,
-            collections,
+            opened: Arc::default(),
+            dir: dir.to_path_buf(),
+            collections: Arc::new(tokio::sync::watch::channel(0u64).0),
             every,
         })
+    }
+
+    /// The iroh-blobs store, opened the first time it's asked for.
+    async fn store(&self) -> Result<&FsStore> {
+        self.opened
+            .get_or_try_init(|| async {
+                let started = self.collections.clone();
+                let mut options = StoreOptions::new(&self.dir);
+                options.gc = Some(GcConfig {
+                    interval: self.every,
+                    add_protected: Some(Arc::new(move |_: &mut HashSet<Hash>| {
+                        started.send_modify(|count| *count += 1);
+                        Box::pin(async { ProtectOutcome::Continue })
+                    })),
+                });
+                FsStore::load_with_opts(self.dir.join("blobs.db"), options)
+                    .await
+                    .map_err(store_error)
+            })
+            .await
+    }
+
+    /// Closes the store, if it was ever opened.
+    pub async fn shutdown(&self) {
+        if let Some(store) = self.opened.get() {
+            let _ = store.shutdown().await;
+        }
     }
 
     /// Waits until what an earlier transfer of `content` left behind is
@@ -188,7 +208,8 @@ impl CopyStore {
         // Only the store's records: opening the leftovers would read moved
         // files as the store's own, which spoils them for good.
         let status = self
-            .store
+            .store()
+            .await?
             .blobs()
             .status(content.hash)
             .await
@@ -196,7 +217,13 @@ impl CopyStore {
         if matches!(status, iroh_blobs::api::blobs::BlobStatus::NotFound) {
             return Ok(());
         }
-        let mut tags = self.store.tags().list().await.map_err(store_error)?;
+        let mut tags = self
+            .store()
+            .await?
+            .tags()
+            .list()
+            .await
+            .map_err(store_error)?;
         while let Some(tag) = tags.next().await {
             if tag.map_err(store_error)?.hash_and_format() == content {
                 return Ok(());
@@ -237,7 +264,8 @@ impl CopyStore {
         let mut kept = Vec::with_capacity(files.len());
         for (path, name, size) in files {
             let tag = self
-                .store
+                .store()
+                .await?
                 .blobs()
                 .add_path_with_opts(AddPathOptions {
                     path,
@@ -253,8 +281,12 @@ impl CopyStore {
             progress(done, total);
         }
         let count = collection.len() as u64;
-        let root = collection.store(&self.store).await.map_err(store_error)?;
-        self.store
+        let root = collection
+            .store(self.store().await?)
+            .await
+            .map_err(store_error)?;
+        self.store()
+            .await?
             .tags()
             .set(tag, root.hash_and_format())
             .await
@@ -269,8 +301,8 @@ impl CopyStore {
 
     /// The iroh-blobs store, for this crate's other transfers (shares'
     /// swarm, #249).
-    pub(crate) fn blobs(&self) -> &FsStore {
-        &self.store
+    pub(crate) async fn blobs(&self) -> Result<&FsStore> {
+        self.store().await
     }
 
     /// Bytes of the collection `root` this store has, verified.
@@ -278,7 +310,8 @@ impl CopyStore {
         let root = parse(root)?;
         self.settle(HashAndFormat::hash_seq(root)).await?;
         let local = self
-            .store
+            .store()
+            .await?
             .remote()
             .local(HashAndFormat::hash_seq(root))
             .await
@@ -300,12 +333,18 @@ impl CopyStore {
         let content = HashAndFormat::hash_seq(root);
         self.settle(content).await?;
         // Kept from the start, so a cancelled fetch keeps what arrived.
-        self.store
+        self.store()
+            .await?
             .tags()
             .set(tag, content)
             .await
             .map_err(store_error)?;
-        let mut items = self.store.remote().fetch(connection, content).stream();
+        let mut items = self
+            .store()
+            .await?
+            .remote()
+            .fetch(connection, content)
+            .stream();
         while let Some(item) = items.next().await {
             match item {
                 GetProgressItem::Progress(bytes) => progress(bytes),
@@ -318,13 +357,14 @@ impl CopyStore {
 
     /// The files of the collection `root`: names and sizes.
     pub async fn files(&self, root: &str) -> Result<Vec<(String, u64)>> {
-        let collection = Collection::load(parse(root)?, self.store.as_ref())
+        let collection = Collection::load(parse(root)?, self.store().await?.as_ref())
             .await
             .map_err(store_error)?;
         let mut files = Vec::new();
         for (name, hash) in collection.iter() {
             let size = self
-                .store
+                .store()
+                .await?
                 .remote()
                 .local(HashAndFormat::raw(*hash))
                 .await
@@ -348,7 +388,7 @@ impl CopyStore {
     }
 
     async fn export_as(&self, root: &str, target: &Path, mode: ExportMode) -> Result<()> {
-        let collection = Collection::load(parse(root)?, self.store.as_ref())
+        let collection = Collection::load(parse(root)?, self.store().await?.as_ref())
             .await
             .map_err(store_error)?;
         for (name, hash) in collection.iter() {
@@ -357,7 +397,8 @@ impl CopyStore {
             if let Some(parent) = path.parent() {
                 std::fs::create_dir_all(parent).map_err(store_error)?;
             }
-            self.store
+            self.store()
+                .await?
                 .blobs()
                 .export_with_opts(ExportOptions {
                     hash: *hash,
@@ -375,12 +416,52 @@ impl CopyStore {
 
     /// Lets go of what `tag` kept; the store cleans it up later.
     pub async fn release(&self, tag: &str) -> Result<()> {
-        self.store.tags().delete(tag).await.map_err(store_error)?;
+        self.store()
+            .await?
+            .tags()
+            .delete(tag)
+            .await
+            .map_err(store_error)?;
         Ok(())
     }
 
     /// Serves what `gate` allows, to whom it allows it.
-    pub fn protocol(&self, gate: &CopyGate) -> BlobsProtocol {
+    pub fn protocol(&self, gate: &CopyGate) -> CopyProtocol {
+        CopyProtocol {
+            store: self.clone(),
+            gate: gate.clone(),
+            made: Arc::default(),
+        }
+    }
+}
+
+/// What a router serves a [`CopyStore`]'s copies with
+/// ([`CopyStore::protocol`]). The store opens, and its provider starts, when
+/// the first device connects.
+#[derive(Debug, Clone)]
+pub struct CopyProtocol {
+    store: CopyStore,
+    gate: CopyGate,
+    made: Arc<tokio::sync::OnceCell<BlobsProtocol>>,
+}
+
+impl CopyProtocol {
+    /// The store this serves.
+    pub fn store(&self) -> &CopyStore {
+        &self.store
+    }
+
+    async fn provider(&self) -> Result<&BlobsProtocol> {
+        self.made
+            .get_or_try_init(|| async {
+                let store = self.store.store().await?;
+                Ok(self.serving(store))
+            })
+            .await
+    }
+
+    fn serving(&self, store: &FsStore) -> BlobsProtocol {
+        let gate = &self.gate;
         let mask = EventMask {
             connected: ConnectMode::Intercept,
             get: RequestMode::InterceptLog,
@@ -393,19 +474,20 @@ impl CopyStore {
         };
         let (events, receiver) = EventSender::channel(64, mask);
         tokio::spawn(gate.clone().serve(receiver));
-        BlobsProtocol::new(&self.store, Some(events))
+        BlobsProtocol::new(store, Some(events))
     }
 }
 
-/// [`BlobsProtocol`] for a router that closes while the store goes on. Its own
-/// handler shuts the whole store down with the router, and the store outlives
-/// every endpoint and every transfer's port.
+/// [`CopyProtocol`] for a router that closes while the store goes on.
+/// [`BlobsProtocol`]'s own handler shuts the whole store down with the
+/// router, and the store outlives every endpoint and every transfer's port.
 #[derive(Debug, Clone)]
-pub(crate) struct OnRouter(pub BlobsProtocol);
+pub(crate) struct OnRouter(pub CopyProtocol);
 
 impl ProtocolHandler for OnRouter {
     async fn accept(&self, connection: Connection) -> std::result::Result<(), AcceptError> {
-        self.0.accept(connection).await
+        let provider = self.0.provider().await.map_err(AcceptError::from_err)?;
+        provider.accept(connection).await
     }
 }
 

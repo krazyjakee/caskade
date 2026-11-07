@@ -281,7 +281,7 @@ struct Inner {
     play_handler: OnceLock<Arc<dyn Sessions>>,
     /// Serves the folders offered to other devices (#233), bound with the
     /// endpoint.
-    copy_provider: OnceLock<caskade_sync::copy::BlobsProtocol>,
+    copy_provider: OnceLock<caskade_sync::copy::CopyProtocol>,
     /// Pulls game files with no relay transport (#233), for the current
     /// identity.
     dialer: tokio::sync::Mutex<Option<(EndpointId, caskade_sync::copy::DirectDialer)>>,
@@ -456,7 +456,7 @@ impl Devices {
             let _ = endpoint.shutdown().await;
         }
         if let Some(provider) = self.inner.copy_provider.get() {
-            let _ = provider.store().shutdown().await;
+            provider.store().shutdown().await;
         }
     }
 
@@ -718,7 +718,7 @@ impl Devices {
 
     /// Serves folders offered to other devices (#233). Set before the
     /// endpoint starts: its protocols are fixed when it binds.
-    pub fn set_copy_provider(&self, provider: caskade_sync::copy::BlobsProtocol) {
+    pub fn set_copy_provider(&self, provider: caskade_sync::copy::CopyProtocol) {
         let _ = self.inner.copy_provider.set(provider);
     }
 

@@ -131,7 +131,7 @@ pub struct Config {
     pub open_timeout: Duration,
     /// iroh-blobs on the same endpoint, under `iroh_blobs::ALPN`. Every ALPN
     /// has to be known at bind time: the router is built once.
-    pub blobs: Option<iroh_blobs::BlobsProtocol>,
+    pub blobs: Option<crate::copy::CopyProtocol>,
 }
 
 impl Default for Config {
