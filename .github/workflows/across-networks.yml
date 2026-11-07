@@ -1,0 +1,67 @@
+# The runner's half of scripts/across-networks.sh: a share between this runner
+# and a PC on another network (#17). Run by hand, never on a push.
+name: across-networks
+
+on:
+  workflow_dispatch:
+    inputs:
+      runner:
+        description: The machine that shares
+        type: choice
+        default: ubuntu-24.04
+        options:
+          - ubuntu-24.04
+          - macos-latest
+
+permissions:
+  contents: read
+
+jobs:
+  share:
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: System libraries
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential pkg-config libssl-dev libudev-dev libdbus-1-dev
+      - name: Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: across-networks-${{ runner.os }}
+      - name: Build the tests
+        run: |
+          cargo test -p caskade-core --test it --no-run --message-format=json \
+            | jq -r 'select(.executable != null and .target.name == "it") | .executable' \
+            | tail -1 > binary
+          cat binary
+      - name: Share
+        run: |
+          mkdir links
+          CASKADE_SHARE_LINKS=$PWD/links/links RUST_LOG=warn nohup "$(cat binary)" \
+            --ignored --exact --nocapture across_networks::sharer > sharer.log 2>&1 &
+          echo $! > sharer.pid
+          for _ in $(seq 300); do
+            [ -s links/links ] && break
+            sleep 1
+          done
+          [ -s links/links ] || { cat sharer.log; exit 1; }
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: links
+          path: links/links
+          retention-days: 1
+      - name: Wait for the recipient
+        timeout-minutes: 35
+        run: |
+          tail -f sharer.log &
+          while kill -0 "$(cat sharer.pid)" 2> /dev/null; do sleep 5; done
+          grep -q 'test result: ok' sharer.log

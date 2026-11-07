@@ -1,6 +1,8 @@
 //! Integration tests, compiled as one binary: a change relinks once instead
 //! of once per file. Run one file's tests with `cargo test --test it <file>::`.
 
+#[cfg(all(feature = "net", unix))]
+mod across_networks;
 mod addon_offers;
 mod appimage_env;
 #[cfg(feature = "net")]

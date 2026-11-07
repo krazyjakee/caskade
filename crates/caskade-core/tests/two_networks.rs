@@ -27,7 +27,7 @@ use crate::lan_unplugged::{Peer, pair_by_code};
 
 const INTERNET: Ipv4Addr = Ipv4Addr::new(203, 0, 113, 1);
 const SECOND_HOST: Ipv4Addr = Ipv4Addr::new(203, 0, 113, 9);
-const MIB: usize = 1024 * 1024;
+pub(crate) const MIB: usize = 1024 * 1024;
 /// More than a session's frames and a relay's keepalives come to in a run,
 /// and a sixtieth of the game: a game that passed through the relay shows.
 const RELAY_ALLOWANCE: u64 = MIB as u64;
@@ -112,7 +112,7 @@ fn relay_bytes() -> u64 {
         .expect("a number")
 }
 
-async fn online(device: &Core) {
+pub(crate) async fn online(device: &Core) {
     within("a relay answers", 30, || async {
         device.devices.status().await.this_device.internet == Some(true)
     })
@@ -121,7 +121,7 @@ async fn online(device: &Core) {
 
 /// A Linux game: a program that leaves a mark beside itself when it runs,
 /// and `size` bytes of data.
-async fn add_game(device: &Core, size: usize) -> (String, PathBuf) {
+pub(crate) async fn add_game(device: &Core, size: usize) -> (String, PathBuf) {
     use std::os::unix::fs::PermissionsExt as _;
     let folder = device.dir.path().join("My Games").join("Celeste");
     std::fs::create_dir_all(folder.join("Content")).unwrap();
@@ -156,7 +156,7 @@ async fn add_game(device: &Core, size: usize) -> (String, PathBuf) {
 }
 
 /// Shares `entry` for a week once its files are read: its id and link.
-async fn shared(device: &Core, entry: &str) -> (String, String) {
+pub(crate) async fn shared(device: &Core, entry: &str) -> (String, String) {
     let share = device.shares.share(entry, ShareExpiry::Week).await.unwrap();
     within("the share's files are read", 60, || async {
         let shares = device.shares.list().await.unwrap();
@@ -170,7 +170,7 @@ async fn shared(device: &Core, entry: &str) -> (String, String) {
 }
 
 /// Follows `job` until it ends or `wait` passes, logging what it says.
-async fn follow(device: &Core, job: &str, wait: Duration) -> JobSnapshot {
+pub(crate) async fn follow(device: &Core, job: &str, wait: Duration) -> JobSnapshot {
     let started = Instant::now();
     let mut last = String::new();
     loop {
@@ -190,7 +190,7 @@ async fn follow(device: &Core, job: &str, wait: Duration) -> JobSnapshot {
 }
 
 /// Plays what `done` installed and checks the program really ran.
-async fn plays(device: &Core, done: &JobSnapshot) {
+pub(crate) async fn plays(device: &Core, done: &JobSnapshot) {
     let game = done.game_id.as_ref().expect("a game");
     let entries = device.store.entries_for_game(game).await.unwrap();
     let copy = entries
