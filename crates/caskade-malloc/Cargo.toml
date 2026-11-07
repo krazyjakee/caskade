@@ -1,0 +1,15 @@
+[package]
+name = "caskade-malloc"
+version = "0.1.0"
+description = "Caps glibc's malloc arenas, so short bursts of work don't stay resident"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+# Not the workspace lints: they forbid `unsafe_code`, and `mallopt` is a
+# foreign call. The crate denies unsafe code itself and allows it once.
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
+
+[target.'cfg(all(target_os = "linux", target_env = "gnu"))'.dependencies]
+libc = "0.2"
