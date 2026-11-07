@@ -39,17 +39,9 @@ pub(super) async fn open(path: &Path) -> Result<SqlitePool> {
 }
 
 pub(super) async fn build(dir: &Path, bytes: Vec<u8>) -> Result<u32> {
-    let games = tokio::task::spawn_blocking(move || {
-        let games = manifest::parse(&bytes)?;
-        Ok::<_, crate::Error>((games, bytes))
-    })
-    .await
-    .map_err(|error| super::invalid(error.to_string()))??;
-    let (games, bytes) = games;
     tokio::fs::create_dir_all(dir).await?;
-    let yaml = tokio::fs::File::create(dir.join("manifest.yaml")).await?;
     use tokio::io::AsyncWriteExt;
-    let mut yaml = yaml;
+    let mut yaml = tokio::fs::File::create(dir.join("manifest.yaml")).await?;
     yaml.write_all(&bytes).await?;
     yaml.sync_all().await?;
     drop(yaml);
@@ -65,14 +57,27 @@ pub(super) async fn build(dir: &Path, bytes: Vec<u8>) -> Result<u32> {
     use sqlx::Connection;
     let mut tx = db.begin().await?;
     sqlx::raw_sql(SCHEMA).execute(&mut *tx).await?;
+    // Read a game at a time, each written as it comes (#280's memory: the
+    // whole manifest parsed at once took 600 MB).
+    let (sender, mut games) = tokio::sync::mpsc::channel::<(String, Game)>(64);
+    let reading = tokio::task::spawn_blocking(move || {
+        manifest::each_game(&bytes, |title, game| {
+            sender
+                .blocking_send((title, game))
+                .map_err(|_| super::invalid("the save manifest's index stopped"))
+        })
+    });
+    // Every title and its alias, for the names: games themselves aren't kept.
+    let mut aliases = std::collections::BTreeMap::new();
     let mut count = 0;
-    for (title, game) in &games {
+    while let Some((title, game)) = games.recv().await {
+        aliases.insert(title.clone(), game.alias.clone());
         if game.alias.is_some() {
             continue;
         }
         sqlx::query("INSERT INTO games(title,data) VALUES(?,?)")
-            .bind(title)
-            .bind(serde_json::to_string(game)?)
+            .bind(&title)
+            .bind(serde_json::to_string(&game)?)
             .execute(&mut *tx)
             .await?;
         count += 1;
@@ -84,15 +89,18 @@ pub(super) async fn build(dir: &Path, bytes: Vec<u8>) -> Result<u32> {
                 sqlx::query("INSERT OR IGNORE INTO ids(store,id,title) VALUES(?,?,?)")
                     .bind(store)
                     .bind(id.to_string())
-                    .bind(title)
+                    .bind(&title)
                     .execute(&mut *tx)
                     .await?;
             }
         }
     }
-    for title in games.keys() {
+    reading
+        .await
+        .map_err(|error| super::invalid(error.to_string()))??;
+    for title in aliases.keys() {
         // Ignore unresolved/cyclic aliases, as Ludusavi's loose schema does.
-        if let Some(target) = manifest::target(&games, title) {
+        if let Some(target) = manifest::target(&aliases, title) {
             sqlx::query("INSERT OR IGNORE INTO names(name,title) VALUES(?,?)")
                 .bind(normalized(title))
                 .bind(target)

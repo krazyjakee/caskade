@@ -74,12 +74,74 @@ pub(super) fn parse(bytes: &[u8]) -> Result<BTreeMap<String, Game>> {
     Ok(games)
 }
 
-pub(super) fn target<'a>(games: &'a BTreeMap<String, Game>, title: &'a str) -> Option<&'a str> {
+/// Each game of a manifest in turn, as [`parse`] reads them, without the
+/// whole manifest in memory at once: parsed whole, Ludusavi's 17 MB manifest
+/// took 600 MB. It is one mapping with a game's title at the start of each
+/// top-level line, so each game is read from its own lines. Errors as
+/// [`parse`] does; `each` is called with games read so far before then.
+pub(super) fn each_game(
+    bytes: &[u8],
+    mut each: impl FnMut(String, Game) -> Result<()>,
+) -> Result<()> {
+    let mut any = false;
+    for lines in top_level(bytes) {
+        let games: BTreeMap<String, Game> = serde_yaml_ng::from_slice(lines)
+            .map_err(|error| super::invalid(format!("invalid Ludusavi manifest: {error}")))?;
+        for (title, mut game) in games {
+            if title.trim().is_empty() {
+                return Err(super::invalid("empty Ludusavi game title"));
+            }
+            game.title.clone_from(&title);
+            any = true;
+            each(title, game)?;
+        }
+    }
+    if !any {
+        return Err(super::invalid("empty Ludusavi manifest"));
+    }
+    Ok(())
+}
+
+/// A YAML mapping's entries, split where a line starts with neither space,
+/// tab nor `#`: each begins with its key, and the lines after it, until the
+/// next such line, hold its value. The document marker is left out.
+fn top_level(bytes: &[u8]) -> Vec<&[u8]> {
+    let mut starts = Vec::new();
+    let mut offset = 0;
+    for line in bytes.split_inclusive(|byte| *byte == b'\n') {
+        let begins = !matches!(
+            line.first(),
+            None | Some(b' ' | b'\t' | b'#' | b'\r' | b'\n')
+        );
+        if begins {
+            starts.push(offset);
+        }
+        offset += line.len();
+    }
+    starts.push(bytes.len());
+    starts
+        .windows(2)
+        .map(|pair| &bytes[pair[0]..pair[1]])
+        .filter(|lines| !is_marker(lines))
+        .collect()
+}
+
+/// `---` or `...` alone on its line.
+fn is_marker(lines: &[u8]) -> bool {
+    let text = lines.trim_ascii();
+    text == b"---" || text == b"..."
+}
+
+/// The game `title` names, following aliases (`aliases`: each title's, if
+/// any). None for an alias that leads nowhere or round in a circle.
+pub(super) fn target<'a>(
+    aliases: &'a BTreeMap<String, Option<String>>,
+    title: &'a str,
+) -> Option<&'a str> {
     let mut title = title;
     let mut seen = BTreeSet::new();
     while seen.insert(title) {
-        let game = games.get(title)?;
-        match &game.alias {
+        match aliases.get(title)? {
             Some(alias) => title = alias,
             None => return Some(title),
         }
@@ -113,4 +175,70 @@ pub(super) fn merge_secondary(primary: &Game, secondary: Game) -> Game {
     result.id.extra.extend(secondary.id.extra);
     result.extra.extend(secondary.extra);
     result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn games(bytes: &[u8]) -> Result<Vec<(String, Game)>> {
+        let mut games = Vec::new();
+        each_game(bytes, |title, game| {
+            games.push((title, game));
+            Ok(())
+        })?;
+        Ok(games)
+    }
+
+    const MANIFEST: &str = r#"---
+# Generated.
+"A: The Game":
+  files:
+    "<base>/save.dat":
+      tags:
+        - save
+  steam:
+    id: 10
+# Between games.
+B Game:
+  alias: "A: The Game"
+'C "quoted"': {steam: {id: 30}, gog: {id: 31}}
+D:
+  registry:
+    HKEY_CURRENT_USER/Software/D:
+      when:
+        - os: windows
+
+      tags: [save]
+  id:
+    steamExtra: [40, 41]
+...
+"#;
+
+    #[test]
+    fn games_one_at_a_time_read_as_the_whole_manifest_does() {
+        let streamed: BTreeMap<String, Game> =
+            games(MANIFEST.as_bytes()).unwrap().into_iter().collect();
+        assert_eq!(streamed, parse(MANIFEST.as_bytes()).unwrap());
+        assert_eq!(
+            streamed.keys().collect::<Vec<_>>(),
+            ["A: The Game", "B Game", "C \"quoted\"", "D"]
+        );
+        assert_eq!(streamed["C \"quoted\""].gog.id, Some(31));
+        assert_eq!(streamed["D"].id.steam_extra, [40, 41]);
+    }
+
+    #[test]
+    fn a_bad_manifest_fails_as_a_whole_one_does() {
+        for bad in [
+            "",
+            "---\n",
+            "# nothing\n",
+            "\"\":\n  steam:\n    id: 1\n",
+            "A:\n  steam: [\n",
+        ] {
+            assert!(games(bad.as_bytes()).is_err(), "{bad:?}");
+            assert!(parse(bad.as_bytes()).is_err(), "{bad:?}");
+        }
+    }
 }
