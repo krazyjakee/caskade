@@ -215,6 +215,39 @@ async fn a_folder_received_again_after_its_files_moved_arrives_whole() {
     }
 }
 
+/// Connect only directly binds the endpoint again: the store stays, and what
+/// it offered still arrives.
+#[tokio::test(flavor = "multi_thread")]
+async fn a_store_outlives_its_endpoint() {
+    let temp = tempfile::tempdir().unwrap();
+    let folder = temp.path().join("Celeste");
+    game(&folder, 1024 * 1024);
+    let offering = CopyStore::open(&temp.path().join("send")).await.unwrap();
+    let gate = CopyGate::default();
+    let first = sender(&offering, &gate).await;
+    let offered = offering
+        .offer(&folder, "copy/test", |_, _| {})
+        .await
+        .unwrap();
+    first.shutdown().await.unwrap();
+
+    let endpoint = sender(&offering, &gate).await;
+    let receiving = CopyStore::open(&temp.path().join("receive")).await.unwrap();
+    let dialer = DirectDialer::bind(None, true).await.unwrap();
+    gate.allow(dialer.id(), &offered.root).unwrap();
+    let connection = dialer
+        .connect(endpoint.id(), &direct(&endpoint))
+        .await
+        .unwrap();
+    receiving
+        .fetch(connection, &offered.root, "copy/in", |_| {})
+        .await
+        .unwrap();
+    let target = temp.path().join("installed");
+    receiving.export(&offered.root, &target).await.unwrap();
+    same_tree(&folder, &target);
+}
+
 /// What `gate` counted for `peer`, once a closed connection's last progress
 /// has come in.
 async fn settled(gate: &CopyGate, peer: EndpointId, root: &str) -> u64 {

@@ -449,11 +449,14 @@ impl Devices {
         })
     }
 
-    /// Closes the endpoint. Call at exit.
+    /// Closes the endpoint and the store it served. Call at exit.
     pub async fn shutdown(&self) {
         let endpoint = self.inner.lock().endpoint.take();
         if let Some(endpoint) = endpoint {
             let _ = endpoint.shutdown().await;
+        }
+        if let Some(provider) = self.inner.copy_provider.get() {
+            let _ = provider.store().shutdown().await;
         }
     }
 

@@ -421,7 +421,7 @@ impl SyncEndpoint {
             },
         );
         if let Some(blobs) = config.blobs {
-            builder = builder.accept(iroh_blobs::ALPN, blobs);
+            builder = builder.accept(iroh_blobs::ALPN, crate::copy::OnRouter(blobs));
         }
         Ok(Self {
             router: builder.spawn(),

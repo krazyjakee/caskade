@@ -85,4 +85,20 @@ async fn a_folder_arrives_on_ports_of_the_transfers_own() {
     );
     server.close().await;
     dialer.close().await;
+
+    // The store outlives the port: the next transfer is served from it.
+    let (near, far) = (port(), port());
+    let (dialer, addrs) = DirectDialer::bind_on(&friend, &near).await.unwrap();
+    let server = FileServer::bind(&desk, &far, offering.protocol(&gate), friend.id(), &addrs)
+        .await
+        .unwrap();
+    gate.allow(dialer.id(), &offered.root).unwrap();
+    let again = CopyStore::open(&temp.path().join("again")).await.unwrap();
+    let connection = dialer.connect(desk.id(), &server.addrs()).await.unwrap();
+    again
+        .fetch(connection, &offered.root, "copy/again", |_| {})
+        .await
+        .unwrap();
+    server.close().await;
+    dialer.close().await;
 }

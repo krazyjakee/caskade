@@ -30,7 +30,7 @@ use iroh::endpoint::{Builder, PortmapperConfig, presets};
 use iroh::protocol::Router;
 use iroh::{Endpoint, EndpointAddr, EndpointId, RelayMode, TransportAddr, Watcher as _};
 
-use crate::copy::BlobsProtocol;
+use crate::copy::{BlobsProtocol, OnRouter};
 use crate::endpoint::Relays;
 use crate::error::{Error, Result};
 use crate::identity::Identity;
@@ -154,7 +154,7 @@ impl FileServer {
         let endpoint = bind_again(|| on_port(identity, open.port)).await?;
         let addrs = addrs_of(&endpoint, open).await;
         let router = Router::builder(endpoint.clone())
-            .accept(iroh_blobs::ALPN, blobs)
+            .accept(iroh_blobs::ALPN, OnRouter(blobs))
             .spawn();
         let theirs = theirs.iter().take(MAX_KNOCKED);
         let target = EndpointAddr::from_parts(peer, theirs.map(|addr| TransportAddr::Ip(*addr)));

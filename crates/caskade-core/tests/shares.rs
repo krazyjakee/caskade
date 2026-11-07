@@ -358,6 +358,23 @@ async fn stopping_a_share_fails_its_link_at_once_also_part_way() {
     assert!(desk.shares.list().await.unwrap().is_empty());
 }
 
+/// Two links to one game: stopping one leaves the other working, though they
+/// share most of their files.
+#[tokio::test(flavor = "multi_thread")]
+async fn stopping_one_share_leaves_another_of_the_same_game_alone() {
+    let desk = core("Desk").await;
+    let friend = core("Friend's PC").await;
+    let (entry, folder) = add_celeste(&desk, 8 * 1024 * 1024).await;
+    let (first, _) = shared(&desk, &entry).await;
+    std::fs::write(folder.join("second.bin"), "the second share").unwrap();
+    let (_, link) = shared(&desk, &entry).await;
+
+    desk.shares.stop(&first).await.unwrap();
+    let job = friend.shares.receive(&link, None).await.unwrap();
+    let done = finished(&friend.install, &job.id).await;
+    assert_eq!(done.status, JobStatus::Completed, "{done:?}");
+}
+
 /// A sharer reached only through a relay always offers addresses of its
 /// own, and those say nothing about reaching it: the session decides, the
 /// job says so and no game comes. `scripts/two-networks.sh` has it behind

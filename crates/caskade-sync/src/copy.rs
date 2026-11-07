@@ -27,6 +27,7 @@ use std::sync::{Arc, Mutex};
 
 use futures_util::StreamExt as _;
 pub use iroh::endpoint::Connection;
+use iroh::protocol::{AcceptError, ProtocolHandler};
 use iroh::{Endpoint, EndpointAddr, EndpointId, RelayMode, TransportAddr, endpoint::presets};
 use iroh_blobs::api::blobs::{AddPathOptions, ExportMode, ExportOptions, ImportMode};
 use iroh_blobs::api::remote::GetProgressItem;
@@ -393,6 +394,18 @@ impl CopyStore {
         let (events, receiver) = EventSender::channel(64, mask);
         tokio::spawn(gate.clone().serve(receiver));
         BlobsProtocol::new(&self.store, Some(events))
+    }
+}
+
+/// [`BlobsProtocol`] for a router that closes while the store goes on. Its own
+/// handler shuts the whole store down with the router, and the store outlives
+/// every endpoint and every transfer's port.
+#[derive(Debug, Clone)]
+pub(crate) struct OnRouter(pub BlobsProtocol);
+
+impl ProtocolHandler for OnRouter {
+    async fn accept(&self, connection: Connection) -> std::result::Result<(), AcceptError> {
+        self.0.accept(connection).await
     }
 }
 
