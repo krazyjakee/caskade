@@ -82,7 +82,7 @@ retrying until restart (seen after a VM paused for hours, whose clock then jumpe
 The same PC, the two Ubuntu guests and Windows Server, in release builds, plus
 Windows 10 Enterprise Evaluation (a client edition, 90 days, `win10.qcow2` in
 the VM lab) and, for the shares, a GitHub runner in a data centre. Enough for
-the issues closed on them: #11, #14, #17 and #26.
+the issues closed on them: #9, #11, #14, #17 and #26.
 
 | Check | Result |
 | --- | --- |
@@ -96,12 +96,26 @@ the issues closed on them: #11, #14, #17 and #26.
 | S11 | Passed: hosting off left ViGEmBus running, hosting on again didn't reinstall it (Windows Installer's log shows one install), and the pad and rumble worked |
 | W3's ViGEmBus note | Passed on a PC that never had it: installed silently in the one UAC prompt, running, no window |
 
+| N4 | Passed: an unrated game asked of a limited account waited for the admin's PIN on the target, then started |
+| WK1 | Passed with the limited account signed in on the sleeping host: real S3, real magic packet, the PIN asked there, then "Started on lanhost" |
+| S3 | No client window before or after: the game menu and quick look on Cinnamon, the page on GNOME Shell and KDE Plasma (all X11 on Xvfb, llvmpipe), and quick look and page on a Windows 10 client. Frame-by-frame on each. Not every button on every desktop |
+| S4 | On a Windows 10 client too, with a pad alone: stream, guide, End stream, the game stopped on the host. The guide here was Select + Start on a virtual XInput pad; the Xbox button itself wasn't tried |
+| SV1 | Passed: a user with `sv_SE.UTF-8` in a Cinnamon session, fresh install: setup, both shells, every view, all 17 Settings tabs in console mode, tray, the feed's notification, a core error |
+| SV2 | Passed: English at once, tray included, no restart |
+
 Found and fixed: iroh-blobs' handler shut the whole copy store down with its
 router, so after the first transfer through two routers, or a change to Connect
 only directly, a device served no more copies or shares until it restarted.
 Windows' add-game dialog said a Windows program runs through a compatibility
 tool. A full disk named what was short in bytes. Games from a streaming host
-were listed in the notification under their raw source id.
+were listed in the notification under their raw source id. Under GNOME the
+client's window opened beneath Caskade's always-on-top one, and the Shell said
+"Moonlight is ready". On Windows a firewall prompt named Moonlight, a pad did
+nothing at all (Windows Gaming Input sends nothing behind WebView2, so gilrs now
+uses XInput, and DualSense and other non-XInput pads need Steam Input or the
+like there), the guide button never reached Caskade over a game, the guide menu
+stayed under a stream, and helper programs flashed console windows. A paired
+host's games waited up to ten minutes, and Look again didn't look.
 
 `scripts/across-networks.sh` runs T1 and T2 at the core, sharing from a GitHub
 runner (`.github/workflows/across-networks.yml`) so this PC's address stays out
@@ -503,7 +517,7 @@ Tick or decide these on the issue itself:
 | Issue | Gitea | Checks |
 | --- | --- | --- |
 | #8 Library, store and plugin milestone | 194 | A1, A2, A3, L2, L7 |
-| #9 Localization | 221 | L1, SV1, SV2 |
+| #9 Localization (closed; optional) | 221 | L1, SV1, SV2 |
 | #10 Local network first (closed; optional) | 225 | O4, O5, O6 |
 | #11 Copy a game (closed; optional) | 233 | N1, N2, WL1, T3 |
 | #12 Play on another device (closed; optional) | 234 | N3, N4, WK1 |
