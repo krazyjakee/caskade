@@ -650,7 +650,10 @@ for a fresh install to restore from.
 
 - Every 2 seconds it captures this device's changes, and exchanges with every
   paired device when there are any, so a change reaches a device on the same
-  network within seconds.
+  network within seconds. A capture reads every synced table, so it runs only
+  when the library was written since the last one (`LibraryStore::writes`,
+  counted by an SQLite update hook that leaves out sync's own bookkeeping
+  tables), and otherwise every 5 minutes, for writes by another process.
 - It also exchanges when a paired device is found on this network (mDNS), and
   whenever a paired device connects.
 - Otherwise it polls each device a minute after a sync, backing off from 30

@@ -61,6 +61,7 @@ mod sync_carried;
 mod sync_copies;
 mod sync_data;
 mod sync_log;
+mod writes;
 pub use sync_accounts::is_marker as is_stand_in_marker;
 pub use sync_artwork::SyncedArtwork;
 pub use sync_copies::{AnnouncedCopy, CopyLocation, PEER_PREFIX, PeerCopyRecord, this_os};
@@ -143,6 +144,8 @@ mod opening_tests;
 #[derive(Debug, Clone)]
 pub struct LibraryStore {
     pub(super) pool: SqlitePool,
+    /// Rows written, for skipping work when nothing changed.
+    writes: Arc<writes::Writes>,
     /// Titles' order in the language (#218), as the `caskade_title`
     /// collation sorts them.
     titles: Arc<collation::TitleOrder>,
@@ -175,12 +178,17 @@ impl LibraryStore {
             .busy_timeout(Duration::from_secs(5))
             .disable_statement_logging()
             .collation(collation::TITLE, move |a, b| order.compare(a, b));
-        let pool = SqlitePoolOptions::new()
+        let writes = Arc::default();
+        let pool = writes::counting(SqlitePoolOptions::new(), &writes)
             .max_connections(4)
             .connect_lazy_with(options);
         let migrate = async { Ok(MIGRATOR.run(&pool).await?) };
         opening.open(&pool, before, migrate).await?;
-        Ok(Self { pool, titles })
+        Ok(Self {
+            pool,
+            writes,
+            titles,
+        })
     }
     /// The library, waited for as `Opening::PATIENT` allows.
     pub async fn open_default(paths: &AppPaths) -> Result<Self> {
@@ -214,7 +222,8 @@ impl LibraryStore {
         let titles = Arc::new(collation::TitleOrder::new(language));
         let order = titles.clone();
         let options = options.collation(collation::TITLE, move |a, b| order.compare(a, b));
-        let pool = SqlitePoolOptions::new()
+        let writes = Arc::default();
+        let pool = writes::counting(SqlitePoolOptions::new(), &writes)
             .max_connections(max)
             .connect_with(options)
             .await?;
@@ -222,7 +231,11 @@ impl LibraryStore {
             pool.close().await;
             return Err(error.into());
         }
-        Ok(Self { pool, titles })
+        Ok(Self {
+            pool,
+            writes,
+            titles,
+        })
     }
     pub async fn close(&self) {
         self.pool.close().await;

@@ -28,8 +28,13 @@ use crate::db::LibraryStore;
 use crate::devices::{ConnectionPurpose, DeviceSession, DeviceSync, Devices};
 use crate::settings::SettingsService;
 
-/// How often this device's changes are captured.
+/// How often this device's changes are looked for. A capture reads every
+/// synced table, so it runs only when the library was written since the
+/// last one, or after [`RECAPTURE`].
 const CAPTURE: Duration = Duration::from_secs(2);
+/// How long a capture is skipped while nothing is written: another process
+/// can write the library without this one counting it.
+const RECAPTURE: Duration = Duration::from_secs(5 * 60);
 /// How long after a sync a device is polled again.
 const POLL: Duration = Duration::from_secs(60);
 /// The first wait after a failed attempt; it doubles up to [`MAX_BACKOFF`].
@@ -199,16 +204,31 @@ impl Inner {
         let mut next: HashMap<String, Instant> = HashMap::new();
         let mut backoff: HashMap<String, Duration> = HashMap::new();
         let (results, mut finished) = mpsc::unbounded_channel::<(String, bool)>();
+        // The engine, the library's writes and the time of the last capture.
+        let mut captured: Option<(std::sync::Weak<SyncEngine>, u64, Instant)> = None;
         loop {
             let wake = next.values().min().copied();
             let mut now_due: Vec<String> = Vec::new();
             tokio::select! {
                 _ = capture.tick() => {
                     let Some(engine) = self.engine() else { continue };
+                    // Read before capturing: a write during it is caught next time.
+                    let writes = engine.store().writes();
+                    if captured.as_ref().is_some_and(|(at_engine, at_writes, at)| {
+                        std::ptr::eq(at_engine.as_ptr(), Arc::as_ptr(&engine))
+                            && *at_writes == writes
+                            && at.elapsed() < RECAPTURE
+                    }) {
+                        continue;
+                    }
                     match engine.capture().await {
-                        // This device changed something: tell everyone.
-                        Ok(count) if count > 0 => now_due.extend(self.paired().await),
-                        Ok(_) => {}
+                        Ok(count) => {
+                            captured = Some((Arc::downgrade(&engine), writes, Instant::now()));
+                            // This device changed something: tell everyone.
+                            if count > 0 {
+                                now_due.extend(self.paired().await);
+                            }
+                        }
                         Err(error) => tracing::warn!(%error, "sync capture failed"),
                     }
                     for device in self.paired().await {
