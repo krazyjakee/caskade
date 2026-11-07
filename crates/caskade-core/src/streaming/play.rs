@@ -292,7 +292,13 @@ impl Streams {
             address.into(),
             app.into(),
             "--display-mode".into(),
-            "fullscreen".into(),
+            // Windows' exclusive full screen stays over Caskade's guide menu.
+            if cfg!(windows) {
+                "borderless"
+            } else {
+                "fullscreen"
+            }
+            .into(),
             // Caskade stops the game itself, without the client's
             // quitting window.
             "--no-quit-after".into(),

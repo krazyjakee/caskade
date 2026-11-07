@@ -139,6 +139,8 @@ pub fn run() {
         // The main window, with its navigation guard (CSK-14), brought back
         // when its webview loses its processes (#3).
         let main = navigation::create_main_window(app.handle())?;
+        #[cfg(windows)]
+        main_window::watch_focus(&main);
         webview_recovery::watch(&main, setup_paths.cache.join("webview-restarts"));
         background::bridge(app.handle().clone());
         let bus = caskade_core::bus::Bus::default();

@@ -12,10 +12,18 @@ default = ["gilrs"]
 gilrs = ["dep:gilrs"]
 
 [dependencies]
-gilrs = { version = "0.11", optional = true }
 serde = { version = "1", features = ["derive"] }
 specta = { version = "=2.0.0-rc.26", features = ["derive"] }
 tracing = "0.1"
+
+[target.'cfg(not(windows))'.dependencies]
+gilrs = { version = "0.11", optional = true }
+
+# Windows Gaming Input, gilrs' default there, sends nothing to a process whose
+# focus is in another's window, and WebView2's is in msedgewebview2.
+[target.'cfg(windows)'.dependencies]
+caskade-xinput = { path = "../caskade-xinput" }
+gilrs = { version = "0.11", optional = true, default-features = false, features = ["xinput"] }
 
 [dev-dependencies]
 serde_json = "1"

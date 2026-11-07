@@ -100,6 +100,77 @@ impl InputService {
         if let Err(error) = started {
             tracing::warn!(%error, "gamepad reader didn't start");
         }
+        #[cfg(windows)]
+        {
+            let sender = lock(&self.inner.sender).clone();
+            let stop = self.inner.stop.clone();
+            let started = std::thread::Builder::new()
+                .name("caskade-guide".into())
+                .spawn(move || guide::watch(&sender, &stop));
+            if let Err(error) = started {
+                tracing::warn!(%error, "guide button reader didn't start");
+            }
+        }
+    }
+}
+
+/// The guide button on Windows while another program has focus, which is
+/// when gilrs hears nothing (`caskade_xinput`). With Caskade focused, gilrs
+/// has the pads.
+#[cfg(windows)]
+mod guide {
+    use crate::{Button, PadId, Raw};
+    use caskade_xinput::{PADS, Reader, focused, wants_guide};
+    use std::{
+        sync::{
+            atomic::{AtomicBool, Ordering},
+            mpsc,
+        },
+        time::Duration,
+    };
+
+    /// Not a pad gilrs numbers.
+    const PAD: PadId = PadId::MAX;
+    const POLL: Duration = Duration::from_millis(50);
+    /// An empty slot makes XInput look for a device, which is slow enough to
+    /// show in a game: those wait this many polls.
+    const EMPTY_EVERY: u32 = 40;
+
+    pub(super) fn watch(sender: &mpsc::Sender<Raw>, stop: &AtomicBool) {
+        let Some(reader) = Reader::new() else {
+            tracing::warn!("this Windows has no XInput: no guide button over games");
+            return;
+        };
+        let mut connected = [false; PADS as usize];
+        let mut held = false;
+        let mut tick = 0u32;
+        while !stop.load(Ordering::Relaxed) {
+            std::thread::sleep(POLL);
+            tick = tick.wrapping_add(1);
+            let wanted = !focused() && {
+                let mut wanted = false;
+                for index in 0..PADS {
+                    let slot = &mut connected[index as usize];
+                    if *slot || tick.is_multiple_of(EMPTY_EVERY) {
+                        let buttons = reader.buttons(index);
+                        *slot = buttons.is_some();
+                        wanted |= buttons.is_some_and(wants_guide);
+                    }
+                }
+                wanted
+            };
+            if wanted != held {
+                held = wanted;
+                let raw = if held {
+                    Raw::Pressed(PAD, Button::Guide)
+                } else {
+                    Raw::Released(PAD, Button::Guide)
+                };
+                if sender.send(raw).is_err() {
+                    return;
+                }
+            }
+        }
     }
 }
 

@@ -1,0 +1,12 @@
+[package]
+name = "caskade-xinput"
+version = "0.1.0"
+description = "XInput's guide button behind a safe API, for pads while another program has focus"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+# Not the workspace lints: they forbid `unsafe_code`, and these are all foreign
+# calls. The crate denies unsafe code itself and allows it call by call.
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"

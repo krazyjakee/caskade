@@ -48,9 +48,10 @@ On Windows 10 or 11 with an Xbox controller (USB or Bluetooth):
 1. Start Caskade and press **View** on the pad: it switches to console mode,
    fullscreen. The glyphs are Xbox's.
 2. Repeat Steam Deck step 2 without Steam.
-3. Guide: launch a game, then press the Xbox button. Caskade comes to the
-   front, or flashes in the taskbar if Windows refuses focus. Note which, and
-   whether the Game Bar takes the button first. Check Return to game and Stop
+3. Guide: launch a game, then press the Xbox button (or Select + Start, which
+   a VM has shown working). Caskade comes to the front, or flashes in the
+   taskbar if Windows refuses focus. Note which, and whether the Game Bar takes
+   the button first. Check Return to game and Stop
    game as in Steam Deck step 4.
 4. Close the window while in console mode, then reopen Caskade. The desktop
    window has its old size and position (window-state), and with **Start in**

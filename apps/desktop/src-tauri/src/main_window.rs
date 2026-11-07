@@ -19,11 +19,62 @@ pub fn raise<R: Runtime>(app: &AppHandle<R>) {
     if let Err(error) = window.show().and_then(|()| window.unminimize()) {
         tracing::warn!(%error, "couldn't raise the main window");
     }
+    #[cfg(windows)]
+    over_topmost(&window);
     #[cfg(target_os = "linux")]
     present(&window);
     // GTK restores a window asynchronously, and tao drops a focus request
     // for a window it still sees minimized: focus once it is back.
     std::thread::spawn(move || focus(&window));
+}
+
+/// How far a raise over another program's topmost window has got.
+#[cfg(windows)]
+static OVER_TOPMOST: std::sync::atomic::AtomicU8 = std::sync::atomic::AtomicU8::new(NOT_OVER);
+#[cfg(windows)]
+const NOT_OVER: u8 = 0;
+/// Topmost, and waiting for focus. A focus change now is the old one's.
+#[cfg(windows)]
+const RAISING: u8 = 1;
+#[cfg(windows)]
+const OVER: u8 = 2;
+
+/// A full-screen client or game is a topmost window on Windows, and an
+/// ordinary window stays beneath it however focused: Caskade goes topmost too,
+/// until [`watch_focus`] sees it lose focus.
+#[cfg(windows)]
+fn over_topmost<R: Runtime>(window: &WebviewWindow<R>) {
+    match window.set_always_on_top(true) {
+        Ok(()) => OVER_TOPMOST.store(RAISING, std::sync::atomic::Ordering::Relaxed),
+        Err(error) => tracing::warn!(%error, "couldn't raise over the game"),
+    }
+}
+
+/// Lets go of topmost when the window that took it loses focus.
+#[cfg(windows)]
+pub fn watch_focus<R: Runtime>(window: &WebviewWindow<R>) {
+    use std::sync::atomic::Ordering::Relaxed;
+    let watched = window.clone();
+    window.on_window_event(move |event| match event {
+        tauri::WindowEvent::Focused(true) => {
+            let _ = OVER_TOPMOST.compare_exchange(RAISING, OVER, Relaxed, Relaxed);
+        }
+        tauri::WindowEvent::Focused(false)
+            if OVER_TOPMOST
+                .compare_exchange(OVER, NOT_OVER, Relaxed, Relaxed)
+                .is_ok() =>
+        {
+            let_go_of_topmost(&watched);
+        }
+        _ => {}
+    });
+}
+
+#[cfg(windows)]
+fn let_go_of_topmost<R: Runtime>(window: &WebviewWindow<R>) {
+    if let Err(error) = window.set_always_on_top(false) {
+        tracing::warn!(%error, "Caskade's window stays on top");
+    }
 }
 
 /// Where the main window is while it's on screen (shown, not minimized):
@@ -128,7 +179,19 @@ fn focus<R: Runtime>(window: &WebviewWindow<R>) {
     if let Err(error) = window.set_focus() {
         tracing::warn!(%error, "couldn't focus the main window");
     }
-    if !settle(|| window.is_focused().unwrap_or(false)) {
+    let focused = settle(|| window.is_focused().unwrap_or(false));
+    // Focus never came, so nothing would end the raise.
+    #[cfg(windows)]
+    if !focused {
+        use std::sync::atomic::Ordering::Relaxed;
+        if OVER_TOPMOST
+            .compare_exchange(RAISING, NOT_OVER, Relaxed, Relaxed)
+            .is_ok()
+        {
+            let_go_of_topmost(window);
+        }
+    }
+    if !focused {
         let _ = window.request_user_attention(Some(tauri::UserAttentionType::Critical));
     }
 }
