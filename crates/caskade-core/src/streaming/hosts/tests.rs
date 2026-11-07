@@ -349,6 +349,21 @@ async fn a_typed_address_is_kept_and_asked() {
 }
 
 #[tokio::test]
+async fn looking_again_asks_a_paired_host_for_its_games_at_once() {
+    let f = fixture(Some(PAIRED)).await;
+    let asked = || {
+        let times = crate::lock(&f.hosts.inner.apps_at);
+        times.values().next().copied().expect("the host was asked")
+    };
+    f.hosts.refresh().await.unwrap();
+    let first = asked();
+    f.hosts.refresh().await.unwrap();
+    assert_eq!(asked(), first, "asked again within apps_every");
+    f.hosts.look_again().await.unwrap();
+    assert!(asked() > first, "a paired device waited for apps_every");
+}
+
+#[tokio::test]
 async fn a_paired_hosts_games_join_the_library_and_leave_with_it() {
     let f = fixture(Some(PAIRED)).await;
     let hades = Game::new("HADES");

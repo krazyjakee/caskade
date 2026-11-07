@@ -495,6 +495,14 @@ impl StreamHosts {
         }
     }
 
+    /// [`refresh`](Self::refresh), asking each paired host for its games now
+    /// and not at the next [`HostTiming::apps_every`]: a device just paired,
+    /// or someone pressed Look again.
+    pub async fn look_again(&self) -> Result<()> {
+        crate::lock(&self.inner.apps_at).clear();
+        self.refresh().await
+    }
+
     /// Looks for hosts once: mDNS, typed addresses and paired hosts, each
     /// asked whether it is there; a paired host's apps go into the library.
     pub async fn refresh(&self) -> Result<()> {

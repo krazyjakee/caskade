@@ -35,14 +35,16 @@ const FLATPAK_STATE: &str = "caskade";
 /// Settings written before every start (§5.2): no warning toasts or
 /// overlays, no Discord presence naming it, its own window at the size
 /// Caskade gives it (full screen, it fills the screen with its "Starting…"
-/// page and a tip about its buttons), and hosts found on the network.
+/// page and a tip about its buttons), and no search of its own.
 pub const QUIET: [(&str, &str); 6] = [
     ("confwarnings", "false"),
     ("connwarnings", "false"),
     ("detectnetblocking", "false"),
     ("richpresence", "false"),
     ("uidisplaymode", "0"),
-    ("mdns", "true"),
+    // Caskade finds hosts itself. The client's own search listens on a port,
+    // and Windows then asks to let "Moonlight" through its firewall.
+    ("mdns", "false"),
 ];
 
 /// The client as Caskade runs it.

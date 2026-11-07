@@ -153,7 +153,7 @@ pub async fn streaming_add_host(
 ) -> Result<Vec<StreamHost>, CommandError> {
     let hosts = hosts.inner().clone();
     hosts.add_address(&address).await.map_err(report)?;
-    hosts.refresh().await.map_err(report)?;
+    hosts.look_again().await.map_err(report)?;
     Ok(hosts.hosts())
 }
 
@@ -385,7 +385,7 @@ pub async fn streaming_pair_with<R: Runtime>(
             .emit(&app);
             // Fetching the host's games can take 25 s, too long to leave
             // someone on "Waiting for…" after the host said yes.
-            let _ = hosts.refresh().await;
+            let _ = hosts.look_again().await;
         })
     };
     drop(pairing);

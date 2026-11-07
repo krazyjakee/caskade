@@ -180,7 +180,7 @@ Moonlight runs in portable mode: a `portable.dat` in its **working directory** m
 - `confwarnings=false`, `connwarnings=false`, `detectnetblocking=false` (no warning toasts or overlays);
 - `richpresence=false` (Windows and macOS builds announce "Moonlight" on Discord otherwise);
 - `uidisplaymode=0` (Moonlight's own window keeps the 1×1 size Caskade gives it. Full screen, it showed its grey "Starting…" page and a button tip for about 1.5 s on a real desktop, 6 Nov 2026);
-- `mdns=true`.
+- `mdns=false`: Caskade finds hosts itself (§6.1), and on Windows the client's own search listening on a port brought up a firewall prompt naming Moonlight (found 7 Nov 2026).
 
 *Unverified:* the Flatpak's working directory (`flatpak run --cwd=` inside `~/.var/app/com.moonlight_stream.Moonlight/`).
 
