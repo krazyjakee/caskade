@@ -283,13 +283,20 @@ pub(crate) fn source_name(source: &str) -> String {
     if let Some(plugin) = source.strip_prefix(crate::bus::PLUGIN_SOURCE_PREFIX) {
         return plugin.to_owned();
     }
-    if source.starts_with("stream:") {
+    if ["stream:", "peer:"]
+        .iter()
+        .any(|prefix| source.starts_with(prefix))
+    {
         return "Other devices".into();
+    }
+    if source.starts_with(crate::store_accounts::SOURCE_PREFIX) {
+        return "Store accounts".into();
     }
     match source {
         "roms" => "ROM folders",
         "web" => "Web games",
         "caskade-storage" | "caskade-handoff" => "Installs",
+        crate::model::MANUAL_SOURCE => "Added by hand",
         "steam" | "steam.shortcuts" => "Steam",
         "gog" | "minigalaxy" => "GOG",
         "epic" | "epic.app" | "legendary" | "rare" => "Epic",
@@ -320,6 +327,8 @@ pub(crate) fn source_text(name: &str) -> Text {
         // Feeds stored before the name was given kept the id.
         "Desktop entries" | "desktop" => crate::msgp!("library source", "Desktop entries").into(),
         "Other devices" => crate::msgp!("library source", "Other devices").into(),
+        "Store accounts" => crate::msgp!("library source", "Store accounts").into(),
+        "Added by hand" | "manual" => crate::msgp!("library source", "Added by hand").into(),
         "Other" => crate::msgp!("library source", "Other").into(),
         other => other.into(),
     }

@@ -3124,6 +3124,16 @@ msgstr ""
 
 #: crates/caskade-core/src/notifications/mod.rs
 msgctxt "library source"
+msgid "Store accounts"
+msgstr ""
+
+#: crates/caskade-core/src/notifications/mod.rs
+msgctxt "library source"
+msgid "Added by hand"
+msgstr ""
+
+#: crates/caskade-core/src/notifications/mod.rs
+msgctxt "library source"
 msgid "Other"
 msgstr ""
 

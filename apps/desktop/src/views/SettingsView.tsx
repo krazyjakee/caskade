@@ -288,7 +288,7 @@ function SettingsContent({ tab: asked }: { tab: SettingsTab }) {
             the section it left from. */}
         <div
           data-focus-section="settings-nav"
-          className="sticky top-0 flex max-h-[calc(100dvh-12rem)] w-40 shrink-0 flex-col gap-2 sm:w-48 lg:w-56"
+          className="sticky top-0 flex max-h-[calc(100dvh-12rem)] w-40 shrink-0 flex-col gap-2 sm:w-48 lg:w-60"
         >
           <SettingsSearch
             query={query}

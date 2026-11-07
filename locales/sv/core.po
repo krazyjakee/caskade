@@ -3126,6 +3126,16 @@ msgstr "Andra enheter"
 
 #: crates/caskade-core/src/notifications/mod.rs
 msgctxt "library source"
+msgid "Store accounts"
+msgstr "Butikskonton"
+
+#: crates/caskade-core/src/notifications/mod.rs
+msgctxt "library source"
+msgid "Added by hand"
+msgstr "Tillagda för hand"
+
+#: crates/caskade-core/src/notifications/mod.rs
+msgctxt "library source"
 msgid "Other"
 msgstr "Övrigt"
 
