@@ -363,13 +363,15 @@ pub fn run() {
                     Ok(hosts) => {
                         // Play streams from them (#264).
                         let handle = app.handle().clone();
+                        let focus = app.handle().clone();
                         launch.set_streamer(std::sync::Arc::new(
                             caskade_core::streaming::play::Streams::new(
                                 client.clone(),
                                 Some(hosts.clone()),
                                 settings.clone(),
                             )
-                            .with_placement(move || main_window::placement(&handle)),
+                            .with_placement(move || main_window::placement(&handle))
+                            .with_activation(move || main_window::activation(&focus)),
                         ));
                         commands::streaming::watch_hosts(app.handle(), hosts, client)
                     }

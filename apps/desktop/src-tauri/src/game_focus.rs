@@ -11,7 +11,8 @@
 //! A stream from another device (#264) shows its client's own window
 //! before the stream's: Caskade's window stays on top of it until the
 //! stream is up, then gets out of the way in either mode, since the
-//! stream's window is already there underneath.
+//! stream's window is already there underneath. GNOME is the exception,
+//! see [`refuses_focus_under_a_cover`].
 //!
 //! Hiding needs the tray icon to come back from: without one (GNOME without
 //! the AppIndicator extension, no libappindicator), the window minimizes
@@ -60,6 +61,21 @@ pub fn making_for_stream(console: bool, on_launch: &str, tray_shown: bool) -> Ma
     }
 }
 
+/// Mutter refuses focus to a window that opens under an always-on-top one and
+/// marks it as wanting attention, and GNOME Shell then names the client in a
+/// notification ("<client> is ready"). There Caskade stays an ordinary window:
+/// the client's first window is one pixel, it has Caskade's startup id, and
+/// the stream's opens over Caskade.
+fn refuses_focus_under_a_cover(desktop: &str) -> bool {
+    desktop
+        .split(':')
+        .any(|name| name.eq_ignore_ascii_case("gnome"))
+}
+
+fn desktop() -> String {
+    std::env::var("XDG_CURRENT_DESKTOP").unwrap_or_default()
+}
+
 /// Replaces the sessions followed with the ones running now, after missed
 /// events. True when none is left: the window should come back.
 fn reconcile(running: &mut BTreeSet<String>, now: impl IntoIterator<Item = String>) -> bool {
@@ -83,11 +99,11 @@ pub fn follow<R: Runtime>(app: AppHandle<R>, bus: &Bus, settings: SettingsServic
                     let Some(window) = app.get_webview_window("main") else {
                         continue;
                     };
-                    match window.set_always_on_top(true) {
-                        Ok(()) => {
-                            covering.insert(session_id);
-                        }
-                        Err(error) => tracing::warn!(%error, "couldn't cover the stream's start"),
+                    covering.insert(session_id);
+                    if !refuses_focus_under_a_cover(&desktop())
+                        && let Err(error) = window.set_always_on_top(true)
+                    {
+                        tracing::warn!(%error, "couldn't cover the stream's start");
                     }
                 }
                 Ok(Event::GameStarted(session)) => {
@@ -185,6 +201,17 @@ async fn on_launch(settings: &SettingsService) -> String {
 
 #[cfg(test)]
 mod tests {
+    use super::refuses_focus_under_a_cover;
+
+    #[test]
+    fn only_gnome_refuses_focus_under_a_cover() {
+        assert!(refuses_focus_under_a_cover("ubuntu:GNOME"));
+        assert!(refuses_focus_under_a_cover("GNOME"));
+        assert!(!refuses_focus_under_a_cover("X-Cinnamon"));
+        assert!(!refuses_focus_under_a_cover("KDE"));
+        assert!(!refuses_focus_under_a_cover(""));
+    }
+
     use super::*;
 
     #[test]

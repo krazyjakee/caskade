@@ -76,6 +76,7 @@ struct Inner {
     /// Where Caskade's window is: the client's own window opens, one
     /// pixel small, in its middle, under it.
     placement: Option<Placement>,
+    activation: Option<Activation>,
     playing: Mutex<HashMap<(String, String), Playing>>,
 }
 
@@ -140,7 +141,24 @@ impl Streams {
                 ports,
                 wake_to: None,
                 placement: None,
+                activation: None,
                 playing: Mutex::default(),
+            }),
+        }
+    }
+
+    /// What lets the client's window take focus from Caskade's: without it
+    /// GNOME says "<the client> is ready" in a notification (#27).
+    pub fn with_activation(
+        self,
+        activation: impl Fn() -> Vec<(String, String)> + Send + Sync + 'static,
+    ) -> Self {
+        let inner = Arc::try_unwrap(self.inner)
+            .unwrap_or_else(|_| panic!("with_activation before the service is shared"));
+        Self {
+            inner: Arc::new(Inner {
+                activation: Some(Arc::new(activation)),
+                ..inner
             }),
         }
     }
@@ -304,6 +322,7 @@ impl Streams {
 }
 
 type Placement = Arc<dyn Fn() -> Option<WindowPlacement> + Send + Sync>;
+type Activation = Arc<dyn Fn() -> Vec<(String, String)> + Send + Sync>;
 
 /// The client's start window: one pixel in the middle of `caskade`'s.
 /// X geometry counts a negative offset from the far edge, so a middle left
@@ -465,11 +484,14 @@ impl StreamLauncher for Streams {
             }
         }
         let args = self.args(&address, &wanted.name).await;
-        let command = self
+        let mut command = self
             .inner
             .client
             .command(&client, &args)
             .map_err(launch_error)?;
+        if let Some(activation) = &self.inner.activation {
+            command.envs(activation());
+        }
         crate::lock(&self.inner.playing).insert(
             (host.to_owned(), app.to_owned()),
             Playing {

@@ -43,6 +43,58 @@ pub fn placement<R: Runtime>(app: &AppHandle<R>) -> Option<caskade_core::launch:
     })
 }
 
+/// The variables that let a program Caskade starts take focus from this
+/// window: a startup id on X11, an activation token on Wayland. A window
+/// refused focus demands attention, and GNOME Shell then says "<its name> is
+/// ready" in a notification.
+#[cfg(target_os = "linux")]
+pub fn activation<R: Runtime>(app: &AppHandle<R>) -> Vec<(String, String)> {
+    use gtk::gdk;
+    use gtk::gio;
+    use gtk::prelude::{AppLaunchContextExt as _, Cast as _, WidgetExt as _};
+    let Some(window) = app.get_webview_window("main") else {
+        return Vec::new();
+    };
+    let (sent, received) = std::sync::mpsc::channel();
+    let target = window.clone();
+    let asked = window.run_on_main_thread(move || {
+        let id = (|| {
+            let context = gdk::Display::default()?.app_launch_context()?;
+            let gtk = target.gtk_window().ok()?;
+            if let Some(x11) = gtk
+                .window()
+                .and_then(|gdk| gdk.downcast::<gdkx11::X11Window>().ok())
+            {
+                context.set_timestamp(gdkx11::functions::x11_get_server_time(&x11));
+            }
+            let info = gio::AppInfo::create_from_commandline(
+                "caskade",
+                Some("Caskade"),
+                gio::AppInfoCreateFlags::SUPPORTS_STARTUP_NOTIFICATION,
+            )
+            .ok()?;
+            context.startup_notify_id(&info, &[]).map(String::from)
+        })();
+        let _ = sent.send(id);
+    });
+    if asked.is_err() {
+        return Vec::new();
+    }
+    let Ok(Some(id)) = received.recv_timeout(Duration::from_secs(1)) else {
+        return Vec::new();
+    };
+    vec![
+        ("DESKTOP_STARTUP_ID".to_owned(), id.clone()),
+        ("XDG_ACTIVATION_TOKEN".to_owned(), id),
+    ]
+}
+
+/// Other systems have nothing like it to pass on.
+#[cfg(not(target_os = "linux"))]
+pub fn activation<R: Runtime>(_: &AppHandle<R>) -> Vec<(String, String)> {
+    Vec::new()
+}
+
 /// Muffin and Mutter leave a minimized window minimized on GTK's deiconify,
 /// and tao won't present a window it sees minimized: present it here, which
 /// asks the window manager to activate it (`_NET_ACTIVE_WINDOW`).
