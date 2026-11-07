@@ -247,7 +247,9 @@ ordinary one. When the plain dial fails, both ends make a way
    game data.
 3. The receiver dials. Each side's first packet leaves a hole in its own
    router, so the dial gets through once the sender's has gone out. The
-   `FileServer` closes with the session.
+   `FileServer` closes with the session, and the store goes on: a router
+   serves blobs through `copy::OnRouter`, because iroh-blobs' own handler shuts
+   the whole store down with its router.
 
 A session on a relay gets `PUNCH_WAIT` (5 s) to move to a direct path
 (`Session::direct_path`). If it doesn't, nothing is tried: the job waits and
@@ -1198,7 +1200,7 @@ Windows for its folders, reads its saves there and writes the next ones:
 | --- | --- |
 | Play on Windows, quit, start on a Linux device through Proton: the Windows save is there | 2026-11-06, one PC: passed under real Proton from a fixture Windows device, first launch included (the prefix didn't exist yet), and the game read the save. No Windows machine involved. |
 | Play on the Linux device, quit, start on Windows: the Linux save is there | 2026-11-06, one PC: the version kept from the real prefix (four files, each once) restored to the fixture Windows device's folders, and nothing else. Reading it back on real Windows not yet run. |
-| Two real machines, Windows and Linux (WL2) | not yet run |
+| Windows and Linux on two machines (WL2) | 2026-11-07, two KVM guests: passed both ways with the app's own windows, real Windows Server 2022 and real Proton. `level=1` written on Windows, read under Proton on its first launch; `level=2` written under Proton, read on Windows; `level=3` read back under Proton. All four save folders followed. Not physical machines. |
 
 ## Setting up a new device
 
@@ -1447,9 +1449,21 @@ Linux, Windows and macOS, each pair of them:
 
 | Pair | 1 Pairing, sync | 2 Copy (Wi-Fi / Ethernet) | 3 Nearby downloads | 4 Wake-on-LAN | 5 Share across networks | 6 Offline | Date, notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Linux ↔ Windows | — | — | — | — | — | — | Not run yet |
+| Linux ↔ Windows | KVM guests, internet on | QEMU LAN: 23 MB/s, no Wi-Fi or Ethernet | — | Linux only, 6 Nov | — | — | 2026-11-07, not physical machines; see the sections below |
 | Linux ↔ macOS | — | — | — | — | — | — | Not run yet |
 | Windows ↔ macOS | — | — | — | — | — | — | Not run yet |
+
+Step 5 between two real networks (`scripts/across-networks.sh`, 2026-11-07): a
+GitHub runner in a data centre shared a game with this PC behind its home
+router, through real NAT on both sides and n0's relays and lookup, as the app
+sets them. The links held only the runner's addresses.
+The link said `Direct`; 256 MiB arrived in 26 s (42 s with hole punching and
+installing), byte for byte, and the program ran. A second share, stopped by the
+runner once 16 MiB had gone, failed the copy at 20 MB within seconds saying it
+was stopped, and the link was refused after. The first attempt found that the
+store stopped with the first router, fixed in `copy::OnRouter`. A data centre
+isn't a phone's hotspot and one router isn't every router; T1 and T2 are still
+worth trying on one.
 
 Step 5 on one PC, in network namespaces (`scripts/two-networks.sh`, no root,
 2026-11-06). This isn't two networks: every device is a process on one Linux
@@ -1537,7 +1551,25 @@ Results:
 | Date | Machines | Steps passed | Speed | Notes |
 | --- | --- | --- | --- | --- |
 | 2026-11-06 | One Linux PC, both devices (`scripts/proton-real.sh`) | 1 and 4 in part | — | Not a Windows machine and not two machines: see below. |
-| — | A Windows and a Linux machine | — | — | Not run yet. |
+| 2026-11-07 | Windows Server 2022 and Ubuntu 24.04 in KVM, release builds | 1, 2, 4 | See below | No cable to pull between them here; the two Linux guests did that on 6 Nov. |
+
+**Windows to Linux in virtual machines (2026-11-07).** The game was added by
+hand in Windows' Add game dialog, copied with Copy to this computer and started
+with Play: Proton built the prefix and ran it from `G:\Game` with its data
+found. An 8.1 GiB game of one archive and a thousand small files, release builds
+on both sides, on a QEMU LAN between KVM guests on one PC:
+
+| From | To | Copy, steady | Whole job | That link, measured |
+| --- | --- | --- | --- | --- |
+| Windows | Linux | 23 MB/s | about 6 min | TCP 42 MB/s; bare 1,200-byte UDP from that guest 19 MB/s |
+| Linux | Linux | 60 MB/s | 2 min 40 s, then 80 s placing | TCP 92 MB/s; bare UDP 129 MB/s; disk write 174 MB/s |
+
+QUIC sends what the guest's network card lets UDP send: Windows' copy ran at
+that limit, so the emulated e1000e, not Caskade, set its speed. Linux reached
+two thirds of the link with the PC's load around 10. Both are far above a
+relay's 1 MB/s. A real network wasn't involved, and the sender's cache held part
+of the Windows game; N1's figures on Ethernet and Wi-Fi are still worth having.
+A game too big for the disk failed before moving a byte, naming what was short.
 
 **Step 4 on one PC (2026-11-06).** `scripts/proton-real.sh` needs umu, umu's
 Steam Runtime and a UMU-Proton build where Caskade and umu keep them, copies

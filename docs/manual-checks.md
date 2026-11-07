@@ -37,13 +37,9 @@ there: the administrator step undoes itself and hosting stays off.
 
 These runs are enough for the issues closed on them on 6 Nov: #10, #12, #21,
 #22, #23, #25 and #31. Each closing comment gives its limits, and those
-issues' checks below are optional on real hardware. The issues still open wait
-on real hardware: #11 needs a real Windows sender and speeds from a real
-network, #26 a Windows client edition with ViGEmBus, a 1440p host and a Wayland
-session, #27 a Windows client after its display fix, real desktops and a Mac,
-#28 a Mac, and #29 the game menu on real desktops, a Steam Deck and a Mac. The
-table at the end lists the checks each one needs. The boxes on this page stay
-for real machines, so a result here doesn't tick one.
+issues' checks below are optional on real hardware. The table at the end lists
+the checks each open issue needs. The boxes on this page stay for real
+machines, so a result here doesn't tick one.
 
 | Check | Result |
 | --- | --- |
@@ -80,6 +76,36 @@ longer prints the script's first lines (L3 looks at it). A system clock that
 stepped while a game ran left Stop unable to match its process by start time,
 retrying until restart (seen after a VM paused for hours, whose clock then jumped); fixed since:
 `tracking::ProcessIdentity`, and `tests/clock_step.rs` steps a real clock in CI.
+
+## What ran on 7 Nov 2026
+
+The same PC, the two Ubuntu guests and Windows Server, in release builds, plus
+Windows 10 Enterprise Evaluation (a client edition, 90 days, `win10.qcow2` in
+the VM lab) and, for the shares, a GitHub runner in a data centre. Enough for
+the issues closed on them: #11, #14, #17 and #26.
+
+| Check | Result |
+| --- | --- |
+| WL1 | Passed: added by hand on Windows, copied to Linux, started through real Proton on Play |
+| WL2 | Passed both ways and back, all four save folders, the prefix built on first launch |
+| N1 | 8.1 GiB. Windows to Linux 23 MB/s, the guest's UDP limit (19 MB/s bare); Linux to Linux 60 MB/s on a link TCP measured at 92 MB/s. A QEMU LAN, not Ethernet or Wi-Fi; see `docs/sync.md` |
+| T1 | Passed between this PC behind its router and a GitHub runner, with n0's relays: `Direct`, 256 MiB in 26 s, and the program ran. Not a hotspot |
+| T2 | Passed the same way: stopped at 20 MB, failed with the reason in seconds, link refused after |
+| S9 | Windows 10 host, ViGEmBus: A and B reached XInput, and a game's rumble reached the client's pad at its own strength. A Linux host under Wayland (sway, wlr capture) passed the same way. A desktop-portal approval (GNOME, KDE) wasn't tried |
+| S10 | Passed: a 1080p client took a 2560×1440 host to 1920×1080 at 60 Hz, and Sunshine reverted it when the game ended. The display was a virtual 60 Hz one (Virtual Display Driver), as QEMU's report 1 Hz and Sunshine's request fails on them. No HDR |
+| S11 | Passed: hosting off left ViGEmBus running, hosting on again didn't reinstall it (Windows Installer's log shows one install), and the pad and rumble worked |
+| W3's ViGEmBus note | Passed on a PC that never had it: installed silently in the one UAC prompt, running, no window |
+
+Found and fixed: iroh-blobs' handler shut the whole copy store down with its
+router, so after the first transfer through two routers, or a change to Connect
+only directly, a device served no more copies or shares until it restarted.
+Windows' add-game dialog said a Windows program runs through a compatibility
+tool. A full disk named what was short in bytes. Games from a streaming host
+were listed in the notification under their raw source id.
+
+`scripts/across-networks.sh` runs T1 and T2 at the core, sharing from a GitHub
+runner (`.github/workflows/across-networks.yml`) so this PC's address stays out
+of a public log.
 
 ## One Linux PC
 
@@ -479,13 +505,13 @@ Tick or decide these on the issue itself:
 | #8 Library, store and plugin milestone | 194 | A1, A2, A3, L2, L7 |
 | #9 Localization | 221 | L1, SV1, SV2 |
 | #10 Local network first (closed; optional) | 225 | O4, O5, O6 |
-| #11 Copy a game | 233 | N1, N2, WL1, T3 |
+| #11 Copy a game (closed; optional) | 233 | N1, N2, WL1, T3 |
 | #12 Play on another device (closed; optional) | 234 | N3, N4, WK1 |
 | #13 Downloads from a device nearby (closed; optional) | 236 | O7 |
-| #14 Save versions and sync | 239 | WL2 |
+| #14 Save versions and sync (closed; optional) | 239 | WL2 |
 | #15 Set up a new device (closed; optional) | 242 | O1 |
 | #16 Per-device settings (closed; optional) | 244 | H1 |
-| #17 Share a game once | 246 | T1, T2 |
+| #17 Share a game once (closed; optional) | 246 | T1, T2 |
 | #19 Sync on every platform | 250 | WL3, M1 |
 | #20 Sync milestone | 252 | O4, WL1, WL2, N4, WK1, T1, T2, T3 |
 | #21 Administrator steps (closed; optional) | 255 | L3, L4, W3, W5, W6 |
@@ -493,7 +519,7 @@ Tick or decide these on the issue itself:
 | #23 Hidden host (closed; optional) | 257 | S1, W4, S3, S7 |
 | #24 The user's own Sunshine (closed; optional) | 258 | L6, W8 |
 | #25 Games on the host (closed; optional) | 259 | S4 |
-| #26 Display, pads, capture | 260 | S9, S10, S11 |
+| #26 Display, pads, capture (closed; optional) | 260 | S9, S10, S11 |
 | #27 Client on first stream | 261 | S3, S8, M3 |
 | #28 Pairing with a code | 263 | S2, M3 |
 | #29 Stream from Play | 264 | S3, S4, S5, S6, WK2, M3 |
