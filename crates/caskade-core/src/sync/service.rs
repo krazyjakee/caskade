@@ -206,6 +206,9 @@ impl Inner {
         let (results, mut finished) = mpsc::unbounded_channel::<(String, bool)>();
         // The engine, the library's writes and the time of the last capture.
         let mut captured: Option<(std::sync::Weak<SyncEngine>, u64, Instant)> = None;
+        // All the library's writes at the last compaction: none since, and
+        // there's nothing new to compact.
+        let mut compacted: Option<u64> = None;
         loop {
             let wake = next.values().min().copied();
             let mut now_due: Vec<String> = Vec::new();
@@ -236,10 +239,15 @@ impl Inner {
                     }
                 }
                 _ = compact.tick() => {
-                    if let Some(engine) = self.engine()
-                        && let Err(error) = engine.compact().await
-                    {
-                        tracing::warn!(%error, "sync log not compacted");
+                    if let Some(engine) = self.engine() {
+                        let writes = engine.store().all_writes();
+                        if compacted == Some(writes) {
+                            continue;
+                        }
+                        match engine.compact().await {
+                            Ok(_) => compacted = Some(writes),
+                            Err(error) => tracing::warn!(%error, "sync log not compacted"),
+                        }
                     }
                 }
                 device = due_rx.recv() => match device {

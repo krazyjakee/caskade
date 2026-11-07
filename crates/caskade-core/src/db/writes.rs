@@ -19,15 +19,22 @@ use super::LibraryStore;
 /// every capture call for another.
 const UNCOUNTED: &[&str] = &["sync_changes", "sync_fields", "sync_peers", "sync_seen"];
 
-/// How many rows have changed in the library's tables, other than
-/// [`UNCOUNTED`] ones, since it opened.
+/// How many rows have changed in the library's tables since it opened:
+/// other than [`UNCOUNTED`] ones, and in all of them.
 #[derive(Debug, Default)]
-pub(crate) struct Writes(AtomicU64);
+pub(crate) struct Writes {
+    counted: AtomicU64,
+    all: AtomicU64,
+}
 
 impl Writes {
     fn count(&self, change: UpdateHookResult<'_>) {
-        if change.database == "main" && !UNCOUNTED.contains(&change.table) {
-            self.0.fetch_add(1, Ordering::Relaxed);
+        if change.database != "main" {
+            return;
+        }
+        self.all.fetch_add(1, Ordering::Relaxed);
+        if !UNCOUNTED.contains(&change.table) {
+            self.counted.fetch_add(1, Ordering::Relaxed);
         }
     }
 }
@@ -52,9 +59,15 @@ pub(super) fn counting(options: SqlitePoolOptions, writes: &Arc<Writes>) -> Sqli
 
 impl LibraryStore {
     /// Rows changed so far, for telling whether anything was written since
-    /// an earlier reading. Writes by other processes don't count.
+    /// an earlier reading. Writes by other processes don't count, and
+    /// neither does sync's bookkeeping.
     pub fn writes(&self) -> u64 {
-        self.writes.0.load(Ordering::Relaxed)
+        self.writes.counted.load(Ordering::Relaxed)
+    }
+
+    /// [`writes`](Self::writes), sync's bookkeeping included.
+    pub fn all_writes(&self) -> u64 {
+        self.writes.all.load(Ordering::Relaxed)
     }
 }
 
@@ -85,6 +98,10 @@ mod tests {
             store.writes(),
             after_insert,
             "sync's bookkeeping isn't counted"
+        );
+        assert!(
+            store.all_writes() > after_insert,
+            "but counts among all writes"
         );
     }
 }

@@ -658,7 +658,8 @@ for a fresh install to restore from.
   whenever a paired device connects.
 - Otherwise it polls each device a minute after a sync, backing off from 30
   seconds to 5 minutes while one can't be reached.
-- The log is compacted every 10 minutes.
+- The log is compacted every 10 minutes, when the library was written since
+  the last compaction (sync's own tables included).
 
 When both devices dial at once, both exchanges run; that's safe, because every
 change applies in its own transaction. An unreachable device is a normal state,
