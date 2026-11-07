@@ -155,7 +155,9 @@ pub struct Runtime {
     engine: Engine,
     linker: Linker<State>,
     limits: Limits,
-    _ticker: Ticker,
+    /// Started by the first instance: with no plugin running, nothing has
+    /// to wake 100 times a second.
+    ticker: std::sync::OnceLock<Ticker>,
     cache: std::sync::RwLock<Option<caskade_component_cache::ComponentCache>>,
     cached: std::sync::atomic::AtomicU32,
     compiled: std::sync::atomic::AtomicU32,
@@ -177,7 +179,7 @@ impl Runtime {
         Plugin::add_to_linker::<_, wasmtime::component::HasSelf<_>>(&mut linker, |state| state)
             .map_err(|e| CallError::Instantiate(e.to_string()))?;
         Ok(Self {
-            _ticker: Ticker::start(engine.clone()),
+            ticker: std::sync::OnceLock::new(),
             engine,
             linker,
             limits,
@@ -259,6 +261,8 @@ impl Runtime {
             install_input: None,
             language: sandbox.language,
         };
+        self.ticker
+            .get_or_init(|| Ticker::start(self.engine.clone()));
         let mut store = Store::new(&self.engine, state);
         store.limiter(|state| &mut state.limits);
         store.set_epoch_deadline(deadline);
