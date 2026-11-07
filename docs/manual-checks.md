@@ -91,7 +91,7 @@ the issues closed on them: #11, #14, #17 and #26.
 | N1 | 8.1 GiB. Windows to Linux 23 MB/s, the guest's UDP limit (19 MB/s bare); Linux to Linux 60 MB/s on a link TCP measured at 92 MB/s. A QEMU LAN, not Ethernet or Wi-Fi; see `docs/sync.md` |
 | T1 | Passed between this PC behind its router and a GitHub runner, with n0's relays: `Direct`, 256 MiB in 26 s, and the program ran. Not a hotspot |
 | T2 | Passed the same way: stopped at 20 MB, failed with the reason in seconds, link refused after |
-| S9 | Windows 10 host, ViGEmBus: A and B reached XInput, and a game's rumble reached the client's pad at its own strength. A Linux host under Wayland (sway, wlr capture) passed the same way. A desktop-portal approval (GNOME, KDE) wasn't tried |
+| S9 | Windows 10 host, ViGEmBus: A and B reached XInput, and a game's rumble reached the client's pad at its own strength. A Linux host under Wayland (sway with no GPU) took the pad and sent rumble back, but its picture stayed black: wlroots' software renderer is all this VM has, so Wayland video and a desktop-portal approval (GNOME, KDE) are still unproved |
 | S10 | Passed: a 1080p client took a 2560×1440 host to 1920×1080 at 60 Hz, and Sunshine reverted it when the game ended. The display was a virtual 60 Hz one (Virtual Display Driver), as QEMU's report 1 Hz and Sunshine's request fails on them. No HDR |
 | S11 | Passed: hosting off left ViGEmBus running, hosting on again didn't reinstall it (Windows Installer's log shows one install), and the pad and rumble worked |
 | W3's ViGEmBus note | Passed on a PC that never had it: installed silently in the one UAC prompt, running, no window |
