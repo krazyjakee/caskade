@@ -62,6 +62,8 @@ pub fn run() {
     logging::init();
     // Panics reach the log too, not only stderr.
     background::log_panics();
+    // Before anything runs on it.
+    async_runtime();
     // First, as it may restart the process.
     webkit::prefer_gpu();
     // The OS's language, until the Language setting (#213) picks one.
@@ -883,6 +885,27 @@ pub fn run() {
     .build(tauri::generate_context!())
     .expect("error while building Caskade")
     .run(run_event);
+}
+
+/// Most workers the app's async runtime starts. Tauri's own starts one per
+/// core (24 on a desktop we measured), each a thread with its own stack and
+/// malloc cache; the app's async work waits on I/O, and its heavy work runs
+/// on blocking threads, which come and go as needed.
+const ASYNC_WORKERS: usize = 4;
+
+/// Gives Tauri a runtime with at most [`ASYNC_WORKERS`] workers.
+fn async_runtime() {
+    let workers = std::thread::available_parallelism()
+        .map_or(ASYNC_WORKERS, |cores| cores.get().min(ASYNC_WORKERS));
+    match tokio::runtime::Builder::new_multi_thread()
+        .worker_threads(workers)
+        .enable_all()
+        .build()
+    {
+        // It runs as long as the process: Tauri keeps only a handle.
+        Ok(runtime) => tauri::async_runtime::set(Box::leak(Box::new(runtime)).handle().clone()),
+        Err(error) => tracing::warn!(%error, "Tauri's own async runtime is used"),
+    }
 }
 
 /// The app's run events: the streaming host stops when Caskade exits
