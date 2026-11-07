@@ -120,7 +120,9 @@ where
                 match receiver.recv_timeout(wait) {
                     Ok(Message::Stop) | Err(RecvTimeoutError::Disconnected) => break,
                     Ok(Message::Events(paths)) => {
-                        for source in registrations.sources_for(&paths) {
+                        let sources = registrations.sources_for(&paths);
+                        tracing::trace!(?paths, ?sources, "watched paths changed");
+                        for source in sources {
                             debouncer.event(source, now());
                         }
                     }
@@ -133,7 +135,9 @@ where
                 }
                 if now() >= next_poll {
                     next_poll = now() + options.poll_interval;
-                    for source in registrations.unwatched(&library) {
+                    let polled = registrations.unwatched(&library);
+                    tracing::trace!(?polled, "polling sources without watch paths");
+                    for source in polled {
                         debouncer.event(source, now());
                     }
                 }
@@ -141,8 +145,10 @@ where
                 if due.is_empty() {
                     continue;
                 }
+                let rescan = Instant::now();
                 let result = caskade_jobs::global()
                     .sync("Updating library", || library.rescan(&due, &Cancel::new()));
+                tracing::debug!(sources = ?due, took = ?rescan.elapsed(), "rescanned");
                 match result {
                     Ok(delta) if !delta.is_empty() => on_delta(delta),
                     Ok(_) => {}
