@@ -717,6 +717,7 @@ async fn a_language_switch_changes_earlier_notifications() {
 fn sources_are_named_for_people_even_when_stored_as_ids() {
     assert_eq!(source_label("desktop"), "Desktop entries");
     assert_eq!(source_label("steam.shortcuts"), "Steam");
+    assert_eq!(source_label("stream:86CB5AF7"), "Other devices");
     // A feed stored before `desktop` had a name.
     assert_eq!(source_text("desktop").render(), "Desktop entries");
     // A new batch's body names it.

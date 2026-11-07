@@ -275,7 +275,7 @@ function TargetSummary({ target }: { target: ManualTarget }) {
               <dd className="font-mono break-all">{launch.cwd}</dd>
             </>
           )}
-          {target.windows && (
+          {target.windows && !navigator.userAgent.includes("Windows") && (
             <>
               <dt className="text-fg-muted">{t`Runs with`}</dt>
               <dd>{t`a Windows compatibility tool`}</dd>

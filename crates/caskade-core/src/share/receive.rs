@@ -555,8 +555,8 @@ impl ShareFetcher {
         };
         if short > 0 {
             return Err(FetchFailure::Failed(Error::Invalid(crate::tr!(
-                "there isn't enough room for the game: {short} more bytes are needed",
-                short = short
+                "there isn't enough room for the game: {short} more is needed",
+                short = crate::transfer::readable_size(short)
             ))));
         }
         Ok(())

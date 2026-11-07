@@ -3119,6 +3119,11 @@ msgstr ""
 
 #: crates/caskade-core/src/notifications/mod.rs
 msgctxt "library source"
+msgid "Other devices"
+msgstr ""
+
+#: crates/caskade-core/src/notifications/mod.rs
+msgctxt "library source"
 msgid "Other"
 msgstr ""
 
@@ -4207,7 +4212,7 @@ msgid "it's here already: it can help others only if that's chosen while it arri
 msgstr ""
 
 #: crates/caskade-core/src/share/receive.rs
-msgid "there isn't enough room for the game: {short} more bytes are needed"
+msgid "there isn't enough room for the game: {short} more is needed"
 msgstr ""
 
 #: crates/caskade-core/src/storage/catalogue.rs
@@ -4878,7 +4883,7 @@ msgid "Waiting for {device} to be in reach"
 msgstr ""
 
 #: crates/caskade-core/src/transfer/mod.rs
-msgid "there isn't enough room for the copy: {short} more bytes are needed"
+msgid "there isn't enough room for the copy: {short} more is needed"
 msgstr ""
 
 #: crates/caskade-core/src/transfer/mod.rs

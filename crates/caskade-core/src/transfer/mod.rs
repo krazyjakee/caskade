@@ -780,6 +780,18 @@ impl Transfers {
     }
 }
 
+/// A size for a message: "3.2 GB", "820 MB".
+pub(crate) fn readable_size(bytes: u64) -> String {
+    const GB: f64 = 1e9;
+    const MB: f64 = 1e6;
+    let bytes = bytes as f64;
+    if bytes >= GB {
+        format!("{:.1} GB", bytes / GB)
+    } else {
+        format!("{:.0} MB", (bytes / MB).max(1.0))
+    }
+}
+
 fn waiting(why: String) -> FetchFailure {
     FetchFailure::Waiting(why)
 }
@@ -894,8 +906,8 @@ impl PeerFetcher for Transfers {
         };
         if short > 0 {
             return Err(FetchFailure::Failed(Error::Invalid(crate::tr!(
-                "there isn't enough room for the copy: {short} more bytes are needed",
-                short = short
+                "there isn't enough room for the copy: {short} more is needed",
+                short = readable_size(short)
             ))));
         }
         if session.direct_path(PUNCH_WAIT).await.is_none() {
@@ -1028,5 +1040,17 @@ impl PeerFetcher for Transfers {
             .unwrap_or_else(|e| e.into_inner())
             .values()
             .any(|outgoing| outgoing.entry == entry_id)
+    }
+}
+
+#[cfg(test)]
+mod size_tests {
+    use super::readable_size;
+
+    #[test]
+    fn a_size_reads_as_megabytes_or_gigabytes() {
+        assert_eq!(readable_size(3_485_671_424), "3.5 GB");
+        assert_eq!(readable_size(820_000_000), "820 MB");
+        assert_eq!(readable_size(10), "1 MB");
     }
 }

@@ -283,6 +283,9 @@ pub(crate) fn source_name(source: &str) -> String {
     if let Some(plugin) = source.strip_prefix(crate::bus::PLUGIN_SOURCE_PREFIX) {
         return plugin.to_owned();
     }
+    if source.starts_with("stream:") {
+        return "Other devices".into();
+    }
     match source {
         "roms" => "ROM folders",
         "web" => "Web games",
@@ -316,6 +319,7 @@ pub(crate) fn source_text(name: &str) -> Text {
         "Installs" => crate::msgp!("library source", "Installs").into(),
         // Feeds stored before the name was given kept the id.
         "Desktop entries" | "desktop" => crate::msgp!("library source", "Desktop entries").into(),
+        "Other devices" => crate::msgp!("library source", "Other devices").into(),
         "Other" => crate::msgp!("library source", "Other").into(),
         other => other.into(),
     }

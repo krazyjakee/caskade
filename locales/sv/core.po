@@ -3121,6 +3121,11 @@ msgstr "Skrivbordsposter"
 
 #: crates/caskade-core/src/notifications/mod.rs
 msgctxt "library source"
+msgid "Other devices"
+msgstr "Andra enheter"
+
+#: crates/caskade-core/src/notifications/mod.rs
+msgctxt "library source"
 msgid "Other"
 msgstr "Övrigt"
 
@@ -4209,8 +4214,8 @@ msgid "it's here already: it can help others only if that's chosen while it arri
 msgstr "det finns redan här: det kan bara hjälpa andra om det väljs medan det kommer fram"
 
 #: crates/caskade-core/src/share/receive.rs
-msgid "there isn't enough room for the game: {short} more bytes are needed"
-msgstr "det finns inte tillräckligt med plats för spelet: {short} byte till behövs"
+msgid "there isn't enough room for the game: {short} more is needed"
+msgstr "det finns inte tillräckligt med plats för spelet: {short} till behövs"
 
 #: crates/caskade-core/src/storage/catalogue.rs
 msgid "storage catalogue supports at most 128 locations"
@@ -4880,8 +4885,8 @@ msgid "Waiting for {device} to be in reach"
 msgstr "Väntar på att {device} ska gå att nå"
 
 #: crates/caskade-core/src/transfer/mod.rs
-msgid "there isn't enough room for the copy: {short} more bytes are needed"
-msgstr "det finns inte plats för kopian: {short} byte till behövs"
+msgid "there isn't enough room for the copy: {short} more is needed"
+msgstr "det finns inte plats för kopian: {short} till behövs"
 
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "Only a relay reaches {device}: the copy waits for a direct connection"
