@@ -24,7 +24,14 @@ impl RommService {
             .count();
         let rom = &record.rom;
         Ok(match kind {
-            ArtworkKind::Cover => rom.cover().is_some() && ours == 0,
+            ArtworkKind::Cover => {
+                let waiting = record.cover_unavailable.as_ref().is_some_and(|failed| {
+                    rom.cover() == Some(failed.location.as_str())
+                        && crate::now_ms().saturating_sub(failed.at_ms)
+                            < super::COVER_RETRY.as_millis() as i64
+                });
+                rom.cover().is_some() && ours == 0 && !waiting
+            }
             _ => ours < rom.screenshots().count(),
         })
     }
@@ -84,6 +91,10 @@ impl RommService {
             Ok(cached) => cached,
             Err(error) => {
                 tracing::warn!(rom, %error, "RomM cover not imported");
+                // Every sync would ask again for what never comes.
+                if error.lasting {
+                    self.mark_cover(record, Some(location)).await;
+                }
                 return;
             }
         };
@@ -92,6 +103,21 @@ impl RommService {
             .await
         {
             tracing::warn!(rom, %error, "RomM cover not saved");
+        } else if record.cover_unavailable.is_some() {
+            self.mark_cover(record, None).await;
+        }
+    }
+
+    /// Records `location` as the cover the server couldn't give, or none.
+    #[cfg(feature = "net")]
+    async fn mark_cover(&self, record: &RommRom, location: Option<&str>) {
+        let mut record = record.clone();
+        record.cover_unavailable = location.map(|location| super::CoverUnavailable {
+            location: location.to_owned(),
+            at_ms: crate::now_ms(),
+        });
+        if let Err(error) = self.inner.store.save_romm_rom(&record).await {
+            tracing::warn!(rom = record.rom.id, %error, "RomM cover failure not recorded");
         }
     }
 
@@ -171,6 +197,30 @@ impl RommService {
     }
 }
 
+/// Why an image didn't come.
+#[derive(Debug)]
+struct NotFetched {
+    message: String,
+    /// Asking again can't help: the server refused it (a 4xx other than 408
+    /// and 429), or it isn't usable artwork.
+    lasting: bool,
+}
+
+impl std::fmt::Display for NotFetched {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.message)
+    }
+}
+
+impl From<crate::artwork::ArtworkError> for NotFetched {
+    fn from(error: crate::artwork::ArtworkError) -> Self {
+        Self {
+            lasting: error.permanent(),
+            message: error.to_string(),
+        }
+    }
+}
+
 /// An image from the server (a path) or the web (a URL) into the artwork
 /// cache. A URL elsewhere than the server must lead to a public address.
 #[cfg(feature = "net")]
@@ -178,7 +228,7 @@ async fn fetch(
     client: &super::client::Client,
     artwork: &crate::artwork::ArtworkCache,
     location: &str,
-) -> std::result::Result<crate::artwork::CachedArtwork, String> {
+) -> std::result::Result<crate::artwork::CachedArtwork, NotFetched> {
     if location.starts_with("https://") || location.starts_with("http://") {
         let on_server = url::Url::parse(location).is_ok_and(|url| client.same_origin(&url));
         let downloaded = if on_server {
@@ -186,8 +236,18 @@ async fn fetch(
         } else {
             artwork.download_metadata(location).await
         };
-        return downloaded.map_err(|e| e.to_string());
+        return Ok(downloaded?);
     }
-    let bytes = client.resource(location).await.map_err(|e| e.to_string())?;
-    artwork.import_bytes(bytes).await.map_err(|e| e.to_string())
+    let bytes = client
+        .resource(location)
+        .await
+        .map_err(|error| NotFetched {
+            message: error.to_string(),
+            lasting: false,
+        })?
+        .map_err(|status| NotFetched {
+            message: crate::tr!("artwork: {status}", status = status),
+            lasting: status.is_client_error() && !matches!(status.as_u16(), 408 | 429),
+        })?;
+    Ok(artwork.import_bytes(bytes).await?)
 }

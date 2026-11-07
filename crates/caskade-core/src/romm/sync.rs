@@ -614,6 +614,7 @@ impl RommService {
             pinned: false,
             orphaned: false,
             cache: None,
+            cover_unavailable: None,
         };
         store.save_romm_rom(&record).await?;
         self.import_cover(client, &record).await;

@@ -211,6 +211,23 @@ pub struct RommRom {
     /// Deleted on the server but still cached.
     pub orphaned: bool,
     pub cache: Option<CachedRom>,
+    /// A cover the server couldn't give (a 404, not an image): not asked
+    /// for again for [`COVER_RETRY`], or until the ROM's cover changes.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cover_unavailable: Option<CoverUnavailable>,
+}
+
+/// How long a cover the server couldn't give waits to be asked for again.
+/// RomM can answer 404 for a cover it hasn't fetched yet, so not for good;
+/// but not at every sync either (a library had 7,600 such covers).
+pub const COVER_RETRY: std::time::Duration = std::time::Duration::from_secs(7 * 24 * 3600);
+
+/// A cover that didn't come, and when.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct CoverUnavailable {
+    pub location: String,
+    pub at_ms: i64,
 }
 
 /// How a server answered last.

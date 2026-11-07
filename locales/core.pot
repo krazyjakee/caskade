@@ -3282,6 +3282,10 @@ msgstr ""
 msgid "that game isn't in this device's library"
 msgstr ""
 
+#: crates/caskade-core/src/romm/artwork.rs
+msgid "artwork: {status}"
+msgstr ""
+
 #: crates/caskade-core/src/romm/cache.rs
 msgid "{checksum} for {file}"
 msgstr ""
@@ -3381,10 +3385,6 @@ msgstr ""
 
 #: crates/caskade-core/src/romm/client.rs
 msgid "the server's ROM list for platform {platform} doesn't end"
-msgstr ""
-
-#: crates/caskade-core/src/romm/client.rs
-msgid "artwork: {status}"
 msgstr ""
 
 #: crates/caskade-core/src/romm/client.rs

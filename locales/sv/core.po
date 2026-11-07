@@ -3284,6 +3284,10 @@ msgstr "ingen startade det på den enheten i tid"
 msgid "that game isn't in this device's library"
 msgstr "det spelet finns inte i den här enhetens bibliotek"
 
+#: crates/caskade-core/src/romm/artwork.rs
+msgid "artwork: {status}"
+msgstr "bilder: {status}"
+
 #: crates/caskade-core/src/romm/cache.rs
 msgid "{checksum} for {file}"
 msgstr "{checksum} för {file}"
@@ -3384,10 +3388,6 @@ msgstr "firmware: {status}"
 #: crates/caskade-core/src/romm/client.rs
 msgid "the server's ROM list for platform {platform} doesn't end"
 msgstr "serverns ROM-lista för plattformen {platform} tar aldrig slut"
-
-#: crates/caskade-core/src/romm/client.rs
-msgid "artwork: {status}"
-msgstr "bilder: {status}"
 
 #: crates/caskade-core/src/romm/client.rs
 msgid "the server no longer has this ROM's files"

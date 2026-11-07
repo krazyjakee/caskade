@@ -1215,6 +1215,7 @@ async fn romm_games_match_by_romms_id_and_keep_romms_values_and_artwork() {
             pinned: false,
             orphaned: false,
             cache: None,
+            cover_unavailable: None,
         })
         .await
         .unwrap();

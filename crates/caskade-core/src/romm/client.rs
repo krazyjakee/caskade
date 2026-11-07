@@ -417,7 +417,11 @@ impl Client {
     /// (`/assets/romm/resources/…`), or a user's screenshot (`/api/raw/…`).
     /// RomM sends resource paths with that prefix and a `?ts=` query; a
     /// bare `roms/…` path gets the prefix added.
-    pub(crate) async fn resource(&self, path: &str) -> Result<Vec<u8>, RommError> {
+    /// A status other than success is the inner error.
+    pub(crate) async fn resource(
+        &self,
+        path: &str,
+    ) -> Result<Result<Vec<u8>, reqwest::StatusCode>, RommError> {
         const RESOURCES: &str = "assets/romm/resources/";
         let path = path.trim_start_matches('/');
         let url = if path.starts_with(RESOURCES) || path.starts_with("api/") {
@@ -430,12 +434,9 @@ impl Client {
             .await?;
         let status = response.status();
         if !status.is_success() {
-            return Err(RommError::Server(crate::tr!(
-                "artwork: {status}",
-                status = status
-            )));
+            return Ok(Err(status));
         }
-        read(response, MAX_IMAGE).await
+        read(response, MAX_IMAGE).await.map(Ok)
     }
 
     /// Streams a ROM's content (`/api/roms/{id}/content/{fs_name}`; a zip

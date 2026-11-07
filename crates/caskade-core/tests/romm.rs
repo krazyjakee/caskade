@@ -626,20 +626,45 @@ async fn a_resync_retries_covers_that_failed_to_import() {
         found.items[0].clone()
     };
 
+    let cover_requests = async |fixture: &Fixture| {
+        fixture
+            .server
+            .received_requests()
+            .await
+            .unwrap()
+            .iter()
+            .filter(|request| request.url.path().ends_with("/cover/big.png"))
+            .count()
+    };
+
     fixture.romm.sync("home").await.unwrap();
     let game = chrono(&fixture).await;
     assert!(game.cover.is_none());
     assert!(!fixture.romm.page_images(&game.id).await.unwrap());
     let details = fixture.store.get_game(&game.id).await.unwrap().unwrap();
     assert!(details.artwork.is_empty());
+    // A cover the server refused isn't asked for at every sync.
+    let asked = cover_requests(&fixture).await;
+    assert!(asked > 0);
+    fixture.romm.sync("home").await.unwrap();
+    assert_eq!(cover_requests(&fixture).await, asked);
 
-    // The server's covers work again, though the ROMs are unchanged.
+    // A week on, the server's covers work again, though the ROMs are
+    // unchanged.
+    let mut record = fixture.record(10).await;
+    let failed = record
+        .cover_unavailable
+        .as_mut()
+        .expect("the 404 is recorded");
+    failed.at_ms -= caskade_core::romm::COVER_RETRY.as_millis() as i64;
+    fixture.store.save_romm_rom(&record).await.unwrap();
     fixture.server.reset().await;
     mount(&fixture.server, default_snes()).await;
     let report = fixture.romm.sync("home").await.unwrap();
     assert_eq!(report.added, 0);
     let game = chrono(&fixture).await;
     assert!(game.cover.is_some());
+    assert!(fixture.record(10).await.cover_unavailable.is_none());
     // The page tries its screenshots again too.
     assert!(fixture.romm.page_images(&game.id).await.unwrap());
     let details = fixture.store.get_game(&game.id).await.unwrap().unwrap();
