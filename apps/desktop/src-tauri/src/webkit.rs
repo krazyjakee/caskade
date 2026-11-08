@@ -34,6 +34,7 @@ const CHOICES: [&str; 5] = [
 const SOFTWARE_GL: &str = "LIBGL_ALWAYS_SOFTWARE";
 
 /// The GPU renderer, with frames handed over in shared memory.
+#[cfg(any(target_os = "linux", test))]
 const GPU_OVER_SHM: [(&str, &str); 2] = [
     ("WEBKIT_FORCE_DMABUF_RENDERER", "1"),
     ("WEBKIT_DMABUF_RENDERER_FORCE_SHM", "1"),

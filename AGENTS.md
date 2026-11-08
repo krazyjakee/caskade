@@ -22,22 +22,22 @@ Keep the specs true: a change that alters what Caskade does or how a subsystem w
 
 Cargo commands share one heavy lane: run them under `flock /tmp/caskade-heavy.lock …`. `just` recipes take the lock themselves; never wrap a `just` recipe in `flock`.
 
-| Task | Command |
-| --- | --- |
-| Install | `pnpm install` |
-| App with hot reload | `just dev` (Vite on :1420, one at a time) |
-| UI in a browser, no core | `just web` (`VITE_CASKADE_FIXTURES=1` for fixtures) |
-| Build | `flock /tmp/caskade-heavy.lock cargo build -p caskade-core -p caskade-desktop` |
-| Lint | `flock /tmp/caskade-heavy.lock cargo clippy --workspace --all-targets -- -D warnings`; Windows: add `--target x86_64-pc-windows-gnu -p caskade-core -p caskade-desktop` |
-| Test the app | `just test-app` (core and adapter), `pnpm test` (Vitest) |
-| One integration test file | `cargo test -p <crate> --test it <file>::` (each crate's `tests/*.rs` compile into one `it` binary; a new file needs `mod <file>;` in `tests/main.rs`) |
-| Installer, discovery, plugin host, theme | `just test-installer`, `just test-discovery`, `cargo test -p caskade-plugin-host` (needs `rustup target add wasm32-wasip2`), `cargo test -p caskade-theme` |
-| TypeScript | `pnpm typecheck` (under RTK: `rtk proxy pnpm typecheck`), `pnpm lint` (Biome) |
-| Bindings | `just bindings` after adding or changing a command; a test fails on stale bindings |
-| Translations | `just i18n`, then commit the `.pot` and `.po` changes; `just i18n-check` gates CI |
-| Tokens and anatomy docs | `pnpm --filter @caskade/tokens build`, `pnpm --filter @caskade/ui docs` (generated; never edit `docs/theming/tokens.md` or `anatomy.md` by hand) |
-| Plugin schema | `CASKADE_WRITE_SCHEMA=1 cargo test -p caskade-plugin-host` |
-| App bundle | `just build-app` |
+| Task                                     | Command                                                                                                                                                                 |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Install                                  | `pnpm install`                                                                                                                                                          |
+| App with hot reload                      | `just dev` (Vite on :1420, one at a time)                                                                                                                               |
+| UI in a browser, no core                 | `just web` (`VITE_CASKADE_FIXTURES=1` for fixtures)                                                                                                                     |
+| Build                                    | `flock /tmp/caskade-heavy.lock cargo build -p caskade-core -p caskade-desktop`                                                                                          |
+| Lint                                     | `flock /tmp/caskade-heavy.lock cargo clippy --workspace --all-targets -- -D warnings`; Windows: add `--target x86_64-pc-windows-gnu -p caskade-core -p caskade-desktop` |
+| Test the app                             | `just test-app` (core and adapter), `pnpm test` (Vitest)                                                                                                                |
+| One integration test file                | `cargo test -p <crate> --test it <file>::` (each crate's `tests/*.rs` compile into one `it` binary; a new file needs `mod <file>;` in `tests/main.rs`)                  |
+| Installer, discovery, plugin host, theme | `just test-installer`, `just test-discovery`, `cargo test -p caskade-plugin-host` (needs `rustup target add wasm32-wasip2`), `cargo test -p caskade-theme`              |
+| TypeScript                               | `pnpm typecheck` (under RTK: `rtk proxy pnpm typecheck`), `pnpm lint` (Biome)                                                                                           |
+| Bindings                                 | `just bindings` after adding or changing a command; a test fails on stale bindings                                                                                      |
+| Translations                             | `just i18n`, then commit the `.pot` and `.po` changes; `just i18n-check` gates CI                                                                                       |
+| Tokens and anatomy docs                  | `pnpm --filter @caskade/tokens build`, `pnpm --filter @caskade/ui docs` (generated; never edit `docs/theming/tokens.md` or `anatomy.md` by hand)                        |
+| Plugin schema                            | `CASKADE_WRITE_SCHEMA=1 cargo test -p caskade-plugin-host`                                                                                                              |
+| App bundle                               | `just build-app`                                                                                                                                                        |
 
 ## Rules that tests or reviews enforce
 
