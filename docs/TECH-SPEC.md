@@ -171,6 +171,7 @@ Sessions survive restarts: recovery state records running processes by `ProcessI
 ### Launching extras
 
 - **Launch actions** (`game_actions`, `entry_action_settings`) and **lifecycle scripts** (`lifecycle_scripts`, run by `ScriptRunner` with bounded output, a time limit, cancellation and process-group kill) plug into the pipeline in §4.3.
+- **Proton builds**: `HostCaps::detect` lists builds in Steam's `compatibilitytools.d` folders (native, Flatpak, system) and `steamapps/common/Proton*`, ranked by family (UMU-Proton, GE-Proton, numbered Steam Proton, Experimental, others, betas, Hotfix), then by version compared as numbers. At each launch `InstallerRunnerResolver` sets `PROTONPATH` to the best one the installer's compatibility runner setting allows: `UMU-Proton` when an umu build leads (so umu keeps it current), never a Hotfix, and `UMU-Proton` (umu downloads it) when none is installed. An action's `proton` (and the built-in action's `builtIn.proton`) names a build by its folder; `launch::actions::apply` puts it in the entry's runner hint, and the resolver uses it when this device has it, otherwise the automatic choice. Managed entries never store a build's path.
 - **Web games** play in the game window. Offline bundles (Linux) are captured through the window's MITM proxy and saved with `WebGames::save_offline`.
 - **Ports** come from Decomp Buddy's `plans.json` (fetched daily with an ETag) and install with `InstallService::install_attached`.
 

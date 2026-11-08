@@ -1,15 +1,73 @@
 /** One launch action's fields (#178): its name, whether it plays the game
  * or is a tool, what it starts, its arguments, working folder and
- * environment, and how a play action's game is tracked. Nothing is typed
- * as a command line: each argument is its own field. */
+ * environment, the Proton build a Windows program runs with, and how a
+ * play action's game is tracked. Nothing is typed as a command line: each
+ * argument is its own field. */
 import { Button, SegmentedControl, Select, TextField } from "@caskade/ui";
 import { useLingui } from "@lingui/react/macro";
 import { FolderOpen, Plus, X } from "lucide-react";
-import type { ActionTarget, GameAction, TrackingMode } from "../../api/actions";
+import type { ActionTarget, GameAction, ProtonBuilds, TrackingMode } from "../../api/actions";
 import { useDropZone } from "../../drop/DropProvider";
 import { type PathRequest, usePathPicker } from "../pathBrowser/PathPicker";
 
 type TargetKind = "executable" | "uri" | "flatpak";
+
+/** The Proton select's value for the automatic choice. */
+const AUTOMATIC = "";
+
+/** Which Proton build a Windows program runs with: the best one installed
+ * when it starts, or one the user keeps it on. */
+function ProtonField({
+  value,
+  builds,
+  onChange,
+  isDisabled,
+}: {
+  value: string | null;
+  builds: ProtonBuilds;
+  onChange: (value: string | null) => void;
+  isDisabled?: boolean;
+}) {
+  const { t } = useLingui();
+  const automatic = builds.automatic;
+  const options = [
+    {
+      id: AUTOMATIC,
+      label: automatic
+        ? t({
+            message: `Automatic (${automatic})`,
+            comment: "The Proton build choice that runs the best one installed, which is named",
+          })
+        : t({ message: "Automatic", context: "Proton build" }),
+    },
+    ...builds.installed.map((name) => ({ id: name, label: name })),
+  ];
+  // A build another device chose, or one since removed, stays shown.
+  if (value && !builds.installed.includes(value))
+    options.push({
+      id: value,
+      label: t({
+        message: `${value} (not installed here)`,
+        comment: "A chosen Proton build this device doesn't have",
+      }),
+    });
+  return (
+    <div data-part="proton" className="flex flex-col gap-1.5">
+      <Select<string>
+        label={t`Proton build`}
+        options={options}
+        value={value ?? AUTOMATIC}
+        onChange={(next) => onChange(next === AUTOMATIC ? null : next)}
+        isDisabled={isDisabled}
+      />
+      <p className="text-xs text-fg-muted">
+        {value && !builds.installed.includes(value)
+          ? t`This device doesn't have it, so the best build installed runs instead.`
+          : t`Automatic runs the best Proton build installed each time the game starts. Choose a build to keep this action on it.`}
+      </p>
+    </div>
+  );
+}
 
 /** A path field with Browse…, which a file or folder dropped on it fills. */
 export function PathField({
@@ -194,11 +252,15 @@ export function ActionForm({
   onChange,
   /** The target is the release's source's: only name and tracking change. */
   targetLocked,
+  /** The Proton builds to choose from, when the action runs a Windows
+   * program through Proton. */
+  proton,
   isDisabled,
 }: {
   action: GameAction;
   onChange: (action: GameAction) => void;
   targetLocked: boolean;
+  proton?: ProtonBuilds | null;
   isDisabled?: boolean;
 }) {
   const { t } = useLingui();
@@ -324,6 +386,14 @@ export function ActionForm({
             isDisabled={locked}
           />
         </>
+      )}
+      {proton && (
+        <ProtonField
+          value={action.proton}
+          builds={proton}
+          onChange={(build) => set({ proton: build })}
+          isDisabled={isDisabled}
+        />
       )}
       {action.kind === "play" && (
         <fieldset data-part="tracking" className="flex flex-col gap-3">

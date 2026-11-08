@@ -1185,6 +1185,11 @@ msgstr "{used} använt"
 msgid "{used} used of {total}, {free} free"
 msgstr "{used} använt av {total}, {free} ledigt"
 
+#. A chosen Proton build this device doesn't have
+#: apps/desktop/src/components/gameActions/ActionForm.tsx
+msgid "{value} (not installed here)"
+msgstr ""
+
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "{value} / 100"
@@ -2354,6 +2359,13 @@ msgctxt "game tracking"
 msgid "Automatic"
 msgstr "Automatiskt"
 
+#: apps/desktop/src/components/gameActions/ActionForm.tsx
+#, fuzzy
+#| msgid "Automatic"
+msgctxt "Proton build"
+msgid "Automatic"
+msgstr "Automatiskt"
+
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgctxt "start mode"
 msgid "Automatic"
@@ -2363,6 +2375,13 @@ msgstr "Automatiskt"
 msgctxt "stream quality"
 msgid "Automatic"
 msgstr "Automatiskt"
+
+#. The Proton build choice that runs the best one installed, which is named
+#: apps/desktop/src/components/gameActions/ActionForm.tsx
+#, fuzzy
+#| msgid "Automatic ({platform})"
+msgid "Automatic ({automatic})"
+msgstr "Automatiskt ({platform})"
 
 #. The Caskade platform matched to a RomM platform
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
@@ -2391,6 +2410,10 @@ msgstr "Automatisk biblioteksidentifiering"
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Automatic opens console mode in Steam Deck game mode (gamescope), otherwise the mode you last used."
 msgstr "Automatiskt öppnar konsolläge i Steam Decks spelläge (gamescope), annars läget du använde senast."
+
+#: apps/desktop/src/components/gameActions/ActionForm.tsx
+msgid "Automatic runs the best Proton build installed each time the game starts. Choose a build to keep this action on it."
+msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 msgid "autostart, login"
@@ -9380,6 +9403,10 @@ msgstr "Framsteg som inte har sparats går förlorade."
 msgid "Project page"
 msgstr "Projektsida"
 
+#: apps/desktop/src/components/gameActions/ActionForm.tsx
+msgid "Proton build"
+msgstr ""
+
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Provides {providers}"
 msgstr "Tillhandahåller {providers}"
@@ -12329,6 +12356,10 @@ msgstr "Den här enheten"
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "This device can't share its games yet."
 msgstr "Den här enheten kan inte dela sina spel än."
+
+#: apps/desktop/src/components/gameActions/ActionForm.tsx
+msgid "This device doesn't have it, so the best build installed runs instead."
+msgstr ""
 
 #: apps/desktop/src/components/shares/ShareInfoDetails.tsx
 msgid "This device has an emulator for it."

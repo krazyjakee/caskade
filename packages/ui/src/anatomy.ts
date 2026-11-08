@@ -1003,6 +1003,8 @@ export const anatomy = {
       list: "A list of values, one field each: arguments, program names.",
       env: "The environment variables, a name and a value per row.",
       remove: "Removes one value or variable (a `button`).",
+      proton:
+        "Which Proton build a Windows program runs with: Automatic (the best installed) or one build.",
       tracking: "Which programs are the game, for a play action.",
       error: "Why the last save, order, delete or default change was refused.",
       delete: "Deletes the action; pressed once more to confirm (a `button`).",

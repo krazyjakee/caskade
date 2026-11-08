@@ -33,6 +33,7 @@ fn action(entry: &GameEntry, name: &str, kind: ActionKind) -> GameAction {
         kind,
         target: exe("/games/fixture/tool"),
         tracking: ActionTracking::default(),
+        proton: None,
     }
 }
 async fn imported(store: &LibraryStore, key: &str) -> (Game, GameEntry) {

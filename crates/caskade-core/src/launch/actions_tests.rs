@@ -28,6 +28,7 @@ fn action(id: &str, kind: ActionKind) -> GameAction {
         kind,
         target: exe("/games/fixture/tool"),
         tracking: ActionTracking::default(),
+        proton: None,
     }
 }
 fn ids(actions: &[GameAction]) -> Vec<&str> {
@@ -60,6 +61,7 @@ fn the_built_in_action_keeps_the_user_s_name_and_tracking() {
         built_in: BuiltInAction {
             name: Some("Play (Vulkan)".into()),
             tracking: Some(tracking.clone()),
+            proton: None,
         },
         ..Default::default()
     };
@@ -177,6 +179,51 @@ fn a_native_tool_for_a_windows_game_runs_without_wine() {
     assert_eq!(apply(&entry, &tool).runtime, GameRuntime::Native);
     tool.target = exe("/games/fixture/ModOrganizer.exe");
     assert_eq!(apply(&entry, &tool).runtime, entry.runtime);
+}
+
+#[test]
+fn an_action_s_proton_build_goes_to_the_runner_and_none_leaves_it_automatic() {
+    use caskade_discovery::RunnerHint;
+    let umu = |name: Option<&str>| GameRuntime::Windows {
+        prefix: None,
+        runner: Some(RunnerHint {
+            kind: RunnerKind::Umu,
+            name: name.map(Into::into),
+            path: None,
+        }),
+    };
+    let mut entry = release();
+    entry.runtime = umu(None);
+    let settings = EntryActionSettings {
+        built_in: BuiltInAction {
+            proton: Some("GE-Proton10-34".into()),
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+    // The built-in action keeps its launch and takes its build.
+    let built_in = built_in_action(&entry, &settings).unwrap();
+    let launched = apply(&entry, &built_in);
+    assert_eq!(launched.runtime, umu(Some("GE-Proton10-34")));
+    assert_eq!(launched.launch, entry.launch);
+    // An added Windows program takes its own; without one, the best
+    // installed build runs.
+    let mut modded = action("modded", ActionKind::Play);
+    modded.target = exe("/games/fixture/game-modded.exe");
+    assert_eq!(apply(&entry, &modded).runtime, umu(None));
+    modded.proton = Some("Proton 10.0".into());
+    assert_eq!(apply(&entry, &modded).runtime, umu(Some("Proton 10.0")));
+    // A Wine prefix has no Proton build to choose.
+    let wine = GameRuntime::Windows {
+        prefix: None,
+        runner: Some(RunnerHint {
+            kind: RunnerKind::Wine,
+            name: None,
+            path: None,
+        }),
+    };
+    entry.runtime = wine.clone();
+    assert_eq!(apply(&entry, &modded).runtime, wine);
 }
 
 #[test]
@@ -355,6 +402,7 @@ mod editing {
             kind,
             target,
             tracking: ActionTracking::default(),
+            proton: None,
         }
     }
 
@@ -416,8 +464,16 @@ mod editing {
             folder: None,
             names: vec!["game.exe".into()],
         };
+        built_in.proton = Some(" GE-Proton10-34 ".into());
         let saved = save_action(&store, &game.id, &built_in).await.unwrap();
+        built_in.proton = Some("GE-Proton10-34".into());
         assert_eq!(saved, built_in);
+        // A build is named, not given by path.
+        let mut by_path = built_in.clone();
+        by_path.proton = Some("/opt/proton".into());
+        assert!(save_action(&store, &game.id, &by_path).await.is_err());
+        // An external release's programs don't run through Caskade's Proton.
+        assert!(!releases[0].proton);
         let mut retarget = built_in.clone();
         retarget.target = exe("/elsewhere");
         let Err(crate::Error::Invalid(why)) = save_action(&store, &game.id, &retarget).await else {

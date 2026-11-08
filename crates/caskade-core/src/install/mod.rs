@@ -33,7 +33,7 @@ mod source;
 mod update;
 pub use operations::{JobAnswer, Verification};
 pub use recovery::Recovery;
-pub use settings::{InstallerRunnerResolver, runner_paths};
+pub use settings::{InstallerRunnerResolver, ProtonBuilds, proton_builds, runner_paths};
 
 pub use jobs::{JobKind, JobPhase, JobProgress, JobSnapshot, JobStatus};
 pub use mapping::{

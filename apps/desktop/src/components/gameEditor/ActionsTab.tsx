@@ -12,8 +12,10 @@ import {
   type GameAction,
   isBuiltIn,
   type ReleaseActions,
+  runsWindowsProgram,
   useActionChanges,
   useGameActions,
+  useProtonBuilds,
 } from "../../api/actions";
 import type { GameEntry } from "../../api/types";
 import { ActionForm } from "../gameActions/ActionForm";
@@ -43,6 +45,7 @@ export function ActionsTab({ gameId, details, onDirtyChange }: GameEditorTabProp
   const [draft, setDraft] = useState<GameAction | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const actions = release?.actions ?? [];
+  const proton = useProtonBuilds(Boolean(release?.proton));
   // The saved action shown: the one chosen, else the first.
   const shown = actions.find((action) => action.id === (selected ?? actions[0]?.id)) ?? null;
   const editing = draft ?? shown;
@@ -237,6 +240,7 @@ export function ActionsTab({ gameId, details, onDirtyChange }: GameEditorTabProp
               action={editing}
               onChange={setDraft}
               targetLocked={builtIn && !release?.editableBuiltIn}
+              proton={release?.proton && runsWindowsProgram(editing) ? proton.data : null}
               isDisabled={changes.save.isPending}
             />
             {failure && (

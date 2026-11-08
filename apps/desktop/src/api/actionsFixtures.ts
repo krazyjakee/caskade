@@ -39,7 +39,7 @@ export function createFixtureActions(records: GameDetails[]): ActionsApi & {
     settings.get(entryId) ?? {
       defaultAction: null,
       ask: false,
-      builtIn: { name: null, tracking: null },
+      builtIn: { name: null, tracking: null, proton: null },
     };
   const builtIn = (entry: GameEntry): GameAction | null => {
     if (!entry.canLaunch && !targets.has(entry.id)) return null;
@@ -57,6 +57,7 @@ export function createFixtureActions(records: GameDetails[]): ActionsApi & {
         env: {},
       },
       tracking: own.tracking ?? { mode: "automatic", folder: null, names: [] },
+      proton: own.proton ?? null,
     };
   };
   const actionsOf = (entry: GameEntry): GameAction[] => [
@@ -121,6 +122,8 @@ export function createFixtureActions(records: GameDetails[]): ActionsApi & {
             entryId: entry.id,
             editableBuiltIn: entry.source === MANUAL,
             hasFolder: entry.location !== null,
+            // Caskade's own installs run Windows programs through Proton.
+            proton: entry.source === "caskade-storage",
             actions: actionsOf(entry),
             settings: settingsOf(entry.id),
           }),
@@ -169,6 +172,7 @@ export function createFixtureActions(records: GameDetails[]): ActionsApi & {
           builtIn: {
             name: saved.name === "Play" ? null : saved.name,
             tracking: saved.tracking.mode === "automatic" ? null : saved.tracking,
+            proton: saved.proton?.trim() || null,
           },
         });
         return builtIn(entry) as GameAction;
@@ -218,6 +222,12 @@ export function createFixtureActions(records: GameDetails[]): ActionsApi & {
       };
       settings.set(entryId, saved);
       return structuredClone(saved);
+    },
+    async protonBuilds() {
+      return {
+        installed: ["UMU-Proton-10.0-4", "GE-Proton10-34", "Proton 10.0", "Proton Hotfix"],
+        automatic: "UMU-Proton-10.0-4",
+      };
     },
     async runTool(entryId, actionId) {
       const tool = (added.get(entryId) ?? []).find((each) => each.id === actionId);

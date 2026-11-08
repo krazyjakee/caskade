@@ -191,15 +191,8 @@ fn proton_builds() -> Vec<PathBuf> {
             }
         }
     }
-    // umu-managed UMU-Proton first (umu's default and best tested), then
-    // newest-looking names; PROTONPATH above always wins.
-    found.sort_by_key(|path| {
-        let name = path
-            .file_name()
-            .map(|name| name.to_string_lossy().to_lowercase())
-            .unwrap_or_default();
-        (!name.starts_with("umu-proton"), std::cmp::Reverse(name))
-    });
+    // Best first (see `proton_rank`); PROTONPATH above always wins.
+    found.sort_by_cached_key(|path| proton_rank(path));
     for build in found {
         if !builds.contains(&build) {
             builds.push(build);
@@ -207,6 +200,99 @@ fn proton_builds() -> Vec<PathBuf> {
     }
     builds
 }
+
+/// A Proton build's family, in the order an automatic choice prefers them.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum ProtonFamily {
+    /// umu's own build: its default and best tested with it.
+    Umu,
+    GeProton,
+    /// Valve's numbered releases (`Proton 10.0`).
+    SteamStable,
+    SteamExperimental,
+    /// Other compatibility tools (Proton-tkg, CachyOS and the like).
+    Other,
+    Beta,
+    /// Valve's builds for the particular games it assigns them to.
+    Hotfix,
+}
+
+fn proton_family(name: &str) -> ProtonFamily {
+    let name = name.to_ascii_lowercase();
+    if name.contains("hotfix") {
+        ProtonFamily::Hotfix
+    } else if name.starts_with("umu-proton") {
+        ProtonFamily::Umu
+    } else if name.starts_with("ge-proton")
+        || name.starts_with("ge_proton")
+        || name.starts_with("proton-ge")
+    {
+        ProtonFamily::GeProton
+    } else if name.contains("beta") {
+        ProtonFamily::Beta
+    } else if name.contains("experimental") {
+        ProtonFamily::SteamExperimental
+    } else if name
+        .strip_prefix("proton ")
+        .is_some_and(|rest| rest.starts_with(|c: char| c.is_ascii_digit()))
+    {
+        ProtonFamily::SteamStable
+    } else {
+        ProtonFamily::Other
+    }
+}
+
+/// The numbers in a build's name, so `GE-Proton10-34` is newer than
+/// `GE-Proton9-27` (a text comparison would say otherwise).
+fn proton_version(name: &str) -> Vec<u32> {
+    name.split(|c: char| !c.is_ascii_digit())
+        .filter_map(|digits| digits.parse().ok())
+        .collect()
+}
+
+/// Sorts Proton builds best first: by family, then newest version.
+fn proton_rank(path: &Path) -> (ProtonFamily, std::cmp::Reverse<Vec<u32>>, String) {
+    let name = proton_build_name(path);
+    (
+        proton_family(&name),
+        std::cmp::Reverse(proton_version(&name)),
+        name,
+    )
+}
+
+/// A Proton build's name: its folder's, as Steam and umu show it.
+pub fn proton_build_name(path: &Path) -> String {
+    path.file_name()
+        .map(|name| name.to_string_lossy().into_owned())
+        .unwrap_or_default()
+}
+
+/// The build an automatic choice runs from `builds`, which are best first
+/// (as `HostCaps::proton_builds`): the first that isn't a Hotfix, which is
+/// only for the games Valve assigns it to.
+pub fn automatic_proton_build(builds: &[PathBuf]) -> Option<&PathBuf> {
+    builds
+        .iter()
+        .find(|path| proton_family(&proton_build_name(path)) != ProtonFamily::Hotfix)
+}
+
+/// `PROTONPATH` for an automatic choice from `builds`: the
+/// [automatic build](automatic_proton_build), except that an umu-managed
+/// UMU-Proton is named `UMU-Proton` so umu keeps it current. `None` when
+/// none is installed.
+pub fn automatic_proton(builds: &[PathBuf]) -> Option<String> {
+    let build = automatic_proton_build(builds)?;
+    Some(
+        if proton_family(&proton_build_name(build)) == ProtonFamily::Umu {
+            UMU_PROTON.into()
+        } else {
+            build.to_string_lossy().into_owned()
+        },
+    )
+}
+
+/// `PROTONPATH` that has umu download UMU-Proton and keep it current.
+pub const UMU_PROTON: &str = "UMU-Proton";
 
 fn find_tool(name: &str) -> Option<PathBuf> {
     let path = std::env::var_os("PATH")?;
@@ -241,5 +327,71 @@ fn is_executable(path: &Path) -> bool {
     #[cfg(not(unix))]
     {
         true
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn names(mut builds: Vec<PathBuf>) -> Vec<String> {
+        builds.sort_by_cached_key(|path| proton_rank(path));
+        builds.iter().map(|path| proton_build_name(path)).collect()
+    }
+
+    #[test]
+    fn proton_builds_rank_by_family_then_newest_version() {
+        let common = Path::new("/steam/steamapps/common");
+        let tools = Path::new("/steam/compatibilitytools.d");
+        let builds = vec![
+            common.join("Proton Hotfix"),
+            common.join("Proton 9.0 (Beta)"),
+            common.join("Proton 10.0"),
+            common.join("Proton 8.0"),
+            common.join("Proton - Experimental"),
+            tools.join("GE-Proton9-27"),
+            tools.join("GE-Proton10-34"),
+            tools.join("proton-cachyos"),
+            tools.join("UMU-Proton-10.0-4"),
+            tools.join("UMU-Proton-9.0-3"),
+        ];
+        assert_eq!(
+            names(builds),
+            [
+                "UMU-Proton-10.0-4",
+                "UMU-Proton-9.0-3",
+                "GE-Proton10-34",
+                "GE-Proton9-27",
+                "Proton 10.0",
+                "Proton 8.0",
+                "Proton - Experimental",
+                "proton-cachyos",
+                "Proton 9.0 (Beta)",
+                "Proton Hotfix",
+            ]
+        );
+    }
+
+    #[test]
+    fn automatic_proton_skips_hotfix_and_lets_umu_keep_its_own_current() {
+        let common = Path::new("/steam/steamapps/common");
+        let tools = Path::new("/steam/compatibilitytools.d");
+        assert_eq!(automatic_proton(&[]), None);
+        assert_eq!(automatic_proton(&[common.join("Proton Hotfix")]), None);
+        assert_eq!(
+            automatic_proton(&[common.join("Proton Hotfix"), common.join("Proton 10.0")]),
+            Some("/steam/steamapps/common/Proton 10.0".into())
+        );
+        assert_eq!(
+            automatic_proton(&[
+                tools.join("UMU-Proton-10.0-4"),
+                tools.join("GE-Proton10-34")
+            ]),
+            Some(UMU_PROTON.into())
+        );
+        assert_eq!(
+            automatic_proton_build(&[tools.join("UMU-Proton-10.0-4")]),
+            Some(&tools.join("UMU-Proton-10.0-4"))
+        );
     }
 }

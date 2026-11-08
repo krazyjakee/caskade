@@ -118,6 +118,7 @@ pub fn builder() -> Builder<tauri::Wry> {
             crate::commands::actions::game_action_delete,
             crate::commands::actions::game_actions_order,
             crate::commands::actions::game_action_settings_save,
+            crate::commands::actions::proton_builds,
             crate::commands::actions::game_tool_run,
             crate::commands::scripts::lifecycle_scripts,
             crate::commands::scripts::lifecycle_script_save,

@@ -12,7 +12,7 @@ use crate::{
     },
     tracking::TrackingMode,
 };
-use caskade_discovery::GameRuntime;
+use caskade_discovery::{GameRuntime, RunnerKind};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -43,6 +43,7 @@ pub fn built_in_action(entry: &GameEntry, settings: &EntryActionSettings) -> Opt
         kind: ActionKind::Play,
         target,
         tracking: settings.built_in.tracking.clone().unwrap_or_default(),
+        proton: settings.built_in.proton.clone(),
     })
 }
 
@@ -117,20 +118,42 @@ pub(crate) fn select(
 }
 
 /// The entry as the launch pipeline sees it for `action`: its target in
-/// place of the entry's own launch. A native tool for a Windows game (a
-/// script, a Linux mod manager) runs without Wine.
+/// place of the entry's own launch, and its Proton build in its runner. A
+/// native tool for a Windows game (a script, a Linux mod manager) runs
+/// without Wine.
 pub(crate) fn apply(entry: &GameEntry, action: &GameAction) -> GameEntry {
     let mut entry = entry.clone();
-    if action.id == built_in_action_id(&entry.id) {
-        return entry;
+    if action.id != built_in_action_id(&entry.id) {
+        if matches!(entry.runtime, GameRuntime::Windows { .. })
+            && !matches!(&action.target, LaunchSpec::Executable { path, .. } if windows_program(path))
+        {
+            entry.runtime = GameRuntime::Native;
+        }
+        entry.launch = Some(action.target.clone());
     }
-    if matches!(entry.runtime, GameRuntime::Windows { .. })
-        && !matches!(&action.target, LaunchSpec::Executable { path, .. } if windows_program(path))
+    if let Some(build) = &action.proton
+        && let GameRuntime::Windows {
+            runner: Some(runner),
+            ..
+        } = &mut entry.runtime
+        && matches!(runner.kind, RunnerKind::Umu | RunnerKind::Proton)
     {
-        entry.runtime = GameRuntime::Native;
+        runner.name = Some(build.clone());
     }
-    entry.launch = Some(action.target.clone());
     entry
+}
+
+/// Whether a release's Windows programs run through Proton here, so its
+/// actions can choose the build: a Caskade install's prefix on Linux.
+fn runs_proton(entry: &GameEntry) -> bool {
+    cfg!(target_os = "linux")
+        && matches!(entry.location, Some(InstallLocation::Managed { .. }))
+        && match &entry.runtime {
+            GameRuntime::Windows { runner, .. } => runner
+                .as_ref()
+                .is_none_or(|runner| matches!(runner.kind, RunnerKind::Umu | RunnerKind::Proton)),
+            _ => false,
+        }
 }
 
 fn windows_program(path: &Path) -> bool {
@@ -304,6 +327,9 @@ pub struct ReleaseActions {
     pub editable_built_in: bool,
     /// Its own folder (a managed install's), which relative paths are in.
     pub has_folder: bool,
+    /// Its Windows programs run through Proton on this device, so an
+    /// action can choose the build (`proton_builds` lists them).
+    pub proton: bool,
     /// Its built-in action first, then the ones the user added.
     pub actions: Vec<GameAction>,
     pub settings: EntryActionSettings,
@@ -329,6 +355,7 @@ pub async fn game_actions(
             entry_id: entry.id.clone(),
             editable_built_in: entry.source_id.as_str() == MANUAL_SOURCE,
             has_folder: entry.location.is_some(),
+            proton: runs_proton(&entry),
             actions: entry_actions(&entry, added, &settings),
             settings,
         });
@@ -415,6 +442,7 @@ async fn save_built_in(
         name: Some(action.name.clone()).filter(|name| *name != crate::tr!("Play")),
         tracking: Some(action.tracking.clone())
             .filter(|tracking| *tracking != ActionTracking::default()),
+        proton: action.proton.clone(),
     };
     let settings = store
         .save_entry_action_settings(&entry.id, &settings)

@@ -424,6 +424,7 @@ async fn add_action(core: &Core, name: &str) {
                 args: Vec::new(),
             },
             tracking: Default::default(),
+            proton: None,
         })
         .await
         .unwrap();

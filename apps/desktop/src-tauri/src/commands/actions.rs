@@ -6,8 +6,10 @@ use caskade_core::{
     accounts::AgeRestriction,
     bus::{Bus, Event},
     db::LibraryStore,
+    install::{self, ProtonBuilds},
     launch::{self, LaunchError, LaunchService, ReleaseActions},
     model::{EntryActionSettings, GameAction},
+    settings::SettingsService,
 };
 use serde::Serialize;
 use specta::Type;
@@ -92,6 +94,16 @@ pub async fn game_action_settings_save(
         .map_err(report)?;
     bus.emit(Event::LibraryGameUpdated { game_id });
     Ok(saved)
+}
+
+/// The Proton builds installed on this device that an action can choose,
+/// and the one an action without its own runs now.
+#[tauri::command]
+#[specta::specta]
+pub async fn proton_builds(
+    settings: State<'_, SettingsService>,
+) -> Result<ProtonBuilds, CommandError> {
+    install::proton_builds(&settings).await.map_err(report)
 }
 
 /// A tool started, or the age limit holds the game back until an admin's

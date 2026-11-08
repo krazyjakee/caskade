@@ -1162,6 +1162,7 @@ Root: `[data-cs="game-actions"]`
 | `list` | `[data-cs="game-actions"] [data-part="list"]` | A list of values, one field each: arguments, program names. |
 | `env` | `[data-cs="game-actions"] [data-part="env"]` | The environment variables, a name and a value per row. |
 | `remove` | `[data-cs="game-actions"] [data-part="remove"]` | Removes one value or variable (a `button`). |
+| `proton` | `[data-cs="game-actions"] [data-part="proton"]` | Which Proton build a Windows program runs with: Automatic (the best installed) or one build. |
 | `tracking` | `[data-cs="game-actions"] [data-part="tracking"]` | Which programs are the game, for a play action. |
 | `error` | `[data-cs="game-actions"] [data-part="error"]` | Why the last save, order, delete or default change was refused. |
 | `delete` | `[data-cs="game-actions"] [data-part="delete"]` | Deletes the action; pressed once more to confirm (a `button`). |

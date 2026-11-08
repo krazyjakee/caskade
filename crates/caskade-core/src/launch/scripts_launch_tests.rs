@@ -354,6 +354,7 @@ async fn tools_run_without_lifecycle_scripts() {
                 env: BTreeMap::new(),
             },
             tracking: ActionTracking::default(),
+            proton: None,
         })
         .await
         .unwrap();
@@ -417,6 +418,7 @@ async fn after_a_restart_each_phase_still_runs_once() {
                 mode: TrackingMode::ProcessTree,
                 ..Default::default()
             },
+            proton: None,
         })
         .await
         .unwrap();

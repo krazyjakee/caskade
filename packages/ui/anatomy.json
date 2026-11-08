@@ -914,6 +914,7 @@
         "list",
         "env",
         "remove",
+        "proton",
         "tracking",
         "error",
         "delete"

@@ -66,6 +66,17 @@ impl CompatibilityRunner {
         }
     }
 
+    /// `PROTONPATH` from a host [configured](Self::configure_host) for this
+    /// choice: the best Proton build installed, or for plain Proton, when
+    /// none is, umu's own download of UMU-Proton.
+    pub fn proton_path(self, host: &HostCaps) -> Result<String, &'static str> {
+        match crate::host::automatic_proton(&host.proton_builds) {
+            Some(path) => Ok(path),
+            None if self == Self::Proton => Ok(crate::host::UMU_PROTON.into()),
+            None => Err("the selected GE-Proton/Steam Proton build is not installed"),
+        }
+    }
+
     pub fn launcher(self, host: &HostCaps, game_id: &str) -> PipelineResult<Launcher> {
         let mut selected = host.clone();
         self.configure_host(&mut selected);
@@ -81,15 +92,7 @@ impl CompatibilityRunner {
             .ok_or("umu-launcher is unavailable for the selected compatibility runner")?
             .program
             .clone();
-        let proton_path = if self == Self::Proton {
-            "UMU-Proton".into()
-        } else {
-            host.proton_builds
-                .first()
-                .ok_or("the selected GE-Proton/Steam Proton build is not installed")?
-                .to_string_lossy()
-                .into_owned()
-        };
+        let proton_path = self.proton_path(host)?;
         Ok(Launcher::Umu {
             umu_run,
             proton_path,

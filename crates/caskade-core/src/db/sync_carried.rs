@@ -607,6 +607,7 @@ async fn action(
             .unwrap_or(ActionKind::Play),
         target: bound,
         tracking,
+        proton: None,
     };
     let managed = matches!(release.location, Some(InstallLocation::Managed { .. }));
     let Ok(action) = action.normalized(managed) else {

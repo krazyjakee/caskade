@@ -244,8 +244,12 @@ fn runner_preferences_use_detected_builds_without_changing_the_host_snapshot() {
         "/fixture/steamapps/common/Proton 9.0".into(),
     ];
     let original = host.clone();
+    // Plain Proton runs the best build installed (no UMU-Proton here).
     for (preference, expected) in [
-        (CompatibilityRunner::Proton, "UMU-Proton"),
+        (
+            CompatibilityRunner::Proton,
+            "/fixture/compatibilitytools.d/GE-Proton9-27",
+        ),
         (
             CompatibilityRunner::GeProton,
             "/fixture/compatibilitytools.d/GE-Proton9-27",
@@ -265,6 +269,13 @@ fn runner_preferences_use_detected_builds_without_changing_the_host_snapshot() {
     }
     let mut missing = host.clone();
     missing.proton_builds.clear();
+    // With none installed, umu downloads UMU-Proton.
+    assert_eq!(
+        runner_paths(&InstallerSettings::default(), &missing)
+            .unwrap()
+            .proton_path,
+        "UMU-Proton"
+    );
     assert!(
         runner_paths(
             &InstallerSettings {

@@ -162,6 +162,29 @@ it("adds, edits, orders, defaults and deletes a release's actions", {
   );
 });
 
+it("keeps an installed Windows game's action on a Proton build, or the best one", async () => {
+  const app = renderApp("/games/fixture-0", { games: games() });
+  const dialog = await openActions();
+  // The store's release runs its own way: no Proton choice.
+  expect(within(dialog).queryByRole("button", { name: /Proton build/ })).toBeNull();
+  await pick(dialog, /Release/, /Fixture · caskade-storage/);
+  const proton = await within(dialog).findAllByRole("button", { name: /Proton build/ });
+  expect(proton[0]?.textContent).toMatch(/Automatic \(UMU-Proton-10.0-4\)/);
+  await pick(dialog, /Proton build/, "GE-Proton10-34");
+  fireEvent.click(within(dialog).getByRole("button", { name: "Save action" }));
+  await waitFor(async () =>
+    expect((await app.library.actions.list("fixture-0"))[1]?.actions[0]?.proton).toBe(
+      "GE-Proton10-34",
+    ),
+  );
+  // A native tool runs without Proton, so it has no choice.
+  fireEvent.click(within(dialog).getByRole("button", { name: "Add tool" }));
+  type(textbox(dialog, "Program"), "/games/Fixture/configure.sh");
+  expect(within(dialog).queryByRole("button", { name: /Proton build/ })).toBeNull();
+  type(textbox(dialog, "Program"), "/games/Fixture/Config.exe");
+  expect(within(dialog).getAllByRole("button", { name: /Proton build/ }).length).toBeGreaterThan(0);
+});
+
 it("duplicates the built-in action into one whose target can change", async () => {
   const app = renderApp("/games/fixture-0", { games: games() });
   const dialog = await openActions();
@@ -187,7 +210,7 @@ it("asks which action Play starts and launches the one chosen", async () => {
   await app.library.actions.saveSettings("fixture-0", "steam", {
     defaultAction: modded.id,
     ask: true,
-    builtIn: { name: null, tracking: null },
+    builtIn: { name: null, tracking: null, proton: null },
   });
   const launch = vi.spyOn(app.library, "launchGame");
   rightClick(await screen.findByRole("heading", { level: 1, name: "Fixture Game 0001" }));

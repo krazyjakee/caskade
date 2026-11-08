@@ -192,6 +192,7 @@ impl LibraryStore {
         if let Some(tracking) = &settings.built_in.tracking {
             settings.built_in.tracking = Some(tracking.normalized(managed)?);
         }
+        settings.built_in.proton = v::proton_build(settings.built_in.proton.as_deref())?;
         if let Some(id) = &settings.default_action
             && *id != crate::model::built_in_action_id(entry_id)
         {

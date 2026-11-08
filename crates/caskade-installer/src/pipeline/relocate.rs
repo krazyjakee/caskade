@@ -125,11 +125,8 @@ fn engine_at(
                             })?
                             .program
                             .clone(),
-                        proton_path: host
-                            .proton_builds
-                            .first()
-                            .map(|path| path.to_string_lossy().into_owned())
-                            .unwrap_or_else(|| "UMU-Proton".into()),
+                        proton_path: crate::host::automatic_proton(&host.proton_builds)
+                            .unwrap_or_else(|| crate::host::UMU_PROTON.into()),
                         game_id: id.clone(),
                     },
                     RuntimeSpec::Native => unreachable!(),

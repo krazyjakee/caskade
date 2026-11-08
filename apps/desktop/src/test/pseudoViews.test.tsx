@@ -751,8 +751,17 @@ it.each(modes)("shows the game editor's tabs in the pseudo-locale (%s)", async (
   await ready('[data-cs="game-editor"] [data-cs="game-actions"] [data-part="action"]');
   await ready('[data-cs="game-editor"] [data-cs="scripts"] [data-part="order"]');
   await ready('[data-cs="game-editor"] [data-cs="game-saves"] [data-part="location"]');
-  // The built-in action's name is the core's (#214), as is the save match's.
-  const data = [...dialogData, /CASKADE_\w+/g, /\{\w+\}/g, /^Play$/, "Fixture Game"];
+  // The built-in action's name is the core's (#214), as is the save match's;
+  // Proton builds are named by their folders.
+  const builds = await app.library.actions.protonBuilds();
+  const data = [
+    ...dialogData,
+    /CASKADE_\w+/g,
+    /\{\w+\}/g,
+    /^Play$/,
+    "Fixture Game",
+    ...builds.installed,
+  ];
   expect(over(data)).toEqual([]);
 
   // Unsaved work asks first.
@@ -2161,6 +2170,7 @@ it.each(modes)("says a tool didn't start in the pseudo-locale (%s)", async (mode
     kind: "utility",
     target: { type: "executable", path: "/fixture/mods", args: [], cwd: null, env: {} },
     tracking: { mode: "automatic", folder: null, names: [] },
+    proton: null,
   });
   vi.spyOn(app.library.actions, "runTool").mockRejectedValue(new Error("The tool is missing"));
   await gameHeading();

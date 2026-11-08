@@ -105,6 +105,7 @@ pub fn access(command: &str) -> Option<Access> {
         | "igdb_catalog_games"
         | "igdb_owned"
         | "game_actions"
+        | "proton_builds"
         | "lifecycle_scripts"
         | "lifecycle_scripts_effective"
         | "game_achievements"

@@ -3083,6 +3083,10 @@ msgid "the action has no program"
 msgstr ""
 
 #: crates/caskade-core/src/model/validation.rs
+msgid "a Proton build is named by its folder's name, without a path"
+msgstr ""
+
+#: crates/caskade-core/src/model/validation.rs
 msgid "too many process names"
 msgstr ""
 

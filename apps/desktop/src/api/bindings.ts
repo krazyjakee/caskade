@@ -330,6 +330,11 @@ export const commands = {
 	gameActionsOrder: (gameId: string, entryId: string, ids: string[]) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("game_actions_order", { gameId, entryId, ids })),
 	/**  A release's default action and ask-at-launch choice. */
 	gameActionSettingsSave: (gameId: string, entryId: string, settings: EntryActionSettings_Deserialize) => typedError<EntryActionSettings_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_action_settings_save", { gameId, entryId, settings })),
+	/**
+	 *  The Proton builds installed on this device that an action can choose,
+	 *  and the one an action without its own runs now.
+	 */
+	protonBuilds: () => typedError<ProtonBuilds_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("proton_builds")),
 	/**  Runs a release's tool: no play session, playtime or last played. */
 	gameToolRun: (entryId: string, actionId: string) => typedError<ToolOutcome_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_tool_run", { entryId, actionId })),
 	/**  One scope's scripts in their order, disabled ones included. */
@@ -2267,27 +2272,34 @@ export type BiosState = "found" | "missing" |
 "wrong_hash";
 
 /**
- *  The built-in action as the user changed it: its name and tracking. Its
- *  target stays the entry's `launch`, which rediscovery keeps current.
+ *  The built-in action as the user changed it: its name, tracking and
+ *  Proton build. Its target stays the entry's `launch`, which rediscovery
+ *  keeps current.
  */
 export type BuiltInAction = BuiltInAction_Serialize | BuiltInAction_Deserialize;
 
 /**
- *  The built-in action as the user changed it: its name and tracking. Its
- *  target stays the entry's `launch`, which rediscovery keeps current.
+ *  The built-in action as the user changed it: its name, tracking and
+ *  Proton build. Its target stays the entry's `launch`, which rediscovery
+ *  keeps current.
  */
 export type BuiltInAction_Deserialize = {
 	name?: string | null,
 	tracking?: ActionTracking_Deserialize | null,
+	/**  As [`GameAction::proton`]. */
+	proton?: string | null,
 };
 
 /**
- *  The built-in action as the user changed it: its name and tracking. Its
- *  target stays the entry's `launch`, which rediscovery keeps current.
+ *  The built-in action as the user changed it: its name, tracking and
+ *  Proton build. Its target stays the entry's `launch`, which rediscovery
+ *  keeps current.
  */
 export type BuiltInAction_Serialize = {
 	name: string | null,
 	tracking: ActionTracking_Serialize | null,
+	/**  As [`GameAction::proton`]. */
+	proton: string | null,
 };
 
 /**  One field of one game in a bulk edit, as text to show. */
@@ -3910,6 +3922,12 @@ export type GameAction_Deserialize = {
 	 */
 	target: LaunchSpec_Deserialize,
 	tracking?: ActionTracking_Deserialize,
+	/**
+	 *  The Proton build a Windows program runs with on Linux, by its folder
+	 *  name (`GE-Proton10-34`). `None` runs the best build installed when it
+	 *  starts, as does a device that doesn't have this one.
+	 */
+	proton?: string | null,
 };
 
 export type GameAction_Serialize = {
@@ -3923,6 +3941,12 @@ export type GameAction_Serialize = {
 	 */
 	target: LaunchSpec_Serialize,
 	tracking: ActionTracking_Serialize,
+	/**
+	 *  The Proton build a Windows program runs with on Linux, by its folder
+	 *  name (`GE-Proton10-34`). `None` runs the best build installed when it
+	 *  starts, as does a device that doesn't have this one.
+	 */
+	proton: string | null,
 };
 
 /**  A library game's age ratings and the minimum age they come to. */
@@ -7164,6 +7188,35 @@ export type ProfileView_Serialize = {
 /**  A program from the input, the game tree or a host tool resolved by runtime. */
 export type Program = { type: "source"; value: SourcePath } | { type: "tool"; value: string };
 
+/**  The Proton builds a launch action can choose on this device (#177). */
+export type ProtonBuilds = ProtonBuilds_Serialize | ProtonBuilds_Deserialize;
+
+/**  The Proton builds a launch action can choose on this device (#177). */
+export type ProtonBuilds_Deserialize = {
+	/**  Installed builds by name, best first. */
+	installed: string[],
+	/**
+	 *  The build an action without its own runs now, under the installer's
+	 *  compatibility runner setting. `None` when none is installed: umu
+	 *  downloads UMU-Proton (or, for GE-Proton or Steam Proton, the launch
+	 *  says it is missing).
+	 */
+	automatic?: string | null,
+};
+
+/**  The Proton builds a launch action can choose on this device (#177). */
+export type ProtonBuilds_Serialize = {
+	/**  Installed builds by name, best first. */
+	installed: string[],
+	/**
+	 *  The build an action without its own runs now, under the installer's
+	 *  compatibility runner setting. `None` when none is installed: umu
+	 *  downloads UMU-Proton (or, for GE-Proton or Steam Proton, the launch
+	 *  says it is missing).
+	 */
+	automatic: string | null,
+};
+
 /**  An explicit ambiguity; the default pipeline asks only when it cannot decide. */
 export type Question = Question_Serialize | Question_Deserialize;
 
@@ -7429,6 +7482,11 @@ export type ReleaseActions_Deserialize = {
 	editableBuiltIn: boolean,
 	/**  Its own folder (a managed install's), which relative paths are in. */
 	hasFolder: boolean,
+	/**
+	 *  Its Windows programs run through Proton on this device, so an
+	 *  action can choose the build (`proton_builds` lists them).
+	 */
+	proton: boolean,
 	/**  Its built-in action first, then the ones the user added. */
 	actions: GameAction_Deserialize[],
 	settings: EntryActionSettings_Deserialize,
@@ -7444,6 +7502,11 @@ export type ReleaseActions_Serialize = {
 	editableBuiltIn: boolean,
 	/**  Its own folder (a managed install's), which relative paths are in. */
 	hasFolder: boolean,
+	/**
+	 *  Its Windows programs run through Proton on this device, so an
+	 *  action can choose the build (`proton_builds` lists them).
+	 */
+	proton: boolean,
 	/**  Its built-in action first, then the ones the user added. */
 	actions: GameAction_Serialize[],
 	settings: EntryActionSettings_Serialize,

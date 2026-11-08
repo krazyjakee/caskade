@@ -189,8 +189,24 @@ impl GameAction {
             return Err(Error::Invalid(crate::tr!("the action has no program")));
         }
         out.tracking = out.tracking.normalized(managed)?;
+        out.proton = proton_build(out.proton.as_deref())?;
         Ok(out)
     }
+}
+
+/// A launch action's Proton build name, trimmed; empty is the automatic
+/// choice (`None`).
+pub(crate) fn proton_build(name: Option<&str>) -> Result<Option<String>> {
+    let Some(name) = name.map(str::trim).filter(|name| !name.is_empty()) else {
+        return Ok(None);
+    };
+    text(name, "Proton build", false, 256)?;
+    if name.contains(['/', '\\']) || name == "." || name == ".." {
+        return Err(Error::Invalid(crate::tr!(
+            "a Proton build is named by its folder's name, without a path"
+        )));
+    }
+    Ok(Some(name.to_owned()))
 }
 impl ActionTracking {
     pub fn normalized(&self, managed: bool) -> Result<Self> {

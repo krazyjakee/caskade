@@ -37,6 +37,7 @@ async fn a_synced_flatpak_action_whose_app_is_missing_says_so() {
                 args: Vec::new(),
             },
             tracking: ActionTracking::default(),
+            proton: None,
         })
         .await
         .unwrap();

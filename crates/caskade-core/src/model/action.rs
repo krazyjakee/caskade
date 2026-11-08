@@ -57,10 +57,16 @@ pub struct GameAction {
     pub target: LaunchSpec,
     #[serde(default)]
     pub tracking: ActionTracking,
+    /// The Proton build a Windows program runs with on Linux, by its folder
+    /// name (`GE-Proton10-34`). `None` runs the best build installed when it
+    /// starts, as does a device that doesn't have this one.
+    #[serde(default)]
+    pub proton: Option<String>,
 }
 
-/// The built-in action as the user changed it: its name and tracking. Its
-/// target stays the entry's `launch`, which rediscovery keeps current.
+/// The built-in action as the user changed it: its name, tracking and
+/// Proton build. Its target stays the entry's `launch`, which rediscovery
+/// keeps current.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct BuiltInAction {
@@ -68,6 +74,9 @@ pub struct BuiltInAction {
     pub name: Option<String>,
     #[serde(default)]
     pub tracking: Option<ActionTracking>,
+    /// As [`GameAction::proton`].
+    #[serde(default)]
+    pub proton: Option<String>,
 }
 
 /// A release's choice of action, apart from the game's default release.

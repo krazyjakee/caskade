@@ -11,6 +11,7 @@ import type {
   EntryActionSettings_Serialize,
   GameAction_Serialize,
   LaunchSpec_Serialize,
+  ProtonBuilds_Serialize,
   ReleaseActions_Serialize,
   ToolOutcome_Serialize,
   TrackingMode,
@@ -28,6 +29,9 @@ export type EntryActionSettings = EntryActionSettings_Serialize;
 export type ReleaseActions = ReleaseActions_Serialize;
 /** A tool started, or the age limit asks for an admin's PIN first. */
 export type ToolOutcome = ToolOutcome_Serialize;
+/** The Proton builds on this device an action can choose, best first, and
+ * the one an action without its own runs now. */
+export type ProtonBuilds = ProtonBuilds_Serialize;
 
 /** The built-in action's id: the release's own launch. */
 export const builtInActionId = (entryId: string) => `source:${entryId}`;
@@ -50,6 +54,7 @@ export interface ActionsApi {
   ): Promise<EntryActionSettings>;
   /** Starts a tool: no play session, playtime or last played. */
   runTool(entryId: string, actionId: string): Promise<ToolOutcome>;
+  protonBuilds(): Promise<ProtonBuilds>;
 }
 
 function native() {
@@ -81,11 +86,16 @@ export const nativeActions: ActionsApi = {
     native();
     return unwrap(commands.gameToolRun(entryId, actionId));
   },
+  async protonBuilds() {
+    native();
+    return unwrap(commands.protonBuilds());
+  },
 };
 
 export const actionKeys = {
   /** Under the library's keys, so library changes refresh them. */
   game: (gameId: string) => [...libraryKeys.all, "actions", gameId] as const,
+  proton: ["actions", "proton"] as const,
 };
 
 /** The library's launch actions, or `null` where there are none. */
@@ -103,6 +113,29 @@ export function useGameActions(gameId: string) {
     },
     enabled: Boolean(api),
   });
+}
+
+/** The Proton builds an action can choose, once a release runs Proton. */
+export function useProtonBuilds(enabled: boolean) {
+  const api = useActionsApi();
+  return useQuery({
+    queryKey: actionKeys.proton,
+    queryFn: () => {
+      if (!api) throw new Error("Launch actions aren't available here");
+      return api.protonBuilds();
+    },
+    enabled: enabled && Boolean(api),
+  });
+}
+
+/** Whether `action` starts a Windows program, which runs through Proton
+ * when its release does: its built-in action, or a program like `.exe`. */
+export function runsWindowsProgram(action: GameAction) {
+  if (isBuiltIn(action)) return true;
+  return (
+    action.target.type === "executable" &&
+    /\.(exe|bat|cmd|com|lnk|msi)$/i.test(action.target.path.trim())
+  );
 }
 
 /** Changes to a game's actions; each refreshes its list. */
@@ -156,5 +189,6 @@ export function blankAction(entryId: string, kind: ActionKind): GameAction {
     kind,
     target: { type: "executable", path: "", args: [], cwd: null, env: {} },
     tracking: { mode: "automatic", folder: null, names: [] },
+    proton: null,
   };
 }

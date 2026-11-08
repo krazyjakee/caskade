@@ -268,6 +268,7 @@ async fn launch_actions_and_their_choices_follow_the_release_where_they_can_be_b
                 args: vec!["--hades".into()],
             },
             tracking: ActionTracking::default(),
+            proton: None,
         })
         .await
         .unwrap();
@@ -285,6 +286,7 @@ async fn launch_actions_and_their_choices_follow_the_release_where_they_can_be_b
                 env: Default::default(),
             },
             tracking: ActionTracking::default(),
+            proton: None,
         })
         .await
         .unwrap();

@@ -45,6 +45,7 @@ fn action(entry: &GameEntry, kind: ActionKind, target: LaunchSpec) -> GameAction
         kind,
         target,
         tracking: ActionTracking::default(),
+        proton: None,
     }
 }
 /// A game in `dir` whose own launch writes `own` when it runs.

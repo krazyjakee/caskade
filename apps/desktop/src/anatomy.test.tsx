@@ -884,6 +884,11 @@ describe("the shell's catalogued anatomy, and the app-only parts of shared compo
       name: "Play",
       target: { type: "executable", path: "/games/fixture/game", args: [], cwd: null, env: {} },
     });
+    // As if Caskade installed it: its Windows programs run through Proton.
+    const list = app.api.actions.list.bind(app.api.actions);
+    vi.spyOn(app.api.actions, "list").mockImplementation(async (gameId) =>
+      (await list(gameId)).map((release) => ({ ...release, proton: true })),
+    );
     await app.api.setDefaultEntry?.(first.id, own.entryId);
     const add = (action: Partial<typeof own>) =>
       app.api.actions.save(first.id, { ...own, id: "", ...action });
@@ -913,8 +918,10 @@ describe("the shell's catalogued anatomy, and the app-only parts of shared compo
     fireEvent.click(await screen.findByRole("button", { name: "Edit details" }));
     const dialog = await screen.findByRole("dialog", { name: /^Edit / });
     fireEvent.click(within(dialog).getByRole("tab", { name: /Actions/ }));
-    // The built-in action, locked, with the default choice above.
+    // The built-in action, locked, with the default choice above and its
+    // Proton build.
     await within(dialog).findByRole("option", { name: /Modded/ });
+    await within(dialog).findAllByRole("button", { name: /Proton build/ });
     expect(survey(seen, "game-actions")).toEqual([]);
     // An emulator, web or plugin target is described, not edited.
     fireEvent.click(within(dialog).getByRole("option", { name: /Browser build/ }));
