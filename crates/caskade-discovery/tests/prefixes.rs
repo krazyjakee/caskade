@@ -263,3 +263,43 @@ fn crossover_and_whisky_bottles_on_macos() {
     );
     assert_eq!(found[1].2, Some(RunnerKind::Wine));
 }
+
+#[test]
+fn watch_paths_follow_a_prefix_registry_that_changed() {
+    let temp = crate::fixtures::tempdir();
+    let home = linux(temp.path());
+    let pfx = home.join(".wine");
+    prefix(&pfx, "");
+    write(&pfx, "drive_c/Ubi/Launcher/upc.exe", "inert");
+    let env = HostEnv::fixture(temp.path()).unwrap();
+    let cache = pfx.join("drive_c/Ubi/Launcher/cache/configuration/configurations");
+    let watches = |env: &HostEnv| {
+        Prefixes
+            .watch_paths(env)
+            .into_iter()
+            .map(|watch| env.resolve_path(&watch.path).unwrap())
+            .collect::<Vec<_>>()
+    };
+    let before = watches(&env);
+    assert!(!before.contains(&cache), "{before:#?}");
+    assert_eq!(watches(&env), before);
+
+    // Ubisoft Connect's install recorded in the registry: its cache is
+    // watched.
+    write(
+        &pfx,
+        "system.reg",
+        "WINE REGISTRY Version 2\n;; All keys relative to \\\\Machine\n\n#arch=win64\n\n\
+         [Software\\\\Ubisoft\\\\Launcher] 1700000000\n\
+         \"InstallDir\"=\"C:\\\\Ubi\\\\Launcher\\\\\"\n",
+    );
+    let later = std::time::SystemTime::now() + std::time::Duration::from_secs(60);
+    fs::File::options()
+        .write(true)
+        .open(pfx.join("system.reg"))
+        .unwrap()
+        .set_modified(later)
+        .unwrap();
+    let after = watches(&env);
+    assert!(after.contains(&cache), "{after:#?}");
+}

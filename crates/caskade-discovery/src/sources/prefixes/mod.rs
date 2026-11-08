@@ -24,9 +24,12 @@ use crate::{
     },
 };
 use std::{
+    collections::BTreeMap,
     fs,
     io::Read,
     path::{Path, PathBuf},
+    sync::{Mutex, PoisonError},
+    time::SystemTime,
 };
 
 pub const ID: SourceId = SourceId::new("prefixes");
@@ -121,6 +124,42 @@ pub fn scan_prefix(
     Ok(games)
 }
 
+/// What a prefix's watch paths are worked out from: its registry and the
+/// folders [`HostEnv::wine_prefix`] finds its drives, user and known folders
+/// in. Sizes and modification times, so checking costs a few `stat`s. The
+/// launchers whose files the sources also look for are installed through
+/// their installers, which write the registry.
+#[derive(Debug, PartialEq, Eq)]
+struct Stamp(Vec<Option<(u64, Option<SystemTime>)>>);
+
+impl Stamp {
+    fn of(prefix: &Path) -> Self {
+        Self(
+            [
+                "system.reg",
+                "user.reg",
+                "userdef.reg",
+                "drive_c",
+                "drive_c/users",
+                "dosdevices",
+            ]
+            .into_iter()
+            .map(|name| {
+                fs::metadata(prefix.join(name))
+                    .ok()
+                    .map(|meta| (meta.len(), meta.modified().ok()))
+            })
+            .collect(),
+        )
+    }
+}
+
+/// Each prefix's own watch paths, by its folder, while its [`Stamp`] holds.
+/// The watcher works its plan out again after every rescan, the 5-minute
+/// poll's included, and a prefix's registry is often tens of MiB to parse
+/// (#71). Prefixes no longer found are dropped.
+static WATCHED: Mutex<BTreeMap<PathBuf, (Stamp, Vec<WatchPath>)>> = Mutex::new(BTreeMap::new());
+
 #[derive(Debug, Default)]
 pub struct Prefixes;
 
@@ -173,6 +212,8 @@ impl Source for Prefixes {
     fn watch_paths(&self, env: &HostEnv) -> Vec<WatchPath> {
         let ctx = ScanCtx::default();
         let mut paths = Vec::new();
+        let mut watched = WATCHED.lock().unwrap_or_else(PoisonError::into_inner);
+        let mut kept = BTreeMap::new();
         for prefix in find::prefixes(env, &ctx) {
             for name in ["system.reg", "user.reg"] {
                 paths.push(WatchPath {
@@ -180,12 +221,26 @@ impl Source for Prefixes {
                     recursive: false,
                 });
             }
-            if let Ok(windows) = env.wine_prefix(&prefix.path) {
-                for source in windows_sources() {
-                    paths.extend(source.watch_paths(&windows));
-                }
-            }
+            let Ok(dir) = env.resolve_path(&prefix.path) else {
+                continue;
+            };
+            let stamp = Stamp::of(&dir);
+            let inside = match watched.remove(&dir) {
+                Some((was, inside)) if was == stamp => inside,
+                _ => env
+                    .wine_prefix(&prefix.path)
+                    .map(|windows| {
+                        windows_sources()
+                            .into_iter()
+                            .flat_map(|source| source.watch_paths(&windows))
+                            .collect()
+                    })
+                    .unwrap_or_default(),
+            };
+            paths.extend(inside.iter().cloned());
+            kept.insert(dir, (stamp, inside));
         }
+        *watched = kept;
         paths
     }
 
