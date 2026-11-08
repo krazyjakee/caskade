@@ -55,6 +55,8 @@ export const LibraryCard = memo(function LibraryCard({
         // Desktop: its summary panel; console: its page (`useSelectGame`).
         // In selection mode: chooses it.
         onClick={actions.onClick}
+        onDoubleClick={actions.onDoubleClick}
+        onMouseDown={actions.onMouseDown}
         aria-pressed={actions.chosen.mode ? actions.chosen.selected : undefined}
         className="group relative flex h-full flex-col overflow-hidden rounded-card border border-border bg-surface-raised outline-none transition-colors duration-(--cs-motion-duration-fast) hover:bg-surface-hover focus-visible:focus-ring-over"
       >

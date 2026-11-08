@@ -96,6 +96,19 @@ it("plays once from the panel", async () => {
   expect(screen.queryByRole("dialog", { name: "Fixture Game 0002" })).toBeNull();
 });
 
+it("plays once on a double click", async () => {
+  const app = renderApp("/library?filter=all&sort=title");
+  const link = await card(/Fixture Game 0002/);
+  fireEvent.click(link, { detail: 1 });
+  fireEvent.click(link, { detail: 2 });
+  fireEvent.doubleClick(link);
+  await waitFor(async () => {
+    const running = (await app.library.listSessions()).filter((s) => s.endedAt === null);
+    expect(running.map((s) => s.entryId)).toEqual(["entry-1"]);
+  });
+  expect(app.router.state.location.pathname).toBe("/library");
+});
+
 it("View more opens the page, whose Back returns to the library", async () => {
   const app = renderApp("/library?filter=all&sort=title");
   fireEvent.click(await card(/Fixture Game 0004/));

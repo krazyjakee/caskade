@@ -76,6 +76,8 @@ const WebTile = memo(function WebTile({
         to="/games/$gameId"
         params={{ gameId: game.id }}
         onClick={actions.onClick}
+        onDoubleClick={actions.onDoubleClick}
+        onMouseDown={actions.onMouseDown}
         aria-label={game.title}
         className="group relative block size-full overflow-hidden rounded-[calc(var(--cs-radius-card)*2)] border border-border bg-surface-raised outline-none focus-visible:focus-ring-over"
       >

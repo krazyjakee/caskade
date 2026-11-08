@@ -95,6 +95,8 @@ export const LibraryRow = memo(function LibraryRow({
           // Desktop: its summary panel; console: its page (`useSelectGame`).
           // In selection mode: chooses it.
           onClick={actions.onClick}
+          onDoubleClick={actions.onDoubleClick}
+          onMouseDown={actions.onMouseDown}
           aria-pressed={actions.chosen.mode ? actions.chosen.selected : undefined}
           data-part="title"
           // The link covers the row, so the whole row opens the game.
