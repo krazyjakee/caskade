@@ -283,3 +283,77 @@ async fn games_arriving_start_matching_without_waiting_for_the_hourly_check() {
     watch.abort();
     assert_eq!(filled.description, "Portal 2 from IGDB.");
 }
+
+/// Saves the automatic match the sending device found: by its RomM server,
+/// say, for a ROM with no store id.
+async fn matched_there(device: &Device, game_id: &str, igdb_id: u64) {
+    device
+        .store
+        .save_igdb_match(&IgdbMatch {
+            game_id: game_id.to_owned(),
+            igdb_id: Some(igdb_id),
+            source: MatchSource::Romm,
+            pending: false,
+            checked_at_ms: 1,
+            dumps: String::new(),
+            applied: Default::default(),
+        })
+        .await
+        .unwrap();
+}
+
+async fn match_requests(server: &MockServer) -> usize {
+    server
+        .received_requests()
+        .await
+        .unwrap()
+        .iter()
+        .filter(|request| request.url.path() == "/match")
+        .count()
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn a_game_matched_without_a_store_id_takes_its_devices_igdb_id() {
+    let server = server().await;
+    let dir = tempfile::tempdir().unwrap();
+    let desk = device('a').await;
+    let laptop = device('b').await;
+    // A ROM the desk's RomM server matched: no store id on either device.
+    let witcher = game(&desk, "The Witcher 3", vec![]).await;
+    matched_there(&desk, &witcher, 1942).await;
+
+    sync(&desk, &laptop).await;
+    let synced = only_game(&laptop).await;
+    assert!(synced.description.is_empty());
+
+    let report = metadata(&laptop, dir.path(), &server).run().await.unwrap();
+    assert_eq!((report.matched, report.applied), (1, 1), "{report:?}");
+    let synced = laptop.store.game(&synced.id).await.unwrap().unwrap();
+    assert_eq!(synced.description, "The Witcher 3 from IGDB.");
+    assert_eq!(covers(&laptop, &synced.id).await, ["igdb:co1942"]);
+    let row = laptop.store.igdb_match(&synced.id).await.unwrap().unwrap();
+    assert_eq!((row.igdb_id, row.source), (Some(1942), MatchSource::Device));
+    // The desk's match was the answer: nothing to ask the server to match.
+    assert_eq!(match_requests(&server).await, 0);
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn store_ids_here_are_asked_about_before_the_other_devices_match() {
+    let server = server().await;
+    let dir = tempfile::tempdir().unwrap();
+    let desk = device('a').await;
+    let laptop = device('b').await;
+    let there = game(&desk, "Portal 2", vec![]).await;
+    matched_there(&desk, &there, 1942).await;
+    // The same game on the laptop, from Steam.
+    let here = game(&laptop, "Portal 2", vec![ExternalId::Steam { app_id: 620 }]).await;
+
+    sync(&desk, &laptop).await;
+    assert_eq!(only_game(&laptop).await.id, here, "the two are one game");
+
+    let report = metadata(&laptop, dir.path(), &server).run().await.unwrap();
+    assert_eq!(report.matched, 1, "{report:?}");
+    let row = laptop.store.igdb_match(&here).await.unwrap().unwrap();
+    assert_eq!((row.igdb_id, row.source), (Some(72), MatchSource::Store));
+    assert_eq!(match_requests(&server).await, 1);
+}

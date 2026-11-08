@@ -18,6 +18,7 @@ const sources: Record<MatchSource, MessageDescriptor> = {
   romm: msg`Matched by your RomM server`,
   hasheous: msg`Matched by name (Hasheous)`,
   store: msg`Matched by store id`,
+  device: msg`Matched on another device`,
   manual: msg({ message: "Chosen by you", comment: "How the game's IGDB match was made" }),
   none: msg`No match found`,
 };

@@ -5963,6 +5963,11 @@ export type MatchSource =
 "hasheous" | 
 /**  The metadata server matched a store id. */
 "store" | 
+/**
+ *  Another device's match for a game that came from it, sent with the
+ *  game (#75): used when nothing here finds one.
+ */
+"device" | 
 /**  The user chose it, or chose that there is none. */
 "manual" | 
 /**  Nothing found one. */

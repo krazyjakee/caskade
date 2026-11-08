@@ -7253,6 +7253,10 @@ msgstr "Matchad på titel: kontrollera att det är det här spelet"
 msgid "Matched by your RomM server"
 msgstr "Matchat av din RomM-server"
 
+#: apps/desktop/src/views/game/IgdbPanel.tsx
+msgid "Matched on another device"
+msgstr "Matchat på en annan enhet"
+
 #. Followed by the file extensions the scanner's profile matches
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "Matches"

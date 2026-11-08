@@ -78,6 +78,9 @@ pub enum MatchSource {
     Hasheous,
     /// The metadata server matched a store id.
     Store,
+    /// Another device's match for a game that came from it, sent with the
+    /// game (#75): used when nothing here finds one.
+    Device,
     /// The user chose it, or chose that there is none.
     Manual,
     /// Nothing found one.
@@ -90,6 +93,7 @@ impl MatchSource {
             Self::Romm => "romm",
             Self::Hasheous => "hasheous",
             Self::Store => "store",
+            Self::Device => "device",
             Self::Manual => "manual",
             Self::None => "none",
         }
@@ -100,6 +104,7 @@ impl MatchSource {
             "romm" => Self::Romm,
             "hasheous" => Self::Hasheous,
             "store" => Self::Store,
+            "device" => Self::Device,
             "manual" => Self::Manual,
             "none" => Self::None,
             other => {
@@ -426,6 +431,21 @@ impl Metadata {
                 .iter()
                 .flat_map(|entry| entry.ids.iter().cloned())
                 .collect();
+            // Nothing here knows the game, but the device it came from
+            // matched it: a ROM matched by name or by RomM there has no
+            // store id to ask about here (#75). Store ids of its own here
+            // are asked about instead.
+            if !matches!(local, find::Local::Found(..))
+                && find::store_ids(&ids, &HashMap::new()).is_empty()
+                && let Some(igdb_id) = store.synced_igdb_id(game_id).await?
+            {
+                rows.extend(
+                    self.matched(game_id, Some(igdb_id), MatchSource::Device, dumps)
+                        .await?,
+                );
+                report.matched += 1;
+                continue;
+            }
             ids.extend(store.synced_store_ids(game_id).await?);
             if matches!(local, find::Local::Unsure)
                 && find::store_ids(&ids, &HashMap::new()).is_empty()

@@ -254,6 +254,25 @@ impl LibraryStore {
         }
         Ok(ids)
     }
+
+    /// The IGDB id the device that sent `game_id` matched it to, from the
+    /// newest identity naming one (#75). Its automatic match counts: a ROM
+    /// matched by name or by RomM there has no store id to ask about here.
+    pub async fn synced_igdb_id(&self, game_id: &str) -> Result<Option<u64>> {
+        let igdb: Option<i64> = sqlx::query_scalar(
+            "SELECT json_extract(value_json,'$.igdb') FROM sync_changes \
+             WHERE entity='game' AND target=? AND field='identity' \
+             AND json_valid(value_json) AND json_type(value_json,'$.igdb')='integer' \
+             ORDER BY wall DESC,counter DESC LIMIT 1",
+        )
+        .bind(game_id)
+        .fetch_optional(&self.pool)
+        .await?
+        .flatten();
+        Ok(igdb
+            .and_then(|id| u64::try_from(id).ok())
+            .filter(|id| *id > 0))
+    }
 }
 
 /// The store id a synced identity names by `key` (`sync_data`'s store

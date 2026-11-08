@@ -7251,6 +7251,10 @@ msgstr ""
 msgid "Matched by your RomM server"
 msgstr ""
 
+#: apps/desktop/src/views/game/IgdbPanel.tsx
+msgid "Matched on another device"
+msgstr ""
+
 #. Followed by the file extensions the scanner's profile matches
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "Matches"
