@@ -19,6 +19,7 @@
 //!
 //! Pairing links live in memory: a restart invalidates links not used yet.
 
+mod addresses;
 mod gate;
 pub use gate::ShareAdmission;
 
@@ -1115,12 +1116,21 @@ impl Inner {
             .filter(|device| device.forgotten_at_ms.is_none())
             .map(|device| view(device, endpoint.as_ref(), &sync))
             .collect();
-        let nearby = endpoint
+        let mut nearby: Vec<_> = endpoint
             .as_ref()
             .map(SyncEndpoint::nearby)
             .unwrap_or_default()
             .into_iter()
             .filter(|nearby| !devices.iter().any(|d| d.id == nearby.id.to_string()))
+            .collect();
+        if !nearby.is_empty() {
+            let networks = addresses::networks();
+            for device in &mut nearby {
+                addresses::rank(&mut device.addrs, &networks);
+            }
+        }
+        let nearby = nearby
+            .into_iter()
             .map(|nearby| NearbyDevice {
                 id: nearby.id.to_string(),
                 name: nearby.info.name,
