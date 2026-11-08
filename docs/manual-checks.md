@@ -178,6 +178,12 @@ debug build for L1 and L7 (`just dev`), and Sunshine installed by you for L6.
   good update installs; the failed one says the previous version is back,
   settings are kept, and an update never adds permissions without asking.
   (#8)
+- [ ] **L8.** Idle memory, alongside the others: start an installed build
+  (deb or AppImage) with your own library, leave it in the tray for an hour,
+  then run
+  `grep -E 'RssAnon|VmSwap' /proc/$(pgrep -xo caskade)/status`. **Pass:**
+  RssAnon plus VmSwap is under 400 MB with a library the size of 8,400
+  games. Record it in "Idle memory with a large library". (#71)
 
 ## One Windows PC
 
@@ -542,6 +548,7 @@ Tick or decide these on the issue itself:
 | #32 Pairing through sync (closed; optional) | 267 | S15 |
 | #33 Streaming milestone | 268 | closes with #21–#32 |
 | #34 Nearby downloads for emulators and data (closed; optional) | 277 | O2, O3 |
+| #71 Idle memory with a large library | — | L8 |
 
 Issues marked closed were met by the tests their Validation sections ask for
 or by the virtual machine runs above, so their checks now only confirm them on
@@ -819,3 +826,22 @@ newest one listed.
 | Search by Y with the OS keyboard, typed plugin folder | `b6f3f3c` |
 | Suspend and resume (input service, the hint bar's clock) | `dae8c00`, `b6f3f3c` |
 | Frame rate on NVIDIA under X11 | `bdb6460` |
+
+### Idle memory with a large library (#71)
+
+The budget is the main `caskade` process's anonymous memory, RssAnon plus
+VmSwap from `/proc/<pid>/status`, after an hour idle: under 400 MB with
+8,400 games. The WebKit web process is separate and isn't counted.
+`WebKitWebProcess` was about 270 MB in the report that opened #71.
+
+To find what holds memory, run a copy of the library under Xvfb with
+jemalloc's profiler (`LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+MALLOC_CONF=prof:true,prof_accum:true,lg_prof_interval:30,prof_prefix:<dir>/jeprof`)
+and symbolize its dumps against `/proc/<pid>/maps` with `addr2line`. Delete
+the copy afterwards: its keyring holds your sign-ins.
+
+| Build | Where | Result |
+| --- | --- | --- |
+| 0.1.2 (deb) | Linux Mint 22.3, NVIDIA, X11, 8,439 games | 1.65–1.71 GB for 14 hours, 60 % of it swapped out |
+| `9d786ab` (debug) | copy of the same library under Xvfb, glibc, 100 minutes | 337 MB at start; from 10 minutes on 209–315 MB, mean 226 MB; 105 threads |
+| `cacf049` (debug) | the same copy restarted, 20 minutes | 152–155 MB between discovery's 5-minute polls, 178–231 MB for the 40 s after each |
