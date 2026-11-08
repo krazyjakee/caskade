@@ -811,6 +811,13 @@ pub fn run() {
                 let joined = joined.clone();
                 tauri::async_runtime::spawn(async move { joined.joined(&from, &into).await });
             });
+            // Games from another device are filled in here: metadata and
+            // artwork stay on each device (#75). Matching runs only while
+            // online lookups are allowed.
+            if let Some(metadata) = app.try_state::<caskade_core::metadata::Metadata>() {
+                let metadata = metadata.inner().clone();
+                sync.on_games_arrived(move || metadata.wake());
+            }
             // The user's own artwork travels with its files (#273).
             if let Some(cache) = artwork {
                 sync.set_artwork_cache(cache);

@@ -52,6 +52,8 @@ mod sync_carried;
 mod sync_games;
 mod sync_log;
 #[cfg(feature = "net")]
+mod sync_metadata;
+#[cfg(feature = "net")]
 mod sync_network;
 mod sync_policy;
 mod sync_romm;

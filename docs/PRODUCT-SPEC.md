@@ -56,7 +56,8 @@ Choosing a game opens its quick look: a side panel in desktop mode, the page its
 
 - **IGDB metadata** through Caskade's metadata server: each game is matched by its RomM ROM, a Hasheous hash or name match, or its store ids (Steam, GOG, Epic and others), then given a description, genres, tags, release date, alternative names, age ratings, cover, hero, icon, screenshots and videos. Answers are cached, so a matched library stays complete offline.
 - **Hasheous** data dumps identify ROMs and games by hash and title, offline.
-- **The IGDB panel** on a game page shows the match and changes it: search by title, type an id, mark "not on IGDB", rematch or refresh.
+- **Games from your other devices** are matched and filled in on each device, with its own downloads, as soon as they arrive, while online lookups are on there. A match you chose by hand travels with the game.
+- **The IGDB panel** on a game page shows the match and changes it: search by title, type an id, mark "not on IGDB", rematch or refresh. While online lookups are off on this device it says so, and turns them on.
 - **Artwork**: covers, backgrounds and icons from IGDB, RomM and stores, each replaceable by the user's own image (a file or a drop), hidden or reset. Screenshots and the hero download only when the page first opens.
 - **Videos** play in a dedicated video window over Caskade.
 - **Age ratings** from every rating board give each game a minimum age, which account age limits use.

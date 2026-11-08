@@ -126,7 +126,7 @@ Sessions survive restarts: recovery state records running processes by `ProcessI
 
 ### 5.2 Storage
 
-- **Library**: `library.sqlite` in the data folder, migrated by numbered `sqlx` migrations (`crates/caskade-core/migrations/`, 35 so far, each with a down migration).
+- **Library**: `library.sqlite` in the data folder, migrated by numbered `sqlx` migrations (`crates/caskade-core/migrations/`, 36 so far, each with a down migration).
 - **Caches** (`<cache>/`): artwork and thumbnails, IGDB answers (`igdb/games.sqlite`), Hasheous dumps and indexes, the Ludusavi manifest and indexes, Decomp Buddy plans, the add-on catalogue, compiled plugins, peer downloads. All disposable and rebuilt on demand.
 - **Data** (`<data>/`): managed emulators and tools, save blobs, staged restores, elevation records, streaming state, themes, plugins and plugin data.
 - **Settings**: namespaced sections (`core.general`, `core.appearance`, `core.sync`, `core.streaming`, …) registered with a schema version, a JSON Schema from `schemars` and validated defaults. The same mechanism renders plugin settings.
@@ -149,6 +149,7 @@ Sessions survive restarts: recovery state records running processes by `ProcessI
 
 - `Igdb` asks caskade-server (closed source, on Railway) by IGDB id and caches every answer, including not-found. Concurrent lookups share one request; failures pause all requests for a minute or `Retry-After` (up to 6 h). Cached answers carry a shape version so new fields are fetched once.
 - `Metadata` matches each game (RomM ROM, Hasheous, then the server's `/match` for store ids) and applies fields only where the game's value is empty or was written by the last apply. Runs retry with capped, jittered backoff.
+- Fetched metadata and automatic artwork stay on each device, so a device fills in the games sync brings itself. A game from another device has no entries here until it's installed; it's matched by the store ids in the identities its devices sent (`LibraryStore::synced_store_ids`), and a hand-set match that arrives is applied like one made here. Sync wakes matching when games or hand-set matches arrive (`SyncService::on_games_arrived` → `Metadata::wake`, after a 5-second settle, one run for a burst, not during a failure's backoff); runs go 50 games at a time and only while online lookups are allowed.
 - `Hasheous` downloads the dumps the library needs and answers hash and title lookups offline.
 - The artwork cache downloads once, makes thumbnails and serves them over `caskade-asset://`. Page-only images download when the page opens.
 

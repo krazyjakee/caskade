@@ -21,9 +21,16 @@ pub(super) const MAX_OFFLINE_RETRY: Duration = Duration::from_secs(60 * 60);
 const SETTLE: Duration = Duration::from_secs(5);
 
 impl Metadata {
-    /// Runs now, after library changes, and every [`RECHECK`]; failures try
-    /// again after a wait that grows with each failure in a row, and no
-    /// sooner than the server allows.
+    /// Games came into the library without a library event: games and
+    /// hand-set matches from another device (#75). [`Metadata::watch`]
+    /// runs soon, or as soon as it starts; wakes close together make one run.
+    pub fn wake(&self) {
+        self.inner.wake.notify_one();
+    }
+
+    /// Runs now, after library changes or a [`Metadata::wake`], and every
+    /// [`RECHECK`]; failures try again after a wait that grows with each
+    /// failure in a row, and no sooner than the server allows.
     pub fn watch(&self) -> tokio::task::JoinHandle<()> {
         use tokio::sync::broadcast::error::{RecvError, TryRecvError};
         let this = self.clone();
@@ -35,6 +42,10 @@ impl Metadata {
             loop {
                 tokio::select! {
                     _ = timer.tick() => {}
+                    // After a failure the retry waits for its time.
+                    () = this.inner.wake.notified(), if failures == 0 => {
+                        tokio::time::sleep(SETTLE).await;
+                    }
                     event = events.recv() => match event {
                         Ok(event) if relevant(&event) => tokio::time::sleep(SETTLE).await,
                         Ok(_) => continue,
@@ -42,7 +53,13 @@ impl Metadata {
                         Err(RecvError::Closed) => break,
                     },
                 }
-                // One run covers every event that arrived meanwhile.
+                // One run covers every event and wake that arrived
+                // meanwhile; a wake during the run runs it again after.
+                tokio::select! {
+                    biased;
+                    () = this.inner.wake.notified() => {}
+                    () = std::future::ready(()) => {}
+                }
                 loop {
                     match events.try_recv() {
                         Ok(_) | Err(TryRecvError::Lagged(_)) => {}

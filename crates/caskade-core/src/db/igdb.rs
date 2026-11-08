@@ -7,7 +7,7 @@ use crate::{
     Result,
     igdb::{IgdbAgeRating, age},
     metadata::{IgdbMatch, MatchSource},
-    model::validation as v,
+    model::{ExternalId, validation as v},
 };
 use serde::Serialize;
 use specta::Type;
@@ -220,5 +220,135 @@ impl LibraryStore {
         .bind(retry_before_ms)
         .fetch_all(&self.pool)
         .await?)
+    }
+
+    /// The store ids other devices know `game_id` by: those the identities
+    /// they sent it with name (#75). A game that came from another device
+    /// has no entries here until it's installed, so matching asks about
+    /// these.
+    pub async fn synced_store_ids(&self, game_id: &str) -> Result<Vec<ExternalId>> {
+        let identities: Vec<String> = sqlx::query_scalar(
+            "SELECT value_json FROM sync_changes \
+             WHERE entity='game' AND target=? AND field='identity' AND value_json IS NOT NULL \
+             ORDER BY wall DESC,counter DESC",
+        )
+        .bind(game_id)
+        .fetch_all(&self.pool)
+        .await?;
+        let mut ids = Vec::new();
+        for identity in identities {
+            let Ok(identity) = serde_json::from_str::<serde_json::Value>(&identity) else {
+                continue;
+            };
+            let keys = identity
+                .get("stores")
+                .and_then(serde_json::Value::as_array)
+                .into_iter()
+                .flatten()
+                .filter_map(serde_json::Value::as_str);
+            for id in keys.filter_map(store_id) {
+                if !ids.contains(&id) {
+                    ids.push(id);
+                }
+            }
+        }
+        Ok(ids)
+    }
+}
+
+/// The store id a synced identity names by `key` (`sync_data`'s store
+/// keys: the id's JSON, or `epic:<namespace>:<catalog item>`).
+fn store_id(key: &str) -> Option<ExternalId> {
+    match key.strip_prefix("epic:") {
+        Some(epic) => {
+            let (namespace, catalog_item) = epic.split_once(':')?;
+            Some(ExternalId::Epic {
+                namespace: namespace.to_owned(),
+                catalog_item: catalog_item.to_owned(),
+                app_name: String::new(),
+            })
+        }
+        None => serde_json::from_str(key).ok(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::model::Game;
+
+    /// A game another device sent, with the identity it sent it with.
+    async fn synced_game(store: &LibraryStore, stores: serde_json::Value) -> String {
+        let game = store.upsert_game(&Game::new("Portal 2")).await.unwrap();
+        let identity = serde_json::json!({"title": "Portal 2", "stores": stores});
+        sqlx::query(
+            "INSERT INTO sync_changes(origin,wall,counter,entity,key,field,value_json,target,applied) \
+             VALUES('desk',1,0,'game','g1','identity',?,?,1)",
+        )
+        .bind(identity.to_string())
+        .bind(&game.id)
+        .execute(&store.pool)
+        .await
+        .unwrap();
+        sqlx::query(
+            "INSERT INTO sync_game_ids(origin,origin_id,game_id,method) VALUES('desk','g1',?,'created')",
+        )
+        .bind(&game.id)
+        .execute(&store.pool)
+        .await
+        .unwrap();
+        game.id
+    }
+
+    #[tokio::test]
+    async fn synced_identities_name_the_games_store_ids() {
+        let store = LibraryStore::in_memory().await.unwrap();
+        let steam = serde_json::to_string(&ExternalId::Steam { app_id: 620 }).unwrap();
+        let game = synced_game(
+            &store,
+            serde_json::json!([steam, "epic:crab:item", "epic:broken", "not json"]),
+        )
+        .await;
+        assert_eq!(
+            store.synced_store_ids(&game).await.unwrap(),
+            [
+                ExternalId::Steam { app_id: 620 },
+                ExternalId::Epic {
+                    namespace: "crab".into(),
+                    catalog_item: "item".into(),
+                    app_name: String::new(),
+                },
+            ]
+        );
+        let local = store.upsert_game(&Game::new("Local")).await.unwrap();
+        assert!(store.synced_store_ids(&local.id).await.unwrap().is_empty());
+    }
+
+    #[tokio::test]
+    async fn synced_games_found_without_a_match_are_due_again_after_the_upgrade() {
+        let store = LibraryStore::in_memory().await.unwrap();
+        let synced = synced_game(&store, serde_json::json!([])).await;
+        let local = store.upsert_game(&Game::new("Local")).await.unwrap();
+        for game in [&synced, &local.id] {
+            let row = IgdbMatch {
+                game_id: game.clone(),
+                igdb_id: None,
+                source: MatchSource::None,
+                pending: false,
+                checked_at_ms: crate::now_ms(),
+                dumps: String::new(),
+                applied: Default::default(),
+            };
+            store.save_igdb_match(&row).await.unwrap();
+        }
+        let week_ago = crate::now_ms() - 7 * 24 * 60 * 60 * 1000;
+        assert!(store.igdb_pending(None, week_ago).await.unwrap().is_empty());
+        sqlx::raw_sql(include_str!(
+            "../../migrations/0036_synced_games_rematch.up.sql"
+        ))
+        .execute(&store.pool)
+        .await
+        .unwrap();
+        assert_eq!(store.igdb_pending(None, week_ago).await.unwrap(), [synced]);
     }
 }

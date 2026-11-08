@@ -2,6 +2,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
 import { type GameIgdb, type GameIgdbApi, GameIgdbProvider, type IgdbGame } from "../../api/igdb";
+import { coreSettingsDefaults, createSettingsFixture } from "../../test/settingsFixture";
+import { SettingsProvider } from "../settings/useSettings";
 import { IgdbPanel } from "./IgdbPanel";
 
 afterEach(cleanup);
@@ -227,4 +229,27 @@ it("explains a game matching hasn't reached yet, and an id it can't describe off
   expect(
     screen.getByText(/Matched by your RomM server · IGDB ID 72 · not filled in yet/),
   ).toBeTruthy();
+});
+
+it("says lookups are off on this device instead of waiting for a match, and turns them on", async () => {
+  const { api } = fakeApi(null);
+  const settings = createSettingsFixture({
+    ...coreSettingsDefaults(),
+    "core.metadata": { online: false },
+  });
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <SettingsProvider api={settings.api}>
+        <GameIgdbProvider api={api}>
+          <IgdbPanel gameId="g1" title="Portal 2" />
+        </GameIgdbProvider>
+      </SettingsProvider>
+    </QueryClientProvider>,
+  );
+  await screen.findByText(/Online lookups are off on this device/);
+  expect(screen.queryByText(/Caskade matches games with IGDB in the background/)).toBeNull();
+
+  fireEvent.click(screen.getByRole("button", { name: "Turn on online lookups" }));
+  await screen.findByText("Not matched yet. Caskade matches games with IGDB in the background.");
+  expect(settings.values["core.metadata"]).toEqual({ online: true });
 });

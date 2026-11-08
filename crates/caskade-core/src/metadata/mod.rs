@@ -51,6 +51,7 @@ use crate::{
     emulation::Catalog,
     hasheous::Hasheous,
     igdb::{Igdb, IgdbAgeRating, IgdbGame},
+    model::ExternalId,
     now_ms,
 };
 use serde::{Deserialize, Serialize};
@@ -257,6 +258,9 @@ struct Inner {
     lock: Mutex<()>,
     /// Refreshing chosen games (#176).
     refresh: selected::RefreshJob,
+    /// Games arrived without a library event (from another device, #75):
+    /// [`Metadata::watch`] runs soon.
+    wake: tokio::sync::Notify,
 }
 
 impl Metadata {
@@ -280,6 +284,7 @@ impl Metadata {
                 epic: epic::EpicOffers::default(),
                 lock: Mutex::new(()),
                 refresh: selected::RefreshJob::default(),
+                wake: tokio::sync::Notify::new(),
             }),
         }
     }
@@ -414,8 +419,16 @@ impl Metadata {
             };
             let entries = store.entries_for_game(game_id).await?;
             let local = self.find_local(&game, &entries).await?;
+            // The entries' ids, then those of the game on other devices: a
+            // game that came by sync has no entries here until it's
+            // installed, and is matched by what its devices know it as (#75).
+            let mut ids: Vec<ExternalId> = entries
+                .iter()
+                .flat_map(|entry| entry.ids.iter().cloned())
+                .collect();
+            ids.extend(store.synced_store_ids(game_id).await?);
             if matches!(local, find::Local::Unsure)
-                && find::store_ids(&entries, &HashMap::new()).is_empty()
+                && find::store_ids(&ids, &HashMap::new()).is_empty()
             {
                 // Nothing else to ask, and the dumps couldn't answer: left
                 // for the next run instead of recorded as none (#160).
@@ -440,7 +453,7 @@ impl Metadata {
                         rows.extend(store.save_auto_igdb_match(&row).await?.then_some(row));
                     }
                     _ => {
-                        if find::store_ids(&entries, &HashMap::new()).is_empty() {
+                        if find::store_ids(&ids, &HashMap::new()).is_empty() {
                             // Nothing to ask the server about (a ROM RomM
                             // left without an id), so none, offline too.
                             report.none += 1;
@@ -449,7 +462,7 @@ impl Metadata {
                                     .await?,
                             );
                         } else {
-                            unmatched.push((game_id.clone(), entries));
+                            unmatched.push((game_id.clone(), ids));
                         }
                     }
                 },
@@ -457,18 +470,18 @@ impl Metadata {
         }
         let namespaces: BTreeSet<String> = unmatched
             .iter()
-            .flat_map(|(_, entries)| find::epic_namespaces(entries))
+            .flat_map(|(_, ids)| find::epic_namespaces(ids))
             .collect();
         let offers = self.epic_offers(&namespaces).await;
         // A game is asked about with every id it has, else it waits for the
         // next run unless one of the others is found.
         let unmatched: Vec<_> = unmatched
             .into_iter()
-            .map(|(game_id, entries)| {
-                let complete = find::epic_namespaces(&entries)
+            .map(|(game_id, ids)| {
+                let complete = find::epic_namespaces(&ids)
                     .iter()
                     .all(|namespace| offers.contains_key(namespace));
-                (game_id, find::store_ids(&entries, &offers), complete)
+                (game_id, find::store_ids(&ids, &offers), complete)
             })
             .collect();
         let asked: Vec<_> = unmatched

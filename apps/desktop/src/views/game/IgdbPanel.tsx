@@ -2,8 +2,8 @@ import { Button, TextField } from "@caskade/ui";
 import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
-import { ExternalLink, RefreshCw, Search, Sparkles, X } from "lucide-react";
-import { type FormEvent, useEffect, useState } from "react";
+import { Cloud, ExternalLink, RefreshCw, Search, Sparkles, X } from "lucide-react";
+import { type FormEvent, type ReactNode, useEffect, useState } from "react";
 import {
   type IgdbGame,
   type MatchSource,
@@ -12,6 +12,7 @@ import {
   useIgdbSearch,
 } from "../../api/igdb";
 import { formatReleaseDate } from "../../api/presentation";
+import { useHasSettings, useSettingsSection } from "../settings/useSettings";
 
 const sources: Record<MatchSource, MessageDescriptor> = {
   romm: msg`Matched by your RomM server`,
@@ -83,9 +84,11 @@ export function IgdbPanel({
         )}
         {match.isError && <p className="text-fg-muted">{match.error.message}</p>}
         {data === null && (
-          <p className="text-fg-muted">
-            <Trans>Not matched yet. Caskade matches games with IGDB in the background.</Trans>
-          </p>
+          <OnlineLookups>
+            <p className="text-fg-muted">
+              <Trans>Not matched yet. Caskade matches games with IGDB in the background.</Trans>
+            </p>
+          </OnlineLookups>
         )}
         {data && game && (
           <dl data-part="igdb-facts" className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
@@ -149,18 +152,25 @@ export function IgdbPanel({
           </dl>
         )}
         {data && !game && data.igdbId && (
+          <OnlineLookups>
+            <p className="text-fg-muted">
+              <Trans>
+                IGDB game {igdbId}. Its details show once Caskade can reach the metadata server.
+              </Trans>
+            </p>
+          </OnlineLookups>
+        )}
+        {data && !data.igdbId && data.source === "manual" && (
           <p className="text-fg-muted">
-            <Trans>
-              IGDB game {igdbId}. Its details show once Caskade can reach the metadata server.
-            </Trans>
+            <Trans>You marked this game as not on IGDB.</Trans>
           </p>
         )}
-        {data && !data.igdbId && (
-          <p className="text-fg-muted">
-            {data.source === "manual"
-              ? t`You marked this game as not on IGDB.`
-              : t`Caskade found no IGDB game for it.`}
-          </p>
+        {data && !data.igdbId && data.source !== "manual" && (
+          <OnlineLookups>
+            <p className="text-fg-muted">
+              <Trans>Caskade found no IGDB game for it.</Trans>
+            </p>
+          </OnlineLookups>
         )}
         {data && (
           <p data-part="igdb-source" className="mt-3 text-xs text-fg-subtle">
@@ -271,6 +281,42 @@ export function IgdbPanel({
         )}
       </div>
     </section>
+  );
+}
+
+/** `children`, or while online lookups are off on this device, why the
+ * game isn't matched or filled in and the switch to turn them on (#75).
+ * Outside a settings provider (views rendered on their own), `children`. */
+function OnlineLookups({ children }: { children: ReactNode }) {
+  return useHasSettings() ? <LookupsOff>{children}</LookupsOff> : children;
+}
+
+function LookupsOff({ children }: { children: ReactNode }) {
+  const metadata = useSettingsSection<{ online: boolean }>("core.metadata");
+  if (metadata.settings?.online !== false) return children;
+  return (
+    <div data-part="igdb-lookups-off">
+      <p className="text-fg-muted">
+        <Trans>
+          Online lookups are off on this device, so Caskade doesn't match games with IGDB or fetch
+          their details and artwork.
+        </Trans>
+      </p>
+      <Button
+        size="sm"
+        icon={Cloud}
+        className="mt-3"
+        isDisabled={metadata.saving}
+        onPress={() => metadata.setSettings((current) => ({ ...current, online: true }))}
+      >
+        <Trans>Turn on online lookups</Trans>
+      </Button>
+      {metadata.saveError && (
+        <p role="alert" className="mt-2 text-sm text-danger">
+          {metadata.saveError.message}
+        </p>
+      )}
+    </div>
   );
 }
 

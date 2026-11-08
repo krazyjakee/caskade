@@ -51,6 +51,12 @@ pub struct SyncEngine {
     artwork: std::sync::OnceLock<crate::artwork::ArtworkCache>,
     /// The wall clock: tests set one that's wrong.
     time: std::sync::RwLock<std::sync::Arc<dyn Fn() -> i64 + Send + Sync>>,
+    /// Called after games arrived here or a hand-set IGDB match did, so
+    /// this device fills them in itself: their metadata and artwork stay on
+    /// each device (#75).
+    games_arrived: std::sync::OnceLock<std::sync::Arc<dyn Fn() + Send + Sync>>,
+    /// Games or matches arrived since [`Self::games_arrived`] was last called.
+    arrived: std::sync::atomic::AtomicBool,
     /// Files that travel after the changes (save files, #239).
     #[cfg(feature = "net")]
     blobs: super::blobs::Registry,
@@ -124,6 +130,8 @@ impl SyncEngine {
             artwork: std::sync::OnceLock::new(),
             account_joined: std::sync::OnceLock::new(),
             time: std::sync::RwLock::new(std::sync::Arc::new(now_ms)),
+            games_arrived: std::sync::OnceLock::new(),
+            arrived: std::sync::atomic::AtomicBool::new(false),
             #[cfg(feature = "net")]
             blobs: super::blobs::Registry::default(),
             #[cfg(feature = "net")]
@@ -170,6 +178,13 @@ impl SyncEngine {
     /// its downloaded ROMs and library games through `RommService`.
     pub fn on_romm_removed(&self, removed: impl Fn(String) + Send + Sync + 'static) {
         let _ = self.romm_removed.set(std::sync::Arc::new(removed));
+    }
+
+    /// What to do after games or hand-set IGDB matches arrived from another
+    /// device: the app looks them up (`Metadata::wake`). Called once per
+    /// apply that brought any.
+    pub fn on_games_arrived(&self, arrived: impl Fn() + Send + Sync + 'static) {
+        let _ = self.games_arrived.set(std::sync::Arc::new(arrived));
     }
 
     /// Replaces the wall clock this device reads (tests: a clock set wrong).
@@ -497,6 +512,10 @@ impl SyncEngine {
                             Applied::Wait => {}
                             Applied::Superseded => progress = true,
                             Applied::Written => {
+                                if change.entity == Entity::IgdbMatch {
+                                    self.arrived
+                                        .store(true, std::sync::atomic::Ordering::Relaxed);
+                                }
                                 state.fields.insert(
                                     (change.entity, target, change.field.clone()),
                                     FieldState {
@@ -514,6 +533,13 @@ impl SyncEngine {
             if !progress {
                 break;
             }
+        }
+        if self
+            .arrived
+            .swap(false, std::sync::atomic::Ordering::Relaxed)
+            && let Some(arrived) = self.games_arrived.get()
+        {
+            arrived();
         }
         if applied > 0
             && let Some((from, into)) = self.store.sync_join_stand_in(&self.device).await?
@@ -666,6 +692,8 @@ impl SyncEngine {
         self.store
             .set_sync_mapped_game(origin, id, &game, "created")
             .await?;
+        self.arrived
+            .store(true, std::sync::atomic::Ordering::Relaxed);
         Ok(Some(game))
     }
 

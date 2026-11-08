@@ -65,6 +65,8 @@ struct Inner {
     artwork: OnceLock<crate::artwork::ArtworkCache>,
     /// Handed to each engine: this device's default admin joined another's.
     account_joined: OnceLock<Arc<dyn Fn(String, String) + Send + Sync>>,
+    /// Handed to each engine: games or hand-set matches arrived (#75).
+    games_arrived: OnceLock<Arc<dyn Fn() + Send + Sync>>,
     /// Devices an exchange is running with.
     busy: Mutex<HashSet<String>>,
     /// Something wants an exchange now: devices to sync.
@@ -90,6 +92,7 @@ impl SyncService {
                 presence: OnceLock::new(),
                 artwork: OnceLock::new(),
                 account_joined: OnceLock::new(),
+                games_arrived: OnceLock::new(),
                 busy: Mutex::default(),
                 due,
                 due_rx: tokio::sync::Mutex::new(due_rx),
@@ -116,6 +119,18 @@ impl SyncService {
     /// `AccountService::joined`).
     pub fn on_account_joined(&self, joined: impl Fn(String, String) + Send + Sync + 'static) {
         let _ = self.inner.account_joined.set(Arc::new(joined));
+    }
+
+    /// What to do after games or hand-set IGDB matches arrived from another
+    /// device: their metadata and artwork are this device's to look up
+    /// (`Metadata::wake`, #75).
+    pub fn on_games_arrived(&self, arrived: impl Fn() + Send + Sync + 'static) {
+        let arrived: Arc<dyn Fn() + Send + Sync> = Arc::new(arrived);
+        if let Some(engine) = self.inner.engine() {
+            let arrived = arrived.clone();
+            engine.on_games_arrived(move || arrived());
+        }
+        let _ = self.inner.games_arrived.set(arrived);
     }
 
     /// Exchanges `kind`'s files with every paired device, after the changes.
@@ -183,6 +198,9 @@ impl Inner {
         }
         if let Some(joined) = self.account_joined.get().cloned() {
             engine.on_account_joined(move |from, into| joined(from, into));
+        }
+        if let Some(arrived) = self.games_arrived.get().cloned() {
+            engine.on_games_arrived(move || arrived());
         }
         let engine = Arc::new(engine);
         if let Some(settings) = self.settings.get() {

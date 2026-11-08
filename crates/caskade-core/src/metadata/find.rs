@@ -134,12 +134,10 @@ fn unique_igdb(found: &[DumpGame], title: &str) -> Option<u64> {
     (exact.len() == 1).then(|| exact.first().copied()).flatten()
 }
 
-/// The Epic namespaces of the entries, whose store offers IGDB knows
-/// their games by.
-pub(super) fn epic_namespaces(entries: &[GameEntry]) -> BTreeSet<String> {
-    entries
-        .iter()
-        .flat_map(|entry| &entry.ids)
+/// The Epic namespaces of `ids`, whose store offers IGDB knows their
+/// games by.
+pub(super) fn epic_namespaces(ids: &[ExternalId]) -> BTreeSet<String> {
+    ids.iter()
         .filter_map(|id| match id {
             ExternalId::Epic { namespace, .. } if !namespace.is_empty() => Some(namespace.clone()),
             _ => None,
@@ -147,14 +145,14 @@ pub(super) fn epic_namespaces(entries: &[GameEntry]) -> BTreeSet<String> {
         .collect()
 }
 
-/// The entries' store ids that IGDB links to, primary entry first, with
-/// `offers`: each Epic namespace's base-game offers.
+/// The store ids among `ids` that IGDB links to, in order (the primary
+/// entry's first), with `offers`: each Epic namespace's base-game offers.
 pub(super) fn store_ids(
-    entries: &[GameEntry],
+    external: &[ExternalId],
     offers: &HashMap<String, Vec<String>>,
 ) -> Vec<StoreId> {
     let mut ids = Vec::new();
-    for id in entries.iter().flat_map(|entry| &entry.ids) {
+    for id in external {
         match id {
             ExternalId::Steam { app_id } => ids.push(StoreId::new("steam", app_id.to_string())),
             ExternalId::Gog { product_id } => {

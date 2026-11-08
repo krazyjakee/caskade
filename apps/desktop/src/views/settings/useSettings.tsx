@@ -37,6 +37,12 @@ export function useSettingsApi(): SettingsApi {
   return api;
 }
 
+/** Whether a `SettingsProvider` is around: parts of views that also render
+ * on their own (in their tests) read settings only then. */
+export function useHasSettings(): boolean {
+  return useContext(SettingsContext) !== null;
+}
+
 export function useSettingsSection<T extends object>(namespace: string) {
   const api = useSettingsApi();
   const client = useQueryClient();
