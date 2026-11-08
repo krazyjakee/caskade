@@ -164,6 +164,7 @@ Sessions survive restarts: recovery state records running processes by `ProcessI
 - Definitions in `caskade-sources/emulation/` describe detection, install sources per OS, setup steps, profiles, display flags, BIOS and save rules. `platforms.toml` maps platforms to IGDB, Hasheous and RomM ids and lists recommended emulators. Each definition's sources are recorded in `emulation/SOURCES.md`.
 - `managed` holds the shared steps: resolve (GitHub without the API, Dolphin's endpoint, a URL), download, unpack and swap carrying the user's files, Flatpak. `EmulatorSetup` and `ManagedTools` build on it. Removal deletes only what `.caskade/shipped.json` lists.
 - ROM scanners identify by hash; RomM is both a library source and a `BiosProvider`.
+- RomM server definitions sync between devices; their passwords and API tokens stay in each device's keychain. A server with no secret saved on this device for its address, or whose server refused the one it has (401/403), is `sign_in_needed` in `ServerStatus`: the panel offers Sign in (or Enter API token) instead of Sync now, and `romm::watch` doesn't sync it until a new secret is saved. Sync now still tries.
 
 ### Launching extras
 

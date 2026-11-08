@@ -133,6 +133,11 @@ async fn a_romm_server_arrives_without_its_password_and_keeps_local_emulators() 
         !overview.servers[0].has_secret,
         "the TV asks for its own password"
     );
+    assert_eq!(
+        overview.servers[0].state,
+        caskade_core::romm::ConnectionState::SignInNeeded,
+        "the TV says it needs signing in, not that it can't connect (#73)"
+    );
     // ...and without the desk's emulator choice.
     assert_eq!(server.platforms[0].emulator_id, None);
     // Nothing in the log carries the secret.

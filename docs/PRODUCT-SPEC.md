@@ -94,7 +94,7 @@ Choosing a game opens its quick look: a side panel in desktop mode, the page its
 - **ROM scanners** turn ROM folders into library games, identified by hash where possible, with per-platform defaults and per-game overrides.
 - **Profiles** set each emulator's arguments, and launches add fullscreen flags in console mode.
 - **BIOS** files missing for a platform come from your RomM server's firmware.
-- **RomM servers** are a library source: their ROMs, artwork and metadata sync into the library, and ROMs download on demand.
+- **RomM servers** are a library source: their ROMs, artwork and metadata sync into the library, and ROMs download on demand. Servers can be the same on your other devices, but each device signs in on its own: a server without a sign-in here, or whose sign-in the server refused, says so and offers Sign in, and waits for it instead of retrying in the background.
 - **Emulator saves** are found from each definition's save rules.
 
 ### 4.7 Web games

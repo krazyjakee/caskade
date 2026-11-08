@@ -20,14 +20,24 @@ export type SyncedSection = keyof typeof SECTIONS;
 
 type Value = SyncSettingsValue & { sections?: Partial<Record<SyncedSection, CategoryState>> };
 
-export function SectionSync({ namespace }: { namespace: SyncedSection }) {
+/** `note` follows the description while the section syncs: what stays on
+ * each device anyway. */
+export function SectionSync({ namespace, note }: { namespace: SyncedSection; note?: string }) {
   // Without devices (the browser preview, a panel on its own) there's
   // nothing to choose, and nothing else is asked for.
   const api = useProvidedSyncApi();
-  return api ? <Choice namespace={namespace} api={api} /> : null;
+  return api ? <Choice namespace={namespace} note={note} api={api} /> : null;
 }
 
-function Choice({ namespace, api }: { namespace: SyncedSection; api: SyncApi }) {
+function Choice({
+  namespace,
+  note,
+  api,
+}: {
+  namespace: SyncedSection;
+  note: string | undefined;
+  api: SyncApi;
+}) {
   const { t } = useLingui();
   const admin = useDeviceAdmin();
   const status = useQuery({
@@ -45,7 +55,7 @@ function Choice({ namespace, api }: { namespace: SyncedSection; api: SyncApi }) 
     ? t`Not synced: this kind of setting is This device only in Settings → Devices.`
     : kept
       ? t`Kept on this device. Changes here stay here, and other devices' don't arrive.`
-      : t`Changes here reach your other devices.`;
+      : [t`Changes here reach your other devices.`, note].filter(Boolean).join(" ");
   return (
     <>
       <SettingRow label={what} description={description}>

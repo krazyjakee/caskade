@@ -62,12 +62,17 @@ it("the rating board and RomM servers have the same choice", async () => {
     <LibraryProvider api={createFixtureApi()} client={createLibraryQueryClient()}>
       <SettingsProvider api={fixture.api}>
         <SyncProvider api={createSyncFixtureApi()}>
-          <SectionSync namespace="core.romm" />
+          <SectionSync namespace="core.romm" note="Sign-ins stay here." />
         </SyncProvider>
       </SettingsProvider>
     </LibraryProvider>,
   );
-  fireEvent.click(await screen.findByRole("switch", { name: "Same on your other devices" }, slow));
+  const toggle = await screen.findByRole("switch", { name: "Same on your other devices" }, slow);
+  // What stays on each device anyway follows while the section syncs (#73).
+  expect(
+    screen.getByText("Changes here reach your other devices. Sign-ins stay here."),
+  ).toBeTruthy();
+  fireEvent.click(toggle);
   await waitFor(
     () =>
       expect(

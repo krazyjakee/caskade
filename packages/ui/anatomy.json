@@ -1333,6 +1333,20 @@
       "parts": [],
       "states": {},
       "interaction": []
+    },
+    "romm": {
+      "parts": [],
+      "states": {},
+      "interaction": []
+    },
+    "romm-servers": {
+      "parts": [
+        "romm-server",
+        "sign-in",
+        "sign-in-reason"
+      ],
+      "states": {},
+      "interaction": []
     }
   },
   "attributes": [

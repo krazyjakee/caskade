@@ -177,6 +177,12 @@ fn unseal(stored: &str, url: &str) -> Option<String> {
     (origin(url)? == bound).then(|| secret.to_owned())
 }
 
+/// Whether `config` has all its sign-in needs on this device: a saved
+/// secret (`has_secret`) and, to sign in with a password, a username.
+fn sign_in_complete(config: &RommServerConfig, has_secret: bool) -> bool {
+    has_secret && (config.auth == RommAuth::Token || !config.username.trim().is_empty())
+}
+
 /// A ROM downloaded into the cache.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]
@@ -238,8 +244,12 @@ pub enum ConnectionState {
     Connected,
     /// Not reachable: cached games still play.
     Offline,
-    /// Reachable, but sign-in or the API failed.
+    /// Reachable, but the API failed.
     Error,
+    /// This device can't sign in: it has no password or API token for the
+    /// server (they stay in each device's keychain and never sync), or the
+    /// server refused the one it has. Background syncs wait for a new one.
+    SignInNeeded,
 }
 
 /// A server and what Caskade knows about it.
@@ -255,6 +265,8 @@ pub struct ServerStatus {
     pub syncing: bool,
     /// Library games from this server.
     pub games: u32,
+    /// This device's keychain has a password or API token saved for the
+    /// server's address.
     pub has_secret: bool,
 }
 
@@ -417,6 +429,8 @@ struct Inner {
     secrets: Arc<dyn SecretStore>,
     #[cfg_attr(not(feature = "net"), allow(dead_code))]
     timeouts: Timeouts,
+    /// How often the background syncs look for servers that are due.
+    watch_every: Duration,
     /// The cache folder when no storage location exists.
     fallback_cache: PathBuf,
     servers: Mutex<BTreeMap<String, ServerState>>,
@@ -464,6 +478,7 @@ impl RommService {
                 artwork: None,
                 secrets: Arc::new(KeychainSecrets),
                 timeouts: Timeouts::default(),
+                watch_every: watch::CHECK,
                 fallback_cache: fallback_cache.into(),
                 servers: Mutex::default(),
                 downloads: Mutex::default(),
@@ -500,6 +515,16 @@ impl RommService {
         if let Some(inner) = Arc::get_mut(&mut self.inner) {
             inner.timeouts.read = read;
             inner.timeouts.request = request;
+        }
+        self
+    }
+
+    /// How often the background syncs look for due servers, for tests.
+    /// Configure before cloning.
+    #[doc(hidden)]
+    pub fn with_watch_interval(mut self, every: Duration) -> Self {
+        if let Some(inner) = Arc::get_mut(&mut self.inner) {
+            inner.watch_every = every;
         }
         self
     }
@@ -668,9 +693,16 @@ impl RommService {
                 false
             }
         };
+        // A server that answered this session, or couldn't be reached, says
+        // so; otherwise a missing sign-in is what stands in the way.
+        let connection = match state.state {
+            Some(known @ (ConnectionState::Connected | ConnectionState::Offline)) => known,
+            _ if !sign_in_complete(server, has_secret) => ConnectionState::SignInNeeded,
+            known => known.unwrap_or(ConnectionState::Untested),
+        };
         Ok(ServerStatus {
             id: server.id.clone(),
-            state: state.state.unwrap_or(ConnectionState::Untested),
+            state: connection,
             version: state.version,
             error: state.error,
             last_sync_ms: state.last_sync_ms,
@@ -707,6 +739,10 @@ impl RommService {
                 state.error = Some(error.clone());
             }
             RommError::Cancelled => {}
+            RommError::Auth(_) => {
+                state.state = Some(ConnectionState::SignInNeeded);
+                state.error = Some(error.to_string());
+            }
             error => {
                 state.state = Some(ConnectionState::Error);
                 state.error = Some(error.to_string());
@@ -725,6 +761,25 @@ impl RommService {
         lock(&self.inner.servers)
             .get(server)
             .is_some_and(|state| state.state == Some(ConnectionState::Offline))
+    }
+
+    /// The last request found this device can't sign in.
+    fn needs_sign_in(&self, server: &str) -> bool {
+        lock(&self.inner.servers)
+            .get(server)
+            .is_some_and(|state| state.state == Some(ConnectionState::SignInNeeded))
+    }
+
+    /// `config` has no saved secret on this device, or no username to go
+    /// with a password. A keychain that can't be read isn't taken as missing.
+    async fn sign_in_missing(&self, config: &RommServerConfig) -> bool {
+        match self.stored_secret(config).await {
+            Ok(secret) => !sign_in_complete(config, secret.is_some()),
+            Err(error) => {
+                tracing::debug!(%error, "keychain unavailable");
+                false
+            }
+        }
     }
 
     #[cfg(feature = "net")]

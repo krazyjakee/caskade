@@ -2,7 +2,7 @@ import { Button, SettingsSection, StatusDot } from "@caskade/ui";
 import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
-import { Download, Info, Pencil, Plus, RefreshCw, Server, X } from "lucide-react";
+import { Download, Info, KeyRound, Pencil, Plus, RefreshCw, Server, X } from "lucide-react";
 import { useState } from "react";
 import { Button as AriaButton } from "react-aria-components";
 import { formatDateTime, formatNumber } from "../../../api/presentation";
@@ -57,6 +57,14 @@ function ServerState({ status }: { status: RommServerStatus | undefined }) {
           <Trans comment="A RomM server's status">Can't connect</Trans>
         </StatusDot>
       );
+    case "sign_in_needed":
+      return (
+        <StatusDot tone="warning">
+          <Trans comment="A RomM server's status: this device has no working password or API token for it">
+            Sign-in needed on this device
+          </Trans>
+        </StatusDot>
+      );
     default:
       return (
         <StatusDot tone="off">
@@ -66,6 +74,45 @@ function ServerState({ status }: { status: RommServerStatus | undefined }) {
         </StatusDot>
       );
   }
+}
+
+/** A server this device can't sign in to: no saved password or token (they
+ * stay on each device), or one the server refused. */
+const needsSignIn = (status: RommServerStatus | undefined) => status?.state === "sign_in_needed";
+
+/** Under the status: why the server needs signing in, or what failed. One
+ * line per problem: a failed sync replaces the row's recorded error. */
+function ServerProblem({
+  server,
+  status,
+  syncError,
+}: {
+  server: RommServer;
+  status: RommServerStatus | undefined;
+  syncError: string | undefined;
+}) {
+  const { t } = useLingui();
+  if (needsSignIn(status)) {
+    // The server refused the saved sign-in: its own reason says why.
+    const refused = status?.hasSecret ? status.error : null;
+    const text =
+      refused ??
+      (server.auth === "token"
+        ? t`Sign-ins stay on each device. Enter this server's API token here to import its games.`
+        : t`Sign-ins stay on each device. Sign in here to import this server's games.`);
+    return (
+      <div data-part="sign-in-reason" className="mt-1 max-w-80 text-xs text-fg-muted">
+        {text}
+      </div>
+    );
+  }
+  if (syncError)
+    return (
+      <div role="alert" className="mt-1 text-xs text-danger">
+        {syncError}
+      </div>
+    );
+  return status?.error ? <div className="mt-1 text-xs text-fg-muted">{status.error}</div> : null;
 }
 
 const phases: Record<RommDownload["phase"], MessageDescriptor> = {
@@ -157,6 +204,9 @@ export function RommPanel() {
   const api = useRommApi();
   const write = useRommWrite();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Sign in: opens the server's editor with its password or token field
+  // focused; a count, so pressing it again focuses the field again.
+  const [signIn, setSignIn] = useState<{ id: string; count: number } | null>(null);
   const [draft, setDraft] = useState<RommServer | null>(null);
   const [syncing, setSyncing] = useState<string | null>(null);
   // A sync that fails before the core records it on the server's row.
@@ -197,6 +247,18 @@ export function RommPanel() {
         ),
       ),
     );
+  const edit = (id: string) => {
+    setDraft(null);
+    setSelectedId(id);
+  };
+  const startSignIn = (id: string) => {
+    edit(id);
+    setSignIn((old) => ({ id, count: (old?.count ?? 0) + 1 }));
+  };
+  const signInLabel = (server: RommServer) =>
+    server.auth === "token"
+      ? t({ message: "Enter API token", comment: "Opens a RomM server's editor at its API token" })
+      : t({ message: "Sign in", comment: "Opens a RomM server's editor at its password" });
   const sync = (id: string) => {
     setSyncing(id);
     setSyncErrors(({ [id]: _, ...rest }) => rest);
@@ -238,7 +300,10 @@ export function RommPanel() {
           </div>
         ) : (
           servers.length > 0 && (
-            <div className="mt-3 overflow-x-auto rounded-control border border-border">
+            <div
+              data-cs="romm-servers"
+              className="mt-3 overflow-x-auto rounded-control border border-border"
+            >
               <table className="w-full text-left text-sm">
                 <thead className="bg-surface-overlay font-mono text-[11px] tracking-wider text-fg-subtle uppercase">
                   <tr>
@@ -266,10 +331,18 @@ export function RommPanel() {
                     const state = status(server.id);
                     const busy = syncing === server.id || !!state?.syncing;
                     const active = !draft && server.id === selected?.id;
+                    const signingIn = needsSignIn(state);
+                    const name = server.name || server.url;
                     return (
                       <tr
                         key={server.id}
-                        {...menus.target(server.name || server.url, [
+                        {...menus.target(name, [
+                          signingIn && {
+                            id: "sign-in",
+                            label: signInLabel(server),
+                            icon: KeyRound,
+                            onAction: () => startSignIn(server.id),
+                          },
                           {
                             id: "sync",
                             label: t`Sync now`,
@@ -281,10 +354,7 @@ export function RommPanel() {
                             id: "edit",
                             label: t`Edit server`,
                             icon: Pencil,
-                            onAction: () => {
-                              setDraft(null);
-                              setSelectedId(server.id);
-                            },
+                            onAction: () => edit(server.id),
                           },
                         ])}
                         data-part="romm-server"
@@ -294,10 +364,7 @@ export function RommPanel() {
                       >
                         <td className="px-4 py-2.5">
                           <AriaButton
-                            onPress={() => {
-                              setDraft(null);
-                              setSelectedId(server.id);
-                            }}
+                            onPress={() => edit(server.id)}
                             aria-pressed={active}
                             className="rounded-[4px] text-left font-medium data-focus-visible:focus-ring data-hovered:text-accent-alt"
                           >
@@ -308,14 +375,11 @@ export function RommPanel() {
                         </td>
                         <td className="px-4 py-2.5">
                           <ServerState status={state} />
-                          {state?.error && (
-                            <div className="mt-1 text-xs text-fg-muted">{state.error}</div>
-                          )}
-                          {syncErrors[server.id] && (
-                            <div role="alert" className="mt-1 text-xs text-danger">
-                              {syncErrors[server.id]}
-                            </div>
-                          )}
+                          <ServerProblem
+                            server={server}
+                            status={state}
+                            syncError={syncErrors[server.id]}
+                          />
                         </td>
                         <td className="px-4 py-2.5 text-right font-mono">
                           {formatNumber(state?.games ?? 0)}
@@ -324,15 +388,32 @@ export function RommPanel() {
                           {lastSync(state)}
                         </td>
                         <td className="px-4 py-2.5 text-right">
-                          <Button
-                            size="sm"
-                            icon={RefreshCw}
-                            isDisabled={busy}
-                            onPress={() => sync(server.id)}
-                            aria-label={t`Sync ${{ server: server.name || server.url }}`}
-                          >
-                            <Trans>Sync now</Trans>
-                          </Button>
+                          {signingIn ? (
+                            <Button
+                              data-part="sign-in"
+                              size="sm"
+                              variant="primary"
+                              icon={KeyRound}
+                              onPress={() => startSignIn(server.id)}
+                              aria-label={
+                                server.auth === "token"
+                                  ? t`Enter the API token for ${{ server: name }}`
+                                  : t`Sign in to ${{ server: name }}`
+                              }
+                            >
+                              {signInLabel(server)}
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              icon={RefreshCw}
+                              isDisabled={busy}
+                              onPress={() => sync(server.id)}
+                              aria-label={t`Sync ${{ server: name }}`}
+                            >
+                              <Trans>Sync now</Trans>
+                            </Button>
+                          )}
                         </td>
                       </tr>
                     );
@@ -355,7 +436,10 @@ export function RommPanel() {
             the rest show as unavailable until the server is back.
           </Trans>
         </p>
-        <SectionSync namespace="core.romm" />
+        <SectionSync
+          namespace="core.romm"
+          note={t`Sign-ins don't: each device signs in to a server on its own.`}
+        />
       </SettingsSection>
 
       {selected && (
@@ -364,6 +448,7 @@ export function RommPanel() {
           initial={selected}
           status={draft ? undefined : status(selected.id)}
           isNew={draft !== null}
+          focusSecret={!draft && signIn?.id === selected.id ? signIn.count : 0}
           emulation={emulation.data}
           onSaved={(server) => {
             setDraft(null);

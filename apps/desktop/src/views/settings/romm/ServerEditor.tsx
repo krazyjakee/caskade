@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import type { EmulationSnapshot } from "../../../api/emulation";
-import { errorMessage } from "../../../api/reply";
+import { toFailure } from "../../../api/reply";
 import {
   authKinds,
   type RommAuth,
@@ -124,6 +124,18 @@ function launchOptions(
   return options;
 }
 
+/** What went wrong in this editor; `signIn` when the server refused the
+ * sign-in rather than couldn't be reached or failed. */
+interface EditorError {
+  message: string;
+  signIn: boolean;
+}
+
+const editorError = (failure: unknown): EditorError => {
+  const reported = toFailure(failure);
+  return { message: reported.message, signIn: reported.code === "auth" };
+};
+
 function Connection({
   status,
   busy,
@@ -133,17 +145,32 @@ function Connection({
   status: RommServerStatus | undefined;
   busy: boolean;
   report: RommConnection | null;
-  error: string | null;
+  error: EditorError | null;
 }) {
   const failed = (
     <StatusDot tone="danger">
       <Trans comment="A RomM server's status">Can't connect</Trans>
     </StatusDot>
   );
+  const signIn = (
+    <StatusDot tone="warning">
+      <Trans comment="A RomM server's status: this device has no working password or API token for it">
+        Sign-in needed on this device
+      </Trans>
+    </StatusDot>
+  );
   if (busy)
     return (
       <StatusDot tone="warning">
         <Trans comment="A RomM server's status">Connecting…</Trans>
+      </StatusDot>
+    );
+  if (error?.signIn)
+    return (
+      <StatusDot tone="warning">
+        <Trans comment="A RomM server's status: it refused the username and password or API token">
+          Can't sign in
+        </Trans>
       </StatusDot>
     );
   if (error) return failed;
@@ -167,6 +194,7 @@ function Connection({
       </StatusDot>
     );
   if (status?.state === "error") return failed;
+  if (status?.state === "sign_in_needed") return signIn;
   return (
     <StatusDot tone="off">
       <Trans comment="A RomM server's status: its connection hasn't been tried">Not tested</Trans>
@@ -179,6 +207,7 @@ export function ServerEditor({
   initial,
   status,
   isNew,
+  focusSecret = 0,
   emulation,
   onSaved,
   onRemoved,
@@ -186,6 +215,9 @@ export function ServerEditor({
   initial: RommServer;
   status: RommServerStatus | undefined;
   isNew: boolean;
+  /** Above 0: Sign in was pressed, the password or token field takes focus
+   * (again each time it grows). */
+  focusSecret?: number;
   emulation: EmulationSnapshot | undefined;
   onSaved: (server: RommServer) => void;
   onRemoved: () => void;
@@ -196,7 +228,7 @@ export function ServerEditor({
   const [server, setServer] = useState(initial);
   const [secret, setSecret] = useState("");
   const [report, setReport] = useState<RommConnection | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<EditorError | null>(null);
   const [testing, setTesting] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [synced, setSynced] = useState<RommSyncReport | null>(null);
@@ -221,7 +253,7 @@ export function ServerEditor({
       setReport(await api.testServer(server, secret || null));
     } catch (failure) {
       setReport(null);
-      setError(errorMessage(failure));
+      setError(editorError(failure));
     } finally {
       setTesting(false);
     }
@@ -233,7 +265,7 @@ export function ServerEditor({
         setSecret("");
         onSaved(server);
       },
-      onError: (failure) => setError(errorMessage(failure)),
+      onError: (failure) => setError(editorError(failure)),
     });
   };
   const sync = async () => {
@@ -244,7 +276,7 @@ export function ServerEditor({
       setSynced(result ?? null);
       write.mutate((api) => api.overview());
     } catch (failure) {
-      setError(errorMessage(failure));
+      setError(editorError(failure));
     } finally {
       setSyncing(false);
     }
@@ -270,7 +302,7 @@ export function ServerEditor({
     0,
   );
   let connection: string = status?.state ?? "untested";
-  if (error) connection = "error";
+  if (error) connection = error.signIn ? "sign_in_needed" : "error";
 
   return (
     <SettingsSection
@@ -323,6 +355,8 @@ export function ServerEditor({
             />
           )}
           <TextField
+            key={`secret-${focusSecret}`}
+            autoFocus={focusSecret > 0}
             label={server.auth === "password" ? t`Password` : t(authLabels.token)}
             type="password"
             icon={KeyRound}
@@ -350,7 +384,7 @@ export function ServerEditor({
       <div
         data-part="connection"
         data-status={connection}
-        className="mt-1 flex flex-wrap items-center gap-3 rounded-control border border-border bg-surface-overlay/50 p-3 data-[status=error]:border-danger/40 data-[status=error]:bg-danger/5"
+        className="mt-1 flex flex-wrap items-center gap-3 rounded-control border border-border bg-surface-overlay/50 p-3 data-[status=error]:border-danger/40 data-[status=error]:bg-danger/5 data-[status=sign_in_needed]:border-warning/40 data-[status=sign_in_needed]:bg-warning/5"
       >
         <Button icon={Plug} onPress={() => void test()} isDisabled={testing || !server.url}>
           {testing
@@ -360,7 +394,7 @@ export function ServerEditor({
         <Connection status={status} busy={testing} report={report} error={error} />
         {error && (
           <span role="alert" className="text-xs text-danger">
-            {error}
+            {error.message}
           </span>
         )}
         {report && (

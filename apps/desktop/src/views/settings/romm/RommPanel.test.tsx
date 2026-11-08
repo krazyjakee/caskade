@@ -1,13 +1,16 @@
+import { checkAnatomy } from "@caskade/ui";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createEmulationFixtureApi } from "../../../api/emulationFixtures";
+import { CommandFailure } from "../../../api/reply";
 import type {
   RommApi,
   RommConnection,
   RommDownload,
   RommOverview,
   RommServer,
+  RommServerStatus,
   RommSettings,
 } from "../../../api/romm";
 import { EmulationProvider } from "../emulators/EmulationProvider";
@@ -174,6 +177,31 @@ const home: RommServer = {
   syncInterval: "6h",
 };
 
+const settingsWith = (server: RommServer): RommSettings => ({
+  servers: [server],
+  cache: { dir: "", limitGb: 100, keepFavorites: true, verify: true },
+});
+
+const statusOf = (patch: Partial<RommServerStatus>): RommServerStatus => ({
+  id: "home",
+  state: "untested",
+  version: null,
+  error: null,
+  lastSyncMs: null,
+  syncing: false,
+  games: 0,
+  hasSecret: true,
+  ...patch,
+});
+
+/** The server's row in the table. */
+const serverRow = async () => {
+  await screen.findByRole("button", { name: "Home" });
+  const row = document.querySelector<HTMLElement>('[data-part="romm-server"]');
+  if (!row) throw new Error("no server row");
+  return row;
+};
+
 describe("RommPanel", () => {
   it("adds a server, tests it and hands the password to the keychain", async () => {
     const { api } = backend();
@@ -305,6 +333,89 @@ describe("RommPanel", () => {
     expect(screen.queryByText("Secret of Mana")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Clear Cache" }));
     await waitFor(() => expect(api.clearCache).toHaveBeenCalled());
+  });
+});
+
+describe("RommPanel sign-in on this device (#73)", () => {
+  it("a server synced without its API token asks for one here", async () => {
+    const synced: RommServer = { ...home, auth: "token", username: "" };
+    const { api } = backend({
+      settings: settingsWith(synced),
+      servers: [statusOf({ state: "sign_in_needed", hasSecret: false })],
+    });
+    const { container } = renderPanel(api);
+    const row = await serverRow();
+    expect(row.dataset.status).toBe("sign_in_needed");
+    expect(within(row).getByText("Sign-in needed on this device")).toBeTruthy();
+    expect(within(row).getByText(/Enter this server's API token here/)).toBeTruthy();
+    expect(screen.queryByText("Can't connect")).toBeNull();
+    // Signing in replaces Sync now as the row's action.
+    expect(within(row).queryByRole("button", { name: "Sync Home" })).toBeNull();
+    const signIn = within(row).getByRole("button", { name: "Enter the API token for Home" });
+    expect(signIn.textContent).toBe("Enter API token");
+
+    fireEvent.click(signIn);
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByLabelText("API token")));
+    fireEvent.change(screen.getByLabelText("API token"), { target: { value: "rmm_token" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+    await waitFor(() =>
+      expect(api.saveServer).toHaveBeenCalledWith(
+        expect.objectContaining({ id: "home" }),
+        "rmm_token",
+      ),
+    );
+    // Signed in: the row goes back to syncing.
+    await within(row).findByRole("button", { name: "Sync Home" });
+
+    const root = container.querySelector('[data-cs="romm-servers"]');
+    expect(root && checkAnatomy(root)).toEqual([]);
+  });
+
+  it("a refused sign-in shows the server's reason once, with Sign in", async () => {
+    const { api } = backend({
+      settings: settingsWith(home),
+      servers: [
+        statusOf({
+          state: "sign_in_needed",
+          error: "sign-in failed: Invalid username or password",
+        }),
+      ],
+    });
+    renderPanel(api);
+    const row = await serverRow();
+    expect(within(row).getAllByText(/Invalid username or password/)).toHaveLength(1);
+    fireEvent.click(within(row).getByRole("button", { name: "Sign in to Home" }));
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByLabelText("Password")));
+  });
+
+  it("a failed sync shows its error once, not again under the status", async () => {
+    const { api } = backend({
+      settings: settingsWith(home),
+      servers: [statusOf({ state: "error", error: "the server answered 500" })],
+    });
+    api.sync.mockRejectedValueOnce(
+      new CommandFailure({ code: "server", summary: "The server answered 500" }),
+    );
+    renderPanel(api);
+    const row = await serverRow();
+    expect(within(row).getByText("the server answered 500")).toBeTruthy();
+    fireEvent.click(within(row).getByRole("button", { name: "Sync Home" }));
+    expect((await within(row).findByRole("alert")).textContent).toBe("The server answered 500");
+    expect(within(row).queryByText("the server answered 500")).toBeNull();
+  });
+
+  it("the editor tells a refused sign-in from a connection that failed", async () => {
+    const { api } = backend({ settings: settingsWith(home), servers: [statusOf({})] });
+    api.testServer.mockRejectedValueOnce(
+      new CommandFailure({ code: "auth", summary: "Sign-in failed: Invalid username or password" }),
+    );
+    renderPanel(api);
+    fireEvent.click(await screen.findByRole("button", { name: "Test connection" }));
+    await screen.findByText("Can't sign in");
+    expect(screen.queryByText("Can't connect")).toBeNull();
+    expect(document.querySelector('[data-part="connection"]')?.getAttribute("data-status")).toBe(
+      "sign_in_needed",
+    );
   });
 });
 

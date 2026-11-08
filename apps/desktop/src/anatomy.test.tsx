@@ -24,6 +24,7 @@ import { createAddonsFixture } from "./api/addonsFixtures";
 import { type AppUpdateApi, AppUpdateProvider } from "./api/appUpdate";
 import type { BrowseApi } from "./api/browse";
 import { createBrowseFixtureApi } from "./api/browseFixtures";
+import { createEmulationFixtureApi } from "./api/emulationFixtures";
 import { createFixtureApi, createFixtureGames } from "./api/fixtures";
 import { createInstallFixtureApi } from "./api/installFixtures";
 import { type NotificationsApi, NotificationsProvider } from "./api/notifications";
@@ -33,6 +34,7 @@ import {
   fixtureNotifications,
 } from "./api/notificationsFixtures";
 import { createLibraryQueryClient, LibraryProvider } from "./api/provider";
+import type { RommApi, RommOverview } from "./api/romm";
 import { StorageProvider } from "./api/StorageProvider";
 import { SharesProvider } from "./api/shares";
 import { createSharesFixtureApi, FIXTURE_LINK, fixtureShare } from "./api/sharesFixtures";
@@ -71,6 +73,9 @@ import { LibraryCard } from "./views/library/LibraryCard";
 import { LibraryRow } from "./views/library/LibraryRow";
 import { LibraryView } from "./views/library/LibraryView";
 import { WebMosaic } from "./views/library/web/WebMosaic";
+import { EmulationProvider } from "./views/settings/emulators/EmulationProvider";
+import { RommPanel } from "./views/settings/romm/RommPanel";
+import { RommApiContext } from "./views/settings/romm/useRomm";
 import { StatisticsDashboard } from "./views/settings/statistics/StatisticsDashboard";
 
 afterEach(cleanup);
@@ -692,6 +697,60 @@ describe("the shell's catalogued anatomy, and the app-only parts of shared compo
     renderWholeApp("/settings?tab=about&section=licenses");
     await screen.findByRole("article", { name: "Licenses" });
     expect(survey(seen, "legal")).toEqual([]);
+  });
+
+  it("renders the RomM server list with a server that needs signing in here", async () => {
+    const overview: RommOverview = {
+      settings: {
+        servers: [
+          {
+            id: "home",
+            name: "Home",
+            url: "https://romm.local",
+            auth: "token",
+            username: "",
+            allowInvalidCerts: false,
+            importAll: true,
+            platforms: [],
+            collections: [],
+            syncOnStartup: true,
+            syncInterval: "6h",
+          },
+        ],
+        cache: { dir: "", limitGb: 100, keepFavorites: true, verify: true },
+      },
+      servers: [
+        {
+          id: "home",
+          state: "sign_in_needed",
+          version: null,
+          error: null,
+          lastSyncMs: null,
+          syncing: false,
+          games: 0,
+          hasSecret: false,
+        },
+      ],
+      cache: { dir: "/games/romm-cache", used: 0, limit: null, games: [] },
+      downloads: [],
+    };
+    const romm = {
+      overview: async () => structuredClone(overview),
+      subscribeDownloads: async () => () => {},
+    } as unknown as RommApi;
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <EmulationProvider api={createEmulationFixtureApi()}>
+          <RommApiContext.Provider value={romm}>
+            <RommPanel />
+          </RommApiContext.Provider>
+        </EmulationProvider>
+      </QueryClientProvider>,
+    );
+    await screen.findByText("Enter API token");
+    expect(survey(seen, "romm")).toEqual([]);
+    expect(survey(seen, "romm-servers")).toEqual([]);
+    cleanup();
   });
 
   it("renders the Statistics dashboard in each state", () => {

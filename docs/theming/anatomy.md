@@ -110,6 +110,8 @@ variant of the component, such as the library's card.
 - [`addon-details`](#addon-details): A catalogue add-on's details: screenshots, description as text, compatibility, the release an install gets, and installing, updating, applying and removing it.
 - [`achievements`](#achievements): A game page's achievements: one store account's set at a time, its counts and how its last fetch went, and every achievement with its state, progress, unlock time, rarity and points where the service gives them. Hidden achievements stay concealed until unlocked or revealed.
 - [`achievement-summary`](#achievement-summary): A game's achievement counts in its hero, across its sets; pressing it moves to the achievements.
+- [`romm`](#romm): Settings → RomM servers: the server list, the selected server's editor, downloads and the cache.
+- [`romm-servers`](#romm-servers): The RomM server list: each server's state, games, last sync and its action (Sync now, or Sign in when this device can't sign in).
 
 ## `button`
 
@@ -1649,3 +1651,27 @@ Contains: [`button`](#button), [`segmented`](#segmented), [`switch`](#switch)
 A game's achievement counts in its hero, across its sets; pressing it moves to the achievements. Rendered by AchievementSummary (app).
 
 Root: `[data-cs="achievement-summary"]`
+
+## `romm`
+
+Settings → RomM servers: the server list, the selected server's editor, downloads and the cache. Rendered by RommPanel (app).
+
+Root: `[data-cs="romm"]`
+
+Container: its content comes from the caller, which may add parts of its own.
+
+Contains: [`settings-section`](#settings-section), [`romm-servers`](#romm-servers)
+
+## `romm-servers`
+
+The RomM server list: each server's state, games, last sync and its action (Sync now, or Sign in when this device can't sign in). Rendered by RommPanel (app).
+
+Root: `[data-cs="romm-servers"]`
+
+| Part | Selector | What it is |
+| --- | --- | --- |
+| `romm-server` | `[data-cs="romm-servers"] [data-part="romm-server"]` | A server's row (`data-status`: `untested`, `connected`, `offline`, `error` or `sign_in_needed`; `data-selected` while its editor is open). |
+| `sign-in` | `[data-cs="romm-servers"] [data-part="sign-in"]` | Sign in or Enter API token on a server this device can't sign in to: opens its editor at the password or token (a `button`). |
+| `sign-in-reason` | `[data-cs="romm-servers"] [data-part="sign-in-reason"]` | Why a server needs signing in on this device: sign-ins stay on each device, or the server refused the saved one. |
+
+Contains: [`button`](#button), [`status-dot`](#status-dot)

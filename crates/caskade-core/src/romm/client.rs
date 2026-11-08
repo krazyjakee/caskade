@@ -293,7 +293,7 @@ impl Client {
                 let body = read(response, MAX_JSON).await.unwrap_or_default();
                 return Err(RommError::Auth(
                     if matches!(self.credentials, Credentials::None) {
-                        crate::tr!("this server needs a username and password or an API token")
+                        crate::tr!("this device has no password or API token saved for this server")
                     } else {
                         failure(status, &body)
                     },
