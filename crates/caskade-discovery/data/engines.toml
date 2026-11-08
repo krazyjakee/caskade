@@ -1,4 +1,4 @@
-# Original Caskade fingerprint data (DISCOVERY-PLAN §6.7).
+# Original Caskade fingerprint data.
 # All patterns in one rule must match. Alternative layouts use separate rules.
 # Paths include directories and use globset's ** for zero or more parents.
 # SDK presence is weaker than an engine; store-* rules cannot establish Likely alone.

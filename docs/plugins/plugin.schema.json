@@ -28,7 +28,7 @@
         },
         "emulation": {
           "default": [],
-          "description": "Data contributions such as emulator definitions (EMULATION-PLAN §8).",
+          "description": "Data contributions such as emulator definitions.",
           "items": {
             "type": "string"
           },

@@ -1,4 +1,4 @@
-//! The host's web API (STREAMING-PLAN §4.2): HTTPS to `localhost:47990`
+//! The host's web API: HTTPS to `localhost:47990`
 //! with basic auth, pinned to the certificate the host made
 //! (`credentials/cacert.pem`). Nothing else is trusted, not the system's
 //! roots and not another certificate on the same port. Requests carry no

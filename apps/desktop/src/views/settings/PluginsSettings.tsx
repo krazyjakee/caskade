@@ -21,7 +21,7 @@ import { hookNames, providerName, slotName } from "./pluginTerms";
 
 type Permissions = NonNullable<PluginSummary["permissions"]>;
 
-/** The capabilities a plugin asks for, in plain words (TECH-PLAN §7), in
+/** The capabilities a plugin asks for, in plain words, in
  * the current language (called while rendering). */
 export function capabilityLines(permissions: Permissions | null): string[] {
   if (!permissions) return [];
@@ -40,7 +40,7 @@ export function capabilityLines(permissions: Permissions | null): string[] {
 }
 
 /** Everything a plugin can do, its UI half included: UI modules run in the
- * app's page with the app's IPC access (TECH-PLAN §7's known gap). */
+ * app's page with the app's IPC access (a known gap). */
 function accessLines(plugin: PluginSummary): string[] {
   return [
     ...(plugin.hasUi

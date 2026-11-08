@@ -1,4 +1,4 @@
-//! Stand-ins for portals' ad SDKs (WEB-GAMES-PLAN §6): an offline copy
+//! Stand-ins for portals' ad SDKs: an offline copy
 //! plays without the portal's page, and a game that waits for an ad its
 //! page would have shown waits for good.
 

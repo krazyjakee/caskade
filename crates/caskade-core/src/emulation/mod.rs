@@ -1,4 +1,4 @@
-//! Emulation (EMULATION-PLAN): platform and emulator definitions as data,
+//! Emulation: platform and emulator definitions as data,
 //! the variables profiles use, argv resolution, and the user's emulator
 //! configuration.
 //!

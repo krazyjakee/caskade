@@ -427,8 +427,7 @@ fn names_never_leave_the_target() {
 }
 
 /// A large copy on loopback, measured: `cargo test --release -p caskade-sync
-/// --test it copy::loopback_throughput -- --ignored --nocapture`. The figure
-/// goes in docs/sync.md.
+/// --test it copy::loopback_throughput -- --ignored --nocapture`.
 #[tokio::test(flavor = "multi_thread")]
 #[ignore = "moves 256 MiB; run by hand, in release"]
 async fn loopback_throughput() {

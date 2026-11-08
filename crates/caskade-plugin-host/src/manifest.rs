@@ -1,4 +1,4 @@
-//! `plugin.json` (TECH-PLAN §4.2): what a plugin is, what it needs and what
+//! `plugin.json`: what a plugin is, what it needs and what
 //! it contributes. Contributions are declared so Caskade can list them, ask
 //! for permissions and activate lazily without running the plugin's code.
 
@@ -105,7 +105,7 @@ pub struct Contributes {
     #[serde(default)]
     #[specta(type = Option<serde_json::Value>)]
     pub settings: Option<serde_json::Value>,
-    /// Data contributions such as emulator definitions (EMULATION-PLAN §8).
+    /// Data contributions such as emulator definitions.
     #[serde(default)]
     pub emulation: Vec<PathBuf>,
     /// Theme folders the plugin bundles, each with a `theme.json` (#139).
@@ -210,7 +210,7 @@ pub const HOOK_POINTS: [&str; 26] = [
     "install.moved",
 ];
 
-/// UI contribution points (TECH-PLAN §4.3); the shell renders them (#127).
+/// UI contribution points; the shell renders them (#127).
 pub const SLOTS: [&str; 12] = [
     "views",
     "home.sections",
@@ -249,8 +249,7 @@ fn valid_id(id: &str) -> bool {
         })
 }
 
-/// Whether `api` accepts this host: the current or the previous 0.x minor
-/// (TECH-PLAN §4.4 Versioning).
+/// Whether `api` accepts this host: the current or the previous 0.x minor.
 pub fn api_supported(api: &semver::VersionReq) -> bool {
     let previous = (HOST_API.major == 0 && HOST_API.minor > 0)
         .then(|| semver::Version::new(0, HOST_API.minor - 1, 0));

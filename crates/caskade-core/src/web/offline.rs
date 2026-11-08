@@ -1,4 +1,4 @@
-//! Play offline (WEB-GAMES-PLAN §6): the guided capture of a web game into
+//! Play offline: the guided capture of a web game into
 //! a storage root, and the bundle it leaves as the game's entry.
 
 use super::{

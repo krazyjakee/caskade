@@ -13,7 +13,7 @@ import {
 import { formatSize } from "./presentation";
 import { unwrap } from "./reply";
 
-/** One-click emulator installs (EMULATOR-SETUP-PLAN §7). */
+/** One-click emulator installs. */
 export type Installable = Installable_Serialize;
 export type MissingPlatform = MissingPlatform_Serialize;
 export type SetupJob = SetupJob_Serialize;

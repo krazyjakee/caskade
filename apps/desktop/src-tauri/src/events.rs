@@ -1,6 +1,5 @@
 //! Typed events from the core to the frontend. The bus bridge forwards the
-//! core bus events the UI needs (TECH-PLAN §4.3 "delivered to backend and
-//! UI halves").
+//! core bus events the UI needs.
 
 use caskade_core::bus::{Event as BusEvent, GameSession};
 use serde::{Deserialize, Serialize};

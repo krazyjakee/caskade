@@ -1,4 +1,4 @@
-/** Settings → Streaming (#265, STREAMING-PLAN §8.5): letting other devices
+/** Settings → Streaming (#265): letting other devices
  * stream games from this one (admins), the devices paired with it and the
  * ones waiting to pair; the devices this one can stream from, pairing
  * with them and adding one by its address; and the stream quality.

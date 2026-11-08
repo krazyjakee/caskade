@@ -1,4 +1,4 @@
-//! Provider adapters (#126, TECH-PLAN §2, §4.3): a plugin's provider
+//! Provider adapters (#126): a plugin's provider
 //! exports implement the same core traits as the built-in providers, so
 //! both use one code path. Each call goes through the host like any other:
 //! lazily activated, time-boxed, and contained if it fails. Providers also

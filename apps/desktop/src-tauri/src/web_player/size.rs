@@ -1,4 +1,4 @@
-//! The game window's size (WEB-GAMES-PLAN §3): a game whose size is known
+//! The game window's size: a game whose size is known
 //! opens at it, centred over Caskade's window, rather than covering it. A
 //! window the user resized opens at their size next time.
 

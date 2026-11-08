@@ -1,4 +1,4 @@
-//! The `roms` library source (EMULATION-PLAN §6): ROM scanners take part in
+//! The `roms` library source: ROM scanners take part in
 //! library updates. Scanning and reconciliation live in the core's
 //! [`ScannerService`], which the installer's ROM hand-off uses too.
 //!

@@ -1,4 +1,4 @@
-//! The in-process hook bus (TECH-PLAN §2 Core → Bus, §4.3): typed events,
+//! The in-process hook bus: typed events,
 //! ordered interceptors and provider registries. Built-in code and WASM
 //! plugins (adapted by `caskade-plugin-host`) use the same contracts.
 //!

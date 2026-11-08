@@ -1,0 +1,274 @@
+# Tech spec
+
+How Caskade is built today. Last reviewed 2026-11-08, at version 0.1.3.
+
+What it does is in the [product spec](PRODUCT-SPEC.md). Public contracts for extension authors live beside this document: [plugins](plugins/README.md) (with `plugin.schema.json` and `wit/caskade-plugin.wit`) and [theming](theming/README.md) (with the generated [token](theming/tokens.md) and [anatomy](theming/anatomy.md) references).
+
+## 1. Principles
+
+1. **The core has no Tauri dependency.** `crates/caskade-core` is a plain Rust library: domain model, database, services, hook bus. `apps/desktop/src-tauri` is a thin adapter of commands, events, windows and URI schemes. The core is tested without a window.
+2. **The webview never touches the OS.** Files, processes and the network go through typed commands to the core, which checks permissions. The webview gets no `fs` or `shell` plugin, and its CSP allows connections only to IPC, the app's own schemes and a few image hosts.
+3. **Built-ins and plugins share code paths.** Each extension point is one provider trait. Built-in sources implement it natively; WebAssembly plugins are adapted to it.
+4. **Local first.** Everything that can work offline does. Network answers are cached, a failed refresh keeps the last good answer, and caches are only evicted while online.
+5. **Declared, not implied.** Every table and setting is classified for sync and for backups, every plugin capability is declared and granted, every user-set field is recorded as user-set. Guard tests fail when something new is unclassified.
+6. **Nothing unasked.** Downloads, installs, elevation and destructive actions wait for confirmation. Background work is bounded and never prompts.
+
+## 2. Stack
+
+| Area | Choice |
+| --- | --- |
+| Language | Rust 2024 edition, MSRV 1.94; TypeScript 7 (`strict`) |
+| App shell | Tauri 2.12 (WebView2, WKWebView, WebKitGTK). Plain tao + wry for the game and video windows. |
+| Async | tokio. Tauri gets a 4-worker runtime. |
+| Database | SQLite through `sqlx` 0.9 (bundled SQLite, in-repo migrations), FTS5 for search |
+| IPC types | `specta` + `tauri-specta` (pinned RC). Generated bindings are committed. |
+| HTTP | `reqwest` with rustls |
+| Process tracking | `sysinfo` plus per-OS process identity |
+| Plugins | wasmtime 50 (pinned), Component Model, WASI 0.2, guests built for `wasm32-wasip2` |
+| Device sync | iroh 1.0.3 and iroh-blobs 0.103.1 (pinned) |
+| Torrents | librqbit 9 (upload disabled) |
+| Web game capture | hudsucker MITM proxy |
+| Gamepads | `gilrs` (XInput backend on Windows) |
+| UI | React 19, React Aria Components, TanStack Router, Query and Virtual, Tailwind CSS 4 over `--cs-*` tokens, Lingui, lucide-react, Vite 8 |
+| Translations | gettext PO catalogs (`ui`, `app`, `core` domains) |
+| Lint and format | rustfmt, Clippy with `-D warnings`, Biome |
+| Tests | `cargo test` / nextest, insta, wiremock, Vitest with Testing Library, Storybook as a component workshop |
+| Tasks | `just`, pnpm workspaces |
+
+## 3. Repository
+
+| Path | Contents |
+| --- | --- |
+| `crates/caskade-core` | Domain model, library store, every service listed in §6. Feature `net` adds everything that needs `reqwest` or iroh. |
+| `crates/caskade-discovery` | Standalone: finds installed games from launchers, stores and the OS. Features per OS, `deep`, `watch`, `sqlite`, `cli`. |
+| `crates/caskade-installer` | Standalone: fetches, probes, plans, installs, uninstalls, moves and reconciles payloads (installers, packages, archives, discs, torrents). Dev CLI. |
+| `crates/caskade-sources` | Built-in library sources over discovery, emulator and platform definitions (`emulation/*.toml`), managed tool definitions (`tools/*.toml`). |
+| `crates/caskade-sync` | iroh endpoint, device identity, pairing, the `caskade/sync/1` protocol, blob transfer, share links, swarm downloads. |
+| `crates/caskade-plugin-host` | Manifests, discovery, the wasmtime runtime and capability enforcement. |
+| `crates/caskade-plugin-sdk` | Rust SDK for plugin backends. |
+| `crates/caskade-component-cache` | Cache of compiled plugin components. |
+| `crates/caskade-theme` | Validates and compiles theme folders against the token manifest and anatomy catalogue. |
+| `crates/caskade-input` | Gamepad input normalised to actions. |
+| `crates/caskade-jobs` | The process-wide resource queue. |
+| `crates/caskade-i18n` | Runtime translation for the Rust side. |
+| `crates/caskade-malloc`, `caskade-webview2`, `caskade-xinput` | The only crates with `unsafe`: glibc allocator tuning, WebView2 COM calls, XInput's guide button. |
+| `crates/caskade-emulation-fixtures` | Generated emulator and ROM fixtures for tests. |
+| `apps/desktop/src-tauri` | The Tauri adapter: commands, events, windows, schemes, tray, deep links, launch channel, elevation entry. |
+| `apps/desktop/src` | The React app. |
+| `apps/storybook` | Storybook for `@caskade/ui`, also a theme playground. |
+| `packages/ui`, `packages/tokens` | `@caskade/ui` (themeable components and the anatomy catalogue), `@caskade/tokens` (DTCG tokens compiled to CSS). |
+| `packages/sdk`, `packages/vite-plugin`, `packages/create-plugin`, `packages/i18n` | Plugin UI SDK, build preset, scaffolder, translation tooling. |
+| `themes/`, `plugins/examples/` | Built-in and catalogue themes, example plugins (dogfooded in tests). |
+| `wit/` | The backend plugin contract, `caskade:plugin@0.1.0`. |
+| `locales/` | PO templates and catalogs. |
+| `xtask/`, `scripts/` | Fixture builders, the installer corpus score, CI scope, legal notices, catalogue builds. |
+| `vendor/` | Vendored and patched third-party crates. |
+
+## 4. Runtime architecture
+
+### 4.1 Processes and windows
+
+One `caskade` binary has several entry points, decided in `run()` before logging and Tauri start:
+
+| Invocation | What runs |
+| --- | --- |
+| `caskade` | The app: main window (React), tray icon, core services. A second start shows the running window (single instance). |
+| `caskade --console` | The app, starting in console mode. |
+| `caskade --launch <game> [--entry] [--action]` | A caller that connects to the running app over a per-user channel (a 0600 Unix socket or a local-only named pipe), starting it detached if needed, and lives as long as the game. Exit codes: 0 exited, 1 crashed, 2 usage, 3 refused, 4 failed, 5 stopped. |
+| `caskade --web-game <url>` / `--bundle <dir> [--capture]` | The game window: tao + wry with no IPC, optionally behind the capture proxy. |
+| `caskade --video <id>` | The video window for YouTube embeds, closed when Caskade exits. |
+| `caskade --elevated <steps> …` | Windows administrator steps, started with `runas`. |
+| `caskade --restore <backup>` | Stages a restore for the next start. |
+| `caskade <magnet or .torrent>` / `caskade://…` | Turned into an install request (deep links, OS handlers). |
+
+### 4.2 Webview and core
+
+- **Commands** live in `src-tauri/src/commands/<area>.rs` and are registered in `bindings.rs`. `just bindings` regenerates `apps/desktop/src/api/bindings.ts`, and a test fails when the committed file is stale. 64-bit times and sizes cross as numbers, 64-bit ids as strings.
+- **Events** from the core (`events.rs`) invalidate TanStack Query caches.
+- **Each API area** in the webview (`src/api/*.ts`) is an interface with a native implementation and fixtures, so the browser preview (`just web`) and tests run without the core.
+- **Schemes**: `caskade-asset://` serves cached artwork and thumbnails, `caskade-theme://` compiled theme stylesheets and assets, `caskade-plugin://` plugin UI modules.
+- **Permissions**: commands check the active local account's role and permissions in the adapter (`permissions.rs`). The account comes from the adapter, never from the webview.
+
+### 4.3 Hook bus and the launch pipeline
+
+The bus carries events, interceptors and providers between the core, built-ins and plugins. The launch pipeline is its main user:
+
+1. Check the play gate (signed-in account, age limit, already running, one stream at a time).
+2. Pick the release and action (a default, or ask), apply the action's target.
+3. Offer a game update, check saves on paired devices (at most 4 s), warn if playing elsewhere.
+4. Run before-launch lifecycle scripts and `launch.before` interceptors (which may rewrite or cancel).
+5. Spawn, or open the URI, web window or stream. Processes Caskade starts drop its own AppImage environment.
+6. Identify the real game process by install folder and executable (and alias path), track it with the chosen tracking mode.
+7. `game.started`, after-start scripts in the background.
+8. Wait for exit, persist the `PlaySession`, `game.exited`, after-exit scripts, `launch.after` interceptors, save versioning, achievement refresh.
+
+Sessions survive restarts: recovery state records running processes by `ProcessIdentity` (on Linux, start ticks plus `boot_id`), so a reused PID is never touched and clock steps change nothing.
+
+## 5. Data
+
+### 5.1 Domain model
+
+| Entity | Notes |
+| --- | --- |
+| **Game** | What the user sees: titles, description, genres, tags, dates, platforms, age ratings, favourite, hidden, user overrides (`overrides_json`). |
+| **Entry (release)** | One per source: `source_id` + `external_id`, install state and location, size, `LaunchSpec`. Several entries make one game. |
+| **Install location** | `Managed { root_id, rel_dir }` for games Caskade installed, never an absolute path, so games and roots can move; `External(path)` for games another launcher owns. |
+| **StorageRoot** | A managed install folder with an id also written to `<root>/.caskade/root.json`, so a root at a new path is recognised. |
+| **LaunchSpec** | `Uri`, `Executable` (relative to the install for managed games), `Emulator` (platform default, pinned profile or ask, plus ROMs), `Web`, `Stream { host, app }`, `Plugin`. |
+| **Action** | A named play or utility action with its own target and tracking mode. |
+| **Platform, Emulator, Profile, Scanner** | Definitions are data (TOML); installed emulators, profiles, defaults and scanners are user configuration. |
+| **PlaySession** | Start, end, duration, entry. Remote playtime from stores is kept apart, per release, provider and account. |
+| **Collection** | Manual or smart, owned by a local account. |
+| **Artwork** | Kind, source, cached path, thumbnails; user choices override automatic sources. |
+| **Account** | Local accounts: role, permissions, age limit, PIN hash (argon2id). |
+| **Store account, entitlement** | Launcher and store accounts and what each owns, apart from what is installed. |
+| **Device, change log, save version, share** | Paired devices and grants, the sync change log with hybrid logical clocks and tombstones, content-addressed save versions, one-off shares. |
+
+### 5.2 Storage
+
+- **Library**: `library.sqlite` in the data folder, migrated by numbered `sqlx` migrations (`crates/caskade-core/migrations/`, 34 so far, each with a down migration).
+- **Caches** (`<cache>/`): artwork and thumbnails, IGDB answers (`igdb/games.sqlite`), Hasheous dumps and indexes, the Ludusavi manifest and indexes, Decomp Buddy plans, the add-on catalogue, compiled plugins, peer downloads. All disposable and rebuilt on demand.
+- **Data** (`<data>/`): managed emulators and tools, save blobs, staged restores, elevation records, streaming state, themes, plugins and plugin data.
+- **Settings**: namespaced sections (`core.general`, `core.appearance`, `core.sync`, `core.streaming`, …) registered with a schema version, a JSON Schema from `schemars` and validated defaults. The same mechanism renders plugin settings.
+- **Secrets** live in the OS keychain (Secret Service, Keychain, Credential Manager): RomM credentials, store account sign-ins (`dev.caskade.store-accounts`), the device key (`dev.caskade.sync`), streaming credentials (`dev.caskade.streaming`). Never in the database, settings, logs, events, backups or the webview.
+- **Overrides**: a field the user set is recorded with its automatic value. Automatic writers go through `update_automatic_game` or `upsert_game`, which write beneath the user's values.
+
+### 5.3 Sync and backup classification
+
+- Every table and setting is **synced**, **optional** (off by default) or **local** in `sync::policy`. Paths, folders, emulators, sign-ins and caches are local. Guard tests and the `sync_policy` fixtures fail on anything unclassified.
+- Every table and setting is backed up unless `backup::policy` excludes it (credentials, caches, work in progress). Files outside the database need a backup `Component`.
+
+## 6. Subsystems
+
+### Library and discovery
+
+- `caskade-discovery` reads launcher files, registries, plists, `.desktop` files, Start Menu shortcuts, uninstall entries and Wine prefixes; a classifier keeps out non-games; copies found by several sources merge. Watching uses `notify`, never recursively over large trees.
+- `LibraryStore` imports scans, merges games that are one game (`same_games`: same IGDB id, or title within five years), keeps separated games apart (`kept_apart`) and serves queries, counts and FTS5 search.
+
+### Metadata and artwork
+
+- `Igdb` asks caskade-server (closed source, on Railway) by IGDB id and caches every answer, including not-found. Concurrent lookups share one request; failures pause all requests for a minute or `Retry-After` (up to 6 h). Cached answers carry a shape version so new fields are fetched once.
+- `Metadata` matches each game (RomM ROM, Hasheous, then the server's `/match` for store ids) and applies fields only where the game's value is empty or was written by the last apply. Runs retry with capped, jittered backoff.
+- `Hasheous` downloads the dumps the library needs and answers hash and title lookups offline.
+- The artwork cache downloads once, makes thumbnails and serves them over `caskade-asset://`. Page-only images download when the page opens.
+
+### Installs, storage and updates
+
+- `caskade-installer` classifies payloads, plans per host, runs installers silently where it can (and interactively where it must), records what it installed, and rolls back. Its failure model (kind, stage, file, security note, recovery actions) drives Activity's recovery UI.
+- `InstallService` owns the job queues, maps finished installs into the library and owns `InstallRequests`, the confirmation queue that every deep link, drop, paste and torrent link goes through.
+- Storage roots are reconciled by id; moves are transactional and resume.
+- `updates` follows managed installs whose source an `UpdateProvider` knows (GitHub releases, without the API). Updates install beside the old folder, carry the user's files over and roll back on failure; interrupted ones are finished or undone at start.
+
+### Emulation and managed tools
+
+- Definitions in `caskade-sources/emulation/` describe detection, install sources per OS, setup steps, profiles, display flags, BIOS and save rules. `platforms.toml` maps platforms to IGDB, Hasheous and RomM ids and lists recommended emulators. Each definition's sources are recorded in `emulation/SOURCES.md`.
+- `managed` holds the shared steps: resolve (GitHub without the API, Dolphin's endpoint, a URL), download, unpack and swap carrying the user's files, Flatpak. `EmulatorSetup` and `ManagedTools` build on it. Removal deletes only what `.caskade/shipped.json` lists.
+- ROM scanners identify by hash; RomM is both a library source and a `BiosProvider`.
+
+### Launching extras
+
+- **Launch actions** (`game_actions`, `entry_action_settings`) and **lifecycle scripts** (`lifecycle_scripts`, run by `ScriptRunner` with bounded output, a time limit, cancellation and process-group kill) plug into the pipeline in §4.3.
+- **Web games** play in the game window. Offline bundles (Linux) are captured through the window's MITM proxy and saved with `WebGames::save_offline`.
+- **Ports** come from Decomp Buddy's `plans.json` (fetched daily with an ETag) and install with `InstallService::install_attached`.
+
+### Accounts, store accounts and achievements
+
+- `AccountService`: roles, permissions, age limits, PIN hashes with a throttle that survives restarts.
+- `StoreAccounts`: connect flows (browser callback with a `state` check, device poll, pasted code, key), token renewal, complete-snapshot imports (partial pages never mark products lost), reconciliation of owned and installed copies, remote playtime counted once per store-identity family.
+- `Achievements`: per-account caches, single-flight fetches, last good answer kept, unlocks announced only after a baseline. Providers: Steam, GOG (via the game's Galaxy client), Epic (GraphQL per sandbox), RetroAchievements (by verified hash).
+
+### Devices, sync, saves and shares
+
+- **Transport**: iroh endpoints; devices found over mDNS (service `caskade`), n0 lookup and relays unless `core.sync.neverRelay`. Game files only move over endpoints with no relay transport (`DirectDialer`, `SwarmDialer`, `FileServer`).
+- **Protocol**: `caskade/sync/1`, one byte-identical refusal for anything unauthorised, line-framed JSON with read bounds.
+- **Pairing**: code pairing with a nonce commitment, or single-use 10-minute `caskade://pair` links accepted by an admin. Grants never reach the webview.
+- **Library sync**: changes captured by diffing snapshots against `sync_fields` (only after the library was written), last writer wins per field by hybrid logical clock, tombstones for deletions, games matched across devices by identity (`sync_game_ids`).
+- **Saves**: `Saves` resolves locations per release (Ludusavi manifest by Steam id, GOG id, title, aliases; emulator `[saves]` rules; the user's choices), maps Windows paths into a Wine or Proton prefix, and versions files content-addressed in `<data>/saves/blobs/`.
+- **Presence, copies, nearby downloads, backups on devices, emulator offers and config** ride on the same exchange as notes on the blob rounds.
+- **Shares**: `caskade://receive` links with their own grant and expiry, admitted only while the share runs, revoked mid-transfer when stopped. Recipients fetch from the swarm of the sharer and other recipients.
+
+### Streaming
+
+- Sunshine (host) and Moonlight (client) are separate GPLv3 programs installed through managed tools, configured by Caskade and never shown.
+- **Host**: config in `<data>/streaming/host/`, random web credentials in the keychain, a child process under `setpriv --pdeathsig` (Linux) or an on-demand service (Windows), crash restarts with backoff, the local API pinned to its certificate by bytes. `Publisher` keeps one app per playable game, running `caskade --launch <id>`. A user's own Sunshine is detected and used instead of installing one.
+- **Client**: Moonlight's own state directory with quiet settings; Caskade pairs over the GameStream protocol itself (no Moonlight window), finds hosts over mDNS `_nvstream._tcp`, wakes them with Wake-on-LAN, and starts streams fullscreen centred on Caskade's window.
+- **Elevation**: `Elevation::apply` asks once (pkexec on Linux, `runas` on Windows) for the missing changes in a named plan, records what appeared, and `undo` removes only those. ViGEmBus is installed on Windows hosts in the same prompt.
+
+### Plugins and themes
+
+- **Plugins**: a manifest (`plugin.json`, JSON Schema in `docs/plugins/`), an optional wasm backend against `wit/caskade-plugin.wit` with preopened dirs, allowlisted hosts and per-call memory and time limits, and an optional UI half loaded with `import()` from `caskade-plugin://` behind an import map that shares the app's React, SDK and UI. Every contribution has an error boundary; repeated backend failures disable the plugin. Backends are Rust-only for API 0.1.
+- **Add-on catalogue**: signed with minisign (the updater's key), cached offline, compatibility worked out per device; packages are size- and SHA-256-checked, unpacked safely and swapped in with a journal that rolls back.
+- **Themes**: `theme.json`, DTCG `tokens.json`, `theme.css`, `assets/`, no JavaScript. `caskade-theme` validates them against the token manifest and anatomy catalogue and compiles them; switching swaps one stylesheet with no reload. Cascade layers: `cs.reset, cs.tokens, cs.base, cs.components, cs.plugins, cs.theme, cs.user`.
+
+### Input and console mode
+
+- `caskade-input` normalises pads to actions (`nav.*`, `confirm`, `back`, `tab.*`, `guide`, …), emitted to the webview only while a Caskade window has focus, except `guide`. On Windows a thread reads XInput's guide button.
+- The webview's spatial focus engine (`input/spatial.ts`) moves focus within `data-focus-section` areas; views declare a default stop and bind buttons with `useInputAction`.
+- `main_window::raise` handles window managers that ignore plain focus requests (Muffin, Mutter) on Linux.
+
+### App services
+
+- **Background work**: `caskade-jobs` is one FIFO resource queue for CPU and disk stages across services. Scans use at most two workers; the 7-Zip sidecar two decoder threads.
+- **Notifications**: a feed in the library database with versioned read state; new games batch hourly.
+- **Backups**: `VACUUM INTO` snapshots plus optional components in a zip with a manifest of SHA-256s, written as `.partial`, verified, then renamed. Restores are staged and applied before the library opens, keeping the old profile until the restored one opens.
+- **App updates**: `tauri-plugin-updater` against `latest.json` on the newest GitHub release, minisign-verified. Debs install through `pkexec apt-get`.
+- **Webview recovery**: WebView2 process failures reload or restart with caps counted across processes.
+- **Tray**: AppIndicator loaded at run time on Linux; hides before exit and keeps answering the bus for 500 ms to spare Cinnamon's watcher.
+- **System statistics**: sampled once a second on a blocking thread, only while a watcher holds a lease.
+### Localization
+
+- **gettext throughout.** The English text is the message id, with a `msgctxt` only where the same English means different things. Domains: `core` (the Rust side: core, adapter, tray), `ui` (`@caskade/ui`, shared with plugins and Storybook) and `app` (the rest of the webview). Templates are committed as `locales/<domain>.pot`, translations as `locales/<lang>/<domain>.po`. Adding a language's PO files ships it.
+- **Rust**: `crates/caskade-i18n` is a pure-Rust gettext runtime (no libintl, so cross builds and bundles need no C gettext). `caskade_core::i18n` provides `tr!`, `trn!`, `trp!` and `trnp!` with named placeholders, and `msg!`-style macros for text stored to render later (notifications keep messages, not rendered text). Catalogs are compiled into the binary. The core owns the language: `set_locale` takes a tag or `system` and falls back through less specific tags to English.
+- **Webview**: Lingui 6 with PO catalogs, macros transformed natively, catalogs compiled per language into lazy chunks at build time. `main.tsx` takes the language from the core and follows its `LocaleChanged` event. The pseudo-locale `en-XA` (longer, accented) exists in dev, tests and debug builds to find unmarked or overflowing text.
+- **Formatting**: numbers, sizes, durations and dates go through `api/presentation.ts`, never bare `toLocaleString()`. Titles sort with an ICU collation per language, search folds case and accents, and the on-screen keyboard has a layout per language.
+- **Plugins and themes** ship their own `locales/<lang>.po` in a domain named after their id.
+- **Tooling**: `just i18n` extracts and merges (needs GNU gettext); `just i18n-check` (in CI) fails on a stale template, a PO file `msgfmt --check` rejects, or a translation that drops or changes a placeholder or tag. The translator's guide is [translating.md](translating.md).
+- **Not yet translated**: native dialogs the Rust side opens itself, the macOS app menu, and bundle metadata (`.desktop` entries, installer languages).
+
+## 7. Errors and recovery
+
+### 7.1 The error model
+
+`caskade_core::error::ErrorReport` is what crosses to the webview when a command fails: a stable `code`, a one-sentence `summary`, a redacted `detail`, `hints` (most useful first), `transient` and an eight-hex-character `reference` logged with the detail. `ErrorReport::from_error` walks the cause chain and picks the code; text Caskade wrote becomes the summary and an OS or database message the detail. Redaction (`error::sanitize`) strips URL credentials, queries and fragments, tokens, passwords, secrets and bearer values from every summary and detail.
+
+Codes: `invalid`, `forbidden`, `conflict`, `cancelled`, `refused`, `missingFile`, `accessDenied`, `diskFull`, `storageOffline`, `busy`, `offline`, `server`, `auth`, `integrity`, `corrupt`, `database`, `unavailable`, `internal`, `other`.
+
+Hints: `retry`, `retryLater`, `checkConnection`, `reconnectStorage`, `freeSpace`, `checkPermissions`, `checkCredentials`, `signIn`, `reload`, `restart`, `updateCaskade`.
+
+A test fails when a code or hint is missing from this list or lacks a label in `apps/desktop/src/api/reply.ts`. In the adapter, commands return `Result<T, CommandError>` and map with `.map_err(report)`; in the webview, `unwrap` rejects with a `CommandFailure` and `FailureNotice` / `ErrorNotice` show it. Installs and updates keep the installer's richer `Failure`.
+
+### 7.2 Recovery policy
+
+| Policy | When | Examples |
+| --- | --- | --- |
+| Automatic | Safe, bounded, inside what the user started | Retry transient failures with backoff and `Retry-After`, resume verified downloads, rebuild caches, recreate app-owned folders, skip one unreadable record, fall back to the default theme |
+| Confirm | Crosses an authorization or has an uncertain effect | Locate a moved source, replace user-modified files, reset a damaged settings section (keeping a backup), delete user data |
+| Manual | Only the user can fix it | Credentials, reconnecting a drive, freeing space, a quarantine, data from a newer Caskade |
+
+Recovery code is bounded (fixed attempts or capped, jittered backoff, one layer owns the retry), respects cancellation, reconciles before retrying, never reports success before verifying, keeps the original error, and never bypasses integrity checks, consent or permissions.
+
+## 8. Security
+
+- **Backend plugins are sandboxed** to what the manifest declares and the user granted. A first install shows the permission review; an update that asks for more waits for consent.
+- **UI plugins are trusted code** in the app's origin, contained by the CSP and an app-level IPC surface with no raw filesystem or shell commands. A malicious UI plugin can call any app-level command; signing and review through the catalogue are the current answer.
+- **Secrets** stay in the keychain (§5.2), and no command returns a token.
+- **Devices** authenticate by ed25519 keys; unauthorised peers get one identical refusal; game files never cross a relay.
+- **Downloads** are checked by SHA-256 or signature wherever the source offers one; the app updater and the catalogue are minisign-signed.
+- **Elevation** runs only fixed, named steps behind one OS prompt, with an undo.
+- **Local accounts** are a household lock, not data protection.
+- Vulnerability reporting is in [SECURITY.md](../SECURITY.md).
+
+## 9. Performance and resources
+
+- Big lists are virtualised; artwork is thumbnailed and served from cache, never decoded at full size in the grid.
+- On Linux, glibc's malloc arenas are capped at 2 and free memory is trimmed every minute (`caskade-malloc`). A `MALLOC_ARENA_MAX` in the environment wins.
+- Background work reacts to writes (`LibraryStore::writes`) instead of rereading whole tables on a timer. Large files (the Ludusavi manifest) are parsed incrementally. Threads start only for features in use: copy stores open on first use, the plugin epoch thread starts with the first plugin.
+- On NVIDIA's proprietary driver under X11, WebKitGTK paints on the CPU; the app restarts itself with the DMABUF renderer, and where WebKit still paints on the CPU, `<html data-paint="cpu">` pauses ambient animation.
+
+## 10. Build, test and release
+
+- **Commands**: `just dev` (app with hot reload), `just web` (UI only), `just test-app`, `just bindings`, `just build-app`, `just i18n`, `pnpm typecheck`, `pnpm lint`, `pnpm test`. Cargo commands share `/tmp/caskade-heavy.lock` through `flock`.
+- **Build speed**: the desktop crate emits only an `rlib`; dev builds use `debug = "line-tables-only"` and no dependency debug info; each crate's integration tests compile into one `it` binary (`tests/main.rs`).
+- **Tests** never reach the internet: wiremock for services, recorded fixtures, fake launchers and processes, several cores in one process for sync, a TLS-fronted fake for the streaming host. Live tests against real services and programs are `#[ignore]`d. The console end-to-end test drives the built app with a scripted pad under Xvfb.
+- **CI** (`.github/workflows/ci.yml`): pull requests run only what their changes reach (`scripts/ci-scope.py`); master runs everything. Jobs: frontend, Rust (Linux), Windows cross-Clippy, Windows launch channel and elevation (native), console end-to-end, installer and discovery on Linux, Windows and macOS. `across-networks.yml`, run by hand, tests a share between a runner and a PC on another network.
+- **Release** (`.github/workflows/release.yml`, [RELEASING.md](RELEASING.md)): a version tag builds signed bundles for every platform into a draft GitHub release with the updater feed.

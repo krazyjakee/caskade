@@ -1,4 +1,4 @@
-//! Ad and tracking hosts a web game's window refuses (WEB-GAMES-PLAN §6),
+//! Ad and tracking hosts a web game's window refuses,
 //! while capturing and while playing a bundle. A short built-in list for
 //! now: the hosts portals' and games' ads and analytics come from.
 

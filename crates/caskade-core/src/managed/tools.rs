@@ -1,4 +1,4 @@
-//! Helper programs Caskade installs and keeps (STREAMING-PLAN §3): the
+//! Helper programs Caskade installs and keeps: the
 //! streaming host and client. Installed under `<data>/<definition dir>`,
 //! recorded in `managed_tools`, checked for updates on `core.updates`
 //! like managed emulators, and never updated or removed by themselves.
@@ -63,7 +63,7 @@ impl ManagedTool {
 }
 
 /// A tool as people read it: Caskade's words for what it does, never the
-/// program's name (STREAMING-PLAN §1).
+/// program's name.
 pub fn tool_label(tool_id: &str) -> String {
     match tool_id {
         "sunshine" => crate::tr!("Game streaming from this device"),

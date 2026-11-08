@@ -1,4 +1,4 @@
-//! Relocate a game to another root (INSTALLER-PLAN §7.1, "The move job"):
+//! Relocate a game to another root, the move job:
 //! move the files, retarget the alias and absolute prefix links, and rewrite
 //! every real-path reference the scanner recorded, as one transaction. Every
 //! change is undone, newest first, on any failure or cancellation.

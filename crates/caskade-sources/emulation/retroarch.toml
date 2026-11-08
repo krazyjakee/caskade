@@ -53,7 +53,7 @@ bios = "{AppSupport}/RetroArch/system"
 lib = ".dylib"
 
 # The version is RetroArch's GitHub tag; the builds are on libretro's
-# buildbot. Cores install separately (EMULATOR-SETUP-PLAN §2.4).
+# buildbot. Cores install separately.
 [install.windows]
 source = "github"
 repo = "libretro/RetroArch"

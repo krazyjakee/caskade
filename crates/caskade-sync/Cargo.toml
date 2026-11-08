@@ -13,7 +13,7 @@ test-utils = ["iroh/test-utils", "dep:iroh-relay"]
 [dependencies]
 async-trait = "0.1"
 futures-util = "0.3"
-# The set wobu proved together (docs/sync.md); 0.103.1 is the patch release
+# The set wobu proved together; 0.103.1 is the patch release
 # of the yanked 0.103.0. Cargo.lock also holds iroh-base, iroh-relay,
 # iroh-dns and noq at the versions iroh 1.0.3 shipped with.
 iroh = "=1.0.3"

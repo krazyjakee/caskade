@@ -1,4 +1,4 @@
-//! Installing games into storage roots (#51, INSTALLER-PLAN §3, §10): job
+//! Installing games into storage roots (#51): job
 //! queues over the installer pipeline, and install outcomes as library
 //! games.
 //!
@@ -661,7 +661,7 @@ impl InstallService {
         Ok(())
     }
 
-    /// Finishes handed-off ROMs (EMULATION-PLAN §9): into a ROM scanner's
+    /// Finishes handed-off ROMs: into a ROM scanner's
     /// folder if the user picks one, otherwise where they are.
     async fn finish_roms(
         &self,

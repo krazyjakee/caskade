@@ -1,6 +1,6 @@
 //! Gettext catalogs for Caskade's Rust side, in pure Rust: no libintl, so
 //! the bundles and the Windows and macOS cross builds need no C gettext.
-//! See `docs/localization.md`.
+//! See `docs/translating.md`.
 //!
 //! - [`po`] reads and writes PO and POT files.
 //! - [`Catalog`] is one language's translations: lookups by context, plural

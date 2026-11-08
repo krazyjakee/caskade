@@ -911,7 +911,7 @@ expression: schema_for!(InstallOutcome)
           ]
         },
         {
-          "description": "Where handed-off files should go, e.g. into a ROM scanner's folder\n(EMULATION-PLAN §9). The first option is the suggested one.",
+          "description": "Where handed-off files should go, e.g. into a ROM scanner's folder.\nThe first option is the suggested one.",
           "type": "object",
           "properties": {
             "type": {

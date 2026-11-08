@@ -1,5 +1,5 @@
 //! `caskade-plugin://localhost/<id>/<path>` (`http://caskade-plugin.localhost/…`
-//! on Windows): enabled plugins' UI files (TECH-PLAN §4.4, #127). Only files
+//! on Windows): enabled plugins' UI files (#127). Only files
 //! inside the plugin's folder are served, read-only.
 use caskade_plugin_host::PluginHost;
 use std::path::{Component, Path, PathBuf};

@@ -1,4 +1,4 @@
-//! Installed themes (#139, TECH-PLAN §5): the built-in ones (`caskade.default`
+//! Installed themes (#139): the built-in ones (`caskade.default`
 //! first), folders under `<data>/themes/`, and folders plugins bundle. Each
 //! one is checked with `caskade-theme`; a broken theme is listed with its
 //! problems and never hides the others.

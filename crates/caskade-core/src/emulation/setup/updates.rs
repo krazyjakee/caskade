@@ -1,4 +1,4 @@
-//! Updates of managed emulators (EMULATOR-SETUP-PLAN §4): checked like
+//! Updates of managed emulators: checked like
 //! game updates, offered with Update and Skip, applied by installing the
 //! newer release over the old one with the user's files carried across.
 

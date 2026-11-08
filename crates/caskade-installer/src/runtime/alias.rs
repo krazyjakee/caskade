@@ -1,4 +1,4 @@
-//! Stable alias paths (INSTALLER-PLAN §7.1, layer 2). Each game gets a short
+//! Stable alias paths (layer 2). Each game gets a short
 //! ID and an alias `<base>/<id>` that points at its real directory: a
 //! directory junction on Windows (no admin rights needed) or a symlink
 //! elsewhere. Installers and games see the alias, so moving a game is a

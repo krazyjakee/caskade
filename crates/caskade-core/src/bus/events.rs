@@ -1,4 +1,4 @@
-//! Events: observe-only notifications (TECH-PLAN §4.3).
+//! Events: observe-only notifications.
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -147,7 +147,7 @@ pub enum Event {
     EmulationScanCompleted {
         scanners: Vec<crate::emulation::ScannerCount>,
     },
-    /// Every change of an emulator install or update (EMULATOR-SETUP-PLAN §3.4).
+    /// Every change of an emulator install or update.
     EmulationSetupChanged(Box<crate::emulation::SetupJob>),
     /// An account was made, changed or deleted, an account signed in or
     /// out, or wrong PINs locked one (#202). What the active account owns

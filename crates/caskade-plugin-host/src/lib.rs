@@ -1,4 +1,4 @@
-//! Caskade's plugin host (TECH-PLAN §4): reads `plugin.json` manifests,
+//! Caskade's plugin host: reads `plugin.json` manifests,
 //! discovers plugin folders, keeps their state, and runs backend halves as
 //! WebAssembly components in wasmtime against the `caskade:plugin@0.1.1`
 //! WIT world (`wit/caskade-plugin.wit`). Backends built for 0.1.0 load too:

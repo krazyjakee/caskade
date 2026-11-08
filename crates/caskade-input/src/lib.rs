@@ -1,4 +1,4 @@
-//! Console mode's input path (TECH-PLAN §6): gamepads are read natively with
+//! Console mode's input path: gamepads are read natively with
 //! `gilrs`, so input works in every webview and while the window is
 //! unfocused, and raw pad events become a small set of [`Action`]s. The
 //! frontend consumes the actions, and its keyboard map produces the same

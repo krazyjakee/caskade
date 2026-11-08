@@ -11,11 +11,11 @@ How to report:
   with what happened, if the box is worded differently).
 - When a check fails, comment on the issue with what you saw: the machines,
   what you pressed, and what happened instead.
-- Some issues also want the result in a table in the docs. The check says
-  where. Those tables and `docs/STREAMING-PLAN.md` §9 use GitHub numbers.
-  Three-digit numbers elsewhere in those two docs are archived Gitea issues
-  (Gitea #233 is GitHub #11, Gitea #255 is #21); the table at the end of this
-  page maps the ones behind open checks.
+- Some checks also want the result in a table. The check says which; the
+  tables are under "Procedures and result tables" at the end of this page.
+  Three-digit issue numbers are archived Gitea issues (Gitea #233 is GitHub
+  #11, Gitea #255 is #21); the "Which checks finish each issue" table maps
+  the ones behind open checks.
 
 Use a build of the current `master` on every machine. Caskade's data folder
 is `~/.local/share/caskade` on Linux and `%APPDATA%\Caskade\Caskade\data` on
@@ -54,7 +54,7 @@ machines, so a result here doesn't tick one.
 | W6 | Passed: one prompt, only `kept\` left |
 | W7 | Passed: firewall rule, service and host file, one prompt each |
 | O4 | Passed with two VMs, no internet: nearby, code, link `lan`, library and sessions both ways |
-| N1 | Finished, hashes equal, 3 GB. About 11 MB/s on a link TCP measured at 77 MB/s, in a debug build on a loaded PC, so this doesn't pass; see `docs/sync.md` for release figures |
+| N1 | Finished, hashes equal, 3 GB. About 11 MB/s on a link TCP measured at 77 MB/s, in a debug build on a loaded PC, so this doesn't pass; see "Copying a game (#11)" below for release figures |
 | N2 | Passed: held at 100 MB for 60 s, carried on from there. "Waiting for…" wasn't seen |
 | N3 | Passed: "Started on lanhost", session on both |
 | WK1 | Passed with real S3 sleep and a real magic packet. A script on the PC stood in for the NIC: it read the frame off the LAN and woke the VM |
@@ -88,7 +88,7 @@ the issues closed on them: #9, #11, #14, #17 and #26.
 | --- | --- |
 | WL1 | Passed: added by hand on Windows, copied to Linux, started through real Proton on Play |
 | WL2 | Passed both ways and back, all four save folders, the prefix built on first launch |
-| N1 | 8.1 GiB. Windows to Linux 23 MB/s, the guest's UDP limit (19 MB/s bare); Linux to Linux 60 MB/s on a link TCP measured at 92 MB/s. A QEMU LAN, not Ethernet or Wi-Fi; see `docs/sync.md` |
+| N1 | 8.1 GiB. Windows to Linux 23 MB/s, the guest's UDP limit (19 MB/s bare); Linux to Linux 60 MB/s on a link TCP measured at 92 MB/s. A QEMU LAN, not Ethernet or Wi-Fi; see "Copying a game (#11)" below |
 | T1 | Passed between this PC behind its router and a GitHub runner, with n0's relays: `Direct`, 256 MiB in 26 s, and the program ran. Not a hotspot |
 | T2 | Passed the same way: stopped at 20 MB, failed with the reason in seconds, link refused after |
 | S9 | Windows 10 host, ViGEmBus: A and B reached XInput, and a game's rumble reached the client's pad at its own strength. A Linux host under Wayland (sway with no GPU) took the pad and sent rumble back, but its picture stayed black: wlroots' software renderer is all this VM has, so Wayland video and a desktop-portal approval (GNOME, KDE) are still unproved |
@@ -237,8 +237,8 @@ Sunshine installed (W8 installs one). To find a game's id, open
   achievements panel and the shell in this WebView2 build. **Pass:** a
   plugin's stylesheet loads, and scrolling or tabbing never pushes the shell
   out of the window. (Clears no box: #8 lets this stay deferred.)
-- [ ] **W10.** Work through "Windows: a real XInput pad" in
-  `docs/console-native-checklist.md`. **Pass:** every step as written; note
+- [ ] **W10.** Work through "Windows: a real XInput pad" under
+  "Console mode on real hardware" below. **Pass:** every step as written; note
   whether the Xbox button brings Caskade to the front. (Clears no box: #8 lets
   this stay deferred.)
 
@@ -289,11 +289,11 @@ DualSense paired over Bluetooth to a Linux desktop.
   Devices calls it a Handheld; the desktop starts in the desktop shell.
   Use a Windows handheld too if you have one: CI proves the registry reads on
   a virtual machine, not a real handheld's names. (#16)
-- [ ] **H2.** Work through "Steam Deck game mode" in
-  `docs/console-native-checklist.md`. **Pass:** every step as written. (Clears
+- [ ] **H2.** Work through "Steam Deck game mode" under
+  "Console mode on real hardware" below. **Pass:** every step as written. (Clears
   no box: #8 lets this stay deferred.)
 - [ ] **H3.** Work through "Linux: a DualSense over Bluetooth" in the same
-  file. **Pass:** every step as written. (Clears no box: #8 lets this stay
+  section. **Pass:** every step as written. (Clears no box: #8 lets this stay
   deferred.)
 
 ## Two PCs on the same network
@@ -306,7 +306,7 @@ Caskade (not by a launcher), and a standard account with an age limit.
   this computer under On your other devices. Time it over Ethernet, then
   over Wi-Fi. **Pass:** the speed is close to the slower of the disks and
   the network, far above a relay's 1 MB/s. Write the figures in
-  `docs/sync.md`, "Copying a game". (#11)
+  "Copying a game (#11)" below. (#11)
 - [ ] **N2.** During a copy, unplug the cable (or turn Wi-Fi off), wait a
   minute, and plug it back in. **Pass:** the job in Activity says "Waiting
   for …", then carries on from where it was, not from zero. (#11)
@@ -330,7 +330,7 @@ release, say), with A updated to the newer one while online.
   with A by code. **Pass:** the first sync finishes; B has A's library,
   accounts (it asks for the admin's PIN if there is one) and collections,
   and keeps its own storage folder, emulators and settings. Fill in the table
-  in `docs/sync.md`, "Setting up a new device". (#15)
+  in "Setting up a new device (#15)" below. (#15)
 - [ ] **O2.** After O3 (an emulator's dump comes once it's installed), on B,
   still never online, look in the cache folder's `hasheous/dumps/`
   (`~/.cache/caskade` on Linux, `%LOCALAPPDATA%\Caskade\Caskade\cache` on
@@ -345,7 +345,7 @@ release, say), with A updated to the newer one while online.
   collection and play a game for a minute on each side, and copy a game.
   **Pass:** each lists the other as nearby within seconds, the link shows the
   local network, every change arrives the other way, and the copy finishes.
-  Fill in `docs/sync.md`, "Two machines on one network, internet unplugged".
+  Fill in "Two machines on one network, internet unplugged" below.
   (#10, #20)
 - [ ] **O5.** Turn on Connect only directly in Settings → Devices on one PC
   (#10's box calls it Never use relays) and plug the internet back in.
@@ -355,7 +355,7 @@ release, say), with A updated to the newer one while online.
   link instead. **Pass:** they pair and sync. (#10)
 - [ ] **O7.** Unplug the internet. On B, press Sync now in Settings → Devices,
   then update the game A already updated. **Pass:** the update installs, from
-  A. Fill in `docs/sync.md`, "Downloads from a device nearby". (#13)
+  A. Fill in "Downloads from a device nearby (#13)" below. (#13)
 
 ## A Windows PC and a Linux PC
 
@@ -368,10 +368,10 @@ place (one the Ludusavi manifest lists).
   **Pass:** it starts through Proton. (#11, #20)
 - [ ] **WL2.** Play on Windows, make progress and quit; start it on Linux.
   Then play on Linux, quit, and start it on Windows. **Pass:** each side
-  starts with the other's save. Fill in the table in `docs/sync.md`,
-  "Saves → Checks". (#14, #20)
-- [ ] **WL3.** Fill in the Linux ↔ Windows row of `docs/sync.md`'s "Manual
-  checklist" (steps 1–6; most are N, O, WK and T checks here). (#19)
+  starts with the other's save. Fill in the table in
+  "Saves between Windows and Linux (#14)" below. (#14, #20)
+- [ ] **WL3.** Fill in the Linux ↔ Windows row of "Sync between real
+  machines (#19)" below (steps 1–6; most are N, O, WK and T checks here). (#19)
 
 ## Streaming: a host and a client on one network
 
@@ -381,7 +381,7 @@ rumble on the client, a TV for S12, and for single checks: Moonlight
 installed by you on the client with a host added (S8), Discord running on
 the client (S8), a 1440p Windows host with a 1080p client (S10), and
 ViGEmBus installed on a Windows host beforehand (S11). Record each result
-in `docs/STREAMING-PLAN.md` §9 too.
+under "Streaming on real machines" below too.
 
 - [ ] **S1.** On the clean host, turn hosting on in Settings → Streaming.
   **Pass:** one prompt; no `~/.config/sunshine`, menu entry, tray icon or
@@ -448,7 +448,7 @@ For WK2 it also hosts streaming and is paired for it.
   age-limited account signed in on the desktop. **Pass:** it shows
   "Waking …", the desktop wakes, the game starts and shows as running on
   both; with the age-limited account the PIN is asked on the desktop first.
-  Fill in `docs/sync.md`, "Waking a device to play". (#12, #20)
+  Fill in "Waking a device to play (#12)" below. (#12, #20)
 - [ ] **WK2.** Put the host to sleep and press Stream from <device>.
   **Pass:** the host wakes and the stream starts. (#29)
 
@@ -475,7 +475,7 @@ hotspot. For T3, the two PCs paired.
 About 2 hours. Needs: a Mac, plus the Linux and Windows PCs.
 
 - [ ] **M1.** Fill in the Linux ↔ macOS and Windows ↔ macOS rows of
-  `docs/sync.md`'s "Manual checklist". (#19)
+  "Sync between real machines (#19)" below. (#19)
 - [ ] **M2.** Do W9's look-over in the Mac app (WKWebView). **Pass:** as W9.
   (Clears no box: #8 lets this stay deferred.)
 - [ ] **M3.** Use the Mac as a streaming client: S2, S3 and S8. **Pass:** as
@@ -509,8 +509,8 @@ Tick or decide these on the issue itself:
   `host::tests::repair_fixes_each_breakage`; L5 and W7 try it for real.
 - Trackers #8, #20 and #33: their sub-issue boxes tick when the sub-issues
   close.
-- Gitea #262 (finding hosts): it has no GitHub issue, so its check in
-  `docs/STREAMING-PLAN.md` §9 clears no box and isn't listed on this page.
+- Gitea #262 (finding hosts): it has no GitHub issue, so its check under
+  "Streaming on real machines" clears no box and isn't listed on this page.
 
 ## Which checks finish each issue
 
@@ -550,9 +550,272 @@ real machines.
 `scripts/lan-unplugged.sh` runs O1 and most of O4 at the core on one PC, in
 network namespaces with no uplink. `scripts/two-networks.sh` runs T1, T2, T3,
 O5 and O6 the same way, behind router namespaces doing NAT with a relay between
-them (results in `docs/sync.md`). Neither needs root, and neither replaces real
+them (results in git history, in the retired `docs/sync.md`). Neither needs root, and neither replaces real
 machines, routers, Wi-Fi or a phone's hotspot.
 
 W9, W10, H2, H3 and M2 finish no issue: #8's keyboard, mouse and controller box
 lets native checks stay deferred, so they only look for regressions on real
 hardware.
+
+## Procedures and result tables
+
+These came from the design plans retired on 8 Nov 2026 (git history keeps the plans). Checks above that say "fill in" a table record their result in the table here, as well as on the issue.
+
+### Sync between real machines (#19)
+
+CI covers what one machine can: two or more
+cores on loopback, relay paths through a local relay, no internet. What only
+real machines can show (other operating systems, Wi-Fi against Ethernet,
+NAT, a sleeping computer, two separate networks) is this checklist, run on
+Linux, Windows and macOS, each pair of them:
+
+1. **Pairing and sync**, with the router's internet unplugged: the procedure
+   in "Two machines on one network, internet unplugged" below.
+2. **A large copy over Wi-Fi, then over Ethernet**: "Copying a game (#11)"
+   below, with a game of tens of GB. Record the speed each way against the
+   disks' and the network's.
+3. **Downloads from a device nearby**: "Downloads from a device nearby
+   (#13)" below.
+4. **Wake-on-LAN**: "Waking a device to play (#12)" below (the desktop of
+   the pair).
+5. **A share across two networks** (#17), between two people: share a
+   game from one machine on the home network; open the link on a machine on
+   another network (a phone's hotspot). The files come straight from the
+   sharer (a direct path through the routers, or the port the sharer's router
+   mapped), or the receiver says it waits for a direct connection; never
+   through a relay. The game installs and plays. Stop the share: the link
+   fails at once, mid-copy too. With a third machine receiving after the
+   second chose Help others receive it, both serve it (#18).
+6. **Everything with the internet unplugged**: steps 1 to 4 again with the
+   router's internet unplugged (and step 5's receiver says "Can't reach whoever
+   shared this: their Caskade may be closed or offline. Caskade keeps trying.").
+
+### Two machines on one network, internet unplugged
+
+The in-process tests share one host, so they can't show two routers' worth of
+network. This check needs two machines on one network, with the router's
+internet unplugged:
+
+1. Start Caskade on both; open Settings → Devices or call the commands.
+2. Each lists the other as nearby within a few seconds.
+3. Pair them by code; the link state is `lan`.
+4. Make an edit on one and see it on the other.
+5. Turn on Connect only directly on one and plug the internet back in: the link
+   stays `lan`.
+6. Block multicast between them (or use client isolation) and pair with a
+   pairing link instead.
+
+Results:
+
+| Date | Machines | Steps passed | Notes |
+| --- | --- | --- | --- |
+| 2026-11-06 | One PC: two processes in network namespaces on a bridge with no uplink (`scripts/lan-unplugged.sh`) | 1–4, plus a copy | Not two machines. Real mDNS, pairing by code, an edit, a collection and a session both ways, link `lan`, a copy of a fixture game. No real router, Wi-Fi or Windows. Steps 5–6 not run. With the bridge's ports isolated it fails at discovery, as it should. |
+| 2026-11-06 | One PC: two processes in network namespaces on one bridge (`scripts/two-networks.sh`) | 5, 6 | Not two machines. Step 5: Connect only directly on one, then the router's uplink brought up to a local relay; the other device's relay answered, and the link and each session's real path stayed on 192.168.10.x both ways for 20 s while edits crossed. With the LAN cut instead, it fails. Step 6: `mcast_flood off` on the bridge's ports; neither saw the other nearby in 10 s, a pairing link paired, an edit crossed each way, link `lan`. With multicast passing, they see each other. No real router, Wi-Fi or guest network. |
+| 2026-11-06 | Two Ubuntu VMs on a virtual LAN, dead gateway, app built from master | 1–4 | Real mDNS between kernels, pairing by code, link `lan`, library and sessions both ways. No real router or Wi-Fi. Discovery needs a default route: with none at all, `swarm_discovery` can't send. |
+| — | Two physical machines | — | Not run yet. |
+
+### Copying a game (#11)
+
+1. On a Windows machine, add a Windows game by hand (Add game → Add a game on
+   this computer…) from a folder of its own.
+2. On a Linux machine paired with it, open the game's page: On your other
+   devices shows the Windows machine. Press Copy to this computer.
+3. Mid-copy, unplug the network cable (or turn Wi-Fi off) on either machine,
+   wait, plug it back in: the job in Activity waits ("Waiting for …"), then
+   goes on from where it was, not from zero.
+4. When it finishes, Play: the game starts through Proton.
+5. Copy a large game (tens of GB) over the local network and record the
+   speed against the disks' and the network's.
+
+| Date | Machines | Steps passed | Speed | Notes |
+| --- | --- | --- | --- | --- |
+| 2026-11-06 | One Linux PC, both devices (`scripts/proton-real.sh`) | 1 and 4 in part | — | Not a Windows machine and not two machines: see below. |
+| 2026-11-07 | Windows Server 2022 and Ubuntu 24.04 in KVM, release builds | 1, 2, 4 | See below | No cable to pull between them here; the two Linux guests did that on 6 Nov. |
+
+**Windows to Linux in virtual machines (2026-11-07).** The game was added by
+hand in Windows' Add game dialog, copied with Copy to this computer and started
+with Play: Proton built the prefix and ran it from `G:\Game` with its data
+found. An 8.1 GiB game of one archive and a thousand small files, release builds
+on both sides, on a QEMU LAN between KVM guests on one PC:
+
+| From | To | Copy, steady | Whole job | That link, measured |
+| --- | --- | --- | --- | --- |
+
+| Linux | Linux | 60 MB/s | 2 min 40 s, then 80 s placing | TCP 92 MB/s; bare UDP 129 MB/s; disk write 174 MB/s |
+
+QUIC sends what the guest's network card lets UDP send: Windows' copy ran at
+that limit, so the emulated e1000e, not Caskade, set its speed. Linux reached
+two thirds of the link with the PC's load around 10. Both are far above a
+relay's 1 MB/s. A real network wasn't involved, and the sender's cache held part
+of the Windows game; N1's figures on Ethernet and Wi-Fi are still worth having.
+A game too big for the disk failed before moving a byte, naming what was short.
+
+**Step 4 on one PC (2026-11-06).** `scripts/proton-real.sh` needs umu, umu's
+
+### Downloads from a device nearby (#13)
+
+1. On two paired machines on one network, install the same older release of
+   a game from a link (a GitHub release, say) on both.
+2. Update it on the first from the internet.
+3. Unplug the router's internet. On the second, wait for a sync (or press
+   Sync now in Settings → Devices), then update: the update installs, from
+   the first machine.
+4. Plug the internet back in, turn off Downloads from my devices on the
+   second and install another game the first has downloaded: it downloads
+   from the internet.
+
+| Date | Machines | Steps passed | Notes |
+| --- | --- | --- | --- |
+| — | — | — | Not run yet: needs two machines. Loopback with a wiremock source passes. |
+
+Emulators, dumps and the manifest (#34): with the first machine's emulator
+installed through Get emulators and its Hasheous dumps and save manifest
+downloaded, set up the second with the router's internet unplugged. Install
+the same emulator there, then check that `hasheous/dumps/` in the cache folder
+holds the dumps' `.zip` files (no screen in the app lists them), that Settings →
+Devices → Saves no longer calls the Save locations list "Not downloaded yet",
+and that a game's Saves tab in its editor names save locations.
+
+| Date | Machines | Steps passed | Notes |
+| --- | --- | --- | --- |
+| — | — | — | Not run yet: needs two machines. Loopback with a fake GitHub, Hasheous and manifest server passes. |
+
+### Waking a device to play (#12)
+
+1. On a desktop with Wake-on-LAN on in its firmware and network settings, sync
+   once with the other device (it learns the MAC addresses), then put the
+   desktop to sleep.
+2. On the other device, open a game installed on the desktop: On your other
+   devices offers Wake and play on …. Press it.
+3. The desktop wakes ("Waking …"), the game starts there ("Started on …"),
+   and the game shows as running on both devices.
+4. With an age-limited account signed in on the desktop, the admin PIN is
+   asked there before it starts.
+
+| Date | Machines | Steps passed | Notes |
+| --- | --- | --- | --- |
+| 2026-11-06 | Two Ubuntu VMs, real S3 sleep | Wake and play; Stream from a sleeping host | Real magic packets. A script on the PC stood in for the NIC. No physical Wake-on-LAN. |
+| — | — | — | Not run yet: needs a sleeping desktop with Wake-on-LAN. |
+
+### Saves between Windows and Linux (#14)
+
+| Check | Result |
+| --- | --- |
+| Play on Windows, quit, start on a Linux device through Proton: the Windows save is there | 2026-11-06, one PC: passed under real Proton from a fixture Windows device, first launch included (the prefix didn't exist yet), and the game read the save. No Windows machine involved. |
+| Play on the Linux device, quit, start on Windows: the Linux save is there | 2026-11-06, one PC: the version kept from the real prefix (four files, each once) restored to the fixture Windows device's folders, and nothing else. Reading it back on real Windows not yet run. |
+| Windows and Linux on two machines (WL2) | 2026-11-07, two KVM guests: passed both ways with the app's own windows, real Windows Server 2022 and real Proton. `level=1` written on Windows, read under Proton on its first launch; `level=2` written under Proton, read on Windows; `level=3` read back under Proton. All four save folders followed. Not physical machines. |
+
+### Setting up a new device (#15)
+
+| Check | Result |
+| --- | --- |
+| A new device on a network with no internet set up from another: same library, accounts and collections; its own storage, emulators and settings | passed 2026-11-06 in `scripts/lan-unplugged.sh` (two processes in network namespaces, the core's steps, no setup screens); not yet run on two machines |
+| Games chosen during setup copy from the other device over the local network (Gitea #276) | not yet run |
+
+### Streaming on real machines
+
+Each item names its GitHub issue; record the date and result on the issue.
+
+VM runs on 6 and 7 Nov 2026 (Linux and Windows hosts, Windows 10 with ViGEmBus, Linux and Windows clients) are recorded above, in "What ran in virtual machines" and "What ran on 7 Nov 2026". Boxes below stay for real hardware.
+
+- [ ] #21 Linux: switching hosting on shows one pkexec prompt, and cancelling it leaves `/etc/udev/rules.d` and `/etc/modules-load.d` unchanged. After allowing it, the rules and module list are there, `/dev/uinput` and `/dev/uhid` belong to group `input` with a seat ACL, and uhid is loaded. Switching hosting off removes exactly those, with one prompt.
+- [ ] #21 Windows: one UAC prompt (Caskade, verified publisher); cancelling changes nothing (`sc query CaskadeStreaming` fails, `netsh advfirewall firewall show rule name="Caskade streaming (TCP)"` finds none). After allowing it, the service is demand-start, a standard user can `sc start` and `sc stop` it, and both firewall rules name the host's `sunshine.exe`. A host path with a space and an apostrophe works. Switching hosting off removes the service and both rules, with one prompt.
+- [ ] #23 Linux, clean machine: switching hosting on shows one prompt, and Moonlight on another device pairs  and streams a game. No `~/.config/sunshine`, desktop entry, tray icon or browser page appears. Closing Caskade to the tray keeps the stream available; Quit ends it; killing Caskade (`kill -9`) ends the host too.
+- [ ] #23 Windows, clean machine: the same with one UAC prompt. Services shows only "Caskade streaming", and firewall rules only "Caskade streaming (TCP/UDP)". `%ProgramFiles%\Caskade\Streaming\host` grants users read and execute only. A standard user can't change the host's files.
+- [ ] #27 per OS: the first Stream from a device installs the client under "Getting streaming ready", then streams. A Moonlight the user installed keeps its hosts and settings afterwards. No warning toast, overlay or Discord presence names Moonlight during or after the stream. Flatpak: `flatpak run --cwd=` keeps the state in `~/.var/app/com.moonlight_stream.Moonlight/caskade`.
+- [ ] Gitea #262 (Gitea closed it and it has no GitHub issue, so this clears no box): a host on the LAN appears in `streaming_hosts` within seconds, and shows unreachable after it leaves the network. After pairing (#28), its games show as "Stream from <device>" on the matching library games.
+- [ ] #24 per OS: with Sunshine installed the usual way, switching hosting on offers to use it, and the right password works, a wrong one doesn't. Caskade's games appear in its apps beside the user's; switching off removes only Caskade's.
+- [ ] #25 per OS: a client lists the host's games with their covers, plus "Caskade". Starting one plays it on the host with a session there, and quitting the stream stops it. Installing, uninstalling, hiding or renaming a game changes the client's list after a refresh.
+- [ ] #28 per OS pair: Pair with a device shows a code; entering it on the host's Caskade pairs with no window from either program. A wrong code says so and can be tried again; an unanswered request disappears from the host after five minutes.
+- [ ] #29 per OS pair, the Steam Deck as a client included: Stream from <device> on the game page, the Play button and the game menu starts the stream with no Moonlight window in sight before or after (Cinnamon, GNOME, KDE, Windows, macOS, gamescope). The pad plays the game; guide brings up the quick menu and End stream returns to Caskade with the game stopped on the host. A host asleep wakes; one switched off, one that forgot this device and a game it no longer offers each show Caskade's error with no Moonlight process left. The host's playtime grows and the client's doesn't.
+- [ ] #30 per OS: a new user switches hosting on, pairs a device and streams a game without leaving Caskade or seeing a technology name; the same with a pad in console mode on the TV, the request prompt included.
+- [ ] #31 per OS: after switching hosting off, nothing of the host remains: Linux has no `/etc/udev/rules.d/60-caskade-streaming.rules` or `/etc/modules-load.d/60-caskade-streaming.conf`, and no program under `<data>/streaming/host`. Windows has no `CaskadeStreaming` service, no "Caskade streaming" firewall rule, and no program file under `%ProgramFiles%\Caskade\Streaming` (only `kept\`). Switching on again reinstalls it, and a device paired before streams with no new code. An update of either program from Settings → Streaming keeps pairings and settings. On Windows it applies with one UAC prompt into the administrator-only folder. Each repair case works on a real machine.
+- [ ] #26: a 1080p client streaming from a 1440p Windows host gets a 1080p stream, and the host's mode comes back afterwards (HDR too, on an HDR screen). A pad on the client drives the game on a Linux host (X11 and Wayland, the portal's approval asked once) and on a Windows host, with rumble. A Windows host where ViGEmBus was already installed keeps it and works, and one without gets it in the same UAC prompt (`/exenoui /qn /norestart`; W3 above ran the installer silently on Windows Server, where it refuses, so installing it needs a client edition). A host with no screen, or whose pads don't work, says so in Settings → Streaming.
+- [ ] #32: two of the household's devices, paired in Settings → Devices, pair for streaming with no code typed. A host on a synced device names each streamed game as that device's installed copy.
+- [ ] #22 Windows: with Caskade running, `caskade.exe --launch <game id>` starts the game; `taskkill /PID <caller>` (WM_CLOSE, without `/F`), or ending a Sunshine stream, quits the game and ends its session, and the caller exits 5.
+
+### Console mode on real hardware (#153)
+
+CI proves console mode with a synthetic pad (`apps/desktop/src-tauri/tests/console_e2e.rs`, under Xvfb). These need real hardware: they are W10, H2 and H3 above. Issue numbers in this section are archived Gitea issues.
+
+Build: `pnpm tauri build --debug` (the AppImage or deb), or `just dev` on the device.
+
+Build: `pnpm tauri build --debug` (the AppImage or deb), or `just dev` on the device.
+
+#### Steam Deck game mode (gamescope)
+
+Install the AppImage on the Deck. In desktop mode, add it to Steam as a non-Steam
+game, then switch to game mode and launch it from the library.
+
+1. **Starts in console mode.** It opens fullscreen in console mode, with no
+   `--console` flag: Settings → General → Start in is **Automatic**, and
+   gamescope is detected. Set **Start in** to **Desktop**, relaunch, and check
+   it now opens on the desktop shell.
+2. **Steam Input on** (the default for non-Steam games). The d-pad and left stick
+   move focus. A selects, B goes back, X opens a card's details, and Y goes to
+   the search. LB/RB page Home's shelves and switch Settings tabs, and LT/RT
+   scroll a long list by a screen. The hint bar shows Xbox glyphs.
+3. **Steam Input off** (the controller settings for Caskade → Disable Steam
+   Input). Repeat 2. The pad is read directly, and the glyphs follow the
+   Deck's own pad.
+4. **Guide.** Launch a game from Caskade. Press the Steam button (or Select +
+   Start, the guide chord) during play. Caskade comes to the front with the
+   quick menu. **Return to game** puts the game back in front. Do it again and
+   choose **Stop game**: the game ends, and its page shows the new session's
+   playtime. Note whether gamescope or Steam itself takes the Steam button
+   first.
+5. **Fullscreen.** Console mode fills the screen with no window chrome. Press
+   **View** to go to desktop mode, then back. In desktop mode, the gamepad
+   button next to maximize returns to console mode.
+6. **On-screen keyboard.** Press Y to focus the search, and Steam + X opens
+   the keyboard. Type, press down for the suggestions, then A. Settings →
+   Plugins in console mode takes a typed folder path the same way, since there
+   is no folder picker.
+7. **Suspend and resume.** Suspend the Deck from the power menu with Caskade in
+   front, then resume. The pad still drives it, focus is where it was, and the
+   clock in the hint bar is current.
+
+#### Windows: a real XInput pad
+
+On Windows 10 or 11 with an Xbox controller (USB or Bluetooth):
+
+1. Start Caskade and press **View** on the pad: it switches to console mode,
+   fullscreen. The glyphs are Xbox's.
+2. Repeat Steam Deck step 2 without Steam.
+3. Guide: launch a game, then press the Xbox button (or Select + Start, which
+   a VM has shown working). Caskade comes to the front, or flashes in the
+   taskbar if Windows refuses focus. Note which, and whether the Game Bar takes
+   the button first. Check Return to game and Stop
+   game as in Steam Deck step 4.
+4. Close the window while in console mode, then reopen Caskade. The desktop
+   window has its old size and position (window-state), and with **Start in**
+   set to **Automatic** it opens in console mode, the mode it was left in.
+
+#### Linux: a DualSense over Bluetooth
+
+On a desktop Linux session (GNOME or KDE), pair the controller over Bluetooth:
+
+1. `caskade --console` opens in console mode. The hint bar shows PlayStation
+   glyphs (✕ ○ □ △, L1/R1).
+2. Repeat Steam Deck step 2. ✕ selects and ○ goes back.
+3. The PS button summons Caskade over a running game (Steam Deck step 4). On
+   Wayland, if the compositor refuses focus, Caskade asks for attention
+   instead: note which.
+4. Disconnect the controller with Caskade in front, then reconnect it. Input
+   resumes without a restart.
+
+#### What each check covers
+
+The commits that implement what each check exercises. Test at or after the
+newest one listed.
+
+| Check | Commits |
+|---|---|
+| Starting in console mode, gamescope detection, Start in | `b6f3f3c` (with `3dee3f5`, which carried `commands/console.rs`) |
+| Pad navigation, Steam Input on and off, hot plug | `dae8c00` (#146, gilrs input), `a687963` (#147, focus engine) |
+| Hint bar glyphs per pad family, LB/RB and LT/RT paging | `b6f3f3c` (glyphs from `3dee3f5`) |
+| Guide, the quick menu, Return to game, Stop game | `62b0387` (#149) |
+| Fullscreen, View and the console button, window state on exit | `b6f3f3c` |
+| Search by Y with the OS keyboard, typed plugin folder | `b6f3f3c` |
+| Suspend and resume (input service, the hint bar's clock) | `dae8c00`, `b6f3f3c` |
+| Frame rate on NVIDIA under X11 | `bdb6460` |

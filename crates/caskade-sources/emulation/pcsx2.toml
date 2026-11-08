@@ -39,7 +39,7 @@ data = "{UserHome}/.var/app/net.pcsx2.PCSX2/config/PCSX2"
 [vars.macos]
 data = "{AppSupport}/PCSX2"
 
-# One-click install (EMULATOR-SETUP-PLAN §2): GitHub releases, verified 2026-10-28.
+# One-click install: GitHub releases, verified 2026-10-28.
 [install.windows]
 source = "github"
 repo = "PCSX2/pcsx2"

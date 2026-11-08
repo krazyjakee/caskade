@@ -1,4 +1,4 @@
-//! `caskade://install` deep links (#57, INSTALLER-PLAN §9): `?url=` from
+//! `caskade://install` deep links (#57): `?url=` from
 //! websites, `?path=` from the CLI. Any web page can open these links, so a
 //! deep link only becomes a pending install request. Nothing is resolved,
 //! downloaded or run until the user confirms it in the app

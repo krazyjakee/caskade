@@ -1,4 +1,4 @@
-//! Plugin settings (#128, TECH-PLAN §4.2 `contributes.settings`). A
+//! Plugin settings (#128, `contributes.settings`). A
 //! manifest's JSON Schema becomes the settings section `plugins.<id>`,
 //! which Settings → Plugins renders and the backend reads with
 //! `settings-get`. Changes reach the plugin as `settings.changed`.

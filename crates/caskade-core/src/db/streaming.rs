@@ -1,4 +1,4 @@
-//! Games a paired streaming host offers (STREAMING-PLAN §8.2, #262): each
+//! Games a paired streaming host offers (#262): each
 //! app is an uninstalled release under source `stream:<host id>`, joined to
 //! the library game with the same title, or a streaming-only game of its
 //! own. Sync (#232) will join them by the game's identity instead.

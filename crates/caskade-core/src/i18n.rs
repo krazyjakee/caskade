@@ -1,5 +1,5 @@
 //! The core's language (#212): the `core` gettext domain, which covers the
-//! Rust crates, the Tauri adapter and the tray. See `docs/localization.md`.
+//! Rust crates, the Tauri adapter and the tray. See `docs/translating.md`.
 //!
 //! Mark text people read with the macros below; `just i18n` extracts them
 //! into `locales/core.pot`, and each language's `locales/<lang>/core.po`

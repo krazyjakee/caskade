@@ -1,4 +1,4 @@
-//! The user's emulation configuration (EMULATION-PLAN §4), stored in SQLite
+//! The user's emulation configuration, stored in SQLite
 //! and edited in Settings → Emulators.
 
 use super::InstallKind;

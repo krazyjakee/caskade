@@ -259,7 +259,7 @@ impl Default for ConsoleSettings {
     }
 }
 
-/// Emulated games (EMULATOR-SETUP-PLAN §6). Console mode always plays them
+/// Emulated games. Console mode always plays them
 /// fullscreen.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -315,7 +315,7 @@ impl Default for AppUpdateSettings {
     }
 }
 
-/// Game streaming (STREAMING-PLAN §8.5): whether other devices may stream
+/// Game streaming: whether other devices may stream
 /// games from this one. Hosting is switched on and off through the
 /// streaming commands, which install and set up the host first.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

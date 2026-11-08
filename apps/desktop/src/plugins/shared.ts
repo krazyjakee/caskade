@@ -1,5 +1,5 @@
 /** The app's own module instances that UI plugins import through the import
- * map (TECH-PLAN §4.4): one React tree, one SDK. The generated shims under
+ * map: one React tree, one SDK. The generated shims under
  * `/plugin-shims/` read them from here. */
 
 import * as Sdk from "@caskade/sdk";

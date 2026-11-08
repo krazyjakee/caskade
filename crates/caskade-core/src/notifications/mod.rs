@@ -1,6 +1,5 @@
 //! Notifications (#198): a feed kept in the library database, with read
-//! state that survives restarts. `docs/notifications.md` has the category
-//! matrix and the rules.
+//! state that survives restarts.
 //!
 //! Game additions don't depend on bus events: every game insert writes a
 //! `game_additions` row in its own transaction (a trigger), and

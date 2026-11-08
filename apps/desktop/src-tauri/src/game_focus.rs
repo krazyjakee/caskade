@@ -1,12 +1,12 @@
-//! Making way for a game (EMULATOR-SETUP-PLAN §6). When a game starts, the
+//! Making way for a game. When a game starts, the
 //! main window does what `core.general.onLaunch` says (stay, minimize or
 //! hide to the tray), so the window manager focuses the game. Console mode
 //! leaves the window where it is: the webview fades to black
 //! (`GameCurtain`), and the window manager gives the new game window focus
 //! over it. When the last game exits, Caskade takes focus back.
 //!
-//! A web game in desktop mode opens over Caskade's window
-//! (WEB-GAMES-PLAN §3), so Caskade stays where it is, under it.
+//! A web game in desktop mode opens over Caskade's window,
+//! so Caskade stays where it is, under it.
 //!
 //! A stream from another device (#264) shows its client's own window
 //! before the stream's: Caskade's window stays on top of it until the

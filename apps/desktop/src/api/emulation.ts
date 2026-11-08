@@ -195,7 +195,7 @@ export interface EmulationApi {
   /** Gives each console folder in a ROM collection (`snes/`, `psx/`, …) a
    * scanner with an emulator that runs it. Nothing is scanned yet. */
   setupRomFolder(folder: string): Promise<RomFolderSetup>;
-  /** Exclusions every scanner applies (EMULATION-PLAN §6.3, #135). */
+  /** Exclusions every scanner applies (#135). */
   globalExclusions(): Promise<string[]>;
   /** Replaces them; returns them as stored. The next scan uses them. */
   setGlobalExclusions(patterns: string[]): Promise<string[]>;

@@ -1,4 +1,4 @@
-//! Fixed administrator steps (STREAMING-PLAN §8.4, #255): a short list of
+//! Fixed administrator steps (#255): a short list of
 //! system changes behind one OS prompt, each recorded so its undo removes
 //! exactly what it added.
 //!

@@ -1,4 +1,4 @@
-//! Web games (WEB-GAMES-PLAN): pages played in Caskade's game window.
+//! Web games: pages played in Caskade's game window.
 
 #[cfg(feature = "net")]
 mod add;
@@ -54,7 +54,7 @@ pub fn page_url(input: &str) -> crate::Result<Url> {
 
 /// How big a game is when it isn't fullscreen, in CSS pixels: its page's
 /// size for its frame or movie, or a movie's stage. The game window opens
-/// at it (WEB-GAMES-PLAN §3).
+/// at it.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct GameSize {
     pub width: u32,

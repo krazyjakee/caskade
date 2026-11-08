@@ -1,6 +1,6 @@
 //! A plugin's own translations (#219): `locales/<lang>.po` in its folder,
 //! in a gettext domain named after the plugin's id. The English text is the
-//! message id, as everywhere in Caskade (`docs/localization.md`).
+//! message id, as everywhere in Caskade.
 //!
 //! The host translates what it shows from `plugin.json` (the name, the
 //! description, slot, view and command titles, and the settings schema's

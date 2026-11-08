@@ -1,4 +1,4 @@
-//! One-click emulator installs (EMULATOR-SETUP-PLAN §3): download an
+//! One-click emulator installs: download an
 //! emulator's release, unpack it into `<data>/emulators/<definition>`,
 //! write its first-run config, and configure it with its profiles and the
 //! platform defaults that are missing.

@@ -123,8 +123,8 @@ pub enum Question {
     ConfirmExecution {
         candidates: Vec<Candidate>,
     },
-    /// Where handed-off files should go, e.g. into a ROM scanner's folder
-    /// (EMULATION-PLAN §9). The first option is the suggested one.
+    /// Where handed-off files should go, e.g. into a ROM scanner's folder.
+    /// The first option is the suggested one.
     ChooseDestination {
         reason: String,
         options: Vec<Destination>,

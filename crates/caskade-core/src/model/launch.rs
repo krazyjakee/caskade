@@ -25,7 +25,7 @@ pub enum LaunchSpec {
         app_id: String,
         args: Vec<String>,
     },
-    /// An emulated game (EMULATION-PLAN §4): its platform, what it launches
+    /// An emulated game: its platform, what it launches
     /// with, its ROMs (several for multi-disc) and per-game arguments.
     Emulator {
         platform_id: String,
@@ -38,12 +38,12 @@ pub enum LaunchSpec {
         runner_id: String,
         payload: serde_json::Value,
     },
-    /// A web game (WEB-GAMES-PLAN §2): its page, `http` or `https`, played
+    /// A web game: its page, `http` or `https`, played
     /// in Caskade's game window.
     Web {
         url: String,
     },
-    /// A game another device offers for streaming (STREAMING-PLAN §8.2):
+    /// A game another device offers for streaming:
     /// the host's id and the app's name there, played through Caskade's
     /// streaming client.
     Stream {

@@ -1,4 +1,4 @@
-/// The contract between Caskade and a plugin's backend half (TECH-PLAN §4).
+/// The contract between Caskade and a plugin's backend half.
 /// Payloads cross as JSON text, so the shapes can grow without breaking
 /// the binary interface.
 ///

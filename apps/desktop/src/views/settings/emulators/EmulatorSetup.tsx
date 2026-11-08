@@ -77,7 +77,7 @@ function JobStatus({ job }: { job: SetupJob }) {
   );
 }
 
-/** Platforms the user has games for that no emulator runs (EMULATOR-SETUP-PLAN §7). */
+/** Platforms the user has games for that no emulator runs. */
 export function MissingEmulators() {
   const { t } = useLingui();
   const missing = useMissingEmulators();
@@ -351,7 +351,7 @@ export function ManagedEmulatorInfo({ emulatorId }: { emulatorId: string }) {
   );
 }
 
-/** "Get from RomM" for a platform's missing BIOS files (EMULATOR-SETUP-PLAN §5). */
+/** "Get from RomM" for a platform's missing BIOS files. */
 export function FetchBios({ platformId }: { platformId: string }) {
   const { t } = useLingui();
   const { setup } = useEmulationApi();
@@ -408,7 +408,7 @@ export function FetchBios({ platformId }: { platformId: string }) {
   );
 }
 
-/** Every emulator Caskade can install here (EMULATOR-SETUP-PLAN §7). */
+/** Every emulator Caskade can install here. */
 export function BrowseEmulators({ snapshot }: { snapshot: EmulationSnapshot }) {
   const { t } = useLingui();
   const installable = useInstallable();

@@ -1,4 +1,4 @@
-//! BIOS files from RomM servers' firmware (EMULATOR-SETUP-PLAN §5): a
+//! BIOS files from RomM servers' firmware: a
 //! platform's missing files, found by name or MD5 on every server whose
 //! platform maps to it, the same mapping RomM syncs use.
 

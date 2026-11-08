@@ -5,7 +5,7 @@ import { libraryKeys, useLibraryApi } from "../../../api/provider";
 import { useStorageApi } from "../../../api/StorageProvider";
 import { InstallRootPicker } from "../../../components/storage/InstallRootPicker";
 
-/** A web game's Play offline… (WEB-GAMES-PLAN §6), from its menu: where to
+/** A web game's Play offline…, from its menu: where to
  * keep it, then the guided capture opens. */
 export function SaveOfflineDialog({
   gameId,

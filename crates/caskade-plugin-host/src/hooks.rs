@@ -1,4 +1,4 @@
-//! Backend plugins on the hook bus (#125, TECH-PLAN §4.3, §4.4). A plugin's
+//! Backend plugins on the hook bus (#125). A plugin's
 //! `on-event` and `intercept` exports run like built-in subscribers and
 //! interceptors: ordered, time-boxed and isolated by the #109 bus.
 //!

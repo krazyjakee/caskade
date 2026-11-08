@@ -1,4 +1,4 @@
-//! The game window (WEB-GAMES-PLAN §3): `caskade --web-game <url>` plays a
+//! The game window: `caskade --web-game <url>` plays a
 //! web game in a window of its own, in a process of its own, before any of
 //! the app starts.
 //!

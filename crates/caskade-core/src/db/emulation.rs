@@ -1,5 +1,5 @@
-//! Emulator, platform settings and ROM scanner repositories (#112,
-//! EMULATION-PLAN §4). Built-in profile checks that need definitions belong
+//! Emulator, platform settings and ROM scanner repositories (#112).
+//! Built-in profile checks that need definitions belong
 //! to the emulation service; the store checks everything else.
 
 use super::{LibraryStore, decode};

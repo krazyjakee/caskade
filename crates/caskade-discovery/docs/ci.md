@@ -4,8 +4,7 @@ The `discovery` and `discovery-live` jobs of `.github/workflows/ci.yml` run on
 GitHub-hosted runners (`ubuntu-24.04`, `windows-latest`, `macos-latest`); the
 repository is public, so they cost nothing and no self-hosted runner is
 involved. Pull requests run `discovery` when their changes reach
-`caskade-discovery` (`scripts/ci-scope.py`,
-[build performance](../../../docs/build-performance.md)); master pushes and
+`caskade-discovery` (`scripts/ci-scope.py`); master pushes and
 manual runs always do. CI runs neither the fuzz targets nor the release
 performance budget; run them by hand ([the fuzz README](../fuzz/README.md)).
 

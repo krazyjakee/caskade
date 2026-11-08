@@ -1,4 +1,4 @@
-//! Plugin state (TECH-PLAN §3, #123): enabled flags, granted permissions
+//! Plugin state (#123): enabled flags, granted permissions
 //! and each plugin's bounded key-value store. The plugin host owns what the
 //! grants mean; the store keeps them as JSON.
 

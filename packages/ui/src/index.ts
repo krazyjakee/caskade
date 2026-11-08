@@ -1,4 +1,4 @@
-/** `@caskade/ui`: the shell's themeable components (TECH-PLAN §5). UI plugins
+/** `@caskade/ui`: the shell's themeable components. UI plugins
  * import the app's instance through the import map. */
 
 export {

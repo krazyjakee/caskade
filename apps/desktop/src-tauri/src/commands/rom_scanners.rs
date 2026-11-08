@@ -130,7 +130,7 @@ pub async fn rom_scan_all(state: State<'_>) -> Result<Vec<ScanSummary>, CommandE
     state.scanners().scan_all().await.map_err(report)
 }
 
-/// Exclusions every scanner applies (EMULATION-PLAN §6.3, #135).
+/// Exclusions every scanner applies (#135).
 #[tauri::command]
 #[specta::specta]
 pub async fn rom_exclusions(state: State<'_>) -> Result<Vec<String>, CommandError> {

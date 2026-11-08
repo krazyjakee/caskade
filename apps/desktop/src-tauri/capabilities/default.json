@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "The main window: core events, window state and the title bar Caskade draws (move, minimize, maximize, close). No fs or shell plugins reach the webview (TECH-PLAN §7).",
+  "description": "The main window: core events, window state and the title bar Caskade draws (move, minimize, maximize, close). No fs or shell plugins reach the webview.",
   "windows": ["main"],
   "permissions": [
     "core:default",

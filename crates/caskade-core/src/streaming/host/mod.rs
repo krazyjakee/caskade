@@ -1,4 +1,4 @@
-//! The streaming host (STREAMING-PLAN §4, #257): Sunshine, installed,
+//! The streaming host (#257): Sunshine, installed,
 //! configured and run by Caskade without being shown.
 //!
 //! - **On** ([`StreamingHost::enable`]): download it (managed tools),
@@ -665,7 +665,7 @@ impl StreamingHost {
         }
     }
 
-    /// Installs the newest host (STREAMING-PLAN §7), never during a stream:
+    /// Installs the newest host, never during a stream:
     /// it stops, the files are swapped (its configuration, state, paired
     /// devices and published games stay), Caskade's configuration is
     /// written again, the administrator step re-applies what the new copy

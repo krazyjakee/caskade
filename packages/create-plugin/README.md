@@ -1,6 +1,6 @@
 # create-caskade-plugin
 
-Scaffolds a Caskade plugin (TECH-PLAN §4, #130):
+Scaffolds a Caskade plugin (#130):
 
 ```sh
 just plugin-new my-plugin                    # asks for the name, id and halves

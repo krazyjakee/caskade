@@ -31,7 +31,7 @@ export function useWebGames(input: LibraryQuery, { enabled = true } = {}) {
   });
 }
 
-/** The Web tab's games as a mosaic of square tiles (WEB-GAMES-PLAN §5),
+/** The Web tab's games as a mosaic of square tiles,
  * packed densely; favourites and games played lately or often are large. */
 export function WebMosaic({ games }: { games: GameSummary[] }) {
   const { t } = useLingui();

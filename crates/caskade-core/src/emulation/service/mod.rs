@@ -1,4 +1,4 @@
-//! The emulation service (#116, EMULATION-PLAN §4, §5, §7): emulators,
+//! The emulation service (#116): emulators,
 //! profiles and platform settings with what the editor shows next to them:
 //! install presence, profile availability, the resolved command line for a
 //! sample ROM, and Replace overrides whose definition args changed since.

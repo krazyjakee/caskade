@@ -1,4 +1,4 @@
-//! Loading and validating definition files (EMULATION-PLAN §3). Files are
+//! Loading and validating definition files. Files are
 //! read in order and a later file replaces an earlier one's platform, region
 //! or emulator with the same id, so plugins can fix shipped data.
 

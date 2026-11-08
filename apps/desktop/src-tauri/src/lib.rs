@@ -1,7 +1,7 @@
-//! The Caskade desktop app: a thin Tauri 2 adapter over `caskade-core`
-//! (TECH-PLAN §2). Commands, events, windows and URI schemes live here;
+//! The Caskade desktop app: a thin Tauri 2 adapter over `caskade-core`.
+//! Commands, events, windows and URI schemes live here;
 //! everything else is in the core. The webview gets no `fs` or `shell`
-//! plugin (TECH-PLAN §7).
+//! plugin.
 
 pub mod addon_tool;
 pub mod asset;
@@ -310,7 +310,7 @@ pub fn run() {
             }),
         )
         .with_paths(&setup_paths);
-        // One-click emulator installs (EMULATOR-SETUP-PLAN §3), and
+        // One-click emulator installs, and
         // their update checks, which follow `core.updates`.
         let emulator_setup = caskade_core::emulation::EmulatorSetup::new(
             store.clone(),
@@ -325,7 +325,7 @@ pub fn run() {
             move || emulator_setup.watch()
         });
         app.manage(emulator_setup);
-        // Helper tools (the streaming host and client, STREAMING-PLAN §3):
+        // Helper tools (the streaming host and client):
         // nothing installs them yet; their update checks follow
         // `core.updates` like the emulators'.
         match caskade_sources::tools::catalog() {

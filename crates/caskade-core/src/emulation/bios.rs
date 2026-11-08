@@ -1,4 +1,4 @@
-//! BIOS status (#122, EMULATION-PLAN §1, §3.1): which of a platform's and
+//! BIOS status (#122): which of a platform's and
 //! profile's BIOS files exist, and whether their MD5 matches. Files are
 //! looked up in the platform's BIOS folder override, otherwise in the
 //! emulator's BIOS folder: its definition's `bios` variable, or `system`

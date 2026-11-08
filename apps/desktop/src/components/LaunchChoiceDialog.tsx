@@ -15,7 +15,7 @@ import type { LaunchChoice, LaunchPrompt } from "../api/types";
 const option =
   "block cursor-pointer rounded-control border border-border p-3 outline-none data-selected:border-accent-alt data-selected:bg-accent/10 data-focus-visible:focus-ring data-disabled:cursor-default data-disabled:opacity-50";
 
-/** Ask-at-launch and the disc picker (EMULATION-PLAN §4): the launch asked
+/** Ask-at-launch and the disc picker: the launch asked
  * for a play action (#178), a profile, a disc or both; continuing launches
  * again with the answers. */
 export function LaunchChoiceDialog({

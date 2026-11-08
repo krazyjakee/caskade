@@ -1,4 +1,4 @@
-//! The streaming client (STREAMING-PLAN §5, #261): Moonlight, installed the
+//! The streaming client (#261): Moonlight, installed the
 //! first time someone streams and run with state of its own, so a user's
 //! own Moonlight never sees Caskade's hosts or settings, nor Caskade theirs.
 //!
@@ -344,7 +344,7 @@ impl StreamingClient {
         Ok(paired)
     }
 
-    /// Installs the newest client (STREAMING-PLAN §7), never during a
+    /// Installs the newest client, never during a
     /// stream: a stream holds the client until it ends. Its state (this
     /// device's identity, paired devices, settings) is a folder the
     /// release doesn't ship, so it stays.

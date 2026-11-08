@@ -1,7 +1,7 @@
 # Helper tools
 
 Programs Caskade installs and manages for its own features, never shown to
-people by name (`docs/STREAMING-PLAN.md` §3): `sunshine.toml` (the streaming
+people by name: `sunshine.toml` (the streaming
 host) and `moonlight.toml` (the streaming client). `caskade_sources::tools`
 embeds them and `caskade_core::managed::ManagedTools` installs them.
 

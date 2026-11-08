@@ -1,8 +1,7 @@
 # Theming contract
 
-What themes (and plugins' styles) may rely on. The design is
-[TECH-PLAN §5](../TECH-PLAN.md#5-theming); this page tracks what is
-implemented. Rule: **themes restyle, plugins restructure.** A theme is
+What themes (and plugins' styles) may rely on. How it should look is in the
+[design guidelines](../DESIGN-GUIDELINES.md). Rule: **themes restyle, plugins restructure.** A theme is
 tokens, CSS, fonts and images, never JavaScript.
 
 ## Design tokens (#137)

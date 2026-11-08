@@ -1,5 +1,5 @@
 //! Variables in `args`, `requires`, `vars`, working directories and tracking
-//! paths (EMULATION-PLAN §3.3). `{Name}` is replaced inside each argv token,
+//! paths. `{Name}` is replaced inside each argv token,
 //! so a value with spaces stays one argument and nothing needs quoting.
 
 use super::{InstallKind, Vars};

@@ -1,5 +1,5 @@
 /** Settings → Statistics (#156): live readings of this machine from the
- * core's sampler (`caskade_core::system_stats`, docs/system-stats.md).
+ * core's sampler (`caskade_core::system_stats`).
  * The dashboard watches while it is open and the window is visible, renews
  * its watch, and gets each sample as a `systemStatsSampled` event; the
  * core stops sampling when nobody watches. A metric that couldn't be read

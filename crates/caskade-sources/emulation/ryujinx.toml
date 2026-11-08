@@ -34,7 +34,7 @@ process = "Ryujinx"
 process = "Ryujinx.exe"
 
 # No install source: Nintendo's DMCA notice of 2026-02-12 took Switch
-# emulators off GitHub (EMULATOR-SETUP-PLAN §1).
+# emulators off GitHub.
 [display]
 fullscreen = ["--fullscreen"]
 

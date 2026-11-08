@@ -1,4 +1,4 @@
-//! The library's games on the host (STREAMING-PLAN §4.3, #259): every
+//! The library's games on the host (#259): every
 //! installed, launchable game the host's active account may play is an app
 //! named for it, with its cover as a PNG, that runs `caskade --launch <game
 //! id>` (#256) and lasts as long as the game. One more app, "Caskade",

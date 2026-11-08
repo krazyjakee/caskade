@@ -1,4 +1,4 @@
-//! Finding the game in the page it's captured in (WEB-GAMES-PLAN §6).
+//! Finding the game in the page it's captured in.
 //! Portals build their game's frame with scripts, and some serve it only
 //! inside their page (Poki's sitelock), so the capture plays the whole
 //! page and looks for the game while it runs. On Done the offline copy

@@ -1,4 +1,4 @@
-//! The gamepad driver a Windows host needs (STREAMING-PLAN §4.5, #260):
+//! The gamepad driver a Windows host needs (#260):
 //! ViGEmBus 1.22.0, downloaded unelevated into `<data>\streaming\drivers`
 //! and kept only when it matches the pinned SHA-256. The administrator step
 //! copies it into the administrator-only folder, checks it again there and

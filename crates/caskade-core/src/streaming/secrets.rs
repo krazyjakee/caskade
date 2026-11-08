@@ -1,4 +1,4 @@
-//! The host's web credentials (STREAMING-PLAN §4.1): a random user name and
+//! The host's web credentials: a random user name and
 //! password, made once and kept in the OS keychain under
 //! `dev.caskade.streaming`, never in the database, settings, logs, IPC or
 //! backups.

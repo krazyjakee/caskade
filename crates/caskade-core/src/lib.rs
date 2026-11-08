@@ -1,4 +1,4 @@
-//! Caskade's application core (TECH-PLAN §2, §3): domain model, SQLite
+//! Caskade's application core: domain model, SQLite
 //! library store, artwork cache, settings, launch pipeline, process
 //! tracking, play sessions and the in-process hook bus.
 //!

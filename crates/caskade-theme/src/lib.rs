@@ -1,4 +1,4 @@
-//! Theme packages (TECH-PLAN §5, `docs/theming/README.md`). A theme is a
+//! Theme packages (`docs/theming/README.md`). A theme is a
 //! folder with `theme.json`, an optional DTCG `tokens.json`, an optional
 //! `theme.css` and `assets/`: tokens, CSS, fonts and images, never code.
 //!

@@ -32,7 +32,7 @@ The definitions ported from Playnite (RetroArch, PCSX2, DuckStation, Dolphin,
 PPSSPP, melonDS, mGBA, Cemu, Ryujinx, RPCS3) say so in their headers; the rest
 (MesenCE, Rosalie's Mupen GUI, gopher64, Flycast, Ymir, ares, MAME, Azahar,
 xemu, Xenia Canary, shadPS4) are authored for Caskade from
-`docs/research/emulator-sources.md`.
+[`SOURCES.md`](SOURCES.md).
 Caskade ids stay independent of external databases: e.g. `nintendo_snes` has
 Playnite id `nintendo_super_nes`. The recommended RetroArch core order is
 encoded by the `[[profile]]` order. A profile is offered only when its

@@ -1,4 +1,4 @@
-//! Shipped emulation definitions (EMULATION-PLAN §3).
+//! Shipped emulation definitions.
 //!
 //! The catalogue is data-only: loading it never probes the host or executes
 //! an emulator. Plugin/user files can be appended to [`definition_files`]

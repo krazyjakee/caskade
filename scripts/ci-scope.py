@@ -71,7 +71,7 @@ def scope(paths, root=ROOT):
         owners = {name for name, (directory, _) in packages.items()
                   if path.startswith(directory.relative_to(root).as_posix() + "/")}
         if not owners and path.endswith(".md"):
-            # Prose can still be a compiled/tested input (e.g. docs/errors.md).
+            # Prose can still be a compiled/tested input (e.g. docs/TECH-SPEC.md).
             # Derive direct include paths instead of maintaining a second list
             # that becomes stale when a crate adds a documentation contract.
             target = (root / path).resolve()

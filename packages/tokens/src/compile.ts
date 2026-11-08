@@ -1,4 +1,4 @@
-/** The design token compiler (TECH-PLAN §5.1, §5.2): W3C Design Tokens
+/** The design token compiler: W3C Design Tokens
  * (DTCG) JSON in three tiers → `--cs-*` CSS custom properties and a manifest
  * of the public token names. Pure: callers pass parsed JSON. */
 

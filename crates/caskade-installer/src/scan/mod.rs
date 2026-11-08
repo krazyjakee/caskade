@@ -1,4 +1,4 @@
-//! Reference scanner and relocation verdict (INSTALLER-PLAN §7.1, layer 3).
+//! Reference scanner and relocation verdict (layer 3).
 //! Finds where an install path was written (game files, registry values the
 //! caller read, recorded out-of-root files) and rates how movable the game is.
 //! Nothing is executed or rewritten here.

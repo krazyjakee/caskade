@@ -1,4 +1,4 @@
-//! Pairing a client with a host (STREAMING-PLAN §6.2, #263) without any of
+//! Pairing a client with a host (#263) without any of
 //! Moonlight's windows: Caskade speaks the GameStream pairing exchange
 //! itself, with the identity (certificate, key, unique id) Moonlight keeps
 //! in Caskade's client state, then records the host there as Moonlight

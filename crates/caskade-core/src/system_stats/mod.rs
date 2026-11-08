@@ -1,6 +1,6 @@
 //! Live system statistics for Settings → Statistics (#156): CPU, GPU,
 //! memory, storage capacity and network rates of the machine Caskade runs
-//! on (`docs/system-stats.md`).
+//! on.
 //!
 //! [`SystemStats`] samples only while someone watches: the dashboard takes a
 //! lease with [`SystemStats::watch`] and renews it, and sampling stops once

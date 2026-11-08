@@ -1,4 +1,4 @@
-/** The anatomy catalogue (TECH-PLAN §5.2): the selectors themes and plugins
+/** The anatomy catalogue: the selectors themes and plugins
  * may target. Every catalogued component renders `data-cs="<name>"` on its
  * root, `data-part` on its parts and its domain state as the attributes in
  * `states`; React Aria adds the interaction attributes. Class names are not

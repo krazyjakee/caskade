@@ -93,7 +93,7 @@ impl GitHub {
     }
 }
 
-/// Release lookups for emulator installs (EMULATOR-SETUP-PLAN §2.1).
+/// Release lookups for emulator installs.
 impl GitHub {
     /// The latest stable release's tag; `None` when there is none.
     pub async fn latest_tag(&self, project: &str) -> Result<Option<String>> {

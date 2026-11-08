@@ -50,7 +50,7 @@ const homeRoute = createRoute({
 const libraryRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/library",
-  // Library filters live in the URL (TECH-PLAN §1, Routing). A link may
+  // Library filters live in the URL (Routing). A link may
   // leave out the filter, sort and layout to come back to the remembered ones.
   // `opening` marks a filter no link named, which the user therefore didn't
   // choose here; every link that names one drops it.

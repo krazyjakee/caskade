@@ -1,4 +1,4 @@
-//! Plugin lifecycle (TECH-PLAN §4.4): discover → validate → load (manifest
+//! Plugin lifecycle: discover → validate → load (manifest
 //! only) → enable → activate (instantiate, lazily) → call → deactivate.
 //! Nothing runs at startup; a failed call drops the instance, and the next
 //! call starts a fresh one.

@@ -6,7 +6,7 @@ export type TileSize = "small" | "large" | "huge";
 /** Played this recently, a game's tile is large. */
 const RECENT_DAYS = 7;
 
-/** Each game's tile (WEB-GAMES-PLAN §5). A tile is large when the game is a
+/** Each game's tile. A tile is large when the game is a
  * favourite, was played in the last week, or has play time in the top
  * quarter of `games`; the first large one is huge. */
 export function tileSizes(games: GameSummary[], now = Date.now()): Map<string, TileSize> {

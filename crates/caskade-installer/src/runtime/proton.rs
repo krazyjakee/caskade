@@ -1,4 +1,4 @@
-//! Prefix runtimes (INSTALLER-PLAN §5): Proton through umu-launcher on Linux,
+//! Prefix runtimes: Proton through umu-launcher on Linux,
 //! and a user-configured Wine build on macOS. Each game owns its prefix at
 //! `<game>/.caskade/prefix` (or `WINEPREFIX` from the command), where
 //! `dosdevices/g:` points at the game directory and `z:` (the whole host

@@ -1,4 +1,4 @@
-//! ROMs handed off by the installer (#120, EMULATION-PLAN §9). The
+//! ROMs handed off by the installer (#120). The
 //! installer names a platform with its own ids; the files become one game
 //! whose ROMs keep their absolute paths and launch with the platform's
 //! default emulator.

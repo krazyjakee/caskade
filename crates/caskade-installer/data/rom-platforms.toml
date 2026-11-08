@@ -1,4 +1,4 @@
-# Stable IDs match EMULATION-PLAN.md's Platform convention.
+# Stable IDs match the platform ids in `crates/caskade-sources/emulation/platforms.toml`.
 # Shared archive/disc extensions (zip,7z,iso,bin,cue,chd) intentionally excluded.
 [[platforms]]
 id = "nintendo_nes"

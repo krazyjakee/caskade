@@ -1,4 +1,4 @@
-//! Redistributables (INSTALLER-PLAN §4.6): VC++, DirectX, .NET, PhysX,
+//! Redistributables: VC++, DirectX, .NET, PhysX,
 //! OpenAL, XNA. Detection reads file names in the installed tree (also under
 //! `__redist/` and `_CommonRedist/`), installer `[Run]` targets and PE
 //! ProductNames, matched against `data/redists.toml`. On Windows each missing

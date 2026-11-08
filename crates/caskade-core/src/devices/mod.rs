@@ -1,7 +1,7 @@
 //! This device and the devices paired with it (#226): identity, the sync
 //! endpoint, pairing by code or link, and forgetting.
 //!
-//! The connection layer is `caskade-sync` (`docs/sync.md`); this service
+//! The connection layer is `caskade-sync`; this service
 //! keeps what it needs on disk and decides who is admitted:
 //!
 //! - **Identity.** Loaded from the keychain off the caller's thread by

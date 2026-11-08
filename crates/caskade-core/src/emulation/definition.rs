@@ -1,4 +1,4 @@
-//! Emulation data (EMULATION-PLAN §3): platforms, regions and emulator
+//! Emulation data: platforms, regions and emulator
 //! definitions, read from TOML. Read-only to the user; plugins contribute
 //! more in the same format.
 
@@ -22,7 +22,7 @@ pub struct Platform {
     #[serde(default)]
     pub bios: Vec<Bios>,
     /// Emulators to install for the platform, best first: `<emulator>` or
-    /// `<emulator>:<profile>` (EMULATOR-SETUP-PLAN §2.4).
+    /// `<emulator>:<profile>`.
     #[serde(default)]
     pub recommended: Vec<String>,
 }
@@ -90,7 +90,7 @@ pub struct EmulatorDefinition {
     pub import: Option<String>,
     /// The default tracking mode when the install kind's isn't right.
     pub tracking: Option<Tracking>,
-    /// Where Caskade downloads it from, per OS (EMULATOR-SETUP-PLAN §2.1).
+    /// Where Caskade downloads it from, per OS.
     #[serde(default)]
     pub install: Install,
     /// Flags for fullscreen and windowed play (§2.2).
@@ -254,7 +254,7 @@ impl Install {
     }
 }
 
-/// One download source (EMULATOR-SETUP-PLAN §2.1).
+/// One download source.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "source", rename_all = "snake_case", deny_unknown_fields)]
 pub enum InstallSource {

@@ -1,4 +1,4 @@
-//! Emulated games (EMULATION-PLAN §4, §5.1, #121): choose the profile and the
+//! Emulated games (#121): choose the profile and the
 //! disc, build the emulator's argv for its install kind, and decide how the
 //! game's process is tracked. Nothing here runs a process.
 

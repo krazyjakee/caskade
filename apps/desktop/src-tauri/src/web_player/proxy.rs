@@ -1,5 +1,4 @@
-//! The game window's proxy for offline bundles (WEB-GAMES-PLAN §6,
-//! research/web-capture-spike.md): every request the window makes comes
+//! The game window's proxy for offline bundles: every request the window makes comes
 //! here. Capturing, it fetches upstream, verifying TLS itself, and keeps
 //! each response in the bundle; playing, it answers from the bundle at the
 //! game's own URLs and keeps what the bundle lacks while online; checking,

@@ -1,4 +1,4 @@
-//! Dev mode (#131, TECH-PLAN §4.4): a plugin loaded in place from its
+//! Dev mode (#131): a plugin loaded in place from its
 //! folder, watched for changes. After a short quiet period:
 //! - `plugin.json` changed: the manifest is validated again, grants follow
 //!   it, and the hooks and the UI half reload;

@@ -23,7 +23,7 @@ const items = (job: ScanJob): Item[] =>
     regions: game.regions,
   }));
 
-/** The manual-scan review list (EMULATION-PLAN §6.1): untick, fix titles,
+/** The manual-scan review list: untick, fix titles,
  * platforms and regions in bulk, merge or split multi-disc games. The
  * choices are stored, so later automatic scans agree. */
 export function ScanReview({ job, platforms }: { job: ScanJob; platforms: EmulationPlatform[] }) {

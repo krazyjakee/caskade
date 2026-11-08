@@ -41,7 +41,7 @@ impl LaunchCommand {
     }
 }
 
-/// What an emulator launch resolved to (EMULATION-PLAN §8). `launch.before`
+/// What an emulator launch resolved to. `launch.before`
 /// interceptors may rewrite it with the argv; the frontend never receives it.
 #[derive(
     Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema, specta::Type,

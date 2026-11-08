@@ -1,4 +1,4 @@
-//! Offline web game bundles (WEB-GAMES-PLAN §2, §6): everything a game
+//! Offline web game bundles: everything a game
 //! loaded, kept by URL, in a folder that plays without a network.
 //!
 //! `caskade-web.json` maps each URL to a file under `files/`, named after

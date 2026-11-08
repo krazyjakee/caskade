@@ -1,4 +1,4 @@
-//! Rust SDK for Caskade plugin backends (TECH-PLAN §4.5).
+//! Rust SDK for Caskade plugin backends.
 //!
 //! A backend is a WebAssembly component for the `caskade:plugin@0.1.1`
 //! world. This crate carries the bindings, so a plugin implements one

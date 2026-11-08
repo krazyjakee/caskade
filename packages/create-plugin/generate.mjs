@@ -1,4 +1,4 @@
-// Writes a new Caskade plugin (TECH-PLAN §4.1, #130): UI half, backend half
+// Writes a new Caskade plugin (#130): UI half, backend half
 // (Rust, `caskade-plugin-sdk`) or both. No dependencies: Node's own modules.
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";

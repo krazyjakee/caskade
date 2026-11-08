@@ -1,5 +1,5 @@
-//! The shipped tool definitions against the releases they were written for
-//! (STREAMING-PLAN §3.2): every machine picks exactly the file the plan
+//! The shipped tool definitions against the releases they were written for:
+//! every machine picks exactly the file the plan
 //! names, and every asset pattern matches one recorded file. An upstream
 //! rename shows up here, and in the live test, as a one-line fix.
 

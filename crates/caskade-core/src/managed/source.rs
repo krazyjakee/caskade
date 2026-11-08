@@ -1,5 +1,4 @@
-//! What an install source's newest version is and where its file is
-//! (EMULATOR-SETUP-PLAN §2.1).
+//! What an install source's newest version is and where its file is.
 
 use crate::{Error, Result, emulation::InstallSource, updates::GitHub};
 use url::Url;

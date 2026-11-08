@@ -2,7 +2,7 @@ use super::*;
 use caskade_installer::OperatingSystem;
 use std::{fmt::Write, path::PathBuf};
 
-/// The examples from EMULATION-PLAN §3.1–§3.2.
+/// Example definitions.
 const PLATFORMS: &str = r#"
 [[platform]]
 id = "nintendo_snes"

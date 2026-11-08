@@ -1,4 +1,4 @@
-//! Add web game (WEB-GAMES-PLAN §4): a page becomes a library game.
+//! Add web game: a page becomes a library game.
 
 use super::{
     PLATFORM, WEB_SOURCE,

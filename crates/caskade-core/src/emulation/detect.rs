@@ -1,4 +1,4 @@
-//! Emulator detection (#115, EMULATION-PLAN §5). Every definition's rules
+//! Emulator detection (#115). Every definition's rules
 //! for the host OS are tried against standard locations, through
 //! discovery's read-only OS probes (#102): `$PATH`, Flatpak installations,
 //! AppImages, app bundles, Emulator desktop entries and shortcuts, and the

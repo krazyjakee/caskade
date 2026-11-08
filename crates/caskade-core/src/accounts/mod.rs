@@ -1,7 +1,7 @@
 //! Local accounts (#202): who is using Caskade, what they may change, and
 //! PIN checks. Accounts are local to the machine; the PIN is a household
 //! lock against other people at the keyboard, not protection for the data
-//! files (`docs/accounts.md`).
+//! files.
 //!
 //! [`AccountService`] holds the active account and decides who may change
 //! what; the store keeps the rules every change must leave intact (an

@@ -1,22 +1,17 @@
 # Caskade
 
-A game library and launcher for Windows, Linux and macOS. It is written in Rust, with a Tauri 2 shell and a React UI. It has a desktop mode and a fullscreen console mode for gamepads.
+A game library and launcher for Windows, Linux and macOS, written in Rust with a Tauri 2 shell and a React UI.
 
-## What it does
+Every game you own, on every device in your home, in one library: store and launcher games, emulated games with emulators set up for you, web games, fan ports, and games streamed from another PC in the house. Devices pair and keep the library, saves and playtime in step directly, with no account and no server. It has a desktop mode, a fullscreen console mode for gamepads, themes and WebAssembly plugins.
 
-- **Finds installed games:** Steam, Heroic, Legendary, Lutris, Epic, GOG, EA, Ubisoft, Battle.net, Xbox, itch, Amazon, Riot, Rockstar, Bottles, Faugus, Minigalaxy, Flatpak and Snap. It also finds games through the Start Menu, uninstall entries, `.desktop` files, app bundles and Wine prefixes. Copies found by more than one source are merged.
-- **Emulation:** detects installed emulators, scans ROM folders into the library, and launches ROMs through per-emulator profiles. RomM servers work as a library source.
-- **Installs:** installs a file, folder or URL into a storage root. That covers Windows installers (run under Proton on Linux), Linux and macOS packages, archives and portable games. A `caskade://install?url=…` link queues an install, and nothing is downloaded until you confirm it.
-- **Launches games:** tracks the real game process for playtime, including games a launcher starts in a child process.
-- **Themes:** themes are token sets plus CSS over documented component parts. `themes/default` and `themes/paper` are built in, and you can add your own CSS.
-- **Plugins:** WebAssembly backends with permissions the user grants, plus optional UI halves.
+- [Mission](docs/MISSION.md)
+- [Product spec](docs/PRODUCT-SPEC.md): what it does today and what is planned
+- [Tech spec](docs/TECH-SPEC.md): how it is built
+- [Design guidelines](docs/DESIGN-GUIDELINES.md)
 
-## Status and limitations
+## Status
 
-- This is a prototype. Nothing is packaged or published yet.
-- CI tests the desktop app on Linux only. Windows gets a cross-compiled Clippy check, and the app has not been checked on macOS. The installer and discovery crates are tested on Linux, Windows and macOS.
-- The Store view shows placeholder data.
-- Plugin backends are Rust only. Two plugin features are reserved and don't run yet: metadata providers and plugin-supplied emulator definitions. See [docs/plugins](docs/plugins/README.md).
+Version 0.1.x is published as [GitHub releases](https://github.com/krazyjakee/caskade/releases), and installed copies update themselves. Linux is the reference platform. Windows builds and is partly verified on real systems; the app hasn't been run on macOS yet. Details are in the product spec's Status section.
 
 ## Build and run
 
@@ -40,16 +35,6 @@ just test-app   # core and adapter tests, then Vitest
 
 ## Layout
 
-| Path                                                                                              | Contents                                                                                                                       |
-| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `crates/caskade-core`                                                                             | Library store (SQLite), launch pipeline, play sessions, settings, install and storage services, hook bus. No Tauri dependency. |
-| `crates/caskade-installer`, `caskade-discovery`                                                   | Standalone libraries (with dev CLIs) for installing payloads and finding installed games                                       |
-| `crates/caskade-sources`, `caskade-plugin-host`, `caskade-theme`, `caskade-input`, `caskade-jobs` | Library sources, the wasmtime plugin host, the theme compiler, gamepad input, the background job queue                         |
-| `crates/caskade-component-cache`, `caskade-plugin-sdk`, `caskade-emulation-fixtures`              | Compiled-plugin cache, the Rust SDK for plugin backends, generated emulator and ROM test fixtures                              |
-| `apps/desktop`                                                                                    | The Tauri adapter (`src-tauri`) and the React app (`src`)                                                                      |
-| `apps/storybook`                                                                                  | Storybook for `@caskade/ui`, also a theme playground                                                                           |
-| `packages/`                                                                                       | `@caskade/ui` components, `@caskade/tokens` design tokens, the plugin SDK and scaffolder                                       |
-| `themes/`, `plugins/examples/`                                                                    | Built-in themes and example plugins                                                                                            |
-| `xtask/`                                                                                          | Installer fixture builders, the corpus scoreboard and emulation fixture checks (`cargo xtask`)                                 |
+The crates, apps and packages are described in the [tech spec](docs/TECH-SPEC.md#3-repository).
 
-The [documentation index](docs/README.md) links to architecture, plugin and theme contracts, crate guides, and verification checklists.
+The [documentation index](docs/README.md) links to the specs, the plugin and theme contracts, and the guides.

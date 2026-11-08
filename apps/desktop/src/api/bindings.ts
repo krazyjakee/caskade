@@ -211,7 +211,7 @@ export const commands = {
 	addWebGame: (url: string) => typedError<string, ErrorReport_Serialize>(__TAURI_INVOKE("add_web_game", { url })),
 	/**
 	 *  Opens the guided capture that keeps `game_id`'s web game in `root_id`
-	 *  for offline play (WEB-GAMES-PLAN §6). Returns once the window is open;
+	 *  for offline play. Returns once the window is open;
 	 *  the library changes when the player saves it.
 	 */
 	saveWebGameOffline: (gameId: string, rootId: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("save_web_game_offline", { gameId, rootId })),
@@ -604,7 +604,7 @@ export const commands = {
 	romScanSubmit: (id: string, revision: number, choices: ReviewChoice[]) => typedError<ScanJob_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("rom_scan_submit", { id, revision, choices })),
 	/**  "Scan all": every scanner that takes part in library updates imports. */
 	romScanAll: () => typedError<ScanSummary_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("rom_scan_all")),
-	/**  Exclusions every scanner applies (EMULATION-PLAN §6.3, #135). */
+	/**  Exclusions every scanner applies (#135). */
 	romExclusions: () => typedError<string[], ErrorReport_Serialize>(__TAURI_INVOKE("rom_exclusions")),
 	/**
 	 *  Replaces the global exclusions and returns them as stored (trimmed,
@@ -2801,7 +2801,7 @@ export type Contributes_Deserialize = {
 	commands?: Command[],
 	/**  A JSON Schema for the plugin's settings (#128). */
 	settings?: Value | null,
-	/**  Data contributions such as emulator definitions (EMULATION-PLAN §8). */
+	/**  Data contributions such as emulator definitions. */
 	emulation?: string[],
 	/**  Theme folders the plugin bundles, each with a `theme.json` (#139). */
 	themes?: string[],
@@ -2819,7 +2819,7 @@ export type Contributes_Serialize = {
 	commands: Command[],
 	/**  A JSON Schema for the plugin's settings (#128). */
 	settings: Value | null,
-	/**  Data contributions such as emulator definitions (EMULATION-PLAN §8). */
+	/**  Data contributions such as emulator definitions. */
 	emulation: string[],
 	/**  Theme folders the plugin bundles, each with a `theme.json` (#139). */
 	themes: string[],
@@ -5123,7 +5123,7 @@ export type InputAction = {
 	glyphs: GlyphFamily,
 };
 
-/**  One normalized action from a pad (TECH-PLAN §6). */
+/**  One normalized action from a pad. */
 export type InputActionEvent = InputAction;
 
 export type InputKind = "path" | "url" | 
@@ -5523,17 +5523,17 @@ export type LaunchSpec_Deserialize = { type: "uri"; uri: string } | { type: "exe
 /**  Retain discovery's structured target rather than inventing a shell command. */
 { type: "flatpak"; appId: string; args: string[] } | 
 /**
- *  An emulated game (EMULATION-PLAN §4): its platform, what it launches
+ *  An emulated game: its platform, what it launches
  *  with, its ROMs (several for multi-disc) and per-game arguments.
  */
 { type: "emulator"; platformId: string; target: EmulatorTarget; roms: GameRom_Deserialize[]; args: ArgsOverride_Deserialize } | { type: "plugin"; pluginId: string; runnerId: string; payload: Value } | 
 /**
- *  A web game (WEB-GAMES-PLAN §2): its page, `http` or `https`, played
+ *  A web game: its page, `http` or `https`, played
  *  in Caskade's game window.
  */
 { type: "web"; url: string } | 
 /**
- *  A game another device offers for streaming (STREAMING-PLAN §8.2):
+ *  A game another device offers for streaming:
  *  the host's id and the app's name there, played through Caskade's
  *  streaming client.
  */
@@ -5543,17 +5543,17 @@ export type LaunchSpec_Serialize = { type: "uri"; uri: string } | { type: "execu
 /**  Retain discovery's structured target rather than inventing a shell command. */
 { type: "flatpak"; appId: string; args: string[] } | 
 /**
- *  An emulated game (EMULATION-PLAN §4): its platform, what it launches
+ *  An emulated game: its platform, what it launches
  *  with, its ROMs (several for multi-disc) and per-game arguments.
  */
 { type: "emulator"; platformId: string; target: EmulatorTarget; roms: GameRom_Serialize[]; args: ArgsOverride_Serialize } | { type: "plugin"; pluginId: string; runnerId: string; payload: Value } | 
 /**
- *  A web game (WEB-GAMES-PLAN §2): its page, `http` or `https`, played
+ *  A web game: its page, `http` or `https`, played
  *  in Caskade's game window.
  */
 { type: "web"; url: string } | 
 /**
- *  A game another device offers for streaming (STREAMING-PLAN §8.2):
+ *  A game another device offers for streaming:
  *  the host's id and the app's name there, played through Caskade's
  *  streaming client.
  */
@@ -7146,8 +7146,8 @@ export type Question_Deserialize =
 	candidates: Candidate_Deserialize[],
 } } | 
 /**
- *  Where handed-off files should go, e.g. into a ROM scanner's folder
- *  (EMULATION-PLAN §9). The first option is the suggested one.
+ *  Where handed-off files should go, e.g. into a ROM scanner's folder.
+ *  The first option is the suggested one.
  */
 { type: "choose_destination"; value: {
 	reason: string,
@@ -7187,8 +7187,8 @@ export type Question_Serialize =
 	candidates: Candidate_Serialize[],
 } } | 
 /**
- *  Where handed-off files should go, e.g. into a ROM scanner's folder
- *  (EMULATION-PLAN §9). The first option is the suggested one.
+ *  Where handed-off files should go, e.g. into a ROM scanner's folder.
+ *  The first option is the suggested one.
  */
 { type: "choose_destination"; value: {
 	reason: string,

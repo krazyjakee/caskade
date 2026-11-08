@@ -1,4 +1,4 @@
-//! Running the host (STREAMING-PLAN §4.2): only while Caskade runs.
+//! Running the host: only while Caskade runs.
 //!
 //! - Linux: Sunshine is Caskade's child, in a process group of its own,
 //!   started through `setpriv --pdeathsig TERM` so it ends with Caskade

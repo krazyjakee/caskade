@@ -107,7 +107,7 @@ pub(crate) fn unreachable(error: &Error) -> bool {
 // What crosses to the webview and into notifications when something fails:
 // a stable code to match on (never the text), a sentence for people, the
 // redacted causes for diagnostics, and what can be done about it. See
-// `docs/errors.md`.
+// `docs/TECH-SPEC.md`, Errors and recovery.
 
 /// What kind of failure an [`ErrorReport`] is. Stable: the webview,
 /// notifications and recovery code match on it, never on the text.

@@ -1,4 +1,4 @@
-//! Shipped helper-tool definitions (STREAMING-PLAN §3.1): the streaming
+//! Shipped helper-tool definitions: the streaming
 //! host and client, in `tools/`. Data only: loading them probes nothing.
 use caskade_core::managed::{ToolCatalog, ToolDefinition};
 

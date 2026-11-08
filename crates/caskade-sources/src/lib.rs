@@ -1,4 +1,4 @@
-//! Discovery-backed library providers and imports (DISCOVERY-PLAN §11).
+//! Discovery-backed library providers and imports.
 //! No global state, filesystem mutations in launcher data or ambient scans.
 mod adapter;
 pub mod emulation;

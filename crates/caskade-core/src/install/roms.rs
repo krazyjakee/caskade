@@ -1,4 +1,4 @@
-//! ROMs the installer hands off (#120, EMULATION-PLAN §9). With a ROM
+//! ROMs the installer hands off (#120). With a ROM
 //! scanner for the platform, the job asks whether to move or copy the files
 //! into its folder (move by default on the same filesystem), then runs that
 //! scanner. Otherwise the ROMs are imported where they are.

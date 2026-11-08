@@ -1,4 +1,4 @@
-//! Someone else's Sunshine on this device (STREAMING-PLAN §3.4, #258). Its
+//! Someone else's Sunshine on this device (#258). Its
 //! ports and mDNS name would collide with Caskade's, so hosting offers to
 //! use it instead ("Streaming is already set up on this device. Use it?"):
 //! Caskade then installs nothing, asks once for its user name and password

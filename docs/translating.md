@@ -2,7 +2,7 @@
 
 Caskade is translated with gettext PO files, kept in the repository. English is the source language: its text is in the code, and anything a language leaves untranslated shows in English. Translations come in through pull requests. A hosted translation service can come later: Weblate works on these same PO files, so adding one changes nothing for translators who use a PO editor.
 
-How the pipeline works inside the code is in [Localization](localization.md).
+How the pipeline works inside the code is in the [tech spec](TECH-SPEC.md#localization).
 
 ## The files
 

@@ -37,7 +37,7 @@ function DesktopFullscreen() {
   );
 }
 
-/** Settings → Emulation (EMULATION-PLAN §7). The section lives in the URL as `?section=`. */
+/** Settings → Emulation. The section lives in the URL as `?section=`. */
 export function EmulatorSettings() {
   const search = settingsRoute.useSearch();
   const navigate = settingsRoute.useNavigate();

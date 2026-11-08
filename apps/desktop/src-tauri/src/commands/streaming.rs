@@ -1,4 +1,4 @@
-//! Game streaming (STREAMING-PLAN): hosting on and off, and the host's
+//! Game streaming: hosting on and off, and the host's
 //! state. Settings → Streaming (#265) is their UI.
 
 use crate::error::{CommandError, report};

@@ -9,7 +9,7 @@ use specta::Type;
 use tauri::{AppHandle, Manager, Runtime};
 use tauri_specta::Event as _;
 
-/// One normalized action from a pad (TECH-PLAN §6).
+/// One normalized action from a pad.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type, tauri_specta::Event)]
 pub struct InputActionEvent(pub InputAction);
 

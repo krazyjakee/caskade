@@ -3,7 +3,7 @@ name: ci
 # Tauri adapter, the React UI and the crates they build on), the installer and
 # discovery crates on Linux, Windows and macOS, and the translation catalogs.
 # Pull requests run only the checks their changes reach (scripts/ci-scope.py,
-# docs/build-performance.md); master pushes and manual runs run them all. The
+# docs/TECH-SPEC.md); master pushes and manual runs run them all. The
 # jobs need no secrets and get a read-only token, so pull requests from forks
 # run too. The repository has no self-hosted runners, and no job here may ask
 # for one. Labels a maintainer adds to a pull request ask for more: `run-e2e`
@@ -312,7 +312,7 @@ jobs:
         run: "cargo test -p caskade-core --test it --locked device_defaults::windows_ -- --nocapture"
       # A real program's saves in the real %APPDATA% and Documents, to a
       # Proton-shaped prefix and back (#14). Not required until it has passed
-      # here: the first run has only been through Wine (docs/sync.md, "Saves").
+      # here: the first run has only been through Wine.
       - name: Saves in the real Windows folders
         run: "cargo test -p caskade-core --test it --locked windows_saves:: -- --ignored --nocapture"
 

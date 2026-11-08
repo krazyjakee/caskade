@@ -1,5 +1,5 @@
 //! Launcher protocol identity only. Parsing never opens a URI or runs a shell.
-//! Forms are specified in DISCOVERY-PLAN §5; Heroic's current query form is
+//! Heroic's current query form is
 //! also accepted (format reference, no launcher implementation is copied):
 //! https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/blob/main/src/backend/shortcuts/shortcuts/shortcuts.ts
 //! goggalaxy openGameView is documented by PlayniteExtensions/GogGameController.cs.

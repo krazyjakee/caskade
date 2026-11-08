@@ -1,4 +1,4 @@
-//! Pairing streaming through sync (STREAMING-PLAN §6.3, #267): devices
+//! Pairing streaming through sync (#267): devices
 //! already paired through sync (#226) stream to each other with no code.
 //!
 //! The client starts the usual pairing (§6.2) with its own device name and

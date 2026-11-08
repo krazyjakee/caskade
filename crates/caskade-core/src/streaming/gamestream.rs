@@ -1,6 +1,6 @@
 //! What a client asks a paired host itself, over its HTTPS port with the
-//! client's certificate and the host's pinned one (STREAMING-PLAN §5.3,
-//! #264): whether it still knows this device, what it is playing, which
+//! client's certificate and the host's pinned one
+//! (#264): whether it still knows this device, what it is playing, which
 //! games it offers, and to quit the game. Moonlight only streams.
 //!
 //! Also Wake-on-LAN, for a host that sleeps.

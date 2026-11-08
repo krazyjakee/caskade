@@ -1,4 +1,4 @@
-//! Plugin seams (#55, INSTALLER-PLAN §10): extra handlers and URL resolvers,
+//! Plugin seams (#55): extra handlers and URL resolvers,
 //! and the `install.plan` review. The installer knows no plugin runtime;
 //! the app adapts its plugins to these traits and puts them in [`Context`].
 //!

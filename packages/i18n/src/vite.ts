@@ -2,7 +2,7 @@
 /** The Node side of the webview's gettext pipeline: the Lingui configuration,
  * reading PO and POT files, compiling catalogs and the Vite plugin that does
  * both at build time. Imported by the Vite, Vitest and Storybook configs and
- * by the scripts, so it has no relative imports (see `docs/localization.md`). */
+ * by the scripts, so it has no relative imports (see `docs/translating.md`). */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { fileURLToPath } from "node:url";

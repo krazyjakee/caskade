@@ -1,6 +1,6 @@
 # Example plugins
 
-These are the dogfood plugins from TECH-PLAN §8. CI builds and tests them.
+These are the dogfood plugins. CI builds and tests them.
 
 | Plugin                            | Halves       | Shows                                                                                                   |
 | --------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------- |

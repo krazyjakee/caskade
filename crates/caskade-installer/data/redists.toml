@@ -1,4 +1,4 @@
-# Redistributables shipped with Windows games (INSTALLER-PLAN §4.6).
+# Redistributables shipped with Windows games.
 # files: lower-case glob on the file name (`*` = any run, `?` = one char).
 # product_names: case-insensitive prefixes of the PE/MSI ProductName.
 # silent: argv for an unattended, no-prompt install.

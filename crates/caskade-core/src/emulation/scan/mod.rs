@@ -1,4 +1,4 @@
-//! ROM enumeration and a pure, bounded scan pipeline (EMULATION-PLAN §6).
+//! ROM enumeration and a pure, bounded scan pipeline.
 //! No emulators are started, archives are listed without extracting, and no
 //! library records are mutated. The library adapter owns reconciliation.
 mod enumerate;

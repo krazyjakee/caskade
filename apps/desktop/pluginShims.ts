@@ -3,8 +3,8 @@ import type { Plugin } from "vite";
 import { appExports, importMap, shimPath, shimSource } from "./src/plugins/sharedExports";
 
 /** Serves (dev) and emits (build) the `/plugin-shims/*.js` modules and puts
- * the import map in index.html, so UI plugins share the app's React and SDK
- * (TECH-PLAN §4.4). Package export names are read from the installed
+ * the import map in index.html, so UI plugins share the app's React and SDK.
+ * Package export names are read from the installed
  * packages; the app's own modules list theirs in `sharedExports.ts`. */
 export function pluginShims(): Plugin {
   let shims: Promise<Map<string, string>> | undefined;

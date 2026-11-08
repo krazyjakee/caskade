@@ -379,7 +379,7 @@ pub(crate) fn record_shipped(dir: &Path) -> Result<()> {
 }
 
 /// The shipped files of the release in `dir` that are gone: what a repair
-/// puts back (STREAMING-PLAN §7). Empty when nothing was recorded.
+/// puts back. Empty when nothing was recorded.
 pub(crate) fn missing_shipped(dir: &Path) -> Vec<PathBuf> {
     shipped(dir)
         .into_iter()

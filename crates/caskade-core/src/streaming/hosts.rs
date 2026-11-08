@@ -1,5 +1,5 @@
-//! Streaming hosts this device can stream from (STREAMING-PLAN §6.1, §8.2,
-//! #262): found on the local network (mDNS), typed by address
+//! Streaming hosts this device can stream from
+//! (#262): found on the local network (mDNS), typed by address
 //! (`core.streaming.addresses`), or paired before (Caskade's own client
 //! state). Any Sunshine host is welcome, not only Caskade's.
 //!

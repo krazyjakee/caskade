@@ -1,5 +1,5 @@
-//! The config an install writes so the first launch needs no setup
-//! (EMULATOR-SETUP-PLAN §2.3): INI keys set, whole files written once.
+//! The config an install writes so the first launch needs no setup:
+//! INI keys set, whole files written once.
 
 use crate::{
     Error, Result,

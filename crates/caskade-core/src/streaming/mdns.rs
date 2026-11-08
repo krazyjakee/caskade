@@ -1,4 +1,4 @@
-//! Finding streaming hosts on the local network (STREAMING-PLAN §6.1):
+//! Finding streaming hosts on the local network:
 //! one mDNS question for `_nvstream._tcp.local`, asked from an ordinary
 //! port so responders answer it directly (RFC 6762 §6.7, legacy unicast),
 //! and the answers' PTR, SRV and A records put together. The instance name

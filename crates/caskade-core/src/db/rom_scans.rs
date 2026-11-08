@@ -1,4 +1,4 @@
-//! ROM scanner state and review choices (#119, EMULATION-PLAN §6.1). The
+//! ROM scanner state and review choices (#119). The
 //! scanners themselves live with the emulator configuration.
 
 use super::{LibraryStore, decode, records::escape_like};

@@ -1,4 +1,4 @@
-/** `@caskade/vite-plugin` (TECH-PLAN §4.4): builds a plugin's UI half as one
+/** `@caskade/vite-plugin`: builds a plugin's UI half as one
  * ES module, `dist/ui.js`, that the app loads with dynamic `import()`. */
 import type { Plugin } from "vite";
 
@@ -13,7 +13,7 @@ export const sharedSpecifiers = [
   "@caskade/ui",
 ] as const;
 
-/** The cascade layer plugin styles live in (TECH-PLAN §5). */
+/** The cascade layer plugin styles live in. */
 export const STYLE_LAYER = "cs.plugins";
 
 export interface CaskadePluginOptions {

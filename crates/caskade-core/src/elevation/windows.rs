@@ -4,8 +4,8 @@
 //! is where Caskade downloaded and checked the host program, which it
 //! works out itself and the elevated side checks again.
 //!
-//! The host runs from an administrator-only folder (decided 2026-11-02,
-//! STREAMING-PLAN §8.4): `add-host` copies the staged program and its
+//! The host runs from an administrator-only folder (decided 2026-11-02):
+//! `add-host` copies the staged program and its
 //! configuration into `%ProgramFiles%\Caskade\Streaming\host` ([`target`],
 //! found in HKLM, never in the environment) and checks every copied file
 //! against the manifest Caskade wrote in staging, whose own SHA-256 is the

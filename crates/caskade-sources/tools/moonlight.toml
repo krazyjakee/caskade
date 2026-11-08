@@ -1,4 +1,4 @@
-# The streaming client (STREAMING-PLAN §3.2, §5): moonlight-qt, GPLv3, run
+# The streaming client: moonlight-qt, GPLv3, run
 # as a separate program in portable mode and never shown by name. Asset
 # names were checked against v6.2.0 (tests/tools.rs records them).
 

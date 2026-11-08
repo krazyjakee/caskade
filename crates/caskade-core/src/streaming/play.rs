@@ -1,4 +1,4 @@
-//! Streaming a game from another device (STREAMING-PLAN §5.3, §8.2, #264):
+//! Streaming a game from another device (#264):
 //! [`Streams`] is the launch pipeline's [`StreamLauncher`]. Before the
 //! client starts, Caskade asks the host itself (over HTTPS, as the paired
 //! client) whether it still knows this device, what it plays and which

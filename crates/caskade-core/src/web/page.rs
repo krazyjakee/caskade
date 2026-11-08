@@ -1,5 +1,4 @@
-//! What a game's page says about it: title, description and pictures
-//! (WEB-GAMES-PLAN §4).
+//! What a game's page says about it: title, description and pictures.
 
 use super::GameSize;
 use scraper::{Html, Selector};

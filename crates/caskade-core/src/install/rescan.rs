@@ -1,4 +1,4 @@
-//! The first-exit reference rescan (INSTALLER-PLAN §7, "When"): many games
+//! The first-exit reference rescan: many games
 //! write configs holding their own path on first launch, so a managed
 //! game's relocation evidence is refreshed after its first exit. Moves scan
 //! again; this keeps the verdict shown before a move honest.

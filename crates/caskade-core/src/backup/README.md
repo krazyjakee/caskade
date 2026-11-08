@@ -80,13 +80,13 @@ then renamed to its final name (never over an existing file). On failure
 or cancellation both partial files are removed; after a crash the next
 backup to that folder removes them. Earlier backups are never touched.
 Writing and checking run on the shared resource queue
-(`docs/background-jobs.md`), under a "Backing up" activity.
+(`caskade-jobs`), under a "Backing up" activity.
 
 Tests inject a full disk, a crash before publishing and the free space.
 
 ## Sync state
 
-What devices, library sync and copies keep (`docs/sync.md`), in a backup:
+What devices, library sync and copies keep, in a backup:
 
 - **Left out** (`policy.rs`): `paired_devices`, which holds the grants each
   device presents: devices pair again after a restore. `sync_peers`, what

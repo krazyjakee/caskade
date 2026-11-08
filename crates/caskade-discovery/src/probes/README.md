@@ -1,6 +1,6 @@
 # Shared application probes (#102)
 
-This is the consumer API for EMULATION-PLAN §5. It describes installed applications as data; matching emulator definitions, profiles and imports belongs to the future emulation crate. There is no emulator-detection subsystem in this repository to switch yet. Its Flatpak implementation must call this file-based reader rather than `flatpak list`.
+This is the consumer API for emulator detection. It describes installed applications as data; matching emulator definitions, profiles and imports belongs to the future emulation crate. There is no emulator-detection subsystem in this repository to switch yet. Its Flatpak implementation must call this file-based reader rather than `flatpak list`.
 
 All APIs accept an injected `HostEnv` and `ScanCtx` (use `ScanCtx::new(Cancel::new())` if no scan configuration is needed). They capture no additional environment, run no subprocesses, load no Windows COM objects, execute no applications and write no icons/metadata. `SourceError::Cancelled` is propagated. Malformed sibling metadata warns through ScanCtx; callers should read `take_warnings`. Fixed input and entry caps prevent unbounded inventories.
 

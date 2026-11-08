@@ -1,4 +1,4 @@
-//! Capabilities (#124, TECH-PLAN §7): a backend gets only what its manifest
+//! Capabilities (#124): a backend gets only what its manifest
 //! declares and the user granted. Network access is an allowlist checked on
 //! every `wasi:http` request (redirects are new requests, so they are
 //! checked too), folders are WASI preopens, and library and launch access

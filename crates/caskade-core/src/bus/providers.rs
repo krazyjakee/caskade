@@ -1,4 +1,4 @@
-//! Provider registries (TECH-PLAN §4.3): contracts the core calls.
+//! Provider registries: contracts the core calls.
 //! Built-in providers and WASM plugins (adapted by `caskade-plugin-host`)
 //! register here.
 
@@ -37,7 +37,7 @@ pub struct InstallInput {
 }
 
 /// `install-handler`: teaches the installer an input it doesn't know. The
-/// answer is plan steps (INSTALLER-PLAN §4.4); the installer runs them.
+/// answer is plan steps; the installer runs them.
 #[async_trait]
 pub trait InstallHandler: Send + Sync {
     fn id(&self) -> &str;

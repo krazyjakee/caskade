@@ -32,7 +32,7 @@ class ScopeTests(unittest.TestCase):
             self.assertTrue(all(value in ("true", "false") for value in values.values()))
 
     def test_prose_skips_heavy_jobs(self):
-        self.assertFalse(any(ci.scope(["README.md", "docs/TECH-PLAN.md"]).values()))
+        self.assertFalse(any(ci.scope(["README.md", "docs/PRODUCT-SPEC.md"]).values()))
 
     def test_frontend_change_does_not_select_native_rust_suites(self):
         scope = ci.scope(["apps/desktop/src/views/LibraryView.tsx"])
@@ -55,7 +55,7 @@ class ScopeTests(unittest.TestCase):
     def test_embedded_contracts_and_catalogs_need_rust_checks(self):
         for path in ["packages/ui/anatomy.json", "packages/tokens/tokens/sets/base.json",
                      "locales/fr/core.po", "docs/legal/privacy.md", "wit/caskade-plugin.wit",
-                     "docs/errors.md"]:
+                     "docs/TECH-SPEC.md"]:
             with self.subTest(path=path):
                 self.assertTrue(ci.scope([path])["rust"])
 

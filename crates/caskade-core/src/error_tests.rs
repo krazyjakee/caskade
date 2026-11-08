@@ -228,7 +228,7 @@ fn docs_list_every_code_and_hint() {
         H::Restart,
         H::UpdateCaskade,
     ];
-    let docs = include_str!("../../../docs/errors.md");
+    let docs = include_str!("../../../docs/TECH-SPEC.md");
     let names = codes
         .iter()
         .map(|code| serde_json::to_value(code).unwrap())
@@ -237,7 +237,7 @@ fn docs_list_every_code_and_hint() {
         let name = name.as_str().unwrap().to_owned();
         assert!(
             docs.contains(&format!("`{name}`")),
-            "docs/errors.md lacks `{name}`"
+            "docs/TECH-SPEC.md lacks `{name}`"
         );
         // Every code and hint has a plain sentence or label in the webview.
         if hints

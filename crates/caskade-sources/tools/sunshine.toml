@@ -1,4 +1,4 @@
-# The streaming host (STREAMING-PLAN §3.2, §4): Sunshine, GPLv3, run as a
+# The streaming host: Sunshine, GPLv3, run as a
 # separate program and never shown by name. Asset names were checked against
 # v2026.914.233613 (tests/tools.rs records them). No macOS host in the first
 # version (§1).

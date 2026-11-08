@@ -1,4 +1,4 @@
-//! One-click emulator installs (EMULATOR-SETUP-PLAN §7) over
+//! One-click emulator installs over
 //! `caskade_core::emulation::EmulatorSetup`.
 
 use crate::error::{CommandError, report};

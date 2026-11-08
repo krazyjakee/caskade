@@ -1,4 +1,4 @@
-//! Flash games (WEB-GAMES-PLAN §6): a `.swf` plays in Ruffle's web build,
+//! Flash games: a `.swf` plays in Ruffle's web build,
 //! on a page of the game window's own that fills the window. The page is
 //! loaded at the movie's address, so the movie comes from its own origin
 //! and its saves stay there.

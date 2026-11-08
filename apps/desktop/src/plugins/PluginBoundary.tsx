@@ -9,7 +9,7 @@ interface Props {
   children: ReactNode;
 }
 
-/** Wraps every contributed component (TECH-PLAN §4.4): a plugin that throws
+/** Wraps every contributed component: a plugin that throws
  * while rendering shows this placeholder and the shell keeps working. Focus
  * that was inside the crashed part lands on the placeholder, so a pad can
  * move on from there (#152). */

@@ -7,8 +7,8 @@
 //! launch's context (release, action, ROM, install folder, the observed
 //! process), which plugin payloads and frontend events never carry, and
 //! they must run once per lifecycle across restarts, which the session's
-//! recovery state records. Their order relative to plugins is fixed: see
-//! `docs/lifecycle-scripts.md`.
+//! recovery state records. Their order relative to plugins is fixed
+//! (`docs/TECH-SPEC.md`, the launch pipeline).
 //!
 //! Values reach a script as data: as environment variables, and in a
 //! direct command as `{Placeholder}`s expanded inside one argument each.

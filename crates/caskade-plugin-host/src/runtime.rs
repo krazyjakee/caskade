@@ -1,4 +1,4 @@
-//! The wasmtime side (TECH-PLAN §4.1, §7): one engine for every plugin, and
+//! The wasmtime side: one engine for every plugin, and
 //! per instance a memory cap and a CPU time box on every call. WASI is
 //! linked with nothing granted: no preopened folders, no network, no
 //! environment, no inherited stdio.

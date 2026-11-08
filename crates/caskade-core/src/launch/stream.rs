@@ -1,4 +1,4 @@
-//! Streamed games (STREAMING-PLAN §8.2–8.3, #264): a release another device
+//! Streamed games (#264): a release another device
 //! offers plays through Caskade's streaming client, which a
 //! [`StreamLauncher`] gets ready and checks first.
 //!

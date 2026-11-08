@@ -1,4 +1,4 @@
-//! The capture bar (WEB-GAMES-PLAN §6): one line above the game while
+//! The capture bar: one line above the game while
 //! Caskade saves it, in GTK, outside the page.
 
 use gtk::prelude::*;

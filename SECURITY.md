@@ -64,10 +64,9 @@ it are welcome here too.
 
 ## Audits
 
-- **October 2026:** [docs/security/audit-2026-10.md](docs/security/audit-2026-10.md).
-  It records the scope, method and findings, and their status.
-
-The October 2026 audit left some risks open:
+An application security audit ran in October 2026. Its report is kept in
+the repository's history (`docs/security/audit-2026-10.md`, removed from the
+tree in November 2026). It left some risks open:
 
 - Several low and medium findings are still being fixed and tracked. Their
   details are withheld until the fixes ship.

@@ -1,4 +1,4 @@
-//! Game streaming between a household's devices (`docs/STREAMING-PLAN.md`).
+//! Game streaming between a household's devices.
 //! Caskade installs, configures and drives two separate GPLv3 programs,
 //! never linked or patched, and never shown by name: Sunshine on the
 //! device that runs games (the host, [`host`]) and Moonlight on the device

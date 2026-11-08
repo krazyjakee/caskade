@@ -436,7 +436,7 @@ fn user_definition_overrides_preserve_the_shipped_catalogue() {
 }
 
 /// The files each GitHub source picks, as released when the source was
-/// written (docs/research/emulator-sources.md). A rename upstream fails here.
+/// written (`emulation/SOURCES.md`). A rename upstream fails here.
 #[test]
 fn install_sources_match_released_files() {
     use caskade_core::emulation::InstallSource;

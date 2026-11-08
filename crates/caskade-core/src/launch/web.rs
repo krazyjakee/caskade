@@ -1,4 +1,4 @@
-//! Web games' launches (WEB-GAMES-PLAN §3): Caskade's own executable in
+//! Web games' launches: Caskade's own executable in
 //! game-window mode, one process per game, so sessions, Stop and recovery
 //! work as for any other game.
 
@@ -21,7 +21,7 @@ pub const WEB_GAME_ARG: &str = "--web-game";
 pub const DATA_DIR_ARG: &str = "--data-dir";
 /// Start fullscreen.
 pub const FULLSCREEN_ARG: &str = "--fullscreen";
-/// Play the offline bundle in this folder (WEB-GAMES-PLAN §6).
+/// Play the offline bundle in this folder.
 pub const BUNDLE_ARG: &str = "--bundle";
 /// Save the game into the `--bundle` folder: the guided capture.
 pub const CAPTURE_ARG: &str = "--capture";
@@ -87,7 +87,7 @@ impl WebPlayer {
     }
 
     /// Outside console mode the window opens over Caskade's, where
-    /// `placement` says Caskade's is (WEB-GAMES-PLAN §3).
+    /// `placement` says Caskade's is.
     pub fn with_placement(
         mut self,
         placement: impl Fn() -> Option<WindowPlacement> + Send + Sync + 'static,

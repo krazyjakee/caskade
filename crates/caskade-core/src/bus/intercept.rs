@@ -1,5 +1,5 @@
-//! Interceptors: an ordered chain over one payload type per hook point
-//! (TECH-PLAN §4.3). Each step may rewrite the payload or cancel; a step
+//! Interceptors: an ordered chain over one payload type per hook point.
+//! Each step may rewrite the payload or cancel; a step
 //! that fails, panics or runs past its time box is skipped and logged, and
 //! the chain continues with the payload it had.
 

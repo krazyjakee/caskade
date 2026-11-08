@@ -1,4 +1,4 @@
-//! Web games (WEB-GAMES-PLAN): Add web game on the Library's Web tab, and
+//! Web games: Add web game on the Library's Web tab, and
 //! keeping one for offline play.
 use crate::error::{CommandError, report};
 use caskade_core::web::WebGames;
@@ -13,7 +13,7 @@ pub async fn add_web_game(web: State<'_, WebGames>, url: String) -> Result<Strin
 }
 
 /// Opens the guided capture that keeps `game_id`'s web game in `root_id`
-/// for offline play (WEB-GAMES-PLAN §6). Returns once the window is open;
+/// for offline play. Returns once the window is open;
 /// the library changes when the player saves it.
 #[tauri::command]
 #[specta::specta]

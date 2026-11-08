@@ -1,5 +1,5 @@
 /*
- * Layer order is part of the theming contract (docs/TECH-PLAN.md §5.2):
+ * Layer order is part of the theming contract:
  * themes beat component styles, and user CSS beats themes.
  * Tailwind is imported into our own layers rather than its defaults.
  */

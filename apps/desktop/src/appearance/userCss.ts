@@ -1,5 +1,5 @@
 /** The user's CSS (#142): one `<style>` in `@layer cs.user`, which beats
- * every theme and component style without `!important` (TECH-PLAN §5.2).
+ * every theme and component style without `!important`.
  * Like themes, it can't load anything from other origins: a remote
  * `@import` or `url()` refuses the whole sheet, with a message. */
 

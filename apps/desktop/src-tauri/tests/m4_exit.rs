@@ -1,4 +1,4 @@
-//! M4 exit (#134, TECH-PLAN §8): the three example plugins installed from
+//! M4 exit (#134): the three example plugins installed from
 //! their folders work together, and a deliberately broken one (`crashy`)
 //! doesn't affect the app: its calls fail alone, its launch.before step is
 //! skipped, the circuit breaker turns it off with a notice, and launches,

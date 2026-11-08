@@ -1,4 +1,4 @@
-//! BIOS files from somewhere the user keeps them (EMULATOR-SETUP-PLAN §5):
+//! BIOS files from somewhere the user keeps them:
 //! after an install, and from the Platforms section, the platform's
 //! missing BIOS files are fetched into the folder its emulator reads.
 

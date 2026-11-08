@@ -1,8 +1,8 @@
 # Caskade plugins
 
 How a plugin is laid out, what `plugin.json` declares, and the backend
-contract. The design and its reasons are in [TECH-PLAN §4](../TECH-PLAN.md#4-plugin-system)
-and the security model in §7. This page tracks what is implemented.
+contract. How the plugin host fits into Caskade, and its security model,
+are in the [tech spec](../TECH-SPEC.md).
 
 ## Folder layout
 
@@ -161,7 +161,7 @@ A plugin can show in the user's language. It ships gettext catalogs in
 `locales/<lang>.po`, named by the language's BCP 47 tag (`sv.po`,
 `pt-BR.po`), in a domain named after the plugin's id. The English text is
 the message id, as in Caskade itself
-([`docs/localization.md`](../localization.md)); `msgctxt` tells apart the
+([tech spec, Localization](../TECH-SPEC.md#localization)); `msgctxt` tells apart the
 same English with different meanings, and `{name}` placeholders are
 filled in after the lookup. The language is Caskade's: the core resolves
 the Language setting, and `pt-BR` falls back to `pt`. Anything missing,
@@ -264,9 +264,8 @@ backends are not supported in 0.1**: write the UI half in TypeScript and
 the backend half in Rust. A jco-built TypeScript backend can pass the host's
 functional checks, but it can't make HTTP calls from the 0.1 exports (they
 are synchronous, and `fetch()` never settles). It is also about 70× larger,
-about 30× slower per call and needs 12 MiB per instance. The measurements
-and what would change this are in
-[`docs/research/js-backend-spike.md`](../research/js-backend-spike.md) (#132).
+about 30× slower per call and needs 12 MiB per instance. The full measurements
+are in archived Gitea issue 132.
 
 ### Rust backend: `caskade-plugin-sdk`
 

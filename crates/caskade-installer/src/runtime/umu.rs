@@ -1,4 +1,4 @@
-//! umu-launcher bootstrap (INSTALLER-PLAN §5). When no `umu-run` is on the
+//! umu-launcher bootstrap. When no `umu-run` is on the
 //! host, the pinned release zipapp is installed user-locally into the app
 //! data dir. umu downloads its Steam Runtime and UMU-Proton itself on first
 //! use; callers show that first run as its own job.

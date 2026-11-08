@@ -11,7 +11,7 @@ import { useActivityStorage } from "../../activity/ActivityProvider";
 const overlay =
   "fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm";
 
-/** The Web tab's Add web game (WEB-GAMES-PLAN §4): a page address, and the
+/** The Web tab's Add web game: a page address, and the
  * game is in the library. With Play offline, Caskade then asks where to
  * keep it and opens the guided capture (§6). */
 export function AddWebGame() {

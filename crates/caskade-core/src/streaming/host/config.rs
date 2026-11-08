@@ -1,4 +1,4 @@
-//! The host's configuration (STREAMING-PLAN §4.1), written whole before
+//! The host's configuration, written whole before
 //! every start: Caskade owns it. Sunshine keeps its configuration, apps,
 //! state, credentials and log in one folder ([`HostFiles`]): on Linux
 //! `$CONFIGURATION_DIRECTORY/sunshine` (Caskade sets the variable), on

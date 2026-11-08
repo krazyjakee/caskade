@@ -1,4 +1,4 @@
-//! Managed programs (STREAMING-PLAN §3.1): third-party programs Caskade
+//! Managed programs: third-party programs Caskade
 //! downloads, installs, finds, keeps up to date and removes on the user's
 //! behalf. Emulator setup (`emulation::setup`) and helper tools (the
 //! streaming host and client, [`ManagedTools`]) share these steps:

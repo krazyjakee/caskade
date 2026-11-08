@@ -1,4 +1,4 @@
-//! The installer's hooks (#55, INSTALLER-PLAN §10): its interceptor points,
+//! The installer's hooks (#55): its interceptor points,
 //! and the bus's install handlers and URL resolvers adapted to the
 //! installer's own traits.
 

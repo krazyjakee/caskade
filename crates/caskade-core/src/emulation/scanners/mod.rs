@@ -1,4 +1,4 @@
-//! ROM scanners (EMULATION-PLAN §6, §6.1, §7.4): saved folders whose ROMs
+//! ROM scanners: saved folders whose ROMs
 //! become library games. Automatic scans (a library update, "Scan all",
 //! the installer's hand-off) import straight away; a manual scan stops at a
 //! review list, and the choices made there are stored as exclusions and
@@ -241,7 +241,7 @@ impl ScannerService {
         }
     }
 
-    /// Exclusions every scanner applies (EMULATION-PLAN §6.3), in
+    /// Exclusions every scanner applies, in
     /// Playnite's syntax.
     pub async fn global_exclusions(&self) -> Result<Vec<String>> {
         match self.store.get_setting(GLOBAL_EXCLUSIONS).await? {

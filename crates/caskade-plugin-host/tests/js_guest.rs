@@ -1,6 +1,7 @@
-//! #132 spike: a TypeScript backend built with `jco componentize`
-//! (docs/research/js-backend-spike/) against the same checks as the Rust
-//! test guest, plus the measurements in docs/research/js-backend-spike.md.
+//! #132 spike: a TypeScript backend built with `jco componentize` against
+//! the same checks as the Rust test guest. The spike's guest and
+//! measurements were in `docs/research/js-backend-spike/`, removed from the
+//! tree in November 2026; git history keeps them.
 //!
 //! Opt-in, because building the JS guest needs Node and jco:
 //! `CASKADE_JS_GUEST=/path/plugin.wasm cargo test -p caskade-plugin-host --test it js_guest:: -- --ignored --nocapture`

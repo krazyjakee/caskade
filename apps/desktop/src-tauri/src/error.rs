@@ -2,7 +2,7 @@
 //! a sentence for people, redacted details and recovery hints, instead of a
 //! bare string. Write `Result<T, CommandError>` and `.map_err(report)` in new
 //! commands; `?` also takes a `caskade_core::Error` or a `String`.
-//! See `docs/errors.md`.
+//! See `docs/TECH-SPEC.md`, Errors and recovery.
 
 pub use caskade_core::error::{ErrorCode, ErrorReport as CommandError, RecoveryHint};
 
