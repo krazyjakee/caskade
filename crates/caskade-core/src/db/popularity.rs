@@ -20,7 +20,7 @@ impl LibraryStore {
         response: &PopularityResponse,
         at: i64,
     ) -> Result<()> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         for score in &response.scores {
             sqlx::query("INSERT INTO igdb_popularity(igdb_id,popularity_type,value,calculated_at,fetched_at_ms) VALUES(?,?,?,?,?) ON CONFLICT(igdb_id) DO UPDATE SET popularity_type=excluded.popularity_type,value=excluded.value,calculated_at=excluded.calculated_at,fetched_at_ms=excluded.fetched_at_ms")
                 .bind(score.game_id as i64).bind(score.popularity_type as i64).bind(score.value)

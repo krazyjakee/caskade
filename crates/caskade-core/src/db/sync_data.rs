@@ -619,7 +619,7 @@ impl LibraryStore {
         if let Some(year) = identity.get("year").and_then(Value::as_i64) {
             game.release_date = Some(format!("{year:04}-01-01"));
         }
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         super::notifications::not_an_addition(&mut tx, &game.id).await?;
         write_game(&mut tx, &game, None).await?;
         tx.commit().await?;

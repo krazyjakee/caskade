@@ -90,7 +90,7 @@ impl LibraryStore {
         pin_hash: Option<&str>,
     ) -> Result<()> {
         v::id(&account.id)?;
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         sqlx::query("INSERT INTO accounts(id,name,avatar,role,pin_hash,permissions_json,max_age,unrated_needs_pin,created_at_ms,updated_at_ms) VALUES(?,?,?,?,?,?,?,?,?,?)")
             .bind(&account.id)
             .bind(&account.name)
@@ -110,7 +110,7 @@ impl LibraryStore {
     }
     /// Writes an account's name, avatar, role, permissions and age limit.
     pub(crate) async fn update_account(&self, account: &Account) -> Result<()> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let updated = sqlx::query("UPDATE accounts SET name=?,avatar=?,role=?,permissions_json=?,max_age=?,unrated_needs_pin=?,updated_at_ms=? WHERE id=?")
             .bind(&account.name)
             .bind(&account.avatar)
@@ -136,7 +136,7 @@ impl LibraryStore {
         pin_hash: Option<&str>,
         now: i64,
     ) -> Result<()> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let updated = sqlx::query("UPDATE accounts SET pin_hash=?,pin_failures=0,pin_lockouts=0,pin_locked_until_ms=0,updated_at_ms=? WHERE id=?")
             .bind(pin_hash)
             .bind(now)
@@ -153,7 +153,7 @@ impl LibraryStore {
     /// Deletes an account and, through the reference, what it owns: its
     /// collections and their members, in the same transaction.
     pub(crate) async fn delete_account(&self, id: &str) -> Result<bool> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let deleted = sqlx::query("DELETE FROM accounts WHERE id=?")
             .bind(id)
             .execute(&mut *tx)

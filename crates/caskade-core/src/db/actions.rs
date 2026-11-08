@@ -37,7 +37,7 @@ impl LibraryStore {
     /// Adds the action, last, or replaces it in its place. An action can't
     /// move to another release.
     pub async fn save_game_action(&self, action: &GameAction) -> Result<GameAction> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let entry = super::games::load_entry(&mut tx, &action.entry_id).await?;
         let action = action.normalized(matches!(
             entry.location,
@@ -102,7 +102,7 @@ impl LibraryStore {
     /// Removes the action; a release whose default it was plays its
     /// built-in action again.
     pub async fn delete_game_action(&self, id: &str) -> Result<bool> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let entry = sqlx::query_scalar::<_, String>("SELECT entry_id FROM game_actions WHERE id=?")
             .bind(id)
             .fetch_optional(&mut *tx)
@@ -129,7 +129,7 @@ impl LibraryStore {
     /// Puts `entry_id`'s actions in the order of `ids`, which must name each
     /// of them once.
     pub async fn order_game_actions(&self, entry_id: &str, ids: &[String]) -> Result<()> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let mut current: Vec<String> =
             sqlx::query_scalar("SELECT id FROM game_actions WHERE entry_id=?")
                 .bind(entry_id)

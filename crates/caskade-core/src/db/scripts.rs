@@ -77,7 +77,7 @@ impl LibraryStore {
     pub async fn save_lifecycle_script(&self, script: &LifecycleScript) -> Result<LifecycleScript> {
         let script = script.normalized()?;
         let (kind, profile, game) = columns(&script.scope);
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let existing =
             sqlx::query_scalar::<_, String>("SELECT record_json FROM lifecycle_scripts WHERE id=?")
                 .bind(&script.id)
@@ -156,7 +156,7 @@ impl LibraryStore {
     /// of them once.
     pub async fn order_lifecycle_scripts(&self, scope: &ScriptScope, ids: &[String]) -> Result<()> {
         let (kind, profile, game) = columns(scope);
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let mut current: Vec<String> = sqlx::query_scalar(
             "SELECT id FROM lifecycle_scripts WHERE scope=? AND profile_id IS ? AND game_id IS ?",
         )

@@ -121,7 +121,7 @@ impl LibraryStore {
 
     /// Forgets a stopped share and its recipients.
     pub async fn delete_share(&self, id: &str) -> Result<()> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         sqlx::query("DELETE FROM share_recipients WHERE share_id=?")
             .bind(id)
             .execute(&mut *tx)

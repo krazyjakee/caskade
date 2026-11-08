@@ -174,7 +174,7 @@ impl LibraryStore {
         artwork_id: &str,
     ) -> Result<()> {
         editable(kind)?;
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         exists(&mut tx, game_id).await?;
         let image: Artwork = decode(
             sqlx::query_scalar::<_, String>(
@@ -206,7 +206,7 @@ impl LibraryStore {
     ) -> Result<Artwork> {
         editable(kind)?;
         let record = image.record(game_id, kind, USER_ARTWORK_SOURCE);
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         exists(&mut tx, game_id).await?;
         take_over(&mut tx, game_id, kind, Some(&record)).await?;
         tx.commit().await?;
@@ -242,7 +242,7 @@ impl LibraryStore {
     /// Shows no `kind` artwork for the game, whatever refreshes bring.
     pub async fn remove_artwork(&self, game_id: &str, kind: ArtworkKind) -> Result<()> {
         editable(kind)?;
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         exists(&mut tx, game_id).await?;
         take_over(&mut tx, game_id, kind, None).await?;
         tx.commit().await?;
@@ -253,7 +253,7 @@ impl LibraryStore {
     /// records go (their cache bytes stay for others).
     pub async fn reset_artwork(&self, game_id: &str, kind: ArtworkKind) -> Result<()> {
         editable(kind)?;
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         exists(&mut tx, game_id).await?;
         sqlx::query("DELETE FROM artwork_choices WHERE game_id=? AND kind=?")
             .bind(game_id)

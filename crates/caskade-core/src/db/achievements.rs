@@ -104,7 +104,7 @@ impl LibraryStore {
         states: &BTreeMap<String, AchievementState>,
         complete: bool,
     ) -> Result<Applied> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let known: BTreeMap<String, (String, String, i64)> =
             sqlx::query_as::<_, (String, String, String, i64)>(
                 "SELECT achievement_id,definition_json,state_json,position FROM achievement_items \

@@ -63,6 +63,8 @@ mod sync_carried;
 mod sync_copies;
 mod sync_data;
 mod sync_log;
+#[cfg(test)]
+mod write_lock_tests;
 mod writes;
 pub use sync_accounts::is_marker as is_stand_in_marker;
 pub use sync_artwork::SyncedArtwork;
@@ -191,6 +193,16 @@ impl LibraryStore {
             writes,
             titles,
         })
+    }
+    /// A transaction that writes: it takes the write lock at `BEGIN`. A
+    /// deferred one that reads first can't wait for the lock when it comes
+    /// to write while another connection is writing (SQLite never waits
+    /// while it holds a read snapshot), so it failed at once with "database
+    /// is locked" whenever an import or a sync wrote at the same time.
+    /// Waiting at `BEGIN`, the busy timeout applies. Transactions that only
+    /// read keep `pool.begin()`.
+    pub(super) async fn begin_write(&self) -> Result<sqlx::Transaction<'static, sqlx::Sqlite>> {
+        Ok(self.pool.begin_with("BEGIN IMMEDIATE").await?)
     }
     /// The library, waited for as `Opening::PATIENT` allows.
     pub async fn open_default(paths: &AppPaths) -> Result<Self> {

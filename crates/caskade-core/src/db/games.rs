@@ -47,14 +47,14 @@ impl LibraryStore {
     /// Saves a game from an automatic source, keeping the fields the user
     /// set (#171); the game as saved.
     pub async fn upsert_game(&self, game: &Game) -> Result<Game> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let game = save_game(&mut tx, game).await?;
         tx.commit().await?;
         Ok(game)
     }
     /// A single transaction for imports, including the search-index triggers.
     pub async fn upsert_games(&self, games: &[Game]) -> Result<()> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         for game in games {
             save_game(&mut tx, game).await?;
         }
@@ -72,7 +72,7 @@ impl LibraryStore {
     /// Hides a game from every library view, or shows it again. The game
     /// keeps its entries, so re-imports find it and it stays hidden.
     pub async fn set_game_hidden(&self, id: &str, hidden: bool) -> Result<Game> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let mut game = load_game(&mut tx, id).await?;
         game.hidden = hidden;
         save_game(&mut tx, &game).await?;
@@ -82,7 +82,7 @@ impl LibraryStore {
     /// Marks a game as a favourite, or not. Re-imports keep the mark, and a
     /// merge keeps it when either game had it.
     pub async fn set_game_favorite(&self, id: &str, favorite: bool) -> Result<Game> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let mut game = load_game(&mut tx, id).await?;
         game.favorite = favorite;
         save_game(&mut tx, &game).await?;
@@ -92,7 +92,7 @@ impl LibraryStore {
     /// Chooses the entry the game's Play starts, or goes back to the first
     /// that can launch (`None`).
     pub async fn set_game_default_entry(&self, id: &str, entry: Option<&str>) -> Result<Game> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let mut game = load_game(&mut tx, id).await?;
         if let Some(entry) = entry {
             let owner: Option<String> =
@@ -123,7 +123,7 @@ impl LibraryStore {
     }
     pub async fn upsert_entry(&self, entry: &GameEntry) -> Result<GameEntry> {
         let mut entry = entry.normalized()?;
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         if let Some((id, game_id)) = sqlx::query_as::<_, (String, String)>(
             "SELECT id,game_id FROM game_entries WHERE source_id=? AND external_id=?",
         )
@@ -258,7 +258,7 @@ impl LibraryStore {
         root_id: &str,
         relative_dir: &std::path::Path,
     ) -> Result<GameEntry> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let mut entry = load_entry(&mut tx, entry_id).await?;
         if !matches!(entry.location, Some(InstallLocation::Managed { .. })) {
             return Err(Error::Invalid(crate::tr!("entry is not a managed install")));
@@ -289,7 +289,7 @@ impl LibraryStore {
         if keep == remove {
             return self.game(keep).await?.ok_or_else(|| missing("game", keep));
         }
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let target = merge_in(&mut tx, keep, remove).await?;
         tx.commit().await?;
         Ok(target)

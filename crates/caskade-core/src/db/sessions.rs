@@ -46,7 +46,7 @@ impl LibraryStore {
         if record.ended_at_ms.is_none() {
             return Err(Error::Invalid("use start_session for open sessions".into()));
         }
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         if let Some(open) =
             sqlx::query_scalar::<_, Option<i64>>("SELECT ended_at_ms FROM play_sessions WHERE id=?")
                 .bind(&record.id)

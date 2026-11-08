@@ -322,7 +322,7 @@ impl LibraryStore {
         base: Option<&Game>,
         apply: bool,
     ) -> Result<Option<(GameEditOutcome, Game)>> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let Some((shown, mut overrides)) = load_layers(&mut tx, id).await? else {
             return Ok(None);
         };
@@ -517,7 +517,7 @@ impl LibraryStore {
         id: &str,
         update: impl FnOnce(&mut Game) -> R,
     ) -> Result<Option<(R, bool)>> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let Some((shown, mut overrides)) = load_layers(&mut tx, id).await? else {
             return Ok(None);
         };

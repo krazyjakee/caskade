@@ -77,7 +77,7 @@ impl LibraryStore {
         device: Option<&str>,
     ) -> Result<StreamSync> {
         let source = stream_source(host_id);
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let known: Vec<(String, String, String)> =
             sqlx::query_as("SELECT id,game_id,external_id FROM game_entries WHERE source_id=?")
                 .bind(source.as_str())

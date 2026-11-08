@@ -147,7 +147,7 @@ impl LibraryStore {
         target: &str,
         value: Option<Value>,
     ) -> Result<()> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         set_field(
             &mut tx,
             (&change.entity, target, &change.field),
@@ -204,7 +204,7 @@ impl LibraryStore {
         if changes.is_empty() {
             return Ok(());
         }
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         for change in changes {
             sqlx::query(
                 "INSERT INTO sync_changes(origin,wall,counter,entity,key,field,value_json,target,applied) \
@@ -238,7 +238,7 @@ impl LibraryStore {
     /// Takes in changes from another device, unapplied. Ones already here
     /// are skipped. Returns how many were new.
     pub async fn sync_import(&self, changes: &[Change]) -> Result<usize> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let mut added = 0;
         for change in changes {
             added += sqlx::query(
@@ -504,7 +504,7 @@ impl LibraryStore {
                 drop.push(stamp);
             }
         }
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let mut removed = 0;
         for stamp in &drop {
             removed +=

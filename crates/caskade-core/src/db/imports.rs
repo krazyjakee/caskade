@@ -93,7 +93,7 @@ impl LibraryStore {
                 )));
             }
         }
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let mut previous = Vec::new();
         let mut game_ids = Vec::new();
         for entry in &entries {
@@ -249,7 +249,7 @@ impl LibraryStore {
     /// move to another entry of its game first; a game with nothing else
     /// left goes with it. Caskade's own installs and running games stay.
     pub async fn remove_source_entries(&self, source: &str) -> Result<Vec<SourceRemoval>> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let entries = sqlx::query_scalar::<_, String>(
             "SELECT record_json FROM game_entries WHERE source_id=? ORDER BY external_id,id",
         )

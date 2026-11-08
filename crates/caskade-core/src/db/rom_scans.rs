@@ -68,7 +68,7 @@ impl LibraryStore {
         scanner_id: &str,
         overrides: &[(String, RomOverride)],
     ) -> Result<()> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         for (path, choice) in overrides {
             v::text(path, "ROM path", false, 4096)?;
             if choice.is_empty() {

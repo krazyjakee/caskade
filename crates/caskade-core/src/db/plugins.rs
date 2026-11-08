@@ -77,7 +77,7 @@ impl LibraryStore {
 
     /// Forgets a plugin: its state and everything it stored.
     pub async fn delete_plugin_state(&self, id: &str) -> Result<bool> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         sqlx::query("DELETE FROM plugin_kv WHERE plugin_id=?")
             .bind(id)
             .execute(&mut *tx)
@@ -117,7 +117,7 @@ impl LibraryStore {
                 max = PLUGIN_VALUE_MAX
             )));
         }
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let others: i64 = sqlx::query_scalar(
             "SELECT coalesce(sum(length(key)+length(value)),0) FROM plugin_kv WHERE plugin_id=? AND key<>?",
         )

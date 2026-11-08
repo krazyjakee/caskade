@@ -89,7 +89,7 @@ impl LibraryStore {
         platforms: &[String],
         left: &[String],
     ) -> Result<Game> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let game_id: String = sqlx::query_scalar("SELECT game_id FROM game_entries WHERE id=?")
             .bind(entry_id)
             .fetch_optional(&mut *tx)

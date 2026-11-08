@@ -200,9 +200,12 @@ impl RommService {
                     tracing::warn!(server = server_id, %error, "RomM cache limit not enforced");
                 }
             }
-            // Its games were marked when it went offline.
+            // Its games were marked when it went offline. A failure here
+            // leaves the sync's own outcome to report.
             Err(RommError::Unreachable(_)) if !was_offline => {
-                self.mark_unavailable(&config).await?
+                if let Err(error) = self.mark_unavailable(&config).await {
+                    tracing::warn!(server = server_id, %error, "RomM games not marked unavailable");
+                }
             }
             Err(_) => {}
         }

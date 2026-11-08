@@ -9,7 +9,7 @@ use std::collections::BTreeMap;
 impl LibraryStore {
     pub async fn upsert_root(&self, root: &StorageRoot) -> Result<StorageRoot> {
         root.validate()?;
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         if root.is_default {
             sqlx::query("UPDATE storage_roots SET is_default=0,record_json=json_set(record_json,'$.isDefault',json('false')) WHERE is_default=1 AND id<>?").bind(&root.id).execute(&mut *tx).await?;
         }
@@ -103,7 +103,7 @@ impl LibraryStore {
         if collection.game_ids.len() > MEMBER_LIMIT {
             return Err(Error::Invalid(crate::tr!("collection member limit")));
         }
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let written = sqlx::query("INSERT INTO collections(id,account_id,name,description,pinned,kind,query_json,updated_at_ms) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,description=excluded.description,pinned=excluded.pinned,kind=excluded.kind,query_json=excluded.query_json,updated_at_ms=excluded.updated_at_ms WHERE collections.account_id=excluded.account_id").bind(&collection.id).bind(account).bind(&collection.name).bind(&collection.description).bind(collection.pinned).bind(if query.is_some(){"smart"}else{"manual"}).bind(query).bind(collection.updated_at_ms).execute(&mut *tx).await?;
         if written.rows_affected() == 0 {
             return Err(super::missing("collection", &collection.id));
@@ -133,7 +133,7 @@ impl LibraryStore {
         let query = smart_query(&save.kind)?;
         let kind = if query.is_some() { "smart" } else { "manual" };
         let now = crate::now_ms();
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let id = match &save.id {
             Some(id) => {
                 let updated = sqlx::query("UPDATE collections SET name=?,description=?,kind=?,query_json=?,updated_at_ms=? WHERE id=? AND account_id=?").bind(&save.name).bind(&save.description).bind(kind).bind(&query).bind(now).bind(id).bind(account).execute(&mut *tx).await?;
@@ -183,7 +183,7 @@ impl LibraryStore {
         if game_ids.len() > MEMBER_LIMIT {
             return Err(Error::Invalid(crate::tr!("collection member limit")));
         }
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         manual_collection(&mut tx, account, id).await?;
         let mut next: i64 = sqlx::query_scalar(
             "SELECT coalesce(max(position)+1,0) FROM collection_members WHERE collection_id=?",
@@ -213,7 +213,7 @@ impl LibraryStore {
         id: &str,
         game_ids: &[String],
     ) -> Result<()> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         manual_collection(&mut tx, account, id).await?;
         let mut removed = false;
         for game in game_ids {

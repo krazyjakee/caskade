@@ -28,7 +28,7 @@ impl LibraryStore {
         emulator.validate(None)?;
         let ids: Vec<&str> = emulator.profiles.iter().map(EmulatorProfile::id).collect();
         let ids_json = v::json(&ids)?;
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let used: Option<String> = sqlx::query_scalar(
             "SELECT s.name FROM rom_scanners s WHERE s.emulator_id=? AND s.profile_id NOT IN (SELECT value FROM json_each(?)) LIMIT 1",
         )
@@ -134,7 +134,7 @@ impl LibraryStore {
     /// Deletes an emulator and its profiles; platforms using one of them
     /// lose their default. Refused while a ROM scanner uses the emulator.
     pub async fn delete_emulator(&self, id: &str) -> Result<bool> {
-        let mut tx = self.pool.begin().await?;
+        let mut tx = self.begin_write().await?;
         let used: Option<String> =
             sqlx::query_scalar("SELECT name FROM rom_scanners WHERE emulator_id=? LIMIT 1")
                 .bind(id)
