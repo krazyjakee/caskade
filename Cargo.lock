@@ -1174,6 +1174,7 @@ dependencies = [
  "insta",
  "jsonschema",
  "keyring",
+ "log",
  "md-5 0.10.6",
  "minisign",
  "minisign-verify",

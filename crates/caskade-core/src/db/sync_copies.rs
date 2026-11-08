@@ -239,6 +239,14 @@ impl LibraryStore {
 
 /// SQL: whether game `g` has another device's copy that can come here (for
 /// Ready to Install): copyable, and a build this system runs.
+///
+/// The announced copies that qualify are read once per statement, as
+/// `(device, entry)` pairs from their `device|game|entry` keys (the game
+/// part may name a game merged away since), and each peer entry is looked
+/// up among them. Matching each entry's key with `LIKE` instead compared
+/// every peer entry with every announced copy for every game: with a few
+/// thousand copies, Library's counts took seconds per query and held the
+/// library's connections long enough that everything else timed out (#77).
 pub fn copyable_here_sql() -> String {
     // A Windows build runs on Linux through Proton.
     let systems = match this_os() {
@@ -246,10 +254,13 @@ pub fn copyable_here_sql() -> String {
         "windows" => "'windows'",
         _ => "'mac'",
     };
+    // The key after its device: `game|entry`.
+    let rest = "substr(pf.key,instr(pf.key,'|')+1)";
     format!(
-        "EXISTS(SELECT 1 FROM game_entries pe JOIN sync_fields pf ON pf.entity='copy' AND pf.field='' \
-         AND pf.key LIKE substr(pe.source_id,6)||'|%|'||pe.external_id \
-         WHERE pe.game_id=g.id AND pe.source_id LIKE 'peer:%' \
-         AND pf.value_json->>'$.copyable' AND pf.value_json->>'$.os' IN ({systems}))"
+        "EXISTS(SELECT 1 FROM game_entries pe WHERE pe.game_id=g.id AND pe.source_id LIKE 'peer:%' \
+         AND (substr(pe.source_id,6),pe.external_id) IN (\
+         SELECT substr(pf.key,1,instr(pf.key,'|')-1),substr({rest},instr({rest},'|')+1) \
+         FROM sync_fields pf WHERE pf.entity='copy' AND pf.field='' \
+         AND pf.value_json->>'$.copyable' AND pf.value_json->>'$.os' IN ({systems})))"
     )
 }

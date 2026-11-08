@@ -136,6 +136,9 @@ pub enum ErrorCode {
     StorageOffline,
     /// A file or the database is in use; usually passes.
     Busy,
+    /// Caskade's own work kept every library connection busy for too long
+    /// (a pool timeout): nothing outside Caskade holds it. Usually passes.
+    Overloaded,
     /// A server can't be reached or didn't answer in time.
     Offline,
     /// A server answered with an error or something unusable.
@@ -204,7 +207,10 @@ impl ErrorReport {
             summary: capitalize(&sanitize(&summary.into())),
             detail: None,
             hints: hints(code),
-            transient: matches!(code, ErrorCode::Offline | ErrorCode::Busy),
+            transient: matches!(
+                code,
+                ErrorCode::Offline | ErrorCode::Busy | ErrorCode::Overloaded
+            ),
             reference: reference(),
         }
     }
@@ -560,7 +566,9 @@ fn sql_error(error: &sqlx::Error) -> Option<Found> {
     use ErrorCode::*;
     match error {
         sqlx::Error::Io(io) => io_error(io),
-        sqlx::Error::PoolTimedOut => found(Busy, Summary::Plain),
+        // Every connection was Caskade's own and stayed busy: not another
+        // program's lock (#77).
+        sqlx::Error::PoolTimedOut => found(Overloaded, Summary::Plain),
         sqlx::Error::Database(db) => {
             // SQLite's primary result codes.
             let code = db
@@ -596,6 +604,9 @@ fn plain(code: ErrorCode) -> String {
         DiskFull => crate::tr!("There isn't enough free space."),
         StorageOffline => crate::tr!("A drive or network location Caskade needs can't be reached."),
         Busy => crate::tr!("A file or the library is in use. Caskade will manage once it's free."),
+        Overloaded => crate::tr!(
+            "Caskade's own work is keeping the library busy. It catches up by itself, so try again in a moment."
+        ),
         Offline => crate::tr!("A server can't be reached. Check the connection."),
         Server => crate::tr!("A server answered with an error."),
         Auth => crate::tr!("The server refused the sign-in."),
@@ -613,7 +624,7 @@ fn hints(code: ErrorCode) -> Vec<RecoveryHint> {
     use RecoveryHint::*;
     match code {
         C::Offline => vec![CheckConnection, Retry],
-        C::Busy => vec![Retry],
+        C::Busy | C::Overloaded => vec![Retry],
         C::Server => vec![RetryLater],
         C::Auth => vec![CheckCredentials],
         C::Forbidden => vec![SignIn],

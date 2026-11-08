@@ -41,6 +41,21 @@ fn network_failures_are_transient_and_keep_the_host() {
 }
 
 #[test]
+fn library_connections_all_busy_is_caskades_own_load_not_a_file_in_use() {
+    // A pool timeout: every connection was Caskade's own (#77).
+    let settings = crate::settings::SettingsError::Store(Error::Db(sqlx::Error::PoolTimedOut));
+    let report = ErrorReport::from_error(&settings);
+    assert_eq!(report.code, ErrorCode::Overloaded);
+    assert_eq!(report.summary, plain(ErrorCode::Overloaded));
+    assert!(report.transient);
+    assert_eq!(report.hints, [RecoveryHint::Retry]);
+    assert_ne!(report.summary, plain(ErrorCode::Busy));
+    // SQLite's own "database is locked" stays a file in use.
+    let locked = ErrorReport::from(Error::Io(io::Error::from(io::ErrorKind::ResourceBusy)));
+    assert_eq!(locked.code, ErrorCode::Busy);
+}
+
+#[test]
 fn causes_are_walked_through_wrapping_errors() {
     use crate::settings::SettingsError;
     let error = SettingsError::Store(Error::Io(io::Error::from(io::ErrorKind::PermissionDenied)));
@@ -175,8 +190,8 @@ fn docs_list_every_code_and_hint() {
         use RecoveryHint as H;
         match code {
             Invalid | Forbidden | Conflict | Cancelled | Refused | MissingFile | AccessDenied
-            | DiskFull | StorageOffline | Busy | Offline | Server | Auth | Integrity | Corrupt
-            | Database | Unavailable | Internal | Other => {}
+            | DiskFull | StorageOffline | Busy | Overloaded | Offline | Server | Auth
+            | Integrity | Corrupt | Database | Unavailable | Internal | Other => {}
         }
         match hint {
             H::Retry
@@ -204,6 +219,7 @@ fn docs_list_every_code_and_hint() {
         DiskFull,
         StorageOffline,
         Busy,
+        Overloaded,
         Offline,
         Server,
         Auth,

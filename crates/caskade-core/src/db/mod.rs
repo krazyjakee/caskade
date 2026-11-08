@@ -57,6 +57,8 @@ mod paired_devices;
 #[cfg(test)]
 mod platform_tests;
 mod playtime;
+#[cfg(test)]
+mod pool_tests;
 mod sync_accounts;
 mod sync_artwork;
 mod sync_carried;
@@ -88,6 +90,14 @@ use sqlx::{
 use std::{path::Path, sync::Arc, time::Duration};
 
 pub static MIGRATOR: sqlx::migrate::Migrator = sqlx::migrate!("./migrations");
+
+/// A library statement that runs this long is logged (`sqlx::query`) with
+/// its SQL: it holds one of the pool's four connections all that time, and
+/// a few of them at once make every other query wait (#77).
+const SLOW_STATEMENT: Duration = Duration::from_secs(1);
+/// A wait this long for a connection is logged (`sqlx::pool::acquire`); one
+/// past sqlx's 30 s gives up as [`crate::error::ErrorCode::Overloaded`].
+const SLOW_ACQUIRE: Duration = Duration::from_secs(2);
 
 /// How long opening a database file may take: its first connection, which
 /// creates or opens the file and switches it to WAL, and the migrations.
@@ -180,11 +190,14 @@ impl LibraryStore {
             .journal_mode(SqliteJournalMode::Wal)
             .synchronous(SqliteSynchronous::Normal)
             .busy_timeout(Duration::from_secs(5))
-            .disable_statement_logging()
+            .log_statements(log::LevelFilter::Off)
+            .log_slow_statements(log::LevelFilter::Warn, SLOW_STATEMENT)
             .collation(collation::TITLE, move |a, b| order.compare(a, b));
         let writes = Arc::default();
         let pool = writes::counting(SqlitePoolOptions::new(), &writes)
             .max_connections(4)
+            .acquire_slow_level(log::LevelFilter::Warn)
+            .acquire_slow_threshold(SLOW_ACQUIRE)
             .connect_lazy_with(options);
         let migrate = async { Ok(MIGRATOR.run(&pool).await?) };
         opening.open(&pool, before, migrate).await?;

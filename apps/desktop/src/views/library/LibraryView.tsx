@@ -225,7 +225,9 @@ export function LibraryView({
             ))}
         </div>
       </div>
-      {result.error ? (
+      {/* A refetch that fails keeps the games already shown, and the next
+          library change fetches again (#77). */}
+      {result.error && result.total === undefined ? (
         <FailureNotice
           error={result.error}
           title={t`Couldn't load your library`}

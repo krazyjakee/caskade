@@ -234,7 +234,9 @@ Sessions survive restarts: recovery state records running processes by `ProcessI
 
 `caskade_core::error::ErrorReport` is what crosses to the webview when a command fails: a stable `code`, a one-sentence `summary`, a redacted `detail`, `hints` (most useful first), `transient` and an eight-hex-character `reference` logged with the detail. `ErrorReport::from_error` walks the cause chain and picks the code; text Caskade wrote becomes the summary and an OS or database message the detail. Redaction (`error::sanitize`) strips URL credentials, queries and fragments, tokens, passwords, secrets and bearer values from every summary and detail.
 
-Codes: `invalid`, `forbidden`, `conflict`, `cancelled`, `refused`, `missingFile`, `accessDenied`, `diskFull`, `storageOffline`, `busy`, `offline`, `server`, `auth`, `integrity`, `corrupt`, `database`, `unavailable`, `internal`, `other`.
+Codes: `invalid`, `forbidden`, `conflict`, `cancelled`, `refused`, `missingFile`, `accessDenied`, `diskFull`, `storageOffline`, `busy`, `overloaded`, `offline`, `server`, `auth`, `integrity`, `corrupt`, `database`, `unavailable`, `internal`, `other`.
+
+`busy` is a file in use, or the database locked by a writer past the busy timeout (SQLite's "database is locked"). `overloaded` is Caskade's own work keeping all four of the library's connections busy past sqlx's 30-second wait (a pool timeout): nothing outside Caskade holds it. Both are transient. The library logs each statement that runs a second or more with its SQL (`sqlx::query`, "slow statement") and each wait of two seconds or more for a connection (`sqlx::pool::acquire`), which name what held the connections.
 
 Hints: `retry`, `retryLater`, `checkConnection`, `reconnectStorage`, `freeSpace`, `checkPermissions`, `checkCredentials`, `signIn`, `reload`, `restart`, `updateCaskade`.
 
@@ -265,6 +267,7 @@ Recovery code is bounded (fixed attempts or capped, jittered backoff, one layer 
 
 - Big lists are virtualised; artwork is thumbnailed and served from cache, never decoded at full size in the grid.
 - On Linux, glibc's malloc arenas are capped at 2 and free memory is trimmed every minute (`caskade-malloc`). A `MALLOC_ARENA_MAX` in the environment wins.
+- Library queries never compare every row of one table with every row of another per game: Ready to Install's peer copies are matched to the copies other devices announced by `(device, entry)` against the announced set read once per statement (`db::sync_copies::copyable_here_sql`). The quadratic `LIKE` join it replaced held connections for seconds per count on synced libraries and starved the pool (#77).
 - Background work reacts to writes (`LibraryStore::writes`) instead of rereading whole tables on a timer. Large files (the Ludusavi manifest) are parsed incrementally. Threads start only for features in use: copy stores open on first use, the plugin epoch thread starts with the first plugin.
 - On NVIDIA's proprietary driver under X11, WebKitGTK paints on the CPU; the app restarts itself with the DMABUF renderer over shared memory (`webkit.rs`), unless a `WEBKIT_*` renderer variable or `LIBGL_ALWAYS_SOFTWARE` (a software-rendering session) is set. If the main window's page then crashes or hangs, the driver and WebKit library are recorded in the cache (`webkit-gpu-failed`) and the app restarts on WebKit's own renderer; it tries the GPU again once either changes. Where WebKit still paints on the CPU, `<html data-paint="cpu">` pauses ambient animation.
 
