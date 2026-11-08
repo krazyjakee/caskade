@@ -51,6 +51,8 @@ mod game_edit_tests;
 mod hidden_tests;
 #[cfg(test)]
 mod letter_tests;
+#[cfg(test)]
+mod migration_checksum_tests;
 mod paired_devices;
 #[cfg(test)]
 mod platform_tests;
