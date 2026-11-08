@@ -1518,6 +1518,10 @@ msgid "A file or the library is in use. Caskade will manage once it's free."
 msgstr "En fil eller biblioteket används. Caskade fortsätter när det är ledigt."
 
 #: crates/caskade-core/src/error.rs
+msgid "Caskade's own work is keeping the library busy. It catches up by itself, so try again in a moment."
+msgstr ""
+
+#: crates/caskade-core/src/error.rs
 msgid "A server can't be reached. Check the connection."
 msgstr "En server kan inte nås. Kontrollera anslutningen."
 
@@ -1926,6 +1930,31 @@ msgstr "Nedladdningen misslyckades på grund av problem med nätverket eller ser
 #: crates/caskade-core/src/install/failure_text.rs
 msgid "The download failed."
 msgstr "Nedladdningen misslyckades."
+
+#: crates/caskade-core/src/install/failure_text.rs
+msgctxt "install failure file"
+msgid "The file"
+msgstr ""
+
+#: crates/caskade-core/src/install/failure_text.rs
+msgid "{file} has no game program Caskade recognises, so it wasn't installed. Choose the game's installer or the folder with its program."
+msgstr ""
+
+#: crates/caskade-core/src/install/failure_text.rs
+msgid "{file} is made for another system, so it wasn't installed. Choose a version for this one."
+msgstr ""
+
+#: crates/caskade-core/src/install/failure_text.rs
+msgid "{file} needs a program to run it that this device doesn't have, so it wasn't installed."
+msgstr ""
+
+#: crates/caskade-core/src/install/failure_text.rs
+msgid "{file} has to run its installer, and running installers is turned off in Settings."
+msgstr ""
+
+#: crates/caskade-core/src/install/failure_text.rs
+msgid "{file} isn't a kind of installer, archive or game folder Caskade can install, so it wasn't installed."
+msgstr ""
 
 #: crates/caskade-core/src/install/failure_text.rs
 msgid "The install stopped {stage}."
@@ -3370,8 +3399,8 @@ msgid "unexpected token response"
 msgstr "oväntat tokensvar"
 
 #: crates/caskade-core/src/romm/client.rs
-msgid "this server needs a username and password or an API token"
-msgstr "den här servern kräver användarnamn och lösenord eller en API-token"
+msgid "this device has no password or API token saved for this server"
+msgstr ""
 
 #: crates/caskade-core/src/romm/client.rs
 msgid "unexpected response: {error}"
@@ -4120,6 +4149,7 @@ msgid "that save's files are only where this device keeps them, so they can't go
 msgstr "den sparningens filer finns bara där den här enheten har dem, så de kan inte flyttas någon annanstans"
 
 #: crates/caskade-core/src/share/items.rs
+#: crates/caskade-core/src/transfer/web.rs
 msgid "that isn't a web game"
 msgstr "det är inte ett webbspel"
 
@@ -4133,6 +4163,7 @@ msgid "the game's storage isn't available"
 msgstr "spelets lagring är inte tillgänglig"
 
 #: crates/caskade-core/src/share/items.rs
+#: crates/caskade-core/src/transfer/mod.rs
 msgid "the offline copy's files aren't there"
 msgstr "offlinekopians filer finns inte där"
 
@@ -4153,10 +4184,6 @@ msgstr "en fil i den sparningen finns inte på den här enheten längre"
 #: crates/caskade-core/src/share/items.rs
 msgid "a collection has no files to receive"
 msgstr "en samling har inga filer att ta emot"
-
-#: crates/caskade-core/src/share/items.rs
-msgid "that isn't a web game's offline copy"
-msgstr "det är inte en offlinekopia av ett webbspel"
 
 #: crates/caskade-core/src/share/items.rs
 msgid "that link doesn't share a collection"
@@ -4929,6 +4956,14 @@ msgstr "en ROM-fil för det spelet finns inte där"
 #: crates/caskade-core/src/transfer/rom.rs
 msgid "that storage location is gone"
 msgstr "den lagringsplatsen finns inte längre"
+
+#: crates/caskade-core/src/transfer/web.rs
+msgid "it plays from its web page and has no offline copy there; save it for offline play on that device first"
+msgstr ""
+
+#: crates/caskade-core/src/transfer/web.rs
+msgid "that isn't a web game's offline copy"
+msgstr "det är inte en offlinekopia av ett webbspel"
 
 #: crates/caskade-core/src/updates/github.rs
 msgid "GitHub's address can't have a path"

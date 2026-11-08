@@ -2716,6 +2716,11 @@ msgstr ""
 msgid "Can't connect"
 msgstr ""
 
+#. A RomM server's status: it refused the username and password or API token
+#: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+msgid "Can't sign in"
+msgstr ""
+
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
 #: apps/desktop/src/components/ConfirmDialog.tsx
@@ -4776,9 +4781,18 @@ msgstr ""
 msgid "Enter a number."
 msgstr ""
 
+#. Opens a RomM server's editor at its API token
+#: apps/desktop/src/views/settings/romm/RommPanel.tsx
+msgid "Enter API token"
+msgstr ""
+
 #. Keyboard keys in the search overlay
 #: apps/desktop/src/shell/TypeSearch.tsx
 msgid "Enter for results · Esc to cancel · Backspace to delete"
+msgstr ""
+
+#: apps/desktop/src/views/settings/romm/RommPanel.tsx
+msgid "Enter the API token for {server}"
 msgstr ""
 
 #: apps/desktop/src/components/streaming/StreamPairingHost.tsx
@@ -6612,6 +6626,16 @@ msgctxt "library column"
 msgid "Last played"
 msgstr ""
 
+#. Home: the paired device a game's latest session was played on
+#: apps/desktop/src/views/home/PlayedOn.tsx
+msgid "Last played on {device}"
+msgstr ""
+
+#. Home: a game's latest session was played on a device this one isn't paired with
+#: apps/desktop/src/views/home/PlayedOn.tsx
+msgid "Last played on another device"
+msgstr ""
+
 #. ROM scanners table column
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "Last scan"
@@ -8388,6 +8412,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Online lookups"
+msgstr ""
+
+#: apps/desktop/src/views/game/IgdbPanel.tsx
+msgid "Online lookups are off on this device, so Caskade doesn't match games with IGDB or fetch their details and artwork."
 msgstr ""
 
 #: apps/desktop/src/components/shares/ShareInfoDetails.tsx
@@ -11142,6 +11170,11 @@ msgstr ""
 msgid "Shows your {name} achievements on the games in your library."
 msgstr ""
 
+#. Opens a RomM server's editor at its password
+#: apps/desktop/src/views/settings/romm/RommPanel.tsx
+msgid "Sign in"
+msgstr ""
+
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Sign in on {name}'s page in your browser. Caskade continues when the page sends you back."
 msgstr ""
@@ -11152,6 +11185,10 @@ msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "Sign in to {provider} as {name} again to see these achievements."
+msgstr ""
+
+#: apps/desktop/src/views/settings/romm/RommPanel.tsx
+msgid "Sign in to {server}"
 msgstr ""
 
 #: apps/desktop/src/api/reply.ts
@@ -11173,8 +11210,27 @@ msgctxt "store account"
 msgid "Sign-in expired"
 msgstr ""
 
+#. A RomM server's status: this device has no working password or API token for it
+#. A RomM server's status: this device has no working password or API token for it
+#: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+msgid "Sign-in needed on this device"
+msgstr ""
+
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Sign-ins are kept in your system's keychain, never in Caskade's settings or backups. After restoring a backup or moving computer, reconnect each account."
+msgstr ""
+
+#: apps/desktop/src/views/settings/romm/RommPanel.tsx
+msgid "Sign-ins don't: each device signs in to a server on its own."
+msgstr ""
+
+#: apps/desktop/src/views/settings/romm/RommPanel.tsx
+msgid "Sign-ins stay on each device. Enter this server's API token here to import its games."
+msgstr ""
+
+#: apps/desktop/src/views/settings/romm/RommPanel.tsx
+msgid "Sign-ins stay on each device. Sign in here to import this server's games."
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
@@ -12537,6 +12593,10 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Turn on"
+msgstr ""
+
+#: apps/desktop/src/views/game/IgdbPanel.tsx
+msgid "Turn on online lookups"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx

@@ -2761,8 +2761,14 @@ export type ConnectionReport_Serialize = {
 export type ConnectionState = "untested" | "connected" | 
 /**  Not reachable: cached games still play. */
 "offline" | 
-/**  Reachable, but sign-in or the API failed. */
-"error";
+/**  Reachable, but the API failed. */
+"error" | 
+/**
+ *  This device can't sign in: it has no password or API token for the
+ *  server (they stay in each device's keychain and never sync), or the
+ *  server refused the one it has. Background syncs wait for a new one.
+ */
+"sign_in_needed";
 
 /**  Console mode went on or off. */
 export type ConsoleModeEvent = {
@@ -3622,6 +3628,11 @@ export type ErrorCode =
 "storageOffline" | 
 /**  A file or the database is in use; usually passes. */
 "busy" | 
+/**
+ *  Caskade's own work kept every library connection busy for too long
+ *  (a pool timeout): nothing outside Caskade holds it. Usually passes.
+ */
+"overloaded" | 
 /**  A server can't be reached or didn't answer in time. */
 "offline" | 
 /**  A server answered with an error or something unusable. */
@@ -3805,7 +3816,14 @@ export type FailureKind =
 /**  Not enough free space. */
 "diskFull" | 
 /**  The download failed: the network or the server. */
-"download" | "other";
+"download" | 
+/**
+ *  Caskade has no way to install the input: a kind of file or folder it
+ *  doesn't install, a build for another system, a missing runner or an
+ *  installer that may not run. Its [`Reason`](crate::Reason) is the
+ *  detail ([`Failure::unsupported`]).
+ */
+"unsupported" | "other";
 
 /**  Where in the install it went wrong. */
 export type FailureStage = "download" | 
@@ -4336,6 +4354,11 @@ export type GameSummary_Deserialize = {
 	installed: boolean,
 	playtimeMs: number,
 	lastPlayedAtMs?: number | null,
+	/**
+	 *  The other device its latest session was played on; `None` when it
+	 *  was played here or the device isn't known (#74).
+	 */
+	lastPlayedOn?: PlayedOn_Deserialize | null,
 };
 
 export type GameSummary_Serialize = {
@@ -4359,6 +4382,11 @@ export type GameSummary_Serialize = {
 	installed: boolean,
 	playtimeMs: number,
 	lastPlayedAtMs: number | null,
+	/**
+	 *  The other device its latest session was played on; `None` when it
+	 *  was played here or the device isn't known (#74).
+	 */
+	lastPlayedOn: PlayedOn_Serialize | null,
 };
 
 /**  An install's updates, for the game page. */
@@ -6657,6 +6685,25 @@ export type PlaySession_Serialize = {
 	tracking: Value | null,
 };
 
+/**  Another device a game was played on (#74). */
+export type PlayedOn = PlayedOn_Serialize | PlayedOn_Deserialize;
+
+/**  Another device a game was played on (#74). */
+export type PlayedOn_Deserialize = {
+	/**  Its endpoint id. */
+	device: string,
+	/**  What this device calls it, when the two are paired. */
+	name?: string | null,
+};
+
+/**  Another device a game was played on (#74). */
+export type PlayedOn_Serialize = {
+	/**  Its endpoint id. */
+	device: string,
+	/**  What this device calls it, when the two are paired. */
+	name: string | null,
+};
+
 /**  A game running on another device, as the webview shows it. */
 export type PlayingElsewhere = {
 	deviceId: string,
@@ -8536,6 +8583,10 @@ export type ServerStatus_Deserialize = {
 	syncing: boolean,
 	/**  Library games from this server. */
 	games: number,
+	/**
+	 *  This device's keychain has a password or API token saved for the
+	 *  server's address.
+	 */
 	hasSecret: boolean,
 };
 
@@ -8550,6 +8601,10 @@ export type ServerStatus_Serialize = {
 	syncing: boolean,
 	/**  Library games from this server. */
 	games: number,
+	/**
+	 *  This device's keychain has a password or API token saved for the
+	 *  server's address.
+	 */
 	hasSecret: boolean,
 };
 

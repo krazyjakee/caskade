@@ -2715,6 +2715,13 @@ msgstr "Kan inte användas:"
 msgid "Can't connect"
 msgstr "Kan inte ansluta"
 
+#. A RomM server's status: it refused the username and password or API token
+#: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#, fuzzy
+#| msgid "Cancel sign-in"
+msgid "Can't sign in"
+msgstr "Avbryt inloggningen"
+
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
 #: apps/desktop/src/components/ConfirmDialog.tsx
@@ -4773,10 +4780,21 @@ msgstr "Ange PIN för {name}"
 msgid "Enter a number."
 msgstr "Ange ett tal."
 
+#. Opens a RomM server's editor at its API token
+#: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#, fuzzy
+#| msgid "API token"
+msgid "Enter API token"
+msgstr "API-token"
+
 #. Keyboard keys in the search overlay
 #: apps/desktop/src/shell/TypeSearch.tsx
 msgid "Enter for results · Esc to cancel · Backspace to delete"
 msgstr "Enter för resultat · Esc för att avbryta · Backspace för att radera"
+
+#: apps/desktop/src/views/settings/romm/RommPanel.tsx
+msgid "Enter the API token for {server}"
+msgstr ""
 
 #: apps/desktop/src/components/streaming/StreamPairingHost.tsx
 msgid "Enter the code {device} shows to let it play this device's games."
@@ -6607,6 +6625,20 @@ msgctxt "library column"
 msgid "Last played"
 msgstr "Senast spelat"
 
+#. Home: the paired device a game's latest session was played on
+#: apps/desktop/src/views/home/PlayedOn.tsx
+#, fuzzy
+#| msgid "Play on {device}"
+msgid "Last played on {device}"
+msgstr "Spela på {device}"
+
+#. Home: a game's latest session was played on a device this one isn't paired with
+#: apps/desktop/src/views/home/PlayedOn.tsx
+#, fuzzy
+#| msgid "Set up from another device"
+msgid "Last played on another device"
+msgstr "Ställ in från en annan enhet"
+
 #. ROM scanners table column
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 msgid "Last scan"
@@ -8381,6 +8413,10 @@ msgstr "Online"
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 msgid "Online lookups"
 msgstr "Onlineuppslag"
+
+#: apps/desktop/src/views/game/IgdbPanel.tsx
+msgid "Online lookups are off on this device, so Caskade doesn't match games with IGDB or fetch their details and artwork."
+msgstr ""
 
 #: apps/desktop/src/components/shares/ShareInfoDetails.tsx
 msgid "Only a relay reaches {sharer}'s computer right now. The game waits for a direct connection: game files don't go through relays."
@@ -11129,6 +11165,13 @@ msgstr "Visar katalogen från {0}; den senaste kontrollen misslyckades: {1}"
 msgid "Shows your {name} achievements on the games in your library."
 msgstr "Visar dina prestationer från {name} på spelen i ditt bibliotek."
 
+#. Opens a RomM server's editor at its password
+#: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#, fuzzy
+#| msgid "Sign in with"
+msgid "Sign in"
+msgstr "Logga in med"
+
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Sign in on {name}'s page in your browser. Caskade continues when the page sends you back."
 msgstr "Logga in på {name}s sida i din webbläsare. Caskade fortsätter när sidan skickar tillbaka dig."
@@ -11140,6 +11183,12 @@ msgstr "Logga in på {name}"
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "Sign in to {provider} as {name} again to see these achievements."
 msgstr "Logga in på {provider} som {name} igen för att se de här prestationerna."
+
+#: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#, fuzzy
+#| msgid "Sign in to {name}"
+msgid "Sign in to {server}"
+msgstr "Logga in på {name}"
 
 #: apps/desktop/src/api/reply.ts
 msgid "Sign in to an account that may do this."
@@ -11160,9 +11209,30 @@ msgctxt "store account"
 msgid "Sign-in expired"
 msgstr "Inloggningen har gått ut"
 
+#. A RomM server's status: this device has no working password or API token for it
+#. A RomM server's status: this device has no working password or API token for it
+#: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#, fuzzy
+#| msgid "Not found on this device"
+msgid "Sign-in needed on this device"
+msgstr "Hittades inte på den här enheten"
+
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 msgid "Sign-ins are kept in your system's keychain, never in Caskade's settings or backups. After restoring a backup or moving computer, reconnect each account."
 msgstr "Inloggningar sparas i systemets nyckelring, aldrig i Caskades inställningar eller säkerhetskopior. Anslut varje konto igen efter att du har återställt en säkerhetskopia eller bytt dator."
+
+#: apps/desktop/src/views/settings/romm/RommPanel.tsx
+msgid "Sign-ins don't: each device signs in to a server on its own."
+msgstr ""
+
+#: apps/desktop/src/views/settings/romm/RommPanel.tsx
+msgid "Sign-ins stay on each device. Enter this server's API token here to import its games."
+msgstr ""
+
+#: apps/desktop/src/views/settings/romm/RommPanel.tsx
+msgid "Sign-ins stay on each device. Sign in here to import this server's games."
+msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
 msgid "Signed in as {name}, a standard account."
@@ -12524,6 +12594,12 @@ msgstr "Stäng av oskärpa, glöd, scanlinjer och bakgrundsrutnätet."
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 msgid "Turn on"
 msgstr "Slå på"
+
+#: apps/desktop/src/views/game/IgdbPanel.tsx
+#, fuzzy
+#| msgid "Online lookups"
+msgid "Turn on online lookups"
+msgstr "Onlineuppslag"
 
 #: apps/desktop/src/onboarding/Questions.tsx
 msgid "Turn on what you have. Everything can be changed later in Settings."
