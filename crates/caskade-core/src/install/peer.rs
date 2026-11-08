@@ -1,8 +1,10 @@
 //! Copies of games from another device (#233) as install jobs: the files
 //! come from the device that has the game (a [`PeerFetcher`], over the
-//! network), then the folder they make is installed like any other, as a
-//! Caskade-managed install with a `caskade-install` id of its own, on the
-//! game the user copied.
+//! network), then the folder they make is installed as a Caskade-managed
+//! install with a `caskade-install` id of its own, on the game the user
+//! copied. The folder is an installed game, so it is installed as it is
+//! (`prepare_portable`), whatever its files look like (#76). A ROM or a web
+//! game's offline copy is placed by the fetcher instead ([`Placed`]).
 //!
 //! While the device can't be reached (the network went, only a relay
 //! reaches it), the job waits and tries again, and what arrived stays: a

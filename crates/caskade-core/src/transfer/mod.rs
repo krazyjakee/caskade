@@ -27,8 +27,12 @@
 //! a ROM scanner's holding every game of the platform (#279, [`rom`]): the
 //! offer describes the platform and emulator profile, and the receiver
 //! places the files as a game of that platform instead of installing them.
+//! A web game goes as its offline copy (#76, [`web`]): the offer names its
+//! page, and the receiver makes the bundle that game's offline copy. One
+//! played from its page alone has nothing to copy, and is refused.
 
 pub(crate) mod rom;
+pub(crate) mod web;
 
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
@@ -84,6 +88,9 @@ enum Message {
         /// profile (#279).
         #[serde(default)]
         rom: Option<rom::RomCopy>,
+        /// A web game's offline copy: its page (#76).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        web: Option<web::WebCopy>,
     },
     /// Sender: not this one, and why.
     Refused { reason: String },
@@ -132,11 +139,19 @@ pub struct TransferRecord {
 struct Offer {
     offered: Offered,
     tag: String,
+    what: Described,
+    peers: HashSet<EndpointId>,
+}
+
+/// What an offer says about the release it sends.
+#[derive(Clone)]
+struct Described {
     title: String,
+    /// The program, relative to the folder and `/`-separated.
     launch: Option<String>,
     windows: bool,
     rom: Option<rom::RomCopy>,
-    peers: HashSet<EndpointId>,
+    web: Option<web::WebCopy>,
 }
 
 struct Outgoing {
@@ -558,6 +573,10 @@ impl Transfers {
                 "an emulated game goes as its ROM files, not its folder"
             )));
         }
+        // A web game goes as its offline copy, when it has one (`web`).
+        let web = web::is_web(&entry)
+            .then(|| web::describe(&entry))
+            .transpose()?;
         let folder = match &entry.location {
             Some(InstallLocation::Managed { root_id, rel_dir }) => {
                 let root = self.inner.store.get_root(root_id).await?.ok_or_else(|| {
@@ -583,6 +602,11 @@ impl Transfers {
         };
         if !folder.is_dir() {
             return Err(Error::Invalid(crate::tr!("the game's folder isn't there")));
+        }
+        if web.is_some() && !folder.join(crate::web::bundle::MANIFEST).is_file() {
+            return Err(Error::Invalid(crate::tr!(
+                "the offline copy's files aren't there"
+            )));
         }
         let launch = match &entry.launch {
             Some(LaunchSpec::Executable { path, .. }) => {
@@ -620,20 +644,14 @@ impl Transfers {
     async fn offer(&self, entry: &str, peer: EndpointId, session: &mut Session) -> Result<()> {
         let earlier = {
             let offers = self.inner.offers.lock().unwrap_or_else(|e| e.into_inner());
-            offers.get(entry).map(|offer| {
-                (
-                    offer.offered.clone(),
-                    offer.title.clone(),
-                    offer.launch.clone(),
-                    offer.windows,
-                    offer.rom.clone(),
-                )
-            })
+            offers
+                .get(entry)
+                .map(|offer| (offer.offered.clone(), offer.what.clone()))
         };
-        let (offered, title, launch, windows, rom) = match earlier {
+        let (offered, what) = match earlier {
             Some(earlier) => earlier,
             None => {
-                let (folder, title, launch, windows, rom) = self.what_to_send(entry).await?;
+                let (folder, what) = self.what_to_send(entry).await?;
                 let tag = format!("copy/{entry}");
                 let (tx, mut rx) = mpsc::unbounded_channel();
                 let reading = self.inner.sending.offer(&folder, &tag, move |done, total| {
@@ -664,14 +682,11 @@ impl Transfers {
                         Offer {
                             offered: offered.clone(),
                             tag: tag.clone(),
-                            title: title.clone(),
-                            launch: launch.clone(),
-                            windows,
-                            rom: rom.clone(),
+                            what: what.clone(),
                             peers: HashSet::new(),
                         },
                     );
-                (offered, title, launch, windows, rom)
+                (offered, what)
             }
         };
         self.inner
@@ -694,7 +709,7 @@ impl Transfers {
             .entry((peer, entry.to_owned()))
             .or_insert_with(|| Outgoing {
                 entry: entry.to_owned(),
-                title: title.clone(),
+                title: what.title.clone(),
                 root: offered.root.clone(),
                 size: offered.size,
                 started_at_ms: crate::now_ms(),
@@ -713,26 +728,39 @@ impl Transfers {
                 root: offered.root,
                 size: offered.size,
                 files: offered.files,
-                title,
-                launch,
-                windows,
-                rom,
+                title: what.title,
+                launch: what.launch,
+                windows: what.windows,
+                rom: what.rom,
+                web: what.web,
             })
             .await
             .map_err(sync_error)
     }
 
     /// What release `entry` sends: its folder, title, program and whether
-    /// it's a Windows build; or, for an emulated release, its ROM files put
-    /// together on their own and what they are.
-    async fn what_to_send(
-        &self,
-        entry: &str,
-    ) -> Result<(PathBuf, String, Option<String>, bool, Option<rom::RomCopy>)> {
+    /// it's a Windows build, and for a web game its page; or, for an
+    /// emulated release, its ROM files put together on their own and what
+    /// they are.
+    async fn what_to_send(&self, entry: &str) -> Result<(PathBuf, Described)> {
         let release = self.inner.store.get_entry(entry).await?;
         if !release.as_ref().is_some_and(rom::emulated) {
             let (folder, title, launch, windows) = self.source(entry).await?;
-            return Ok((folder, title, launch, windows, None));
+            let web = release
+                .as_ref()
+                .filter(|release| web::is_web(release))
+                .map(web::describe)
+                .transpose()?;
+            return Ok((
+                folder,
+                Described {
+                    title,
+                    launch,
+                    windows,
+                    rom: None,
+                    web,
+                },
+            ));
         }
         let (release, copy, files) = rom::describe(&self.inner.store, entry).await?;
         if !matches!(release.state, InstallState::Installed) {
@@ -748,7 +776,16 @@ impl Transfers {
             .await?
             .map(|game| game.title)
             .unwrap_or_default();
-        Ok((folder, title, None, false, Some(copy)))
+        Ok((
+            folder,
+            Described {
+                title,
+                launch: None,
+                windows: false,
+                rom: Some(copy),
+                web: None,
+            },
+        ))
     }
 
     /// `peer` has release `entry`, or its offer ran out: withdrawn, and let
@@ -865,7 +902,7 @@ impl PeerFetcher for Transfers {
             })
             .await
             .map_err(|_| waiting(unreachable()))?;
-        let (root_hash, size, title, launch, rom) = loop {
+        let (root_hash, size, title, launch, rom, web) = loop {
             let frame = tokio::time::timeout(FRAME_WAIT, session.reader().read(MAX_LINE)).await;
             match frame {
                 Ok(Ok(Message::Preparing { done, total })) => {
@@ -877,8 +914,9 @@ impl PeerFetcher for Transfers {
                     title,
                     launch,
                     rom,
+                    web,
                     ..
-                })) => break (root, size, title, launch, rom),
+                })) => break (root, size, title, launch, rom, web),
                 Ok(Ok(Message::Refused { reason })) => {
                     return Err(FetchFailure::Failed(Error::Invalid(reason)));
                 }
@@ -1000,10 +1038,19 @@ impl PeerFetcher for Transfers {
         let exported = store.export(&root_hash, &folder).await;
         finished(self);
         exported.map_err(|error| FetchFailure::Failed(sync_error(error)))?;
+        let game_id = Some(&target.game_id)
+            .filter(|game| !game.is_empty())
+            .map(String::as_str);
         // An emulated release: placed as a game of its platform, not
-        // installed (#279).
-        let placed = match &rom {
-            Some(rom) => Some(
+        // installed (#279). A web game's offline copy: made that game's
+        // offline copy, not installed (#76); a device on an older Caskade
+        // doesn't say so, and its bundle does.
+        let web = match (&rom, web) {
+            (None, None) => web::in_folder(&folder),
+            (_, web) => web,
+        };
+        let placed = match (&rom, &web) {
+            (Some(rom), _) => Some(
                 rom::place(
                     &self.inner.store,
                     self.emulator_installer(),
@@ -1011,14 +1058,17 @@ impl PeerFetcher for Transfers {
                     &folder,
                     root,
                     &title,
-                    Some(&target.game_id)
-                        .filter(|game| !game.is_empty())
-                        .map(String::as_str),
+                    game_id,
                 )
                 .await
                 .map_err(FetchFailure::Failed)?,
             ),
-            None => None,
+            (None, Some(web)) => Some(
+                web::place(&self.inner.store, &web.url, &folder, root, &title, game_id)
+                    .await
+                    .map_err(FetchFailure::Failed)?,
+            ),
+            (None, None) => None,
         };
         Ok(Fetched {
             folder,

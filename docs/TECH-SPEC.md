@@ -186,6 +186,7 @@ Sessions survive restarts: recovery state records running processes by `ProcessI
 - **Library sync**: changes captured by diffing snapshots against `sync_fields` (only after the library was written), last writer wins per field by hybrid logical clock, tombstones for deletions, games matched across devices by identity (`sync_game_ids`). A session travels as one record plus its device as a separate `device` field, so it keeps the device that played it when forwarded, and Home's game list names that device from `paired_devices` when it isn't this one.
 - **Saves**: `Saves` resolves locations per release (Ludusavi manifest by Steam id, GOG id, title, aliases; emulator `[saves]` rules; the user's choices), maps Windows paths into a Wine or Proton prefix, and versions files content-addressed in `<data>/saves/blobs/`.
 - **Presence, copies, nearby downloads, backups on devices, emulator offers and config** ride on the same exchange as notes on the blob rounds.
+- **Copies** (`Transfers`): the sender offers an installed release's folder as an iroh-blobs collection, refusing a launcher's install and a web game with no offline copy. The receiver installs the folder as it is (`prepare_portable`: a copy is an installed game, never planned by its files), places an emulated release's ROM files as a game of its platform (`transfer::rom`), and makes a web game's offline bundle that game's offline copy (`transfer::web`, shared with shares).
 - **Shares**: `caskade://receive` links with their own grant and expiry, admitted only while the share runs, revoked mid-transfer when stopped. Recipients fetch from the swarm of the sharer and other recipients.
 
 ### Streaming
@@ -236,7 +237,7 @@ Codes: `invalid`, `forbidden`, `conflict`, `cancelled`, `refused`, `missingFile`
 
 Hints: `retry`, `retryLater`, `checkConnection`, `reconnectStorage`, `freeSpace`, `checkPermissions`, `checkCredentials`, `signIn`, `reload`, `restart`, `updateCaskade`.
 
-A test fails when a code or hint is missing from this list or lacks a label in `apps/desktop/src/api/reply.ts`. In the adapter, commands return `Result<T, CommandError>` and map with `.map_err(report)`; in the webview, `unwrap` rejects with a `CommandFailure` and `FailureNotice` / `ErrorNotice` show it. Installs and updates keep the installer's richer `Failure`.
+A test fails when a code or hint is missing from this list or lacks a label in `apps/desktop/src/api/reply.ts`. In the adapter, commands return `Result<T, CommandError>` and map with `.map_err(report)`; in the webview, `unwrap` rejects with a `CommandFailure` and `FailureNotice` / `ErrorNotice` show it. Installs and updates keep the installer's richer `Failure`; an input the installer has no way to install is the `unsupported` kind, its `Reason` kept as the detail and said in words with Locate the installer… as the way on.
 
 ### 7.2 Recovery policy
 

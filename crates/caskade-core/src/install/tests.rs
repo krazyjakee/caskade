@@ -414,6 +414,57 @@ async fn an_attached_install_becomes_a_release_of_the_existing_game() {
     );
 }
 
+/// A folder the installer has no way to install says why in words, with
+/// what can be done, never the installer's reason as it is (#76).
+#[tokio::test(flavor = "multi_thread")]
+async fn a_folder_with_nothing_to_install_says_why() {
+    use caskade_installer::failure::{FailureKind, RecoveryAction};
+    let temp = tempfile::tempdir().unwrap();
+    let root_path = temp.path().join("Games");
+    std::fs::create_dir_all(&root_path).unwrap();
+    let identity = caskade_installer::manifest::RootManifest::new("root-unsupported").unwrap();
+    identity.write(&root_path).unwrap();
+    let store = crate::db::LibraryStore::in_memory().await.unwrap();
+    let mut root =
+        StorageRoot::from_manifest(std::fs::canonicalize(&root_path).unwrap(), &identity);
+    root.is_default = true;
+    store.upsert_root(&root).await.unwrap();
+    let source = temp.path().join("Snake");
+    std::fs::create_dir_all(source.join("files")).unwrap();
+    std::fs::write(source.join("caskade-web.json"), "{}").unwrap();
+    std::fs::write(source.join("files/0a1b"), "<canvas></canvas>").unwrap();
+    let service = InstallService::new(
+        store,
+        Bus::default(),
+        InstallOptions {
+            downloads: 1,
+            aliases: None,
+        },
+    );
+    let job = service
+        .install(source.to_string_lossy().into_owned(), None)
+        .await
+        .unwrap();
+    let job = finished(&service, &job.id).await;
+    assert_eq!(job.status, JobStatus::Failed, "{job:?}");
+    let failure = job.failure.expect("a classified failure");
+    assert_eq!(failure.kind, FailureKind::Unsupported);
+    assert_eq!(
+        failure.actions,
+        vec![RecoveryAction::LocateSource, RecoveryAction::Cancel]
+    );
+    assert!(
+        failure
+            .summary
+            .starts_with("\u{201c}Snake\u{201d} has no game program"),
+        "{}",
+        failure.summary
+    );
+    let error = job.error.unwrap_or_default();
+    assert_eq!(error, failure.summary);
+    assert!(!error.contains("unsupported_format"), "{error}");
+}
+
 #[tokio::test]
 async fn installs_need_a_storage_root() {
     let store = crate::db::LibraryStore::in_memory().await.unwrap();

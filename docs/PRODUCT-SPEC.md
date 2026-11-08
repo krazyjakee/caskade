@@ -126,7 +126,7 @@ A household's devices pair once and then keep in step directly, with no server a
 - **Library sync**: games, edits, collections, favourites, play sessions (with the device each was played on), accounts and settings, merged field by field. Paths, folders, emulators, store sign-ins and caches never leave a device. Each settings section can be kept to this device. New handhelds and TVs start in console mode.
 - **Saves** follow the player: after each session a game's saves are kept as versions (from the Ludusavi manifest or emulator rules, mapped into a Wine or Proton prefix where needed), sent to the other devices, restored before play, and browsable on the game page.
 - **Playing elsewhere**: a game running on another device shows as such, and Play warns before starting it twice.
-- **Copies**: a game installed on one device can be copied to another over the local network, as an independent install. Downloads a nearby device already has come from it instead of the internet.
+- **Copies**: a game installed on one device can be copied to another over the local network, as an independent install. A web game's offline copy arrives as that game's offline copy; one that plays from its page has nothing to copy. Downloads a nearby device already has come from it instead of the internet.
 - **Other devices' games** show on the game page, with copy and stream offers.
 - **Backups kept on a paired device**, restorable on a fresh install.
 - **Set up from another device**: first-run setup can pair with an existing device, take its library, and offer its games to copy.

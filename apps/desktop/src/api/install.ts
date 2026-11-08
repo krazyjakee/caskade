@@ -26,6 +26,7 @@ export type FailureKind =
   | "storageDisconnected"
   | "diskFull"
   | "download"
+  | "unsupported"
   | "other";
 export type RecoveryAction =
   | "retry"

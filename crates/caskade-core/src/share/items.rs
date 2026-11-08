@@ -574,67 +574,7 @@ impl Shares {
                 Ok(Placed { game_id, added })
             }
             Details::Web { url } => {
-                let url = crate::web::page_url(url)?.to_string();
-                let root = rom::root_at(store, root).await?;
-                let existing = store
-                    .entry_by_source(crate::web::WEB_SOURCE.as_str(), &url)
-                    .await?;
-                if let Some(entry) = existing.as_ref().filter(|entry| entry.location.is_some()) {
-                    // Theirs stays: it's already offline here.
-                    return Ok(Placed {
-                        game_id: entry.game_id.clone(),
-                        added: false,
-                    });
-                }
-                let added = existing.is_none();
-                let (rel_dir, size) = {
-                    let (folder, base) = (folder.to_owned(), root.path.clone());
-                    let name = crate::transfer::folder_name(title);
-                    tokio::task::spawn_blocking(move || {
-                        let rel_dir = rom::free_folder(&base, &name)?;
-                        let target = base.join(&rel_dir);
-                        rom::move_path(&folder, &target)?;
-                        let bundle = crate::web::bundle::Bundle::open(&target).map_err(|_| {
-                            let _ = std::fs::remove_dir_all(&target);
-                            Error::Invalid(crate::tr!("that isn't a web game's offline copy"))
-                        })?;
-                        Ok::<_, Error>((rel_dir, bundle.stats().1))
-                    })
-                    .await
-                    .map_err(|error| Error::Io(std::io::Error::other(error)))??
-                };
-                let location = Some(InstallLocation::Managed {
-                    root_id: root.id.clone(),
-                    rel_dir,
-                });
-                let entry = match existing {
-                    Some(mut entry) => {
-                        entry.location = location;
-                        entry.size = Some(size);
-                        entry
-                    }
-                    None => {
-                        let mut game = crate::model::Game::new(if title.trim().is_empty() {
-                            "Web game"
-                        } else {
-                            title.trim()
-                        });
-                        game.platforms = vec![crate::web::PLATFORM.to_owned()];
-                        let game = store.upsert_game(&game).await?;
-                        let mut entry =
-                            GameEntry::new(&game.id, crate::web::WEB_SOURCE, url.as_str());
-                        entry.state = InstallState::Installed;
-                        entry.launch = Some(LaunchSpec::Web { url });
-                        entry.location = location;
-                        entry.size = Some(size);
-                        entry
-                    }
-                };
-                store.upsert_entry(&entry).await?;
-                Ok(Placed {
-                    game_id: entry.game_id,
-                    added,
-                })
+                crate::transfer::web::place(store, url, folder, root, title, None).await
             }
             Details::Rom(copy) => {
                 rom::place(

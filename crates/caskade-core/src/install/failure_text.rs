@@ -6,6 +6,7 @@
 use crate::i18n::{Message, Text};
 use crate::{msg, msgp};
 use caskade_installer::failure::{Failure, FailureKind, FailureStage, SecurityNote};
+use caskade_installer::{Format, Reason};
 use std::path::Path;
 
 /// `failure`'s summary, translated when it is shown.
@@ -79,6 +80,33 @@ pub fn failure_message(failure: &Failure) -> Message {
             msg!("The download failed because the network or the server had trouble.")
         }
         FailureKind::Download => msg!("The download failed."),
+        FailureKind::Unsupported => {
+            let file = file_or(msgp!("install failure file", "The file"));
+            match failure.reason() {
+                Some(Reason::UnsupportedFormat {
+                    format: Format::Directory,
+                }) => msg!(
+                    "{file} has no game program Caskade recognises, so it wasn't installed. Choose the game's installer or the folder with its program.",
+                    file = file
+                ),
+                Some(Reason::PlatformMismatch { .. }) => msg!(
+                    "{file} is made for another system, so it wasn't installed. Choose a version for this one.",
+                    file = file
+                ),
+                Some(Reason::MissingRuntime { .. }) => msg!(
+                    "{file} needs a program to run it that this device doesn't have, so it wasn't installed.",
+                    file = file
+                ),
+                Some(Reason::ExecutionDisabled) => msg!(
+                    "{file} has to run its installer, and running installers is turned off in Settings.",
+                    file = file
+                ),
+                _ => msg!(
+                    "{file} isn't a kind of installer, archive or game folder Caskade can install, so it wasn't installed.",
+                    file = file
+                ),
+            }
+        }
         FailureKind::Other => msg!("The install stopped {stage}.", stage = stage),
     };
     let note = match failure.security {
@@ -162,6 +190,28 @@ msgstr "Det hände igen. Säkerhetsprogram kan ta bort eller blockera filen; kon
                 failure.summary,
                 "{kind:?}"
             );
+        }
+        // An install the installer has no way to do says why in words,
+        // never as the installer's reason (#76).
+        for reason in [
+            Reason::UnsupportedFormat {
+                format: Format::Directory,
+            },
+            Reason::UnsupportedFormat {
+                format: Format::Msi,
+            },
+            Reason::UnknownFormat,
+            Reason::ExecutionDisabled,
+        ] {
+            let failure = Failure::unsupported(&reason, Some("/games/Snake".into()));
+            assert_eq!(failure.reason(), Some(reason.clone()));
+            assert_eq!(
+                failure_message(&failure).render(),
+                failure.summary,
+                "{reason:?}"
+            );
+            assert!(failure.summary.starts_with("\u{201c}Snake\u{201d} "));
+            assert!(!failure.summary.contains('{'), "{}", failure.summary);
         }
     }
 

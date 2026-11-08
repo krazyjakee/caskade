@@ -54,6 +54,11 @@ pub enum FailureKind {
     DiskFull,
     /// The download failed: the network or the server.
     Download,
+    /// Caskade has no way to install the input: a kind of file or folder it
+    /// doesn't install, a build for another system, a missing runner or an
+    /// installer that may not run. Its [`Reason`](crate::Reason) is the
+    /// detail ([`Failure::unsupported`]).
+    Unsupported,
     Other,
 }
 
@@ -271,6 +276,27 @@ impl Failure {
     pub fn resummarize(&mut self) {
         self.summary = summary(self);
     }
+
+    /// An install of `path` the installer has no way to do
+    /// ([`InstallOutcome::Unsupported`](crate::InstallOutcome::Unsupported)),
+    /// and why: the [`Reason`](crate::Reason) is kept as the detail.
+    pub fn unsupported(reason: &crate::Reason, path: Option<PathBuf>) -> Self {
+        Self::new(
+            FailureKind::Unsupported,
+            FailureStage::Inspect,
+            path,
+            false,
+            &serde_json::to_string(reason).unwrap_or_default(),
+        )
+    }
+
+    /// Why an [`FailureKind::Unsupported`] failure happened.
+    pub fn reason(&self) -> Option<crate::Reason> {
+        if self.kind != FailureKind::Unsupported {
+            return None;
+        }
+        serde_json::from_str(&self.detail).ok()
+    }
 }
 
 /// Whether an executor error is about the environment (the source, the
@@ -316,7 +342,7 @@ fn possibly_security(kind: FailureKind) -> bool {
 /// Which finding wins when an error says several things.
 fn rank(kind: FailureKind) -> u8 {
     match kind {
-        FailureKind::Other => 0,
+        FailureKind::Other | FailureKind::Unsupported => 0,
         FailureKind::Download => 1,
         FailureKind::MissingStaged => 2,
         FailureKind::MissingOutput => 3,
@@ -388,6 +414,8 @@ fn actions(kind: FailureKind, stage: FailureStage, remote: bool) -> Vec<Recovery
             vec![Retry, ChooseDestination]
         }
         FailureKind::Download => vec![Retry, Redownload],
+        // The same input does the same again: only another one helps.
+        FailureKind::Unsupported => vec![LocateSource],
         FailureKind::Other => vec![Retry],
     };
     if remote && kind == FailureKind::MissingSource {
@@ -459,6 +487,28 @@ fn summary(failure: &Failure) -> String {
             "The download failed because the network or the server had trouble.".into()
         }
         FailureKind::Download => "The download failed.".into(),
+        FailureKind::Unsupported => {
+            let file = file_or("The file");
+            match failure.reason() {
+                Some(crate::Reason::UnsupportedFormat {
+                    format: crate::Format::Directory,
+                }) => format!(
+                    "{file} has no game program Caskade recognises, so it wasn't installed. Choose the game's installer or the folder with its program."
+                ),
+                Some(crate::Reason::PlatformMismatch { .. }) => format!(
+                    "{file} is made for another system, so it wasn't installed. Choose a version for this one."
+                ),
+                Some(crate::Reason::MissingRuntime { .. }) => format!(
+                    "{file} needs a program to run it that this device doesn't have, so it wasn't installed."
+                ),
+                Some(crate::Reason::ExecutionDisabled) => format!(
+                    "{file} has to run its installer, and running installers is turned off in Settings."
+                ),
+                _ => format!(
+                    "{file} isn't a kind of installer, archive or game folder Caskade can install, so it wasn't installed."
+                ),
+            }
+        }
         FailureKind::Other => format!("The install stopped {stage}."),
     };
     match failure.security {

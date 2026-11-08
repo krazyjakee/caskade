@@ -228,6 +228,50 @@ async fn download_torrent(
     }
 }
 
+/// Reads `path`, a folder known to be an installed game (a copy from
+/// another device), as a portable game whatever its files look like: a
+/// program without a known extension, archives or installers among its
+/// data. [`prepare`] would plan such a folder by its files, and refuse it
+/// or install one of them instead.
+pub async fn prepare_portable(path: PathBuf, ctx: &Context) -> PipelineResult<Prepared> {
+    if ctx.cancel.is_cancelled() {
+        return Err(ExecError::Cancelled.into());
+    }
+    caskade_jobs::blocking(
+        "Reading the game folder",
+        move || -> PipelineResult<Prepared> {
+            if !path.is_dir() {
+                return Err(format!("{} isn't a folder", path.display()).into());
+            }
+            let mut result =
+                probe::ProbeEngine::with_builtin_formats(probe::ProbeLimits::default())
+                    .probe_path(&path)?;
+            result.root.role = crate::Role::Application;
+            result
+                .root
+                .facts
+                .insert("folder.portable".into(), true.into());
+            Ok(Prepared {
+                resolved: input::ResolvedInput::Folder {
+                    path: path.clone(),
+                    classification: input::FolderKind::PortableGame,
+                    files: Vec::new(),
+                    installers: Vec::new(),
+                },
+                source: Input::Path(path.clone()),
+                path,
+                artifact: result.root,
+                io: result.io,
+                final_url: None,
+                download_url: None,
+                checksum: None,
+                downloaded: false,
+            })
+        },
+    )
+    .await?
+}
+
 /// Reads what [`prepare`] got.
 async fn finish(got: Got, ctx: &Context) -> PipelineResult<Prepared> {
     let (path, source, final_url, download_url, checksum, downloaded) = got;

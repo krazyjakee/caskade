@@ -486,8 +486,18 @@ impl InstallService {
             } else {
                 None
             };
-            match pipeline::input::prepare(input.to_owned(), &root.path, &job_id, &host, ctx).await
-            {
+            // A copy from another device is an installed game's folder:
+            // installed as it is, never planned by what its files look like
+            // (#76).
+            let copied = lock(&self.inner.jobs)
+                .get(id)
+                .is_some_and(|job| job.peer.is_some());
+            let prepared = if copied {
+                pipeline::input::prepare_portable(input.into(), ctx).await
+            } else {
+                pipeline::input::prepare(input.to_owned(), &root.path, &job_id, &host, ctx).await
+            };
+            match prepared {
                 Ok(prepared) => prepared,
                 Err(error) => {
                     if let Some(pipeline::NeedsDecision(question)) =
@@ -648,13 +658,19 @@ impl InstallService {
                     job.question = Some(question.clone());
                 });
             }
+            // Why, in words, with what can be done (#76): never the
+            // installer's reason as it is.
             InstallOutcome::Unsupported(reason) => {
+                self.record_failure(
+                    id,
+                    caskade_installer::failure::Failure::unsupported(
+                        &reason,
+                        Some(source.to_path_buf()),
+                    ),
+                );
                 self.update(id, |job| {
                     job.status = JobStatus::Failed;
-                    job.error = Some(format!(
-                        "unsupported: {}",
-                        serde_json::to_string(&reason).unwrap_or_default()
-                    ));
+                    job.error = job.failure.as_ref().map(|failure| failure.summary.clone());
                 });
             }
         }

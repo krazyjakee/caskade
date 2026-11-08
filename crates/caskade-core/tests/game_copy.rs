@@ -560,3 +560,205 @@ async fn a_game_sent_from_the_desk_waits_on_the_tv_until_confirmed() {
         std::fs::read(folder.join("Celeste.exe")).unwrap()
     );
 }
+
+/// Snake, a web game saved for offline play on `core`: its bundle in the
+/// storage root, its entry playing the page.
+async fn add_snake(core: &Core, url: &str) -> (String, String) {
+    let folder = core.games.join("Snake");
+    let bundle = caskade_core::web::bundle::Bundle::create(&folder, &url.parse().unwrap()).unwrap();
+    bundle
+        .put(
+            &format!("{url}index.html").parse().unwrap(),
+            200,
+            Some("text/html"),
+            b"<canvas></canvas>",
+        )
+        .unwrap();
+    bundle.save().unwrap();
+    let game = core.store.upsert_game(&Game::new("Snake")).await.unwrap();
+    let root = core.store.roots().await.unwrap().remove(0);
+    let mut entry = GameEntry::new(&game.id, caskade_core::web::WEB_SOURCE, url);
+    entry.state = InstallState::Installed;
+    entry.launch = Some(LaunchSpec::Web { url: url.into() });
+    entry.location = Some(InstallLocation::Managed {
+        root_id: root.id,
+        rel_dir: "Snake".into(),
+    });
+    let entry = core.store.upsert_entry(&entry).await.unwrap();
+    (game.id, entry.id)
+}
+
+/// A web game's offline copy isn't a folder to install (#76): it arrives as
+/// the offline copy of the same game, playing the same page, and no
+/// install runs.
+#[tokio::test(flavor = "multi_thread")]
+async fn a_web_games_offline_copy_arrives_as_the_same_games_offline_copy() {
+    let desk = core("Desk").await;
+    let tv = core("TV").await;
+    pair(&desk, &tv).await;
+    let url = "https://games.example/snake/";
+    let (_, desk_entry) = add_snake(&desk, url).await;
+    // The game came over with the library; its web release didn't.
+    let tv_game = tv.store.upsert_game(&Game::new("Snake")).await.unwrap();
+
+    let job = tv
+        .install
+        .copy_from_device(
+            PeerCopyTarget {
+                device_id: id(&desk).await,
+                device_name: "Desk".into(),
+                entry_id: desk_entry,
+                game_id: tv_game.id.clone(),
+                title: "Snake".into(),
+            },
+            None,
+        )
+        .await
+        .unwrap();
+    let done = finished(&tv.install, &job.id).await;
+    assert_eq!(done.status, JobStatus::Completed, "{done:?}");
+    assert_eq!(done.game_id.as_deref(), Some(tv_game.id.as_str()));
+    // The same game, not a new one.
+    let by_page = tv
+        .store
+        .entry_by_source(caskade_core::web::WEB_SOURCE.as_str(), url)
+        .await
+        .unwrap()
+        .expect("the web release");
+    assert_eq!(by_page.game_id, tv_game.id);
+
+    let entries = tv.store.entries_for_game(&tv_game.id).await.unwrap();
+    assert!(
+        !entries
+            .iter()
+            .any(|entry| entry.source_id.as_str() == "caskade-storage"),
+        "not installed as a folder: {entries:?}"
+    );
+    let web = entries
+        .iter()
+        .find(|entry| entry.source_id == caskade_core::web::WEB_SOURCE)
+        .expect("the game's web release");
+    assert_eq!(web.launch, Some(LaunchSpec::Web { url: url.into() }));
+    assert_eq!(web.state, InstallState::Installed);
+    let Some(InstallLocation::Managed { rel_dir, .. }) = &web.location else {
+        panic!("an offline copy in the TV's storage: {:?}", web.location);
+    };
+    let bundle = caskade_core::web::bundle::Bundle::open(tv.games.join(rel_dir)).unwrap();
+    assert!(bundle.has(&format!("{url}index.html").parse().unwrap()));
+    let staging = tv.dir.path().join("cache/copies/receive/incoming");
+    assert!(
+        !staging.exists() || std::fs::read_dir(&staging).unwrap().next().is_none(),
+        "staging left behind"
+    );
+}
+
+/// A web game played from its page has nothing to copy (#76): the device
+/// that has it doesn't announce a copy, and asked anyway it says why.
+#[tokio::test(flavor = "multi_thread")]
+async fn a_web_game_without_an_offline_copy_is_refused_and_says_why() {
+    let desk = core("Desk").await;
+    let tv = core("TV").await;
+    pair(&desk, &tv).await;
+    let url = "https://games.example/snake/";
+    let game = desk.store.upsert_game(&Game::new("Snake")).await.unwrap();
+    let mut entry = GameEntry::new(&game.id, caskade_core::web::WEB_SOURCE, url);
+    entry.state = InstallState::Installed;
+    entry.launch = Some(LaunchSpec::Web { url: url.into() });
+    let entry = desk.store.upsert_entry(&entry).await.unwrap();
+    let tv_game = tv.store.upsert_game(&Game::new("Snake")).await.unwrap();
+    let job = tv
+        .install
+        .copy_from_device(
+            PeerCopyTarget {
+                device_id: id(&desk).await,
+                device_name: "Desk".into(),
+                entry_id: entry.id,
+                game_id: tv_game.id,
+                title: "Snake".into(),
+            },
+            None,
+        )
+        .await
+        .unwrap();
+    let done = finished(&tv.install, &job.id).await;
+    assert_eq!(done.status, JobStatus::Failed);
+    assert!(
+        done.error
+            .as_deref()
+            .unwrap_or_default()
+            .contains("offline"),
+        "the reason says it has no offline copy: {:?}",
+        done.error
+    );
+}
+
+/// A copy is an installed game, whatever its files look like (#76): a
+/// Linux build whose program has no extension and whose data is in a zip
+/// arrives as it was, not refused as an unknown folder or unpacked.
+#[cfg(target_os = "linux")]
+#[tokio::test(flavor = "multi_thread")]
+async fn a_folder_without_a_known_program_arrives_as_it_was() {
+    let desk = core("Desk").await;
+    let tv = core("TV").await;
+    pair(&desk, &tv).await;
+    let folder = desk.dir.path().join("My Games").join("Lume");
+    std::fs::create_dir_all(folder.join("data")).unwrap();
+    std::fs::copy(
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../caskade-installer/tests/fixtures/bin/fixture-game-linux-x86_64"),
+        folder.join("lume"),
+    )
+    .unwrap();
+    std::fs::write(folder.join("data/levels.zip"), vec![7u8; 4096]).unwrap();
+    let game = desk.store.upsert_game(&Game::new("Lume")).await.unwrap();
+    let mut entry = GameEntry::new(&game.id, "manual".to_owned().into(), "lume");
+    entry.state = InstallState::Installed;
+    entry.location = Some(InstallLocation::External {
+        path: folder.clone(),
+    });
+    entry.launch = Some(LaunchSpec::Executable {
+        path: folder.join("lume"),
+        args: Vec::new(),
+        cwd: None,
+        env: Default::default(),
+    });
+    let entry = desk.store.upsert_entry(&entry).await.unwrap();
+    let tv_game = tv.store.upsert_game(&Game::new("Lume")).await.unwrap();
+    let job = tv
+        .install
+        .copy_from_device(
+            PeerCopyTarget {
+                device_id: id(&desk).await,
+                device_name: "Desk".into(),
+                entry_id: entry.id,
+                game_id: tv_game.id.clone(),
+                title: "Lume".into(),
+            },
+            None,
+        )
+        .await
+        .unwrap();
+    let done = finished(&tv.install, &job.id).await;
+    assert_eq!(done.status, JobStatus::Completed, "{done:?}");
+    assert_eq!(done.game_id.as_deref(), Some(tv_game.id.as_str()));
+    let entries = tv.store.entries_for_game(&tv_game.id).await.unwrap();
+    let copy = entries
+        .iter()
+        .find(|entry| entry.source_id.as_str() == "caskade-storage")
+        .expect("a managed release");
+    let Some(InstallLocation::Managed { rel_dir, .. }) = &copy.location else {
+        panic!("not managed: {:?}", copy.location)
+    };
+    let Some(LaunchSpec::Executable { path, .. }) = &copy.launch else {
+        panic!("no program: {:?}", copy.launch)
+    };
+    assert!(path.ends_with("lume"), "{path:?}");
+    let installed = tv.games.join(rel_dir);
+    for file in ["lume", "data/levels.zip"] {
+        assert_eq!(
+            std::fs::read(installed.join(file)).unwrap(),
+            std::fs::read(folder.join(file)).unwrap(),
+            "{file}"
+        );
+    }
+}
