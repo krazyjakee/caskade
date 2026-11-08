@@ -16,7 +16,10 @@
 //! The game and video windows (`web_player`, `video_player`) follow the
 //! same [`Policy`], reloading or closing themselves.
 //!
-//! WebView2 reports failures on Windows; WebKitGTK reports content-process termination on Linux.
+//! WebView2 reports failures on Windows; WebKitGTK reports its web process
+//! exiting or going unresponsive on Linux. A main-window failure on the GPU
+//! renderer Caskade picked (`webkit.rs`) restarts on WebKit's own instead
+//! of reloading (#72).
 
 // Elsewhere nothing reports a failure, so recovery never runs.
 #![cfg_attr(not(any(windows, target_os = "linux")), allow(dead_code))]
@@ -215,7 +218,8 @@ pub fn watch<R: Runtime>(window: &WebviewWindow<R>, restarts: PathBuf) {
             attach_webkit(&platform.inner(), move |failed| {
                 log("main window", &failed);
                 let app = app.clone();
-                std::thread::spawn(move || recover(&app, Failure::RendererExited, failed.url));
+                let failure = failure_of(failed.kind);
+                std::thread::spawn(move || recover(&app, failure, failed.url));
             });
         }) {
             tracing::warn!(%error, "can't watch WebKit's web process");
@@ -239,6 +243,13 @@ fn recover<R: Runtime>(app: &AppHandle<R>, failure: Failure, url: Option<String>
         .lock()
         .unwrap_or_else(std::sync::PoisonError::into_inner)
         .next(failure, Instant::now());
+    // The page failed on the GPU renderer Caskade picked: restart on
+    // WebKit's own rather than reload into the same failure.
+    let step = if step != Step::Wait && crate::webkit::record_gpu_failure() {
+        Step::Restart
+    } else {
+        step
+    };
     match step {
         Step::Wait => {}
         Step::Reload => {
@@ -383,13 +394,44 @@ fn attach_webkit(
     notify: impl Fn(caskade_webview2::ProcessFailure) + 'static,
 ) {
     use webkit2gtk::WebViewExt;
+    use webkit2gtk::glib::object::ObjectExt;
+    let notify = std::rc::Rc::new(notify);
+    let exited = notify.clone();
     view.connect_web_process_terminated(move |view, reason| {
-        notify(caskade_webview2::ProcessFailure {
+        exited(caskade_webview2::ProcessFailure {
             kind: caskade_webview2::Kind::RendererExited,
             reason: "WebKit web process terminated",
             exit_code: None,
             process: Some(format!("{reason:?}")),
             url: view.uri().map(|uri| uri.to_string()),
+        });
+    });
+    let hung = move |view: &webkit2gtk::WebView| {
+        notify(caskade_webview2::ProcessFailure {
+            kind: caskade_webview2::Kind::RendererUnresponsive,
+            reason: "WebKit web process unresponsive",
+            exit_code: None,
+            process: None,
+            url: view.uri().map(|uri| uri.to_string()),
+        });
+    };
+    let hung = std::rc::Rc::new(hung);
+    view.connect_is_web_process_responsive_notify(move |view| {
+        if view.is_web_process_responsive() {
+            return;
+        }
+        hung(view);
+        // WebKit says so once, and the policy waits for a hang that lasts:
+        // say it again if it still hangs past the grace.
+        let view = view.downgrade();
+        let again = hung.clone();
+        let past_grace = HANG_GRACE + Duration::from_secs(1);
+        webkit2gtk::glib::timeout_add_local_once(past_grace, move || {
+            if let Some(view) = view.upgrade()
+                && !view.is_web_process_responsive()
+            {
+                again(&view);
+            }
         });
     });
 }

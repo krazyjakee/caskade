@@ -212,7 +212,7 @@ Sessions survive restarts: recovery state records running processes by `ProcessI
 - **Notifications**: a feed in the library database with versioned read state; new games batch hourly.
 - **Backups**: `VACUUM INTO` snapshots plus optional components in a zip with a manifest of SHA-256s, written as `.partial`, verified, then renamed. Restores are staged and applied before the library opens, keeping the old profile until the restored one opens.
 - **App updates**: `tauri-plugin-updater` against `latest.json` on the newest GitHub release, minisign-verified. Debs install through `pkexec apt-get`.
-- **Webview recovery**: WebView2 process failures reload or restart with caps counted across processes.
+- **Webview recovery**: a page whose process exits, or hangs for 20 seconds, reloads; failures that keep coming restart the app, with caps counted across processes. WebView2 reports its process failures on Windows, WebKitGTK its web process exiting or going unresponsive on Linux.
 - **Tray**: AppIndicator loaded at run time on Linux; hides before exit and keeps answering the bus for 500 ms to spare Cinnamon's watcher.
 - **System statistics**: sampled once a second on a blocking thread, only while a watcher holds a lease.
 ### Localization
@@ -263,7 +263,7 @@ Recovery code is bounded (fixed attempts or capped, jittered backoff, one layer 
 - Big lists are virtualised; artwork is thumbnailed and served from cache, never decoded at full size in the grid.
 - On Linux, glibc's malloc arenas are capped at 2 and free memory is trimmed every minute (`caskade-malloc`). A `MALLOC_ARENA_MAX` in the environment wins.
 - Background work reacts to writes (`LibraryStore::writes`) instead of rereading whole tables on a timer. Large files (the Ludusavi manifest) are parsed incrementally. Threads start only for features in use: copy stores open on first use, the plugin epoch thread starts with the first plugin.
-- On NVIDIA's proprietary driver under X11, WebKitGTK paints on the CPU; the app restarts itself with the DMABUF renderer, and where WebKit still paints on the CPU, `<html data-paint="cpu">` pauses ambient animation.
+- On NVIDIA's proprietary driver under X11, WebKitGTK paints on the CPU; the app restarts itself with the DMABUF renderer over shared memory (`webkit.rs`), unless a `WEBKIT_*` renderer variable or `LIBGL_ALWAYS_SOFTWARE` (a software-rendering session) is set. If the main window's page then crashes or hangs, the driver and WebKit library are recorded in the cache (`webkit-gpu-failed`) and the app restarts on WebKit's own renderer; it tries the GPU again once either changes. Where WebKit still paints on the CPU, `<html data-paint="cpu">` pauses ambient animation.
 
 ## 10. Build, test and release
 

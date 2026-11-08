@@ -84,9 +84,10 @@ http-body-util = "0.1"
 # A share link as a QR code in console mode (#247): SVG only, no image crates.
 qrcode = { version = "=0.14.1", default-features = false, features = ["svg"] }
 
-# Reads WebKitGTK's rendering policy (`webkit.rs`); wry already builds it.
+# Reads WebKitGTK's rendering policy (`webkit.rs`) and watches its web
+# process (`webview_recovery.rs`); wry already builds it.
 [target.'cfg(target_os = "linux")'.dependencies]
-webkit2gtk = "2"
+webkit2gtk = { version = "2", features = ["v2_34"] }
 # Present the main window to bring it back from minimized (`main_window.rs`).
 gtk = "0.18"
 gdkx11 = "0.18"
