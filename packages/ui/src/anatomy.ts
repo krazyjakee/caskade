@@ -237,6 +237,8 @@ export const anatomy = {
       "playing-elsewhere": "In console mode, the paired device the game is running on.",
       "played-on":
         "On Home's Recently Played, the other device the game was last played on, in place of the subtitle.",
+      starting:
+        "Starting…, over the art from a double click or Play until the game runs, the launch fails or a question stops it.",
     },
     states: {
       "data-status": gameStatus,
@@ -253,6 +255,7 @@ export const anatomy = {
       "select",
       "playing-elsewhere",
       "played-on",
+      "starting",
       "data-storage-status",
       "data-tile",
       "data-selected",
@@ -793,6 +796,8 @@ export const anatomy = {
       size: "Size on disk.",
       actions: "The actions menu button.",
       select: "In selection mode, the check that shows whether the game is chosen.",
+      starting:
+        "Starting…, after the title from a double click or Play until the game runs, the launch fails or a question stops it.",
     },
     states: {
       "data-status": ["installed", "not-installed", "emulated"],

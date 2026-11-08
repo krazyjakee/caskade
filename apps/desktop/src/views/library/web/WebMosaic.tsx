@@ -9,6 +9,7 @@ import { libraryKeys, useLibraryApi } from "../../../api/provider";
 import type { GameSummary, LibraryQuery } from "../../../api/types";
 import { AgeLockLabel } from "../../game/AgeGate";
 import { useGameActions } from "../GameActions";
+import { StartingMark } from "../StartingMark";
 import { type TileSize, tileSizes } from "./tiles";
 
 /** The most web games the mosaic shows: the core's page limit. */
@@ -93,6 +94,7 @@ const WebTile = memo(function WebTile({
         >
           {game.title}
         </p>
+        <StartingMark gameId={game.id} />
         {game.favorite && (
           <Heart
             data-part="favorite"

@@ -17,6 +17,7 @@ import type { GameSummary, LibraryFilter, LibraryLayout, LibrarySort } from "../
 import { PluginRowBadges } from "../../plugins/GameSlots";
 import { AgeLockLabel } from "../game/AgeGate";
 import { useGameActions } from "./GameActions";
+import { StartingMark } from "./StartingMark";
 
 /** Title, status, last played, playtime, size, actions. */
 const listColumns = "minmax(0,1fr) 7.5rem 7.5rem 5rem 5.5rem 2rem";
@@ -104,6 +105,7 @@ export const LibraryRow = memo(function LibraryRow({
         >
           {game.title}
         </Link>
+        <StartingMark gameId={game.id} inline />
         {game.adminPinNeeded && <AgeLockLabel />}
         {game.favorite && (
           <Heart

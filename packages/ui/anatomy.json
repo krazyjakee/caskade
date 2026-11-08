@@ -247,7 +247,8 @@
         "plugins",
         "select",
         "playing-elsewhere",
-        "played-on"
+        "played-on",
+        "starting"
       ],
       "states": {
         "data-status": [
@@ -739,7 +740,8 @@
         "playtime",
         "size",
         "actions",
-        "select"
+        "select",
+        "starting"
       ],
       "states": {
         "data-status": [

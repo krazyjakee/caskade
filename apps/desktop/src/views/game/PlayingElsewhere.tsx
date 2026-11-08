@@ -39,7 +39,7 @@ export function usePlayWhilePlayingElsewhere(gameId: string, next: (entryId: str
       }}
     />
   );
-  return { play, dialog };
+  return { play, asking: asking !== null, dialog };
 }
 
 function PlayingElsewhereDialog({

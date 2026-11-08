@@ -12,6 +12,7 @@ import { AgeLockLabel } from "../game/AgeGate";
 import { PlayingElsewhereMark } from "../game/PlayingElsewhere";
 import { usePlayedOnLabel } from "../home/PlayedOn";
 import { useGameActions } from "./GameActions";
+import { StartingMark } from "./StartingMark";
 
 /** A game in the library grid: its cover, its title and, unless it is a PC
  * game, its platform (or its first and how many more). The list layout is
@@ -61,6 +62,8 @@ export const LibraryCard = memo(function LibraryCard({
         className="group relative flex h-full flex-col overflow-hidden rounded-card border border-border bg-surface-raised outline-none transition-colors duration-(--cs-motion-duration-fast) hover:bg-surface-hover focus-visible:focus-ring-over"
       >
         <GameArt part="art" game={game} image={game.coverGrid} className="min-h-0 flex-1 w-full" />
+        {/* Above the title strip (h-14). */}
+        <StartingMark gameId={game.id} className="bottom-14" />
         {game.adminPinNeeded && (
           <span className="absolute top-2 left-2 rounded-control bg-surface-base/90 px-2 py-1">
             <AgeLockLabel />

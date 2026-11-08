@@ -378,6 +378,7 @@ Root: `[data-cs="game-card"]`
 | `select` (app only) | `[data-cs="game-card"] [data-part="select"]` | In selection mode, the check that shows whether the game is chosen. |
 | `playing-elsewhere` (app only) | `[data-cs="game-card"] [data-part="playing-elsewhere"]` | In console mode, the paired device the game is running on. |
 | `played-on` (app only) | `[data-cs="game-card"] [data-part="played-on"]` | On Home's Recently Played, the other device the game was last played on, in place of the subtitle. |
+| `starting` (app only) | `[data-cs="game-card"] [data-part="starting"]` | Starting…, over the art from a double click or Play until the game runs, the launch fails or a question stops it. |
 
 Slots: `plugins` hold the caller's content; parts inside them belong to that content.
 
@@ -951,6 +952,7 @@ Root: `[data-cs="game-row"]`
 | `size` | `[data-cs="game-row"] [data-part="size"]` | Size on disk. |
 | `actions` | `[data-cs="game-row"] [data-part="actions"]` | The actions menu button. |
 | `select` | `[data-cs="game-row"] [data-part="select"]` | In selection mode, the check that shows whether the game is chosen. |
+| `starting` | `[data-cs="game-row"] [data-part="starting"]` | Starting…, after the title from a double click or Play until the game runs, the launch fails or a question stops it. |
 
 Slots: `plugins` hold the caller's content; parts inside them belong to that content.
 

@@ -108,7 +108,13 @@ export function usePlayWithSaves(start: (entryId: string) => void) {
       {note && <SaveNote result={note} dismiss={() => setNote(null)} />}
     </>
   );
-  return { play, checking: check.isPending, dialog };
+  return {
+    play,
+    checking: check.isPending,
+    /** A conflict's question, or the wait for a save on its way. */
+    asking: conflict !== null || arriving !== null,
+    dialog,
+  };
 }
 
 /** Another device's newer save is on its way: looks again every couple of

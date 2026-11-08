@@ -1191,6 +1191,32 @@ describe("the shell's catalogued anatomy, and the app-only parts of shared compo
     expect(survey(seen)).toEqual([]);
   });
 
+  for (const [where, path, root] of [
+    ["a card", "/library", "game-card"],
+    ["a row", "/list", "game-row"],
+  ] as const)
+    it(`renders a game starting from a double click on ${where}`, async () => {
+      fakeViewport();
+      onTestFinished(() => {
+        vi.restoreAllMocks();
+        vi.unstubAllGlobals();
+      });
+      const app = renderApp(path);
+      // The launch never answers, so it stays starting.
+      const launch = vi
+        .spyOn(app.api, "launchGame")
+        .mockImplementation(() => new Promise(() => {}));
+      // The first game has nothing that can launch; the second has.
+      const second = games[1] as (typeof games)[number];
+      const links = await screen.findAllByRole("link", { name: new RegExp(second.title) });
+      const link = links.find((each) => each.closest(`[data-cs="${root}"]`));
+      if (!link) throw new Error(`no ${root}`);
+      fireEvent.doubleClick(link);
+      await waitFor(() => expect(launch).toHaveBeenCalled());
+      expect(document.querySelector(`[data-cs="${root}"] [data-part="starting"]`)).not.toBeNull();
+      expect(survey(seen)).toEqual([]);
+    });
+
   it("renders adding a game by hand: a target, a refusal and duplicates", async () => {
     renderApp("/library");
     const open = async (item: string) => {

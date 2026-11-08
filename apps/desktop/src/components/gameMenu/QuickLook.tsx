@@ -18,7 +18,7 @@ import { AgeLock } from "../../views/game/AgeGate";
 import { useOpenGame } from "../../views/game/origin";
 import { AgeRatingLabel } from "../AgeRatingLabel";
 import { playableEntry } from "./GameMenu";
-import type { GameMenuTarget } from "./GameMenuHost";
+import { type GameMenuTarget, useGameStarting } from "./GameMenuHost";
 
 /** A game at a glance, over the view it was opened from: its art,
  * platforms, playtime, last play, size, release, genres and description,
@@ -52,6 +52,8 @@ export function QuickLook({
   const ratings = useGameAgeRatings(target.gameId).data?.ratings ?? [];
   const unavailable = useUnavailableStorageEntries();
   const running = sessions?.find((session) => session.endedAt === null);
+  // A double click on its card, or the menu's Play, is starting it.
+  const starting = useGameStarting(target.gameId) && !running;
   const playable = game ? playableEntry(game.entries, unavailable, game.defaultEntryId) : undefined;
   // Enabled while the details load; the launch picks the entry then.
   const canPlay = !game || Boolean(playable);
@@ -60,7 +62,7 @@ export function QuickLook({
       stop.mutate(running.id);
       return;
     }
-    if (!canPlay) return;
+    if (!canPlay || starting) return;
     close();
     play(playable?.id);
   };
@@ -136,10 +138,16 @@ export function QuickLook({
               icon={running ? Square : Play}
               data-part="play"
               data-focus-default
-              isDisabled={!canPlay || stop.isPending}
+              isDisabled={!canPlay || stop.isPending || starting}
               onPress={start}
             >
-              {running ? (stop.isPending ? t`Stopping…` : stopLabel) : playLabel}
+              {running
+                ? stop.isPending
+                  ? t`Stopping…`
+                  : stopLabel
+                : starting
+                  ? t({ message: "Starting…", comment: "The Play button while the game starts" })
+                  : playLabel}
             </Button>
             <Button icon={Info} data-part="open" onPress={open}>
               <Trans>View more</Trans>

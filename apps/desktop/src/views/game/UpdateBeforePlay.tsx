@@ -47,7 +47,7 @@ export function usePlayWithUpdates(gameId: string, start: (entryId: string) => v
       }}
     />
   );
-  return { play, checking: check.isPending, dialog };
+  return { play, checking: check.isPending, asking: offer !== null, dialog };
 }
 
 /** Starts the game once its update job has completed. */

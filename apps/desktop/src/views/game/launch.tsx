@@ -128,6 +128,16 @@ export function useGameLaunch(gameId: string) {
     /** A PIN, profile or disc question is open; its dialog shows the
      * launch's error. */
     asking: prompt !== null || gate !== null || hostBusy !== null,
+    /** Any question before or at the launch is open: the PIN, a newer
+     * release's offer, playing elsewhere, the saves, a profile or disc.
+     * Its answer goes on with the launch, or ends it. */
+    questioning:
+      prompt !== null ||
+      gate !== null ||
+      hostBusy !== null ||
+      updates.asking ||
+      elsewhere.asking ||
+      saves.asking,
     dialogs,
   };
 }

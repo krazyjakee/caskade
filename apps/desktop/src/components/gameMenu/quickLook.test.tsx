@@ -109,6 +109,37 @@ it("plays once on a double click", async () => {
   expect(app.router.state.location.pathname).toBe("/library");
 });
 
+it("says Starting… at once on a double click, until the game runs", async () => {
+  const app = renderApp("/library?filter=all&sort=title");
+  // The launch answers when the test says so.
+  let answer = () => {};
+  const launch = app.library.launchGame.bind(app.library);
+  const spy = vi.spyOn(app.library, "launchGame").mockImplementation(
+    (entryId, choice) =>
+      new Promise((resolve, reject) => {
+        answer = () => launch(entryId, choice).then(resolve, reject);
+      }),
+  );
+  const link = await card(/Fixture Game 0002/);
+  const tile = link.closest<HTMLElement>('[data-cs="game-card"]');
+  if (!tile) throw new Error("no card");
+  fireEvent.click(link, { detail: 1 });
+  fireEvent.click(link, { detail: 2 });
+  fireEvent.doubleClick(link);
+  const panel = await screen.findByRole("dialog", { name: "Fixture Game 0002" });
+  await waitFor(() => expect(within(tile).getByRole("status").textContent).toBe("Starting…"));
+  const play = panel.querySelector<HTMLButtonElement>('[data-part="play"]');
+  expect(play?.textContent).toBe("Starting…");
+  expect(play?.disabled).toBe(true);
+  // Another double click while it starts doesn't start it twice.
+  await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
+  fireEvent.doubleClick(link);
+  answer();
+  await waitFor(() => expect(play?.textContent).toBe("Stop"));
+  expect(within(tile).queryByRole("status")).toBeNull();
+  expect(spy).toHaveBeenCalledTimes(1);
+});
+
 it("View more opens the page, whose Back returns to the library", async () => {
   const app = renderApp("/library?filter=all&sort=title");
   fireEvent.click(await card(/Fixture Game 0004/));

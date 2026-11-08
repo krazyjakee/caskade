@@ -11,6 +11,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { useGame } from "../../api/hooks";
@@ -75,6 +76,31 @@ interface Host {
    * game page (#178). */
   dialog(target: GameMenuTarget, dialog: GameMenuDialog): void;
   current: GameMenuTarget | null;
+  /** The game whose Play is on its way. */
+  starting: Starting;
+}
+
+/** The game a Play from the host is starting, from the moment it is asked
+ * for until the game runs, the launch fails or a question stops it: the
+ * checks before a launch (updates, saves) can take a few seconds. A store,
+ * so that only that game's card re-renders. */
+class Starting {
+  private gameId: string | null = null;
+  private listeners = new Set<() => void>();
+  get = () => this.gameId;
+  set = (gameId: string | null) => {
+    if (this.gameId === gameId) return;
+    this.gameId = gameId;
+    for (const listener of this.listeners) listener();
+  };
+  /** Clears it, if `gameId` is still the one starting. */
+  end = (gameId: string) => {
+    if (this.gameId === gameId) this.set(null);
+  };
+  subscribe = (listener: () => void) => {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  };
 }
 
 const HostContext = createContext<Host | null>(null);
@@ -118,6 +144,20 @@ export function usePlayGame() {
   const host = useContext(HostContext);
   return host ? (target: GameMenuTarget) => host.play(target) : null;
 }
+
+/** Whether a Play from the game menu host (its menu's, its quick look's, a
+ * double click) is starting `gameId`: see `Starting`. Re-renders only when
+ * that changes for this game. */
+export function useGameStarting(gameId: string): boolean {
+  const starting = useContext(HostContext)?.starting;
+  return useSyncExternalStore(
+    starting?.subscribe ?? noop,
+    () => starting?.get() === gameId,
+    () => false,
+  );
+}
+
+const noop = () => () => {};
 
 /** What choosing a game does (a click on a card, a list row or a search
  * suggestion; a pad's A in console mode): in desktop mode its summary
@@ -230,6 +270,7 @@ export function GameMenuHost({ children }: { children: ReactNode }) {
     dialog: GameMenuDialog;
     count: number;
   } | null>(null);
+  const [starting] = useState(() => new Starting());
   const host = useMemo<Host>(
     () => ({
       open: (target, anchor) => setMenu({ target, anchor }),
@@ -245,12 +286,15 @@ export function GameMenuHost({ children }: { children: ReactNode }) {
               : null),
         });
       },
-      play: (target) =>
+      play: (target) => {
+        // A second double click while the first is starting: one launch.
+        if (starting.get() === target.gameId) return;
         setDialog((current) => ({
           target,
           dialog: { type: "play" },
           count: (current?.count ?? 0) + 1,
-        })),
+        }));
+      },
       edit: (target) =>
         setDialog((current) => ({
           target,
@@ -260,8 +304,9 @@ export function GameMenuHost({ children }: { children: ReactNode }) {
       dialog: (target, next) =>
         setDialog((current) => ({ target, dialog: next, count: (current?.count ?? 0) + 1 })),
       current: menu?.target ?? null,
+      starting,
     }),
-    [menu],
+    [menu, starting],
   );
   const close = () => setDialog(null);
   return (
@@ -361,6 +406,7 @@ export function GameMenuHost({ children }: { children: ReactNode }) {
           action={dialog.dialog.action}
           title={dialog.target.title}
           close={close}
+          starting={starting}
         />
       )}
       {dialog?.dialog.type === "tool" && (
@@ -384,16 +430,19 @@ function PlayRequest({
   action,
   title,
   close,
+  starting,
 }: {
   gameId: string;
   entryId?: string;
   action?: string;
   title: string;
   close: () => void;
+  starting: Starting;
 }) {
   const { t } = useLingui();
   const flow = useGameLaunch(gameId);
-  const game = useGame(gameId).data;
+  const details = useGame(gameId);
+  const game = details.data;
   const unavailable = useUnavailableStorageEntries();
   const entry =
     entryId ??
@@ -412,6 +461,23 @@ function PlayRequest({
     : flow.launch.isError && !flow.asking
       ? flow.launch.error.message
       : null;
+  // Starting from the first frame, through the details and the checks
+  // before the launch, until it answers or asks something. After a
+  // question, only its answer's checks and launch are.
+  const settled = flow.launch.isSuccess || flow.launch.isError;
+  const [asked, setAsked] = useState(false);
+  useEffect(() => {
+    if (flow.questioning || settled) setAsked(true);
+  }, [flow.questioning, settled]);
+  const pending =
+    !nothing &&
+    !flow.questioning &&
+    (asked || settled ? flow.checking || flow.launch.isPending : !details.isError);
+  useEffect(() => {
+    if (pending) starting.set(gameId);
+    else starting.end(gameId);
+  }, [pending, starting, gameId]);
+  useEffect(() => () => starting.end(gameId), [starting, gameId]);
   return (
     <>
       {flow.dialogs}

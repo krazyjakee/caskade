@@ -11500,7 +11500,10 @@ msgid "Starting the update…"
 msgstr "Startar uppdateringen…"
 
 #. A game starting, before its title is known
+#. On a game's card while the game starts
+#. The Play button while the game starts
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/desktop/src/components/gameMenu/QuickLook.tsx
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
 #: apps/desktop/src/components/saves/SaveConflictDialog.tsx
 #: apps/desktop/src/components/streaming/StopHostDialog.tsx
@@ -11508,6 +11511,7 @@ msgstr "Startar uppdateringen…"
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/game/PortsPanel.tsx
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
+#: apps/desktop/src/views/library/StartingMark.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 msgid "Starting…"
