@@ -2282,6 +2282,10 @@ msgstr ""
 msgid "This job is no longer in Activity."
 msgstr ""
 
+#: crates/caskade-core/src/install/mod.rs
+msgid "Cancel this job before removing it from Activity."
+msgstr ""
+
 #: crates/caskade-core/src/install/move_location.rs
 msgid "One game moved to {to}."
 msgid_plural "{n} games moved to {to}."

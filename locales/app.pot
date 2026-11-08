@@ -9782,7 +9782,9 @@ msgstr ""
 #. Confirms removing a ROM scanner
 #. Confirms removing an emulator or profile
 #. Removes a RomM server
+#. Takes a failed or cancelled job out of Activity; its files stay
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/desktop/src/views/activity/JobCard.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx

@@ -294,6 +294,8 @@ export const commands = {
 	moveGame: (entryId: string, targetRootId: string) => typedError<JobSnapshot_Serialize, string>(__TAURI_INVOKE("move_game", { entryId, targetRootId })),
 	jobGet: (id: string) => typedError<JobSnapshot_Serialize, string>(__TAURI_INVOKE("job_get", { id })),
 	jobCancel: (id: string) => typedError<JobSnapshot_Serialize, string>(__TAURI_INVOKE("job_cancel", { id })),
+	/**  Takes a finished job out of Activity. Its files stay. */
+	jobRemove: (id: string) => typedError<null, string>(__TAURI_INVOKE("job_remove", { id })),
 	chooseInstallFiles: () => typedError<string[], string>(__TAURI_INVOKE("choose_install_files")),
 	chooseInstallFolder: () => typedError<string | null, string>(__TAURI_INVOKE("choose_install_folder")),
 	launchGame: (entryId: string) => typedError<LaunchTicket, ErrorReport_Serialize>(__TAURI_INVOKE("launch_game", { entryId })),

@@ -32,7 +32,14 @@ function renderFailed(job: JobSnapshot) {
   render(
     <QueryClientProvider client={createLibraryQueryClient()}>
       <ActivityProvider api={api}>
-        <JobCard job={job} busy={false} cancel={vi.fn()} retry={vi.fn()} openQuestion={vi.fn()} />
+        <JobCard
+          job={job}
+          busy={false}
+          cancel={vi.fn()}
+          remove={vi.fn()}
+          retry={vi.fn()}
+          openQuestion={vi.fn()}
+        />
       </ActivityProvider>
     </QueryClientProvider>,
   );

@@ -60,6 +60,24 @@ fn game(dir: &Path) -> String {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn a_finished_job_can_be_removed_from_activity() {
+    let temp = tempfile::tempdir().unwrap();
+    let (store, service) = service().await;
+    root(&store, temp.path(), "root-a").await;
+    let gone = temp.path().join("Removed Game");
+    let queued = service
+        .install(gone.to_string_lossy().into_owned(), None)
+        .await
+        .unwrap();
+    let job = stopped(&service, &queued.id).await;
+    assert_eq!(job.status, JobStatus::Failed, "{job:?}");
+    service.remove(&queued.id).unwrap();
+    assert!(service.job(&queued.id).is_none());
+    assert!(service.jobs().iter().all(|job| job.id != queued.id));
+    assert!(service.remove(&queued.id).is_err());
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn a_missing_source_waits_for_the_user_then_installs_from_the_located_one() {
     let temp = tempfile::tempdir().unwrap();
     let (store, service) = service().await;

@@ -156,7 +156,7 @@ Play a game installed on another device in the house, streamed over the local ne
 
 ### 4.15 Activity and notifications
 
-- Jobs show progress, wait for answers, recover after a failure (try again, download again, locate the installer, choose another location) and survive restarts.
+- Jobs show progress, wait for answers, recover after a failure (try again, download again, locate the installer, choose another location) and survive restarts. A failed or cancelled job can be removed from Activity; what it downloaded or installed stays.
 - The notification feed keeps finished work, failures, updates found, new games and achievement unlocks, with read state that survives restarts.
 
 ### 4.16 Backups

@@ -113,11 +113,18 @@ export function useJobActions() {
     mutationFn: async (
       action:
         | { type: "cancel"; jobId: string }
+        | { type: "remove"; jobId: string }
         | { type: "retry"; jobId: string; strategyId?: string }
         | { type: "answer"; jobId: string; questionId: string; choiceId: string },
     ) => {
       if (action.type === "cancel") await api.cancel(action.jobId);
-      else if (action.type === "answer")
+      else if (action.type === "remove") {
+        await api.remove(action.jobId);
+        // The list keeps jobs it has seen (`mergeJobs`), so it drops this one.
+        client.setQueryData<JobSnapshot[]>(activityKey, (current) =>
+          current?.filter((job) => job.id !== action.jobId),
+        );
+      } else if (action.type === "answer")
         await api.answer(action.jobId, action.questionId, action.choiceId);
       else {
         const job = await api.retry(action.jobId, action.strategyId);

@@ -162,6 +162,7 @@ function JobsPanel() {
               job={job}
               busy={action.isPending}
               cancel={() => action.mutate({ type: "cancel", jobId: job.id })}
+              remove={() => action.mutate({ type: "remove", jobId: job.id })}
               retry={(strategyId) =>
                 action.mutate(
                   { type: "retry", jobId: job.id, strategyId },

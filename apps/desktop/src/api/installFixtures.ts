@@ -66,6 +66,10 @@ export function createInstallFixtureApi(
       const job = find(id);
       emit({ ...job, revision: job.revision + 1, status: "cancelled", question: undefined });
     },
+    async remove(id) {
+      find(id);
+      jobs = jobs.filter((job) => job.id !== id);
+    },
     async retry(id, strategyId) {
       const job = find(id);
       const next = {

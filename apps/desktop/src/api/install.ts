@@ -84,6 +84,8 @@ export interface InstallApi {
   install(input: InstallInput, rootId?: string): Promise<JobSnapshot>;
   choosePaths(kind: "file" | "folder"): Promise<string[]>;
   cancel(jobId: string): Promise<void>;
+  /** Takes a finished job out of Activity; its files stay. */
+  remove(jobId: string): Promise<void>;
   /** Without a strategy, the job runs again as it ran before. */
   retry(jobId: string, strategyId?: string): Promise<JobSnapshot>;
   answer(jobId: string, questionId: string, choiceId: string): Promise<void>;
@@ -101,6 +103,9 @@ export function mergeJobs(current: JobSnapshot[] = [], incoming: JobSnapshot[]):
   }
   return [...jobs.values()];
 }
+/** A failed or cancelled job can be removed from Activity. */
+export const canRemove = (job: JobSnapshot) =>
+  job.status === "failed" || job.status === "cancelled";
 export const isActiveJob = (job: JobSnapshot) =>
   job.status === "running" || job.status === "queued" || job.status === "needs_user";
 /** A failed or cancelled install, update or copy from another device can

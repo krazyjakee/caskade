@@ -2,10 +2,10 @@ import { Button } from "@caskade/ui";
 import type { MessageDescriptor } from "@lingui/core";
 import { msg, plural } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
-import { ListChecks, RotateCcw, X } from "lucide-react";
+import { ListChecks, RotateCcw, Trash2, X } from "lucide-react";
 import { useId } from "react";
 import { Disclosure, DisclosurePanel, Heading } from "react-aria-components";
-import { canRetry, isActiveJob, type JobSnapshot } from "../../api/install";
+import { canRemove, canRetry, isActiveJob, type JobSnapshot } from "../../api/install";
 import { formatSize } from "../../api/presentation";
 import { useActionMenus } from "../../components/ActionMenu";
 import { JobFailurePanel } from "./JobRecovery";
@@ -24,12 +24,15 @@ export function JobCard({
   job,
   busy,
   cancel,
+  remove,
   retry,
   openQuestion,
 }: {
   job: JobSnapshot;
   busy: boolean;
   cancel: () => void;
+  /** Takes a failed or cancelled job out of Activity. */
+  remove: () => void;
   /** Without a strategy, the job runs again as it ran before. */
   retry: (strategyId?: string) => void;
   openQuestion: () => void;
@@ -49,6 +52,10 @@ export function JobCard({
       ? formatSize(completed)
       : plural(completed, { one: "# file", other: "# files" });
   const title = job.title;
+  const removeLabel = t({
+    message: "Remove",
+    comment: "Takes a failed or cancelled job out of Activity; its files stay",
+  });
   return (
     <article
       {...menus.target(job.title, [
@@ -85,6 +92,13 @@ export function JobCard({
           isDisabled: busy,
           onAction: () => retry(id),
         })),
+        canRemove(job) && {
+          id: "remove",
+          label: removeLabel,
+          icon: Trash2,
+          isDisabled: busy,
+          onAction: remove,
+        },
       ])}
       aria-labelledby={heading}
       data-cs="activity-job"
@@ -121,6 +135,11 @@ export function JobCard({
               isDisabled={busy}
             >
               <RotateCcw className="size-4" /> {t({ message: "Retry", context: "job" })}
+            </Button>
+          )}
+          {canRemove(job) && (
+            <Button data-spatial="focusable" variant="ghost" onPress={remove} isDisabled={busy}>
+              <Trash2 className="size-4" /> {removeLabel}
             </Button>
           )}
         </div>

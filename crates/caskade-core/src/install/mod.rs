@@ -806,6 +806,26 @@ impl InstallService {
         .ok_or_else(|| Error::Invalid(crate::tr!("This job is no longer in Activity.")))
     }
 
+    /// Takes a finished job out of Activity, with its scheduled automatic
+    /// retry and its failure count. What it downloaded or installed stays.
+    pub fn remove(&self, id: &str) -> Result<()> {
+        let mut jobs = lock(&self.inner.jobs);
+        let job = jobs
+            .get(id)
+            .ok_or_else(|| Error::Invalid(crate::tr!("This job is no longer in Activity.")))?;
+        if !job.snapshot.status.is_finished() {
+            return Err(Error::Invalid(crate::tr!(
+                "Cancel this job before removing it from Activity."
+            )));
+        }
+        job.cancel.cancel();
+        jobs.remove(id);
+        drop(jobs);
+        self.forget_attempts(id);
+        lock(&self.inner.pending_roms).remove(id);
+        Ok(())
+    }
+
     pub fn jobs(&self) -> Vec<JobSnapshot> {
         lock(&self.inner.jobs)
             .values()

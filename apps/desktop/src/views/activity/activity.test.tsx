@@ -49,6 +49,7 @@ it("shows byte progress, the target, warnings and dependencies, with strategies 
       job={fixtureJob()}
       busy={false}
       cancel={vi.fn()}
+      remove={vi.fn()}
       retry={retry}
       openQuestion={vi.fn()}
     />,
@@ -65,6 +66,7 @@ it("shows byte progress, the target, warnings and dependencies, with strategies 
       job={fixtureJob({ status: "failed", error: "Archive is incomplete" })}
       busy={false}
       cancel={vi.fn()}
+      remove={vi.fn()}
       retry={retry}
       openQuestion={vi.fn()}
     />,
@@ -81,6 +83,7 @@ it("offers Retry on a failed or cancelled install, and not on other jobs", () =>
       job={fixtureJob(job)}
       busy={false}
       cancel={vi.fn()}
+      remove={vi.fn()}
       retry={retry}
       openQuestion={vi.fn()}
     />
@@ -100,12 +103,58 @@ it("offers Retry on a failed or cancelled install, and not on other jobs", () =>
   }
 });
 
+it("offers Remove on a failed or cancelled job, and not on others", () => {
+  const remove = vi.fn();
+  const card = (job: Parameters<typeof fixtureJob>[0]) => (
+    <JobCard
+      job={fixtureJob(job)}
+      busy={false}
+      cancel={vi.fn()}
+      remove={remove}
+      retry={vi.fn()}
+      openQuestion={vi.fn()}
+    />
+  );
+  const result = render(card({ status: "cancelled" }));
+  fireEvent.click(screen.getByRole("button", { name: "Remove" }));
+  expect(remove).toHaveBeenCalledOnce();
+  result.rerender(card({ status: "failed", kind: "uninstall" }));
+  expect(screen.getByRole("button", { name: "Remove" })).toBeTruthy();
+  for (const status of ["completed", "running", "queued", "needs_user"] as const) {
+    result.rerender(card({ status }));
+    expect(screen.queryByRole("button", { name: "Remove" })).toBeNull();
+  }
+});
+
+it("drops a removed job from the list", async () => {
+  const api = createInstallFixtureApi([fixtureJob({ id: "gone", status: "cancelled" })]);
+  let remove: (() => void) | undefined;
+  function Jobs() {
+    const jobs = useJobs();
+    const action = useJobActions();
+    remove = () => action.mutate({ type: "remove", jobId: "gone" });
+    return <p>{jobs.data?.map((job) => job.id).join(",") || "none"}</p>;
+  }
+  render(
+    <QueryClientProvider client={createLibraryQueryClient()}>
+      <ActivityProvider api={api}>
+        <Jobs />
+      </ActivityProvider>
+    </QueryClientProvider>,
+  );
+  await screen.findByText("gone");
+  act(() => remove?.());
+  await screen.findByText("none");
+  expect(await api.listJobs()).toEqual([]);
+});
+
 it("treats an unknown or zero total as indeterminate instead of reporting false completion", () => {
   render(
     <JobCard
       job={fixtureJob({ progress: { completed: 500, total: 0, unit: "files" } })}
       busy={false}
       cancel={vi.fn()}
+      remove={vi.fn()}
       retry={vi.fn()}
       openQuestion={vi.fn()}
     />,

@@ -201,6 +201,11 @@ impl InstallService {
         }
     }
 
+    /// The job left Activity: its failure count goes with it.
+    pub(super) fn forget_attempts(&self, id: &str) {
+        lock(&self.inner.recovery.attempts).remove(id);
+    }
+
     /// Waits `delays` before automatic retries instead of the defaults.
     #[cfg(all(test, target_os = "linux", feature = "net"))]
     pub(crate) fn set_retry_delays(&self, delays: Vec<Duration>) {

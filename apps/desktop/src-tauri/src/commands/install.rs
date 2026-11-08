@@ -109,6 +109,13 @@ pub fn job_cancel(
     state.cancel(&id).map_err(|error| error.to_string())
 }
 
+/// Takes a finished job out of Activity. Its files stay.
+#[tauri::command]
+#[specta::specta]
+pub fn job_remove(state: tauri::State<'_, InstallService>, id: String) -> Result<(), String> {
+    state.remove(&id).map_err(|error| error.to_string())
+}
+
 #[tauri::command]
 #[specta::specta]
 pub async fn choose_install_files(
