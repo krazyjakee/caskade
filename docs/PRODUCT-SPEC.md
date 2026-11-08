@@ -85,7 +85,7 @@ Choosing a game opens its quick look: a side panel in desktop mode, the page its
 - **Install from** a file, a folder, a link (web page, Google Drive, Dropbox, GitHub releases and other hosts), a magnet link or a `.torrent` file. Windows installers, Linux and macOS packages, disc images, archives and portable games are all understood. On Linux, Windows installers and games run under Proton through umu-launcher, with the best build installed when they start: UMU-Proton (which umu keeps current), else the newest GE-Proton, else Steam's newest numbered Proton, then Experimental; Hotfix builds are never chosen on their own. With none installed, umu downloads UMU-Proton.
 - **Nothing installs unasked**: links (`caskade://install?…`), drops on the library, pasted text and torrent links all land in a confirmation first. Caskade can become the system's handler for magnet links and torrent files (Linux and Windows).
 - **Storage locations**: Caskade-managed install folders, with a default. A drive that comes back at another path is recognised. Games move between locations as a job, and a game moved outside Caskade is found again.
-- **Game updates**: games installed from GitHub releases are checked every six hours (and before play when the last check is old). An update keeps the user's own files and changes, backs up the ones upstream changed too, and rolls back on failure.
+- **Game updates**: games installed from GitHub releases are checked every six hours (and before play when that check is overdue). An update keeps the user's own files and changes, backs up the ones upstream changed too, and rolls back on failure.
 - **Uninstall** removes a game's files; removing a game Caskade didn't install never touches its files.
 
 ### 4.6 Emulation

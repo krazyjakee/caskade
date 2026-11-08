@@ -42,9 +42,7 @@ use std::{
 };
 use url::Url;
 
-/// How long a check is good for when the game is about to be played.
-const BEFORE_PLAY: Duration = Duration::from_secs(60 * 60);
-/// How long Play waits for that check.
+/// How long Play waits for a check that's due.
 const PLAY_TIMEOUT: Duration = Duration::from_secs(5);
 /// How often [`Updates::watch`] looks for games due a check.
 const TICK: Duration = Duration::from_secs(15 * 60);
@@ -442,9 +440,11 @@ impl Updates {
     }
 
     /// The update to offer before `entry_id` is played, if any. A check
-    /// older than an hour is redone first, for a few seconds at most,
-    /// unless one failed in the last half hour; when it can't finish, the
-    /// last answer stands.
+    /// older than the settings' interval (one the background watch hasn't
+    /// got to yet) is redone first, for a few seconds at most, unless one
+    /// failed in the last half hour; when it can't finish, the last answer
+    /// stands. A newer one is the watch's answer, so Play doesn't wait on
+    /// GitHub.
     pub async fn before_play(&self, entry_id: &str) -> Result<Option<GameUpdate>> {
         let settings = self.settings().await;
         if !settings.ask_before_play {
@@ -459,8 +459,8 @@ impl Updates {
         else {
             return Ok(None);
         };
-        let stale = row.checked_at_ms
-            < now_ms().saturating_sub(BEFORE_PLAY.as_millis().try_into().unwrap_or(i64::MAX));
+        let interval = i64::from(settings.interval_hours) * 60 * 60 * 1000;
+        let stale = row.checked_at_ms < now_ms().saturating_sub(interval);
         let update = if settings.check && stale && !self.failed_recently(entry_id) {
             match tokio::time::timeout(PLAY_TIMEOUT, self.check(entry_id)).await {
                 Ok(Ok(update)) => update,

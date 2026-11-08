@@ -8,7 +8,7 @@ use async_trait::async_trait;
 
 use super::blobs::Incoming;
 use super::{RemoteSaves, SaveVersions};
-use crate::devices::Devices;
+use crate::devices::{DeviceLink, Devices};
 use crate::sync::SyncService;
 use crate::sync::blobs::{BlobKind, BlobWriter};
 use crate::sync::policy::Category;
@@ -89,14 +89,21 @@ impl RemoteSaves for SyncRefresh {
         // Each device in reach, and when this device asked it to sync. One
         // already syncing may have started before the newest save existed:
         // it's asked again once it's done.
-        // A device out of reach fails to connect, or runs into the deadline:
-        // either way the launch goes ahead.
-        let mut asked: Vec<(String, Option<i64>)> = status
-            .devices
-            .iter()
-            .map(|device| (device.id.clone(), None))
-            .collect();
+        // One known to be offline (nothing heard from it for minutes, though
+        // library sync reaches each device every minute) isn't waited for:
+        // dialing it would hold the launch until the deadline. It still
+        // counts as not reached. One that went out of reach since fails to
+        // connect, or runs into the deadline: either way the launch goes
+        // ahead.
         let mut all = true;
+        let mut asked: Vec<(String, Option<i64>)> = Vec::new();
+        for device in &status.devices {
+            if device.link == DeviceLink::Offline {
+                all = false;
+            } else {
+                asked.push((device.id.clone(), None));
+            }
+        }
         let begun = tokio::time::Instant::now();
         while !asked.is_empty() {
             let status = self.devices.status().await;

@@ -95,7 +95,7 @@ The bus carries events, interceptors and providers between the core, built-ins a
 
 1. Check the play gate (signed-in account, age limit, already running, one stream at a time).
 2. Pick the release and action (a default, or ask), apply the action's target.
-3. Offer a game update, check saves on paired devices (at most 4 s), warn if playing elsewhere.
+3. Offer a game update (a live check only when the background one is overdue, at most 5 s), check saves on paired devices (at most 4 s; devices known to be offline aren't waited for), warn if playing elsewhere.
 4. Run before-launch lifecycle scripts and `launch.before` interceptors (which may rewrite or cancel).
 5. Spawn, or open the URI, web window or stream. Processes Caskade starts drop its own AppImage environment.
 6. Identify the real game process by install folder and executable (and alias path), track it with the chosen tracking mode.

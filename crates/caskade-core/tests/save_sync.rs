@@ -11,7 +11,7 @@ use std::time::{Duration, Instant};
 use caskade_core::accounts::AccountService;
 use caskade_core::bus::Bus;
 use caskade_core::db::LibraryStore;
-use caskade_core::devices::{ConnectionPurpose, Devices, MemoryKeyStore, Reach};
+use caskade_core::devices::{ConnectionPurpose, DeviceLink, Devices, MemoryKeyStore, Reach};
 use caskade_core::ludusavi::Ludusavi;
 use caskade_core::model::{
     ExternalId, Game, GameEntry, GameRuntime, InstallLocation, InstallState, SourceId, StorageRoot,
@@ -565,4 +565,26 @@ async fn a_device_out_of_reach_never_holds_up_a_launch_for_long_and_is_reported(
     assert!(!check.checked, "{check:?}");
     assert_eq!(check.check, SaveCheck::UpToDate);
     assert_eq!(read(desktop.documents.join("Fixture/slot1.sav")), "here");
+
+    // Once it's known to be offline, a launch doesn't wait for it at all,
+    // and still says it wasn't reached.
+    within("the deck reads offline", 30, || async {
+        desktop
+            .devices
+            .status()
+            .await
+            .devices
+            .iter()
+            .all(|device| device.link == DeviceLink::Offline)
+    })
+    .await;
+    let started = Instant::now();
+    let check = desktop.versions.before_play(&desktop.entry).await.unwrap();
+    assert!(
+        started.elapsed() < Duration::from_secs(1),
+        "{:?}",
+        started.elapsed()
+    );
+    assert!(!check.checked, "{check:?}");
+    assert_eq!(check.check, SaveCheck::UpToDate);
 }

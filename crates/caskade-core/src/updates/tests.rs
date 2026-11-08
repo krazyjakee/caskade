@@ -173,6 +173,40 @@ async fn unknown_installs_start_at_the_newest_release_and_failures_keep_the_last
 }
 
 #[tokio::test]
+async fn play_asks_github_only_when_the_background_check_is_overdue() {
+    let f = fixture().await;
+    let game = entry(&f.store, &f.root, "Game").await;
+    follow(&f.store, &game, "owner/game", Some("v1.0")).await;
+    redirect(
+        &f.server,
+        "/owner/game/releases/latest",
+        "/owner/game/releases/tag/v1.1",
+    )
+    .await;
+    f.updates.check(&game.id).await.unwrap();
+    let requests = || async { f.server.received_requests().await.unwrap().len() };
+    let asked = requests().await;
+    let checked_ago = |hours: i64| {
+        let (store, id) = (&f.store, game.id.clone());
+        async move {
+            let mut row = store.game_update(&id).await.unwrap().unwrap();
+            row.checked_at_ms = now_ms() - hours * 60 * 60 * 1000;
+            store.save_update_check(&row).await.unwrap();
+        }
+    };
+
+    // Two hours old, within the six-hour interval: the watch's answer stands.
+    checked_ago(2).await;
+    assert!(f.updates.before_play(&game.id).await.unwrap().is_some());
+    assert_eq!(requests().await, asked);
+
+    // Seven hours old, overdue: Play checks first.
+    checked_ago(7).await;
+    assert!(f.updates.before_play(&game.id).await.unwrap().is_some());
+    assert!(requests().await > asked);
+}
+
+#[tokio::test]
 async fn a_failed_check_keeps_the_last_good_one_and_is_retried_sooner() {
     let f = fixture().await;
     let game = entry(&f.store, &f.root, "Game").await;
