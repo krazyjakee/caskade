@@ -8,7 +8,7 @@ use async_trait::async_trait;
 
 use super::blobs::Incoming;
 use super::{RemoteSaves, SaveVersions};
-use crate::devices::{DeviceLink, Devices};
+use crate::devices::{DeviceLink, Devices, PairedDevice};
 use crate::sync::SyncService;
 use crate::sync::blobs::{BlobKind, BlobWriter};
 use crate::sync::policy::Category;
@@ -81,6 +81,15 @@ impl SyncRefresh {
     }
 }
 
+/// Whether the check before a launch skips `device`: offline (nothing
+/// heard from it for minutes, though library sync tries each device every
+/// minute) and its last attempt failed, so dialing it would only hold the
+/// launch until the deadline. One not tried yet (just paired, or Caskade
+/// just started) is asked: it may be in reach on another network.
+fn out_of_reach(device: &PairedDevice) -> bool {
+    device.link == DeviceLink::Offline && device.sync_error.is_some()
+}
+
 #[async_trait]
 impl RemoteSaves for SyncRefresh {
     async fn refresh(&self, within: Duration) -> bool {
@@ -89,16 +98,14 @@ impl RemoteSaves for SyncRefresh {
         // Each device in reach, and when this device asked it to sync. One
         // already syncing may have started before the newest save existed:
         // it's asked again once it's done.
-        // One known to be offline (nothing heard from it for minutes, though
-        // library sync reaches each device every minute) isn't waited for:
-        // dialing it would hold the launch until the deadline. It still
-        // counts as not reached. One that went out of reach since fails to
-        // connect, or runs into the deadline: either way the launch goes
-        // ahead.
+        // One known to be out of reach isn't waited for (`out_of_reach`),
+        // but still counts as not reached. One that went out of reach since
+        // fails to connect, or runs into the deadline: either way the
+        // launch goes ahead.
         let mut all = true;
         let mut asked: Vec<(String, Option<i64>)> = Vec::new();
         for device in &status.devices {
-            if device.link == DeviceLink::Offline {
+            if out_of_reach(device) {
                 all = false;
             } else {
                 asked.push((device.id.clone(), None));
@@ -146,5 +153,39 @@ impl RemoteSaves for SyncRefresh {
             tokio::time::sleep(Duration::from_millis(100)).await;
         }
         all
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::devices::{DeviceKind, DeviceOs};
+
+    fn device(link: DeviceLink, sync_error: Option<&str>) -> PairedDevice {
+        PairedDevice {
+            id: "deck".into(),
+            name: "Deck".into(),
+            kind: DeviceKind::default(),
+            os: DeviceOs::Linux,
+            link,
+            addresses: Vec::new(),
+            last_sync_ms: None,
+            paired_at_ms: 0,
+            syncing: false,
+            sync_error: sync_error.map(Into::into),
+        }
+    }
+
+    #[test]
+    fn only_a_device_that_failed_and_reads_offline_is_skipped() {
+        assert!(out_of_reach(&device(
+            DeviceLink::Offline,
+            Some("timed out")
+        )));
+        // Not tried yet (just paired, or just started): asked.
+        assert!(!out_of_reach(&device(DeviceLink::Offline, None)));
+        // In reach, whatever failed before.
+        assert!(!out_of_reach(&device(DeviceLink::Lan, Some("timed out"))));
+        assert!(!out_of_reach(&device(DeviceLink::Relay, None)));
     }
 }

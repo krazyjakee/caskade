@@ -380,7 +380,8 @@ mod tests {
         assert_eq!(automatic_proton(&[common.join("Proton Hotfix")]), None);
         assert_eq!(
             automatic_proton(&[common.join("Proton Hotfix"), common.join("Proton 10.0")]),
-            Some("/steam/steamapps/common/Proton 10.0".into())
+            // The path as joined here: a backslash on Windows.
+            Some(common.join("Proton 10.0").to_string_lossy().into_owned())
         );
         assert_eq!(
             automatic_proton(&[

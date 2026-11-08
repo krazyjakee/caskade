@@ -566,8 +566,9 @@ async fn a_device_out_of_reach_never_holds_up_a_launch_for_long_and_is_reported(
     assert_eq!(check.check, SaveCheck::UpToDate);
     assert_eq!(read(desktop.documents.join("Fixture/slot1.sav")), "here");
 
-    // Once it's known to be offline, a launch doesn't wait for it at all,
-    // and still says it wasn't reached.
+    // Once it's known to be out of reach (offline, and the last try
+    // failed), a launch doesn't wait for it at all, and still says it
+    // wasn't reached.
     within("the deck reads offline", 30, || async {
         desktop
             .devices
@@ -575,7 +576,7 @@ async fn a_device_out_of_reach_never_holds_up_a_launch_for_long_and_is_reported(
             .await
             .devices
             .iter()
-            .all(|device| device.link == DeviceLink::Offline)
+            .all(|device| device.link == DeviceLink::Offline && device.sync_error.is_some())
     })
     .await;
     let started = Instant::now();

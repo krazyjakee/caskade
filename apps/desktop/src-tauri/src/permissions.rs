@@ -193,6 +193,8 @@ pub fn access(command: &str) -> Option<Access> {
         | "remove_from_collection"
         | "dismiss_install_request"
         | "job_cancel"
+        // Takes a finished job out of Activity; its files stay.
+        | "job_remove"
         | "verify_game"
         | "launch_game"
         | "launch_game_with"

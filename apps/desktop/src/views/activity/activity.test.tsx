@@ -126,24 +126,31 @@ it("offers Remove on a failed or cancelled job, and not on others", () => {
   }
 });
 
+/** The jobs' ids, and a button that removes the job `gone`. */
+function JobIds() {
+  const jobs = useJobs();
+  const action = useJobActions();
+  return (
+    <>
+      <p>{jobs.data?.map((job) => job.id).join(",") || "none"}</p>
+      <button type="button" onClick={() => action.mutate({ type: "remove", jobId: "gone" })}>
+        Remove gone
+      </button>
+    </>
+  );
+}
+
 it("drops a removed job from the list", async () => {
   const api = createInstallFixtureApi([fixtureJob({ id: "gone", status: "cancelled" })]);
-  let remove: (() => void) | undefined;
-  function Jobs() {
-    const jobs = useJobs();
-    const action = useJobActions();
-    remove = () => action.mutate({ type: "remove", jobId: "gone" });
-    return <p>{jobs.data?.map((job) => job.id).join(",") || "none"}</p>;
-  }
   render(
     <QueryClientProvider client={createLibraryQueryClient()}>
       <ActivityProvider api={api}>
-        <Jobs />
+        <JobIds />
       </ActivityProvider>
     </QueryClientProvider>,
   );
   await screen.findByText("gone");
-  act(() => remove?.());
+  fireEvent.click(screen.getByRole("button", { name: "Remove gone" }));
   await screen.findByText("none");
   expect(await api.listJobs()).toEqual([]);
 });
