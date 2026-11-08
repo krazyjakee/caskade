@@ -10,6 +10,7 @@ import { PluginCardExtras } from "../../plugins/GameSlots";
 import { useMode } from "../../shell/console/mode";
 import { AgeLockLabel } from "../game/AgeGate";
 import { PlayingElsewhereMark } from "../game/PlayingElsewhere";
+import { usePlayedOnLabel } from "../home/PlayedOn";
 import { useGameActions } from "./GameActions";
 
 /** A game in the library grid: its cover, its title and, unless it is a PC
@@ -19,16 +20,21 @@ import { useGameActions } from "./GameActions";
 export const LibraryCard = memo(function LibraryCard({
   game,
   index,
+  showPlayedOn = false,
 }: {
   game: GameSummary;
   /** Its place in the view, for range selection. */
   index?: number;
+  /** Show the other device it was last played on, when it was, in place of
+   * its platform (Home's Recently Played). */
+  showPlayedOn?: boolean;
 }) {
   const { t } = useLingui();
   const unavailableCopy = useStorageAvailability(game.id);
   const actions = useGameActions(game, index);
   const platform = platformLine(game.platform);
   const { mode } = useMode();
+  const playedOn = usePlayedOnLabel(showPlayedOn ? game.lastPlayedOn : null);
   return (
     <div
       ref={actions.owner}
@@ -62,10 +68,16 @@ export const LibraryCard = memo(function LibraryCard({
           <p data-part="title" className="truncate text-sm font-semibold">
             {game.title}
           </p>
-          {platform && (
-            <p data-part="subtitle" className="truncate text-xs text-fg-subtle">
-              {platform}
+          {playedOn ? (
+            <p data-part="played-on" title={playedOn} className="truncate text-xs text-fg-subtle">
+              {playedOn}
             </p>
+          ) : (
+            platform && (
+              <p data-part="subtitle" className="truncate text-xs text-fg-subtle">
+                {platform}
+              </p>
+            )
           )}
         </div>
         {unavailableCopy && (

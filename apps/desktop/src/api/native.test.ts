@@ -56,6 +56,7 @@ const game: GameSummary_Serialize = {
   installed: true,
   playtimeMs: 3_600_000,
   lastPlayedAtMs: null,
+  lastPlayedOn: null,
 };
 it.each(["linux", "windows", "macos"])(
   "uses generated commands and platform-correct thumbnail URLs on %s",

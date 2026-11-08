@@ -6,6 +6,16 @@ use crate::{
 };
 use sqlx::Row;
 
+/// This device's endpoint id, as `devices` keeps it (`sync.device`); NULL
+/// before the device has an identity. A session started or imported here
+/// records it as the device it was played on (#74).
+macro_rules! this_device {
+    () => {
+        "(SELECT value_json->>'$.id' FROM settings WHERE key='sync.device')"
+    };
+}
+pub(super) const THIS_DEVICE: &str = this_device!();
+
 fn session(row: sqlx::sqlite::SqliteRow) -> Result<PlaySession> {
     let duration: i64 = row.try_get("duration_ms")?;
     let tracking: Option<String> = row.try_get("tracking_json")?;
@@ -58,7 +68,7 @@ impl LibraryStore {
                 "cannot replace an open session with an imported record"
             )));
         }
-        sqlx::query("INSERT INTO play_sessions(id,game_id,entry_id,started_at_ms,ended_at_ms,duration_ms,heartbeat_at_ms,tracking_json) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET game_id=excluded.game_id,entry_id=excluded.entry_id,started_at_ms=excluded.started_at_ms,ended_at_ms=excluded.ended_at_ms,duration_ms=excluded.duration_ms,heartbeat_at_ms=excluded.heartbeat_at_ms,tracking_json=excluded.tracking_json")
+        sqlx::query(concat!("INSERT INTO play_sessions(id,game_id,entry_id,started_at_ms,ended_at_ms,duration_ms,heartbeat_at_ms,tracking_json,device_id) VALUES(?,?,?,?,?,?,?,?,", this_device!(), ") ON CONFLICT(id) DO UPDATE SET game_id=excluded.game_id,entry_id=excluded.entry_id,started_at_ms=excluded.started_at_ms,ended_at_ms=excluded.ended_at_ms,duration_ms=excluded.duration_ms,heartbeat_at_ms=excluded.heartbeat_at_ms,tracking_json=excluded.tracking_json"))
             .bind(&record.id).bind(&record.game_id).bind(&record.entry_id).bind(record.started_at_ms).bind(record.ended_at_ms).bind(v::integer(record.duration_ms)?).bind(record.heartbeat_at_ms).bind(record.tracking.as_ref().map(v::json).transpose()?).execute(&mut *tx).await?;
         tx.commit().await?;
         Ok(record.clone())
@@ -155,7 +165,7 @@ impl LibraryStore {
     }
 }
 async fn insert(store: &LibraryStore, record: &PlaySession) -> Result<()> {
-    sqlx::query("INSERT INTO play_sessions(id,game_id,entry_id,started_at_ms,ended_at_ms,duration_ms,heartbeat_at_ms,tracking_json) VALUES(?,?,?,?,?,?,?,?)")
+    sqlx::query(concat!("INSERT INTO play_sessions(id,game_id,entry_id,started_at_ms,ended_at_ms,duration_ms,heartbeat_at_ms,tracking_json,device_id) VALUES(?,?,?,?,?,?,?,?,", this_device!(), ")"))
         .bind(&record.id).bind(&record.game_id).bind(&record.entry_id).bind(record.started_at_ms).bind(record.ended_at_ms).bind(v::integer(record.duration_ms)?).bind(record.heartbeat_at_ms).bind(record.tracking.as_ref().map(v::json).transpose()?).execute(&store.pool).await?;
     Ok(())
 }

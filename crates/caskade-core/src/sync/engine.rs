@@ -582,7 +582,9 @@ impl SyncEngine {
             }
             _ => {}
         }
+        // A record names its game; a session's `device` field doesn't.
         if matches!(change.entity, Entity::Session | Entity::SaveVersion)
+            && change.field == EXISTS
             && let Some(record) = value.as_mut()
         {
             let origin_game = record

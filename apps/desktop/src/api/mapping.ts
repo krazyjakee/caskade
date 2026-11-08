@@ -31,6 +31,7 @@ type SummaryRecord = GameRecord & {
   icon?: ArtworkRecord | null;
   playtimeMs: number;
   lastPlayedAtMs: number | null;
+  lastPlayedOn?: { device: string; name: string | null } | null;
 };
 type EntryRecord = {
   id: string;
@@ -70,6 +71,9 @@ export function mapSummary(record: SummaryRecord, assetUrl: (path: string) => st
     status: record.installed ? "installed" : "not-installed",
     playtimeSeconds: record.playtimeMs / 1000,
     lastPlayedAt: date(record.lastPlayedAtMs),
+    lastPlayedOn: record.lastPlayedOn
+      ? { device: record.lastPlayedOn.device, name: record.lastPlayedOn.name }
+      : null,
     releaseDate: record.releaseDate ?? null,
     sizeBytes: null,
     coverGrid: cover(record.cover, 320, assetUrl),

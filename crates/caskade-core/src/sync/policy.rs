@@ -375,13 +375,14 @@ pub const TABLES: &[Rule] = &[
     shared(
         "play_sessions",
         Category::PlaySessions,
-        "play history travels; process tracking, heartbeat and local entry binding do not",
+        "play history and the device it was played on travel; process tracking, heartbeat and local entry binding do not",
         &[
             "id",
             "game_id",
             "started_at_ms",
             "ended_at_ms",
             "duration_ms",
+            "device_id",
         ],
     ),
     Rule {

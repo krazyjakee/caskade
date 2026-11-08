@@ -287,15 +287,22 @@ impl LibraryStore {
             snapshot.put(Entity::Member, key, "position", json!(position));
         }
 
-        // Finished play sessions.
-        for (id, game, started, ended, duration) in
-            sqlx::query_as::<_, (String, String, i64, i64, i64)>(
-                "SELECT id,game_id,started_at_ms,ended_at_ms,duration_ms FROM play_sessions \
+        // Finished play sessions, and the device each was played on (#74)
+        // as a field of its own: a build that doesn't know it leaves it
+        // waiting rather than capturing the record back without it.
+        for (id, game, started, ended, duration, device) in sqlx::query_as::<
+            _,
+            (String, String, i64, i64, i64, Option<String>),
+        >(
+            "SELECT id,game_id,started_at_ms,ended_at_ms,duration_ms,device_id FROM play_sessions \
              WHERE ended_at_ms IS NOT NULL",
-            )
-            .fetch_all(&mut *conn)
-            .await?
+        )
+        .fetch_all(&mut *conn)
+        .await?
         {
+            if let Some(device) = device {
+                snapshot.put(Entity::Session, id.clone(), "device", json!(device));
+            }
             snapshot.put(
                 Entity::Session,
                 id,
@@ -798,7 +805,7 @@ async fn write(
             }
             Ok(true)
         }
-        Entity::Session => session(conn, target, value).await,
+        Entity::Session => session(conn, target, field, value).await,
         Entity::SaveVersion => crate::saves::versions::sync_apply(conn, target, value).await,
         // Settings: the engine applies them through `SettingsService`.
         Entity::RommServer | Entity::Appearance | Entity::AccountSettings => Ok(true),
@@ -1028,12 +1035,28 @@ async fn collection(
     Ok(true)
 }
 
-/// A finished play session from another device. Sessions are a union: one
-/// is never removed by sync.
-async fn session(conn: &mut SqliteConnection, id: &str, value: Option<&Value>) -> Result<bool> {
+/// A finished play session from another device, or the device it was
+/// played on (`device`). Sessions are a union: one is never removed by sync.
+async fn session(
+    conn: &mut SqliteConnection,
+    id: &str,
+    field: &str,
+    value: Option<&Value>,
+) -> Result<bool> {
     let Some(value) = value else {
         return Ok(true);
     };
+    if field == "device" {
+        sqlx::query("UPDATE play_sessions SET device_id=? WHERE id=?")
+            .bind(value.as_str())
+            .bind(id)
+            .execute(&mut *conn)
+            .await?;
+        return Ok(true);
+    }
+    if field != EXISTS {
+        return Ok(true);
+    }
     let game = value
         .get("game")
         .and_then(Value::as_str)

@@ -15,6 +15,16 @@ const PLAYTIME: &str = "(coalesce((SELECT sum(s.duration_ms) FROM play_sessions 
 const OWNED: &str = "EXISTS(SELECT 1 FROM game_entries oe JOIN account_entitlements ae ON ae.entry_id=oe.id WHERE oe.game_id=g.id AND ae.lost_at_ms IS NULL)";
 /// The latest session start or reported last play.
 const RECENT: &str = "(SELECT max(t) FROM (SELECT max(s.started_at_ms) AS t FROM play_sessions s WHERE s.game_id=g.id UNION ALL SELECT max(r.last_played_ms) FROM remote_playtime r JOIN game_entries re ON re.id=r.entry_id WHERE re.game_id=g.id))";
+/// The device the latest session was played on, as a `PlayedOn`, when it
+/// is another one (#74): its name is what this device calls it.
+fn played_on() -> String {
+    format!(
+        "(SELECT CASE WHEN s.device_id IS NOT NULL AND s.device_id IS NOT {this} \
+         THEN json_object('device',s.device_id,'name',(SELECT d.name FROM paired_devices d WHERE d.endpoint_id=s.device_id)) END \
+         FROM play_sessions s WHERE s.game_id=g.id ORDER BY s.started_at_ms DESC,s.id LIMIT 1)",
+        this = super::sessions::THIS_DEVICE
+    )
+}
 /// Ids are UUIDv7s, so the greatest is the newest: the game's own, or its
 /// newest entry's. A game with no entries left (its install uninstalled)
 /// has nothing added, so it sorts last.
@@ -165,7 +175,7 @@ impl LibraryStore {
         let mut query = QueryBuilder::<Sqlite>::new("SELECT ");
         age_blocked(&mut query, account);
         query.push(" AS admin_pin_needed,g.record_json,");
-        query.push(INSTALLED).push(" AS installed,").push(PLAYTIME).push(" AS playtime_ms,").push(RECENT).push(" AS last_played_at_ms,(SELECT a.record_json FROM artwork a WHERE a.game_id=g.id AND a.kind='cover' AND ").push(super::artwork_choice::SHOWN).push(" ORDER BY a.id LIMIT 1) AS cover,(SELECT a.record_json FROM artwork a WHERE a.game_id=g.id AND a.kind='icon' AND ").push(super::artwork_choice::SHOWN).push(" ORDER BY a.record_json->>'$.source' LIKE 'igdb:%' DESC,a.id LIMIT 1) AS icon FROM (SELECT g.id,");
+        query.push(INSTALLED).push(" AS installed,").push(PLAYTIME).push(" AS playtime_ms,").push(RECENT).push(" AS last_played_at_ms,").push(played_on()).push(" AS played_on,(SELECT a.record_json FROM artwork a WHERE a.game_id=g.id AND a.kind='cover' AND ").push(super::artwork_choice::SHOWN).push(" ORDER BY a.id LIMIT 1) AS cover,(SELECT a.record_json FROM artwork a WHERE a.game_id=g.id AND a.kind='icon' AND ").push(super::artwork_choice::SHOWN).push(" ORDER BY a.record_json->>'$.source' LIKE 'igdb:%' DESC,a.id LIMIT 1) AS icon FROM (SELECT g.id,");
         query.push(key).push(" AS k FROM games g WHERE g.hidden=");
         query.push_bind(hidden);
         filters(&mut query, request, collection, hidden);
@@ -187,6 +197,7 @@ impl LibraryStore {
                 Option<i64>,
                 Option<String>,
                 Option<String>,
+                Option<String>,
             )>()
             .fetch_all(&mut *tx)
             .await?;
@@ -204,7 +215,7 @@ impl LibraryStore {
         let items = rows
             .into_iter()
             .filter_map(
-                |(admin_pin_needed, record, installed, duration, last, cover, icon)| {
+                |(admin_pin_needed, record, installed, duration, last, played_on, cover, icon)| {
                     let game: Game = decode(record)
                         .inspect_err(
                             |error| tracing::warn!(%error, "game record unreadable; left out"),
@@ -228,6 +239,13 @@ impl LibraryStore {
                         installed,
                         playtime_ms: duration as u64,
                         last_played_at_ms: last,
+                        last_played_on: played_on.and_then(|text| {
+                            decode(text)
+                                .inspect_err(
+                                    |error| tracing::warn!(%error, "played-on device unreadable"),
+                                )
+                                .ok()
+                        }),
                     })
                 },
             )

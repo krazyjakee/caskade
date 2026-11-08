@@ -117,7 +117,7 @@ Sessions survive restarts: recovery state records running processes by `ProcessI
 | **LaunchSpec** | `Uri`, `Executable` (relative to the install for managed games), `Emulator` (platform default, pinned profile or ask, plus ROMs), `Web`, `Stream { host, app }`, `Plugin`. |
 | **Action** | A named play or utility action with its own target and tracking mode. |
 | **Platform, Emulator, Profile, Scanner** | Definitions are data (TOML); installed emulators, profiles, defaults and scanners are user configuration. |
-| **PlaySession** | Start, end, duration, entry. Remote playtime from stores is kept apart, per release, provider and account. |
+| **PlaySession** | Start, end, duration, entry, and the device it was played on (`device_id`, this device's endpoint id from `sync.device` when it starts here). Remote playtime from stores is kept apart, per release, provider and account. |
 | **Collection** | Manual or smart, owned by a local account. |
 | **Artwork** | Kind, source, cached path, thumbnails; user choices override automatic sources. |
 | **Account** | Local accounts: role, permissions, age limit, PIN hash (argon2id). |
@@ -126,7 +126,7 @@ Sessions survive restarts: recovery state records running processes by `ProcessI
 
 ### 5.2 Storage
 
-- **Library**: `library.sqlite` in the data folder, migrated by numbered `sqlx` migrations (`crates/caskade-core/migrations/`, 34 so far, each with a down migration).
+- **Library**: `library.sqlite` in the data folder, migrated by numbered `sqlx` migrations (`crates/caskade-core/migrations/`, 35 so far, each with a down migration).
 - **Caches** (`<cache>/`): artwork and thumbnails, IGDB answers (`igdb/games.sqlite`), Hasheous dumps and indexes, the Ludusavi manifest and indexes, Decomp Buddy plans, the add-on catalogue, compiled plugins, peer downloads. All disposable and rebuilt on demand.
 - **Data** (`<data>/`): managed emulators and tools, save blobs, staged restores, elevation records, streaming state, themes, plugins and plugin data.
 - **Settings**: namespaced sections (`core.general`, `core.appearance`, `core.sync`, `core.streaming`, …) registered with a schema version, a JSON Schema from `schemars` and validated defaults. The same mechanism renders plugin settings.
@@ -183,7 +183,7 @@ Sessions survive restarts: recovery state records running processes by `ProcessI
 - **Transport**: iroh endpoints; devices found over mDNS (service `caskade`), n0 lookup and relays unless `core.sync.neverRelay`. Game files only move over endpoints with no relay transport (`DirectDialer`, `SwarmDialer`, `FileServer`).
 - **Protocol**: `caskade/sync/1`, one byte-identical refusal for anything unauthorised, line-framed JSON with read bounds.
 - **Pairing**: code pairing with a nonce commitment, or single-use 10-minute `caskade://pair` links accepted by an admin. Grants never reach the webview.
-- **Library sync**: changes captured by diffing snapshots against `sync_fields` (only after the library was written), last writer wins per field by hybrid logical clock, tombstones for deletions, games matched across devices by identity (`sync_game_ids`).
+- **Library sync**: changes captured by diffing snapshots against `sync_fields` (only after the library was written), last writer wins per field by hybrid logical clock, tombstones for deletions, games matched across devices by identity (`sync_game_ids`). A session travels as one record plus its device as a separate `device` field, so it keeps the device that played it when forwarded, and Home's game list names that device from `paired_devices` when it isn't this one.
 - **Saves**: `Saves` resolves locations per release (Ludusavi manifest by Steam id, GOG id, title, aliases; emulator `[saves]` rules; the user's choices), maps Windows paths into a Wine or Proton prefix, and versions files content-addressed in `<data>/saves/blobs/`.
 - **Presence, copies, nearby downloads, backups on devices, emulator offers and config** ride on the same exchange as notes on the blob rounds.
 - **Shares**: `caskade://receive` links with their own grant and expiry, admitted only while the share runs, revoked mid-transfer when stopped. Recipients fetch from the swarm of the sharer and other recipients.

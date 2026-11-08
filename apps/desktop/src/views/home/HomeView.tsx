@@ -1,7 +1,14 @@
 import { GameArt } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { Link } from "@tanstack/react-router";
-import { CalendarDays, Clock, History, type LucideIcon, PackagePlus } from "lucide-react";
+import {
+  CalendarDays,
+  Clock,
+  History,
+  type LucideIcon,
+  MonitorSmartphone,
+  PackagePlus,
+} from "lucide-react";
 import { useRef } from "react";
 import { useGames, useLibraryStats, useRunningCount } from "../../api/hooks";
 import { formatDuration, formatPlaytime } from "../../api/presentation";
@@ -12,6 +19,7 @@ import { useDefaultFocus } from "../../input";
 import { PluginHomeSections } from "../../plugins/GameSlots";
 import { useOpenGame } from "../game/origin";
 import { LibraryCard } from "../library/LibraryCard";
+import { usePlayedOnLabel } from "./PlayedOn";
 
 const SHELF_SIZE = 12;
 
@@ -35,6 +43,7 @@ export function HomeView() {
   const menus = useGameMenus();
   // Its page, which goes back to Home (#195).
   const openGame = useOpenGame();
+  const playedOn = usePlayedOnLabel(continueGame?.lastPlayedOn);
   return (
     <div data-view="home" className="mt-4">
       <div className="mb-5 flex items-center justify-between gap-4">
@@ -70,8 +79,17 @@ export function HomeView() {
             <h2 data-part="title" className="mt-3 font-display text-3xl font-semibold">
               {continueGame.title}
             </h2>
-            <p data-part="meta" className="mt-3 text-sm text-fg-muted">
-              {formatPlaytime(continueGame.playtimeSeconds)}
+            <p
+              data-part="meta"
+              className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-fg-muted"
+            >
+              <span>{formatPlaytime(continueGame.playtimeSeconds)}</span>
+              {playedOn && (
+                <span data-part="played-on" className="flex items-center gap-1.5">
+                  <MonitorSmartphone aria-hidden="true" className="size-4 shrink-0" />
+                  {playedOn}
+                </span>
+              )}
             </p>
             <Link
               ref={resume}
@@ -136,7 +154,7 @@ export function HomeView() {
           }
         >
           {shelf.map((game) => (
-            <LibraryCard key={game.id} game={game} />
+            <LibraryCard key={game.id} game={game} showPlayedOn />
           ))}
         </ShelfRow>
       )}

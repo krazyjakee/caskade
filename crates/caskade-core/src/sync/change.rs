@@ -39,7 +39,8 @@ pub enum Entity {
     Collection,
     /// A game in a manual collection. Key: collection|game.
     Member,
-    /// A finished play session, one immutable record. Key: session id.
+    /// A finished play session, one immutable record, and the device it
+    /// was played on (field `device`, #74). Key: session id.
     Session,
     /// Key: account id.
     Account,

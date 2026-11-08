@@ -79,6 +79,15 @@ export function createEmulatedFixtureGames(): GameDetails[] {
         daysAgo === null || index > 0
           ? null
           : new Date(Date.now() - daysAgo * 86_400_000).toISOString(),
+      // Played on paired devices: one named, one this device isn't paired with.
+      lastPlayedOn:
+        index > 0
+          ? null
+          : p === 4
+            ? { device: "fixture-den", name: "Den" }
+            : p === 2
+              ? { device: "fixture-handheld", name: null }
+              : null,
       entries: [
         {
           id: `fixture-emulated-entry-${p}-${index}`,
@@ -379,6 +388,7 @@ export function createFixtureApi(
       };
       sessions.push(session);
       game.lastPlayedAt = session.startedAt;
+      game.lastPlayedOn = null;
       emit({ type: "game.started", gameId: game.id, entryId, sessionId: session.id });
       return { type: "started", ticket: { gameId: game.id, entryId, sessionId: session.id } };
     },

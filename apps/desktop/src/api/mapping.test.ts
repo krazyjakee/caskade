@@ -64,6 +64,20 @@ it("converts real DTO milliseconds and exact thumbnail projections without stori
   );
   expect(summary.coverGrid).toBeNull();
   expect(summary.lastPlayedAt).toBeNull();
+  expect(summary.lastPlayedOn).toBeNull();
+  expect(
+    mapSummary(
+      {
+        ...game,
+        installed: false,
+        cover: null,
+        playtimeMs: 0,
+        lastPlayedAtMs: 1_700_000_000_000,
+        lastPlayedOn: { device: "den-id", name: "Den" },
+      },
+      (path) => path,
+    ).lastPlayedOn,
+  ).toEqual({ device: "den-id", name: "Den" });
   expect(
     mapSession({
       id: "s",

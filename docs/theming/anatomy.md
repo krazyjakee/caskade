@@ -377,6 +377,7 @@ Root: `[data-cs="game-card"]`
 | `plugins` (app only) | `[data-cs="game-card"] [data-part="plugins"]` | Badges and overlays contributed by plugins. |
 | `select` (app only) | `[data-cs="game-card"] [data-part="select"]` | In selection mode, the check that shows whether the game is chosen. |
 | `playing-elsewhere` (app only) | `[data-cs="game-card"] [data-part="playing-elsewhere"]` | In console mode, the paired device the game is running on. |
+| `played-on` (app only) | `[data-cs="game-card"] [data-part="played-on"]` | On Home's Recently Played, the other device the game was last played on, in place of the subtitle. |
 
 Slots: `plugins` hold the caller's content; parts inside them belong to that content.
 
@@ -413,6 +414,7 @@ Root: `[data-cs="hero"]`
 | `badge` | `[data-cs="hero"] [data-part="badge"]` | The status (a `status-badge`). |
 | `tags` (app only) | `[data-cs="hero"] [data-part="tags"]` | The game's tags. |
 | `website` (app only) | `[data-cs="hero"] [data-part="website"]` | A link to the game's own page on the web (a web game's). |
+| `played-on` (app only) | `[data-cs="hero"] [data-part="played-on"]` | On Home, the other device the game was last played on (in the meta). |
 
 Slots: `actions` hold the caller's content; parts inside them belong to that content.
 

@@ -55,3 +55,25 @@ it("leaves out Recently Played when the hero is the only game played", async () 
   await screen.findByRole("region", { name: "Recently Added" });
   expect(screen.queryByRole("region", { name: "Recently Played" })).toBeNull();
 });
+
+it("names the other device a game was last played on, and nothing for this one", async () => {
+  const playedOn = [null, { device: "handheld", name: null }, { device: "den", name: "Den" }];
+  const games = playedGames(3).map((game, index) => ({
+    ...game,
+    lastPlayedOn: playedOn[index] ?? null,
+  }));
+  renderApp("/", { games });
+  const heading = await screen.findByRole("heading", { name: "Fixture Game 0003" });
+  const hero = heading.closest('[data-cs="hero"]');
+  expect(hero?.querySelector('[data-part="played-on"]')?.textContent).toBe("Last played on Den");
+
+  const shelf = await screen.findByRole("region", { name: "Recently Played" });
+  const card = (title: string) =>
+    within(shelf)
+      .getAllByRole("link")
+      .find((link) => link.querySelector('[data-part="title"]')?.textContent === title);
+  expect(card("Fixture Game 0002")?.querySelector('[data-part="played-on"]')?.textContent).toBe(
+    "Last played on another device",
+  );
+  expect(card("Fixture Game 0001")?.querySelector('[data-part="played-on"]')).toBeNull();
+});

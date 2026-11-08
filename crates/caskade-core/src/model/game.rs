@@ -226,6 +226,19 @@ pub struct GameSummary {
     pub installed: bool,
     pub playtime_ms: u64,
     pub last_played_at_ms: Option<i64>,
+    /// The other device its latest session was played on; `None` when it
+    /// was played here or the device isn't known (#74).
+    #[serde(default)]
+    pub last_played_on: Option<PlayedOn>,
+}
+/// Another device a game was played on (#74).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct PlayedOn {
+    /// Its endpoint id.
+    pub device: String,
+    /// What this device calls it, when the two are paired.
+    pub name: Option<String>,
 }
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]

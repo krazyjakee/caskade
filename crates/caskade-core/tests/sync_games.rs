@@ -324,3 +324,119 @@ async fn machine_specific_ids_never_match_games() {
         assert!(titles.iter().any(|t| t == title), "{title} in {titles:?}");
     }
 }
+
+/// Gives `device` its identity, as `Devices` records it (`sync.device`).
+async fn identify(device: &Device) {
+    device
+        .store
+        .set_setting(
+            "sync.device",
+            &serde_json::json!({ "id": device.engine.device() }),
+        )
+        .await
+        .unwrap();
+}
+
+/// Pairs `device` with `other`, calling it `name`.
+async fn pair(device: &Device, other: &Device, name: &str) {
+    device
+        .store
+        .save_paired_device(&caskade_core::db::PairedDeviceRecord {
+            endpoint_id: other.engine.device().to_owned(),
+            name: name.to_owned(),
+            kind: "desktop".into(),
+            os: "linux".into(),
+            addresses: Vec::new(),
+            wol_macs: Vec::new(),
+            last_sync_ms: None,
+            grant_in: "0".repeat(64),
+            grant_out: "1".repeat(64),
+            paired_at_ms: 1,
+            forgotten_at_ms: None,
+        })
+        .await
+        .unwrap();
+}
+
+/// The other device `title` was last played on, as Home shows it.
+async fn played_on(device: &Device, title: &str) -> Option<caskade_core::model::PlayedOn> {
+    let page = device
+        .store
+        .list_games(&caskade_core::model::ListGames {
+            sort: caskade_core::model::GameSort::Recent,
+            ..Default::default()
+        })
+        .await
+        .unwrap();
+    let game = page.items.into_iter().find(|game| game.title == title);
+    game.unwrap_or_else(|| panic!("{title} missing"))
+        .last_played_on
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn a_session_keeps_the_device_it_was_played_on_through_sync() {
+    let den = device('a').await;
+    let laptop = device('b').await;
+    let tv = device('c').await;
+    for device in [&den, &laptop, &tv] {
+        identify(device).await;
+    }
+    // The laptop is paired with the den; the TV only with the laptop.
+    pair(&laptop, &den, "Den").await;
+    pair(&den, &laptop, "Laptop").await;
+    // Celeste is on the den only.
+    let steam = ExternalId::Steam { app_id: 504_230 };
+    let (celeste, entries) = game(&den, "Celeste", &[("steam", "504230", steam)]).await;
+    let session = played(&den, &celeste, &entries[0], 1_000_000, 30).await;
+
+    // Recorded as played here: the den shows no device.
+    let snapshot = den.store.sync_snapshot().await.unwrap();
+    let device = snapshot.values.get(&(
+        caskade_core::sync::change::Entity::Session,
+        session.clone(),
+        "device".to_owned(),
+    ));
+    assert_eq!(device, Some(&serde_json::json!(den.engine.device())));
+    assert_eq!(played_on(&den, "Celeste").await, None);
+
+    // The laptop, where Celeste isn't installed, names the den.
+    sync(&den, &laptop).await;
+    assert_eq!(
+        played_on(&laptop, "Celeste").await,
+        Some(caskade_core::model::PlayedOn {
+            device: den.engine.device().to_owned(),
+            name: Some("Den".into()),
+        })
+    );
+    // Forwarded by the laptop, the TV keeps the den, which it has no name for.
+    sync(&laptop, &tv).await;
+    assert_eq!(
+        played_on(&tv, "Celeste").await,
+        Some(caskade_core::model::PlayedOn {
+            device: den.engine.device().to_owned(),
+            name: None,
+        })
+    );
+
+    // Played on the laptop later: the den names the laptop, and the laptop
+    // shows nothing.
+    let here = laptop.store.sync_snapshot().await.unwrap().games;
+    let laptop_celeste = here.into_iter().next().unwrap();
+    let entry = laptop
+        .store
+        .entries_for_game(&laptop_celeste)
+        .await
+        .unwrap()
+        .remove(0)
+        .id;
+    played(&laptop, &laptop_celeste, &entry, 5_000_000, 10).await;
+    assert_eq!(played_on(&laptop, "Celeste").await, None);
+    sync(&den, &laptop).await;
+    assert_eq!(
+        played_on(&den, "Celeste").await,
+        Some(caskade_core::model::PlayedOn {
+            device: laptop.engine.device().to_owned(),
+            name: Some("Laptop".into()),
+        })
+    );
+}

@@ -535,6 +535,21 @@ describe("the shell's catalogued anatomy, and the app-only parts of shared compo
     expect(survey(seen)).toEqual([]);
   });
 
+  it("renders Home's games last played on other devices", async () => {
+    const games = playedGames(3).map((game) => ({
+      ...game,
+      lastPlayedOn: { device: "den", name: "Den" },
+    }));
+    renderWholeApp("/", { games });
+    await waitFor(() =>
+      expect(
+        document.querySelector('[data-cs="game-card"] [data-part="played-on"]'),
+      ).not.toBeNull(),
+    );
+    expect(document.querySelector('[data-cs="hero"] [data-part="played-on"]')).not.toBeNull();
+    expect(survey(seen)).toEqual([]);
+  });
+
   it("renders first-run setup, step by step", async () => {
     renderOnboarding();
     const start = await screen.findByRole("button", { name: "Get started" });

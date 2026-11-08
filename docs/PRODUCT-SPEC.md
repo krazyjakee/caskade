@@ -31,7 +31,7 @@ Views:
 
 | View | What it holds |
 | --- | --- |
-| **Home** | A hero for the game to continue, then Recently Played, Recently Added and Recently Released shelves. |
+| **Home** | A hero for the game to continue, then Recently Played, Recently Added and Recently Released shelves. A game last played on another device says which ("Last played on Den", or "another device" when this one isn't paired with it). |
 | **Library** | Every game, filtered by Recently Played, Installed, Ready to Install (owned but not installed), Emulated, Web and All Games, with counts. Grid or list layout, sorts (recently played, title, popular, playtime, recently added, release date), a platform view, search, selection mode and Save as collection. The Web filter shows web games as a mosaic. |
 | **Game page** | Hero art, Play (or Stream from a device), playtime and its sources, details, screenshots and videos, achievements, saves, the game's releases (one per platform or store), owned releases still to install, other devices that have it, fan ports, the IGDB match, and plugin tabs. |
 | **Store** | A catalog of games from IGDB: search with filters, new and upcoming releases, popular sorts, and pages for games you don't own, linking to stores. It creates no library entries. |
@@ -123,7 +123,7 @@ Read-only achievement progress for Steam, GOG, Epic and RetroAchievements (emula
 A household's devices pair once and then keep in step directly, with no server and no internet needed on a local network.
 
 - **Pairing** by a short code or a single-use link, accepted by an admin. Only admins pair.
-- **Library sync**: games, edits, collections, favourites, play sessions, accounts and settings, merged field by field. Paths, folders, emulators, store sign-ins and caches never leave a device. Each settings section can be kept to this device. New handhelds and TVs start in console mode.
+- **Library sync**: games, edits, collections, favourites, play sessions (with the device each was played on), accounts and settings, merged field by field. Paths, folders, emulators, store sign-ins and caches never leave a device. Each settings section can be kept to this device. New handhelds and TVs start in console mode.
 - **Saves** follow the player: after each session a game's saves are kept as versions (from the Ludusavi manifest or emulator rules, mapped into a Wine or Proton prefix where needed), sent to the other devices, restored before play, and browsable on the game page.
 - **Playing elsewhere**: a game running on another device shows as such, and Play warns before starting it twice.
 - **Copies**: a game installed on one device can be copied to another over the local network, as an independent install. Downloads a nearby device already has come from it instead of the internet.

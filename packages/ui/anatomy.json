@@ -246,7 +246,8 @@
         "storage-availability",
         "plugins",
         "select",
-        "playing-elsewhere"
+        "playing-elsewhere",
+        "played-on"
       ],
       "states": {
         "data-status": [
@@ -291,7 +292,8 @@
         "primary-action",
         "badge",
         "tags",
-        "website"
+        "website",
+        "played-on"
       ],
       "states": {},
       "interaction": []

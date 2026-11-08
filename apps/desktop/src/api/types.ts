@@ -35,6 +35,9 @@ export interface GameSummary {
   favorite: boolean;
   playtimeSeconds: number;
   lastPlayedAt: string | null;
+  /** The other device its latest session was played on; absent or null
+   * when it was played here or the device isn't known. */
+  lastPlayedOn?: PlayedOn | null;
   /** `YYYY-MM-DD`. */
   releaseDate: string | null;
   sizeBytes: number | null;
@@ -42,6 +45,13 @@ export interface GameSummary {
   coverList: string | null;
   /** The 96px icon for compact rows. */
   icon: string | null;
+}
+/** Another device a game was played on. */
+export interface PlayedOn {
+  /** Its device id. */
+  device: string;
+  /** What this device calls it; null when the two aren't paired. */
+  name: string | null;
 }
 export interface GameEntry {
   id: string;
