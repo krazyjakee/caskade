@@ -7,7 +7,7 @@
 export interface AnatomyEntry {
   /** The components that render this root, and where they live. */
   rendered: string;
-  source: "@caskade/ui" | "app";
+  source: "@caskade/ui" | "app" | "website";
   description: string;
   /** `data-part` names owned by this root → what each part is. */
   parts: Readonly<Record<string, string>>;
@@ -32,6 +32,71 @@ const gameStatus = ["installed", "not-installed", "available", "emulated"] as co
 const press = ["data-hovered", "data-pressed", "data-focus-visible", "data-disabled"] as const;
 
 export const anatomy = {
+  website: {
+    rendered: "apps/website/index.html (static GitHub Pages site)",
+    source: "website",
+    description: "The public landing page, sharing the app's tokens and branding.",
+    parts: {
+      skip: "Keyboard skip link to the main content.",
+      header: "Brand, primary navigation, language link and download link.",
+      brand: "Caskade's mark and name.",
+      button: "A link styled as a button; data-variant is primary or small when set.",
+      hero: "Introduction and library illustration.",
+      "hero-copy": "The main heading, introduction and actions.",
+      eyebrow: "A short section introduction.",
+      "status-dot": "A decorative accent beside the introduction.",
+      intro: "The landing page introduction.",
+      actions: "Primary download and source links.",
+      "text-link": "A text link to a project resource.",
+      "hero-note": "Free software and privacy summary.",
+      illustration: "The captioned library illustration, not a product screenshot.",
+      "library-window": "Decorative example library, hidden from assistive technology.",
+      "window-bar": "Illustrated window title bar.",
+      "window-brand": "Illustrated window brand.",
+      "window-dots": "Decorative window controls.",
+      "library-layout": "Illustrated navigation rail and content.",
+      "library-rail": "Decorative navigation icons; data-selected marks the example selection.",
+      "library-content": "Illustrated game banner and shelf.",
+      "library-title": "The example library heading.",
+      "game-banner": "An example game with original vector scenery.",
+      landscape: "The decorative vector landscape.",
+      sun: "The landscape's sun.",
+      "mountain-back": "Distant mountains.",
+      "mountain-front": "Near mountains.",
+      river: "The landscape's river.",
+      stars: "The landscape's stars.",
+      "banner-copy": "The example game's title and action label.",
+      "play-label": "An illustrative Play label, not an interactive control.",
+      "shelf-label": "The example shelf's title.",
+      "game-shelf": "The example game tiles.",
+      "game-tile": "An illustrative game; data-art selects orbit, meadow or neon art.",
+      "cover-art": "Original decorative cover art.",
+      orbit: "An illustrated planet and its ring.",
+      meadow: "Illustrated hills.",
+      city: "An illustrated city skyline.",
+      "window-status": "Decorative library status labels.",
+      "device-tag": "A callout about playing across paired devices.",
+      sources: "Examples of supported library sources.",
+      features: "The library, household and emulation feature overview.",
+      "section-heading": "A section's introduction and heading.",
+      "feature-grid": "The three feature descriptions.",
+      feature: "One feature; data-feature is library, household or retro.",
+      "feature-number": "A decorative feature index.",
+      principles: "Local ownership, offline use, privacy and customisation.",
+      "principle-list": "The three product principles.",
+      downloads: "Platform status and download links.",
+      "download-grid": "The three platform download panels.",
+      platform: "A platform's status, formats and release link.",
+      "platform-title": "Platform name, icon and optional status badge.",
+      badge: "The Linux reference-platform label.",
+      "release-note": "Download instructions and the release archive link.",
+      faq: "Native details disclosures with common questions.",
+      closing: "The final download invitation.",
+      footer: "Project documentation, source and licence links.",
+    },
+    states: {},
+    interaction: [],
+  },
   // ── @caskade/ui ──
   button: {
     rendered: "Button",

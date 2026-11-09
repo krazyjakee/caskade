@@ -113,6 +113,75 @@ variant of the component, such as the library's card.
 - [`romm`](#romm): Settings → RomM servers: the server list, the selected server's editor, downloads and the cache.
 - [`romm-servers`](#romm-servers): The RomM server list: each server's state, games, last sync and its action (Sync now, or Sign in when this device can't sign in).
 
+## Website
+
+- [`website`](#website): The public landing page, sharing the app's tokens and branding.
+
+## `website`
+
+The public landing page, sharing the app's tokens and branding. Rendered by apps/website/index.html (static GitHub Pages site).
+
+Root: `[data-cs="website"]`
+
+| Part | Selector | What it is |
+| --- | --- | --- |
+| `skip` | `[data-cs="website"] [data-part="skip"]` | Keyboard skip link to the main content. |
+| `header` | `[data-cs="website"] [data-part="header"]` | Brand, primary navigation, language link and download link. |
+| `brand` | `[data-cs="website"] [data-part="brand"]` | Caskade's mark and name. |
+| `button` | `[data-cs="website"] [data-part="button"]` | A link styled as a button; data-variant is primary or small when set. |
+| `hero` | `[data-cs="website"] [data-part="hero"]` | Introduction and library illustration. |
+| `hero-copy` | `[data-cs="website"] [data-part="hero-copy"]` | The main heading, introduction and actions. |
+| `eyebrow` | `[data-cs="website"] [data-part="eyebrow"]` | A short section introduction. |
+| `status-dot` | `[data-cs="website"] [data-part="status-dot"]` | A decorative accent beside the introduction. |
+| `intro` | `[data-cs="website"] [data-part="intro"]` | The landing page introduction. |
+| `actions` | `[data-cs="website"] [data-part="actions"]` | Primary download and source links. |
+| `text-link` | `[data-cs="website"] [data-part="text-link"]` | A text link to a project resource. |
+| `hero-note` | `[data-cs="website"] [data-part="hero-note"]` | Free software and privacy summary. |
+| `illustration` | `[data-cs="website"] [data-part="illustration"]` | The captioned library illustration, not a product screenshot. |
+| `library-window` | `[data-cs="website"] [data-part="library-window"]` | Decorative example library, hidden from assistive technology. |
+| `window-bar` | `[data-cs="website"] [data-part="window-bar"]` | Illustrated window title bar. |
+| `window-brand` | `[data-cs="website"] [data-part="window-brand"]` | Illustrated window brand. |
+| `window-dots` | `[data-cs="website"] [data-part="window-dots"]` | Decorative window controls. |
+| `library-layout` | `[data-cs="website"] [data-part="library-layout"]` | Illustrated navigation rail and content. |
+| `library-rail` | `[data-cs="website"] [data-part="library-rail"]` | Decorative navigation icons; data-selected marks the example selection. |
+| `library-content` | `[data-cs="website"] [data-part="library-content"]` | Illustrated game banner and shelf. |
+| `library-title` | `[data-cs="website"] [data-part="library-title"]` | The example library heading. |
+| `game-banner` | `[data-cs="website"] [data-part="game-banner"]` | An example game with original vector scenery. |
+| `landscape` | `[data-cs="website"] [data-part="landscape"]` | The decorative vector landscape. |
+| `sun` | `[data-cs="website"] [data-part="sun"]` | The landscape's sun. |
+| `mountain-back` | `[data-cs="website"] [data-part="mountain-back"]` | Distant mountains. |
+| `mountain-front` | `[data-cs="website"] [data-part="mountain-front"]` | Near mountains. |
+| `river` | `[data-cs="website"] [data-part="river"]` | The landscape's river. |
+| `stars` | `[data-cs="website"] [data-part="stars"]` | The landscape's stars. |
+| `banner-copy` | `[data-cs="website"] [data-part="banner-copy"]` | The example game's title and action label. |
+| `play-label` | `[data-cs="website"] [data-part="play-label"]` | An illustrative Play label, not an interactive control. |
+| `shelf-label` | `[data-cs="website"] [data-part="shelf-label"]` | The example shelf's title. |
+| `game-shelf` | `[data-cs="website"] [data-part="game-shelf"]` | The example game tiles. |
+| `game-tile` | `[data-cs="website"] [data-part="game-tile"]` | An illustrative game; data-art selects orbit, meadow or neon art. |
+| `cover-art` | `[data-cs="website"] [data-part="cover-art"]` | Original decorative cover art. |
+| `orbit` | `[data-cs="website"] [data-part="orbit"]` | An illustrated planet and its ring. |
+| `meadow` | `[data-cs="website"] [data-part="meadow"]` | Illustrated hills. |
+| `city` | `[data-cs="website"] [data-part="city"]` | An illustrated city skyline. |
+| `window-status` | `[data-cs="website"] [data-part="window-status"]` | Decorative library status labels. |
+| `device-tag` | `[data-cs="website"] [data-part="device-tag"]` | A callout about playing across paired devices. |
+| `sources` | `[data-cs="website"] [data-part="sources"]` | Examples of supported library sources. |
+| `features` | `[data-cs="website"] [data-part="features"]` | The library, household and emulation feature overview. |
+| `section-heading` | `[data-cs="website"] [data-part="section-heading"]` | A section's introduction and heading. |
+| `feature-grid` | `[data-cs="website"] [data-part="feature-grid"]` | The three feature descriptions. |
+| `feature` | `[data-cs="website"] [data-part="feature"]` | One feature; data-feature is library, household or retro. |
+| `feature-number` | `[data-cs="website"] [data-part="feature-number"]` | A decorative feature index. |
+| `principles` | `[data-cs="website"] [data-part="principles"]` | Local ownership, offline use, privacy and customisation. |
+| `principle-list` | `[data-cs="website"] [data-part="principle-list"]` | The three product principles. |
+| `downloads` | `[data-cs="website"] [data-part="downloads"]` | Platform status and download links. |
+| `download-grid` | `[data-cs="website"] [data-part="download-grid"]` | The three platform download panels. |
+| `platform` | `[data-cs="website"] [data-part="platform"]` | A platform's status, formats and release link. |
+| `platform-title` | `[data-cs="website"] [data-part="platform-title"]` | Platform name, icon and optional status badge. |
+| `badge` | `[data-cs="website"] [data-part="badge"]` | The Linux reference-platform label. |
+| `release-note` | `[data-cs="website"] [data-part="release-note"]` | Download instructions and the release archive link. |
+| `faq` | `[data-cs="website"] [data-part="faq"]` | Native details disclosures with common questions. |
+| `closing` | `[data-cs="website"] [data-part="closing"]` | The final download invitation. |
+| `footer` | `[data-cs="website"] [data-part="footer"]` | Project documentation, source and licence links. |
+
 ## `button`
 
 A push button. Rendered by Button.

@@ -14,6 +14,7 @@ Contracts for extension authors:
 
 Guides:
 
+- [Website](../apps/website/README.md): editing, translating, previewing and deploying the GitHub Pages landing page.
 - [Releasing](RELEASING.md): cutting a release, the updater signing key, testing an update before publishing.
 - [Translating Caskade](translating.md): languages, catalogs and `just i18n-check`.
 - [Manual checks](manual-checks.md): the real-machine, network and account checks still open on GitHub issues.

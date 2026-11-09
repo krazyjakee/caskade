@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="{{language}}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content="{{description}}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="{{title}}" />
+    <meta property="og:description" content="{{description}}" />
+    <meta property="og:url" content="{{canonical}}" />
+    <title>{{title}}</title>
+    <link rel="canonical" href="{{canonical}}" />
+    <link rel="alternate" hreflang="en" href="{{english}}" />
+    <link rel="alternate" hreflang="sv" href="{{swedish}}" />
+    <link rel="alternate" hreflang="x-default" href="{{english}}" />
+    <link rel="icon" type="image/svg+xml" href="{{assets}}caskade.svg" />
+    <link rel="preload" href="{{assets}}inter.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="{{assets}}oxanium.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="{{assets}}tokens.css" />
+    <link rel="stylesheet" href="{{assets}}site.css" />
+  </head>
+  <body data-cs="website">
+    <a data-part="skip" href="#main">{{skip}}</a>
+    <header data-part="header">
+      <a data-part="brand" href="#" aria-label="{{home}}">
+        <img src="{{assets}}caskade.svg" alt="" width="34" height="34" />
+        <span>Caskade</span>
+      </a>
+      <nav aria-label="{{navigation}}">
+        <a href="#features">{{featuresNav}}</a>
+        <a href="https://github.com/krazyjakee/caskade/tree/master/docs">{{docsNav}}</a>
+        <a href="{{otherPage}}" lang="{{otherLanguage}}" hreflang="{{otherLanguage}}">{{languageName}}</a>
+      </nav>
+      <a data-part="button" data-variant="small" href="#download">{{downloadNav}} <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main id="main">
+      <section data-part="hero" aria-labelledby="hero-title">
+        <div data-part="hero-copy">
+          <p data-part="eyebrow"><span data-part="status-dot" aria-hidden="true"></span>{{eyebrow}}</p>
+          <h1 id="hero-title">{{heroOne}}<br /><span>{{heroTwo}}</span></h1>
+          <p data-part="intro">{{intro}}</p>
+          <div data-part="actions">
+            <a data-part="button" data-variant="primary" href="#download">{{downloadHero}} <span aria-hidden="true">↓</span></a>
+            <a data-part="text-link" href="https://github.com/krazyjakee/caskade">{{sourceHero}} <span aria-hidden="true">↗</span></a>
+          </div>
+          <p data-part="hero-note">{{heroNote}}</p>
+        </div>
+
+        <figure data-part="illustration">
+          <div data-part="library-window" aria-hidden="true">
+            <div data-part="window-bar"><span data-part="window-brand"><img src="{{assets}}caskade.svg" alt="" width="18" height="18" />Caskade</span><span data-part="window-dots">• • •</span></div>
+            <div data-part="library-layout">
+              <div data-part="library-rail"><span>⌂</span><span data-selected="true">▦</span><span>♡</span><span>⚙</span></div>
+              <div data-part="library-content">
+                <div data-part="library-title"><strong>{{libraryTitle}}</strong><span>⌕</span></div>
+                <div data-part="game-banner">
+                  <svg data-part="landscape" viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg"><circle data-part="sun" cx="400" cy="70" r="43"/><path data-part="mountain-back" d="M0 180 85 104 130 140 248 34 360 164 423 98 540 185V230H0Z"/><path data-part="mountain-front" d="m0 200 127-46 102 42 124-68 100 52 87-23v73H0Z"/><path data-part="river" d="m297 166-34 27 59 15-33 22h79l17-29-89-13 19-19Z"/><path data-part="stars" d="M50 44h3v3h-3zm120 26h2v2h-2zm145-47h3v3h-3zm179 26h2v2h-2z"/></svg>
+                  <div data-part="banner-copy"><span>{{continuePlaying}}</span><strong>Aetherfall</strong><span data-part="play-label">▶ {{play}}</span></div>
+                </div>
+                <div data-part="shelf-label">{{everythingTogether}}<span>→</span></div>
+                <div data-part="game-shelf">
+                  <div data-part="game-tile" data-art="orbit"><div data-part="cover-art"><span data-part="orbit"></span></div><strong>Voidstriders</strong><span>Steam</span></div>
+                  <div data-part="game-tile" data-art="meadow"><div data-part="cover-art"><span data-part="meadow"></span></div><strong>Meadowgrove</strong><span>SNES</span></div>
+                  <div data-part="game-tile" data-art="neon"><div data-part="cover-art"><span data-part="city"></span></div><strong>Neon Meridian</strong><span>GOG</span></div>
+                </div>
+              </div>
+            </div>
+            <div data-part="window-status"><span>● {{libraryLocal}}</span><span>{{libraryReady}}</span></div>
+          </div>
+          <div data-part="device-tag"><span aria-hidden="true">⇄</span><div><strong>{{deviceTitle}}</strong><span>{{deviceDetail}}</span></div></div>
+          <figcaption>{{illustrationCaption}}</figcaption>
+        </figure>
+      </section>
+
+      <section data-part="sources" aria-label="{{sourcesLabel}}">
+        <p>{{sourcesIntro}}</p>
+        <ul><li>Steam</li><li>GOG</li><li>Epic Games</li><li>itch.io</li><li>{{emulators}}</li><li>{{webGames}}</li><li>{{andMore}}</li></ul>
+      </section>
+
+      <section id="features" data-part="features" aria-labelledby="features-title">
+        <div data-part="section-heading"><p data-part="eyebrow">{{featuresEyebrow}}</p><h2 id="features-title">{{featuresTitle}}</h2><p>{{featuresIntro}}</p></div>
+        <div data-part="feature-grid">
+          <article data-part="feature" data-feature="library"><span data-part="feature-number">01 /</span><h3>{{libraryHeading}}</h3><p>{{libraryBody}}</p><a data-part="text-link" href="https://github.com/krazyjakee/caskade/blob/master/docs/PRODUCT-SPEC.md#41-finding-games">{{libraryLink}} <span aria-hidden="true">↗</span></a></article>
+          <article data-part="feature" data-feature="household"><span data-part="feature-number">02 /</span><h3>{{householdHeading}}</h3><p>{{householdBody}}</p><a data-part="text-link" href="https://github.com/krazyjakee/caskade/blob/master/docs/PRODUCT-SPEC.md#411-devices-and-sync">{{householdLink}} <span aria-hidden="true">↗</span></a></article>
+          <article data-part="feature" data-feature="retro"><span data-part="feature-number">03 /</span><h3>{{retroHeading}}</h3><p>{{retroBody}}</p><a data-part="text-link" href="https://github.com/krazyjakee/caskade/blob/master/docs/PRODUCT-SPEC.md#46-emulation">{{retroLink}} <span aria-hidden="true">↗</span></a></article>
+        </div>
+      </section>
+
+      <section data-part="principles" aria-labelledby="principles-title">
+        <div><p data-part="eyebrow">{{principlesEyebrow}}</p><h2 id="principles-title">{{principlesTitle}}</h2><p>{{principlesIntro}}</p><a data-part="text-link" href="https://github.com/krazyjakee/caskade/blob/master/docs/MISSION.md">{{missionLink}} <span aria-hidden="true">↗</span></a></div>
+        <ul data-part="principle-list"><li><span aria-hidden="true">✓</span><div><h3>{{offlineHeading}}</h3><p>{{offlineBody}}</p></div></li><li><span aria-hidden="true">✓</span><div><h3>{{privacyHeading}}</h3><p>{{privacyBody}}</p></div></li><li><span aria-hidden="true">✓</span><div><h3>{{customHeading}}</h3><p>{{customBody}}</p></div></li></ul>
+      </section>
+
+      <section id="download" data-part="downloads" aria-labelledby="download-title">
+        <div data-part="section-heading"><p data-part="eyebrow">{{downloadEyebrow}}</p><h2 id="download-title">{{downloadTitle}}</h2><p>{{downloadIntro}}</p></div>
+        <div data-part="download-grid">
+          <article data-part="platform"><div data-part="platform-title"><span aria-hidden="true">◈</span><h3>Linux</h3><span data-part="badge">{{linuxBadge}}</span></div><p>{{linuxBody}}</p><a data-part="button" href="https://github.com/krazyjakee/caskade/releases/latest">{{linuxDownload}} <span aria-hidden="true">↗</span></a><small>{{linuxFormats}}</small></article>
+          <article data-part="platform"><div data-part="platform-title"><span aria-hidden="true">⊞</span><h3>Windows</h3></div><p>{{windowsBody}}</p><a data-part="button" href="https://github.com/krazyjakee/caskade/releases/latest">{{windowsDownload}} <span aria-hidden="true">↗</span></a><small>{{windowsFormats}}</small></article>
+          <article data-part="platform"><div data-part="platform-title"><span aria-hidden="true">⌘</span><h3>macOS</h3></div><p>{{macBody}}</p><a data-part="button" href="https://github.com/krazyjakee/caskade/releases/latest">{{macDownload}} <span aria-hidden="true">↗</span></a><small>{{macFormats}}</small></article>
+        </div>
+        <p data-part="release-note">{{releaseNote}} <a href="https://github.com/krazyjakee/caskade/releases">{{releaseLink}}</a></p>
+      </section>
+
+      <section data-part="faq" aria-labelledby="faq-title">
+        <h2 id="faq-title">{{faqTitle}}</h2>
+        <div><details><summary>{{faqAccount}}</summary><p>{{faqAccountAnswer}}</p></details><details><summary>{{faqStores}}</summary><p>{{faqStoresAnswer}}</p></details><details><summary>{{faqController}}</summary><p>{{faqControllerAnswer}}</p></details><details><summary>{{faqContribute}}</summary><p>{{faqContributeAnswer}} <a href="https://github.com/krazyjakee/caskade/issues">{{issuesLink}}</a></p></details></div>
+      </section>
+      <section data-part="closing"><img src="{{assets}}caskade.svg" alt="" width="44" height="44" loading="lazy" /><h2>{{closingTitle}}</h2><a data-part="button" data-variant="primary" href="#download">{{downloadHero}} <span aria-hidden="true">↓</span></a></section>
+    </main>
+
+    <footer data-part="footer"><a data-part="brand" href="#"><img src="{{assets}}caskade.svg" alt="" width="26" height="26" /><span>Caskade</span></a><p>{{footerNote}}</p><nav aria-label="{{footerNavigation}}"><a href="https://github.com/krazyjakee/caskade">GitHub</a><a href="https://github.com/krazyjakee/caskade/tree/master/docs">{{docsNav}}</a><a href="https://github.com/krazyjakee/caskade/blob/master/LICENSE">{{licence}}</a></nav></footer>
+  </body>
+</html>

@@ -89,6 +89,10 @@ export function build(): string {
     "",
     ...index(group("app")),
     "",
+    "## Website",
+    "",
+    ...index(group("website")),
+    "",
     ...entries.flatMap(([name, entry]) => section(name, entry)),
   ];
   return `${lines.join("\n").trimEnd()}\n`;

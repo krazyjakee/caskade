@@ -4,6 +4,7 @@ A game library and launcher for Windows, Linux and macOS, written in Rust with a
 
 Every game you own, on every device in your home, in one library: store and launcher games, emulated games with emulators set up for you, web games, fan ports, and games streamed from another PC in the house. Devices pair and keep the library, saves and playtime in step directly, with no account and no server. It has a desktop mode, a fullscreen console mode for gamepads, themes and WebAssembly plugins.
 
+- [Website](https://krazyjakee.github.io/caskade/) · [Downloads](https://github.com/krazyjakee/caskade/releases/latest)
 - [Mission](docs/MISSION.md)
 - [Product spec](docs/PRODUCT-SPEC.md): what it does today and what is planned
 - [Tech spec](docs/TECH-SPEC.md): how it is built
