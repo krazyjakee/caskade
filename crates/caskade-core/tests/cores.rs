@@ -33,7 +33,12 @@ pub struct Core {
     pub account: String,
     pub transfers: Transfers,
     pub install: InstallService,
-    /// One-off shares, both ways (#246, #248).
+    /// One-off shares, both ways (#246, #248). Read by the Unix-only
+    /// network scenarios here and by caskade-share's tests.
+    #[cfg_attr(
+        windows,
+        allow(dead_code, reason = "the scenarios that read it run on Unix")
+    )]
     pub shares: Shares,
     /// The storage root installs land in.
     pub games: PathBuf,
