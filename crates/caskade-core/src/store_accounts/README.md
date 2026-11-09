@@ -135,7 +135,7 @@ ask for several values (`AuthChallenge::fields`, answered with
 `AuthInput::Fields`) and say what to know first (`instructions`).
 `OwnedProduct` carries `playtime_minutes` and `last_played_ms` only when the
 store supplies them; #169 reconciles them with local sessions.
-`StoreAccounts::credentials(account)` gives other core features (achievements,
+`StoreAccounts::credentials(account)` gives other features (achievements,
 #186–#188) an account's sign-in, renewed when it can be; it never leaves
 the core. A provider with `library: false` (RetroAchievements, #189) has
 nothing to list: its Refresh runs the `AccountRefresher` the app sets

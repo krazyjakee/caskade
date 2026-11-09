@@ -33,7 +33,16 @@ pub struct Domain {
 /// The core's domain: the Rust crates, the Tauri adapter and the tray.
 pub const CORE: Domain = Domain {
     name: "core",
-    sources: &["crates/caskade-core/src", "apps/desktop/src-tauri/src"],
+    sources: &[
+        "crates/caskade-core/src",
+        "crates/caskade-achievements/src",
+        "crates/caskade-addons/src",
+        "crates/caskade-backup/src",
+        "crates/caskade-share/src",
+        "crates/caskade-streaming/src",
+        "crates/caskade-system-stats/src",
+        "apps/desktop/src-tauri/src",
+    ],
     title: "Caskade's core messages: the Rust crates, the Tauri adapter and the tray.",
 };
 

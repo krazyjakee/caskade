@@ -6,9 +6,9 @@ To try it in the app, serve the folder and point a run at it with a test key (ne
 
 ```sh
 python3 -m http.server -d target/catalogue 8765
-pnpm tauri signer sign -f crates/caskade-core/src/addons/testdata/test-signing.key -p "" target/catalogue/catalogue.json
+pnpm tauri signer sign -f crates/caskade-addons/src/testdata/test-signing.key -p "" target/catalogue/catalogue.json
 CASKADE_CATALOGUE_URL=http://127.0.0.1:8765/catalogue.json \
-CASKADE_CATALOGUE_PUBKEY="$(cat crates/caskade-core/src/addons/testdata/test-signing.key.pub)" just dev
+CASKADE_CATALOGUE_PUBKEY="$(cat crates/caskade-addons/src/testdata/test-signing.key.pub)" just dev
 ```
 
 See `docs/plugins/publishing.md`.
