@@ -14,6 +14,8 @@ on:
       - apps/desktop/public/caskade.svg
       - packages/tokens/tokens.css
       - .github/workflows/pages.yml
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
@@ -31,11 +33,21 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: ${{ github.event_name == 'release' && 'master' || github.ref }}
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
+      - name: Check download asset selection
+        run: node --test apps/website/downloads.test.mjs
+      - name: Read current download assets
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api repos/krazyjakee/caskade/releases/latest > "$RUNNER_TEMP/caskade-release.json"
       - name: Build both languages
-        run: node apps/website/build.mjs
+        env:
+          RELEASE_METADATA: ${{ github.event_name == 'pull_request' && 'apps/website/releases.json' || format('{0}/caskade-release.json', runner.temp) }}
+        run: node apps/website/build.mjs "$RELEASE_METADATA"
       - name: Check generated pages and local links
         run: python3 apps/website/check.py
       - name: Upload Pages artifact
@@ -45,7 +57,7 @@ jobs:
           path: apps/website/dist
 
   deploy:
-    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+    if: (github.ref == 'refs/heads/master' || github.event_name == 'release') && github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 10

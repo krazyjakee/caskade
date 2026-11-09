@@ -1,11 +1,17 @@
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import { downloadLinks } from "./downloads.mjs";
 
 // A dependency-free static build. All URLs are relative so the same output
 // works at /caskade/, at a custom domain's root, and in local previews.
 const root = new URL("./", import.meta.url);
 const output = new URL("dist/", root);
 const languages = ["en", "sv"];
+// Deployment supplies fresh GitHub metadata; local builds use the offline snapshot.
+const release = JSON.parse(
+  await readFile(process.argv[2] ?? new URL("releases.json", root), "utf8"),
+);
+const downloads = downloadLinks(release);
 const template = await readFile(new URL("index.html", root), "utf8");
 const catalogues = await Promise.all(
   languages.map(async (language) =>
@@ -24,6 +30,7 @@ const builtins = [
   "canonical",
   "english",
   "swedish",
+  ...Object.keys(downloads),
 ];
 const escapeHtml = (value) =>
   value
@@ -58,6 +65,7 @@ for (const [index, language] of languages.entries()) {
   const prefix = language === "en" ? "./" : "../";
   const values = {
     ...catalogues[index],
+    ...downloads,
     language,
     assets: `${prefix}assets/`,
     englishPage: language === "en" ? "./" : "../",

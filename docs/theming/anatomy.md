@@ -138,7 +138,7 @@ Root: `[data-cs="website"]`
 | `eyebrow` | `[data-cs="website"] [data-part="eyebrow"]` | A short section introduction. |
 | `status-dot` | `[data-cs="website"] [data-part="status-dot"]` | A decorative accent beside the introduction. |
 | `intro` | `[data-cs="website"] [data-part="intro"]` | The landing page introduction. |
-| `actions` | `[data-cs="website"] [data-part="actions"]` | Primary download and source links. |
+| `actions` | `[data-cs="website"] [data-part="actions"]` | Download and source link groups, including platform installer choices. |
 | `text-link` | `[data-cs="website"] [data-part="text-link"]` | A text link to a project resource. |
 | `hero-note` | `[data-cs="website"] [data-part="hero-note"]` | Free software and privacy summary. |
 | `screenshots` | `[data-cs="website"] [data-part="screenshots"]` | Actual app captures with a sample library, linking to the full images. |
@@ -157,7 +157,7 @@ Root: `[data-cs="website"]`
 | `principle-list` | `[data-cs="website"] [data-part="principle-list"]` | The three product principles. |
 | `downloads` | `[data-cs="website"] [data-part="downloads"]` | Platform status and download links. |
 | `download-grid` | `[data-cs="website"] [data-part="download-grid"]` | The three platform download panels. |
-| `platform` | `[data-cs="website"] [data-part="platform"]` | A platform's status, formats and release link. |
+| `platform` | `[data-cs="website"] [data-part="platform"]` | A platform's status, formats and direct installer links. |
 | `platform-title` | `[data-cs="website"] [data-part="platform-title"]` | Platform name, icon and optional status badge. |
 | `badge` | `[data-cs="website"] [data-part="badge"]` | The Linux reference-platform label. |
 | `release-note` | `[data-cs="website"] [data-part="release-note"]` | Download instructions and the release archive link. |

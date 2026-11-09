@@ -38,9 +38,17 @@ Swedish. The generated `dist/` directory is ignored by Git.
   library. The page crops the images with CSS and links to the complete captures.
   The sample artwork comes from Steam's public artwork CDN; game artwork belongs
   to its respective owners. No personal library, account or device data is used.
-- Download links go to GitHub's latest release page, where visitors choose a
-  platform asset. There are no pinned version numbers or guessed filenames.
-  Keep the platform caveats aligned with `docs/PRODUCT-SPEC.md`.
+- Download buttons link directly to the published AppImage, Debian package,
+  Windows setup and Apple silicon / Intel disk images. `downloads.mjs` selects
+  exactly one asset per format from GitHub release metadata and rejects missing,
+  ambiguous or unexpected URLs. Keep platform caveats aligned with
+  `docs/PRODUCT-SPEC.md`.
+- `releases.json` is a snapshot for offline builds. To preview newer metadata,
+  run `gh api repos/krazyjakee/caskade/releases/latest > /tmp/caskade-release.json`,
+  then `node apps/website/build.mjs /tmp/caskade-release.json`. Refresh the snapshot
+  with the five installer assets when updating it; filenames are read from the
+  metadata rather than constructed from the app's version. Run
+  `node --test apps/website/downloads.test.mjs` to check asset selection.
 - The video below the introduction uses a responsive, lazy-loaded YouTube
   privacy-enhanced embed (`youtube-nocookie.com`) with no autoplay and a direct
   YouTube link. Both languages share the video, with translated headings and
@@ -80,7 +88,11 @@ Review all four images, then rebuild the website and commit the captures.
 
 `.github/workflows/pages.yml` builds and checks pull requests without deployment.
 Changes to the site, shared logo, token CSS or the workflow on `master` publish
-the checked artifact. A manual workflow dispatch also publishes `master`.
+the checked artifact. Publishing a release also rebuilds and publishes the site
+from `master`. Deployment reads the latest stable release metadata through the
+GitHub API before the offline build, so download links follow new releases without
+runtime JavaScript or a browser API request. A manual workflow dispatch also
+publishes `master`.
 Deployment uses the `github-pages` environment with `pages: write` and
 `id-token: write`; the build only has read access. Actions are pinned to commit
 SHAs. No `gh-pages` branch or generated files in `master` are needed.

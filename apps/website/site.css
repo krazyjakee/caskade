@@ -536,8 +536,13 @@ h3 {
   font-size: 0.8rem;
   margin-block: 1.2rem 1.8rem;
 }
-[data-part="platform"] > a {
+[data-part="platform"] > [data-part="actions"] {
+  flex-direction: column;
+  align-items: stretch;
+  gap: calc(0.75rem * var(--cs-density-scale));
   margin-top: auto;
+}
+[data-part="platform"] [data-part="button"] {
   gap: 0.5rem;
   justify-content: space-between;
   padding-inline: 0.9rem;

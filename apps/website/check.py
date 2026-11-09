@@ -15,6 +15,7 @@ class Page(HTMLParser):
         self.path = path
         self.ids = set()
         self.links = []
+        self.downloads = []
         self.headings = 0
         self.language = None
         self.parts = set()
@@ -36,6 +37,8 @@ class Page(HTMLParser):
         for name in ("href", "src"):
             if name in attrs:
                 self.links.append(attrs[name])
+        if tag == "a" and attrs.get("data-part") == "button" and not attrs["href"].startswith("#"):
+            self.downloads.append(attrs["href"])
         if "popovertarget" in attrs:
             self.links.append("#" + attrs["popovertarget"])
 
@@ -45,6 +48,10 @@ anatomy = json.loads((ROOT.parents[2] / "packages/ui/anatomy.json").read_text())
 parts = set(anatomy["roots"]["website"]["parts"])
 assert {page.language for page in pages.values()} == {"en", "sv"}, "Both languages must build"
 for path, page in pages.items():
+    suffixes = ("_amd64.AppImage", "_amd64.deb", "_x64-setup.exe", "_aarch64.dmg", "_x64.dmg")
+    assert len(page.downloads) == len(suffixes), f"Expected five direct installer links in {path}"
+    for suffix in suffixes:
+        assert sum(link.endswith(suffix) for link in page.downloads) == 1, f"Missing or duplicate installer: {suffix}"
     assert page.headings == 1, f"Expected one main heading in {path}"
     assert page.parts == parts, f"Website anatomy differs: {page.parts ^ parts}"
     assert "{{" not in path.read_text(), f"Unresolved template in {path}"

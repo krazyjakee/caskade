@@ -98,9 +98,32 @@
       <section id="download" data-part="downloads" aria-labelledby="download-title">
         <div data-part="section-heading"><p data-part="eyebrow">{{downloadEyebrow}}</p><h2 id="download-title">{{downloadTitle}}</h2><p>{{downloadIntro}}</p></div>
         <div data-part="download-grid">
-          <article data-part="platform"><div data-part="platform-title"><span aria-hidden="true">◈</span><h3>Linux</h3><span data-part="badge">{{linuxBadge}}</span></div><p>{{linuxBody}}</p><a data-part="button" href="https://github.com/krazyjakee/caskade/releases/latest">{{linuxDownload}} <span aria-hidden="true">↗</span></a><small>{{linuxFormats}}</small></article>
-          <article data-part="platform"><div data-part="platform-title"><span aria-hidden="true">⊞</span><h3>Windows</h3></div><p>{{windowsBody}}</p><a data-part="button" href="https://github.com/krazyjakee/caskade/releases/latest">{{windowsDownload}} <span aria-hidden="true">↗</span></a><small>{{windowsFormats}}</small></article>
-          <article data-part="platform"><div data-part="platform-title"><span aria-hidden="true">⌘</span><h3>macOS</h3></div><p>{{macBody}}</p><a data-part="button" href="https://github.com/krazyjakee/caskade/releases/latest">{{macDownload}} <span aria-hidden="true">↗</span></a><small>{{macFormats}}</small></article>
+          <article data-part="platform">
+            <div data-part="platform-title"><span aria-hidden="true">◈</span><h3>Linux</h3><span data-part="badge">{{linuxBadge}}</span></div>
+            <p>{{linuxBody}}</p>
+            <div data-part="actions">
+              <a data-part="button" href="{{linuxAppImageUrl}}">{{linuxDownload}} <span aria-hidden="true">↓</span></a>
+              <a data-part="button" href="{{linuxDebUrl}}">{{linuxDebDownload}} <span aria-hidden="true">↓</span></a>
+            </div>
+            <small>{{linuxFormats}}</small>
+          </article>
+          <article data-part="platform">
+            <div data-part="platform-title"><span aria-hidden="true">⊞</span><h3>Windows</h3></div>
+            <p>{{windowsBody}}</p>
+            <div data-part="actions">
+              <a data-part="button" href="{{windowsSetupUrl}}">{{windowsDownload}} <span aria-hidden="true">↓</span></a>
+            </div>
+            <small>{{windowsFormats}}</small>
+          </article>
+          <article data-part="platform">
+            <div data-part="platform-title"><span aria-hidden="true">⌘</span><h3>macOS</h3></div>
+            <p>{{macBody}}</p>
+            <div data-part="actions">
+              <a data-part="button" href="{{macArmUrl}}">{{macDownload}} <span aria-hidden="true">↓</span></a>
+              <a data-part="button" href="{{macIntelUrl}}">{{macIntelDownload}} <span aria-hidden="true">↓</span></a>
+            </div>
+            <small>{{macFormats}}</small>
+          </article>
         </div>
         <p data-part="release-note">{{releaseNote}} <a href="https://github.com/krazyjakee/caskade/releases">{{releaseLink}}</a></p>
       </section>
