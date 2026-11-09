@@ -27,12 +27,21 @@
         <img src="{{assets}}caskade.svg" alt="" width="34" height="34" />
         <span>Caskade</span>
       </a>
-      <nav aria-label="{{navigation}}">
+      <nav data-part="main-nav" aria-label="{{navigation}}">
         <a href="#features">{{featuresNav}}</a>
         <a href="https://github.com/krazyjakee/caskade/tree/master/docs">{{docsNav}}</a>
-        <a href="{{otherPage}}" lang="{{otherLanguage}}" hreflang="{{otherLanguage}}">{{languageName}}</a>
       </nav>
-      <a data-part="button" data-variant="small" href="#download">{{downloadNav}} <span aria-hidden="true">↗</span></a>
+      <div data-part="header-actions">
+        <button data-part="language-trigger" type="button" popovertarget="language-options" aria-label="{{chooseLanguage}}: {{currentLanguage}}">
+          <img src="{{assets}}flag-{{language}}.svg" alt="" width="24" height="16" />
+          <span>{{currentLanguage}}</span><span aria-hidden="true">⌄</span>
+        </button>
+        <nav data-part="language-options" id="language-options" popover aria-label="{{chooseLanguage}}">
+          <a href="{{englishPage}}" lang="en" hreflang="en" aria-current="{{englishCurrent}}"><img src="{{assets}}flag-en.svg" alt="" width="24" height="16" />English</a>
+          <a href="{{swedishPage}}" lang="sv" hreflang="sv" aria-current="{{swedishCurrent}}"><img src="{{assets}}flag-sv.svg" alt="" width="24" height="16" />Svenska</a>
+        </nav>
+        <a data-part="button" data-variant="small" href="#download">{{downloadNav}} <span aria-hidden="true">↗</span></a>
+      </div>
     </header>
 
     <main id="main">
@@ -48,29 +57,16 @@
           <p data-part="hero-note">{{heroNote}}</p>
         </div>
 
-        <figure data-part="illustration">
-          <div data-part="library-window" aria-hidden="true">
-            <div data-part="window-bar"><span data-part="window-brand"><img src="{{assets}}caskade.svg" alt="" width="18" height="18" />Caskade</span><span data-part="window-dots">• • •</span></div>
-            <div data-part="library-layout">
-              <div data-part="library-rail"><span>⌂</span><span data-selected="true">▦</span><span>♡</span><span>⚙</span></div>
-              <div data-part="library-content">
-                <div data-part="library-title"><strong>{{libraryTitle}}</strong><span>⌕</span></div>
-                <div data-part="game-banner">
-                  <svg data-part="landscape" viewBox="0 0 540 230" xmlns="http://www.w3.org/2000/svg"><circle data-part="sun" cx="400" cy="70" r="43"/><path data-part="mountain-back" d="M0 180 85 104 130 140 248 34 360 164 423 98 540 185V230H0Z"/><path data-part="mountain-front" d="m0 200 127-46 102 42 124-68 100 52 87-23v73H0Z"/><path data-part="river" d="m297 166-34 27 59 15-33 22h79l17-29-89-13 19-19Z"/><path data-part="stars" d="M50 44h3v3h-3zm120 26h2v2h-2zm145-47h3v3h-3zm179 26h2v2h-2z"/></svg>
-                  <div data-part="banner-copy"><span>{{continuePlaying}}</span><strong>Aetherfall</strong><span data-part="play-label">▶ {{play}}</span></div>
-                </div>
-                <div data-part="shelf-label">{{everythingTogether}}<span>→</span></div>
-                <div data-part="game-shelf">
-                  <div data-part="game-tile" data-art="orbit"><div data-part="cover-art"><span data-part="orbit"></span></div><strong>Voidstriders</strong><span>Steam</span></div>
-                  <div data-part="game-tile" data-art="meadow"><div data-part="cover-art"><span data-part="meadow"></span></div><strong>Meadowgrove</strong><span>SNES</span></div>
-                  <div data-part="game-tile" data-art="neon"><div data-part="cover-art"><span data-part="city"></span></div><strong>Neon Meridian</strong><span>GOG</span></div>
-                </div>
-              </div>
-            </div>
-            <div data-part="window-status"><span>● {{libraryLocal}}</span><span>{{libraryReady}}</span></div>
-          </div>
-          <div data-part="device-tag"><span aria-hidden="true">⇄</span><div><strong>{{deviceTitle}}</strong><span>{{deviceDetail}}</span></div></div>
-          <figcaption>{{illustrationCaption}}</figcaption>
+        <figure data-part="screenshots">
+          <a data-part="screenshot-main" href="{{assets}}desktop-{{language}}.jpg" aria-label="{{desktopScreenshotLink}}">
+            <img src="{{assets}}desktop-{{language}}.jpg" alt="{{desktopScreenshotAlt}}" width="1440" height="780" fetchpriority="high" />
+            <span data-part="screenshot-label">{{desktopLabel}} <span aria-hidden="true">↗</span></span>
+          </a>
+          <a data-part="screenshot-console" href="{{assets}}console-{{language}}.jpg" aria-label="{{consoleScreenshotLink}}">
+            <img src="{{assets}}console-{{language}}.jpg" alt="{{consoleScreenshotAlt}}" width="1440" height="900" />
+            <span data-part="screenshot-label">{{consoleLabel}} <span aria-hidden="true">↗</span></span>
+          </a>
+          <figcaption>{{screenshotCaption}}</figcaption>
         </figure>
       </section>
 

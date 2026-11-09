@@ -126,10 +126,14 @@ Root: `[data-cs="website"]`
 | Part | Selector | What it is |
 | --- | --- | --- |
 | `skip` | `[data-cs="website"] [data-part="skip"]` | Keyboard skip link to the main content. |
-| `header` | `[data-cs="website"] [data-part="header"]` | Brand, primary navigation, language link and download link. |
+| `header` | `[data-cs="website"] [data-part="header"]` | Brand, primary navigation, language dropdown and download link. |
+| `main-nav` | `[data-cs="website"] [data-part="main-nav"]` | The main page navigation links. |
+| `header-actions` | `[data-cs="website"] [data-part="header-actions"]` | The language dropdown and download link. |
+| `language-trigger` | `[data-cs="website"] [data-part="language-trigger"]` | Native popover button with the current language flag and name. |
+| `language-options` | `[data-cs="website"] [data-part="language-options"]` | Language links with flags; aria-current marks the current page. |
 | `brand` | `[data-cs="website"] [data-part="brand"]` | Caskade's mark and name. |
 | `button` | `[data-cs="website"] [data-part="button"]` | A link styled as a button; data-variant is primary or small when set. |
-| `hero` | `[data-cs="website"] [data-part="hero"]` | Introduction and library illustration. |
+| `hero` | `[data-cs="website"] [data-part="hero"]` | Introduction and desktop and console screenshots. |
 | `hero-copy` | `[data-cs="website"] [data-part="hero-copy"]` | The main heading, introduction and actions. |
 | `eyebrow` | `[data-cs="website"] [data-part="eyebrow"]` | A short section introduction. |
 | `status-dot` | `[data-cs="website"] [data-part="status-dot"]` | A decorative accent beside the introduction. |
@@ -137,33 +141,10 @@ Root: `[data-cs="website"]`
 | `actions` | `[data-cs="website"] [data-part="actions"]` | Primary download and source links. |
 | `text-link` | `[data-cs="website"] [data-part="text-link"]` | A text link to a project resource. |
 | `hero-note` | `[data-cs="website"] [data-part="hero-note"]` | Free software and privacy summary. |
-| `illustration` | `[data-cs="website"] [data-part="illustration"]` | The captioned library illustration, not a product screenshot. |
-| `library-window` | `[data-cs="website"] [data-part="library-window"]` | Decorative example library, hidden from assistive technology. |
-| `window-bar` | `[data-cs="website"] [data-part="window-bar"]` | Illustrated window title bar. |
-| `window-brand` | `[data-cs="website"] [data-part="window-brand"]` | Illustrated window brand. |
-| `window-dots` | `[data-cs="website"] [data-part="window-dots"]` | Decorative window controls. |
-| `library-layout` | `[data-cs="website"] [data-part="library-layout"]` | Illustrated navigation rail and content. |
-| `library-rail` | `[data-cs="website"] [data-part="library-rail"]` | Decorative navigation icons; data-selected marks the example selection. |
-| `library-content` | `[data-cs="website"] [data-part="library-content"]` | Illustrated game banner and shelf. |
-| `library-title` | `[data-cs="website"] [data-part="library-title"]` | The example library heading. |
-| `game-banner` | `[data-cs="website"] [data-part="game-banner"]` | An example game with original vector scenery. |
-| `landscape` | `[data-cs="website"] [data-part="landscape"]` | The decorative vector landscape. |
-| `sun` | `[data-cs="website"] [data-part="sun"]` | The landscape's sun. |
-| `mountain-back` | `[data-cs="website"] [data-part="mountain-back"]` | Distant mountains. |
-| `mountain-front` | `[data-cs="website"] [data-part="mountain-front"]` | Near mountains. |
-| `river` | `[data-cs="website"] [data-part="river"]` | The landscape's river. |
-| `stars` | `[data-cs="website"] [data-part="stars"]` | The landscape's stars. |
-| `banner-copy` | `[data-cs="website"] [data-part="banner-copy"]` | The example game's title and action label. |
-| `play-label` | `[data-cs="website"] [data-part="play-label"]` | An illustrative Play label, not an interactive control. |
-| `shelf-label` | `[data-cs="website"] [data-part="shelf-label"]` | The example shelf's title. |
-| `game-shelf` | `[data-cs="website"] [data-part="game-shelf"]` | The example game tiles. |
-| `game-tile` | `[data-cs="website"] [data-part="game-tile"]` | An illustrative game; data-art selects orbit, meadow or neon art. |
-| `cover-art` | `[data-cs="website"] [data-part="cover-art"]` | Original decorative cover art. |
-| `orbit` | `[data-cs="website"] [data-part="orbit"]` | An illustrated planet and its ring. |
-| `meadow` | `[data-cs="website"] [data-part="meadow"]` | Illustrated hills. |
-| `city` | `[data-cs="website"] [data-part="city"]` | An illustrated city skyline. |
-| `window-status` | `[data-cs="website"] [data-part="window-status"]` | Decorative library status labels. |
-| `device-tag` | `[data-cs="website"] [data-part="device-tag"]` | A callout about playing across paired devices. |
+| `screenshots` | `[data-cs="website"] [data-part="screenshots"]` | Actual app captures with a sample library, linking to the full images. |
+| `screenshot-main` | `[data-cs="website"] [data-part="screenshot-main"]` | The cropped desktop screenshot and its link to the full capture. |
+| `screenshot-console` | `[data-cs="website"] [data-part="screenshot-console"]` | The cropped console screenshot and its link to the full capture. |
+| `screenshot-label` | `[data-cs="website"] [data-part="screenshot-label"]` | A mode label below a screenshot. |
 | `sources` | `[data-cs="website"] [data-part="sources"]` | Examples of supported library sources. |
 | `features` | `[data-cs="website"] [data-part="features"]` | The library, household and emulation feature overview. |
 | `section-heading` | `[data-cs="website"] [data-part="section-heading"]` | A section's introduction and heading. |

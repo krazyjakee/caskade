@@ -36,6 +36,8 @@ class Page(HTMLParser):
         for name in ("href", "src"):
             if name in attrs:
                 self.links.append(attrs[name])
+        if "popovertarget" in attrs:
+            self.links.append("#" + attrs["popovertarget"])
 
 
 pages = {path.resolve(): Page(path) for path in ROOT.rglob("*.html")}
