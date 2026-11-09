@@ -46,5 +46,18 @@
     "rules": {
       "preset": "recommended"
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["apps/website/index.html"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useValidLang": "off",
+            "useValidAriaValues": "off"
+          }
+        }
+      }
+    }
+  ]
 }
