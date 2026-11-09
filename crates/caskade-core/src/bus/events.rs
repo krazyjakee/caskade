@@ -104,7 +104,7 @@ pub enum Event {
     /// (`crate::managed`).
     ToolsChanged,
     /// The streaming hosts this device can stream from changed
-    /// (`crate::streaming::hosts`).
+    /// (`caskade_streaming::hosts`).
     StreamHostsChanged,
     /// A stream from another device is about to start (#264): its client's
     /// windows may show before `game.started`, or `game.exited` if it

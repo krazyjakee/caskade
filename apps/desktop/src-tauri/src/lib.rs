@@ -42,9 +42,9 @@ pub fn run() {
         let args: Vec<String> = std::env::args().collect();
         if args
             .iter()
-            .any(|arg| arg == caskade_core::elevation::windows::ELEVATED_ARG)
+            .any(|arg| arg == caskade_streaming::elevation::windows::ELEVATED_ARG)
         {
-            std::process::exit(caskade_core::elevation::windows::perform(&args));
+            std::process::exit(caskade_streaming::elevation::windows::perform(&args));
         }
     }
     // `caskade --launch <game>` (#256): hand the launch to the running
@@ -345,9 +345,9 @@ pub fn run() {
                 // is on, and offers the library's games (#259).
                 commands::streaming::setup(
                     app.handle(),
-                    caskade_core::streaming::StreamingHost::new(
+                    caskade_streaming::StreamingHost::new(
                         tools.clone(),
-                        caskade_core::elevation::Elevation::new(&setup_paths),
+                        caskade_streaming::elevation::Elevation::new(&setup_paths),
                         settings.clone(),
                         &setup_paths,
                     ),
@@ -357,8 +357,8 @@ pub fn run() {
                     &setup_paths,
                 );
                 // Devices to stream from (#262), through Caskade's own client.
-                let client = caskade_core::streaming::StreamingClient::new(tools.clone());
-                match caskade_core::streaming::hosts::StreamHosts::new(
+                let client = caskade_streaming::StreamingClient::new(tools.clone());
+                match caskade_streaming::hosts::StreamHosts::new(
                     store.clone(),
                     bus.clone(),
                     settings.clone(),
@@ -369,7 +369,7 @@ pub fn run() {
                         let handle = app.handle().clone();
                         let focus = app.handle().clone();
                         launch.set_streamer(std::sync::Arc::new(
-                            caskade_core::streaming::play::Streams::new(
+                            caskade_streaming::play::Streams::new(
                                 client.clone(),
                                 Some(hosts.clone()),
                                 settings.clone(),
@@ -691,17 +691,17 @@ pub fn run() {
             devices.set_settings(settings.clone());
             // Streaming pairs through sync with no code (#267): this host
             // enters a paired device's code; this client hands its over.
-            if let Some(host) = app.try_state::<caskade_core::streaming::StreamingHost>() {
+            if let Some(host) = app.try_state::<caskade_streaming::StreamingHost>() {
                 devices.set_stream_handler(std::sync::Arc::new(
-                    caskade_core::streaming::linked::HostHandover::new(std::sync::Arc::new(
+                    caskade_streaming::linked::HostHandover::new(std::sync::Arc::new(
                         host.inner().clone(),
                     )),
                 ));
             }
-            app.manage(caskade_core::streaming::linked::LinkedPairing::new(
+            app.manage(caskade_streaming::linked::LinkedPairing::new(
                 devices.clone(),
             ));
-            if let Some(hosts) = app.try_state::<caskade_core::streaming::hosts::StreamHosts>() {
+            if let Some(hosts) = app.try_state::<caskade_streaming::hosts::StreamHosts>() {
                 hosts.set_devices(devices.clone());
             }
             // Copies of games between devices (#233): served with the

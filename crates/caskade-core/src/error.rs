@@ -30,7 +30,7 @@ pub enum Error {
 /// parameters). A host that can't be reached or doesn't answer in time is
 /// [`unreachable`].
 #[cfg(feature = "net")]
-pub(crate) fn net(error: reqwest::Error) -> Error {
+pub fn net(error: reqwest::Error) -> Error {
     use std::io::ErrorKind;
     let kind = if error.is_timeout() {
         ErrorKind::TimedOut

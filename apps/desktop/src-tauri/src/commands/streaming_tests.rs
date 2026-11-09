@@ -6,17 +6,17 @@ use caskade_core::{
     AppPaths,
     bus::Bus,
     db::LibraryStore,
-    elevation::Elevation,
     emulation::OperatingSystem,
     managed::{ManagedTools, ToolCatalog},
     settings::SettingsService,
-    streaming::{
-        host::{
-            Parts, Timing,
-            process::{HostLaunch, HostRunner},
-        },
-        secrets::HostSecrets,
+};
+use caskade_streaming::{
+    elevation::Elevation,
+    host::{
+        Parts, Timing,
+        process::{HostLaunch, HostRunner},
     },
+    secrets::HostSecrets,
 };
 use std::sync::{
     Arc,
@@ -62,7 +62,7 @@ fn closing_to_the_tray_keeps_the_host_and_quitting_stops_it() {
             timing: Timing::default(),
             api_base: "https://127.0.0.1:1/".parse().unwrap(),
             http_port: 1,
-            checks: std::sync::Arc::new(caskade_core::streaming::host::HostChecks::fine),
+            checks: std::sync::Arc::new(caskade_streaming::host::HostChecks::fine),
         },
     );
     let app = mock_builder().build(mock_context(noop_assets())).unwrap();
@@ -93,7 +93,7 @@ fn closing_to_the_tray_keeps_the_host_and_quitting_stops_it() {
 
 #[test]
 fn a_pairing_that_fails_says_why_in_caskades_words() {
-    use caskade_core::streaming::pairing::Paired;
+    use caskade_streaming::pairing::Paired;
     let (outcome, message) = pairing_outcome(&Ok(Paired::WrongCode), "Den");
     assert_eq!(outcome, PairingOutcome::WrongCode);
     assert_eq!(

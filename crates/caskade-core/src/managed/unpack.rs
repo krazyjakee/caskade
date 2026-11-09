@@ -215,7 +215,7 @@ pub(crate) fn extract_appimage(file: &Path, into: &Path) -> Result<()> {
 }
 
 /// Every file under `dir`, relative, skipping Caskade's own folder.
-pub(crate) fn files(dir: &Path) -> Result<Vec<PathBuf>> {
+pub fn files(dir: &Path) -> Result<Vec<PathBuf>> {
     let mut found = Vec::new();
     let mut pending = vec![PathBuf::new()];
     while let Some(relative) = pending.pop() {

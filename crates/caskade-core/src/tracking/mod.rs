@@ -7,8 +7,8 @@ mod matching;
 mod monitor;
 mod system;
 
-#[cfg(all(test, target_os = "linux"))]
-pub(crate) use identity::ClockStep;
+#[cfg(all(any(test, feature = "test-utils"), target_os = "linux"))]
+pub use identity::ClockStep;
 pub use identity::ProcessIdentity;
 pub use matching::{ProcessTracker, TrackingMode, TrackingTarget};
 pub use monitor::{LiveTracker, ProcessMonitor, TrackingError};

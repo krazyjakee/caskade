@@ -92,7 +92,7 @@ fn reading<T>(pid: u32, read: impl FnOnce(&Process) -> T) -> Option<T> {
 /// When sysinfo says `process` started, in seconds since the Unix epoch.
 fn wall_start(process: &Process) -> u64 {
     let started = process.start_time();
-    #[cfg(all(test, target_os = "linux"))]
+    #[cfg(all(any(test, feature = "test-utils"), target_os = "linux"))]
     let started = started.saturating_add_signed(STEP.get());
     started
 }
@@ -159,7 +159,7 @@ mod linux {
     }
 }
 
-#[cfg(all(test, target_os = "linux"))]
+#[cfg(all(any(test, feature = "test-utils"), target_os = "linux"))]
 thread_local! {
     static STEP: std::cell::Cell<i64> = const { std::cell::Cell::new(0) };
 }
@@ -167,18 +167,18 @@ thread_local! {
 /// Stands in for a stepped system clock on this thread: what sysinfo reports
 /// for a running process moves as it does on Linux, and tests leave the real
 /// clock alone (`tests/clock_step.rs` steps it on throwaway CI runners).
-#[cfg(all(test, target_os = "linux"))]
-pub(crate) struct ClockStep;
+#[cfg(all(any(test, feature = "test-utils"), target_os = "linux"))]
+pub struct ClockStep;
 
-#[cfg(all(test, target_os = "linux"))]
+#[cfg(all(any(test, feature = "test-utils"), target_os = "linux"))]
 impl ClockStep {
-    pub(crate) fn by(seconds: i64) -> Self {
+    pub fn by(seconds: i64) -> Self {
         STEP.set(seconds);
         Self
     }
 }
 
-#[cfg(all(test, target_os = "linux"))]
+#[cfg(all(any(test, feature = "test-utils"), target_os = "linux"))]
 impl Drop for ClockStep {
     fn drop(&mut self) {
         STEP.set(0);

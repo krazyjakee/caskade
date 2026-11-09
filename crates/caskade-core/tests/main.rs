@@ -58,7 +58,5 @@ mod sync_romm;
 mod sync_sections;
 #[cfg(all(feature = "net", unix))]
 mod two_networks;
-#[cfg(windows)]
-mod windows_elevation;
 #[cfg(all(feature = "net", windows))]
 mod windows_saves;

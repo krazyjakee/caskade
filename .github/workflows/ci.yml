@@ -303,7 +303,7 @@ jobs:
       - name: Administrator step on and off
         env:
           CASKADE_TEST_NATIVE: "1"
-        run: "cargo test -p caskade-core --test it --locked windows_elevation:: -- --ignored --nocapture"
+        run: "cargo test -p caskade-streaming --test it --locked windows_elevation:: -- --ignored --nocapture"
       - name: A real clock step
         env:
           CASKADE_TEST_NATIVE: "1"

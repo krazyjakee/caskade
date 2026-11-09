@@ -19,7 +19,6 @@ pub mod db;
 pub mod device_type;
 #[cfg(feature = "net")]
 pub mod devices;
-pub mod elevation;
 pub mod emulation;
 pub mod error;
 pub mod hasheous;
@@ -56,7 +55,7 @@ pub(crate) mod remote_file {
         ))
     }
 }
-mod quiet;
+pub mod quiet;
 #[cfg(feature = "net")]
 pub mod remote_play;
 pub mod romm;
@@ -68,7 +67,6 @@ pub mod settings;
 pub mod share;
 pub mod storage;
 pub mod store_accounts;
-pub mod streaming;
 pub mod sync;
 pub mod system_stats;
 pub mod themes;

@@ -1,0 +1,68 @@
+[package]
+name = "caskade-streaming"
+version = "0.1.0"
+description = "Game streaming between a household's Caskade devices, and the administrator step its host needs"
+edition.workspace = true
+rust-version.workspace = true
+# Integration tests are declared below, not discovered from tests/.
+autotests = false
+
+# Like caskade-core: `net` pulls in rustls/ring, so it can be left off.
+[features]
+default = ["net"]
+net = ["caskade-core/net", "dep:caskade-sync", "dep:netdev", "dep:socket2", "dep:reqwest", "dep:rustls", "dep:hickory-proto", "dep:aes", "dep:ring", "dep:x509-parser"]
+
+[dependencies]
+caskade-core = { path = "../caskade-core", default-features = false }
+caskade-jobs = { path = "../caskade-jobs" }
+# Streaming a linked device's games (`linked`), with `net`.
+caskade-sync = { path = "../caskade-sync", optional = true }
+async-trait = "0.1"
+# Game covers published to the host (`publish`); caskade-core's pin.
+image = { version = "=0.25.10", default-features = false, features = ["png", "jpeg", "webp", "ico"] }
+# The host's credentials, in the OS keychain (`secrets`).
+keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service", "crypto-rust"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+specta = { version = "=2.0.0-rc.26", features = ["derive", "serde_json"] }
+# The device's name for pairing; caskade-core's pin.
+sysinfo = { version = "=0.38.4", default-features = false, features = ["system", "disk", "network"] }
+tokio = { version = "1", features = ["rt-multi-thread", "sync", "macros", "time", "process", "fs", "io-util", "net"] }
+tokio-util = "0.7"
+tracing = "0.1"
+url = "2"
+uuid = { version = "1", features = ["v4", "v7", "serde"] }
+# Network interfaces for host discovery (`mdns`, `gamestream`).
+socket2 = { version = "0.6", optional = true }
+netdev = { version = "=0.46.3", default-features = false, optional = true }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream"], optional = true }
+# The streaming host's API, pinned to its own certificate (`api`);
+# reqwest's rustls, so it takes the configuration.
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"], optional = true }
+# Finding streaming hosts with mDNS (`mdns`); iroh's version.
+hickory-proto = { version = "0.26", default-features = false, features = ["std"], optional = true }
+# Pairing a streaming client with a host natively, over the GameStream
+# protocol (`pairing`): AES-128, RSA signatures, certificates.
+aes = { version = "0.8", optional = true }
+ring = { version = "0.17", optional = true }
+x509-parser = { version = "0.18", optional = true }
+
+[dev-dependencies]
+# A stepped clock for the host's process tests (`tracking::ClockStep`).
+caskade-core = { path = "../caskade-core", default-features = false, features = ["test-utils"] }
+tempfile = "=3.27.0"
+wiremock = "0.6"
+# A TLS front for wiremock, with certificates made per test (`api`).
+rcgen = { version = "0.14", default-features = false, features = ["ring", "pem"] }
+tokio-rustls = { version = "0.26", default-features = false, features = ["ring", "tls12"] }
+# Fake host and client releases; caskade-core's pin.
+zip = { version = "=9.1.3", default-features = false, features = ["deflate"] }
+
+[lints]
+workspace = true
+
+# One binary for the integration tests (tests/main.rs); see its header.
+[[test]]
+name = "it"
+path = "tests/main.rs"

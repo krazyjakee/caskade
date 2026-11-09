@@ -1146,7 +1146,6 @@ dependencies = [
 name = "caskade-core"
 version = "0.1.0"
 dependencies = [
- "aes",
  "argon2",
  "async-trait",
  "base64 0.22.1",
@@ -1163,7 +1162,6 @@ dependencies = [
  "flate2",
  "fs2",
  "globset",
- "hickory-proto",
  "icu_collator",
  "icu_locale_core",
  "icu_normalizer",
@@ -1178,11 +1176,8 @@ dependencies = [
  "netdev 0.46.3",
  "notify",
  "percent-encoding",
- "rcgen",
  "regex",
  "reqwest 0.12.28",
- "ring",
- "rustls",
  "schemars 1.2.3",
  "scraper",
  "semver",
@@ -1192,14 +1187,12 @@ dependencies = [
  "sha1 0.10.7",
  "sha2 0.10.9",
  "shlex",
- "socket2",
  "specta",
  "sqlx",
  "sysinfo",
  "tempfile",
  "thiserror 2.0.21",
  "tokio",
- "tokio-rustls",
  "tokio-util",
  "toml 0.8.23",
  "tracing",
@@ -1207,7 +1200,6 @@ dependencies = [
  "url",
  "uuid",
  "wiremock",
- "x509-parser",
  "zip",
 ]
 
@@ -1224,6 +1216,7 @@ dependencies = [
  "caskade-malloc",
  "caskade-plugin-host",
  "caskade-sources",
+ "caskade-streaming",
  "caskade-webview2",
  "gdkx11",
  "gtk",
@@ -1488,6 +1481,7 @@ dependencies = [
  "caskade-emulation-fixtures",
  "caskade-installer",
  "caskade-jobs",
+ "caskade-streaming",
  "insta",
  "regex",
  "schemars 1.2.3",
@@ -1498,6 +1492,41 @@ dependencies = [
  "thiserror 2.0.21",
  "tokio",
  "tracing",
+]
+
+[[package]]
+name = "caskade-streaming"
+version = "0.1.0"
+dependencies = [
+ "aes",
+ "async-trait",
+ "caskade-core",
+ "caskade-jobs",
+ "caskade-sync",
+ "hickory-proto",
+ "image",
+ "keyring",
+ "netdev 0.46.3",
+ "rcgen",
+ "reqwest 0.12.28",
+ "ring",
+ "rustls",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "socket2",
+ "specta",
+ "sysinfo",
+ "tempfile",
+ "tokio",
+ "tokio-rustls",
+ "tokio-util",
+ "tracing",
+ "url",
+ "uuid",
+ "wiremock",
+ "x509-parser",
+ "zip",
 ]
 
 [[package]]
