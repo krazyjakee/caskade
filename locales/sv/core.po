@@ -2895,6 +2895,10 @@ msgstr "Streamen startade inte inom {seconds} s."
 msgid "The stream ended before it started."
 msgstr "Streamen avslutades innan den startade."
 
+#: crates/caskade-core/src/login_item.rs
+msgid "Start Caskade when you log in"
+msgstr "Starta Caskade när du loggar in"
+
 #: crates/caskade-core/src/managed/download.rs
 msgid "the download was cut short"
 msgstr "nedladdningen avbröts i förtid"

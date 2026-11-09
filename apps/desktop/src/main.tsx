@@ -15,6 +15,7 @@ import { nativeInstallRequestApi } from "./api/installRequestsNative";
 import { nativeLocaleApi } from "./api/locale";
 import { createLibraryQueryClient, LibraryProvider } from "./api/provider";
 import { StorageProvider } from "./api/StorageProvider";
+import { nativeSettingsApi } from "./api/settings";
 import { nativeStorageApi } from "./api/storageNative";
 import { AppearanceRoot } from "./appearance/AppearanceRoot";
 import { startAppearance } from "./appearance/startup";
@@ -27,6 +28,7 @@ import { router } from "./router";
 import { applyMode, ModeProvider, nativeConsoleApi } from "./shell/console/mode";
 import { AppErrorBoundary } from "./shell/ErrorFallback";
 import { suppressNativeContextMenu } from "./shell/nativeMenu";
+import { rememberView, startLocation } from "./shell/startView";
 import { ActivityProvider } from "./views/activity/ActivityProvider";
 import { InstallIngress } from "./views/activity/InstallIngress";
 import { DiscoveryProvider } from "./views/settings/discovery/DiscoveryProvider";
@@ -57,6 +59,15 @@ const initialLocale = await nativeLocaleApi.current().catch((error: unknown) => 
 });
 await activateLocale(initialLocale.locale).catch(() => activateLocale(sourceLocale));
 applyLocale(i18n.locale);
+// Open to (#114): the chosen first view, before the first render; the view
+// open now is remembered for `last`.
+const startAt = await startLocation({
+  pathname: window.location.pathname,
+  console: initialMode === "console",
+  setting: async () => (await nativeSettingsApi.get("core.general")).value.startView,
+});
+if (startAt) router.history.replace(startAt);
+router.subscribe("onResolved", ({ toLocation }) => rememberView(toLocation.href));
 createRoot(root).render(
   <StrictMode>
     <I18nProvider i18n={i18n}>

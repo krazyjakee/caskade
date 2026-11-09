@@ -184,6 +184,20 @@ debug build for L1 and L7 (`just dev`), and Sunshine installed by you for L6.
   `grep -E 'RssAnon|VmSwap' /proc/$(pgrep -xo caskade)/status`. **Pass:**
   RssAnon plus VmSwap is under 400 MB with a library the size of 8,400
   games. Record it in "Idle memory with a large library". (#71)
+- [ ] **L9.** Startup, once in an X11 session and once in a Wayland one,
+  with an installed build (deb or AppImage). Settings → General → Startup:
+  turn on Launch on system startup, set Open to Library, log out and in.
+  **Pass:** `~/.config/autostart/caskade.desktop` exists with
+  `Exec=<caskade or the AppImage> --login`, Caskade starts at login and opens
+  on the Library. Turn on Start minimized and log out and in again: the tray
+  icon is there with no window; the tray's Show, or starting Caskade again,
+  shows it. Set Open to Last opened view, open Collections and quit: the next
+  start opens Collections. Turn Launch on system startup off: the file is gone
+  and the next login starts nothing. (#114)
+- [ ] **L10.** As L9 in a Flatpak build of Caskade (none is published yet).
+  **Pass:** turning Launch on system startup on asks through the desktop's
+  background permission once, and `~/.config/autostart/` gets an entry that
+  runs `flatpak run … --login`; the rest as L9. (#114)
 
 ## One Windows PC
 
@@ -247,6 +261,14 @@ Sunshine installed (W8 installs one). To find a game's id, open
   "Console mode on real hardware" below. **Pass:** every step as written; note
   whether the Xbox button brings Caskade to the front. (Clears no box: #8 lets
   this stay deferred.)
+- [ ] **W11.** Startup, with the installed build. Turn on Launch on system
+  startup and set Open to Collections; sign out and in. **Pass:**
+  `reg query HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v Caskade`
+  shows `"<install folder>\caskade.exe" --login`, Task Manager → Startup apps
+  lists Caskade, and it starts at sign-in on Collections. With Start minimized
+  on too, the next sign-in leaves only the tray icon; a click on it, or
+  starting Caskade again, shows the window. Turning Launch on system startup
+  off deletes the value. (#114)
 
 ## One PC with your store accounts
 
@@ -486,6 +508,13 @@ About 2 hours. Needs: a Mac, plus the Linux and Windows PCs.
   (Clears no box: #8 lets this stay deferred.)
 - [ ] **M3.** Use the Mac as a streaming client: S2, S3 and S8. **Pass:** as
   those. (#27, #28, #29)
+- [ ] **M4.** Startup: turn on Launch on system startup and Start minimized,
+  set Open to Library, log out and in. **Pass:**
+  `~/Library/LaunchAgents/dev.caskade.app.login.plist` exists, System
+  Settings → General → Login Items lists Caskade under Allow in the
+  Background, and Caskade starts at login in the menu bar with no window; the
+  menu's Show or a Dock click shows it, on the Library. Turning the setting
+  off removes the file. (#114)
 
 ## Boxes no check here covers
 
@@ -549,6 +578,7 @@ Tick or decide these on the issue itself:
 | #33 Streaming milestone | 268 | closes with #21–#32 |
 | #34 Nearby downloads for emulators and data (closed; optional) | 277 | O2, O3 |
 | #71 Idle memory with a large library | — | L8 |
+| #114 Startup settings | — | L9, L10, W11, M4 |
 
 Issues marked closed were met by the tests their Validation sections ask for
 or by the virtual machine runs above, so their checks now only confirm them on

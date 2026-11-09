@@ -28,6 +28,7 @@ pub mod icons;
 pub mod igdb;
 pub mod install;
 pub mod launch;
+pub mod login_item;
 pub mod ludusavi;
 pub mod managed;
 pub mod manual;

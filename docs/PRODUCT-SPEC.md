@@ -173,6 +173,7 @@ Settings → Backup (admins): back up now, daily or weekly automatic backups wit
 
 - **Caskade updates** are checked every six hours, downloaded and installed only when you press the button, and run after Restart now.
 - **Tray icon** with Show and Quit. Closing the window hides it to the tray by default. A second start shows the running window.
+- **Startup** (Settings → General): Launch on system startup starts Caskade when you log in, Start minimized keeps that start in the tray with no window, and Open to picks the first view: Home (the default), Library, Collections or the view open when Caskade last quit. Console mode keeps its own start.
 - **Settings → Statistics**: CPU, GPU, memory, network and storage use, sampled only while you watch.
 - **Self-healing**: lost webviews reload and the app restarts itself with a cap, interrupted installs and updates finish or roll back at start, and failures say what happened and what to do.
 - **First-run setup**: language, where games and ROMs live, the first account, or setting up from another device.

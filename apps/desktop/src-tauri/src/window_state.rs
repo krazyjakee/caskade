@@ -46,6 +46,36 @@ pub fn show<R: Runtime>(app: &AppHandle<R>) {
     }
 }
 
+/// Whether this start leaves the main window hidden in the tray: a login
+/// start with Start minimized on (#114), when there's a tray icon to bring
+/// it back from. The tray, a second start and the Dock show it later
+/// (`main_window::raise`).
+pub fn starts_in_tray<R: Runtime>(
+    app: &AppHandle<R>,
+    args: &[String],
+    general: &caskade_core::settings::GeneralSettings,
+) -> bool {
+    if !caskade_core::login_item::starts_hidden(args, general) {
+        return false;
+    }
+    let tray = app
+        .try_state::<crate::tray::Tray>()
+        .is_some_and(|tray| tray.shown());
+    if tray {
+        tracing::info!("started at login: Caskade stays in the tray");
+        // macOS starts its window shown (`tauri.macos.conf.json`).
+        #[cfg(target_os = "macos")]
+        if let Some(window) = app.get_webview_window("main")
+            && let Err(error) = window.hide()
+        {
+            tracing::warn!(%error, "couldn't hide the main window");
+        }
+    } else {
+        tracing::info!("started at login without a tray icon: the window shows");
+    }
+    tray
+}
+
 /// Saves the window state a moment after the main window last moved or
 /// resized.
 pub fn save_on_change<R: Runtime>(app: &AppHandle<R>) {

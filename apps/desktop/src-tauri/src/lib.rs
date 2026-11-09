@@ -240,8 +240,25 @@ pub fn run() {
             let (app, settings) = (app.handle().clone(), settings.clone());
             move || commands::app_update::watch(app.clone(), settings.clone())
         });
+        // Launch on system startup (#114): the login item follows the
+        // setting.
+        if let Some(item) = caskade_core::login_item::LoginItem::live() {
+            tauri::async_runtime::spawn(caskade_core::login_item::follow(
+                settings.clone(),
+                item,
+            ));
+        }
         window_state::save_on_change(app.handle());
-        window_state::show(app.handle());
+        // Start minimized (#114): a login start stays in the tray.
+        let general: caskade_core::settings::GeneralSettings =
+            tauri::async_runtime::block_on(settings.read_or_default("core.general"));
+        if !window_state::starts_in_tray(
+            app.handle(),
+            &std::env::args().collect::<Vec<_>>(),
+            &general,
+        ) {
+            window_state::show(app.handle());
+        }
         let launch = launch.with_runner_resolver(std::sync::Arc::new(
             caskade_core::install::InstallerRunnerResolver(settings.clone()),
         ));

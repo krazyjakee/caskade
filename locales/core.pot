@@ -2893,6 +2893,10 @@ msgstr ""
 msgid "The stream ended before it started."
 msgstr ""
 
+#: crates/caskade-core/src/login_item.rs
+msgid "Start Caskade when you log in"
+msgstr ""
+
 #: crates/caskade-core/src/managed/download.rs
 msgid "the download was cut short"
 msgstr ""
