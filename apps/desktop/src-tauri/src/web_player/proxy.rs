@@ -26,7 +26,7 @@ use hudsucker::{
     rcgen::{
         BasicConstraints, CertificateParams, DistinguishedName, DnType, IsCa, Issuer, KeyPair,
     },
-    rustls::crypto::aws_lc_rs,
+    rustls::crypto::ring,
 };
 use std::{
     collections::{BTreeSet, HashMap},
@@ -154,7 +154,7 @@ pub fn start(session: Arc<Session>) -> Result<u16, String> {
                     let proxy = Proxy::builder()
                         .with_listener(listener)
                         .with_ca(authority()?)
-                        .with_rustls_connector(aws_lc_rs::default_provider())
+                        .with_rustls_connector(ring::default_provider())
                         .with_http_handler(Handler {
                             session,
                             keep: None,
@@ -224,7 +224,7 @@ fn authority() -> Result<RcgenAuthority, String> {
     Ok(RcgenAuthority::new(
         Issuer::new(params, key),
         1_000,
-        aws_lc_rs::default_provider(),
+        ring::default_provider(),
     ))
 }
 
@@ -610,5 +610,22 @@ mod tests {
         runtime.block_on(handler.kept(keep, upstream));
         assert!(session.bundle.get_post(&level, b"level_id=1").is_some());
         assert!(session.bundle.get(&level).is_none(), "not for a GET");
+    }
+
+    /// rustls runs on ring alone. aws-lc's C build cost every cold build
+    /// ~36 s; two vendored crates (`vendor/hudsucker-0.25.0`,
+    /// `vendor/librqbit-sha1-wrapper-9.0.1`) keep it out. An upgrade that
+    /// brings it back fails here: patch the new version the same way.
+    #[test]
+    fn the_lockfile_has_no_aws_lc() {
+        let lock =
+            std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/../../../Cargo.lock"))
+                .expect("the workspace's Cargo.lock");
+        for name in ["aws-lc-rs", "aws-lc-sys"] {
+            assert!(
+                !lock.contains(&format!("name = \"{name}\"")),
+                "{name} is back in Cargo.lock",
+            );
+        }
     }
 }

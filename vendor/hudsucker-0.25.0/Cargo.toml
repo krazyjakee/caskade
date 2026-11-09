@@ -262,6 +262,7 @@ features = [
     "logging",
     "tls12",
 ]
+default-features = false
 
 [dependencies.tokio-tungstenite]
 version = "0.30.0"

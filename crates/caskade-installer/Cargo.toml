@@ -15,7 +15,7 @@ macos-formats = ["dep:xattr", "dep:cpio-archive", "dep:sha1", "dep:md-5"]
 disc = []
 fetch = ["dep:reqwest", "dep:futures-util", "dep:httpdate", "dep:scraper", "dep:percent-encoding"]
 # Magnet links and .torrent files (#159). Off by default: librqbit brings a
-# large tree and aws-lc (C, for SHA-1). caskade-core's `net` turns it on.
+# large tree. caskade-core's `net` turns it on.
 torrent = ["fetch", "dep:librqbit", "dep:librqbit-core", "dep:librqbit-sha1-wrapper", "dep:reqwest013", "dep:rustls"]
 cli = ["dep:clap", "dep:tracing-subscriber"]
 
@@ -84,8 +84,9 @@ httpdate = { version = "0.3", optional = true }
 scraper = { version = "0.29", default-features = false, optional = true }
 percent-encoding = { version = "2", optional = true }
 # BitTorrent (#159): no HTTP API, web UI, UPnP or persistence; uploads can be
-# turned off per session. SHA-1 comes from aws-lc-rs ("sha1-ring" names it),
-# not librqbit's TLS features, which would add aws-lc to rustls next to ring.
+# turned off per session. SHA-1 comes from ring: "sha1-ring" pointed at
+# aws-lc-rs upstream; vendor/librqbit-sha1-wrapper-9.0.1 points it at ring.
+# librqbit's TLS features stay off: they would add aws-lc to rustls.
 librqbit = { version = "=9.0.1", default-features = false, features = ["disable-upload"], optional = true }
 librqbit-core = { version = "=9.0.1", default-features = false, features = ["sha1-ring"], optional = true }
 librqbit-sha1-wrapper = { version = "=9.0.1", default-features = false, features = ["sha1-ring"], optional = true }

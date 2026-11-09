@@ -29,7 +29,7 @@ resolver = "2"
 [features]
 default = ["sha1-crypto-hash"]
 sha1-crypto-hash = ["crypto-hash"]
-sha1-ring = ["aws-lc-rs"]
+sha1-ring = ["dep:ring"]
 
 [lib]
 name = "librqbit_sha1_wrapper"
@@ -44,4 +44,8 @@ optional = true
 
 [dependencies.crypto-hash]
 version = "0.3"
+optional = true
+
+[dependencies.ring]
+version = "0.17"
 optional = true

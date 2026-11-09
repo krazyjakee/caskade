@@ -69,3 +69,7 @@ sqlx-macros-core = { git = "https://github.com/launchbadge/sqlx", rev = "10462fa
 sqlx-mysql = { git = "https://github.com/launchbadge/sqlx", rev = "10462fa4414c6c7f1ed1d39bb31678e3b726878c" }
 sqlx-postgres = { git = "https://github.com/launchbadge/sqlx", rev = "10462fa4414c6c7f1ed1d39bb31678e3b726878c" }
 sqlx-sqlite = { git = "https://github.com/launchbadge/sqlx", rev = "10462fa4414c6c7f1ed1d39bb31678e3b726878c" }
+# rustls on ring only: aws-lc's C build script cost ~36 s of every cold build.
+# Published crates with one-line feature/import changes (see their PATCHES.md).
+hudsucker = { path = "vendor/hudsucker-0.25.0" }
+librqbit-sha1-wrapper = { path = "vendor/librqbit-sha1-wrapper-9.0.1" }
