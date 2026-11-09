@@ -161,7 +161,7 @@ Play a game installed on another device in the house, streamed over the local ne
 
 ### 4.16 Backups
 
-Settings → Backup (admins): back up now, daily or weekly automatic backups with retention, and inspect or restore any backup, applied at the next start. Each backup is verified before it counts. A library that won't open offers Restore from backup…, and `caskade --restore` restores from the command line.
+Settings → Backup (admins): back up now, daily or weekly automatic backups with retention, and inspect or restore any backup, applied at the next start. Each backup is verified before it counts. A library that won't open offers Restore from backup…, and `caskade --restore` restores from the command line. An older Caskade opens a library a newer one changed when the changes don't affect it; when they do, it offers Update Caskade, which installs the newest release and restarts.
 
 ### 4.17 Making it yours
 

@@ -13,6 +13,7 @@ mod actions;
 #[cfg(test)]
 mod actions_tests;
 mod collation;
+mod compat;
 mod emulation;
 mod game_edit;
 mod games;
@@ -199,7 +200,7 @@ impl LibraryStore {
             .acquire_slow_level(log::LevelFilter::Warn)
             .acquire_slow_threshold(SLOW_ACQUIRE)
             .connect_lazy_with(options);
-        let migrate = async { Ok(MIGRATOR.run(&pool).await?) };
+        let migrate = compat::migrate(&pool);
         opening.open(&pool, before, migrate).await?;
         Ok(Self {
             pool,
@@ -254,9 +255,9 @@ impl LibraryStore {
             .max_connections(max)
             .connect_with(options)
             .await?;
-        if let Err(error) = MIGRATOR.run(&pool).await {
+        if let Err(error) = compat::migrate(&pool).await {
             pool.close().await;
-            return Err(error.into());
+            return Err(error);
         }
         Ok(Self {
             pool,

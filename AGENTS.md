@@ -44,6 +44,7 @@ Cargo commands share one heavy lane: run them under `flock /tmp/caskade-heavy.lo
 - `caskade-core` has no Tauri dependency. Commands go in `apps/desktop/src-tauri/src/commands/<area>.rs` and are registered in `bindings.rs`. 64-bit ids cross to the webview as strings.
 - The webview never touches the OS: no `fs` or `shell` plugin, everything through commands. The active account comes from the adapter, never from the webview.
 - Secrets (device key, store sign-ins, RomM and streaming credentials) live only in the OS keychain: never in the database, settings, logs, events, backups or the webview.
+- A new migration starts with `-- older Caskade: compatible` or `-- older Caskade: incompatible` (see `db/compat.rs`); a test fails otherwise.
 - A new table or setting needs its `sync::policy` classification (guard tests fail otherwise) and is backed up unless `backup::policy` excludes it.
 - Game files move only over relay-free endpoints, never through a relay.
 - Never `cargo update` iroh, iroh-base, iroh-relay, iroh-dns or noq: `Cargo.lock` pins them together.

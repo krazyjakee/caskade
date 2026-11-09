@@ -5544,6 +5544,32 @@ msgstr ""
 msgid "Quit"
 msgstr ""
 
+#: apps/desktop/src-tauri/src/lib.rs
+msgid ""
+"{summary}\n"
+"\n"
+"Update Caskade to open it."
+msgstr ""
+
+#: apps/desktop/src-tauri/src/lib.rs
+msgid "Update Caskade"
+msgstr ""
+
+#: apps/desktop/src-tauri/src/lib.rs
+msgid ""
+"Updating Caskade…\n"
+"\n"
+"Caskade restarts by itself once the update is installed."
+msgstr ""
+
+#: apps/desktop/src-tauri/src/lib.rs
+msgid "No released version of Caskade can open this library yet: a development build changed it."
+msgstr ""
+
+#: apps/desktop/src-tauri/src/lib.rs
+msgid "Try again"
+msgstr ""
+
 #: apps/desktop/src-tauri/src/permissions.rs
 msgid "accounts are unavailable"
 msgstr ""

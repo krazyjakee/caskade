@@ -414,6 +414,30 @@ pub fn install<R: Runtime>(app: AppHandle<R>) -> Result<AppUpdateStatus, String>
     Ok(emit(&app, status))
 }
 
+/// Finds, downloads and installs the newest release at once, without the
+/// status or the library: a library a newer Caskade wrote doesn't open
+/// here, so only the startup dialog is left to ask. Returns the installed
+/// version, or `None` when the feed has nothing newer.
+pub async fn install_now<R: Runtime>(app: &AppHandle<R>) -> Result<Option<String>, String> {
+    let Some(mut update) = find(app, ENDPOINT).await? else {
+        return Ok(None);
+    };
+    update.timeout = Some(DOWNLOAD_TIMEOUT);
+    let bytes = update.download(|_, _| {}, || {}).await.map_err(|error| {
+        caskade_core::tr!("Couldn't download the update: {error}", error = error)
+    })?;
+    let version = update.version.clone();
+    tauri::async_runtime::spawn_blocking(move || put_in_place(&update, &bytes))
+        .await
+        .map_err(|error| error.to_string())
+        .and_then(|installed| installed)
+        .map_err(|error| {
+            caskade_core::tr!("Couldn't install the update: {error}", error = error)
+        })?;
+    tracing::info!(%version, "app update installed from the startup dialog");
+    Ok(Some(version))
+}
+
 /// Puts a downloaded release in place of this copy, once its signature
 /// checks out.
 fn put_in_place(update: &Update, bytes: &[u8]) -> Result<(), String> {

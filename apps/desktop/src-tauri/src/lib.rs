@@ -944,15 +944,25 @@ fn startup_failed(what: &str, error: &dyn std::fmt::Display) -> ! {
 }
 
 /// The library store couldn't open: a dialog says why and offers to restore
-/// a backup (#192); otherwise closing it quits.
+/// a backup (#192), or to update when a newer Caskade wrote the library;
+/// otherwise closing it quits.
 fn library_failed<R: tauri::Runtime>(
     app: &tauri::AppHandle<R>,
-    error: &dyn std::fmt::Display,
+    error: &caskade_core::Error,
     paths: &caskade_core::AppPaths,
 ) {
     use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
     tracing::error!(%error, "library unavailable");
     eprintln!("Caskade couldn't open its library: {error}");
+    let report = caskade_core::error::ErrorReport::from(error);
+    if report
+        .hints
+        .contains(&caskade_core::error::RecoveryHint::UpdateCaskade)
+    {
+        // A backup is older than the library: restoring one would lose
+        // what the newer Caskade added.
+        return library_newer(app, report.summary);
+    }
     let (handle, paths) = (app.clone(), paths.clone());
     app.dialog()
         .message(caskade_core::tr!(
@@ -972,6 +982,90 @@ fn library_failed<R: tauri::Runtime>(
                 handle.exit(1);
             }
         });
+}
+
+/// A newer Caskade changed the library in a way this one can't read: a
+/// copy that updates itself offers to, then restarts into the update.
+fn library_newer<R: tauri::Runtime>(app: &tauri::AppHandle<R>, summary: String) {
+    use tauri_plugin_dialog::MessageDialogButtons;
+    let handle = app.clone();
+    match commands::app_update::unavailable_reason(tauri::utils::platform::bundle_type()) {
+        Some(reason) => startup_dialog(app, format!("{summary}\n\n{}", reason.render()))
+            .buttons(MessageDialogButtons::OkCustom(caskade_core::tr!("Quit")))
+            .show(move |_| handle.exit(1)),
+        None => startup_dialog(
+            app,
+            caskade_core::tr!("{summary}\n\nUpdate Caskade to open it.", summary = summary),
+        )
+        .buttons(MessageDialogButtons::OkCancelCustom(
+            caskade_core::tr!("Update Caskade"),
+            caskade_core::tr!("Quit"),
+        ))
+        .show(move |update| {
+            if update {
+                update_for_library(&handle);
+            } else {
+                handle.exit(1);
+            }
+        }),
+    }
+}
+
+/// An error dialog before the main window shows.
+fn startup_dialog<R: tauri::Runtime>(
+    app: &tauri::AppHandle<R>,
+    message: String,
+) -> tauri_plugin_dialog::MessageDialogBuilder<R> {
+    use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
+    app.dialog()
+        .message(message)
+        .title("Caskade")
+        .kind(MessageDialogKind::Error)
+}
+
+/// Installs the newest release from the startup dialog, then restarts into
+/// it; a failed update says why and offers to try again.
+fn update_for_library<R: tauri::Runtime>(app: &tauri::AppHandle<R>) {
+    use tauri_plugin_dialog::{MessageDialogButtons, MessageDialogKind};
+    // Nothing else shows while it downloads; closing this changes nothing.
+    startup_dialog(
+        app,
+        caskade_core::tr!(
+            "Updating Caskade…\n\nCaskade restarts by itself once the update is installed."
+        ),
+    )
+    .kind(MessageDialogKind::Info)
+    .show(|_| {});
+    let handle = app.clone();
+    tauri::async_runtime::spawn(async move {
+        let quit = handle.clone();
+        match commands::app_update::install_now(&handle).await {
+            Ok(Some(_)) => tray::restart(&handle),
+            Ok(None) => startup_dialog(
+                &handle,
+                caskade_core::tr!(
+                    "No released version of Caskade can open this library yet: a development build changed it."
+                ),
+            )
+            .buttons(MessageDialogButtons::OkCustom(caskade_core::tr!("Quit")))
+            .show(move |_| quit.exit(1)),
+            Err(error) => {
+                tracing::warn!(%error, "update from the startup dialog failed");
+                startup_dialog(&handle, error)
+                    .buttons(MessageDialogButtons::OkCancelCustom(
+                        caskade_core::tr!("Try again"),
+                        caskade_core::tr!("Quit"),
+                    ))
+                    .show(move |again| {
+                        if again {
+                            update_for_library(&quit);
+                        } else {
+                            quit.exit(1);
+                        }
+                    })
+            }
+        }
+    });
 }
 
 /// The plugin host (#123): reads the plugin folders and joins enabled
