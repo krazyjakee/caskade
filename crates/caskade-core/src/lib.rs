@@ -8,7 +8,6 @@
 //! without setting a global subscriber.
 
 pub mod accounts;
-pub mod achievements;
 pub mod addons;
 pub mod artwork;
 pub mod backup_error;
@@ -32,7 +31,6 @@ pub mod managed;
 pub mod manual;
 pub mod metadata;
 pub mod model;
-pub mod notifications;
 pub mod paths;
 pub mod ports;
 #[cfg(feature = "net")]

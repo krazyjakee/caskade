@@ -10,7 +10,7 @@ mod events;
 mod intercept;
 mod providers;
 
-pub use events::{Event, EventFilter, GameSession, SourceCount};
+pub use events::{Event, EventFilter, GameSession, NewUnlocks, SourceCount};
 pub use intercept::{Intercept, InterceptPoint, InterceptReport, Interceptor, Outcome};
 pub use providers::{
     DownloadRequest, InstallHandler, InstallInput, LibrarySource, PLUGIN_SOURCE_PREFIX, UrlResolver,

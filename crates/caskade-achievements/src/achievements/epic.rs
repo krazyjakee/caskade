@@ -23,8 +23,8 @@ use super::{
     AchievementCapabilities, AchievementDefinition, AchievementProvider, AchievementState,
     FetchError, Fetched, net,
 };
-use crate::store_accounts::{ProviderError, StoreAccount, StoreCredentials};
 use async_trait::async_trait;
+use caskade_core::store_accounts::{ProviderError, StoreAccount, StoreCredentials};
 use caskade_discovery::ExternalId;
 use reqwest::StatusCode;
 use serde::Deserialize;
@@ -101,7 +101,7 @@ impl EpicAchievements {
             .body(json!({"query": query, "variables": variables}).to_string());
         let (status, body) = net::send(request, EPIC).await?;
         if status == StatusCode::UNAUTHORIZED || status == StatusCode::FORBIDDEN {
-            return Err(ProviderError::Expired(crate::tr!(
+            return Err(ProviderError::Expired(caskade_core::tr!(
                 "{store} refused the sign-in (HTTP {status})",
                 store = EPIC,
                 status = status.as_u16()
@@ -226,7 +226,7 @@ fn nonempty(text: Option<String>) -> Option<String> {
 #[async_trait]
 impl AchievementProvider for EpicAchievements {
     fn id(&self) -> String {
-        crate::store_accounts::epic::ID.into()
+        caskade_core::store_accounts::epic::ID.into()
     }
 
     fn capabilities(&self) -> AchievementCapabilities {
@@ -253,8 +253,8 @@ impl AchievementProvider for EpicAchievements {
         product: &str,
         cancel: &CancellationToken,
     ) -> Result<Fetched, FetchError> {
-        let credentials =
-            credentials.ok_or_else(|| ProviderError::Expired(crate::tr!("not signed in")))?;
+        let credentials = credentials
+            .ok_or_else(|| ProviderError::Expired(caskade_core::tr!("not signed in")))?;
         let account_id = credentials
             .extra
             .get("account_id")
@@ -276,7 +276,7 @@ impl AchievementProvider for EpicAchievements {
             if let Some(error) = definitions.errors.first() {
                 tracing::info!(message = %error.message, "Epic answered no achievement record");
             }
-            return Err(FetchError::Unsupported(crate::tr!(
+            return Err(FetchError::Unsupported(caskade_core::tr!(
                 "this game uses no Epic achievements"
             )));
         };
@@ -307,7 +307,7 @@ impl AchievementProvider for EpicAchievements {
                 .map(|data| data.player_achievements)
                 .unwrap_or_default(),
             _ => {
-                return Err(ProviderError::Unavailable(crate::tr!(
+                return Err(ProviderError::Unavailable(caskade_core::tr!(
                     "Epic doesn't show this account's achievements: check the account's privacy settings"
                 ))
                 .into());

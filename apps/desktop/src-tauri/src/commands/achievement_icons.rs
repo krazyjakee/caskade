@@ -4,9 +4,9 @@
 //! the game's sets, and the icon that set lists comes through the artwork
 //! cache, re-encoded as a WebP thumbnail.
 use crate::error::{CommandError, report};
+use caskade_achievements::achievements::Achievements;
 use caskade_core::{
     accounts::AccountService,
-    achievements::Achievements,
     artwork::{ArtworkCache, CachedArtwork},
 };
 use tauri::State;

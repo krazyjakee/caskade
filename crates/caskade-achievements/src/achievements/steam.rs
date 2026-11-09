@@ -18,8 +18,8 @@ use super::{
     AchievementCapabilities, AchievementDefinition, AchievementProvider, AchievementState,
     FetchError, Fetched, net,
 };
-use crate::store_accounts::{ProviderError, StoreAccount, StoreCredentials};
 use async_trait::async_trait;
+use caskade_core::store_accounts::{ProviderError, StoreAccount, StoreCredentials};
 use caskade_discovery::ExternalId;
 use reqwest::StatusCode;
 use serde::Deserialize;
@@ -65,7 +65,7 @@ impl SteamAchievements {
         let url = self
             .base
             .join(method)
-            .map_err(|_| ProviderError::Other(crate::tr!("bad Steam API method")))?;
+            .map_err(|_| ProviderError::Other(caskade_core::tr!("bad Steam API method")))?;
         let request = net::client()?
             .get(url)
             .query(&[("key", key), ("format", "json")])
@@ -76,11 +76,11 @@ impl SteamAchievements {
 
 fn credentials(credentials: Option<&StoreCredentials>) -> Result<(&str, &str), ProviderError> {
     let credentials =
-        credentials.ok_or_else(|| ProviderError::Expired(crate::tr!("not signed in")))?;
+        credentials.ok_or_else(|| ProviderError::Expired(caskade_core::tr!("not signed in")))?;
     let steam_id = credentials
         .extra
         .get("steamid")
-        .ok_or_else(|| ProviderError::Expired(crate::tr!("not signed in")))?;
+        .ok_or_else(|| ProviderError::Expired(caskade_core::tr!("not signed in")))?;
     Ok((&credentials.access_token, steam_id))
 }
 
@@ -161,7 +161,7 @@ struct Percentage {
 #[async_trait]
 impl AchievementProvider for SteamAchievements {
     fn id(&self) -> String {
-        crate::store_accounts::steam::ID.into()
+        caskade_core::store_accounts::steam::ID.into()
     }
 
     fn capabilities(&self) -> AchievementCapabilities {
@@ -200,7 +200,9 @@ impl AchievementProvider for SteamAchievements {
             )
             .await?;
         if status == StatusCode::UNAUTHORIZED || status == StatusCode::FORBIDDEN {
-            return Err(ProviderError::Expired(crate::tr!("Steam refused the Web API key")).into());
+            return Err(
+                ProviderError::Expired(caskade_core::tr!("Steam refused the Web API key")).into(),
+            );
         }
         let schema: Schema = if status.is_success() {
             serde_json::from_slice(&body).map_err(|_| unreadable())?
@@ -237,23 +239,24 @@ impl AchievementProvider for SteamAchievements {
         let stats = match player {
             Some(player) if status.is_success() && player.playerstats.success => player.playerstats,
             _ if error.to_lowercase().contains("not public") => {
-                return Err(ProviderError::Unavailable(crate::tr!(
+                return Err(ProviderError::Unavailable(caskade_core::tr!(
                     "the Steam profile's game details are private: make them public in Steam's privacy settings"
                 ))
                 .into());
             }
             _ if error.to_lowercase().contains("no stats") => {
-                return Err(FetchError::Unsupported(crate::tr!(
+                return Err(FetchError::Unsupported(caskade_core::tr!(
                     "Steam keeps no achievements for this game"
                 )));
             }
             _ if status == StatusCode::UNAUTHORIZED || status == StatusCode::FORBIDDEN => {
-                return Err(
-                    ProviderError::Expired(crate::tr!("Steam refused the Web API key")).into(),
-                );
+                return Err(ProviderError::Expired(caskade_core::tr!(
+                    "Steam refused the Web API key"
+                ))
+                .into());
             }
             _ => {
-                return Err(ProviderError::Other(crate::tr!(
+                return Err(ProviderError::Other(caskade_core::tr!(
                     "Steam answered HTTP {status}",
                     status = status.as_u16()
                 ))

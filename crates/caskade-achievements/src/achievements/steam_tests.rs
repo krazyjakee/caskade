@@ -2,8 +2,8 @@
 //! sanitized answers in the documented shapes.
 
 use super::*;
-use crate::{
-    achievements::{AccountAccess, Achievements, SetStatus},
+use crate::achievements::{AccountAccess, Achievements, SetStatus};
+use caskade_core::{
     bus::{Bus, Event},
     db::LibraryStore,
     model::{Game, GameEntry, SourceId},
@@ -234,7 +234,7 @@ async fn a_missing_rarity_leaves_the_achievements_and_a_failed_player_list_keeps
 struct Access(LibraryStore);
 #[async_trait]
 impl AccountAccess for Access {
-    async fn accounts(&self) -> crate::Result<Vec<StoreAccount>> {
+    async fn accounts(&self) -> caskade_core::Result<Vec<StoreAccount>> {
         self.0.store_accounts().await
     }
     async fn credentials(
@@ -265,7 +265,7 @@ async fn one_set_for_discovery_s_copy_and_the_owned_copy_and_a_later_unlock_is_n
     let owned = {
         let mut entry = GameEntry::new(
             &game.id,
-            crate::store_accounts::source_id("steam-account"),
+            caskade_core::store_accounts::source_id("steam-account"),
             "620",
         );
         entry.ids = vec![ExternalId::Steam { app_id: 620 }];

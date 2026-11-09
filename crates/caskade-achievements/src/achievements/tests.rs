@@ -1,7 +1,7 @@
 //! Achievements against scripted providers and accounts (#185).
 
 use super::*;
-use crate::{
+use caskade_core::{
     accounts::{
         AccountAccess as LocalAccess, AccountRole, AccountService, NewAccount, Permissions,
     },
@@ -30,7 +30,7 @@ impl Fake {
         })
     }
     fn then(&self, answer: std::result::Result<Fetched, FetchError>) {
-        crate::lock(&self.answers).push_back(answer);
+        caskade_core::lock(&self.answers).push_back(answer);
     }
     fn calls(&self) -> u32 {
         self.calls.load(Ordering::SeqCst)
@@ -64,11 +64,13 @@ impl AchievementProvider for Fake {
     ) -> std::result::Result<Fetched, FetchError> {
         assert!(credentials.is_some(), "a fetch gets the sign-in");
         self.calls.fetch_add(1, Ordering::SeqCst);
-        crate::lock(&self.answers).pop_front().unwrap_or_else(|| {
-            Err(FetchError::Provider(ProviderError::Other(
-                "no answer".into(),
-            )))
-        })
+        caskade_core::lock(&self.answers)
+            .pop_front()
+            .unwrap_or_else(|| {
+                Err(FetchError::Provider(ProviderError::Other(
+                    "no answer".into(),
+                )))
+            })
     }
 }
 
@@ -86,7 +88,7 @@ impl AccountAccess for Access {
         &self,
         account: &StoreAccount,
     ) -> std::result::Result<Option<StoreCredentials>, ProviderError> {
-        if crate::lock(&self.signed_out).contains(&account.id) {
+        if caskade_core::lock(&self.signed_out).contains(&account.id) {
             return Err(ProviderError::Expired("signed out".into()));
         }
         Ok(Some(StoreCredentials {
@@ -132,7 +134,7 @@ async fn account(
     owner: Option<&str>,
 ) -> StoreAccount {
     let account = StoreAccount {
-        id: crate::model::new_id(),
+        id: caskade_core::model::new_id(),
         provider: provider.into(),
         external_id: external.into(),
         display_name: format!("{provider} {external}"),
@@ -284,7 +286,7 @@ async fn each_account_and_store_keeps_its_own_set_and_viewers_see_their_own() {
     let kid = local
         .create(NewAccount {
             name: "Kid".into(),
-            avatar: crate::accounts::DEFAULT_AVATAR.into(),
+            avatar: caskade_core::accounts::DEFAULT_AVATAR.into(),
             access: LocalAccess {
                 role: AccountRole::Standard,
                 permissions: Permissions::default(),
@@ -364,7 +366,11 @@ async fn failures_keep_what_was_known_and_say_why() {
         retry_after: Some(Duration::from_secs(600)),
     })));
     let set = refresh().await.unwrap().remove(0);
-    assert!(set.sync.retry_at_ms.is_some_and(|at| at > crate::now_ms()));
+    assert!(
+        set.sync
+            .retry_at_ms
+            .is_some_and(|at| at > caskade_core::now_ms())
+    );
     let calls = steam.calls();
     refresh().await.unwrap();
     assert_eq!(steam.calls(), calls, "the wait is kept");
@@ -394,7 +400,7 @@ async fn failures_keep_what_was_known_and_say_why() {
         assert_eq!(set.sync.status, status, "case {index}");
     }
     let signed_out = game_with(&s.store, 2000).await;
-    crate::lock(&s.access.signed_out).push(steam_account.id.clone());
+    caskade_core::lock(&s.access.signed_out).push(steam_account.id.clone());
     let set = s
         .service
         .refresh_game(&signed_out, None, &CancellationToken::new())
@@ -416,7 +422,7 @@ async fn failures_keep_what_was_known_and_say_why() {
     assert_eq!(set.sync.status, SetStatus::SignInNeeded);
     assert_eq!(steam.calls(), calls);
     // A cancelled fetch records nothing.
-    crate::lock(&s.access.signed_out).clear();
+    caskade_core::lock(&s.access.signed_out).clear();
     s.store.save_store_account(&steam_account).await.unwrap();
     let fresh = game_with(&s.store, 3000).await;
     steam.then(Err(ProviderError::Cancelled.into()));

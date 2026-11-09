@@ -3,10 +3,10 @@
 //! defaults; game scripts, launch actions and hand-made achievement links,
 //! by the release they belong to.
 
-use caskade_core::achievements::{AchievementLink, LinkMethod};
 use caskade_core::bus::Bus;
 use caskade_core::db::{LibraryStore, PluginRow};
 use caskade_core::emulation::{Emulator, EmulatorInstall, EmulatorProfile};
+use caskade_core::model::{AchievementLink, LinkMethod};
 use caskade_core::model::{
     ActionKind, ActionTracking, EntryActionSettings, ExternalId, Game, GameAction, GameEntry,
     LaunchSpec,

@@ -10,7 +10,10 @@
 //! Nothing is ever joined by title, and a game that merges or separates
 //! takes exactly its releases' sets along.
 
+mod db;
+pub use db::{AchievementStore, Applied as AchievementsApplied};
 mod model;
+pub use caskade_core::bus::NewUnlocks;
 pub use model::*;
 mod provider;
 /// For implementing [`AchievementProvider`] outside the core.
@@ -32,7 +35,7 @@ pub use tokio_util::sync::CancellationToken;
 #[cfg(test)]
 mod tests;
 
-use crate::{
+use caskade_core::{
     Result,
     bus::{Bus, Event},
     db::LibraryStore,
@@ -87,20 +90,6 @@ impl Default for AchievementSettings {
     }
 }
 
-/// Achievements newly unlocked on a set, after its baseline: what a
-/// notification announces. Never sent for the first fetch.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, specta::Type)]
-#[serde(rename_all = "camelCase")]
-pub struct NewUnlocks {
-    pub game_id: String,
-    pub game_title: String,
-    pub set_id: String,
-    pub provider_name: String,
-    pub account_name: String,
-    /// The unlocked achievements' names.
-    pub names: Vec<String>,
-}
-
 /// Reads and caches achievements.
 #[derive(Clone)]
 pub struct Achievements {
@@ -117,7 +106,7 @@ struct Inner {
     flights: Mutex<HashMap<String, Arc<tokio::sync::Mutex<()>>>>,
     /// Refreshes asked for by a game's page, by game: what Stop cancels.
     asked: Mutex<HashMap<String, CancellationToken>>,
-    settings: std::sync::OnceLock<crate::settings::SettingsService>,
+    settings: std::sync::OnceLock<caskade_core::settings::SettingsService>,
 }
 
 /// What fetching one set did.
@@ -145,7 +134,7 @@ fn stops(error: &ProviderError) -> bool {
 struct Refresher(std::sync::Weak<Inner>);
 
 #[async_trait::async_trait]
-impl crate::store_accounts::AccountRefresher for Refresher {
+impl caskade_core::store_accounts::AccountRefresher for Refresher {
     async fn refresh_account(
         &self,
         account: &StoreAccount,
@@ -187,22 +176,22 @@ impl Achievements {
     }
 
     pub fn register_provider(&self, provider: Arc<dyn AchievementProvider>) {
-        crate::write(&self.inner.providers).insert(provider.id(), provider);
+        caskade_core::write(&self.inner.providers).insert(provider.id(), provider);
     }
 
     /// Links releases to `linker`'s service before their sets are fetched.
     pub fn register_linker(&self, linker: Arc<dyn ReleaseLinker>) {
-        crate::write(&self.inner.linkers).push(linker);
+        caskade_core::write(&self.inner.linkers).push(linker);
     }
 
     fn provider(&self, id: &str) -> Option<Arc<dyn AchievementProvider>> {
-        crate::read(&self.inner.providers).get(id).cloned()
+        caskade_core::read(&self.inner.providers).get(id).cloned()
     }
 
     /// Reads `core.achievements` from `settings`; registers it first.
-    pub fn set_settings(&self, settings: crate::settings::SettingsService) {
+    pub fn set_settings(&self, settings: caskade_core::settings::SettingsService) {
         if let Err(error) = settings.register(
-            crate::settings::SectionDefinition::typed::<AchievementSettings>(NAMESPACE, 1)
+            caskade_core::settings::SectionDefinition::typed::<AchievementSettings>(NAMESPACE, 1)
                 .expect("the achievement settings schema is valid"),
         ) {
             tracing::error!(%error, "achievement settings unavailable");
@@ -265,15 +254,15 @@ impl Achievements {
         viewer: Option<&str>,
     ) -> Result<Vec<AchievementSet>> {
         let cancel = CancellationToken::new();
-        crate::lock(&self.inner.asked).insert(game_id.into(), cancel.clone());
+        caskade_core::lock(&self.inner.asked).insert(game_id.into(), cancel.clone());
         let result = self.refresh_game(game_id, viewer, &cancel).await;
-        crate::lock(&self.inner.asked).remove(game_id);
+        caskade_core::lock(&self.inner.asked).remove(game_id);
         result
     }
 
     /// Stops `game_id`'s refresh under way; false when there is none.
     pub fn cancel_refresh(&self, game_id: &str) -> bool {
-        match crate::lock(&self.inner.asked).get(game_id) {
+        match caskade_core::lock(&self.inner.asked).get(game_id) {
             Some(cancel) => {
                 cancel.cancel();
                 true
@@ -292,7 +281,7 @@ impl Achievements {
         account: &StoreAccount,
         cancel: &CancellationToken,
     ) -> std::result::Result<(), ProviderError> {
-        let other = |error: crate::Error| ProviderError::Other(error.to_string());
+        let other = |error: caskade_core::Error| ProviderError::Other(error.to_string());
         self.inner.accounts.credentials(account).await?;
         let mut fetched = false;
         let mut failed = None;
@@ -333,9 +322,9 @@ impl Achievements {
         }
     }
 
-    /// What [`StoreAccounts`](crate::store_accounts::StoreAccounts) runs to
+    /// What [`StoreAccounts`](caskade_core::store_accounts::StoreAccounts) runs to
     /// refresh an account without a library; it holds the service weakly.
-    pub fn account_refresher(&self) -> Arc<dyn crate::store_accounts::AccountRefresher> {
+    pub fn account_refresher(&self) -> Arc<dyn caskade_core::store_accounts::AccountRefresher> {
         Arc::new(Refresher(Arc::downgrade(&self.inner)))
     }
 
@@ -350,7 +339,7 @@ impl Achievements {
         viewer: Option<&str>,
         cancel: &CancellationToken,
     ) -> Result<Option<FetchError>> {
-        let linkers = crate::read(&self.inner.linkers).clone();
+        let linkers = caskade_core::read(&self.inner.linkers).clone();
         if linkers.is_empty() {
             return Ok(None);
         }
@@ -359,7 +348,7 @@ impl Achievements {
         let ids: Vec<String> = entries.iter().map(|entry| entry.id.clone()).collect();
         let links = store.achievement_links(&ids).await?;
         let accounts = self.inner.accounts.accounts().await?;
-        let now = crate::now_ms();
+        let now = caskade_core::now_ms();
         for linker in linkers {
             let provider = linker.provider();
             let Some(account) = accounts.iter().find(|account| {
@@ -533,7 +522,7 @@ impl Achievements {
             .ensure_achievement_set(&candidate.account.id, &candidate.product)
             .await?;
         let flight = Arc::clone(
-            crate::lock(&self.inner.flights)
+            caskade_core::lock(&self.inner.flights)
                 .entry(set_id.clone())
                 .or_default(),
         );
@@ -542,7 +531,7 @@ impl Achievements {
             .achievement_set(&candidate.account.id, &candidate.product)
             .await?
             .unwrap_or_default();
-        let now = crate::now_ms();
+        let now = caskade_core::now_ms();
         // The service's wait, for this set or for the whole account.
         if sync.retry_at_ms.is_some_and(|at| at > now)
             || candidate
@@ -597,7 +586,7 @@ impl Achievements {
                 sync.failures = 0;
                 sync.retry_at_ms = None;
                 sync.error = (!fetched.complete).then(|| {
-                    ErrorReport::from(crate::tr!(
+                    ErrorReport::from(caskade_core::tr!(
                         "Not every achievement came back; the rest show as last fetched."
                     ))
                 });
@@ -716,7 +705,7 @@ impl Achievements {
         if !settings.enabled || !settings.background {
             return;
         }
-        let now = crate::now_ms();
+        let now = caskade_core::now_ms();
         let games = match self
             .inner
             .store
@@ -794,9 +783,9 @@ fn products(
 /// The app's store accounts: their sign-ins come from the keychain,
 /// renewed when about to expire (#165).
 #[async_trait::async_trait]
-impl AccountAccess for crate::store_accounts::StoreAccounts {
+impl AccountAccess for caskade_core::store_accounts::StoreAccounts {
     async fn accounts(&self) -> Result<Vec<StoreAccount>> {
-        Ok(crate::store_accounts::StoreAccounts::accounts(self)
+        Ok(caskade_core::store_accounts::StoreAccounts::accounts(self)
             .await?
             .into_iter()
             .map(|summary| summary.account)
@@ -805,8 +794,9 @@ impl AccountAccess for crate::store_accounts::StoreAccounts {
     async fn credentials(
         &self,
         account: &StoreAccount,
-    ) -> std::result::Result<Option<crate::store_accounts::StoreCredentials>, ProviderError> {
-        crate::store_accounts::StoreAccounts::credentials(self, &account.id).await
+    ) -> std::result::Result<Option<caskade_core::store_accounts::StoreCredentials>, ProviderError>
+    {
+        caskade_core::store_accounts::StoreAccounts::credentials(self, &account.id).await
     }
     fn provider_name(&self, provider: &str) -> Option<String> {
         self.providers()

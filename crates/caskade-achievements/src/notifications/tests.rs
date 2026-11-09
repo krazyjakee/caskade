@@ -2,7 +2,7 @@
 //! read-state races, failures, updates and cleanup.
 
 use super::*;
-use crate::{
+use caskade_core::{
     bus::Event,
     db::LibraryStore,
     install::{JobKind, JobSnapshot, JobStatus},
@@ -412,7 +412,7 @@ async fn a_disabled_plugin_is_noted_once() {
 
 #[tokio::test]
 async fn a_failed_script_after_a_game_is_noted_once_per_session_and_phase() {
-    use crate::scripts::{ScriptPhase, ScriptReport, ScriptRun, ScriptScope, ScriptStatus};
+    use caskade_core::scripts::{ScriptPhase, ScriptReport, ScriptRun, ScriptScope, ScriptStatus};
     let fx = Fixture::new().await;
     let run = |status| ScriptRun {
         script_id: "s".into(),
@@ -523,9 +523,9 @@ fn updates_notice(count: usize) -> Notice {
         category: NotificationCategory::UpdatesAvailable,
         severity: Severity::Info,
         key: "updates.available".into(),
-        title: crate::i18n::Message::new(None, "{n} updates available", None, None)
+        title: caskade_core::i18n::Message::new(None, "{n} updates available", None, None)
             .arg("n", count.to_string()),
-        body: crate::i18n::Text::Plain(String::new()),
+        body: caskade_core::i18n::Text::Plain(String::new()),
         target: NotificationTarget::Members,
     }
 }
@@ -560,6 +560,43 @@ async fn updates_on_offer_are_grouped_and_repeated_checks_change_nothing() {
     // None left: resolved.
     assert!(sync(vec![]).await);
     assert!(fx.items().await[0].resolved);
+}
+
+/// A managed tool's newer release, as `ManagedTools::check` and `skip`
+/// leave it (their own test, in core, runs against a fake GitHub).
+#[tokio::test]
+async fn a_tool_update_is_offered_in_caskades_words_until_skipped() {
+    let fx = Fixture::new().await;
+    let mut tool = caskade_core::managed::ManagedTool {
+        tool_id: "moonlight".into(),
+        source: "github".into(),
+        dir: Some("streaming/client".into()),
+        install: None,
+        installed: Some("v1.0".into()),
+        file: Some("Viewer-1.0-x86_64.zip".into()),
+        latest: Some("v2.0".into()),
+        latest_url: None,
+        checked_at_ms: T0,
+        skipped: None,
+        error: None,
+    };
+    fx.store.upsert_managed_tool(&tool).await.unwrap();
+    // Offered in "Updates available" under its own kind, in Caskade's words.
+    fx.feed.sync_updates().await.unwrap();
+    let item = fx.items().await.remove(0);
+    let members = fx.feed.members(&item.id, 0, 10).await.unwrap().items;
+    assert_eq!(members.len(), 1);
+    assert_eq!(members[0].kind, MemberKind::ToolUpdate);
+    assert_eq!(members[0].label, "Game streaming to this device v2.0");
+    assert!(!members[0].label.to_lowercase().contains("moonlight"));
+    // Skipped, it isn't offered.
+    tool.skipped = tool.latest.clone();
+    fx.store.upsert_managed_tool(&tool).await.unwrap();
+    fx.feed.sync_updates().await.unwrap();
+    for item in fx.items().await {
+        let members = fx.feed.members(&item.id, 0, 10).await.unwrap().items;
+        assert!(members.iter().all(|m| m.kind != MemberKind::ToolUpdate));
+    }
 }
 
 #[tokio::test]
@@ -686,7 +723,7 @@ async fn a_language_switch_changes_earlier_notifications() {
     );
 
     // ...and read after a switch to Swedish.
-    let _sv = crate::i18n::scope_catalog("sv", SV);
+    let _sv = caskade_core::i18n::scope_catalog("sv", SV);
     let swedish = fx.items().await;
     let job_failed = find(&swedish, NotificationCategory::JobFailed);
     assert_eq!(job_failed.title, "Celeste 1.4 kunde inte uppdateras");

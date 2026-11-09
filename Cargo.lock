@@ -1110,6 +1110,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "caskade-achievements"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "caskade-core",
+ "caskade-discovery",
+ "caskade-installer",
+ "flate2",
+ "md-5 0.10.6",
+ "reqwest 0.12.28",
+ "schemars 1.2.3",
+ "serde",
+ "serde_json",
+ "specta",
+ "sqlx",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "url",
+ "wiremock",
+]
+
+[[package]]
 name = "caskade-backup"
 version = "0.1.0"
 dependencies = [
@@ -1208,6 +1232,7 @@ name = "caskade-desktop"
 version = "0.1.4"
 dependencies = [
  "arboard",
+ "caskade-achievements",
  "caskade-backup",
  "caskade-core",
  "caskade-discovery",

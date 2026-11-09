@@ -181,7 +181,7 @@ pub fn run() {
         // in the library.
         commands::notifications::setup(
             app.handle(),
-            caskade_core::notifications::Notifications::new(store.clone()),
+            caskade_achievements::notifications::Notifications::new(store.clone()),
             &bus,
         );
         // Plugin runners (#126) attach once the plugin host exists.
@@ -652,11 +652,11 @@ pub fn run() {
         ));
         // RetroAchievements (#189): connected like a store, without a library.
         let retro = std::sync::Arc::new(
-            caskade_core::achievements::retroachievements::RetroAchievements::new(),
+            caskade_achievements::achievements::retroachievements::RetroAchievements::new(),
         );
         store_accounts.register_provider(retro.clone());
         // Achievements (#185) of those accounts, read with their sign-ins.
-        let achievements = caskade_core::achievements::Achievements::new(
+        let achievements = caskade_achievements::achievements::Achievements::new(
             store.clone(),
             bus.clone(),
             std::sync::Arc::new(store_accounts.clone()),
@@ -664,13 +664,13 @@ pub fn run() {
         achievements.set_settings(settings.clone());
         achievements.register_provider(retro.clone());
         achievements.register_provider(std::sync::Arc::new(
-            caskade_core::achievements::steam::SteamAchievements::new(),
+            caskade_achievements::achievements::steam::SteamAchievements::new(),
         ));
         achievements.register_provider(std::sync::Arc::new(
-            caskade_core::achievements::gog::GogAchievements::new(),
+            caskade_achievements::achievements::gog::GogAchievements::new(),
         ));
         achievements.register_provider(std::sync::Arc::new(
-            caskade_core::achievements::epic::EpicAchievements::new(),
+            caskade_achievements::achievements::epic::EpicAchievements::new(),
         ));
         achievements.register_linker(retro);
         // Refresh on an achievements-only account fetches its achievements.

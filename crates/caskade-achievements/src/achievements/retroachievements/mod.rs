@@ -26,7 +26,8 @@ use super::{
     AchievementCapabilities, AchievementDefinition, AchievementProvider, AchievementState,
     FetchError, Fetched, HardcoreUnlock, LinkOutcome, ReleaseLinker, net::iso_ms,
 };
-use crate::{
+use async_trait::async_trait;
+use caskade_core::{
     db::LibraryStore,
     model::{GameEntry, LaunchSpec},
     store_accounts::{
@@ -34,7 +35,6 @@ use crate::{
         ProviderCapabilities, ProviderError, SignedIn, StoreAccount, StoreCredentials, http,
     },
 };
-use async_trait::async_trait;
 use serde::Deserialize;
 use std::{
     collections::{BTreeMap, BTreeSet, HashMap},
@@ -129,11 +129,11 @@ impl RetroAchievements {
 
 fn key(credentials: Option<&StoreCredentials>) -> Result<(&str, &str), ProviderError> {
     let credentials =
-        credentials.ok_or_else(|| ProviderError::Expired(crate::tr!("not signed in")))?;
+        credentials.ok_or_else(|| ProviderError::Expired(caskade_core::tr!("not signed in")))?;
     let user = credentials
         .extra
         .get("username")
-        .ok_or_else(|| ProviderError::Expired(crate::tr!("not signed in")))?;
+        .ok_or_else(|| ProviderError::Expired(caskade_core::tr!("not signed in")))?;
     Ok((user, &credentials.access_token))
 }
 
@@ -217,20 +217,20 @@ impl AccountProvider for RetroAchievements {
             fields: vec![
                 AuthField {
                     id: "username".into(),
-                    label: crate::tr!("RetroAchievements user name"),
+                    label: caskade_core::tr!("RetroAchievements user name"),
                     description: None,
                     secret: false,
                 },
                 AuthField {
                     id: "key".into(),
-                    label: crate::tr!("Web API key"),
-                    description: Some(crate::tr!(
+                    label: caskade_core::tr!("Web API key"),
+                    description: Some(caskade_core::tr!(
                         "From the Keys section of your RetroAchievements settings."
                     )),
                     secret: true,
                 },
             ],
-            instructions: Some(crate::tr!(
+            instructions: Some(caskade_core::tr!(
                 "Caskade reads your progress only. Achievements are earned in an emulator core that supports RetroAchievements, signed in there."
             )),
         })
@@ -242,14 +242,14 @@ impl AccountProvider for RetroAchievements {
         input: &AuthInput,
     ) -> Result<SignedIn, ProviderError> {
         let AuthInput::Fields { fields } = input else {
-            return Err(ProviderError::Rejected(crate::tr!(
+            return Err(ProviderError::Rejected(caskade_core::tr!(
                 "enter your user name and web API key"
             )));
         };
         let user = fields.get("username").map(|v| v.trim()).unwrap_or_default();
         let key = fields.get("key").map(|v| v.trim()).unwrap_or_default();
         if user.is_empty() || key.is_empty() {
-            return Err(ProviderError::Rejected(crate::tr!(
+            return Err(ProviderError::Rejected(caskade_core::tr!(
                 "enter your user name and web API key"
             )));
         }
@@ -257,7 +257,7 @@ impl AccountProvider for RetroAchievements {
             .get("API_GetUserProfile.php", key, &[("u", user)])
             .await
             .map_err(|error| match error {
-                ProviderError::Expired(_) => ProviderError::Rejected(crate::tr!(
+                ProviderError::Expired(_) => ProviderError::Rejected(caskade_core::tr!(
                     "RetroAchievements didn't accept that user name and key"
                 )),
                 other => other,
@@ -319,7 +319,7 @@ impl AchievementProvider for RetroAchievements {
             progress = request => progress?,
         };
         if progress.id.is_none() {
-            return Err(FetchError::Unsupported(crate::tr!(
+            return Err(FetchError::Unsupported(caskade_core::tr!(
                 "RetroAchievements has no game {id}",
                 id = product
             )));
@@ -401,10 +401,12 @@ impl ReleaseLinker for RetroAchievements {
             platform_id, roms, ..
         }) = &entry.launch
         else {
-            return Ok(LinkOutcome::Unresolved(crate::tr!("not an emulated game")));
+            return Ok(LinkOutcome::Unresolved(caskade_core::tr!(
+                "not an emulated game"
+            )));
         };
         let Some((console, rule)) = hash::console(platform_id) else {
-            return Ok(LinkOutcome::Unresolved(crate::tr!(
+            return Ok(LinkOutcome::Unresolved(caskade_core::tr!(
                 "RetroAchievements doesn't cover this system"
             )));
         };
@@ -417,22 +419,22 @@ impl ReleaseLinker for RetroAchievements {
             match hash::hash_file(&path, rule).await {
                 Ok(hash) => hashes.push(hash),
                 Err(hash::HashError::UnsupportedSystem) => {
-                    return Ok(LinkOutcome::Unresolved(crate::tr!(
+                    return Ok(LinkOutcome::Unresolved(caskade_core::tr!(
                         "RetroAchievements identifies this system's games by a hash Caskade doesn't compute: link the game by hand"
                     )));
                 }
                 Err(hash::HashError::Archive) => {
-                    return Ok(LinkOutcome::Unresolved(crate::tr!(
+                    return Ok(LinkOutcome::Unresolved(caskade_core::tr!(
                         "the ROM is compressed; RetroAchievements identifies what is inside: link the game by hand"
                     )));
                 }
                 Err(hash::HashError::TooLarge) => {
-                    return Ok(LinkOutcome::Unresolved(crate::tr!(
+                    return Ok(LinkOutcome::Unresolved(caskade_core::tr!(
                         "the ROM is too large to be a cartridge: link the game by hand"
                     )));
                 }
                 Err(hash::HashError::Read(why)) => {
-                    return Ok(LinkOutcome::Unresolved(crate::tr!(
+                    return Ok(LinkOutcome::Unresolved(caskade_core::tr!(
                         "the ROM couldn't be read: {why}",
                         why = why
                     )));
@@ -459,7 +461,7 @@ impl ReleaseLinker for RetroAchievements {
                 .collect();
             match owners.as_slice() {
                 [] => {
-                    return Ok(LinkOutcome::Unresolved(crate::tr!(
+                    return Ok(LinkOutcome::Unresolved(caskade_core::tr!(
                         "RetroAchievements doesn't know this ROM (hash {hash}): another revision, region or a modified copy",
                         hash = hash
                     )));
@@ -468,7 +470,7 @@ impl ReleaseLinker for RetroAchievements {
                     found.insert(*one);
                 }
                 _ => {
-                    return Ok(LinkOutcome::Unresolved(crate::tr!(
+                    return Ok(LinkOutcome::Unresolved(caskade_core::tr!(
                         "this ROM's hash belongs to more than one RetroAchievements game: link it by hand"
                     )));
                 }
@@ -479,7 +481,7 @@ impl ReleaseLinker for RetroAchievements {
                 product: game.to_string(),
                 hash: hashes.join(","),
             }),
-            _ => Ok(LinkOutcome::Unresolved(crate::tr!(
+            _ => Ok(LinkOutcome::Unresolved(caskade_core::tr!(
                 "the release's ROMs are different RetroAchievements games: link it by hand"
             ))),
         }

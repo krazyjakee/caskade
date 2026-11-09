@@ -2,8 +2,8 @@
 //! connecting, progress and linking releases by verified hash.
 
 use super::{hash::*, *};
-use crate::{
-    achievements::{AccountAccess, AchievementLink, Achievements, LinkMethod, SetStatus},
+use crate::achievements::{AccountAccess, AchievementLink, Achievements, LinkMethod, SetStatus};
+use caskade_core::{
     bus::Bus,
     emulation::{ArgsOverride, EmulatorTarget, GameRom},
     model::{Game, SourceId},
@@ -214,7 +214,7 @@ async fn progress_keeps_hardcore_and_softcore_apart() {
 struct Access(LibraryStore);
 #[async_trait]
 impl AccountAccess for Access {
-    async fn accounts(&self) -> crate::Result<Vec<StoreAccount>> {
+    async fn accounts(&self) -> caskade_core::Result<Vec<StoreAccount>> {
         self.0.store_accounts().await
     }
     async fn credentials(

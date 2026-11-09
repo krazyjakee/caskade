@@ -7,11 +7,13 @@
 //! documented answers.
 
 use crate::ipc::invoke;
+use caskade_achievements::achievements::{
+    Achievements, retroachievements::RetroAchievements, steam::SteamAchievements,
+};
 use caskade_core::{
     accounts::{
         AccountAccess, AccountRole, AccountService, DEFAULT_AVATAR, NewAccount, Permissions,
     },
-    achievements::{Achievements, retroachievements::RetroAchievements, steam::SteamAchievements},
     bus::Bus,
     db::LibraryStore,
     emulation::{ArgsOverride, EmulatorTarget, GameRom},
@@ -142,9 +144,9 @@ fn each_account_s_progress_shows_with_its_states_through_the_app() {
     file.extend(&body);
     std::fs::write(&rom, &file).unwrap();
     // The hash RetroAchievements lists for it: the ROM without its header.
-    let rom_hash = caskade_core::achievements::retroachievements::hash::hash_bytes(
+    let rom_hash = caskade_achievements::achievements::retroachievements::hash::hash_bytes(
         &body,
-        caskade_core::achievements::retroachievements::hash::Rule::Whole,
+        caskade_achievements::achievements::retroachievements::hash::Rule::Whole,
     )
     .unwrap();
 

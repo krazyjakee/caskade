@@ -3,7 +3,7 @@
 //! errors (a private profile, a game without achievements). Waits, server
 //! failures and unreachable services become [`ProviderError`]s here.
 
-use crate::store_accounts::{ProviderError, http};
+use caskade_core::store_accounts::{ProviderError, http};
 use reqwest::{RequestBuilder, StatusCode};
 
 pub(crate) use http::{client, unexpected, unreadable};

@@ -6,7 +6,7 @@ mod edit;
 mod game;
 mod launch;
 mod records;
-pub(crate) mod validation;
+pub mod validation;
 pub use action::*;
 pub use caskade_discovery::{ExternalId, GameRuntime, InstallState, SourceId, TrackingHint};
 pub use edit::*;

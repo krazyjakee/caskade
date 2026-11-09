@@ -5,7 +5,6 @@
 mod account_tests;
 mod accounts;
 mod achievements;
-pub use achievements::Applied as AchievementsApplied;
 mod artwork_choice;
 mod backup;
 pub use backup::ARTWORK_HASHES;
@@ -30,7 +29,6 @@ pub use streaming::{StreamApp, StreamSync, stream_source};
 mod manual;
 pub use imports::{ImportedGroup, SourceRemoval};
 mod notifications;
-pub use notifications::Ingested;
 mod query;
 mod records;
 mod rom_scans;
@@ -158,7 +156,7 @@ impl Opening {
 mod opening_tests;
 #[derive(Debug, Clone)]
 pub struct LibraryStore {
-    pub(super) pool: SqlitePool,
+    pub pool: SqlitePool,
     /// Rows written, for skipping work when nothing changed.
     writes: Arc<writes::Writes>,
     /// Titles' order in the language (#218), as the `caskade_title`
@@ -215,7 +213,7 @@ impl LibraryStore {
     /// is locked" whenever an import or a sync wrote at the same time.
     /// Waiting at `BEGIN`, the busy timeout applies. Transactions that only
     /// read keep `pool.begin()`.
-    pub(super) async fn begin_write(&self) -> Result<sqlx::Transaction<'static, sqlx::Sqlite>> {
+    pub async fn begin_write(&self) -> Result<sqlx::Transaction<'static, sqlx::Sqlite>> {
         Ok(self.pool.begin_with("BEGIN IMMEDIATE").await?)
     }
     /// The library, waited for as `Opening::PATIENT` allows.
@@ -270,7 +268,7 @@ impl LibraryStore {
     }
 }
 
-fn decode<T: serde::de::DeserializeOwned>(text: String) -> Result<T> {
+pub fn decode<T: serde::de::DeserializeOwned>(text: String) -> Result<T> {
     Ok(serde_json::from_str(&text)?)
 }
 /// `entity` is gone, in the user's words; the id stays in the log.

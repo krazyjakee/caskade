@@ -2,8 +2,8 @@
 //! sanitized answers in the store's shapes.
 
 use super::*;
-use crate::{
-    achievements::{AccountAccess, Achievements, SetStatus},
+use crate::achievements::{AccountAccess, Achievements, SetStatus};
+use caskade_core::{
     bus::Bus,
     db::LibraryStore,
     model::{Game, GameEntry, SourceId},
@@ -215,7 +215,7 @@ async fn unsupported_empty_private_and_expired_differ() {
 struct Access(LibraryStore);
 #[async_trait]
 impl AccountAccess for Access {
-    async fn accounts(&self) -> crate::Result<Vec<StoreAccount>> {
+    async fn accounts(&self) -> caskade_core::Result<Vec<StoreAccount>> {
         self.0.store_accounts().await
     }
     async fn credentials(

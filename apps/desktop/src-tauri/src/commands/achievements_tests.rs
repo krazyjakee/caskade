@@ -1,11 +1,11 @@
 //! Achievements through IPC: a game's sets before and after a refresh.
 use super::*;
 use crate::commands::test_ipc::invoke;
+use caskade_achievements::achievements::{
+    AccountAccess, AchievementCapabilities, AchievementDefinition, AchievementProvider,
+    AchievementState, FetchError, Fetched,
+};
 use caskade_core::{
-    achievements::{
-        AccountAccess, AchievementCapabilities, AchievementDefinition, AchievementProvider,
-        AchievementState, FetchError, Fetched,
-    },
     bus::Bus,
     db::LibraryStore,
     model::{ExternalId, Game, GameEntry, SourceId},
@@ -16,7 +16,7 @@ use std::sync::Arc;
 use tauri::test::{mock_builder, mock_context, noop_assets};
 
 struct Steam;
-#[caskade_core::achievements::async_trait]
+#[caskade_achievements::achievements::async_trait]
 impl AchievementProvider for Steam {
     fn id(&self) -> String {
         "steam".into()
@@ -38,7 +38,7 @@ impl AchievementProvider for Steam {
         _: &StoreAccount,
         _: Option<&StoreCredentials>,
         _: &str,
-        _: &caskade_core::achievements::CancellationToken,
+        _: &caskade_achievements::achievements::CancellationToken,
     ) -> Result<Fetched, FetchError> {
         Ok(Fetched {
             definitions: vec![AchievementDefinition {
@@ -67,7 +67,7 @@ impl AchievementProvider for Steam {
 }
 
 struct Accounts(LibraryStore);
-#[caskade_core::achievements::async_trait]
+#[caskade_achievements::achievements::async_trait]
 impl AccountAccess for Accounts {
     async fn accounts(&self) -> caskade_core::Result<Vec<StoreAccount>> {
         self.0.store_accounts().await

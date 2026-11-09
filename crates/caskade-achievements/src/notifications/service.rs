@@ -3,9 +3,9 @@
 
 use super::{
     ENTRY_GRACE_MS, KEEP_READ_MS, MemberKind, MemberPage, MemberRow, Notice, NotificationCategory,
-    NotificationPage, NotificationTarget, Severity,
+    NotificationPage, NotificationStore, NotificationTarget, Severity,
 };
-use crate::{
+use caskade_core::{
     Result,
     bus::{Bus, Event},
     db::LibraryStore,
@@ -48,7 +48,7 @@ struct Inner {
 
 impl Notifications {
     pub fn new(store: LibraryStore) -> Self {
-        Self::with_clock(store, Arc::new(crate::now_ms))
+        Self::with_clock(store, Arc::new(caskade_core::now_ms))
     }
 
     pub fn with_clock(store: LibraryStore, clock: Clock) -> Self {
@@ -149,7 +149,7 @@ impl Notifications {
                 entry_id: None,
                 label: format!(
                     "{} {}",
-                    crate::managed::tool_label(&managed.tool_id),
+                    caskade_core::managed::tool_label(&managed.tool_id),
                     version_label(&latest)
                 ),
             });
@@ -295,8 +295,8 @@ impl Notifications {
     /// Failed after-start and after-exit scripts: one item per session and
     /// phase, naming each failure. A failed before-launch script stops the
     /// launch, which says why itself.
-    async fn on_scripts(&self, report: &crate::scripts::ScriptReport) -> Result<bool> {
-        use crate::scripts::ScriptPhase;
+    async fn on_scripts(&self, report: &caskade_core::scripts::ScriptReport) -> Result<bool> {
+        use caskade_core::scripts::ScriptPhase;
         let phase = match report.phase {
             Some(phase @ (ScriptPhase::AfterStart | ScriptPhase::AfterExit)) => phase,
             _ => return Ok(false),
@@ -398,7 +398,7 @@ impl Notifications {
                 // The classified failure says why in the language shown;
                 // other jobs' errors stay as they came.
                 let body = match &job.failure {
-                    Some(failure) => crate::install::failure_message(failure).into(),
+                    Some(failure) => caskade_core::install::failure_message(failure).into(),
                     None => Text::Plain(job.error.clone().unwrap_or_default()),
                 };
                 let target = match (&job.game_id, job.kind) {

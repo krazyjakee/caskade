@@ -26,6 +26,20 @@ pub struct SourceCount {
     pub count: u32,
 }
 
+/// Achievements newly unlocked on a set, after its baseline: what a
+/// notification announces. Never sent for the first fetch.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct NewUnlocks {
+    pub game_id: String,
+    pub game_title: String,
+    pub set_id: String,
+    pub provider_name: String,
+    pub account_name: String,
+    /// The unlocked achievements' names.
+    pub names: Vec<String>,
+}
+
 /// Every core event. The dotted name (`Event::name`) is the stable
 /// identifier plugins subscribe to.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
@@ -164,7 +178,7 @@ pub enum Event {
     },
     /// Achievements unlocked since a set's last complete fetch (#185):
     /// never the first fetch's history.
-    AchievementsUnlocked(Box<crate::achievements::NewUnlocks>),
+    AchievementsUnlocked(Box<NewUnlocks>),
     /// Someone received everything of a game this device shared (#247).
     /// Not in the plugin event list: it names a person.
     ShareReceived {

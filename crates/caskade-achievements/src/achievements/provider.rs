@@ -3,8 +3,8 @@
 //! Nothing here writes to a service: providers read only.
 
 use super::{AchievementCapabilities, AchievementDefinition, AchievementState};
-use crate::store_accounts::{ProviderError, StoreAccount, StoreCredentials};
 use async_trait::async_trait;
+use caskade_core::store_accounts::{ProviderError, StoreAccount, StoreCredentials};
 use caskade_discovery::ExternalId;
 use std::collections::BTreeMap;
 use tokio_util::sync::CancellationToken;
@@ -88,11 +88,11 @@ pub trait ReleaseLinker: Send + Sync {
     /// The store provider whose accounts it uses.
     fn provider(&self) -> String;
     /// Whether it could link `entry` at all (an emulated game).
-    fn applies(&self, entry: &crate::model::GameEntry) -> bool;
+    fn applies(&self, entry: &caskade_core::model::GameEntry) -> bool;
     async fn link(
         &self,
-        store: &crate::db::LibraryStore,
-        entry: &crate::model::GameEntry,
+        store: &caskade_core::db::LibraryStore,
+        entry: &caskade_core::model::GameEntry,
         account: &StoreAccount,
         credentials: Option<&StoreCredentials>,
         cancel: &CancellationToken,
@@ -103,7 +103,7 @@ pub trait ReleaseLinker: Send + Sync {
 #[async_trait]
 pub trait AccountAccess: Send + Sync {
     /// Every store account, connected or not.
-    async fn accounts(&self) -> crate::Result<Vec<StoreAccount>>;
+    async fn accounts(&self) -> caskade_core::Result<Vec<StoreAccount>>;
     /// The account's current sign-in, renewed first when it is about to
     /// expire; `Expired` when there is none to use.
     async fn credentials(

@@ -14,14 +14,16 @@
 //! an item changed since stays unread; mark all read takes the revision the
 //! list was read at for the same reason.
 
+mod db;
 mod service;
 #[cfg(test)]
 mod tests;
 
+pub use db::{Ingested, NotificationStore};
 pub use service::{Clock, Notifications};
 
-use crate::bus::SourceCount;
-use crate::i18n::{Message, Text};
+use caskade_core::bus::SourceCount;
+use caskade_core::i18n::{Message, Text};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
@@ -276,10 +278,10 @@ pub fn source_label(source: &str) -> String {
 
 /// A library source's English name, as the feed stores it.
 pub(crate) fn source_name(source: &str) -> String {
-    if source.starts_with(crate::romm::SOURCE_PREFIX) {
+    if source.starts_with(caskade_core::romm::SOURCE_PREFIX) {
         return "RomM".into();
     }
-    if let Some(plugin) = source.strip_prefix(crate::bus::PLUGIN_SOURCE_PREFIX) {
+    if let Some(plugin) = source.strip_prefix(caskade_core::bus::PLUGIN_SOURCE_PREFIX) {
         return plugin.to_owned();
     }
     if ["stream:", "peer:"]
@@ -288,14 +290,14 @@ pub(crate) fn source_name(source: &str) -> String {
     {
         return "Other devices".into();
     }
-    if source.starts_with(crate::store_accounts::SOURCE_PREFIX) {
+    if source.starts_with(caskade_core::store_accounts::SOURCE_PREFIX) {
         return "Store accounts".into();
     }
     match source {
         "roms" => "ROM folders",
         "web" => "Web games",
         "caskade-storage" | "caskade-handoff" => "Installs",
-        crate::model::MANUAL_SOURCE => "Added by hand",
+        caskade_core::model::MANUAL_SOURCE => "Added by hand",
         "steam" | "steam.shortcuts" => "Steam",
         "gog" | "minigalaxy" => "GOG",
         "epic" | "epic.app" | "legendary" | "rare" => "Epic",
@@ -320,15 +322,17 @@ pub(crate) fn source_name(source: &str) -> String {
 /// a plugin's own.
 pub(crate) fn source_text(name: &str) -> Text {
     match name {
-        "ROM folders" => crate::msgp!("library source", "ROM folders").into(),
-        "Web games" => crate::msgp!("library source", "Web games").into(),
-        "Installs" => crate::msgp!("library source", "Installs").into(),
+        "ROM folders" => caskade_core::msgp!("library source", "ROM folders").into(),
+        "Web games" => caskade_core::msgp!("library source", "Web games").into(),
+        "Installs" => caskade_core::msgp!("library source", "Installs").into(),
         // Feeds stored before the name was given kept the id.
-        "Desktop entries" | "desktop" => crate::msgp!("library source", "Desktop entries").into(),
-        "Other devices" => crate::msgp!("library source", "Other devices").into(),
-        "Store accounts" => crate::msgp!("library source", "Store accounts").into(),
-        "Added by hand" | "manual" => crate::msgp!("library source", "Added by hand").into(),
-        "Other" => crate::msgp!("library source", "Other").into(),
+        "Desktop entries" | "desktop" => {
+            caskade_core::msgp!("library source", "Desktop entries").into()
+        }
+        "Other devices" => caskade_core::msgp!("library source", "Other devices").into(),
+        "Store accounts" => caskade_core::msgp!("library source", "Store accounts").into(),
+        "Added by hand" | "manual" => caskade_core::msgp!("library source", "Added by hand").into(),
+        "Other" => caskade_core::msgp!("library source", "Other").into(),
         other => other.into(),
     }
 }
@@ -336,15 +340,15 @@ pub(crate) fn source_text(name: &str) -> Text {
 /// "10 games added", or the title of a batch's only game.
 pub(crate) fn batch_title(count: u32, only: Option<&str>) -> Message {
     match (count, only) {
-        (1, Some(title)) => crate::msg!("{title} added", title = title),
-        (n, _) => crate::msgn!("{n} game added", "{n} games added", n),
+        (1, Some(title)) => caskade_core::msg!("{title} added", title = title),
+        (n, _) => caskade_core::msgn!("{n} game added", "{n} games added", n),
     }
 }
 
 /// "RomM 6 · Steam 4", from sources stored by their English names.
 pub(crate) fn sources_body(sources: &[SourceCount]) -> Text {
     let mut items = sources.iter().rev().map(|s| {
-        crate::msgp!(
+        caskade_core::msgp!(
             "games added from a library source",
             "{source} {count}",
             source = source_text(&s.source),
@@ -356,7 +360,7 @@ pub(crate) fn sources_body(sources: &[SourceCount]) -> Text {
     };
     items
         .fold(last, |rest, item| {
-            crate::msgp!(
+            caskade_core::msgp!(
                 "list of library sources",
                 "{first} · {rest}",
                 first = item,

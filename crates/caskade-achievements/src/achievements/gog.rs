@@ -24,8 +24,8 @@ use super::{
     AchievementCapabilities, AchievementDefinition, AchievementProvider, AchievementState,
     FetchError, Fetched, net,
 };
-use crate::store_accounts::{ProviderError, StoreAccount, StoreCredentials};
 use async_trait::async_trait;
+use caskade_core::store_accounts::{ProviderError, StoreAccount, StoreCredentials};
 use caskade_discovery::ExternalId;
 use reqwest::StatusCode;
 use serde::Deserialize;
@@ -90,7 +90,7 @@ impl GogAchievements {
             return Ok(None);
         }
         if status == StatusCode::UNAUTHORIZED || status == StatusCode::FORBIDDEN {
-            return Err(ProviderError::Expired(crate::tr!(
+            return Err(ProviderError::Expired(caskade_core::tr!(
                 "{store} refused the sign-in (HTTP {status})",
                 store = GOG,
                 status = status.as_u16()
@@ -209,7 +209,7 @@ fn visible() -> bool {
 #[async_trait]
 impl AchievementProvider for GogAchievements {
     fn id(&self) -> String {
-        crate::store_accounts::gog::ID.into()
+        caskade_core::store_accounts::gog::ID.into()
     }
 
     fn capabilities(&self) -> AchievementCapabilities {
@@ -236,19 +236,19 @@ impl AchievementProvider for GogAchievements {
         product: &str,
         cancel: &CancellationToken,
     ) -> Result<Fetched, FetchError> {
-        let credentials =
-            credentials.ok_or_else(|| ProviderError::Expired(crate::tr!("not signed in")))?;
+        let credentials = credentials
+            .ok_or_else(|| ProviderError::Expired(caskade_core::tr!("not signed in")))?;
         let refresh = credentials
             .refresh_token
             .as_deref()
-            .ok_or_else(|| ProviderError::Expired(crate::tr!("not signed in")))?;
+            .ok_or_else(|| ProviderError::Expired(caskade_core::tr!("not signed in")))?;
         let user = credentials
             .extra
             .get("user_id")
             .map(String::as_str)
             .unwrap_or(&account.external_id);
         let Some(client) = self.client(product).await? else {
-            return Err(FetchError::Unsupported(crate::tr!(
+            return Err(FetchError::Unsupported(caskade_core::tr!(
                 "this game doesn't use GOG Galaxy's achievements"
             )));
         };
@@ -268,7 +268,9 @@ impl AchievementProvider for GogAchievements {
                 ("without_new_session", "1"),
             ]))
             .await?
-            .ok_or_else(|| ProviderError::Expired(crate::tr!("GOG didn't renew the sign-in")))?;
+            .ok_or_else(|| {
+                ProviderError::Expired(caskade_core::tr!("GOG didn't renew the sign-in"))
+            })?;
         let url = self
             .gameplay
             .join(&format!("clients/{}/users/{user}/achievements", client.id))
@@ -292,7 +294,7 @@ impl AchievementProvider for GogAchievements {
             let page: Page = match (self.json(request).await, index) {
                 (Ok(Some(page)), _) => page,
                 (Ok(None), 0) => {
-                    return Err(FetchError::Unsupported(crate::tr!(
+                    return Err(FetchError::Unsupported(caskade_core::tr!(
                         "GOG keeps no achievements for this game"
                     )));
                 }
