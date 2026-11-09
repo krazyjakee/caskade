@@ -39,6 +39,7 @@ tauri-build = { version = "2", features = [] }
 [dependencies]
 tracing-appender = "0.2"
 caskade-core = { path = "../../../crates/caskade-core" }
+caskade-backup = { path = "../../../crates/caskade-backup" }
 caskade-sources = { path = "../../../crates/caskade-sources" }
 caskade-discovery = { path = "../../../crates/caskade-discovery" }
 caskade-plugin-host = { path = "../../../crates/caskade-plugin-host" }

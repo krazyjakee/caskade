@@ -4,7 +4,7 @@ use super::{
     tests::{Profile, fill, hash, live, options, profile, quiet},
     *,
 };
-use crate::model::{Game, GameEntry, InstallLocation, SourceId, StorageRoot};
+use caskade_core::model::{Game, GameEntry, InstallLocation, SourceId, StorageRoot};
 use std::{collections::BTreeSet, path::Path};
 use tokio_util::sync::CancellationToken;
 
@@ -28,7 +28,7 @@ async fn backup() -> (Profile, Exported) {
     fill(&source).await;
     source
         .store
-        .upsert_plugin_state(&crate::db::PluginRow {
+        .upsert_plugin_state(&caskade_core::db::PluginRow {
             id: "fixture.plugin".into(),
             enabled: true,
             grants: serde_json::json!({"permissions": {"fs": []}}),
@@ -363,7 +363,7 @@ async fn old_database(file: &Path, version: i64) {
         .connect()
         .await
         .unwrap();
-    crate::db::MIGRATOR
+    caskade_core::db::MIGRATOR
         .run_to(version, &mut connection)
         .await
         .unwrap();
@@ -412,7 +412,11 @@ async fn an_older_backup_is_migrated_and_a_newer_one_refused() {
     store.close().await;
 
     // The manifest claims a newer schema.
-    let newest = crate::db::MIGRATOR.iter().map(|m| m.version).max().unwrap();
+    let newest = caskade_core::db::MIGRATOR
+        .iter()
+        .map(|m| m.version)
+        .max()
+        .unwrap();
     let newer = handmade(&old, newest + 1, temp.path());
     let fresh = profile().await;
     let error = fresh

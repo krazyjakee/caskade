@@ -11,7 +11,7 @@ pub mod accounts;
 pub mod achievements;
 pub mod addons;
 pub mod artwork;
-pub mod backup;
+pub mod backup_error;
 pub mod browse;
 pub mod bus;
 mod cache_db;

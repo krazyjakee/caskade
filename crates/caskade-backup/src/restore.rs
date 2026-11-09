@@ -15,7 +15,7 @@ use super::{
     manifest::{self, Component, ComponentSummary, Manifest},
     snapshot,
 };
-use crate::{AppPaths, db::LibraryStore};
+use caskade_core::{AppPaths, db::LibraryStore};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use specta::Type;
@@ -128,7 +128,7 @@ async fn examine(
     let manifest = verified(archive_path, cancel, progress).await?;
     let dir = folder(paths);
     tokio::fs::create_dir_all(&dir).await?;
-    let file = dir.join(format!("inspect-{}.sqlite", crate::model::new_id()));
+    let file = dir.join(format!("inspect-{}.sqlite", caskade_core::model::new_id()));
     let result = async {
         let archive_path = archive_path.to_owned();
         let (target, manifest_copy) = (file.clone(), manifest.clone());
@@ -179,7 +179,7 @@ async fn verified(
 }
 
 fn newest_schema() -> i64 {
-    crate::db::MIGRATOR
+    caskade_core::db::MIGRATOR
         .iter()
         .map(|m| m.version)
         .max()
@@ -195,13 +195,16 @@ async fn check_migrations(connection: &mut sqlx::SqliteConnection) -> Result<(),
             .fetch_all(&mut *connection)
             .await
             .map_err(|_| {
-                BackupError::Damaged(crate::tr!("its database has no migration record"))
+                BackupError::Damaged(caskade_core::tr!("its database has no migration record"))
             })?;
     for (version, checksum) in applied {
-        match crate::db::MIGRATOR.iter().find(|m| m.version == version) {
+        match caskade_core::db::MIGRATOR
+            .iter()
+            .find(|m| m.version == version)
+        {
             Some(known) if *known.checksum == *checksum => {}
             Some(_) => {
-                return Err(BackupError::Damaged(crate::tr!(
+                return Err(BackupError::Damaged(caskade_core::tr!(
                     "its database schema {version} differs from this Caskade's",
                     version = version
                 )));
@@ -220,12 +223,12 @@ async fn survey(
     let roots: Vec<String> = sqlx::query_scalar("SELECT path FROM storage_roots ORDER BY path")
         .fetch_all(&mut *connection)
         .await
-        .map_err(crate::Error::from)?;
+        .map_err(caskade_core::Error::from)?;
     let external: Vec<String> =
         sqlx::query_scalar("SELECT external_path FROM game_entries WHERE location_kind='external'")
             .fetch_all(&mut *connection)
             .await
-            .map_err(crate::Error::from)?;
+            .map_err(caskade_core::Error::from)?;
     let (missing_roots, missing_games) = tokio::task::spawn_blocking(move || {
         let missing_roots: Vec<PathBuf> = roots
             .into_iter()
@@ -378,7 +381,7 @@ pub async fn discard_staged(paths: &AppPaths) -> Result<(), BackupError> {
 pub fn pending(paths: &AppPaths) -> Result<Option<Journal>, BackupError> {
     match fs::read(folder(paths).join(JOURNAL)) {
         Ok(bytes) => Ok(Some(serde_json::from_slice(&bytes).map_err(|_| {
-            BackupError::Damaged(crate::tr!("the restore journal can't be read"))
+            BackupError::Damaged(caskade_core::tr!("the restore journal can't be read"))
         })?)),
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(None),
         Err(error) => Err(error.into()),
@@ -412,7 +415,7 @@ fn extract(
         }
     }
     let mut zip = zip::ZipArchive::new(fs::File::open(archive_path)?)
-        .map_err(|_| BackupError::Damaged(crate::tr!("the backup archive is damaged")))?;
+        .map_err(|_| BackupError::Damaged(caskade_core::tr!("the backup archive is damaged")))?;
     let mut done = 0u64;
     for file in manifest
         .files
@@ -443,7 +446,7 @@ fn extract(
             fs::create_dir_all(parent)?;
         }
         let mut entry = zip.by_name(&file.path).map_err(|_| {
-            BackupError::Damaged(crate::tr!("“{path}” is missing", path = file.path))
+            BackupError::Damaged(caskade_core::tr!("“{path}” is missing", path = file.path))
         })?;
         let partial = target.with_extension("caskade-partial");
         let mut out = fs::File::create(&partial)?;
@@ -470,7 +473,7 @@ fn extract(
         drop(out);
         if size != file.size || format!("{:x}", hash.finalize()) != file.sha256 {
             let _ = fs::remove_file(&partial);
-            return Err(BackupError::Damaged(crate::tr!(
+            return Err(BackupError::Damaged(caskade_core::tr!(
                 "“{path}” doesn't match its checksum",
                 path = file.path
             )));
@@ -491,12 +494,14 @@ fn extract_one(
         .files
         .iter()
         .find(|f| f.path == path)
-        .ok_or_else(|| BackupError::Damaged(crate::tr!("“{path}” is missing", path = path)))?;
+        .ok_or_else(|| {
+            BackupError::Damaged(caskade_core::tr!("“{path}” is missing", path = path))
+        })?;
     let mut zip = zip::ZipArchive::new(fs::File::open(archive_path)?)
-        .map_err(|_| BackupError::Damaged(crate::tr!("the backup archive is damaged")))?;
+        .map_err(|_| BackupError::Damaged(caskade_core::tr!("the backup archive is damaged")))?;
     let mut reader = zip
         .by_name(path)
-        .map_err(|_| BackupError::Damaged(crate::tr!("“{path}” is missing", path = path)))?;
+        .map_err(|_| BackupError::Damaged(caskade_core::tr!("“{path}” is missing", path = path)))?;
     let mut out = fs::File::create(target)?;
     std::io::copy(&mut (&mut reader).take(entry.size), &mut out)?;
     Ok(())
@@ -506,7 +511,7 @@ fn extract_one(
 /// grants dropped unless their files come back too, out of WAL and checked.
 async fn prepare(file: &Path, components: &BTreeSet<Component>) -> Result<(), BackupError> {
     // The library it will be: opened as patiently as the library is.
-    let store = LibraryStore::open_with(file, crate::db::Opening::PATIENT).await?;
+    let store = LibraryStore::open_with(file, caskade_core::db::Opening::PATIENT).await?;
     store.close().await;
     let mut connection = snapshot::open(file).await?;
     let result = async {
@@ -516,7 +521,7 @@ async fn prepare(file: &Path, components: &BTreeSet<Component>) -> Result<(), Ba
             sqlx::query("UPDATE plugins SET enabled=0, grants_json='null'")
                 .execute(&mut connection)
                 .await
-                .map_err(crate::Error::from)?;
+                .map_err(caskade_core::Error::from)?;
         }
         snapshot::check(&mut connection).await
     }
@@ -602,7 +607,7 @@ pub fn apply_pending(paths: &AppPaths) -> Result<Option<Journal>, BackupError> {
     let dir = folder(paths);
     match journal.state {
         RestoreState::RollingBack => {
-            roll_back(paths, &crate::tr!("the restore was interrupted"))?;
+            roll_back(paths, &caskade_core::tr!("the restore was interrupted"))?;
             return Ok(None);
         }
         RestoreState::Applied => return Ok(Some(journal)),
@@ -699,7 +704,7 @@ fn write_outcome(dir: &Path, journal: &Journal, error: Option<String>) {
     let outcome = RestoreOutcome {
         journal: journal.clone(),
         error,
-        finished_at_ms: crate::now_ms(),
+        finished_at_ms: caskade_core::now_ms(),
     };
     if let Err(error) = serde_json::to_vec(&outcome)
         .map_err(std::io::Error::other)
@@ -716,7 +721,7 @@ fn write_journal(dir: &Path, journal: &Journal) -> Result<(), BackupError> {
 
 fn atomic_write(dir: &Path, name: &str, bytes: &[u8]) -> std::io::Result<()> {
     fs::create_dir_all(dir)?;
-    let temporary = dir.join(format!(".{name}.{}.tmp", crate::model::new_id()));
+    let temporary = dir.join(format!(".{name}.{}.tmp", caskade_core::model::new_id()));
     let mut file = fs::File::create(&temporary)?;
     file.write_all(bytes)?;
     file.sync_all()?;

@@ -1,7 +1,7 @@
 //! Backups of a file library under a temporary profile.
 
 use super::*;
-use crate::model::{Artwork, ArtworkKind, Game};
+use caskade_core::model::{Artwork, ArtworkKind, Game};
 use std::{
     collections::BTreeSet,
     io::{Read, Write},
@@ -192,8 +192,12 @@ async fn a_backup_holds_the_library_and_chosen_components_without_secrets() {
     );
     let manifest = &exported.manifest;
     assert_eq!(manifest.format, FORMAT);
-    assert_eq!(manifest.app_version, crate::VERSION);
-    let newest = crate::db::MIGRATOR.iter().map(|m| m.version).max().unwrap();
+    assert_eq!(manifest.app_version, caskade_core::VERSION);
+    let newest = caskade_core::db::MIGRATOR
+        .iter()
+        .map(|m| m.version)
+        .max()
+        .unwrap();
     assert_eq!(manifest.schema_version, newest);
     let paths: BTreeSet<&str> = manifest.files.iter().map(|f| f.path.as_str()).collect();
     assert_eq!(
@@ -339,7 +343,7 @@ async fn fails_cleanly(
 #[tokio::test]
 async fn a_full_disk_leaves_the_last_backup_alone() {
     let (_, error) = fails_cleanly(
-        |backups| crate::lock(&backups.faults).disk_full_after = Some(2048),
+        |backups| caskade_core::lock(&backups.faults).disk_full_after = Some(2048),
         CancellationToken::new(),
         quiet(),
     )
@@ -368,7 +372,7 @@ async fn cancelling_leaves_the_last_backup_alone() {
 #[tokio::test]
 async fn too_little_space_is_refused_before_writing() {
     let (_, error) = fails_cleanly(
-        |backups| crate::lock(&backups.faults).available = Some(1024),
+        |backups| caskade_core::lock(&backups.faults).available = Some(1024),
         CancellationToken::new(),
         quiet(),
     )
@@ -388,7 +392,7 @@ async fn too_little_space_is_refused_before_writing() {
 #[tokio::test]
 async fn the_next_backup_clears_what_a_crash_left() {
     let (profile, _) = fails_cleanly(
-        |backups| crate::lock(&backups.faults).crash = true,
+        |backups| caskade_core::lock(&backups.faults).crash = true,
         CancellationToken::new(),
         quiet(),
     )
@@ -400,7 +404,7 @@ async fn the_next_backup_clears_what_a_crash_left() {
             .count(),
         2
     );
-    crate::lock(&profile.backups.faults).crash = false;
+    caskade_core::lock(&profile.backups.faults).crash = false;
     profile
         .backups
         .export(options(&profile, &[]), quiet(), CancellationToken::new())

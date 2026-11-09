@@ -4,7 +4,7 @@ use super::{
     tests::{fill, listing, profile},
     *,
 };
-use crate::settings::SettingsService;
+use caskade_core::settings::SettingsService;
 use std::path::Path;
 
 const DAY: i64 = 24 * 60 * 60 * 1000;
@@ -138,7 +138,7 @@ async fn a_failed_backup_retries_and_keeps_the_last_good_ones() {
     let last = status.last.unwrap();
     assert_eq!(
         last.error.unwrap().code,
-        crate::error::ErrorCode::StorageOffline
+        caskade_core::error::ErrorCode::StorageOffline
     );
     // Tried again in half an hour, not before.
     assert_eq!(status.next_automatic_ms, Some(START + DAY + DAY / 48));
@@ -175,7 +175,7 @@ async fn a_manual_backup_and_a_due_one_never_overlap() {
     ));
     drop(held);
     let next = profile.backups.status().await.next_automatic_ms.unwrap();
-    assert!(next <= crate::now_ms());
+    assert!(next <= caskade_core::now_ms());
     assert!(profile.backups.run_due(START).await.unwrap().is_ok());
     let manual = profile.backups.back_up_now().await.unwrap();
     assert_eq!(manual.manifest.set_id, None);
@@ -211,7 +211,7 @@ async fn status_follows_a_job_and_cancel_stops_it() {
     assert!(status.running.is_none());
     assert_eq!(
         status.last.unwrap().error.unwrap().code,
-        crate::error::ErrorCode::Cancelled
+        caskade_core::error::ErrorCode::Cancelled
     );
     assert!(backups_in(temp.path()).is_empty());
 }

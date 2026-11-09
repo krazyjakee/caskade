@@ -28,8 +28,6 @@ mod missing_programs;
 #[cfg(feature = "net")]
 mod new_device;
 #[cfg(feature = "net")]
-mod peer_backups;
-#[cfg(feature = "net")]
 mod peer_downloads;
 #[cfg(feature = "net")]
 mod presence;

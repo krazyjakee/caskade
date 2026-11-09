@@ -467,8 +467,8 @@ fn classify(error: &(dyn std::error::Error + 'static)) -> Option<Found> {
                 // What they wrap says more.
                 C::Provider(_) | C::Store(_) => None,
             }
-        } else if let Some(error) = error.downcast_ref::<crate::backup::BackupError>() {
-            use crate::backup::BackupError as B;
+        } else if let Some(error) = error.downcast_ref::<crate::backup_error::BackupError>() {
+            use crate::backup_error::BackupError as B;
             match error {
                 B::Busy => found(Busy, Summary::Own),
                 B::Cancelled => found(Cancelled, Summary::Own),

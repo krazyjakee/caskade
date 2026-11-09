@@ -130,7 +130,7 @@ pub fn verify(
     for file in &manifest.files {
         safe_path(&file.path, file.component)?;
         if !listed.insert(file.path.as_str()) {
-            return Err(BackupError::Damaged(crate::tr!(
+            return Err(BackupError::Damaged(caskade_core::tr!(
                 "“{path}” is listed twice",
                 path = file.path
             )));
@@ -141,7 +141,7 @@ pub fn verify(
         .iter()
         .any(|f| f.path == manifest::DATABASE && f.component == Component::Library)
     {
-        return Err(BackupError::Damaged(crate::tr!(
+        return Err(BackupError::Damaged(caskade_core::tr!(
             "the backup has no library database"
         )));
     }
@@ -151,12 +151,14 @@ pub fn verify(
         let name = archive
             .name_for_index(index)
             .and_then(Result::ok)
-            .ok_or_else(|| BackupError::Damaged(crate::tr!("the archive's index is damaged")))?
+            .ok_or_else(|| {
+                BackupError::Damaged(caskade_core::tr!("the archive's index is damaged"))
+            })?
             .into_owned();
         if !seen.insert(name.clone())
             || (name != manifest::MANIFEST && !listed.contains(name.as_str()))
         {
-            return Err(BackupError::Damaged(crate::tr!(
+            return Err(BackupError::Damaged(caskade_core::tr!(
                 "the archive holds “{path}”, which its manifest doesn't list",
                 path = name
             )));
@@ -166,7 +168,7 @@ pub fn verify(
     let mut buffer = vec![0u8; CHUNK];
     for file in &manifest.files {
         let mut entry = archive.by_name(&file.path).map_err(|_| {
-            BackupError::Damaged(crate::tr!("“{path}” is missing", path = file.path))
+            BackupError::Damaged(caskade_core::tr!("“{path}” is missing", path = file.path))
         })?;
         let mut hash = Sha256::new();
         let mut size = 0u64;
@@ -186,7 +188,7 @@ pub fn verify(
             report(done);
         }
         if size != file.size || format!("{:x}", hash.finalize()) != file.sha256 {
-            return Err(BackupError::Damaged(crate::tr!(
+            return Err(BackupError::Damaged(caskade_core::tr!(
                 "“{path}” doesn't match its checksum",
                 path = file.path
             )));
@@ -200,15 +202,15 @@ pub(super) fn read_manifest<R: Read + Seek>(
     archive: &mut ZipArchive<R>,
 ) -> Result<Manifest, BackupError> {
     if archive.len() > MAX_FILES + 1 {
-        return Err(BackupError::Damaged(crate::tr!(
+        return Err(BackupError::Damaged(caskade_core::tr!(
             "the archive holds too many files"
         )));
     }
     let entry = archive
         .by_name(manifest::MANIFEST)
-        .map_err(|_| BackupError::Damaged(crate::tr!("this isn't a Caskade backup")))?;
+        .map_err(|_| BackupError::Damaged(caskade_core::tr!("this isn't a Caskade backup")))?;
     if entry.size() > MAX_MANIFEST {
-        return Err(BackupError::Damaged(crate::tr!(
+        return Err(BackupError::Damaged(caskade_core::tr!(
             "the backup's manifest is too large"
         )));
     }
@@ -224,15 +226,15 @@ pub(super) fn read_manifest<R: Read + Seek>(
         format: u32,
     }
     let format = serde_json::from_slice::<Format>(&text)
-        .map_err(|_| BackupError::Damaged(crate::tr!("the backup's manifest is damaged")))?
+        .map_err(|_| BackupError::Damaged(caskade_core::tr!("the backup's manifest is damaged")))?
         .format;
     if format > manifest::FORMAT {
         return Err(BackupError::Newer);
     }
     let manifest: Manifest = serde_json::from_slice(&text)
-        .map_err(|_| BackupError::Damaged(crate::tr!("the backup's manifest is damaged")))?;
+        .map_err(|_| BackupError::Damaged(caskade_core::tr!("the backup's manifest is damaged")))?;
     if manifest.files.len() > MAX_FILES {
-        return Err(BackupError::Damaged(crate::tr!(
+        return Err(BackupError::Damaged(caskade_core::tr!(
             "the archive holds too many files"
         )));
     }
@@ -252,7 +254,7 @@ pub(super) fn safe_path(path: &str, component: Component) -> Result<(), BackupEr
     if safe {
         Ok(())
     } else {
-        Err(BackupError::Damaged(crate::tr!(
+        Err(BackupError::Damaged(caskade_core::tr!(
             "the backup holds an unsafe path: “{path}”",
             path = path
         )))
@@ -271,7 +273,9 @@ fn damaged(error: zip::result::ZipError) -> BackupError {
         zip::result::ZipError::Io(error) if error.kind() != std::io::ErrorKind::InvalidData => {
             error.into()
         }
-        _ => BackupError::Damaged(crate::tr!("the file isn't a readable backup archive")),
+        _ => BackupError::Damaged(caskade_core::tr!(
+            "the file isn't a readable backup archive"
+        )),
     }
 }
 
@@ -280,7 +284,7 @@ fn damaged(error: zip::result::ZipError) -> BackupError {
 fn damaged_io(error: std::io::Error) -> BackupError {
     match error.kind() {
         std::io::ErrorKind::InvalidData | std::io::ErrorKind::UnexpectedEof => {
-            BackupError::Damaged(crate::tr!("the backup archive is damaged"))
+            BackupError::Damaged(caskade_core::tr!("the backup archive is damaged"))
         }
         _ => error.into(),
     }

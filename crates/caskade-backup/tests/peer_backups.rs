@@ -6,9 +6,9 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
+use caskade_backup::peers::PeerBackups;
+use caskade_backup::{Backups, CancellationToken, ExportOptions, RestoreOptions, restore};
 use caskade_core::accounts::AccountService;
-use caskade_core::backup::peers::PeerBackups;
-use caskade_core::backup::{Backups, CancellationToken, ExportOptions, RestoreOptions, restore};
 use caskade_core::bus::Bus;
 use caskade_core::db::LibraryStore;
 use caskade_core::devices::{Devices, MemoryKeyStore, Reach};
@@ -71,7 +71,7 @@ async fn core(name: &str) -> Core {
         .unwrap();
     let settings = SettingsService::new(store.clone());
     settings.register_core(&paths).unwrap();
-    caskade_core::backup::register_settings(&settings).unwrap();
+    caskade_backup::register_settings(&settings).unwrap();
     let devices = Devices::with_reach(
         store.clone(),
         accounts,

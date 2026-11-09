@@ -190,7 +190,7 @@ impl Backups {
         {
             return Err(BackupError::NoSpace { needed, available });
         }
-        let id = crate::model::new_id();
+        let id = caskade_core::model::new_id();
         let database = destination.join(format!("{PARTIAL}{id}.partial.sqlite"));
         let partial = destination.join(format!("{PARTIAL}{id}.partial"));
         let result = self
@@ -234,9 +234,9 @@ impl Backups {
         }
         let manifest = Manifest {
             format: super::manifest::FORMAT,
-            app_version: crate::VERSION.to_owned(),
+            app_version: caskade_core::VERSION.to_owned(),
             schema_version: snapshot.schema_version,
-            created_at_ms: crate::now_ms(),
+            created_at_ms: caskade_core::now_ms(),
             os: std::env::consts::OS.to_owned(),
             set_id: options.set_id.clone(),
             components: selected
@@ -302,7 +302,7 @@ impl Backups {
         .await
         .map_err(|error| BackupError::Io(std::io::Error::other(error)))??;
         if verified != manifest {
-            return Err(BackupError::Damaged(crate::tr!(
+            return Err(BackupError::Damaged(caskade_core::tr!(
                 "the backup read back differently from how it was written"
             )));
         }
@@ -326,7 +326,7 @@ impl Backups {
 
 /// The files of `component`. The library's is the snapshot at `database`.
 fn files(
-    paths: &crate::AppPaths,
+    paths: &caskade_core::AppPaths,
     component: Component,
     artwork: &[(String, bool)],
     database: &Path,
@@ -449,7 +449,7 @@ async fn publish(partial: &Path, destination: &Path, at_ms: i64) -> Result<PathB
 pub(super) fn stamp(ms: i64) -> String {
     let seconds = ms.div_euclid(1000);
     let (days, rest) = (seconds.div_euclid(86_400), seconds.rem_euclid(86_400));
-    let (year, month, day) = crate::civil_from_days(days);
+    let (year, month, day) = caskade_core::civil_from_days(days);
     format!(
         "{year:04}{month:02}{day:02}-{:02}{:02}{:02}",
         rest / 3600,

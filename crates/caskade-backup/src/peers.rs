@@ -29,11 +29,11 @@ use serde_json::Value;
 use specta::Type;
 
 use super::schedule::BackupSettings;
-use crate::saves::versions::{BlobStore, hash_file};
-use crate::settings::SettingsService;
-use crate::sync::blobs::{BlobKind, BlobWriter};
-use crate::sync::policy::Category;
-use crate::{Error, Result};
+use caskade_core::saves::versions::{BlobStore, hash_file};
+use caskade_core::settings::SettingsService;
+use caskade_core::sync::blobs::{BlobKind, BlobWriter};
+use caskade_core::sync::policy::Category;
+use caskade_core::{Error, Result};
 
 const SETTINGS: &str = "core.backups";
 const INDEX: &str = "index.json";
@@ -94,7 +94,7 @@ struct Inner {
     requested: Mutex<HashSet<String>>,
     arrived: tokio::sync::Notify,
     /// Paired devices, for their names.
-    devices: std::sync::OnceLock<crate::devices::Devices>,
+    devices: std::sync::OnceLock<caskade_core::devices::Devices>,
     index_lock: tokio::sync::Mutex<()>,
 }
 
@@ -126,7 +126,7 @@ impl PeerBackups {
     }
 
     /// Names paired devices in what this device holds for them.
-    pub fn set_devices(&self, devices: crate::devices::Devices) {
+    pub fn set_devices(&self, devices: caskade_core::devices::Devices) {
         let _ = self.inner.devices.set(devices);
     }
 
@@ -423,10 +423,9 @@ impl BlobKind for PeerBackups {
     }
 
     async fn read(&self, hash: &str, offset: u64, len: usize) -> Result<Vec<u8>> {
-        let path = self
-            .serving(hash)
-            .await
-            .ok_or_else(|| Error::Invalid(crate::tr!("That backup isn't on this device.")))?;
+        let path = self.serving(hash).await.ok_or_else(|| {
+            Error::Invalid(caskade_core::tr!("That backup isn't on this device."))
+        })?;
         tokio::task::spawn_blocking(move || read_at(&path, offset, len))
             .await
             .map_err(|error| Error::Io(std::io::Error::other(error)))?
@@ -471,15 +470,14 @@ impl Request {
                 break;
             }
             if tokio::time::timeout_at(deadline, arrived).await.is_err() {
-                return Err(Error::Invalid(crate::tr!(
+                return Err(Error::Invalid(caskade_core::tr!(
                     "The backup didn't arrive from the other device. Make sure it's on and in reach, then try again."
                 )));
             }
         }
-        inner
-            .store
-            .path(&self.hash)
-            .ok_or_else(|| Error::Invalid(crate::tr!("The backup that arrived can't be read.")))
+        inner.store.path(&self.hash).ok_or_else(|| {
+            Error::Invalid(caskade_core::tr!("The backup that arrived can't be read."))
+        })
     }
 }
 
@@ -506,7 +504,7 @@ fn read_at(path: &Path, offset: u64, len: usize) -> Result<Vec<u8>> {
 }
 
 struct Receiving {
-    incoming: Option<crate::saves::versions::Incoming>,
+    incoming: Option<caskade_core::saves::versions::Incoming>,
     hash: String,
     backups: PeerBackups,
 }
@@ -537,8 +535,8 @@ impl BlobWriter for Receiving {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::db::LibraryStore;
-    use crate::saves::versions::hash_bytes;
+    use caskade_core::db::LibraryStore;
+    use caskade_core::saves::versions::hash_bytes;
 
     async fn peers() -> (PeerBackups, tempfile::TempDir) {
         let temp = tempfile::tempdir().unwrap();

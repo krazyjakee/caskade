@@ -15,7 +15,7 @@ use super::{
     BackupError, Backups, CancellationToken, Component, ExportOptions, Exported, Inspection,
     Journal, Progress, ProgressFn, RestoreOptions, RestoreOutcome, restore,
 };
-use crate::{error::ErrorReport, settings::SettingsService};
+use caskade_core::{error::ErrorReport, settings::SettingsService};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -152,10 +152,10 @@ pub enum BackupJobKind {
 }
 
 /// Registers `core.backups`.
-pub fn register_settings(settings: &SettingsService) -> crate::settings::Result<()> {
-    settings.register(crate::settings::SectionDefinition::typed::<BackupSettings>(
-        NAMESPACE, 1,
-    )?)
+pub fn register_settings(settings: &SettingsService) -> caskade_core::settings::Result<()> {
+    settings.register(caskade_core::settings::SectionDefinition::typed::<
+        BackupSettings,
+    >(NAMESPACE, 1)?)
 }
 
 /// When the next automatic backup is due under `schedule`, given `state`,
@@ -228,12 +228,14 @@ impl Backups {
     pub async fn status(&self) -> BackupStatus {
         let (settings, state) = (self.settings().await, self.state().await);
         BackupStatus {
-            running: crate::lock(&self.job).as_ref().map(|job| job.1.clone()),
+            running: caskade_core::lock(&self.job)
+                .as_ref()
+                .map(|job| job.1.clone()),
             last: state.last.clone(),
-            next_automatic_ms: due(settings.schedule, &state, crate::now_ms()),
+            next_automatic_ms: due(settings.schedule, &state, caskade_core::now_ms()),
             default_destination: self.default_destination(),
             staged_restore: restore::pending(&self.paths).ok().flatten(),
-            last_restore: crate::lock(&self.last_restore).clone(),
+            last_restore: caskade_core::lock(&self.last_restore).clone(),
         }
     }
 
@@ -249,12 +251,12 @@ impl Backups {
 
     /// Keeps how the restore before this start ended, for the status.
     pub fn set_last_restore(&self, outcome: Option<RestoreOutcome>) {
-        *crate::lock(&self.last_restore) = outcome;
+        *caskade_core::lock(&self.last_restore) = outcome;
     }
 
     /// Cancels the backup, check or restore under way.
     pub fn cancel(&self) {
-        if let Some(job) = crate::lock(&self.job).as_ref() {
+        if let Some(job) = caskade_core::lock(&self.job).as_ref() {
             job.0.cancel();
         }
     }
@@ -268,7 +270,7 @@ impl Backups {
     {
         let cancel = CancellationToken::new();
         {
-            let mut job = crate::lock(&self.job);
+            let mut job = caskade_core::lock(&self.job);
             if job.is_some() || self.running.try_lock().is_err() {
                 return Err(BackupError::Busy);
             }
@@ -285,7 +287,7 @@ impl Backups {
             let this = self.clone();
             let last = Arc::new(std::sync::Mutex::new((std::time::Instant::now(), None)));
             move |progress: Progress| {
-                let mut last = crate::lock(&last);
+                let mut last = caskade_core::lock(&last);
                 let now = std::time::Instant::now();
                 if last.1 == Some(progress.phase)
                     && now.duration_since(last.0) < Duration::from_millis(100)
@@ -293,7 +295,7 @@ impl Backups {
                     return;
                 }
                 *last = (now, Some(progress.phase));
-                if let Some(job) = crate::lock(&this.job).as_mut() {
+                if let Some(job) = caskade_core::lock(&this.job).as_mut() {
                     job.1.progress = Some(progress);
                 }
                 let this = this.clone();
@@ -303,7 +305,7 @@ impl Backups {
             }
         });
         let result = work(progress, cancel).await;
-        *crate::lock(&self.job) = None;
+        *caskade_core::lock(&self.job) = None;
         self.publish().await;
         result
     }
@@ -340,7 +342,7 @@ impl Backups {
             return None;
         }
         if state.set_id.is_empty() {
-            state.set_id = crate::model::new_id();
+            state.set_id = caskade_core::model::new_id();
             self.save_state(&state).await;
         }
         let destination = self.destination().await;
@@ -384,7 +386,7 @@ impl Backups {
         tokio::time::sleep(SETTLE).await;
         let mut changes = self.settings.get().map(|settings| settings.subscribe());
         loop {
-            let _ = self.run_due(crate::now_ms()).await;
+            let _ = self.run_due(caskade_core::now_ms()).await;
             let changed = async {
                 match changes.as_mut() {
                     Some(changes) => loop {
@@ -440,7 +442,7 @@ fn last(result: &Result<Exported, BackupError>, automatic: bool) -> LastBackup {
             error: None,
         },
         Err(error) => LastBackup {
-            at_ms: crate::now_ms(),
+            at_ms: caskade_core::now_ms(),
             automatic,
             path: None,
             bytes: 0,

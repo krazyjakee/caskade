@@ -626,9 +626,9 @@ pub fn run() {
         }
         // Backups (#191–#193): Settings → Backup, automatic backups, and
         // how a restore before this start ended.
-        let backups = caskade_core::backup::Backups::new(store.clone(), setup_paths.clone());
+        let backups = caskade_backup::Backups::new(store.clone(), setup_paths.clone());
         backups.set_settings(settings.clone());
-        backups.set_last_restore(caskade_core::backup::restore::take_outcome(&setup_paths));
+        backups.set_last_restore(caskade_backup::restore::take_outcome(&setup_paths));
         commands::backup::setup(app.handle(), backups);
         // Store accounts (#164): what they own, reconciled with what
         // discovery finds installed after every scan.
@@ -838,10 +838,10 @@ pub fn run() {
             sync.set_presence(presence.clone());
             // Backups kept on a paired device (#243): sent to the chosen
             // one after the changes, and held here for the others.
-            let peer_backups = caskade_core::backup::peers::PeerBackups::new(
+            let peer_backups = caskade_backup::peers::PeerBackups::new(
                 settings.clone(),
                 setup_paths.data.join("peer-backups"),
-                app.state::<caskade_core::backup::Backups>()
+                app.state::<caskade_backup::Backups>()
                     .default_destination(),
             );
             peer_backups.set_devices(devices.clone());

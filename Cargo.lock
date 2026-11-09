@@ -1110,6 +1110,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "caskade-backup"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "caskade-core",
+ "caskade-jobs",
+ "fs2",
+ "schemars 1.2.3",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "specta",
+ "sqlx",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "zip",
+]
+
+[[package]]
 name = "caskade-component-cache"
 version = "0.1.0"
 dependencies = [
@@ -1195,6 +1216,7 @@ name = "caskade-desktop"
 version = "0.1.4"
 dependencies = [
  "arboard",
+ "caskade-backup",
  "caskade-core",
  "caskade-discovery",
  "caskade-emulation-fixtures",

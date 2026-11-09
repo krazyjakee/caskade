@@ -8,7 +8,7 @@ mod achievements;
 pub use achievements::Applied as AchievementsApplied;
 mod artwork_choice;
 mod backup;
-pub(crate) use backup::ARTWORK_HASHES;
+pub use backup::ARTWORK_HASHES;
 mod actions;
 #[cfg(test)]
 mod actions_tests;
