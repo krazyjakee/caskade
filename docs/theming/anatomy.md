@@ -146,6 +146,8 @@ Root: `[data-cs="website"]`
 | `screenshot-console` | `[data-cs="website"] [data-part="screenshot-console"]` | The cropped console screenshot and its link to the full capture. |
 | `screenshot-label` | `[data-cs="website"] [data-part="screenshot-label"]` | A mode label below a screenshot. |
 | `sources` | `[data-cs="website"] [data-part="sources"]` | Examples of supported library sources. |
+| `video` | `[data-cs="website"] [data-part="video"]` | The introductory video and its direct YouTube link. |
+| `video-player` | `[data-cs="website"] [data-part="video-player"]` | A responsive, lazy-loaded YouTube privacy-enhanced embed. |
 | `features` | `[data-cs="website"] [data-part="features"]` | The library, household and emulation feature overview. |
 | `section-heading` | `[data-cs="website"] [data-part="section-heading"]` | A section's introduction and heading. |
 | `feature-grid` | `[data-cs="website"] [data-part="feature-grid"]` | The three feature descriptions. |

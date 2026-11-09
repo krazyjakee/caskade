@@ -58,6 +58,8 @@ export const anatomy = {
       "screenshot-console": "The cropped console screenshot and its link to the full capture.",
       "screenshot-label": "A mode label below a screenshot.",
       sources: "Examples of supported library sources.",
+      video: "The introductory video and its direct YouTube link.",
+      "video-player": "A responsive, lazy-loaded YouTube privacy-enhanced embed.",
       features: "The library, household and emulation feature overview.",
       "section-heading": "A section's introduction and heading.",
       "feature-grid": "The three feature descriptions.",

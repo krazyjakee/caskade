@@ -381,6 +381,23 @@ figcaption {
   font: 400 0.75rem var(--cs-font-sans);
   align-self: center;
 }
+[data-part="video"] {
+  padding-top: var(--cs-site-space);
+}
+[data-part="video-player"] {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  margin-top: 2rem;
+  border: 1px solid var(--cs-color-border-strong);
+  border-radius: var(--cs-radius-panel);
+  background: var(--cs-color-surface-raised);
+}
+[data-part="video"] > p {
+  margin-top: 1rem;
+  text-align: center;
+}
 [data-part="features"],
 [data-part="downloads"] {
   padding-block: var(--cs-site-space);

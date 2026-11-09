@@ -3,7 +3,9 @@
 The public landing page at <https://krazyjakee.github.io/caskade/>. This is a
 static website hosted by GitHub Pages, separate from the desktop webview.
 It needs Node 22 and Python 3 for building and checking; no package installation,
-network access, runtime JavaScript, backend or external font service is required.
+network access, backend or external font service is required to build or check it.
+The page has no first-party runtime JavaScript; its embedded YouTube player loads
+third-party content when viewed.
 
 From the repository root:
 
@@ -39,6 +41,10 @@ Swedish. The generated `dist/` directory is ignored by Git.
 - Download links go to GitHub's latest release page, where visitors choose a
   platform asset. There are no pinned version numbers or guessed filenames.
   Keep the platform caveats aligned with `docs/PRODUCT-SPEC.md`.
+- The video below the introduction uses a responsive, lazy-loaded YouTube
+  privacy-enhanced embed (`youtube-nocookie.com`) with no autoplay and a direct
+  YouTube link. Both languages share the video, with translated headings and
+  accessibility labels. Video playback requires an internet connection.
 
 The offline checker verifies both languages, headings, image alternatives,
 local assets, section anchors, CSS asset URLs and the website anatomy. All local
