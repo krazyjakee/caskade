@@ -39,7 +39,7 @@ jobs:
           key: across-networks-${{ runner.os }}
       - name: Build the tests
         run: |
-          cargo test -p caskade-core --test it --no-run --message-format=json \
+          cargo test -p caskade-share --test it --no-run --message-format=json \
             | jq -r 'select(.executable != null and .target.name == "it") | .executable' \
             | tail -1 > binary
           cat binary

@@ -3,64 +3,51 @@
 //! relay on the internet between them (#10, #11, #17, #20). Each test here is
 //! one process: a device, the relay, or one half of the NAT probe. What each
 //! expects comes from the script, which runs the same tests on networks they
-//! have to fail on, so that passing means something.
+//! have to fail on, so that passing means something. The share scenarios are
+//! in caskade-share's tests, under the same module name.
 
 use std::net::{Ipv4Addr, SocketAddr, UdpSocket};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use async_trait::async_trait;
 use caskade_core::devices::{ConnectionPurpose, DeviceLink, Devices, Reach};
-use caskade_core::install::{JobSnapshot, JobStatus, PeerCopyTarget};
-use caskade_core::launch::LaunchService;
-use caskade_core::model::{
-    Game, GameEdit, GameEntry, GameRuntime, InstallLocation, InstallState, LaunchSpec, TextEdit,
-};
-use caskade_share::{ShareExpiry, ShareReach, ShareState};
-use caskade_sync::testing::{relay_on, relays_at};
+use caskade_core::install::{JobStatus, PeerCopyTarget};
+use caskade_core::model::{Game, GameEdit, TextEdit};
+use caskade_sync::testing::relay_on;
 use caskade_sync::{Admission, Config, EndpointId, Grant, Relays, Session, Sessions, SyncEndpoint};
 use serde_json::json;
 
 use crate::cores::{Core, core_on, core_with, within};
-use crate::lan_unplugged::{Peer, pair_by_code};
+use crate::lan_unplugged::pair_by_code;
+use crate::networks::{
+    MIB, RELAY_ALLOWANCE, add_game, expected, follow, online, patience, plays, reach, relay_bytes,
+    relays,
+};
+use crate::peer::Peer;
 
 const INTERNET: Ipv4Addr = Ipv4Addr::new(203, 0, 113, 1);
 const SECOND_HOST: Ipv4Addr = Ipv4Addr::new(203, 0, 113, 9);
-pub(crate) const MIB: usize = 1024 * 1024;
-/// More than a session's frames and a relay's keepalives come to in a run,
-/// and a sixtieth of the game: a game that passed through the relay shows.
-const RELAY_ALLOWANCE: u64 = MIB as u64;
-
-fn relays() -> Relays {
-    relays_at(&std::env::var("CASKADE_NET_RELAY").expect("run by scripts/two-networks.sh"))
-}
-
-/// The app's reach, with a relay on this internet for n0's and no lookup on
-/// n0's DNS: links carry the relay and the addresses.
-fn reach() -> Reach {
-    Reach {
-        relays: relays(),
-        ip: caskade_sync::Ip::Any { port: None },
-        internet_lookup: false,
-        lan: Some(caskade_sync::lan::SERVICE.to_owned()),
-    }
-}
 
 /// A device that binds what `core.sync` asks for, as the app does, with this
 /// internet's relay for n0's.
 async fn core_following(name: &str) -> Core {
     let relays = relays();
-    core_on(name, move |store, accounts, keys| {
-        Devices::with_reach_from(store, accounts, keys, move |asked: Reach| Reach {
-            relays: match asked.relays {
-                Relays::N0 => relays.clone(),
-                other => other,
-            },
-            internet_lookup: false,
-            ..asked
-        })
-    })
+    core_on(
+        name,
+        move |store, accounts, keys| {
+            Devices::with_reach_from(store, accounts, keys, move |asked: Reach| Reach {
+                relays: match asked.relays {
+                    Relays::N0 => relays.clone(),
+                    other => other,
+                },
+                internet_lookup: false,
+                ..asked
+            })
+        },
+        |_| (),
+    )
     .await
 }
 
@@ -88,133 +75,6 @@ async fn connection(device: &Core, never_relay: bool, port: Option<u16>) {
         );
         tokio::time::sleep(Duration::from_millis(100)).await;
     }
-}
-
-fn expected() -> String {
-    std::env::var("CASKADE_NET_EXPECT").unwrap_or_default()
-}
-
-/// How long a scenario gives something that has to happen. Short in the runs
-/// meant to fail, so they don't take a timeout each.
-fn patience() -> Duration {
-    let seconds = std::env::var("CASKADE_NET_PATIENCE").unwrap_or_default();
-    Duration::from_secs(seconds.parse().unwrap_or(60))
-}
-
-/// Bytes through the relay so far, both ways, as iptables in the internet's
-/// namespace counts them, so iroh's word isn't taken for it.
-fn relay_bytes() -> u64 {
-    let meter = Path::new(&std::env::var("CASKADE_LAN_NOTES").unwrap()).join("relay-bytes");
-    std::fs::read_to_string(meter)
-        .expect("the script keeps the meter")
-        .trim()
-        .parse()
-        .expect("a number")
-}
-
-pub(crate) async fn online(device: &Core) {
-    within("a relay answers", 30, || async {
-        device.devices.status().await.this_device.internet == Some(true)
-    })
-    .await;
-}
-
-/// A Linux game: a program that leaves a mark beside itself when it runs,
-/// and `size` bytes of data.
-pub(crate) async fn add_game(device: &Core, size: usize) -> (String, PathBuf) {
-    use std::os::unix::fs::PermissionsExt as _;
-    let folder = device.dir.path().join("My Games").join("Celeste");
-    std::fs::create_dir_all(folder.join("Content")).unwrap();
-    let program = folder.join("celeste.sh");
-    std::fs::write(
-        &program,
-        "#!/bin/sh\necho played > \"$(dirname \"$0\")/played\"\n",
-    )
-    .unwrap();
-    std::fs::set_permissions(&program, std::fs::Permissions::from_mode(0o755)).unwrap();
-    let data: Vec<u8> = (0..size).map(|i| (i % 253) as u8).collect();
-    std::fs::write(folder.join("Content/Celeste.pak"), data).unwrap();
-    let game = device
-        .store
-        .upsert_game(&Game::new("Celeste"))
-        .await
-        .unwrap();
-    let mut entry = GameEntry::new(&game.id, "manual".to_owned().into(), "celeste");
-    entry.state = InstallState::Installed;
-    entry.location = Some(InstallLocation::External {
-        path: folder.clone(),
-    });
-    entry.launch = Some(LaunchSpec::Executable {
-        path: program,
-        args: Vec::new(),
-        cwd: None,
-        env: Default::default(),
-    });
-    entry.runtime = GameRuntime::Native;
-    let entry = device.store.upsert_entry(&entry).await.unwrap();
-    (entry.id, folder)
-}
-
-/// Shares `entry` for a week once its files are read: its id and link.
-pub(crate) async fn shared(device: &Core, entry: &str) -> (String, String) {
-    let share = device.shares.share(entry, ShareExpiry::Week).await.unwrap();
-    within("the share's files are read", 60, || async {
-        let shares = device.shares.list().await.unwrap();
-        shares
-            .iter()
-            .any(|record| record.id == share.id && record.state == ShareState::Ready)
-    })
-    .await;
-    let link = device.shares.link(&share.id).await.unwrap();
-    (share.id, link)
-}
-
-/// Follows `job` until it ends or `wait` passes, logging what it says.
-pub(crate) async fn follow(device: &Core, job: &str, wait: Duration) -> JobSnapshot {
-    let started = Instant::now();
-    let mut last = String::new();
-    loop {
-        let snapshot = device.install.job(job).unwrap();
-        let progress = snapshot.progress.as_ref();
-        let message = progress.map_or("", |progress| progress.message.as_str());
-        let now = format!("{:?}: {message}", snapshot.status);
-        if now != last {
-            eprintln!("{:.1?} {now}", started.elapsed());
-            last = now;
-        }
-        if snapshot.status.is_finished() || started.elapsed() > wait {
-            return snapshot;
-        }
-        tokio::time::sleep(Duration::from_millis(100)).await;
-    }
-}
-
-/// Plays what `done` installed and checks the program really ran.
-pub(crate) async fn plays(device: &Core, done: &JobSnapshot) {
-    let game = done.game_id.as_ref().expect("a game");
-    let entries = device.store.entries_for_game(game).await.unwrap();
-    let copy = entries
-        .iter()
-        .find(|entry| entry.source_id.as_str() == "caskade-storage")
-        .expect("a managed release");
-    let Some(InstallLocation::Managed { rel_dir, .. }) = &copy.location else {
-        panic!("not managed: {:?}", copy.location)
-    };
-    let installed = device.games.join(rel_dir);
-    let pak = std::fs::read(installed.join("Content/Celeste.pak")).unwrap();
-    assert!(pak.iter().enumerate().all(|(i, b)| *b == (i % 253) as u8));
-    let launches = LaunchService::new(device.store.clone());
-    let session = launches
-        .launch(&copy.id)
-        .await
-        .expect("it starts")
-        .wait()
-        .await
-        .expect("it ends");
-    assert!(session.ended_at_ms.is_some(), "{session:?}");
-    let played = std::fs::read_to_string(installed.join("played")).expect("the program ran");
-    assert_eq!(played.trim(), "played");
-    eprintln!("the game ran, from {}", installed.display());
 }
 
 /// The relay, on the internet, until the script ends it.
@@ -305,137 +165,6 @@ fn nat_probe() {
         }
         other => panic!("no NAT called {other}"),
     }
-}
-
-/// T1, #17: the Desk's share link opened behind another router. The game
-/// arrives directly, nothing of it through the relay, and it plays.
-#[tokio::test(flavor = "multi_thread")]
-#[ignore = "one device of two: scripts/two-networks.sh"]
-async fn share_arrives_and_plays() {
-    let peer = Peer::from_env();
-    let device = core_with(&peer.me, reach()).await;
-    online(&device).await;
-    let size = 32 * MIB;
-    if peer.me == "Desk" {
-        let (entry, _) = add_game(&device, size).await;
-        let (_, link) = shared(&device, &entry).await;
-        peer.say("link", &link);
-        peer.heard("played").await;
-        return;
-    }
-    let link = peer.heard("link").await;
-    let before = relay_bytes();
-    let info = device.shares.inspect(&link).await.unwrap();
-    assert_eq!(info.reach, ShareReach::Direct);
-    let job = device.shares.receive(&link, None).await.unwrap();
-    let done = follow(&device, &job.id, patience()).await;
-    assert_eq!(done.status, JobStatus::Completed, "{done:?}");
-    let through_relay = relay_bytes() - before;
-    eprintln!("{size} bytes of game, {through_relay} bytes through the relay");
-    assert!(through_relay < RELAY_ALLOWANCE, "{through_relay}");
-    plays(&device, &done).await;
-    peer.say("played", "yes");
-}
-
-/// T1's other outcome, #17: with no direct path the job says only a relay
-/// reaches the sharer, and no game passes through it.
-#[tokio::test(flavor = "multi_thread")]
-#[ignore = "one device of two: scripts/two-networks.sh"]
-async fn share_waits_when_only_a_relay_reaches() {
-    let peer = Peer::from_env();
-    let device = core_with(&peer.me, reach()).await;
-    online(&device).await;
-    let size = 32 * MIB;
-    if peer.me == "Desk" {
-        let (entry, _) = add_game(&device, size).await;
-        let (share, link) = shared(&device, &entry).await;
-        peer.say("link", &link);
-        peer.heard("waited").await;
-        let records = device.shares.list().await.unwrap();
-        let record = records.iter().find(|record| record.id == share).unwrap();
-        assert!(
-            record.recipients.iter().all(|who| !who.finished),
-            "{record:?}"
-        );
-        return;
-    }
-    let link = peer.heard("link").await;
-    let before = relay_bytes();
-    let info = device.shares.inspect(&link).await.unwrap();
-    assert_eq!(info.reach, ShareReach::RelayOnly);
-    let job = device.shares.receive(&link, None).await.unwrap();
-    let waiting = follow(&device, &job.id, Duration::from_secs(40)).await;
-    assert!(!waiting.status.is_finished(), "{waiting:?}");
-    let progress = waiting.progress.expect("it says why");
-    assert!(
-        progress.message.contains("Only a relay reaches"),
-        "{progress:?}"
-    );
-    assert_eq!(progress.bytes, 0);
-    let through_relay = relay_bytes() - before;
-    eprintln!("waited 40 s, {through_relay} bytes through the relay of a {size}-byte game");
-    assert!(through_relay < RELAY_ALLOWANCE, "{through_relay}");
-    peer.say("waited", "yes");
-}
-
-/// T2, #17: Stop sharing part-way, across the two routers. `no-stop` is its
-/// control: the same copy left alone finishes, so it's the stop that ends it.
-#[tokio::test(flavor = "multi_thread")]
-#[ignore = "one device of two: scripts/two-networks.sh"]
-async fn stopping_a_share_fails_the_copy_part_way() {
-    let peer = Peer::from_env();
-    let device = core_with(&peer.me, reach()).await;
-    online(&device).await;
-    let leave_it = expected() == "no-stop";
-    let size = 48 * MIB;
-    if peer.me == "Desk" {
-        let (entry, _) = add_game(&device, size).await;
-        let (share, link) = shared(&device, &entry).await;
-        peer.say("link", &link);
-        peer.heard("part-way").await;
-        if !leave_it {
-            device.shares.stop(&share).await.unwrap();
-            peer.say("stopped", "yes");
-        }
-        peer.heard("over").await;
-        return;
-    }
-    let link = peer.heard("link").await;
-    let job = device.shares.receive(&link, None).await.unwrap();
-    within("some of it arrives", 60, || async {
-        device
-            .install
-            .job(&job.id)
-            .and_then(|job| job.progress)
-            .is_some_and(|progress| {
-                progress.bytes > MIB as u64 && progress.bytes < (size / 2) as u64
-            })
-    })
-    .await;
-    peer.say("part-way", "yes");
-    if leave_it {
-        let done = follow(&device, &job.id, patience()).await;
-        assert_eq!(done.status, JobStatus::Completed, "{done:?}");
-        peer.say("over", "yes");
-        return;
-    }
-    peer.heard("stopped").await;
-    let stopped = Instant::now();
-    let done = follow(&device, &job.id, Duration::from_secs(15)).await;
-    assert_eq!(done.status, JobStatus::Failed, "{done:?}");
-    eprintln!("failed {:?} after the stop", stopped.elapsed());
-    assert!(
-        stopped.elapsed() < Duration::from_secs(10),
-        "{:?}",
-        stopped.elapsed()
-    );
-    let reason = done.error.clone().unwrap_or_default();
-    assert!(reason.contains("stopped"), "{reason}");
-    let arrived = done.progress.map_or(0, |progress| progress.bytes);
-    assert!(arrived < size as u64, "it all arrived anyway: {arrived}");
-    let error = device.shares.inspect(&link).await.unwrap_err().to_string();
-    assert!(error.contains("doesn't work any more"), "{error}");
-    peer.say("over", "yes");
 }
 
 /// Pairs the two with a pairing link the Desk makes: it carries the relay.

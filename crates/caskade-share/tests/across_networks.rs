@@ -14,8 +14,9 @@ use caskade_core::devices::Reach;
 use caskade_core::install::JobStatus;
 use caskade_share::ShareState;
 
-use crate::cores::{Core, core_with};
-use crate::two_networks::{MIB, add_game, follow, online, plays, shared};
+use crate::networks::{MIB, add_game, follow, online, plays};
+use crate::shared_cores::{Core, core_with};
+use crate::two_networks::shared;
 
 const SIZE: usize = 256 * MIB;
 /// How far the second copy gets before Stop sharing.
@@ -41,7 +42,7 @@ async fn recipient(device: &Core, share: &str, done: impl Fn(u64, bool) -> bool)
     let deadline = Instant::now() + PATIENCE;
     let mut said = String::new();
     while Instant::now() < deadline {
-        let shares = device.shares.list().await.unwrap();
+        let shares = device.shares().list().await.unwrap();
         let record = shares.iter().find(|record| record.id == share).unwrap();
         for one in &record.recipients {
             let now = format!("{:?}: {} finished={}", record.state, one.done, one.finished);
@@ -73,12 +74,12 @@ async fn sharer() {
 
     let arrived = recipient(&device, &whole, |_, finished| finished).await;
     eprintln!("the whole game arrived: {arrived}");
-    device.shares.stop(&whole).await.unwrap();
+    device.shares().stop(&whole).await.unwrap();
 
     let part_way = recipient(&device, &part, |done, _| done > STOP_AT).await;
     eprintln!("the second copy got part-way: {part_way}");
-    device.shares.stop(&part).await.unwrap();
-    let stopped = device.shares.list().await.unwrap();
+    device.shares().stop(&part).await.unwrap();
+    let stopped = device.shares().list().await.unwrap();
     let stopped = stopped.iter().find(|record| record.id == part).unwrap();
     assert_eq!(stopped.state, ShareState::Stopped);
     // The recipient asks once more, and is refused.
@@ -96,10 +97,10 @@ fn link(line: usize) -> String {
 async fn receives_and_plays() {
     let device = device("Home").await;
     let link = link(0);
-    let info = device.shares.inspect(&link).await.unwrap();
+    let info = device.shares().inspect(&link).await.unwrap();
     eprintln!("reach {:?}, size {:?}", info.reach, info.size);
     let started = Instant::now();
-    let job = device.shares.receive(&link, None).await.unwrap();
+    let job = device.shares().receive(&link, None).await.unwrap();
     let done = follow(&device, &job.id, PATIENCE).await;
     assert_eq!(done.status, JobStatus::Completed, "{done:?}");
     let seconds = started.elapsed().as_secs_f64();
@@ -114,7 +115,7 @@ async fn receives_and_plays() {
 async fn a_stop_fails_the_copy() {
     let device = device("Home").await;
     let link = link(1);
-    let job = device.shares.receive(&link, None).await.unwrap();
+    let job = device.shares().receive(&link, None).await.unwrap();
     let done = follow(&device, &job.id, PATIENCE).await;
     assert_eq!(done.status, JobStatus::Failed, "{done:?}");
     let reason = done.error.clone().unwrap_or_default();
@@ -122,6 +123,11 @@ async fn a_stop_fails_the_copy() {
     let arrived = done.progress.map_or(0, |progress| progress.bytes);
     assert!(arrived < SIZE as u64, "it all arrived anyway: {arrived}");
     eprintln!("failed at {arrived} bytes: {reason}");
-    let error = device.shares.inspect(&link).await.unwrap_err().to_string();
+    let error = device
+        .shares()
+        .inspect(&link)
+        .await
+        .unwrap_err()
+        .to_string();
     assert!(error.contains("doesn't work any more"), "{error}");
 }

@@ -2,8 +2,11 @@
 //! settings, device key and storage, connected on loopback (or through a
 //! local relay, `core_with`): what the devices, sync, copy, send, play-there
 //! and share tests start from. Nothing here reaches the internet.
+//!
+//! caskade-share's tests include this file and give each core a share
+//! service (`core_serving`), so caskade-core doesn't build caskade-share.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -20,11 +23,11 @@ use caskade_core::sync::SyncService;
 use caskade_core::transfer::Transfers;
 use caskade_installer::manifest::RootManifest;
 use caskade_installer::pipeline::input;
-use caskade_share::Shares;
 
 /// One device: its library, its device service started, copies and an
-/// install service with a storage root of its own.
-pub struct Core {
+/// install service with a storage root of its own, and `X`: a service of
+/// another crate's, served with the endpoint.
+pub struct Core<X = ()> {
     pub store: LibraryStore,
     pub artwork: ArtworkCache,
     pub devices: Devices,
@@ -33,13 +36,9 @@ pub struct Core {
     pub account: String,
     pub transfers: Transfers,
     pub install: InstallService,
-    /// One-off shares, both ways (#246, #248). Read by the Unix-only
-    /// network scenarios here and by caskade-share's tests.
-    #[cfg_attr(
-        windows,
-        allow(dead_code, reason = "the scenarios that read it run on Unix")
-    )]
-    pub shares: Shares,
+    /// What `core_serving` set up before the endpoint started.
+    #[allow(dead_code, reason = "caskade-share's tests read it")]
+    pub extra: X,
     /// The storage root installs land in.
     pub games: PathBuf,
     /// Where its device key is, for starting it again.
@@ -47,7 +46,19 @@ pub struct Core {
     pub dir: tempfile::TempDir,
 }
 
-impl Core {
+/// What a core lends the service `core_serving` sets up, before its
+/// endpoint starts: a protocol served with the endpoint is registered then.
+#[allow(dead_code, reason = "caskade-share's tests read them")]
+pub struct Setup<'a> {
+    pub store: &'a LibraryStore,
+    pub devices: &'a Devices,
+    pub transfers: &'a Transfers,
+    pub install: &'a InstallService,
+    /// The cache directory the copies use.
+    pub cache: &'a Path,
+}
+
+impl<X> Core<X> {
     /// This device's id.
     pub async fn id(&self) -> String {
         self.devices.status().await.this_device.id.unwrap()
@@ -71,18 +82,31 @@ pub async fn core(name: &str) -> Core {
 /// A device named `name` reached as `reach` says (loopback, a local relay),
 /// with Hades (Steam) discovered.
 pub async fn core_with(name: &str, reach: Reach) -> Core {
-    core_on(name, move |store, accounts, keys| {
-        Devices::with_reach(store, accounts, keys, reach)
-    })
+    core_serving(name, reach, |_| ()).await
+}
+
+/// A device named `name` reached as `reach` says, serving what `extra` sets
+/// up, with Hades (Steam) discovered.
+pub async fn core_serving<X>(
+    name: &str,
+    reach: Reach,
+    extra: impl FnOnce(Setup<'_>) -> X,
+) -> Core<X> {
+    core_on(
+        name,
+        move |store, accounts, keys| Devices::with_reach(store, accounts, keys, reach),
+        extra,
+    )
     .await
 }
 
-/// A device named `name` whose device service `devices` makes, with Hades
-/// (Steam) discovered.
-pub async fn core_on(
+/// A device named `name` whose device service `devices` makes, serving what
+/// `extra` sets up, with Hades (Steam) discovered.
+pub async fn core_on<X>(
     name: &str,
     devices: impl FnOnce(LibraryStore, AccountService, Arc<MemoryKeyStore>) -> Devices,
-) -> Core {
+    extra: impl FnOnce(Setup<'_>) -> X,
+) -> Core<X> {
     let dir = tempfile::tempdir().unwrap();
     let store = LibraryStore::in_memory().await.unwrap();
     let accounts = AccountService::open(store.clone(), Bus::default())
@@ -115,18 +139,18 @@ pub async fn core_on(
     )
     .with_settings(settings.clone())
     .with_host(input::host(Some("linux")).unwrap());
-    // Copies and shares are served with the endpoint: set up before it starts.
+    // Copies and `extra` are served with the endpoint: set up before it starts.
     let transfers = Transfers::new(store.clone(), devices.clone(), &cache)
         .await
         .unwrap();
     install.set_peer_fetcher(Arc::new(transfers.clone()));
-    let shares = Shares::new(
-        store.clone(),
-        devices.clone(),
-        transfers.clone(),
-        install.clone(),
-        &cache,
-    );
+    let extra = extra(Setup {
+        store: &store,
+        devices: &devices,
+        transfers: &transfers,
+        install: &install,
+        cache: &cache,
+    });
     devices.start();
     let core = Core {
         artwork: ArtworkCache::new(dir.path().join("artwork")).unwrap(),
@@ -136,7 +160,7 @@ pub async fn core_on(
         account,
         transfers,
         install,
-        shares,
+        extra,
         games,
         keys,
         dir,

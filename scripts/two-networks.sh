@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Runs the scenarios in crates/caskade-core/tests/two_networks.rs: each device
+# Runs the scenarios in crates/caskade-core/tests/two_networks.rs and, for
+# shares, crates/caskade-share/tests/two_networks.rs: each device
 # is a process in a network namespace of its own, behind a router namespace
 # doing NAT, with this namespace as the internet (a bridge, and a real iroh
 # relay on it). It needs no root (user namespaces) and touches nothing
@@ -13,19 +14,29 @@ set -euo pipefail
 
 if [ "${1:-}" != --inside ]; then
   cd "$(dirname "$0")/.."
-  built=$(flock /tmp/caskade-heavy.lock cargo test -p caskade-core --test it --no-run 2>&1) \
-    || { echo "$built"; exit 1; }
-  binary=$(sed -n 's/.*Executable .*(\(.*\))$/\1/p' <<<"$built" | tail -1)
-  [ -n "$binary" ] || { echo "$built"; exit 1; }
-  exec unshare -rn "$0" --inside "$(realpath "$binary")" "$@"
+  # it <crate>: builds the crate's test binary and prints its path.
+  it() {
+    local built binary
+    built=$(flock /tmp/caskade-heavy.lock cargo test -p "$1" --test it --no-run 2>&1) \
+      || { echo "$built" >&2; return 1; }
+    binary=$(sed -n 's/.*Executable .*(\(.*\))$/\1/p' <<<"$built" | tail -1)
+    [ -n "$binary" ] || { echo "$built" >&2; return 1; }
+    realpath "$binary"
+  }
+  core=$(it caskade-core)
+  share=$(it caskade-share)
+  exec unshare -rn "$0" --inside "$core" "$share" "$@"
 fi
 shift
 run=$(mktemp -d)
 trap 'kill $(jobs -p) 2>/dev/null || true; rm -rf "$run"' EXIT
-# A copy: other work on this checkout may rebuild it during the run.
+# Copies: other work on this checkout may rebuild them during the run. The
+# share scenarios are caskade-share's, the rest caskade-core's.
 binary=$run/it
+share_binary=$run/share-it
 cp "$1" "$binary"
-shift
+cp "$2" "$share_binary"
+shift 2
 
 ip link set lo up
 ip link add wan0 type bridge mcast_snooping 0
@@ -111,12 +122,15 @@ on_wan() {
 
 # start_test <namespace pid> <name> <other> <test>: one device's half; $!.
 start_test() {
-  local pid=$1 me=$2 other=$3 test=$4
+  local pid=$1 me=$2 other=$3 test=$4 runs=$binary
+  case $test in
+    share_* | stopping_a_share_*) runs=$share_binary ;;
+  esac
   env CASKADE_LAN_ME=$me CASKADE_LAN_OTHER=$other CASKADE_LAN_NOTES=$run/notes \
     "CASKADE_NET_RELAY=${relay_at:-}" "CASKADE_NET_EXPECT=${expect:-}" \
     "CASKADE_NET_PATIENCE=${patience:-}" ${fixed_port:+CASKADE_NET_PORT=$fixed_port} \
     ${only_desk:+CASKADE_NET_ONLY_DESK=1} \
-    nsenter -t "$pid" -n timeout 280 "$binary" --exact --ignored --nocapture "two_networks::$test" \
+    nsenter -t "$pid" -n timeout 280 "$runs" --exact --ignored --nocapture "two_networks::$test" \
     > >(grep --line-buffered -vE '^(running 1 test|test .* has been running.*|note: run with.*|failures:.*| *two_networks::.*|)$' \
       | sed -u "s/^/  [$me] /" | tee -a "$run/log") 2>&1 &
 }

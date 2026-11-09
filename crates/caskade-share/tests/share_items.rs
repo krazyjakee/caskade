@@ -30,7 +30,8 @@ use caskade_share::{
 };
 use wiremock::{Mock, MockServer, ResponseTemplate, matchers::method};
 
-use crate::cores::{Core, core, within};
+use crate::cores::within;
+use crate::shared_cores::{Core, core};
 
 async fn manifest_server() -> MockServer {
     let server = MockServer::start().await;
@@ -46,12 +47,12 @@ async fn manifest_server() -> MockServer {
 /// The link of `item` shared by `core`, once its files are read.
 async fn link(core: &Core, item: ShareItem) -> String {
     let share = core
-        .shares
+        .shares()
         .share_item(item, ShareExpiry::Day, &core.account)
         .await
         .unwrap();
     within("the share is ready", 30, || async {
-        core.shares
+        core.shares()
             .list()
             .await
             .unwrap()
@@ -59,12 +60,12 @@ async fn link(core: &Core, item: ShareItem) -> String {
             .any(|s| s.id == share.id && s.state == ShareState::Ready)
     })
     .await;
-    core.shares.link(&share.id).await.unwrap()
+    core.shares().link(&share.id).await.unwrap()
 }
 
 /// Receives `link` on `core` and waits for its job to end.
 async fn receive(core: &Core, link: &str) -> JobSnapshot {
-    let job = core.shares.receive(link, None).await.unwrap();
+    let job = core.shares().receive(link, None).await.unwrap();
     within("the share arrives", 60, || async {
         core.install
             .job(&job.id)
@@ -105,7 +106,7 @@ async fn with_saves(core: &Core, manifest: &MockServer) -> (SaveVersions, String
     versions.set_settings(core.settings.clone());
     let account = core.account.clone();
     versions.set_account(move || Some(account.clone()));
-    core.shares.set_saves(versions.clone());
+    core.shares().set_saves(versions.clone());
     (versions, entry.id, base.join("title-saves/slot1.sav"))
 }
 
@@ -137,7 +138,7 @@ async fn a_shared_save_is_a_new_version_and_never_replaces_one_without_asking() 
         },
     )
     .await;
-    let info = sam.shares.inspect(&link).await.unwrap();
+    let info = sam.shares().inspect(&link).await.unwrap();
     assert_eq!(info.kind, "save");
     let ShareContents::Save { game, here, files } = info.contents else {
         panic!("a save: {:?}", info.contents);
@@ -214,7 +215,7 @@ async fn a_web_games_offline_copy_becomes_the_recipients_offline_copy() {
     alex.store.upsert_entry(&entry).await.unwrap();
 
     let link = link(&alex, ShareItem::Web { game_id: game.id }).await;
-    let info = sam.shares.inspect(&link).await.unwrap();
+    let info = sam.shares().inspect(&link).await.unwrap();
     assert!(
         matches!(&info.contents, ShareContents::Web { url: shared, here: None } if shared == url),
         "{:?}",
@@ -312,8 +313,8 @@ async fn the_rom_game(core: &Core, job: &JobSnapshot) -> GameEntry {
 async fn a_rom_arrives_with_its_platform_and_emulator_profile() {
     let (alex, sam, kim) = (core("Alex").await, core("Sam").await, core("Kim").await);
     let installs = Arc::new(Installs::default());
-    sam.shares.set_emulator_installer(installs.clone());
-    kim.shares.set_emulator_installer(installs.clone());
+    sam.shares().set_emulator_installer(installs.clone());
+    kim.shares().set_emulator_installer(installs.clone());
     let (emulator, profile) = mgba(&alex).await;
     alex.store
         .set_platform_settings(&PlatformSettings {
@@ -340,7 +341,7 @@ async fn a_rom_arrives_with_its_platform_and_emulator_profile() {
     let entry = alex.store.upsert_entry(&entry).await.unwrap();
 
     let link = link(&alex, ShareItem::Rom { entry_id: entry.id }).await;
-    let info = sam.shares.inspect(&link).await.unwrap();
+    let info = sam.shares().inspect(&link).await.unwrap();
     assert_eq!(
         info.contents,
         ShareContents::Rom {
@@ -461,7 +462,7 @@ async fn a_collection_arrives_as_a_list_showing_what_the_recipient_has() {
         },
     )
     .await;
-    let info = sam.shares.inspect(&link).await.unwrap();
+    let info = sam.shares().inspect(&link).await.unwrap();
     let ShareContents::Collection { name, games } = info.contents else {
         panic!("a collection: {:?}", info.contents);
     };
@@ -480,7 +481,7 @@ async fn a_collection_arrives_as_a_list_showing_what_the_recipient_has() {
     );
     // Nothing to download: no job, and the list is a collection of Sam's.
     let received = sam
-        .shares
+        .shares()
         .receive_collection(&link, &sam.account)
         .await
         .unwrap();

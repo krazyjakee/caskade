@@ -1202,7 +1202,6 @@ dependencies = [
  "caskade-i18n",
  "caskade-installer",
  "caskade-jobs",
- "caskade-share",
  "caskade-sync",
  "caskade-theme",
  "crc32fast",
