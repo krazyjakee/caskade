@@ -191,7 +191,7 @@ impl Database {
         ))
     }
     fn finish(
-        connection: Connection,
+        mut connection: Connection,
         snapshot: Option<tempfile::TempDir>,
         limits: DatabaseLimits,
     ) -> Result<Self> {
@@ -249,7 +249,6 @@ impl Database {
         }
         let columns = statement
             .column_names()
-            .into_iter()
             .map(|s| s.to_string())
             .collect::<Vec<_>>();
         let mut cursor = statement.query(rusqlite::params_from_iter(params))?;

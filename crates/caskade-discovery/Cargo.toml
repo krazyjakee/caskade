@@ -59,7 +59,7 @@ sha1 = "0.10.6"
 directories = "6"
 sysinfo = { version = "=0.38.4", default-features = false, features = ["disk"] }
 notify = { version = "8", default-features = false, features = ["macos_kqueue"], optional = true }
-rusqlite = { version = "0.39", features = ["bundled", "hooks", "limits"], optional = true }
+rusqlite = { version = "0.41", features = ["bundled", "hooks", "limits"], optional = true }
 clap = { version = "4", features = ["derive"], optional = true }
 tracing-subscriber = { version = "0.3", features = ["env-filter"], optional = true }
 

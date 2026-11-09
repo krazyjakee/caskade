@@ -59,3 +59,13 @@ unsafe_code = "forbid"
 [patch.crates-io]
 inno = { path = "vendor/inno-0.7.1" }
 innospect = { path = "vendor/innospect-0.2.0" }
+# sqlx 0.9.0 caps libsqlite3-sys below 0.38, whose bundled SQLite (< 3.54)
+# has RUSTSEC-2026-0459. Upstream main allows 0.39 (launchbadge/sqlx#4502);
+# drop these for the first release after 0.9.0 that does.
+sqlx = { git = "https://github.com/launchbadge/sqlx", rev = "10462fa4414c6c7f1ed1d39bb31678e3b726878c" }
+sqlx-core = { git = "https://github.com/launchbadge/sqlx", rev = "10462fa4414c6c7f1ed1d39bb31678e3b726878c" }
+sqlx-macros = { git = "https://github.com/launchbadge/sqlx", rev = "10462fa4414c6c7f1ed1d39bb31678e3b726878c" }
+sqlx-macros-core = { git = "https://github.com/launchbadge/sqlx", rev = "10462fa4414c6c7f1ed1d39bb31678e3b726878c" }
+sqlx-mysql = { git = "https://github.com/launchbadge/sqlx", rev = "10462fa4414c6c7f1ed1d39bb31678e3b726878c" }
+sqlx-postgres = { git = "https://github.com/launchbadge/sqlx", rev = "10462fa4414c6c7f1ed1d39bb31678e3b726878c" }
+sqlx-sqlite = { git = "https://github.com/launchbadge/sqlx", rev = "10462fa4414c6c7f1ed1d39bb31678e3b726878c" }
