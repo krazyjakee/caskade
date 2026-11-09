@@ -7,7 +7,7 @@ use super::{
     AddonKind, AddonOs, AppMode, CATALOGUE_FORMAT, Catalogue, CatalogueArtifact, CatalogueEntry,
     CatalogueMedia, CatalogueProblem, CatalogueRelease,
 };
-use crate::{Error, Result};
+use caskade_core::{Error, Result};
 use serde_json::{Map, Value};
 use std::collections::HashSet;
 use url::Url;
@@ -245,7 +245,7 @@ fn release(
     let published = match text(record, "published", 10, false)? {
         date if date.is_empty() => None,
         date => {
-            crate::model::validation::validate_date(&date)
+            caskade_core::model::validation::validate_date(&date)
                 .map_err(|_| format!("published date “{date}” isn't YYYY-MM-DD"))?;
             Some(date)
         }
@@ -377,25 +377,25 @@ fn entry(
 /// it resolve against `base`).
 pub fn parse(bytes: &[u8], base: &Url) -> Result<Catalogue> {
     if bytes.len() > MAX_CATALOGUE_BYTES {
-        return Err(Error::Invalid(crate::tr!(
+        return Err(Error::Invalid(caskade_core::tr!(
             "the catalogue is larger than {mib} MiB",
             mib = MAX_CATALOGUE_BYTES >> 20
         )));
     }
     let document: Value = serde_json::from_slice(bytes)
-        .map_err(|_| Error::Invalid(crate::tr!("the catalogue isn't readable JSON")))?;
+        .map_err(|_| Error::Invalid(caskade_core::tr!("the catalogue isn't readable JSON")))?;
     let Some(document) = document.as_object() else {
-        return Err(Error::Invalid(crate::tr!(
+        return Err(Error::Invalid(caskade_core::tr!(
             "the catalogue isn't readable JSON"
         )));
     };
     if document.get("format").and_then(Value::as_u64) != Some(u64::from(CATALOGUE_FORMAT)) {
-        return Err(Error::Invalid(crate::tr!(
+        return Err(Error::Invalid(caskade_core::tr!(
             "the catalogue is in a format this Caskade can't read; update Caskade"
         )));
     }
     let Some(Value::Array(packages)) = document.get("packages") else {
-        return Err(Error::Invalid(crate::tr!(
+        return Err(Error::Invalid(caskade_core::tr!(
             "the catalogue lists no packages"
         )));
     };

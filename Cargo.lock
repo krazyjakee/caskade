@@ -1134,6 +1134,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "caskade-addons"
+version = "0.1.0"
+dependencies = [
+ "caskade-core",
+ "image",
+ "minisign",
+ "minisign-verify",
+ "reqwest 0.12.28",
+ "semver",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "specta",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "url",
+ "wiremock",
+ "zip",
+]
+
+[[package]]
 name = "caskade-backup"
 version = "0.1.0"
 dependencies = [
@@ -1179,6 +1202,7 @@ dependencies = [
  "caskade-i18n",
  "caskade-installer",
  "caskade-jobs",
+ "caskade-share",
  "caskade-sync",
  "caskade-theme",
  "crc32fast",
@@ -1195,8 +1219,6 @@ dependencies = [
  "keyring",
  "log",
  "md-5 0.10.6",
- "minisign",
- "minisign-verify",
  "netdev 0.46.3",
  "notify",
  "percent-encoding",
@@ -1204,7 +1226,6 @@ dependencies = [
  "reqwest 0.12.28",
  "schemars 1.2.3",
  "scraper",
- "semver",
  "serde",
  "serde_json",
  "serde_yaml_ng",
@@ -1233,6 +1254,7 @@ version = "0.1.4"
 dependencies = [
  "arboard",
  "caskade-achievements",
+ "caskade-addons",
  "caskade-backup",
  "caskade-core",
  "caskade-discovery",
@@ -1240,8 +1262,10 @@ dependencies = [
  "caskade-input",
  "caskade-malloc",
  "caskade-plugin-host",
+ "caskade-share",
  "caskade-sources",
  "caskade-streaming",
+ "caskade-system-stats",
  "caskade-webview2",
  "gdkx11",
  "gtk",
@@ -1496,6 +1520,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "caskade-share"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "caskade-core",
+ "caskade-discovery",
+ "caskade-installer",
+ "caskade-sync",
+ "fs2",
+ "serde",
+ "serde_json",
+ "specta",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "wiremock",
+]
+
+[[package]]
 name = "caskade-sources"
 version = "0.1.0"
 dependencies = [
@@ -1576,6 +1620,19 @@ dependencies = [
  "subtle",
  "tempfile",
  "thiserror 2.0.21",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "caskade-system-stats"
+version = "0.1.0"
+dependencies = [
+ "caskade-core",
+ "serde",
+ "specta",
+ "sysinfo",
+ "tempfile",
  "tokio",
  "tracing",
 ]

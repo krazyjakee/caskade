@@ -264,7 +264,7 @@ fn a_swap_commits_rolls_back_and_survives_a_crash() {
 
 #[tokio::test]
 async fn records_persist_in_the_library() {
-    let store = crate::db::LibraryStore::in_memory().await.unwrap();
+    let store = caskade_core::db::LibraryStore::in_memory().await.unwrap();
     assert_eq!(
         AddonRecords::load(&store).await.unwrap(),
         AddonRecords::default()

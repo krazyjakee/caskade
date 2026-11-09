@@ -42,10 +42,6 @@ mod save_locations;
 #[cfg(feature = "net")]
 mod save_sync;
 mod save_versions;
-#[cfg(feature = "net")]
-mod share_items;
-#[cfg(feature = "net")]
-mod shares;
 mod sync_carried;
 mod sync_games;
 mod sync_log;

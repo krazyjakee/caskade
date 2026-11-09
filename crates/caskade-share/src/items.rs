@@ -29,17 +29,17 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use super::{ShareExpiry, ShareRecord, Shares};
-use crate::db::{LibraryStore, ShareRow};
-use crate::install::Placed;
-use crate::metadata::{Applied, IgdbMatch, MatchSource};
-use crate::model::{
+use caskade_core::db::{LibraryStore, ShareRow};
+use caskade_core::install::Placed;
+use caskade_core::metadata::{Applied, IgdbMatch, MatchSource};
+use caskade_core::model::{
     Collection, CollectionKind, GameEntry, InstallLocation, InstallState, LaunchSpec,
     SaveCollection,
 };
-use crate::saves::versions::{ManifestFile, SaveVersions};
-pub use crate::transfer::rom::EmulatorInstaller;
-use crate::transfer::rom::{self, RomCopy};
-use crate::{Error, Result};
+use caskade_core::saves::versions::{ManifestFile, SaveVersions};
+pub use caskade_core::transfer::rom::EmulatorInstaller;
+use caskade_core::transfer::rom::{self, RomCopy};
+use caskade_core::{Error, Result};
 
 /// The most games a shared collection lists.
 pub(super) const MAX_GAMES: usize = 1000;
@@ -166,7 +166,7 @@ impl Details {
                     && files.len() <= 20_000
                     && files.iter().all(|file| blob_name(&file.hash).is_some())
             }
-            Self::Web { url } => crate::web::page_url(url).is_ok(),
+            Self::Web { url } => caskade_core::web::page_url(url).is_ok(),
             Self::Rom(rom) => rom.sound(),
             Self::Collection { games, .. } => games.len() <= MAX_GAMES,
         };
@@ -224,7 +224,7 @@ async fn found_or_made(store: &LibraryStore, identity: &Value) -> Result<(String
                 igdb_id: Some(igdb),
                 source: MatchSource::Manual,
                 pending: true,
-                checked_at_ms: crate::now_ms(),
+                checked_at_ms: caskade_core::now_ms(),
                 dumps: String::new(),
                 applied: Applied::default(),
             })
@@ -257,7 +257,7 @@ impl Shares {
             .items
             .saves
             .get()
-            .ok_or_else(|| Error::Invalid(crate::tr!("saves aren't available")))
+            .ok_or_else(|| Error::Invalid(caskade_core::tr!("saves aren't available")))
     }
 
     /// Where a share's files are put together on this device.
@@ -278,14 +278,13 @@ impl Shares {
         let (kind, title, game_id, entry_id, size, details) = match item {
             ShareItem::Save { version_id } => {
                 let saves = self.saves()?;
-                let version = store
-                    .save_version(&version_id)
-                    .await?
-                    .ok_or_else(|| Error::Invalid(crate::tr!("that save isn't here any more")))?;
+                let version = store.save_version(&version_id).await?.ok_or_else(|| {
+                    Error::Invalid(caskade_core::tr!("that save isn't here any more"))
+                })?;
                 let files: Vec<ManifestFile> = saves
                     .files(&version)
                     .ok_or_else(|| {
-                        Error::Invalid(crate::tr!(
+                        Error::Invalid(caskade_core::tr!(
                             "that save's files haven't all arrived on this device"
                         ))
                     })?
@@ -294,14 +293,14 @@ impl Shares {
                     .filter(|file| !file.root.is_empty())
                     .collect();
                 if files.is_empty() {
-                    return Err(Error::Invalid(crate::tr!(
+                    return Err(Error::Invalid(caskade_core::tr!(
                         "that save's files are only where this device keeps them, so they can't go elsewhere"
                     )));
                 }
                 let game = store
                     .game_identity(&version.game_id)
                     .await?
-                    .ok_or_else(|| crate::db::missing("game", &version.game_id))?;
+                    .ok_or_else(|| caskade_core::db::missing("game", &version.game_id))?;
                 let size = files.iter().map(|file| file.size).sum::<u64>();
                 (
                     "save",
@@ -315,7 +314,7 @@ impl Shares {
             ShareItem::Web { game_id } => {
                 let (entry, _) = self.offline_copy(&game_id).await?;
                 let Some(LaunchSpec::Web { url }) = &entry.launch else {
-                    return Err(Error::Invalid(crate::tr!("that isn't a web game")));
+                    return Err(Error::Invalid(caskade_core::tr!("that isn't a web game")));
                 };
                 let title = store
                     .game(&game_id)
@@ -356,7 +355,7 @@ impl Shares {
                 let collection = store
                     .get_collection(account, &collection_id)
                     .await?
-                    .ok_or_else(|| crate::db::missing("collection", &collection_id))?;
+                    .ok_or_else(|| caskade_core::db::missing("collection", &collection_id))?;
                 let ids = match &collection.kind {
                     CollectionKind::Manual => collection.game_ids.clone(),
                     CollectionKind::Smart { query } => {
@@ -389,9 +388,9 @@ impl Shares {
                 )
             }
         };
-        let now = crate::now_ms();
+        let now = caskade_core::now_ms();
         let row = ShareRow {
-            id: crate::model::new_id(),
+            id: caskade_core::model::new_id(),
             kind: kind.into(),
             game_id,
             entry_id,
@@ -420,20 +419,19 @@ impl Shares {
             .entries_for_game(game_id)
             .await?
             .into_iter()
-            .find(|entry| entry.source_id == crate::web::WEB_SOURCE)
-            .ok_or_else(|| Error::Invalid(crate::tr!("that isn't a web game")))?;
+            .find(|entry| entry.source_id == caskade_core::web::WEB_SOURCE)
+            .ok_or_else(|| Error::Invalid(caskade_core::tr!("that isn't a web game")))?;
         let Some(InstallLocation::Managed { root_id, rel_dir }) = &entry.location else {
-            return Err(Error::Invalid(crate::tr!(
+            return Err(Error::Invalid(caskade_core::tr!(
                 "save it for offline play first: only an offline copy can be shared"
             )));
         };
-        let root = store
-            .get_root(root_id)
-            .await?
-            .ok_or_else(|| Error::Invalid(crate::tr!("the game's storage isn't available")))?;
+        let root = store.get_root(root_id).await?.ok_or_else(|| {
+            Error::Invalid(caskade_core::tr!("the game's storage isn't available"))
+        })?;
         let folder = root.path.join(rel_dir);
-        if !folder.join(crate::web::bundle::MANIFEST).is_file() {
-            return Err(Error::Invalid(crate::tr!(
+        if !folder.join(caskade_core::web::bundle::MANIFEST).is_file() {
+            return Err(Error::Invalid(caskade_core::tr!(
                 "the offline copy's files aren't there"
             )));
         }
@@ -445,15 +443,16 @@ impl Shares {
     /// put together under [`Shares::outgoing`] (linked where the disk
     /// allows), the offline copy's folder is offered as it is.
     pub(super) async fn staged(&self, row: &ShareRow) -> Result<Option<PathBuf>> {
-        let details = Details::parse(&row.details_json)
-            .ok_or_else(|| Error::Invalid(crate::tr!("this share's description is damaged")))?;
+        let details = Details::parse(&row.details_json).ok_or_else(|| {
+            Error::Invalid(caskade_core::tr!("this share's description is damaged"))
+        })?;
         match details {
             Details::Collection { .. } => Ok(None),
             Details::Web { .. } => {
                 let game = row
                     .game_id
                     .as_deref()
-                    .ok_or_else(|| Error::Invalid(crate::tr!("this share has no game")))?;
+                    .ok_or_else(|| Error::Invalid(caskade_core::tr!("this share has no game")))?;
                 Ok(Some(self.offline_copy(game).await?.1))
             }
             Details::Save { files, .. } => {
@@ -461,14 +460,14 @@ impl Shares {
                 let mut sources = Vec::new();
                 for file in &files {
                     let name = blob_name(&file.hash).ok_or_else(|| {
-                        Error::Invalid(crate::tr!("this share's description is damaged"))
+                        Error::Invalid(caskade_core::tr!("this share's description is damaged"))
                     })?;
                     let path = saves
                         .blobs()
                         .path(&file.hash)
                         .filter(|path| path.is_file())
                         .ok_or_else(|| {
-                            Error::Invalid(crate::tr!(
+                            Error::Invalid(caskade_core::tr!(
                                 "a file of that save isn't on this device any more"
                             ))
                         })?;
@@ -480,7 +479,7 @@ impl Shares {
                 let entry = row
                     .entry_id
                     .as_deref()
-                    .ok_or_else(|| Error::Invalid(crate::tr!("this share has no game")))?;
+                    .ok_or_else(|| Error::Invalid(caskade_core::tr!("this share has no game")))?;
                 let (_, _, sources) = rom::describe(&self.inner.store, entry).await?;
                 self.put_together(&row.id, sources).await.map(Some)
             }
@@ -510,7 +509,7 @@ impl Shares {
             Some(Details::Web { url }) => ShareContents::Web {
                 url: url.clone(),
                 here: store
-                    .entry_by_source(crate::web::WEB_SOURCE.as_str(), url)
+                    .entry_by_source(caskade_core::web::WEB_SOURCE.as_str(), url)
                     .await?
                     .map(|entry| entry.game_id),
             },
@@ -557,7 +556,7 @@ impl Shares {
     ) -> Result<Placed> {
         let store = &self.inner.store;
         match details {
-            Details::Collection { .. } => Err(Error::Invalid(crate::tr!(
+            Details::Collection { .. } => Err(Error::Invalid(caskade_core::tr!(
                 "a collection has no files to receive"
             ))),
             Details::Save { game, files } => {
@@ -565,7 +564,7 @@ impl Shares {
                 let mut arrived = Vec::with_capacity(files.len());
                 for file in files {
                     let name = blob_name(&file.hash).ok_or_else(|| {
-                        Error::Invalid(crate::tr!("this share's description is damaged"))
+                        Error::Invalid(caskade_core::tr!("this share's description is damaged"))
                     })?;
                     arrived.push((file.clone(), folder.join(name)));
                 }
@@ -574,7 +573,7 @@ impl Shares {
                 Ok(Placed { game_id, added })
             }
             Details::Web { url } => {
-                crate::transfer::web::place(store, url, folder, root, title, None).await
+                caskade_core::transfer::web::place(store, url, folder, root, title, None).await
             }
             Details::Rom(copy) => {
                 rom::place(
@@ -602,7 +601,7 @@ impl Shares {
             games,
         }) = details
         else {
-            return Err(Error::Invalid(crate::tr!(
+            return Err(Error::Invalid(caskade_core::tr!(
                 "that link doesn't share a collection"
             )));
         };
@@ -615,7 +614,7 @@ impl Shares {
             }
         }
         let description = if description.trim().is_empty() {
-            crate::tr!("Shared by {sharer}", sharer = info.sharer)
+            caskade_core::tr!("Shared by {sharer}", sharer = info.sharer)
         } else {
             description
         };
@@ -643,6 +642,6 @@ impl Shares {
         store
             .get_collection(account, &collection.id)
             .await?
-            .ok_or_else(|| crate::db::missing("collection", &collection.id))
+            .ok_or_else(|| caskade_core::db::missing("collection", &collection.id))
     }
 }

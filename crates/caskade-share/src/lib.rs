@@ -42,11 +42,11 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::{broadcast, mpsc, watch};
 use tokio_util::sync::CancellationToken;
 
-use crate::db::{LibraryStore, ShareRow};
-use crate::devices::Devices;
-use crate::install::InstallService;
-use crate::transfer::Transfers;
-use crate::{Error, Result, lock};
+use caskade_core::db::{LibraryStore, ShareRow};
+use caskade_core::devices::Devices;
+use caskade_core::install::InstallService;
+use caskade_core::transfer::Transfers;
+use caskade_core::{Error, Result, lock};
 
 pub use items::{EmulatorInstaller, GameHere, ShareContents, ShareItem, SharedGame};
 pub use receive::{ReceivedShare, ShareInfo, ShareReach};
@@ -177,7 +177,7 @@ struct Inner {
     received: Mutex<HashMap<String, receive::Received>>,
     changed: broadcast::Sender<()>,
     /// Where someone receiving a share is announced (a notification).
-    bus: std::sync::OnceLock<crate::bus::Bus>,
+    bus: std::sync::OnceLock<caskade_core::bus::Bus>,
     /// Saves and emulator setup, for what else is shared (#248).
     items: items::Parts,
 }
@@ -220,7 +220,7 @@ impl Shares {
     /// Runs the shares that were running when Caskade last quit: their
     /// files are read again in the background, and their links work again.
     pub async fn resume(&self) -> Result<()> {
-        let now = crate::now_ms();
+        let now = caskade_core::now_ms();
         for row in self.inner.store.shares().await? {
             if row.running(now) && !lock(&self.inner.running).contains_key(&row.id) {
                 self.run(row);
@@ -231,7 +231,7 @@ impl Shares {
 
     /// Announces on `bus` when someone received everything of a share
     /// (`Event::ShareReceived`, #247).
-    pub fn set_bus(&self, bus: crate::bus::Bus) {
+    pub fn set_bus(&self, bus: caskade_core::bus::Bus) {
         let _ = self.inner.bus.set(bus);
     }
 
@@ -250,7 +250,7 @@ impl Shares {
     pub async fn share(&self, entry_id: &str, expiry: ShareExpiry) -> Result<ShareRecord> {
         // An emulated release goes as its ROM, never its folder (#279).
         if let Some(release) = self.inner.store.get_entry(entry_id).await?
-            && crate::transfer::rom::emulated(&release)
+            && caskade_core::transfer::rom::emulated(&release)
         {
             let item = ShareItem::Rom {
                 entry_id: entry_id.to_owned(),
@@ -259,11 +259,13 @@ impl Shares {
         }
         let (_, title, _, _) = self.inner.transfers.source(entry_id).await?;
         let entry = self.inner.store.get_entry(entry_id).await?.ok_or_else(|| {
-            Error::Invalid(crate::tr!("that game isn't installed on this device"))
+            Error::Invalid(caskade_core::tr!(
+                "that game isn't installed on this device"
+            ))
         })?;
-        let now = crate::now_ms();
+        let now = caskade_core::now_ms();
         let row = ShareRow {
-            id: crate::model::new_id(),
+            id: caskade_core::model::new_id(),
             kind: "game".into(),
             game_id: Some(entry.game_id.clone()),
             entry_id: Some(entry_id.to_owned()),
@@ -291,15 +293,15 @@ impl Shares {
     /// the relay once there is one). Only for a share that runs.
     pub async fn link(&self, id: &str) -> Result<String> {
         let row = self.row(id).await?;
-        if !row.running(crate::now_ms()) {
-            return Err(Error::Invalid(crate::tr!(
+        if !row.running(caskade_core::now_ms()) {
+            return Err(Error::Invalid(caskade_core::tr!(
                 "this share has stopped; share the game again for a new link"
             )));
         }
         let grant: Grant = row
             .grant
             .parse()
-            .map_err(|_| Error::Invalid(crate::tr!("this share's link is damaged")))?;
+            .map_err(|_| Error::Invalid(caskade_core::tr!("this share's link is damaged")))?;
         let addr = self.inner.devices.link_addr(Duration::from_secs(3)).await?;
         let expires = row.expires_at_ms.map(|at| {
             SystemTime::UNIX_EPOCH + Duration::from_millis(u64::try_from(at).unwrap_or(0))
@@ -311,7 +313,10 @@ impl Shares {
     /// a transfer. What was received stays.
     pub async fn stop(&self, id: &str) -> Result<()> {
         self.row(id).await?;
-        self.inner.store.stop_share(id, crate::now_ms()).await?;
+        self.inner
+            .store
+            .stop_share(id, caskade_core::now_ms())
+            .await?;
         self.end(id).await;
         self.changed();
         Ok(())
@@ -320,8 +325,8 @@ impl Shares {
     /// Forgets a share that has stopped or expired, and who received it.
     pub async fn forget(&self, id: &str) -> Result<()> {
         let row = self.row(id).await?;
-        if row.running(crate::now_ms()) {
-            return Err(Error::Invalid(crate::tr!("stop sharing it first")));
+        if row.running(caskade_core::now_ms()) {
+            return Err(Error::Invalid(caskade_core::tr!("stop sharing it first")));
         }
         self.inner.store.delete_share(id).await?;
         self.changed();
@@ -342,11 +347,11 @@ impl Shares {
             .store
             .share(id)
             .await?
-            .ok_or_else(|| Error::Invalid(crate::tr!("there's no such share")))
+            .ok_or_else(|| Error::Invalid(caskade_core::tr!("there's no such share")))
     }
 
     async fn record(&self, row: ShareRow) -> Result<ShareRecord> {
-        let now = crate::now_ms();
+        let now = caskade_core::now_ms();
         let (state, live, size) = {
             let running = lock(&self.inner.running);
             match running.get(&row.id) {
@@ -438,7 +443,7 @@ impl Shares {
             let expiry = async {
                 match row.expires_at_ms {
                     Some(at) => {
-                        let left = u64::try_from(at - crate::now_ms()).unwrap_or(0);
+                        let left = u64::try_from(at - caskade_core::now_ms()).unwrap_or(0);
                         tokio::time::sleep(Duration::from_millis(left)).await;
                     }
                     None => std::future::pending().await,
@@ -468,7 +473,7 @@ impl Shares {
                 let entry = row
                     .entry_id
                     .as_deref()
-                    .ok_or_else(|| Error::Invalid(crate::tr!("this share has no game")))?;
+                    .ok_or_else(|| Error::Invalid(caskade_core::tr!("this share has no game")))?;
                 let (folder, _, launch, _) = self.inner.transfers.source(entry).await?;
                 (folder, launch)
             } else {
@@ -543,7 +548,7 @@ fn admits(inner: &Weak<Inner>, grant: &Grant) -> bool {
     let Some(inner) = inner.upgrade() else {
         return false;
     };
-    let now = crate::now_ms();
+    let now = caskade_core::now_ms();
     lock(&inner.running)
         .values()
         .any(|share| share.grant == *grant && share.expires_at_ms.is_none_or(|at| now < at))

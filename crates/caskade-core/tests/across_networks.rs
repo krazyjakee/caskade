@@ -12,7 +12,7 @@ use std::time::{Duration, Instant};
 
 use caskade_core::devices::Reach;
 use caskade_core::install::JobStatus;
-use caskade_core::share::ShareState;
+use caskade_share::ShareState;
 
 use crate::cores::{Core, core_with};
 use crate::two_networks::{MIB, add_game, follow, online, plays, shared};

@@ -272,7 +272,7 @@ pub fn decode<T: serde::de::DeserializeOwned>(text: String) -> Result<T> {
     Ok(serde_json::from_str(&text)?)
 }
 /// `entity` is gone, in the user's words; the id stays in the log.
-pub(crate) fn missing(entity: &str, id: &str) -> crate::Error {
+pub fn missing(entity: &str, id: &str) -> crate::Error {
     tracing::debug!(entity, id, "not found");
     crate::Error::Invalid(match entity {
         "account" => crate::tr!("This account no longer exists."),

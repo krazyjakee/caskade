@@ -125,14 +125,14 @@ fn display_name(disk: &RawDisk) -> String {
     }
     let mount = disk.mount.trim_end_matches(['/', '\\']);
     if mount.is_empty() {
-        return crate::trp!("disk name", "System");
+        return caskade_core::trp!("disk name", "System");
     }
     // `C:` once the separator is gone.
     if mount.len() == 2 && mount.ends_with(':') {
         return if disk.removable {
-            crate::tr!("Removable disk")
+            caskade_core::tr!("Removable disk")
         } else {
-            crate::tr!("Local disk")
+            caskade_core::tr!("Local disk")
         };
     }
     mount

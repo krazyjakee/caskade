@@ -13,7 +13,7 @@ use tokio::sync::mpsc;
 
 use super::wire::{MAX_LINE, Message};
 use super::{Connected, Inner, Prepared, Ready, Shares};
-use crate::lock;
+use caskade_core::lock;
 
 /// How long a recipient gets to say hello.
 const HELLO_WAIT: Duration = Duration::from_secs(30);
@@ -138,7 +138,7 @@ impl Shares {
         let _ = self
             .inner
             .store
-            .add_share_recipient(&id, &peer.to_string(), &name, crate::now_ms())
+            .add_share_recipient(&id, &peer.to_string(), &name, caskade_core::now_ms())
             .await;
         if self.inner.transfers.allow(peer, &ready.root).is_err() {
             return session.end().await;
@@ -211,10 +211,10 @@ impl Shares {
                     let _ = self
                         .inner
                         .store
-                        .set_share_progress(&id, &recipient, size, Some(crate::now_ms()))
+                        .set_share_progress(&id, &recipient, size, Some(caskade_core::now_ms()))
                         .await;
                     if let Some(bus) = self.inner.bus.get() {
-                        bus.emit(crate::bus::Event::ShareReceived {
+                        bus.emit(caskade_core::bus::Event::ShareReceived {
                             share_id: id.clone(),
                             title: row.title.clone(),
                             recipient: name.clone(),

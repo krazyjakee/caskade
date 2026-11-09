@@ -17,7 +17,7 @@ use caskade_core::launch::LaunchService;
 use caskade_core::model::{
     Game, GameEdit, GameEntry, GameRuntime, InstallLocation, InstallState, LaunchSpec, TextEdit,
 };
-use caskade_core::share::{ShareExpiry, ShareReach, ShareState};
+use caskade_share::{ShareExpiry, ShareReach, ShareState};
 use caskade_sync::testing::{relay_on, relays_at};
 use caskade_sync::{Admission, Config, EndpointId, Grant, Relays, Session, Sessions, SyncEndpoint};
 use serde_json::json;

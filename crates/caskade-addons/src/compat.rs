@@ -104,7 +104,7 @@ fn reasons(
         reasons.push(CompatibilityReason {
             code: ReasonCode::Api,
             blocking: true,
-            message: crate::tr!(
+            message: caskade_core::tr!(
                 "{version} needs plugin API {api}; this Caskade has {host}",
                 version = release.version,
                 api = api,
@@ -116,7 +116,7 @@ fn reasons(
         reasons.push(CompatibilityReason {
             code: ReasonCode::Os,
             blocking: true,
-            message: crate::tr!(
+            message: caskade_core::tr!(
                 "{version} doesn't run on this operating system",
                 version = release.version
             ),
@@ -127,8 +127,8 @@ fn reasons(
             code: ReasonCode::Mode,
             blocking: false,
             message: match host.mode {
-                AppMode::Console => crate::tr!("Its pages work in desktop mode only."),
-                AppMode::Desktop => crate::tr!("Its pages work in console mode only."),
+                AppMode::Console => caskade_core::tr!("Its pages work in desktop mode only."),
+                AppMode::Desktop => caskade_core::tr!("Its pages work in console mode only."),
             },
         });
     }
@@ -173,7 +173,7 @@ pub fn evaluate_entry(
         found.push(CompatibilityReason {
             code: ReasonCode::Kind,
             blocking: true,
-            message: crate::tr!("Something else is installed under the same id."),
+            message: caskade_core::tr!("Something else is installed under the same id."),
         });
         return Compatibility {
             state: ItemState::Incompatible,

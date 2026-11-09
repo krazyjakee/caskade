@@ -567,7 +567,7 @@ pub fn build(source: &Path, out: &Path, previous: Option<&Path>) -> Result<Built
 /// `seconds` since the epoch as `YYYY-MM-DDTHH:MM:SSZ`.
 pub(crate) fn utc(seconds: i64) -> String {
     let (days, rest) = (seconds.div_euclid(86_400), seconds.rem_euclid(86_400));
-    let (year, month, day) = crate::civil_from_days(days);
+    let (year, month, day) = caskade_core::civil_from_days(days);
     format!(
         "{year:04}-{month:02}-{day:02}T{:02}:{:02}:{:02}Z",
         rest / 3600,

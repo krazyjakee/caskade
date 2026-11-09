@@ -5,8 +5,8 @@
 //! package: the plugin host's preview and a start in a scratch host, and
 //! the theme service's check. See `docs/plugins/publishing.md`.
 
+use caskade_addons::{AddonKind, author};
 use caskade_core::{
-    addons::{AddonKind, author},
     db::LibraryStore,
     themes::{ThemeService, ThemeSource},
 };
@@ -72,7 +72,7 @@ pub async fn check(
 }
 
 async fn check_plugin(
-    release: &caskade_core::addons::CatalogueRelease,
+    release: &caskade_addons::CatalogueRelease,
     root: &Path,
     scratch: &Path,
 ) -> Vec<String> {

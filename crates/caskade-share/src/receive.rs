@@ -20,11 +20,11 @@ use tokio_util::sync::CancellationToken;
 use super::Shares;
 use super::items::{Details, ShareContents};
 use super::wire::{MAX_ABOUT, MAX_LINE, Message};
-use crate::install::{
+use caskade_core::install::{
     FetchFailure, Fetched, JobSnapshot, PeerCopyTarget, PeerFetcher, PeerProgress,
 };
-use crate::transfer::{PLAIN_WAIT, PUNCH_WAIT};
-use crate::{Error, Result, lock};
+use caskade_core::transfer::{PLAIN_WAIT, PUNCH_WAIT};
+use caskade_core::{Error, Result, lock};
 
 /// How long the sharer gets for each frame: reading a large game takes a
 /// while, and it says how far it got meanwhile.
@@ -120,7 +120,7 @@ fn tag(job: &str) -> String {
 
 /// `at_ms` as a date, `YYYY-MM-DD`.
 fn date(at_ms: i64) -> String {
-    let (year, month, day) = crate::civil_from_days(at_ms.div_euclid(86_400_000));
+    let (year, month, day) = caskade_core::civil_from_days(at_ms.div_euclid(86_400_000));
     format!("{year:04}-{month:02}-{day:02}")
 }
 
@@ -131,26 +131,26 @@ fn expired(link: &ShareLink) -> Error {
         .map_or(0, |since| {
             i64::try_from(since.as_millis()).unwrap_or(i64::MAX)
         });
-    Error::Invalid(crate::tr!(
+    Error::Invalid(caskade_core::tr!(
         "This link expired on {date}. Ask whoever shared it for a new one.",
         date = date(at)
     ))
 }
 
 fn stopped() -> Error {
-    Error::Invalid(crate::tr!(
+    Error::Invalid(caskade_core::tr!(
         "This link doesn't work any more: the share was stopped or has expired. Ask whoever shared it for a new one."
     ))
 }
 
 fn unreachable() -> String {
-    crate::tr!(
+    caskade_core::tr!(
         "Can't reach whoever shared this: their Caskade may be closed or offline. Caskade keeps trying."
     )
 }
 
 fn relay_only(sharer: &str) -> String {
-    crate::tr!(
+    caskade_core::tr!(
         "Only a relay reaches {sharer}'s computer: the game waits for a direct connection",
         sharer = sharer
     )
@@ -199,7 +199,7 @@ impl Shares {
     /// [`Shares::inspect`], with what a share other than a game is.
     pub(super) async fn look(&self, text: &str) -> Result<(ShareInfo, Option<Details>)> {
         let link = ShareLink::parse(text)
-            .map_err(|_| Error::Invalid(crate::tr!("that isn't a Caskade share link")))?;
+            .map_err(|_| Error::Invalid(caskade_core::tr!("that isn't a Caskade share link")))?;
         let mut session = self.open(&link).await.map_err(|failure| match failure {
             FetchFailure::Failed(error) => error,
             FetchFailure::Waiting(why) => Error::Invalid(why),
@@ -227,7 +227,7 @@ impl Shares {
             })) => {
                 let details = Details::read(details.as_ref());
                 if kind != "game" && details.is_none() {
-                    return Err(Error::Invalid(crate::tr!(
+                    return Err(Error::Invalid(caskade_core::tr!(
                         "This Caskade can't receive what that link shares. Update Caskade, then try again."
                     )));
                 }
@@ -256,12 +256,12 @@ impl Shares {
     pub async fn receive(&self, text: &str, root_id: Option<String>) -> Result<JobSnapshot> {
         let (info, details) = self.look(text).await?;
         if matches!(details, Some(Details::Collection { .. })) {
-            return Err(Error::Invalid(crate::tr!(
+            return Err(Error::Invalid(caskade_core::tr!(
                 "That link shares a collection: add it to your collections instead."
             )));
         }
         let link = ShareLink::parse(text)
-            .map_err(|_| Error::Invalid(crate::tr!("that isn't a Caskade share link")))?;
+            .map_err(|_| Error::Invalid(caskade_core::tr!("that isn't a Caskade share link")))?;
         let fetcher = Arc::new(ShareFetcher {
             shares: self.clone(),
             link,
@@ -321,14 +321,16 @@ impl Shares {
             .is_some_and(|job| !job.status.is_finished());
         let mut received = lock(&self.inner.received);
         if !received.contains_key(job) && !queued {
-            return Err(Error::Invalid(crate::tr!("that share isn't here any more")));
+            return Err(Error::Invalid(caskade_core::tr!(
+                "that share isn't here any more"
+            )));
         }
         // A job whose files haven't started coming yet takes it when they do.
         let share = received
             .entry(job.to_owned())
             .or_insert_with(Received::queued);
         if on && !share.receiving && !share.serving {
-            return Err(Error::Invalid(crate::tr!(
+            return Err(Error::Invalid(caskade_core::tr!(
                 "it's here already: it can help others only if that's chosen while it arrives"
             )));
         }
@@ -554,9 +556,9 @@ impl ShareFetcher {
                 .max(size.saturating_sub(root_free))
         };
         if short > 0 {
-            return Err(FetchFailure::Failed(Error::Invalid(crate::tr!(
+            return Err(FetchFailure::Failed(Error::Invalid(caskade_core::tr!(
                 "there isn't enough room for the game: {short} more is needed",
-                short = crate::transfer::readable_size(short)
+                short = caskade_core::transfer::readable_size(short)
             ))));
         }
         Ok(())
@@ -746,7 +748,7 @@ impl PeerFetcher for ShareFetcher {
             }
         };
         let staging = shares.inner.incoming_dir.join(job);
-        let folder = staging.join(crate::transfer::folder_name(&target.title));
+        let folder = staging.join(caskade_core::transfer::folder_name(&target.title));
         let _ = std::fs::remove_dir_all(&staging);
         let transfers = &shares.inner.transfers;
         let exported = if keep {
@@ -806,7 +808,7 @@ impl PeerFetcher for ShareFetcher {
         // It's here: a notification, opening the game.
         if let Some(bus) = shares.inner.bus.get() {
             let snapshot = shares.inner.install.job(job);
-            bus.emit(crate::bus::Event::ShareArrived {
+            bus.emit(caskade_core::bus::Event::ShareArrived {
                 job: job.to_owned(),
                 title: snapshot
                     .as_ref()

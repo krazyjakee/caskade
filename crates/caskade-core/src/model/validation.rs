@@ -77,7 +77,7 @@ impl Game {
         }
     }
 }
-pub(crate) fn validate_date(date: &str) -> Result<()> {
+pub fn validate_date(date: &str) -> Result<()> {
     let fail = || Error::Invalid(crate::tr!("release date must be YYYY-MM-DD"));
     let bytes = date.as_bytes();
     if bytes.len() != 10

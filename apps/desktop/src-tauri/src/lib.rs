@@ -553,7 +553,7 @@ pub fn run() {
         // Catalogue add-ons (#182): an install the app stopped in the middle
         // of rolls back before plugins and themes load.
         let addon_work = setup_paths.data.join("addons");
-        if let Err(error) = caskade_core::addons::package::recover(&addon_work) {
+        if let Err(error) = caskade_addons::package::recover(&addon_work) {
             tracing::warn!(%error, "an interrupted add-on install wasn't rolled back");
         }
         app.manage(commands::addon_packages::AddonFolders {
@@ -746,7 +746,7 @@ pub fn run() {
                     // One-off shares (#246): admitted and served by the same
                     // endpoint, so set up before it starts too.
                     if let Some(install) = app.try_state::<caskade_core::install::InstallService>() {
-                        let shares = caskade_core::share::Shares::new(
+                        let shares = caskade_share::Shares::new(
                             store.clone(),
                             devices.clone(),
                             transfers.clone(),

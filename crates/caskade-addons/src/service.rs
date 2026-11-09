@@ -6,7 +6,7 @@
 use super::{Catalogue, parse};
 #[cfg(feature = "net")]
 use super::{MAX_CATALOGUE_BYTES, MAX_SIGNATURE_BYTES};
-use crate::{Error, Result};
+use caskade_core::{Error, Result};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::{
@@ -127,7 +127,7 @@ fn verify(
         return Ok(false);
     };
     let refused = || {
-        Error::Invalid(crate::tr!(
+        Error::Invalid(caskade_core::tr!(
             "the catalogue's signature doesn't match Caskade's key"
         ))
     };
@@ -190,11 +190,12 @@ impl CatalogueService {
     pub fn new(dir: impl Into<PathBuf>, origin: &str, public_key: Option<&str>) -> Result<Self> {
         let dir = dir.into();
         let origin = Url::parse(origin)
-            .map_err(|_| Error::Invalid(crate::tr!("the catalogue address isn't valid")))?;
+            .map_err(|_| Error::Invalid(caskade_core::tr!("the catalogue address isn't valid")))?;
         let key = public_key
             .map(|text| {
-                minisign_verify::PublicKey::decode(&minisign_text(text))
-                    .map_err(|_| Error::Invalid(crate::tr!("the catalogue key can't be read")))
+                minisign_verify::PublicKey::decode(&minisign_text(text)).map_err(|_| {
+                    Error::Invalid(caskade_core::tr!("the catalogue key can't be read"))
+                })
             })
             .transpose()?;
         let status = CatalogueStatus {
@@ -261,7 +262,7 @@ impl CatalogueService {
             .and_then(|verified| Ok((verified, parse(bytes, &inner.origin)?)));
         match outcome {
             Ok((verified, catalogue)) => {
-                let mut state = crate::write(&inner.state);
+                let mut state = caskade_core::write(&inner.state);
                 state.status.fetched_at_ms = Some(snapshot.fetched_at_ms);
                 state.status.verified = verified;
                 state.status.left_out = catalogue.problems.len() as u32;
@@ -272,11 +273,11 @@ impl CatalogueService {
     }
 
     pub fn catalogue(&self) -> Catalogue {
-        crate::read(&self.inner.state).catalogue.clone()
+        caskade_core::read(&self.inner.state).catalogue.clone()
     }
 
     pub fn status(&self) -> CatalogueStatus {
-        crate::read(&self.inner.state).status.clone()
+        caskade_core::read(&self.inner.state).status.clone()
     }
 
     pub fn origin(&self) -> &Url {
@@ -319,7 +320,7 @@ impl CatalogueService {
             self.step()?;
             let _ = tokio::fs::remove_file(inner.dir.join(name)).await;
         }
-        let mut state = crate::write(&inner.state);
+        let mut state = caskade_core::write(&inner.state);
         state.status.fetched_at_ms = Some(fetched_at_ms);
         state.status.verified = verified;
         state.status.error = None;
@@ -331,7 +332,7 @@ impl CatalogueService {
 
     #[cfg(feature = "net")]
     fn failed(&self, error: &Error, offline: bool) -> CatalogueStatus {
-        let mut state = crate::write(&self.inner.state);
+        let mut state = caskade_core::write(&self.inner.state);
         state.status.error = Some(error.to_string());
         state.status.offline = offline;
         state.status.refreshing = false;
@@ -343,12 +344,12 @@ impl CatalogueService {
     #[cfg(feature = "net")]
     pub async fn refresh(&self) -> CatalogueStatus {
         let _one = self.inner.refresh.lock().await;
-        crate::write(&self.inner.state).status.refreshing = true;
+        caskade_core::write(&self.inner.state).status.refreshing = true;
         let outcome = self.fetch().await;
-        crate::write(&self.inner.state).status.refreshing = false;
+        caskade_core::write(&self.inner.state).status.refreshing = false;
         match outcome {
             Ok((bytes, signature)) => match self
-                .accept(&bytes, signature.as_deref(), crate::now_ms())
+                .accept(&bytes, signature.as_deref(), caskade_core::now_ms())
                 .await
             {
                 Ok(status) => status,
@@ -395,7 +396,7 @@ async fn get(
     let fail = |error: reqwest::Error| {
         let offline = error.is_connect() || error.is_timeout();
         (
-            Error::Invalid(crate::tr!(
+            Error::Invalid(caskade_core::tr!(
                 "the catalogue couldn't be fetched: {error}",
                 error = error.without_url()
             )),
@@ -405,7 +406,7 @@ async fn get(
     let mut response = client.get(url).send().await.map_err(fail)?;
     if !response.status().is_success() {
         return Err((
-            Error::Invalid(crate::tr!(
+            Error::Invalid(caskade_core::tr!(
                 "the catalogue server answered {status}",
                 status = response.status().as_u16()
             )),
@@ -416,7 +417,7 @@ async fn get(
     while let Some(chunk) = response.chunk().await.map_err(fail)? {
         if body.len() + chunk.len() > max {
             return Err((
-                Error::Invalid(crate::tr!(
+                Error::Invalid(caskade_core::tr!(
                     "the catalogue is larger than {mib} MiB",
                     mib = MAX_CATALOGUE_BYTES >> 20
                 )),

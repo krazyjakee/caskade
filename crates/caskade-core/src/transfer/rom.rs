@@ -30,7 +30,7 @@ pub(crate) const MAX_ROMS: usize = 64;
 /// An emulated release, in a form another device reads.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct RomCopy {
+pub struct RomCopy {
     pub platform: String,
     /// The emulator definition and its profile it plays with.
     pub definition: Option<String>,
@@ -41,7 +41,7 @@ pub(crate) struct RomCopy {
 /// One ROM file of a [`RomCopy`].
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct RomFile {
+pub struct RomFile {
     /// Its file name in the sent folder.
     pub file: String,
     /// Shown in the disc picker.
@@ -51,7 +51,7 @@ pub(crate) struct RomFile {
 impl RomCopy {
     /// Whether what another device sent is within bounds: some files, not
     /// too many, each a bare file name.
-    pub(crate) fn sound(&self) -> bool {
+    pub fn sound(&self) -> bool {
         !self.roms.is_empty()
             && self.roms.len() <= MAX_ROMS
             && self.roms.iter().all(|rom| plain(&rom.file))
@@ -118,7 +118,7 @@ pub(crate) fn free_folder(root: &Path, name: &str) -> Result<PathBuf> {
 }
 
 /// Whether `entry` launches through an emulator.
-pub(crate) fn emulated(entry: &GameEntry) -> bool {
+pub fn emulated(entry: &GameEntry) -> bool {
     matches!(entry.launch, Some(LaunchSpec::Emulator { .. }))
 }
 
@@ -172,7 +172,7 @@ pub(crate) async fn rom_files(
 }
 
 /// Release `entry_id` as a [`RomCopy`], with its files' paths here.
-pub(crate) async fn describe(
+pub async fn describe(
     store: &LibraryStore,
     entry_id: &str,
 ) -> Result<(GameEntry, RomCopy, Vec<(PathBuf, String)>)> {
@@ -246,7 +246,7 @@ async fn portable_profile(
 }
 
 /// A folder `dir` of `sources` under their names, made afresh.
-pub(crate) async fn put_together(dir: &Path, sources: Vec<(PathBuf, String)>) -> Result<PathBuf> {
+pub async fn put_together(dir: &Path, sources: Vec<(PathBuf, String)>) -> Result<PathBuf> {
     let folder = dir.to_owned();
     tokio::task::spawn_blocking(move || {
         let _ = std::fs::remove_dir_all(&folder);
@@ -269,7 +269,7 @@ pub(crate) async fn put_together(dir: &Path, sources: Vec<(PathBuf, String)>) ->
 
 /// Whether this device has an emulator of `definition`, or else one set
 /// for `platform`.
-pub(crate) async fn emulator_here(
+pub async fn emulator_here(
     store: &LibraryStore,
     platform: &str,
     definition: Option<&str>,
@@ -331,7 +331,7 @@ pub(crate) async fn root_at(store: &LibraryStore, path: &Path) -> Result<Storage
 /// definition and profile when it has one; otherwise, when this device has
 /// no emulator for it, `installer` installs that definition in the
 /// background.
-pub(crate) async fn place(
+pub async fn place(
     store: &LibraryStore,
     installer: Option<Arc<dyn EmulatorInstaller>>,
     rom: &RomCopy,

@@ -267,7 +267,7 @@ impl SystemStats {
         // A history from an earlier watch is kept while it is still in the
         // window; the time between shows as a gap.
         let window = config.interval.saturating_mul(config.history as u32);
-        let oldest = crate::now_ms().saturating_sub(window.as_millis() as i64);
+        let oldest = caskade_core::now_ms().saturating_sub(window.as_millis() as i64);
         state.history.retain(|sample| sample.at >= oldest);
         let snapshot = SystemStatsSnapshot {
             interval_ms: config.interval.as_millis().min(u32::MAX as u128) as u32,
@@ -304,7 +304,7 @@ impl SystemStats {
 
 impl Shared {
     fn lock(&self) -> MutexGuard<'_, State> {
-        crate::lock(&self.state)
+        caskade_core::lock(&self.state)
     }
 
     /// Drops the watches whose lease ran out; with none left, stops.
@@ -356,7 +356,7 @@ async fn run(shared: Arc<Shared>) {
             (probe, readings)
         })
         .await;
-        let at = crate::now_ms();
+        let at = caskade_core::now_ms();
         let sample = match read {
             Ok((kept, readings)) => {
                 probe = Some(kept);
@@ -364,7 +364,7 @@ async fn run(shared: Arc<Shared>) {
             }
             Err(error) => {
                 tracing::warn!(%error, "system statistics: a sample failed");
-                Aggregator::failed(at, &crate::tr!("This sample couldn't be read."))
+                Aggregator::failed(at, &caskade_core::tr!("This sample couldn't be read."))
             }
         };
         shared.push(sample);

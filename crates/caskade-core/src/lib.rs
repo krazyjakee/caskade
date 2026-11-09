@@ -8,7 +8,6 @@
 //! without setting a global subscriber.
 
 pub mod accounts;
-pub mod addons;
 pub mod artwork;
 pub mod backup_error;
 pub mod browse;
@@ -61,12 +60,9 @@ pub mod saves;
 pub mod scripts;
 pub mod sessions;
 pub mod settings;
-#[cfg(feature = "net")]
-pub mod share;
 pub mod storage;
 pub mod store_accounts;
 pub mod sync;
-pub mod system_stats;
 pub mod themes;
 pub mod tracking;
 #[cfg(feature = "net")]

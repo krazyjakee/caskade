@@ -19,10 +19,10 @@ use caskade_core::model::{
 };
 use caskade_core::paths::AppPaths;
 use caskade_core::settings::SettingsService;
-use caskade_core::share::{ShareExpiry, ShareReach, ShareState, Shares};
 use caskade_core::transfer::Transfers;
 use caskade_installer::manifest::RootManifest;
 use caskade_installer::pipeline::input;
+use caskade_share::{ShareExpiry, ShareReach, ShareState, Shares};
 
 struct Core {
     store: LibraryStore,

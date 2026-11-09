@@ -123,10 +123,10 @@ pub(crate) fn drm_cards(drm: &Path) -> Vec<DrmCard> {
 
 fn vendor_name(vendor: GpuVendor) -> String {
     match vendor {
-        GpuVendor::Amd => crate::tr!("AMD GPU"),
-        GpuVendor::Intel => crate::tr!("Intel GPU"),
-        GpuVendor::Nvidia => crate::tr!("NVIDIA GPU"),
-        GpuVendor::Other => crate::tr!("GPU"),
+        GpuVendor::Amd => caskade_core::tr!("AMD GPU"),
+        GpuVendor::Intel => caskade_core::tr!("Intel GPU"),
+        GpuVendor::Nvidia => caskade_core::tr!("NVIDIA GPU"),
+        GpuVendor::Other => caskade_core::tr!("GPU"),
     }
 }
 
@@ -190,9 +190,11 @@ pub(crate) fn merge(cards: Vec<DrmCard>, smi: &SmiView) -> Vec<GpuSample> {
                 GpuVendor::Nvidia => smi
                     .problem
                     .clone()
-                    .unwrap_or_else(|| crate::tr!("nvidia-smi didn't report this GPU.")),
-                GpuVendor::Intel => crate::tr!("Intel's driver doesn't report GPU usage to apps."),
-                _ => crate::tr!("This GPU's driver doesn't report its usage."),
+                    .unwrap_or_else(|| caskade_core::tr!("nvidia-smi didn't report this GPU.")),
+                GpuVendor::Intel => {
+                    caskade_core::tr!("Intel's driver doesn't report GPU usage to apps.")
+                }
+                _ => caskade_core::tr!("This GPU's driver doesn't report its usage."),
             });
             GpuSample {
                 name: card.name.unwrap_or_else(|| vendor_name(card.vendor)),
@@ -228,20 +230,22 @@ fn from_row(id: String, row: &SmiRow) -> GpuSample {
         unavailable: row
             .usage
             .is_none()
-            .then(|| crate::tr!("The NVIDIA driver doesn't report this GPU's usage.")),
+            .then(|| caskade_core::tr!("The NVIDIA driver doesn't report this GPU's usage.")),
     }
 }
 
 /// Why no GPU is listed.
 fn none_found() -> String {
     if cfg!(target_os = "macos") {
-        crate::tr!("macOS doesn't report GPU usage to apps.")
+        caskade_core::tr!("macOS doesn't report GPU usage to apps.")
     } else if cfg!(windows) {
-        crate::tr!("GPU usage on Windows comes from NVIDIA's nvidia-smi; no NVIDIA GPU answered.")
+        caskade_core::tr!(
+            "GPU usage on Windows comes from NVIDIA's nvidia-smi; no NVIDIA GPU answered."
+        )
     } else if cfg!(target_os = "linux") {
-        crate::tr!("No GPU found.")
+        caskade_core::tr!("No GPU found.")
     } else {
-        crate::tr!("GPU usage isn't available on this system.")
+        caskade_core::tr!("GPU usage isn't available on this system.")
     }
 }
 
@@ -271,7 +275,7 @@ const SMI_RETRY: Duration = Duration::from_secs(30);
 impl NvidiaSmi {
     fn start() -> std::io::Result<Self> {
         let mut command = Command::new("nvidia-smi");
-        crate::managed::outside_own_appimage(&mut command);
+        caskade_core::managed::outside_own_appimage(&mut command);
         command
             .args([
                 "--query-gpu=index,pci.bus_id,name,utilization.gpu,memory.used,memory.total",
@@ -301,7 +305,7 @@ impl NvidiaSmi {
             .spawn(move || {
                 for line in BufReader::new(stdout).lines() {
                     let Ok(line) = line else { break };
-                    let mut state = crate::lock(&shared);
+                    let mut state = caskade_core::lock(&shared);
                     match parse_smi_line(&line) {
                         Some(row) => {
                             state.rows.insert(row.index, (Instant::now(), row));
@@ -312,7 +316,7 @@ impl NvidiaSmi {
                         None => {}
                     }
                 }
-                crate::lock(&shared).ended = true;
+                caskade_core::lock(&shared).ended = true;
             });
         if let Err(error) = reader {
             let _ = child.kill();
@@ -378,7 +382,7 @@ impl GpuReader {
         if self.smi_missing {
             return SmiView {
                 rows: Vec::new(),
-                problem: Some(crate::tr!(
+                problem: Some(caskade_core::tr!(
                     "Install NVIDIA's nvidia-smi to see this GPU's usage."
                 )),
             };
@@ -395,7 +399,7 @@ impl GpuReader {
                 }
                 Err(error) => {
                     tracing::debug!(%error, "nvidia-smi didn't start");
-                    self.smi_problem = Some(crate::tr!(
+                    self.smi_problem = Some(caskade_core::tr!(
                         "nvidia-smi didn't start: {error}",
                         error = error
                     ));
@@ -410,7 +414,7 @@ impl GpuReader {
             };
         };
         let (rows, message, ended) = {
-            let state = crate::lock(&smi.state);
+            let state = caskade_core::lock(&smi.state);
             let now = Instant::now();
             let mut rows: Vec<SmiRow> = state
                 .rows
@@ -424,14 +428,15 @@ impl GpuReader {
         if ended {
             self.smi = None;
             self.smi_retry_at = Some(Instant::now() + SMI_RETRY);
-            self.smi_problem = Some(message.unwrap_or_else(|| crate::tr!("nvidia-smi stopped.")));
+            self.smi_problem =
+                Some(message.unwrap_or_else(|| caskade_core::tr!("nvidia-smi stopped.")));
             return SmiView {
                 rows,
                 problem: self.smi_problem.clone(),
             };
         }
         let problem = rows.is_empty().then(|| {
-            message.unwrap_or_else(|| crate::tr!("Waiting for nvidia-smi's first reading."))
+            message.unwrap_or_else(|| caskade_core::tr!("Waiting for nvidia-smi's first reading."))
         });
         SmiView { rows, problem }
     }

@@ -7,7 +7,7 @@
 //! theme service rather than adding another package manager.
 
 use super::{AddonKind, CatalogueEntry, CatalogueRelease};
-use crate::{Error, Result};
+use caskade_core::{Error, Result};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use specta::Type;
@@ -100,7 +100,7 @@ pub fn verify(archive: &Path, release: &CatalogueRelease) -> std::result::Result
     if size != release.artifact.size {
         return Err(PackageError::new(
             AddonFailure::Integrity,
-            crate::tr!("the download's size doesn't match the catalogue"),
+            caskade_core::tr!("the download's size doesn't match the catalogue"),
         ));
     }
     let digest: String = hasher
@@ -111,7 +111,7 @@ pub fn verify(archive: &Path, release: &CatalogueRelease) -> std::result::Result
     if digest != release.artifact.sha256 {
         return Err(PackageError::new(
             AddonFailure::Integrity,
-            crate::tr!("the download's checksum doesn't match the catalogue"),
+            caskade_core::tr!("the download's checksum doesn't match the catalogue"),
         ));
     }
     Ok(())
@@ -137,7 +137,7 @@ pub async fn download(
     let network = |error: reqwest::Error| {
         PackageError::new(
             AddonFailure::Network,
-            crate::tr!("the download failed: {error}", error = error.without_url()),
+            caskade_core::tr!("the download failed: {error}", error = error.without_url()),
         )
     };
     let client = reqwest::Client::builder()
@@ -154,7 +154,7 @@ pub async fn download(
     if !response.status().is_success() {
         return Err(PackageError::new(
             AddonFailure::Network,
-            crate::tr!(
+            caskade_core::tr!(
                 "the download server answered {status}",
                 status = response.status().as_u16()
             ),
@@ -163,7 +163,7 @@ pub async fn download(
     if cancel.is_cancelled() {
         return Err(PackageError::new(
             AddonFailure::Cancelled,
-            crate::tr!("cancelled"),
+            caskade_core::tr!("cancelled"),
         ));
     }
     let partial = archive.with_extension("partial");
@@ -175,7 +175,7 @@ pub async fn download(
             () = cancel.cancelled() => {
                 drop(file);
                 let _ = tokio::fs::remove_file(&partial).await;
-                return Err(PackageError::new(AddonFailure::Cancelled, crate::tr!("cancelled")));
+                return Err(PackageError::new(AddonFailure::Cancelled, caskade_core::tr!("cancelled")));
             }
             chunk = response.chunk() => chunk.map_err(network)?,
         };
@@ -186,7 +186,7 @@ pub async fn download(
             let _ = tokio::fs::remove_file(&partial).await;
             return Err(PackageError::new(
                 AddonFailure::Integrity,
-                crate::tr!("the download is larger than the catalogue says"),
+                caskade_core::tr!("the download is larger than the catalogue says"),
             ));
         }
         file.write_all(&chunk).await?;
@@ -214,19 +214,26 @@ pub async fn download(
 pub fn extract(archive: &Path, into: &Path) -> std::result::Result<PathBuf, PackageError> {
     let unsafe_archive = |message: String| PackageError::new(AddonFailure::Unsafe, message);
     let file = std::fs::File::open(archive)?;
-    let mut zip = zip::ZipArchive::new(file)
-        .map_err(|_| unsafe_archive(crate::tr!("the download isn't a readable zip archive")))?;
+    let mut zip = zip::ZipArchive::new(file).map_err(|_| {
+        unsafe_archive(caskade_core::tr!(
+            "the download isn't a readable zip archive"
+        ))
+    })?;
     if zip.len() > MAX_FILES {
-        return Err(unsafe_archive(crate::tr!("the package has too many files")));
+        return Err(unsafe_archive(caskade_core::tr!(
+            "the package has too many files"
+        )));
     }
     std::fs::create_dir_all(into)?;
     let mut total = 0u64;
     let mut tops = std::collections::BTreeSet::new();
     let mut files_at_root = false;
     for index in 0..zip.len() {
-        let mut entry = zip
-            .by_index(index)
-            .map_err(|_| unsafe_archive(crate::tr!("the download isn't a readable zip archive")))?;
+        let mut entry = zip.by_index(index).map_err(|_| {
+            unsafe_archive(caskade_core::tr!(
+                "the download isn't a readable zip archive"
+            ))
+        })?;
         let raw = entry
             .name()
             .map(|name| name.into_owned())
@@ -234,7 +241,7 @@ pub fn extract(archive: &Path, into: &Path) -> std::result::Result<PathBuf, Pack
         // An absolute or drive path is refused, not quietly made relative.
         let absolute = raw.starts_with(['/', '\\']) || raw.as_bytes().get(1) == Some(&b':');
         let Some(relative) = entry.enclosed_name().filter(|_| !absolute) else {
-            return Err(unsafe_archive(crate::tr!(
+            return Err(unsafe_archive(caskade_core::tr!(
                 "the package has an unsafe path: {path}",
                 path = entry
                     .name()
@@ -246,7 +253,7 @@ pub fn extract(archive: &Path, into: &Path) -> std::result::Result<PathBuf, Pack
             .unix_mode()
             .is_some_and(|mode| mode & 0o170000 == 0o120000)
         {
-            return Err(unsafe_archive(crate::tr!(
+            return Err(unsafe_archive(caskade_core::tr!(
                 "the package has a link: {path}",
                 path = relative.display()
             )));
@@ -266,7 +273,7 @@ pub fn extract(archive: &Path, into: &Path) -> std::result::Result<PathBuf, Pack
         }
         total += entry.size();
         if total > MAX_UNPACKED {
-            return Err(unsafe_archive(crate::tr!(
+            return Err(unsafe_archive(caskade_core::tr!(
                 "the package unpacks to more than 512 MiB"
             )));
         }
@@ -278,7 +285,7 @@ pub fn extract(archive: &Path, into: &Path) -> std::result::Result<PathBuf, Pack
         let size = entry.size();
         let copied = std::io::copy(&mut (&mut entry).take(size + 1), &mut out)?;
         if copied > size {
-            return Err(unsafe_archive(crate::tr!(
+            return Err(unsafe_archive(caskade_core::tr!(
                 "the package's sizes don't match its contents"
             )));
         }
@@ -309,7 +316,7 @@ fn manifest(kind: AddonKind, root: &Path) -> std::result::Result<serde_json::Val
     let wrong = || {
         PackageError::new(
             AddonFailure::Identity,
-            crate::tr!("the package has no readable {file}", file = file),
+            caskade_core::tr!("the package has no readable {file}", file = file),
         )
     };
     let bytes = std::fs::read(root.join(file)).map_err(|_| wrong())?;
@@ -328,7 +335,7 @@ pub fn identity(
     let wrong = || {
         PackageError::new(
             AddonFailure::Identity,
-            crate::tr!("the package has no readable {file}", file = file),
+            caskade_core::tr!("the package has no readable {file}", file = file),
         )
     };
     let manifest = manifest(kind, root)?;
@@ -356,7 +363,7 @@ pub fn check_identity(
     if entry.kind == AddonKind::Plugin && contributes_metadata(&manifest(entry.kind, root)?) {
         return Err(PackageError::new(
             AddonFailure::Incompatible,
-            crate::tr!("the package provides metadata, which the catalogue doesn't offer"),
+            caskade_core::tr!("the package provides metadata, which the catalogue doesn't offer"),
         ));
     }
     let same_version = semver::Version::parse(&version)
@@ -366,7 +373,7 @@ pub fn check_identity(
     if id != entry.id || !same_version {
         return Err(PackageError::new(
             AddonFailure::Identity,
-            crate::tr!(
+            caskade_core::tr!(
                 "the package is {id} {version}, not {expected} {expected_version}",
                 id = id,
                 version = version,
@@ -546,7 +553,7 @@ pub struct AddonRecords {
 const RECORDS: &str = "addons.records";
 
 impl AddonRecords {
-    pub async fn load(store: &crate::db::LibraryStore) -> Result<Self> {
+    pub async fn load(store: &caskade_core::db::LibraryStore) -> Result<Self> {
         Ok(store
             .get_setting(RECORDS)
             .await?
@@ -554,7 +561,7 @@ impl AddonRecords {
             .unwrap_or_default())
     }
 
-    pub async fn save(&self, store: &crate::db::LibraryStore) -> Result<()> {
+    pub async fn save(&self, store: &caskade_core::db::LibraryStore) -> Result<()> {
         store
             .set_setting(RECORDS, &serde_json::to_value(self).map_err(Error::from)?)
             .await

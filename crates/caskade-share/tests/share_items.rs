@@ -24,10 +24,10 @@ use caskade_core::model::{
 };
 use caskade_core::saves::Saves;
 use caskade_core::saves::versions::{SaveCheck, SaveVersions, VersionReason};
-use caskade_core::share::{
+use caskade_discovery::HostEnv;
+use caskade_share::{
     EmulatorInstaller, GameHere, ShareContents, ShareExpiry, ShareItem, ShareState,
 };
-use caskade_discovery::HostEnv;
 use wiremock::{Mock, MockServer, ResponseTemplate, matchers::method};
 
 use crate::cores::{Core, core, within};
@@ -35,10 +35,9 @@ use crate::cores::{Core, core, within};
 async fn manifest_server() -> MockServer {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
-        .respond_with(
-            ResponseTemplate::new(200)
-                .set_body_string(include_str!("fixtures/saves/manifest.yaml")),
-        )
+        .respond_with(ResponseTemplate::new(200).set_body_string(include_str!(
+            "../../caskade-core/tests/fixtures/saves/manifest.yaml"
+        )))
         .mount(&server)
         .await;
     server

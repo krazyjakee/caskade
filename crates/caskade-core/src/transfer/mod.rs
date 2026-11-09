@@ -31,8 +31,8 @@
 //! page, and the receiver makes the bundle that game's offline copy. One
 //! played from its page alone has nothing to copy, and is refused.
 
-pub(crate) mod rom;
-pub(crate) mod web;
+pub mod rom;
+pub mod web;
 
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
@@ -62,10 +62,10 @@ const FRAME_WAIT: Duration = Duration::from_secs(300);
 /// How long a direct connection gets to open.
 const DIAL_WAIT: Duration = Duration::from_secs(15);
 /// How long hole punching gets to move a session off a relay.
-pub(crate) const PUNCH_WAIT: Duration = Duration::from_secs(5);
+pub const PUNCH_WAIT: Duration = Duration::from_secs(5);
 /// How long a dial with no hole made for it gets. Past that the other
 /// device is behind a router, and the two make one (`caskade_sync::punch`).
-pub(crate) const PLAIN_WAIT: Duration = Duration::from_secs(3);
+pub const PLAIN_WAIT: Duration = Duration::from_secs(3);
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
@@ -201,7 +201,7 @@ fn sync_error(error: caskade_sync::Error) -> Error {
 }
 
 /// A folder name for a title: letters, digits, spaces and a few marks.
-pub(crate) fn folder_name(title: &str) -> String {
+pub fn folder_name(title: &str) -> String {
     let name: String = title
         .chars()
         .filter(|c| c.is_alphanumeric() || matches!(c, ' ' | '-' | '_' | '.' | '\''))
@@ -251,7 +251,7 @@ impl Transfers {
         let _ = self.inner.emulators.set(installer);
     }
 
-    pub(crate) fn emulator_installer(&self) -> Option<Arc<dyn rom::EmulatorInstaller>> {
+    pub fn emulator_installer(&self) -> Option<Arc<dyn rom::EmulatorInstaller>> {
         self.inner.emulators.get().cloned()
     }
 
@@ -543,10 +543,7 @@ impl Transfers {
 
     /// The folder release `entry` is in, its program relative to it, and
     /// whether it's a Windows build; refused when it can't be copied.
-    pub(crate) async fn source(
-        &self,
-        entry: &str,
-    ) -> Result<(PathBuf, String, Option<String>, bool)> {
+    pub async fn source(&self, entry: &str) -> Result<(PathBuf, String, Option<String>, bool)> {
         let not_here = || Error::Invalid(crate::tr!("that game isn't installed on this device"));
         let entry = self
             .inner
@@ -818,7 +815,7 @@ impl Transfers {
 }
 
 /// A size for a message: "3.2 GB", "820 MB".
-pub(crate) fn readable_size(bytes: u64) -> String {
+pub fn readable_size(bytes: u64) -> String {
     const GB: f64 = 1e9;
     const MB: f64 = 1e6;
     let bytes = bytes as f64;

@@ -16,11 +16,11 @@ use caskade_core::install::{InstallOptions, InstallService};
 use caskade_core::model::{ExternalId, Game, GameEntry, StorageRoot};
 use caskade_core::paths::AppPaths;
 use caskade_core::settings::SettingsService;
-use caskade_core::share::Shares;
 use caskade_core::sync::SyncService;
 use caskade_core::transfer::Transfers;
 use caskade_installer::manifest::RootManifest;
 use caskade_installer::pipeline::input;
+use caskade_share::Shares;
 
 /// One device: its library, its device service started, copies and an
 /// install service with a storage root of its own.
