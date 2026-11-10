@@ -149,6 +149,20 @@ blocks the first start: allow it under System Settings → Privacy & Security,
 or run `xattr -dr com.apple.quarantine /Applications/Caskade.app`. The updater
 signature is separate from OS code signing and is always checked.
 
+## What the bundles contain
+
+Every bundle carries `caskade`, `caskade-native` and `7zz`. The dev tools
+`export-bindings` and `caskade-catalogue` are built only with
+`caskade-desktop`'s `dev-tools` feature, which release builds leave off. Before
+#126 they shipped in every bundle (155 MB and 64 MB on Linux). Release
+builds strip debuginfo but keep symbol names, so panic backtraces in users'
+logs still name functions. That saves about 8 MB a binary (`caskade` 237.1 →
+228.7 MB, `caskade-native` 222.6 → 214.6 MB); a full strip would save about
+64 MB a binary but lose those names.
+
+Sizes from the `bundles` workflow run 42886518561 (10 Nov 2026, 0.1.4): the
+Linux `.deb` is 148 MB and the AppImage 209 MB.
+
 ## Testing an update before publishing
 
 A draft's files only download when logged in, so serve them locally and build
