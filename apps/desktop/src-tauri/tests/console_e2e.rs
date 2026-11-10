@@ -7,16 +7,16 @@
 //! event. The test then reads the core's records: sessions with playtime,
 //! the emulator's invocation and the changed settings.
 //!
-//! It needs X and the built frontend, so it is ignored by default:
+//! It needs the built frontend, so it is ignored by default:
 //!
 //! ```sh
 //! pnpm build
-//! xvfb-run -a -s "-screen 0 1600x1000x24" dbus-run-session -- \
-//!   cargo test -p caskade-desktop --features e2e --test it console_e2e:: -- --ignored
+//! cargo test -p caskade-desktop --features e2e --test it console_e2e:: -- --ignored
 //! ```
 //!
-//! `dbus-run-session` keeps the single-instance check away from a Caskade
-//! already running on the desktop.
+//! The app runs on an Xvfb display and a session bus of its own
+//! (`caskade-test-desktop`), never the developer's (#122): its tray icon
+//! and single-instance check stay away from the desktop's.
 
 use caskade_core::{
     AppPaths,
@@ -32,7 +32,6 @@ use caskade_emulation_fixtures::{FakeEmulator, Invocation};
 use std::{
     collections::BTreeMap,
     path::{Path, PathBuf},
-    process::Command,
     time::{Duration, Instant},
 };
 
@@ -244,10 +243,7 @@ fn make_executable(path: &Path) {
 #[test]
 #[ignore = "drives the built app under X with the e2e feature; see the module docs"]
 fn console_mode_end_to_end_with_a_pad_only() {
-    assert!(
-        std::env::var_os("DISPLAY").is_some(),
-        "run under X: xvfb-run -a dbus-run-session -- cargo test …"
-    );
+    let desktop = caskade_test_desktop::PrivateDesktop::start_sized("1600x1000x24");
     let temp = tempfile::tempdir().unwrap();
     let root = temp.path();
     let home = root.join("home");
@@ -272,7 +268,8 @@ fn console_mode_end_to_end_with_a_pad_only() {
     std::fs::write(&script, SCRIPT).unwrap();
     let report_path = root.join("report.json");
 
-    let mut app = Command::new(env!("CARGO_BIN_EXE_caskade"))
+    let mut app = desktop
+        .command(env!("CARGO_BIN_EXE_caskade"))
         .arg("--console")
         .current_dir(root)
         .env("HOME", &home)

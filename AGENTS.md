@@ -38,6 +38,7 @@ Cargo commands share one heavy lane: run them under `flock /tmp/caskade-heavy.lo
 | Tokens and anatomy docs                  | `pnpm --filter @caskade/tokens build`, `pnpm --filter @caskade/ui docs` (generated; never edit `docs/theming/tokens.md` or `anatomy.md` by hand)                        |
 | Plugin schema                            | `CASKADE_WRITE_SCHEMA=1 cargo test -p caskade-plugin-host`                                                                                                              |
 | App bundle                               | `just build-app`                                                                                                                                                        |
+| Anything that starts the app outside a Rust test | `scripts/private-desktop.sh -- <command>` (its own Xvfb and D-Bus); `scripts/tray-race/run.sh <binary>` (tray quit race, #122); `scripts/tray-race/decoy.sh -- <command>` (checks a command leaves a desktop alone) |
 
 ## Rules that tests or reviews enforce
 
@@ -53,6 +54,6 @@ Cargo commands share one heavy lane: run them under `flock /tmp/caskade-heavy.lo
 - UI: style through `--cs-*` token utilities only, never raw colours; give components `data-cs`/`data-part` attributes and add them to `packages/ui/src/anatomy.ts`; never select on classes; animations use the motion tokens. Follow the verbs and ellipsis rules in the design guidelines. Don't use Tauri's `data-tauri-drag-region`.
 - Every visible string is translatable (Lingui in the webview, `tr!` in Rust).
 - Tests never reach the internet (wiremock, fixtures, fakes); live tests are `#[ignore]`d.
-- Never send synthetic input to the real desktop or kill processes by name: live UI checks run under Xvfb with isolated profiles.
+- Nothing a test, check or measurement starts may reach the developer's desktop: no synthetic input, windows, tray icons or notifications on its display or its session bus, and never kill processes by name. Rust tests start the app on `caskade_test_desktop::PrivateDesktop` (its own Xvfb and D-Bus); scripts run it under `scripts/private-desktop.sh`, whose `--guard` refuses a login session's display or bus. `xvfb-run` alone isn't enough: the bus is still the desktop's, and a test's tray icon vanishing crashed Cinnamon (#122). Real-display runs are the user's (#120).
 - Don't start threads, re-read whole tables on a timer, parse large files whole, or watch large trees recursively: see the tech spec's performance section.
 - caskade-server (the IGDB metadata server) is closed source: never link to it.

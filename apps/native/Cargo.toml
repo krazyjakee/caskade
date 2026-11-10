@@ -86,6 +86,8 @@ windows-registry = "0.6"
 
 [dev-dependencies]
 tempfile = "=3.27.0"
+# The smoke and e2e tests' own display and session bus (#122).
+caskade-test-desktop = { path = "../../crates/caskade-test-desktop" }
 
 [lints]
 workspace = true

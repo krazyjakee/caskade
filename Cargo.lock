@@ -1765,6 +1765,7 @@ dependencies = [
  "caskade-sources",
  "caskade-streaming",
  "caskade-system-stats",
+ "caskade-test-desktop",
  "caskade-webview2",
  "gdkx11",
  "gtk",
@@ -1982,6 +1983,7 @@ dependencies = [
  "caskade-core",
  "caskade-input",
  "caskade-player",
+ "caskade-test-desktop",
  "caskade-ui-data",
  "caskade-ui-i18n",
  "caskade-ui-input",
@@ -2187,6 +2189,13 @@ dependencies = [
  "tempfile",
  "tokio",
  "tracing",
+]
+
+[[package]]
+name = "caskade-test-desktop"
+version = "0.1.0"
+dependencies = [
+ "tempfile",
 ]
 
 [[package]]

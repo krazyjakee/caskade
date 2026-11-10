@@ -9,10 +9,14 @@
 //! no game running. The webview's full console script runs here once the
 //! native views exist.
 //!
-//! `xvfb-run -a cargo test -p caskade-native --test console_e2e -- --ignored`
+//! The app runs on a display and session bus of its own
+//! (`caskade-test-desktop`), never the developer's (#122):
+//! `cargo test -p caskade-native --test console_e2e -- --ignored`
 
 use std::path::PathBuf;
-use std::process::{Command, Stdio};
+use std::process::Stdio;
+
+use caskade_test_desktop::PrivateDesktop;
 use std::time::{Duration, Instant};
 
 const SCRIPT: &str = "\
@@ -30,12 +34,9 @@ press back
 ";
 
 #[test]
-#[ignore = "drives the built app under X: run with -- --ignored under xvfb-run"]
+#[ignore = "drives the built app on a private Xvfb display and bus: run with -- --ignored"]
 fn a_scripted_pad_drives_the_native_app_with_no_key_or_pointer_event() {
-    assert!(
-        std::env::var_os("DISPLAY").is_some(),
-        "run under Xvfb: xvfb-run -a cargo test …"
-    );
+    let desktop = PrivateDesktop::start();
     let temp = tempfile::tempdir().unwrap();
     let home = temp.path().to_path_buf();
     let runtime: PathBuf = home.join("run");
@@ -44,12 +45,8 @@ fn a_scripted_pad_drives_the_native_app_with_no_key_or_pointer_event() {
     std::fs::write(&script, SCRIPT).unwrap();
     let report = home.join("report.json");
     let log = std::fs::File::create(home.join("native.log")).unwrap();
-    let mut app = Command::new(env!("CARGO_BIN_EXE_caskade-native"))
-        .env_clear()
-        .env("PATH", std::env::var_os("PATH").unwrap_or_default())
-        .env("DISPLAY", std::env::var_os("DISPLAY").unwrap())
-        // xvfb-run's display needs its cookie.
-        .envs(std::env::var_os("XAUTHORITY").map(|file| ("XAUTHORITY", file)))
+    let mut app = desktop
+        .command(env!("CARGO_BIN_EXE_caskade-native"))
         .env("HOME", &home)
         .env("XDG_DATA_HOME", home.join("data"))
         .env("XDG_CONFIG_HOME", home.join("config"))

@@ -1,17 +1,21 @@
 //! #87's smoke test: the native binary starts on a library of its own,
 //! restores its window's saved place and size, plays a web game and opens
 //! a video (each a wry window in a process of its own), and quits cleanly
-//! with its window state saved. Needs an X display without a window
-//! manager (Xvfb) and `xwininfo`; nothing reaches the internet: the game
-//! and the video's page are served here, on loopback.
+//! with its window state saved. Each test starts the app on a display and
+//! session bus of its own (`caskade-test-desktop`: Xvfb and dbus-daemon,
+//! no window manager), never the developer's (#122); `xwininfo` reads its
+//! windows. Nothing reaches the internet: the game and the video's page are
+//! served here, on loopback.
 //!
-//! `xvfb-run -a cargo test -p caskade-native --test smoke -- --ignored`
+//! `cargo test -p caskade-native --test smoke -- --ignored`
 
 use std::io::{BufRead, BufReader, Write};
 use std::net::TcpListener;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::time::{Duration, Instant};
+
+use caskade_test_desktop::PrivateDesktop;
 
 use caskade_core::{
     AppPaths,
@@ -59,9 +63,9 @@ fn page(path: &str) -> String {
 
 /// Every top-level window on the display: its title and geometry
 /// (`WIDTHxHEIGHT+X+Y`), as `xwininfo` says.
-fn windows() -> Vec<(String, String)> {
+fn windows(display: &str) -> Vec<(String, String)> {
     let output = Command::new("xwininfo")
-        .args(["-root", "-tree"])
+        .args(["-display", display, "-root", "-tree"])
         .output()
         .expect("xwininfo runs");
     String::from_utf8_lossy(&output.stdout)
@@ -81,10 +85,10 @@ fn windows() -> Vec<(String, String)> {
 }
 
 /// Waits up to `limit` for a window titled `title`; its geometry.
-fn window(title: &str, limit: Duration) -> Option<String> {
+fn window(display: &str, title: &str, limit: Duration) -> Option<String> {
     let deadline = Instant::now() + limit;
     while Instant::now() < deadline {
-        if let Some((_, geometry)) = windows().into_iter().find(|(name, _)| name == title) {
+        if let Some((_, geometry)) = windows(display).into_iter().find(|(name, _)| name == title) {
             return Some(geometry);
         }
         std::thread::sleep(Duration::from_millis(200));
@@ -135,12 +139,9 @@ fn profile(home: &Path) -> AppPaths {
 }
 
 #[test]
-#[ignore = "needs an X display (Xvfb, no window manager) and xwininfo: run with -- --ignored"]
+#[ignore = "starts the app on a private Xvfb display and bus: run with -- --ignored"]
 fn starts_restores_its_window_plays_a_web_game_and_a_video_and_quits() {
-    assert!(
-        std::env::var_os("DISPLAY").is_some(),
-        "run under Xvfb: xvfb-run -a cargo test …"
-    );
+    let desktop = PrivateDesktop::start();
     let temp = tempfile::tempdir().unwrap();
     let home = temp.path().to_path_buf();
     let paths = profile(&home);
@@ -168,12 +169,8 @@ fn starts_restores_its_window_plays_a_web_game_and_a_video_and_quits() {
     let runtime: PathBuf = home.join("run");
     std::fs::create_dir_all(&runtime).unwrap();
     let log = std::fs::File::create(home.join("native.log")).unwrap();
-    let mut app = Command::new(env!("CARGO_BIN_EXE_caskade-native"))
-        .env_clear()
-        .env("PATH", std::env::var_os("PATH").unwrap_or_default())
-        .env("DISPLAY", std::env::var_os("DISPLAY").unwrap())
-        // xvfb-run's display needs its cookie.
-        .envs(std::env::var_os("XAUTHORITY").map(|file| ("XAUTHORITY", file)))
+    let mut app = desktop
+        .command(env!("CARGO_BIN_EXE_caskade-native"))
         .env("HOME", &home)
         .env("XDG_DATA_HOME", home.join("data"))
         .env("XDG_CONFIG_HOME", home.join("config"))
@@ -199,19 +196,21 @@ fn starts_restores_its_window_plays_a_web_game_and_a_video_and_quits() {
         // Without a window manager the window goes exactly where it asks.
         let restored = "1100x700+40+30";
         let deadline = Instant::now() + Duration::from_secs(30);
-        while !windows()
+        while !windows(desktop.display())
             .iter()
             .any(|(title, geometry)| title == "Caskade" && geometry == restored)
         {
             assert!(
                 Instant::now() < deadline,
                 "no main window at {restored}: {:?}",
-                windows()
+                windows(desktop.display())
             );
             std::thread::sleep(Duration::from_millis(200));
         }
-        let game = window("Smoke Game", Duration::from_secs(30)).expect("the web game's window");
-        let video = window("Smoke test", Duration::from_secs(30)).expect("the video window");
+        let game = window(desktop.display(), "Smoke Game", Duration::from_secs(30))
+            .expect("the web game's window");
+        let video = window(desktop.display(), "Smoke test", Duration::from_secs(30))
+            .expect("the video window");
         (game, video)
     });
     // Whatever happened: the app, and the windows it started, end here.
@@ -241,21 +240,17 @@ fn starts_restores_its_window_plays_a_web_game_and_a_video_and_quits() {
 /// process gets), within the restart budget the webviews share; past it
 /// Caskade stops instead of looping.
 #[test]
-#[ignore = "needs an X display (Xvfb, no window manager): run with -- --ignored"]
+#[ignore = "starts the app on a private Xvfb display and bus: run with -- --ignored"]
 fn a_panicking_window_restarts_within_the_budget_then_stops() {
-    assert!(std::env::var_os("DISPLAY").is_some(), "run under Xvfb");
+    let desktop = PrivateDesktop::start();
     let temp = tempfile::tempdir().unwrap();
     let home = temp.path().to_path_buf();
     let runtime = home.join("run");
     std::fs::create_dir_all(&runtime).unwrap();
     let log_path = home.join("native.log");
     let log = std::fs::File::create(&log_path).unwrap();
-    let mut app = Command::new(env!("CARGO_BIN_EXE_caskade-native"))
-        .env_clear()
-        .env("PATH", std::env::var_os("PATH").unwrap_or_default())
-        .env("DISPLAY", std::env::var_os("DISPLAY").unwrap())
-        // xvfb-run's display needs its cookie.
-        .envs(std::env::var_os("XAUTHORITY").map(|file| ("XAUTHORITY", file)))
+    let mut app = desktop
+        .command(env!("CARGO_BIN_EXE_caskade-native"))
         .env("HOME", &home)
         .env("XDG_DATA_HOME", home.join("data"))
         .env("XDG_CONFIG_HOME", home.join("config"))
@@ -302,22 +297,18 @@ fn a_panicking_window_restarts_within_the_budget_then_stops() {
 /// A second start hands its `caskade://` link to the running Caskade and
 /// ends; the running one queues the link's install for confirmation (#88).
 #[test]
-#[ignore = "needs an X display (Xvfb, no window manager): run with -- --ignored"]
+#[ignore = "starts the app on a private Xvfb display and bus: run with -- --ignored"]
 fn a_second_start_hands_its_link_to_the_running_caskade() {
-    assert!(std::env::var_os("DISPLAY").is_some(), "run under Xvfb");
+    let desktop = PrivateDesktop::start();
     let temp = tempfile::tempdir().unwrap();
     let home = temp.path().to_path_buf();
     let runtime = home.join("run");
     std::fs::create_dir_all(&runtime).unwrap();
     let start = |name: &str, args: &[&str], quit: Option<&str>| {
         let log = std::fs::File::create(home.join(name)).unwrap();
-        let mut command = Command::new(env!("CARGO_BIN_EXE_caskade-native"));
+        let mut command = desktop.command(env!("CARGO_BIN_EXE_caskade-native"));
         command
             .args(args)
-            .env_clear()
-            .env("PATH", std::env::var_os("PATH").unwrap_or_default())
-            .env("DISPLAY", std::env::var_os("DISPLAY").unwrap())
-            .envs(std::env::var_os("XAUTHORITY").map(|file| ("XAUTHORITY", file)))
             .env("HOME", &home)
             .env("XDG_DATA_HOME", home.join("data"))
             .env("XDG_CONFIG_HOME", home.join("config"))

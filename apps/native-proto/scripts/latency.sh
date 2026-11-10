@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Input latency on a private Xvfb: moves the pointer onto a card and off it
+# Input latency on a private desktop (scripts/private-desktop.sh: its own Xvfb
+# and session bus, never the developer's, #122): moves the pointer onto a card and off it
 # again 20 times each (xdotool, on the private display only; each move restyles
 # the card's hover state, which takes one frame) and reports the time from
 # sending the event to the end of the next frame, on the monotonic clock.
@@ -7,14 +8,12 @@
 #   latency.sh <prototype built with log-frame-times> <library copy> <out dir>
 set -euo pipefail
 here=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+if [ -z "${CASKADE_PRIVATE_DESKTOP:-}" ]; then
+  exec "$here/../../../scripts/private-desktop.sh" --size 1440x900 -- "$0" "$@"
+fi
 bin=$(realpath "$1") home=$(realpath "$2") out=$3
 mkdir -p "$out"
-d=:$((520 + RANDOM % 100))
-Xvfb "$d" -screen 0 1440x900x24 -nolisten tcp >/dev/null 2>&1 &
-xvfb=$!
-trap 'kill $xvfb 2>/dev/null' EXIT
-sleep 1
-export DISPLAY=$d CASKADE_PROTO_HOME=$home CASKADE_PROTO_WIDTH=1440 CASKADE_PROTO_HEIGHT=900
+export CASKADE_PROTO_HOME=$home CASKADE_PROTO_WIDTH=1440 CASKADE_PROTO_HEIGHT=900
 export CASKADE_PROTO_BENCH=idle CASKADE_PROTO_BENCH_SETTLE=2 CASKADE_PROTO_BENCH_SECONDS=40
 python3 -I "$here/frames.py" --out "$out" -- "$bin" >/dev/null &
 runner=$!

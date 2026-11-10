@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 # Every animation in themes/ (assets/gallery.html with the app's compiled CSS)
-# in Blitz (the prototype) and in WebKitGTK (MiniBrowser), each on a private
-# Xvfb: after 5 s the pointer moves onto the card (on that private display
-# only), then 24 screenshots 125 ms apart. Reports, per animated element,
+# in Blitz (the prototype) and in WebKitGTK (MiniBrowser), one after the other on
+# a private desktop (scripts/private-desktop.sh: its own Xvfb and session bus,
+# never the developer's, #122): after 5 s the pointer moves onto the card (on
+# that private display only), then 24 screenshots 125 ms apart. Reports, per animated element,
 # whether and how much it moved, and keeps a contact sheet of both.
 #
 #   gallery.sh <prototype binary> <library copy> <out dir>
 set -euo pipefail
 here=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+if [ -z "${CASKADE_PRIVATE_DESKTOP:-}" ]; then
+  exec "$here/../../../scripts/private-desktop.sh" --size 1000x700 -- "$0" "$@"
+fi
 proto=$(cd "$here/.." && pwd)
 bin=$(realpath "$1") home=$(realpath "$2") out=$3
 mkdir -p "$out"
@@ -24,11 +28,8 @@ out=$(realpath "$out")
 capture() { # name, command...
   local name=$1
   shift
-  local d=:$((700 + RANDOM % 100))
-  Xvfb "$d" -screen 0 1000x700x24 -nolisten tcp >/dev/null 2>&1 &
-  local xvfb=$!
-  sleep 1
-  DISPLAY=$d "$@" >"$out/$name.log" 2>&1 &
+  local d=$DISPLAY
+  "$@" >"$out/$name.log" 2>&1 &
   local app=$!
   sleep 5
   DISPLAY=$d xdotool mousemove 700 150
@@ -38,7 +39,6 @@ capture() { # name, command...
     sleep 0.125
   done
   kill "$app" 2>/dev/null || true
-  kill "$xvfb" 2>/dev/null || true
   wait "$app" 2>/dev/null || true
 }
 

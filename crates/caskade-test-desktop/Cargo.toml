@@ -1,0 +1,13 @@
+[package]
+name = "caskade-test-desktop"
+version = "0.1.0"
+description = "A private X display and D-Bus session bus for tests that start Caskade, and the guard that keeps them off the developer's desktop (#122)"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+tempfile = "=3.27.0"
+
+[lints]
+workspace = true

@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # BLITZ-0 on a real display: idle, spinner, ambient and scroll runs of the
 # prototype, each driving itself (no synthetic input) and exiting when done.
-# Opens one window at a time on the current display.
+# Opens one window at a time on the current display: only the user runs it
+# (#120). It refuses a login session's display or bus unless
+# CASKADE_REAL_DISPLAY=1 says the user is running it (#122).
 #
 #   display-suite.sh --bin <dir with proto-hybrid and proto-hybrid-timed> \
 #                    --home <library copy> --out <dir> [--refresh 59.95] [--only name]
@@ -10,6 +12,12 @@
 # cache/caskade/artwork), never the live one: opening it runs migrations.
 set -euo pipefail
 here=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+if [ "${CASKADE_REAL_DISPLAY:-}" != 1 ]; then
+  "$here/../../../scripts/private-desktop.sh" --guard || {
+    echo "display-suite.sh: real-display runs are the user's (#120); set CASKADE_REAL_DISPLAY=1 if this is one" >&2
+    exit 1
+  }
+fi
 bin= home= out= refresh=59.95 only=
 while [ $# -gt 0 ]; do
   case $1 in

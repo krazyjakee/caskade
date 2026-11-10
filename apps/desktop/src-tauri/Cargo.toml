@@ -102,6 +102,8 @@ libappindicator-sys = "0.9"
 caskade-emulation-fixtures = { path = "../../../crates/caskade-emulation-fixtures" }
 tauri = { version = "2.12", features = ["test"] }
 tempfile = "=3.27.0"
+# The e2e's own display and session bus (#122).
+caskade-test-desktop = { path = "../../../crates/caskade-test-desktop" }
 wiremock = "0.6"
 # Catalogue package fixtures (#182); the core's pin.
 zip = { version = "=9.1.3", default-features = false, features = ["deflate"] }

@@ -62,6 +62,30 @@ fn image() -> Result<tray_icon::Icon, String> {
     tray_icon::Icon::from_rgba(image.into_raw(), width, height).map_err(|error| error.to_string())
 }
 
+/// Runs that put no icon up (#122): a data probe
+/// (`CASKADE_DATA_PROBE`), a motion measurement
+/// (`CASKADE_NATIVE_SMOKE_MOTION`), or `CASKADE_NATIVE_NO_TRAY=1`.
+/// Screenshots (`--shots`) never get this far.
+const NO_TRAY: [&str; 3] = [
+    "CASKADE_NATIVE_NO_TRAY",
+    "CASKADE_DATA_PROBE",
+    "CASKADE_NATIVE_SMOKE_MOTION",
+];
+
+/// Whether this run puts a tray icon up.
+fn wanted() -> bool {
+    let quiet = NO_TRAY
+        .iter()
+        .find(|name| std::env::var_os(name).is_some_and(|value| !value.is_empty()));
+    if let Some(name) = quiet {
+        tracing::info!(
+            because = name,
+            "no tray icon in this run; closing the window quits"
+        );
+    }
+    quiet.is_none()
+}
+
 /// Puts the icon up on this thread, and takes its clicks and menu.
 fn build() -> Result<(), String> {
     let macos = cfg!(target_os = "macos");
@@ -273,6 +297,9 @@ mod linux {
 
     /// Puts the icon up on the GTK thread; whether it's up.
     pub fn start() -> bool {
+        if !wanted() {
+            return false;
+        }
         on_gtk(|| {
             if !indicator_available() {
                 tracing::warn!(
@@ -322,6 +349,9 @@ pub fn start() -> bool {
 /// running (Windows and macOS).
 #[cfg(not(target_os = "linux"))]
 pub fn start_here() -> bool {
+    if !wanted() {
+        return false;
+    }
     match build() {
         Ok(()) => true,
         Err(error) => {

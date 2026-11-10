@@ -15,7 +15,10 @@
 # xvfb (default): a user and network namespace (no network), a private Xvfb
 # and a private D-Bus with a throwaway keyring, so the live desktop and its
 # keychain are never touched. current: the session's own display (for GPU and
-# vsync numbers); still no network namespace changes, no input is sent.
+# vsync numbers); still no network namespace changes, no input is sent. Only
+# the user runs it (#120): it refuses a login session's display or bus when
+# an agent's or a test's run would reach the developer's desktop (#122);
+# CASKADE_REAL_DISPLAY=1 is the user saying it's theirs.
 set -euo pipefail
 here=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
@@ -64,6 +67,12 @@ print(json.dumps({"label": label, "app": app, "app_bytes": os.path.getsize(app),
   "window": size, "settle_s": float(settle), "duration_s": float(duration), "interval_s": float(interval),
   "click": click, "kernel": platform.release(), "cpu": cpu, "cores": os.cpu_count(), "ram_mb": mem, "gpu": gpu}, indent=1))
 EOF
+  if [ "$display" != xvfb ] && [ "${CASKADE_REAL_DISPLAY:-}" != 1 ]; then
+    "$here/../../../scripts/private-desktop.sh" --guard || {
+      echo "run.sh: --display current is for the user's own runs (#120); set CASKADE_REAL_DISPLAY=1 if this is one" >&2
+      exit 1
+    }
+  fi
   args=(--inside "$app" "$out" "$display" "$size" "$settle" "$duration" "$interval" "$click" "$exe" "$startup" "$@")
   if [ "$display" = xvfb ]; then
     exec unshare -rn "$0" "${args[@]}"
