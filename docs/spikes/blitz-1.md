@@ -71,7 +71,11 @@ doesn't set it).
 - The theme screenshots (`tests/shots`) now show the library card's cut
   title ending in "…" (the only pixels that changed).
 
-## Upstream (not filed: waiting for the user's go)
+## Upstream
+
+Submitted on 10 Nov 2026 where upstream didn't already have the bug or a fix;
+each item's upstream issue or PR and its state is in [#127](https://github.com/krazyjakee/caskade/issues/127). The
+drafts below are kept as written.
 
 ### A comment on blitz#893
 

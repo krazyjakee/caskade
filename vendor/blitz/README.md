@@ -20,14 +20,15 @@ formatting and i18n checks skip them.
 
 | Repo | Patches | Upstream |
 | --- | --- | --- |
-| blitz | 0001–0005: gradient centring and tiling, inline SVG snapshots, damage-limited repaint of animation frames, `prefers-reduced-motion`; 0006–0013: screen readers (ARIA states and properties, bounds, actions routed to DOM events, controls named by their labels, no stray `<main>` around a Dioxus app, the AT-SPI backend built, text as labels, the window named); 0014–0020: text fields (composition events, IME placement and purpose, preedit underline, read-only and password fields, clipboard fixes and commands, selection past the edge and by long press, `::selection`, setting the value); 0021–0022: `text-overflow` (ellipsis and string markers, from blitz#893) and placeholders in the `::placeholder` style; 0023: images with an empty `alt` are decorative; 0024: `position: sticky` (blitz#887, ported); 0025: SVG background images tiled at `background-size`, and SVGs that use filters drawn (rasterised by resvg, once per size); 0026: dioxus-native's `gpu-cpu-fallback` renderer (vello_hybrid, or vello_cpu without a usable GPU) | not yet submitted ([0021–0022 drafted](../../docs/spikes/blitz-1.md#upstream-not-filed-waiting-for-the-users-go)) |
-| anyrender | 0001–0002: damage rendering in vello_hybrid; 0003–0004 measurement only (`ANYRENDER_PRESENT_MODE`, `ANYRENDER_FRAME_LIMIT_HZ`); 0005: damage rendering in vello_cpu over softbuffer; 0006: vello_hybrid reports a failed start (and can refuse software adapters) instead of panicking; 0007: a type-erased `PaintScene` | not yet submitted (0003–0004 never) |
-| stylo | 0001–0002: when a stepped animation next changes, the `prefers-reduced-motion` media feature | not yet submitted |
-| taffy | 0001: an auto-height column flex container sizes from its items' hypothetical main sizes, not their content (`flex: 1 1 0` with a min-height kept a scroll area the view's height) | not yet submitted ([draft issue](../../docs/spikes/blitz-2.md#upstream-not-filed-waiting-for-the-users-go)) |
+| blitz | 0001–0005: gradient centring and tiling, inline SVG snapshots, damage-limited repaint of animation frames, `prefers-reduced-motion`; 0006–0013: screen readers (ARIA states and properties, bounds, actions routed to DOM events, controls named by their labels, no stray `<main>` around a Dioxus app, the AT-SPI backend built, text as labels, the window named); 0014–0020: text fields (composition events, IME placement and purpose, preedit underline, read-only and password fields, clipboard fixes and commands, selection past the edge and by long press, `::selection`, setting the value); 0021–0022: `text-overflow` (ellipsis and string markers, from blitz#893) and placeholders in the `::placeholder` style; 0023: images with an empty `alt` are decorative; 0024: `position: sticky` (blitz#887, ported); 0025: SVG background images tiled at `background-size`, and SVGs that use filters drawn (rasterised by resvg, once per size); 0026: dioxus-native's `gpu-cpu-fallback` renderer (vello_hybrid, or vello_cpu without a usable GPU) | [#127](https://github.com/krazyjakee/caskade/issues/127) |
+| anyrender | 0001–0002: damage rendering in vello_hybrid; 0003–0004 measurement only (`ANYRENDER_PRESENT_MODE`, `ANYRENDER_FRAME_LIMIT_HZ`); 0005: damage rendering in vello_cpu over softbuffer; 0006: vello_hybrid reports a failed start (and can refuse software adapters) instead of panicking; 0007: a type-erased `PaintScene` | [#127](https://github.com/krazyjakee/caskade/issues/127) (0003–0004 stay local) |
+| stylo | 0001–0002: when a stepped animation next changes, the `prefers-reduced-motion` media feature | [#127](https://github.com/krazyjakee/caskade/issues/127) |
+| taffy | 0001: an auto-height column flex container sizes from its items' hypothetical main sizes, not their content (`flex: 1 1 0` with a min-height kept a scroll area the view's height) | [#127](https://github.com/krazyjakee/caskade/issues/127) |
 
 What each does and why: [`docs/spikes/blitz-3.md`](../../docs/spikes/blitz-3.md)
-(#82, with measurements), [`docs/spikes/blitz-4.md`](../../docs/spikes/blitz-4.md) (#83), [`docs/spikes/blitz-5.md`](../../docs/spikes/blitz-5.md) (#84), [`docs/spikes/blitz-6.md`](../../docs/spikes/blitz-6.md) (#85) and [`docs/spikes/blitz-2.md`](../../docs/spikes/blitz-2.md) (#81). When a patch lands upstream, drop it from the series at the next pin
-bump.
+(#82, with measurements), [`docs/spikes/blitz-4.md`](../../docs/spikes/blitz-4.md) (#83), [`docs/spikes/blitz-5.md`](../../docs/spikes/blitz-5.md) (#84), [`docs/spikes/blitz-6.md`](../../docs/spikes/blitz-6.md) (#85) and [`docs/spikes/blitz-2.md`](../../docs/spikes/blitz-2.md) (#81). [#127](https://github.com/krazyjakee/caskade/issues/127) lists every patch and
+workaround with its upstream issue or PR and its state. When a patch lands
+upstream, drop it from the series at the next pin bump.
 
 ## Regenerating
 
@@ -75,7 +76,9 @@ dependency: bump it with Blitz's.
    Dioxus's crates.io versions there if Blitz's workspace moved them.
 3. `vendor/blitz/update.sh <work dir>`. A patch that no longer applies stops
    it: rebase it in the checkout (`git am --abort`, fix, commit), then export
-   the series again as above. Drop patches that landed upstream.
+   the series again as above. Drop patches that landed upstream: go through
+   [#127](https://github.com/krazyjakee/caskade/issues/127), tick the rows the new pins contain, and remove the
+   workarounds those rows name.
 4. If the set of crates the root lockfile takes from these repos changed,
    update the root `Cargo.toml`'s `[patch]` lists (one entry per crate the
    lockfile names; the prototype's lists follow `PINS`).

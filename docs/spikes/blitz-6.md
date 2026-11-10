@@ -59,7 +59,11 @@ CPU: no blur means no cost; the resolution adds nothing to a frame.
 
 ## Upstream
 
-Not submitted (the user approves the batch):
+Submitted on 10 Nov 2026 where upstream didn't already have the bug or a fix;
+each item's upstream issue or PR and its state is in [#127](https://github.com/krazyjakee/caskade/issues/127). The
+drafts below are kept as written.
+
+The drafts:
 
 - **DioxusLabs/blitz#887 "Implement position: sticky"** is LinuxBoy-96's
   open PR; `blitz/0024` is its port to our pin, with seven tests. Offer

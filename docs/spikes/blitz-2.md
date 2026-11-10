@@ -64,7 +64,11 @@ The patch adds two fixtures, generated from Chrome with Taffy's
   a min-height, where the automatic minimum keeps the content's 200 px. It
   passes either way.
 
-## Upstream (not filed: waiting for the user's go)
+## Upstream
+
+Submitted on 10 Nov 2026 where upstream didn't already have the bug or a fix;
+each item's upstream issue or PR and its state is in [#127](https://github.com/krazyjakee/caskade/issues/127). The
+drafts below are kept as written.
 
 A Taffy issue, with the patch as its pull request:
 

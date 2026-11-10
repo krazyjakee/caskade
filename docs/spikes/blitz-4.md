@@ -78,7 +78,9 @@ spinner doesn't rebuild it.
 
 ## Upstream pull requests
 
-Not submitted: they go out under the user's name once approved. Each is one
+Submitted on 10 Nov 2026 where upstream didn't already have the bug or a fix;
+each item's upstream issue or PR and its state is in [#127](https://github.com/krazyjakee/caskade/issues/127). The
+drafts below are kept as written. Each is one
 patch file in `vendor/blitz/patches/blitz/`, with its tests (Blitz's suite,
 358 tests, passes with the series).
 

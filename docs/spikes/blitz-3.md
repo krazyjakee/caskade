@@ -199,7 +199,9 @@ From engineer 1's work on input and focus (#92), all at the BLITZ-0 pin:
 
 ## Upstream pull requests
 
-Not submitted: they go out under the user's name once approved. Each is one
+Submitted on 10 Nov 2026 where upstream didn't already have the bug or a fix;
+each item's upstream issue or PR and its state is in [#127](https://github.com/krazyjakee/caskade/issues/127). The
+drafts below are kept as written. Each is one
 patch file in `vendor/blitz/patches/`.
 
 **DioxusLabs/blitz: "Centre angle linear gradients on the gradient box"**
