@@ -5,25 +5,26 @@
 //! [`share_receive_collection`] adds to the signed-in account's collections
 //! without downloading anything.
 use caskade_core::{accounts::AccountService, model::Collection};
-use caskade_share::{ShareExpiry, ShareItem, ShareRecord, Shares};
+use caskade_share::{ShareExpiry, ShareItem, Shares};
+
+use super::shares::ShareCreated;
 
 use crate::error::{CommandError, report};
 
-/// Shares `item` until `expiry`, and its link. A collection is the
-/// signed-in account's.
+/// Shares `item` until `expiry`. A collection is the signed-in account's.
 pub async fn share_item(
     shares: &Shares,
     accounts: &AccountService,
     item: ShareItem,
     expiry: ShareExpiry,
-) -> Result<(ShareRecord, String), CommandError> {
+) -> Result<ShareCreated, CommandError> {
     let account = accounts.require_active().map_err(report)?;
     let share = shares
         .share_item(item, expiry, &account)
         .await
         .map_err(report)?;
     let link = shares.link(&share.id).await.map_err(report)?;
-    Ok((share, link))
+    Ok(ShareCreated { share, link })
 }
 
 /// Adds the collection `link` shares to the signed-in account's

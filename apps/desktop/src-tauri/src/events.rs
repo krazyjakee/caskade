@@ -64,6 +64,16 @@ webview_events!(
     NotificationsChanged,
     BackupChanged,
     ThemeReloaded,
+    PlayingElsewhereChanged,
+    RemotePlayRequested,
+    StoreAccountsChanged,
+    AddonProgress,
+    SharesChanged,
+    DevicesChanged,
+    PairingLinkOpened,
+    InstallRequested,
+    InstallRefused,
+    StreamingPairingFinished,
 );
 
 /// The app layer's [`app::Emit`] sink for this app's webview.

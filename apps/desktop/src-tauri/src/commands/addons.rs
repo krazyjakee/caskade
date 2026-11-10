@@ -2,117 +2,37 @@
 //! (installed, update, compatible), its status, a refresh, and its images
 //! through the artwork cache, so nothing in the catalogue runs in the
 //! webview. Plugins and themes only.
-use crate::error::{CommandError, report};
-use caskade_addons::{
-    AddonKind, AddonOs, AppMode, CatalogueItem, CatalogueService, CatalogueStatus, HostFacts,
-    InstalledAddon, evaluate,
-};
-use caskade_core::{
-    artwork::{ArtworkCache, CachedArtwork},
-    themes::{ThemeService, ThemeSource},
-};
+use crate::error::CommandError;
+pub use app::*;
+use caskade_addons::{AppMode, CatalogueService, InstalledAddon};
+use caskade_app::commands::addons as app;
+use caskade_core::{artwork::CachedArtwork, themes::ThemeService};
 use caskade_plugin_host::PluginHost;
-use serde::{Deserialize, Serialize};
-use specta::Type;
 use tauri::{Manager, Runtime, State};
-
-/// The catalogue as Settings shows it.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct CatalogueView {
-    pub status: CatalogueStatus,
-    pub items: Vec<CatalogueItem>,
-}
-
-/// The cache the catalogue's images go through; `None` without one.
-pub struct AddonMedia(pub Option<ArtworkCache>);
-
-/// The catalogue client: `CASKADE_CATALOGUE_URL` and
-/// `CASKADE_CATALOGUE_PUBKEY` point a run at another catalogue (a local
-/// server while developing), else the curated origin checked against the
-/// release key the updater uses.
+/// The catalogue client (`caskade_app`'s), checked against the release key
+/// the updater uses unless the environment names another.
 pub fn service(
     app: &tauri::AppHandle<impl Runtime>,
     dir: std::path::PathBuf,
 ) -> Option<CatalogueService> {
-    let origin = std::env::var("CASKADE_CATALOGUE_URL")
-        .ok()
-        .unwrap_or_else(|| caskade_addons::DEFAULT_ORIGIN.to_owned());
-    let key = std::env::var("CASKADE_CATALOGUE_PUBKEY").ok().or_else(|| {
-        app.config()
-            .plugins
-            .0
-            .get("updater")
-            .and_then(|updater| updater.get("pubkey"))
-            .and_then(|key| key.as_str())
-            .map(str::to_owned)
-    });
-    CatalogueService::new(dir, &origin, key.as_deref())
-        .inspect_err(|error| tracing::error!(%error, "the add-on catalogue is unavailable"))
-        .ok()
+    let key = app
+        .config()
+        .plugins
+        .0
+        .get("updater")
+        .and_then(|updater| updater.get("pubkey"))
+        .and_then(|key| key.as_str())
+        .map(str::to_owned);
+    app::service(dir, key)
 }
 
-/// Whether the catalogue is served from this machine (a local server):
-/// then its images may come from there too.
-pub fn local_origin(service: &CatalogueService) -> bool {
-    service.origin().host_str().is_some_and(|host| {
-        host == "localhost"
-            || host
-                .parse::<std::net::IpAddr>()
-                .is_ok_and(|ip| ip.is_loopback())
-    })
-}
-
-/// What is installed: plugins by manifest id and version, and themes
-/// (built-in and installed; a plugin's bundled themes are the plugin's).
-pub(crate) async fn installed<R: Runtime>(app: &tauri::AppHandle<R>) -> Vec<InstalledAddon> {
-    let mut installed = Vec::new();
-    if let Some(host) = app.try_state::<PluginHost>() {
-        installed.extend(
-            host.list()
-                .await
-                .into_iter()
-                .filter(|plugin| !plugin.dev)
-                .map(|plugin| InstalledAddon {
-                    id: plugin.id,
-                    kind: AddonKind::Plugin,
-                    version: plugin.version,
-                }),
-        );
-    }
-    if let Some(themes) = app.try_state::<ThemeService>() {
-        installed.extend(
-            themes
-                .list()
-                .into_iter()
-                .filter(|theme| matches!(theme.source, ThemeSource::Builtin | ThemeSource::User))
-                .map(|theme| InstalledAddon {
-                    id: theme.id,
-                    kind: AddonKind::Theme,
-                    version: Some(theme.version),
-                }),
-        );
-    }
-    installed
-}
-
-pub(crate) fn host_facts(mode: AppMode) -> HostFacts {
-    HostFacts {
-        plugin_api: caskade_plugin_host::manifest::api_supported,
-        plugin_api_version: caskade_plugin_host::HOST_API.to_string(),
-        os: AddonOs::current(),
-        mode,
-    }
-}
-
-fn catalogue_service<R: Runtime>(
-    app: &tauri::AppHandle<R>,
-) -> Result<State<'_, CatalogueService>, CommandError> {
-    app.try_state::<CatalogueService>().ok_or_else(|| {
-        report(caskade_core::Error::Invalid(caskade_core::tr!(
-            "the add-on catalogue is unavailable"
-        )))
-    })
+/// What is installed: plugins and themes.
+pub async fn installed<R: Runtime>(app: &tauri::AppHandle<R>) -> Vec<InstalledAddon> {
+    app::installed(
+        app.try_state::<PluginHost>().as_deref(),
+        app.try_state::<ThemeService>().as_deref(),
+    )
+    .await
 }
 
 /// The catalogue as last fetched (offline too), with what each entry means
@@ -123,16 +43,13 @@ pub async fn addons_catalogue<R: Runtime>(
     app: tauri::AppHandle<R>,
     mode: AppMode,
 ) -> Result<CatalogueView, CommandError> {
-    let service = catalogue_service(&app)?;
-    let items = evaluate(
-        &service.catalogue(),
-        &installed(&app).await,
-        &host_facts(mode),
-    );
-    Ok(CatalogueView {
-        status: service.status(),
-        items,
-    })
+    app::addons_catalogue(
+        app.try_state::<CatalogueService>().as_deref(),
+        app.try_state::<PluginHost>().as_deref(),
+        app.try_state::<ThemeService>().as_deref(),
+        mode,
+    )
+    .await
 }
 
 /// Fetches the catalogue again; on failure the last good one stays and
@@ -143,9 +60,13 @@ pub async fn addons_catalogue_refresh<R: Runtime>(
     app: tauri::AppHandle<R>,
     mode: AppMode,
 ) -> Result<CatalogueView, CommandError> {
-    let service = catalogue_service(&app)?.inner().clone();
-    service.refresh().await;
-    addons_catalogue(app, mode).await
+    app::addons_catalogue_refresh(
+        app.try_state::<CatalogueService>().as_deref(),
+        app.try_state::<PluginHost>().as_deref(),
+        app.try_state::<ThemeService>().as_deref(),
+        mode,
+    )
+    .await
 }
 
 /// One of an entry's screenshots, fetched and re-encoded by the artwork
@@ -159,24 +80,13 @@ pub async fn addons_media<R: Runtime>(
     id: String,
     index: u32,
 ) -> Result<Option<CachedArtwork>, CommandError> {
-    let service = catalogue_service(&app)?;
-    let Some(cache) = &media.0 else {
-        return Ok(None);
-    };
-    let catalogue = service.catalogue();
-    let Some(image) = catalogue
-        .entry(&id)
-        .and_then(|entry| entry.screenshots.get(index as usize))
-    else {
-        return Ok(None);
-    };
-    match cache.download_metadata(&image.url).await {
-        Ok(cached) => Ok(Some(cached)),
-        Err(error) => {
-            tracing::debug!(%error, addon = %id, "catalogue image not loaded");
-            Ok(None)
-        }
-    }
+    app::addons_media(
+        app.try_state::<CatalogueService>().as_deref(),
+        &media,
+        &id,
+        index,
+    )
+    .await
 }
 
 #[cfg(test)]

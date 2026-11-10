@@ -24,8 +24,7 @@ pub async fn share_item(
     item: ShareItem,
     expiry: ShareExpiry,
 ) -> Result<ShareCreated, CommandError> {
-    let (share, link) = app::share_item(&shares, &accounts, item, expiry).await?;
-    Ok(ShareCreated { share, link })
+    app::share_item(&shares, &accounts, item, expiry).await
 }
 
 /// Adds the collection `link` shares to the signed-in account's

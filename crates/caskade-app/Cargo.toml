@@ -12,8 +12,14 @@ caskade-achievements = { path = "../caskade-achievements" }
 caskade-share = { path = "../caskade-share" }
 # The storage scanner the storage commands rescan with.
 caskade-sources = { path = "../caskade-sources" }
+# A share link as a QR code (`commands::shares`).
+qrcode = { version = "=0.14.1", default-features = false, features = ["svg"] }
 # Installed-games discovery and its controller (`discovery/`).
 caskade-discovery = { path = "../caskade-discovery" }
+# The add-on catalogue and packages.
+caskade-addons = { path = "../caskade-addons" }
+# Game streaming: the managed host and client, and pairing.
+caskade-streaming = { path = "../caskade-streaming" }
 # Plugins, their UI and the themes they bundle.
 caskade-plugin-host = { path = "../caskade-plugin-host" }
 serde = { version = "1", features = ["derive"] }

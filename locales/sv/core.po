@@ -1917,7 +1917,7 @@ msgstr "ROM-filens spel saknas"
 #: crates/caskade-core/src/install/peer.rs
 #: crates/caskade-core/src/install/recovery.rs
 #: crates/caskade-core/src/install/roms.rs
-#: apps/desktop/src-tauri/src/commands/install.rs
+#: crates/caskade-app/src/commands/install.rs
 msgid "This job is no longer in Activity."
 msgstr "Det här jobbet finns inte längre i Aktivitet."
 
@@ -2081,7 +2081,7 @@ msgid "the job didn't download anything"
 msgstr "jobbet laddade inte ner något"
 
 #: crates/caskade-core/src/install/recovery.rs
-#: apps/desktop/src-tauri/src/commands/install.rs
+#: crates/caskade-app/src/commands/install.rs
 msgid "input must be a nonempty path or URL"
 msgstr "indata måste vara en sökväg eller URL som inte är tom"
 
@@ -2806,7 +2806,7 @@ msgid "the plan names no release file"
 msgstr "planen anger ingen utgåvefil"
 
 #: crates/caskade-core/src/remote_play/mod.rs
-#: apps/desktop/src-tauri/src/commands/copies.rs
+#: crates/caskade-app/src/commands/copies.rs
 msgid "that device isn't paired"
 msgstr "den enheten är inte parkopplad"
 
@@ -5025,6 +5025,75 @@ msgstr "Det här provet kunde inte läsas."
 msgid "choose the game to link"
 msgstr "välj spelet att koppla"
 
+#: crates/caskade-app/src/commands/addon_packages.rs
+#: crates/caskade-app/src/commands/addons.rs
+msgid "the add-on catalogue is unavailable"
+msgstr "tilläggskatalogen är inte tillgänglig"
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "This add-on isn't in the catalogue any more."
+msgstr "Det här tillägget finns inte längre i katalogen."
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "plugins are unavailable"
+msgstr "plugins är inte tillgängliga"
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "the plugin didn't load"
+msgstr "pluginet lästes inte in"
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "the plugin's manifest is invalid"
+msgstr "pluginets manifest är ogiltigt"
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "themes are unavailable"
+msgstr "teman är inte tillgängliga"
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "a built-in or plugin theme already has this id"
+msgstr "ett inbyggt tema eller ett plugintema har redan detta id"
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "the theme didn't load"
+msgstr "temat lästes inte in"
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "{id} is already being installed"
+msgstr "{id} håller redan på att installeras"
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "only themes Caskade installed can be removed"
+msgstr "bara teman som Caskade har installerat kan tas bort"
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "This add-on isn't installed."
+msgstr "Det här tillägget är inte installerat."
+
+#: crates/caskade-app/src/commands/backup.rs
+msgid "That isn't a backup in the backup folder."
+msgstr "Det är ingen säkerhetskopia i mappen för säkerhetskopior."
+
+#: crates/caskade-app/src/commands/backup.rs
+msgid "No restore is waiting for a restart."
+msgstr "Ingen återställning väntar på en omstart."
+
+#: crates/caskade-app/src/commands/backup.rs
+msgid "Close your running games first: restoring restarts Caskade."
+msgstr "Stäng spelen som körs först: återställningen startar om Caskade."
+
+#: crates/caskade-app/src/commands/backup.rs
+msgid "Wait for installs, moves and updates to finish, or cancel them: restoring restarts Caskade."
+msgstr "Vänta tills installationer, flyttar och uppdateringar är klara, eller avbryt dem: återställningen startar om Caskade."
+
+#: crates/caskade-app/src/commands/copies.rs
+msgid "that device has no copy of the game"
+msgstr "den enheten har ingen kopia av spelet"
+
+#: crates/caskade-app/src/commands/copies.rs
+msgid "the game isn't installed on this computer in a folder that can be copied"
+msgstr "spelet är inte installerat på den här datorn i en mapp som kan kopieras"
+
 #: crates/caskade-app/src/commands/emulation.rs
 msgid "This emulator no longer exists."
 msgstr "Den här emulatorn finns inte längre."
@@ -5041,9 +5110,70 @@ msgstr "bildcachen är inte tillgänglig"
 msgid "at most {count} IGDB ids at a time"
 msgstr "högst {count} IGDB-id:n åt gången"
 
+#: crates/caskade-app/src/commands/install.rs
+msgid "storage locations unavailable"
+msgstr "lagringsplatserna är inte tillgängliga"
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "too many pending install requests; dismiss one first"
+msgstr "för många väntande installationsbegäranden; avfärda en först"
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "request is already being confirmed"
+msgstr "begäran håller redan på att bekräftas"
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "unknown or expired request"
+msgstr "okänd eller utgången begäran"
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "request is expired or already being confirmed"
+msgstr "begäran har gått ut eller håller redan på att bekräftas"
+
+#: crates/caskade-app/src/commands/install_requests.rs
+#: apps/desktop/src-tauri/src/commands/shares.rs
+msgid "receiving shares isn't available"
+msgstr "mottagning av delningar är inte tillgänglig"
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "that request isn't a share"
+msgstr "den begäran är inte en delning"
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "input must be one path or HTTP(S) URL"
+msgstr "indata måste vara en sökväg eller HTTP(S)-URL"
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "invalid download URL"
+msgstr "ogiltig nedladdnings-URL"
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "a magnet link needs a BitTorrent info hash (xt=urn:btih:…)"
+msgstr "en magnetlänk behöver en BitTorrent-infohash (xt=urn:btih:…)"
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "choose a local path, not a network or device path"
+msgstr "välj en lokal sökväg, inte en nätverks- eller enhetssökväg"
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "choose an absolute local path or HTTP(S) URL"
+msgstr "välj en absolut lokal sökväg eller HTTP(S)-URL"
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "input is not a file or folder"
+msgstr "indata är inte en fil eller mapp"
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "path is not UTF-8"
+msgstr "sökvägen är inte UTF-8"
+
 #: crates/caskade-app/src/commands/library.rs
 msgid "Couldn't open the file manager ({opener}) to show “{folder}”."
 msgstr "Det gick inte att öppna filhanteraren ({opener}) för att visa ”{folder}”."
+
+#: crates/caskade-app/src/commands/peer_backups.rs
+msgid "Devices aren't ready on this device yet."
+msgstr "Enheter är inte redo på den här enheten än."
 
 #: crates/caskade-app/src/commands/plugins.rs
 msgid "This plugin isn't installed any more."
@@ -5065,6 +5195,10 @@ msgstr "Det här tillägget har inget att köra."
 msgid "This plugin ran into a problem. The details say what."
 msgstr "Det här tillägget stötte på ett problem. Detaljerna visar vad."
 
+#: crates/caskade-app/src/commands/remote_play.rs
+msgid "it didn't start on that device"
+msgstr "det startade inte på den enheten"
+
 #: crates/caskade-app/src/commands/romm.rs
 msgid "the password or token is too long"
 msgstr "lösenordet eller token är för lång"
@@ -5077,9 +5211,45 @@ msgstr "Den sparplatsen finns inte på den här enheten."
 msgid "the script belongs to another scope"
 msgstr "skriptet hör till en annan omfattning"
 
+#: crates/caskade-app/src/commands/shares.rs
+msgid "the link is too long for a QR code"
+msgstr "länken är för lång för en QR-kod"
+
 #: crates/caskade-app/src/commands/storage.rs
 msgid "The storage location was added, but it disappeared from the list before it could be shown. Reload Settings → Storage."
 msgstr "Lagringsplatsen lades till, men den försvann från listan innan den kunde visas. Läs in Inställningar → Lagring igen."
+
+#: crates/caskade-app/src/commands/streaming.rs
+msgid "The code entered on {device} didn't match. Try again with a new code."
+msgstr "Koden som angavs på {device} stämde inte. Försök igen med en ny kod."
+
+#: crates/caskade-app/src/commands/streaming.rs
+msgid "{device} declined."
+msgstr "{device} avböjde."
+
+#: crates/caskade-app/src/commands/streaming.rs
+msgid "Nobody entered the code on {device} in time. Try again."
+msgstr "Ingen angav koden på {device} i tid. Försök igen."
+
+#: crates/caskade-app/src/commands/streaming.rs
+msgid "that device isn't on the network"
+msgstr "den enheten finns inte i nätverket"
+
+#: crates/caskade-app/src/commands/sync.rs
+msgid "no pairing link is waiting"
+msgstr "ingen parkopplingslänk väntar"
+
+#: crates/caskade-app/src/commands/themes.rs
+msgid "Safe mode: Caskade started with the default theme and without your custom CSS."
+msgstr "Felsäkert läge: Caskade startade med standardtemat och utan din anpassade CSS."
+
+#: crates/caskade-app/src/commands/themes.rs
+msgid "themes are not ready"
+msgstr "teman är inte redo"
+
+#: crates/caskade-app/src/commands/themes.rs
+msgid "Loading a theme folder is only available in development builds; run `caskade dev <folder>`"
+msgstr "Att läsa in en temamapp är bara möjligt i utvecklingsversioner; kör `caskade dev <folder>`"
 
 #: crates/caskade-app/src/deep_link.rs
 msgid "not a {scheme}: link"
@@ -5221,51 +5391,6 @@ msgstr "HOME är inte satt"
 msgid "Caskade couldn't open Default apps: {error}"
 msgstr "Caskade kunde inte öppna Standardappar: {error}"
 
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-#: apps/desktop/src-tauri/src/commands/addons.rs
-msgid "the add-on catalogue is unavailable"
-msgstr "tilläggskatalogen är inte tillgänglig"
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "This add-on isn't in the catalogue any more."
-msgstr "Det här tillägget finns inte längre i katalogen."
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "plugins are unavailable"
-msgstr "plugins är inte tillgängliga"
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "the plugin didn't load"
-msgstr "pluginet lästes inte in"
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "the plugin's manifest is invalid"
-msgstr "pluginets manifest är ogiltigt"
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "themes are unavailable"
-msgstr "teman är inte tillgängliga"
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "a built-in or plugin theme already has this id"
-msgstr "ett inbyggt tema eller ett plugintema har redan detta id"
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "the theme didn't load"
-msgstr "temat lästes inte in"
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "{id} is already being installed"
-msgstr "{id} håller redan på att installeras"
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "only themes Caskade installed can be removed"
-msgstr "bara teman som Caskade har installerat kan tas bort"
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "This add-on isn't installed."
-msgstr "Det här tillägget är inte installerat."
-
 #: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "Caskade was installed as a system package: update it with your package manager."
 msgstr "Caskade installerades som ett systempaket: uppdatera det med din pakethanterare."
@@ -5342,22 +5467,6 @@ msgstr "det här kontot får inte installera paket, eller så kunde ingen lösen
 msgid "the package manager failed: {detail}"
 msgstr "pakethanteraren misslyckades: {detail}"
 
-#: apps/desktop/src-tauri/src/commands/backup.rs
-msgid "No restore is waiting for a restart."
-msgstr "Ingen återställning väntar på en omstart."
-
-#: apps/desktop/src-tauri/src/commands/backup.rs
-msgid "Close your running games first: restoring restarts Caskade."
-msgstr "Stäng spelen som körs först: återställningen startar om Caskade."
-
-#: apps/desktop/src-tauri/src/commands/backup.rs
-msgid "Wait for installs, moves and updates to finish, or cancel them: restoring restarts Caskade."
-msgstr "Vänta tills installationer, flyttar och uppdateringar är klara, eller avbryt dem: återställningen startar om Caskade."
-
-#: apps/desktop/src-tauri/src/commands/backup.rs
-msgid "That isn't a backup in the backup folder."
-msgstr "Det är ingen säkerhetskopia i mappen för säkerhetskopior."
-
 #: apps/desktop/src-tauri/src/commands/clipboard.rs
 msgid "the clipboard isn't available"
 msgstr "urklipp är inte tillgängligt"
@@ -5374,18 +5483,6 @@ msgstr "huvudfönstret finns inte längre"
 #: apps/desktop/src-tauri/src/commands/console.rs
 msgid "console mode isn't ready yet"
 msgstr "konsolläget är inte redo än"
-
-#: apps/desktop/src-tauri/src/commands/copies.rs
-msgid "that device has no copy of the game"
-msgstr "den enheten har ingen kopia av spelet"
-
-#: apps/desktop/src-tauri/src/commands/copies.rs
-msgid "the game isn't installed on this computer in a folder that can be copied"
-msgstr "spelet är inte installerat på den här datorn i en mapp som kan kopieras"
-
-#: apps/desktop/src-tauri/src/commands/install.rs
-msgid "storage locations unavailable"
-msgstr "lagringsplatserna är inte tillgängliga"
 
 #: apps/desktop/src-tauri/src/commands/install_picker.rs
 msgid "selected path is not UTF-8"
@@ -5407,71 +5504,6 @@ msgstr "Välj spelmapp att installera"
 msgid "folder dialog closed without a response"
 msgstr "mappdialogen stängdes utan svar"
 
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "too many pending install requests; dismiss one first"
-msgstr "för många väntande installationsbegäranden; avfärda en först"
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "request is already being confirmed"
-msgstr "begäran håller redan på att bekräftas"
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "unknown or expired request"
-msgstr "okänd eller utgången begäran"
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "request is expired or already being confirmed"
-msgstr "begäran har gått ut eller håller redan på att bekräftas"
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-#: apps/desktop/src-tauri/src/commands/shares.rs
-msgid "receiving shares isn't available"
-msgstr "mottagning av delningar är inte tillgänglig"
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "that request isn't a share"
-msgstr "den begäran är inte en delning"
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "input must be one path or HTTP(S) URL"
-msgstr "indata måste vara en sökväg eller HTTP(S)-URL"
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "invalid download URL"
-msgstr "ogiltig nedladdnings-URL"
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "a magnet link needs a BitTorrent info hash (xt=urn:btih:…)"
-msgstr "en magnetlänk behöver en BitTorrent-infohash (xt=urn:btih:…)"
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "choose a local path, not a network or device path"
-msgstr "välj en lokal sökväg, inte en nätverks- eller enhetssökväg"
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "choose an absolute local path or HTTP(S) URL"
-msgstr "välj en absolut lokal sökväg eller HTTP(S)-URL"
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "input is not a file or folder"
-msgstr "indata är inte en fil eller mapp"
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "path is not UTF-8"
-msgstr "sökvägen är inte UTF-8"
-
-#: apps/desktop/src-tauri/src/commands/peer_backups.rs
-msgid "Devices aren't ready on this device yet."
-msgstr "Enheter är inte redo på den här enheten än."
-
-#: apps/desktop/src-tauri/src/commands/remote_play.rs
-msgid "it didn't start on that device"
-msgstr "det startade inte på den enheten"
-
-#: apps/desktop/src-tauri/src/commands/shares.rs
-msgid "the link is too long for a QR code"
-msgstr "länken är för lång för en QR-kod"
-
 #: apps/desktop/src-tauri/src/commands/storage.rs
 msgid "Choose game storage location"
 msgstr "Välj lagringsplats för spel"
@@ -5479,38 +5511,6 @@ msgstr "Välj lagringsplats för spel"
 #: apps/desktop/src-tauri/src/commands/storage.rs
 msgid "The folder chooser closed without an answer."
 msgstr "Mappväljaren stängdes utan svar."
-
-#: apps/desktop/src-tauri/src/commands/streaming.rs
-msgid "The code entered on {device} didn't match. Try again with a new code."
-msgstr "Koden som angavs på {device} stämde inte. Försök igen med en ny kod."
-
-#: apps/desktop/src-tauri/src/commands/streaming.rs
-msgid "{device} declined."
-msgstr "{device} avböjde."
-
-#: apps/desktop/src-tauri/src/commands/streaming.rs
-msgid "Nobody entered the code on {device} in time. Try again."
-msgstr "Ingen angav koden på {device} i tid. Försök igen."
-
-#: apps/desktop/src-tauri/src/commands/streaming.rs
-msgid "that device isn't on the network"
-msgstr "den enheten finns inte i nätverket"
-
-#: apps/desktop/src-tauri/src/commands/sync.rs
-msgid "no pairing link is waiting"
-msgstr "ingen parkopplingslänk väntar"
-
-#: apps/desktop/src-tauri/src/commands/themes.rs
-msgid "Safe mode: Caskade started with the default theme and without your custom CSS."
-msgstr "Felsäkert läge: Caskade startade med standardtemat och utan din anpassade CSS."
-
-#: apps/desktop/src-tauri/src/commands/themes.rs
-msgid "themes are not ready"
-msgstr "teman är inte redo"
-
-#: apps/desktop/src-tauri/src/commands/themes.rs
-msgid "Loading a theme folder is only available in development builds; run `caskade dev <folder>`"
-msgstr "Att läsa in en temamapp är bara möjligt i utvecklingsversioner; kör `caskade dev <folder>`"
 
 #: apps/desktop/src-tauri/src/dev_plugins.rs
 msgid "plugins are not ready"

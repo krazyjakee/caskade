@@ -1161,12 +1161,15 @@ name = "caskade-app"
 version = "0.1.0"
 dependencies = [
  "caskade-achievements",
+ "caskade-addons",
  "caskade-backup",
  "caskade-core",
  "caskade-discovery",
  "caskade-plugin-host",
  "caskade-share",
  "caskade-sources",
+ "caskade-streaming",
+ "qrcode",
  "serde",
  "serde_json",
  "specta",

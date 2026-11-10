@@ -28,7 +28,12 @@ fn devices_playing_answers_from_memory_through_ipc() {
         .invoke_handler(tauri::generate_handler![devices_playing])
         .build(mock_context(noop_assets()))
         .unwrap();
-    setup(app.handle(), Presence::new(store.clone()), devices);
+    setup(
+        app.handle(),
+        Presence::new(store.clone()),
+        devices,
+        store.clone(),
+    );
     let window = tauri::WebviewWindowBuilder::new(&app, "main", Default::default())
         .build()
         .unwrap();

@@ -4,10 +4,20 @@
 //! turns the core bus's events into these.
 
 // The commands' own events.
-pub use crate::commands::themes::ThemeReloaded;
+pub use crate::commands::addon_packages::AddonProgress;
 pub use crate::commands::backup::BackupChanged;
+pub use crate::commands::install_requests::InstallRefused;
+pub use crate::commands::install_requests::InstallRequested;
 pub use crate::commands::notifications::NotificationsChanged;
+pub use crate::commands::presence::PlayingElsewhereChanged;
+pub use crate::commands::remote_play::RemotePlayRequested;
 pub use crate::commands::romm::RommDownloadChanged;
+pub use crate::commands::shares::SharesChanged;
+pub use crate::commands::store_accounts::StoreAccountsChanged;
+pub use crate::commands::streaming::StreamingPairingFinished;
+pub use crate::commands::sync::DevicesChanged;
+pub use crate::commands::sync::PairingLinkOpened;
+pub use crate::commands::themes::ThemeReloaded;
 pub use crate::discovery::DiscoveryChanged;
 use caskade_core::bus::{Event as BusEvent, GameSession};
 use serde::{Deserialize, Serialize};
@@ -157,6 +167,16 @@ pub enum Event {
     NotificationsChanged(NotificationsChanged),
     BackupChanged(BackupChanged),
     ThemeReloaded(ThemeReloaded),
+    PlayingElsewhereChanged(PlayingElsewhereChanged),
+    RemotePlayRequested(RemotePlayRequested),
+    StoreAccountsChanged(StoreAccountsChanged),
+    AddonProgress(AddonProgress),
+    SharesChanged(SharesChanged),
+    DevicesChanged(DevicesChanged),
+    PairingLinkOpened(PairingLinkOpened),
+    InstallRequested(InstallRequested),
+    InstallRefused(InstallRefused),
+    StreamingPairingFinished(StreamingPairingFinished),
 }
 
 /// Where a shell receives [`Event`]s: called on the async runtime, in the
@@ -220,6 +240,16 @@ impl Event {
             Self::NotificationsChanged(_) => "notifications.changed",
             Self::BackupChanged(_) => "backup.changed",
             Self::ThemeReloaded(_) => "theme.reloaded",
+            Self::PlayingElsewhereChanged(_) => "playing.elsewhere.changed",
+            Self::RemotePlayRequested(_) => "remote.play.requested",
+            Self::StoreAccountsChanged(_) => "store_accounts.changed",
+            Self::AddonProgress(_) => "addon.progress",
+            Self::SharesChanged(_) => "shares.changed",
+            Self::DevicesChanged(_) => "devices.changed",
+            Self::PairingLinkOpened(_) => "pairing.link.opened",
+            Self::InstallRequested(_) => "install.requested",
+            Self::InstallRefused(_) => "install.refused",
+            Self::StreamingPairingFinished(_) => "streaming.pairing.finished",
         }
     }
 }

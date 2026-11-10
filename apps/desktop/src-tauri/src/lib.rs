@@ -889,7 +889,7 @@ pub fn run() {
                     (presence.clone(), bus.clone(), sync.clone(), devices.clone());
                 move || presence.watch(&bus, sync.clone(), devices.clone())
             });
-            commands::presence::setup(app.handle(), presence, devices.clone());
+            commands::presence::setup(app.handle(), presence, devices.clone(), store.clone());
             commands::sync::setup(app.handle(), devices, sync);
         }
         commands::saves::forward_changes(app.handle(), &save_versions);

@@ -4,10 +4,9 @@
 //! downloaded or run until the user confirms it in the app
 //! (`confirm_install_request`).
 
-use crate::commands::install_requests::{InstallRefused, InstallRequest, InstallRequests};
+use crate::commands::install_requests::{InstallRequest, InstallRequests};
 use caskade_core::accounts::Permission;
 use tauri::{Manager, Runtime, Url};
-use tauri_specta::Event;
 
 pub use caskade_app::deep_link::{SCHEME, install_input};
 
@@ -40,7 +39,9 @@ pub async fn queue<R: Runtime>(
     // not, since a link has no caller to answer.
     if let Err(error) = crate::permissions::require(app, Permission::Install) {
         tracing::warn!(%error, "refused deep links");
-        if let Err(error) = InstallRefused(error).emit(app) {
+        if let Err(error) = crate::events::sink(app.clone()).emit(
+            caskade_app::events::Event::InstallRefused(caskade_app::events::InstallRefused(error)),
+        ) {
             tracing::warn!(%error, "couldn't tell the UI about refused deep links");
         }
         crate::main_window::raise(app);
@@ -49,7 +50,11 @@ pub async fn queue<R: Runtime>(
     let mut queued = Vec::new();
     for input in inputs {
         let result = match input {
-            Ok(input) => requests.request_and_emit(app, input).await,
+            Ok(input) => {
+                requests
+                    .request_and_emit(&crate::events::sink(app.clone()), input)
+                    .await
+            }
             Err(error) => Err(error),
         };
         // The link may carry tokens: log the outcome, never the link.

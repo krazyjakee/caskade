@@ -1915,7 +1915,7 @@ msgstr ""
 #: crates/caskade-core/src/install/peer.rs
 #: crates/caskade-core/src/install/recovery.rs
 #: crates/caskade-core/src/install/roms.rs
-#: apps/desktop/src-tauri/src/commands/install.rs
+#: crates/caskade-app/src/commands/install.rs
 msgid "This job is no longer in Activity."
 msgstr ""
 
@@ -2079,7 +2079,7 @@ msgid "the job didn't download anything"
 msgstr ""
 
 #: crates/caskade-core/src/install/recovery.rs
-#: apps/desktop/src-tauri/src/commands/install.rs
+#: crates/caskade-app/src/commands/install.rs
 msgid "input must be a nonempty path or URL"
 msgstr ""
 
@@ -2804,7 +2804,7 @@ msgid "the plan names no release file"
 msgstr ""
 
 #: crates/caskade-core/src/remote_play/mod.rs
-#: apps/desktop/src-tauri/src/commands/copies.rs
+#: crates/caskade-app/src/commands/copies.rs
 msgid "that device isn't paired"
 msgstr ""
 
@@ -5023,6 +5023,75 @@ msgstr ""
 msgid "choose the game to link"
 msgstr ""
 
+#: crates/caskade-app/src/commands/addon_packages.rs
+#: crates/caskade-app/src/commands/addons.rs
+msgid "the add-on catalogue is unavailable"
+msgstr ""
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "This add-on isn't in the catalogue any more."
+msgstr ""
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "plugins are unavailable"
+msgstr ""
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "the plugin didn't load"
+msgstr ""
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "the plugin's manifest is invalid"
+msgstr ""
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "themes are unavailable"
+msgstr ""
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "a built-in or plugin theme already has this id"
+msgstr ""
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "the theme didn't load"
+msgstr ""
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "{id} is already being installed"
+msgstr ""
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "only themes Caskade installed can be removed"
+msgstr ""
+
+#: crates/caskade-app/src/commands/addon_packages.rs
+msgid "This add-on isn't installed."
+msgstr ""
+
+#: crates/caskade-app/src/commands/backup.rs
+msgid "That isn't a backup in the backup folder."
+msgstr ""
+
+#: crates/caskade-app/src/commands/backup.rs
+msgid "No restore is waiting for a restart."
+msgstr ""
+
+#: crates/caskade-app/src/commands/backup.rs
+msgid "Close your running games first: restoring restarts Caskade."
+msgstr ""
+
+#: crates/caskade-app/src/commands/backup.rs
+msgid "Wait for installs, moves and updates to finish, or cancel them: restoring restarts Caskade."
+msgstr ""
+
+#: crates/caskade-app/src/commands/copies.rs
+msgid "that device has no copy of the game"
+msgstr ""
+
+#: crates/caskade-app/src/commands/copies.rs
+msgid "the game isn't installed on this computer in a folder that can be copied"
+msgstr ""
+
 #: crates/caskade-app/src/commands/emulation.rs
 msgid "This emulator no longer exists."
 msgstr ""
@@ -5039,8 +5108,69 @@ msgstr ""
 msgid "at most {count} IGDB ids at a time"
 msgstr ""
 
+#: crates/caskade-app/src/commands/install.rs
+msgid "storage locations unavailable"
+msgstr ""
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "too many pending install requests; dismiss one first"
+msgstr ""
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "request is already being confirmed"
+msgstr ""
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "unknown or expired request"
+msgstr ""
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "request is expired or already being confirmed"
+msgstr ""
+
+#: crates/caskade-app/src/commands/install_requests.rs
+#: apps/desktop/src-tauri/src/commands/shares.rs
+msgid "receiving shares isn't available"
+msgstr ""
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "that request isn't a share"
+msgstr ""
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "input must be one path or HTTP(S) URL"
+msgstr ""
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "invalid download URL"
+msgstr ""
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "a magnet link needs a BitTorrent info hash (xt=urn:btih:…)"
+msgstr ""
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "choose a local path, not a network or device path"
+msgstr ""
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "choose an absolute local path or HTTP(S) URL"
+msgstr ""
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "input is not a file or folder"
+msgstr ""
+
+#: crates/caskade-app/src/commands/install_requests.rs
+msgid "path is not UTF-8"
+msgstr ""
+
 #: crates/caskade-app/src/commands/library.rs
 msgid "Couldn't open the file manager ({opener}) to show “{folder}”."
+msgstr ""
+
+#: crates/caskade-app/src/commands/peer_backups.rs
+msgid "Devices aren't ready on this device yet."
 msgstr ""
 
 #: crates/caskade-app/src/commands/plugins.rs
@@ -5063,6 +5193,10 @@ msgstr ""
 msgid "This plugin ran into a problem. The details say what."
 msgstr ""
 
+#: crates/caskade-app/src/commands/remote_play.rs
+msgid "it didn't start on that device"
+msgstr ""
+
 #: crates/caskade-app/src/commands/romm.rs
 msgid "the password or token is too long"
 msgstr ""
@@ -5075,8 +5209,44 @@ msgstr ""
 msgid "the script belongs to another scope"
 msgstr ""
 
+#: crates/caskade-app/src/commands/shares.rs
+msgid "the link is too long for a QR code"
+msgstr ""
+
 #: crates/caskade-app/src/commands/storage.rs
 msgid "The storage location was added, but it disappeared from the list before it could be shown. Reload Settings → Storage."
+msgstr ""
+
+#: crates/caskade-app/src/commands/streaming.rs
+msgid "The code entered on {device} didn't match. Try again with a new code."
+msgstr ""
+
+#: crates/caskade-app/src/commands/streaming.rs
+msgid "{device} declined."
+msgstr ""
+
+#: crates/caskade-app/src/commands/streaming.rs
+msgid "Nobody entered the code on {device} in time. Try again."
+msgstr ""
+
+#: crates/caskade-app/src/commands/streaming.rs
+msgid "that device isn't on the network"
+msgstr ""
+
+#: crates/caskade-app/src/commands/sync.rs
+msgid "no pairing link is waiting"
+msgstr ""
+
+#: crates/caskade-app/src/commands/themes.rs
+msgid "Safe mode: Caskade started with the default theme and without your custom CSS."
+msgstr ""
+
+#: crates/caskade-app/src/commands/themes.rs
+msgid "themes are not ready"
+msgstr ""
+
+#: crates/caskade-app/src/commands/themes.rs
+msgid "Loading a theme folder is only available in development builds; run `caskade dev <folder>`"
 msgstr ""
 
 #: crates/caskade-app/src/deep_link.rs
@@ -5219,51 +5389,6 @@ msgstr ""
 msgid "Caskade couldn't open Default apps: {error}"
 msgstr ""
 
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-#: apps/desktop/src-tauri/src/commands/addons.rs
-msgid "the add-on catalogue is unavailable"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "This add-on isn't in the catalogue any more."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "plugins are unavailable"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "the plugin didn't load"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "the plugin's manifest is invalid"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "themes are unavailable"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "a built-in or plugin theme already has this id"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "the theme didn't load"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "{id} is already being installed"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "only themes Caskade installed can be removed"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/addon_packages.rs
-msgid "This add-on isn't installed."
-msgstr ""
-
 #: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "Caskade was installed as a system package: update it with your package manager."
 msgstr ""
@@ -5340,22 +5465,6 @@ msgstr ""
 msgid "the package manager failed: {detail}"
 msgstr ""
 
-#: apps/desktop/src-tauri/src/commands/backup.rs
-msgid "No restore is waiting for a restart."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/backup.rs
-msgid "Close your running games first: restoring restarts Caskade."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/backup.rs
-msgid "Wait for installs, moves and updates to finish, or cancel them: restoring restarts Caskade."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/backup.rs
-msgid "That isn't a backup in the backup folder."
-msgstr ""
-
 #: apps/desktop/src-tauri/src/commands/clipboard.rs
 msgid "the clipboard isn't available"
 msgstr ""
@@ -5371,18 +5480,6 @@ msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/console.rs
 msgid "console mode isn't ready yet"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/copies.rs
-msgid "that device has no copy of the game"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/copies.rs
-msgid "the game isn't installed on this computer in a folder that can be copied"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/install.rs
-msgid "storage locations unavailable"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/install_picker.rs
@@ -5405,109 +5502,12 @@ msgstr ""
 msgid "folder dialog closed without a response"
 msgstr ""
 
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "too many pending install requests; dismiss one first"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "request is already being confirmed"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "unknown or expired request"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "request is expired or already being confirmed"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-#: apps/desktop/src-tauri/src/commands/shares.rs
-msgid "receiving shares isn't available"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "that request isn't a share"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "input must be one path or HTTP(S) URL"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "invalid download URL"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "a magnet link needs a BitTorrent info hash (xt=urn:btih:…)"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "choose a local path, not a network or device path"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "choose an absolute local path or HTTP(S) URL"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "input is not a file or folder"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/install_requests.rs
-msgid "path is not UTF-8"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/peer_backups.rs
-msgid "Devices aren't ready on this device yet."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/remote_play.rs
-msgid "it didn't start on that device"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/shares.rs
-msgid "the link is too long for a QR code"
-msgstr ""
-
 #: apps/desktop/src-tauri/src/commands/storage.rs
 msgid "Choose game storage location"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/storage.rs
 msgid "The folder chooser closed without an answer."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/streaming.rs
-msgid "The code entered on {device} didn't match. Try again with a new code."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/streaming.rs
-msgid "{device} declined."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/streaming.rs
-msgid "Nobody entered the code on {device} in time. Try again."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/streaming.rs
-msgid "that device isn't on the network"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/sync.rs
-msgid "no pairing link is waiting"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/themes.rs
-msgid "Safe mode: Caskade started with the default theme and without your custom CSS."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/themes.rs
-msgid "themes are not ready"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/themes.rs
-msgid "Loading a theme folder is only available in development builds; run `caskade dev <folder>`"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/dev_plugins.rs
