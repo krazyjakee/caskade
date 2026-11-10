@@ -290,6 +290,7 @@ fn app() -> Element {
         // while the data below it starts.
         input::InputRoot {
             data::DataRoot {
+                {smoke::motion()}
                 div { style: "padding: 24px; font-family: sans-serif;", "Caskade" }
             }
         }

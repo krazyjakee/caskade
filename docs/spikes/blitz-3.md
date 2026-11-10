@@ -77,6 +77,32 @@ intermediate-texture blit about 0.25 ms, the event loop the rest.
 repaint differ only inside the spinner's own 24 px box (its angle at capture
 time), on Xvfb at 1440×900.
 
+### In caskade-native (#121)
+
+`caskade-native` built from `vendor/blitz` (release, `--features
+smoke,dioxus-native/log-frame-times`), with
+`CASKADE_NATIVE_SMOKE_MOTION=spinner|ambient|both` showing the backdrop and
+the status-bar spinner (`steps(8)`), on a private Xvfb at 1440×900 (no GPU:
+wgpu on lavapipe), 30 s after a 20 s settle:
+
+| Running | CPU, % of one core | Frames/s | Present per frame |
+| --- | ---: | ---: | ---: |
+| Nothing animating | 0.3% | 0 | — |
+| Spinner | 24.8% | 7.7 | 29 ms (damage) |
+| Spinner, `BLITZ_DAMAGE=0` | 24.5% | 7.7 | 31 ms |
+| Ambient background | 28.6% | 8.8 | 30 ms (damage) |
+| Ambient background, `BLITZ_DAMAGE=0` | 29.3% | 9.0 | 31 ms |
+| Both, GTK `gtk-enable-animations=0` (reduced motion) | 0.37% | 0 | — |
+
+The app draws only when a step lands, as the prototype does: idle and
+reduced motion draw nothing. Damage-limited frames are taken
+(`present(damage)` in the frame log), but on Xvfb a frame's cost is
+lavapipe presenting the whole 1440×900 surface in software (about 30 ms with
+or without damage). What damage saves per frame shows only on a GPU, so the
+vsynced run on the real GPU is a check for #120. `caskade-native` sets the
+reduced-motion flag from the OS (`theme::prefers_reduced_motion`), which
+overrides `BLITZ_PREFERS_REDUCED_MOTION`.
+
 ## Theme animations against WebKit
 
 `apps/native-proto/scripts/gallery.sh` renders
