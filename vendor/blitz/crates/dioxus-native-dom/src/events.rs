@@ -8,12 +8,12 @@ use blitz_traits::events::{
 };
 use dioxus_html::{
     AnimationData, BeforeInputData, CancelData, ClipboardData, CompositionData, DragData,
-    FocusData, FormData, FormValue, HasFileData, HasFocusData, HasFormData, HasKeyboardData,
-    HasMouseData, HasPointerData, HasScrollData, HasTouchData, HasTouchPointData, HasWheelData,
-    HtmlEventConverter, ImageData, KeyboardData, MediaData, MountedData, MountedError,
-    MountedResult, MouseData, PlatformEventData, PointerData, RenderedElementBacking, ResizeData,
-    ScrollBehavior, ScrollData, ScrollLogicalPosition, ScrollToOptions, SelectionData, ToggleData,
-    TouchData, TouchPoint, TransitionData, VisibleData, WheelData,
+    FocusData, FormData, FormValue, HasCompositionData, HasFileData, HasFocusData, HasFormData,
+    HasKeyboardData, HasMouseData, HasPointerData, HasScrollData, HasTouchData, HasTouchPointData,
+    HasWheelData, HtmlEventConverter, ImageData, KeyboardData, MediaData, MountedData,
+    MountedError, MountedResult, MouseData, PlatformEventData, PointerData, RenderedElementBacking,
+    ResizeData, ScrollBehavior, ScrollData, ScrollLogicalPosition, ScrollToOptions, SelectionData,
+    ToggleData, TouchData, TouchPoint, TransitionData, VisibleData, WheelData,
     geometry::{
         ClientPoint, ElementPoint, PagePoint, PixelsRect, PixelsSize, PixelsVector2D, ScreenPoint,
         WheelDelta,
@@ -81,8 +81,12 @@ impl HtmlEventConverter for NativeConverter {
         unimplemented!("todo: convert_clipboard_data in dioxus-native. requires support in blitz")
     }
 
-    fn convert_composition_data(&self, _event: &PlatformEventData) -> CompositionData {
-        unimplemented!("todo: convert_composition_data in dioxus-native. requires support in blitz")
+    fn convert_composition_data(&self, event: &PlatformEventData) -> CompositionData {
+        event
+            .downcast::<NativeCompositionData>()
+            .unwrap()
+            .clone()
+            .into()
     }
 
     fn convert_drag_data(&self, _event: &PlatformEventData) -> DragData {
@@ -308,6 +312,23 @@ impl RenderedElementBacking for NodeHandle {
         }
 
         Box::pin(async { Ok(()) })
+    }
+}
+
+/// A composition event's text (`compositionstart`, `compositionupdate`,
+/// `compositionend`).
+#[derive(Clone, Debug)]
+pub struct NativeCompositionData {
+    pub data: String,
+}
+
+impl HasCompositionData for NativeCompositionData {
+    fn data(&self) -> String {
+        self.data.clone()
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self as &dyn Any
     }
 }
 

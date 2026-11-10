@@ -766,19 +766,30 @@ impl Node {
         }
         self.mark_ancestors_dirty();
 
-        // If focussing a text input, enable IME and set IME area
-        if self
+        // If focussing a text input, enable IME for its purpose, with its
+        // content box as the caret area until the next resolve places it
+        // at the caret (`BaseDocument::update_ime_cursor_area`).
+        // (Not for a read-only field: it takes no typing.)
+        if let Some(element) = self
             .element_data()
-            .and_then(|elem| elem.text_input_data())
-            .is_some()
+            .filter(|elem| elem.text_input_data().is_some() && !elem.text_field_flags().read_only)
         {
-            shell_provider.set_ime_enabled(true);
+            use blitz_traits::shell::TextInputPurpose;
+            let purpose = match element.attr(local_name!("type")) {
+                Some("password") => TextInputPurpose::Password,
+                Some("email") => TextInputPurpose::Email,
+                Some("number") => TextInputPurpose::Number,
+                Some("tel") => TextInputPurpose::Phone,
+                Some("url") => TextInputPurpose::Url,
+                _ => TextInputPurpose::Normal,
+            };
+            let layout = self.final_layout();
             let mut pos = self.absolute_position(0.0, 0.0);
-            pos.x += self.final_layout().content_box_x();
-            pos.y += self.final_layout().content_box_y();
+            pos.x += layout.border.left + layout.padding.left;
+            pos.y += layout.border.top + layout.padding.top;
             let width = self.final_layout().content_box_width();
             let height = self.final_layout().content_box_height();
-            shell_provider.set_ime_cursor_area(pos.x, pos.y, width, height);
+            shell_provider.enable_ime(purpose, pos.x, pos.y, width, height);
         }
     }
 
@@ -1146,6 +1157,29 @@ impl Node {
     pub fn attr(&self, name: LocalName) -> Option<&str> {
         let attr = self.attrs()?.iter().find(|id| id.name.local == name)?;
         Some(&attr.value)
+    }
+
+    /// The background of selected text in this node: its `::selection`
+    /// style's, or its nearest ancestor's (as highlights inherit). `None`
+    /// when no `::selection` rule applies, for the default highlight.
+    pub fn selection_background(&self) -> Option<style::color::AbsoluteColor> {
+        use style::selector_parser::PseudoElement;
+        let mut node = Some(self);
+        while let Some(current) = node {
+            if let Some(data) = current.try_stylo_element_data().and_then(|data| data.get())
+                && let Some(selection) = data.styles.pseudos.get(&PseudoElement::Selection)
+            {
+                let text = selection.get_inherited_text().color;
+                return Some(
+                    selection
+                        .get_background()
+                        .background_color
+                        .resolve_to_absolute(&text),
+                );
+            }
+            node = current.parent.map(|id| self.with(id));
+        }
+        None
     }
 
     pub fn primary_styles(&self) -> Option<impl Deref<Target = ServoArc<ComputedValues>>> {

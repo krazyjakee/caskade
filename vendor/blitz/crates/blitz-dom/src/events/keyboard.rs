@@ -3,7 +3,7 @@ use crate::{BaseDocument, node::GeneratedTextInputEvent, util::ACTION_MOD};
 use blitz_traits::node_id::NodeId;
 use blitz_traits::{
     SmolStr,
-    events::{BlitzInputEvent, BlitzKeyEvent, DomEvent, DomEventData},
+    events::{BlitzCompositionEvent, BlitzInputEvent, BlitzKeyEvent, DomEvent, DomEventData},
 };
 use keyboard_types::{Key, Modifiers, NamedKey};
 use markup5ever::local_name;
@@ -71,6 +71,7 @@ pub(crate) fn handle_key_or_input_event<F: FnMut(DomEvent)>(
             return;
         };
 
+        let flags = element_data.text_field_flags();
         if let Some(input_data) = element_data.text_input_data_mut() {
             let generated_event = match event {
                 KeyboardOrTextInputEvent::KeyPress(blitz_key_event) => input_data
@@ -79,6 +80,7 @@ pub(crate) fn handle_key_or_input_event<F: FnMut(DomEvent)>(
                         &mut doc.layout_ctx,
                         &*doc.shell_provider,
                         blitz_key_event,
+                        flags,
                     ),
                 KeyboardOrTextInputEvent::AppleStandardKeyBinding(command) => input_data
                     .apply_apple_standard_keybinding(
@@ -86,6 +88,7 @@ pub(crate) fn handle_key_or_input_event<F: FnMut(DomEvent)>(
                         &mut doc.layout_ctx,
                         &*doc.shell_provider,
                         &command,
+                        flags,
                     ),
             };
 
@@ -96,7 +99,87 @@ pub(crate) fn handle_key_or_input_event<F: FnMut(DomEvent)>(
     }
 }
 
+/// A text field's edit commands, as a context menu offers them.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TextFieldCommand {
+    SelectAll,
+    Copy,
+    Cut,
+    Paste,
+}
+
 impl BaseDocument {
+    /// Runs `command` on the text field `node_id`, as its keyboard shortcut
+    /// would: `dispatch_event` gets the DOM events it generates (`input`
+    /// after a cut, focus events when a paste focuses the field). A paste
+    /// asks the shell for the clipboard; its text arrives as a paste in the
+    /// focused field, so the field is focused first. Read-only fields only
+    /// select and copy, and passwords don't copy. Returns whether the node
+    /// is a text field.
+    pub fn text_field_command(
+        &mut self,
+        node_id: NodeId,
+        command: TextFieldCommand,
+        mut dispatch_event: impl FnMut(DomEvent),
+    ) -> bool {
+        let Some(element) = self.nodes.get(node_id).and_then(|node| node.element_data()) else {
+            return false;
+        };
+        if element.text_input_data().is_none() {
+            return false;
+        }
+        let flags = element.text_field_flags();
+        if command == TextFieldCommand::Paste {
+            if !flags.read_only {
+                super::focus::generate_focus_events(
+                    self,
+                    &mut |doc| {
+                        doc.set_focus_to(node_id);
+                    },
+                    &mut dispatch_event,
+                );
+                let _ = self.shell_provider.request_clipboard_text();
+            }
+            return true;
+        }
+        let shell_provider = self.shell_provider.clone();
+        let font_ctx = self.font_ctx.clone();
+        let mut font_ctx = font_ctx.lock().unwrap();
+        let Some(input) = self.nodes[node_id]
+            .element_data_mut()
+            .and_then(|element| element.text_input_data_mut())
+        else {
+            return false;
+        };
+        let mut driver = input.editor.driver(&mut font_ctx, &mut self.layout_ctx);
+        let generated = match command {
+            TextFieldCommand::SelectAll => {
+                driver.select_all();
+                Some(GeneratedTextInputEvent::Select)
+            }
+            TextFieldCommand::Copy => {
+                if let Some(text) = driver.editor.selected_text().filter(|_| !flags.password) {
+                    let _ = shell_provider.set_clipboard_text(text.to_owned());
+                }
+                None
+            }
+            TextFieldCommand::Cut => match driver.editor.selected_text() {
+                Some(text) if !flags.password && !flags.read_only => {
+                    let _ = shell_provider.set_clipboard_text(text.to_owned());
+                    driver.delete_selection();
+                    Some(GeneratedTextInputEvent::Input)
+                }
+                _ => None,
+            },
+            TextFieldCommand::Paste => unreachable!(),
+        };
+        drop(font_ctx);
+        if let Some(generated) = generated {
+            self.apply_generated_text_input_event(node_id, generated, dispatch_event);
+        }
+        true
+    }
+
     pub(crate) fn apply_generated_text_input_event<F: FnMut(DomEvent)>(
         &mut self,
         node_id: NodeId,
@@ -113,7 +196,8 @@ impl BaseDocument {
 
         match event {
             GeneratedTextInputEvent::Input => {
-                let value = input_data.editor.raw_text().to_string();
+                // The value without an IME's preedit, which isn't text yet.
+                let value = input_data.editor.text().to_string();
                 // The value is in the accessibility tree.
                 self.has_changes = true;
                 dispatch_event(DomEvent::new(
@@ -123,6 +207,27 @@ impl BaseDocument {
                 self.shell_provider.request_redraw();
             }
             GeneratedTextInputEvent::Select | GeneratedTextInputEvent::PreEditChange => {
+                self.shell_provider.request_redraw();
+            }
+            GeneratedTextInputEvent::CompositionStart => {
+                dispatch_event(DomEvent::new(
+                    node_id,
+                    DomEventData::CompositionStart(BlitzCompositionEvent {
+                        data: String::new(),
+                    }),
+                ));
+            }
+            GeneratedTextInputEvent::CompositionUpdate(data) => {
+                dispatch_event(DomEvent::new(
+                    node_id,
+                    DomEventData::CompositionUpdate(BlitzCompositionEvent { data }),
+                ));
+            }
+            GeneratedTextInputEvent::CompositionEnd(data) => {
+                dispatch_event(DomEvent::new(
+                    node_id,
+                    DomEventData::CompositionEnd(BlitzCompositionEvent { data }),
+                ));
                 self.shell_provider.request_redraw();
             }
             GeneratedTextInputEvent::Submit => {

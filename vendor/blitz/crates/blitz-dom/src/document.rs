@@ -401,6 +401,8 @@ pub struct BaseDocument {
     pub(crate) iframe_loads: HashMap<NodeId, crate::iframe::IframeLoad>,
     /// Whether the DOM or focus changed since the accessibility tree was last pushed
     pub(crate) has_changes: bool,
+    /// The IME caret area last sent for the focused text field.
+    pub(crate) ime_cursor_area: Option<[f32; 4]>,
     /// Set of changed nodes for updating the accessibility tree
     pub(crate) deferred_construction_nodes: Vec<ConstructionTask>,
 
@@ -576,6 +578,7 @@ impl BaseDocument {
             pending_resource_deallocations: Vec::new(),
 
             has_changes: false,
+            ime_cursor_area: None,
             deferred_construction_nodes: Vec::new(),
             image_cache: HashMap::new(),
             pending_images: HashMap::new(),
@@ -1805,9 +1808,86 @@ impl BaseDocument {
         Some(id)
     }
 
+    /// Sends the IME the focused text field's caret area when it moved:
+    /// the preedit, or else the selection, in the window's logical pixels.
+    pub(crate) fn update_ime_cursor_area(&mut self) {
+        let area = self.focus_node_id.and_then(|id| {
+            let node = self.get_node(id)?;
+            let input = node.element_data()?.text_input_data()?;
+            input.editor.try_layout()?;
+            let rect = self.get_client_bounding_rect(id)?;
+            let layout = node.final_layout();
+            let scale = self.viewport.scale_f64();
+            let zoom = self.viewport.zoom() as f64;
+            let caret = input.editor.ime_cursor_area();
+            let scroll = input.scroll_offset as f64;
+            let (scroll_x, scroll_y) = if input.is_multiline {
+                (0.0, scroll)
+            } else {
+                (scroll, 0.0)
+            };
+            // `content_box_x` would count the box's own position again.
+            let inset_x = (layout.border.left + layout.padding.left) as f64;
+            let inset_y = (layout.border.top + layout.padding.top) as f64;
+            let x = rect.x + inset_x + caret.x0 / scale - scroll_x;
+            let y = rect.y + inset_y + node.text_input_v_centering_offset(scale) + caret.y0 / scale
+                - scroll_y;
+            let width = (caret.x1 - caret.x0) / scale;
+            let height = (caret.y1 - caret.y0) / scale;
+            Some([x, y, width, height].map(|v| (v * zoom) as f32))
+        });
+        if area != self.ime_cursor_area {
+            if let Some([x, y, width, height]) = area {
+                self.shell_provider.set_ime_cursor_area(x, y, width, height);
+            }
+            self.ime_cursor_area = area;
+        }
+    }
+
+    /// Commits the composition in progress in `node_id`'s text field, as a
+    /// browser does when the focus moves away: an `input`, then
+    /// `compositionend` with the committed text.
+    pub(crate) fn finish_composition(
+        &mut self,
+        node_id: NodeId,
+        dispatch_event: &mut dyn FnMut(DomEvent),
+    ) {
+        let font_ctx = self.font_ctx.clone();
+        let mut font_ctx = font_ctx.lock().unwrap();
+        let Some(input) = self
+            .nodes
+            .get_mut(node_id)
+            .and_then(|node| node.element_data_mut())
+            .and_then(|element| element.text_input_data_mut())
+        else {
+            return;
+        };
+        let Some(range) = input.editor.raw_compose().clone() else {
+            return;
+        };
+        let committed = input.editor.raw_text()[range].to_owned();
+        input
+            .editor
+            .driver(&mut font_ctx, &mut self.layout_ctx)
+            .finish_compose();
+        drop(font_ctx);
+        self.apply_generated_text_input_event(
+            node_id,
+            crate::node::GeneratedTextInputEvent::Input,
+            &mut *dispatch_event,
+        );
+        self.apply_generated_text_input_event(
+            node_id,
+            crate::node::GeneratedTextInputEvent::CompositionEnd(committed),
+            &mut *dispatch_event,
+        );
+    }
+
     /// Clear the focussed node
     pub fn clear_focus(&mut self) {
         if let Some(id) = self.focus_node_id {
+            self.finish_composition(id, &mut |_| {});
+            self.ime_cursor_area = None;
             let shell_provider = self.shell_provider.clone();
             self.snapshot_node_and(id, ElementState::FOCUS | ElementState::FOCUSRING, |node| {
                 node.blur(shell_provider)
@@ -1837,6 +1917,10 @@ impl BaseDocument {
         if !self.nodes[focus_node_id].flags.is_in_document() {
             return false;
         }
+        if let Some(old_focus) = self.focus_node_id {
+            self.finish_composition(old_focus, &mut |_| {});
+        }
+        self.ime_cursor_area = None;
 
         #[cfg(feature = "tracing")]
         tracing::info!("Focussed node {focus_node_id}");

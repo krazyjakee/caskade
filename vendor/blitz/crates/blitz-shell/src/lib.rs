@@ -124,11 +124,46 @@ impl ShellProvider for BlitzShellProvider {
     }
     fn set_ime_enabled(&self, is_enabled: bool) {
         if is_enabled {
-            let _ = self.window.request_ime_update(ImeRequest::Enable(
-                ImeEnableRequest::new(ImeCapabilities::new(), ImeRequestData::default()).unwrap(),
-            ));
+            // The caret area follows at the next resolve.
+            self.enable_ime(Default::default(), 0.0, 0.0, 0.0, 0.0);
         } else {
             let _ = self.window.request_ime_update(ImeRequest::Disable);
+        }
+    }
+    fn enable_ime(
+        &self,
+        purpose: blitz_traits::shell::TextInputPurpose,
+        x: f32,
+        y: f32,
+        width: f32,
+        height: f32,
+    ) {
+        use blitz_traits::shell::TextInputPurpose;
+        use winit::window::{ImeHint, ImePurpose};
+        // Without these capabilities winit drops the caret area: the IME's
+        // candidate window would open wherever the platform puts it.
+        let (hint, purpose) = match purpose {
+            TextInputPurpose::Normal => (ImeHint::NONE, ImePurpose::Normal),
+            TextInputPurpose::Password => (
+                ImeHint::HIDDEN_TEXT | ImeHint::SENSITIVE_DATA,
+                ImePurpose::Password,
+            ),
+            TextInputPurpose::Email => (ImeHint::LATIN, ImePurpose::Email),
+            TextInputPurpose::Number => (ImeHint::NONE, ImePurpose::Number),
+            TextInputPurpose::Phone => (ImeHint::NONE, ImePurpose::Phone),
+            TextInputPurpose::Url => (ImeHint::LATIN, ImePurpose::Url),
+        };
+        let data = ImeRequestData::default()
+            .with_cursor_area(
+                LogicalPosition::new(x, y).into(),
+                LogicalSize::new(width, height).into(),
+            )
+            .with_hint_and_purpose(hint, purpose);
+        let capabilities = ImeCapabilities::new()
+            .with_cursor_area()
+            .with_hint_and_purpose();
+        if let Some(request) = ImeEnableRequest::new(capabilities, data) {
+            let _ = self.window.request_ime_update(ImeRequest::Enable(request));
         }
     }
     fn set_ime_cursor_area(&self, x: f32, y: f32, width: f32, height: f32) {

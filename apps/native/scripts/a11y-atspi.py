@@ -15,6 +15,7 @@ Run it only inside the desktop isolation wrapper, never on a real session:
 Needs at-spi2-core, python3-gi with Atspi 2.0, and Orca (for its part).
 """
 import argparse
+import warnings
 import os
 import shutil
 import subprocess
@@ -61,6 +62,36 @@ if os.path.isdir("/etc/speech-dispatcher/modules"):
 with open(f"{home}/.libao", "w") as fh:
     fh.write("default_driver=null\n")
 
+def private_bus(home):
+    """A session bus of this run's own, started after the environment above:
+    the services it activates (a portal, a keyring, gvfs) get this run's
+    HOME and runtime dir. dbus-run-session's bus hands them the wrapper's,
+    the user's real ones."""
+    sock_dir = os.path.join(home, "bus")
+    os.makedirs(sock_dir, mode=0o700)
+    config = os.path.join(home, "bus.conf")
+    with open(config, "w") as fh:
+        fh.write(f"""<!DOCTYPE busconfig PUBLIC "-//freedesktop//DTD D-Bus Bus Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
+<busconfig>
+  <type>session</type>
+  <listen>unix:dir={sock_dir}</listen>
+  <auth>EXTERNAL</auth>
+  <standard_session_servicedirs/>
+  <policy context="default">
+    <allow send_destination="*" eavesdrop="true"/>
+    <allow eavesdrop="true"/>
+    <allow own="*"/>
+  </policy>
+</busconfig>
+""")
+    proc = subprocess.Popen(["dbus-daemon", f"--config-file={config}", "--nofork", "--print-address=1"],
+                            stdout=subprocess.PIPE, text=True)
+    address = proc.stdout.readline().strip()
+    os.environ["DBUS_SESSION_BUS_ADDRESS"] = address
+    return proc
+
+
 children = []
 app = None
 orca = None
@@ -91,6 +122,7 @@ def check(what, passed, detail=""):
 
 
 try:
+    children.append(private_bus(home))
     start(["/usr/libexec/at-spi-bus-launcher", "--launch-immediately"])
     for _ in range(50):
         if subprocess.run(["gdbus", "call", "--session", "--dest", "org.a11y.Bus", "--object-path",
@@ -104,6 +136,8 @@ try:
     import gi
 
     gi.require_version("Atspi", "2.0")
+    # get_action_name: its replacement, get_name, clashes with Accessible.get_name.
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
     from gi.repository import Atspi, GLib
 
     Atspi.init()
@@ -178,7 +212,7 @@ try:
             parts.append(",".join(sorted(interesting)))
         action = node.get_action_iface()
         if action is not None and action.get_n_actions():
-            parts.append("[" + " ".join(action.get_name(i) for i in range(action.get_n_actions())) + "]")
+            parts.append("[" + " ".join(action.get_action_name(i) for i in range(action.get_n_actions())) + "]")
         return " ".join(parts)
 
     def by_name(role, name):
@@ -223,7 +257,7 @@ try:
     def act(node, name):
         action = node.get_action_iface()
         for i in range(action.get_n_actions()):
-            if action.get_name(i) == name:
+            if action.get_action_name(i) == name:
                 action.do_action(i)
                 pump(0.5)
                 return True

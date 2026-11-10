@@ -181,6 +181,9 @@ pub enum DomEventKind {
     KeyUp,
     Input,
     Ime,
+    CompositionStart,
+    CompositionUpdate,
+    CompositionEnd,
 
     Focus,
     Blur,
@@ -232,6 +235,9 @@ impl FromStr for DomEventKind {
             "keyup" => Ok(Self::KeyUp),
             "input" => Ok(Self::Input),
             "composition" => Ok(Self::Ime),
+            "compositionstart" => Ok(Self::CompositionStart),
+            "compositionupdate" => Ok(Self::CompositionUpdate),
+            "compositionend" => Ok(Self::CompositionEnd),
 
             "focus" => Ok(Self::Focus),
             "blur" => Ok(Self::Blur),
@@ -279,6 +285,9 @@ pub enum DomEventData {
     KeyUp(BlitzKeyEvent),
     Input(BlitzInputEvent),
     Ime(BlitzImeEvent),
+    CompositionStart(BlitzCompositionEvent),
+    CompositionUpdate(BlitzCompositionEvent),
+    CompositionEnd(BlitzCompositionEvent),
 
     Focus(BlitzFocusEvent),
     Blur(BlitzFocusEvent),
@@ -334,6 +343,9 @@ impl DomEventData {
             Self::KeyUp { .. } => "keyup",
             Self::Input { .. } => "input",
             Self::Ime { .. } => "composition",
+            Self::CompositionStart { .. } => "compositionstart",
+            Self::CompositionUpdate { .. } => "compositionupdate",
+            Self::CompositionEnd { .. } => "compositionend",
 
             Self::Focus { .. } => "focus",
             Self::Blur { .. } => "blur",
@@ -380,6 +392,9 @@ impl DomEventData {
             Self::KeyUp { .. } => DomEventKind::KeyUp,
             Self::Input { .. } => DomEventKind::Input,
             Self::Ime { .. } => DomEventKind::Ime,
+            Self::CompositionStart { .. } => DomEventKind::CompositionStart,
+            Self::CompositionUpdate { .. } => DomEventKind::CompositionUpdate,
+            Self::CompositionEnd { .. } => DomEventKind::CompositionEnd,
 
             Self::Focus { .. } => DomEventKind::Focus,
             Self::Blur { .. } => DomEventKind::Blur,
@@ -425,6 +440,9 @@ impl DomEventData {
             Self::KeyUp { .. } => true,
             Self::KeyPress { .. } => true,
             Self::Ime { .. } => true,
+            Self::CompositionStart { .. } => false,
+            Self::CompositionUpdate { .. } => false,
+            Self::CompositionEnd { .. } => false,
             Self::Input { .. } => false,
 
             Self::Focus { .. } => false,
@@ -471,6 +489,9 @@ impl DomEventData {
             Self::KeyUp { .. } => true,
             Self::KeyPress { .. } => true,
             Self::Ime { .. } => true,
+            Self::CompositionStart { .. } => true,
+            Self::CompositionUpdate { .. } => true,
+            Self::CompositionEnd { .. } => true,
             Self::Input { .. } => true,
 
             Self::Focus { .. } => false,
@@ -761,6 +782,14 @@ pub struct BlitzKeyEvent {
 #[derive(Clone, Debug)]
 pub struct BlitzInputEvent {
     pub value: String,
+}
+
+/// A composition (IME) event's data: the text being composed
+/// (`compositionstart`, `compositionupdate`) or committed (`compositionend`;
+/// empty when the composition was cancelled).
+#[derive(Clone, Debug)]
+pub struct BlitzCompositionEvent {
+    pub data: String,
 }
 
 #[derive(Clone, Debug)]

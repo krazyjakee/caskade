@@ -1,8 +1,8 @@
 //! Integration between Dioxus and Blitz
 use crate::NodeId;
 use crate::events::{
-    BlitzKeyboardData, NativeConverter, NativeFocusData, NativeFormData, NativePointerData,
-    NativeScrollData, NativeTouchData, NativeWheelData, NodeHandle,
+    BlitzKeyboardData, NativeCompositionData, NativeConverter, NativeFocusData, NativeFormData,
+    NativePointerData, NativeScrollData, NativeTouchData, NativeWheelData, NodeHandle,
 };
 use crate::mutation_writer::DioxusState;
 use crate::qual_name;
@@ -332,8 +332,13 @@ impl EventHandler for DioxusEventHandler<'_> {
                 values: vec![],
             })),
 
-            // TODO: Implement IME handling
+            // The IME's own events are Blitz's; script hears compositions.
             DomEventData::Ime(_) => None,
+            DomEventData::CompositionStart(data)
+            | DomEventData::CompositionUpdate(data)
+            | DomEventData::CompositionEnd(data) => Some(wrap_event_data(NativeCompositionData {
+                data: data.data.clone(),
+            })),
 
             // AppleStandardKeybinding events are not exposed to script
             DomEventData::AppleStandardKeybinding(_) => None,

@@ -533,6 +533,10 @@ impl Input {
     /// A key on the root: its action, while navigation is on. Whether the
     /// key was taken.
     fn key(&self, event: &KeyboardEvent) -> bool {
+        // An IME's keys are the IME's (#84).
+        if event.is_composing() {
+            return false;
+        }
         if !self.inner.dispatcher.borrow().active() {
             return false;
         }

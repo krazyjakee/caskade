@@ -63,6 +63,22 @@ pub enum GeneratedTextInputEvent {
     Select,
     PreEditChange,
     Submit,
+    /// A composition began (`compositionstart`).
+    CompositionStart,
+    /// The composed text is now this (`compositionupdate`).
+    CompositionUpdate(String),
+    /// A composition ended with this text committed, empty when it was
+    /// cancelled (`compositionend`).
+    CompositionEnd(String),
+}
+
+/// What a text field allows, from its element's attributes when an event
+/// arrives: a read-only field can be selected and copied but not edited,
+/// and a password can't be copied out.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct TextFieldFlags {
+    pub read_only: bool,
+    pub password: bool,
 }
 
 pub struct TextInputData {
@@ -106,9 +122,18 @@ impl TextInputData {
         layout_ctx: &mut LayoutContext<TextBrush>,
         text: &str,
     ) {
+        // The same value again (a controlled field re-rendering) changes
+        // nothing: the caret, the selection and a composition stay.
         if self.editor.text() != text {
+            let mut driver = self.editor.driver(font_ctx, layout_ctx);
+            // A new value replaces a composition in progress, and the caret
+            // goes to its end, as a browser puts it.
+            driver.clear_compose();
+            drop(driver);
             self.editor.set_text(text);
-            self.editor.driver(font_ctx, layout_ctx).refresh_layout();
+            let mut driver = self.editor.driver(font_ctx, layout_ctx);
+            driver.refresh_layout();
+            driver.move_to_text_end();
         }
     }
 
@@ -214,9 +239,15 @@ impl TextInputData {
         layout_ctx: &mut LayoutContext<TextBrush>,
         shell_provider: &dyn ShellProvider,
         event: BlitzKeyEvent,
+        flags: TextFieldFlags,
     ) -> Option<GeneratedTextInputEvent> {
         // Do nothing if it is a keyup event
         if !event.state.is_pressed() {
+            return None;
+        }
+        // While the IME composes, its own keys edit the composition; the
+        // field's shortcuts would edit around it.
+        if self.editor.is_composing() {
             return None;
         }
 
@@ -225,30 +256,47 @@ impl TextInputData {
         let action_mod = mods.contains(ACTION_MOD);
 
         let is_multiline = self.is_multiline;
+        // Shortcuts match whatever Shift or Caps Lock did to the letter.
+        let shortcut = match &event.key {
+            Key::Character(c) if action_mod => Some(c.to_lowercase()),
+            _ => None,
+        };
+        if flags.read_only {
+            let edits = match &event.key {
+                Key::Character(_) => !action_mod || matches!(shortcut.as_deref(), Some("x" | "v")),
+                Key::Named(NamedKey::Backspace | NamedKey::Delete) => true,
+                Key::Named(NamedKey::Enter) => is_multiline,
+                _ => false,
+            };
+            if edits {
+                return None;
+            }
+        }
         let editor = &mut self.editor;
         let mut driver = editor.driver(font_ctx, layout_ctx);
         match event.key {
-            Key::Character(c) if action_mod && matches!(c.as_str(), "c" | "x" | "v") => {
-                match c.to_lowercase().as_str() {
-                    "c" => {
+            Key::Character(_) if matches!(shortcut.as_deref(), Some("c" | "x" | "v")) => {
+                match shortcut.as_deref() {
+                    Some("c" | "x") if flags.password => return None,
+                    Some("c") => {
                         if let Some(text) = driver.editor.selected_text() {
                             let _ = shell_provider.set_clipboard_text(text.to_owned());
                         }
+                        // Copying changes nothing: no `input`.
+                        return None;
                     }
-                    "x" => {
-                        if let Some(text) = driver.editor.selected_text() {
-                            let _ = shell_provider.set_clipboard_text(text.to_owned());
-                            driver.delete_selection()
-                        }
+                    Some("x") => {
+                        let text = driver.editor.selected_text()?;
+                        let _ = shell_provider.set_clipboard_text(text.to_owned());
+                        driver.delete_selection();
+                        return Some(GeneratedTextInputEvent::Input);
                     }
-                    "v" => {
+                    _ => {
+                        // The text arrives as a paste (`UiEvent::Paste`).
                         let _ = shell_provider.request_clipboard_text();
                         return None;
                     }
-                    _ => unreachable!(),
                 }
-
-                return Some(GeneratedTextInputEvent::Input);
             }
             Key::Character(c) if action_mod && matches!(c.to_lowercase().as_str(), "a") => {
                 if shift {
@@ -384,7 +432,27 @@ impl TextInputData {
         layout_ctx: &mut LayoutContext<TextBrush>,
         shell_provider: &dyn ShellProvider,
         command: &str,
+        flags: TextFieldFlags,
     ) -> Option<GeneratedTextInputEvent> {
+        // A read-only field takes Cocoa's moves and selections, not its edits.
+        const EDITS: &[&str] = &[
+            "insert",
+            "delete",
+            "paste",
+            "cut",
+            "yank",
+            "transpose",
+            "capitalize",
+            "lowercase",
+            "uppercase",
+            "indent",
+        ];
+        if flags.read_only && EDITS.iter().any(|edit| command.starts_with(edit)) {
+            return None;
+        }
+        if flags.password && matches!(command, "copy:" | "cut:") {
+            return None;
+        }
         let editor = &mut self.editor;
         let mut driver = editor.driver(font_ctx, layout_ctx);
         let is_multiline = self.is_multiline;
@@ -769,45 +837,88 @@ impl TextInputData {
         None
     }
 
+    /// Applies an IME event, returning the events it generates in order:
+    /// a composition's start, updates and end around the edits, as a
+    /// browser fires `compositionstart`, `compositionupdate`, `input` and
+    /// `compositionend`.
     pub(crate) fn apply_ime_event(
         &mut self,
         font_ctx: &mut FontContext,
         layout_ctx: &mut LayoutContext<TextBrush>,
         event: BlitzImeEvent,
-    ) -> Option<GeneratedTextInputEvent> {
+    ) -> Vec<GeneratedTextInputEvent> {
+        use GeneratedTextInputEvent as Generated;
+        let was_composing = self.editor.is_composing();
         let editor = &mut self.editor;
         let mut driver = editor.driver(font_ctx, layout_ctx);
 
         match event {
-            BlitzImeEvent::Enabled => {
-                // Do nothing
-                None
-            }
+            BlitzImeEvent::Enabled => Vec::new(),
             BlitzImeEvent::Disabled => {
+                if !was_composing {
+                    return Vec::new();
+                }
                 driver.clear_compose();
-                Some(GeneratedTextInputEvent::PreEditChange)
+                vec![
+                    Generated::PreEditChange,
+                    Generated::CompositionEnd(String::new()),
+                ]
             }
             BlitzImeEvent::Commit(text) => {
+                // A single-line field drops pasted line breaks.
+                let text = if self.is_multiline {
+                    text
+                } else {
+                    text.replace(['\r', '\n'], "")
+                };
                 driver.clear_compose();
                 driver.insert_or_replace_selection(&text);
-                Some(GeneratedTextInputEvent::Input)
+                let mut events = vec![Generated::Input];
+                if was_composing {
+                    events.push(Generated::CompositionEnd(text));
+                }
+                events
             }
             BlitzImeEvent::Preedit(text, cursor) => {
                 if text.is_empty() {
+                    if !was_composing {
+                        return Vec::new();
+                    }
                     driver.clear_compose();
-                } else {
-                    driver.set_compose(&text, cursor);
+                    return vec![
+                        Generated::PreEditChange,
+                        Generated::CompositionEnd(String::new()),
+                    ];
                 }
-                Some(GeneratedTextInputEvent::PreEditChange)
+                driver.set_compose(&text, cursor);
+                let mut events = Vec::new();
+                if !was_composing {
+                    events.push(Generated::CompositionStart);
+                }
+                events.push(Generated::CompositionUpdate(text));
+                events.push(Generated::PreEditChange);
+                events
             }
             BlitzImeEvent::DeleteSurrounding {
                 before_bytes,
                 after_bytes,
             } => {
-                let _ = before_bytes;
-                let _ = after_bytes;
-                // TODO
-                None
+                // Bytes around the selection (the IME's surrounding text),
+                // as winit's `Ime::DeleteSurrounding` gives them.
+                let mut changed = false;
+                if let Some(len) = std::num::NonZeroUsize::new(before_bytes) {
+                    driver.delete_bytes_before_selection(len);
+                    changed = true;
+                }
+                if let Some(len) = std::num::NonZeroUsize::new(after_bytes) {
+                    driver.delete_bytes_after_selection(len);
+                    changed = true;
+                }
+                if changed {
+                    vec![Generated::Input]
+                } else {
+                    Vec::new()
+                }
             }
         }
     }
@@ -839,6 +950,93 @@ mod tests {
                 assert_eq!(input.editor.text(), committed);
             }
         }
+    }
+
+    #[test]
+    fn composition_events_wrap_the_edit() {
+        use GeneratedTextInputEvent as G;
+        let mut input = TextInputData::new(false);
+        let mut font_ctx = FontContext::new();
+        let mut layout_ctx = LayoutContext::new();
+        let mut ime = |event| input.apply_ime_event(&mut font_ctx, &mut layout_ctx, event);
+        let kinds = |events: Vec<G>| {
+            events
+                .into_iter()
+                .map(|event| match event {
+                    G::CompositionStart => "start".to_string(),
+                    G::CompositionUpdate(text) => format!("update {text}"),
+                    G::CompositionEnd(text) => format!("end {text}"),
+                    G::Input => "input".to_string(),
+                    G::PreEditChange => "preedit".to_string(),
+                    G::Select => "select".to_string(),
+                    G::Submit => "submit".to_string(),
+                })
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(
+            kinds(ime(BlitzImeEvent::Preedit("ni".into(), None))),
+            ["start", "update ni", "preedit"]
+        );
+        assert_eq!(
+            kinds(ime(BlitzImeEvent::Preedit("你".into(), None))),
+            ["update 你", "preedit"]
+        );
+        assert_eq!(
+            kinds(ime(BlitzImeEvent::Commit("你".into()))),
+            ["input", "end 你"]
+        );
+        // A commit outside a composition (a paste) is only an edit.
+        assert_eq!(kinds(ime(BlitzImeEvent::Commit("好".into()))), ["input"]);
+        // A cancelled composition ends with nothing committed.
+        ime(BlitzImeEvent::Preedit("x".into(), None));
+        assert_eq!(
+            kinds(ime(BlitzImeEvent::Preedit(String::new(), None))),
+            ["preedit", "end "]
+        );
+        assert!(ime(BlitzImeEvent::Disabled).is_empty());
+        assert_eq!(input.editor.text(), "你好");
+    }
+
+    #[test]
+    fn ime_deletes_surrounding_text() {
+        let mut input = TextInputData::new(false);
+        let mut font_ctx = FontContext::new();
+        let mut layout_ctx = LayoutContext::new();
+        input.apply_ime_event(
+            &mut font_ctx,
+            &mut layout_ctx,
+            BlitzImeEvent::Commit("abc".into()),
+        );
+        input.apply_ime_event(
+            &mut font_ctx,
+            &mut layout_ctx,
+            BlitzImeEvent::DeleteSurrounding {
+                before_bytes: 2,
+                after_bytes: 0,
+            },
+        );
+        assert_eq!(input.editor.text(), "a");
+    }
+
+    #[test]
+    fn setting_the_value_keeps_or_ends_a_composition() {
+        let mut input = TextInputData::new(false);
+        let mut font_ctx = FontContext::new();
+        let mut layout_ctx = LayoutContext::new();
+        input.set_text(&mut font_ctx, &mut layout_ctx, "ab");
+        input.apply_ime_event(
+            &mut font_ctx,
+            &mut layout_ctx,
+            BlitzImeEvent::Preedit("x".into(), None),
+        );
+        // The same value: the composition goes on.
+        input.set_text(&mut font_ctx, &mut layout_ctx, "ab");
+        assert!(input.editor.is_composing());
+        // A new value ends it, with the caret at the end.
+        input.set_text(&mut font_ctx, &mut layout_ctx, "hello");
+        assert!(!input.editor.is_composing());
+        assert_eq!(input.editor.text(), "hello");
+        assert_eq!(input.editor.raw_selection().focus().index(), 5);
     }
 
     #[test]

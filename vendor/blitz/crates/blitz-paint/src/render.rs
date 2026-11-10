@@ -1038,12 +1038,18 @@ impl ElementCx<'_, '_> {
 
             // Render text selection highlight (if any) using cached selection ranges
             if let Some(&(sel_start, sel_end)) = self.context.selection_ranges.get(&self.node.id) {
+                let color = self
+                    .node
+                    .selection_background()
+                    .map(|color| color.as_srgb_color())
+                    .unwrap_or(SELECTION_COLOR);
                 crate::text::draw_text_selection(
                     scene,
                     &text_layout.layout,
                     transform,
                     sel_start,
                     sel_end,
+                    color,
                 );
             }
 
@@ -1091,11 +1097,16 @@ impl ElementCx<'_, '_> {
 
             if self.node.is_focussed() {
                 // Render selection/caret
+                let selection_color = self
+                    .node
+                    .selection_background()
+                    .map(|color| color.as_srgb_color())
+                    .unwrap_or(SELECTION_COLOR);
                 for (rect, _line_idx) in input_data.editor.selection_geometry().iter() {
                     scene.fill(
                         Fill::NonZero,
                         transform,
-                        SELECTION_COLOR,
+                        selection_color,
                         None,
                         &convert_rect(rect),
                     );
@@ -1115,6 +1126,26 @@ impl ElementCx<'_, '_> {
                         &convert_rect(&cursor),
                     );
                 };
+            }
+
+            // Underline an IME's composition (the preedit), as platforms
+            // mark text that isn't committed yet.
+            if let (Some(compose), Some(layout)) = (
+                input_data.editor.raw_compose(),
+                input_data.editor.try_layout(),
+            ) {
+                use parley::{Affinity, Cursor, Selection};
+                let color = self.style.get_inherited_text().color.as_srgb_color();
+                let thickness = self.scale.max(1.0);
+                let preedit = Selection::new(
+                    Cursor::from_byte_index(layout, compose.start, Affinity::Downstream),
+                    Cursor::from_byte_index(layout, compose.end, Affinity::Upstream),
+                );
+                for (rect, _line) in preedit.geometry(layout) {
+                    let underline =
+                        kurbo::Rect::new(rect.x0, rect.y1 - thickness, rect.x1, rect.y1);
+                    scene.fill(Fill::NonZero, transform, color, None, &underline);
+                }
             }
 
             // Render text

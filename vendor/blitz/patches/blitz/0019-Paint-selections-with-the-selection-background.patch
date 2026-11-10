@@ -1,0 +1,179 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: caskade <caskade@localhost>
+Date: Tue, 10 Nov 2026 11:50:27 +0000
+Subject: [PATCH] Paint selections with the `::selection` background
+
+Selected text (in text inputs and on the page) was always highlighted in
+one fixed light blue, whatever the page's `::selection` rules said, so a
+dark theme's selection was unreadable and an accent colour couldn't show.
+The highlight now takes the background of the node's `::selection` style
+(Stylo computes it eagerly), or its nearest ancestor's, as highlights
+inherit; without a rule it keeps the default.
+
+Test in `selection_pseudo.rs`.
+---
+ packages/blitz-dom/src/node/node.rs         | 23 ++++++++++++++
+ packages/blitz-paint/src/render.rs          | 13 +++++++-
+ packages/blitz-paint/src/text.rs            |  5 ++--
+ tests/blitz-tests/tests/all.rs              |  1 +
+ tests/blitz-tests/tests/selection_pseudo.rs | 33 +++++++++++++++++++++
+ 5 files changed, 72 insertions(+), 3 deletions(-)
+ create mode 100644 tests/blitz-tests/tests/selection_pseudo.rs
+
+diff --git a/packages/blitz-dom/src/node/node.rs b/packages/blitz-dom/src/node/node.rs
+index 387c73d7..4e2b7c52 100644
+--- a/packages/blitz-dom/src/node/node.rs
++++ b/packages/blitz-dom/src/node/node.rs
+@@ -1159,6 +1159,29 @@ impl Node {
+         Some(&attr.value)
+     }
+ 
++    /// The background of selected text in this node: its `::selection`
++    /// style's, or its nearest ancestor's (as highlights inherit). `None`
++    /// when no `::selection` rule applies, for the default highlight.
++    pub fn selection_background(&self) -> Option<style::color::AbsoluteColor> {
++        use style::selector_parser::PseudoElement;
++        let mut node = Some(self);
++        while let Some(current) = node {
++            if let Some(data) = current.try_stylo_element_data().and_then(|data| data.get())
++                && let Some(selection) = data.styles.pseudos.get(&PseudoElement::Selection)
++            {
++                let text = selection.get_inherited_text().color;
++                return Some(
++                    selection
++                        .get_background()
++                        .background_color
++                        .resolve_to_absolute(&text),
++                );
++            }
++            node = current.parent.map(|id| self.with(id));
++        }
++        None
++    }
++
+     pub fn primary_styles(&self) -> Option<impl Deref<Target = ServoArc<ComputedValues>>> {
+         self.try_stylo_element_data()
+             .and_then(|stylo| stylo.primary_styles())
+diff --git a/packages/blitz-paint/src/render.rs b/packages/blitz-paint/src/render.rs
+index 4be46e0c..bb97fcc1 100644
+--- a/packages/blitz-paint/src/render.rs
++++ b/packages/blitz-paint/src/render.rs
+@@ -1038,12 +1038,18 @@ impl ElementCx<'_, '_> {
+ 
+             // Render text selection highlight (if any) using cached selection ranges
+             if let Some(&(sel_start, sel_end)) = self.context.selection_ranges.get(&self.node.id) {
++                let color = self
++                    .node
++                    .selection_background()
++                    .map(|color| color.as_srgb_color())
++                    .unwrap_or(SELECTION_COLOR);
+                 crate::text::draw_text_selection(
+                     scene,
+                     &text_layout.layout,
+                     transform,
+                     sel_start,
+                     sel_end,
++                    color,
+                 );
+             }
+ 
+@@ -1091,11 +1097,16 @@ impl ElementCx<'_, '_> {
+ 
+             if self.node.is_focussed() {
+                 // Render selection/caret
++                let selection_color = self
++                    .node
++                    .selection_background()
++                    .map(|color| color.as_srgb_color())
++                    .unwrap_or(SELECTION_COLOR);
+                 for (rect, _line_idx) in input_data.editor.selection_geometry().iter() {
+                     scene.fill(
+                         Fill::NonZero,
+                         transform,
+-                        SELECTION_COLOR,
++                        selection_color,
+                         None,
+                         &convert_rect(rect),
+                     );
+diff --git a/packages/blitz-paint/src/text.rs b/packages/blitz-paint/src/text.rs
+index 9ed11d6e..b378aad4 100644
+--- a/packages/blitz-paint/src/text.rs
++++ b/packages/blitz-paint/src/text.rs
+@@ -11,8 +11,8 @@ use style::values::computed::{
+ };
+ use style::values::generics::text::{GenericTextDecorationInset, GenericTextDecorationLength};
+ 
++use crate::FONT_EMBOLDEN_ENABLED;
+ use crate::color::{Color, ToColorColor as _};
+-use crate::{FONT_EMBOLDEN_ENABLED, SELECTION_COLOR};
+ 
+ /// Draw the backgrounds of inline elements (e.g. `<span style="background: ...">`).
+ ///
+@@ -755,6 +755,7 @@ pub(crate) fn draw_text_selection(
+     transform: Affine,
+     selection_start: usize,
+     selection_end: usize,
++    color: Color,
+ ) {
+     let anchor = Cursor::from_byte_index(layout, selection_start, Affinity::Downstream);
+     let focus = Cursor::from_byte_index(layout, selection_end, Affinity::Downstream);
+@@ -762,7 +763,7 @@ pub(crate) fn draw_text_selection(
+ 
+     selection.geometry_with(layout, |rect, _line_idx| {
+         let rect = kurbo::Rect::new(rect.x0, rect.y0, rect.x1, rect.y1);
+-        scene.fill(Fill::NonZero, transform, SELECTION_COLOR, None, &rect);
++        scene.fill(Fill::NonZero, transform, color, None, &rect);
+     });
+ }
+ 
+diff --git a/tests/blitz-tests/tests/all.rs b/tests/blitz-tests/tests/all.rs
+index 1407c9aa..58dff7ba 100644
+--- a/tests/blitz-tests/tests/all.rs
++++ b/tests/blitz-tests/tests/all.rs
+@@ -72,6 +72,7 @@ mod stale_node_mapping;
+ mod style_property_invalidation;
+ mod svg_attr_sizing;
+ mod svg_background_size;
++mod selection_pseudo;
+ mod text_input_clipboard;
+ mod text_input_ime;
+ mod text_input_selection;
+diff --git a/tests/blitz-tests/tests/selection_pseudo.rs b/tests/blitz-tests/tests/selection_pseudo.rs
+new file mode 100644
+index 00000000..046c9192
+--- /dev/null
++++ b/tests/blitz-tests/tests/selection_pseudo.rs
+@@ -0,0 +1,33 @@
++//! `::selection` gives selected text its background, and descendants take
++//! their ancestor's (highlight inheritance).
++
++use blitz_test_harness::Harness;
++
++#[test]
++fn selection_backgrounds_come_from_the_selection_pseudo_element() {
++    let harness = Harness::from_html(
++        r#"<html><head><style>
++            #themed::selection { background-color: rgb(10, 20, 30); }
++        </style></head><body>
++            <div id="themed"><input id="inside"><p id="text">Some text</p></div>
++            <input id="plain">
++        </body></html>"#,
++    );
++    let background = |selector: &str| {
++        harness
++            .base()
++            .get_node(harness.node(selector))
++            .unwrap()
++            .selection_background()
++            .map(|color| {
++                color
++                    .to_color_space(style::color::ColorSpace::Srgb)
++                    .raw_components()
++                    .map(|c| (c * 255.0).round())
++            })
++    };
++    assert_eq!(background("#themed"), Some([10.0, 20.0, 30.0, 255.0]));
++    assert_eq!(background("#inside"), Some([10.0, 20.0, 30.0, 255.0]));
++    assert_eq!(background("#text"), Some([10.0, 20.0, 30.0, 255.0]));
++    assert_eq!(background("#plain"), None);
++}

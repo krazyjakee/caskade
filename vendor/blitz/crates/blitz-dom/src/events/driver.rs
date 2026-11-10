@@ -286,14 +286,20 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
             UiEvent::Wheel(data) => {
                 self.handle_dom_event(DomEvent::new(target, DomEventData::Wheel(data)))
             }
-            UiEvent::KeyUp(data) => {
+            UiEvent::KeyUp(mut data) => {
+                data.is_composing |= self.is_composing(target);
                 self.handle_dom_event(DomEvent::new(target, DomEventData::KeyUp(data)))
             }
-            UiEvent::KeyDown(data) => {
+            UiEvent::KeyDown(mut data) => {
+                data.is_composing |= self.is_composing(target);
                 self.handle_dom_event(DomEvent::new(target, DomEventData::KeyDown(data)))
             }
+            // The IME's own events are the field's to apply; script hears the
+            // composition events and the input they generate.
             UiEvent::Ime(data) => {
-                self.handle_dom_event(DomEvent::new(target, DomEventData::Ime(data)))
+                let mut event = DomEvent::new(target, DomEventData::Ime(data));
+                self.run_default_action(&mut event);
+                self.process_queue();
             }
             UiEvent::Paste(text) => {
                 super::ime::handle_ime_event(
@@ -406,6 +412,17 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
                 }
             }
         }
+    }
+
+    /// Whether an IME is composing in the text field `target`: a key event
+    /// then says so (`KeyboardEvent.isComposing`).
+    fn is_composing(&self, target: NodeId) -> bool {
+        self.doc
+            .inner()
+            .get_node(target)
+            .and_then(|node| node.element_data())
+            .and_then(|element| element.text_input_data())
+            .is_some_and(|input| input.editor.is_composing())
     }
 
     fn focus_for_accessibility(&mut self, focusable: Option<NodeId>) {

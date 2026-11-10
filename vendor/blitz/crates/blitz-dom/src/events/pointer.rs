@@ -297,7 +297,36 @@ pub(crate) fn handle_pointermove<F: FnMut(DomEvent)>(
         return has_changed;
     }
 
-    let Some(hit) = doc.hit(x, y) else {
+    let hit = doc.hit(x, y);
+    // A drag that began in the focused text input keeps selecting in it
+    // when the pointer leaves it (or the page), as if the input captured the
+    // pointer.
+    if buttons != MouseEventButtons::None
+        && event.is_mouse()
+        && let Some(input_id) = doc
+            .mousedown_node_id
+            .filter(|id| Some(*id) == doc.focus_node_id)
+            .filter(|id| {
+                hit.as_ref()
+                    .and_then(|hit| doc.nearest_non_anonymous_ancestor(hit.node_id))
+                    != Some(*id)
+            })
+        && let Some((input_x, input_y)) = text_input_point(doc, input_id, x, y)
+    {
+        let font_ctx = doc.font_ctx.clone();
+        if let Some(input) = doc.nodes[input_id]
+            .element_data_mut()
+            .and_then(|element| element.text_input_data_mut())
+        {
+            input
+                .editor
+                .driver(&mut font_ctx.lock().unwrap(), &mut doc.layout_ctx)
+                .extend_selection_to_point(input_x, input_y);
+            return true;
+        }
+    }
+
+    let Some(hit) = hit else {
         return changed;
     };
 
@@ -380,6 +409,37 @@ pub(crate) fn handle_pointermove<F: FnMut(DomEvent)>(
 
     changed
 }
+
+/// The page point (`x`, `y`) in text input `node_id`'s editor coordinates:
+/// device pixels in its text layout, after its own scrolling.
+fn text_input_point(doc: &BaseDocument, node_id: NodeId, x: f32, y: f32) -> Option<(f32, f32)> {
+    let node = doc.get_node(node_id)?;
+    let input = node.element_data()?.text_input_data()?;
+    input.editor.try_layout()?;
+    let rect = doc.get_client_bounding_rect(node_id)?;
+    let page = doc.viewport_scroll();
+    let layout = node.final_layout();
+    let scale = doc.viewport.scale_f64();
+    let left = rect.x + page.x + (layout.padding.left + layout.border.left) as f64;
+    let mut top = rect.y + page.y + (layout.padding.top + layout.border.top) as f64;
+    if !input.is_multiline {
+        top += node.text_input_v_centering_offset(scale);
+    }
+    let scroll = input.scroll_offset as f64 * scale;
+    let (scroll_x, scroll_y) = if input.is_multiline {
+        (0.0, scroll)
+    } else {
+        (scroll, 0.0)
+    };
+    Some((
+        ((x as f64 - left) * scale + scroll_x) as f32,
+        ((y as f64 - top) * scale + scroll_y) as f32,
+    ))
+}
+
+/// How long a finger rests on a text input before lifting it selects the
+/// word under it, as a long press does.
+const LONG_PRESS: Duration = Duration::from_millis(500);
 
 pub(crate) fn handle_pointerdown(
     doc: &mut BaseDocument,
@@ -578,6 +638,32 @@ pub(crate) fn handle_pointerup<F: FnMut(DomEvent)>(
     // Don't dispatch click if we were doing a text selection drag or panning
     // the document with a touch
     let do_click = drag_mode == DragMode::None;
+
+    // A long press on the focused text input selects the word under it
+    // (touch has no double click; a moving finger pans instead).
+    if do_click
+        && matches!(event.id, BlitzPointerId::Finger(_))
+        && doc
+            .last_mousedown_time
+            .is_some_and(|down| down.elapsed() >= LONG_PRESS)
+        && let Some(input_id) = doc
+            .focus_node_id
+            .filter(|id| doc.nearest_non_anonymous_ancestor(target) == Some(*id))
+        && let Some((input_x, input_y)) =
+            text_input_point(doc, input_id, event.page_x(), event.page_y())
+    {
+        let font_ctx = doc.font_ctx.clone();
+        if let Some(input) = doc.nodes[input_id]
+            .element_data_mut()
+            .and_then(|element| element.text_input_data_mut())
+        {
+            input
+                .editor
+                .driver(&mut font_ctx.lock().unwrap(), &mut doc.layout_ctx)
+                .select_word_at_point(input_x, input_y);
+            doc.shell_provider.request_redraw();
+        }
+    }
 
     // Repaint so a dragged scrollbar thumb drops its active styling, and
     // restart its fade-out delay now that the drag no longer holds it shown

@@ -1,0 +1,45 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: caskade <caskade@localhost>
+Date: Tue, 10 Nov 2026 11:39:28 +0000
+Subject: [PATCH] Underline an IME's composition in text inputs
+
+The preedit (text an IME is composing, not yet committed) was drawn like
+the rest of the field's text, so nothing showed it wasn't text yet. It is
+now underlined in the text colour along parley's geometry for the
+composed range, as platforms mark it; the IME's active clause keeps the
+selection highlight parley gives it.
+---
+ packages/blitz-paint/src/render.rs | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/packages/blitz-paint/src/render.rs b/packages/blitz-paint/src/render.rs
+index 34bf2d0f..4be46e0c 100644
+--- a/packages/blitz-paint/src/render.rs
++++ b/packages/blitz-paint/src/render.rs
+@@ -1117,6 +1117,26 @@ impl ElementCx<'_, '_> {
+                 };
+             }
+ 
++            // Underline an IME's composition (the preedit), as platforms
++            // mark text that isn't committed yet.
++            if let (Some(compose), Some(layout)) = (
++                input_data.editor.raw_compose(),
++                input_data.editor.try_layout(),
++            ) {
++                use parley::{Affinity, Cursor, Selection};
++                let color = self.style.get_inherited_text().color.as_srgb_color();
++                let thickness = self.scale.max(1.0);
++                let preedit = Selection::new(
++                    Cursor::from_byte_index(layout, compose.start, Affinity::Downstream),
++                    Cursor::from_byte_index(layout, compose.end, Affinity::Upstream),
++                );
++                for (rect, _line) in preedit.geometry(layout) {
++                    let underline =
++                        kurbo::Rect::new(rect.x0, rect.y1 - thickness, rect.x1, rect.y1);
++                    scene.fill(Fill::NonZero, transform, color, None, &underline);
++                }
++            }
++
+             // Render text
+             let mut draw_text_context = self.context.draw_text_context.borrow_mut();
+             crate::text::stroke_text(

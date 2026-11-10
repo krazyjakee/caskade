@@ -172,6 +172,9 @@ impl BaseDocument {
         self.subdoc_is_animating = subdoc_is_animating;
         timer.record_time("subdocs");
 
+        // Layout and scrolling may have moved the focused field's caret.
+        self.update_ime_cursor_area();
+
         timer.print_times(&format!("Resolve({}): ", self.id()));
     }
 

@@ -594,6 +594,15 @@ impl ElementData {
         }
     }
 
+    /// What this text field allows: `readonly`, and whether it's a password.
+    pub fn text_field_flags(&self) -> crate::node::TextFieldFlags {
+        crate::node::TextFieldFlags {
+            read_only: self.attr(local_name!("readonly")).is_some(),
+            password: self.name.local == local_name!("input")
+                && self.attr(local_name!("type")) == Some("password"),
+        }
+    }
+
     pub fn text_input_data(&self) -> Option<&TextInputData> {
         match &self.special_data {
             SpecialElementData::TextInput(data) => Some(data),

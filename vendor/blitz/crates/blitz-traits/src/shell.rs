@@ -8,6 +8,19 @@ pub struct ClipboardError;
 
 /// Abstraction over windowing / operating system ("shell") functionality that allows a Blitz document
 /// to access that functionality without depending on a specific shell environment.
+/// What a text field is for: an IME or an on-screen keyboard adapts to it
+/// (the `type` of an `<input>`).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum TextInputPurpose {
+    #[default]
+    Normal,
+    Password,
+    Email,
+    Number,
+    Phone,
+    Url,
+}
+
 pub trait ShellProvider: Send + Sync + 'static {
     fn request_redraw(&self) {}
     fn set_cursor(&self, icon: Option<CursorIcon>) {
@@ -18,6 +31,14 @@ pub trait ShellProvider: Send + Sync + 'static {
     }
     fn set_ime_enabled(&self, is_enabled: bool) {
         let _ = is_enabled;
+    }
+    /// Turns the IME on for a text field: what the field is for, and where
+    /// its caret is (`x`, `y`, `width`, `height` as `set_ime_cursor_area`
+    /// takes them), so the candidate window opens beside the text.
+    fn enable_ime(&self, purpose: TextInputPurpose, x: f32, y: f32, width: f32, height: f32) {
+        let _ = purpose;
+        self.set_ime_enabled(true);
+        self.set_ime_cursor_area(x, y, width, height);
     }
     fn set_ime_cursor_area(&self, x: f32, y: f32, width: f32, height: f32) {
         let _ = x;

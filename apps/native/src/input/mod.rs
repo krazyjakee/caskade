@@ -25,6 +25,8 @@
 
 mod doc;
 pub mod e2e;
+// A text field's edit commands for its menu and a pad (#84).
+mod field;
 mod guide;
 mod keyboard;
 mod root;

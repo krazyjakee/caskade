@@ -1,0 +1,69 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: caskade <caskade@localhost>
+Date: Tue, 10 Nov 2026 11:52:46 +0000
+Subject: [PATCH] Setting a text input's value ends a composition and puts the
+ caret last
+
+A controlled field sets its `value` on every render. Setting the text the
+field already holds changed nothing, which is right, but a different
+value replaced the buffer under a composition in progress (leaving
+parley's compose range pointing into the new text) and kept the caret's
+byte offset. A new value now cancels the composition and puts the caret
+at the end, as browsers do; the same value still leaves the caret, the
+selection and the composition alone.
+---
+ packages/blitz-dom/src/node/text.rs | 32 ++++++++++++++++++++++++++++-
+ 1 file changed, 31 insertions(+), 1 deletion(-)
+
+diff --git a/packages/blitz-dom/src/node/text.rs b/packages/blitz-dom/src/node/text.rs
+index eddcd17e..2cec1f28 100644
+--- a/packages/blitz-dom/src/node/text.rs
++++ b/packages/blitz-dom/src/node/text.rs
+@@ -122,9 +122,18 @@ impl TextInputData {
+         layout_ctx: &mut LayoutContext<TextBrush>,
+         text: &str,
+     ) {
++        // The same value again (a controlled field re-rendering) changes
++        // nothing: the caret, the selection and a composition stay.
+         if self.editor.text() != text {
++            let mut driver = self.editor.driver(font_ctx, layout_ctx);
++            // A new value replaces a composition in progress, and the caret
++            // goes to its end, as a browser puts it.
++            driver.clear_compose();
++            drop(driver);
+             self.editor.set_text(text);
+-            self.editor.driver(font_ctx, layout_ctx).refresh_layout();
++            let mut driver = self.editor.driver(font_ctx, layout_ctx);
++            driver.refresh_layout();
++            driver.move_to_text_end();
+         }
+     }
+ 
+@@ -1009,6 +1018,27 @@ mod tests {
+         assert_eq!(input.editor.text(), "a");
+     }
+ 
++    #[test]
++    fn setting_the_value_keeps_or_ends_a_composition() {
++        let mut input = TextInputData::new(false);
++        let mut font_ctx = FontContext::new();
++        let mut layout_ctx = LayoutContext::new();
++        input.set_text(&mut font_ctx, &mut layout_ctx, "ab");
++        input.apply_ime_event(
++            &mut font_ctx,
++            &mut layout_ctx,
++            BlitzImeEvent::Preedit("x".into(), None),
++        );
++        // The same value: the composition goes on.
++        input.set_text(&mut font_ctx, &mut layout_ctx, "ab");
++        assert!(input.editor.is_composing());
++        // A new value ends it, with the caret at the end.
++        input.set_text(&mut font_ctx, &mut layout_ctx, "hello");
++        assert!(!input.editor.is_composing());
++        assert_eq!(input.editor.text(), "hello");
++        assert_eq!(input.editor.raw_selection().focus().index(), 5);
++    }
++
+     #[test]
+     fn ime_commit_without_preedit() {
+         let mut input = TextInputData::new(false);

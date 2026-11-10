@@ -9,6 +9,10 @@ pub(crate) fn generate_focus_events(
 ) {
     // Update focus, tracking which node was focussed before and after
     let old_focus = doc.get_focussed_node_id();
+    // A composition in the field losing focus is committed, with its events.
+    if let Some(old_focus) = old_focus {
+        doc.finish_composition(old_focus, dispatch_event);
+    }
     update_focus(doc);
     let new_focus = doc.get_focussed_node_id();
 

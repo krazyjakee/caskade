@@ -1,0 +1,567 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: caskade <caskade@localhost>
+Date: Tue, 10 Nov 2026 11:31:08 +0000
+Subject: [PATCH] Fire composition events and say when a key comes
+ mid-composition
+
+IME compositions reached the text field but not script: the internal
+`Ime` event went out as a "composition" event no handler listens for, and
+Dioxus Native dropped it (`convert_composition_data` was unimplemented).
+A search field couldn't wait for a composition to end, and Enter that
+confirmed a candidate looked like Enter that submits.
+
+- The text field fires `compositionstart`, `compositionupdate` (with the
+  preedit) and `compositionend` (with the committed text, or empty when the
+  composition is cancelled) around its edits, in a browser's order;
+  Dioxus Native turns them into its composition events.
+- Key events say `is_composing` while the focused field composes, and the
+  field's own key handling leaves the composition alone.
+- `input` carries the value without the preedit, which isn't text yet.
+- `DeleteSurrounding` deletes the bytes around the selection.
+---
+ packages/blitz-dom/src/events/driver.rs       |  23 ++-
+ packages/blitz-dom/src/events/ime.rs          |   8 +-
+ packages/blitz-dom/src/events/keyboard.rs     |  26 +++-
+ packages/blitz-dom/src/events/mod.rs          |   9 +-
+ packages/blitz-dom/src/node/text.rs           | 143 ++++++++++++++++--
+ packages/blitz-traits/src/events.rs           |  29 ++++
+ .../dioxus-native-dom/src/dioxus_document.rs  |  11 +-
+ packages/dioxus-native-dom/src/events.rs      |  37 ++++-
+ 8 files changed, 251 insertions(+), 35 deletions(-)
+
+diff --git a/packages/blitz-dom/src/events/driver.rs b/packages/blitz-dom/src/events/driver.rs
+index edc0e7c4..f1b9035e 100644
+--- a/packages/blitz-dom/src/events/driver.rs
++++ b/packages/blitz-dom/src/events/driver.rs
+@@ -286,14 +286,20 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
+             UiEvent::Wheel(data) => {
+                 self.handle_dom_event(DomEvent::new(target, DomEventData::Wheel(data)))
+             }
+-            UiEvent::KeyUp(data) => {
++            UiEvent::KeyUp(mut data) => {
++                data.is_composing |= self.is_composing(target);
+                 self.handle_dom_event(DomEvent::new(target, DomEventData::KeyUp(data)))
+             }
+-            UiEvent::KeyDown(data) => {
++            UiEvent::KeyDown(mut data) => {
++                data.is_composing |= self.is_composing(target);
+                 self.handle_dom_event(DomEvent::new(target, DomEventData::KeyDown(data)))
+             }
++            // The IME's own events are the field's to apply; script hears the
++            // composition events and the input they generate.
+             UiEvent::Ime(data) => {
+-                self.handle_dom_event(DomEvent::new(target, DomEventData::Ime(data)))
++                let mut event = DomEvent::new(target, DomEventData::Ime(data));
++                self.run_default_action(&mut event);
++                self.process_queue();
+             }
+             UiEvent::Paste(text) => {
+                 super::ime::handle_ime_event(
+@@ -408,6 +414,17 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
+         }
+     }
+ 
++    /// Whether an IME is composing in the text field `target`: a key event
++    /// then says so (`KeyboardEvent.isComposing`).
++    fn is_composing(&self, target: NodeId) -> bool {
++        self.doc
++            .inner()
++            .get_node(target)
++            .and_then(|node| node.element_data())
++            .and_then(|element| element.text_input_data())
++            .is_some_and(|input| input.editor.is_composing())
++    }
++
+     fn focus_for_accessibility(&mut self, focusable: Option<NodeId>) {
+         let Some(focusable) = focusable else {
+             return;
+diff --git a/packages/blitz-dom/src/events/ime.rs b/packages/blitz-dom/src/events/ime.rs
+index 6338a279..9408604b 100644
+--- a/packages/blitz-dom/src/events/ime.rs
++++ b/packages/blitz-dom/src/events/ime.rs
+@@ -5,7 +5,7 @@ use crate::BaseDocument;
+ pub(crate) fn handle_ime_event<F: FnMut(DomEvent)>(
+     doc: &mut BaseDocument,
+     event: BlitzImeEvent,
+-    dispatch_event: F,
++    mut dispatch_event: F,
+ ) {
+     if let Some(node_id) = doc.focus_node_id {
+         let node = &mut doc.nodes[node_id];
+@@ -14,14 +14,14 @@ pub(crate) fn handle_ime_event<F: FnMut(DomEvent)>(
+             .downcast_element_mut()
+             .and_then(|el| el.text_input_data_mut());
+         if let Some(input_data) = text_input_data {
+-            let generated_event = input_data.apply_ime_event(
++            let generated_events = input_data.apply_ime_event(
+                 &mut doc.font_ctx.lock().unwrap(),
+                 &mut doc.layout_ctx,
+                 event,
+             );
+ 
+-            if let Some(generated_event) = generated_event {
+-                doc.apply_generated_text_input_event(node_id, generated_event, dispatch_event);
++            for generated_event in generated_events {
++                doc.apply_generated_text_input_event(node_id, generated_event, &mut dispatch_event);
+             }
+ 
+             #[cfg(feature = "tracing")]
+diff --git a/packages/blitz-dom/src/events/keyboard.rs b/packages/blitz-dom/src/events/keyboard.rs
+index 21a2cd5b..a7318a47 100644
+--- a/packages/blitz-dom/src/events/keyboard.rs
++++ b/packages/blitz-dom/src/events/keyboard.rs
+@@ -3,7 +3,7 @@ use crate::{BaseDocument, node::GeneratedTextInputEvent, util::ACTION_MOD};
+ use blitz_traits::node_id::NodeId;
+ use blitz_traits::{
+     SmolStr,
+-    events::{BlitzInputEvent, BlitzKeyEvent, DomEvent, DomEventData},
++    events::{BlitzCompositionEvent, BlitzInputEvent, BlitzKeyEvent, DomEvent, DomEventData},
+ };
+ use keyboard_types::{Key, Modifiers, NamedKey};
+ use markup5ever::local_name;
+@@ -113,7 +113,8 @@ impl BaseDocument {
+ 
+         match event {
+             GeneratedTextInputEvent::Input => {
+-                let value = input_data.editor.raw_text().to_string();
++                // The value without an IME's preedit, which isn't text yet.
++                let value = input_data.editor.text().to_string();
+                 // The value is in the accessibility tree.
+                 self.has_changes = true;
+                 dispatch_event(DomEvent::new(
+@@ -125,6 +126,27 @@ impl BaseDocument {
+             GeneratedTextInputEvent::Select | GeneratedTextInputEvent::PreEditChange => {
+                 self.shell_provider.request_redraw();
+             }
++            GeneratedTextInputEvent::CompositionStart => {
++                dispatch_event(DomEvent::new(
++                    node_id,
++                    DomEventData::CompositionStart(BlitzCompositionEvent {
++                        data: String::new(),
++                    }),
++                ));
++            }
++            GeneratedTextInputEvent::CompositionUpdate(data) => {
++                dispatch_event(DomEvent::new(
++                    node_id,
++                    DomEventData::CompositionUpdate(BlitzCompositionEvent { data }),
++                ));
++            }
++            GeneratedTextInputEvent::CompositionEnd(data) => {
++                dispatch_event(DomEvent::new(
++                    node_id,
++                    DomEventData::CompositionEnd(BlitzCompositionEvent { data }),
++                ));
++                self.shell_provider.request_redraw();
++            }
+             GeneratedTextInputEvent::Submit => {
+                 // TODO: Generate submit event that can be handled by script
+                 implicit_form_submission(self, node_id);
+diff --git a/packages/blitz-dom/src/events/mod.rs b/packages/blitz-dom/src/events/mod.rs
+index c105b7be..bf86e0f5 100644
+--- a/packages/blitz-dom/src/events/mod.rs
++++ b/packages/blitz-dom/src/events/mod.rs
+@@ -83,6 +83,10 @@ fn map_dom_event_to_ui_event(
+         DomEventData::KeyDown(data) => Some(UiEvent::KeyDown(data)),
+         DomEventData::KeyUp(data) => Some(UiEvent::KeyUp(data)),
+         DomEventData::Ime(data) => Some(UiEvent::Ime(data)),
++        // Generated by the text field itself, not forwarded.
++        DomEventData::CompositionStart(_)
++        | DomEventData::CompositionUpdate(_)
++        | DomEventData::CompositionEnd(_) => None,
+         DomEventData::AppleStandardKeybinding(data) => Some(UiEvent::AppleStandardKeybinding(data)),
+ 
+         DomEventData::KeyPress(_) => None,
+@@ -239,7 +243,10 @@ pub(crate) fn handle_dom_event<F: FnMut(DomEvent)>(
+         DomEventData::Ime(event) => {
+             handle_ime_event(doc, event.clone(), dispatch_event);
+         }
+-        DomEventData::Input(_) => {
++        DomEventData::Input(_)
++        | DomEventData::CompositionStart(_)
++        | DomEventData::CompositionUpdate(_)
++        | DomEventData::CompositionEnd(_) => {
+             // Do nothing (no default action)
+         }
+         DomEventData::ContextMenu(_) => {
+diff --git a/packages/blitz-dom/src/node/text.rs b/packages/blitz-dom/src/node/text.rs
+index 119569a9..43249c17 100644
+--- a/packages/blitz-dom/src/node/text.rs
++++ b/packages/blitz-dom/src/node/text.rs
+@@ -63,6 +63,13 @@ pub enum GeneratedTextInputEvent {
+     Select,
+     PreEditChange,
+     Submit,
++    /// A composition began (`compositionstart`).
++    CompositionStart,
++    /// The composed text is now this (`compositionupdate`).
++    CompositionUpdate(String),
++    /// A composition ended with this text committed, empty when it was
++    /// cancelled (`compositionend`).
++    CompositionEnd(String),
+ }
+ 
+ pub struct TextInputData {
+@@ -219,6 +226,11 @@ impl TextInputData {
+         if !event.state.is_pressed() {
+             return None;
+         }
++        // While the IME composes, its own keys edit the composition; the
++        // field's shortcuts would edit around it.
++        if self.editor.is_composing() {
++            return None;
++        }
+ 
+         let mods = event.modifiers;
+         let shift = mods.contains(Modifiers::SHIFT);
+@@ -769,45 +781,82 @@ impl TextInputData {
+         None
+     }
+ 
++    /// Applies an IME event, returning the events it generates in order:
++    /// a composition's start, updates and end around the edits, as a
++    /// browser fires `compositionstart`, `compositionupdate`, `input` and
++    /// `compositionend`.
+     pub(crate) fn apply_ime_event(
+         &mut self,
+         font_ctx: &mut FontContext,
+         layout_ctx: &mut LayoutContext<TextBrush>,
+         event: BlitzImeEvent,
+-    ) -> Option<GeneratedTextInputEvent> {
++    ) -> Vec<GeneratedTextInputEvent> {
++        use GeneratedTextInputEvent as Generated;
++        let was_composing = self.editor.is_composing();
+         let editor = &mut self.editor;
+         let mut driver = editor.driver(font_ctx, layout_ctx);
+ 
+         match event {
+-            BlitzImeEvent::Enabled => {
+-                // Do nothing
+-                None
+-            }
++            BlitzImeEvent::Enabled => Vec::new(),
+             BlitzImeEvent::Disabled => {
++                if !was_composing {
++                    return Vec::new();
++                }
+                 driver.clear_compose();
+-                Some(GeneratedTextInputEvent::PreEditChange)
++                vec![
++                    Generated::PreEditChange,
++                    Generated::CompositionEnd(String::new()),
++                ]
+             }
+             BlitzImeEvent::Commit(text) => {
+                 driver.clear_compose();
+                 driver.insert_or_replace_selection(&text);
+-                Some(GeneratedTextInputEvent::Input)
++                let mut events = vec![Generated::Input];
++                if was_composing {
++                    events.push(Generated::CompositionEnd(text));
++                }
++                events
+             }
+             BlitzImeEvent::Preedit(text, cursor) => {
+                 if text.is_empty() {
++                    if !was_composing {
++                        return Vec::new();
++                    }
+                     driver.clear_compose();
+-                } else {
+-                    driver.set_compose(&text, cursor);
++                    return vec![
++                        Generated::PreEditChange,
++                        Generated::CompositionEnd(String::new()),
++                    ];
+                 }
+-                Some(GeneratedTextInputEvent::PreEditChange)
++                driver.set_compose(&text, cursor);
++                let mut events = Vec::new();
++                if !was_composing {
++                    events.push(Generated::CompositionStart);
++                }
++                events.push(Generated::CompositionUpdate(text));
++                events.push(Generated::PreEditChange);
++                events
+             }
+             BlitzImeEvent::DeleteSurrounding {
+                 before_bytes,
+                 after_bytes,
+             } => {
+-                let _ = before_bytes;
+-                let _ = after_bytes;
+-                // TODO
+-                None
++                // Bytes around the selection (the IME's surrounding text),
++                // as winit's `Ime::DeleteSurrounding` gives them.
++                let mut changed = false;
++                if let Some(len) = std::num::NonZeroUsize::new(before_bytes) {
++                    driver.delete_bytes_before_selection(len);
++                    changed = true;
++                }
++                if let Some(len) = std::num::NonZeroUsize::new(after_bytes) {
++                    driver.delete_bytes_after_selection(len);
++                    changed = true;
++                }
++                if changed {
++                    vec![Generated::Input]
++                } else {
++                    Vec::new()
++                }
+             }
+         }
+     }
+@@ -841,6 +890,72 @@ mod tests {
+         }
+     }
+ 
++    #[test]
++    fn composition_events_wrap_the_edit() {
++        use GeneratedTextInputEvent as G;
++        let mut input = TextInputData::new(false);
++        let mut font_ctx = FontContext::new();
++        let mut layout_ctx = LayoutContext::new();
++        let mut ime = |event| input.apply_ime_event(&mut font_ctx, &mut layout_ctx, event);
++        let kinds = |events: Vec<G>| {
++            events
++                .into_iter()
++                .map(|event| match event {
++                    G::CompositionStart => "start".to_string(),
++                    G::CompositionUpdate(text) => format!("update {text}"),
++                    G::CompositionEnd(text) => format!("end {text}"),
++                    G::Input => "input".to_string(),
++                    G::PreEditChange => "preedit".to_string(),
++                    G::Select => "select".to_string(),
++                    G::Submit => "submit".to_string(),
++                })
++                .collect::<Vec<_>>()
++        };
++        assert_eq!(
++            kinds(ime(BlitzImeEvent::Preedit("ni".into(), None))),
++            ["start", "update ni", "preedit"]
++        );
++        assert_eq!(
++            kinds(ime(BlitzImeEvent::Preedit("你".into(), None))),
++            ["update 你", "preedit"]
++        );
++        assert_eq!(
++            kinds(ime(BlitzImeEvent::Commit("你".into()))),
++            ["input", "end 你"]
++        );
++        // A commit outside a composition (a paste) is only an edit.
++        assert_eq!(kinds(ime(BlitzImeEvent::Commit("好".into()))), ["input"]);
++        // A cancelled composition ends with nothing committed.
++        ime(BlitzImeEvent::Preedit("x".into(), None));
++        assert_eq!(
++            kinds(ime(BlitzImeEvent::Preedit(String::new(), None))),
++            ["preedit", "end "]
++        );
++        assert!(ime(BlitzImeEvent::Disabled).is_empty());
++        assert_eq!(input.editor.text(), "你好");
++    }
++
++    #[test]
++    fn ime_deletes_surrounding_text() {
++        let mut input = TextInputData::new(false);
++        let mut font_ctx = FontContext::new();
++        let mut layout_ctx = LayoutContext::new();
++        input.apply_ime_event(
++            &mut font_ctx,
++            &mut layout_ctx,
++            BlitzImeEvent::Commit("abc".into()),
++        );
++        input.apply_ime_event(
++            &mut font_ctx,
++            &mut layout_ctx,
++            BlitzImeEvent::DeleteSurrounding {
++                before_bytes: 2,
++                after_bytes: 0,
++            },
++        );
++        assert_eq!(input.editor.text(), "a");
++    }
++
+     #[test]
+     fn ime_commit_without_preedit() {
+         let mut input = TextInputData::new(false);
+diff --git a/packages/blitz-traits/src/events.rs b/packages/blitz-traits/src/events.rs
+index 49161bbd..22332794 100644
+--- a/packages/blitz-traits/src/events.rs
++++ b/packages/blitz-traits/src/events.rs
+@@ -181,6 +181,9 @@ pub enum DomEventKind {
+     KeyUp,
+     Input,
+     Ime,
++    CompositionStart,
++    CompositionUpdate,
++    CompositionEnd,
+ 
+     Focus,
+     Blur,
+@@ -232,6 +235,9 @@ impl FromStr for DomEventKind {
+             "keyup" => Ok(Self::KeyUp),
+             "input" => Ok(Self::Input),
+             "composition" => Ok(Self::Ime),
++            "compositionstart" => Ok(Self::CompositionStart),
++            "compositionupdate" => Ok(Self::CompositionUpdate),
++            "compositionend" => Ok(Self::CompositionEnd),
+ 
+             "focus" => Ok(Self::Focus),
+             "blur" => Ok(Self::Blur),
+@@ -279,6 +285,9 @@ pub enum DomEventData {
+     KeyUp(BlitzKeyEvent),
+     Input(BlitzInputEvent),
+     Ime(BlitzImeEvent),
++    CompositionStart(BlitzCompositionEvent),
++    CompositionUpdate(BlitzCompositionEvent),
++    CompositionEnd(BlitzCompositionEvent),
+ 
+     Focus(BlitzFocusEvent),
+     Blur(BlitzFocusEvent),
+@@ -334,6 +343,9 @@ impl DomEventData {
+             Self::KeyUp { .. } => "keyup",
+             Self::Input { .. } => "input",
+             Self::Ime { .. } => "composition",
++            Self::CompositionStart { .. } => "compositionstart",
++            Self::CompositionUpdate { .. } => "compositionupdate",
++            Self::CompositionEnd { .. } => "compositionend",
+ 
+             Self::Focus { .. } => "focus",
+             Self::Blur { .. } => "blur",
+@@ -380,6 +392,9 @@ impl DomEventData {
+             Self::KeyUp { .. } => DomEventKind::KeyUp,
+             Self::Input { .. } => DomEventKind::Input,
+             Self::Ime { .. } => DomEventKind::Ime,
++            Self::CompositionStart { .. } => DomEventKind::CompositionStart,
++            Self::CompositionUpdate { .. } => DomEventKind::CompositionUpdate,
++            Self::CompositionEnd { .. } => DomEventKind::CompositionEnd,
+ 
+             Self::Focus { .. } => DomEventKind::Focus,
+             Self::Blur { .. } => DomEventKind::Blur,
+@@ -425,6 +440,9 @@ impl DomEventData {
+             Self::KeyUp { .. } => true,
+             Self::KeyPress { .. } => true,
+             Self::Ime { .. } => true,
++            Self::CompositionStart { .. } => false,
++            Self::CompositionUpdate { .. } => false,
++            Self::CompositionEnd { .. } => false,
+             Self::Input { .. } => false,
+ 
+             Self::Focus { .. } => false,
+@@ -471,6 +489,9 @@ impl DomEventData {
+             Self::KeyUp { .. } => true,
+             Self::KeyPress { .. } => true,
+             Self::Ime { .. } => true,
++            Self::CompositionStart { .. } => true,
++            Self::CompositionUpdate { .. } => true,
++            Self::CompositionEnd { .. } => true,
+             Self::Input { .. } => true,
+ 
+             Self::Focus { .. } => false,
+@@ -763,6 +784,14 @@ pub struct BlitzInputEvent {
+     pub value: String,
+ }
+ 
++/// A composition (IME) event's data: the text being composed
++/// (`compositionstart`, `compositionupdate`) or committed (`compositionend`;
++/// empty when the composition was cancelled).
++#[derive(Clone, Debug)]
++pub struct BlitzCompositionEvent {
++    pub data: String,
++}
++
+ #[derive(Clone, Debug)]
+ pub struct BlitzFocusEvent;
+ 
+diff --git a/packages/dioxus-native-dom/src/dioxus_document.rs b/packages/dioxus-native-dom/src/dioxus_document.rs
+index cc897a88..83cd335a 100644
+--- a/packages/dioxus-native-dom/src/dioxus_document.rs
++++ b/packages/dioxus-native-dom/src/dioxus_document.rs
+@@ -1,8 +1,8 @@
+ //! Integration between Dioxus and Blitz
+ use crate::NodeId;
+ use crate::events::{
+-    BlitzKeyboardData, NativeConverter, NativeFocusData, NativeFormData, NativePointerData,
+-    NativeScrollData, NativeTouchData, NativeWheelData, NodeHandle,
++    BlitzKeyboardData, NativeCompositionData, NativeConverter, NativeFocusData, NativeFormData,
++    NativePointerData, NativeScrollData, NativeTouchData, NativeWheelData, NodeHandle,
+ };
+ use crate::mutation_writer::DioxusState;
+ use crate::qual_name;
+@@ -332,8 +332,13 @@ impl EventHandler for DioxusEventHandler<'_> {
+                 values: vec![],
+             })),
+ 
+-            // TODO: Implement IME handling
++            // The IME's own events are Blitz's; script hears compositions.
+             DomEventData::Ime(_) => None,
++            DomEventData::CompositionStart(data)
++            | DomEventData::CompositionUpdate(data)
++            | DomEventData::CompositionEnd(data) => Some(wrap_event_data(NativeCompositionData {
++                data: data.data.clone(),
++            })),
+ 
+             // AppleStandardKeybinding events are not exposed to script
+             DomEventData::AppleStandardKeybinding(_) => None,
+diff --git a/packages/dioxus-native-dom/src/events.rs b/packages/dioxus-native-dom/src/events.rs
+index 305db872..75a656d7 100644
+--- a/packages/dioxus-native-dom/src/events.rs
++++ b/packages/dioxus-native-dom/src/events.rs
+@@ -8,12 +8,12 @@ use blitz_traits::events::{
+ };
+ use dioxus_html::{
+     AnimationData, BeforeInputData, CancelData, ClipboardData, CompositionData, DragData,
+-    FocusData, FormData, FormValue, HasFileData, HasFocusData, HasFormData, HasKeyboardData,
+-    HasMouseData, HasPointerData, HasScrollData, HasTouchData, HasTouchPointData, HasWheelData,
+-    HtmlEventConverter, ImageData, KeyboardData, MediaData, MountedData, MountedError,
+-    MountedResult, MouseData, PlatformEventData, PointerData, RenderedElementBacking, ResizeData,
+-    ScrollBehavior, ScrollData, ScrollLogicalPosition, ScrollToOptions, SelectionData, ToggleData,
+-    TouchData, TouchPoint, TransitionData, VisibleData, WheelData,
++    FocusData, FormData, FormValue, HasCompositionData, HasFileData, HasFocusData, HasFormData,
++    HasKeyboardData, HasMouseData, HasPointerData, HasScrollData, HasTouchData, HasTouchPointData,
++    HasWheelData, HtmlEventConverter, ImageData, KeyboardData, MediaData, MountedData,
++    MountedError, MountedResult, MouseData, PlatformEventData, PointerData, RenderedElementBacking,
++    ResizeData, ScrollBehavior, ScrollData, ScrollLogicalPosition, ScrollToOptions, SelectionData,
++    ToggleData, TouchData, TouchPoint, TransitionData, VisibleData, WheelData,
+     geometry::{
+         ClientPoint, ElementPoint, PagePoint, PixelsRect, PixelsSize, PixelsVector2D, ScreenPoint,
+         WheelDelta,
+@@ -81,8 +81,12 @@ impl HtmlEventConverter for NativeConverter {
+         unimplemented!("todo: convert_clipboard_data in dioxus-native. requires support in blitz")
+     }
+ 
+-    fn convert_composition_data(&self, _event: &PlatformEventData) -> CompositionData {
+-        unimplemented!("todo: convert_composition_data in dioxus-native. requires support in blitz")
++    fn convert_composition_data(&self, event: &PlatformEventData) -> CompositionData {
++        event
++            .downcast::<NativeCompositionData>()
++            .unwrap()
++            .clone()
++            .into()
+     }
+ 
+     fn convert_drag_data(&self, _event: &PlatformEventData) -> DragData {
+@@ -311,6 +315,23 @@ impl RenderedElementBacking for NodeHandle {
+     }
+ }
+ 
++/// A composition event's text (`compositionstart`, `compositionupdate`,
++/// `compositionend`).
++#[derive(Clone, Debug)]
++pub struct NativeCompositionData {
++    pub data: String,
++}
++
++impl HasCompositionData for NativeCompositionData {
++    fn data(&self) -> String {
++        self.data.clone()
++    }
++
++    fn as_any(&self) -> &dyn Any {
++        self as &dyn Any
++    }
++}
++
+ #[derive(Clone, Debug)]
+ pub struct NativeFormData {
+     pub value: String,
