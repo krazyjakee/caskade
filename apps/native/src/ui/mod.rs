@@ -51,7 +51,7 @@ pub use button::{Button, ButtonSize, ButtonVariant};
 #[allow(unused_imports)]
 pub use checkbox::Checkbox;
 #[allow(unused_imports)]
-pub use combobox::Combobox;
+pub use combobox::{ActiveOption, Combobox, use_active_option};
 #[allow(unused_imports)]
 pub use dialog::{ConfirmDialog, Dialog};
 #[allow(unused_imports)]

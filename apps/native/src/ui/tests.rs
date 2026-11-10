@@ -1359,3 +1359,40 @@ fn a_combobox_filters_moves_and_chooses_with_focus_in_the_field() {
     assert!(!window.exists("listbox"));
     assert_eq!(window.focused(), Some(field));
 }
+
+#[test]
+fn a_combobox_opens_on_its_first_option_and_answers_a_pad() {
+    let _one = one_window();
+    let mut window = Window::open(fields);
+    let field = {
+        let doc = window.doc.inner.borrow();
+        let mut found = None;
+        doc.visit(|id, node| {
+            if node.attr(LocalName::from("role")) == Some("combobox") {
+                found = Some(id);
+            }
+        });
+        found.unwrap()
+    };
+    let active = |window: &Window| {
+        let doc = window.doc.inner.borrow();
+        doc.get_node(field)
+            .and_then(|node| node.attr(LocalName::from("aria-activedescendant")))
+            .map(|id| id.rsplit('-').next().unwrap_or_default().to_owned())
+    };
+    window.focus_node(field);
+    window.key(Key::Named(NamedKey::ArrowDown));
+    assert!(window.exists("listbox"));
+    assert_eq!(active(&window).as_deref(), Some("0"));
+    window.key(Key::Named(NamedKey::Escape));
+    assert!(!window.exists("listbox"));
+    assert_eq!(window.focused(), Some(field));
+    window.pad(Action::NavDown);
+    assert_eq!(active(&window).as_deref(), Some("0"));
+    window.pad(Action::NavUp);
+    assert_eq!(active(&window).as_deref(), Some("2"));
+    window.pad(Action::Confirm);
+    assert_eq!(take_done(), ["platform ds"]);
+    assert!(!window.exists("listbox"));
+    assert_eq!(window.focused(), Some(field));
+}
