@@ -71,7 +71,9 @@
   /* Staggered by the element's --i index (0 when unset). */
   --animate-enter: cs-enter var(--cs-motion-duration-slow) var(--cs-motion-ease-out)
     calc(var(--i, 0) * var(--cs-motion-stagger)) backwards;
-  --animate-worker: cs-worker calc(var(--cs-motion-duration-slow) * 2) linear infinite;
+  /* The busy spinner turns in 8 steps a turn: a native frame costs CPU for
+     every step it draws, and 8 keep it under 2% of a core (#82, #113). */
+  --animate-worker: cs-worker calc(var(--cs-motion-duration-slow) * 2) steps(8) infinite;
   /* First-run setup: things arriving, staggered by --i, and the running
      task's progress sweep. */
   --animate-rise: cs-rise calc(var(--cs-motion-duration-slow) * 1.6) var(--cs-motion-ease-out)

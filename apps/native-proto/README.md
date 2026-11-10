@@ -22,15 +22,11 @@ is 0.8.0-alpha.3.
 
 ## Patches (BLITZ-3, #82)
 
-`patches/` holds Caskade's patches to Blitz, anyrender and Stylo at the pins
-in `patches/PINS` (results in
-[`docs/spikes/blitz-3.md`](../../docs/spikes/blitz-3.md)).
-`patches/apply.sh [dir]` clones those revisions into `dir` (default
-`/mnt/Rusty/caskade-native-proto/vendor`; it must be outside the repo),
-applies the series and writes `.cargo/config.toml` (gitignored), after which
-the builds below use the patched crates. Delete `.cargo/config.toml` to build
-the upstream revisions again. To change a patch, commit in the checkout and
-regenerate the series with `git format-patch <pin>..caskade -o patches/<repo>`.
+The prototype builds Blitz, anyrender and Stylo from
+[`vendor/blitz/crates`](../../vendor/blitz/README.md), the same patched
+crates `caskade-native` uses: `[patch]` entries in `Cargo.toml` point there
+for every crate in `vendor/blitz/PINS`. Results in
+[`docs/spikes/blitz-3.md`](../../docs/spikes/blitz-3.md).
 
 ## Build
 

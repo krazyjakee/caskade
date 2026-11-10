@@ -40,6 +40,7 @@ Style only through the `--cs-*` tokens, through their Tailwind utilities (`bg-su
 ## 4. Motion
 
 - Durations come from `--cs-motion-*` tokens. Looping animations set `animation-play-state: var(--cs-motion-ambient)`.
+- Loops that run for as long as background work or the app does move in steps: the busy spinner (`animate-worker`) turns in `steps(8)`, the backdrop pans in steps. The native UI draws a frame for each step, so a continuous loop costs a share of a core for as long as it runs (#82).
 - Reduced motion (the system setting or Appearance) zeroes durations and pauses loops through token sets, so every new animation must use the tokens to inherit that.
 - When the webview paints on the CPU (`data-paint="cpu"`), ambient loops pause by default. Never make anything depend on an animation running.
 - Lists enter with `animate-enter`, staggered by `--i`. Motion explains a change (something arrived, moved or opened); it never decorates a static screen.

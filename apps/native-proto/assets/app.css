@@ -286,7 +286,7 @@
     transform: var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,) var(--tw-skew-x,) var(--tw-skew-y,);
   }
   .animate-worker {
-    animation: cs-worker calc(var(--cs-motion-duration-slow) * 2) linear infinite;
+    animation: cs-worker calc(var(--cs-motion-duration-slow) * 2) steps(8) infinite;
   }
   .flex-col {
     flex-direction: column;

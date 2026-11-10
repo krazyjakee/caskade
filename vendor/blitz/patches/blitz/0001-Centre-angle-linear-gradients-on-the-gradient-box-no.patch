@@ -1,0 +1,41 @@
+From 4aa9af0eb83ee72e3744a61ba78e0950dc4e53ce Mon Sep 17 00:00:00 2001
+From: Jake Cattrall <krazyjakee@gmail.com>
+Date: Tue, 10 Nov 2026 03:09:06 +0000
+Subject: [PATCH 1/5] Centre angle linear gradients on the gradient box, not
+ the border box
+
+A linear gradient given as an angle took its centre from the element's
+border box while keyword directions used the gradient's own rectangle. For
+a background sized with background-size the gradient box is the tile, so
+every tile but one saw its line off-centre: `linear-gradient(90deg, red
+1px, transparent 1px)` tiled at 48px drew nothing but the padded start
+colour.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ packages/blitz-paint/src/gradient.rs | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/packages/blitz-paint/src/gradient.rs b/packages/blitz-paint/src/gradient.rs
+index 9ad3b362..750956e6 100644
+--- a/packages/blitz-paint/src/gradient.rs
++++ b/packages/blitz-paint/src/gradient.rs
+@@ -88,13 +88,16 @@ pub(crate) fn to_peniko_gradient(
+ fn linear_gradient(
+     gradient: LinearGradient,
+     rect: Rect,
+-    bounding_box: Rect,
++    _bounding_box: Rect,
+     scale: f64,
+     current_color: &AbsoluteColor,
+ ) -> (peniko::Gradient, Option<Affine>) {
+     let (direction, items, flags) = gradient;
+ 
+-    let center = bounding_box.center();
++    // The gradient line is centred on the gradient box: the image's own
++    // rectangle (a background tile when `background-size` sizes it), not the
++    // element's border box.
++    let center = rect.center();
+     let (start, end) = match direction {
+         LineDirection::Angle(angle) => {
+             let angle = -angle.radians64() + std::f64::consts::PI;

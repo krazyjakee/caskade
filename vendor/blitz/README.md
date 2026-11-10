@@ -1,0 +1,78 @@
+# Blitz, anyrender and Stylo with Caskade's patches
+
+`crates/` holds the Blitz, anyrender and Stylo crates Caskade's native UI
+builds: the upstream revisions in [`PINS`](PINS) with the patch series in
+[`patches/`](patches/) applied, each crate rewritten as a standalone package.
+Both builds take them through `[patch]` entries for the three git sources:
+
+- the root workspace's `caskade-native` (root `Cargo.toml`);
+- the prototype, `apps/native-proto` (its own `Cargo.toml`).
+
+`apps/native/Cargo.toml` and the prototype keep their upstream git
+dependencies at the same revisions; the patches redirect them here, so
+`Cargo.lock` only records these crates without a source.
+
+Don't edit `crates/` by hand: it is generated. The root workspace excludes
+`vendor/`, so these crates are not workspace members and Caskade's clippy,
+formatting and i18n checks skip them.
+
+## The series
+
+| Repo | Patches | Upstream |
+| --- | --- | --- |
+| blitz | 0001–0005: gradient centring and tiling, inline SVG snapshots, damage-limited repaint of animation frames, `prefers-reduced-motion` | not yet submitted |
+| anyrender | 0001–0002: damage rendering in vello_hybrid; 0003–0004 measurement only (`ANYRENDER_PRESENT_MODE`, `ANYRENDER_FRAME_LIMIT_HZ`) | not yet submitted (0003–0004 never) |
+| stylo | 0001–0002: when a stepped animation next changes, the `prefers-reduced-motion` media feature | not yet submitted |
+
+What each does and why, with measurements: [`docs/spikes/blitz-3.md`](../../docs/spikes/blitz-3.md)
+(#82). When a patch lands upstream, drop it from the series at the next pin
+bump.
+
+## Regenerating
+
+```sh
+vendor/blitz/update.sh [work dir]   # default ~/.cache/caskade-blitz-vendor, outside the repo
+```
+
+It clones each repo at its pin into the work dir, applies the series on a
+`caskade` branch, resolves every crate with `cargo metadata` in a scratch
+workspace, and writes `crates/` with [`normalize.py`](normalize.py):
+standalone manifests (no `workspace = true`), path dependencies between the
+vendored crates, no dev-dependencies, tests or examples. Optional
+dependencies outside the set (Blitz's devtools server) are left out with the
+features that enable them. Run it twice and nothing changes.
+
+## Changing a patch
+
+1. `vendor/blitz/update.sh <work dir>`, then edit the checkout in
+   `<work dir>/<repo>` and commit there (one commit per change, with a
+   message that can go upstream).
+2. Export the series again: delete `patches/<repo>/*.patch`, then
+   `git -C <work dir>/<repo> format-patch --no-signature -o vendor/blitz/patches/<repo> <pin>..caskade`.
+3. `vendor/blitz/update.sh <work dir>` and build both:
+   `cargo build -p caskade-native` and, in `apps/native-proto`,
+   `cargo build --profile proto`.
+4. Commit `patches/`, `crates/` and any lockfile change together.
+
+## Bumping a pin
+
+Blitz, anyrender, Stylo and Dioxus move together (#113, condition 6).
+
+1. In `PINS`, set the new revisions (and the crate lists, if the upstream
+   crates changed).
+2. Bump the git `rev`s to match: `apps/native/Cargo.toml` and
+   `apps/native-proto/Cargo.toml` (Blitz's `dioxus-native`, `blitz-*`), and
+   Dioxus's crates.io versions there if Blitz's workspace moved them.
+3. `vendor/blitz/update.sh <work dir>`. A patch that no longer applies stops
+   it: rebase it in the checkout (`git am --abort`, fix, commit), then export
+   the series again as above. Drop patches that landed upstream.
+4. If the set of crates the root lockfile takes from these repos changed,
+   update the root `Cargo.toml`'s `[patch]` lists (one entry per crate the
+   lockfile names; the prototype's lists follow `PINS`).
+5. `cargo update -p dioxus-native` (root) and `cargo update` in
+   `apps/native-proto` for the new revisions; check that the root lockfile
+   moved only these crates and their new dependencies: iroh's crates keep
+   their versions (never `cargo update` them), and no `aws-lc-*` package
+   appears (`grep aws-lc Cargo.lock`; nothing checks this automatically).
+6. Rerun BLITZ-0's and BLITZ-3's measurements (`apps/native-proto/scripts`,
+   `docs/spikes/blitz-0.md` and `blitz-3.md`) and note what moved.

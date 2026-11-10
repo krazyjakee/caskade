@@ -55,3 +55,42 @@ sqlx-sqlite = { git = "https://github.com/launchbadge/sqlx", rev = "10462fa4414c
 [profile.proto]
 inherits = "release"
 debug = "line-tables-only"
+
+# Blitz, anyrender and Stylo with Caskade's patches, as the root workspace
+# builds them (vendor/blitz/README.md).
+[patch."https://github.com/DioxusLabs/blitz"]
+accesskit_xplat = { path = "../../vendor/blitz/crates/accesskit_xplat" }
+blitz-dom = { path = "../../vendor/blitz/crates/blitz-dom" }
+blitz-html = { path = "../../vendor/blitz/crates/blitz-html" }
+blitz-net = { path = "../../vendor/blitz/crates/blitz-net" }
+blitz-paint = { path = "../../vendor/blitz/crates/blitz-paint" }
+blitz-shell = { path = "../../vendor/blitz/crates/blitz-shell" }
+blitz-traits = { path = "../../vendor/blitz/crates/blitz-traits" }
+debug_timer = { path = "../../vendor/blitz/crates/debug_timer" }
+dioxus-native = { path = "../../vendor/blitz/crates/dioxus-native" }
+dioxus-native-dom = { path = "../../vendor/blitz/crates/dioxus-native-dom" }
+stylo_taffy = { path = "../../vendor/blitz/crates/stylo_taffy" }
+
+[patch."https://github.com/DioxusLabs/anyrender"]
+anyrender = { path = "../../vendor/blitz/crates/anyrender" }
+anyrender_skia = { path = "../../vendor/blitz/crates/anyrender_skia" }
+anyrender_svg = { path = "../../vendor/blitz/crates/anyrender_svg" }
+anyrender_vello = { path = "../../vendor/blitz/crates/anyrender_vello" }
+anyrender_vello_cpu = { path = "../../vendor/blitz/crates/anyrender_vello_cpu" }
+anyrender_vello_hybrid = { path = "../../vendor/blitz/crates/anyrender_vello_hybrid" }
+pixels_window_renderer = { path = "../../vendor/blitz/crates/pixels_window_renderer" }
+softbuffer_window_renderer = { path = "../../vendor/blitz/crates/softbuffer_window_renderer" }
+wgpu_context = { path = "../../vendor/blitz/crates/wgpu_context" }
+
+[patch."https://github.com/servo/stylo"]
+selectors = { path = "../../vendor/blitz/crates/selectors" }
+servo_arc = { path = "../../vendor/blitz/crates/servo_arc" }
+stylo = { path = "../../vendor/blitz/crates/stylo" }
+stylo_atoms = { path = "../../vendor/blitz/crates/stylo_atoms" }
+stylo_derive = { path = "../../vendor/blitz/crates/stylo_derive" }
+stylo_dom = { path = "../../vendor/blitz/crates/stylo_dom" }
+stylo_malloc_size_of = { path = "../../vendor/blitz/crates/stylo_malloc_size_of" }
+stylo_static_prefs = { path = "../../vendor/blitz/crates/stylo_static_prefs" }
+stylo_traits = { path = "../../vendor/blitz/crates/stylo_traits" }
+to_shmem = { path = "../../vendor/blitz/crates/to_shmem" }
+to_shmem_derive = { path = "../../vendor/blitz/crates/to_shmem_derive" }
