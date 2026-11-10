@@ -14,6 +14,11 @@ dev:
 web:
     pnpm dev
 
+# Run the native app (#87): the main window rendered by Blitz, without Tauri
+native *args:
+    flock /tmp/caskade-heavy.lock cargo build -p caskade-native
+    "$(cargo metadata --format-version 1 --no-deps | python3 -c 'import json,sys;print(json.load(sys.stdin)["target_directory"])')/debug/caskade-native" {{args}}
+
 # Production build of the UI (no app bundle)
 build:
     pnpm build

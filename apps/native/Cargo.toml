@@ -1,0 +1,33 @@
+[package]
+name = "caskade-native"
+version = "0.1.4"
+description = "Caskade's native app: the main window rendered by Blitz, over caskade-app, without Tauri"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[features]
+default = ["hybrid"]
+# Blitz's renderers (BLITZ-0 measured hybrid): vello_hybrid (its default),
+# vello (GPU compute), vello_cpu and skia.
+hybrid = ["dioxus-native/vello-hybrid"]
+gpu = ["dioxus-native/vello"]
+cpu = ["dioxus-native/vello-cpu-softbuffer"]
+skia = ["dioxus-native/skia"]
+
+[[bin]]
+name = "caskade-native"
+path = "src/main.rs"
+
+[dependencies]
+# The BLITZ-0 baseline (#113, Pins): Blitz 9f9c8e3 with Dioxus 0.8.0-alpha.3,
+# anyrender 812644a and Stylo 2dca345, as apps/native-proto pins them. They
+# move together, and the BLITZ-0 measurements are rerun on every bump.
+dioxus-native = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735890754b4a9970cb07765b8bf3c0c", default-features = false, features = ["prelude", "accessibility", "net", "svg", "system-fonts", "woff"] }
+caskade-app = { path = "../../crates/caskade-app" }
+caskade-core = { path = "../../crates/caskade-core" }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[lints]
+workspace = true
