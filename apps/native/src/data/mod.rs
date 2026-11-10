@@ -69,6 +69,62 @@ pub fn use_data_source(source: impl FnOnce() -> DataSource) -> DataSource {
     use_context_provider(source)
 }
 
+impl PartialEq for DataSource {
+    /// One source per app: the same events mean the same data.
+    fn eq(&self, other: &Self) -> bool {
+        self.events.same_channel(&other.events)
+    }
+}
+
+/// The source this run reads: the fixture library in fixtures mode, else
+/// the app's services, once they've started.
+async fn resolve() -> Option<DataSource> {
+    if fixtures_mode() {
+        return DataSource::fixtures(fixture_count())
+            .await
+            .inspect_err(|error| tracing::error!(%error, "the fixture library didn't open"))
+            .ok();
+    }
+    // The services start beside the window, about a second in.
+    caskade_app::runtime::spawn(async {
+        loop {
+            if let Some(source) = DataSource::app() {
+                return source;
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+        }
+    })
+    .await
+    .ok()
+}
+
+/// Gives `children` the data source once it's ready. Until then they render
+/// without it; once it is, they render again inside it.
+#[component]
+pub fn DataRoot(children: Element) -> Element {
+    let source = use_resource(resolve);
+    let ready = source.read().clone().flatten();
+    match ready {
+        Some(source) => rsx! {
+            Provided { source, {children} }
+        },
+        None => children,
+    }
+}
+
+#[component]
+fn Provided(source: DataSource, children: Element) -> Element {
+    use_data_source(move || source);
+    rsx! {
+        {children}
+        if probe::enabled() {
+            probe::Probe {}
+        }
+    }
+}
+
+mod probe;
+
 /// The library, for a view's changes: run them through [`change`].
 pub fn use_library() -> Library {
     use_context::<DataSource>().library
@@ -127,6 +183,8 @@ pub fn use_library_page(query: ReadSignal<ListGames>) -> Query<GamePage> {
 }
 
 /// The top bar's search: the best few matches for `text`.
+// The views (#96 onwards) use it.
+#[allow(dead_code)]
 pub fn use_library_search(text: ReadSignal<String>) -> Query<GamePage> {
     use_query(DataKey::Games, move |library| {
         let text = text();
@@ -135,6 +193,8 @@ pub fn use_library_search(text: ReadSignal<String>) -> Query<GamePage> {
 }
 
 /// A game with its releases; `None` when it's gone.
+// The views (#96 onwards) use it.
+#[allow(dead_code)]
 pub fn use_game(id: String) -> Query<Option<GameDetails>> {
     use_query(DataKey::Game(id.clone()), move |library| {
         let id = id.clone();
@@ -143,6 +203,8 @@ pub fn use_game(id: String) -> Query<Option<GameDetails>> {
 }
 
 /// The library's totals.
+// The views (#96 onwards) use it.
+#[allow(dead_code)]
 pub fn use_library_stats() -> Query<LibraryStats> {
     use_query(
         DataKey::Summary,

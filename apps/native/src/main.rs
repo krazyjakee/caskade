@@ -8,7 +8,6 @@
 //! (`caskade-player`), so no webview shares the loop.
 
 // The data hooks (#89); the views (#96 onwards) use them.
-#[allow(dead_code)]
 mod data;
 mod shell;
 mod smoke;
@@ -204,8 +203,11 @@ fn app() -> Element {
             smoke::panic_in_ui();
         }
     });
+    // What the views read (#89), once the services are there.
     rsx! {
-        div { style: "padding: 24px; font-family: sans-serif;", "Caskade" }
+        data::DataRoot {
+            div { style: "padding: 24px; font-family: sans-serif;", "Caskade" }
+        }
     }
 }
 
