@@ -148,26 +148,44 @@ macro_rules! builtin_theme {
 /// The built-in themes, `caskade.default` first. A new one is a line here
 /// listing its folder and every file in it (previews and assets too).
 fn builtins() -> Vec<MemFiles> {
-    vec![
-        builtin_theme!(
-            "default": "theme.json",
-            "tokens.json",
-            "theme.css",
-            "locales/sv.po",
-        ),
-        // The contrasting light theme (#143), written only against the contract.
-        builtin_theme!(
-            "paper": "theme.json",
-            "tokens.json",
-            "theme.css",
-            "assets/fonts/source-serif-4-latin-wght-normal.woff2",
-            "assets/fonts/source-serif-4-latin-ext-wght-normal.woff2",
-            "assets/fonts/OFL.txt",
-            "assets/grain.svg",
-            "previews/home.svg",
-            "locales/sv.po",
-        ),
-    ]
+    vec![builtin_theme!(
+        "default": "theme.json",
+        "tokens.json",
+        "theme.css",
+        "locales/sv.po",
+    )]
+}
+
+/// Themes that were built in and left the built-in set: Paper went to the
+/// catalogue (#125, as `dev.caskade.paper`). Someone who had one chosen
+/// gets the default theme without a notice, and [`retire`] moves their
+/// setting there.
+pub const RETIRED: &[&str] = &["caskade.paper"];
+
+/// Moves a `core.appearance` theme choice that's [`RETIRED`] (and not
+/// installed some other way) to the default theme, as the app starts;
+/// whether it did.
+pub async fn retire(
+    settings: &crate::settings::SettingsService,
+    themes: &ThemeService,
+) -> std::result::Result<bool, crate::settings::SettingsError> {
+    let current = settings.get("core.appearance").await?;
+    let Some(theme) = current.value.get("theme").and_then(|theme| theme.as_str()) else {
+        return Ok(false);
+    };
+    if !RETIRED.contains(&theme) || themes.info(theme).is_some() {
+        return Ok(false);
+    }
+    tracing::info!(
+        theme,
+        "the chosen theme isn't built in any more: using the default"
+    );
+    let mut value = current.value.clone();
+    value["theme"] = DEFAULT_THEME.into();
+    settings
+        .set("core.appearance", value, Some(current.revision))
+        .await?;
+    Ok(true)
 }
 
 /// How long a dev theme's folder must be quiet before it is recompiled:
@@ -309,9 +327,13 @@ impl ThemeService {
     /// notice saying why. The setting itself is left alone, so the theme
     /// comes back once it is reinstalled or fixed.
     pub fn resolve(&self, requested: &str) -> ActiveTheme {
-        let notice = match self.stylesheet(requested) {
+        let applies = self.stylesheet(requested);
+        let falls_back = applies.is_err();
+        let notice = match applies {
             Ok(_) => None,
             Err(_) if requested == DEFAULT_THEME => None,
+            // A theme that left the built-in set: the default, quietly.
+            Err(_) if RETIRED.contains(&requested) && self.info(requested).is_none() => None,
             Err(error) => Some(match self.info(requested) {
                 None => "The chosen theme isn't installed any more. Caskade is using the default theme instead.".to_owned(),
                 Some(info) => format!(
@@ -323,8 +345,10 @@ impl ThemeService {
                 ),
             }),
         };
-        let id = if notice.is_some() {
-            tracing::warn!(theme = %requested, "selected theme can't be applied");
+        let id = if falls_back {
+            if notice.is_some() {
+                tracing::warn!(theme = %requested, "selected theme can't be applied");
+            }
             DEFAULT_THEME
         } else {
             requested

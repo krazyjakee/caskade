@@ -72,7 +72,7 @@ export function fixtureCatalogueItems(): CatalogueItem[] {
   }
   items.push({
     entry: {
-      id: "caskade.paper",
+      id: "dev.caskade.paper",
       kind: "theme",
       name: "Paper",
       author: "Caskade",

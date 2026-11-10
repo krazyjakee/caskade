@@ -1,4 +1,4 @@
-//! Paper (`themes/paper`, #143): the second built-in theme, written only
+//! Paper (`themes/paper`, #143): a light theme written only
 //! against the public contract. It passes the lint as it is on disk and
 //! compiles on its own, without caskade.default underneath.
 use caskade_theme::{DirFiles, Theme, chain, compile, servable};
@@ -15,7 +15,7 @@ fn paper() -> Theme {
 #[test]
 fn paper_passes_the_lint_as_a_light_theme_that_extends_nothing() {
     let theme = paper();
-    assert_eq!(theme.id(), "caskade.paper");
+    assert_eq!(theme.id(), "dev.caskade.paper");
     assert_eq!(theme.manifest.name, "Paper");
     assert_eq!(theme.manifest.modes, ["light"]);
     assert_eq!(theme.manifest.extends, None);
@@ -25,11 +25,11 @@ fn paper_passes_the_lint_as_a_light_theme_that_extends_nothing() {
 #[test]
 fn paper_compiles_into_the_theme_layer_with_its_tokens_and_assets() {
     let theme = paper();
-    let chain = chain("caskade.paper", |id| (id == theme.id()).then_some(&theme)).unwrap();
+    let chain = chain("dev.caskade.paper", |id| (id == theme.id()).then_some(&theme)).unwrap();
     assert_eq!(chain.len(), 1, "Paper stands alone");
     let css = compile(&chain);
     assert!(css.starts_with(
-        "/* caskade.paper 1.0.0, compiled by caskade-theme. */\n@layer cs.theme {\n:root {\n"
+        "/* dev.caskade.paper 1.0.0, compiled by caskade-theme. */\n@layer cs.theme {\n:root {\n"
     ));
     assert!(css.trim_end().ends_with('}'));
     for expected in [
@@ -51,9 +51,9 @@ fn paper_compiles_into_the_theme_layer_with_its_tokens_and_assets() {
         "  --cs-font-display: \"Source Serif 4 Variable\", \"Georgia\", \"Times New Roman\", serif;\n",
         "  --cs-focus-ring-glow: var(--cs-color-accent-alt);\n",
         "  --cs-card-aspect: 3 / 2;\n",
-        r#"src: url("/caskade.paper/assets/fonts/source-serif-4-latin-wght-normal.woff2") format("woff2");"#,
-        r#"src: url("/caskade.paper/assets/fonts/source-serif-4-latin-ext-wght-normal.woff2") format("woff2");"#,
-        r#"background-image: url("/caskade.paper/assets/grain.svg");"#,
+        r#"src: url("/dev.caskade.paper/assets/fonts/source-serif-4-latin-wght-normal.woff2") format("woff2");"#,
+        r#"src: url("/dev.caskade.paper/assets/fonts/source-serif-4-latin-ext-wght-normal.woff2") format("woff2");"#,
+        r#"background-image: url("/dev.caskade.paper/assets/grain.svg");"#,
     ] {
         assert!(css.contains(expected), "missing {expected:?} in\n{css}");
     }

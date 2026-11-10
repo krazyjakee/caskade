@@ -71,6 +71,28 @@
       ],
       "notes": "First catalogue release.",
       "published": "2026-10-30"
+    },
+    {
+      "path": "../../themes/paper",
+      "kind": "theme",
+      "summary": "A light, printed look: warm paper, ink-red accents and a serif display face.",
+      "license": "MIT",
+      "homepage": "https://github.com/krazyjakee/caskade/tree/master/themes/paper",
+      "categories": [
+        "light"
+      ],
+      "screenshots": [
+        {
+          "file": "media/paper-hero.webp",
+          "alt": "Paper's serif hero, ink-red play button and a shelf of games"
+        },
+        {
+          "file": "media/paper-cards.webp",
+          "alt": "Game cards on Paper's warm paper surfaces"
+        }
+      ],
+      "notes": "Paper was built into Caskade; it now comes from the catalogue.",
+      "published": "2026-11-10"
     }
   ]
 }

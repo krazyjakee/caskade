@@ -666,7 +666,6 @@ mod tests {
         for (id, base) in [
             ("caskade.default", "#060914"),
             ("dev.caskade.ember", ""),
-            ("caskade.paper", "#f3eee3"),
         ] {
             let mut document = document();
             let active = themes.resolve(id);

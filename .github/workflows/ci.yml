@@ -427,6 +427,14 @@ jobs:
       # against Chromium's rendering (#80).
       - name: Native screenshots
         run: cargo test -p caskade-native --features shots --locked --test shots --test text_pixels
+      - name: Upload screenshots that differ
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: native-shots-${{ github.run_id }}
+          path: target/tmp/shots-failed/
+          if-no-files-found: ignore
+          retention-days: 14
 
   # The native app builds on macOS (#95). A check only: its window on a
   # real Mac is a hardware check (#120).

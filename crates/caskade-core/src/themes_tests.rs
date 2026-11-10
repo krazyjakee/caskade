@@ -65,7 +65,6 @@ fn lists_the_default_and_installed_themes_and_a_broken_one_hides_nothing() {
         summary,
         [
             ("caskade.default", ThemeSource::Builtin, 0),
-            ("caskade.paper", ThemeSource::Builtin, 0),
             ("dev.example.broken", ThemeSource::User, 2),
             ("caskade.default", ThemeSource::User, 1),
             ("dev.example.neon", ThemeSource::User, 0),
@@ -74,11 +73,11 @@ fn lists_the_default_and_installed_themes_and_a_broken_one_hides_nothing() {
         ]
     );
     assert_eq!(
-        themes[3].problems[0].message,
+        themes[2].problems[0].message,
         "id caskade.default is already used by the built-in theme Nexus"
     );
     assert_eq!(
-        themes[6].problems[0].message,
+        themes[5].problems[0].message,
         "dev.example.orphan extends dev.example.gone, which isn't installed or isn't valid"
     );
 
@@ -376,4 +375,137 @@ fn a_broken_translation_catalog_is_a_warning_and_the_theme_still_applies() {
         .find(|theme| theme.id == "dev.example.plain")
         .unwrap();
     assert!(plain.problems.is_empty() && plain.warnings.is_empty());
+}
+
+/// Paper left the built-in set (#125): someone who had it chosen gets the
+/// default theme with no notice, and their setting moves there as the app
+/// starts, unless Paper is installed (from the catalogue, say).
+#[tokio::test]
+async fn a_retired_built_in_theme_falls_back_quietly_and_its_choice_moves_to_the_default() {
+    use crate::{AppPaths, db::LibraryStore, settings::SettingsService};
+    assert!(RETIRED.contains(&"caskade.paper"));
+    let temp = tempfile::tempdir().unwrap();
+    let paths = AppPaths::under(temp.path());
+    let service = ThemeService::new(temp.path().join("themes"));
+    assert!(
+        service
+            .list()
+            .iter()
+            .all(|theme| theme.id != "caskade.paper"),
+        "Paper isn't built in"
+    );
+    let active = service.resolve("caskade.paper");
+    assert_eq!(
+        (active.id.as_str(), active.requested.as_str(), active.notice),
+        (DEFAULT_THEME, "caskade.paper", None)
+    );
+    // Another theme that went missing still says so.
+    assert!(service.resolve("dev.example.gone").notice.is_some());
+
+    let settings = SettingsService::new(
+        LibraryStore::open(&temp.path().join("library.db"))
+            .await
+            .unwrap(),
+    );
+    settings.register_core(&paths).unwrap();
+    let mut value = settings.get("core.appearance").await.unwrap().value;
+    value["theme"] = "caskade.paper".into();
+    value["accent"] = "#ff8800".into();
+    settings.set("core.appearance", value, None).await.unwrap();
+    assert!(retire(&settings, &service).await.unwrap());
+    let value = settings.get("core.appearance").await.unwrap().value;
+    assert_eq!(value["theme"], DEFAULT_THEME);
+    assert_eq!(value["accent"], "#ff8800", "the rest is kept");
+    assert!(!retire(&settings, &service).await.unwrap(), "once");
+
+    // Installed under its old id, it stays chosen and applies.
+    write(
+        &temp.path().join("themes/paper"),
+        &[(
+            "theme.json",
+            r#"{"id": "caskade.paper", "name": "Paper", "version": "1.0.0", "extends": "caskade.default"}"#,
+        )],
+    );
+    let service = ThemeService::new(temp.path().join("themes"));
+    let mut value = settings.get("core.appearance").await.unwrap().value;
+    value["theme"] = "caskade.paper".into();
+    settings.set("core.appearance", value, None).await.unwrap();
+    assert!(!retire(&settings, &service).await.unwrap());
+    assert_eq!(service.resolve("caskade.paper").id, "caskade.paper");
+}
+
+/// The first-party themes are inspired by console home screens, never
+/// copies of them (#125): no built-in theme names a console or its maker
+/// anywhere in its text (manifest, tokens, CSS, translations, previews).
+/// `switch` is also one of the anatomy's roots, so a selector naming it
+/// (`[data-cs="switch"]`) isn't a mark.
+#[test]
+fn no_built_in_theme_names_a_console_or_its_maker() {
+    const MARKS: &[&str] = &[
+        "playstation",
+        "ps",
+        "ps1",
+        "ps2",
+        "ps3",
+        "ps4",
+        "ps5",
+        "psn",
+        "sony",
+        "dualsense",
+        "dualshock",
+        "xbox",
+        "microsoft",
+        "nintendo",
+        "switch",
+        "joy-con",
+        "joycon",
+        "wii",
+        "mario",
+        "zelda",
+        "halo",
+        "kinect",
+    ];
+    /// Whether `mark` is in `text` as a word of its own.
+    fn has_word(text: &str, mark: &str) -> bool {
+        let is_word = |c: char| c.is_ascii_alphanumeric();
+        text.match_indices(mark).any(|(at, _)| {
+            let before = text[..at].chars().next_back();
+            let after = text[at + mark.len()..].chars().next();
+            !before.is_some_and(is_word) && !after.is_some_and(is_word)
+        })
+    }
+    let mut found = Vec::new();
+    for files in builtins() {
+        let id = files
+            .read("theme.json")
+            .and_then(|json| serde_json::from_slice::<serde_json::Value>(&json).ok())
+            .and_then(|manifest| manifest["id"].as_str().map(str::to_owned))
+            .unwrap_or_default();
+        for path in files.list() {
+            if [".woff2", ".woff", ".ttf", ".otf", ".png", ".webp", ".jpg"]
+                .iter()
+                .any(|binary| path.ends_with(binary))
+            {
+                continue;
+            }
+            let text = String::from_utf8_lossy(&files.read(&path).unwrap_or_default())
+                .to_lowercase()
+                .replace("data-cs=\"switch\"", "data-cs=\"\"")
+                .replace("data-cs='switch'", "data-cs=''")
+                .replace("data-cs=switch", "data-cs=");
+            for mark in MARKS {
+                if has_word(&text, mark) {
+                    found.push(format!("{id} {path}: {mark}"));
+                }
+            }
+        }
+    }
+    assert!(
+        found.is_empty(),
+        "marks in built-in themes:\n{}",
+        found.join("\n")
+    );
+    // The check itself sees a mark.
+    assert!(has_word("a playful nod to the ps5 era", "ps5"));
+    assert!(!has_word("steps(4)", "ps"));
 }

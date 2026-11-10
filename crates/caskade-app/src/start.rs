@@ -118,6 +118,11 @@ pub fn open(
         tracing::warn!(%error, "an interrupted add-on install wasn't rolled back");
     }
     let themes = caskade_core::themes::ThemeService::new(paths.data.join("themes"));
+    // A theme that left the built-in set (Paper, #125): its users move to
+    // the default, without a notice.
+    if let Err(error) = crate::runtime::block_on(caskade_core::themes::retire(&settings, &themes)) {
+        tracing::warn!(%error, "a retired theme choice wasn't moved to the default");
+    }
     Ok(Core {
         paths: paths.clone(),
         artwork,

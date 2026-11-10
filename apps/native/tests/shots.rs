@@ -82,7 +82,7 @@ fn every_theme_renders_the_reference_screens_as_before() {
     let log = String::from_utf8_lossy(&output.stderr);
     assert!(output.status.success(), "{log}");
     let rendered = pngs(&out);
-    for theme in ["caskade.default", "caskade.paper", "dev.caskade.ember"] {
+    for theme in ["caskade.default", "dev.caskade.ember"] {
         assert!(
             rendered
                 .iter()
@@ -106,16 +106,21 @@ fn every_theme_renders_the_reference_screens_as_before() {
         "screens or themes changed: CASKADE_WRITE_SHOTS=1 writes the images"
     );
     let mut problems = Vec::new();
+    // The renders that differ, kept for a look (CI uploads them).
+    let kept = Path::new(env!("CARGO_TARGET_TMPDIR")).join("shots-failed");
+    let _ = std::fs::remove_dir_all(&kept);
     for name in &rendered {
         let share = differing(&out.join(name), &golden().join(name));
         if share > MAX_DIFFERING {
             problems.push(format!("{name}: {:.2}% of pixels differ", share * 100.0));
+            std::fs::create_dir_all(&kept).unwrap();
+            std::fs::copy(out.join(name), kept.join(name)).unwrap();
         }
     }
     assert!(
         problems.is_empty(),
-        "{}\n(rendered in {}; CASKADE_WRITE_SHOTS=1 writes them if the change is meant)",
+        "{}\n(the renders are in {}; CASKADE_WRITE_SHOTS=1 writes them if the change is meant)",
         problems.join("\n"),
-        out.display()
+        kept.display()
     );
 }

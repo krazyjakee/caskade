@@ -13,11 +13,10 @@ If you need something the contract doesn't have, ask for it to be added to
 the contract. Don't work around it with class names. The rules are in the
 [README](README.md#theme-packages-139).
 
-The finished theme ships as [`themes/paper`](../../themes/paper) with the id
-`caskade.paper`. Give your copy your own reverse-DNS id. A built-in theme
-wins over an installed folder with the same id. This guide uses
-`dev.example.paper`. Apart from the id and the author, your folder ends up
-identical to `themes/paper`.
+The finished theme is [`themes/paper`](../../themes/paper), which the add-on
+catalogue offers with the id `dev.caskade.paper`. Give your copy your own
+reverse-DNS id: this guide uses `dev.example.paper`. Apart from the id and
+the author, your folder ends up identical to `themes/paper`.
 
 ## 1. The folder
 

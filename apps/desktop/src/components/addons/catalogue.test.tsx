@@ -143,7 +143,7 @@ it("installs, applies and removes a theme; skips an update; keeps plugin data on
   fireEvent.click(use);
   await waitFor(async () =>
     expect((await app.settings.api.get("core.appearance")).value).toMatchObject({
-      theme: "caskade.paper",
+      theme: "dev.caskade.paper",
     }),
   );
   fireEvent.click(within(dialog).getByRole("button", { name: "Uninstall…" }));
