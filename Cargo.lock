@@ -1976,8 +1976,10 @@ dependencies = [
 name = "caskade-native"
 version = "0.1.4"
 dependencies = [
- "accesskit",
+ "anyrender",
+ "anyrender_vello_cpu",
  "blitz-dom",
+ "blitz-paint",
  "blitz-shell",
  "blitz-traits",
  "caskade-app",

@@ -385,6 +385,10 @@ jobs:
       # e2e harness (#92).
       - name: Native app smoke test
         run: cargo test -p caskade-native --locked --test smoke --test console_e2e -- --ignored
+      # Every theme on the reference screens, rendered with vello_cpu,
+      # against the committed images (#90).
+      - name: Native theme screenshots
+        run: cargo test -p caskade-native --features shots --locked --test shots
 
   # The installer suite (crates/caskade-installer/docs/ci.md).
   installer:

@@ -294,6 +294,17 @@ fn sheets(doc: &mut BaseDocument) -> Option<Sheets> {
     Some(sheets)
 }
 
+/// Replaces the app's stylesheet in `doc` with `css`: the screenshot
+/// harness's, which also has its reference screens' classes.
+#[cfg(feature = "shots")]
+pub fn set_app_css(doc: &mut BaseDocument, css: &str) {
+    if let Some(head) = doc.find_head_node().map(|head| head.id)
+        && let Some(app) = find_sheet(doc, head, "app")
+    {
+        set_sheet(doc, app, css);
+    }
+}
+
 /// Gives `sheet` the stylesheet `css`, unless it has it already (a
 /// stylesheet is parsed again only when it changed).
 fn set_sheet(doc: &mut BaseDocument, sheet: Sheet, css: &str) {

@@ -17,6 +17,9 @@ skia = ["dioxus-native/skia"]
 # The smoke test's environment hooks (`src/smoke.rs`) in a release build,
 # for a manual run on another OS; debug builds always have them.
 smoke = []
+# The reference screens' screenshots (`src/shots.rs`, #90): vello_cpu,
+# headless. `cargo test -p caskade-native --features shots --test shots`.
+shots = ["dep:anyrender", "dep:anyrender_vello_cpu", "dep:blitz-paint"]
 # The end-to-end harness's scripted pad (`src/input/e2e.rs`) in a release
 # build; debug builds always have it.
 e2e = []
@@ -28,6 +31,11 @@ embed-resource = "3"
 [[bin]]
 name = "caskade-native"
 path = "src/main.rs"
+
+# The screenshots of every theme need the `shots` feature (#90).
+[[test]]
+name = "shots"
+required-features = ["shots"]
 
 [dependencies]
 # The BLITZ-0 baseline (#113, Pins): Blitz 9f9c8e3 with Dioxus 0.8.0-alpha.3,
@@ -60,6 +68,10 @@ tracing = "0.1"
 blitz-dom = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735890754b4a9970cb07765b8bf3c0c", default-features = false }
 blitz-shell = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735890754b4a9970cb07765b8bf3c0c", default-features = false, features = ["data-uri"] }
 blitz-traits = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735890754b4a9970cb07765b8bf3c0c", default-features = false }
+# Headless rendering for the screenshots (`shots`), at the same revisions.
+blitz-paint = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735890754b4a9970cb07765b8bf3c0c", default-features = false, optional = true }
+anyrender = { git = "https://github.com/DioxusLabs/anyrender", branch = "main", optional = true }
+anyrender_vello_cpu = { git = "https://github.com/DioxusLabs/anyrender", branch = "main", default-features = false, optional = true }
 # The tray icon and its menu (`tray.rs`), as the Tauri app builds them.
 tray-icon = { version = "0.25", default-features = false, features = ["libappindicator"] }
 image = { version = "=0.25.10", default-features = false, features = ["png"] }
@@ -85,8 +97,6 @@ rfd = { version = "0.16", default-features = false, features = ["common-controls
 windows-registry = "0.6"
 
 [dev-dependencies]
-# The accessibility test reads Blitz's AccessKit tree (#83).
-accesskit = "0.25"
 tempfile = "=3.27.0"
 # The smoke and e2e tests' own display and session bus (#122).
 caskade-test-desktop = { path = "../../crates/caskade-test-desktop" }

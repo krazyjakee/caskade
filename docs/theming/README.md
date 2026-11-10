@@ -63,7 +63,8 @@ generated from the catalogue in `packages/ui/src/anatomy.ts`, which plugins
 can also import from `@caskade/ui`. Anything not in the catalogue, including
 every class name, may change without notice. The native app (#90) renders the
 same roots, parts and states, catalogued again in `apps/native/src/anatomy.rs`
-and checked against `anatomy.ts`; themes apply to both unchanged.
+and checked against `anatomy.ts`; themes apply to both unchanged. What
+Blitz still renders differently is in [blitz.md](blitz.md).
 
 Tests check both directions:
 

@@ -17,6 +17,8 @@ mod i18n;
 mod input;
 mod launch;
 mod shell;
+#[cfg(feature = "shots")]
+mod shots;
 mod smoke;
 mod theme;
 mod tray;
@@ -34,6 +36,22 @@ const ASYNC_WORKERS: usize = 4;
 static KEEPER: OnceLock<shell::Keeper> = OnceLock::new();
 
 fn main() {
+    // `--shots <folder>`: the reference screens' screenshots (#90). A
+    // build without them says so instead of starting the app.
+    #[cfg(not(feature = "shots"))]
+    if std::env::args().any(|arg| arg == "--shots") {
+        eprintln!("this build has no screenshots: build with --features shots");
+        std::process::exit(2);
+    }
+    #[cfg(feature = "shots")]
+    if let Some((out, themes)) = shots::requested() {
+        logging();
+        if let Err(error) = shots::run(&out, themes.as_deref()) {
+            eprintln!("{error}");
+            std::process::exit(1);
+        }
+        return;
+    }
     // `caskade-native --web-game <url>` / `--video <id>`: a game's or a
     // video's window, not the app. Their WebKitGTK first gets the renderer
     // the Tauri app picks for its own (it may restart the process); Blitz's
