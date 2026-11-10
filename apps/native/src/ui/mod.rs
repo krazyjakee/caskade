@@ -14,16 +14,24 @@
 mod button;
 mod checkbox;
 mod dialog;
+mod error_notice;
 mod icons;
 mod ids;
 mod interact;
 mod link;
 mod menu;
 mod popover;
+mod progress;
+mod radio;
+mod segmented;
 mod select;
+mod slider;
+mod status_badge;
 mod switch;
+mod tabs;
 #[cfg(test)]
 mod tests;
+mod toast;
 mod tooltip;
 
 #[allow(unused_imports)]
@@ -33,6 +41,8 @@ pub use checkbox::Checkbox;
 #[allow(unused_imports)]
 pub use dialog::{ConfirmDialog, Dialog};
 #[allow(unused_imports)]
+pub use error_notice::{ErrorNotice, NoticeVariant};
+#[allow(unused_imports)]
 pub use icons::{Icon, Svg};
 #[allow(unused_imports)]
 pub use link::Link;
@@ -41,9 +51,23 @@ pub use menu::{Menu, MenuButton, MenuEntry, MenuItem};
 #[allow(unused_imports)]
 pub use popover::{Anchor, Popover};
 #[allow(unused_imports)]
+pub use progress::Progress;
+#[allow(unused_imports)]
+pub use radio::{RadioGroup, RadioOption};
+#[allow(unused_imports)]
+pub use segmented::{Segment, SegmentedControl};
+#[allow(unused_imports)]
 pub use select::{Select, SelectOption};
 #[allow(unused_imports)]
+pub use slider::Slider;
+#[allow(unused_imports)]
+pub use status_badge::{GameStatus, StatusBadge};
+#[allow(unused_imports)]
 pub use switch::{Switch, SwitchSize};
+#[allow(unused_imports)]
+pub use tabs::{Tab, Tabs};
+#[allow(unused_imports)]
+pub use toast::{ToastRegion, Toasts, use_toasts};
 #[allow(unused_imports)]
 pub use tooltip::Tooltip;
 
@@ -53,8 +77,12 @@ use caskade_ui_theme::anatomy::Entry;
 pub const ANATOMY: &[Entry] = &[
     button::ANATOMY,
     checkbox::ANATOMY,
+    error_notice::ANATOMY,
     menu::ANATOMY,
     select::ANATOMY,
     select::POPOVER_ANATOMY,
+    segmented::ANATOMY,
+    slider::ANATOMY,
+    status_badge::ANATOMY,
     switch::ANATOMY,
 ];
