@@ -10,7 +10,7 @@ impl DiscoveryController {
             return;
         }
         let controller = self.clone();
-        tauri::async_runtime::spawn(async move {
+        crate::runtime::spawn(async move {
             controller.lifecycle().await;
         });
     }
@@ -26,14 +26,15 @@ impl DiscoveryController {
             }
         }
     }
-    pub fn bridge<R: tauri::Runtime>(&self, app: tauri::AppHandle<R>) {
+    /// Sends every change of the controller's state to `events`.
+    pub fn bridge(&self, events: crate::events::Events) {
         let mut updates = self.subscribe();
-        tauri::async_runtime::spawn(async move {
+        crate::runtime::spawn(async move {
             while updates.changed().await.is_ok() {
                 let snapshot = updates.borrow_and_update().clone();
-                if let Err(error) = DiscoveryChanged(snapshot).emit(&app) {
-                    tracing::warn!(%error, "discovery event delivery failed");
-                }
+                events.send(crate::events::Event::DiscoveryChanged(DiscoveryChanged(
+                    snapshot,
+                )));
             }
         });
     }

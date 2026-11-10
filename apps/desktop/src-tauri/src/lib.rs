@@ -10,7 +10,6 @@ pub mod bindings;
 pub mod commands;
 pub mod deep_link;
 pub mod dev_plugins;
-pub mod discovery;
 #[cfg(feature = "e2e")]
 pub mod e2e;
 pub mod events;
@@ -31,7 +30,7 @@ pub mod webview_recovery;
 pub mod window_state;
 
 // The app layer's, under the paths the adapter has always used.
-pub use caskade_app::{error, onboarding, torrent_links};
+pub use caskade_app::{discovery, error, onboarding, torrent_links};
 
 /// Builds and runs the app.
 pub fn run() {
@@ -313,7 +312,7 @@ pub fn run() {
         if let Some(source) = app.try_state::<caskade_sources::storage::StorageSource>() {
             controller = controller.with_storage(source.inner().clone());
         }
-        controller.bridge(app.handle().clone());
+        controller.bridge(events::sink(app.handle().clone()));
         controller.start();
         app.manage(controller);
         app.manage(discovery);

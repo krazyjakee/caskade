@@ -3,6 +3,9 @@
 //! under its event name; a native shell reads them directly. [`bridge`]
 //! turns the core bus's events into these.
 
+// The commands' own events.
+pub use crate::commands::romm::RommDownloadChanged;
+pub use crate::discovery::DiscoveryChanged;
 use caskade_core::bus::{Event as BusEvent, GameSession};
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -146,6 +149,8 @@ pub enum Event {
     LifecycleScriptsRan(LifecycleScriptsRan),
     AchievementsChanged(AchievementsChanged),
     BackgroundChanged(BackgroundChanged),
+    RommDownloadChanged(RommDownloadChanged),
+    DiscoveryChanged(DiscoveryChanged),
 }
 
 /// Where a shell receives [`Event`]s: called on the async runtime, in the
@@ -161,6 +166,12 @@ pub struct Events(Arc<dyn Emit>);
 impl Events {
     pub fn new(sink: impl Emit) -> Self {
         Self(Arc::new(sink))
+    }
+
+    /// Sends `event`; the shell's reason when it couldn't, for a caller
+    /// that acts on it (a request nobody saw is answered as failed).
+    pub fn emit(&self, event: Event) -> Result<(), String> {
+        self.0.emit(event)
     }
 
     /// Sends `event`; a failure is logged, as nothing can answer it.
@@ -198,6 +209,8 @@ impl Event {
             Self::LifecycleScriptsRan(_) => "lifecycle.scripts.ran",
             Self::AchievementsChanged(_) => "achievements.changed",
             Self::BackgroundChanged(_) => "background.changed",
+            Self::RommDownloadChanged(_) => "romm.download.changed",
+            Self::DiscoveryChanged(_) => "discovery.changed",
         }
     }
 }

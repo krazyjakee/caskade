@@ -2,7 +2,7 @@
 //! No live HostEnv, registry, launcher files or real user database are read.
 use crate::ipc::invoke;
 use caskade_core::{AppPaths, bus::Bus, db::LibraryStore, settings::SettingsService};
-use caskade_desktop::discovery::{DiscoveryChanged, DiscoveryController};
+use caskade_desktop::{discovery::DiscoveryController, events::DiscoveryChanged};
 use caskade_discovery::{
     Confidence, DetectedGame, Evidence, HostEnv, LauncherStatus, OsSet, ScanCtx, Source,
     SourceError, SourceId, WatchPath,
@@ -107,7 +107,7 @@ fn scan_review_accept_ignore_and_stale_rejection_round_trip_through_typed_ipc() 
             .unwrap()
             .push(serde_json::from_str(event.payload()).unwrap());
     });
-    controller.bridge(app.handle().clone());
+    controller.bridge(caskade_desktop::events::sink(app.handle().clone()));
     let launchers = invoke(&view, "discovery_launchers", json!({})).unwrap();
     assert_eq!(launchers["os"], "linux");
     assert_eq!(launchers["launchers"][0]["found"], false);

@@ -6,6 +6,7 @@
 pub mod background;
 pub mod commands;
 pub mod deep_link;
+pub mod discovery;
 pub mod error;
 pub mod events;
 pub mod navigation;

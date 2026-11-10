@@ -22,7 +22,6 @@ use std::{
         atomic::{AtomicBool, Ordering},
     },
 };
-use tauri_specta::Event;
 use tokio::sync::{Mutex, watch};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
@@ -55,7 +54,7 @@ pub struct DiscoverySnapshot {
     #[serde(default)]
     pub storage: Option<StorageScanReport>,
 }
-#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 pub struct DiscoveryChanged(pub DiscoverySnapshot);
 
 struct State {

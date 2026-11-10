@@ -1,6 +1,10 @@
 use super::*;
 use crate::commands::test_ipc::invoke;
-use caskade_core::{bus::Bus, db::LibraryStore, model::Game};
+use caskade_core::{
+    bus::{Bus, Event},
+    db::LibraryStore,
+    model::Game,
+};
 use serde_json::json;
 use tauri::test::{mock_builder, mock_context, noop_assets};
 

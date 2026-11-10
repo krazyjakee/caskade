@@ -2,7 +2,7 @@ use super::*;
 use crate::commands::test_ipc::invoke;
 use caskade_core::{
     model::{Game, GameEntry, InstallLocation, InstallState, SourceId},
-    saves::{LocationKind, versions::VersionReason},
+    saves::{LocationKind, LocationSpec, Saves, versions::VersionReason},
 };
 use serde_json::json;
 use tauri::test::{mock_builder, mock_context, noop_assets};

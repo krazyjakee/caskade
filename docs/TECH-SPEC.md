@@ -59,7 +59,7 @@ What it does is in the [product spec](PRODUCT-SPEC.md). Public contracts for ext
 | `crates/caskade-i18n` | Runtime translation for the Rust side. |
 | `crates/caskade-malloc`, `caskade-webview2`, `caskade-xinput` | The only crates with `unsafe`: glibc allocator tuning, WebView2 COM calls, XInput's guide button. |
 | `crates/caskade-emulation-fixtures` | Generated emulator and ROM fixtures for tests. |
-| `crates/caskade-app` | The application layer every app shell runs, with no Tauri: the async runtime, background supervision, command errors, permission checks, typed UI events, the commands as plain async functions over the services they use (the adapter's commands forward to them), first-run setup, startup recovery, deep-link and torrent-link handling, navigation targets. Moving the rest of the adapter's logic here is #86. |
+| `crates/caskade-app` | The application layer every app shell runs, with no Tauri: the async runtime, background supervision, command errors, permission checks, typed UI events, the commands as plain async functions over the services they use (the adapter's commands forward to them), first-run setup, startup recovery, the installed-games discovery controller (startup scan, schedule and watch), deep-link and torrent-link handling, navigation targets. Moving the rest of the adapter's logic here is #86. |
 | `apps/desktop/src-tauri` | The Tauri adapter over `caskade-app`: commands, events, windows, schemes, tray, deep links, launch channel, elevation entry. |
 | `apps/desktop/src` | The React app. |
 | `apps/storybook` | Storybook for `@caskade/ui`, also a theme playground. |

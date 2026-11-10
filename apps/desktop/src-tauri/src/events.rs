@@ -59,6 +59,8 @@ webview_events!(
     LifecycleScriptsRan,
     AchievementsChanged,
     BackgroundChanged,
+    RommDownloadChanged,
+    DiscoveryChanged,
 );
 
 /// The app layer's [`app::Emit`] sink for this app's webview.

@@ -50,7 +50,7 @@ async fn controller() -> (DiscoveryController, LibraryStore) {
     caskade_sources::register_settings(&settings).unwrap();
     let env = HostEnv::fixture(
         PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("../../../crates/caskade-discovery/tests/fixtures/machines/linux-integration"),
+            .join("../caskade-discovery/tests/fixtures/machines/linux-integration"),
     )
     .unwrap();
     let service = DiscoveryService::with_sources(store.clone(), bus, env, vec![Arc::new(Desktop)]);

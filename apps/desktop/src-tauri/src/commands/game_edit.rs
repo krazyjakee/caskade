@@ -1,24 +1,19 @@
 //! Game editing (#171): the editor's view of a game and validated patches.
 //! Fields the user sets stay theirs through automatic refreshes until reset.
-use crate::error::{CommandError, report};
+use crate::error::CommandError;
+pub use app::*;
+use caskade_app::commands::game_edit as app;
 use caskade_core::{
     accounts::AccountService,
-    artwork::ArtworkCache,
-    bus::{Bus, Event},
+    bus::Bus,
     db::LibraryStore,
     metadata::{Metadata, RefreshMode, RefreshStatus},
     model::{
-        ArtworkKind, ArtworkSlot, BulkGameResult, BulkStatus, Game, GameEdit, GameEditOutcome,
-        GameEditState, ListGames,
+        ArtworkKind, ArtworkSlot, BulkGameResult, Game, GameEdit, GameEditOutcome, GameEditState,
+        ListGames,
     },
 };
-use std::path::PathBuf;
 use tauri::State;
-
-/// The artwork cache images the user imports go into; `None` when it
-/// couldn't open, and then imports fail.
-pub struct EditArtwork(pub Option<ArtworkCache>);
-
 /// The game as the editor shows it: its values, the automatic values
 /// beneath, and which fields the user set. `null` when it is gone.
 #[tauri::command]
@@ -27,7 +22,7 @@ pub async fn game_edit_state(
     store: State<'_, LibraryStore>,
     game_id: String,
 ) -> Result<Option<GameEditState>, CommandError> {
-    store.game_edit_state(&game_id).await.map_err(report)
+    app::game_edit_state(&store, game_id).await
 }
 
 /// Saves the changed fields, all or none. `base` is the game as the
@@ -41,16 +36,7 @@ pub async fn game_edit(
     edit: GameEdit,
     base: Option<Game>,
 ) -> Result<GameEditOutcome, CommandError> {
-    let outcome = store
-        .edit_game(&game_id, &edit, base.as_ref())
-        .await
-        .map_err(report)?;
-    if let GameEditOutcome::Saved { changed, .. } = &outcome
-        && !changed.is_empty()
-    {
-        bus.emit(Event::LibraryGameUpdated { game_id });
-    }
-    Ok(outcome)
+    app::game_edit(&store, &bus, game_id, edit, base).await
 }
 
 /// The game's cover, background and icon as the editor shows them: who
@@ -62,21 +48,7 @@ pub async fn game_artwork(
     store: State<'_, LibraryStore>,
     game_id: String,
 ) -> Result<Option<Vec<ArtworkSlot>>, CommandError> {
-    store.artwork_slots(&game_id).await.map_err(report)
-}
-
-/// What the user does with one kind of a game's artwork.
-#[derive(Debug, Clone, serde::Deserialize, specta::Type)]
-#[serde(tag = "op", rename_all = "camelCase", rename_all_fields = "camelCase")]
-pub enum ArtworkChange {
-    /// Shows one of the game's images of that kind.
-    Choose { artwork_id: String },
-    /// Imports an image file and shows it.
-    Import { path: PathBuf },
-    /// Shows none.
-    Remove,
-    /// Back to the automatic image.
-    Reset,
+    app::game_artwork(&store, game_id).await
 }
 
 /// Changes one kind of the game's artwork; refreshes never undo it. An
@@ -91,33 +63,7 @@ pub async fn game_artwork_set(
     kind: ArtworkKind,
     change: ArtworkChange,
 ) -> Result<Vec<ArtworkSlot>, CommandError> {
-    match change {
-        ArtworkChange::Choose { artwork_id } => {
-            store.choose_artwork(&game_id, kind, &artwork_id).await
-        }
-        ArtworkChange::Import { path } => {
-            let Some(cache) = &cache.0 else {
-                return Err(report(caskade_core::Error::Invalid(caskade_core::tr!(
-                    "the artwork cache isn't available"
-                ))));
-            };
-            store
-                .import_user_artwork(cache, &game_id, kind, &path)
-                .await
-                .map(drop)
-        }
-        ArtworkChange::Remove => store.remove_artwork(&game_id, kind).await,
-        ArtworkChange::Reset => store.reset_artwork(&game_id, kind).await,
-    }
-    .map_err(report)?;
-    bus.emit(Event::LibraryGameUpdated {
-        game_id: game_id.clone(),
-    });
-    Ok(store
-        .artwork_slots(&game_id)
-        .await
-        .map_err(report)?
-        .unwrap_or_default())
+    app::game_artwork_set(&store, &bus, &cache, game_id, kind, change).await
 }
 
 /// One edit on many games (#173): a preview (`apply` false) saves nothing;
@@ -132,20 +78,7 @@ pub async fn games_bulk_edit(
     edit: GameEdit,
     apply: bool,
 ) -> Result<Vec<BulkGameResult>, CommandError> {
-    let results = store
-        .bulk_edit_games(&game_ids, &edit, apply)
-        .await
-        .map_err(report)?;
-    if apply {
-        for result in &results {
-            if result.status == BulkStatus::Changed {
-                bus.emit(Event::LibraryGameUpdated {
-                    game_id: result.game_id.clone(),
-                });
-            }
-        }
-    }
-    Ok(results)
+    app::games_bulk_edit(&store, &bus, game_ids, edit, apply).await
 }
 
 /// Every game a library query finds, in its order, for "select all".
@@ -156,10 +89,7 @@ pub async fn library_game_ids(
     accounts: State<'_, AccountService>,
     query: ListGames,
 ) -> Result<Vec<String>, CommandError> {
-    store
-        .game_ids_for_account(&query, accounts.active_id().as_deref())
-        .await
-        .map_err(report)
+    app::library_game_ids(&store, &accounts, query).await
 }
 
 /// How the refresh of chosen games' details is going (#176).
@@ -194,21 +124,21 @@ pub async fn games_refresh_start(
     game_ids: Vec<String>,
     mode: RefreshMode,
 ) -> Result<(), CommandError> {
-    metadata.start_refresh(game_ids, mode).map_err(report)
+    app::games_refresh_start(&metadata, game_ids, mode).await
 }
 
 /// Stops the refresh after its current batch; whether one was running.
 #[tauri::command]
 #[specta::specta]
 pub fn games_refresh_cancel(metadata: State<'_, Metadata>) -> bool {
-    metadata.cancel_refresh()
+    app::games_refresh_cancel(&metadata)
 }
 
 /// The last refresh's status, or `null` when none ran.
 #[tauri::command]
 #[specta::specta]
 pub fn games_refresh_status(metadata: State<'_, Metadata>) -> Option<RefreshStatus> {
-    metadata.refresh_updates().borrow().clone()
+    app::games_refresh_status(&metadata)
 }
 
 #[cfg(test)]

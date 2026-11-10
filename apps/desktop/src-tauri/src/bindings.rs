@@ -344,7 +344,7 @@ pub fn builder() -> Builder<tauri::Wry> {
             crate::commands::system_stats::system_stats_unwatch,
         ])
         .events(collect_events![
-            crate::discovery::DiscoveryChanged,
+            crate::events::DiscoveryChanged,
             crate::commands::streaming::StreamingPairingFinished,
             crate::events::JobChanged,
             crate::commands::input::InputActionEvent,
@@ -373,7 +373,7 @@ pub fn builder() -> Builder<tauri::Wry> {
             crate::events::EmulationDetectChanged,
             crate::events::EmulationScanChanged,
             crate::events::EmulationSetupChanged,
-            crate::commands::romm::RommDownloadChanged,
+            crate::events::RommDownloadChanged,
             crate::commands::app_update::AppUpdateChanged,
             crate::commands::backup::BackupChanged,
             crate::commands::sync::DevicesChanged,
