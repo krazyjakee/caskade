@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-msgid "Cobalt Five"
-msgstr "Kobolt fem"
+msgid "Cobalt"
+msgstr "Kobolt"
 
 msgid "Deep cobalt and clean white: airy type, pill-shaped controls, soft rounded panels and a cool glow on focus."
 msgstr "Djup koboltblå och rent vitt: luftig text, pillerformade kontroller, mjukt rundade paneler och ett svalt sken vid fokus."

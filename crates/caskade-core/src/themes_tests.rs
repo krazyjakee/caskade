@@ -65,9 +65,9 @@ fn lists_the_default_and_installed_themes_and_a_broken_one_hides_nothing() {
         summary,
         [
             ("caskade.default", ThemeSource::Builtin, 0),
-            ("caskade.cobalt-five", ThemeSource::Builtin, 0),
-            ("caskade.emerald-one", ThemeSource::Builtin, 0),
-            ("caskade.toggle-two", ThemeSource::Builtin, 0),
+            ("caskade.cobalt", ThemeSource::Builtin, 0),
+            ("caskade.emerald", ThemeSource::Builtin, 0),
+            ("caskade.engage", ThemeSource::Builtin, 0),
             ("dev.example.broken", ThemeSource::User, 2),
             ("caskade.default", ThemeSource::User, 1),
             ("dev.example.neon", ThemeSource::User, 0),
@@ -386,7 +386,7 @@ fn a_broken_translation_catalog_is_a_warning_and_the_theme_still_applies() {
 #[tokio::test]
 async fn a_retired_built_in_theme_falls_back_quietly_and_its_choice_moves_to_the_default() {
     use crate::{AppPaths, db::LibraryStore, settings::SettingsService};
-    assert!(RETIRED.contains(&"caskade.paper"));
+    assert_eq!(replacement("caskade.paper"), Some(DEFAULT_THEME));
     let temp = tempfile::tempdir().unwrap();
     let paths = AppPaths::under(temp.path());
     let service = ThemeService::new(temp.path().join("themes"));
@@ -435,6 +435,47 @@ async fn a_retired_built_in_theme_falls_back_quietly_and_its_choice_moves_to_the
     settings.set("core.appearance", value, None).await.unwrap();
     assert!(!retire(&settings, &service).await.unwrap());
     assert_eq!(service.resolve("caskade.paper").id, "caskade.paper");
+}
+
+/// Cobalt, Emerald and Engage were renamed before any release (#125): a
+/// choice of an old id applies the new theme with no notice and moves to
+/// it as the app starts. Every replacement is built in.
+#[tokio::test]
+async fn a_renamed_built_in_theme_applies_under_its_new_id_and_its_choice_moves_there() {
+    use crate::{AppPaths, db::LibraryStore, settings::SettingsService};
+    let temp = tempfile::tempdir().unwrap();
+    let paths = AppPaths::under(temp.path());
+    let service = ThemeService::new(temp.path().join("themes"));
+    let built_in: Vec<String> = service.list().into_iter().map(|theme| theme.id).collect();
+    for (old, next) in RETIRED {
+        assert!(built_in.iter().all(|id| id != old), "{old} isn't built in");
+        assert!(built_in.iter().any(|id| id == next), "{next} is built in");
+    }
+    for (old, next) in [
+        ("caskade.cobalt-five", "caskade.cobalt"),
+        ("caskade.emerald-one", "caskade.emerald"),
+        ("caskade.toggle-two", "caskade.engage"),
+    ] {
+        let active = service.resolve(old);
+        assert_eq!(
+            (active.id.as_str(), active.requested.as_str(), active.notice),
+            (next, old, None)
+        );
+    }
+
+    let settings = SettingsService::new(
+        LibraryStore::open(&temp.path().join("library.db"))
+            .await
+            .unwrap(),
+    );
+    settings.register_core(&paths).unwrap();
+    let mut value = settings.get("core.appearance").await.unwrap().value;
+    value["theme"] = "caskade.toggle-two".into();
+    settings.set("core.appearance", value, None).await.unwrap();
+    assert!(retire(&settings, &service).await.unwrap());
+    let value = settings.get("core.appearance").await.unwrap().value;
+    assert_eq!(value["theme"], "caskade.engage");
+    assert!(!retire(&settings, &service).await.unwrap(), "once");
 }
 
 /// The first-party themes are inspired by console home screens, never

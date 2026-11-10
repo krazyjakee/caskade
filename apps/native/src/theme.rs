@@ -672,9 +672,9 @@ mod tests {
         let themes = ThemeService::new(folder.path());
         for (id, base) in [
             ("caskade.default", "#060914"),
-            ("caskade.cobalt-five", "#081433"),
-            ("caskade.emerald-one", "#0b0d0c"),
-            ("caskade.toggle-two", "#eef0f3"),
+            ("caskade.cobalt", "#081433"),
+            ("caskade.emerald", "#0b0d0c"),
+            ("caskade.engage", "#eef0f3"),
             ("dev.caskade.ember", ""),
         ] {
             let mut document = document();

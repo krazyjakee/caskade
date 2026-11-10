@@ -169,8 +169,10 @@ themes/neon/
 The core reads themes from these places:
 
 - the built-in themes: `caskade.default` (Nexus, `themes/default` in the
-  repository) first, then Cobalt Five, Emerald One and Toggle Two
-  (`caskade.cobalt-five`, `caskade.emerald-one`, `caskade.toggle-two`, #125);
+  repository) first, then Cobalt, Emerald and Engage
+  (`caskade.cobalt`, `caskade.emerald`, `caskade.engage`, #125). A
+  choice of a built-in id that's gone (Paper's, or the ids these three
+  had before their rename) moves to its replacement without a notice;
 - the folders under `<app data>/themes/`;
 - folders bundled by plugins;
 - folders loaded in place in [dev mode](#dev-mode).

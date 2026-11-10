@@ -157,7 +157,7 @@ fn builtins() -> Vec<MemFiles> {
         ),
         // Deep cobalt and white, in the spirit of a console home screen (#125).
         builtin_theme!(
-            "cobalt-five": "theme.json",
+            "cobalt": "theme.json",
             "tokens.json",
             "theme.css",
             "assets/fonts/OFL.txt",
@@ -168,7 +168,7 @@ fn builtins() -> Vec<MemFiles> {
         ),
         // Near-black and emerald, in the spirit of a console dashboard (#125).
         builtin_theme!(
-            "emerald-one": "theme.json",
+            "emerald": "theme.json",
             "tokens.json",
             "theme.css",
             "assets/fonts/OFL.txt",
@@ -183,7 +183,7 @@ fn builtins() -> Vec<MemFiles> {
         ),
         // Bright white with red and teal, in the spirit of a playful console home screen (#125).
         builtin_theme!(
-            "toggle-two": "theme.json",
+            "engage": "theme.json",
             "tokens.json",
             "theme.css",
             "assets/fonts/OFL.txt",
@@ -195,14 +195,29 @@ fn builtins() -> Vec<MemFiles> {
     ]
 }
 
-/// Themes that were built in and left the built-in set: Paper went to the
-/// catalogue (#125, as `dev.caskade.paper`). Someone who had one chosen
-/// gets the default theme without a notice, and [`retire`] moves their
-/// setting there.
-pub const RETIRED: &[&str] = &["caskade.paper"];
+/// Built-in theme ids that are gone, and what replaces each: Paper left
+/// the built-in set for the catalogue (#125, as `dev.caskade.paper`), so
+/// the default theme replaces it; Cobalt Five, Emerald One and Toggle Two
+/// were renamed before any release had them (#125). Someone who had one
+/// chosen gets its replacement without a notice, and [`retire`] moves
+/// their setting there.
+pub const RETIRED: &[(&str, &str)] = &[
+    ("caskade.paper", DEFAULT_THEME),
+    ("caskade.cobalt-five", "caskade.cobalt"),
+    ("caskade.emerald-one", "caskade.emerald"),
+    ("caskade.toggle-two", "caskade.engage"),
+];
+
+/// What replaces theme `id` if it's [`RETIRED`].
+pub fn replacement(id: &str) -> Option<&'static str> {
+    RETIRED
+        .iter()
+        .find(|(retired, _)| *retired == id)
+        .map(|(_, next)| *next)
+}
 
 /// Moves a `core.appearance` theme choice that's [`RETIRED`] (and not
-/// installed some other way) to the default theme, as the app starts;
+/// installed some other way) to its replacement, as the app starts;
 /// whether it did.
 pub async fn retire(
     settings: &crate::settings::SettingsService,
@@ -212,15 +227,19 @@ pub async fn retire(
     let Some(theme) = current.value.get("theme").and_then(|theme| theme.as_str()) else {
         return Ok(false);
     };
-    if !RETIRED.contains(&theme) || themes.info(theme).is_some() {
+    let Some(next) = replacement(theme) else {
+        return Ok(false);
+    };
+    if themes.info(theme).is_some() {
         return Ok(false);
     }
     tracing::info!(
         theme,
-        "the chosen theme isn't built in any more: using the default"
+        next,
+        "the chosen theme isn't built in any more: using its replacement"
     );
     let mut value = current.value.clone();
-    value["theme"] = DEFAULT_THEME.into();
+    value["theme"] = next.into();
     settings
         .set("core.appearance", value, Some(current.revision))
         .await?;
@@ -364,15 +383,22 @@ impl ThemeService {
     /// The theme to apply for `requested` (`core.appearance.theme`): it, when
     /// it is installed and compiles, otherwise `caskade.default` with a
     /// notice saying why. The setting itself is left alone, so the theme
-    /// comes back once it is reinstalled or fixed.
+    /// comes back once it is reinstalled or fixed. A [`RETIRED`] built-in
+    /// that isn't installed some other way quietly gives its replacement.
     pub fn resolve(&self, requested: &str) -> ActiveTheme {
+        if let Some(next) = replacement(requested)
+            && self.info(requested).is_none()
+        {
+            return ActiveTheme {
+                requested: requested.to_owned(),
+                ..self.resolve(next)
+            };
+        }
         let applies = self.stylesheet(requested);
         let falls_back = applies.is_err();
         let notice = match applies {
             Ok(_) => None,
             Err(_) if requested == DEFAULT_THEME => None,
-            // A theme that left the built-in set: the default, quietly.
-            Err(_) if RETIRED.contains(&requested) && self.info(requested).is_none() => None,
             Err(error) => Some(match self.info(requested) {
                 None => "The chosen theme isn't installed any more. Caskade is using the default theme instead.".to_owned(),
                 Some(info) => format!(

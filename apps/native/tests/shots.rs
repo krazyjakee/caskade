@@ -84,9 +84,9 @@ fn every_theme_renders_the_reference_screens_as_before() {
     let rendered = pngs(&out);
     for theme in [
         "caskade.default",
-        "caskade.cobalt-five",
-        "caskade.emerald-one",
-        "caskade.toggle-two",
+        "caskade.cobalt",
+        "caskade.emerald",
+        "caskade.engage",
         "dev.caskade.ember",
     ] {
         assert!(
