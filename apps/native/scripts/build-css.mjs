@@ -26,10 +26,12 @@ const entry = readFileSync(path.join(styles, "index.css"), "utf8");
 if (!/^@source .*packages\/ui\/src.*$/m.test(entry)) {
   throw new Error("index.css no longer names packages/ui in @source: update build-css.mjs");
 }
-// The webview's markup isn't the native app's: scan apps/native/src instead.
+// The webview's markup isn't the native app's: scan apps/native/src instead,
+// but not the screenshot harness's reference screens (src/shots, dev only).
+const relative = (folder) => path.relative(styles, folder).split(path.sep).join("/");
 const input = entry.replace(
   /^@source .*packages\/ui\/src.*$/m,
-  `@source "${path.relative(styles, path.join(native, "src")).split(path.sep).join("/")}";`,
+  `@source "${relative(path.join(native, "src"))}";\n@source not "${relative(path.join(native, "src/shots"))}";`,
 );
 
 const compiler = await compile(input, { base: styles, onDependency: () => {} });
