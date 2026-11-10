@@ -40,6 +40,52 @@ pub fn install_input(link: &Url) -> Result<String, String> {
     }
 }
 
+/// Queues each install input from outside the app (deep links, and the
+/// magnet links and torrent files the OS hands Caskade) in `requests` for
+/// confirmation and tells the UI. Only an account that may install queues
+/// one (#205); the UI is told why not, since a link has no caller to
+/// answer. With the queued requests, whether the shell should bring its
+/// window up.
+pub async fn queue(
+    events: &crate::events::Events,
+    requests: Option<&crate::commands::install_requests::InstallRequests>,
+    accounts: Option<&caskade_core::accounts::AccountService>,
+    inputs: Vec<Result<String, String>>,
+) -> (Vec<crate::commands::install_requests::InstallRequest>, bool) {
+    let Some(requests) = requests else {
+        tracing::warn!("install requests unavailable; deep links ignored");
+        return (Vec::new(), false);
+    };
+    if let Err(error) =
+        crate::permissions::require(accounts, caskade_core::accounts::Permission::Install)
+    {
+        tracing::warn!(%error, "refused deep links");
+        if let Err(error) = events.emit(crate::events::Event::InstallRefused(
+            crate::events::InstallRefused(error),
+        )) {
+            tracing::warn!(%error, "couldn't tell the UI about refused deep links");
+        }
+        return (Vec::new(), true);
+    }
+    let mut queued = Vec::new();
+    for input in inputs {
+        let result = match input {
+            Ok(input) => requests.request_and_emit(events, input).await,
+            Err(error) => Err(error),
+        };
+        // The link may carry tokens: log the outcome, never the link.
+        match result {
+            Ok(request) => {
+                tracing::info!(request_id = %request.request_id, kind = ?request.kind, "deep link awaits confirmation");
+                queued.push(request);
+            }
+            Err(error) => tracing::warn!(%error, "ignored a deep link"),
+        }
+    }
+    let raise = !queued.is_empty();
+    (queued, raise)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

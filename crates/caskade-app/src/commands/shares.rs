@@ -136,6 +136,20 @@ pub fn is_share_link(link: &url::Url) -> bool {
     caskade_share::is_link(link.as_str())
 }
 
+/// Adds the shared collection of request `request_id` to the signed-in
+/// account's own (#248).
+pub async fn confirm_share_collection(
+    requests: &super::install_requests::InstallRequests,
+    accounts: &caskade_core::accounts::AccountService,
+    request_id: &str,
+) -> Result<caskade_core::model::Collection, CommandError> {
+    let account = accounts.require_active().map_err(report)?;
+    requests
+        .confirm_collection(request_id, &account)
+        .await
+        .map_err(|reason| report(caskade_core::Error::Invalid(reason)))
+}
+
 #[cfg(test)]
 mod tests {
     #[test]

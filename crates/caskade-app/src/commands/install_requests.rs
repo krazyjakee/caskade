@@ -467,13 +467,22 @@ fn validate(value: String) -> Result<(InputKind, String), String> {
     ))
 }
 
-/// Queues `value` (a path or an HTTP(S) URL) for confirmation and tells
-/// the UI; nothing is resolved or downloaded until it's confirmed.
+/// Queues `value` (a path, an HTTP(S) URL or a share link) for
+/// confirmation and tells the UI; nothing is resolved or downloaded until
+/// it's confirmed. A share link (#246) asks its sharer first, which needs
+/// `shares` and an account that may install.
 pub async fn request_install_input(
     events: &Events,
     state: &InstallRequests,
+    accounts: Option<&caskade_core::accounts::AccountService>,
+    shares: Option<&caskade_share::Shares>,
     value: String,
 ) -> Result<InstallRequest, String> {
+    if caskade_share::is_link(&value) {
+        crate::permissions::require(accounts, caskade_core::accounts::Permission::Install)?;
+        let shares = shares.ok_or_else(|| caskade_core::tr!("receiving shares isn't available"))?;
+        return super::shares::queue_share_link(events, shares, state, value).await;
+    }
     state.request_and_emit(events, value).await
 }
 

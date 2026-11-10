@@ -1,6 +1,21 @@
 //! Background tasks that outlive a panic: [`supervise`] starts them again
 //! after a pause, and [`log_panics`] sends every panic to the log.
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
+#[serde(rename_all = "camelCase")]
+pub struct AppStatus {
+    pub version: String,
+    pub background: caskade_core::jobs::Snapshot,
+}
+
+/// Caskade's `version` and Activity's background tasks now.
+pub fn background_status(version: String) -> AppStatus {
+    AppStatus {
+        version,
+        background: caskade_core::i18n::translated_tasks(caskade_core::jobs::global().snapshot()),
+    }
+}
+
 /// Sends panics to the log as well as stderr: a panic in a background task
 /// otherwise ends it with nothing in the app's log. Chains to the hook that
 /// was there before (the default one prints to stderr).

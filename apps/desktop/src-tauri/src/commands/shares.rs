@@ -10,7 +10,7 @@ use caskade_core::install::JobSnapshot;
 use caskade_share::{ReceivedShare, ShareExpiry, ShareInfo, ShareRecord, Shares};
 use tauri::{AppHandle, Manager, Runtime, State};
 
-use crate::error::{CommandError, report};
+use crate::error::CommandError;
 
 pub use app::{ShareCreated, is_share_link};
 
@@ -111,11 +111,7 @@ pub async fn confirm_share_collection(
     accounts: State<'_, caskade_core::accounts::AccountService>,
     request_id: String,
 ) -> Result<caskade_core::model::Collection, CommandError> {
-    let account = accounts.require_active().map_err(report)?;
-    requests
-        .confirm_collection(&request_id, &account)
-        .await
-        .map_err(|reason| report(caskade_core::Error::Invalid(reason)))
+    app::confirm_share_collection(&requests, &accounts, &request_id).await
 }
 
 /// Asks a share link's sharer what it shares, then queues it for

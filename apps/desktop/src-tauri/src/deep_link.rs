@@ -5,7 +5,6 @@
 //! (`confirm_install_request`).
 
 use crate::commands::install_requests::{InstallRequest, InstallRequests};
-use caskade_core::accounts::Permission;
 use tauri::{Manager, Runtime, Url};
 
 pub use caskade_app::deep_link::{SCHEME, install_input};
@@ -31,42 +30,15 @@ pub async fn queue<R: Runtime>(
     app: &tauri::AppHandle<R>,
     inputs: Vec<Result<String, String>>,
 ) -> Vec<InstallRequest> {
-    let Some(requests) = app.try_state::<InstallRequests>() else {
-        tracing::warn!("install requests unavailable; deep links ignored");
-        return Vec::new();
-    };
-    // Only an account that may install queues one (#205); the UI shows why
-    // not, since a link has no caller to answer.
-    if let Err(error) = crate::permissions::require(app, Permission::Install) {
-        tracing::warn!(%error, "refused deep links");
-        if let Err(error) = crate::events::sink(app.clone()).emit(
-            caskade_app::events::Event::InstallRefused(caskade_app::events::InstallRefused(error)),
-        ) {
-            tracing::warn!(%error, "couldn't tell the UI about refused deep links");
-        }
-        crate::main_window::raise(app);
-        return Vec::new();
-    }
-    let mut queued = Vec::new();
-    for input in inputs {
-        let result = match input {
-            Ok(input) => {
-                requests
-                    .request_and_emit(&crate::events::sink(app.clone()), input)
-                    .await
-            }
-            Err(error) => Err(error),
-        };
-        // The link may carry tokens: log the outcome, never the link.
-        match result {
-            Ok(request) => {
-                tracing::info!(request_id = %request.request_id, kind = ?request.kind, "deep link awaits confirmation");
-                queued.push(request);
-            }
-            Err(error) => tracing::warn!(%error, "ignored a deep link"),
-        }
-    }
-    if !queued.is_empty() {
+    let (queued, raise) = caskade_app::deep_link::queue(
+        &crate::events::sink(app.clone()),
+        app.try_state::<InstallRequests>().as_deref(),
+        app.try_state::<caskade_core::accounts::AccountService>()
+            .as_deref(),
+        inputs,
+    )
+    .await;
+    if raise {
         crate::main_window::raise(app);
     }
     queued

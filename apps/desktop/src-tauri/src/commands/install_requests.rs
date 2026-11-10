@@ -14,11 +14,16 @@ pub async fn request_install_input<R: Runtime>(
     state: tauri::State<'_, InstallRequests>,
     value: String,
 ) -> Result<InstallRequest, String> {
-    // A pasted share link (#246) asks its sharer first.
-    if caskade_share::is_link(&value) {
-        return super::shares::queue_share_link(&app, value).await;
-    }
-    app::request_install_input(&crate::events::sink(app.clone()), &state, value).await
+    use tauri::Manager;
+    app::request_install_input(
+        &crate::events::sink(app.clone()),
+        &state,
+        app.try_state::<caskade_core::accounts::AccountService>()
+            .as_deref(),
+        app.try_state::<caskade_share::Shares>().as_deref(),
+        value,
+    )
+    .await
 }
 
 #[tauri::command]
