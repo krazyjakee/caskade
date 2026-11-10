@@ -5,7 +5,7 @@
 use dioxus_native::prelude::*;
 
 use super::{Current, FOCUS_VISIBLE, Forced, HOVERED, PRESSED, Section, Specimen};
-use crate::ui::icons::{CLOCK, GAMEPAD, HARD_DRIVE, HEART, SEARCH, STORE};
+use crate::ui::icons::{CHEVRON_DOWN, CLOCK, GAMEPAD, HARD_DRIVE, HEART, SEARCH, STORE};
 use crate::ui::{
     Anchor, Button, ButtonSize, ButtonVariant, CardGame, CardVariant, Checkbox, Combobox,
     ConfirmDialog, Dialog, ErrorNotice, GameArt, GameCard, GameRow, GameStatus, Link, Menu,
@@ -637,6 +637,61 @@ pub fn Rows() -> Element {
             for (label, hues) in [("Placeholder", (210, 280)), ("Warm", (20, 340)), ("Green", (120, 180))] {
                 Specimen { label, class: "h-24 w-20",
                     GameArt { hues: Some(hues), class: "size-full rounded-card" }
+                }
+            }
+        }
+    }
+}
+
+/// The webview's library table's columns: title, status, last played,
+/// playtime, size, actions.
+const LIST_COLUMNS: &str = "minmax(0,1fr) 7.5rem 7.5rem 5rem 5.5rem 2rem";
+
+pub fn Table() -> Element {
+    let rows = [
+        CardGame {
+            favorite: true,
+            playtime_ms: 42 * HOUR,
+            last_played_ms: Some(PLAYED),
+            size_bytes: Some(12_400_000_000),
+            ..game("1", "Hollow Pines", None, GameStatus::Installed)
+        },
+        CardGame {
+            playtime_ms: 3 * HOUR,
+            ..game("2", "Star Courier 2", None, GameStatus::Emulated)
+        },
+        CardGame {
+            storage_unavailable: true,
+            ..game("3", "Moss & Iron", None, GameStatus::Installed)
+        },
+        game(
+            "4",
+            "Neon Drift Remastered Collector's Edition",
+            None,
+            GameStatus::NotInstalled,
+        ),
+    ];
+    rsx! {
+        Section { title: "Game rows in a table's columns", class: "flex-col [&>*]:w-full",
+            div { class: "w-full",
+                div {
+                    class: "grid h-8 w-full items-center gap-3 border-b border-border-strong px-2 font-mono text-[11px] tracking-widest text-fg-subtle uppercase",
+                    style: "grid-template-columns: {LIST_COLUMNS};",
+                    span { "Title" }
+                    span { "Status" }
+                    span { "Last played" }
+                    span { class: "text-right", "Playtime" }
+                    span { class: "text-right", "Size" }
+                    span {}
+                }
+                for row in rows {
+                    div { key: "{row.id}", class: "h-11 w-full",
+                        GameRow {
+                            game: row,
+                            columns: LIST_COLUMNS.to_owned(),
+                            actions: rsx! { Button { variant: ButtonVariant::Ghost, size: ButtonSize::Sm, icon: Some(CHEVRON_DOWN), "aria-label": "Actions" } },
+                        }
+                    }
                 }
             }
         }

@@ -68,9 +68,25 @@ pub fn GameRow(
     /// The actions menu button, at the end of the row.
     #[props(default)]
     actions: Option<Element>,
+    /// A table's `grid-template-columns` (the webview's list:
+    /// `minmax(0,1fr) 7.5rem 7.5rem 5rem 5.5rem 2rem`): the row lays out
+    /// as cells in them (title, status, last played, playtime, size,
+    /// actions), lining up with a header that uses the same. Without
+    /// them, a flex row.
+    #[props(default)]
+    columns: Option<String>,
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
 ) -> Element {
     let interaction = use_interaction();
+    let table = columns.is_some();
+    let layout = match &columns {
+        Some(columns) => format!("grid-template-columns: {columns};"),
+        None => String::new(),
+    };
+    // Fixed widths in a flex row; a table's columns size its cells.
+    let width = |flex: &'static str| if table { "" } else { flex };
+    let (last_played_width, playtime_width, size_width) =
+        (width("w-40"), width("w-24"), width("w-20"));
     let open = move || {
         if let Some(on_open) = on_open {
             on_open.call(());
@@ -102,7 +118,8 @@ pub fn GameRow(
             "data-focus-key": focus_key,
             "data-hovered": interaction.hovered(),
             "data-focus-visible": interaction.ring(),
-            class: "relative flex h-full items-center gap-4 border-b border-border px-3 outline-none data-hovered:bg-surface-hover data-focus-visible:focus-ring-over",
+            class: if table { "relative grid h-full items-center gap-3 border-b border-border px-2 outline-none data-hovered:bg-surface-hover data-focus-visible:focus-ring-over" } else { "relative flex h-full items-center gap-4 border-b border-border px-3 outline-none data-hovered:bg-surface-hover data-focus-visible:focus-ring-over" },
+            style: "{layout}",
             onfocusin: move |_| {
                 interaction.focus();
                 if let Some(on_focus) = on_focus {
@@ -117,6 +134,8 @@ pub fn GameRow(
                 interaction.key_down(&event, Keys::Enter, open);
             },
             ..attributes,
+            // The title's cell.
+            div { class: if table { "flex min-w-0 items-center gap-3" } else { "flex min-w-0 flex-1 items-center gap-4" },
             if let Some(selected) = selected {
                 span {
                     "data-part": "select",
@@ -151,12 +170,15 @@ pub fn GameRow(
                 span { "data-part": "storage-availability", class: "shrink-0 text-[10px] text-warning", {t!("Managed copy unavailable")} }
             }
             div { "data-part": "plugins", class: "contents" }
-            StatusBadge { part: "badge", status: game.status }
-            span { "data-part": "last-played", class: "w-40 shrink-0 truncate text-xs text-fg-muted", "{last_played}" }
-            span { "data-part": "playtime", class: "w-24 shrink-0 text-right text-xs text-fg-muted", "{playtime}" }
-            span { "data-part": "size", class: "w-20 shrink-0 text-right text-xs text-fg-muted", "{size}" }
-            if let Some(actions) = actions {
-                span { "data-part": "actions", class: "shrink-0", {actions} }
+            }
+            div { class: "flex min-w-0 shrink-0",
+                StatusBadge { part: "badge", status: game.status }
+            }
+            span { "data-part": "last-played", class: "{last_played_width} shrink-0 truncate text-xs text-fg-muted", "{last_played}" }
+            span { "data-part": "playtime", class: "{playtime_width} shrink-0 text-right text-xs text-fg-muted", "{playtime}" }
+            span { "data-part": "size", class: "{size_width} shrink-0 text-right text-xs text-fg-muted", "{size}" }
+            if actions.is_some() || table {
+                span { "data-part": "actions", class: "flex shrink-0 justify-end", {actions} }
             }
         }
     }

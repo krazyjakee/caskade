@@ -1461,3 +1461,46 @@ fn a_setting_row_names_and_describes_its_controls() {
     assert!(heard.contains("\"Startup\""), "{heard}");
     assert!(heard.contains("Detected"), "{heard}");
 }
+
+#[component]
+fn TableRow() -> Element {
+    rsx! {
+        InputRoot {
+            GameRow {
+                id: "row",
+                game: CardGame {
+                    id: "1".into(),
+                    title: "Hollow Pines".into(),
+                    ..CardGame::default()
+                },
+                columns: "minmax(0,1fr) 7.5rem 7.5rem 5rem 5.5rem 2rem".to_owned(),
+            }
+        }
+    }
+}
+
+fn table_row() -> Element {
+    rsx! { TableRow {} }
+}
+
+#[test]
+fn a_game_row_in_a_tables_columns_is_one_cell_per_column() {
+    let _one = one_window();
+    let window = Window::open(table_row);
+    let style = window.attr("row", "style").unwrap_or_default();
+    assert!(
+        style.contains("grid-template-columns: minmax(0,1fr) 7.5rem"),
+        "{style}"
+    );
+    let doc = window.doc.inner.borrow();
+    let row = doc.get_node(window.id("row")).unwrap();
+    let cells = row
+        .children
+        .iter()
+        .filter(|&&child| doc.get_node(child).is_some_and(|node| node.is_element()))
+        .count();
+    assert_eq!(
+        cells, 6,
+        "title, status, last played, playtime, size, actions"
+    );
+}
