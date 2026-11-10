@@ -5551,10 +5551,12 @@ msgid "Caskade was installed as a system package: update it with your package ma
 msgstr "Caskade installerades som ett systempaket: uppdatera det med din pakethanterare."
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs
+#: apps/native/src/updater.rs
 msgid "This copy of Caskade can't update itself: download the new version instead."
 msgstr "Den här kopian av Caskade kan inte uppdatera sig själv: ladda ner den nya versionen i stället."
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs
+#: apps/native/src/updater.rs
 msgid "Development builds don't update themselves."
 msgstr "Utvecklingsversioner uppdaterar sig inte själva."
 
@@ -5575,6 +5577,7 @@ msgid "Installing Caskade {version}"
 msgstr "Installerar Caskade {version}"
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs
+#: apps/native/src/updater.rs
 msgid "Couldn't install the update: {error}"
 msgstr "Det gick inte att installera uppdateringen: {error}"
 
@@ -5588,10 +5591,12 @@ msgid "console mode isn't ready yet"
 msgstr "konsolläget är inte redo än"
 
 #: apps/desktop/src-tauri/src/commands/install_picker.rs
+#: apps/native/src/dialogs.rs
 msgid "selected path is not UTF-8"
 msgstr "den valda sökvägen är inte UTF-8"
 
 #: apps/desktop/src-tauri/src/commands/install_picker.rs
+#: apps/native/src/dialogs.rs
 msgid "Choose games to install"
 msgstr "Välj spel att installera"
 
@@ -5600,6 +5605,7 @@ msgid "file dialog closed without a response"
 msgstr "fildialogen stängdes utan svar"
 
 #: apps/desktop/src-tauri/src/commands/install_picker.rs
+#: apps/native/src/dialogs.rs
 msgid "Choose game folder to install"
 msgstr "Välj spelmapp att installera"
 
@@ -5616,6 +5622,7 @@ msgid "The folder chooser closed without an answer."
 msgstr "Mappväljaren stängdes utan svar."
 
 #: apps/desktop/src-tauri/src/lib.rs
+#: apps/native/src/main.rs
 msgid ""
 "Caskade couldn't open its library.\n"
 "\n"
@@ -5630,15 +5637,19 @@ msgstr ""
 "Du kan återställa det från en säkerhetskopia, eller starta Caskade med --restore <säkerhetskopia>."
 
 #: apps/desktop/src-tauri/src/lib.rs
+#: apps/native/src/main.rs
 msgid "Restore from backup…"
 msgstr "Återställ från säkerhetskopia…"
 
 #: apps/desktop/src-tauri/src/lib.rs
 #: apps/desktop/src-tauri/src/webview_recovery.rs
+#: apps/native/src/main.rs
+#: apps/native/src/updater.rs
 msgid "Quit"
 msgstr "Avsluta"
 
 #: apps/desktop/src-tauri/src/lib.rs
+#: apps/native/src/updater.rs
 msgid ""
 "{summary}\n"
 "\n"
@@ -5646,6 +5657,7 @@ msgid ""
 msgstr ""
 
 #: apps/desktop/src-tauri/src/lib.rs
+#: apps/native/src/updater.rs
 msgid "Update Caskade"
 msgstr ""
 
@@ -5657,22 +5669,27 @@ msgid ""
 msgstr ""
 
 #: apps/desktop/src-tauri/src/lib.rs
+#: apps/native/src/updater.rs
 msgid "No released version of Caskade can open this library yet: a development build changed it."
 msgstr ""
 
 #: apps/desktop/src-tauri/src/lib.rs
+#: apps/native/src/updater.rs
 msgid "Try again"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/recovery.rs
+#: apps/native/src/main.rs
 msgid "Choose a Caskade backup"
 msgstr "Välj en säkerhetskopia från Caskade"
 
 #: apps/desktop/src-tauri/src/recovery.rs
+#: apps/native/src/main.rs
 msgid "Caskade backups"
 msgstr "Säkerhetskopior från Caskade"
 
 #: apps/desktop/src-tauri/src/recovery.rs
+#: apps/native/src/main.rs
 msgid ""
 "This backup can't be restored.\n"
 "\n"
@@ -5695,3 +5712,72 @@ msgstr ""
 #: apps/desktop/src-tauri/src/webview_recovery.rs
 msgid "Restart Caskade"
 msgstr "Starta om Caskade"
+
+#: apps/native/src/input/keyboard.rs
+msgctxt "on-screen keyboard"
+msgid "Delete"
+msgstr "Radera"
+
+#: apps/native/src/input/keyboard.rs
+msgctxt "on-screen keyboard"
+msgid "Space"
+msgstr "Mellanslag"
+
+#: apps/native/src/input/keyboard.rs
+msgctxt "on-screen keyboard"
+msgid "Paste"
+msgstr "Klistra in"
+
+#: apps/native/src/input/keyboard.rs
+msgid "Cursor left"
+msgstr "Markör vänster"
+
+#: apps/native/src/input/keyboard.rs
+msgid "Cursor right"
+msgstr "Markör höger"
+
+#: apps/native/src/input/keyboard.rs
+msgctxt "on-screen keyboard"
+msgid "Done"
+msgstr "Klar"
+
+#: apps/native/src/input/keyboard.rs
+msgctxt "on-screen keyboard"
+msgid "Symbols"
+msgstr "Symboler"
+
+#: apps/native/src/input/keyboard.rs
+msgctxt "on-screen keyboard"
+msgid "Letters"
+msgstr "Bokstäver"
+
+#: apps/native/src/input/keyboard.rs
+msgctxt "on-screen keyboard"
+msgid "Type"
+msgstr "Skriv"
+
+#: apps/native/src/input/keyboard.rs
+msgid "Close keyboard"
+msgstr "Stäng tangentbordet"
+
+#: apps/native/src/input/keyboard.rs
+msgctxt "on-screen keyboard"
+msgid "?123"
+msgstr "?123"
+
+#: apps/native/src/input/keyboard.rs
+msgctxt "on-screen keyboard"
+msgid "abc"
+msgstr "abc"
+
+#: apps/native/src/input/keyboard.rs
+msgid "On-screen keyboard"
+msgstr "Skärmtangentbord"
+
+#: apps/native/src/tray.rs
+msgid "Edit"
+msgstr "Redigera"
+
+#: apps/native/src/tray.rs
+msgid "Window"
+msgstr "Fönster"

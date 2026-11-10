@@ -107,6 +107,26 @@ impl<N: Copy + Eq> Bindings<N> {
         }
     }
 
+    /// Changes a binding's hint label.
+    pub fn set_label(&mut self, id: BindingId, label: Option<String>) {
+        if let Some((_, binding)) = self.list.iter_mut().find(|(other, _)| *other == id)
+            && binding.label != label
+        {
+            binding.label = label;
+            self.revision += 1;
+        }
+    }
+
+    /// Makes a binding apply inside overlays too, or not.
+    pub fn set_global(&mut self, id: BindingId, global: bool) {
+        if let Some((_, binding)) = self.list.iter_mut().find(|(other, _)| *other == id)
+            && binding.global != global
+        {
+            binding.global = global;
+            self.revision += 1;
+        }
+    }
+
     pub fn revision(&self) -> u64 {
         self.revision
     }

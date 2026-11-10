@@ -11,6 +11,7 @@
 mod data;
 mod dialogs;
 mod forwarded;
+mod input;
 mod launch;
 mod shell;
 mod smoke;
@@ -274,7 +275,10 @@ fn app() -> Element {
     // What the views read (#89), once the services are there.
     rsx! {
         data::DataRoot {
-            div { style: "padding: 24px; font-family: sans-serif;", "Caskade" }
+            // Keys, pads and focus (#92).
+            input::InputRoot {
+                div { style: "padding: 24px; font-family: sans-serif;", "Caskade" }
+            }
         }
     }
 }
@@ -305,6 +309,9 @@ fn window_ready(window: Arc<dyn dioxus_native::winit::window::Window>) {
             }
             tokio::time::sleep(std::time::Duration::from_millis(50)).await;
         };
+        // Pads: their actions reach the input root while the window has
+        // focus (#92).
+        input::start_pads(services, window.clone());
         caskade_app::game_focus::follow(
             shell::NativeWindow(window),
             &services.bus,

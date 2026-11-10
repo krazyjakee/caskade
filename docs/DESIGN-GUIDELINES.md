@@ -46,10 +46,10 @@ Style only through the `--cs-*` tokens, through their Tailwind utilities (`bg-su
 
 ## 5. Input and focus
 
-- **One focus look** for keyboard and pad: the `focus.ring.*` tokens, an outline that never moves layout. In console mode it sits inside the element so a scrolling shelf can't clip it. Focus shows on `:focus-visible` / `data-focus-visible` only.
+- **One focus look** for keyboard and pad: the `focus.ring.*` tokens, an outline that never moves layout. In console mode it sits inside the element so a scrolling shelf can't clip it. Focus shows on `:focus-visible` / `data-focus-visible` only; the native UI sets only `data-focus-visible`, so its styles select that.
 - **Console mode buttons mean the same on every view**: A selects, B goes back or closes, X opens a card's quick look (X again plays), Y searches, Start opens the focused item's menu, LB/RB switch the view's main tabs, LT/RT page the list focus is in. Guide brings Caskade back from a game. The hint bar shows each view's bindings.
 - **Spatial navigation** stays within the current area while it has a target that way, prefers the row or column focus is already in, and treats a settings row as one stop.
-- Each view gives a pad its first stop (`data-focus-default`). A dialog moves focus to its default control.
+- Each view gives a pad its first stop (`data-focus-default`). A dialog moves focus to its default control, and back to where it was when it closes. In the native UI a dialog or popover closes on B through its own `back` binding.
 - **Text entry** on a pad goes through the on-screen keyboard. Typing anywhere outside a field starts a search.
 - **Files and folders**: every control that opens a picker is also a drop zone, and pickers go through `usePathPicker`, which shows the in-app folder browser in console mode.
 - **Menus**: every item that has a context menu opens it from a right click, the context-menu key, Shift+F10, a pad's Start or an actions button. A game has one menu, the same everywhere.

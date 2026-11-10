@@ -67,6 +67,15 @@ fn by_id<T: FocusTree + ?Sized>(tree: &T, id: &str) -> Option<T::Node> {
         .find(|&node| tree.attr(node, "id") == Some(id))
 }
 
+/// An action on its way: the bindings to try, then the default.
+pub struct Routed<N> {
+    pub action: Action,
+    /// The focused element the action is for, if any.
+    pub focused: Option<N>,
+    /// The bindings for it, the one to try first first.
+    pub handlers: Vec<bindings::Run>,
+}
+
 /// Putting focus back when a view comes back, or on its entry when one
 /// opens: tried each frame until the view has rendered, for half a second.
 #[derive(Debug, Clone)]
@@ -103,6 +112,11 @@ pub struct Dispatcher<N> {
     restore: Option<Restore>,
     /// A dialog that took focus itself, to move onto its default control.
     dialog: Option<N>,
+    /// Open overlays, outermost first, with where focus was before each
+    /// opened.
+    overlays: Vec<(N, Option<N>)>,
+    /// An open overlay focus hasn't been put in yet (it has no box yet).
+    entering: bool,
 }
 
 impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
@@ -122,6 +136,8 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
             entered: None,
             restore: None,
             dialog: None,
+            overlays: Vec::new(),
+            entering: false,
         }
     }
 
@@ -199,6 +215,23 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
         sender: InputSource,
         glyphs: Option<GlyphFamily>,
     ) {
+        let routed = self.route(ui, action, sender, glyphs);
+        if bindings::run(&routed.handlers) {
+            return;
+        }
+        self.fallback(ui, &routed);
+    }
+
+    /// The first half of [`Self::dispatch`], for a UI whose binding
+    /// handlers must run with nothing borrowed: the bindings to try, in
+    /// order. If none takes the action, [`Self::fallback`] does the default.
+    pub fn route<U: Ui<Node = N>>(
+        &mut self,
+        ui: &U,
+        action: Action,
+        sender: InputSource,
+        glyphs: Option<GlyphFamily>,
+    ) -> Routed<N> {
         self.from = Some(sender);
         if sender == InputSource::Pad {
             self.pad_used = true;
@@ -218,10 +251,18 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
             .bindings
             .borrow()
             .handlers(ui, action, focused, overlay);
-        if bindings::run(&handlers) {
-            return;
+        Routed {
+            action,
+            focused,
+            handlers,
         }
-        self.run_default(ui, action, focused);
+    }
+
+    /// What `routed`'s action does when no binding took it.
+    pub fn fallback<U: Ui<Node = N>>(&mut self, ui: &mut U, routed: &Routed<N>) {
+        // A handler may have moved focus or removed the element.
+        let focused = routed.focused.filter(|&node| contains(ui, ui.root(), node));
+        self.run_default(ui, routed.action, focused);
     }
 
     /// Moves focus and remembers it in its sections.
@@ -364,6 +405,7 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
 
     /// After each render: the pending dialog start and view focus.
     pub fn frame<U: Ui<Node = N>>(&mut self, ui: &mut U) {
+        self.follow_overlays(ui);
         if let Some(dialog) = self.dialog.take()
             && ui.focused() == Some(dialog)
         {
@@ -411,6 +453,46 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
 
     /// Whether a later frame still has focus to place.
     pub fn pending(&self) -> bool {
-        self.restore.is_some() || self.dialog.is_some()
+        self.restore.is_some() || self.dialog.is_some() || self.entering
+    }
+
+    /// Focus goes into an overlay that opens without taking it, and back to
+    /// where it was when the overlay closes, as a modal's focus scope does.
+    fn follow_overlays<U: Ui<Node = N>>(&mut self, ui: &mut U) {
+        let root = ui.root();
+        let within = scope(ui);
+        // Closed: gone from the tree, or no longer an open overlay.
+        while let Some(&(overlay, back)) = self.overlays.last() {
+            let open =
+                contains(ui, root, overlay) && (overlay == within || contains(ui, overlay, within));
+            if open {
+                break;
+            }
+            self.overlays.pop();
+            let lost = ui
+                .focused()
+                .is_none_or(|node| !contains(ui, root, node) || contains(ui, overlay, node));
+            if lost && let Some(back) = back.filter(|&back| is_focusable(ui, back)) {
+                self.focus(ui, back, true);
+            }
+        }
+        self.entering = false;
+        if within == root {
+            return;
+        }
+        let current = ui.focused();
+        let inside =
+            current.is_some_and(|node| contains(ui, within, node) || controls(ui, node, within));
+        if self.overlays.last().map(|&(overlay, _)| overlay) != Some(within) {
+            self.overlays.push((within, current.filter(|_| !inside)));
+        }
+        if inside {
+            return;
+        }
+        match self.spatial.start_in(ui, within) {
+            Some(start) => self.focus(ui, start, false),
+            // Not laid out yet: the next frame tries again.
+            None => self.entering = true,
+        }
     }
 }

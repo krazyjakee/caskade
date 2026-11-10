@@ -1113,3 +1113,32 @@ fn paste_makes_one_line_for_a_one_line_field() {
     field.insert(&crate::osk::pasted("x\ny", false));
     assert_eq!((field.value.as_str(), field.start), ("ax yb", 4));
 }
+
+#[test]
+fn an_overlay_that_opens_without_focus_gets_it_and_gives_it_back_when_it_closes() {
+    let mut ui = Fake::default();
+    let main = ui.tree.section(0, "main");
+    let open = ui.tree.button(main, "0 0 140 40", "Open");
+    ui.clicks.insert(
+        open,
+        Rc::new(|ui: &mut Fake| {
+            // The native UI's dialogs: rendered, not focused.
+            let dialog = ui.tree.add(0, "div", &[("role", "dialog")], "");
+            ui.tree.button(dialog, "600 400 100 40", "Cancel");
+            let delete = ui.tree.button(dialog, "720 400 100 40", "Delete");
+            ui.tree.set(delete, "data-focus-default", "");
+            let close = Rc::new(move |ui: &mut Fake| ui.tree.remove(dialog));
+            ui.clicks.insert(delete, close.clone());
+            ui.clicks.insert(ui.tree.by_text("Cancel"), close);
+        }),
+    );
+    let mut app = App::new(ui, false);
+    app.focus(open);
+    app.click(open);
+    assert_eq!(app.focused(), "Delete");
+    app.pad(Action::NavLeft);
+    assert_eq!(app.focused(), "Cancel");
+    app.pad(Action::Confirm);
+    assert!(!crate::spatial::has_overlay(&app.ui));
+    assert_eq!(app.focused(), "Open");
+}

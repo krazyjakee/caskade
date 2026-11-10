@@ -30,7 +30,8 @@ pub struct Domain {
     pub title: &'static str,
 }
 
-/// The core's domain: the Rust crates, the Tauri adapter and the tray.
+/// The core's domain: the Rust crates, the Tauri adapter, the native app
+/// and the tray.
 pub const CORE: Domain = Domain {
     name: "core",
     sources: &[
@@ -44,8 +45,9 @@ pub const CORE: Domain = Domain {
         "crates/caskade-app/src",
         "crates/caskade-player/src",
         "apps/desktop/src-tauri/src",
+        "apps/native/src",
     ],
-    title: "Caskade's core messages: the Rust crates, the Tauri adapter and the tray.",
+    title: "Caskade's core messages: the Rust crates, the Tauri adapter, the native app and the tray.",
 };
 
 /// The macros extraction looks for, and the string arguments each takes
