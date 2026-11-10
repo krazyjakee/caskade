@@ -97,6 +97,8 @@ rfd = { version = "0.16", default-features = false, features = ["common-controls
 windows-registry = "0.6"
 
 [dev-dependencies]
+# The accessibility test reads Blitz's AccessKit tree (#83).
+accesskit = "0.25"
 tempfile = "=3.27.0"
 # The smoke and e2e tests' own display and session bus (#122).
 caskade-test-desktop = { path = "../../crates/caskade-test-desktop" }
