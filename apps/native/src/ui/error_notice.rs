@@ -145,6 +145,7 @@ pub fn ErrorNotice(
                                 "aria-expanded": if open() { "true" } else { "false" },
                                 "aria-controls": "{details_id}",
                                 "data-hovered": interaction.hovered(),
+                                "data-focus-visible": interaction.ring(),
                                 class: "rounded-control px-2 py-1 text-xs text-fg-muted underline-offset-2 data-focus-visible:focus-ring data-hovered:text-fg data-hovered:underline",
                                 onmouseenter: move |_| interaction.enter(),
                                 onmouseleave: move |_| interaction.leave(),

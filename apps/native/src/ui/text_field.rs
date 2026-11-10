@@ -16,7 +16,7 @@ use dioxus_native::prelude::*;
 
 use super::icons::{Icon, SEARCH, Svg, X};
 use super::ids::use_id;
-use super::interact::flag;
+use super::interact::{flag, use_forced};
 use super::menu::{Menu, MenuEntry, MenuItem};
 use super::popover::Anchor;
 use crate::input::{Bind, use_input, use_input_action};
@@ -95,8 +95,9 @@ pub fn TextField(
     let help_id = use_id("field-help");
     let mut field = use_signal(|| None::<NodeHandle>);
     let mut menu = use_signal(|| None::<Anchor>);
-    let mut hovered = use_signal(|| false);
-    let mut focused = use_signal(|| false);
+    let forced = use_forced();
+    let mut hovered = use_signal(|| forced.hovered);
+    let mut focused = use_signal(|| forced.focused || forced.focus_visible);
     let invalid = error.is_some();
     let mut open_menu = move || {
         if let Some(anchor) = field.peek().as_ref().and_then(Anchor::of) {
@@ -155,7 +156,11 @@ pub fn TextField(
             div { class: "flex gap-2",
                 div {
                     "data-part": "control",
-                    class: "flex h-9 flex-1 items-center gap-2 rounded-control border border-border-strong bg-surface-base/60 px-3 transition-[border-color,box-shadow] duration-(--cs-motion-duration-fast) focus-within:border-accent-alt/60 focus-within:shadow-[0_0_16px_-6px] focus-within:shadow-accent-alt console:focus-within:focus-ring group-data-invalid:border-danger/70",
+                    // Its input's focus, for its border: Blitz has no
+                    // `:has()`, and `:focus-within` doesn't see the
+                    // gallery's forced focus.
+                    "data-focused": flag(focused()),
+                    class: "flex h-9 flex-1 items-center gap-2 rounded-control border border-border-strong bg-surface-base/60 px-3 transition-[border-color,box-shadow] duration-(--cs-motion-duration-fast) focus-within:border-accent-alt/60 focus-within:shadow-[0_0_16px_-6px] focus-within:shadow-accent-alt console:focus-within:focus-ring data-focused:border-accent-alt/60 data-focused:shadow-[0_0_16px_-6px] data-focused:shadow-accent-alt console:data-focused:focus-ring group-data-invalid:border-danger/70",
                     if let Some(icon) = icon {
                         Svg { icon, part: "icon", class: "size-4 shrink-0 text-fg-subtle" }
                     }
@@ -172,6 +177,7 @@ pub fn TextField(
                         "aria-invalid": flag(invalid),
                         "data-focused": flag(focused()),
                         "data-hovered": flag(hovered()),
+                        "data-focus-visible": flag(forced.focus_visible),
                         class: if mono { "w-full min-w-0 bg-transparent font-mono text-xs placeholder:text-fg-subtle focus:outline-none" } else { "w-full min-w-0 bg-transparent text-sm placeholder:text-fg-subtle focus:outline-none" },
                         onmounted: move |event: Event<MountedData>| {
                             field.set(event.data().downcast::<NodeHandle>().cloned());

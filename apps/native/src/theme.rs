@@ -55,6 +55,16 @@ static PENDING: Mutex<Option<Look>> = Mutex::new(None);
 static LAST: Mutex<Option<Look>> = Mutex::new(None);
 /// The OS asks for a light look (winit's window theme).
 static PREFERS_LIGHT: Mutex<bool> = Mutex::new(false);
+/// The app's stylesheet when it isn't [`APP_CSS`]: the gallery's (#93).
+static APP_SHEET: OnceLock<&'static str> = OnceLock::new();
+
+/// The window's documents get `css` as the app's stylesheet instead of
+/// [`APP_CSS`]: the gallery's, which has its pages' classes too. Before
+/// the window opens.
+#[cfg(any(debug_assertions, feature = "gallery"))]
+pub fn use_app_css(css: &'static str) {
+    let _ = APP_SHEET.set(css);
+}
 
 /// A `<style>` and its text node.
 #[derive(Clone, Copy)]
@@ -183,6 +193,12 @@ async fn current(services: &caskade_app::start::Services) -> Look {
     )
 }
 
+/// Shows `look` in the window: the gallery's theme switcher (#93).
+#[cfg(any(debug_assertions, feature = "gallery"))]
+pub fn show(look: Look) {
+    restyle(look);
+}
+
 /// Asks the main thread to apply `look`.
 fn restyle(look: Look) {
     *PENDING.lock().unwrap_or_else(|e| e.into_inner()) = Some(look);
@@ -284,7 +300,7 @@ fn sheets(doc: &mut BaseDocument) -> Option<Sheets> {
         mutator.append_children(head, &[style]);
         Sheet { style, text }
     };
-    let app = sheet("app", APP_CSS);
+    let app = sheet("app", APP_SHEET.get().copied().unwrap_or(APP_CSS));
     let sheets = Sheets {
         theme: sheet("theme", ""),
         user: sheet("user", ""),

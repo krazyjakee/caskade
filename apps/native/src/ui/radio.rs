@@ -10,7 +10,7 @@ use dioxus_native::prelude::keyboard_types::{Key, NamedKey};
 use dioxus_native::prelude::*;
 
 use super::ids::use_id;
-use super::interact::{Keys, flag, use_interaction};
+use super::interact::{Keys, flag, use_interaction_where};
 use crate::input::use_input;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -110,7 +110,7 @@ fn Radio(
     previous: Option<String>,
     next: Option<String>,
 ) -> Element {
-    let interaction = use_interaction();
+    let interaction = use_interaction_where(stop);
     let input = use_input();
     let arrow = use_callback(move |forward: bool| {
         let target = if forward {
@@ -145,6 +145,7 @@ fn Radio(
             "data-selected": flag(checked),
             "data-disabled": flag(disabled),
             "data-hovered": interaction.hovered(),
+            "data-focus-visible": interaction.ring(),
             "data-pressed": interaction.pressed(),
             class: "group flex items-start gap-3 text-sm data-disabled:opacity-40",
             onmounted: move |event| {

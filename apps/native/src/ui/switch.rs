@@ -94,6 +94,7 @@ pub fn Switch(
             "data-disabled": flag(disabled),
             "data-readonly": flag(readonly),
             "data-hovered": interaction.hovered(),
+            "data-focus-visible": interaction.ring(),
             "data-pressed": interaction.pressed(),
             class: "group inline-flex items-center gap-2.5 text-sm data-disabled:opacity-40 {class}",
             onmouseenter: move |_| interaction.enter(),

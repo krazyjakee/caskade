@@ -54,7 +54,7 @@ impl ButtonVariant {
                 "border-transparent bg-linear-to-r from-accent to-accent-strong text-accent-fg data-hovered:brightness-115 data-hovered:shadow-[0_0_18px_-4px] data-hovered:shadow-glow"
             }
             Self::Secondary => {
-                "border-border-strong bg-surface-overlay/70 text-fg backdrop-blur data-hovered:border-accent-alt/50 data-hovered:bg-surface-hover"
+                "border-border-strong bg-surface-overlay/80 text-fg data-hovered:border-accent-alt/50 data-hovered:bg-surface-hover"
             }
             Self::Ghost => {
                 "border-transparent text-fg-muted data-hovered:bg-surface-hover data-hovered:text-fg"
@@ -129,6 +129,7 @@ pub fn Button(
             "data-variant": variant.name(),
             "data-size": size.name(),
             "data-hovered": interaction.hovered(),
+            "data-focus-visible": interaction.ring(),
             "data-pressed": interaction.pressed(),
             "data-focused": interaction.focused(),
             "data-pending": flag(pending),

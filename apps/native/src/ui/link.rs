@@ -32,6 +32,7 @@ pub fn Link(
             href: "{href}",
             "aria-current": current.then_some("page"),
             "data-hovered": interaction.hovered(),
+            "data-focus-visible": interaction.ring(),
             "data-pressed": interaction.pressed(),
             "data-current": flag(current),
             class: "{class}",

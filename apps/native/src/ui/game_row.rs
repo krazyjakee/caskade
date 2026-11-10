@@ -101,7 +101,8 @@ pub fn GameRow(
             "data-selected": selected.and_then(flag),
             "data-focus-key": focus_key,
             "data-hovered": interaction.hovered(),
-            class: "flex h-full items-center gap-4 border-b border-border px-3 outline-none data-hovered:bg-surface-hover data-focus-visible:focus-ring-over",
+            "data-focus-visible": interaction.ring(),
+            class: "relative flex h-full items-center gap-4 border-b border-border px-3 outline-none data-hovered:bg-surface-hover data-focus-visible:focus-ring-over",
             onfocusin: move |_| {
                 interaction.focus();
                 if let Some(on_focus) = on_focus {

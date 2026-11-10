@@ -11,7 +11,7 @@ use dioxus_native::prelude::keyboard_types::{Key, NamedKey};
 use dioxus_native::prelude::*;
 
 use super::ids::use_id;
-use super::interact::{flag, use_interaction};
+use super::interact::{flag, use_interaction_where};
 use crate::input::{Bind, use_input, use_input_action};
 
 #[derive(Clone, Debug, PartialEq)]
@@ -132,7 +132,7 @@ fn TabButton(
     nodes: Signal<Vec<(String, NodeId)>>,
     on_select: EventHandler<()>,
 ) -> Element {
-    let interaction = use_interaction();
+    let interaction = use_interaction_where(selected);
     let mount_id = tab.id.clone();
     rsx! {
         button {
@@ -145,6 +145,7 @@ fn TabButton(
             "data-part": "tab",
             "data-selected": flag(selected),
             "data-hovered": interaction.hovered(),
+            "data-focus-visible": interaction.ring(),
             class: "-mb-px border-b-2 border-transparent px-3 py-2 text-sm text-fg-muted transition-[color,border-color] duration-(--cs-motion-duration-fast) data-focus-visible:focus-ring data-hovered:text-fg data-selected:border-accent-alt data-selected:text-fg",
             onmounted: move |event| {
                 if let Some(node) = event.data().downcast::<NodeHandle>().map(NodeHandle::node_id) {

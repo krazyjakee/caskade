@@ -19,7 +19,11 @@ skia = ["dioxus-native/skia"]
 smoke = []
 # The reference screens' screenshots (`src/shots.rs`, #90): vello_cpu,
 # headless. `cargo test -p caskade-native --features shots --test shots`.
-shots = ["dep:anyrender", "dep:anyrender_vello_cpu", "dep:blitz-paint"]
+# The reference screens include the component gallery's pages.
+shots = ["dep:anyrender", "dep:anyrender_vello_cpu", "dep:blitz-paint", "gallery"]
+# The component gallery (`src/gallery`, #93) in a release build:
+# `caskade-native --gallery`; debug builds always have it.
+gallery = []
 # The end-to-end harness's scripted pad (`src/input/e2e.rs`) in a release
 # build; debug builds always have it.
 e2e = []

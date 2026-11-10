@@ -21,7 +21,7 @@ mod game_art;
 mod game_card;
 mod game_row;
 mod hero;
-mod icons;
+pub(crate) mod icons;
 mod ids;
 mod interact;
 mod link;
@@ -67,6 +67,8 @@ pub use hero::{Hero, HeroGame};
 #[allow(unused_imports)]
 pub use icons::{Icon, Svg};
 #[allow(unused_imports)]
+pub use interact::Forced;
+#[allow(unused_imports)]
 pub use link::Link;
 #[allow(unused_imports)]
 pub use menu::{Menu, MenuButton, MenuEntry, MenuItem};
@@ -78,6 +80,8 @@ pub use progress::Progress;
 pub use radio::{RadioGroup, RadioOption};
 #[allow(unused_imports)]
 pub use segmented::{Segment, SegmentedControl};
+#[allow(unused_imports)]
+pub(crate) use select::List as SelectList;
 #[allow(unused_imports)]
 pub use select::{Select, SelectOption};
 #[allow(unused_imports)]

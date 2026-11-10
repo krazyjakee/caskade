@@ -13,7 +13,7 @@ use dioxus_native::prelude::*;
 
 use super::icons::{CHECK, CHEVRON_DOWN, Svg};
 use super::ids::use_id;
-use super::interact::{Keys, flag, use_interaction};
+use super::interact::{Keys, flag, use_interaction, use_interaction_where};
 use super::menu::roving;
 use super::popover::{Anchor, Popover, use_trigger};
 use crate::input::use_input;
@@ -133,6 +133,7 @@ pub fn Select(
                 "aria-disabled": flag(disabled),
                 "aria-invalid": flag(invalid),
                 "data-hovered": interaction.hovered(),
+                "data-focus-visible": interaction.ring(),
                 "data-pressed": interaction.pressed(),
                 class: "flex h-9 items-center justify-between gap-2 rounded-control border border-border-strong bg-surface-base/60 px-3 text-left text-fg transition-[border-color] duration-(--cs-motion-duration-fast) data-hovered:border-accent-alt/50 data-focus-visible:focus-ring",
                 onmounted: move |event| trigger.mounted(event),
@@ -178,7 +179,7 @@ pub fn Select(
 }
 
 #[component]
-fn List(
+pub(crate) fn List(
     anchor: Anchor,
     options: Vec<SelectOption>,
     value: Option<String>,
@@ -256,7 +257,7 @@ fn OptionItem(
     nodes: Signal<Vec<(String, NodeId)>>,
     on_choose: EventHandler<String>,
 ) -> Element {
-    let interaction = use_interaction();
+    let interaction = use_interaction_where(start);
     let label_id = use_id("option");
     let value = option.value.clone();
     let disabled = option.disabled;
@@ -277,6 +278,7 @@ fn OptionItem(
             "data-selected": flag(selected),
             "data-focused": interaction.focused(),
             "data-hovered": interaction.hovered(),
+            "data-focus-visible": interaction.ring(),
             "data-disabled": flag(disabled),
             "data-focus-default": flag(start),
             class: "flex cursor-default items-center gap-2 rounded-[6px] px-2.5 py-1.5 text-sm text-fg-muted outline-none console:data-focus-visible:focus-ring data-focused:bg-surface-hover data-focused:text-fg data-selected:text-fg data-disabled:opacity-40",

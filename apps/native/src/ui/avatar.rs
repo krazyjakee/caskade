@@ -17,7 +17,7 @@ use dioxus_native::prelude::keyboard_types::{Key, NamedKey};
 use dioxus_native::prelude::*;
 
 use super::icons::{CHECK, Svg};
-use super::interact::{Keys, flag, use_interaction};
+use super::interact::{Keys, flag, use_interaction_where};
 use crate::input::{Bind, use_input, use_input_action};
 
 pub const ANATOMY: Entry = Entry {
@@ -546,7 +546,7 @@ fn AvatarOption(
     previous: String,
     next: String,
 ) -> Element {
-    let interaction = use_interaction();
+    let interaction = use_interaction_where(stop);
     let input = use_input();
     let id = option.id();
     let label = option.label();
@@ -582,6 +582,7 @@ fn AvatarOption(
             "data-selected": flag(checked),
             "data-disabled": flag(disabled),
             "data-hovered": interaction.hovered(),
+            "data-focus-visible": interaction.ring(),
             "data-pressed": interaction.pressed(),
             class: "group relative grid cursor-default place-items-center rounded-full p-1 outline-none transition-[background-color,box-shadow] duration-(--cs-motion-duration-fast) data-focus-visible:focus-ring data-hovered:bg-surface-hover data-selected:bg-accent/25 data-selected:shadow-[inset_0_0_0_2px] data-selected:shadow-accent-alt",
             onmounted: move |event| {

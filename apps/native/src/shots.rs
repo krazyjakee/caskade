@@ -59,7 +59,7 @@ pub fn run(out: &Path, themes_folder: Option<&Path>) -> Result<(), String> {
             tracing::warn!(theme = info.id, "invalid theme: not rendered");
             continue;
         }
-        for (screen, root) in screens::SCREENS {
+        for &(screen, root) in screens::SCREENS.iter().chain(crate::gallery::SCREENS) {
             render(out, &themes, &info.id, screen, root)?;
         }
     }
@@ -99,11 +99,17 @@ fn render(
     crate::theme::apply(&mut document.inner.borrow_mut(), &look);
     crate::theme::set_app_css(&mut document.inner.borrow_mut(), SHOTS_CSS);
     document.initial_build();
+    // Effects (the gallery's toasts) and what they render.
+    for _ in 0..3 {
+        blitz_dom::Document::poll(&mut document, None);
+    }
     let mut doc = document.inner.borrow_mut();
     // Fonts a theme loads arrive as messages the next resolve takes, and
     // lay the text out again in the one after.
-    for _ in 0..3 {
-        doc.resolve(0.0);
+    // A still: animations (an overlay's or a toast's entrance) have
+    // ended by the last.
+    for time in [0.0, 10.0, 10.0] {
+        doc.resolve(time);
     }
     let pixels = render_to_buffer::<VelloCpuImageRenderer, _>(
         |scene| blitz_paint::paint_scene(scene, &mut doc, 1.0, WIDTH, HEIGHT, 0, 0),

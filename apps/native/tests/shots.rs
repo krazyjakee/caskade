@@ -75,6 +75,8 @@ fn every_theme_renders_the_reference_screens_as_before() {
         .env_clear()
         .env("PATH", std::env::var_os("PATH").unwrap_or_default())
         .env("HOME", temp.path())
+        // The gallery's cards show a time of day.
+        .env("TZ", "UTC")
         .output()
         .expect("the native binary runs");
     let log = String::from_utf8_lossy(&output.stderr);

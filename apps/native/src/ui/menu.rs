@@ -17,7 +17,7 @@ use dioxus_native::prelude::*;
 use super::button::{Button, ButtonSize, ButtonVariant};
 use super::icons::{Icon, Svg};
 use super::ids::use_id;
-use super::interact::{Keys, flag, use_interaction};
+use super::interact::{Keys, flag, use_interaction_where};
 use super::popover::{Anchor, Popover, use_trigger};
 use crate::input::use_input;
 
@@ -241,7 +241,7 @@ fn Item(
     nodes: Signal<Vec<(String, NodeId)>>,
     on_choose: EventHandler<String>,
 ) -> Element {
-    let interaction = use_interaction();
+    let interaction = use_interaction_where(first);
     let label_id = use_id("menu-item");
     let id = item.id.clone();
     let disabled = item.disabled;
@@ -261,6 +261,7 @@ fn Item(
             "data-tone": item.danger.then_some("danger"),
             "data-focused": interaction.focused(),
             "data-hovered": interaction.hovered(),
+            "data-focus-visible": interaction.ring(),
             "data-disabled": flag(disabled),
             "data-focus-default": flag(first),
             class: "flex cursor-default items-start gap-2.5 rounded-[6px] px-2.5 py-1.5 text-sm text-fg-muted outline-none console:data-focus-visible:focus-ring data-focused:bg-surface-hover data-focused:text-fg data-disabled:opacity-40 data-[tone=danger]:text-danger",

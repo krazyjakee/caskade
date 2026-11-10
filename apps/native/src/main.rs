@@ -16,6 +16,8 @@ mod anatomy;
 mod data;
 mod dialogs;
 mod forwarded;
+#[cfg(any(debug_assertions, feature = "gallery"))]
+mod gallery;
 mod i18n;
 mod input;
 mod launch;
@@ -88,6 +90,17 @@ fn main() {
     }
     // The OS's language, until the Language setting picks one.
     caskade_core::i18n::set_locale(caskade_core::i18n::SYSTEM);
+    // `--gallery`: the component gallery (#93), not the app.
+    #[cfg(any(debug_assertions, feature = "gallery"))]
+    if gallery::requested() {
+        gallery::run();
+        return;
+    }
+    #[cfg(not(any(debug_assertions, feature = "gallery")))]
+    if std::env::args().any(|arg| arg == "--gallery") {
+        eprintln!("this build has no gallery: build with --features gallery");
+        std::process::exit(2);
+    }
     tracing::info!(
         version = env!("CARGO_PKG_VERSION"),
         "Caskade (native) starting"

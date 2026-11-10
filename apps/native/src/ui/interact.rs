@@ -13,6 +13,27 @@ pub struct Interaction {
     hovered: Signal<bool>,
     pressed: Signal<bool>,
     focused: Signal<bool>,
+    /// The focus ring, as the gallery shows it (the input layer sets the
+    /// attribute itself otherwise).
+    ring: bool,
+}
+
+/// States the gallery (#93) shows the controls under it in, without a
+/// pointer, keys or a pad: provided as a context, read when a control
+/// mounts.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct Forced {
+    pub hovered: bool,
+    pub pressed: bool,
+    pub focused: bool,
+    /// `data-focus-visible`, which the input layer sets when keys or a pad
+    /// move focus.
+    pub focus_visible: bool,
+}
+
+/// The states forced on the controls here: none outside the gallery.
+pub fn use_forced() -> Forced {
+    use_hook(|| try_consume_context::<Forced>().unwrap_or_default())
 }
 
 /// The attribute value for a flag: present when on, absent when off, as
@@ -22,10 +43,22 @@ pub fn flag(on: bool) -> Option<&'static str> {
 }
 
 pub fn use_interaction() -> Interaction {
+    use_interaction_where(true)
+}
+
+/// An item of a composite control (a radio, a tab, a menu item): forced
+/// states reach only the one `here` (the one focus would land on).
+pub fn use_interaction_where(here: bool) -> Interaction {
+    let forced = if here {
+        use_forced()
+    } else {
+        use_hook(Forced::default)
+    };
     Interaction {
-        hovered: use_signal(|| false),
-        pressed: use_signal(|| false),
-        focused: use_signal(|| false),
+        hovered: use_signal(|| forced.hovered),
+        pressed: use_signal(|| forced.pressed),
+        focused: use_signal(|| forced.focused || forced.focus_visible),
+        ring: forced.focus_visible,
     }
 }
 
@@ -53,6 +86,12 @@ impl Interaction {
     /// layer adds `data-focus-visible` when keys or a pad put it there).
     pub fn focused(&self) -> Option<&'static str> {
         flag((self.focused)())
+    }
+
+    /// `data-focus-visible` when the gallery forces it; the input layer
+    /// sets it otherwise, which this leaves alone.
+    pub fn ring(&self) -> Option<&'static str> {
+        flag(self.ring)
     }
 
     pub fn focus(mut self) {

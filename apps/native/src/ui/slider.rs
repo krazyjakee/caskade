@@ -12,7 +12,7 @@ use dioxus_native::prelude::keyboard_types::{Key, NamedKey};
 use dioxus_native::prelude::*;
 
 use super::ids::use_id;
-use super::interact::flag;
+use super::interact::{flag, use_forced};
 use crate::input::{Bind, use_input_action};
 
 pub const ANATOMY: Entry = Entry {
@@ -53,7 +53,8 @@ pub fn Slider(
     let label_id = use_id("slider");
     let mut thumb = use_signal(|| None::<NodeId>);
     let mut track = use_signal(|| None::<NodeHandle>);
-    let mut hovered = use_signal(|| false);
+    let forced = use_forced();
+    let mut hovered = use_signal(|| forced.hovered);
     let mut dragging = use_signal(|| false);
     let clamp = move |value: f64| {
         let stepped = ((value - min) / step).round() * step + min;
@@ -147,6 +148,7 @@ pub fn Slider(
                         "aria-disabled": flag(disabled),
                         "aria-labelledby": label.as_ref().map(|_| label_id.clone()),
                         "data-dragging": flag(dragging()),
+                        "data-focus-visible": flag(forced.focus_visible),
                         class: "absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-accent-alt bg-white shadow-[0_0_10px] shadow-accent-alt/60 transition-[scale] duration-(--cs-motion-duration-fast) data-dragging:scale-115 data-focus-visible:focus-ring-outside",
                         style: "left: {percent}%;",
                         onmounted: move |event| thumb.set(event.data().downcast::<NodeHandle>().map(NodeHandle::node_id)),

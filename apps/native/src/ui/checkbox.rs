@@ -83,6 +83,7 @@ pub fn Checkbox(
             "data-readonly": flag(readonly),
             "data-invalid": flag(invalid),
             "data-hovered": interaction.hovered(),
+            "data-focus-visible": interaction.ring(),
             "data-pressed": interaction.pressed(),
             class: "group flex items-center gap-3 text-sm data-disabled:opacity-40 {class}",
             onmouseenter: move |_| interaction.enter(),

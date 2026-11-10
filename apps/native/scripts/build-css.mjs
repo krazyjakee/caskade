@@ -28,12 +28,17 @@ if (!/^@source .*packages\/ui\/src.*$/m.test(entry)) {
 }
 // The webview's markup isn't the native app's: scan apps/native/src instead.
 // The app's sheet leaves out the screenshot harness's reference screens
-// (src/shots, dev only); the harness's own sheet (src/shots/shots.css) is
-// the same entry over everything, screens included.
+// and the component gallery (src/shots, src/gallery: dev only); the
+// harness's own sheet (src/shots/shots.css, the gallery's too) is the same
+// entry over everything, screens included.
 const relative = (folder) => path.relative(styles, folder).split(path.sep).join("/");
 const source = (exclude) =>
   `@source "${relative(path.join(native, "src"))}";${
-    exclude ? `\n@source not "${relative(path.join(native, "src/shots"))}";` : ""
+    exclude
+      ? ["src/shots", "src/gallery"]
+          .map((dev) => `\n@source not "${relative(path.join(native, dev))}";`)
+          .join("")
+      : ""
   }`;
 const outputs = [
   [path.join(native, "assets/app.css"), true],

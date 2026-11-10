@@ -132,8 +132,10 @@ const NOT_TRANSLATED: &[(&str, &str)] = &[("apps/native/src/main.rs", "Caskade")
 
 /// Folders whose text no user sees: `shots/` holds #90's fixture screens
 /// for the screenshot comparison (the `shots` feature only), in fixed
-/// English so Blitz and WebKit render the same text.
-const DEV_ONLY: &[&str] = &["apps/native/src/shots/"];
+/// English so Blitz and WebKit render the same text; `gallery/` is the
+/// component gallery's fixtures (#93, for developers and theme authors,
+/// and screens of the same comparison).
+const DEV_ONLY: &[&str] = &["apps/native/src/shots/", "apps/native/src/gallery/"];
 
 #[test]
 fn every_rsx_text_people_see_goes_through_a_macro() {

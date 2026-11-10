@@ -230,6 +230,7 @@ pub fn GameCard(
             "data-selected": selected.and_then(flag),
             "data-focus-key": focus_key,
             "data-hovered": interaction.hovered(),
+            "data-focus-visible": interaction.ring(),
             style: "--i: {index};",
             class: "group relative flex h-full min-w-0 flex-col overflow-hidden rounded-card border border-border bg-surface-raised outline-none transition-colors duration-(--cs-motion-duration-fast) data-hovered:bg-surface-hover data-focus-visible:focus-ring-over",
             onfocusin: move |_| {

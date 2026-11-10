@@ -7,7 +7,7 @@ use caskade_ui_theme::anatomy::{Entry, Source};
 use dioxus_native::prelude::*;
 
 use super::icons::{Icon, Svg};
-use super::interact::{Keys, flag, use_interaction};
+use super::interact::{Keys, flag, use_interaction_where};
 
 pub const ANATOMY: Entry = Entry {
     parts: &[
@@ -80,7 +80,7 @@ fn SegmentButton(
     disabled: bool,
     on_change: EventHandler<String>,
 ) -> Element {
-    let interaction = use_interaction();
+    let interaction = use_interaction_where(selected);
     let id = option.id.clone();
     let pick = use_callback(move |()| {
         if !disabled && !selected {
@@ -95,6 +95,7 @@ fn SegmentButton(
             "aria-disabled": flag(disabled),
             "data-selected": flag(selected),
             "data-hovered": interaction.hovered(),
+            "data-focus-visible": interaction.ring(),
             "data-pressed": interaction.pressed(),
             class: "flex items-center gap-1.5 rounded-[6px] px-3 py-1.5 text-sm whitespace-nowrap text-fg-muted transition-[background-color,color,box-shadow] duration-(--cs-motion-duration-fast) data-focus-visible:focus-ring data-hovered:text-fg data-selected:bg-accent/25 data-selected:text-fg data-selected:shadow-[inset_0_0_0_1px] data-selected:shadow-accent-alt/50",
             onmouseenter: move |_| interaction.enter(),

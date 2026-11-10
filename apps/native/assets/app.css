@@ -736,6 +736,12 @@
       background-color: color-mix(in oklab, var(--cs-color-surface-overlay) 70%, transparent);
     }
   }
+  .bg-surface-overlay\/80 {
+    background-color: var(--cs-color-surface-overlay);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--cs-color-surface-overlay) 80%, transparent);
+    }
+  }
   .bg-surface-raised {
     background-color: var(--cs-color-surface-raised);
   }
@@ -1385,11 +1391,27 @@
       outline-color: Highlight;
     }
   }
+  .data-focused\:border-accent-alt\/60[data-focused] {
+    border-color: var(--cs-color-accent-alt);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--cs-color-accent-alt) 60%, transparent);
+    }
+  }
   .data-focused\:bg-surface-hover[data-focused] {
     background-color: var(--cs-color-surface-hover);
   }
   .data-focused\:text-fg[data-focused] {
     color: var(--cs-color-fg);
+  }
+  .data-focused\:shadow-\[0_0_16px_-6px\][data-focused] {
+    --tw-shadow: 0 0 16px -6px var(--tw-shadow-color, currentcolor);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+  .data-focused\:shadow-accent-alt[data-focused] {
+    --tw-shadow-color: var(--cs-color-accent-alt);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-shadow-color: color-mix(in oklab, var(--cs-color-accent-alt) var(--tw-shadow-alpha), transparent);
+    }
   }
   .data-hovered\:border-accent-alt\/50[data-hovered] {
     border-color: var(--cs-color-accent-alt);
@@ -1501,6 +1523,24 @@
     }
   }
   .console\:data-focus-visible\:focus-ring:where([data-mode="console"] *)[data-focus-visible] {
+    outline: var(--cs-focus-ring-width) solid var(--cs-focus-ring-glow);
+    outline-offset: var(--cs-focus-ring-offset);
+    --tw-ring-offset-shadow: inset 0 0 calc(var(--cs-focus-ring-inner) * var(--cs-effect-glow-strength))
+    var(--cs-focus-ring-glow),
+    0 0 calc(var(--cs-focus-ring-halo) * var(--cs-effect-glow-strength))
+    var(--cs-focus-ring-glow);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-ring-offset-shadow: inset 0 0 calc(var(--cs-focus-ring-inner) * var(--cs-effect-glow-strength))
+    color-mix(in oklab, var(--cs-focus-ring-glow) 45%, transparent),
+    0 0 calc(var(--cs-focus-ring-halo) * var(--cs-effect-glow-strength))
+    color-mix(in oklab, var(--cs-focus-ring-glow) 35%, transparent);
+    }
+    box-shadow: var(--tw-inset-shadow, 0 0 #0000), var(--tw-inset-ring-shadow, 0 0 #0000), var(--tw-ring-offset-shadow), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow, 0 0 #0000);
+    @media (forced-colors: active) {
+      outline-color: Highlight;
+    }
+  }
+  .console\:data-focused\:focus-ring:where([data-mode="console"] *)[data-focused] {
     outline: var(--cs-focus-ring-width) solid var(--cs-focus-ring-glow);
     outline-offset: var(--cs-focus-ring-offset);
     --tw-ring-offset-shadow: inset 0 0 calc(var(--cs-focus-ring-inner) * var(--cs-effect-glow-strength))
