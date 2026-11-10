@@ -301,9 +301,17 @@ impl BaseDocument {
 
             builder.set_html_tag(name);
         } else if node.is_text_node() {
-            builder.set_role(Role::TextRun);
+            // Static text is a label whose value is the text: AccessKit takes
+            // a name from a `labelled_by` target's value only for labels.
+            // (`TextRun` is for runs inside text fields, with character data.)
+            builder.set_role(Role::Label);
             builder.set_value(node.text_content());
-            parent.push_labelled_by(id)
+            // Only some roles take their name from their content
+            // (https://www.w3.org/TR/wai-aria-1.2/#namefromcontent): a status
+            // or a generic container read their text, they aren't named by it.
+            if names_from_content(parent.role()) {
+                parent.push_labelled_by(id)
+            }
         }
 
         parent.push_child(id);
@@ -465,6 +473,36 @@ fn role_from_name(name: &str) -> Option<Role> {
         "generic" | "none" | "presentation" => Some(Role::GenericContainer),
         _ => None,
     }
+}
+
+fn names_from_content(role: Role) -> bool {
+    matches!(
+        role,
+        Role::Button
+            | Role::DefaultButton
+            | Role::Cell
+            | Role::CheckBox
+            | Role::ColumnHeader
+            | Role::DisclosureTriangle
+            | Role::GridCell
+            | Role::Heading
+            | Role::Label
+            | Role::Legend
+            | Role::Link
+            | Role::ListBoxOption
+            | Role::MenuItem
+            | Role::MenuItemCheckBox
+            | Role::MenuItemRadio
+            | Role::RadioButton
+            | Role::Row
+            | Role::RowHeader
+            | Role::Switch
+            | Role::Tab
+            | Role::Tooltip
+            | Role::TreeItem
+            | Role::Caption
+            | Role::FigureCaption
+    )
 }
 
 fn is_form_control(tag: &str) -> bool {
@@ -695,6 +733,7 @@ fn add_actions(
     if matches!(role, Role::Slider | Role::SpinButton) {
         builder.add_action(Action::Increment);
         builder.add_action(Action::Decrement);
+        builder.add_action(Action::SetValue);
     }
 }
 

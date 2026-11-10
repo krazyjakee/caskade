@@ -20,7 +20,7 @@ formatting and i18n checks skip them.
 
 | Repo | Patches | Upstream |
 | --- | --- | --- |
-| blitz | 0001–0005: gradient centring and tiling, inline SVG snapshots, damage-limited repaint of animation frames, `prefers-reduced-motion`; 0006–0010: screen readers (ARIA states and properties, bounds, actions routed to DOM events, controls named by their labels, no stray `<main>` around a Dioxus app) | not yet submitted |
+| blitz | 0001–0005: gradient centring and tiling, inline SVG snapshots, damage-limited repaint of animation frames, `prefers-reduced-motion`; 0006–0013: screen readers (ARIA states and properties, bounds, actions routed to DOM events, controls named by their labels, no stray `<main>` around a Dioxus app, the AT-SPI backend built, text as labels, the window named) | not yet submitted |
 | anyrender | 0001–0002: damage rendering in vello_hybrid; 0003–0004 measurement only (`ANYRENDER_PRESENT_MODE`, `ANYRENDER_FRAME_LIMIT_HZ`) | not yet submitted (0003–0004 never) |
 | stylo | 0001–0002: when a stepped animation next changes, the `prefers-reduced-motion` media feature | not yet submitted |
 | taffy | 0001: an auto-height column flex container sizes from its items' hypothetical main sizes, not their content (`flex: 1 1 0` with a min-height kept a scroll area the view's height) | not yet submitted ([draft issue](../../docs/spikes/blitz-2.md#upstream-not-filed-waiting-for-the-users-go)) |

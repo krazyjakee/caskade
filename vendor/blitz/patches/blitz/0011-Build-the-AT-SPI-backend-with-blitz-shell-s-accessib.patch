@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: caskade <caskade@localhost>
+Date: Tue, 10 Nov 2026 10:44:41 +0000
+Subject: [PATCH] Build the AT-SPI backend with blitz-shell's accessibility
+ feature
+
+The workspace takes accesskit_xplat with default-features = false, and
+nothing turned its accesskit_unix feature back on, so on Linux and the BSDs
+the accessibility feature built no adapter: screen readers saw no window at
+all. The feature now enables accesskit_unix with async-io (accesskit_xplat's
+own defaults). Windows, macOS and Android take their backends as target
+dependencies and are unchanged.
+---
+ packages/blitz-shell/Cargo.toml | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/packages/blitz-shell/Cargo.toml b/packages/blitz-shell/Cargo.toml
+index f7b97e46..764b6348 100644
+--- a/packages/blitz-shell/Cargo.toml
++++ b/packages/blitz-shell/Cargo.toml
+@@ -15,6 +15,10 @@ default = ["accessibility", "file-dialog"]
+ accessibility = [
+     "dep:accesskit",
+     "dep:accesskit_xplat",
++    # The workspace takes accesskit_xplat without its default features, so
++    # its Linux and BSD backend (AT-SPI) is asked for here.
++    "accesskit_xplat?/accesskit_unix",
++    "accesskit_xplat?/async-io",
+     "blitz-dom/accessibility",
+ ]
+ tracing = ["dep:tracing", "blitz-dom/tracing"]

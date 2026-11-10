@@ -1,0 +1,135 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: caskade <caskade@localhost>
+Date: Tue, 10 Nov 2026 10:50:29 +0000
+Subject: [PATCH] Expose text as AccessKit labels, so names from content reach
+ screen readers
+
+Text nodes were `TextRun`s with their text as value, pushed into their
+parent's `labelled_by`. AccessKit takes a name from a `labelled_by` target's
+value only when the target is a `Label` (`label_comes_from_value`), and
+`TextRun` is for runs inside text fields, with character data. So every
+name from content (a button's or a link's text, a heading's) came out
+empty, and on AT-SPI the text itself was an empty `static` that Orca could
+not read. Static text is now a `Label` with the text as its value, as
+AccessKit's other users give it.
+
+Text names its parent only when the parent's role takes its name from its
+content (ARIA's list): a status or a generic container was named by its
+own text, so a screen reader heard a live region's update twice.
+---
+ packages/blitz-dom/src/accessibility.rs       | 42 ++++++++++++++++++-
+ .../blitz-tests/tests/accessibility_label.rs  | 29 ++++++++++++-
+ 2 files changed, 67 insertions(+), 4 deletions(-)
+
+diff --git a/packages/blitz-dom/src/accessibility.rs b/packages/blitz-dom/src/accessibility.rs
+index 374f35a6..94f74944 100644
+--- a/packages/blitz-dom/src/accessibility.rs
++++ b/packages/blitz-dom/src/accessibility.rs
+@@ -301,9 +301,17 @@ impl BaseDocument {
+ 
+             builder.set_html_tag(name);
+         } else if node.is_text_node() {
+-            builder.set_role(Role::TextRun);
++            // Static text is a label whose value is the text: AccessKit takes
++            // a name from a `labelled_by` target's value only for labels.
++            // (`TextRun` is for runs inside text fields, with character data.)
++            builder.set_role(Role::Label);
+             builder.set_value(node.text_content());
+-            parent.push_labelled_by(id)
++            // Only some roles take their name from their content
++            // (https://www.w3.org/TR/wai-aria-1.2/#namefromcontent): a status
++            // or a generic container read their text, they aren't named by it.
++            if names_from_content(parent.role()) {
++                parent.push_labelled_by(id)
++            }
+         }
+ 
+         parent.push_child(id);
+@@ -467,6 +475,36 @@ fn role_from_name(name: &str) -> Option<Role> {
+     }
+ }
+ 
++fn names_from_content(role: Role) -> bool {
++    matches!(
++        role,
++        Role::Button
++            | Role::DefaultButton
++            | Role::Cell
++            | Role::CheckBox
++            | Role::ColumnHeader
++            | Role::DisclosureTriangle
++            | Role::GridCell
++            | Role::Heading
++            | Role::Label
++            | Role::Legend
++            | Role::Link
++            | Role::ListBoxOption
++            | Role::MenuItem
++            | Role::MenuItemCheckBox
++            | Role::MenuItemRadio
++            | Role::RadioButton
++            | Role::Row
++            | Role::RowHeader
++            | Role::Switch
++            | Role::Tab
++            | Role::Tooltip
++            | Role::TreeItem
++            | Role::Caption
++            | Role::FigureCaption
++    )
++}
++
+ fn is_form_control(tag: &str) -> bool {
+     matches!(
+         tag,
+diff --git a/tests/blitz-tests/tests/accessibility_label.rs b/tests/blitz-tests/tests/accessibility_label.rs
+index 21b57910..a8b7fee6 100644
+--- a/tests/blitz-tests/tests/accessibility_label.rs
++++ b/tests/blitz-tests/tests/accessibility_label.rs
+@@ -43,7 +43,7 @@ fn includes_aria_labelledby_as_labelled_by_for_one_node() -> TestResult<()> {
+     let (label_node_id, _) = tree_update
+         .nodes
+         .iter()
+-        .find(|(_, node)| node.role() == Role::Label)
++        .find(|(_, node)| node.role() == Role::Label && node.html_tag() == Some("label"))
+         .expect("Label must be present in accessibility tree");
+     verify_that!(
+         tree_update.nodes,
+@@ -87,7 +87,7 @@ fn includes_aria_labelledby_as_labelled_by_for_two_nodes() -> TestResult<()> {
+         tree_update
+             .nodes
+             .iter()
+-            .find(|(_, node)| node.role() == Role::Label)
++            .find(|(_, node)| node.role() == Role::Label && node.html_tag() == Some("label"))
+             .expect("Expected to find label another-element in the tree")
+             .0,
+     );
+@@ -303,3 +303,28 @@ fn default_document_config() -> DocumentConfig {
+         ..Default::default()
+     }
+ }
++
++#[test]
++fn text_is_a_label_with_its_text_as_value() {
++    let mut document = HtmlDocument::from_html(
++        r#"<html><button>Play</button></html>"#,
++        default_document_config(),
++    );
++    document.resolve(0.0);
++
++    let tree_update = document.build_accessibility_tree();
++
++    // AccessKit names the button from a label target's value.
++    let (text_id, text) = tree_update
++        .nodes
++        .iter()
++        .find(|(_, node)| node.value() == Some("Play"))
++        .expect("the text must be in the accessibility tree");
++    assert_eq!(text.role(), Role::Label);
++    let (_, button) = tree_update
++        .nodes
++        .iter()
++        .find(|(_, node)| node.role() == Role::Button)
++        .expect("the button must be in the accessibility tree");
++    assert!(button.labelled_by().contains(text_id));
++}

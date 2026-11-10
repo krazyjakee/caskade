@@ -15,7 +15,7 @@ through the id map rather than by walking the document.
  2 files changed, 98 insertions(+), 1 deletion(-)
 
 diff --git a/packages/blitz-dom/src/accessibility.rs b/packages/blitz-dom/src/accessibility.rs
-index c0b2916e..599f6b92 100644
+index 51d5e582..374f35a6 100644
 --- a/packages/blitz-dom/src/accessibility.rs
 +++ b/packages/blitz-dom/src/accessibility.rs
 @@ -16,6 +16,7 @@ impl BaseDocument {

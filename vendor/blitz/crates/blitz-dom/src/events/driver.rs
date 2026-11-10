@@ -6,6 +6,7 @@ use blitz_traits::events::{
 };
 use blitz_traits::node_id::NodeId;
 use keyboard_types::{Code, Key, Location, Modifiers, NamedKey};
+use markup5ever::local_name;
 use std::collections::VecDeque;
 
 pub trait EventHandler {
@@ -343,7 +344,19 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
         .find(|node| node.is_focussable())
         .map(|node| node.id);
         let click = node.synthetic_click_event(Modifiers::empty());
+        let now = node
+            .attr(local_name!("aria-valuenow"))
+            .and_then(|value| value.trim_ascii().parse::<f64>().ok());
         drop(doc);
+        // A value to set is a step up or down from the current one.
+        let action = match action {
+            BlitzAccessibilityAction::SetNumericValue(value) => match now {
+                Some(now) if value > now => BlitzAccessibilityAction::Increment,
+                Some(now) if value < now => BlitzAccessibilityAction::Decrement,
+                _ => return,
+            },
+            action => action,
+        };
 
         match action {
             BlitzAccessibilityAction::Focus => self.focus_for_accessibility(focusable),
@@ -362,6 +375,7 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
                     ScrollLogicalPosition::Nearest,
                 );
             }
+            BlitzAccessibilityAction::SetNumericValue(_) => {}
             BlitzAccessibilityAction::Increment | BlitzAccessibilityAction::Decrement => {
                 self.focus_for_accessibility(focusable);
                 if self.doc.inner().focus_node_id != Some(target) {

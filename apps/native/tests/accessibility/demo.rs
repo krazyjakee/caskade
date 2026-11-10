@@ -27,6 +27,7 @@ pub fn Demo() -> Element {
     let mut progress = use_signal(|| 25);
     let mut sort_open = use_signal(|| false);
     rsx! {
+        title { "Caskade accessibility demo" }
         nav { "aria-label": "Library",
             a { href: "#all", "aria-current": "page", "All games" }
             a { href: "#installed", "Installed" }

@@ -21,20 +21,20 @@ A click that has no default action used to clear the focus; it now keeps
 it when the click lands in the focused element, so activating a focused
 button doesn't lose the focus.
 ---
- packages/blitz-dom/src/accessibility.rs       | 53 +++++++++-
- packages/blitz-dom/src/events/driver.rs       | 99 ++++++++++++++++++-
- packages/blitz-dom/src/events/pointer.rs      |  8 +-
- packages/blitz-shell/src/accessibility.rs     | 25 ++++-
- packages/blitz-shell/src/application.rs       |  7 +-
- packages/blitz-traits/src/events.rs           | 29 ++++++
- .../tests/accessibility_actions.rs            | 62 ++++++++++++
- .../blitz-tests/tests/accessibility_states.rs | 10 +-
- tests/blitz-tests/tests/all.rs                |  1 +
- 9 files changed, 282 insertions(+), 12 deletions(-)
+ packages/blitz-dom/src/accessibility.rs       |  54 ++++++++-
+ packages/blitz-dom/src/events/driver.rs       | 113 +++++++++++++++++-
+ packages/blitz-dom/src/events/pointer.rs      |   8 +-
+ packages/blitz-shell/src/accessibility.rs     |  31 ++++-
+ packages/blitz-shell/src/application.rs       |   7 +-
+ packages/blitz-traits/src/events.rs           |  32 +++++
+ .../tests/accessibility_actions.rs            |  62 ++++++++++
+ .../blitz-tests/tests/accessibility_states.rs |  10 +-
+ tests/blitz-tests/tests/all.rs                |   1 +
+ 9 files changed, 306 insertions(+), 12 deletions(-)
  create mode 100644 tests/blitz-tests/tests/accessibility_actions.rs
 
 diff --git a/packages/blitz-dom/src/accessibility.rs b/packages/blitz-dom/src/accessibility.rs
-index c988d23c..c0b2916e 100644
+index c988d23c..51d5e582 100644
 --- a/packages/blitz-dom/src/accessibility.rs
 +++ b/packages/blitz-dom/src/accessibility.rs
 @@ -2,8 +2,8 @@ use crate::{
@@ -56,7 +56,7 @@ index c988d23c..c0b2916e 100644
  
              if let Some(rect) = self.get_client_bounding_rect(node.id) {
                  builder.set_bounds(Rect::new(
-@@ -567,6 +568,54 @@ fn set_states_and_properties(
+@@ -567,6 +568,55 @@ fn set_states_and_properties(
      }
  }
  
@@ -105,6 +105,7 @@ index c988d23c..c0b2916e 100644
 +    if matches!(role, Role::Slider | Role::SpinButton) {
 +        builder.add_action(Action::Increment);
 +        builder.add_action(Action::Decrement);
++        builder.add_action(Action::SetValue);
 +    }
 +}
 +
@@ -112,10 +113,10 @@ index c988d23c..c0b2916e 100644
      // Accesskit levels are 0-based, while ARIA levels are 1-based
      // See https://docs.rs/accesskit/latest/accesskit/struct.Node.html#method.level
 diff --git a/packages/blitz-dom/src/events/driver.rs b/packages/blitz-dom/src/events/driver.rs
-index 60fd9609..e924b881 100644
+index 60fd9609..edc0e7c4 100644
 --- a/packages/blitz-dom/src/events/driver.rs
 +++ b/packages/blitz-dom/src/events/driver.rs
-@@ -1,9 +1,11 @@
+@@ -1,9 +1,12 @@
 -use crate::Document;
 +use crate::events::focus::generate_focus_events;
 +use crate::{Document, ScrollBehavior, ScrollLogicalPosition};
@@ -127,10 +128,11 @@ index 60fd9609..e924b881 100644
  };
  use blitz_traits::node_id::NodeId;
 +use keyboard_types::{Code, Key, Location, Modifiers, NamedKey};
++use markup5ever::local_name;
  use std::collections::VecDeque;
  
  pub trait EventHandler {
-@@ -166,6 +168,10 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
+@@ -166,6 +169,10 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
      }
  
      pub fn handle_ui_event(&mut self, event: UiEvent) {
@@ -141,7 +143,7 @@ index 60fd9609..e924b881 100644
          let doc = self.doc.inner();
  
          // A non-hovering pointer (finger) ends hover once it is lifted or cancelled
-@@ -226,6 +232,7 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
+@@ -226,6 +233,7 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
              UiEvent::Ime(_) => focussed_node_id,
              UiEvent::Paste(_) => focussed_node_id,
              UiEvent::AppleStandardKeybinding(_) => focussed_node_id,
@@ -149,7 +151,7 @@ index 60fd9609..e924b881 100644
          };
          // Fall back to the root element. A document without a root element (e.g. an
          // empty iframe sub-document) has no event target, so there is nothing to do.
-@@ -301,6 +308,7 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
+@@ -301,6 +309,7 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
                  self.run_default_action(&mut dom_event);
                  self.process_queue();
              }
@@ -157,7 +159,7 @@ index 60fd9609..e924b881 100644
          };
  
          // Update document input state (hover, focus, active, etc)
-@@ -316,6 +324,91 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
+@@ -316,6 +325,104 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
          }
      }
  
@@ -180,7 +182,19 @@ index 60fd9609..e924b881 100644
 +        .find(|node| node.is_focussable())
 +        .map(|node| node.id);
 +        let click = node.synthetic_click_event(Modifiers::empty());
++        let now = node
++            .attr(local_name!("aria-valuenow"))
++            .and_then(|value| value.trim_ascii().parse::<f64>().ok());
 +        drop(doc);
++        // A value to set is a step up or down from the current one.
++        let action = match action {
++            BlitzAccessibilityAction::SetNumericValue(value) => match now {
++                Some(now) if value > now => BlitzAccessibilityAction::Increment,
++                Some(now) if value < now => BlitzAccessibilityAction::Decrement,
++                _ => return,
++            },
++            action => action,
++        };
 +
 +        match action {
 +            BlitzAccessibilityAction::Focus => self.focus_for_accessibility(focusable),
@@ -199,6 +213,7 @@ index 60fd9609..e924b881 100644
 +                    ScrollLogicalPosition::Nearest,
 +                );
 +            }
++            BlitzAccessibilityAction::SetNumericValue(_) => {}
 +            BlitzAccessibilityAction::Increment | BlitzAccessibilityAction::Decrement => {
 +                self.focus_for_accessibility(focusable);
 +                if self.doc.inner().focus_node_id != Some(target) {
@@ -269,20 +284,20 @@ index 9617ee68..e9b271a7 100644
      }
  
 diff --git a/packages/blitz-shell/src/accessibility.rs b/packages/blitz-shell/src/accessibility.rs
-index dab01102..c11bbd49 100644
+index dab01102..d9f58769 100644
 --- a/packages/blitz-shell/src/accessibility.rs
 +++ b/packages/blitz-shell/src/accessibility.rs
 @@ -1,7 +1,8 @@
  use crate::{BlitzShellEvent, event::BlitzShellProxy};
 -use accesskit::Rect;
-+use accesskit::{Action, ActionRequest, NodeId, Rect};
++use accesskit::{Action, ActionData, ActionRequest, NodeId, Rect};
  use accesskit_xplat::{Adapter, EventHandler, WindowEvent as AccessKitEvent};
  use blitz_dom::BaseDocument;
 +use blitz_traits::events::{BlitzAccessibilityAction, BlitzAccessibilityEvent, UiEvent};
  use std::sync::Arc;
  use winit::{
      event::WindowEvent,
-@@ -75,3 +76,25 @@ impl AccessibilityState {
+@@ -75,3 +76,31 @@ impl AccessibilityState {
          }
      }
  }
@@ -301,6 +316,12 @@ index dab01102..c11bbd49 100644
 +        Action::Decrement => BlitzAccessibilityAction::Decrement,
 +        Action::Expand => BlitzAccessibilityAction::Expand,
 +        Action::Collapse => BlitzAccessibilityAction::Collapse,
++        Action::SetValue => match request.data {
++            Some(ActionData::NumericValue(value)) => {
++                BlitzAccessibilityAction::SetNumericValue(value)
++            }
++            _ => return None,
++        },
 +        _ => return None,
 +    };
 +    Some(UiEvent::Accessibility(BlitzAccessibilityEvent {
@@ -327,10 +348,10 @@ index 3b246918..81ce20fa 100644
                      }
                  }
 diff --git a/packages/blitz-traits/src/events.rs b/packages/blitz-traits/src/events.rs
-index 057d8481..1f0d95e2 100644
+index 057d8481..49161bbd 100644
 --- a/packages/blitz-traits/src/events.rs
 +++ b/packages/blitz-traits/src/events.rs
-@@ -72,6 +72,35 @@ pub enum UiEvent {
+@@ -72,6 +72,38 @@ pub enum UiEvent {
      Ime(BlitzImeEvent),
      AppleStandardKeybinding(SmolStr),
      Paste(String),
@@ -352,6 +373,9 @@ index 057d8481..1f0d95e2 100644
 +    Increment,
 +    /// Step a range control down.
 +    Decrement,
++    /// Set a range control's value: one step towards it, as the control's
++    /// own keys move it (AT-SPI sets values rather than stepping).
++    SetNumericValue(f64),
 +    /// Expand a collapsed element (`aria-expanded="false"`).
 +    Expand,
 +    /// Collapse an expanded element (`aria-expanded="true"`).

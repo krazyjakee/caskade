@@ -18,7 +18,7 @@ name = "blitz_shell"
 path = "src/lib.rs"
 
 [features]
-accessibility = ["dep:accesskit", "dep:accesskit_xplat", "blitz-dom/accessibility"]
+accessibility = ["dep:accesskit", "dep:accesskit_xplat", "accesskit_xplat?/accesskit_unix", "accesskit_xplat?/async-io", "blitz-dom/accessibility"]
 custom-widget = ["blitz-dom/custom-widget"]
 data-uri = ["dep:data-url"]
 default = ["accessibility", "file-dialog"]

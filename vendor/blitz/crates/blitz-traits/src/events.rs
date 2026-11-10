@@ -90,6 +90,9 @@ pub enum BlitzAccessibilityAction {
     Increment,
     /// Step a range control down.
     Decrement,
+    /// Set a range control's value: one step towards it, as the control's
+    /// own keys move it (AT-SPI sets values rather than stepping).
+    SetNumericValue(f64),
     /// Expand a collapsed element (`aria-expanded="false"`).
     Expand,
     /// Collapse an expanded element (`aria-expanded="true"`).

@@ -62,18 +62,29 @@ impl Window {
         self.settle();
     }
 
-    /// The tree as text: one line per node, children indented, text runs
-    /// folded into their parent's name. Ids and bounds (fonts) are left out.
+    /// The tree as text: one line per node, children indented. Text that
+    /// names its parent is folded into the name; other text (a live
+    /// region's) is a quoted line. Ids and bounds (fonts) are left out.
     fn snapshot(&self) -> String {
         let doc = self.doc.inner.borrow();
         let update = doc.build_accessibility_tree();
         let nodes: std::collections::HashMap<_, _> = update.nodes.iter().cloned().collect();
+        let naming: std::collections::HashSet<_> = update
+            .nodes
+            .iter()
+            .flat_map(|(_, node)| node.labelled_by().iter().copied())
+            .collect();
         let mut out = String::new();
         let mut stack = vec![(update.tree.as_ref().unwrap().root, 0usize)];
         while let Some((id, depth)) = stack.pop() {
             let node = &nodes[&id];
             let role = format!("{:?}", node.role());
-            if role == "TextRun" {
+            // Text is a label without a tag.
+            if node.role() == accesskit::Role::Label && node.html_tag().is_none() {
+                let text = node.value().unwrap_or_default().trim();
+                if !naming.contains(&id) && !text.is_empty() {
+                    let _ = writeln!(out, "{}{text:?}", "  ".repeat(depth));
+                }
                 continue;
             }
             // Wrappers without semantics add depth but nothing to hear.
@@ -111,7 +122,7 @@ impl Window {
                 state!("popup", node.has_popup());
                 state!("orientation", node.orientation());
                 state!("invalid", node.invalid());
-                state!("value", node.value().filter(|_| role != "TextRun"));
+                state!("value", node.value());
                 state!("now", node.numeric_value());
                 state!("min", node.min_numeric_value());
                 state!("max", node.max_numeric_value());
@@ -185,9 +196,11 @@ Main
   Dialog "Uninstall Hollow Knight?" modal
     Button "Uninstall" [focus click]
 Footer
-  Status "Installing Celeste" live=Polite busy atomic
+  Status live=Polite busy atomic
+    "Installing Celeste"
     ProgressIndicator "Celeste" now=25.0 min=0.0 max=100.0
-  Alert "Couldn't reach RomM" live=Assertive atomic
+  Alert live=Assertive atomic
+    "Couldn't reach RomM"
 "#;
 
 #[test]
