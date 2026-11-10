@@ -56,12 +56,12 @@ plugin-new *args:
 # Build the starter add-on catalogue into <out> and check it (docs/plugins/publishing.md): just starter-catalogue [target/catalogue]
 starter-catalogue out="target/catalogue":
     flock /tmp/caskade-heavy.lock node plugins/examples/build.mjs playtime-stats howlongtobeat gamemode
-    flock /tmp/caskade-heavy.lock cargo run -q -p caskade-desktop --bin caskade-catalogue -- build scripts/addons/starter.json --out {{out}}
-    flock /tmp/caskade-heavy.lock cargo run -q -p caskade-desktop --bin caskade-catalogue -- check {{out}}/catalogue.json
+    flock /tmp/caskade-heavy.lock cargo run -q -p caskade-desktop --features dev-tools --bin caskade-catalogue -- build scripts/addons/starter.json --out {{out}}
+    flock /tmp/caskade-heavy.lock cargo run -q -p caskade-desktop --features dev-tools --bin caskade-catalogue -- check {{out}}/catalogue.json
 
 # Regenerate the TypeScript bindings (apps/desktop/src/api/bindings.ts)
 bindings:
-    flock /tmp/caskade-heavy.lock cargo run -q -p caskade-desktop --bin export-bindings
+    flock /tmp/caskade-heavy.lock cargo run -q -p caskade-desktop --features dev-tools --bin export-bindings
 
 # Extract translatable text into locales/<domain>.pot, merged into each locales/<lang>/<domain>.po: the Rust side's tr! calls (core), then the webview's (ui, app; needs GNU gettext)
 i18n:

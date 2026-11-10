@@ -12,7 +12,7 @@
     "tauri": "pnpm --filter @caskade/desktop tauri",
     "storybook": "pnpm --filter @caskade/storybook storybook",
     "build-storybook": "pnpm --filter @caskade/storybook build-storybook",
-    "bindings": "cargo run -q -p caskade-desktop --bin export-bindings",
+    "bindings": "cargo run -q -p caskade-desktop --features dev-tools --bin export-bindings",
     "i18n:extract": "pnpm --filter @caskade/i18n extract",
     "i18n:check": "pnpm --filter @caskade/i18n check",
     "i18n:compile": "pnpm --filter @caskade/i18n compile"

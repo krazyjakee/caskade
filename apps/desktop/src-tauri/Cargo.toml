@@ -12,6 +12,10 @@ autotests = false
 # The end-to-end harness's scripted pad driver (#153, `src/e2e.rs`). It
 # embeds the built frontend (`pnpm build` first).
 e2e = ["tauri/custom-protocol"]
+# The developer and CI tools below (#126): `just bindings` and the add-on
+# catalogue's maintainer tool. Off in release builds, so the bundles carry
+# only `caskade` (Tauri's bundler packs every binary it builds).
+dev-tools = []
 
 [lib]
 name = "caskade_desktop"
@@ -27,11 +31,13 @@ path = "src/main.rs"
 [[bin]]
 name = "export-bindings"
 path = "src/bin/export_bindings.rs"
+required-features = ["dev-tools"]
 
 # Builds and checks the add-on catalogue (`docs/plugins/publishing.md`).
 [[bin]]
 name = "caskade-catalogue"
 path = "src/bin/catalogue.rs"
+required-features = ["dev-tools"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }

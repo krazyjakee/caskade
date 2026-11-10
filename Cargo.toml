@@ -12,6 +12,11 @@ rust-version = "1.94"
 # carry none: full debug info made each test binary ~90% DWARF and dominated
 # link times. For debugger sessions, override with
 # CARGO_PROFILE_DEV_DEBUG=full (dependencies stay without).
+# Release builds drop debuginfo but keep symbol names, so a panic's
+# backtrace in a user's log still names functions (#126).
+[profile.release]
+strip = "debuginfo"
+
 [profile.dev]
 debug = "line-tables-only"
 

@@ -9,8 +9,8 @@ The catalogue lists Caskade plugins and themes only. It doesn't take Playnite ex
 `caskade-catalogue` (`apps/desktop/src-tauri/src/bin/catalogue.rs`) builds packages and checks catalogues with the code the app installs with:
 
 ```sh
-cargo run -p caskade-desktop --bin caskade-catalogue -- build <source.json> --out <dir> [--previous <published catalogue.json>]
-cargo run -p caskade-desktop --bin caskade-catalogue -- check <dir>/catalogue.json | <address> [--key <public key or .pub file> | --release-key]
+cargo run -p caskade-desktop --features dev-tools --bin caskade-catalogue -- build <source.json> --out <dir> [--previous <published catalogue.json>]
+cargo run -p caskade-desktop --features dev-tools --bin caskade-catalogue -- check <dir>/catalogue.json | <address> [--key <public key or .pub file> | --release-key]
 ```
 
 `just starter-catalogue [<dir>]` does both for the starter collection. It builds the example plugins first (`plugins/examples/build.mjs`).
