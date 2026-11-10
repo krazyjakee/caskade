@@ -69,6 +69,8 @@ pub fn VirtualLibrary(
     let mut moved = use_signal(|| 0u64);
     // A game to focus once its card is mounted.
     let pending_focus: Rc<RefCell<Option<usize>>> = use_hook(Rc::default);
+    // Renders spent waiting for it to mount.
+    let pending_tries: Rc<std::cell::Cell<u32>> = use_hook(Rc::default);
 
     // The library's changes load the shown pages again.
     use_hook({
@@ -199,6 +201,25 @@ pub fn VirtualLibrary(
     if let Some(node) = mounted {
         pending_focus.borrow_mut().take();
         input.focus(node);
+    } else if pending_focus.borrow().is_some() {
+        // Its row mounts with this render: look again a frame later, for a
+        // while (its page may still be loading).
+        let tries = pending_tries.get() + 1;
+        pending_tries.set(tries);
+        if tries <= 30 {
+            spawn(async move {
+                let _ = caskade_app::runtime::spawn(async {
+                    tokio::time::sleep(std::time::Duration::from_millis(16)).await;
+                })
+                .await;
+                moved += 1;
+            });
+        } else {
+            pending_focus.borrow_mut().take();
+        }
+    }
+    if pending_focus.borrow().is_none() {
+        pending_tries.set(0);
     }
 
     // LT/RT: a page at a time, or a letter at a time when sorted by title.

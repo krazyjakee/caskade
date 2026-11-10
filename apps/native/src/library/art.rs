@@ -75,3 +75,41 @@ fn cache() -> Option<&'static ArtworkCache> {
     let cache = ArtworkCache::new(services.paths.cache.join("artwork")).ok()?;
     Some(CACHE.get_or_init(|| cache))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use caskade_core::model::{ArtworkKind, ArtworkThumbnail};
+
+    #[test]
+    fn cards_and_rows_show_thumbnails_never_the_original() {
+        let mut cover = Artwork::new(
+            "g1",
+            ArtworkKind::Cover,
+            "ab12",
+            "igdb",
+            "ab12/original.webp",
+            1200,
+            1800,
+        );
+        let thumb = |size: u32| ArtworkThumbnail {
+            size,
+            path: format!("ab12/thumb-{size}.webp"),
+            width: size,
+            height: size * 3 / 2,
+        };
+        cover.thumbnails = vec![thumb(96), thumb(320), thumb(960)];
+        assert_eq!(
+            url(Some(&cover), Variant::Card).as_deref(),
+            Some("caskade-asset://localhost/ab12/thumb-320.webp")
+        );
+        assert_eq!(
+            url(Some(&cover), Variant::Icon).as_deref(),
+            Some("caskade-asset://localhost/ab12/thumb-96.webp")
+        );
+        // Without the thumbnail, no picture rather than the original.
+        cover.thumbnails = vec![thumb(960)];
+        assert_eq!(url(Some(&cover), Variant::Card), None);
+        assert_eq!(url(None, Variant::Card), None);
+    }
+}

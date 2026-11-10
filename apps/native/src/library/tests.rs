@@ -283,3 +283,55 @@ fn scrolling_the_list_keeps_its_rows_bounded() {
     // focused row wherever it is.
     assert!(most <= 19 + 12 + 1, "{most} rows mounted at once");
 }
+
+impl Window {
+    /// A pad action, as the app's events bring it.
+    fn pad(&mut self, action: caskade_ui_input::Action) {
+        use caskade_app::commands::input::InputActionEvent;
+        use caskade_input::{GlyphFamily, InputAction, Source};
+        let _ = crate::shell::events().send(caskade_app::events::Event::InputActionEvent(
+            InputActionEvent(InputAction {
+                action,
+                source: Source::Pad,
+                repeat: false,
+                glyphs: GlyphFamily::Xbox,
+            }),
+        ));
+        self.settle(Duration::from_millis(500));
+    }
+
+    /// The game focus is on.
+    fn focused_index(&self) -> Option<usize> {
+        let doc = self.doc.inner.borrow();
+        let node = doc.get_node(doc.get_focussed_node_id()?)?;
+        node.attr(LocalName::from("data-index"))?.parse().ok()
+    }
+}
+
+#[test]
+fn a_pad_pages_through_the_grid_and_focus_follows() {
+    use caskade_ui_input::Action;
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    let mut window = Window::open(Layout::Grid);
+    // A pad starts on the first game.
+    window.pad(Action::NavDown);
+    assert_eq!(window.focused_index(), Some(0));
+    // RT: a screen of whole rows further, scrolled to and focused.
+    let frame = Frame {
+        layout: Layout::Grid,
+        total: total(),
+        width: 1280.0,
+        height: 800.0,
+        scroll_top: 0.0,
+    };
+    let page = frame.per_page();
+    window.pad(Action::PageNext);
+    window.settle_until(|window| window.focused_index() == Some(page));
+    assert_eq!(window.scroll_top(), frame.top_of(page));
+    window.pad(Action::PageNext);
+    window.settle_until(|window| window.focused_index() == Some(2 * page));
+    // LT: back again.
+    window.pad(Action::PagePrev);
+    window.settle_until(|window| window.focused_index() == Some(page));
+}
