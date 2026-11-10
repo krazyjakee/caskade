@@ -268,7 +268,9 @@ Sunshine installed (W8 installs one). To find a game's id, open
   lists Caskade, and it starts at sign-in on Collections. With Start minimized
   on too, the next sign-in leaves only the tray icon; a click on it, or
   starting Caskade again, shows the window. Turning Launch on system startup
-  off deletes the value. (#114)
+  off deletes the value. A debug build in the Windows 10 VM passed all of
+  this except the installed build, Task Manager and the tray click (10 Nov,
+  #114's comments). (#114)
 
 ## One PC with your store accounts
 
