@@ -109,10 +109,33 @@ fn main() {
         keeper.save();
     }
     shell::stop();
-    if ui.is_err() {
+    if let Err(panic) = ui {
+        if no_renderer(caskade_app::background::panic_message(&*panic)) {
+            tracing::error!("no GPU renderer for the window: Caskade won't restart it");
+            eprintln!(
+                "Caskade couldn't draw its window: no graphics adapter it can use was found. \
+                 Install your GPU's driver, or Mesa's software rendering (lavapipe), and start \
+                 Caskade again."
+            );
+            std::process::exit(1);
+        }
         restart_after_panic(&restarts);
     }
     tracing::info!("Caskade (native) quit");
+}
+
+/// Whether a panic is the renderer finding no graphics adapter or surface
+/// (wgpu's errors, as Blitz's vello_hybrid renderer reports them). A new
+/// process wouldn't find one either, so it doesn't restart; choosing a CPU
+/// renderer then is BLITZ-31 (#110).
+fn no_renderer(message: &str) -> bool {
+    [
+        "RequestAdapterError",
+        "Error creating DeviceHandle",
+        "WgpuCreateSurfaceError",
+    ]
+    .iter()
+    .any(|wgpu| message.contains(wgpu))
 }
 
 /// The UI panicked (`background::log_panics` logged where). One event loop
@@ -237,4 +260,19 @@ fn startup_failed(what: &str, error: &dyn std::fmt::Display) -> ! {
     tracing::error!(%error, "{what}");
     eprintln!("{what}: {error}");
     std::process::exit(1)
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn only_wgpu_finding_no_renderer_stops_the_restarts() {
+        for message in [
+            "Error creating DeviceHandle: RequestAdapterError(NotFound { .. })",
+            "Error creating surface: WgpuCreateSurfaceError(CreateSurfaceError { .. })",
+        ] {
+            assert!(super::no_renderer(message), "{message}");
+        }
+        assert!(!super::no_renderer("smoke: a panic in the UI"));
+        assert!(!super::no_renderer("index out of bounds"));
+    }
 }
