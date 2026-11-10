@@ -23,7 +23,8 @@
       "!packages/tokens/manifest.json",
       "!packages/ui/anatomy.json",
       "!apps/native-proto/assets",
-      "!apps/native/assets/app.css"
+      "!apps/native/assets/app.css",
+      "!locales/native.json"
     ]
   },
   "formatter": {
