@@ -111,6 +111,9 @@ jobs:
         env:
           TARGET: ${{ matrix.target }}
         run: |
+          # The MSVC runtime linked in, as the Tauri CLI links it into
+          # caskade.exe: a fresh Windows has no VCRUNTIME140.dll.
+          case "$TARGET" in *-windows-msvc) export RUSTFLAGS="${RUSTFLAGS:-} -C target-feature=+crt-static" ;; esac
           cargo build --release --locked -p caskade-native --target "$TARGET"
           exe=
           case "$TARGET" in *-windows-*) exe=.exe ;; esac
