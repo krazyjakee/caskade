@@ -18,6 +18,10 @@ skia = ["dioxus-native/skia"]
 # for a manual run on another OS; debug builds always have them.
 smoke = []
 
+[build-dependencies]
+# The Windows exe's manifest and icon (`build.rs`), as Tauri's build embeds.
+embed-resource = "3"
+
 [[bin]]
 name = "caskade-native"
 path = "src/main.rs"

@@ -111,6 +111,7 @@ fn main() {
     tray::follow(core.settings.clone());
     // Caskade's own updates: checked in the background.
     updater::watch(core.settings.clone());
+    smoke::general(&core.settings);
     let general: caskade_core::settings::GeneralSettings =
         caskade_app::runtime::block_on(core.settings.read_or_default("core.general"));
     let hidden =

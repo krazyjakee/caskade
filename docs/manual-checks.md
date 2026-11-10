@@ -121,6 +121,31 @@ host's games waited up to ten minutes, and Look again didn't look.
 runner (`.github/workflows/across-networks.yml`) so this PC's address stays out
 of a public log.
 
+## What ran for the native app (10 Nov 2026)
+
+`caskade-native` (#88), debug builds of `master`: on this PC under Xvfb with
+openbox, a private session bus and a stand-in tray watcher that asks for an
+icon's properties as xapp's does, and in the Windows 10 VM with an exe
+cross-built for `x86_64-pc-windows-gnu`. Settings came from
+`CASKADE_NATIVE_SMOKE_GENERAL` and quits from `CASKADE_NATIVE_SMOKE_QUIT`.
+
+| Check | Result |
+| --- | --- |
+| Tray, Linux | The icon came up with Show Caskade and Quit Caskade. Show showed the window. Quit exited 0, and the icon answered the watcher before Caskade left (Cinnamon's ordering) |
+| Close to the tray | Linux and Windows: closing the window hid it and Caskade kept running |
+| One instance | Linux: a second start exited 0 and showed the first one's window. Windows: `start caskade://install?url=…`, opened by the OS, showed the running window and queued the install for confirmation |
+| `caskade://` links, Windows | With `--register-links`, HKCU's URL protocol pointed at the exe |
+| Startup | Linux: the autostart entry ran `caskade-native --login`, a `--login` start stayed in the tray with no window, and Show showed it. Windows: the Run value `"…\caskade-native.exe" --login` was written, a `--login` start had no window, a link showed it, and turning the setting off deleted the value |
+| Dialogs, Windows | The exe didn't start until it carried a Common Controls 6 manifest (rfd's dialogs need it): `build.rs` embeds one now |
+
+Not proved here: the Windows tray icon's own click and menu (the VM's
+taskbar couldn't be read; the close hid the window, and that happens only
+once the icon is up), a real Cinnamon session, the file pickers and the
+startup dialogs by hand, and self-update. No native bundle is published, so
+every native copy is a development build and says it doesn't update; the
+feed, signature check and install are unit-tested with a throwaway key.
+macOS is M5.
+
 ## One Linux PC
 
 About 1½ hours. Needs: a Linux PC with no Sunshine installed (L3–L5), a
@@ -198,6 +223,23 @@ debug build for L1 and L7 (`just dev`), and Sunshine installed by you for L6.
   **Pass:** turning Launch on system startup on asks through the desktop's
   background permission once, and `~/.config/autostart/` gets an entry that
   runs `flatpak run … --login`; the rest as L9. (#114)
+- [ ] **L11.** The native app (#88), on a real Cinnamon desktop and then on
+  GNOME (with its AppIndicator extension) or KDE. In the Tauri app set
+  Settings → General → Close button to Hide to tray (the native app has no
+  Settings yet; both read the same settings), then quit it. Build
+  `cargo build --release -p caskade-native` and run
+  `target/release/caskade-native --register-links`. **Pass:** the tray icon
+  is there; a left click on it, and its Show Caskade, show the window;
+  closing the window hides it; starting it again shows the running one's
+  window and returns at once;
+  `xdg-open 'caskade://install?url=https://example.com/game.zip'` brings the
+  window up and logs "deep link awaits confirmation"; Quit Caskade quits,
+  five times in a row, with no "Cinnamon crashed". With Launch on system
+  startup and Start minimized on, logging in starts it in the tray with no
+  window. Afterwards turn Launch on system startup off and on in the Tauri
+  app, delete `~/.local/share/applications/caskade-links.desktop`, and make
+  Caskade the `x-scheme-handler/caskade` default again
+  (`xdg-mime default <its .desktop file> x-scheme-handler/caskade`). (#88)
 
 ## One Windows PC
 
@@ -271,6 +313,19 @@ Sunshine installed (W8 installs one). To find a game's id, open
   off deletes the value. A debug build in the Windows 10 VM passed all of
   this except the installed build, Task Manager and the tray click (10 Nov,
   #114's comments). (#114)
+- [ ] **W12.** The native app (#88). Set Close button to Hide to tray in the
+  Tauri app, quit it, and run a release `caskade-native.exe` (built on
+  Windows with `cargo build --release -p caskade-native`, or cross-built)
+  with `--register-links`. **Pass:** its icon is in the notification area; a
+  left click shows the window, a right click opens Show Caskade and Quit
+  Caskade, and both do what they say; closing the window hides it; starting
+  it again shows the running one's window; `start "" "caskade://install?url=https://example.com/game.zip"`
+  brings it up. With Launch on system startup and Start minimized on, a
+  sign-in leaves only its tray icon. The Windows 10 VM passed all of this but
+  the tray icon's click and menu (10 Nov, above). Afterwards turn Launch on
+  system startup off and on in the Tauri app, and set
+  `HKCU\Software\Classes\caskade\shell\open\command` back to
+  `"<install folder>\caskade.exe" "%1"`. (#88)
 
 ## One PC with your store accounts
 
@@ -517,6 +572,18 @@ About 2 hours. Needs: a Mac, plus the Linux and Windows PCs.
   Background, and Caskade starts at login in the menu bar with no window; the
   menu's Show or a Dock click shows it, on the Library. Turning the setting
   off removes the file. (#114)
+- [ ] **M5.** The native app (#88). Set Close button to Hide to tray in the
+  Tauri app and quit it, then build `cargo build --release -p caskade-native`
+  on the Mac and run `target/release/caskade-native`. **Pass:** the menu bar
+  has Caskade (About Caskade, Services, Hide Caskade, Hide Others, Show All,
+  Quit Caskade), Edit and Window menus; the menu bar icon is a template
+  image (it follows light and dark), and a click on it opens Show Caskade
+  and Quit Caskade; closing the window hides it and Show brings it back;
+  ⌘Q quits; starting it again shows the running one's window and returns.
+  With Launch on system startup and Start minimized on, logging out and in
+  starts it with only the menu bar icon. Afterwards turn Launch on system
+  startup off and on in the Tauri app. `caskade://` links and self-update
+  need a native bundle, which isn't built yet. (#88)
 
 ## Boxes no check here covers
 
@@ -581,6 +648,7 @@ Tick or decide these on the issue itself:
 | #34 Nearby downloads for emulators and data (closed; optional) | 277 | O2, O3 |
 | #71 Idle memory with a large library | — | L8 |
 | #114 Startup settings | — | L9, L10, W11, M4 |
+| #88 The native app's shell | — | L11, W12, M5 |
 
 Issues marked closed were met by the tests their Validation sections ask for
 or by the virtual machine runs above, so their checks now only confirm them on

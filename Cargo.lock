@@ -1994,6 +1994,7 @@ dependencies = [
  "caskade-player",
  "caskade-ui-data",
  "dioxus-native",
+ "embed-resource",
  "gtk",
  "image",
  "libappindicator-sys",

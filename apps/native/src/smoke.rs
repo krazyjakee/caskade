@@ -4,6 +4,8 @@
 //! are up, `CASKADE_NATIVE_SMOKE_WEB_URL=<url>` adds a web game at `url` and
 //! plays it (for a manual run on another OS), `CASKADE_NATIVE_SMOKE_VIDEO=<YouTube
 //! id>` opens the video window,
+//! `CASKADE_NATIVE_SMOKE_GENERAL=<json>` merges into `core.general` before
+//! the window opens (Start minimized, launch at login), and
 //! `CASKADE_NATIVE_SMOKE_QUIT=<seconds>` quits as closing the window does,
 //! and `CASKADE_NATIVE_SMOKE_PANIC=1` panics in the window's UI (crash
 //! recovery). Release builds ignore them unless built with the `smoke` feature.
@@ -18,6 +20,33 @@ fn var(name: &str) -> Option<String> {
         return None;
     }
     std::env::var(name).ok().filter(|value| !value.is_empty())
+}
+
+/// Before the window opens: `core.general` changed as asked.
+pub fn general(settings: &caskade_core::settings::SettingsService) {
+    let Some(change) = var("CASKADE_NATIVE_SMOKE_GENERAL") else {
+        return;
+    };
+    let changed = caskade_app::runtime::block_on(async {
+        let current = settings
+            .get("core.general")
+            .await
+            .map_err(|error| error.to_string())?;
+        let mut value = current.value;
+        let change: serde_json::Value =
+            serde_json::from_str(&change).map_err(|error| error.to_string())?;
+        if let (Some(value), Some(change)) = (value.as_object_mut(), change.as_object()) {
+            value.extend(change.clone());
+        }
+        settings
+            .set("core.general", value, None)
+            .await
+            .map_err(|error| error.to_string())
+    });
+    match changed {
+        Ok(_) => tracing::info!("smoke: core.general changed"),
+        Err(error) => tracing::error!(%error, "smoke: core.general unchanged"),
+    }
 }
 
 /// Once the services are up.
