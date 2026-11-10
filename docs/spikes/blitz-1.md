@@ -59,7 +59,11 @@ doesn't set it).
   on the clipped one; the placeholders' colours within 30 of (220, 0, 0)
   and (117, 117, 117) and their extents within a few pixels; black text
   when there's a value. The two images differ in 247 of 104,000 pixels
-  (anti-aliasing; at most 58 in a channel).
+  (anti-aliasing; at most 58 in a channel). A second page does it with
+  the app's stylesheet and classes (`truncate text-sm font-semibold`, the
+  text field's `placeholder:text-fg-subtle`): the title's ellipsis lands
+  where Chromium's does and the placeholder is the default theme's
+  `--cs-color-fg-subtle` in both (`tests/text/chromium-app.png`).
 - `apps/native/tests/text_display.rs`: headless, a cut title's layout has
   its ellipsis and a short one has none; a placeholder shows when empty
   and focused, not while composing or with a value, comes back when

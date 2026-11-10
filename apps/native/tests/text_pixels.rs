@@ -5,7 +5,9 @@
 //! writes); a title cut with `text-overflow: ellipsis` ends in three dots
 //! where Chromium's does, a clipped one doesn't, and a placeholder shows
 //! in its `::placeholder` colour (or the default grey) only while its
-//! field is empty.
+//! field is empty. A second page does the same with the app's own
+//! stylesheet and classes (`truncate`, `placeholder:text-fg-subtle`): the
+//! placeholder takes the theme's muted colour.
 //!
 //! `cargo test -p caskade-native --features shots --test text_pixels`
 
@@ -33,6 +35,12 @@ const FILLED: Rect = (20, 200, 220, 30);
 type Rect = (u32, u32, u32, u32);
 
 const TITLE: &str = "The Legend of a Very Long Game Title";
+
+/// The app's stylesheet, with the default theme's tokens.
+const APP_CSS: &str = include_str!("../assets/app.css");
+/// On the app's page: a card's title and a text field, with its classes.
+const APP_TITLE: Rect = (20, 20, 150, 24);
+const APP_FIELD: Rect = (20, 60, 220, 30);
 
 fn page() -> Element {
     let place = |(left, top, width, height): Rect| {
@@ -79,8 +87,33 @@ fn fonts() -> blitz_dom::FontContext {
     fonts
 }
 
-/// Blitz's rendering, and the page as HTML for Chromium.
-fn render() -> (RgbaImage, String) {
+fn app_page() -> Element {
+    rsx! {
+        style { "{APP_CSS}" }
+        style { "body {{ margin: 0; background: #fff; }}" }
+        p {
+            class: "truncate text-sm font-semibold",
+            style: "position: absolute; left: {APP_TITLE.0}px; top: {APP_TITLE.1}px; width: {APP_TITLE.2}px; height: {APP_TITLE.3}px; font-family: '{FAMILY}'; line-height: 24px; color: #000;",
+            "{TITLE}"
+        }
+        input {
+            class: "w-full min-w-0 bg-transparent text-sm placeholder:text-fg-subtle focus:outline-none",
+            style: "position: absolute; left: {APP_FIELD.0}px; top: {APP_FIELD.1}px; width: {APP_FIELD.2}px; height: {APP_FIELD.3}px; padding: 0 6px; font-family: '{FAMILY}';",
+            placeholder: "Search games",
+        }
+    }
+}
+
+/// The default theme's muted text colour (`--cs-color-fg-subtle`).
+fn fg_subtle() -> [u8; 3] {
+    let at = APP_CSS.find("--cs-color-fg-subtle: #").expect("the token") + 23;
+    let hex = &APP_CSS[at..at + 6];
+    let channel = |i: usize| u8::from_str_radix(&hex[i..i + 2], 16).unwrap();
+    [channel(0), channel(2), channel(4)]
+}
+
+/// Blitz's rendering of a page, and the page as HTML for Chromium.
+fn render(page: fn() -> Element) -> (RgbaImage, String) {
     let mut document = DioxusDocument::new(
         VirtualDom::new(page),
         DocumentConfig {
@@ -185,20 +218,27 @@ fn close(a: [u8; 3], b: [u8; 3], by: u8) -> bool {
     a.iter().zip(b).all(|(x, y)| x.abs_diff(y) <= by)
 }
 
-#[test]
-fn cut_titles_and_placeholders_look_as_in_chromium() {
-    let (blitz, html) = render();
+/// Blitz's rendering of `page` and Chromium's (`tests/text/<name>.png`);
+/// with `CASKADE_TEXT_PAGE`, writes the page there for Chromium.
+fn renders(name: &str, page: fn() -> Element) -> (RgbaImage, RgbaImage) {
+    let (blitz, html) = render(page);
     if let Some(out) = std::env::var_os("CASKADE_TEXT_PAGE") {
         let out = Path::new(&out);
-        std::fs::write(out.join("page.html"), html).unwrap();
+        std::fs::write(out.join(format!("{name}.html")), html).unwrap();
         std::fs::write(out.join("inter.woff2"), FONT).unwrap();
-        blitz.save(out.join("blitz.png")).unwrap();
+        blitz.save(out.join(format!("{name}-blitz.png"))).unwrap();
     }
-    let chromium =
-        image::open(Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/text/chromium.png"))
-            .expect("tests/text/chromium.png (scripts/text-oracle.sh)")
-            .into_rgba8();
+    let path = format!("tests/text/{name}.png");
+    let chromium = image::open(Path::new(env!("CARGO_MANIFEST_DIR")).join(&path))
+        .unwrap_or_else(|error| panic!("{path} (scripts/text-oracle.sh): {error}"))
+        .into_rgba8();
     assert_eq!(chromium.dimensions(), (WIDTH, HEIGHT));
+    (blitz, chromium)
+}
+
+#[test]
+fn cut_titles_and_placeholders_look_as_in_chromium() {
+    let (blitz, chromium) = renders("chromium", page);
     let both = |rect: Rect| {
         let blitz = ink(&blitz, rect).expect("Blitz drew the case");
         let chromium = ink(&chromium, rect).expect("Chromium drew the case");
@@ -239,6 +279,37 @@ fn cut_titles_and_placeholders_look_as_in_chromium() {
     assert!(close(c.darkest, [0, 0, 0], 40), "Chromium {c:?}");
     assert!(
         b.right.abs_diff(c.right) <= 2,
+        "Blitz {b:?}, Chromium {c:?}"
+    );
+}
+
+#[test]
+fn the_apps_classes_cut_titles_and_mute_placeholders_as_in_chromium() {
+    let (blitz, chromium) = renders("chromium-app", app_page);
+    let both = |rect: Rect| {
+        let blitz = ink(&blitz, rect).expect("Blitz drew the case");
+        let chromium = ink(&chromium, rect).expect("Chromium drew the case");
+        (blitz, chromium)
+    };
+    let (b, c) = both(APP_TITLE);
+    assert_eq!((b.dots, c.dots), (3, 3), "Blitz {b:?}, Chromium {c:?}");
+    assert!(
+        b.right.abs_diff(c.right) <= 3,
+        "Blitz {b:?}, Chromium {c:?}"
+    );
+    let (b, c) = both(APP_FIELD);
+    let muted = fg_subtle();
+    assert!(
+        close(c.darkest, muted, 30),
+        "Chromium {c:?}, the token {muted:?}"
+    );
+    assert!(
+        close(b.darkest, muted, 30),
+        "Blitz {b:?}, the token {muted:?}"
+    );
+    assert!(b.left.abs_diff(c.left) <= 1, "Blitz {b:?}, Chromium {c:?}");
+    assert!(
+        b.right.abs_diff(c.right) <= 4,
         "Blitz {b:?}, Chromium {c:?}"
     );
 }
