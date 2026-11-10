@@ -41,6 +41,8 @@ url = "2"
 windows-registry = "0.6"
 
 [dev-dependencies]
+# `test_programs`: programs a test writes and runs without ETXTBSY (#118).
+caskade-core = { path = "../caskade-core", features = ["test-utils"] }
 tempfile = "=3.27.0"
 
 [lints]

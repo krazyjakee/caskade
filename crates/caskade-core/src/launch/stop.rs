@@ -355,7 +355,7 @@ mod tests {
     /// started on the machine.
     async fn play(folder: &std::path::Path, script: String) -> Playing {
         let program = folder.join("game");
-        std::fs::copy("/bin/sh", &program).unwrap();
+        crate::test_programs::copy_program("/bin/sh", &program);
         let game = entry(program, vec!["-c".into(), script], Some(folder.to_owned()));
         let store = Arc::new(MemoryStore::default());
         store

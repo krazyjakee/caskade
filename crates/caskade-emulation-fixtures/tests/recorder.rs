@@ -124,7 +124,14 @@ fn generated_script_uses_the_same_record_contract_without_a_runtime_compiler() {
     // Use a subprocess to remove the CI override, never mutate global env.
     let temp = tempfile::tempdir().unwrap();
     let script = temp.path().join("script emulator");
-    fs::write(&script, include_bytes!("../src/recorder.sh")).unwrap();
+    // Through `cp`, so this process never holds the program open for
+    // writing while another test forks (#118, ETXTBSY).
+    let status = std::process::Command::new("cp")
+        .arg(concat!(env!("CARGO_MANIFEST_DIR"), "/src/recorder.sh"))
+        .arg(&script)
+        .status()
+        .unwrap();
+    assert!(status.success());
     use std::os::unix::fs::PermissionsExt;
     fs::set_permissions(&script, fs::Permissions::from_mode(0o755)).unwrap();
     let fake = FakeEmulator::from_binary(&script).unwrap();

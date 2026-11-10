@@ -46,14 +46,13 @@ async fn service() -> (crate::db::LibraryStore, InstallService) {
 fn game(dir: &Path) -> String {
     std::fs::create_dir_all(dir).unwrap();
     let exe = dir.join("fixture-runner.x86_64");
-    std::fs::copy(
+    crate::test_programs::copy_program(
         concat!(
             env!("CARGO_MANIFEST_DIR"),
             "/../caskade-installer/tests/fixtures/bin/fixture-game-linux-x86_64"
         ),
         &exe,
-    )
-    .unwrap();
+    );
     std::fs::set_permissions(&exe, std::fs::Permissions::from_mode(0o755)).unwrap();
     std::fs::write(dir.join("data.pak"), vec![7u8; 4096]).unwrap();
     dir.to_string_lossy().into_owned()

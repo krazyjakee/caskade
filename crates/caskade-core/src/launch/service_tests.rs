@@ -12,14 +12,13 @@ use std::{fs, sync::Arc, time::Duration};
 async fn installer_fixture_game_records_session_and_ordered_events() {
     let t = tempfile::tempdir().unwrap();
     let exe = t.path().join("fixture-game");
-    fs::copy(
+    crate::test_programs::copy_program(
         concat!(
             env!("CARGO_MANIFEST_DIR"),
             "/../caskade-installer/tests/fixtures/bin/fixture-game-linux-x86_64"
         ),
         &exe,
-    )
-    .unwrap();
+    );
     let token = t.path().join("token");
     let entry = entry(
         exe,
@@ -58,7 +57,7 @@ async fn installer_fixture_game_records_session_and_ordered_events() {
 async fn forked_game_outlives_launcher_and_duplicate_launch_is_rejected() {
     let t = tempfile::tempdir().unwrap();
     let exe = t.path().join("game");
-    fs::copy("/bin/sleep", &exe).unwrap();
+    crate::test_programs::copy_program("/bin/sleep", &exe);
     let entry = entry(
         "/bin/sh".into(),
         vec![
@@ -94,7 +93,7 @@ async fn forked_game_outlives_launcher_and_duplicate_launch_is_rejected() {
 async fn restart_reattaches_to_child_without_creating_second_session() {
     let t = tempfile::tempdir().unwrap();
     let exe = t.path().join("game");
-    fs::copy("/bin/sleep", &exe).unwrap();
+    crate::test_programs::copy_program("/bin/sleep", &exe);
     let entry = entry(exe, vec!["0.8".into()], Some(t.path().into()));
     let store = Arc::new(MemoryStore::default());
     store
@@ -359,15 +358,13 @@ async fn a_web_game_plays_in_the_game_window_process() {
     let dir = tempfile::tempdir().unwrap();
     let script = dir.path().join("caskade");
     let seen = dir.path().join("args");
-    fs::write(
+    crate::test_programs::write_program(
         &script,
         format!(
             "#!/bin/sh\nprintf '%s\\n' \"$@\" > '{}'\nsleep 0.3\n",
             seen.display()
         ),
-    )
-    .unwrap();
-    fs::set_permissions(&script, std::os::unix::fs::PermissionsExt::from_mode(0o755)).unwrap();
+    );
     let store = Arc::new(MemoryStore::default());
     let mut entry = entry("unused".into(), vec![], None);
     entry.launch = Some(crate::model::LaunchSpec::Web {
@@ -415,15 +412,13 @@ async fn a_web_game_ends_when_its_window_closes() {
     let dir = tempfile::tempdir().unwrap();
     let script = dir.path().join("caskade");
     let left = dir.path().join("left");
-    fs::write(
+    crate::test_programs::write_program(
         &script,
         format!(
             "#!/bin/sh\nsleep 5 &\necho $! > '{}'\nsleep 0.3\n",
             left.display()
         ),
-    )
-    .unwrap();
-    fs::set_permissions(&script, std::os::unix::fs::PermissionsExt::from_mode(0o755)).unwrap();
+    );
     let store = Arc::new(MemoryStore::default());
     let mut entry = entry("unused".into(), vec![], None);
     entry.launch = Some(crate::model::LaunchSpec::Web {

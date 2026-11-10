@@ -1,4 +1,5 @@
 #![cfg(unix)]
+use crate::test_programs::copy_program;
 use crate::tracking::{
     ProcessIdentity, ProcessMonitor, ProcessSnapshot, ProcessTracker, TrackingTarget,
 };
@@ -14,7 +15,7 @@ async fn real_alias_launcher_forks_game_and_parent_exits_first() {
     let t = tempfile::tempdir().unwrap();
     let game = t.path().join("Café Game");
     fs::create_dir(&game).unwrap();
-    fs::copy("/bin/sleep", game.join("fixture-child")).unwrap();
+    copy_program("/bin/sleep", game.join("fixture-child"));
     let aliases = AliasStore::new(t.path().join("aliases"));
     let alias = aliases.link("fixture", &game).unwrap();
     let monitor = ProcessMonitor::default();
@@ -61,7 +62,7 @@ async fn real_alias_launcher_forks_game_and_parent_exits_first() {
 async fn tracking_polls_reread_a_process_that_execs() {
     let t = tempfile::tempdir().unwrap();
     let game = fs::canonicalize(t.path()).unwrap().join("fixture-game");
-    fs::copy("/bin/sleep", &game).unwrap();
+    copy_program("/bin/sleep", &game);
     let monitor = ProcessMonitor::default();
     let baseline = Arc::new(identities(&monitor.snapshot().await.unwrap()));
     let mut launcher = tokio::process::Command::new("/bin/sh")
@@ -101,7 +102,7 @@ mod clock_step {
     /// A running copy of `sleep` from `dir`, and that copy's path.
     async fn game(dir: &std::path::Path) -> (tokio::process::Child, std::path::PathBuf) {
         let game = dir.join("fixture-game");
-        fs::copy("/bin/sleep", &game).unwrap();
+        copy_program("/bin/sleep", &game);
         let running = tokio::process::Command::new(&game)
             .arg("30")
             .kill_on_drop(true)

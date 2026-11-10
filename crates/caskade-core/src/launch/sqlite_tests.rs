@@ -17,14 +17,13 @@ async fn managed_fixture_launch_uses_alias_and_persists_relative_entry_and_sessi
     let root = temp.path().join("storage");
     let game_dir = root.join("Café Game");
     fs::create_dir_all(&game_dir).unwrap();
-    fs::copy(
+    crate::test_programs::copy_program(
         concat!(
             env!("CARGO_MANIFEST_DIR"),
             "/../caskade-installer/tests/fixtures/bin/fixture-game-linux-x86_64"
         ),
         game_dir.join("game"),
-    )
-    .unwrap();
+    );
     let token = temp.path().join("token");
     let store = LibraryStore::in_memory().await.unwrap();
     caskade_installer::manifest::RootManifest::new("fixture-root")
@@ -87,7 +86,7 @@ async fn sqlite_open_session_survives_service_restart_and_preserves_uniqueness()
     let temp = tempfile::tempdir().unwrap();
     let game_dir = temp.path().join("game");
     fs::create_dir(&game_dir).unwrap();
-    fs::copy("/bin/sleep", game_dir.join("game")).unwrap();
+    crate::test_programs::copy_program("/bin/sleep", game_dir.join("game"));
     let db = temp.path().join("library.db");
     let store = LibraryStore::open(&db).await.unwrap();
     let game = Game::new("Sleep fixture");

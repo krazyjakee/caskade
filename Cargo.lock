@@ -1697,6 +1697,7 @@ dependencies = [
  "async-trait",
  "base64 0.22.1",
  "cap-std",
+ "caskade-core",
  "caskade-discovery",
  "caskade-emulation-fixtures",
  "caskade-i18n",

@@ -47,12 +47,10 @@ fn managed_executable_symlink_cannot_escape_root() {
 #[cfg(unix)]
 #[tokio::test]
 async fn a_missing_flatpak_app_is_named_before_the_launch() {
-    use std::os::unix::fs::PermissionsExt;
     let t = tempfile::tempdir().unwrap();
     let stand_in = |name: &str, script: &str| {
         let path = t.path().join(name);
-        std::fs::write(&path, format!("#!/bin/sh\n{script}\n")).unwrap();
-        std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o755)).unwrap();
+        crate::test_programs::write_program(&path, format!("#!/bin/sh\n{script}\n"));
         path
     };
     let installed = stand_in("installed", "exit 0");

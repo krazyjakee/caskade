@@ -17,14 +17,13 @@ async fn finished(service: &InstallService, id: &str) -> JobSnapshot {
 fn release(dir: &Path, files: &[(&str, &[u8])]) -> String {
     std::fs::create_dir_all(dir).unwrap();
     let exe = dir.join("fixture-runner.x86_64");
-    std::fs::copy(
+    crate::test_programs::copy_program(
         concat!(
             env!("CARGO_MANIFEST_DIR"),
             "/../caskade-installer/tests/fixtures/bin/fixture-game-linux-x86_64"
         ),
         &exe,
-    )
-    .unwrap();
+    );
     std::fs::set_permissions(&exe, std::fs::Permissions::from_mode(0o755)).unwrap();
     for (path, bytes) in files {
         std::fs::write(dir.join(path), bytes).unwrap();

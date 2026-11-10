@@ -87,12 +87,33 @@ pub(crate) fn write(path: &Path, bytes: impl AsRef<[u8]>) -> io::Result<()> {
     fs::write(path, bytes)
 }
 
+/// Writes a program the tests run. On Unix this process never holds `path`
+/// open for writing (#118, as `caskade_core::test_programs`): a child that
+/// another test thread forks while the file is open inherits the write fd
+/// until it execs, and running `path` then fails with ETXTBSY. The bytes go
+/// to a scratch file beside it, and `cp`, a process of its own, writes the
+/// program.
 pub(crate) fn executable(path: &Path, bytes: impl AsRef<[u8]>) -> io::Result<()> {
-    write(path, bytes)?;
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-        fs::set_permissions(path, fs::Permissions::from_mode(0o755))?;
+        let name = path
+            .file_name()
+            .ok_or_else(|| io::Error::other("a program needs a file name"))?
+            .to_string_lossy();
+        let scratch = path.with_file_name(format!(".{name}.writing"));
+        write(&scratch, bytes)?;
+        let copied = std::process::Command::new("cp")
+            .arg(&scratch)
+            .arg(path)
+            .status();
+        fs::remove_file(&scratch)?;
+        let status = copied?;
+        if !status.success() {
+            return Err(io::Error::other(format!("cp failed: {status}")));
+        }
+        fs::set_permissions(path, fs::Permissions::from_mode(0o755))
     }
-    Ok(())
+    #[cfg(not(unix))]
+    write(path, bytes)
 }

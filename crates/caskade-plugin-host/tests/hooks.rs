@@ -291,7 +291,7 @@ async fn a_trapping_plugin_does_not_stop_a_real_launch() {
     let s = setup(&[("dev.test.crashy", wrapper(true, &[]))]).await;
     let game_dir = s.temp.path().join("game");
     std::fs::create_dir_all(&game_dir).unwrap();
-    std::fs::copy("/bin/true", game_dir.join("game")).unwrap();
+    caskade_core::test_programs::copy_program("/bin/true", game_dir.join("game"));
     let game = Game::new("Fixture");
     s.store.upsert_game(&game).await.unwrap();
     let mut entry = GameEntry::new(&game.id, SourceId::new("fixture"), "fixture");

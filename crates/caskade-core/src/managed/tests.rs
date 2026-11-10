@@ -114,18 +114,13 @@ async fn fixture(server: &MockServer, host: Host) -> Fixture {
     // installed succeeds.
     let flatpak = temp.path().join("flatpak");
     let log = temp.path().join("flatpak.log");
-    std::fs::write(
+    crate::test_programs::write_program(
         &flatpak,
         format!(
             "#!/bin/sh\necho \"$*\" >> '{log}'\ncase \"$1\" in\n  install) touch '{log}.installed' ;;\n  uninstall) rm -f '{log}.installed' ;;\n  info) test -e '{log}.installed' ;;\nesac\n",
             log = log.display()
         ),
-    )
-    .unwrap();
-    {
-        use std::os::unix::fs::PermissionsExt;
-        std::fs::set_permissions(&flatpak, std::fs::Permissions::from_mode(0o755)).unwrap();
-    }
+    );
     let tools = ManagedTools::new(store, Bus::new(BusOptions::default()), catalog, &paths)
         .with_host(host, hosts, flatpak);
     Fixture { temp, tools }

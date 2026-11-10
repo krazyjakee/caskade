@@ -39,14 +39,13 @@ async fn setup(root: &Path) -> (LibraryStore, InstallService, LaunchService) {
 }
 fn executable(path: &Path) {
     use std::os::unix::fs::PermissionsExt;
-    std::fs::copy(
+    crate::test_programs::copy_program(
         concat!(
             env!("CARGO_MANIFEST_DIR"),
             "/../caskade-installer/tests/fixtures/bin/fixture-game-linux-x86_64"
         ),
         path,
-    )
-    .unwrap();
+    );
     std::fs::set_permissions(path, std::fs::Permissions::from_mode(0o755)).unwrap();
 }
 #[tokio::test(flavor = "multi_thread")]

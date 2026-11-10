@@ -270,7 +270,7 @@ fn the_linux_command_is_constants_and_step_names() {
 #[cfg(unix)]
 mod script {
     use super::*;
-    use std::{os::unix::fs::PermissionsExt, path::Path, process::Command};
+    use std::{path::Path, process::Command};
 
     struct Root {
         temp: tempfile::TempDir,
@@ -285,15 +285,13 @@ mod script {
             for (name, fails) in [("modprobe", modprobe_fails), ("udevadm", false)] {
                 let path = bin.join(name);
                 let exit = if fails { 1 } else { 0 };
-                std::fs::write(
+                caskade_core::test_programs::write_program(
                     &path,
                     format!(
                         "#!/bin/sh\necho \"{name} $*\" >> '{}'\nexit {exit}\n",
                         log.display()
                     ),
-                )
-                .unwrap();
-                std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o755)).unwrap();
+                );
             }
             Self { temp }
         }

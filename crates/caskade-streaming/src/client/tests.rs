@@ -113,18 +113,13 @@ pub(crate) async fn client_with(
         gamescope: false,
     };
     let flatpak = temp.path().join("flatpak");
-    std::fs::write(
+    caskade_core::test_programs::write_program(
         &flatpak,
         format!(
             "#!/bin/sh\necho \"$*\" >> '{}'\n[ \"$1\" = info ] && exit 0\nexit 0\n",
             temp.path().join("flatpak.log").display()
         ),
-    )
-    .unwrap();
-    {
-        use std::os::unix::fs::PermissionsExt;
-        std::fs::set_permissions(&flatpak, std::fs::Permissions::from_mode(0o755)).unwrap();
-    }
+    );
     let tools = ManagedTools::new(
         store,
         Bus::new(BusOptions::default()),

@@ -853,13 +853,11 @@ async fn live_linux_published_game_plays_and_stops_with_the_stream() {
     let folder = home.join("Published Game");
     std::fs::create_dir_all(&folder).unwrap();
     let script = folder.join("game.sh");
-    std::fs::write(
+    caskade_core::test_programs::write_program(
         &script,
         "#!/bin/sh\necho \"$$ ${SUNSHINE_CLIENT_WIDTH:-none}\" > started.part\n\
          mv started.part started\nexec /bin/sleep 600\n",
-    )
-    .unwrap();
-    std::fs::set_permissions(&script, std::fs::Permissions::from_mode(0o755)).unwrap();
+    );
     let game = Game::new("Published Game");
     library.upsert_game(&game).await.unwrap();
     let mut release = GameEntry::new(&game.id, SourceId::new("fixture"), "Published Game");

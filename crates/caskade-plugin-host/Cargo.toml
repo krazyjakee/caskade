@@ -47,6 +47,8 @@ notify = { version = "8", default-features = false, features = ["macos_kqueue"] 
 tokio = { version = "1", features = ["sync", "time", "rt", "macros", "net"] }
 
 [dev-dependencies]
+# `test_programs`: programs a test writes and runs without ETXTBSY (#118).
+caskade-core = { path = "../caskade-core", features = ["test-utils"] }
 # The built-in import path plugin library sources join (#126).
 caskade-sources = { path = "../caskade-sources", default-features = false }
 tempfile = "=3.27.0"

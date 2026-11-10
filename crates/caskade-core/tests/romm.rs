@@ -352,12 +352,7 @@ impl Fixture {
         let dir = self.temp.path().join(format!("emulator-{profile}"));
         std::fs::create_dir_all(&dir).unwrap();
         let program = dir.join("emulator");
-        std::fs::write(&program, "#!/bin/sh\nsleep 1\n").unwrap();
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-            std::fs::set_permissions(&program, std::fs::Permissions::from_mode(0o755)).unwrap();
-        }
+        caskade_core::test_programs::write_program(&program, "#!/bin/sh\nsleep 1\n");
         let view = self
             .emulation
             .save_emulator(Emulator {

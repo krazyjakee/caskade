@@ -19,7 +19,6 @@ use caskade_discovery::{InstallState, SourceId};
 use std::{
     collections::BTreeMap,
     fs,
-    os::unix::fs::PermissionsExt,
     path::{Path, PathBuf},
     sync::{Arc, Mutex},
     time::Duration,
@@ -61,8 +60,7 @@ impl LaunchHooks for Reports {
 }
 
 fn write_script(path: &Path, body: &str) {
-    fs::write(path, format!("#!/bin/sh\n{body}\n")).unwrap();
-    fs::set_permissions(path, fs::Permissions::from_mode(0o755)).unwrap();
+    crate::test_programs::write_program(path, format!("#!/bin/sh\n{body}\n"));
 }
 /// A game in `dir` that runs `body`.
 async fn release(store: &LibraryStore, dir: &Path, body: &str) -> GameEntry {
@@ -401,7 +399,7 @@ async fn after_a_restart_each_phase_still_runs_once() {
     let store = LibraryStore::in_memory().await.unwrap();
     let entry = release(&store, temp.path(), "true").await;
     let game = temp.path().join("longgame");
-    fs::copy("/bin/sleep", &game).unwrap();
+    crate::test_programs::copy_program("/bin/sleep", &game);
     let play = store
         .save_game_action(&GameAction {
             id: new_id(),

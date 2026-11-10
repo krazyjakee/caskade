@@ -18,7 +18,6 @@ use caskade_discovery::{InstallState, SourceId};
 use std::{
     collections::BTreeMap,
     fs,
-    os::unix::fs::PermissionsExt,
     path::{Path, PathBuf},
     sync::Arc,
     time::Duration,
@@ -26,8 +25,7 @@ use std::{
 
 fn script(path: &Path, body: &str) {
     fs::create_dir_all(path.parent().unwrap()).unwrap();
-    fs::write(path, format!("#!/bin/sh\n{body}\n")).unwrap();
-    fs::set_permissions(path, fs::Permissions::from_mode(0o755)).unwrap();
+    crate::test_programs::write_program(path, format!("#!/bin/sh\n{body}\n"));
 }
 fn exe(path: impl Into<PathBuf>, args: &[&str]) -> LaunchSpec {
     LaunchSpec::Executable {
@@ -161,7 +159,7 @@ async fn a_mod_manager_play_action_tracks_the_game_it_starts() {
     let entry = release(&store, temp.path()).await;
     let game = temp.path().join("bin/modgame");
     fs::create_dir_all(game.parent().unwrap()).unwrap();
-    fs::copy("/bin/sleep", &game).unwrap();
+    crate::test_programs::copy_program("/bin/sleep", &game);
     // The manager starts the game and exits at once.
     script(
         &temp.path().join("manager.sh"),
@@ -354,7 +352,7 @@ async fn a_cancelled_session_keeps_its_action_and_a_stale_process_is_not_reattac
     let store = LibraryStore::in_memory().await.unwrap();
     let entry = release(&store, temp.path()).await;
     let game = temp.path().join("longgame");
-    fs::copy("/bin/sleep", &game).unwrap();
+    crate::test_programs::copy_program("/bin/sleep", &game);
     let mut play = action(&entry, ActionKind::Play, exe(&game, &["30"]));
     play.tracking.mode = TrackingMode::ProcessTree;
     let play = store.save_game_action(&play).await.unwrap();

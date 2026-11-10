@@ -300,14 +300,13 @@ async fn a_plugin_runner_launches_a_game_and_its_session_is_recorded() {
     let s = setup(everything()).await;
     let temp = tempfile::tempdir().unwrap();
     let exe = temp.path().join("fixture-game");
-    std::fs::copy(
+    caskade_core::test_programs::copy_program(
         concat!(
             env!("CARGO_MANIFEST_DIR"),
             "/../caskade-installer/tests/fixtures/bin/fixture-game-linux-x86_64"
         ),
         &exe,
-    )
-    .unwrap();
+    );
     std::fs::set_permissions(&exe, std::fs::Permissions::from_mode(0o755)).unwrap();
     let token = temp.path().join("token");
     let mut command = LaunchCommand::executable(&exe);

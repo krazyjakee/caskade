@@ -29,6 +29,8 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync"] }
 tracing = "0.1"
 
 [dev-dependencies]
+# `test_programs`: programs a test writes and runs without ETXTBSY (#118).
+caskade-core = { path = "../caskade-core", default-features = false, features = ["test-utils"] }
 regex = "1"
 insta = { version = "1", features = ["json"] }
 caskade-emulation-fixtures = { path = "../caskade-emulation-fixtures" }

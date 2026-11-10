@@ -2,12 +2,9 @@
 use super::{test_support::*, *};
 use crate::bus::{Bus, Event, Intercept, Interceptor};
 use async_trait::async_trait;
-use std::{
-    fs,
-    sync::{
-        Arc,
-        atomic::{AtomicUsize, Ordering},
-    },
+use std::sync::{
+    Arc,
+    atomic::{AtomicUsize, Ordering},
 };
 struct Rewrite {
     token: String,
@@ -40,14 +37,13 @@ impl Interceptor<LaunchAfter> for After {
 async fn bus_rewrite_events_and_after_hook_share_the_persisted_session() {
     let t = tempfile::tempdir().unwrap();
     let exe = t.path().join("fixture");
-    fs::copy(
+    crate::test_programs::copy_program(
         concat!(
             env!("CARGO_MANIFEST_DIR"),
             "/../caskade-installer/tests/fixtures/bin/fixture-game-linux-x86_64"
         ),
         &exe,
-    )
-    .unwrap();
+    );
     let entry = entry(exe, vec![], Some(t.path().into()));
     let store = Arc::new(MemoryStore::default());
     store

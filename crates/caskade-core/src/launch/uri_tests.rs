@@ -4,7 +4,7 @@
 use super::{test_support::*, *};
 use crate::model::LaunchSpec;
 use async_trait::async_trait;
-use std::{collections::BTreeMap, fs, os::unix::fs::PermissionsExt, path::PathBuf, sync::Arc};
+use std::{collections::BTreeMap, fs, path::PathBuf, sync::Arc};
 struct PrivateXdg {
     env: BTreeMap<String, String>,
 }
@@ -25,20 +25,18 @@ async fn steam_uri_uses_native_xdg_dispatch_and_records_fixture_child_playtime()
     fs::create_dir_all(&apps).unwrap();
     fs::create_dir_all(&config).unwrap();
     let exe = game.join("fixture-game");
-    fs::copy("/bin/sleep", &exe).unwrap();
+    crate::test_programs::copy_program("/bin/sleep", &exe);
     let token = temp.path().join("uri-token");
     let handler = temp.path().join("steam-handler");
     // Paths are authored by tempfile and passed as argv: the handler contains
     // no user input and never edits global MIME associations.
-    fs::write(
+    crate::test_programs::write_program(
         &handler,
         r#"#!/bin/sh
 printf '%s' "$1" > "$2"
 exec "$3" 1.0
 "#,
-    )
-    .unwrap();
-    fs::set_permissions(&handler, fs::Permissions::from_mode(0o755)).unwrap();
+    );
     let desktop = format!(
         "[Desktop Entry]\nType=Application\nName=Caskade URI Fixture\nExec={} %u {} {}\nTerminal=false\nMimeType=x-scheme-handler/steam;\n",
         handler.display(),

@@ -146,12 +146,10 @@ impl Harness {
         let folder = self.folder(title);
         std::fs::create_dir_all(&folder).unwrap();
         let program = folder.join(game::FILE);
-        std::fs::write(&program, format!("{}{script}\n", game::HEADER)).unwrap();
         #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-            std::fs::set_permissions(&program, std::fs::Permissions::from_mode(0o755)).unwrap();
-        }
+        caskade_core::test_programs::write_program(&program, format!("{}{script}\n", game::HEADER));
+        #[cfg(not(unix))]
+        std::fs::write(&program, format!("{}{script}\n", game::HEADER)).unwrap();
         block_on(async {
             let game = Game::new(title);
             self.store.upsert_game(&game).await.unwrap();

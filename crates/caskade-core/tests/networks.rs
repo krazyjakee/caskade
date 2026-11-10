@@ -69,16 +69,13 @@ pub async fn online<X>(device: &Core<X>) {
 /// A Linux game: a program that leaves a mark beside itself when it runs,
 /// and `size` bytes of data.
 pub async fn add_game<X>(device: &Core<X>, size: usize) -> (String, PathBuf) {
-    use std::os::unix::fs::PermissionsExt as _;
     let folder = device.dir.path().join("My Games").join("Celeste");
     std::fs::create_dir_all(folder.join("Content")).unwrap();
     let program = folder.join("celeste.sh");
-    std::fs::write(
+    caskade_core::test_programs::write_program(
         &program,
         "#!/bin/sh\necho played > \"$(dirname \"$0\")/played\"\n",
-    )
-    .unwrap();
-    std::fs::set_permissions(&program, std::fs::Permissions::from_mode(0o755)).unwrap();
+    );
     let data: Vec<u8> = (0..size).map(|i| (i % 253) as u8).collect();
     std::fs::write(folder.join("Content/Celeste.pak"), data).unwrap();
     let game = device

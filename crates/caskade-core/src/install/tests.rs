@@ -128,14 +128,13 @@ async fn an_installed_fixture_launches_through_its_alias_and_records_playtime() 
     let source = temp.path().join("Fixture Runner");
     std::fs::create_dir_all(&source).unwrap();
     let exe = source.join("fixture-runner.x86_64");
-    std::fs::copy(
+    crate::test_programs::copy_program(
         concat!(
             env!("CARGO_MANIFEST_DIR"),
             "/../caskade-installer/tests/fixtures/bin/fixture-game-linux-x86_64"
         ),
         &exe,
-    )
-    .unwrap();
+    );
     std::fs::set_permissions(&exe, std::fs::Permissions::from_mode(0o755)).unwrap();
     std::fs::write(source.join("data.pak"), vec![7u8; 4096]).unwrap();
 
@@ -270,14 +269,13 @@ async fn install_hints_choose_the_title_and_launch_target() {
     for exe in ["fixture-runner.x86_64", "tools/editor.x86_64"] {
         let exe = source.join(exe);
         std::fs::create_dir_all(exe.parent().unwrap()).unwrap();
-        std::fs::copy(
+        crate::test_programs::copy_program(
             concat!(
                 env!("CARGO_MANIFEST_DIR"),
                 "/../caskade-installer/tests/fixtures/bin/fixture-game-linux-x86_64"
             ),
             &exe,
-        )
-        .unwrap();
+        );
         std::fs::set_permissions(&exe, std::fs::Permissions::from_mode(0o755)).unwrap();
     }
     let service = InstallService::new(
@@ -345,14 +343,13 @@ async fn an_attached_install_becomes_a_release_of_the_existing_game() {
     for exe in ["Zelda64Recompiled/Zelda64Recompiled", "tools/helper.x86_64"] {
         let exe = source.join(exe);
         std::fs::create_dir_all(exe.parent().unwrap()).unwrap();
-        std::fs::copy(
+        crate::test_programs::copy_program(
             concat!(
                 env!("CARGO_MANIFEST_DIR"),
                 "/../caskade-installer/tests/fixtures/bin/fixture-game-linux-x86_64"
             ),
             &exe,
-        )
-        .unwrap();
+        );
         std::fs::set_permissions(&exe, std::fs::Permissions::from_mode(0o755)).unwrap();
     }
     let rom = temp.path().join("Majora's Mask (USA).z64");
