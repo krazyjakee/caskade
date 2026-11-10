@@ -4,11 +4,10 @@
 //! turns the core bus's events into these.
 
 // The commands' own events.
-pub use crate::commands::saves::SaveVersionsChanged;
-pub use crate::commands::game_edit::GamesRefreshChanged;
 pub use crate::commands::addon_packages::AddonProgress;
 pub use crate::commands::app_update::AppUpdateChanged;
 pub use crate::commands::backup::BackupChanged;
+pub use crate::commands::game_edit::GamesRefreshChanged;
 pub use crate::commands::hello::Hello;
 pub use crate::commands::i18n::LocaleChanged;
 pub use crate::commands::input::InputActionEvent;
@@ -18,6 +17,7 @@ pub use crate::commands::notifications::NotificationsChanged;
 pub use crate::commands::presence::PlayingElsewhereChanged;
 pub use crate::commands::remote_play::RemotePlayRequested;
 pub use crate::commands::romm::RommDownloadChanged;
+pub use crate::commands::saves::SaveVersionsChanged;
 pub use crate::commands::shares::SharesChanged;
 pub use crate::commands::store_accounts::StoreAccountsChanged;
 pub use crate::commands::streaming::StreamingPairingFinished;

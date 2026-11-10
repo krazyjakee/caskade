@@ -30,4 +30,3 @@ pub fn remote_play_finished(
 ) {
     app::remote_play_finished(&play, &request_id, started, reason)
 }
-
