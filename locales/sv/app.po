@@ -16,6 +16,7 @@ msgstr ""
 
 #. The key that switches to symbols
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgctxt "on-screen keyboard"
 msgid "?123"
 msgstr "?123"
@@ -520,7 +521,7 @@ msgid "{done} of {total} · {speed}/s"
 msgstr "{done} av {total} · {speed}/s"
 
 #. A game's total playtime: 3.5h played
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts crates/caskade-ui-i18n/src/format.rs
 msgid "{duration} played"
 msgstr "{duration} spelat"
 
@@ -987,7 +988,7 @@ msgid "{sharer} shares the collection {0} with you."
 msgstr "{sharer} delar samlingen {0} med dig."
 
 #. A size and its unit: 1.5 GiB
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts crates/caskade-ui-i18n/src/format.rs
 msgid "{size} {unit}"
 msgstr "{size} {unit}"
 
@@ -1246,7 +1247,7 @@ msgid "@import of {url} is refused: custom CSS can't load anything from other or
 msgstr "@import av {url} nekas: anpassad CSS kan inte läsa in något från andra ursprung."
 
 #. Under a minute of playtime: <1m
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts crates/caskade-ui-i18n/src/format.rs
 msgid "<{duration}"
 msgstr "<{duration}"
 
@@ -1557,6 +1558,7 @@ msgstr "Ett Windows-spel: det körs här via Proton."
 
 #. The key that switches back to letters
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgctxt "on-screen keyboard"
 msgid "abc"
 msgstr "abc"
@@ -2447,7 +2449,7 @@ msgstr "Avatar"
 msgid "Away from home, devices that can't reach each other directly go through a server that can't read what passes. On, they connect only directly: on this network, or over the internet where the routers allow it, and some may then not connect."
 msgstr "Borta från hemmet går enheter som inte kan nå varandra direkt via en server som inte kan läsa det som passerar. När det här är på ansluter de bara direkt: i det här nätverket, eller över internet där routrarna tillåter det, och vissa kan då inte ansluta."
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts crates/caskade-ui-i18n/src/format.rs
 msgctxt "byte unit"
 msgid "B"
 msgstr "B"
@@ -3512,6 +3514,7 @@ msgid "Close emulator detection"
 msgstr "Stäng emulatoridentifiering"
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgid "Close keyboard"
 msgstr "Stäng tangentbordet"
 
@@ -3978,10 +3981,12 @@ msgid "Current match"
 msgstr "Aktuell matchning"
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgid "Cursor left"
 msgstr "Markör vänster"
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgid "Cursor right"
 msgstr "Markör höger"
 
@@ -4125,6 +4130,7 @@ msgid "Delete"
 msgstr "Radera"
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgctxt "on-screen keyboard"
 msgid "Delete"
 msgstr "Radera"
@@ -4420,6 +4426,7 @@ msgid "Done"
 msgstr "Klar"
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgctxt "on-screen keyboard"
 msgid "Done"
 msgstr "Klar"
@@ -4773,7 +4780,7 @@ msgstr "Aktivera biblioteksidentifiering"
 
 #. Button: ends a stream from another device
 #: apps/desktop/src/input/GuideMenu.tsx
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/input/guide.rs
 msgid "End stream"
 msgstr "Avsluta stream"
 
@@ -4782,7 +4789,7 @@ msgctxt "game action"
 msgid "End stream"
 msgstr "Avsluta stream"
 
-#: apps/desktop/src/input/GuideMenu.tsx
+#: apps/desktop/src/input/GuideMenu.tsx apps/native/src/input/guide.rs
 msgid "End the stream? The game stops on the other device, and progress it hasn't saved is lost."
 msgstr "Avsluta streamen? Spelet stoppas på den andra enheten, och framsteg som inte har sparats går förlorade."
 
@@ -5284,7 +5291,7 @@ msgctxt "plugin provider"
 msgid "game details"
 msgstr "speldetaljer"
 
-#: apps/desktop/src/input/GuideMenu.tsx
+#: apps/desktop/src/input/GuideMenu.tsx apps/native/src/input/guide.rs
 msgid "Game details"
 msgstr "Speldetaljer"
 
@@ -5566,7 +5573,7 @@ msgstr "Gör filerna redo. Länken fungerar redan."
 msgid "Getting this device ready to pair…"
 msgstr "Gör den här enheten redo att parkoppla…"
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts crates/caskade-ui-i18n/src/format.rs
 msgctxt "byte unit"
 msgid "GiB"
 msgstr "GiB"
@@ -6333,12 +6340,12 @@ msgid "is"
 msgstr "är"
 
 #. Follows the running game's title, shown as a heading above
-#: apps/desktop/src/input/GuideMenu.tsx
+#: apps/desktop/src/input/GuideMenu.tsx apps/native/src/input/guide.rs
 msgid "is running."
 msgstr "körs."
 
 #. Follows the streamed game's title, shown as a heading above
-#: apps/desktop/src/input/GuideMenu.tsx
+#: apps/desktop/src/input/GuideMenu.tsx apps/native/src/input/guide.rs
 msgid "is streaming from another device."
 msgstr "streamas från en annan enhet."
 
@@ -6557,7 +6564,7 @@ msgstr "Behåll mina argument"
 msgid "Keep my play time"
 msgstr "Behåll min speltid"
 
-#: apps/desktop/src/input/GuideMenu.tsx
+#: apps/desktop/src/input/GuideMenu.tsx apps/native/src/input/guide.rs
 msgid "Keep playing"
 msgstr "Fortsätt spela"
 
@@ -6585,7 +6592,7 @@ msgstr "Sparas på {holder}"
 msgid "Kept on this device. Changes here stay here, and other devices' don't arrive."
 msgstr "Behålls på den här enheten. Ändringar här stannar här, och andra enheters kommer inte hit."
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts crates/caskade-ui-i18n/src/format.rs
 msgctxt "byte unit"
 msgid "KiB"
 msgstr "KiB"
@@ -6772,6 +6779,7 @@ msgid "Let other devices stream games from this one"
 msgstr "Låt andra enheter streama spel från den här"
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgctxt "on-screen keyboard"
 msgid "Letters"
 msgstr "Bokstäver"
@@ -7344,7 +7352,7 @@ msgstr "Slå ihop till ett spel"
 msgid "metadata, IGDB, covers, offline"
 msgstr "metadata, IGDB, omslag, offline"
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts crates/caskade-ui-i18n/src/format.rs
 msgctxt "byte unit"
 msgid "MiB"
 msgstr "MiB"
@@ -7588,7 +7596,7 @@ msgid "Never"
 msgstr "Aldrig"
 
 #. A game's last play, before any
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts crates/caskade-ui-i18n/src/format.rs
 msgid "Never played"
 msgstr "Aldrig spelat"
 
@@ -8141,7 +8149,7 @@ msgid "Not on this device yet"
 msgstr "Inte på den här enheten än"
 
 #. A game's playtime, before any
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts crates/caskade-ui-i18n/src/format.rs
 msgid "Not played"
 msgstr "Inte spelat"
 
@@ -8419,6 +8427,7 @@ msgid "On your other devices"
 msgstr "På dina andra enheter"
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgid "On-screen keyboard"
 msgstr "Skärmtangentbord"
 
@@ -8826,6 +8835,7 @@ msgid "Passwords and sign-ins aren't in backups: sign in to RomM and your stores
 msgstr "Lösenord och inloggningar ingår inte i säkerhetskopior: logga in på RomM och dina butiker igen efteråt."
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgctxt "on-screen keyboard"
 msgid "Paste"
 msgstr "Klistra in"
@@ -8870,7 +8880,7 @@ msgctxt "keyboard key"
 msgid "PgUp"
 msgstr "PgUp"
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts crates/caskade-ui-i18n/src/format.rs
 msgctxt "byte unit"
 msgid "PiB"
 msgstr "PiB"
@@ -9432,7 +9442,7 @@ msgstr "I kö"
 msgid "Queued: {task}"
 msgstr "I kö: {task}"
 
-#: apps/desktop/src/input/GuideMenu.tsx
+#: apps/desktop/src/input/GuideMenu.tsx apps/native/src/input/guide.rs
 msgid "Quick menu"
 msgstr "Snabbmeny"
 
@@ -10190,7 +10200,7 @@ msgstr "Försök igen med identifieringen i Inställningar → Bibliotek, ROM-ma
 msgid "Retry with {strategyLabel}"
 msgstr "Försök igen med {strategyLabel}"
 
-#: apps/desktop/src/input/GuideMenu.tsx
+#: apps/desktop/src/input/GuideMenu.tsx apps/native/src/input/guide.rs
 msgid "Return to game"
 msgstr "Tillbaka till spelet"
 
@@ -11302,6 +11312,7 @@ msgstr "Storleksgräns"
 #. A game whose size isn't known
 #: apps/desktop/src/api/presentation.ts
 #: apps/desktop/src/onboarding/GamesStep.tsx
+#: crates/caskade-ui-i18n/src/format.rs
 msgid "Size unknown"
 msgstr "Okänd storlek"
 
@@ -11432,6 +11443,7 @@ msgid "Sources: {0}"
 msgstr "Källor: {0}"
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgctxt "on-screen keyboard"
 msgid "Space"
 msgstr "Mellanslag"
@@ -11624,7 +11636,7 @@ msgctxt "game action"
 msgid "Stop"
 msgstr "Stoppa"
 
-#: apps/desktop/src/input/GuideMenu.tsx
+#: apps/desktop/src/input/GuideMenu.tsx apps/native/src/input/guide.rs
 msgid "Stop {title}"
 msgstr "Stoppa {title}"
 
@@ -11632,7 +11644,7 @@ msgstr "Stoppa {title}"
 msgid "Stop and stream"
 msgstr "Stoppa och streama"
 
-#: apps/desktop/src/input/GuideMenu.tsx
+#: apps/desktop/src/input/GuideMenu.tsx apps/native/src/input/guide.rs
 msgid "Stop game"
 msgstr "Stoppa spelet"
 
@@ -11645,7 +11657,7 @@ msgstr "Sluta uppdatera"
 msgid "Stop sharing"
 msgstr "Sluta dela"
 
-#: apps/desktop/src/input/GuideMenu.tsx
+#: apps/desktop/src/input/GuideMenu.tsx apps/native/src/input/guide.rs
 msgid "Stop the game? Progress it hasn't saved is lost."
 msgstr "Stoppa spelet? Framsteg som inte har sparats går förlorade."
 
@@ -11819,6 +11831,7 @@ msgid "Switch any time with the button at the top, or View on a controller."
 msgstr "Byt när som helst med knappen högst upp, eller View på en handkontroll."
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgctxt "on-screen keyboard"
 msgid "Symbols"
 msgstr "Symboler"
@@ -12495,7 +12508,7 @@ msgstr "Den här torrenten innehåller mer än ett spel eller installationsprogr
 msgid "This view couldn't be shown"
 msgstr "Den här vyn kunde inte visas"
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts crates/caskade-ui-i18n/src/format.rs
 msgctxt "byte unit"
 msgid "TiB"
 msgstr "TiB"
@@ -12665,6 +12678,7 @@ msgstr "TV"
 
 #. Hint bar: type the focused key
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgctxt "on-screen keyboard"
 msgid "Type"
 msgstr "Skriv"
@@ -12739,7 +12753,7 @@ msgstr "okänd"
 msgid "Unknown"
 msgstr "Okänd"
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts crates/caskade-ui-i18n/src/format.rs
 msgctxt "size"
 msgid "Unknown"
 msgstr "Okänd"
@@ -13662,7 +13676,7 @@ msgstr "Dina enheter"
 msgid "Your first session will appear here."
 msgstr "Din första session visas här."
 
-#: apps/desktop/src/input/GuideMenu.tsx
+#: apps/desktop/src/input/GuideMenu.tsx apps/native/src/input/guide.rs
 msgid "Your game"
 msgstr "Ditt spel"
 

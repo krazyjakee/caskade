@@ -1,10 +1,12 @@
 //! `caskade-i18n extract [--check] [--root <repository>]`: writes the core
 //! domain's template (`locales/core.pot`) and merges it into each
-//! `locales/<language>/core.po`. With `--check` it writes nothing and fails
+//! `locales/<language>/core.po`, and lists the native UI's messages in
+//! `locales/native.json` for `packages/i18n` (which adds them to the `app`
+//! and `ui` templates). With `--check` it writes nothing and fails
 //! when a file is out of date, naming the entries that changed. `just i18n`
 //! runs it, and `just i18n-check` with `--check`.
 
-use caskade_i18n::extract::CORE;
+use caskade_i18n::extract::{CORE, native_output};
 use caskade_i18n::po::{Message, Po};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -36,7 +38,10 @@ fn main() -> ExitCode {
         }
     }
     let root = root.canonicalize().unwrap_or(root);
-    let outputs = match CORE.outputs(&root) {
+    let outputs = match CORE.outputs(&root).and_then(|mut outputs| {
+        outputs.push(native_output(&root)?);
+        Ok(outputs)
+    }) {
         Ok(outputs) => outputs,
         Err(error) => {
             eprintln!("caskade-i18n: {error}");
@@ -49,6 +54,10 @@ fn main() -> ExitCode {
         if check {
             if !output.is_current() {
                 eprintln!("out of date: {}", shown.display());
+                if output.path.extension().is_some_and(|ext| ext == "json") {
+                    stale = true;
+                    continue;
+                }
                 for change in changes(&output.path, &output.contents) {
                     eprintln!("  {change}");
                 }

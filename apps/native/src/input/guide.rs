@@ -6,6 +6,7 @@
 use super::root::{Bind, use_input, use_input_action};
 use blitz_dom::NodeId;
 use caskade_core::tr;
+use caskade_ui_i18n::t;
 use caskade_ui_input::Action;
 use dioxus_native::prelude::*;
 use std::future::Future;
@@ -73,7 +74,7 @@ impl GuideApi for NativeGuide {
                     games.push(RunningGame {
                         title: details
                             .map(|details| details.game.title)
-                            .unwrap_or_else(|| tr!("Your game")),
+                            .unwrap_or_else(|| t!("Your game")),
                         session_id: ticket.session_id,
                         game_id: ticket.game_id,
                         stream,
@@ -134,7 +135,7 @@ pub fn GuideMenu(guide: Guide) -> Element {
         Action::Guide,
         // The guide button works over menus and dialogs too.
         Bind {
-            label: Some(tr!("Quick menu")),
+            label: Some(t!("Quick menu")),
             global: true,
             ..Bind::default()
         },
@@ -192,17 +193,17 @@ pub fn GuideMenu(guide: Guide) -> Element {
     };
     let details = input.clone();
     let line = match (confirming(), running.stream) {
-        (true, true) => tr!(
+        (true, true) => t!(
             "End the stream? The game stops on the other device, and progress it hasn't saved is lost."
         ),
-        (true, false) => tr!("Stop the game? Progress it hasn't saved is lost."),
-        (false, true) => tr!("is streaming from another device."),
-        (false, false) => tr!("is running."),
+        (true, false) => t!("Stop the game? Progress it hasn't saved is lost."),
+        (false, true) => t!("is streaming from another device."),
+        (false, false) => t!("is running."),
     };
     let stop_label = if running.stream {
-        tr!("End stream")
+        t!("End stream")
     } else {
-        tr!("Stop {title}", title = running.title)
+        t!("Stop {title}", title = running.title)
     };
     let disabled = busy();
     let session = running.session_id.clone();
@@ -215,7 +216,7 @@ pub fn GuideMenu(guide: Guide) -> Element {
             "data-cs": "guide-menu",
             // Over everything, as a modal is.
             style: "position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;",
-            aria_label: tr!("Quick menu"),
+            aria_label: t!("Quick menu"),
             onmounted: move |event| {
                 me.set(event.data().downcast::<dioxus_native::NodeHandle>().map(|h| h.node_id()))
             },
@@ -237,19 +238,19 @@ pub fn GuideMenu(guide: Guide) -> Element {
                     button {
                         disabled,
                         onclick: move |_| confirming.set(false),
-                        {tr!("Keep playing")}
+                        {t!("Keep playing")}
                     }
                 } else {
                     button {
                         "data-focus-default": "true",
                         disabled,
                         onclick: move |_| act(returning.0.return_to_game()),
-                        {tr!("Return to game")}
+                        {t!("Return to game")}
                     }
                     button {
                         disabled,
                         onclick: move |_| confirming.set(true),
-                        if running.stream { {tr!("End stream")} } else { {tr!("Stop game")} }
+                        if running.stream { {t!("End stream")} } else { {t!("Stop game")} }
                     }
                     button {
                         disabled,
@@ -257,7 +258,7 @@ pub fn GuideMenu(guide: Guide) -> Element {
                             details.open_details(game_id.clone());
                             close();
                         },
-                        {tr!("Game details")}
+                        {t!("Game details")}
                     }
                 }
             }

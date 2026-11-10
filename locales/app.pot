@@ -15,6 +15,7 @@ msgstr ""
 
 #. The key that switches to symbols
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgctxt "on-screen keyboard"
 msgid "?123"
 msgstr ""
@@ -520,6 +521,7 @@ msgstr ""
 
 #. A game's total playtime: 3.5h played
 #: apps/desktop/src/api/presentation.ts
+#: crates/caskade-ui-i18n/src/format.rs
 msgid "{duration} played"
 msgstr ""
 
@@ -987,6 +989,7 @@ msgstr ""
 
 #. A size and its unit: 1.5 GiB
 #: apps/desktop/src/api/presentation.ts
+#: crates/caskade-ui-i18n/src/format.rs
 msgid "{size} {unit}"
 msgstr ""
 
@@ -1247,6 +1250,7 @@ msgstr ""
 
 #. Under a minute of playtime: <1m
 #: apps/desktop/src/api/presentation.ts
+#: crates/caskade-ui-i18n/src/format.rs
 msgid "<{duration}"
 msgstr ""
 
@@ -1557,6 +1561,7 @@ msgstr ""
 
 #. The key that switches back to letters
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgctxt "on-screen keyboard"
 msgid "abc"
 msgstr ""
@@ -2445,6 +2450,7 @@ msgid "Away from home, devices that can't reach each other directly go through a
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: crates/caskade-ui-i18n/src/format.rs
 msgctxt "byte unit"
 msgid "B"
 msgstr ""
@@ -3508,6 +3514,7 @@ msgid "Close emulator detection"
 msgstr ""
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgid "Close keyboard"
 msgstr ""
 
@@ -3975,10 +3982,12 @@ msgid "Current match"
 msgstr ""
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgid "Cursor left"
 msgstr ""
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgid "Cursor right"
 msgstr ""
 
@@ -4122,6 +4131,7 @@ msgid "Delete"
 msgstr ""
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgctxt "on-screen keyboard"
 msgid "Delete"
 msgstr ""
@@ -4417,6 +4427,7 @@ msgid "Done"
 msgstr ""
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgctxt "on-screen keyboard"
 msgid "Done"
 msgstr ""
@@ -4771,6 +4782,7 @@ msgstr ""
 #. Button: ends a stream from another device
 #: apps/desktop/src/input/GuideMenu.tsx
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/input/guide.rs
 msgid "End stream"
 msgstr ""
 
@@ -4780,6 +4792,7 @@ msgid "End stream"
 msgstr ""
 
 #: apps/desktop/src/input/GuideMenu.tsx
+#: apps/native/src/input/guide.rs
 msgid "End the stream? The game stops on the other device, and progress it hasn't saved is lost."
 msgstr ""
 
@@ -5280,6 +5293,7 @@ msgid "game details"
 msgstr ""
 
 #: apps/desktop/src/input/GuideMenu.tsx
+#: apps/native/src/input/guide.rs
 msgid "Game details"
 msgstr ""
 
@@ -5563,6 +5577,7 @@ msgid "Getting this device ready to pair…"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: crates/caskade-ui-i18n/src/format.rs
 msgctxt "byte unit"
 msgid "GiB"
 msgstr ""
@@ -6331,11 +6346,13 @@ msgstr ""
 
 #. Follows the running game's title, shown as a heading above
 #: apps/desktop/src/input/GuideMenu.tsx
+#: apps/native/src/input/guide.rs
 msgid "is running."
 msgstr ""
 
 #. Follows the streamed game's title, shown as a heading above
 #: apps/desktop/src/input/GuideMenu.tsx
+#: apps/native/src/input/guide.rs
 msgid "is streaming from another device."
 msgstr ""
 
@@ -6555,6 +6572,7 @@ msgid "Keep my play time"
 msgstr ""
 
 #: apps/desktop/src/input/GuideMenu.tsx
+#: apps/native/src/input/guide.rs
 msgid "Keep playing"
 msgstr ""
 
@@ -6583,6 +6601,7 @@ msgid "Kept on this device. Changes here stay here, and other devices' don't arr
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: crates/caskade-ui-i18n/src/format.rs
 msgctxt "byte unit"
 msgid "KiB"
 msgstr ""
@@ -6765,6 +6784,7 @@ msgid "Let other devices stream games from this one"
 msgstr ""
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgctxt "on-screen keyboard"
 msgid "Letters"
 msgstr ""
@@ -7340,6 +7360,7 @@ msgid "metadata, IGDB, covers, offline"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: crates/caskade-ui-i18n/src/format.rs
 msgctxt "byte unit"
 msgid "MiB"
 msgstr ""
@@ -7585,6 +7606,7 @@ msgstr ""
 
 #. A game's last play, before any
 #: apps/desktop/src/api/presentation.ts
+#: crates/caskade-ui-i18n/src/format.rs
 msgid "Never played"
 msgstr ""
 
@@ -8138,6 +8160,7 @@ msgstr ""
 
 #. A game's playtime, before any
 #: apps/desktop/src/api/presentation.ts
+#: crates/caskade-ui-i18n/src/format.rs
 msgid "Not played"
 msgstr ""
 
@@ -8415,6 +8438,7 @@ msgid "On your other devices"
 msgstr ""
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgid "On-screen keyboard"
 msgstr ""
 
@@ -8822,6 +8846,7 @@ msgid "Passwords and sign-ins aren't in backups: sign in to RomM and your stores
 msgstr ""
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgctxt "on-screen keyboard"
 msgid "Paste"
 msgstr ""
@@ -8867,6 +8892,7 @@ msgid "PgUp"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: crates/caskade-ui-i18n/src/format.rs
 msgctxt "byte unit"
 msgid "PiB"
 msgstr ""
@@ -9429,6 +9455,7 @@ msgid "Queued: {task}"
 msgstr ""
 
 #: apps/desktop/src/input/GuideMenu.tsx
+#: apps/native/src/input/guide.rs
 msgid "Quick menu"
 msgstr ""
 
@@ -10190,6 +10217,7 @@ msgid "Retry with {strategyLabel}"
 msgstr ""
 
 #: apps/desktop/src/input/GuideMenu.tsx
+#: apps/native/src/input/guide.rs
 msgid "Return to game"
 msgstr ""
 
@@ -11297,6 +11325,7 @@ msgstr ""
 #. A game whose size isn't known
 #: apps/desktop/src/api/presentation.ts
 #: apps/desktop/src/onboarding/GamesStep.tsx
+#: crates/caskade-ui-i18n/src/format.rs
 msgid "Size unknown"
 msgstr ""
 
@@ -11427,6 +11456,7 @@ msgid "Sources: {0}"
 msgstr ""
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgctxt "on-screen keyboard"
 msgid "Space"
 msgstr ""
@@ -11620,6 +11650,7 @@ msgid "Stop"
 msgstr ""
 
 #: apps/desktop/src/input/GuideMenu.tsx
+#: apps/native/src/input/guide.rs
 msgid "Stop {title}"
 msgstr ""
 
@@ -11628,6 +11659,7 @@ msgid "Stop and stream"
 msgstr ""
 
 #: apps/desktop/src/input/GuideMenu.tsx
+#: apps/native/src/input/guide.rs
 msgid "Stop game"
 msgstr ""
 
@@ -11641,6 +11673,7 @@ msgid "Stop sharing"
 msgstr ""
 
 #: apps/desktop/src/input/GuideMenu.tsx
+#: apps/native/src/input/guide.rs
 msgid "Stop the game? Progress it hasn't saved is lost."
 msgstr ""
 
@@ -11815,6 +11848,7 @@ msgid "Switch any time with the button at the top, or View on a controller."
 msgstr ""
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgctxt "on-screen keyboard"
 msgid "Symbols"
 msgstr ""
@@ -12492,6 +12526,7 @@ msgid "This view couldn't be shown"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: crates/caskade-ui-i18n/src/format.rs
 msgctxt "byte unit"
 msgid "TiB"
 msgstr ""
@@ -12659,6 +12694,7 @@ msgstr ""
 
 #. Hint bar: type the focused key
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
+#: apps/native/src/input/keyboard.rs
 msgctxt "on-screen keyboard"
 msgid "Type"
 msgstr ""
@@ -12734,6 +12770,7 @@ msgid "Unknown"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: crates/caskade-ui-i18n/src/format.rs
 msgctxt "size"
 msgid "Unknown"
 msgstr ""
@@ -13657,6 +13694,7 @@ msgid "Your first session will appear here."
 msgstr ""
 
 #: apps/desktop/src/input/GuideMenu.tsx
+#: apps/native/src/input/guide.rs
 msgid "Your game"
 msgstr ""
 

@@ -8,7 +8,7 @@
 
 use super::root::{Bind, Input, use_input, use_input_action};
 use blitz_dom::{BaseDocument, LocalName, NodeId, QualName, ns};
-use caskade_core::{tr, trp};
+use caskade_ui_i18n::{t, tp};
 use caskade_ui_input::Action;
 use caskade_ui_input::osk::{Field, KeyKind, Keyboard, Layer, Outcome, Shift, Special};
 use dioxus_native::prelude::dioxus_html::PlatformEventData;
@@ -136,15 +136,15 @@ pub fn OnScreenKeyboard(field: NodeId) -> Element {
     let text =
         use_signal(|| Field::new(input.read(|doc| value_of(doc, field)).unwrap_or_default()));
     let typer = Typer { field, board, text };
-    let delete = trp!("on-screen keyboard", "Delete");
-    let space = trp!("on-screen keyboard", "Space");
-    let paste = trp!("on-screen keyboard", "Paste");
-    let left = tr!("Cursor left");
-    let right = tr!("Cursor right");
-    let done = trp!("on-screen keyboard", "Done");
+    let delete = tp!("on-screen keyboard", "Delete");
+    let space = tp!("on-screen keyboard", "Space");
+    let paste = tp!("on-screen keyboard", "Paste");
+    let left = t!("Cursor left");
+    let right = t!("Cursor right");
+    let done = tp!("on-screen keyboard", "Done");
     let other = match board.read().layer {
-        Layer::Letters => trp!("on-screen keyboard", "Symbols"),
-        Layer::Symbols => trp!("on-screen keyboard", "Letters"),
+        Layer::Letters => tp!("on-screen keyboard", "Symbols"),
+        Layer::Symbols => tp!("on-screen keyboard", "Letters"),
     };
     for action in [
         Action::NavUp,
@@ -157,9 +157,9 @@ pub fn OnScreenKeyboard(field: NodeId) -> Element {
     use_key_action(
         typer,
         Action::Confirm,
-        Some(trp!("on-screen keyboard", "Type")),
+        Some(tp!("on-screen keyboard", "Type")),
     );
-    use_key_action(typer, Action::Back, Some(tr!("Close keyboard")));
+    use_key_action(typer, Action::Back, Some(t!("Close keyboard")));
     use_key_action(typer, Action::Details, Some(delete.clone()));
     use_key_action(typer, Action::Search, Some(space.clone()));
     use_key_action(typer, Action::TabPrev, Some(other.clone()));
@@ -198,8 +198,8 @@ pub fn OnScreenKeyboard(field: NodeId) -> Element {
             KeyKind::Char(_) => String::new(),
             KeyKind::Special(Special::Shift) => "⇧".into(),
             KeyKind::Special(Special::Layer) => match keyboard.layer {
-                Layer::Letters => trp!("on-screen keyboard", "?123"),
-                Layer::Symbols => trp!("on-screen keyboard", "abc"),
+                Layer::Letters => tp!("on-screen keyboard", "?123"),
+                Layer::Symbols => tp!("on-screen keyboard", "abc"),
             },
             KeyKind::Special(Special::Backspace) => delete.clone(),
             KeyKind::Special(Special::Space) => space.clone(),
@@ -214,7 +214,7 @@ pub fn OnScreenKeyboard(field: NodeId) -> Element {
             "data-cs": "osk",
             "data-layer": layer,
             "data-shift": shift,
-            aria_label: tr!("On-screen keyboard"),
+            aria_label: t!("On-screen keyboard"),
             output { "data-part": "preview", "{preview}" }
             for (r, row) in rows.iter().enumerate() {
                 div { key: "{r}", "data-part": "row",

@@ -11,7 +11,14 @@
 //! - [`locale`] normalizes BCP 47 and POSIX tags, reads the OS's languages
 //!   and negotiates one (`pt-BR`, then `pt`, then English).
 //! - [`format()`] fills `{name}` placeholders after the lookup.
-//! - [`bundled`] holds every `locales/<lang>/core.po`, listed at build time.
+//! - [`message`] renders the webview's message syntax (Lingui's ICU:
+//!   `{name}`, `#`, plurals and selects), [`rich`] its numbered tags
+//!   (`<0>…</0>`), and [`pseudo`] the `en-XA` pseudo-locale, for the native
+//!   UI, which shares the `app` and `ui` domains.
+//! - [`intl`] writes numbers, sizes, durations and dates as the webview's
+//!   `Intl` does.
+//! - [`bundled`] holds every `locales/<lang>/core.po`, listed at build time
+//!   (the native UI's `app` and `ui` catalogs are `caskade-ui-i18n`'s).
 //! - `extract` (feature `extract`) writes a domain's POT template from its
 //!   `tr!` calls and merges it into the catalogs: `just i18n`.
 //!
@@ -22,9 +29,13 @@ pub mod catalog;
 #[cfg(feature = "extract")]
 pub mod extract;
 pub mod format;
+pub mod intl;
 pub mod locale;
+pub mod message;
 pub mod plural;
 pub mod po;
+pub mod pseudo;
+pub mod rich;
 pub mod translations;
 
 pub use catalog::{Catalog, CatalogError};

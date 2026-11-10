@@ -11,7 +11,7 @@ Each domain is a group of messages with a template of its own, `locales/<domain>
 | Domain | File | What it covers |
 |---|---|---|
 | `ui` | `locales/<lang>/ui.po` | The shared components (`@caskade/ui`): buttons, badges, dialogs. Plugins and themes use them too. |
-| `app` | `locales/<lang>/app.po` | The rest of the interface: the library, game pages, Settings, first-run setup. |
+| `app` | `locales/<lang>/app.po` | The rest of the interface: the library, game pages, Settings, first-run setup. The native app (the coming replacement for the webview) shares it, and `ui`: one translation serves both. |
 | `core` | `locales/<lang>/core.po` | Text from the Rust side: error messages, notifications, the tray menu. |
 
 Plugins and themes have a domain each, named after the plugin or theme, in their own folder's `locales/<lang>.po` (#219). Translate them like the app's.
@@ -55,6 +55,7 @@ Swedish (`sv`) is the first language. Its first draft is machine-translated and 
 
 - In a browser, without building the app: `just web`, then open http://localhost:1420/?lang=sv (use your language's tag). The pseudo-locale `?lang=en-XA` shows every translatable text accented and lengthened, which finds text that isn't marked or doesn't fit.
 - In the app: `just dev`, then Settings → General → Language (first-run setup asks too). The language switches at once, the tray menu included.
+- In the native app: `CASKADE_LANG=sv cargo run -p caskade-native` (a debug build; `CASKADE_LANG=en-XA` for the pseudo-locale), or the Language setting. It picks up `app.po` and `ui.po` changes when rebuilt.
 
 The interface picks up changes to `ui.po` and `app.po` when the page reloads; the core compiles `core.po` in, so restart `just dev` after changing it.
 
@@ -84,4 +85,5 @@ Translators see only the English and what you add to it.
 - Add a `msgctxt` only when the same English means different things in different places, so each needs its own translation: `context: "navigation"` in the webview, `trp!("folder browser place", "Home")` in the core. Two places that mean the same thing share one message. A context isn't a comment: changing it makes every translation of the message start over.
 - The core's extractor doesn't read Rust comments. Where the English alone is unclear there, word the context (`trp!`) for the translator.
 - Mark whole sentences, with placeholders, not pieces joined in code: word order differs between languages. Use plurals (`plural`, `trn!`) for counts, never `count === 1 ? … : …`.
+- In the native app (`apps/native`), mark text with `caskade_ui_i18n`'s `t!("Quick menu")`, `t!("Stop {title}", title = name)`, `tp!("size", "Unknown")`, `tn!("# game", "# games", count)` and `tnp!`, in the webview's syntax: `#` is the count, and a message the webview has keeps its exact English and context so its translations apply. `note = "…"` first adds a translator comment. Rich text goes through `trans!("<0>{guide}</0> opens the quick menu", guide = glyph; 0 => |inner| rsx! { kbd { {inner} } })`. A test fails on a text literal with words in `rsx!`. Errors, the tray and dialogs keep the core's `tr!`.
 - Run `just i18n` after changing marked text and commit the templates and PO files with the change; `just i18n-check` and CI fail on a stale template.

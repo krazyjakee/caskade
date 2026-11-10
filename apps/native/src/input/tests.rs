@@ -518,3 +518,36 @@ fn guide_shows_no_menu_when_nothing_is_running() {
     assert_eq!(*calls(), ["running"]);
     assert!(!window.menu_open());
 }
+
+fn translated_app() -> Element {
+    crate::i18n::use_language();
+    let guide = use_hook(|| super::guide::Guide(std::rc::Rc::new(FakeGuide)));
+    rsx! {
+        InputRoot { console: true, guide }
+    }
+}
+
+#[test]
+fn switching_language_updates_the_open_guide_menu_without_a_restart() {
+    let _one = ONE_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    caskade_core::i18n::set_locale("en");
+    *RUNNING.lock().unwrap_or_else(|e| e.into_inner()) = vec![super::guide::RunningGame {
+        session_id: "s1".into(),
+        game_id: "g1".into(),
+        title: "Celeste".into(),
+        stream: false,
+    }];
+    let mut window = Window::open_with(translated_app);
+    window.pad(Action::Guide);
+    assert_eq!(window.focused(), "Return to game");
+    // The Language setting changes: the core switches, and the open view
+    // follows.
+    caskade_core::i18n::set_locale("sv");
+    window.settle();
+    assert_eq!(window.focused(), "Tillbaka till spelet");
+    window.find("Speldetaljer");
+    caskade_core::i18n::set_locale("en");
+    window.settle();
+    assert_eq!(window.focused(), "Return to game");
+}

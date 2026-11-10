@@ -670,7 +670,7 @@ pub fn InputRoot(
     let typing = input.keyboard();
     rsx! {
         div {
-            "data-cs": "input-root",
+            "data-input-root": "true",
             tabindex: "-1",
             "data-input-active": if input.active() { "true" } else { "false" },
             // A box of its own: Blitz gives focus on a box-less element

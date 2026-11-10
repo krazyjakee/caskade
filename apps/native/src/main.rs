@@ -11,6 +11,7 @@
 mod data;
 mod dialogs;
 mod forwarded;
+mod i18n;
 mod input;
 mod launch;
 mod shell;
@@ -260,6 +261,8 @@ fn attributes(restored: Option<window_state::WindowState>) -> dioxus_native::Win
 /// a quit asked for) and holds the views, which come with the UI work
 /// (#96 onwards).
 fn app() -> Element {
+    // The UI's language, before any text (#91).
+    i18n::use_language();
     let window = dioxus_native::use_window();
     use_hook({
         let window = window.clone();

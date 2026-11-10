@@ -1983,6 +1983,7 @@ dependencies = [
  "caskade-input",
  "caskade-player",
  "caskade-ui-data",
+ "caskade-ui-i18n",
  "caskade-ui-input",
  "caskade-ui-theme",
  "dioxus-native",
@@ -2206,6 +2207,13 @@ dependencies = [
  "caskade-core",
  "tokio",
  "tracing",
+]
+
+[[package]]
+name = "caskade-ui-i18n"
+version = "0.1.0"
+dependencies = [
+ "caskade-i18n",
 ]
 
 [[package]]

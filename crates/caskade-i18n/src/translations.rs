@@ -145,6 +145,31 @@ impl Translations {
         })
     }
 
+    /// `id`'s translation in the language in use, if it has one (not
+    /// English's, nor an empty or fuzzy entry's): for looking through
+    /// several domains.
+    pub fn find(&self, context: Option<&str>, id: &str) -> Option<String> {
+        self.read(|active| {
+            active
+                .catalog
+                .as_ref()
+                .and_then(|catalog| catalog.get(context, id))
+                .map(str::to_owned)
+        })
+    }
+
+    /// The translated form of `id` / its plural for `n`, if the language in
+    /// use has one.
+    pub fn find_plural(&self, context: Option<&str>, id: &str, n: u64) -> Option<String> {
+        self.read(|active| {
+            active
+                .catalog
+                .as_ref()
+                .and_then(|catalog| catalog.get_plural(context, id, n))
+                .map(str::to_owned)
+        })
+    }
+
     /// Reads every catalog: the languages whose catalog is broken, and why.
     pub fn check(&self) -> Vec<(&str, CatalogError)> {
         self.bundled
@@ -166,7 +191,8 @@ impl Translations {
     }
 }
 
-fn english<'a>(id: &'a str, plural: &'a str, n: u64) -> &'a str {
+/// English's form of `id` / `plural` for `n`.
+pub fn english<'a>(id: &'a str, plural: &'a str, n: u64) -> &'a str {
     static ENGLISH: OnceLock<PluralForms> = OnceLock::new();
     if ENGLISH.get_or_init(PluralForms::default).index(n) == 0 {
         id

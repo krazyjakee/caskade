@@ -44,6 +44,8 @@ caskade-ui-data = { path = "../../crates/caskade-ui-data" }
 # Pads (`src/input`), and the webview's input rules ported to Rust (#92).
 caskade-input = { path = "../../crates/caskade-input" }
 caskade-ui-input = { path = "../../crates/caskade-ui-input" }
+# The UI's text: the webview's catalogs, t! and formatting (#91).
+caskade-ui-i18n = { path = "../../crates/caskade-ui-i18n" }
 # Appearance, the accent and the user CSS check, as the webview has them (#90).
 caskade-ui-theme = { path = "../../crates/caskade-ui-theme" }
 # The game and video windows (`--web-game`, `--video`), shared with the

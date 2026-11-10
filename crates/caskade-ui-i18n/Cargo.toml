@@ -1,0 +1,17 @@
+[package]
+name = "caskade-ui-i18n"
+version = "0.1.0"
+description = "The native UI's text: the webview's app and ui catalogs, the t! macros over them, the en-XA pseudo-locale, and numbers and dates as the webview's Intl writes them"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+caskade-i18n = { path = "../caskade-i18n" }
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+# The extractor's list of the native UI's messages, for the carry-over test.
+caskade-i18n = { path = "../caskade-i18n", features = ["extract"] }
