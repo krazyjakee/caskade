@@ -137,7 +137,8 @@ it("a search for a name finds Streaming and shows only Caskade's words", async (
   expect([...shown]).toEqual([]);
 });
 
-/** What the search index matches and never draws, as the test above shows. */
+/** What the search index matches and never draws, as the test above shows;
+ * the native UI's index (#103) shares the words. */
 const SEARCH_WORDS = [
   "client, Moonlight, pair",
   "host, hosting, Sunshine",
@@ -161,7 +162,10 @@ it("no catalog text can show a name, but the settings search's own words", () =>
   }
   expect(named).toEqual(
     Object.fromEntries(
-      SEARCH_WORDS.map((words) => [words, ["apps/desktop/src/views/settings/searchIndex.ts"]]),
+      SEARCH_WORDS.map((words) => [
+        words,
+        ["apps/desktop/src/views/settings/searchIndex.ts", "apps/native/src/settings/search.rs"],
+      ]),
     ),
   );
 });
