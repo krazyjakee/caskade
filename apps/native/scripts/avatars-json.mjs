@@ -11,7 +11,9 @@ const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../.
 const source = readFileSync(path.join(repo, "packages/ui/src/avatars.ts"), "utf8");
 const between = (from, to) => source.slice(source.indexOf(from), source.indexOf(to));
 // avatars.ts's functions, without their TypeScript annotations.
-const code = (between("function hex(", "function svg(") + between("function svg(", "/** Every avatar"))
+const code = (
+  between("function hex(", "function svg(") + between("function svg(", "/** Every avatar")
+)
   .replace(/: number/g, "")
   .replace(/\): string/g, ")")
   .replace("{ hue, glyph }: Drawing", "{ hue, glyph }")
