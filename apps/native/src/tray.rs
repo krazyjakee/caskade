@@ -141,7 +141,7 @@ pub fn app_menu() {
         QUIT,
         quit_label(),
         true,
-        Some(Accelerator::new(Some(Modifiers::META), Code::KeyQ)),
+        Some(Accelerator::new(Modifiers::META, Code::KeyQ)),
     );
     let separator = PredefinedMenuItem::separator;
     let built = (|| -> Result<(), tray_icon::menu::Error> {
