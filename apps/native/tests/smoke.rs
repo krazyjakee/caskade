@@ -1,0 +1,223 @@
+//! #87's smoke test: the native binary starts on a library of its own,
+//! restores its window's saved place and size, plays a web game and opens
+//! a video (each a wry window in a process of its own), and quits cleanly
+//! with its window state saved. Needs an X display without a window
+//! manager (Xvfb) and `xwininfo`; nothing reaches the internet: the game
+//! and the video's page are served here, on loopback.
+//!
+//! `xvfb-run -a cargo test -p caskade-native --test smoke -- --ignored`
+
+use std::io::{BufRead, BufReader, Write};
+use std::net::TcpListener;
+use std::path::{Path, PathBuf};
+use std::process::{Child, Command, Stdio};
+use std::time::{Duration, Instant};
+
+use caskade_core::{
+    AppPaths,
+    db::LibraryStore,
+    model::{Game, GameEntry, InstallState, LaunchSpec},
+};
+
+/// Serves `page(path)` for every request on loopback; the address.
+fn serve(page: fn(&str) -> String) -> String {
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let address = format!("http://{}", listener.local_addr().unwrap());
+    std::thread::spawn(move || {
+        for stream in listener.incoming().flatten() {
+            let mut reader = BufReader::new(stream.try_clone().unwrap());
+            let mut request = String::new();
+            if reader.read_line(&mut request).is_err() {
+                continue;
+            }
+            let path = request.split_whitespace().nth(1).unwrap_or("/").to_owned();
+            // The headers, up to the blank line.
+            let mut line = String::new();
+            while reader.read_line(&mut line).is_ok_and(|read| read > 2) {
+                line.clear();
+            }
+            let body = page(&path);
+            let mut stream = stream;
+            let _ = write!(
+                stream,
+                "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                body.len()
+            );
+        }
+    });
+    address
+}
+
+fn page(path: &str) -> String {
+    let title = if path.starts_with("/embed/") {
+        "Smoke Video"
+    } else {
+        "Smoke Game"
+    };
+    format!("<!doctype html><title>{title}</title><p>{title}</p>")
+}
+
+/// Every top-level window on the display: its title and geometry
+/// (`WIDTHxHEIGHT+X+Y`), as `xwininfo` says.
+fn windows() -> Vec<(String, String)> {
+    let output = Command::new("xwininfo")
+        .args(["-root", "-tree"])
+        .output()
+        .expect("xwininfo runs");
+    String::from_utf8_lossy(&output.stdout)
+        .lines()
+        .filter_map(|line| {
+            let line = line.trim();
+            let rest = line.split_once(" \"")?.1;
+            let (title, rest) = rest.split_once("\":")?;
+            let geometry = rest.split_whitespace().find(|word| {
+                word.contains('x')
+                    && word.contains('+')
+                    && word.chars().next().is_some_and(|c| c.is_ascii_digit())
+            })?;
+            Some((title.to_owned(), geometry.to_owned()))
+        })
+        .collect()
+}
+
+/// Waits up to `limit` for a window titled `title`; its geometry.
+fn window(title: &str, limit: Duration) -> Option<String> {
+    let deadline = Instant::now() + limit;
+    while Instant::now() < deadline {
+        if let Some((_, geometry)) = windows().into_iter().find(|(name, _)| name == title) {
+            return Some(geometry);
+        }
+        std::thread::sleep(Duration::from_millis(200));
+    }
+    None
+}
+
+/// The processes `parent` started, by their parent id in /proc.
+fn children(parent: u32) -> Vec<u32> {
+    let Ok(entries) = std::fs::read_dir("/proc") else {
+        return Vec::new();
+    };
+    entries
+        .flatten()
+        .filter_map(|entry| entry.file_name().to_str()?.parse::<u32>().ok())
+        .filter(|pid| {
+            std::fs::read_to_string(format!("/proc/{pid}/stat"))
+                .ok()
+                .and_then(|stat| {
+                    let after = stat.rsplit_once(')')?.1;
+                    after.split_whitespace().nth(1)?.parse::<u32>().ok()
+                })
+                == Some(parent)
+        })
+        .collect()
+}
+
+fn wait(child: &mut Child, limit: Duration) -> Option<std::process::ExitStatus> {
+    let deadline = Instant::now() + limit;
+    while Instant::now() < deadline {
+        if let Some(status) = child.try_wait().unwrap() {
+            return Some(status);
+        }
+        std::thread::sleep(Duration::from_millis(100));
+    }
+    None
+}
+
+/// The profile's paths, as the binary finds them under these XDG folders.
+fn profile(home: &Path) -> AppPaths {
+    AppPaths {
+        data: home.join("data/caskade"),
+        config: home.join("config/caskade"),
+        cache: home.join("cache/caskade"),
+        logs: home.join("data/caskade/logs"),
+        games: home.join("Games/Caskade"),
+    }
+}
+
+#[test]
+#[ignore = "needs an X display (Xvfb, no window manager) and xwininfo: run with -- --ignored"]
+fn starts_restores_its_window_plays_a_web_game_and_a_video_and_quits() {
+    assert!(
+        std::env::var_os("DISPLAY").is_some(),
+        "run under Xvfb: xvfb-run -a cargo test …"
+    );
+    let temp = tempfile::tempdir().unwrap();
+    let home = temp.path().to_path_buf();
+    let paths = profile(&home);
+    paths.create().unwrap();
+    let site = serve(page);
+    // A web game in the library, served above.
+    let entry = caskade_app::runtime::block_on(async {
+        let store = LibraryStore::open_default(&paths).await.unwrap();
+        let game = store.upsert_game(&Game::new("Smoke Game")).await.unwrap();
+        let mut entry = GameEntry::new(&game.id, caskade_core::web::WEB_SOURCE, &site);
+        entry.state = InstallState::Installed;
+        entry.launch = Some(LaunchSpec::Web {
+            url: format!("{site}/"),
+        });
+        store.upsert_entry(&entry).await.unwrap();
+        entry.id
+    });
+    // Where the window was last time.
+    let state_file = paths.config.join("native-window.json");
+    std::fs::write(
+        &state_file,
+        r#"{"x":40,"y":30,"width":1100,"height":700,"maximized":false}"#,
+    )
+    .unwrap();
+    let runtime: PathBuf = home.join("run");
+    std::fs::create_dir_all(&runtime).unwrap();
+    let log = std::fs::File::create(home.join("native.log")).unwrap();
+    let mut app = Command::new(env!("CARGO_BIN_EXE_caskade-native"))
+        .env_clear()
+        .env("PATH", std::env::var_os("PATH").unwrap_or_default())
+        .env("DISPLAY", std::env::var_os("DISPLAY").unwrap())
+        .env("HOME", &home)
+        .env("XDG_DATA_HOME", home.join("data"))
+        .env("XDG_CONFIG_HOME", home.join("config"))
+        .env("XDG_CACHE_HOME", home.join("cache"))
+        .env("XDG_STATE_HOME", home.join("state"))
+        .env("XDG_RUNTIME_DIR", &runtime)
+        .env("NO_AT_BRIDGE", "1")
+        .env("GTK_A11Y", "none")
+        .env("RUST_LOG", "info")
+        .env("CASKADE_VIDEO_EMBED", format!("{site}/embed/"))
+        .env("CASKADE_NATIVE_SMOKE_LAUNCH", &entry)
+        .env("CASKADE_NATIVE_SMOKE_VIDEO", "aaaaaaaaaaa")
+        .env("CASKADE_NATIVE_SMOKE_QUIT", "25")
+        .stdin(Stdio::null())
+        .stdout(log.try_clone().unwrap())
+        .stderr(log)
+        .spawn()
+        .expect("the native binary starts");
+    let pid = app.id();
+    let checks = std::panic::catch_unwind(|| {
+        let main = window("Caskade", Duration::from_secs(30)).expect("the main window opens");
+        // Without a window manager the window goes exactly where it asks.
+        assert_eq!(main, "1100x700+40+30", "the restored place and size");
+        let game = window("Smoke Game", Duration::from_secs(30)).expect("the web game's window");
+        let video = window("Smoke test", Duration::from_secs(30)).expect("the video window");
+        (game, video)
+    });
+    // Whatever happened: the app, and the windows it started, end here.
+    let started = children(pid);
+    let status = wait(&mut app, Duration::from_secs(40));
+    for child in started {
+        let _ = Command::new("kill").arg(child.to_string()).status();
+    }
+    if status.is_none() {
+        let _ = app.kill();
+    }
+    let output = std::fs::read_to_string(home.join("native.log")).unwrap_or_default();
+    let (game, video) = checks.unwrap_or_else(|panic| {
+        eprintln!("{output}");
+        std::panic::resume_unwind(panic)
+    });
+    eprintln!("game window {game}, video window {video}");
+    let status = status.unwrap_or_else(|| panic!("the app didn't quit:\n{output}"));
+    assert!(status.success(), "{status}:\n{output}");
+    assert!(output.contains("Caskade (native) quit"), "{output}");
+    assert!(!output.contains("panicked"), "{output}");
+    let saved = std::fs::read_to_string(&state_file).unwrap();
+    assert!(saved.contains("\"width\":1100"), "{saved}");
+}

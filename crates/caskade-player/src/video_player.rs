@@ -81,7 +81,19 @@ impl Options {
 
 /// The player's address for `video_id`, playing at once.
 fn embed_url(video_id: &str) -> String {
-    format!("{EMBED}{video_id}?autoplay=1&rel=0&playsinline=1")
+    format!("{}{video_id}?autoplay=1&rel=0&playsinline=1", embed())
+}
+
+/// The player's own page. Debug builds take `CASKADE_VIDEO_EMBED` instead,
+/// so tests serve a page of their own and never reach YouTube.
+fn embed() -> String {
+    if cfg!(debug_assertions)
+        && let Ok(embed) = std::env::var("CASKADE_VIDEO_EMBED")
+        && !embed.is_empty()
+    {
+        return embed;
+    }
+    EMBED.to_owned()
 }
 
 /// A 16:9 window over the middle of Caskade's, most of its size.
@@ -159,7 +171,7 @@ pub fn run(options: Options) -> Result<i32, String> {
             }
         })
         // The player's own page only: its links lead to YouTube.
-        .with_navigation_handler(|url| url.starts_with(EMBED) || url == "about:blank")
+        .with_navigation_handler(|url| url.starts_with(&embed()) || url == "about:blank")
         .with_new_window_req_handler(|_, _| NewWindowResponse::Deny);
     #[cfg(any(
         target_os = "linux",

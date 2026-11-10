@@ -57,7 +57,7 @@ i18n-check:
 
 # Run the app tests: core and Tauri adapter (Rust), then the frontend (Vitest)
 test-app *args:
-    flock /tmp/caskade-heavy.lock cargo test -p caskade-core -p caskade-achievements -p caskade-addons -p caskade-backup -p caskade-share -p caskade-streaming -p caskade-system-stats -p caskade-app -p caskade-player -p caskade-desktop {{args}}
+    flock /tmp/caskade-heavy.lock cargo test -p caskade-core -p caskade-achievements -p caskade-addons -p caskade-backup -p caskade-share -p caskade-streaming -p caskade-system-stats -p caskade-app -p caskade-player -p caskade-desktop -p caskade-native {{args}}
     pnpm test
 
 # Type-check every package

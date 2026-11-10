@@ -1978,7 +1978,12 @@ version = "0.1.4"
 dependencies = [
  "caskade-app",
  "caskade-core",
+ "caskade-player",
  "dioxus-native",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
  "tracing",
  "tracing-subscriber",
 ]
