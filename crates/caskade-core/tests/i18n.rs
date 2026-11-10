@@ -43,6 +43,6 @@ fn the_template_lists_the_tray_menu() {
             .iter()
             .find(|message| message.id == id)
             .unwrap_or_else(|| panic!("{id:?} isn't extracted"));
-        assert_eq!(message.references, ["apps/desktop/src-tauri/src/tray.rs"]);
+        assert_eq!(message.references, ["crates/caskade-app/src/tray.rs"]);
     }
 }
