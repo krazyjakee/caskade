@@ -21,7 +21,8 @@
       "!packages/sdk/src/core.ts",
       "!packages/tokens/tokens.css",
       "!packages/tokens/manifest.json",
-      "!packages/ui/anatomy.json"
+      "!packages/ui/anatomy.json",
+      "!apps/native-proto/assets"
     ]
   },
   "formatter": {
