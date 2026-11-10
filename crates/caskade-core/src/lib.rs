@@ -37,6 +37,7 @@ pub mod model;
 pub mod notifications;
 pub mod paths;
 pub mod ports;
+pub mod program;
 #[cfg(feature = "net")]
 pub(crate) mod remote_file;
 #[cfg(not(feature = "net"))]

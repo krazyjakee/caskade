@@ -76,13 +76,10 @@ pub struct TorrentLinks {
 }
 
 /// The program the OS should start: the AppImage when Caskade runs from
-/// one, since the executable inside it moves on every start.
+/// one, but not an AppImage it merely inherited (`caskade_core::program`).
 #[cfg(any(windows, target_os = "linux"))]
 fn program() -> Result<String, String> {
-    let path = match std::env::var_os("APPIMAGE") {
-        Some(appimage) if cfg!(target_os = "linux") => PathBuf::from(appimage),
-        _ => std::env::current_exe().map_err(|error| error.to_string())?,
-    };
+    let path = caskade_core::program::current().map_err(|error| error.to_string())?;
     path.into_os_string()
         .into_string()
         .map_err(|_| caskade_core::tr!("Caskade's path isn't valid Unicode"))

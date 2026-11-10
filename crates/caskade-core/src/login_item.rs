@@ -10,7 +10,7 @@
 //! - Linux: an XDG autostart entry, `$XDG_CONFIG_HOME/autostart/caskade.desktop`
 //!   (`~/.config/autostart`), which X11 and Wayland sessions alike start.
 //!   From an AppImage it starts the AppImage, not the executable mounted
-//!   inside it. In a Flatpak the sandbox can't write there: the Background
+//!   inside it ([`crate::program`]). In a Flatpak the sandbox can't write there: the Background
 //!   portal writes it for the app ([`portal_request`]).
 //! - Windows: the current user's `Run` key, value `Caskade`, written with
 //!   `reg.exe` (the core links no registry crate).
@@ -73,7 +73,6 @@ impl LoginItem {
     /// This system's login item for the running Caskade, if it has one.
     pub fn live() -> Option<Self> {
         let exe = std::env::current_exe().ok()?;
-        let var = |name: &str| std::env::var_os(name);
         let dirs = directories::BaseDirs::new()?;
         if cfg!(windows) {
             return Some(Self::RunKey { program: exe });
@@ -96,7 +95,7 @@ impl LoginItem {
             }
             return Some(Self::Autostart {
                 path: autostart_path(dirs.config_dir()),
-                program: program(exe, var("APPIMAGE"), var("APPDIR")),
+                program: crate::program::current().ok()?,
             });
         }
         None
@@ -190,22 +189,6 @@ async fn settle(item: &LoginItem, on: bool, start: bool) {
         Ok(true) => tracing::info!(on, ?item, "login item updated"),
         Ok(false) => {}
         Err(error) => tracing::warn!(%error, on, ?item, "couldn't update the login item"),
-    }
-}
-
-/// What the autostart entry runs: the AppImage when Caskade runs from one,
-/// since the executable inside it moves on every start. `APPIMAGE` counts
-/// only when the executable is inside `APPDIR`, the AppImage's mount: a
-/// program started from another AppImage (a launcher, a terminal) inherits
-/// that one's variables.
-pub fn program(
-    exe: PathBuf,
-    appimage: Option<std::ffi::OsString>,
-    appdir: Option<std::ffi::OsString>,
-) -> PathBuf {
-    match (appimage, appdir) {
-        (Some(appimage), Some(appdir)) if exe.starts_with(&appdir) => PathBuf::from(appimage),
-        _ => exe,
     }
 }
 
@@ -447,29 +430,6 @@ mod tests {
             !starts_hidden(&args(&["caskade"]), &general),
             "a start by the user always shows the window"
         );
-    }
-
-    #[test]
-    fn an_appimage_is_started_as_itself_but_not_a_parents() {
-        let inside = PathBuf::from("/tmp/.mount_CaskadXyz/usr/bin/caskade");
-        assert_eq!(
-            program(
-                inside.clone(),
-                Some("/home/p/Caskade.AppImage".into()),
-                Some("/tmp/.mount_CaskadXyz".into())
-            ),
-            Path::new("/home/p/Caskade.AppImage")
-        );
-        // A deb install started from another AppImage (a launcher).
-        assert_eq!(
-            program(
-                PathBuf::from("/usr/bin/caskade"),
-                Some("/home/p/Launcher.AppImage".into()),
-                Some("/tmp/.mount_LauncherAbc".into())
-            ),
-            Path::new("/usr/bin/caskade")
-        );
-        assert_eq!(program(inside.clone(), None, None), inside);
     }
 
     #[test]
