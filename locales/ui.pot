@@ -21,6 +21,7 @@ msgstr ""
 
 #. Hours played
 #: packages/ui/src/Hero.tsx
+#: apps/native/src/ui/hero.rs
 msgid "{playtimeHours}h played"
 msgstr ""
 
@@ -29,6 +30,7 @@ msgstr ""
 #: packages/ui/src/GameCard.tsx
 #: packages/ui/src/Hero.tsx
 #: apps/native/src/ui/game_card.rs
+#: apps/native/src/ui/hero.rs
 msgid "{sizeGb} GB"
 msgstr ""
 
@@ -42,14 +44,17 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Alien"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Astronaut"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Atom"
 msgstr ""
 
@@ -61,32 +66,39 @@ msgstr ""
 
 #. The picker of an account's picture
 #: packages/ui/src/Avatar.tsx
+#: apps/native/src/ui/avatar.rs
 msgid "Avatar"
 msgstr ""
 
 #. The avatar showing the Caskade logo; usually kept as the brand name
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgctxt "avatar"
 msgid "Caskade"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Chip"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Comet"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Crystal"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Cyber cat"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Droid"
 msgstr ""
 
@@ -97,18 +109,22 @@ msgid "Emulator"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Energy bolt"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Flying saucer"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Gamepad"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Ghost"
 msgstr ""
 
@@ -124,23 +140,28 @@ msgid "Installed"
 msgstr ""
 
 #: packages/ui/src/Hero.tsx
+#: apps/native/src/ui/hero.rs
 msgid "Last played {lastPlayed}"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Mech helmet"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Moon"
 msgstr ""
 
 #. A button opening more actions
 #: packages/ui/src/Hero.tsx
+#: apps/native/src/ui/hero.rs
 msgid "More"
 msgstr ""
 
 #: packages/ui/src/Hero.tsx
+#: apps/native/src/ui/hero.rs
 msgid "More launch options"
 msgstr ""
 
@@ -156,14 +177,17 @@ msgid "Owned"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Portal"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Pulsar"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Radar"
 msgstr ""
 
@@ -174,18 +198,22 @@ msgid "Reference: {reference}"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Ringed planet"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Rocket"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Satellite"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Sentinel eye"
 msgstr ""
 
@@ -196,21 +224,26 @@ msgid "Show details"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Spiral galaxy"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Star"
 msgstr ""
 
 #: packages/ui/src/avatars.ts
+#: apps/native/src/ui/avatar.rs
 msgid "Starfighter"
 msgstr ""
 
 #: packages/ui/src/Shelf.tsx
+#: apps/native/src/ui/shelf.rs
 msgid "View All"
 msgstr ""
 
 #: packages/ui/src/Hero.tsx
+#: apps/native/src/ui/hero.rs
 msgid "View Details"
 msgstr ""

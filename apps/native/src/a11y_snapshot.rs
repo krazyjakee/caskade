@@ -54,6 +54,10 @@ fn snapshot_from(doc: &BaseDocument, start: Option<NodeId>) -> String {
     let mut stack = vec![(root, 0usize)];
     while let Some((id, depth)) = stack.pop() {
         let node = &nodes[&id];
+        // What screen readers skip (`aria-hidden`), with what's inside it.
+        if node.is_hidden() {
+            continue;
+        }
         let role = format!("{:?}", node.role());
         // Text is a label without a tag.
         if node.role() == accesskit::Role::Label && node.html_tag().is_none() {

@@ -11,6 +11,7 @@
 // The gallery (#93) and the views (#96 onwards) use them.
 #![allow(dead_code)]
 
+mod avatar;
 mod button;
 mod checkbox;
 mod combobox;
@@ -19,7 +20,8 @@ mod error_notice;
 mod game_art;
 mod game_card;
 mod game_row;
-mod icons;
+mod hero;
+pub(crate) mod icons;
 mod ids;
 mod interact;
 mod link;
@@ -29,6 +31,7 @@ mod progress;
 mod radio;
 mod segmented;
 mod select;
+mod shelf;
 mod slider;
 mod status_badge;
 mod switch;
@@ -39,6 +42,10 @@ mod text_field;
 mod toast;
 mod tooltip;
 
+#[allow(unused_imports)]
+pub use avatar::{
+    AvatarInfo, AvatarPicker, AvatarSize, Avatar, DEFAULT_AVATAR, avatar_info, avatars, initials,
+};
 #[allow(unused_imports)]
 pub use button::{Button, ButtonSize, ButtonVariant};
 #[allow(unused_imports)]
@@ -56,7 +63,11 @@ pub use game_card::{CardGame, CardVariant, GameCard, platform_line};
 #[allow(unused_imports)]
 pub use game_row::GameRow;
 #[allow(unused_imports)]
+pub use hero::{Hero, HeroGame};
+#[allow(unused_imports)]
 pub use icons::{Icon, Svg};
+#[allow(unused_imports)]
+pub use interact::Forced;
 #[allow(unused_imports)]
 pub use link::Link;
 #[allow(unused_imports)]
@@ -71,6 +82,10 @@ pub use radio::{RadioGroup, RadioOption};
 pub use segmented::{Segment, SegmentedControl};
 #[allow(unused_imports)]
 pub use select::{Select, SelectOption};
+#[allow(unused_imports)]
+pub(crate) use select::List as SelectList;
+#[allow(unused_imports)]
+pub use shelf::Shelf;
 #[allow(unused_imports)]
 pub use slider::Slider;
 #[allow(unused_imports)]
@@ -90,16 +105,20 @@ use caskade_ui_theme::anatomy::Entry;
 
 /// The components' anatomy entries.
 pub const ANATOMY: &[Entry] = &[
+    avatar::ANATOMY,
+    avatar::PICKER_ANATOMY,
     button::ANATOMY,
     checkbox::ANATOMY,
     error_notice::ANATOMY,
     game_art::ANATOMY,
     game_card::ANATOMY,
     game_row::ANATOMY,
+    hero::ANATOMY,
     menu::ANATOMY,
     select::ANATOMY,
     select::POPOVER_ANATOMY,
     segmented::ANATOMY,
+    shelf::ANATOMY,
     slider::ANATOMY,
     status_badge::ANATOMY,
     switch::ANATOMY,
