@@ -67,7 +67,7 @@ pub mod store_accounts;
 pub mod sync;
 pub mod themes;
 // Tests that write a program and run it (#118); siblings use `test-utils`.
-#[cfg(all(unix, any(test, feature = "test-utils")))]
+#[cfg(any(test, feature = "test-utils"))]
 pub mod test_programs;
 pub mod tracking;
 #[cfg(feature = "net")]
