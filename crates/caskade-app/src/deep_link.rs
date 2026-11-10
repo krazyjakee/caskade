@@ -152,9 +152,9 @@ pub async fn open(services: LinkServices<'_>, links: Vec<Url>) -> bool {
         };
         if let Err(error) = queued {
             tracing::info!("an opened share link didn't queue");
-            services
-                .events
-                .send(crate::events::Event::InstallRefused(crate::events::InstallRefused(error)));
+            services.events.send(crate::events::Event::InstallRefused(
+                crate::events::InstallRefused(error),
+            ));
         }
     }
     let (callbacks, installs): (Vec<_>, Vec<_>) = links
