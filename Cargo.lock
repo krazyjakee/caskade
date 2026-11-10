@@ -1635,6 +1635,7 @@ name = "caskade-app"
 version = "0.1.0"
 dependencies = [
  "arboard",
+ "base64 0.22.1",
  "caskade-achievements",
  "caskade-addons",
  "caskade-backup",
@@ -1646,15 +1647,22 @@ dependencies = [
  "caskade-sources",
  "caskade-streaming",
  "caskade-system-stats",
+ "flate2",
+ "minisign",
+ "minisign-verify",
  "qrcode",
+ "reqwest 0.12.28",
+ "semver",
  "serde",
  "serde_json",
  "specta",
+ "tar",
  "tempfile",
  "tokio",
  "tracing",
  "url",
  "windows-registry",
+ "wiremock",
 ]
 
 [[package]]
@@ -1989,6 +1997,7 @@ dependencies = [
  "gtk",
  "image",
  "libappindicator-sys",
+ "rfd",
  "serde",
  "serde_json",
  "tempfile",
@@ -2200,6 +2209,13 @@ dependencies = [
  "caskade-core",
  "tokio",
  "tracing",
+]
+
+[[package]]
+name = "caskade-ui-input"
+version = "0.1.0"
+dependencies = [
+ "caskade-input",
 ]
 
 [[package]]

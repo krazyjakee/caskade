@@ -5456,6 +5456,64 @@ msgstr "{game} frågar vad som ska startas; välj i Caskade, eller ange en åtg�
 msgid "accounts are unavailable"
 msgstr "konton är inte tillgängliga"
 
+#: crates/caskade-app/src/self_update.rs
+msgid "The download is larger than expected."
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+#: apps/desktop/src-tauri/src/commands/app_update.rs
+msgid "Couldn't check for updates: {error}"
+msgstr "Det gick inte att söka efter uppdateringar: {error}"
+
+#: crates/caskade-app/src/self_update.rs
+msgid "The update feed isn't readable: {error}"
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "The update feed's version isn't readable."
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "The new version has no download for this system yet."
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+#: apps/desktop/src-tauri/src/commands/app_update.rs
+msgid "Couldn't download the update: {error}"
+msgstr "Det gick inte att ladda ner uppdateringen: {error}"
+
+#: crates/caskade-app/src/self_update.rs
+msgid "The update's signature doesn't match: {why}"
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "This copy isn't an AppImage."
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "This copy can't install a deb."
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "The update isn't an AppImage."
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "The update isn't an installer."
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "This copy isn't in an app bundle."
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "The update has no app in it."
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "This copy isn't a macOS app."
+msgstr ""
+
 #: crates/caskade-app/src/torrent_links.rs
 msgid "Caskade's path isn't valid Unicode"
 msgstr "Caskades sökväg är inte giltig Unicode"
@@ -5505,20 +5563,12 @@ msgid "The update feed's address is invalid: {error}"
 msgstr "Uppdateringsflödets adress är ogiltig: {error}"
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "Couldn't check for updates: {error}"
-msgstr "Det gick inte att söka efter uppdateringar: {error}"
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "Downloading Caskade {version}"
 msgstr "Laddar ner Caskade {version}"
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "Downloading Caskade {version} ({percent}%)"
 msgstr "Laddar ner Caskade {version} ({percent} %)"
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "Couldn't download the update: {error}"
-msgstr "Det gick inte att ladda ner uppdateringen: {error}"
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "Installing Caskade {version}"

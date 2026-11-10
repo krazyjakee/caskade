@@ -78,14 +78,6 @@ fn build() -> Result<(), String> {
         .with_menu_on_left_click(macos)
         .build()
         .map_err(|error| error.to_string())?;
-    MenuEvent::set_event_handler(Some(|event: MenuEvent| match event.id.as_ref() {
-        SHOW => launch::ask(Request::Show),
-        QUIT => {
-            state().quit();
-            launch::ask(Request::Quit);
-        }
-        _ => {}
-    }));
     TrayIconEvent::set_event_handler(Some(move |event: TrayIconEvent| {
         if let TrayIconEvent::Click {
             button: MouseButton::Left,
@@ -100,6 +92,88 @@ fn build() -> Result<(), String> {
     ICON_HERE.with(|here| *here.borrow_mut() = Some(Icon { icon, show, quit }));
     state().set_shown(true);
     Ok(())
+}
+
+/// Takes the menus' clicks (the tray's and, on macOS, the menu bar's):
+/// once, before either menu is up.
+pub fn handle_menu_events() {
+    MenuEvent::set_event_handler(Some(|event: MenuEvent| match event.id.as_ref() {
+        SHOW => launch::ask(Request::Show),
+        QUIT => {
+            state().quit();
+            launch::ask(Request::Quit);
+        }
+        _ => {}
+    }));
+}
+
+/// macOS: the menu bar's Caskade, Edit and Window menus. Quit is Caskade's
+/// own (⌘Q), so it goes through the same quit as the tray's.
+#[cfg(target_os = "macos")]
+pub fn app_menu() {
+    use tray_icon::menu::accelerator::{Accelerator, Code, Modifiers};
+    use tray_icon::menu::{AboutMetadata, Submenu};
+    let quit = MenuItem::with_id(
+        QUIT,
+        quit_label(),
+        true,
+        Some(Accelerator::new(Some(Modifiers::META), Code::KeyQ)),
+    );
+    let separator = PredefinedMenuItem::separator;
+    let built = (|| -> Result<(), tray_icon::menu::Error> {
+        let about = PredefinedMenuItem::about(
+            None,
+            Some(AboutMetadata {
+                name: Some("Caskade".into()),
+                version: Some(env!("CARGO_PKG_VERSION").into()),
+                ..Default::default()
+            }),
+        );
+        let caskade = Submenu::with_items(
+            "Caskade",
+            true,
+            &[
+                &about,
+                &separator(),
+                &PredefinedMenuItem::services(None),
+                &separator(),
+                &PredefinedMenuItem::hide(None),
+                &PredefinedMenuItem::hide_others(None),
+                &PredefinedMenuItem::show_all(None),
+                &separator(),
+                &quit,
+            ],
+        )?;
+        let edit = Submenu::with_items(
+            caskade_core::tr!("Edit"),
+            true,
+            &[
+                &PredefinedMenuItem::undo(None),
+                &PredefinedMenuItem::redo(None),
+                &separator(),
+                &PredefinedMenuItem::cut(None),
+                &PredefinedMenuItem::copy(None),
+                &PredefinedMenuItem::paste(None),
+                &PredefinedMenuItem::select_all(None),
+            ],
+        )?;
+        let window = Submenu::with_items(
+            caskade_core::tr!("Window"),
+            true,
+            &[
+                &PredefinedMenuItem::minimize(None),
+                &PredefinedMenuItem::fullscreen(None),
+            ],
+        )?;
+        let menu = Menu::with_items(&[&caskade, &edit, &window])?;
+        menu.init_for_nsapp();
+        // The menu bar keeps it for the app's lifetime.
+        std::mem::forget(menu);
+        Ok(())
+    })();
+    if let Err(error) = built {
+        tracing::warn!(%error, "no menu bar menus");
+    }
 }
 
 /// Relabels the menu in the core's language, on the icon's thread.
@@ -145,16 +219,9 @@ pub fn follow(settings: SettingsService) {
 mod linux {
     use super::*;
     use std::sync::{Mutex, mpsc};
-    use std::time::Duration;
 
-    /// What the GTK thread does for the rest of the app.
-    pub enum Command {
-        Relabel,
-        /// Hide the icon; the sender hears once it's hidden.
-        Hide(mpsc::Sender<()>),
-    }
-
-    pub static COMMANDS: Mutex<Option<mpsc::Sender<Command>>> = Mutex::new(None);
+    /// Whether GTK runs on its thread.
+    static GTK: Mutex<Option<bool>> = Mutex::new(None);
 
     /// libappindicator-sys panics on first use when neither library loads,
     /// so load it here first, where the panic can be caught.
@@ -165,68 +232,83 @@ mod linux {
         .is_ok()
     }
 
-    /// Starts the GTK thread and puts the icon up there; whether it's up.
-    pub fn start() -> bool {
-        let (ready, up) = mpsc::channel();
-        let (commands, received) = mpsc::channel::<Command>();
-        let started = std::thread::Builder::new()
-            .name("caskade-tray".into())
+    /// Starts GTK on a thread of its own (once); whether it runs.
+    pub fn start_gtk() -> bool {
+        let mut gtk = GTK.lock().unwrap_or_else(|e| e.into_inner());
+        if let Some(running) = *gtk {
+            return running;
+        }
+        let (ready, started) = mpsc::channel();
+        let spawned = std::thread::Builder::new()
+            .name("caskade-gtk".into())
             .spawn(move || {
                 if let Err(error) = gtk::init() {
-                    tracing::warn!(%error, "no tray icon: GTK didn't start");
-                    let _ = ready.send(false);
-                    return;
-                }
-                if !indicator_available() {
-                    tracing::warn!(
-                        "no tray icon: install libayatana-appindicator3 (or libappindicator3); \
-                         closing the window quits"
-                    );
-                    let _ = ready.send(false);
-                    return;
-                }
-                if let Err(error) = build() {
-                    tracing::warn!(%error, "no tray icon; closing the window quits");
+                    tracing::warn!(%error, "GTK didn't start: no tray icon or dialogs");
                     let _ = ready.send(false);
                     return;
                 }
                 let _ = ready.send(true);
-                gtk::glib::timeout_add_local(Duration::from_millis(100), move || {
-                    while let Ok(command) = received.try_recv() {
-                        match command {
-                            Command::Relabel => relabel(),
-                            Command::Hide(done) => {
-                                ICON_HERE.with(|here| {
-                                    if let Some(icon) = here.borrow().as_ref()
-                                        && let Err(error) = icon.icon.set_visible(false)
-                                    {
-                                        tracing::warn!(%error, "couldn't hide the tray icon");
-                                    }
-                                });
-                                let _ = done.send(());
-                            }
-                        }
-                    }
-                    gtk::glib::ControlFlow::Continue
-                });
                 gtk::main();
             });
-        if let Err(error) = started {
-            tracing::warn!(%error, "no tray icon: its thread didn't start");
-            return false;
-        }
-        *COMMANDS.lock().unwrap_or_else(|e| e.into_inner()) = Some(commands);
-        up.recv_timeout(Duration::from_secs(5)).unwrap_or(false)
+        let running = spawned.is_ok()
+            && started
+                .recv_timeout(std::time::Duration::from_secs(5))
+                .unwrap_or(false);
+        *gtk = Some(running);
+        running
     }
 
-    pub fn send(command: Command) -> bool {
-        COMMANDS
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .as_ref()
-            .is_some_and(|commands| commands.send(command).is_ok())
+    /// Runs `work` on the GTK thread and waits for its answer; `None` when
+    /// GTK doesn't run.
+    pub fn on_gtk<T: Send + 'static>(work: impl FnOnce() -> T + Send + 'static) -> Option<T> {
+        if !start_gtk() {
+            return None;
+        }
+        let (done, answer) = mpsc::channel();
+        gtk::glib::MainContext::default().invoke(move || {
+            let _ = done.send(work());
+        });
+        answer.recv().ok()
+    }
+
+    /// Puts the icon up on the GTK thread; whether it's up.
+    pub fn start() -> bool {
+        on_gtk(|| {
+            if !indicator_available() {
+                tracing::warn!(
+                    "no tray icon: install libayatana-appindicator3 (or libappindicator3); \
+                     closing the window quits"
+                );
+                return false;
+            }
+            match build() {
+                Ok(()) => true,
+                Err(error) => {
+                    tracing::warn!(%error, "no tray icon; closing the window quits");
+                    false
+                }
+            }
+        })
+        .unwrap_or(false)
+    }
+
+    /// Hides the icon on the GTK thread, while its loop answers the bus.
+    pub fn hide() {
+        on_gtk(|| {
+            ICON_HERE.with(|here| {
+                if let Some(icon) = here.borrow().as_ref()
+                    && let Err(error) = icon.icon.set_visible(false)
+                {
+                    tracing::warn!(%error, "couldn't hide the tray icon");
+                }
+            });
+        });
     }
 }
+
+/// Runs `work` on the GTK thread (Linux), for the dialogs.
+#[cfg(target_os = "linux")]
+pub use linux::on_gtk;
 
 /// Puts the icon up where this OS wants it: on Linux, on the tray's own
 /// GTK thread (call this before the window opens); elsewhere call
@@ -251,7 +333,7 @@ pub fn start_here() -> bool {
 
 fn relabel_everywhere() {
     #[cfg(target_os = "linux")]
-    linux::send(linux::Command::Relabel);
+    caskade_app::runtime::spawn_blocking(|| linux::on_gtk(relabel));
     #[cfg(not(target_os = "linux"))]
     launch::ask(Request::Relabel);
 }
@@ -266,10 +348,7 @@ pub fn hide_before_exit() {
         if !state().take_shown() {
             return;
         }
-        let (done, hidden) = std::sync::mpsc::channel();
-        if linux::send(linux::Command::Hide(done)) {
-            let _ = hidden.recv_timeout(std::time::Duration::from_secs(1));
-            std::thread::sleep(HIDDEN_BEFORE_EXIT);
-        }
+        linux::hide();
+        std::thread::sleep(HIDDEN_BEFORE_EXIT);
     }
 }

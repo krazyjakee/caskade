@@ -35,12 +35,26 @@ specta = { version = "=2.0.0-rc.26", features = ["derive"] }
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "sync", "time", "macros", "net", "io-util"] }
 tracing = "0.1"
 url = "2"
+# Caskade's own updates without Tauri (`self_update.rs`): the core's HTTP
+# client settings (rustls on ring), and the release key's signatures.
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream"] }
+minisign-verify = "0.3"
+base64 = "0.22"
+semver = "1"
 
 # Offers Caskade for magnet links and torrent files (`torrent_links.rs`).
 [target.'cfg(windows)'.dependencies]
 windows-registry = "0.6"
 
+# The macOS app's update is a .app.tar.gz.
+[target.'cfg(target_os = "macos")'.dependencies]
+tar = "0.4"
+flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
+
 [dev-dependencies]
+wiremock = "0.6"
+# Signs the self-update tests' bundles with a throwaway key.
+minisign = "=0.10.0"
 # `test_programs`: programs a test writes and runs without ETXTBSY (#118).
 caskade-core = { path = "../caskade-core", features = ["test-utils"] }
 tempfile = "=3.27.0"

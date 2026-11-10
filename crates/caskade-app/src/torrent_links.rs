@@ -78,7 +78,7 @@ pub struct TorrentLinks {
 /// The program the OS should start: the AppImage when Caskade runs from
 /// one, but not an AppImage it merely inherited (`caskade_core::program`).
 #[cfg(any(windows, target_os = "linux"))]
-fn program() -> Result<String, String> {
+pub(crate) fn program() -> Result<String, String> {
     let path = caskade_core::program::current().map_err(|error| error.to_string())?;
     path.into_os_string()
         .into_string()
@@ -181,7 +181,7 @@ pub fn refresh() {
 }
 
 #[cfg(target_os = "linux")]
-mod linux {
+pub(crate) mod linux {
     use super::{Support, TorrentLinks};
     use std::{
         collections::HashMap,
@@ -255,7 +255,7 @@ mod linux {
     }
 
     /// `$<var>`, or `~/<fallback>`.
-    fn xdg_dir(var: &str, fallback: &str) -> Result<PathBuf, String> {
+    pub(crate) fn xdg_dir(var: &str, fallback: &str) -> Result<PathBuf, String> {
         if let Some(dir) = std::env::var_os(var).map(PathBuf::from)
             && dir.is_absolute()
         {

@@ -56,6 +56,10 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 gtk = "0.18"
 libappindicator-sys = "0.9"
 
+# Windows and macOS: the OS's dialogs (`dialogs.rs`), as Tauri builds them.
+[target.'cfg(not(target_os = "linux"))'.dependencies]
+rfd = { version = "0.16", default-features = false, features = ["common-controls-v6"] }
+
 [dev-dependencies]
 tempfile = "=3.27.0"
 

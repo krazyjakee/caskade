@@ -120,6 +120,10 @@ async fn take(
     BufReader::new(read.take(MESSAGE_LIMIT))
         .read_line(&mut line)
         .await?;
+    // A start checking whether the endpoint answers sends nothing.
+    if line.trim().is_empty() {
+        return Ok(());
+    }
     let forwarded: Forwarded = serde_json::from_str(line.trim()).map_err(std::io::Error::other)?;
     on(forwarded);
     write.write_all(format!("{TAKEN}\n").as_bytes()).await?;

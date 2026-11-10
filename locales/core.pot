@@ -5454,6 +5454,64 @@ msgstr ""
 msgid "accounts are unavailable"
 msgstr ""
 
+#: crates/caskade-app/src/self_update.rs
+msgid "The download is larger than expected."
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+#: apps/desktop/src-tauri/src/commands/app_update.rs
+msgid "Couldn't check for updates: {error}"
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "The update feed isn't readable: {error}"
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "The update feed's version isn't readable."
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "The new version has no download for this system yet."
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+#: apps/desktop/src-tauri/src/commands/app_update.rs
+msgid "Couldn't download the update: {error}"
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "The update's signature doesn't match: {why}"
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "This copy isn't an AppImage."
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "This copy can't install a deb."
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "The update isn't an AppImage."
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "The update isn't an installer."
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "This copy isn't in an app bundle."
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "The update has no app in it."
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
+msgid "This copy isn't a macOS app."
+msgstr ""
+
 #: crates/caskade-app/src/torrent_links.rs
 msgid "Caskade's path isn't valid Unicode"
 msgstr ""
@@ -5503,19 +5561,11 @@ msgid "The update feed's address is invalid: {error}"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "Couldn't check for updates: {error}"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "Downloading Caskade {version}"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "Downloading Caskade {version} ({percent}%)"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "Couldn't download the update: {error}"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs

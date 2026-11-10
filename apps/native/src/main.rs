@@ -9,11 +9,13 @@
 
 // The data hooks (#89); the views (#96 onwards) use them.
 mod data;
+mod dialogs;
 mod forwarded;
 mod launch;
 mod shell;
 mod smoke;
 mod tray;
+mod updater;
 mod window_state;
 
 use std::sync::{Arc, OnceLock};
@@ -95,18 +97,20 @@ fn main() {
         .inspect_err(|error| tracing::error!(%error, "artwork cache unavailable"))
         .ok();
     // The library, accounts, settings and launch service; nothing works
-    // without them. Dialogs come with BLITZ-9 (#88): until then the reason
-    // goes to the terminal and the log.
+    // without them.
     let core = caskade_app::start::open(&paths, artwork, &shell::sink())
-        .unwrap_or_else(|error| startup_failed("Caskade couldn't open its library", &error));
+        .unwrap_or_else(|error| library_failed(&error, &paths));
     let state_file = window_state::file(&paths);
     let restored = window_state::WindowState::load(&state_file);
     let _ = KEEPER.set(shell::Keeper::new(state_file, restored));
     // The tray icon (Linux: before the window, on its own thread), and
     // whether a login start stays in it (#114).
+    tray::handle_menu_events();
     #[cfg(target_os = "linux")]
     tray::start();
     tray::follow(core.settings.clone());
+    // Caskade's own updates: checked in the background.
+    updater::watch(core.settings.clone());
     let general: caskade_core::settings::GeneralSettings =
         caskade_app::runtime::block_on(core.settings.read_or_default("core.general"));
     let hidden =
@@ -132,6 +136,15 @@ fn main() {
         );
         smoke::after_start(services);
         forwarded::take_own();
+        // `caskade://` links: this copy takes them when nothing else does.
+        caskade_app::runtime::spawn_blocking(|| {
+            if caskade_app::link_handler::wanted(&std::env::args().collect::<Vec<_>>()) {
+                match caskade_app::link_handler::register() {
+                    Ok(()) => tracing::info!("caskade:// links open this copy"),
+                    Err(error) => tracing::warn!(%error, "caskade:// links weren't registered"),
+                }
+            }
+        });
     });
     let restarts = caskade_player::recovery::Restarts::new(paths.cache.join("native-restarts"));
     // Nothing the window held is used after a panic: the process restarts.
@@ -268,6 +281,9 @@ fn app() -> Element {
 /// The window is up: games may move it once the services are there.
 fn window_ready(window: Arc<dyn dioxus_native::winit::window::Window>) {
     shell::set_main_window(window.clone());
+    // macOS: the menu bar's menus, on the main thread.
+    #[cfg(target_os = "macos")]
+    tray::app_menu();
     // Windows and macOS: the tray icon, here on the main thread.
     #[cfg(not(target_os = "linux"))]
     if !tray::start_here() && !window.is_visible().unwrap_or(true) {
@@ -313,6 +329,71 @@ fn exit_window(outcome: Result<i32, String>, failed: &str) -> ! {
         Ok(code) => std::process::exit(code),
         Err(error) => {
             tracing::error!(%error, "{failed}");
+            std::process::exit(1)
+        }
+    }
+}
+
+/// The library store couldn't open: a dialog says why and offers to restore
+/// a backup (#192), or, when a newer Caskade wrote the library, to update;
+/// otherwise Caskade quits.
+fn library_failed(error: &caskade_core::Error, paths: &caskade_core::AppPaths) -> ! {
+    tracing::error!(%error, "library unavailable");
+    eprintln!("Caskade couldn't open its library: {error}");
+    let report = caskade_core::error::ErrorReport::from(error);
+    if report
+        .hints
+        .contains(&caskade_core::error::RecoveryHint::UpdateCaskade)
+    {
+        // A backup is older than the library: restoring one would lose what
+        // the newer Caskade added.
+        updater::update_for_library(report.summary);
+    }
+    let text = caskade_core::tr!(
+        "Caskade couldn't open its library.\n\n{error}\n\nYou can restore it from a backup, or start Caskade with --restore <backup file>.",
+        error = error
+    );
+    let restore = caskade_core::tr!("Restore from backup…");
+    if dialogs::ask(
+        "Caskade",
+        &text,
+        dialogs::Kind::Error,
+        &[restore, caskade_core::tr!("Quit")],
+    ) != Some(0)
+    {
+        std::process::exit(1);
+    }
+    let Some(archive) = dialogs::pick_file(
+        &caskade_core::tr!("Choose a Caskade backup"),
+        Some((&caskade_core::tr!("Caskade backups"), &["zip"])),
+    ) else {
+        std::process::exit(1);
+    };
+    match caskade_app::runtime::block_on(caskade_app::recovery::stage(paths, &archive)) {
+        Ok(()) => restart(),
+        Err(error) => {
+            dialogs::ask(
+                "Caskade",
+                &caskade_core::tr!("This backup can't be restored.\n\n{error}", error = error),
+                dialogs::Kind::Error,
+                &[caskade_core::tr!("Quit")],
+            );
+            std::process::exit(1)
+        }
+    }
+}
+
+/// Starts Caskade again with this start's arguments, and ends this one.
+fn restart() -> ! {
+    let started = std::env::current_exe().and_then(|program| {
+        std::process::Command::new(program)
+            .args(std::env::args_os().skip(1))
+            .spawn()
+    });
+    match started {
+        Ok(_) => std::process::exit(0),
+        Err(error) => {
+            tracing::error!(%error, "Caskade couldn't restart");
             std::process::exit(1)
         }
     }
