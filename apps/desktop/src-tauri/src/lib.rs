@@ -1,6 +1,6 @@
-//! The Caskade desktop app: a thin Tauri 2 adapter over `caskade-core`.
-//! Commands, events, windows and URI schemes live here;
-//! everything else is in the core. The webview gets no `fs` or `shell`
+//! The Caskade desktop app: a thin Tauri 2 adapter over `caskade-app` and
+//! `caskade-core`. Commands, events, windows and URI schemes live here;
+//! the app layer and the core hold everything else. The webview gets no `fs` or `shell`
 //! plugin.
 
 pub mod addon_tool;
@@ -13,25 +13,25 @@ pub mod dev_plugins;
 pub mod discovery;
 #[cfg(feature = "e2e")]
 pub mod e2e;
-pub mod error;
 pub mod events;
 pub mod game_focus;
 pub mod launch_cli;
 pub mod logging;
 pub mod main_window;
 pub mod navigation;
-pub mod onboarding;
 pub mod permissions;
 pub mod plugin_scheme;
 pub mod recovery;
 pub mod theme_scheme;
-pub mod torrent_links;
 pub mod tray;
 pub mod video_player;
 pub mod web_player;
 pub mod webkit;
 pub mod webview_recovery;
 pub mod window_state;
+
+// The app layer's, under the paths the adapter has always used.
+pub use caskade_app::{error, onboarding, torrent_links};
 
 /// Builds and runs the app.
 pub fn run() {
@@ -917,17 +917,11 @@ pub fn run() {
 /// on blocking threads, which come and go as needed.
 const ASYNC_WORKERS: usize = 4;
 
-/// Gives Tauri a runtime with at most [`ASYNC_WORKERS`] workers.
+/// Gives Tauri the app layer's runtime, with at most [`ASYNC_WORKERS`]
+/// workers, so both spawn onto the same one.
 fn async_runtime() {
-    let workers = std::thread::available_parallelism()
-        .map_or(ASYNC_WORKERS, |cores| cores.get().min(ASYNC_WORKERS));
-    match tokio::runtime::Builder::new_multi_thread()
-        .worker_threads(workers)
-        .enable_all()
-        .build()
-    {
-        // It runs as long as the process: Tauri keeps only a handle.
-        Ok(runtime) => tauri::async_runtime::set(Box::leak(Box::new(runtime)).handle().clone()),
+    match caskade_app::runtime::init(ASYNC_WORKERS) {
+        Ok(handle) => tauri::async_runtime::set(handle),
         Err(error) => tracing::warn!(%error, "Tauri's own async runtime is used"),
     }
 }

@@ -1,7 +1,7 @@
 [package]
 name = "caskade-desktop"
 version = "0.1.4"
-description = "Caskade desktop app: the Tauri adapter over caskade-core"
+description = "Caskade desktop app: the Tauri adapter over caskade-app and caskade-core"
 edition.workspace = true
 rust-version.workspace = true
 default-run = "caskade"
@@ -39,6 +39,8 @@ tauri-build = { version = "2", features = [] }
 [dependencies]
 tracing-appender = "0.2"
 caskade-core = { path = "../../../crates/caskade-core" }
+# The application layer this adapter forwards to (#86).
+caskade-app = { path = "../../../crates/caskade-app" }
 caskade-achievements = { path = "../../../crates/caskade-achievements" }
 caskade-addons = { path = "../../../crates/caskade-addons" }
 caskade-backup = { path = "../../../crates/caskade-backup" }
@@ -100,11 +102,6 @@ gtk = "0.18"
 gdkx11 = "0.18"
 # Probes for the AppIndicator library the tray icon loads (`tray.rs`).
 libappindicator-sys = "0.9"
-
-# Offers Caskade for magnet links and torrent files (`torrent_links.rs`);
-# the deep-link plugin already builds it.
-[target.'cfg(windows)'.dependencies]
-windows-registry = "0.6"
 
 [dev-dependencies]
 caskade-emulation-fixtures = { path = "../../../crates/caskade-emulation-fixtures" }

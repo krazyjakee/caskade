@@ -1185,7 +1185,7 @@ msgid "This part of Caskade isn't available right now."
 msgstr ""
 
 #: crates/caskade-core/src/error.rs
-#: apps/desktop/src-tauri/src/error.rs
+#: crates/caskade-app/src/error.rs
 msgid "Caskade ran into an unexpected problem."
 msgstr ""
 
@@ -5019,6 +5019,58 @@ msgstr ""
 msgid "This sample couldn't be read."
 msgstr ""
 
+#: crates/caskade-app/src/deep_link.rs
+msgid "not a {scheme}: link"
+msgstr ""
+
+#: crates/caskade-app/src/deep_link.rs
+msgid "unknown deep link action"
+msgstr ""
+
+#: crates/caskade-app/src/deep_link.rs
+msgid "a deep link installs one path or URL"
+msgstr ""
+
+#: crates/caskade-app/src/deep_link.rs
+msgid "a deep link needs ?url= or ?path="
+msgstr ""
+
+#: crates/caskade-app/src/deep_link.rs
+msgid "?url= takes an HTTP(S) URL or a magnet link"
+msgstr ""
+
+#: crates/caskade-app/src/deep_link.rs
+msgid "?path= takes a local path"
+msgstr ""
+
+#: crates/caskade-app/src/permissions.rs
+msgid "accounts are unavailable"
+msgstr ""
+
+#: crates/caskade-app/src/torrent_links.rs
+msgid "Caskade's path isn't valid Unicode"
+msgstr ""
+
+#: crates/caskade-app/src/torrent_links.rs
+msgid "Caskade couldn't change the default apps: {error}"
+msgstr ""
+
+#: crates/caskade-app/src/torrent_links.rs
+msgid "This system doesn't let Caskade open magnet links and torrent files."
+msgstr ""
+
+#: crates/caskade-app/src/torrent_links.rs
+msgid "Only Windows asks you to choose the app in its settings."
+msgstr ""
+
+#: crates/caskade-app/src/torrent_links.rs
+msgid "HOME isn't set"
+msgstr ""
+
+#: crates/caskade-app/src/torrent_links.rs
+msgid "Caskade couldn't open Default apps: {error}"
+msgstr ""
+
 #: apps/desktop/src-tauri/src/commands/achievements.rs
 msgid "choose the game to link"
 msgstr ""
@@ -5370,30 +5422,6 @@ msgstr ""
 msgid "Loading a theme folder is only available in development builds; run `caskade dev <folder>`"
 msgstr ""
 
-#: apps/desktop/src-tauri/src/deep_link.rs
-msgid "not a {scheme}: link"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/deep_link.rs
-msgid "unknown deep link action"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/deep_link.rs
-msgid "a deep link installs one path or URL"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/deep_link.rs
-msgid "a deep link needs ?url= or ?path="
-msgstr ""
-
-#: apps/desktop/src-tauri/src/deep_link.rs
-msgid "?url= takes an HTTP(S) URL or a magnet link"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/deep_link.rs
-msgid "?path= takes a local path"
-msgstr ""
-
 #: apps/desktop/src-tauri/src/dev_plugins.rs
 msgid "plugins are not ready"
 msgstr ""
@@ -5574,10 +5602,6 @@ msgstr ""
 msgid "Try again"
 msgstr ""
 
-#: apps/desktop/src-tauri/src/permissions.rs
-msgid "accounts are unavailable"
-msgstr ""
-
 #: apps/desktop/src-tauri/src/recovery.rs
 msgid "Choose a Caskade backup"
 msgstr ""
@@ -5591,30 +5615,6 @@ msgid ""
 "This backup can't be restored.\n"
 "\n"
 "{error}"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/torrent_links.rs
-msgid "Caskade's path isn't valid Unicode"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/torrent_links.rs
-msgid "Caskade couldn't change the default apps: {error}"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/torrent_links.rs
-msgid "This system doesn't let Caskade open magnet links and torrent files."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/torrent_links.rs
-msgid "Only Windows asks you to choose the app in its settings."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/torrent_links.rs
-msgid "HOME isn't set"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/torrent_links.rs
-msgid "Caskade couldn't open Default apps: {error}"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/tray.rs

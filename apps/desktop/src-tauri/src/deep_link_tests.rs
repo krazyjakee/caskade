@@ -18,44 +18,6 @@ use tauri::{
 };
 use tauri_specta::Event;
 
-fn parse(text: &str) -> Result<String, String> {
-    install_input(&Url::parse(text).unwrap())
-}
-
-#[test]
-fn a_link_names_one_path_or_url() {
-    assert_eq!(
-        parse("caskade://install?url=https%3A%2F%2Fexample.com%2Fgame.zip%3Ft%3D1").unwrap(),
-        "https://example.com/game.zip?t=1"
-    );
-    assert_eq!(
-        parse("caskade://install/?path=%2Fhome%2Fme%2FGame%20Setup.exe").unwrap(),
-        "/home/me/Game Setup.exe"
-    );
-    assert_eq!(
-        parse("caskade:install?path=/tmp/game").unwrap(),
-        "/tmp/game"
-    );
-    // A magnet link (#159), percent-encoded inside the deep link.
-    assert_eq!(
-        parse("caskade://install?url=magnet%3A%3Fxt%3Durn%3Abtih%3A0123456789abcdef0123456789abcdef01234567").unwrap(),
-        "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567"
-    );
-    for bad in [
-        "caskade://install",
-        "caskade://uninstall?path=/tmp/game",
-        "caskade://install/extra?path=/tmp/game",
-        "caskade://install?url=/tmp/game",
-        "caskade://install?url=file:///etc/passwd",
-        "caskade://install?path=https://example.com/game.zip",
-        "caskade://install?url=https://example.com/a&path=/tmp/game",
-        "caskade://install?url=https://example.com/a&url=https://example.com/b",
-        "https://install?url=https://example.com/game.zip",
-    ] {
-        assert!(parse(bad).is_err(), "{bad}");
-    }
-}
-
 /// #57 acceptance: a URL deep link never starts a download before the user
 /// confirms it; confirming does.
 #[test]

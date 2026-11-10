@@ -19,7 +19,7 @@ What it does is in the [product spec](PRODUCT-SPEC.md). Public contracts for ext
 | --- | --- |
 | Language | Rust 2024 edition, MSRV 1.94; TypeScript 7 (`strict`) |
 | App shell | Tauri 2.12 (WebView2, WKWebView, WebKitGTK). Plain tao + wry for the game and video windows. |
-| Async | tokio. Tauri gets a 4-worker runtime. |
+| Async | tokio: one 4-worker runtime (`caskade_app::runtime`), which Tauri shares. |
 | Database | SQLite through `sqlx` 0.9 (bundled SQLite, in-repo migrations), FTS5 for search |
 | IPC types | `specta` + `tauri-specta` (pinned RC). Generated bindings are committed. |
 | HTTP | `reqwest` with rustls |
@@ -59,7 +59,8 @@ What it does is in the [product spec](PRODUCT-SPEC.md). Public contracts for ext
 | `crates/caskade-i18n` | Runtime translation for the Rust side. |
 | `crates/caskade-malloc`, `caskade-webview2`, `caskade-xinput` | The only crates with `unsafe`: glibc allocator tuning, WebView2 COM calls, XInput's guide button. |
 | `crates/caskade-emulation-fixtures` | Generated emulator and ROM fixtures for tests. |
-| `apps/desktop/src-tauri` | The Tauri adapter: commands, events, windows, schemes, tray, deep links, launch channel, elevation entry. |
+| `crates/caskade-app` | The application layer every app shell runs, with no Tauri: the async runtime, background supervision, command errors, permission checks, first-run setup, startup recovery, deep-link and torrent-link handling, navigation targets. Moving the rest of the adapter's logic here is #86. |
+| `apps/desktop/src-tauri` | The Tauri adapter over `caskade-app`: commands, events, windows, schemes, tray, deep links, launch channel, elevation entry. |
 | `apps/desktop/src` | The React app. |
 | `apps/storybook` | Storybook for `@caskade/ui`, also a theme playground. |
 | `apps/website` | Static English/Swedish landing page for GitHub Pages; dependency-free Node build, shared branding and tokens, self-hosted fonts. See its [guide](../apps/website/README.md). |
@@ -94,7 +95,7 @@ One `caskade` binary has several entry points, decided in `run()` before logging
 - **Events** from the core (`events.rs`) invalidate TanStack Query caches.
 - **Each API area** in the webview (`src/api/*.ts`) is an interface with a native implementation and fixtures, so the browser preview (`just web`) and tests run without the core.
 - **Schemes**: `caskade-asset://` serves cached artwork and thumbnails, `caskade-theme://` compiled theme stylesheets and assets, `caskade-plugin://` plugin UI modules.
-- **Permissions**: commands check the active local account's role and permissions in the adapter (`permissions.rs`). The account comes from the adapter, never from the webview.
+- **Permissions**: every command is checked against the active local account's role and permissions before it runs. The rules are `caskade_app::permissions`; the adapter's invoke gate (`permissions.rs`) calls them for each command. The account comes from the app layer, never from the webview.
 
 ### 4.3 Hook bus and the launch pipeline
 

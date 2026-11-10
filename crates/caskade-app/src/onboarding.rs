@@ -82,7 +82,7 @@ fn supervise_online_every(
     start: impl Fn() -> Vec<JoinHandle<()>> + Send + 'static,
     check: std::time::Duration,
 ) {
-    tauri::async_runtime::spawn(async move {
+    crate::runtime::spawn(async move {
         let mut changes = settings.subscribe();
         let mut running: Vec<JoinHandle<()>> = Vec::new();
         loop {

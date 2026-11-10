@@ -38,7 +38,7 @@ async fn until(what: &str, count: &AtomicUsize, wanted: usize) {
 
 #[test]
 fn a_new_library_goes_through_setup() {
-    tauri::async_runtime::block_on(async {
+    crate::runtime::block_on(async {
         let (settings, store) = services().await;
         settle_existing(&settings, &store).await.unwrap();
         assert!(!completed(&settings).await);
@@ -48,7 +48,7 @@ fn a_new_library_goes_through_setup() {
 
 #[test]
 fn a_library_with_games_from_before_setup_skips_it() {
-    tauri::async_runtime::block_on(async {
+    crate::runtime::block_on(async {
         let (settings, store) = services().await;
         store
             .upsert_game(&Game::new("Hollow Knight"))
@@ -61,7 +61,7 @@ fn a_library_with_games_from_before_setup_skips_it() {
 
 #[test]
 fn setup_asked_for_again_is_left_alone() {
-    tauri::async_runtime::block_on(async {
+    crate::runtime::block_on(async {
         let (settings, store) = services().await;
         store
             .upsert_game(&Game::new("Hollow Knight"))
@@ -81,7 +81,7 @@ fn setup_asked_for_again_is_left_alone() {
 
 #[test]
 fn online_lookups_wait_for_setup_and_follow_the_switch() {
-    tauri::async_runtime::block_on(async {
+    crate::runtime::block_on(async {
         let (settings, _) = services().await;
         let started = Arc::new(AtomicUsize::new(0));
         let alive = Arc::new(AtomicUsize::new(0));
@@ -126,7 +126,7 @@ fn online_lookups_wait_for_setup_and_follow_the_switch() {
 #[test]
 fn online_lookups_that_panic_start_again() {
     use caskade_core::settings::SectionDefinition;
-    tauri::async_runtime::block_on(async {
+    crate::runtime::block_on(async {
         // Only the two sections the supervisor reads.
         let settings = SettingsService::new(LibraryStore::in_memory().await.unwrap());
         settings

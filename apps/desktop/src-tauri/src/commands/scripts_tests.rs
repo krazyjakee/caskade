@@ -1,12 +1,10 @@
-//! Lifecycle scripts through IPC, and who may change each scope.
+//! Lifecycle scripts through IPC; who may change each scope is
+//! `caskade_app::permissions::script_scope`.
 use super::*;
 use crate::commands::test_ipc::invoke;
-use caskade_core::{accounts::Permission, model::Game};
+use caskade_core::model::Game;
 use serde_json::json;
-use tauri::{
-    ipc::InvokeBody,
-    test::{mock_builder, mock_context, noop_assets},
-};
+use tauri::test::{mock_builder, mock_context, noop_assets};
 
 #[test]
 fn scripts_are_saved_ordered_and_deleted_within_their_scope() {
@@ -81,27 +79,6 @@ fn scripts_are_saved_ordered_and_deleted_within_their_scope() {
     assert_eq!(
         invoke(&window, "launch_cancel", json!({"gameId": game.id})).unwrap(),
         false
-    );
-}
-
-#[test]
-fn each_scope_needs_its_own_permission() {
-    let body = |scope: serde_json::Value| InvokeBody::Json(json!({"scope": scope}));
-    assert_eq!(
-        crate::permissions::script_scope(&body(json!({"type": "game", "gameId": "g"}))),
-        Permission::Install
-    );
-    assert_eq!(
-        crate::permissions::script_scope(&body(json!({"type": "profile", "profileId": "p"}))),
-        Permission::Settings("emulators")
-    );
-    assert_eq!(
-        crate::permissions::script_scope(&body(json!({"type": "global"}))),
-        Permission::Admin
-    );
-    assert_eq!(
-        crate::permissions::script_scope(&InvokeBody::Json(json!({}))),
-        Permission::Admin
     );
 }
 

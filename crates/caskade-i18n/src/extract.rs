@@ -41,6 +41,7 @@ pub const CORE: Domain = Domain {
         "crates/caskade-share/src",
         "crates/caskade-streaming/src",
         "crates/caskade-system-stats/src",
+        "crates/caskade-app/src",
         "apps/desktop/src-tauri/src",
     ],
     title: "Caskade's core messages: the Rust crates, the Tauri adapter and the tray.",

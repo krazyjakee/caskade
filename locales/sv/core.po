@@ -1187,7 +1187,7 @@ msgid "This part of Caskade isn't available right now."
 msgstr "Den här delen av Caskade är inte tillgänglig just nu."
 
 #: crates/caskade-core/src/error.rs
-#: apps/desktop/src-tauri/src/error.rs
+#: crates/caskade-app/src/error.rs
 msgid "Caskade ran into an unexpected problem."
 msgstr "Caskade stötte på ett oväntat problem."
 
@@ -5021,6 +5021,58 @@ msgstr "Väntar på första avläsningen från nvidia-smi."
 msgid "This sample couldn't be read."
 msgstr "Det här provet kunde inte läsas."
 
+#: crates/caskade-app/src/deep_link.rs
+msgid "not a {scheme}: link"
+msgstr "inte en {scheme}:-länk"
+
+#: crates/caskade-app/src/deep_link.rs
+msgid "unknown deep link action"
+msgstr "okänd åtgärd för djuplänk"
+
+#: crates/caskade-app/src/deep_link.rs
+msgid "a deep link installs one path or URL"
+msgstr "en djuplänk installerar en sökväg eller URL"
+
+#: crates/caskade-app/src/deep_link.rs
+msgid "a deep link needs ?url= or ?path="
+msgstr "en djuplänk behöver ?url= eller ?path="
+
+#: crates/caskade-app/src/deep_link.rs
+msgid "?url= takes an HTTP(S) URL or a magnet link"
+msgstr "?url= tar en HTTP(S)-URL eller en magnetlänk"
+
+#: crates/caskade-app/src/deep_link.rs
+msgid "?path= takes a local path"
+msgstr "?path= tar en lokal sökväg"
+
+#: crates/caskade-app/src/permissions.rs
+msgid "accounts are unavailable"
+msgstr "konton är inte tillgängliga"
+
+#: crates/caskade-app/src/torrent_links.rs
+msgid "Caskade's path isn't valid Unicode"
+msgstr "Caskades sökväg är inte giltig Unicode"
+
+#: crates/caskade-app/src/torrent_links.rs
+msgid "Caskade couldn't change the default apps: {error}"
+msgstr "Caskade kunde inte ändra standardapparna: {error}"
+
+#: crates/caskade-app/src/torrent_links.rs
+msgid "This system doesn't let Caskade open magnet links and torrent files."
+msgstr "Det här systemet låter inte Caskade öppna magnetlänkar och torrentfiler."
+
+#: crates/caskade-app/src/torrent_links.rs
+msgid "Only Windows asks you to choose the app in its settings."
+msgstr "Bara Windows ber dig välja appen i sina inställningar."
+
+#: crates/caskade-app/src/torrent_links.rs
+msgid "HOME isn't set"
+msgstr "HOME är inte satt"
+
+#: crates/caskade-app/src/torrent_links.rs
+msgid "Caskade couldn't open Default apps: {error}"
+msgstr "Caskade kunde inte öppna Standardappar: {error}"
+
 #: apps/desktop/src-tauri/src/commands/achievements.rs
 msgid "choose the game to link"
 msgstr "välj spelet att koppla"
@@ -5372,30 +5424,6 @@ msgstr "teman är inte redo"
 msgid "Loading a theme folder is only available in development builds; run `caskade dev <folder>`"
 msgstr "Att läsa in en temamapp är bara möjligt i utvecklingsversioner; kör `caskade dev <folder>`"
 
-#: apps/desktop/src-tauri/src/deep_link.rs
-msgid "not a {scheme}: link"
-msgstr "inte en {scheme}:-länk"
-
-#: apps/desktop/src-tauri/src/deep_link.rs
-msgid "unknown deep link action"
-msgstr "okänd åtgärd för djuplänk"
-
-#: apps/desktop/src-tauri/src/deep_link.rs
-msgid "a deep link installs one path or URL"
-msgstr "en djuplänk installerar en sökväg eller URL"
-
-#: apps/desktop/src-tauri/src/deep_link.rs
-msgid "a deep link needs ?url= or ?path="
-msgstr "en djuplänk behöver ?url= eller ?path="
-
-#: apps/desktop/src-tauri/src/deep_link.rs
-msgid "?url= takes an HTTP(S) URL or a magnet link"
-msgstr "?url= tar en HTTP(S)-URL eller en magnetlänk"
-
-#: apps/desktop/src-tauri/src/deep_link.rs
-msgid "?path= takes a local path"
-msgstr "?path= tar en lokal sökväg"
-
 #: apps/desktop/src-tauri/src/dev_plugins.rs
 msgid "plugins are not ready"
 msgstr "tilläggen är inte redo"
@@ -5581,10 +5609,6 @@ msgstr ""
 msgid "Try again"
 msgstr ""
 
-#: apps/desktop/src-tauri/src/permissions.rs
-msgid "accounts are unavailable"
-msgstr "konton är inte tillgängliga"
-
 #: apps/desktop/src-tauri/src/recovery.rs
 msgid "Choose a Caskade backup"
 msgstr "Välj en säkerhetskopia från Caskade"
@@ -5602,30 +5626,6 @@ msgstr ""
 "Den här säkerhetskopian kan inte återställas.\n"
 "\n"
 "{error}"
-
-#: apps/desktop/src-tauri/src/torrent_links.rs
-msgid "Caskade's path isn't valid Unicode"
-msgstr "Caskades sökväg är inte giltig Unicode"
-
-#: apps/desktop/src-tauri/src/torrent_links.rs
-msgid "Caskade couldn't change the default apps: {error}"
-msgstr "Caskade kunde inte ändra standardapparna: {error}"
-
-#: apps/desktop/src-tauri/src/torrent_links.rs
-msgid "This system doesn't let Caskade open magnet links and torrent files."
-msgstr "Det här systemet låter inte Caskade öppna magnetlänkar och torrentfiler."
-
-#: apps/desktop/src-tauri/src/torrent_links.rs
-msgid "Only Windows asks you to choose the app in its settings."
-msgstr "Bara Windows ber dig välja appen i sina inställningar."
-
-#: apps/desktop/src-tauri/src/torrent_links.rs
-msgid "HOME isn't set"
-msgstr "HOME är inte satt"
-
-#: apps/desktop/src-tauri/src/torrent_links.rs
-msgid "Caskade couldn't open Default apps: {error}"
-msgstr "Caskade kunde inte öppna Standardappar: {error}"
 
 #: apps/desktop/src-tauri/src/tray.rs
 msgid "Show Caskade"

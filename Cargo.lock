@@ -1157,6 +1157,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "caskade-app"
+version = "0.1.0"
+dependencies = [
+ "caskade-backup",
+ "caskade-core",
+ "serde",
+ "serde_json",
+ "specta",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "url",
+ "windows-registry",
+]
+
+[[package]]
 name = "caskade-backup"
 version = "0.1.0"
 dependencies = [
@@ -1254,6 +1270,7 @@ dependencies = [
  "arboard",
  "caskade-achievements",
  "caskade-addons",
+ "caskade-app",
  "caskade-backup",
  "caskade-core",
  "caskade-discovery",
@@ -1295,7 +1312,6 @@ dependencies = [
  "tracing-subscriber",
  "url",
  "webkit2gtk",
- "windows-registry",
  "wiremock",
  "wry",
  "zip",

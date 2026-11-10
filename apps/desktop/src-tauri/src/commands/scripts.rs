@@ -1,6 +1,7 @@
 //! Lifecycle scripts (#179): listing and changing the global, emulator
 //! profile and game scripts, and stopping a launch while its before-launch
-//! scripts run. Who may change a scope is `permissions::script_scope`.
+//! scripts run. Who may change a scope is
+//! `caskade_app::permissions::script_scope`.
 use crate::error::{CommandError, report};
 use caskade_core::{
     db::LibraryStore,

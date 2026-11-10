@@ -9,40 +9,7 @@ use caskade_core::accounts::Permission;
 use tauri::{Manager, Runtime, Url};
 use tauri_specta::Event;
 
-pub const SCHEME: &str = "caskade";
-
-/// The path or URL a `caskade://install?url=…` / `?path=…` link names.
-pub fn install_input(link: &Url) -> Result<String, String> {
-    if link.scheme() != SCHEME {
-        return Err(caskade_core::tr!("not a {scheme}: link", scheme = SCHEME));
-    }
-    // `caskade://install?…`, or `caskade:install?…` from strict handlers.
-    let action = format!("{}{}", link.host_str().unwrap_or_default(), link.path());
-    if action.trim_matches('/') != "install" {
-        return Err(caskade_core::tr!("unknown deep link action"));
-    }
-    let mut input = None;
-    for (key, value) in link.query_pairs() {
-        if !matches!(key.as_ref(), "url" | "path") {
-            continue;
-        }
-        if input.is_some() {
-            return Err(caskade_core::tr!("a deep link installs one path or URL"));
-        }
-        input = Some((key == "url", value.into_owned()));
-    }
-    let (url, value) =
-        input.ok_or_else(|| caskade_core::tr!("a deep link needs ?url= or ?path="))?;
-    let web = Url::parse(&value)
-        .is_ok_and(|parsed| matches!(parsed.scheme(), "http" | "https" | "magnet"));
-    match (url, web) {
-        (true, false) => Err(caskade_core::tr!(
-            "?url= takes an HTTP(S) URL or a magnet link"
-        )),
-        (false, true) => Err(caskade_core::tr!("?path= takes a local path")),
-        _ => Ok(value),
-    }
-}
+pub use caskade_app::deep_link::{SCHEME, install_input};
 
 /// Queues each link for confirmation, tells the UI and brings the window up.
 /// A `?path=` is checked off the caller's thread, so await this on the async
