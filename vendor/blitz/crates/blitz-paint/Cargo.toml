@@ -23,7 +23,7 @@ custom-widget = ["blitz-dom/custom-widget"]
 default = ["svg"]
 font-embolden = []
 scrollbars = ["blitz-dom/scrollbars"]
-svg = ["dep:anyrender_svg", "dep:usvg", "blitz-dom/svg"]
+svg = ["dep:anyrender_svg", "dep:usvg", "dep:resvg", "blitz-dom/svg"]
 tracing = ["dep:tracing"]
 
 [dependencies]
@@ -37,6 +37,7 @@ euclid = { version = "^0.22" }
 kurbo = { version = "^0.13.1" }
 parley = { version = "^0.12", default-features = false, features = ["std", "bytemuck"] }
 peniko = { version = "^0.6.0" }
+resvg = { version = "^0.48", default-features = false, optional = true }
 skrifa = { version = "^0.44", default-features = false, features = ["std"] }
 smallvec = { version = "^1" }
 style = { package = "stylo", path = "../stylo", version = "^0.23.0" }

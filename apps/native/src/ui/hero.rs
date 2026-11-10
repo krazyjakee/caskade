@@ -173,13 +173,13 @@ pub fn Hero(
                         }
                         button {
                             r#type: "button",
-                            class: "rounded-control border border-border-strong bg-surface-overlay/70 px-5 py-2.5 text-sm backdrop-blur hover:border-accent-alt/50 hover:bg-surface-hover",
+                            class: "rounded-control border border-border-strong bg-surface-overlay/80 px-5 py-2.5 text-sm hover:border-accent-alt/50 hover:bg-surface-hover",
                             {t!("View Details")}
                         }
                         button {
                             r#type: "button",
                             "aria-label": t!(note = "A button opening more actions", "More"),
-                            class: "rounded-control border border-border-strong bg-surface-overlay/70 p-2.5 backdrop-blur hover:border-accent-alt/50 hover:bg-surface-hover",
+                            class: "rounded-control border border-border-strong bg-surface-overlay/80 p-2.5 hover:border-accent-alt/50 hover:bg-surface-hover",
                             Svg { icon: ELLIPSIS, class: "size-4" }
                         }
                     }

@@ -1,0 +1,465 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: caskade <caskade@localhost>
+Date: Tue, 10 Nov 2026 13:51:03 +0000
+Subject: [PATCH] Tile SVG background images, and draw SVGs that use filters
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+An SVG background image was drawn once, whatever `background-repeat` and
+`background-size` said; a raster one tiles. It now tiles the same way, a
+tile per repeat, as gradients do (past 1024 tiles only the first row is
+drawn, so a tiny tile over a large area doesn't encode the tree
+thousands of times).
+
+SVG filters (`feTurbulence`, `feGaussianBlur`, `feColorMatrix`, …) aren't
+drawn by the vector path (anyrender_svg), so a filtered shape came out
+as a plain black fill: a paper-grain texture was a black square. An SVG
+image whose tree uses filters is now rasterised with resvg at the size it
+is drawn and cached by source and size (16 sizes), then drawn as an
+image, for background images and `<img>` alike; others stay vectors.
+
+Tests in `background_svg_tiling.rs`.
+---
+ Cargo.toml                                    |  1 +
+ packages/blitz-dom/src/node/svg.rs            | 13 +++
+ packages/blitz-paint/Cargo.toml               |  3 +-
+ packages/blitz-paint/src/lib.rs               |  2 +
+ packages/blitz-paint/src/render.rs            | 16 +++-
+ packages/blitz-paint/src/render/background.rs | 72 ++++++++++----
+ packages/blitz-paint/src/svg.rs               | 87 +++++++++++++++++
+ tests/blitz-tests/tests/all.rs                |  1 +
+ .../tests/background_svg_tiling.rs            | 96 +++++++++++++++++++
+ 9 files changed, 268 insertions(+), 23 deletions(-)
+ create mode 100644 packages/blitz-paint/src/svg.rs
+ create mode 100644 tests/blitz-tests/tests/background_svg_tiling.rs
+
+diff --git a/Cargo.toml b/Cargo.toml
+index 024c976c..c2c566fa 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -132,6 +132,7 @@ peniko = "0.6.0"
+ kurbo = "0.13.1"
+ wgpu = "30"
+ usvg = "0.48.1"
++resvg = { version = "0.48", default-features = false }
+ svgtypes = "0.16.1" # Should match usvg's version
+ 
+ # Windowing & Input
+diff --git a/packages/blitz-dom/src/node/svg.rs b/packages/blitz-dom/src/node/svg.rs
+index c3a5949e..8c830488 100644
+--- a/packages/blitz-dom/src/node/svg.rs
++++ b/packages/blitz-dom/src/node/svg.rs
+@@ -83,6 +83,18 @@ pub struct SvgImageData {
+     /// A hash of the source this was parsed from: an inline `<svg>` whose
+     /// serialized source still hashes the same needn't be rebuilt.
+     pub source_hash: u64,
++    /// Whether the tree uses filters (`feTurbulence`, `feGaussianBlur`, …),
++    /// which vector rendering leaves out: such an image is drawn rasterised.
++    pub has_filters: bool,
++}
++
++/// Whether `group` or anything in it has a filter.
++fn uses_filters(group: &usvg::Group) -> bool {
++    !group.filters().is_empty()
++        || group.children().iter().any(|node| match node {
++            usvg::Node::Group(group) => uses_filters(group),
++            _ => false,
++        })
+ }
+ 
+ /// The hash [`SvgImageData::source_hash`] holds for `data`.
+@@ -120,6 +132,7 @@ impl SvgImageData {
+             .map_err(usvg::Error::ParsingFailed)?;
+         let tree = usvg::Tree::from_xmltree(&doc, options)?;
+         Ok(Self {
++            has_filters: uses_filters(tree.root()),
+             tree: Arc::new(tree),
+             intrinsic_dimensions: SvgIntrinsicDimensions::from_xmltree(&doc),
+             source_hash,
+diff --git a/packages/blitz-paint/Cargo.toml b/packages/blitz-paint/Cargo.toml
+index 7fb7d046..57253d37 100644
+--- a/packages/blitz-paint/Cargo.toml
++++ b/packages/blitz-paint/Cargo.toml
+@@ -13,7 +13,7 @@ rust-version.workspace = true
+ [features]
+ default = ["svg"]
+ tracing = ["dep:tracing"]
+-svg = ["dep:anyrender_svg", "dep:usvg", "blitz-dom/svg"]
++svg = ["dep:anyrender_svg", "dep:usvg", "dep:resvg", "blitz-dom/svg"]
+ custom-widget = ["blitz-dom/custom-widget"]
+ font-embolden = []
+ apple-font-embolden = []
+@@ -43,6 +43,7 @@ color = { workspace = true }
+ peniko = { workspace = true }
+ kurbo = { workspace = true }
+ usvg = { workspace = true, optional = true }
++resvg = { workspace = true, optional = true }
+ 
+ # Other dependencies
+ bytemuck = { workspace = true }
+diff --git a/packages/blitz-paint/src/lib.rs b/packages/blitz-paint/src/lib.rs
+index fd96ea74..7df36cef 100644
+--- a/packages/blitz-paint/src/lib.rs
++++ b/packages/blitz-paint/src/lib.rs
+@@ -12,6 +12,8 @@ mod kurbo_css;
+ mod layers;
+ mod render;
+ mod sizing;
++#[cfg(feature = "svg")]
++mod svg;
+ mod text;
+ 
+ use std::collections::HashMap;
+diff --git a/packages/blitz-paint/src/render.rs b/packages/blitz-paint/src/render.rs
+index 1495cd34..8c4a0292 100644
+--- a/packages/blitz-paint/src/render.rs
++++ b/packages/blitz-paint/src/render.rs
+@@ -837,7 +837,11 @@ fn to_image_quality(image_rendering: ImageRendering) -> peniko::ImageQuality {
+ 
+ /// The transform from an SVG's rendered tree to a viewport of the given size.
+ #[cfg(feature = "svg")]
+-fn svg_viewport_affine(svg: &blitz_dom::node::SvgImageData, width: f32, height: f32) -> Affine {
++pub(crate) fn svg_viewport_affine(
++    svg: &blitz_dom::node::SvgImageData,
++    width: f32,
++    height: f32,
++) -> Affine {
+     let t = svg.viewport_transform(width, height);
+     Affine::new([t.sx, t.ky, t.kx, t.sy, t.tx, t.ty].map(f64::from))
+ }
+@@ -1130,7 +1134,10 @@ impl ElementCx<'_, '_> {
+                 let shift = if input_data.is_multiline {
+                     0.0
+                 } else {
+-                    let text = input_data.editor.try_layout().map_or(0.0, |text| text.height());
++                    let text = input_data
++                        .editor
++                        .try_layout()
++                        .map_or(0.0, |text| text.height());
+                     f64::from((text - layout.height()) / 2.0)
+                 };
+                 let mut draw_text_context = self.context.draw_text_context.borrow_mut();
+@@ -1397,8 +1404,7 @@ impl ElementCx<'_, '_> {
+         let x = x + x_offset.px() as f64;
+         let y = y + y_offset.px() as f64;
+ 
+-        let viewport = svg_viewport_affine(svg, paint_size.width, paint_size.height);
+-        let transform = (self.transform * viewport).then_translate(Vec2 { x, y });
++        let place = self.transform.then_translate(Vec2 { x, y });
+ 
+         self.with_replaced_content_clip(
+             scene,
+@@ -1407,7 +1413,7 @@ impl ElementCx<'_, '_> {
+             x_offset.px(),
+             y_offset.px(),
+             |scene| {
+-                anyrender_svg::render_svg_tree(scene, &svg.tree, transform);
++                crate::svg::draw_svg(scene, svg, place, paint_size.width, paint_size.height);
+             },
+         );
+     }
+diff --git a/packages/blitz-paint/src/render/background.rs b/packages/blitz-paint/src/render/background.rs
+index 827abd11..3b03a0fc 100644
+--- a/packages/blitz-paint/src/render/background.rs
++++ b/packages/blitz-paint/src/render/background.rs
+@@ -443,10 +443,17 @@ impl ElementCx<'_, '_> {
+             return;
+         }
+ 
+-        let (origin_rect, base_transform) = if self.layer_is_fixed(layer) {
+-            self.fixed_positioning_area()
++        // As a gradient's: the positioning area, and the clip area tiles
++        // extend into.
++        let (origin_rect, base_transform, clip_rect) = if self.layer_is_fixed(layer) {
++            let (viewport_rect, transform) = self.fixed_positioning_area();
++            (viewport_rect, transform, viewport_rect)
+         } else {
+-            (self.box_rect(layer.origin), self.transform)
++            (
++                self.box_rect(layer.origin),
++                self.transform,
++                self.box_rect(layer.clip),
++            )
+         };
+ 
+         let frame_w = (origin_rect.width() / self.scale) as f32;
+@@ -480,26 +487,57 @@ impl ElementCx<'_, '_> {
+             return;
+         }
+ 
+-        let viewport = super::svg_viewport_affine(
+-            svg,
+-            (bg_size.width * self.scale) as f32,
+-            (bg_size.height * self.scale) as f32,
+-        );
+-
+         let bg_pos = compute_layer_position(
+             layer,
+             frame_w - bg_size.width as f32,
+             frame_h - bg_size.height as f32,
+         );
+ 
+-        let transform = base_transform
+-            * kurbo::Affine::translate((
+-                origin_rect.x0 + bg_pos.x * self.scale,
+-                origin_rect.y0 + bg_pos.y * self.scale,
+-            ))
+-            * viewport;
+-
+-        anyrender_svg::render_svg_tree(scene, &svg.tree, transform);
++        // Tiled as `background-repeat` says (it repeats by default): each
++        // tile draws the SVG's tree again.
++        let BackgroundRepeat(repeat_x, repeat_y) = layer.repeat;
++        let x = gradient_axis_tiling(
++            *repeat_x,
++            origin_rect.x0,
++            origin_rect.width(),
++            clip_rect.x0,
++            clip_rect.width(),
++            bg_pos.x * self.scale,
++            bg_size.width * self.scale,
++        );
++        let y = gradient_axis_tiling(
++            *repeat_y,
++            origin_rect.y0,
++            origin_rect.height(),
++            clip_rect.y0,
++            clip_rect.height(),
++            bg_pos.y * self.scale,
++            bg_size.height * self.scale,
++        );
++        // Tiles far smaller than the area would encode the tree thousands of
++        // times; past this many, only the first row and column are drawn.
++        const MAX_TILES: u64 = 1024;
++        let (x_count, y_count) = if x.count as u64 * y.count as u64 > MAX_TILES {
++            (x.count.min(MAX_TILES as u32), 1)
++        } else {
++            (x.count, y.count)
++        };
++        for hc in 0..y_count {
++            for wc in 0..x_count {
++                let place = base_transform
++                    * kurbo::Affine::translate((
++                        x.translate + wc as f64 * x.stride,
++                        y.translate + hc as f64 * y.stride,
++                    ));
++                crate::svg::draw_svg(
++                    scene,
++                    svg,
++                    place,
++                    (bg_size.width * self.scale) as f32,
++                    (bg_size.height * self.scale) as f32,
++                );
++            }
++        }
+     }
+ 
+     fn draw_raster_image_layer(&self, scene: &mut impl PaintScene, layer: &ImageLayerStyles) {
+diff --git a/packages/blitz-paint/src/svg.rs b/packages/blitz-paint/src/svg.rs
+new file mode 100644
+index 00000000..8452a096
+--- /dev/null
++++ b/packages/blitz-paint/src/svg.rs
+@@ -0,0 +1,87 @@
++//! Drawing an SVG image: as vectors, or rasterised (once per size, cached)
++//! when it uses filters, which vector rendering can't draw.
++
++use std::sync::{Arc, Mutex};
++
++use anyrender::PaintScene;
++use blitz_dom::node::SvgImageData;
++use kurbo::{Affine, Rect};
++use peniko::{
++    Blob, ImageAlphaType, ImageBrush, ImageData, ImageFormat, ImageQuality, ImageSampler,
++};
++
++use crate::render::svg_viewport_affine;
++
++/// Rasterised filtered SVGs by (source hash, width, height): a tiled
++/// background asks for the same size every frame.
++type RasterCache = Vec<((u64, u32, u32), ImageData)>;
++static RASTERS: Mutex<RasterCache> = Mutex::new(Vec::new());
++/// How many sizes are kept, the most recent first.
++const CACHED: usize = 16;
++
++/// Draws `svg` into the `width`×`height` device-pixel box that `place`
++/// positions (its origin at the box's top left).
++pub(crate) fn draw_svg(
++    scene: &mut impl PaintScene,
++    svg: &SvgImageData,
++    place: Affine,
++    width: f32,
++    height: f32,
++) {
++    let viewport = svg_viewport_affine(svg, width, height);
++    if !svg.has_filters {
++        anyrender_svg::render_svg_tree(scene, &svg.tree, place * viewport);
++        return;
++    }
++    let (w, h) = (width.ceil() as u32, height.ceil() as u32);
++    let Some(image) = rasterise(svg, viewport, w, h) else {
++        return;
++    };
++    let brush = ImageBrush {
++        image,
++        sampler: ImageSampler {
++            x_extend: peniko::Extend::Pad,
++            y_extend: peniko::Extend::Pad,
++            quality: ImageQuality::Medium,
++            alpha: 1.0,
++        },
++    };
++    scene.fill(
++        peniko::Fill::NonZero,
++        place,
++        brush.as_ref(),
++        None,
++        &Rect::new(0.0, 0.0, w as f64, h as f64),
++    );
++}
++
++fn rasterise(svg: &SvgImageData, viewport: Affine, width: u32, height: u32) -> Option<ImageData> {
++    if width == 0 || height == 0 || width > 8192 || height > 8192 {
++        return None;
++    }
++    let key = (svg.source_hash, width, height);
++    let mut cache = RASTERS.lock().unwrap_or_else(|e| e.into_inner());
++    if let Some(at) = cache.iter().position(|(known, _)| *known == key) {
++        let entry = cache.remove(at);
++        let image = entry.1.clone();
++        cache.insert(0, entry);
++        return Some(image);
++    }
++    let mut pixmap = resvg::tiny_skia::Pixmap::new(width, height)?;
++    let [a, b, c, d, e, f] = viewport.as_coeffs().map(|v| v as f32);
++    resvg::render(
++        &svg.tree,
++        resvg::tiny_skia::Transform::from_row(a, b, c, d, e, f),
++        &mut pixmap.as_mut(),
++    );
++    let image = ImageData {
++        data: Blob::new(Arc::new(pixmap.take())),
++        format: ImageFormat::Rgba8,
++        alpha_type: ImageAlphaType::AlphaPremultiplied,
++        width,
++        height,
++    };
++    cache.insert(0, (key, image.clone()));
++    cache.truncate(CACHED);
++    Some(image)
++}
+diff --git a/tests/blitz-tests/tests/all.rs b/tests/blitz-tests/tests/all.rs
+index e59c9151..104023b4 100644
+--- a/tests/blitz-tests/tests/all.rs
++++ b/tests/blitz-tests/tests/all.rs
+@@ -14,6 +14,7 @@ mod anonymous_block_percentage_height;
+ mod anonymous_block_restyle;
+ mod autofocus_attribute;
+ mod background_size;
++mod background_svg_tiling;
+ mod br_trailing_line;
+ mod button_alignment;
+ mod checked_attribute;
+diff --git a/tests/blitz-tests/tests/background_svg_tiling.rs b/tests/blitz-tests/tests/background_svg_tiling.rs
+new file mode 100644
+index 00000000..77fcd363
+--- /dev/null
++++ b/tests/blitz-tests/tests/background_svg_tiling.rs
+@@ -0,0 +1,96 @@
++//! An SVG background image tiles as `background-repeat` says, as a raster
++//! one does (Blitz drew one tile).
++
++use anyrender::render_to_buffer;
++use anyrender_vello_cpu::VelloCpuImageRenderer;
++use blitz_dom::DocumentConfig;
++use blitz_dom::node::{ImageData, SvgImageData};
++use blitz_html::{HtmlDocument, HtmlProvider};
++use blitz_paint::paint_scene;
++use blitz_traits::shell::{ColorScheme, Viewport};
++use std::sync::Arc;
++
++/// A 40×40 tile: a red 20×20 square in its middle, white around it.
++const TILE: &str = r##"<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="#fff"/><rect x="10" y="10" width="20" height="20" fill="#f00"/></svg>"##;
++
++/// A 40×40 tile whose only content is a filter: flooding it green. Drawn
++/// as vectors (without the filter) it would be a black square.
++const FILTERED: &str = r##"<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><filter id="f" x="0" y="0" width="100%" height="100%"><feFlood flood-color="#0f0"/></filter><rect width="40" height="40" filter="url(#f)"/></svg>"##;
++
++fn render(background: &str) -> Vec<u8> {
++    render_tile(background, TILE)
++}
++
++fn render_tile(background: &str, tile: &str) -> Vec<u8> {
++    let html = format!(
++        r#"<html><body style="margin:0; background:#0000ff;">
++            <div id="box" style="width:120px; height:120px; background: {background};"></div>
++        </body></html>"#
++    );
++    let mut doc = HtmlDocument::from_html(
++        &html,
++        DocumentConfig {
++            viewport: Some(Viewport::new(120, 120, 1.0, ColorScheme::Light)),
++            html_parser_provider: Some(Arc::new(HtmlProvider) as _),
++            ..Default::default()
++        },
++    );
++    doc.resolve(0.0);
++    let box_id = doc.query_selector("#box").unwrap().expect("#box");
++    {
++        let svg = SvgImageData::from_data(tile.as_bytes(), &usvg::Options::default()).unwrap();
++        let node = doc.get_node_mut(box_id).unwrap();
++        let el = node.element_data_mut().unwrap();
++        for layer in el.background_images.iter_mut().flatten() {
++            layer.status = blitz_dom::node::Status::Ok;
++            layer.image = ImageData::Svg(svg.clone());
++        }
++    }
++    doc.resolve(0.0);
++    render_to_buffer::<VelloCpuImageRenderer, _>(
++        |scene| paint_scene(scene, doc.as_mut(), 1.0, 120, 120, 0, 0),
++        120,
++        120,
++    )
++}
++
++fn pixel(buffer: &[u8], x: usize, y: usize) -> [u8; 3] {
++    let idx = (y * 120 + x) * 4;
++    [buffer[idx], buffer[idx + 1], buffer[idx + 2]]
++}
++
++const RED: [u8; 3] = [255, 0, 0];
++const WHITE: [u8; 3] = [255, 255, 255];
++const BLUE: [u8; 3] = [0, 0, 255];
++
++#[test]
++fn an_svg_background_repeats_across_the_box() {
++    let buffer = render("url('https://example.com/tile.svg')");
++    // The middle of every tile, the first and the last.
++    for (x, y) in [(20, 20), (60, 20), (100, 20), (20, 100), (100, 100)] {
++        assert_eq!(pixel(&buffer, x, y), RED, "tile at {x},{y}");
++    }
++    assert_eq!(pixel(&buffer, 42, 42), WHITE);
++}
++
++#[test]
++fn an_svg_background_tiles_at_its_background_size() {
++    let buffer = render("url('https://example.com/tile.svg') 0 0 / 60px 60px");
++    assert_eq!(pixel(&buffer, 30, 30), RED);
++    assert_eq!(pixel(&buffer, 90, 90), RED);
++}
++
++#[test]
++fn a_no_repeat_svg_background_draws_once() {
++    let buffer = render("url('https://example.com/tile.svg') no-repeat");
++    assert_eq!(pixel(&buffer, 20, 20), RED);
++    assert_eq!(pixel(&buffer, 60, 20), BLUE);
++}
++
++#[test]
++fn an_svg_background_with_a_filter_is_drawn_with_it() {
++    let buffer = render_tile("url('https://example.com/flood.svg')", FILTERED);
++    for (x, y) in [(20, 20), (100, 100)] {
++        assert_eq!(pixel(&buffer, x, y), [0, 255, 0], "tile at {x},{y}");
++    }
++}

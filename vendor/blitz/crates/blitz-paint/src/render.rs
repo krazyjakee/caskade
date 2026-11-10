@@ -837,7 +837,11 @@ fn to_image_quality(image_rendering: ImageRendering) -> peniko::ImageQuality {
 
 /// The transform from an SVG's rendered tree to a viewport of the given size.
 #[cfg(feature = "svg")]
-fn svg_viewport_affine(svg: &blitz_dom::node::SvgImageData, width: f32, height: f32) -> Affine {
+pub(crate) fn svg_viewport_affine(
+    svg: &blitz_dom::node::SvgImageData,
+    width: f32,
+    height: f32,
+) -> Affine {
     let t = svg.viewport_transform(width, height);
     Affine::new([t.sx, t.ky, t.kx, t.sy, t.tx, t.ty].map(f64::from))
 }
@@ -1130,7 +1134,10 @@ impl ElementCx<'_, '_> {
                 let shift = if input_data.is_multiline {
                     0.0
                 } else {
-                    let text = input_data.editor.try_layout().map_or(0.0, |text| text.height());
+                    let text = input_data
+                        .editor
+                        .try_layout()
+                        .map_or(0.0, |text| text.height());
                     f64::from((text - layout.height()) / 2.0)
                 };
                 let mut draw_text_context = self.context.draw_text_context.borrow_mut();
@@ -1397,8 +1404,7 @@ impl ElementCx<'_, '_> {
         let x = x + x_offset.px() as f64;
         let y = y + y_offset.px() as f64;
 
-        let viewport = svg_viewport_affine(svg, paint_size.width, paint_size.height);
-        let transform = (self.transform * viewport).then_translate(Vec2 { x, y });
+        let place = self.transform.then_translate(Vec2 { x, y });
 
         self.with_replaced_content_clip(
             scene,
@@ -1407,7 +1413,7 @@ impl ElementCx<'_, '_> {
             x_offset.px(),
             y_offset.px(),
             |scene| {
-                anyrender_svg::render_svg_tree(scene, &svg.tree, transform);
+                crate::svg::draw_svg(scene, svg, place, paint_size.width, paint_size.height);
             },
         );
     }

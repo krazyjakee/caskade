@@ -227,7 +227,10 @@ The app's base stylesheet is written for a dark scheme. A light theme sets
 ### The backdrop
 
 `[data-cs="backdrop"]` is an empty layer behind the shell. Nexus draws its
-grid there. Without Nexus, it has no size, so the theme positions it. Paper
+grid there. Without Nexus, it has no size, so the theme positions it:
+`position: absolute; inset: 0` fills the shell, which fills the window. Use
+`absolute`, not `fixed`: the native app paints a fixed box above the shell's
+content (a Blitz bug). Paper
 fills it with paper grain, a small tiling SVG noise. Save this as
 `assets/grain.svg`:
 
@@ -245,7 +248,7 @@ fills it with paper grain, a small tiling SVG noise. Save this as
 /* ── Backdrop: paper grain instead of a grid ── */
 
 [data-cs="backdrop"] {
-  position: fixed;
+  position: absolute;
   inset: 0;
   pointer-events: none;
   background-image: url("assets/grain.svg");

@@ -57,7 +57,7 @@
 /* ── Backdrop: faint HUD grid over slowly drifting nebula glows ── */
 
 [data-cs="backdrop"] {
-  position: fixed;
+  position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;

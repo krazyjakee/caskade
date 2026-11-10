@@ -351,7 +351,7 @@ index e4c268df..34f8ae5b 100644
  mod paint_damage;
  mod query_selector;
 diff --git a/packages/blitz-dom/src/node/text.rs b/packages/blitz-dom/src/node/text.rs
-index 2cec1f28..ad6822c1 100644
+index 05dd4979..1d998b82 100644
 --- a/packages/blitz-dom/src/node/text.rs
 +++ b/packages/blitz-dom/src/node/text.rs
 @@ -26,6 +26,9 @@ pub struct TextLayout {

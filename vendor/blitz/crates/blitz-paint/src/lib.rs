@@ -12,6 +12,8 @@ mod kurbo_css;
 mod layers;
 mod render;
 mod sizing;
+#[cfg(feature = "svg")]
+mod svg;
 mod text;
 
 use std::collections::HashMap;

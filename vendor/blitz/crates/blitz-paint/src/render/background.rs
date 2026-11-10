@@ -443,10 +443,17 @@ impl ElementCx<'_, '_> {
             return;
         }
 
-        let (origin_rect, base_transform) = if self.layer_is_fixed(layer) {
-            self.fixed_positioning_area()
+        // As a gradient's: the positioning area, and the clip area tiles
+        // extend into.
+        let (origin_rect, base_transform, clip_rect) = if self.layer_is_fixed(layer) {
+            let (viewport_rect, transform) = self.fixed_positioning_area();
+            (viewport_rect, transform, viewport_rect)
         } else {
-            (self.box_rect(layer.origin), self.transform)
+            (
+                self.box_rect(layer.origin),
+                self.transform,
+                self.box_rect(layer.clip),
+            )
         };
 
         let frame_w = (origin_rect.width() / self.scale) as f32;
@@ -480,26 +487,57 @@ impl ElementCx<'_, '_> {
             return;
         }
 
-        let viewport = super::svg_viewport_affine(
-            svg,
-            (bg_size.width * self.scale) as f32,
-            (bg_size.height * self.scale) as f32,
-        );
-
         let bg_pos = compute_layer_position(
             layer,
             frame_w - bg_size.width as f32,
             frame_h - bg_size.height as f32,
         );
 
-        let transform = base_transform
-            * kurbo::Affine::translate((
-                origin_rect.x0 + bg_pos.x * self.scale,
-                origin_rect.y0 + bg_pos.y * self.scale,
-            ))
-            * viewport;
-
-        anyrender_svg::render_svg_tree(scene, &svg.tree, transform);
+        // Tiled as `background-repeat` says (it repeats by default): each
+        // tile draws the SVG's tree again.
+        let BackgroundRepeat(repeat_x, repeat_y) = layer.repeat;
+        let x = gradient_axis_tiling(
+            *repeat_x,
+            origin_rect.x0,
+            origin_rect.width(),
+            clip_rect.x0,
+            clip_rect.width(),
+            bg_pos.x * self.scale,
+            bg_size.width * self.scale,
+        );
+        let y = gradient_axis_tiling(
+            *repeat_y,
+            origin_rect.y0,
+            origin_rect.height(),
+            clip_rect.y0,
+            clip_rect.height(),
+            bg_pos.y * self.scale,
+            bg_size.height * self.scale,
+        );
+        // Tiles far smaller than the area would encode the tree thousands of
+        // times; past this many, only the first row and column are drawn.
+        const MAX_TILES: u64 = 1024;
+        let (x_count, y_count) = if x.count as u64 * y.count as u64 > MAX_TILES {
+            (x.count.min(MAX_TILES as u32), 1)
+        } else {
+            (x.count, y.count)
+        };
+        for hc in 0..y_count {
+            for wc in 0..x_count {
+                let place = base_transform
+                    * kurbo::Affine::translate((
+                        x.translate + wc as f64 * x.stride,
+                        y.translate + hc as f64 * y.stride,
+                    ));
+                crate::svg::draw_svg(
+                    scene,
+                    svg,
+                    place,
+                    (bg_size.width * self.scale) as f32,
+                    (bg_size.height * self.scale) as f32,
+                );
+            }
+        }
     }
 
     fn draw_raster_image_layer(&self, scene: &mut impl PaintScene, layer: &ImageLayerStyles) {

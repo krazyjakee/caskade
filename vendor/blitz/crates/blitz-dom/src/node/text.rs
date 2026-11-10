@@ -164,11 +164,9 @@ impl TextInputData {
         // The same value again (a controlled field re-rendering) changes
         // nothing: the caret, the selection and a composition stay.
         if self.editor.text() != text {
-            let mut driver = self.editor.driver(font_ctx, layout_ctx);
             // A new value replaces a composition in progress, and the caret
             // goes to its end, as a browser puts it.
-            driver.clear_compose();
-            drop(driver);
+            self.editor.driver(font_ctx, layout_ctx).clear_compose();
             self.editor.set_text(text);
             let mut driver = self.editor.driver(font_ctx, layout_ctx);
             driver.refresh_layout();

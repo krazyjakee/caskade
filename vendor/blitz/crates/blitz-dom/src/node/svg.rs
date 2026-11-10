@@ -83,6 +83,18 @@ pub struct SvgImageData {
     /// A hash of the source this was parsed from: an inline `<svg>` whose
     /// serialized source still hashes the same needn't be rebuilt.
     pub source_hash: u64,
+    /// Whether the tree uses filters (`feTurbulence`, `feGaussianBlur`, …),
+    /// which vector rendering leaves out: such an image is drawn rasterised.
+    pub has_filters: bool,
+}
+
+/// Whether `group` or anything in it has a filter.
+fn uses_filters(group: &usvg::Group) -> bool {
+    !group.filters().is_empty()
+        || group.children().iter().any(|node| match node {
+            usvg::Node::Group(group) => uses_filters(group),
+            _ => false,
+        })
 }
 
 /// The hash [`SvgImageData::source_hash`] holds for `data`.
@@ -120,6 +132,7 @@ impl SvgImageData {
             .map_err(usvg::Error::ParsingFailed)?;
         let tree = usvg::Tree::from_xmltree(&doc, options)?;
         Ok(Self {
+            has_filters: uses_filters(tree.root()),
             tree: Arc::new(tree),
             intrinsic_dimensions: SvgIntrinsicDimensions::from_xmltree(&doc),
             source_hash,

@@ -12,25 +12,23 @@ byte offset. A new value now cancels the composition and puts the caret
 at the end, as browsers do; the same value still leaves the caret, the
 selection and the composition alone.
 ---
- packages/blitz-dom/src/node/text.rs | 32 ++++++++++++++++++++++++++++-
- 1 file changed, 31 insertions(+), 1 deletion(-)
+ packages/blitz-dom/src/node/text.rs | 30 ++++++++++++++++++++++++++++-
+ 1 file changed, 29 insertions(+), 1 deletion(-)
 
 diff --git a/packages/blitz-dom/src/node/text.rs b/packages/blitz-dom/src/node/text.rs
-index eddcd17e..2cec1f28 100644
+index eddcd17e..05dd4979 100644
 --- a/packages/blitz-dom/src/node/text.rs
 +++ b/packages/blitz-dom/src/node/text.rs
-@@ -122,9 +122,18 @@ impl TextInputData {
+@@ -122,9 +122,16 @@ impl TextInputData {
          layout_ctx: &mut LayoutContext<TextBrush>,
          text: &str,
      ) {
 +        // The same value again (a controlled field re-rendering) changes
 +        // nothing: the caret, the selection and a composition stay.
          if self.editor.text() != text {
-+            let mut driver = self.editor.driver(font_ctx, layout_ctx);
 +            // A new value replaces a composition in progress, and the caret
 +            // goes to its end, as a browser puts it.
-+            driver.clear_compose();
-+            drop(driver);
++            self.editor.driver(font_ctx, layout_ctx).clear_compose();
              self.editor.set_text(text);
 -            self.editor.driver(font_ctx, layout_ctx).refresh_layout();
 +            let mut driver = self.editor.driver(font_ctx, layout_ctx);
@@ -39,7 +37,7 @@ index eddcd17e..2cec1f28 100644
          }
      }
  
-@@ -1009,6 +1018,27 @@ mod tests {
+@@ -1009,6 +1016,27 @@ mod tests {
          assert_eq!(input.editor.text(), "a");
      }
  

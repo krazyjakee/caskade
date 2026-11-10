@@ -255,7 +255,7 @@ index 92cd8f57..ac43dd6a 100644
 +    TextLayout,
 +};
 diff --git a/packages/blitz-dom/src/node/text.rs b/packages/blitz-dom/src/node/text.rs
-index ad6822c1..7ac66a1b 100644
+index 1d998b82..354b4092 100644
 --- a/packages/blitz-dom/src/node/text.rs
 +++ b/packages/blitz-dom/src/node/text.rs
 @@ -99,6 +99,34 @@ pub struct TextInputData {
