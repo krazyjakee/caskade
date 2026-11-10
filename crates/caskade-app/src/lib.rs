@@ -4,8 +4,10 @@
 //! same in each. Nothing here depends on Tauri or any other UI toolkit.
 
 pub mod background;
+pub mod commands;
 pub mod deep_link;
 pub mod error;
+pub mod events;
 pub mod navigation;
 pub mod onboarding;
 pub mod permissions;

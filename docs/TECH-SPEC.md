@@ -59,7 +59,7 @@ What it does is in the [product spec](PRODUCT-SPEC.md). Public contracts for ext
 | `crates/caskade-i18n` | Runtime translation for the Rust side. |
 | `crates/caskade-malloc`, `caskade-webview2`, `caskade-xinput` | The only crates with `unsafe`: glibc allocator tuning, WebView2 COM calls, XInput's guide button. |
 | `crates/caskade-emulation-fixtures` | Generated emulator and ROM fixtures for tests. |
-| `crates/caskade-app` | The application layer every app shell runs, with no Tauri: the async runtime, background supervision, command errors, permission checks, first-run setup, startup recovery, deep-link and torrent-link handling, navigation targets. Moving the rest of the adapter's logic here is #86. |
+| `crates/caskade-app` | The application layer every app shell runs, with no Tauri: the async runtime, background supervision, command errors, permission checks, typed UI events, the commands as plain async functions over the services they use (the adapter's commands forward to them), first-run setup, startup recovery, deep-link and torrent-link handling, navigation targets. Moving the rest of the adapter's logic here is #86. |
 | `apps/desktop/src-tauri` | The Tauri adapter over `caskade-app`: commands, events, windows, schemes, tray, deep links, launch channel, elevation entry. |
 | `apps/desktop/src` | The React app. |
 | `apps/storybook` | Storybook for `@caskade/ui`, also a theme playground. |
@@ -92,7 +92,7 @@ One `caskade` binary has several entry points, decided in `run()` before logging
 ### 4.2 Webview and core
 
 - **Commands** live in `src-tauri/src/commands/<area>.rs` and are registered in `bindings.rs`. `just bindings` regenerates `apps/desktop/src/api/bindings.ts`, and a test fails when the committed file is stale. 64-bit times and sizes cross as numbers, 64-bit ids as strings.
-- **Events** from the core (`events.rs`) invalidate TanStack Query caches.
+- **Events**: the app layer's typed events (`caskade_app::events`, with the bus bridge that coalesces library changes) go out through the shell's `Emit` sink; the adapter (`events.rs`) sends each under its tauri-specta event, whose bindings name the app layer's type. They invalidate TanStack Query caches.
 - **Each API area** in the webview (`src/api/*.ts`) is an interface with a native implementation and fixtures, so the browser preview (`just web`) and tests run without the core.
 - **Schemes**: `caskade-asset://` serves cached artwork and thumbnails, `caskade-theme://` compiled theme stylesheets and assets, `caskade-plugin://` plugin UI modules.
 - **Permissions**: every command is checked against the active local account's role and permissions before it runs. The rules are `caskade_app::permissions`; the adapter's invoke gate (`permissions.rs`) calls them for each command. The account comes from the app layer, never from the webview.

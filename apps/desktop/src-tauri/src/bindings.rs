@@ -356,7 +356,7 @@ pub fn builder() -> Builder<tauri::Wry> {
             crate::commands::install_requests::InstallRefused,
             crate::commands::shares::SharesChanged,
             crate::events::Hello,
-            crate::background::BackgroundChanged,
+            crate::events::BackgroundChanged,
             crate::events::GameStarted,
             crate::events::GameExited,
             crate::events::LibraryChanged,
