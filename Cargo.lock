@@ -2212,13 +2212,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "caskade-ui-input"
-version = "0.1.0"
-dependencies = [
- "caskade-input",
-]
-
-[[package]]
 name = "caskade-webview2"
 version = "0.1.0"
 dependencies = [
