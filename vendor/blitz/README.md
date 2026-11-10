@@ -1,9 +1,9 @@
-# Blitz, anyrender and Stylo with Caskade's patches
+# Blitz, anyrender, Stylo and Taffy with Caskade's patches
 
-`crates/` holds the Blitz, anyrender and Stylo crates Caskade's native UI
+`crates/` holds the Blitz, anyrender, Stylo and Taffy crates Caskade's native UI
 builds: the upstream revisions in [`PINS`](PINS) with the patch series in
 [`patches/`](patches/) applied, each crate rewritten as a standalone package.
-Both builds take them through `[patch]` entries for the three git sources:
+Both builds take them through `[patch]` entries for the four git sources:
 
 - the root workspace's `caskade-native` (root `Cargo.toml`);
 - the prototype, `apps/native-proto` (its own `Cargo.toml`).
@@ -23,9 +23,10 @@ formatting and i18n checks skip them.
 | blitz | 0001–0005: gradient centring and tiling, inline SVG snapshots, damage-limited repaint of animation frames, `prefers-reduced-motion`; 0006–0010: screen readers (ARIA states and properties, bounds, actions routed to DOM events, controls named by their labels, no stray `<main>` around a Dioxus app) | not yet submitted |
 | anyrender | 0001–0002: damage rendering in vello_hybrid; 0003–0004 measurement only (`ANYRENDER_PRESENT_MODE`, `ANYRENDER_FRAME_LIMIT_HZ`) | not yet submitted (0003–0004 never) |
 | stylo | 0001–0002: when a stepped animation next changes, the `prefers-reduced-motion` media feature | not yet submitted |
+| taffy | 0001: an auto-height column flex container sizes from its items' hypothetical main sizes, not their content (`flex: 1 1 0` with a min-height kept a scroll area the view's height) | not yet submitted ([draft issue](../../docs/spikes/blitz-2.md#upstream-not-filed-waiting-for-the-users-go)) |
 
 What each does and why: [`docs/spikes/blitz-3.md`](../../docs/spikes/blitz-3.md)
-(#82, with measurements) and [`docs/spikes/blitz-4.md`](../../docs/spikes/blitz-4.md) (#83). When a patch lands upstream, drop it from the series at the next pin
+(#82, with measurements), [`docs/spikes/blitz-4.md`](../../docs/spikes/blitz-4.md) (#83) and [`docs/spikes/blitz-2.md`](../../docs/spikes/blitz-2.md) (#81). When a patch lands upstream, drop it from the series at the next pin
 bump.
 
 ## Regenerating
@@ -38,7 +39,9 @@ It clones each repo at its pin into the work dir, applies the series on a
 `caskade` branch, resolves every crate with `cargo metadata` in a scratch
 workspace, and writes `crates/` with [`normalize.py`](normalize.py):
 standalone manifests (no `workspace = true`), path dependencies between the
-vendored crates, no dev-dependencies, tests or examples. Optional
+vendored crates, no dev-dependencies, tests or examples (and only what a
+manifest's `include` lists, when it has one: Taffy's crate is its
+repository's root). Optional
 dependencies outside the set (Blitz's devtools server) are left out with the
 features that enable them. Run it twice and nothing changes.
 
@@ -62,6 +65,8 @@ features that enable them. Run it twice and nothing changes.
 ## Bumping a pin
 
 Blitz, anyrender, Stylo and Dioxus move together (#113, condition 6).
+Taffy's revision is the one Blitz's workspace names for its `taffy`
+dependency: bump it with Blitz's.
 
 1. In `PINS`, set the new revisions (and the crate lists, if the upstream
    crates changed).

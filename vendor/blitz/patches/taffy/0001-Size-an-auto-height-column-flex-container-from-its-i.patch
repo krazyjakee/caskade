@@ -1,0 +1,409 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jake Cattrall <krazyjakee@gmail.com>
+Date: Tue, 10 Nov 2026 10:39:30 +0000
+Subject: [PATCH] Size an auto-height column flex container from its items'
+ hypothetical main sizes
+
+A column flex container whose height is auto took its intrinsic main
+size from its items' content, through the flex fraction algorithm. Chrome
+instead sums the items' hypothetical main sizes: each item's
+flex base size clamped by its max-height and floored by its min-height (an
+explicit one, or the automatic minimum, which brings the content back when
+min-height is auto).
+
+The two disagree for an item with `flex: 1 1 0` and an explicit
+min-height whose content is taller: Chrome sizes the column from the
+min-height and keeps the overflow inside the item, Taffy grew the column
+to the full content. A `min-height: 100%` column holding a growing row
+with an `overflow: scroll` child is a common way to fill a view with a
+scroll area; under Taffy the scroll area grew to its whole content (55,000
+px instead of the view's 600) and a virtualised list inside it mounted
+every row.
+
+Two Chrome-generated fixtures cover it: the explicit-min case (fails
+before this change) and the automatic-minimum case (passes either way).
+---
+ src/compute/flexbox.rs                        | 10 +++++
+ ..._auto_height_from_basis_zero_auto_min.html | 21 ++++++++++
+ ..._auto_height_from_basis_zero_with_min.html | 23 +++++++++++
+ ...om_basis_zero_auto_min__border_box_ltr.xml | 21 ++++++++++
+ ...om_basis_zero_auto_min__border_box_rtl.xml | 21 ++++++++++
+ ...m_basis_zero_auto_min__content_box_ltr.xml | 21 ++++++++++
+ ...m_basis_zero_auto_min__content_box_rtl.xml | 21 ++++++++++
+ ...om_basis_zero_with_min__border_box_ltr.xml | 25 ++++++++++++
+ ...om_basis_zero_with_min__border_box_rtl.xml | 25 ++++++++++++
+ ...m_basis_zero_with_min__content_box_ltr.xml | 25 ++++++++++++
+ ...m_basis_zero_with_min__content_box_rtl.xml | 25 ++++++++++++
+ tests/xml/mod.rs                              | 40 +++++++++++++++++++
+ 12 files changed, 278 insertions(+)
+ create mode 100644 test_fixtures/flex/flex_column_auto_height_from_basis_zero_auto_min.html
+ create mode 100644 test_fixtures/flex/flex_column_auto_height_from_basis_zero_with_min.html
+ create mode 100644 tests/xml/flex/flex_column_auto_height_from_basis_zero_auto_min__border_box_ltr.xml
+ create mode 100644 tests/xml/flex/flex_column_auto_height_from_basis_zero_auto_min__border_box_rtl.xml
+ create mode 100644 tests/xml/flex/flex_column_auto_height_from_basis_zero_auto_min__content_box_ltr.xml
+ create mode 100644 tests/xml/flex/flex_column_auto_height_from_basis_zero_auto_min__content_box_rtl.xml
+ create mode 100644 tests/xml/flex/flex_column_auto_height_from_basis_zero_with_min__border_box_ltr.xml
+ create mode 100644 tests/xml/flex/flex_column_auto_height_from_basis_zero_with_min__border_box_rtl.xml
+ create mode 100644 tests/xml/flex/flex_column_auto_height_from_basis_zero_with_min__content_box_ltr.xml
+ create mode 100644 tests/xml/flex/flex_column_auto_height_from_basis_zero_with_min__content_box_rtl.xml
+
+diff --git a/src/compute/flexbox.rs b/src/compute/flexbox.rs
+index a8dbbcf2..92b2c0cb 100644
+--- a/src/compute/flexbox.rs
++++ b/src/compute/flexbox.rs
+@@ -1607,6 +1607,16 @@ fn determine_container_main_size(
+                             style_max.maybe_min(flex_basis_max).or(flex_basis_max).unwrap_or(f32::INFINITY);
+ 
+                         let content_contribution = match (min_main_size, style_preferred, max_main_size) {
++                            // A column container's intrinsic main (block) size is the sum of its items'
++                            // hypothetical main sizes, as Chrome lays it out: each item's flex base
++                            // size clamped by its max and floored by its min (an explicit `min-height`, or the
++                            // automatic minimum, which brings the content back in when `min-height` is `auto`).
++                            // The content beyond that doesn't grow the container, so an item with
++                            // `flex: 1 1 0` and an explicit min doesn't size it from its content.
++                            _ if !constants.is_row => {
++                                item.flex_basis.maybe_min(style_max).max(item.resolved_minimum_main_size) + margin_sum
++                            }
++
+                             // If the clamping values are such that max <= min, then we can avoid the expensive step of computing the content size
+                             // as we know that the clamping values will override it anyway
+                             (min, Some(pref), max) if max <= min || max <= pref => pref.min(max).max(min) + margin_sum,
+diff --git a/test_fixtures/flex/flex_column_auto_height_from_basis_zero_auto_min.html b/test_fixtures/flex/flex_column_auto_height_from_basis_zero_auto_min.html
+new file mode 100644
+index 00000000..91be21e3
+--- /dev/null
++++ b/test_fixtures/flex/flex_column_auto_height_from_basis_zero_auto_min.html
+@@ -0,0 +1,21 @@
++<!DOCTYPE html>
++<html lang="en">
++<head>
++  <script src="../../scripts/gentest/test_helper.js"></script>
++  <link rel="stylesheet" type="text/css" href="../../scripts/gentest/test_base_style.css">
++  <title>
++    With min-height auto, the automatic minimum brings the content back
++  </title>
++</head>
++<body>
++
++<div id="test-root" style="display: block; width: 400px; height: 600px; overflow: scroll;">
++  <div style="flex-direction: column;">
++    <div style="flex-grow: 1; flex-basis: 0px;">
++      <div style="width: 10px; height: 200px;"></div>
++    </div>
++  </div>
++</div>
++
++</body>
++</html>
+diff --git a/test_fixtures/flex/flex_column_auto_height_from_basis_zero_with_min.html b/test_fixtures/flex/flex_column_auto_height_from_basis_zero_with_min.html
+new file mode 100644
+index 00000000..7b109c2a
+--- /dev/null
++++ b/test_fixtures/flex/flex_column_auto_height_from_basis_zero_with_min.html
+@@ -0,0 +1,23 @@
++<!DOCTYPE html>
++<html lang="en">
++<head>
++  <script src="../../scripts/gentest/test_helper.js"></script>
++  <link rel="stylesheet" type="text/css" href="../../scripts/gentest/test_base_style.css">
++  <title>
++    A column's auto height comes from an item's flex basis and min-height, not its content (#81)
++  </title>
++</head>
++<body>
++
++<div id="test-root" style="display: block; width: 400px; height: 600px; overflow: scroll;">
++  <div style="flex-direction: column; min-height: 100%;">
++    <div style="flex-grow: 1; flex-basis: 0px; min-height: 384px;">
++      <div style="flex-grow: 1; overflow: scroll;">
++        <div style="width: 10px; height: 55000px;"></div>
++      </div>
++    </div>
++  </div>
++</div>
++
++</body>
++</html>
+diff --git a/tests/xml/flex/flex_column_auto_height_from_basis_zero_auto_min__border_box_ltr.xml b/tests/xml/flex/flex_column_auto_height_from_basis_zero_auto_min__border_box_ltr.xml
+new file mode 100644
+index 00000000..d5ddb2af
+--- /dev/null
++++ b/tests/xml/flex/flex_column_auto_height_from_basis_zero_auto_min__border_box_ltr.xml
+@@ -0,0 +1,21 @@
++<test name="flex_column_auto_height_from_basis_zero_auto_min__border_box_ltr" use-rounding="true">
++  <viewport width="max-content" height="max-content"/>
++  <input>
++    <div display="block" direction="ltr" position="absolute" overflow-x="scroll" overflow-y="scroll" scrollbar-width="0" width="400px" height="600px">
++      <div direction="ltr" position="relative" flex-direction="column">
++        <div direction="ltr" position="relative" flex-grow="1" flex-basis="0px">
++          <div direction="ltr" position="relative" width="10px" height="200px"/>
++        </div>
++      </div>
++    </div>
++  </input>
++  <expectations>
++    <node x="0" y="0" width="400" height="600" scroll_width="0" scroll_height="0">
++      <node x="0" y="0" width="400" height="200">
++        <node x="0" y="0" width="400" height="200">
++          <node x="0" y="0" width="10" height="200"/>
++        </node>
++      </node>
++    </node>
++  </expectations>
++</test>
+diff --git a/tests/xml/flex/flex_column_auto_height_from_basis_zero_auto_min__border_box_rtl.xml b/tests/xml/flex/flex_column_auto_height_from_basis_zero_auto_min__border_box_rtl.xml
+new file mode 100644
+index 00000000..2a2313fd
+--- /dev/null
++++ b/tests/xml/flex/flex_column_auto_height_from_basis_zero_auto_min__border_box_rtl.xml
+@@ -0,0 +1,21 @@
++<test name="flex_column_auto_height_from_basis_zero_auto_min__border_box_rtl" use-rounding="true">
++  <viewport width="max-content" height="max-content"/>
++  <input>
++    <div display="block" direction="rtl" position="absolute" overflow-x="scroll" overflow-y="scroll" scrollbar-width="0" width="400px" height="600px">
++      <div direction="rtl" position="relative" flex-direction="column">
++        <div direction="rtl" position="relative" flex-grow="1" flex-basis="0px">
++          <div direction="rtl" position="relative" width="10px" height="200px"/>
++        </div>
++      </div>
++    </div>
++  </input>
++  <expectations>
++    <node x="0" y="0" width="400" height="600" scroll_width="0" scroll_height="0">
++      <node x="0" y="0" width="400" height="200">
++        <node x="0" y="0" width="400" height="200">
++          <node x="390" y="0" width="10" height="200"/>
++        </node>
++      </node>
++    </node>
++  </expectations>
++</test>
+diff --git a/tests/xml/flex/flex_column_auto_height_from_basis_zero_auto_min__content_box_ltr.xml b/tests/xml/flex/flex_column_auto_height_from_basis_zero_auto_min__content_box_ltr.xml
+new file mode 100644
+index 00000000..906951b2
+--- /dev/null
++++ b/tests/xml/flex/flex_column_auto_height_from_basis_zero_auto_min__content_box_ltr.xml
+@@ -0,0 +1,21 @@
++<test name="flex_column_auto_height_from_basis_zero_auto_min__content_box_ltr" use-rounding="true">
++  <viewport width="max-content" height="max-content"/>
++  <input>
++    <div display="block" box-sizing="content-box" direction="ltr" position="absolute" overflow-x="scroll" overflow-y="scroll" scrollbar-width="0" width="400px" height="600px">
++      <div box-sizing="content-box" direction="ltr" position="relative" flex-direction="column">
++        <div box-sizing="content-box" direction="ltr" position="relative" flex-grow="1" flex-basis="0px">
++          <div box-sizing="content-box" direction="ltr" position="relative" width="10px" height="200px"/>
++        </div>
++      </div>
++    </div>
++  </input>
++  <expectations>
++    <node x="0" y="0" width="400" height="600" scroll_width="0" scroll_height="0">
++      <node x="0" y="0" width="400" height="200">
++        <node x="0" y="0" width="400" height="200">
++          <node x="0" y="0" width="10" height="200"/>
++        </node>
++      </node>
++    </node>
++  </expectations>
++</test>
+diff --git a/tests/xml/flex/flex_column_auto_height_from_basis_zero_auto_min__content_box_rtl.xml b/tests/xml/flex/flex_column_auto_height_from_basis_zero_auto_min__content_box_rtl.xml
+new file mode 100644
+index 00000000..0f02f2b5
+--- /dev/null
++++ b/tests/xml/flex/flex_column_auto_height_from_basis_zero_auto_min__content_box_rtl.xml
+@@ -0,0 +1,21 @@
++<test name="flex_column_auto_height_from_basis_zero_auto_min__content_box_rtl" use-rounding="true">
++  <viewport width="max-content" height="max-content"/>
++  <input>
++    <div display="block" box-sizing="content-box" direction="rtl" position="absolute" overflow-x="scroll" overflow-y="scroll" scrollbar-width="0" width="400px" height="600px">
++      <div box-sizing="content-box" direction="rtl" position="relative" flex-direction="column">
++        <div box-sizing="content-box" direction="rtl" position="relative" flex-grow="1" flex-basis="0px">
++          <div box-sizing="content-box" direction="rtl" position="relative" width="10px" height="200px"/>
++        </div>
++      </div>
++    </div>
++  </input>
++  <expectations>
++    <node x="0" y="0" width="400" height="600" scroll_width="0" scroll_height="0">
++      <node x="0" y="0" width="400" height="200">
++        <node x="0" y="0" width="400" height="200">
++          <node x="390" y="0" width="10" height="200"/>
++        </node>
++      </node>
++    </node>
++  </expectations>
++</test>
+diff --git a/tests/xml/flex/flex_column_auto_height_from_basis_zero_with_min__border_box_ltr.xml b/tests/xml/flex/flex_column_auto_height_from_basis_zero_with_min__border_box_ltr.xml
+new file mode 100644
+index 00000000..be1c83d8
+--- /dev/null
++++ b/tests/xml/flex/flex_column_auto_height_from_basis_zero_with_min__border_box_ltr.xml
+@@ -0,0 +1,25 @@
++<test name="flex_column_auto_height_from_basis_zero_with_min__border_box_ltr" use-rounding="true">
++  <viewport width="max-content" height="max-content"/>
++  <input>
++    <div display="block" direction="ltr" position="absolute" overflow-x="scroll" overflow-y="scroll" scrollbar-width="0" width="400px" height="600px">
++      <div direction="ltr" position="relative" flex-direction="column" min-height="100%">
++        <div direction="ltr" position="relative" flex-grow="1" flex-basis="0px" min-height="384px">
++          <div direction="ltr" position="relative" overflow-x="scroll" overflow-y="scroll" scrollbar-width="0" flex-grow="1">
++            <div direction="ltr" position="relative" width="10px" height="55000px"/>
++          </div>
++        </div>
++      </div>
++    </div>
++  </input>
++  <expectations>
++    <node x="0" y="0" width="400" height="600" scroll_width="0" scroll_height="0">
++      <node x="0" y="0" width="400" height="600">
++        <node x="0" y="0" width="400" height="600">
++          <node x="0" y="0" width="400" height="600" scroll_width="0" scroll_height="54400">
++            <node x="0" y="0" width="10" height="55000"/>
++          </node>
++        </node>
++      </node>
++    </node>
++  </expectations>
++</test>
+diff --git a/tests/xml/flex/flex_column_auto_height_from_basis_zero_with_min__border_box_rtl.xml b/tests/xml/flex/flex_column_auto_height_from_basis_zero_with_min__border_box_rtl.xml
+new file mode 100644
+index 00000000..5b4fffc6
+--- /dev/null
++++ b/tests/xml/flex/flex_column_auto_height_from_basis_zero_with_min__border_box_rtl.xml
+@@ -0,0 +1,25 @@
++<test name="flex_column_auto_height_from_basis_zero_with_min__border_box_rtl" use-rounding="true">
++  <viewport width="max-content" height="max-content"/>
++  <input>
++    <div display="block" direction="rtl" position="absolute" overflow-x="scroll" overflow-y="scroll" scrollbar-width="0" width="400px" height="600px">
++      <div direction="rtl" position="relative" flex-direction="column" min-height="100%">
++        <div direction="rtl" position="relative" flex-grow="1" flex-basis="0px" min-height="384px">
++          <div direction="rtl" position="relative" overflow-x="scroll" overflow-y="scroll" scrollbar-width="0" flex-grow="1">
++            <div direction="rtl" position="relative" width="10px" height="55000px"/>
++          </div>
++        </div>
++      </div>
++    </div>
++  </input>
++  <expectations>
++    <node x="0" y="0" width="400" height="600" scroll_width="0" scroll_height="0">
++      <node x="0" y="0" width="400" height="600">
++        <node x="0" y="0" width="400" height="600">
++          <node x="0" y="0" width="400" height="600" scroll_width="0" scroll_height="54400">
++            <node x="390" y="0" width="10" height="55000"/>
++          </node>
++        </node>
++      </node>
++    </node>
++  </expectations>
++</test>
+diff --git a/tests/xml/flex/flex_column_auto_height_from_basis_zero_with_min__content_box_ltr.xml b/tests/xml/flex/flex_column_auto_height_from_basis_zero_with_min__content_box_ltr.xml
+new file mode 100644
+index 00000000..6bf7ed76
+--- /dev/null
++++ b/tests/xml/flex/flex_column_auto_height_from_basis_zero_with_min__content_box_ltr.xml
+@@ -0,0 +1,25 @@
++<test name="flex_column_auto_height_from_basis_zero_with_min__content_box_ltr" use-rounding="true">
++  <viewport width="max-content" height="max-content"/>
++  <input>
++    <div display="block" box-sizing="content-box" direction="ltr" position="absolute" overflow-x="scroll" overflow-y="scroll" scrollbar-width="0" width="400px" height="600px">
++      <div box-sizing="content-box" direction="ltr" position="relative" flex-direction="column" min-height="100%">
++        <div box-sizing="content-box" direction="ltr" position="relative" flex-grow="1" flex-basis="0px" min-height="384px">
++          <div box-sizing="content-box" direction="ltr" position="relative" overflow-x="scroll" overflow-y="scroll" scrollbar-width="0" flex-grow="1">
++            <div box-sizing="content-box" direction="ltr" position="relative" width="10px" height="55000px"/>
++          </div>
++        </div>
++      </div>
++    </div>
++  </input>
++  <expectations>
++    <node x="0" y="0" width="400" height="600" scroll_width="0" scroll_height="0">
++      <node x="0" y="0" width="400" height="600">
++        <node x="0" y="0" width="400" height="600">
++          <node x="0" y="0" width="400" height="600" scroll_width="0" scroll_height="54400">
++            <node x="0" y="0" width="10" height="55000"/>
++          </node>
++        </node>
++      </node>
++    </node>
++  </expectations>
++</test>
+diff --git a/tests/xml/flex/flex_column_auto_height_from_basis_zero_with_min__content_box_rtl.xml b/tests/xml/flex/flex_column_auto_height_from_basis_zero_with_min__content_box_rtl.xml
+new file mode 100644
+index 00000000..3c28fe69
+--- /dev/null
++++ b/tests/xml/flex/flex_column_auto_height_from_basis_zero_with_min__content_box_rtl.xml
+@@ -0,0 +1,25 @@
++<test name="flex_column_auto_height_from_basis_zero_with_min__content_box_rtl" use-rounding="true">
++  <viewport width="max-content" height="max-content"/>
++  <input>
++    <div display="block" box-sizing="content-box" direction="rtl" position="absolute" overflow-x="scroll" overflow-y="scroll" scrollbar-width="0" width="400px" height="600px">
++      <div box-sizing="content-box" direction="rtl" position="relative" flex-direction="column" min-height="100%">
++        <div box-sizing="content-box" direction="rtl" position="relative" flex-grow="1" flex-basis="0px" min-height="384px">
++          <div box-sizing="content-box" direction="rtl" position="relative" overflow-x="scroll" overflow-y="scroll" scrollbar-width="0" flex-grow="1">
++            <div box-sizing="content-box" direction="rtl" position="relative" width="10px" height="55000px"/>
++          </div>
++        </div>
++      </div>
++    </div>
++  </input>
++  <expectations>
++    <node x="0" y="0" width="400" height="600" scroll_width="0" scroll_height="0">
++      <node x="0" y="0" width="400" height="600">
++        <node x="0" y="0" width="400" height="600">
++          <node x="0" y="0" width="400" height="600" scroll_width="0" scroll_height="54400">
++            <node x="390" y="0" width="10" height="55000"/>
++          </node>
++        </node>
++      </node>
++    </node>
++  </expectations>
++</test>
+diff --git a/tests/xml/mod.rs b/tests/xml/mod.rs
+index e8f567a7..247cc56f 100644
+--- a/tests/xml/mod.rs
++++ b/tests/xml/mod.rs
+@@ -13207,6 +13207,46 @@ mod flex {
+         crate::run_xml_test("flex", "flex_column_align_start_shrink_to_fit_excludes_margin__content_box_rtl");
+     }
+ 
++    #[test]
++    fn flex_column_auto_height_from_basis_zero_auto_min__border_box_ltr() {
++        crate::run_xml_test("flex", "flex_column_auto_height_from_basis_zero_auto_min__border_box_ltr");
++    }
++
++    #[test]
++    fn flex_column_auto_height_from_basis_zero_auto_min__content_box_ltr() {
++        crate::run_xml_test("flex", "flex_column_auto_height_from_basis_zero_auto_min__content_box_ltr");
++    }
++
++    #[test]
++    fn flex_column_auto_height_from_basis_zero_auto_min__border_box_rtl() {
++        crate::run_xml_test("flex", "flex_column_auto_height_from_basis_zero_auto_min__border_box_rtl");
++    }
++
++    #[test]
++    fn flex_column_auto_height_from_basis_zero_auto_min__content_box_rtl() {
++        crate::run_xml_test("flex", "flex_column_auto_height_from_basis_zero_auto_min__content_box_rtl");
++    }
++
++    #[test]
++    fn flex_column_auto_height_from_basis_zero_with_min__border_box_ltr() {
++        crate::run_xml_test("flex", "flex_column_auto_height_from_basis_zero_with_min__border_box_ltr");
++    }
++
++    #[test]
++    fn flex_column_auto_height_from_basis_zero_with_min__content_box_ltr() {
++        crate::run_xml_test("flex", "flex_column_auto_height_from_basis_zero_with_min__content_box_ltr");
++    }
++
++    #[test]
++    fn flex_column_auto_height_from_basis_zero_with_min__border_box_rtl() {
++        crate::run_xml_test("flex", "flex_column_auto_height_from_basis_zero_with_min__border_box_rtl");
++    }
++
++    #[test]
++    fn flex_column_auto_height_from_basis_zero_with_min__content_box_rtl() {
++        crate::run_xml_test("flex", "flex_column_auto_height_from_basis_zero_with_min__content_box_rtl");
++    }
++
+     #[test]
+     fn flex_column_intrinsic_height_measures_child_at_max_width__border_box_ltr() {
+         crate::run_xml_test("flex", "flex_column_intrinsic_height_measures_child_at_max_width__border_box_ltr");

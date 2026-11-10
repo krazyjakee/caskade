@@ -30,7 +30,7 @@ writing-mode = []
 bitflags = { version = "^2.8.0" }
 style = { package = "stylo", path = "../stylo", version = "^0.23.0" }
 style_atoms = { package = "stylo_atoms", path = "../stylo_atoms", version = "^0.23.0" }
-taffy = { git = "https://github.com/DioxusLabs/taffy", rev = "4aca4f4933aa9cb7a3266050c788aad4c90288d2", default-features = false, features = ["std", "flexbox", "flexbox_balance", "grid", "block_layout", "content_size", "calc", "detailed_layout_info"] }
+taffy = { path = "../taffy", version = "*", default-features = false, features = ["std", "flexbox", "flexbox_balance", "grid", "block_layout", "content_size", "calc", "detailed_layout_info"] }
 
 [lints.rust]
 unexpected_cfgs = "allow"

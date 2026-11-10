@@ -40,7 +40,7 @@ peniko = { version = "^0.6.0" }
 skrifa = { version = "^0.44", default-features = false, features = ["std"] }
 smallvec = { version = "^1" }
 style = { package = "stylo", path = "../stylo", version = "^0.23.0" }
-taffy = { git = "https://github.com/DioxusLabs/taffy", rev = "4aca4f4933aa9cb7a3266050c788aad4c90288d2", default-features = false, features = ["std", "flexbox", "flexbox_balance", "grid", "block_layout", "content_size", "calc", "detailed_layout_info"] }
+taffy = { path = "../taffy", version = "*", default-features = false, features = ["std", "flexbox", "flexbox_balance", "grid", "block_layout", "content_size", "calc", "detailed_layout_info"] }
 tracing = { version = "^0.1.40", optional = true }
 usvg = { version = "^0.48.1", optional = true }
 

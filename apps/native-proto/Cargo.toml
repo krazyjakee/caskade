@@ -56,7 +56,7 @@ sqlx-sqlite = { git = "https://github.com/launchbadge/sqlx", rev = "10462fa4414c
 inherits = "release"
 debug = "line-tables-only"
 
-# Blitz, anyrender and Stylo with Caskade's patches, as the root workspace
+# Blitz, anyrender, Stylo and Taffy with Caskade's patches, as the root workspace
 # builds them (vendor/blitz/README.md).
 [patch."https://github.com/DioxusLabs/blitz"]
 accesskit_xplat = { path = "../../vendor/blitz/crates/accesskit_xplat" }
@@ -94,3 +94,6 @@ stylo_static_prefs = { path = "../../vendor/blitz/crates/stylo_static_prefs" }
 stylo_traits = { path = "../../vendor/blitz/crates/stylo_traits" }
 to_shmem = { path = "../../vendor/blitz/crates/to_shmem" }
 to_shmem_derive = { path = "../../vendor/blitz/crates/to_shmem_derive" }
+
+[patch."https://github.com/DioxusLabs/taffy"]
+taffy = { path = "../../vendor/blitz/crates/taffy" }

@@ -74,7 +74,7 @@ sqlx-sqlite = { git = "https://github.com/launchbadge/sqlx", rev = "10462fa4414c
 hudsucker = { path = "vendor/hudsucker-0.25.0" }
 librqbit-sha1-wrapper = { path = "vendor/librqbit-sha1-wrapper-9.0.1" }
 
-# Blitz, anyrender and Stylo with Caskade's patches (vendor/blitz/README.md):
+# Blitz, anyrender, Stylo and Taffy with Caskade's patches (vendor/blitz/README.md):
 # caskade-native's git dependencies build the in-tree patched copies.
 [patch."https://github.com/DioxusLabs/blitz"]
 accesskit_xplat = { path = "vendor/blitz/crates/accesskit_xplat" }
@@ -110,3 +110,6 @@ stylo_static_prefs = { path = "vendor/blitz/crates/stylo_static_prefs" }
 stylo_traits = { path = "vendor/blitz/crates/stylo_traits" }
 to_shmem = { path = "vendor/blitz/crates/to_shmem" }
 to_shmem_derive = { path = "vendor/blitz/crates/to_shmem_derive" }
+
+[patch."https://github.com/DioxusLabs/taffy"]
+taffy = { path = "vendor/blitz/crates/taffy" }
