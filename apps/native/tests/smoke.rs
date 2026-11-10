@@ -172,6 +172,8 @@ fn starts_restores_its_window_plays_a_web_game_and_a_video_and_quits() {
         .env_clear()
         .env("PATH", std::env::var_os("PATH").unwrap_or_default())
         .env("DISPLAY", std::env::var_os("DISPLAY").unwrap())
+        // xvfb-run's display needs its cookie.
+        .envs(std::env::var_os("XAUTHORITY").map(|file| ("XAUTHORITY", file)))
         .env("HOME", &home)
         .env("XDG_DATA_HOME", home.join("data"))
         .env("XDG_CONFIG_HOME", home.join("config"))
@@ -192,9 +194,22 @@ fn starts_restores_its_window_plays_a_web_game_and_a_video_and_quits() {
         .expect("the native binary starts");
     let pid = app.id();
     let checks = std::panic::catch_unwind(|| {
-        let main = window("Caskade", Duration::from_secs(30)).expect("the main window opens");
+        // The game's window is titled "Caskade" too until its page loads:
+        // the main window is the one at the restored place and size.
         // Without a window manager the window goes exactly where it asks.
-        assert_eq!(main, "1100x700+40+30", "the restored place and size");
+        let restored = "1100x700+40+30";
+        let deadline = Instant::now() + Duration::from_secs(30);
+        while !windows()
+            .iter()
+            .any(|(title, geometry)| title == "Caskade" && geometry == restored)
+        {
+            assert!(
+                Instant::now() < deadline,
+                "no main window at {restored}: {:?}",
+                windows()
+            );
+            std::thread::sleep(Duration::from_millis(200));
+        }
         let game = window("Smoke Game", Duration::from_secs(30)).expect("the web game's window");
         let video = window("Smoke test", Duration::from_secs(30)).expect("the video window");
         (game, video)
@@ -239,6 +254,8 @@ fn a_panicking_window_restarts_within_the_budget_then_stops() {
         .env_clear()
         .env("PATH", std::env::var_os("PATH").unwrap_or_default())
         .env("DISPLAY", std::env::var_os("DISPLAY").unwrap())
+        // xvfb-run's display needs its cookie.
+        .envs(std::env::var_os("XAUTHORITY").map(|file| ("XAUTHORITY", file)))
         .env("HOME", &home)
         .env("XDG_DATA_HOME", home.join("data"))
         .env("XDG_CONFIG_HOME", home.join("config"))
@@ -263,6 +280,13 @@ fn a_panicking_window_restarts_within_the_budget_then_stops() {
         std::thread::sleep(Duration::from_millis(500));
     };
     assert!(output.contains("won't restart it again"), "{output}");
+    // Each start got as far as the window's UI and panicked there, on
+    // purpose: not a display it couldn't open.
+    assert_eq!(
+        output.matches("panic: smoke: a panic in the UI").count(),
+        caskade_player::recovery::RESTARTS + 1,
+        "{output}"
+    );
     assert_eq!(
         output.matches("restarting after the window failed").count(),
         caskade_player::recovery::RESTARTS,
