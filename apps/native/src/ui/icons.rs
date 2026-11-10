@@ -123,6 +123,13 @@ pub const BELL_DOT: Icon = Icon(&[
     "M18 2a3 3 0 1 0 0 6a3 3 0 1 0 0-6z",
 ]);
 
+/// lucide's `external-link`.
+pub const EXTERNAL_LINK: Icon = Icon(&[
+    "M15 3h6v6",
+    "M10 14 21 3",
+    "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6",
+]);
+
 /// Draws `icon` with `class`, `stroke_width` (lucide's default is 2) and
 /// `data-part` when given.
 #[component]

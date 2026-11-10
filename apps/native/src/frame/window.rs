@@ -24,12 +24,12 @@ const DRAG_THRESHOLD: f64 = 4.0;
 /// Two presses this close make a double click.
 const DOUBLE_CLICK: Duration = Duration::from_millis(500);
 
-fn window() -> Option<&'static std::sync::Arc<dyn Window>> {
+pub(super) fn window() -> Option<&'static std::sync::Arc<dyn Window>> {
     crate::shell::main_window()
 }
 
 /// Whether the window is maximized, kept up to date as it resizes.
-fn use_maximized() -> bool {
+pub(super) fn use_maximized() -> bool {
     let mut maximized = use_signal(|| window().is_some_and(|window| window.is_maximized()));
     // Without a window (headless tests) there are no window events; that
     // stays so for the document's life, so the hook is always or never
@@ -51,7 +51,7 @@ fn use_maximized() -> bool {
     maximized()
 }
 
-fn toggle_maximized() {
+pub(super) fn toggle_maximized() {
     if let Some(window) = window() {
         window.set_maximized(!window.is_maximized());
     }

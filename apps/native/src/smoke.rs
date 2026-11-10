@@ -11,10 +11,10 @@
 //! three seconds after the services start (a live change), and
 //! `CASKADE_NATIVE_SMOKE_QUIT=<seconds>` quits as closing the window does,
 //! and `CASKADE_NATIVE_SMOKE_PANIC=1` panics in the window's UI (crash
-//! recovery). `CASKADE_NATIVE_SMOKE_MOTION=spinner|ambient|both` shows the
-//! theme's backdrop and a status-bar spinner, until the shell's views have
-//! them (#96), to measure what animation costs (#121). Release builds ignore
-//! them unless built with the `smoke` feature.
+//! recovery). `CASKADE_NATIVE_SMOKE_MOTION=spinner|both` turns the status
+//! bar's spinner (#96), to measure what animation costs (#121); the theme's
+//! backdrop is the frame's own. Release builds ignore them unless built with
+//! the `smoke` feature.
 
 use std::sync::Arc;
 
@@ -147,33 +147,12 @@ pub fn window_ready(window: Arc<dyn Window>) {
     });
 }
 
-/// The theme's backdrop and a status-bar spinner (`animate-worker`, as the
-/// webview's status bar has it), as `CASKADE_NATIVE_SMOKE_MOTION` asks.
-pub fn motion() -> dioxus_native::prelude::Element {
-    use dioxus_native::prelude::*;
-    let what = var("CASKADE_NATIVE_SMOKE_MOTION").unwrap_or_default();
-    let ambient = matches!(what.as_str(), "ambient" | "both");
-    let spinner = matches!(what.as_str(), "spinner" | "both");
-    rsx! {
-        if ambient {
-            div { "data-cs": "backdrop", "aria-hidden": "true" }
-        }
-        if spinner {
-            footer {
-                "data-cs": "status-bar",
-                "aria-hidden": "true",
-                class: "fixed inset-x-0 bottom-0 flex min-h-9 items-center gap-2 border-t border-border bg-surface-raised px-4 py-2",
-                svg {
-                    "data-part": "spinner",
-                    class: "size-3.5 shrink-0 animate-worker text-accent-alt",
-                    view_box: "0 0 24 24",
-                    fill: "none",
-                    stroke: "currentColor",
-                    stroke_width: "2",
-                    stroke_linecap: "round",
-                    path { d: "M21 12a9 9 0 1 1-6.219-8.56" }
-                }
-            }
-        }
-    }
+/// Whether `CASKADE_NATIVE_SMOKE_MOTION` (`spinner` or `both`) asks the
+/// status bar's spinner to turn, as when something runs in the background:
+/// to measure what it costs (#96, #121).
+pub fn spinning() -> bool {
+    matches!(
+        var("CASKADE_NATIVE_SMOKE_MOTION").as_deref(),
+        Some("spinner" | "both")
+    )
 }

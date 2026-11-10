@@ -12,7 +12,7 @@ use crate::data::status::{
 };
 use crate::library::local_date_time;
 use crate::router::{ActivityTab, Route, RouteLink, href::Href, use_router};
-use crate::ui::{Button, ButtonVariant, Svg, icons};
+use crate::ui::{Anchor, Button, ButtonVariant, Menu, MenuEntry, MenuItem, Svg, icons};
 use caskade_achievements::notifications::{
     MemberKind, MemberState, Notification, NotificationCategory, NotificationMember,
     NotificationTarget, Severity,
@@ -21,6 +21,7 @@ use caskade_core::install::JobStatus;
 use caskade_ui_i18n::format;
 use caskade_ui_i18n::intl::Clock;
 use caskade_ui_i18n::{t, tn};
+use dioxus_native::NodeHandle;
 use dioxus_native::prelude::*;
 
 /// Where Back from a game opened here goes.
@@ -390,19 +391,19 @@ fn Item(
     let toggle_read = {
         let (id, unread) = (item.id.clone(), item.unread);
         let mark_read = mark_read.clone();
-        move || {
+        use_callback(move |()| {
             if unread {
                 mark_read();
             } else {
                 change(ReadChange::Unread { id: id.clone() });
             }
-        }
+        })
     };
     // Opening reads it: only the version shown, so later arrivals stay
     // unread.
     let open_item = {
         let item = item.clone();
-        move || {
+        use_callback(move |()| {
             if item.unread {
                 mark_read();
             }
@@ -412,8 +413,34 @@ fn Item(
             } else {
                 router.navigate(&href);
             }
-        }
+        })
     };
+    // A right click offers the same as its buttons (the webview's
+    // `ActionMenu`).
+    let mut menu = use_signal(|| None::<Anchor>);
+    let mut article = use_signal(|| None::<NodeHandle>);
+    let menu_items = vec![
+        MenuEntry::Item(MenuItem {
+            icon: Some(icons::EXTERNAL_LINK),
+            ..MenuItem::new("open", open_label(&item, open))
+        }),
+        MenuEntry::Item(MenuItem {
+            icon: Some(if item.unread {
+                icons::MAIL_OPEN
+            } else {
+                icons::MAIL
+            }),
+            disabled: pending,
+            ..MenuItem::new(
+                "read",
+                if item.unread {
+                    t!("Mark read")
+                } else {
+                    t!("Mark unread")
+                },
+            )
+        }),
+    ];
     let when = if item.category == NotificationCategory::GamesAdded {
         time_range(item.first_at_ms, item.last_at_ms)
     } else {
@@ -443,6 +470,26 @@ fn Item(
             "data-category": category_name(item.category),
             "data-resolved": item.resolved.then_some("true"),
             class: "rounded-panel border border-border bg-surface-raised p-4 data-[status=unread]:border-accent-alt/50",
+            onmounted: move |event: Event<MountedData>| article.set(event.data().downcast::<NodeHandle>().cloned()),
+            oncontextmenu: move |event: MouseEvent| {
+                menu.set(Some(super::pointer_anchor(article.peek().as_ref(), &event)));
+            },
+            if let Some(anchor) = menu() {
+                Menu {
+                    anchor,
+                    items: menu_items,
+                    label: item.title.clone(),
+                    on_close: move |_| menu.set(None),
+                    on_action: move |id: String| {
+                        menu.set(None);
+                        if id == "open" {
+                            open_item(());
+                        } else {
+                            toggle_read(());
+                        }
+                    },
+                }
+            }
             div { class: "flex flex-wrap items-start justify-between gap-3",
                 div { class: "flex min-w-0 gap-3",
                     span {
@@ -475,7 +522,7 @@ fn Item(
                         "data-spatial": "focusable",
                         variant: if item.unread { ButtonVariant::Primary } else { ButtonVariant::Secondary },
                         "aria-expanded": matches!(item.target, NotificationTarget::Members).then_some(if open { "true" } else { "false" }),
-                        on_press: move |_| open_item(),
+                        on_press: move |_| open_item(()),
                         {open_label(&item, open)}
                     }
                     Button {
@@ -483,7 +530,7 @@ fn Item(
                         variant: ButtonVariant::Ghost,
                         "aria-label": if item.unread { t!("Mark read: {title}", title = title) } else { t!("Mark unread: {title}", title = title) },
                         disabled: pending,
-                        on_press: move |_| toggle_read(),
+                        on_press: move |_| toggle_read(()),
                         Svg { icon: if item.unread { icons::MAIL_OPEN } else { icons::BELL_DOT }, class: "size-4" }
                         if item.unread { {t!("Mark read")} } else { {t!("Mark unread")} }
                     }

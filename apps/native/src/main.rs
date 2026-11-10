@@ -347,7 +347,6 @@ fn app() -> Element {
         // while the data below it starts.
         input::InputRoot {
             data::DataRoot {
-                {smoke::motion()}
                 // The library's scroll benchmark, when asked for (#94).
                 {library::bench::screen()}
                 frame::Frame {}

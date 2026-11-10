@@ -3533,6 +3533,7 @@ msgstr ""
 
 #: apps/desktop/src/shell/Topbar.tsx
 #: apps/desktop/src/shell/WindowControls.tsx
+#: apps/native/src/frame/topbar.rs
 #: apps/native/src/frame/window.rs
 msgctxt "window"
 msgid "Close"
@@ -7403,6 +7404,7 @@ msgstr ""
 
 #: apps/desktop/src/shell/Topbar.tsx
 #: apps/desktop/src/shell/WindowControls.tsx
+#: apps/native/src/frame/topbar.rs
 #: apps/native/src/frame/window.rs
 msgctxt "window"
 msgid "Maximize"
@@ -7455,6 +7457,7 @@ msgstr ""
 #: apps/desktop/src/shell/Topbar.tsx
 #: apps/desktop/src/shell/WindowControls.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/frame/topbar.rs
 #: apps/native/src/frame/window.rs
 msgctxt "window"
 msgid "Minimize"
@@ -10253,6 +10256,7 @@ msgstr ""
 
 #: apps/desktop/src/shell/Topbar.tsx
 #: apps/desktop/src/shell/WindowControls.tsx
+#: apps/native/src/frame/topbar.rs
 #: apps/native/src/frame/window.rs
 msgctxt "window"
 msgid "Restore"
@@ -13682,6 +13686,7 @@ msgstr ""
 
 #. The title bar's right-click menu
 #: apps/desktop/src/shell/Topbar.tsx
+#: apps/native/src/frame/topbar.rs
 msgid "Window"
 msgstr ""
 

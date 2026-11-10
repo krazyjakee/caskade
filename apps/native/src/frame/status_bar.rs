@@ -106,11 +106,13 @@ pub fn StatusBar() -> Element {
         .as_ref()
         .and_then(|jobs| jobs.as_ref().ok().cloned().flatten())
         .unwrap_or_default();
-    let busy = !unavailable
-        && (!tasks.is_empty()
-            || jobs
-                .iter()
-                .any(|job| is_running(job) || job.status == JobStatus::Queued));
+    // `CASKADE_NATIVE_SMOKE_MOTION=spinner` turns it to measure its cost.
+    let busy = crate::smoke::spinning()
+        || !unavailable
+            && (!tasks.is_empty()
+                || jobs
+                    .iter()
+                    .any(|job| is_running(job) || job.status == JobStatus::Queued));
     let label = activity_label(&tasks, &jobs, unavailable, checking);
     let details: Vec<String> = tasks
         .iter()
@@ -146,7 +148,8 @@ pub fn StatusBar() -> Element {
                     Svg {
                         icon: icons::LOADER_CIRCLE,
                         part: "spinner",
-                        class: "size-3.5 shrink-0 animate-worker text-accent-alt motion-reduce:animate-none",
+                        // Paused with ambient motion, as the webview's.
+                        class: "size-3.5 shrink-0 animate-worker text-accent-alt [animation-play-state:var(--cs-motion-ambient,running)] motion-reduce:animate-none",
                     }
                 }
                 span { "data-part": "activity", class: "truncate", "{label}" }
@@ -217,7 +220,7 @@ fn SyncStatus() -> Element {
             if syncing {
                 Svg {
                     icon: icons::LOADER_CIRCLE,
-                    class: "size-3.5 animate-worker text-accent-alt motion-reduce:animate-none",
+                    class: "size-3.5 animate-worker text-accent-alt [animation-play-state:var(--cs-motion-ambient,running)] motion-reduce:animate-none",
                 }
             }
             span {

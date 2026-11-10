@@ -94,6 +94,19 @@ wgpu on lavapipe), 30 s after a 20 s settle:
 | Ambient background, `BLITZ_DAMAGE=0` | 29.3% | 9.0 | 31 ms |
 | Both, GTK `gtk-enable-animations=0` (reduced motion) | 0.37% | 0 | — |
 
+The real status bar (#96, `CASKADE_NATIVE_SMOKE_MOTION=spinner` now turns
+its spinner), release build, private Xvfb at 1440×900 on lavapipe, Paper (a
+theme with no ambient animation), 30 s after a 20 s settle:
+
+| Running | CPU, % of one core | Frames/s | CPU per frame, without the present |
+| --- | ---: | ---: | ---: |
+| Nothing animating | 0.30% | 0 | — |
+| Status-bar spinner (`steps(8)`) | 25.6% | 7.9 | about 1.4 ms (encoding and render 0.81 ms median, 1.06 ms p95) |
+
+Lavapipe's present (31 ms a frame) is nearly all of it; without it the
+spinner costs about 1.1% of a core. The vsynced display's number, with a
+GPU's present, is a #120 check.
+
 The app draws only when a step lands, as the prototype does: idle and
 reduced motion draw nothing. Damage-limited frames are taken
 (`present(damage)` in the frame log), but on Xvfb a frame's cost is

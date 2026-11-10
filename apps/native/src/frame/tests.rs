@@ -33,6 +33,8 @@ use crate::input::tests::ONE_WINDOW as ONE;
 fn app() -> Element {
     use_data_source(|| SOURCE.get().expect("the fixture library").clone());
     rsx! {
+        // The app's stylesheet: the frame lays out as in the app.
+        style { {include_str!("../../assets/app.css")} }
         InputRoot {
             super::Frame { start: "/" }
         }
@@ -181,6 +183,29 @@ impl Window {
             UiEvent::PointerMove(pointer(x, y, false)),
             UiEvent::PointerDown(pointer(x, y, true)),
             UiEvent::PointerUp(pointer(x, y, false)),
+        ] {
+            blitz_dom::Document::handle_ui_event(&mut self.doc, event);
+            self.settle();
+        }
+    }
+
+    /// A right click at `node`'s middle.
+    fn right_click(&mut self, node: NodeId) {
+        let (x, y) = self.middle(node);
+        self.right_click_at(x, y);
+    }
+
+    fn right_click_at(&mut self, x: f32, y: f32) {
+        use blitz_traits::events::{MouseEventButton, MouseEventButtons};
+        let mut down = pointer(x, y, true);
+        down.button = MouseEventButton::Secondary;
+        down.buttons = MouseEventButtons::from(MouseEventButton::Secondary);
+        let mut up = pointer(x, y, false);
+        up.button = MouseEventButton::Secondary;
+        for event in [
+            UiEvent::PointerMove(pointer(x, y, false)),
+            UiEvent::PointerDown(down),
+            UiEvent::PointerUp(up),
         ] {
             blitz_dom::Document::handle_ui_event(&mut self.doc, event);
             self.settle();
@@ -614,4 +639,35 @@ fn search_matches_ignore_case_and_accents() {
     assert_eq!(find_folded("Super POKÉMON", "émon"), Some((9, 14)));
     assert_eq!(find_folded("Tidewater", "zelda"), None);
     assert_eq!(find_folded("Tidewater", "  "), None);
+}
+
+#[test]
+fn a_right_click_on_the_title_bar_offers_the_windows_menu() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    let mut window = Window::open();
+    // On a control, no: the bell keeps its click.
+    let bell = window.get("data-part", "activity");
+    window.right_click(bell);
+    assert!(window.find("role", "menu").is_none());
+    // On the bar's own surface: minimize, maximize and close, where Caskade
+    // draws the title bar.
+    let search = window
+        .doc
+        .inner
+        .borrow()
+        .get_client_bounding_rect(window.get("data-cs", "search"))
+        .unwrap();
+    let (_, y) = window.middle(window.get("data-cs", "topbar"));
+    window.right_click_at((search.x + search.width) as f32 + 40.0, y);
+    let menu = window.find("role", "menu");
+    if super::window::CUSTOM_FRAME {
+        let menu = menu.expect("the window's menu");
+        let text = window.text(menu);
+        for item in ["Minimize", "Maximize", "Close"] {
+            assert!(text.contains(item), "{text}");
+        }
+    } else {
+        assert!(menu.is_none());
+    }
 }

@@ -128,7 +128,11 @@ fn numbers_sizes_and_durations_follow_the_language() {
 }
 
 /// Literals the UI shows as they are in every language: the app's name.
-const NOT_TRANSLATED: &[(&str, &str)] = &[("apps/native/src/main.rs", "Caskade")];
+const NOT_TRANSLATED: &[(&str, &str)] = &[
+    ("apps/native/src/main.rs", "Caskade"),
+    // The sidebar's brand, as the webview's (`Sidebar.tsx`).
+    ("apps/native/src/frame/sidebar.rs", "CASKADE"),
+];
 
 /// Folders whose text no user sees: `shots/` holds #90's fixture screens
 /// for the screenshot comparison (the `shots` feature only), in fixed

@@ -1553,6 +1553,9 @@
   .\[--i\:5\] {
     --i: 5;
   }
+  .\[animation-play-state\:var\(--cs-motion-ambient\,running\)\] {
+    animation-play-state: var(--cs-motion-ambient,running);
+  }
   .chamfer {
     clip-path: polygon( var(--cs-chamfer) 0, 100% 0, 100% calc(100% - var(--cs-chamfer)), calc(100% - var(--cs-chamfer)) 100%, 0 100%, 0 var(--cs-chamfer) );
   }

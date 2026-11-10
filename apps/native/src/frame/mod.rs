@@ -100,3 +100,24 @@ fn Shell() -> Element {
         }
     }
 }
+
+/// A menu's anchor at the pointer, for a right click inside `within`'s
+/// document.
+pub(crate) fn pointer_anchor(
+    within: Option<&dioxus_native::NodeHandle>,
+    event: &MouseEvent,
+) -> crate::ui::Anchor {
+    let point = event.client_coordinates();
+    let viewport_height = within.map_or(0.0, |handle| {
+        let doc = handle.doc();
+        let viewport = doc.viewport();
+        f64::from(viewport.window_size.1) / viewport.scale_f64()
+    });
+    crate::ui::Anchor {
+        x: point.x,
+        y: point.y,
+        width: 0.0,
+        height: 0.0,
+        viewport_height,
+    }
+}

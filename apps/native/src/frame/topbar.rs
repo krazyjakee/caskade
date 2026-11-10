@@ -5,23 +5,87 @@
 
 use crate::data::status::{is_active, use_jobs, use_unread_notifications};
 use crate::router::RouteLink;
-use crate::ui::{Svg, icons};
+use crate::ui::{Anchor, Menu, MenuEntry, MenuItem, Svg, icons};
 use caskade_core::install::JobStatus;
-use caskade_ui_i18n::{tn, tp};
+use caskade_ui_i18n::{t, tn, tp};
+use dioxus_native::NodeHandle;
 use dioxus_native::prelude::*;
+
+/// A right click on the bar itself, not on a control, offers the window's
+/// own menu, as a native title bar does.
+fn window_menu(maximized: bool) -> Vec<MenuEntry> {
+    vec![
+        MenuEntry::Item(MenuItem {
+            icon: Some(icons::MINUS),
+            ..MenuItem::new("minimize", tp!("window", "Minimize"))
+        }),
+        MenuEntry::Item(if maximized {
+            MenuItem {
+                icon: Some(icons::COPY),
+                ..MenuItem::new("maximize", tp!("window", "Restore"))
+            }
+        } else {
+            MenuItem {
+                icon: Some(icons::SQUARE),
+                ..MenuItem::new("maximize", tp!("window", "Maximize"))
+            }
+        }),
+        MenuEntry::Item(MenuItem {
+            icon: Some(icons::X),
+            ..MenuItem::new("close", tp!("window", "Close"))
+        }),
+    ]
+}
 
 #[component]
 pub fn Topbar() -> Element {
+    let maximized = super::window::use_maximized();
+    let mut bar = use_signal(|| None::<NodeHandle>);
+    let mut menu = use_signal(|| None::<Anchor>);
     rsx! {
         header {
             "data-cs": "topbar",
             "data-window-drag": "true",
             class: "relative z-10 flex h-topbar shrink-0 items-center gap-4 pr-4 pl-6",
+            onmounted: move |event: Event<MountedData>| bar.set(event.data().downcast::<NodeHandle>().cloned()),
+            oncontextmenu: move |event: MouseEvent| {
+                if !super::window::CUSTOM_FRAME {
+                    return;
+                }
+                let on_bar = bar.peek().as_ref().is_some_and(|bar| {
+                    let doc = bar.doc();
+                    doc.get_hover_node_id()
+                        .is_some_and(|hovered| super::window::in_drag_region(&doc, hovered))
+                });
+                if on_bar {
+                    menu.set(Some(super::pointer_anchor(bar.peek().as_ref(), &event)));
+                }
+            },
             super::search::SearchBox {}
             div { "data-part": "actions", class: "ml-auto flex items-center gap-4",
                 ActivityLink {}
             }
             super::window::WindowControls {}
+            if let Some(anchor) = menu() {
+                Menu {
+                    anchor,
+                    items: window_menu(maximized),
+                    label: t!(note = "The title bar's right-click menu", "Window"),
+                    on_close: move |_| menu.set(None),
+                    on_action: move |id: String| {
+                        menu.set(None);
+                        match id.as_str() {
+                            "minimize" => {
+                                if let Some(window) = super::window::window() {
+                                    window.set_minimized(true);
+                                }
+                            }
+                            "maximize" => super::window::toggle_maximized(),
+                            _ => crate::launch::ask(crate::launch::Request::Close),
+                        }
+                    },
+                }
+            }
         }
     }
 }
