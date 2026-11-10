@@ -120,5 +120,9 @@ pub fn starts_typing<T: FocusTree + ?Sized>(
             return None;
         }
     }
-    Some(if key == "/" { String::new() } else { key.to_owned() })
+    Some(if key == "/" {
+        String::new()
+    } else {
+        key.to_owned()
+    })
 }

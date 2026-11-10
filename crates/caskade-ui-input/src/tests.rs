@@ -1149,11 +1149,23 @@ fn typing_outside_a_field_a_menu_or_a_dialog_starts_a_search() {
     let mut app = App::new(layout(), false);
     let none = Modifiers::default();
     let card = app.by_text("Card 0");
-    let field = app.ui.tree.elements.iter().position(|e| e.tag == "input").unwrap();
-    assert_eq!(starts_typing(&app.ui, Some(card), "F", none), Some("F".into()));
+    let field = app
+        .ui
+        .tree
+        .elements
+        .iter()
+        .position(|e| e.tag == "input")
+        .unwrap();
+    assert_eq!(
+        starts_typing(&app.ui, Some(card), "F", none),
+        Some("F".into())
+    );
     assert_eq!(starts_typing(&app.ui, None, "8", none), Some("8".into()));
     // `/` opens it empty.
-    assert_eq!(starts_typing(&app.ui, Some(card), "/", none), Some(String::new()));
+    assert_eq!(
+        starts_typing(&app.ui, Some(card), "/", none),
+        Some(String::new())
+    );
     for key in [" ", "ArrowUp", "Enter", "F3"] {
         assert_eq!(starts_typing(&app.ui, Some(card), key, none), None, "{key}");
     }
@@ -1162,7 +1174,11 @@ fn typing_outside_a_field_a_menu_or_a_dialog_starts_a_search() {
         ..Modifiers::default()
     };
     assert_eq!(starts_typing(&app.ui, Some(card), "f", ctrl), None);
-    assert_eq!(starts_typing(&app.ui, Some(field), "f", none), None, "a field types");
+    assert_eq!(
+        starts_typing(&app.ui, Some(field), "f", none),
+        None,
+        "a field types"
+    );
     // Not over a dialog or a popover.
     let open = app.by_text("Open dialog");
     app.focus(open);
