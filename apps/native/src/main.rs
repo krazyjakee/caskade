@@ -7,6 +7,9 @@
 //! executable started again with `--web-game` or `--video`
 //! (`caskade-player`), so no webview shares the loop.
 
+// The data hooks (#89); the views (#96 onwards) use them.
+#[allow(dead_code)]
+mod data;
 mod shell;
 mod smoke;
 mod window_state;

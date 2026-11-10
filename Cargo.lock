@@ -1980,6 +1980,7 @@ dependencies = [
  "caskade-app",
  "caskade-core",
  "caskade-player",
+ "caskade-ui-data",
  "dioxus-native",
  "serde",
  "serde_json",
@@ -2181,6 +2182,16 @@ dependencies = [
  "cssparser 0.38.0",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "caskade-ui-data"
+version = "0.1.0"
+dependencies = [
+ "caskade-app",
+ "caskade-core",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]

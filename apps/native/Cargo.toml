@@ -32,6 +32,8 @@ path = "src/main.rs"
 dioxus-native = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735890754b4a9970cb07765b8bf3c0c", default-features = false, features = ["prelude", "accessibility", "svg", "system-fonts", "woff"] }
 caskade-app = { path = "../../crates/caskade-app" }
 caskade-core = { path = "../../crates/caskade-core" }
+# What views read and change, and fixtures mode (#89, `src/data`).
+caskade-ui-data = { path = "../../crates/caskade-ui-data" }
 # The game and video windows (`--web-game`, `--video`), shared with the
 # Tauri app.
 caskade-player = { path = "../../crates/caskade-player" }

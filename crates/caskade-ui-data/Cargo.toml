@@ -1,0 +1,19 @@
+[package]
+name = "caskade-ui-data"
+version = "0.1.0"
+description = "The native UI's data layer: what views read and change over caskade-app, what each app event makes stale, and an in-memory library for development and tests; free of any UI toolkit"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+caskade-app = { path = "../caskade-app" }
+caskade-core = { path = "../caskade-core" }
+tokio = { version = "1", features = ["sync", "rt", "macros", "time"] }
+tracing = "0.1"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["sync", "rt", "rt-multi-thread", "macros", "time"] }
+
+[lints]
+workspace = true

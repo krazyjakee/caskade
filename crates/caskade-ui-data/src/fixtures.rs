@@ -1,0 +1,216 @@
+//! Fixtures mode (#89): the real core and app layer over an in-memory
+//! library of synthetic games, for UI development and tests. It replaces
+//! the webview's `VITE_CASKADE_FIXTURES`; the games are the ones its
+//! `apps/desktop/src/api/fixtures.ts` shows (`createFixtureGames` and
+//! `createEmulatedFixtureGames`), so both UIs can be compared on the same
+//! library. No contributor's library is copied.
+//!
+//! Filters, sorts and search are the core's own here, not a re-implementation:
+//! where `fixtures.ts` approximates the core (its Installed filter leaves
+//! emulated games out; the core counts their installed releases), fixtures
+//! mode answers as the app does.
+
+use caskade_app::events::{Emit, Event, Events};
+use caskade_core::{
+    accounts::AccountService,
+    bus::Bus,
+    db::{LibraryStore, PlaytimeImport, RemoteTotal},
+    emulation::{ArgsOverride, EmulatorTarget},
+    launch::LaunchService,
+    model::{Game, GameEntry, InstallState, LaunchSpec, SourceId},
+};
+use tokio::sync::broadcast;
+
+use crate::Library;
+
+/// How many plain games fixtures mode makes unless asked for another number
+/// (`createFixtureGames`'s default).
+pub const DEFAULT_COUNT: usize = 24;
+
+/// The emulated games' platforms, how many games each has, and how many days
+/// ago its first game was played (`None`: never), as `fixtures.ts` has them.
+pub const EMULATED: [(&str, usize, Option<u32>); 8] = [
+    ("Super Nintendo Entertainment System", 6, Some(2)),
+    ("Nintendo 64", 4, Some(9)),
+    ("Sony PlayStation", 5, Some(30)),
+    ("Sega Genesis", 3, None),
+    ("Nintendo Game Boy Advance", 4, Some(1)),
+    ("Sega Dreamcast", 2, None),
+    ("Nintendo GameCube", 3, Some(60)),
+    ("Arcade", 2, None),
+];
+
+const DAY_MS: i64 = 86_400_000;
+
+/// One synthetic game, as `fixtures.ts` describes it.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FixtureGame {
+    pub id: String,
+    pub entry_id: String,
+    pub title: String,
+    pub genre: &'static str,
+    pub platform: String,
+    pub installed: bool,
+    pub emulated: bool,
+    pub favorite: bool,
+    pub playtime_ms: u64,
+    /// When it was last played, in days before the library was made.
+    pub last_played_days_ago: Option<u32>,
+    pub release_date: Option<&'static str>,
+}
+
+/// `count` plain PC games (`createFixtureGames(count)`).
+pub fn games(count: usize) -> Vec<FixtureGame> {
+    (0..count)
+        .map(|index| FixtureGame {
+            id: format!("fixture-{index}"),
+            entry_id: format!("entry-{index}"),
+            title: format!("Fixture Game {:04}", index + 1),
+            genre: if index % 2 == 1 {
+                "Adventure"
+            } else {
+                "Strategy"
+            },
+            platform: "PC".into(),
+            installed: index % 5 != 0,
+            emulated: false,
+            favorite: index % 3 == 0,
+            playtime_ms: index as u64 * 1_200_000,
+            last_played_days_ago: None,
+            release_date: (index % 4 != 0).then_some("2024-02-29"),
+        })
+        .collect()
+}
+
+/// The emulated games on several consoles (`createEmulatedFixtureGames`).
+pub fn emulated_games() -> Vec<FixtureGame> {
+    EMULATED
+        .iter()
+        .enumerate()
+        .flat_map(|(p, &(platform, count, days_ago))| {
+            let short = platform.rsplit(' ').next().unwrap_or(platform);
+            (0..count).map(move |index| FixtureGame {
+                id: format!("fixture-emulated-{p}-{index}"),
+                entry_id: format!("fixture-emulated-entry-{p}-{index}"),
+                title: format!("{short} Fixture {}", index + 1),
+                // The template's: the first plain game's.
+                genre: "Strategy",
+                platform: platform.into(),
+                installed: true,
+                emulated: true,
+                favorite: false,
+                playtime_ms: if days_ago.is_some() {
+                    (index as u64 + 1) * 2_700_000
+                } else {
+                    0
+                },
+                last_played_days_ago: days_ago.filter(|_| index == 0),
+                release_date: None,
+            })
+        })
+        .collect()
+}
+
+/// What fixtures mode shows: `count` plain games and the emulated ones, as
+/// the webview's fixtures mode does.
+pub fn library_games(count: usize) -> Vec<FixtureGame> {
+    let mut games = games(count);
+    games.extend(emulated_games());
+    games
+}
+
+/// Writes `games` into `store`, played as of `now_ms`. Play time is a total
+/// the "fixture" launcher reported, so a game can have play time without a
+/// last play, as `fixtures.ts`'s can.
+pub async fn seed(
+    store: &LibraryStore,
+    games: &[FixtureGame],
+    now_ms: i64,
+) -> caskade_core::Result<()> {
+    let mut totals = Vec::new();
+    for fixture in games {
+        let mut game = Game::new(&fixture.title);
+        game.id = fixture.id.clone();
+        game.description = "Original development fixture. No personal library data.".into();
+        game.genres = vec![fixture.genre.into()];
+        game.tags = vec!["Fixture".into()];
+        game.platforms = vec![fixture.platform.clone()];
+        game.favorite = fixture.favorite;
+        game.release_date = fixture.release_date.map(str::to_owned);
+        store.upsert_game(&game).await?;
+        let mut entry = GameEntry::new(&fixture.id, SourceId::new("fixture"), &fixture.id);
+        entry.id = fixture.entry_id.clone();
+        entry.state = if fixture.installed {
+            InstallState::Installed
+        } else {
+            // Not installed: the core has no other state for a release
+            // that isn't here.
+            InstallState::Partial
+        };
+        entry.size = Some(1024 * 1024 * 1024);
+        entry.launch = fixture.emulated.then(|| LaunchSpec::Emulator {
+            platform_id: fixture.platform.clone(),
+            target: EmulatorTarget::default(),
+            roms: Vec::new(),
+            args: ArgsOverride::default(),
+        });
+        store.upsert_entry(&entry).await?;
+        if fixture.playtime_ms > 0 || fixture.last_played_days_ago.is_some() {
+            totals.push(RemoteTotal {
+                entry_id: fixture.entry_id.clone(),
+                total_ms: Some(fixture.playtime_ms),
+                last_played_ms: fixture
+                    .last_played_days_ago
+                    .map(|days| now_ms - i64::from(days) * DAY_MS),
+            });
+        }
+    }
+    store
+        .record_remote_playtime("fixture", "", &totals, now_ms, PlaytimeImport::Always)
+        .await?;
+    Ok(())
+}
+
+/// The app layer's events in fixtures mode, as the native shell has them.
+struct Broadcast(broadcast::Sender<Event>);
+
+impl Emit for Broadcast {
+    fn emit(&self, event: Event) -> Result<(), String> {
+        // Nobody listening isn't a failure: views read state when they start.
+        let _ = self.0.send(event);
+        Ok(())
+    }
+}
+
+/// An in-memory app with the fixture library.
+pub struct Fixtures {
+    pub library: Library,
+    pub store: LibraryStore,
+    pub bus: Bus,
+    pub accounts: AccountService,
+    /// Every app event, as the native shell's `shell::events()`.
+    pub events: broadcast::Sender<Event>,
+}
+
+/// Opens the fixture library with `count` plain games (`DEFAULT_COUNT` is
+/// what the webview shows) and the emulated ones, its bus bridged to
+/// [`Fixtures::events`] as the app's is.
+pub async fn open(count: usize) -> caskade_core::Result<Fixtures> {
+    let store = LibraryStore::in_memory().await?;
+    let bus = Bus::default();
+    let accounts = AccountService::open(store.clone(), bus.clone()).await?;
+    seed(&store, &library_games(count), caskade_core::now_ms()).await?;
+    let launch = LaunchService::new(store.clone()).with_bus(bus.clone());
+    let (events, _) = broadcast::channel(1024);
+    caskade_app::events::bridge(Events::new(Broadcast(events.clone())), &bus);
+    Ok(Fixtures {
+        library: Library::new(store.clone(), accounts.clone(), launch, bus.clone()),
+        store,
+        bus,
+        accounts,
+        events,
+    })
+}
+
+#[cfg(test)]
+mod tests;
