@@ -7,7 +7,8 @@ mod account_libraries;
 mod backup_roundtrip;
 mod bridge;
 // Needs X and the built frontend: `--features e2e`, then `-- --ignored`.
-#[cfg(feature = "e2e")]
+// Unix only: it starts the app on an Xvfb display (caskade-test-desktop).
+#[cfg(all(feature = "e2e", unix))]
 mod console_e2e;
 mod discovery_controller;
 mod hello;

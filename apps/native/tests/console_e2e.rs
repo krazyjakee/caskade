@@ -13,6 +13,9 @@
 //! (`caskade-test-desktop`), never the developer's (#122):
 //! `cargo test -p caskade-native --test console_e2e -- --ignored`
 
+// Unix only: Xvfb and dbus-daemon (caskade-test-desktop).
+#![cfg(unix)]
+
 use std::path::PathBuf;
 use std::process::Stdio;
 

@@ -16,6 +16,10 @@
 //! The bus has no service folders: nothing starts on it by activation (a
 //! notification daemon, a keyring), so an app that asks for one gets an
 //! error, as on a headless machine.
+//!
+//! Unix only (Xvfb and dbus-daemon): elsewhere the crate is empty, and the
+//! tests that use it are Unix only too.
+#![cfg(unix)]
 
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};

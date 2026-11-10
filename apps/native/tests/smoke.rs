@@ -9,6 +9,9 @@
 //!
 //! `cargo test -p caskade-native --test smoke -- --ignored`
 
+// Unix only: Xvfb and dbus-daemon (caskade-test-desktop).
+#![cfg(unix)]
+
 use std::io::{BufRead, BufReader, Write};
 use std::net::TcpListener;
 use std::path::{Path, PathBuf};
