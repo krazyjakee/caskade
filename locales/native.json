@@ -275,7 +275,7 @@
     {"id": "Title", "references": ["apps/native/src/flows/manual_game.rs"]},
     {"id": "Title", "context": "library column", "references": ["apps/native/src/library/grid.rs"]},
     {"id": "Title", "context": "library sort", "references": ["apps/native/src/library/view.rs"]},
-    {"id": "Try again", "references": ["apps/native/src/flows/storage.rs", "apps/native/src/frame/error.rs", "apps/native/src/frame/notifications.rs", "apps/native/src/library/view.rs"]},
+    {"id": "Try again", "references": ["apps/native/src/flows/storage.rs", "apps/native/src/frame/error.rs", "apps/native/src/frame/notifications.rs", "apps/native/src/library/view.rs", "apps/native/src/ui/failure.rs"]},
     {"id": "Type", "context": "on-screen keyboard", "references": ["apps/native/src/input/keyboard.rs"]},
     {"id": "Unknown", "context": "size", "references": ["crates/caskade-ui-i18n/src/format.rs"]},
     {"id": "Unknown error", "references": ["apps/native/src/frame/error.rs"]},

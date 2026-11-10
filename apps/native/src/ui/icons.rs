@@ -162,6 +162,12 @@ pub const SEARCH_X: Icon = Icon(&[
 pub const LIST_PLUS: Icon = Icon(&["M16 5H3", "M11 12H3", "M16 19H3", "M18 9v6", "M21 12h-6"]);
 /// lucide's `arrow-left`.
 pub const ARROW_LEFT: Icon = Icon(&["m12 19-7-7 7-7", "M19 12H5"]);
+/// lucide's `rotate-ccw`.
+pub const ROTATE_CCW: Icon = Icon(&[
+    "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8",
+    "M3 3v5h5",
+]);
+
 /// Draws `icon` with `class`, `stroke_width` (lucide's default is 2) and
 /// `data-part` when given.
 /// lucide's `plus`.

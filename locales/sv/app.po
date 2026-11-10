@@ -12829,7 +12829,7 @@ msgstr "systemfält, avsluta, stäng till systemfältet"
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/desktop/src/views/StoreView.tsx apps/native/src/flows/storage.rs
 #: apps/native/src/frame/error.rs apps/native/src/frame/notifications.rs
-#: apps/native/src/library/view.rs
+#: apps/native/src/library/view.rs apps/native/src/ui/failure.rs
 msgid "Try again"
 msgstr "Försök igen"
 

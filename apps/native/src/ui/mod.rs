@@ -17,6 +17,7 @@ mod checkbox;
 mod combobox;
 mod dialog;
 mod error_notice;
+mod failure;
 mod game_art;
 mod game_card;
 mod game_row;
@@ -57,6 +58,8 @@ pub use combobox::{ActiveOption, Combobox, use_active_option};
 pub use dialog::{ConfirmDialog, Dialog};
 #[allow(unused_imports)]
 pub use error_notice::{ErrorNotice, NoticeVariant};
+#[allow(unused_imports)]
+pub use failure::FailureNotice;
 #[allow(unused_imports)]
 pub use game_art::{GameArt, art_background};
 #[allow(unused_imports)]
