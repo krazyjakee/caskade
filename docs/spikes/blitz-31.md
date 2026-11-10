@@ -85,7 +85,12 @@ under Xvfb too) keeps vello_hybrid.
 
 On the Ubuntu 24.04 VM (no GPU, plain VGA), the deb's
 `/usr/bin/caskade --native` opened its window on the CPU path (the log
-gives the reason: no adapter) and idled at 0.3% of a core.
+gives the reason: no adapter) and idled at 0.3% of a core. On the
+Windows 10 VM (virtio-gpu, no Direct3D driver), the NSIS install's
+`Caskade.exe --native` found only WARP ("Microsoft Basic Render Driver",
+DX12), refused it as a software adapter and drew on the CPU, at 89 MB.
+Its first start raises Windows Firewall's prompt for `caskade-native`
+(publisher unknown: it isn't code-signed).
 
 ## Size and startup against the Tauri app
 
