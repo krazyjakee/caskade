@@ -839,7 +839,8 @@ impl InstallService {
             .map(|job| shown(job.snapshot.clone()))
     }
 
-    /// Applies `change`, bumps the revision and publishes the snapshot.
+    /// Applies `change`, bumps the revision and publishes the snapshot, when
+    /// it changed anything.
     fn update(&self, id: &str, change: impl FnOnce(&mut JobSnapshot)) -> Option<JobSnapshot> {
         let (snapshot, previous) = {
             let mut jobs = lock(&self.inner.jobs);
@@ -850,6 +851,11 @@ impl InstallService {
             change(&mut job.snapshot);
             if finished && job.snapshot.status != before.status {
                 job.snapshot = before;
+                return Some(job.snapshot.clone());
+            }
+            // Nothing changed (a task ending on its question): no new
+            // revision, so an answer to the snapshot shown still holds (#117).
+            if job.snapshot == before {
                 return Some(job.snapshot.clone());
             }
             job.snapshot.revision += 1;

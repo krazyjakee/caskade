@@ -196,3 +196,44 @@ async fn a_failed_install_retries_as_it_ran() {
     assert!(done.game_id.is_some());
     assert!(service.retry(&job.id, None).await.is_err());
 }
+
+/// A job shows its question just before its task ends (#117): an answer to
+/// the question as shown, sent while the task is still ending, is taken.
+/// The ending used to bump the revision without changing anything, so the
+/// answer was refused as stale.
+#[tokio::test(flavor = "multi_thread")]
+async fn an_answer_sent_while_the_task_is_ending_is_taken() {
+    let t = tempfile::tempdir().unwrap();
+    let root = t.path().join("Games");
+    let (_store, service, _launch) = setup(&root).await;
+    let source = t.path().join("Choice Game");
+    std::fs::create_dir(&source).unwrap();
+    executable(&source.join("alpha.x86_64"));
+    executable(&source.join("bravo.x86_64"));
+    let job = service
+        .install(source.to_string_lossy().into_owned(), None)
+        .await
+        .unwrap();
+    let question = stopped(&service, &job.id).await;
+    assert_eq!(question.status, JobStatus::NeedsUser, "{question:?}");
+    // As if the task had posted its question and not ended yet.
+    lock(&service.inner.jobs).get_mut(&job.id).unwrap().active = true;
+    let answering = tokio::spawn({
+        let service = service.clone();
+        let (id, revision) = (job.id.clone(), question.revision);
+        async move {
+            service
+                .answer(&id, revision, JobAnswer::Select { index: 0 })
+                .await
+        }
+    });
+    tokio::time::sleep(Duration::from_millis(50)).await;
+    // The task ends: nothing about the job changes.
+    service.end_operation(&job.id, Ok(()), false);
+    assert_eq!(service.job(&job.id).unwrap().revision, question.revision);
+    answering.await.unwrap().unwrap();
+    assert_eq!(
+        stopped(&service, &job.id).await.status,
+        JobStatus::Completed
+    );
+}
