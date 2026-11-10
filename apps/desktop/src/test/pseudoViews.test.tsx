@@ -2042,7 +2042,7 @@ it.each(modes)("shows an add-on's details in the pseudo-locale (%s)", async (mod
     ),
     /\d+\.\d+\.\d+/g,
     /https?:\/\/\S+/g,
-    /\bcaskade\.\w+/g,
+    /\b(?:\w+\.)*caskade\.\w+/g,
   ];
   await open("/settings?tab=plugins", { mode });
   fireEvent.click(await screen.findByRole("button", { name: /Paper/ }));

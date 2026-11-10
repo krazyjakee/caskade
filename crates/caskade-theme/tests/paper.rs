@@ -25,7 +25,10 @@ fn paper_passes_the_lint_as_a_light_theme_that_extends_nothing() {
 #[test]
 fn paper_compiles_into_the_theme_layer_with_its_tokens_and_assets() {
     let theme = paper();
-    let chain = chain("dev.caskade.paper", |id| (id == theme.id()).then_some(&theme)).unwrap();
+    let chain = chain("dev.caskade.paper", |id| {
+        (id == theme.id()).then_some(&theme)
+    })
+    .unwrap();
     assert_eq!(chain.len(), 1, "Paper stands alone");
     let css = compile(&chain);
     assert!(css.starts_with(
