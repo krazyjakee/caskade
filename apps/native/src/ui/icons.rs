@@ -9,6 +9,8 @@ pub struct Icon(pub &'static [&'static str]);
 
 pub const CHECK: Icon = Icon(&["M20 6 9 17l-5-5"]);
 pub const MINUS: Icon = Icon(&["M5 12h14"]);
+pub const CHEVRON_DOWN: Icon = Icon(&["m6 9 6 6 6-6"]);
+pub const X: Icon = Icon(&["M18 6 6 18", "m6 6 12 12"]);
 
 /// Draws `icon` with `class`, `stroke_width` (lucide's default is 2) and
 /// `data-part` when given.

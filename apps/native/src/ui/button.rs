@@ -94,6 +94,13 @@ pub fn Button(
     /// Pressed: a click, Enter, Space or a pad's A.
     #[props(default)]
     on_press: Option<EventHandler<()>>,
+    /// The element, once mounted (a popup's trigger keeps it).
+    #[props(default)]
+    on_mounted: Option<EventHandler<Event<MountedData>>>,
+    /// Keys, before the button's own (a menu button opens on ArrowDown);
+    /// stopping the event keeps them from the button.
+    #[props(default)]
+    on_key_down: Option<EventHandler<KeyboardEvent>>,
     #[props(default)] class: String,
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
     children: Element,
@@ -135,8 +142,20 @@ pub fn Button(
             onmousedown: move |_| interaction.down(),
             onmouseup: move |_| interaction.up(),
             onclick: move |_| press(),
-            onkeydown: move |event| {
-                interaction.key_down(&event, Keys::EnterAndSpace, press);
+            onmounted: move |event| {
+                if let Some(on_mounted) = on_mounted {
+                    on_mounted.call(event);
+                }
+            },
+            onkeydown: move |event: KeyboardEvent| {
+                if let Some(on_key_down) = on_key_down {
+                    on_key_down.call(event.clone());
+                    if event.propagates() {
+                        interaction.key_down(&event, Keys::EnterAndSpace, press);
+                    }
+                } else {
+                    interaction.key_down(&event, Keys::EnterAndSpace, press);
+                }
             },
             onkeyup: move |event| interaction.key_up(&event, press),
             ..attributes,

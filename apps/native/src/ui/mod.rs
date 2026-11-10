@@ -13,26 +13,48 @@
 
 mod button;
 mod checkbox;
+mod dialog;
 mod icons;
 mod ids;
 mod interact;
 mod link;
+mod menu;
+mod popover;
+mod select;
 mod switch;
 #[cfg(test)]
 mod tests;
+mod tooltip;
 
 #[allow(unused_imports)]
 pub use button::{Button, ButtonSize, ButtonVariant};
 #[allow(unused_imports)]
 pub use checkbox::Checkbox;
 #[allow(unused_imports)]
+pub use dialog::{ConfirmDialog, Dialog};
+#[allow(unused_imports)]
 pub use icons::{Icon, Svg};
 #[allow(unused_imports)]
 pub use link::Link;
 #[allow(unused_imports)]
+pub use menu::{Menu, MenuButton, MenuEntry, MenuItem};
+#[allow(unused_imports)]
+pub use popover::{Anchor, Popover};
+#[allow(unused_imports)]
+pub use select::{Select, SelectOption};
+#[allow(unused_imports)]
 pub use switch::{Switch, SwitchSize};
+#[allow(unused_imports)]
+pub use tooltip::Tooltip;
 
 use caskade_ui_theme::anatomy::Entry;
 
 /// The components' anatomy entries.
-pub const ANATOMY: &[Entry] = &[button::ANATOMY, checkbox::ANATOMY, switch::ANATOMY];
+pub const ANATOMY: &[Entry] = &[
+    button::ANATOMY,
+    checkbox::ANATOMY,
+    menu::ANATOMY,
+    select::ANATOMY,
+    select::POPOVER_ANATOMY,
+    switch::ANATOMY,
+];
