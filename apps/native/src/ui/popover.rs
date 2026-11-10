@@ -217,6 +217,9 @@ pub fn Popover(
     /// What gets focus back when it closes: its trigger.
     #[props(default)]
     return_to: Option<NodeId>,
+    /// Focus stays where it is (a combobox's input) instead of going in.
+    #[props(default)]
+    keep_focus: bool,
     #[props(default)] class: String,
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
     children: Element,
@@ -254,7 +257,9 @@ pub fn Popover(
                 if let Some(handle) = event.data().downcast::<NodeHandle>() {
                     me.set(Some(handle.node_id()));
                     // Focus goes in at once, whatever opened it.
-                    let start = start_in(&handle.doc(), handle.node_id());
+                    let start = (!keep_focus)
+                        .then(|| start_in(&handle.doc(), handle.node_id()))
+                        .flatten();
                     if let Some(start) = start {
                         input.focus(start);
                     }

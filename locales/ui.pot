@@ -15,6 +15,7 @@ msgstr ""
 
 #. Hours played, abbreviated
 #: packages/ui/src/GameCard.tsx
+#: apps/native/src/ui/game_card.rs
 msgid "{playtimeHours}h"
 msgstr ""
 
@@ -27,12 +28,14 @@ msgstr ""
 #. A game's size on disk, in gigabytes
 #: packages/ui/src/GameCard.tsx
 #: packages/ui/src/Hero.tsx
+#: apps/native/src/ui/game_card.rs
 msgid "{sizeGb} GB"
 msgstr ""
 
 #. How many stores sell a game
 #. js-lingui:icu=%7Bstores%2C+plural%2C+one+%7B%23+store%7D+other+%7B%23+stores%7D%7D&pluralize_on=stores
 #: packages/ui/src/GameCard.tsx
+#: apps/native/src/ui/game_card.rs
 msgid "# store"
 msgid_plural "# stores"
 msgstr[0] ""
@@ -52,6 +55,7 @@ msgstr ""
 
 #. A game that can be bought in a store
 #: packages/ui/src/StatusBadge.tsx
+#: apps/native/src/ui/status_badge.rs
 msgid "Available to Buy"
 msgstr ""
 
@@ -88,6 +92,7 @@ msgstr ""
 
 #. A game played through an emulator
 #: packages/ui/src/StatusBadge.tsx
+#: apps/native/src/ui/status_badge.rs
 msgid "Emulator"
 msgstr ""
 
@@ -109,10 +114,12 @@ msgstr ""
 
 #. Hides an error's technical details
 #: packages/ui/src/ErrorNotice.tsx
+#: apps/native/src/ui/error_notice.rs
 msgid "Hide details"
 msgstr ""
 
 #: packages/ui/src/StatusBadge.tsx
+#: apps/native/src/ui/status_badge.rs
 msgid "Installed"
 msgstr ""
 
@@ -138,11 +145,13 @@ msgid "More launch options"
 msgstr ""
 
 #: packages/ui/src/StatusBadge.tsx
+#: apps/native/src/ui/status_badge.rs
 msgid "Not Installed"
 msgstr ""
 
 #. A store game the user already owns
 #: packages/ui/src/GameCard.tsx
+#: apps/native/src/ui/game_card.rs
 msgid "Owned"
 msgstr ""
 
@@ -160,6 +169,7 @@ msgstr ""
 
 #. The id an error's details are logged under
 #: packages/ui/src/ErrorNotice.tsx
+#: apps/native/src/ui/error_notice.rs
 msgid "Reference: {reference}"
 msgstr ""
 
@@ -181,6 +191,7 @@ msgstr ""
 
 #. Shows an error's technical details
 #: packages/ui/src/ErrorNotice.tsx
+#: apps/native/src/ui/error_notice.rs
 msgid "Show details"
 msgstr ""
 

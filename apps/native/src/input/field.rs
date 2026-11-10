@@ -14,7 +14,6 @@ impl Input {
     /// field and asks for the clipboard, whose text arrives there as typing
     /// does (read-only fields don't take it).
     // The text field's menu (#93) calls it.
-    #[cfg_attr(not(test), allow(dead_code))]
     pub fn field_command(&self, field: NodeId, command: TextFieldCommand) {
         let mut inputs = Vec::new();
         self.write(|doc| {

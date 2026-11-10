@@ -13,6 +13,7 @@
 
 mod button;
 mod checkbox;
+mod combobox;
 mod dialog;
 mod error_notice;
 mod game_art;
@@ -34,6 +35,7 @@ mod switch;
 mod tabs;
 #[cfg(test)]
 mod tests;
+mod text_field;
 mod toast;
 mod tooltip;
 
@@ -41,6 +43,8 @@ mod tooltip;
 pub use button::{Button, ButtonSize, ButtonVariant};
 #[allow(unused_imports)]
 pub use checkbox::Checkbox;
+#[allow(unused_imports)]
+pub use combobox::Combobox;
 #[allow(unused_imports)]
 pub use dialog::{ConfirmDialog, Dialog};
 #[allow(unused_imports)]
@@ -76,6 +80,8 @@ pub use switch::{Switch, SwitchSize};
 #[allow(unused_imports)]
 pub use tabs::{Tab, Tabs};
 #[allow(unused_imports)]
+pub use text_field::{SearchField, TextField};
+#[allow(unused_imports)]
 pub use toast::{ToastRegion, Toasts, use_toasts};
 #[allow(unused_imports)]
 pub use tooltip::Tooltip;
@@ -97,4 +103,5 @@ pub const ANATOMY: &[Entry] = &[
     slider::ANATOMY,
     status_badge::ANATOMY,
     switch::ANATOMY,
+    text_field::ANATOMY,
 ];

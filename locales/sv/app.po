@@ -2783,6 +2783,7 @@ msgstr "Avbryt inloggningen"
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/ui/dialog.rs
 msgid "Cancel"
 msgstr "Avbryt"
 
@@ -3470,6 +3471,7 @@ msgid "Clear Cache"
 msgstr "Rensa cache"
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/ui/text_field.rs
 msgid "Clear search"
 msgstr "Rensa sökning"
 
@@ -3766,6 +3768,10 @@ msgstr "Kopierat"
 msgid "Copies and shares"
 msgstr "Kopior och delningar"
 
+#: apps/native/src/ui/text_field.rs
+msgid "Copy"
+msgstr "Kopiera"
+
 #: apps/desktop/src/components/shares/ShareGameDialog.tsx
 msgctxt "button"
 msgid "Copy"
@@ -4013,6 +4019,10 @@ msgstr "Egna mappar"
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
 msgid "Custom profile"
 msgstr "Egen profil"
+
+#: apps/native/src/ui/text_field.rs
+msgid "Cut"
+msgstr "Klipp ut"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 msgctxt "accent colour"
@@ -4387,10 +4397,11 @@ msgid "disk, drive, space, install location, install folder, library folders, mo
 msgstr "disk, hårddisk, utrymme, installationsplats, installationsmapp, biblioteksmappar, flytta spel, standardplats"
 
 #. Closes a plugin's notice
+#. Closes a notification
 #: apps/desktop/src/plugins/PluginViews.tsx
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
-#: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/desktop/src/views/library/LibraryView.tsx apps/native/src/ui/toast.rs
 msgid "Dismiss"
 msgstr "Stäng"
 
@@ -4576,6 +4587,10 @@ msgstr "Varje säkerhetskopia skickas också till den enheten nästa gång de sy
 #: apps/desktop/src/views/store/releases.ts
 msgid "Early access"
 msgstr "Early access"
+
+#: apps/native/src/ui/text_field.rs
+msgid "Edit"
+msgstr "Redigera"
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
@@ -5004,6 +5019,7 @@ msgstr "Dekompileringar, omkompileringar och källkodsportar gjorda av fans som 
 #: apps/desktop/src/views/library/LibraryCard.tsx
 #: apps/desktop/src/views/library/LibraryRow.tsx
 #: apps/desktop/src/views/library/web/WebMosaic.tsx
+#: apps/native/src/ui/game_card.rs apps/native/src/ui/game_row.rs
 msgid "Favorite"
 msgstr "Favorit"
 
@@ -7217,6 +7233,7 @@ msgstr "Hantera standardplatsen och andra lagringsplatser för spel."
 
 #: apps/desktop/src/views/library/LibraryCard.tsx
 #: apps/desktop/src/views/library/LibraryRow.tsx
+#: apps/native/src/ui/game_card.rs apps/native/src/ui/game_row.rs
 msgid "Managed copy unavailable"
 msgstr "Den hanterade kopian är inte tillgänglig"
 
@@ -8840,6 +8857,10 @@ msgstr "lösenord och inloggningar"
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 msgid "Passwords and sign-ins aren't in backups: sign in to RomM and your stores again afterwards."
 msgstr "Lösenord och inloggningar ingår inte i säkerhetskopior: logga in på RomM och dina butiker igen efteråt."
+
+#: apps/native/src/ui/text_field.rs
+msgid "Paste"
+msgstr "Klistra in"
 
 #: apps/desktop/src/input/OnScreenKeyboard.tsx
 #: apps/native/src/input/keyboard.rs
@@ -10892,6 +10913,7 @@ msgstr "Välj {title}"
 
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/ui/text_field.rs
 msgid "Select all"
 msgstr "Markera alla"
 
@@ -11536,6 +11558,7 @@ msgstr "Startar uppdateringen…"
 #: apps/desktop/src/views/library/StartingMark.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/ui/game_card.rs apps/native/src/ui/game_row.rs
 msgid "Starting…"
 msgstr "Startar…"
 
@@ -13777,9 +13800,6 @@ msgstr "zoom, textstorlek, större"
 
 #~ msgid "Change this Settings section."
 #~ msgstr "Ändra det här avsnittet i Inställningar."
-
-#~ msgid "Edit"
-#~ msgstr "Redigera"
 
 #~ msgid "Emulation settings"
 #~ msgstr "Emuleringsinställningar"
