@@ -8,7 +8,6 @@ use crate::{
     bus::{Bus, BusOptions},
     db::LibraryStore,
     emulation::{EmulatorInstall, OperatingSystem},
-    notifications::{MemberKind, Notifications},
     updates::GitHub,
 };
 use std::{io::Write, path::Path};
@@ -90,7 +89,6 @@ async fn release(server: &MockServer, tag: &str, version: &str) {
 
 struct Fixture {
     temp: tempfile::TempDir,
-    store: LibraryStore,
     tools: ManagedTools,
 }
 
@@ -128,14 +126,9 @@ async fn fixture(server: &MockServer, host: Host) -> Fixture {
         use std::os::unix::fs::PermissionsExt;
         std::fs::set_permissions(&flatpak, std::fs::Permissions::from_mode(0o755)).unwrap();
     }
-    let tools = ManagedTools::new(
-        store.clone(),
-        Bus::new(BusOptions::default()),
-        catalog,
-        &paths,
-    )
-    .with_host(host, hosts, flatpak);
-    Fixture { temp, store, tools }
+    let tools = ManagedTools::new(store, Bus::new(BusOptions::default()), catalog, &paths)
+        .with_host(host, hosts, flatpak);
+    Fixture { temp, tools }
 }
 
 fn read(path: &Path) -> String {
@@ -194,15 +187,8 @@ async fn a_tool_installs_is_found_updates_with_the_users_files_and_is_removed() 
     let checked = f.tools.check("moonlight").await.unwrap();
     assert_eq!(checked.latest.as_deref(), Some("v2.0"));
     assert!(checked.update_available());
-    // Offered in "Updates available" under its own kind, in Caskade's words.
-    let feed = Notifications::new(f.store.clone());
-    feed.sync_updates().await.unwrap();
-    let item = feed.list(false, 0, 10).await.unwrap().items.remove(0);
-    let members = feed.members(&item.id, 0, 10).await.unwrap().items;
-    assert_eq!(members.len(), 1);
-    assert_eq!(members[0].kind, MemberKind::ToolUpdate);
-    assert_eq!(members[0].label, "Game streaming to this device v2.0");
-    assert!(!members[0].label.to_lowercase().contains("moonlight"));
+    // How "Updates available" offers it is tested with the feed
+    // (caskade-achievements' notifications tests).
     // Skipped, it isn't offered; a newer one is again.
     assert!(
         !f.tools
@@ -211,11 +197,6 @@ async fn a_tool_installs_is_found_updates_with_the_users_files_and_is_removed() 
             .unwrap()
             .update_available()
     );
-    feed.sync_updates().await.unwrap();
-    for item in feed.list(false, 0, 10).await.unwrap().items {
-        let members = feed.members(&item.id, 0, 10).await.unwrap().items;
-        assert!(members.iter().all(|m| m.kind != MemberKind::ToolUpdate));
-    }
     release(&server, "v3.0", "3.0").await;
     assert!(f.tools.check("moonlight").await.unwrap().update_available());
     // Checking never installs anything.

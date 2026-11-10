@@ -5,7 +5,7 @@
 //! install rolls back, for a plugin and a theme.
 use super::*;
 use crate::commands::test_ipc::invoke;
-use caskade_core::addons::author;
+use caskade_addons::author;
 use caskade_plugin_host::{HostOptions, Limits, PluginServices};
 use serde_json::{Value, json};
 use std::path::{Path, PathBuf};
@@ -372,10 +372,7 @@ fn starter_collection_installs_in_a_clean_profile() {
     let (_app, window) = smoke.app();
     for entry in smoke.catalogue.catalogue().entries {
         let supported = entry.releases.iter().any(|release| {
-            release.os.is_empty()
-                || release
-                    .os
-                    .contains(&caskade_core::addons::AddonOs::current())
+            release.os.is_empty() || release.os.contains(&caskade_addons::AddonOs::current())
         });
         let first = install(&window, &entry.id, true);
         if !supported {

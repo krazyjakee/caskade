@@ -1,6 +1,6 @@
 # The add-on catalogue
 
-A curated list of plugins and themes that Caskade can browse and install (#181–#184). The client is `caskade_core::addons`; the adapter commands are `addons_*` in `commands/addons.rs`.
+A curated list of plugins and themes that Caskade can browse and install (#181–#184). The client is `caskade_addons`; the adapter commands are `addons_*` in `commands/addons.rs`.
 
 The catalogue offers plugins and themes only. A plugin whose release says it `provides` the reserved `metadata-provider` interface is left out, and so is any entry in a `metadata` category: custom metadata sources aren't part of it.
 
@@ -102,7 +102,7 @@ The catalogue itself can't show that its artifacts exist or are what they claim;
 
 `CatalogueService` keeps the last catalogue that verified and validated in `<cache>/addons/`. It shows that catalogue offline and after a restart, and sets a damaged or other-origin cache aside without stopping startup. The catalogue, its signature and when it was fetched are one file, `catalogue.snapshot.json`, replaced by a single rename, so a stop or a disk failure during a save leaves the last good catalogue or the new one. Older versions kept three files, which still load until the next save clears them.
 
-`addons_catalogue(mode)` reads the catalogue, and `addons_catalogue_refresh(mode)` fetches it again. Each entry comes with its `compatibility`, worked out by `caskade_core::addons::evaluate` against what is installed and what this build accepts:
+`addons_catalogue(mode)` reads the catalogue, and `addons_catalogue_refresh(mode)` fetches it again. Each entry comes with its `compatibility`, worked out by `caskade_addons::evaluate` against what is installed and what this build accepts:
 
 - **`state`:**
   - `available`
@@ -125,7 +125,7 @@ Screenshots load through `addons_media(id, index)`. The artwork cache downloads 
 
 ### The steps
 
-1. **Download** (`caskade_core::addons::package::download`): to `<data>/addons/downloads/<sha256>.zip`. The download stops at the catalogue's size and must match its SHA-256; an archive already there that checks out is reused. Cancel with `addons_install_cancel(id)`. Progress arrives as `AddonProgress` events (downloading, checking, installing, starting).
+1. **Download** (`caskade_addons::package::download`): to `<data>/addons/downloads/<sha256>.zip`. The download stops at the catalogue's size and must match its SHA-256; an archive already there that checks out is reused. Cancel with `addons_install_cancel(id)`. Progress arrives as `AddonProgress` events (downloading, checking, installing, starting).
 2. **Unpack** (`extract`): into `<data>/addons/staging/<job>`. Archives are refused for any of:
    - absolute paths, drive paths or `..` paths
    - links

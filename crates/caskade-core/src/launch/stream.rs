@@ -67,7 +67,7 @@ pub struct StreamStart {
     pub hold: Option<Box<dyn std::any::Any + Send>>,
 }
 
-/// Gets streams ready and reads the client (`caskade_core::streaming`'s
+/// Gets streams ready and reads the client (`caskade_streaming`'s
 /// `Streams`; a fake one in tests).
 #[async_trait]
 pub trait StreamLauncher: Send + Sync {

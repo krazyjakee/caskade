@@ -63,7 +63,7 @@ pub(crate) fn in_folder(folder: &Path) -> Option<WebCopy> {
 /// moved into the storage root at `root`. The game is the one with that
 /// page here, else `game_id` when it's here, else a new one named `title`.
 /// A game already offline here keeps its own copy.
-pub(crate) async fn place(
+pub async fn place(
     store: &LibraryStore,
     url: &str,
     folder: &Path,

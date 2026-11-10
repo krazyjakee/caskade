@@ -1,9 +1,11 @@
 //! Achievements (#185): a game's sets for the signed-in account, a per-game
 //! refresh that can be stopped, and the events that follow fetches.
 use crate::error::{CommandError, report};
+use caskade_achievements::achievements::{
+    AchievementLink, AchievementSet, AchievementSummary, Achievements, LinkMethod,
+};
 use caskade_core::{
     accounts::AccountService,
-    achievements::{AchievementLink, AchievementSet, AchievementSummary, Achievements, LinkMethod},
     bus::{Bus, Event},
     db::LibraryStore,
 };

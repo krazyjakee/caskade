@@ -7,7 +7,7 @@
 
 use caskade_core::accounts::AccountService;
 use caskade_core::model::Collection;
-use caskade_core::share::{ShareExpiry, ShareItem, Shares};
+use caskade_share::{ShareExpiry, ShareItem, Shares};
 use tauri::State;
 
 use super::shares::ShareCreated;

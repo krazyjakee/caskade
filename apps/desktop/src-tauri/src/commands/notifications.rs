@@ -1,7 +1,7 @@
 //! The notification feed (#198): pages of it, the unread count and read
-//! state. The feed lives in the core (`caskade_core::notifications`);
+//! state. The feed lives in the core (`caskade_achievements::notifications`);
 //! `NotificationsChanged` tells the webview to read it again.
-use caskade_core::notifications::{MemberPage, NotificationPage, Notifications};
+use caskade_achievements::notifications::{MemberPage, NotificationPage, Notifications};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use tauri::{AppHandle, Manager, Runtime, State};

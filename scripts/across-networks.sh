@@ -6,13 +6,13 @@
 #
 # It starts .github/workflows/across-networks.yml, which shares a game from the
 # runner and uploads the links, and runs this PC's half of
-# crates/caskade-core/tests/across_networks.rs. The links hold only the
+# crates/caskade-share/tests/across_networks.rs. The links hold only the
 # runner's addresses, so this PC's address stays out of a public log.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 runner=${1:-ubuntu-24.04}
-built=$(flock /tmp/caskade-heavy.lock cargo test -p caskade-core --test it --no-run 2>&1) \
+built=$(flock /tmp/caskade-heavy.lock cargo test -p caskade-share --test it --no-run 2>&1) \
   || { echo "$built"; exit 1; }
 binary=$(sed -n 's/.*Executable .*(\(.*\))$/\1/p' <<<"$built" | tail -1)
 [ -n "$binary" ] || { echo "$built"; exit 1; }

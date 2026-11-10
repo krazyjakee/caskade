@@ -39,7 +39,13 @@ What it does is in the [product spec](PRODUCT-SPEC.md). Public contracts for ext
 
 | Path | Contents |
 | --- | --- |
-| `crates/caskade-core` | Domain model, library store, every service listed in §6. Feature `net` adds everything that needs `reqwest` or iroh. |
+| `crates/caskade-core` | Domain model, library store and the services in §6 that the rest of the core depends on. Feature `net` adds everything that needs `reqwest` or iroh. |
+| `crates/caskade-achievements` | Achievements (Steam, GOG, Epic and RetroAchievements providers, the cached sets) and the notification feed. Feature `net` for the providers. |
+| `crates/caskade-addons` | The add-on catalogue: the signed catalogue, compatibility, add-on packages and their journal, the author tools. Feature `net`. |
+| `crates/caskade-backup` | App-data backups: verifiable archives of the library, settings and accounts, schedules, staged restore, backups held on other devices (`net`), and `policy` (what a snapshot leaves out). |
+| `crates/caskade-share` | One-off shares of a game or a smaller item (save, web game, ROM, collection) through a link that can be stopped and may expire. Needs `net`. |
+| `crates/caskade-streaming` | Game streaming: the managed Sunshine host and Moonlight client, pairing, host discovery, publishing, handover to a linked device, and the administrator steps (`elevation`) the host needs. Feature `net`. |
+| `crates/caskade-system-stats` | Live system statistics for Settings → Statistics. |
 | `crates/caskade-discovery` | Standalone: finds installed games from launchers, stores and the OS. Features per OS, `deep`, `watch`, `sqlite`, `cli`. |
 | `crates/caskade-installer` | Standalone: fetches, probes, plans, installs, uninstalls, moves and reconciles payloads (installers, packages, archives, discs, torrents). Dev CLI. |
 | `crates/caskade-sources` | Built-in library sources over discovery, emulator and platform definitions (`emulation/*.toml`), managed tool definitions (`tools/*.toml`). |
@@ -63,7 +69,7 @@ What it does is in the [product spec](PRODUCT-SPEC.md). Public contracts for ext
 | `wit/` | The backend plugin contract, `caskade:plugin@0.1.0`. |
 | `locales/` | PO templates and catalogs. |
 | `xtask/`, `scripts/` | Fixture builders, the installer corpus score, CI scope, legal notices, catalogue builds. |
-| `vendor/` | Vendored and patched third-party crates. |
+| `vendor/` | Vendored and patched third-party crates, each with a `PATCHES.md`: inno and innospect (resource limits), hudsucker and librqbit-sha1-wrapper (rustls and SHA-1 on ring, so no build compiles aws-lc). |
 
 ## 4. Runtime architecture
 
@@ -139,7 +145,7 @@ Sessions survive restarts: recovery state records running processes by `ProcessI
 ### 5.3 Sync and backup classification
 
 - Every table and setting is **synced**, **optional** (off by default) or **local** in `sync::policy`. Paths, folders, emulators, sign-ins and caches are local. Guard tests and the `sync_policy` fixtures fail on anything unclassified.
-- Every table and setting is backed up unless `backup::policy` excludes it (credentials, caches, work in progress). Files outside the database need a backup `Component`.
+- Every table and setting is backed up unless `caskade_backup::policy` excludes it (credentials, caches, work in progress). Files outside the database need a backup `Component`.
 
 ## 6. Subsystems
 
@@ -272,7 +278,7 @@ Recovery code is bounded (fixed attempts or capped, jittered backoff, one layer 
 
 - Big lists are virtualised; artwork is thumbnailed and served from cache, never decoded at full size in the grid.
 - On Linux, glibc's malloc arenas are capped at 2 and free memory is trimmed every minute (`caskade-malloc`). A `MALLOC_ARENA_MAX` in the environment wins.
-- **Budget**: with 8,400 games the main process holds under 400 MB of anonymous memory and swap after an hour idle (check L8 in [manual-checks.md](manual-checks.md)). Work repeated on a timer reuses what it worked out while its inputs are unchanged, as discovery's watch plan does for Wine prefixes.
+- **Budget**: with 8,400 games the main process holds under 400 MB of anonymous memory and swap after an hour idle (check L8 in [manual-checks.md](manual-checks.md)). `scripts/idle-bench/` measures every process the app runs (with the webview, its WebKit processes too) against a seeded 8,400-game library in a sandbox, so builds can be compared; results are kept in the Native UI milestone's benchmark issue. Work repeated on a timer reuses what it worked out while its inputs are unchanged, as discovery's watch plan does for Wine prefixes.
 - Library queries never compare every row of one table with every row of another per game: Ready to Install's peer copies are matched to the copies other devices announced by `(device, entry)` against the announced set read once per statement (`db::sync_copies::copyable_here_sql`). The quadratic `LIKE` join it replaced held connections for seconds per count on synced libraries and starved the pool (#77).
 - Background work reacts to writes (`LibraryStore::writes`) instead of rereading whole tables on a timer. Large files (the Ludusavi manifest) are parsed incrementally. Threads start only for features in use: copy stores open on first use, the plugin epoch thread starts with the first plugin.
 - On NVIDIA's proprietary driver under X11, WebKitGTK paints on the CPU; the app restarts itself with the DMABUF renderer over shared memory (`webkit.rs`), unless a `WEBKIT_*` renderer variable or `LIBGL_ALWAYS_SOFTWARE` (a software-rendering session) is set. If the main window's page then crashes or hangs, the driver and WebKit library are recorded in the cache (`webkit-gpu-failed`) and the app restarts on WebKit's own renderer; it tries the GPU again once either changes. Where WebKit still paints on the CPU, `<html data-paint="cpu">` pauses ambient animation.
@@ -280,7 +286,7 @@ Recovery code is bounded (fixed attempts or capped, jittered backoff, one layer 
 ## 10. Build, test and release
 
 - **Commands**: `just dev` (app with hot reload), `just web` (UI only), `just test-app`, `just bindings`, `just build-app`, `just i18n`, `pnpm typecheck`, `pnpm lint`, `pnpm test`. Cargo commands share `/tmp/caskade-heavy.lock` through `flock`.
-- **Build speed**: the desktop crate emits only an `rlib`; dev builds use `debug = "line-tables-only"` and no dependency debug info; each crate's integration tests compile into one `it` binary (`tests/main.rs`).
+- **Build speed**: features that little else depends on live in their own crates over `caskade-core` (achievements, add-ons, backup, share, streaming, system statistics), so an edit there rebuilds that crate and the adapter but not the core. rustls runs on ring only: aws-lc's C build is kept out by two vendored patches, and a test fails if it returns to `Cargo.lock`. The desktop crate emits only an `rlib`; dev builds use `debug = "line-tables-only"` and no dependency debug info; each crate's integration tests compile into one `it` binary (`tests/main.rs`).
 - **Tests** never reach the internet: wiremock for services, recorded fixtures, fake launchers and processes, several cores in one process for sync, a TLS-fronted fake for the streaming host. Live tests against real services and programs are `#[ignore]`d. The console end-to-end test drives the built app with a scripted pad under Xvfb.
 - **CI** (`.github/workflows/ci.yml`): pull requests run only what their changes reach (`scripts/ci-scope.py`); master runs everything. Jobs: frontend, Rust (Linux), Windows cross-Clippy, Windows launch channel and elevation (native), console end-to-end, installer and discovery on Linux, Windows and macOS. `across-networks.yml`, run by hand, tests a share between a runner and a PC on another network.
 - **Release** (`.github/workflows/release.yml`, [RELEASING.md](RELEASING.md)): a version tag builds signed bundles for every platform into a draft GitHub release with the updater feed.

@@ -3,7 +3,7 @@
 //! seconds, and gets each sample as a `SystemStatsSampled` event. Read-only:
 //! nothing here changes the machine or the library.
 
-use caskade_core::system_stats::{SystemSample, SystemStats, SystemStatsSnapshot};
+use caskade_system_stats::{SystemSample, SystemStats, SystemStatsSnapshot};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use tauri::{AppHandle, Manager, Runtime, State};
@@ -62,7 +62,7 @@ pub async fn system_stats_unwatch(
 mod tests {
     use super::*;
     use crate::commands::test_ipc::invoke;
-    use caskade_core::system_stats::{Probe, Readings, SamplerConfig};
+    use caskade_system_stats::{Probe, Readings, SamplerConfig};
     use serde_json::json;
     use std::time::Duration;
     use tauri::test::{mock_builder, mock_context, noop_assets};

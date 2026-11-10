@@ -311,7 +311,8 @@ async fn a_new_device_set_up_from_another_has_its_library_and_keeps_its_own_hard
 #[tokio::test(flavor = "multi_thread")]
 #[ignore = "one device of two, on a network of its own: scripts/lan-unplugged.sh"]
 async fn set_up_from_another_with_no_internet() {
-    use crate::lan_unplugged::{Peer, pair_by_code};
+    use crate::lan_unplugged::pair_by_code;
+    use crate::peer::Peer;
 
     let peer = Peer::from_env();
     let reach = Reach::network(false, None);

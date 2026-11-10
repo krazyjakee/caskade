@@ -2,7 +2,8 @@
 //! device holds, and fetching one here to restore it through the usual
 //! inspect and staged restore (`backup_inspect`, `backup_restore`).
 use crate::error::{CommandError, report};
-use caskade_core::{backup::peers::HeldBackup, backup::peers::PeerBackups, devices::Devices};
+use caskade_backup::peers::{HeldBackup, PeerBackups};
+use caskade_core::devices::Devices;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::time::Duration;

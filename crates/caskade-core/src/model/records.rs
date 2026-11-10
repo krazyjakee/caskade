@@ -165,3 +165,30 @@ pub struct CollectionSummary {
     /// The covers of its first four games (those that have one).
     pub covers: Vec<Artwork>,
 }
+
+/// A release's identity at an achievement service that its store ids don't
+/// give (#189).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct AchievementLink {
+    pub entry_id: String,
+    pub provider: String,
+    /// The service's game id.
+    pub product_id: String,
+    pub method: LinkMethod,
+    pub linked_at_ms: i64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "snake_case", tag = "type")]
+pub enum LinkMethod {
+    /// The service recognised this hash of the release's ROM.
+    Hash { hash: String },
+    /// The user chose the game.
+    Manual,
+    /// No game could be verified: an unsupported system or file, a ROM the
+    /// service doesn't know (another revision or region), or more than one
+    /// game. `product_id` is empty. Tried again after a while; never
+    /// guessed from the title.
+    Unresolved { reason: String },
+}

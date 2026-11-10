@@ -11,7 +11,7 @@ use std::{sync::OnceLock, time::Duration};
 const MAX_BODY: usize = 64 * 1024 * 1024;
 
 /// One client for every store request.
-pub(crate) fn client() -> std::result::Result<reqwest::Client, ProviderError> {
+pub fn client() -> std::result::Result<reqwest::Client, ProviderError> {
     static CLIENT: OnceLock<reqwest::Client> = OnceLock::new();
     if let Some(client) = CLIENT.get() {
         return Ok(client.clone());
@@ -27,7 +27,7 @@ pub(crate) fn client() -> std::result::Result<reqwest::Client, ProviderError> {
 
 /// Sends `request` and reads its JSON answer. `store` names the store in
 /// errors.
-pub(crate) async fn json<T: DeserializeOwned>(
+pub async fn json<T: DeserializeOwned>(
     request: RequestBuilder,
     store: &str,
 ) -> std::result::Result<T, ProviderError> {
@@ -87,7 +87,7 @@ async fn read(
 
 /// Sends `request`: a failed connection or a timeout is `Offline`, a 429
 /// `RateLimited` for as long as the store asks (up to six hours).
-pub(crate) async fn send(request: RequestBuilder) -> std::result::Result<Response, ProviderError> {
+pub async fn send(request: RequestBuilder) -> std::result::Result<Response, ProviderError> {
     let response = request.send().await.map_err(|error| {
         let error = error.without_url();
         if error.is_connect() || error.is_timeout() {
@@ -108,7 +108,7 @@ pub(crate) async fn send(request: RequestBuilder) -> std::result::Result<Respons
 }
 
 /// `response`'s body, refused past `max` bytes.
-pub(crate) async fn read_body(
+pub async fn read_body(
     mut response: Response,
     store: &str,
     max: usize,
@@ -131,7 +131,7 @@ pub(crate) async fn read_body(
 }
 
 /// "<store> answered HTTP <status>".
-pub(crate) fn answered(store: &str, status: StatusCode) -> String {
+pub fn answered(store: &str, status: StatusCode) -> String {
     crate::tr!(
         "{store} answered HTTP {status}",
         store = store,
@@ -140,12 +140,12 @@ pub(crate) fn answered(store: &str, status: StatusCode) -> String {
 }
 
 /// "<store> answered HTTP <status>", for an answer a provider can't use.
-pub(crate) fn unexpected(store: &str, status: StatusCode) -> ProviderError {
+pub fn unexpected(store: &str, status: StatusCode) -> ProviderError {
     ProviderError::Other(answered(store, status))
 }
 
 /// "<store> sent an answer Caskade can't read".
-pub(crate) fn unreadable(store: &str) -> ProviderError {
+pub fn unreadable(store: &str) -> ProviderError {
     ProviderError::Other(crate::tr!(
         "{store} sent an answer Caskade can't read",
         store = store

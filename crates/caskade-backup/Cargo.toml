@@ -1,0 +1,42 @@
+[package]
+name = "caskade-backup"
+version = "0.1.0"
+description = "Caskade's app-data backups: versioned archives of the library, settings and accounts, and copies kept on other devices"
+edition.workspace = true
+rust-version.workspace = true
+# Integration tests are declared below, not discovered from tests/.
+autotests = false
+
+[features]
+default = ["net"]
+# Backups kept on another of the user's devices (`peers`).
+net = ["caskade-core/net"]
+
+[dependencies]
+caskade-core = { path = "../caskade-core", default-features = false }
+caskade-jobs = { path = "../caskade-jobs" }
+async-trait = "0.1"
+# Free space at the destination, same as the core.
+fs2 = "0.4"
+schemars = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+specta = { version = "=2.0.0-rc.26", features = ["derive", "serde_json"] }
+sqlx = { version = "=0.9.0", default-features = false, features = ["runtime-tokio", "sqlite", "migrate", "macros", "json"] }
+tokio = { version = "1", features = ["rt-multi-thread", "sync", "macros", "time", "fs", "io-util"] }
+tokio-util = "0.7"
+tracing = "0.1"
+# The archive format; the core's pin.
+zip = { version = "=9.1.3", default-features = false, features = ["deflate"] }
+
+[dev-dependencies]
+tempfile = "=3.27.0"
+
+[lints]
+workspace = true
+
+# One binary for the integration tests (tests/main.rs); see its header.
+[[test]]
+name = "it"
+path = "tests/main.rs"

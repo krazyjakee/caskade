@@ -1,0 +1,49 @@
+diff --git a/Cargo.toml b/Cargo.toml
+index 024c976..37acbe4 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -176,7 +176,7 @@ web-time = "1"
+ console_error_panic_hook = "0.1"
+ 
+ # JavaScript engine (Boa)
+-boa_engine = "0.22"
++boa_engine = { version = "0.22", features = ["intl_bundled"] }
+ boa_runtime = "0.22"
+ boa_gc = "0.22"
+ 
+diff --git a/apps/readme/src/main.rs b/apps/readme/src/main.rs
+index 2036dca..f4f79d3 100644
+--- a/apps/readme/src/main.rs
++++ b/apps/readme/src/main.rs
+@@ -130,7 +130,7 @@ fn main() {
+         },
+     );
+     let renderer = WindowRenderer::new();
+-    let attrs = WindowAttributes::default().with_title(title);
++    let attrs = WindowAttributes::default().with_title(title).with_surface_size(winit::dpi::LogicalSize::new(1024.0, 768.0));
+     let window = WindowConfig::with_attributes(Box::new(doc) as _, renderer, attrs);
+ 
+     // Create application
+diff --git a/packages/blitz-vibey-script/src/runtime/modules.rs b/packages/blitz-vibey-script/src/runtime/modules.rs
+index 296bd3a..f5ee6c7 100644
+--- a/packages/blitz-vibey-script/src/runtime/modules.rs
++++ b/packages/blitz-vibey-script/src/runtime/modules.rs
+@@ -89,6 +89,18 @@ impl ModuleLoader for BlitzModuleLoader {
+         self.insert(url, module.clone());
+         Ok(module)
+     }
++
++    // Caskade spike: Vite's dynamic-import helper needs `import.meta.url`.
++    fn init_import_meta(self: Rc<Self>, import_meta: &boa_engine::JsObject, module: &Module, context: &mut Context) {
++        if let Some(path) = module.path().and_then(|p| p.to_str()) {
++            let _ = import_meta.set(
++                boa_engine::js_string!("url"),
++                boa_engine::JsString::from(path),
++                false,
++                context,
++            );
++        }
++    }
+ }
+ 
+ impl ScriptRuntime {

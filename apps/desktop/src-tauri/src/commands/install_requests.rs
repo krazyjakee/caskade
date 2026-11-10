@@ -25,7 +25,7 @@ pub struct InstallRequest {
     /// A game someone shared through a link (#246), as its sharer says.
     /// The link stays here: it's a credential.
     #[serde(default)]
-    pub share: Option<caskade_core::share::ShareInfo>,
+    pub share: Option<caskade_share::ShareInfo>,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "snake_case")]
@@ -81,7 +81,7 @@ struct Pending {
 pub struct InstallRequests {
     pending: Arc<Mutex<BTreeMap<String, Pending>>>,
     /// Where share requests are received from, once set up (#246).
-    shares: Arc<std::sync::OnceLock<caskade_core::share::Shares>>,
+    shares: Arc<std::sync::OnceLock<caskade_share::Shares>>,
 }
 /// How long an unconfirmed request waits.
 const EXPIRY: Duration = Duration::from_secs(600);
@@ -90,7 +90,7 @@ fn locked<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
 }
 impl InstallRequests {
     /// Receives confirmed share requests through `shares` (#246).
-    pub fn set_shares(&self, shares: caskade_core::share::Shares) {
+    pub fn set_shares(&self, shares: caskade_share::Shares) {
         let _ = self.shares.set(shares);
     }
     /// The queue, without unclaimed requests that expired.
@@ -257,7 +257,7 @@ impl InstallRequests {
         &self,
         app: &tauri::AppHandle<R>,
         link: String,
-        info: caskade_core::share::ShareInfo,
+        info: caskade_share::ShareInfo,
     ) -> Result<InstallRequest, String> {
         let request = {
             let mut pending = self.live();
@@ -453,7 +453,7 @@ pub async fn request_install_input<R: Runtime>(
     value: String,
 ) -> Result<InstallRequest, String> {
     // A pasted share link (#246) asks its sharer first.
-    if caskade_core::share::is_link(&value) {
+    if caskade_share::is_link(&value) {
         return super::shares::queue_share_link(&app, value).await;
     }
     state.request_and_emit(&app, value).await

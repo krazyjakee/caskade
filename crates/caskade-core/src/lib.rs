@@ -8,10 +8,8 @@
 //! without setting a global subscriber.
 
 pub mod accounts;
-pub mod achievements;
-pub mod addons;
 pub mod artwork;
-pub mod backup;
+pub mod backup_error;
 pub mod browse;
 pub mod bus;
 mod cache_db;
@@ -19,7 +17,6 @@ pub mod db;
 pub mod device_type;
 #[cfg(feature = "net")]
 pub mod devices;
-pub mod elevation;
 pub mod emulation;
 pub mod error;
 pub mod hasheous;
@@ -34,7 +31,6 @@ pub mod managed;
 pub mod manual;
 pub mod metadata;
 pub mod model;
-pub mod notifications;
 pub mod paths;
 pub mod ports;
 pub mod program;
@@ -58,7 +54,7 @@ pub(crate) mod remote_file {
         ))
     }
 }
-mod quiet;
+pub mod quiet;
 #[cfg(feature = "net")]
 pub mod remote_play;
 pub mod romm;
@@ -66,13 +62,9 @@ pub mod saves;
 pub mod scripts;
 pub mod sessions;
 pub mod settings;
-#[cfg(feature = "net")]
-pub mod share;
 pub mod storage;
 pub mod store_accounts;
-pub mod streaming;
 pub mod sync;
-pub mod system_stats;
 pub mod themes;
 pub mod tracking;
 #[cfg(feature = "net")]
@@ -87,7 +79,7 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Milliseconds since the Unix epoch, as stored in the database; 0 before
 /// the epoch, saturating at `i64::MAX`.
-pub(crate) fn now_ms() -> i64 {
+pub fn now_ms() -> i64 {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map_or(0, |elapsed| {
@@ -97,7 +89,7 @@ pub(crate) fn now_ms() -> i64 {
 
 /// The `(year, month, day)` of `days` since the Unix epoch, in the
 /// proleptic Gregorian calendar (Howard Hinnant's `civil_from_days`).
-pub(crate) fn civil_from_days(days: i64) -> (i64, i64, i64) {
+pub fn civil_from_days(days: i64) -> (i64, i64, i64) {
     let z = days + 719_468;
     let era = z.div_euclid(146_097);
     let doe = z.rem_euclid(146_097);
@@ -113,19 +105,19 @@ pub use error::{Error, Result};
 pub use paths::AppPaths;
 
 /// Locks a mutex, carrying on with the data a panicking holder left.
-pub(crate) fn lock<T>(mutex: &std::sync::Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+pub fn lock<T>(mutex: &std::sync::Mutex<T>) -> std::sync::MutexGuard<'_, T> {
     mutex
         .lock()
         .unwrap_or_else(|poisoned| poisoned.into_inner())
 }
 
 /// Read-locks an `RwLock`, carrying on with the data a panicking holder left.
-pub(crate) fn read<T>(lock: &std::sync::RwLock<T>) -> std::sync::RwLockReadGuard<'_, T> {
+pub fn read<T>(lock: &std::sync::RwLock<T>) -> std::sync::RwLockReadGuard<'_, T> {
     lock.read().unwrap_or_else(|poisoned| poisoned.into_inner())
 }
 
 /// Write-locks an `RwLock`, carrying on with the data a panicking holder left.
-pub(crate) fn write<T>(lock: &std::sync::RwLock<T>) -> std::sync::RwLockWriteGuard<'_, T> {
+pub fn write<T>(lock: &std::sync::RwLock<T>) -> std::sync::RwLockWriteGuard<'_, T> {
     lock.write()
         .unwrap_or_else(|poisoned| poisoned.into_inner())
 }

@@ -27,8 +27,8 @@ use sqlx::SqliteConnection;
 
 use super::{FieldKey, SESSIONS_SOURCE, decode};
 use crate::Result;
-use crate::achievements::{AchievementLink, LinkMethod};
 use crate::emulation::{PlatformSettings, ProfileRef};
+use crate::model::{AchievementLink, LinkMethod};
 use crate::model::{
     ActionKind, ActionTracking, EntryActionSettings, ExternalId, GameAction, InstallLocation,
     LaunchSpec, validation as v,

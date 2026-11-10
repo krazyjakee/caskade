@@ -137,7 +137,7 @@ jobs:
       - name: Rust dependency advisories
         run: cargo audit
       - name: Format app crates
-        run: cargo fmt -p caskade-core -p caskade-desktop -p caskade-plugin-host -p caskade-input --check
+        run: cargo fmt -p caskade-core -p caskade-achievements -p caskade-addons -p caskade-backup -p caskade-share -p caskade-streaming -p caskade-system-stats -p caskade-desktop -p caskade-plugin-host -p caskade-input --check
       # `just i18n-check` (#220), Rust half.
       - name: Rust translation catalogs
         if: needs.changes.outputs.catalogs == 'true'
@@ -159,7 +159,7 @@ jobs:
       # catalog checks.
       - name: Rust app suites
         run: >-
-          cargo test -p caskade-core -p caskade-desktop -p caskade-input
+          cargo test -p caskade-core -p caskade-achievements -p caskade-addons -p caskade-backup -p caskade-share -p caskade-streaming -p caskade-system-stats -p caskade-desktop -p caskade-input
           -p caskade-plugin-host -p caskade-theme -p caskade-component-cache
           -p caskade-jobs -p caskade-plugin-sdk -p caskade-sync -p caskade-i18n
           --features caskade-i18n/extract --locked --timings
@@ -170,7 +170,7 @@ jobs:
         env:
           CASKADE_TEST_NATIVE: "1"
         run: >-
-          cargo test -p caskade-core -p caskade-desktop -p caskade-input
+          cargo test -p caskade-core -p caskade-achievements -p caskade-addons -p caskade-backup -p caskade-share -p caskade-streaming -p caskade-system-stats -p caskade-desktop -p caskade-input
           -p caskade-plugin-host -p caskade-theme -p caskade-component-cache
           -p caskade-jobs -p caskade-plugin-sdk -p caskade-sync -p caskade-i18n
           --features caskade-i18n/extract --locked --tests
@@ -231,7 +231,7 @@ jobs:
       - name: Prepare SHA-pinned 7-Zip sidecar
         run: python3 scripts/tauri-sidecar.py --target x86_64-pc-windows-gnu
       - name: Windows GNU cross Clippy
-        run: cargo clippy -p caskade-core -p caskade-desktop -p caskade-plugin-host -p caskade-input -p caskade-sync --all-targets --locked --target x86_64-pc-windows-gnu -- -D warnings
+        run: cargo clippy -p caskade-core -p caskade-achievements -p caskade-addons -p caskade-backup -p caskade-share -p caskade-streaming -p caskade-system-stats -p caskade-desktop -p caskade-plugin-host -p caskade-input -p caskade-sync --all-targets --locked --target x86_64-pc-windows-gnu -- -D warnings
 
   # `caskade --launch` on real Windows (#22): the named pipe, a game of two
   # processes stopped whole, and WM_CLOSE to the real caller's hidden window.
@@ -303,7 +303,7 @@ jobs:
       - name: Administrator step on and off
         env:
           CASKADE_TEST_NATIVE: "1"
-        run: "cargo test -p caskade-core --test it --locked windows_elevation:: -- --ignored --nocapture"
+        run: "cargo test -p caskade-streaming --test it --locked windows_elevation:: -- --ignored --nocapture"
       - name: A real clock step
         env:
           CASKADE_TEST_NATIVE: "1"

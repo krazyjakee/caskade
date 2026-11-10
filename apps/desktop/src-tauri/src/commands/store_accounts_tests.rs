@@ -44,7 +44,7 @@ impl AccountProvider for Fake {
         &self,
         _account: &StoreAccount,
         _credentials: Option<&StoreCredentials>,
-        _cancel: &caskade_core::backup::CancellationToken,
+        _cancel: &caskade_backup::CancellationToken,
     ) -> Result<LibrarySnapshot, ProviderError> {
         Ok(LibrarySnapshot {
             products: vec![OwnedProduct {

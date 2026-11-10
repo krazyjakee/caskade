@@ -2,14 +2,12 @@
 //! state. Settings → Streaming (#265) is their UI.
 
 use crate::error::{CommandError, report};
-use caskade_core::{
-    settings::{SettingsService, SettingsSnapshot, StreamQuality},
-    streaming::{
-        HostOutcome, HostStatus, StreamingClient, StreamingHost,
-        api::{PairRequest, PairedClient},
-        hosts::{StreamHost, StreamHosts},
-        pairing::Paired,
-    },
+use caskade_core::settings::{SettingsService, SettingsSnapshot, StreamQuality};
+use caskade_streaming::{
+    HostOutcome, HostStatus, StreamingClient, StreamingHost,
+    api::{PairRequest, PairedClient},
+    hosts::{StreamHost, StreamHosts},
+    pairing::Paired,
 };
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -130,7 +128,7 @@ pub async fn streaming_use_existing(
     host: State<'_, StreamingHost>,
 ) -> Result<HostOutcome, CommandError> {
     let host = host.inner().clone();
-    host.use_existing(caskade_core::streaming::secrets::Credentials { user, password })
+    host.use_existing(caskade_streaming::secrets::Credentials { user, password })
         .await
         .map_err(report)
 }
@@ -254,8 +252,8 @@ pub enum StreamingPart {
 impl StreamingPart {
     fn tool(self) -> &'static str {
         match self {
-            Self::Host => caskade_core::streaming::host::TOOL,
-            Self::Client => caskade_core::streaming::client::TOOL,
+            Self::Host => caskade_streaming::host::TOOL,
+            Self::Client => caskade_streaming::client::TOOL,
         }
     }
 }
@@ -361,17 +359,15 @@ pub async fn streaming_pair_with<R: Runtime>(
             "that device isn't on the network"
         )))
     })?;
-    let code = caskade_core::streaming::pairing::new_code().map_err(report)?;
+    let code = caskade_streaming::pairing::new_code().map_err(report)?;
     // Devices paired through sync (#267) take the code without typing.
     // Devices paired through sync (#267) take the code without typing.
     let linked = app
-        .try_state::<caskade_core::streaming::linked::LinkedPairing>()
+        .try_state::<caskade_streaming::linked::LinkedPairing>()
         .map(|linked| linked.inner().clone());
     let name = match &linked {
         Some(linked) => linked.device_name().await,
-        None => {
-            caskade_core::streaming::pairing::device_name(&sysinfo_host_name().unwrap_or_default())
-        }
+        None => caskade_streaming::pairing::device_name(&sysinfo_host_name().unwrap_or_default()),
     };
     let (client, hosts) = (client.inner().clone(), hosts.inner().clone());
     let pairing = {
@@ -414,7 +410,7 @@ pub async fn streaming_pair_with<R: Runtime>(
 
 /// The OS's name for this computer.
 fn sysinfo_host_name() -> Option<String> {
-    caskade_core::streaming::pairing::this_host_name()
+    caskade_streaming::pairing::this_host_name()
 }
 
 /// Forgets a paired device on this device.
@@ -450,7 +446,7 @@ pub fn setup<R: Runtime>(
     let accounts = app
         .try_state::<caskade_core::accounts::AccountService>()
         .map(|accounts| accounts.inner().clone());
-    match caskade_core::streaming::publish::Publisher::new(
+    match caskade_streaming::publish::Publisher::new(
         store,
         std::sync::Arc::new(host.clone()),
         accounts,

@@ -3,7 +3,8 @@
 //! undone if the restored library won't open. When the library can't open
 //! at all, its error dialog offers Restore from backup….
 
-use caskade_core::{AppPaths, backup::restore, db::LibraryStore};
+use caskade_backup::restore;
+use caskade_core::{AppPaths, db::LibraryStore};
 use std::path::{Path, PathBuf};
 
 /// `--restore <backup>` from the command line.
@@ -15,16 +16,16 @@ pub fn restore_arg(args: &[String], cwd: &Path) -> Option<PathBuf> {
 /// Stages `archive` for [`open_library`] to apply; the profile is untouched
 /// until then.
 pub async fn stage(paths: &AppPaths, archive: &Path) -> Result<(), String> {
-    let options = caskade_core::backup::RestoreOptions {
+    let options = caskade_backup::RestoreOptions {
         archive: archive.to_owned(),
         // The library, and whatever else the backup holds.
-        components: caskade_core::backup::Component::ALL.into_iter().collect(),
+        components: caskade_backup::Component::ALL.into_iter().collect(),
     };
     restore::stage(
         paths,
         &options,
-        &caskade_core::backup::CancellationToken::new(),
-        &(std::sync::Arc::new(|_| {}) as caskade_core::backup::ProgressFn),
+        &caskade_backup::CancellationToken::new(),
+        &(std::sync::Arc::new(|_| {}) as caskade_backup::ProgressFn),
     )
     .await
     .map(|_| ())
@@ -128,16 +129,16 @@ mod tests {
             .upsert_game(&caskade_core::model::Game::new("Backed up"))
             .await
             .unwrap();
-        let backups = caskade_core::backup::Backups::new(store.clone(), source.clone());
+        let backups = caskade_backup::Backups::new(store.clone(), source.clone());
         let exported = backups
             .export(
-                caskade_core::backup::ExportOptions {
+                caskade_backup::ExportOptions {
                     destination: backups.default_destination(),
                     components: Default::default(),
                     set_id: None,
                 },
                 std::sync::Arc::new(|_| {}),
-                caskade_core::backup::CancellationToken::new(),
+                caskade_backup::CancellationToken::new(),
             )
             .await
             .unwrap();

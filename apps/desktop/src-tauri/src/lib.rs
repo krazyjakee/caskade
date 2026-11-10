@@ -42,9 +42,9 @@ pub fn run() {
         let args: Vec<String> = std::env::args().collect();
         if args
             .iter()
-            .any(|arg| arg == caskade_core::elevation::windows::ELEVATED_ARG)
+            .any(|arg| arg == caskade_streaming::elevation::windows::ELEVATED_ARG)
         {
-            std::process::exit(caskade_core::elevation::windows::perform(&args));
+            std::process::exit(caskade_streaming::elevation::windows::perform(&args));
         }
     }
     // `caskade --launch <game>` (#256): hand the launch to the running
@@ -181,7 +181,7 @@ pub fn run() {
         // in the library.
         commands::notifications::setup(
             app.handle(),
-            caskade_core::notifications::Notifications::new(store.clone()),
+            caskade_achievements::notifications::Notifications::new(store.clone()),
             &bus,
         );
         // Plugin runners (#126) attach once the plugin host exists.
@@ -362,9 +362,9 @@ pub fn run() {
                 // is on, and offers the library's games (#259).
                 commands::streaming::setup(
                     app.handle(),
-                    caskade_core::streaming::StreamingHost::new(
+                    caskade_streaming::StreamingHost::new(
                         tools.clone(),
-                        caskade_core::elevation::Elevation::new(&setup_paths),
+                        caskade_streaming::elevation::Elevation::new(&setup_paths),
                         settings.clone(),
                         &setup_paths,
                     ),
@@ -374,8 +374,8 @@ pub fn run() {
                     &setup_paths,
                 );
                 // Devices to stream from (#262), through Caskade's own client.
-                let client = caskade_core::streaming::StreamingClient::new(tools.clone());
-                match caskade_core::streaming::hosts::StreamHosts::new(
+                let client = caskade_streaming::StreamingClient::new(tools.clone());
+                match caskade_streaming::hosts::StreamHosts::new(
                     store.clone(),
                     bus.clone(),
                     settings.clone(),
@@ -386,7 +386,7 @@ pub fn run() {
                         let handle = app.handle().clone();
                         let focus = app.handle().clone();
                         launch.set_streamer(std::sync::Arc::new(
-                            caskade_core::streaming::play::Streams::new(
+                            caskade_streaming::play::Streams::new(
                                 client.clone(),
                                 Some(hosts.clone()),
                                 settings.clone(),
@@ -570,7 +570,7 @@ pub fn run() {
         // Catalogue add-ons (#182): an install the app stopped in the middle
         // of rolls back before plugins and themes load.
         let addon_work = setup_paths.data.join("addons");
-        if let Err(error) = caskade_core::addons::package::recover(&addon_work) {
+        if let Err(error) = caskade_addons::package::recover(&addon_work) {
             tracing::warn!(%error, "an interrupted add-on install wasn't rolled back");
         }
         app.manage(commands::addon_packages::AddonFolders {
@@ -643,9 +643,9 @@ pub fn run() {
         }
         // Backups (#191–#193): Settings → Backup, automatic backups, and
         // how a restore before this start ended.
-        let backups = caskade_core::backup::Backups::new(store.clone(), setup_paths.clone());
+        let backups = caskade_backup::Backups::new(store.clone(), setup_paths.clone());
         backups.set_settings(settings.clone());
-        backups.set_last_restore(caskade_core::backup::restore::take_outcome(&setup_paths));
+        backups.set_last_restore(caskade_backup::restore::take_outcome(&setup_paths));
         commands::backup::setup(app.handle(), backups);
         // Store accounts (#164): what they own, reconciled with what
         // discovery finds installed after every scan.
@@ -669,11 +669,11 @@ pub fn run() {
         ));
         // RetroAchievements (#189): connected like a store, without a library.
         let retro = std::sync::Arc::new(
-            caskade_core::achievements::retroachievements::RetroAchievements::new(),
+            caskade_achievements::achievements::retroachievements::RetroAchievements::new(),
         );
         store_accounts.register_provider(retro.clone());
         // Achievements (#185) of those accounts, read with their sign-ins.
-        let achievements = caskade_core::achievements::Achievements::new(
+        let achievements = caskade_achievements::achievements::Achievements::new(
             store.clone(),
             bus.clone(),
             std::sync::Arc::new(store_accounts.clone()),
@@ -681,13 +681,13 @@ pub fn run() {
         achievements.set_settings(settings.clone());
         achievements.register_provider(retro.clone());
         achievements.register_provider(std::sync::Arc::new(
-            caskade_core::achievements::steam::SteamAchievements::new(),
+            caskade_achievements::achievements::steam::SteamAchievements::new(),
         ));
         achievements.register_provider(std::sync::Arc::new(
-            caskade_core::achievements::gog::GogAchievements::new(),
+            caskade_achievements::achievements::gog::GogAchievements::new(),
         ));
         achievements.register_provider(std::sync::Arc::new(
-            caskade_core::achievements::epic::EpicAchievements::new(),
+            caskade_achievements::achievements::epic::EpicAchievements::new(),
         ));
         achievements.register_linker(retro);
         // Refresh on an achievements-only account fetches its achievements.
@@ -708,17 +708,17 @@ pub fn run() {
             devices.set_settings(settings.clone());
             // Streaming pairs through sync with no code (#267): this host
             // enters a paired device's code; this client hands its over.
-            if let Some(host) = app.try_state::<caskade_core::streaming::StreamingHost>() {
+            if let Some(host) = app.try_state::<caskade_streaming::StreamingHost>() {
                 devices.set_stream_handler(std::sync::Arc::new(
-                    caskade_core::streaming::linked::HostHandover::new(std::sync::Arc::new(
+                    caskade_streaming::linked::HostHandover::new(std::sync::Arc::new(
                         host.inner().clone(),
                     )),
                 ));
             }
-            app.manage(caskade_core::streaming::linked::LinkedPairing::new(
+            app.manage(caskade_streaming::linked::LinkedPairing::new(
                 devices.clone(),
             ));
-            if let Some(hosts) = app.try_state::<caskade_core::streaming::hosts::StreamHosts>() {
+            if let Some(hosts) = app.try_state::<caskade_streaming::hosts::StreamHosts>() {
                 hosts.set_devices(devices.clone());
             }
             // Copies of games between devices (#233): served with the
@@ -763,7 +763,7 @@ pub fn run() {
                     // One-off shares (#246): admitted and served by the same
                     // endpoint, so set up before it starts too.
                     if let Some(install) = app.try_state::<caskade_core::install::InstallService>() {
-                        let shares = caskade_core::share::Shares::new(
+                        let shares = caskade_share::Shares::new(
                             store.clone(),
                             devices.clone(),
                             transfers.clone(),
@@ -855,10 +855,10 @@ pub fn run() {
             sync.set_presence(presence.clone());
             // Backups kept on a paired device (#243): sent to the chosen
             // one after the changes, and held here for the others.
-            let peer_backups = caskade_core::backup::peers::PeerBackups::new(
+            let peer_backups = caskade_backup::peers::PeerBackups::new(
                 settings.clone(),
                 setup_paths.data.join("peer-backups"),
-                app.state::<caskade_core::backup::Backups>()
+                app.state::<caskade_backup::Backups>()
                     .default_destination(),
             );
             peer_backups.set_devices(devices.clone());

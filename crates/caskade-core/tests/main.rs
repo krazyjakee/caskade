@@ -1,8 +1,6 @@
 //! Integration tests, compiled as one binary: a change relinks once instead
 //! of once per file. Run one file's tests with `cargo test --test it <file>::`.
 
-#[cfg(all(feature = "net", unix))]
-mod across_networks;
 mod addon_offers;
 mod appimage_env;
 #[cfg(feature = "net")]
@@ -25,10 +23,12 @@ mod ludusavi;
 #[cfg(feature = "net")]
 mod milestone_editing;
 mod missing_programs;
+#[cfg(all(feature = "net", unix))]
+mod networks;
 #[cfg(feature = "net")]
 mod new_device;
 #[cfg(feature = "net")]
-mod peer_backups;
+mod peer;
 #[cfg(feature = "net")]
 mod peer_downloads;
 #[cfg(feature = "net")]
@@ -44,10 +44,6 @@ mod save_locations;
 #[cfg(feature = "net")]
 mod save_sync;
 mod save_versions;
-#[cfg(feature = "net")]
-mod share_items;
-#[cfg(feature = "net")]
-mod shares;
 mod sync_carried;
 mod sync_games;
 mod sync_log;
@@ -60,7 +56,5 @@ mod sync_romm;
 mod sync_sections;
 #[cfg(all(feature = "net", unix))]
 mod two_networks;
-#[cfg(windows)]
-mod windows_elevation;
 #[cfg(all(feature = "net", windows))]
 mod windows_saves;

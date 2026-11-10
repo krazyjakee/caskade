@@ -4,21 +4,21 @@
 //! An install downloads the release the catalogue offers, checks it
 //! against the catalogue's size and SHA-256, unpacks it into staging,
 //! checks it is that add-on at that version and that it is valid, then
-//! swaps it into place with a journal (`caskade_core::addons::package`).
+//! swaps it into place with a journal (`caskade_addons::package`).
 //! A plugin that won't start, or a theme with problems, rolls back to the
 //! previous version. A first plugin install is reviewed (its permissions)
 //! before it is enabled; an update keeps the user's grant, so a plugin that
 //! asks for more is left waiting for consent in Settings → Plugins, never
 //! granted silently.
 use crate::error::{CommandError, report};
-use caskade_core::{
-    addons::{
-        AddonKind, AppMode, CatalogueService, ItemState, evaluate_entry,
-        package::{
-            self, AddonFailure, AddonRecord, AddonRecords, CancellationToken, PackageError,
-            RejectedRelease, UpdatePreference,
-        },
+use caskade_addons::{
+    AddonKind, AppMode, CatalogueService, ItemState, evaluate_entry,
+    package::{
+        self, AddonFailure, AddonRecord, AddonRecords, CancellationToken, PackageError,
+        RejectedRelease, UpdatePreference,
     },
+};
+use caskade_core::{
     db::LibraryStore,
     settings::{AppearanceSettings, SettingsService},
     themes::{ThemeService, ThemeSource},
@@ -133,9 +133,9 @@ fn progress<R: Runtime>(
 }
 
 struct Prepared {
-    entry: caskade_core::addons::CatalogueEntry,
-    release: caskade_core::addons::CatalogueRelease,
-    installed: Option<caskade_core::addons::InstalledAddon>,
+    entry: caskade_addons::CatalogueEntry,
+    release: caskade_addons::CatalogueRelease,
+    installed: Option<caskade_addons::InstalledAddon>,
 }
 
 async fn prepare<R: Runtime>(

@@ -15,7 +15,7 @@ pub mod epic;
 #[cfg(feature = "net")]
 pub mod gog;
 #[cfg(feature = "net")]
-pub(crate) mod http;
+pub mod http;
 mod schedule;
 #[cfg(feature = "net")]
 pub mod steam;

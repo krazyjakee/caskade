@@ -2,16 +2,16 @@ use super::*;
 use crate::{Error, Result};
 use std::path::{Path, PathBuf};
 
-pub(crate) fn text(value: &str, name: &str, empty: bool, max: usize) -> Result<()> {
+pub fn text(value: &str, name: &str, empty: bool, max: usize) -> Result<()> {
     if (!empty && value.trim().is_empty()) || value.contains('\0') || value.len() > max {
         return Err(Error::Invalid(crate::tr!("invalid {name}", name = name)));
     }
     Ok(())
 }
-pub(crate) fn id(value: &str) -> Result<()> {
+pub fn id(value: &str) -> Result<()> {
     text(value, "identifier", false, 1024)
 }
-pub(crate) fn json<T: serde::Serialize>(value: &T) -> Result<String> {
+pub fn json<T: serde::Serialize>(value: &T) -> Result<String> {
     Ok(serde_json::to_string(value)?)
 }
 pub(crate) fn path_text(path: &Path) -> Result<&str> {
@@ -77,7 +77,7 @@ impl Game {
         }
     }
 }
-pub(crate) fn validate_date(date: &str) -> Result<()> {
+pub fn validate_date(date: &str) -> Result<()> {
     let fail = || Error::Invalid(crate::tr!("release date must be YYYY-MM-DD"));
     let bytes = date.as_bytes();
     if bytes.len() != 10

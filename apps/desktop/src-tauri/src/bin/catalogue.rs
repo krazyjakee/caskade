@@ -73,7 +73,7 @@ fn build(args: &[String]) -> Result<(), String> {
     let source = parsed.target.ok_or(USAGE)?;
     let out = PathBuf::from(parsed.flag("--out").ok_or(USAGE)?);
     let previous = parsed.flag("--previous").map(PathBuf::from);
-    let built = caskade_core::addons::author::build(source.as_ref(), &out, previous.as_deref())?;
+    let built = caskade_addons::author::build(source.as_ref(), &out, previous.as_deref())?;
     for (id, version, file, sha256) in &built.packages {
         println!("{id} {version}  {file}  sha256 {sha256}");
     }

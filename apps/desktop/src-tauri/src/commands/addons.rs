@@ -3,11 +3,11 @@
 //! through the artwork cache, so nothing in the catalogue runs in the
 //! webview. Plugins and themes only.
 use crate::error::{CommandError, report};
+use caskade_addons::{
+    AddonKind, AddonOs, AppMode, CatalogueItem, CatalogueService, CatalogueStatus, HostFacts,
+    InstalledAddon, evaluate,
+};
 use caskade_core::{
-    addons::{
-        AddonKind, AddonOs, AppMode, CatalogueItem, CatalogueService, CatalogueStatus, HostFacts,
-        InstalledAddon, evaluate,
-    },
     artwork::{ArtworkCache, CachedArtwork},
     themes::{ThemeService, ThemeSource},
 };
@@ -37,7 +37,7 @@ pub fn service(
 ) -> Option<CatalogueService> {
     let origin = std::env::var("CASKADE_CATALOGUE_URL")
         .ok()
-        .unwrap_or_else(|| caskade_core::addons::DEFAULT_ORIGIN.to_owned());
+        .unwrap_or_else(|| caskade_addons::DEFAULT_ORIGIN.to_owned());
     let key = std::env::var("CASKADE_CATALOGUE_PUBKEY").ok().or_else(|| {
         app.config()
             .plugins

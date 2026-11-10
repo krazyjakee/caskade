@@ -20,7 +20,7 @@ mod release;
 pub(crate) mod source;
 mod tool;
 mod tools;
-pub(crate) mod unpack;
+pub mod unpack;
 mod versions;
 
 /// They stand a shell script in for `flatpak`.

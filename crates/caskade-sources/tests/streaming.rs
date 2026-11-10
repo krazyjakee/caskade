@@ -9,19 +9,15 @@
 #[ignore = "downloads and runs the real streaming host on ports 47984-48010"]
 async fn live_linux_host_answers_pinned_and_stops_with_caskade() {
     use caskade_core::{
-        AppPaths,
-        bus::Bus,
-        db::LibraryStore,
-        elevation::{Change, Elevation, Prompt, Request, Runner},
-        emulation::OperatingSystem,
-        managed::ManagedTools,
+        AppPaths, bus::Bus, db::LibraryStore, emulation::OperatingSystem, managed::ManagedTools,
         settings::SettingsService,
-        streaming::{
-            HostOutcome, HostState, StreamingHost,
-            api::HostApi,
-            host::{Parts, Timing, process::ChildRunner},
-            secrets::HostSecrets,
-        },
+    };
+    use caskade_streaming::{
+        HostOutcome, HostState, StreamingHost,
+        api::HostApi,
+        elevation::{Change, Elevation, Prompt, Request, Runner},
+        host::{Parts, Timing, process::ChildRunner},
+        secrets::HostSecrets,
     };
     use std::{sync::Arc, time::Duration};
 
@@ -57,9 +53,9 @@ async fn live_linux_host_answers_pinned_and_stops_with_caskade() {
             runner: Arc::new(ChildRunner::new(paths.data.join("streaming/run.json"))),
             secrets: secrets.clone(),
             timing: Timing::default(),
-            api_base: caskade_core::streaming::api::LOCAL.parse().unwrap(),
-            http_port: caskade_core::streaming::host::HTTP_PORT,
-            checks: Arc::new(caskade_core::streaming::host::HostChecks::here),
+            api_base: caskade_streaming::api::LOCAL.parse().unwrap(),
+            http_port: caskade_streaming::host::HTTP_PORT,
+            checks: Arc::new(caskade_streaming::host::HostChecks::here),
         },
     );
     host.set_device_name("Caskade live test");
@@ -88,7 +84,7 @@ async fn live_linux_host_answers_pinned_and_stops_with_caskade() {
         .find(|path| path.extension().is_some_and(|ext| ext == "pem"))
         .unwrap();
     let wrong = HostApi::with_cert_file(
-        caskade_core::streaming::api::LOCAL.parse().unwrap(),
+        caskade_streaming::api::LOCAL.parse().unwrap(),
         secrets.get().await.unwrap().unwrap(),
         &other,
     )
@@ -99,7 +95,7 @@ async fn live_linux_host_answers_pinned_and_stops_with_caskade() {
 
     // Another device finds it on the network (#262): mDNS through the
     // system's responder, named by its /serverinfo as Caskade set it.
-    let hosts = caskade_core::streaming::hosts::StreamHosts::new(
+    let hosts = caskade_streaming::hosts::StreamHosts::new(
         LibraryStore::in_memory().await.unwrap(),
         Bus::default(),
         {
@@ -108,7 +104,7 @@ async fn live_linux_host_answers_pinned_and_stops_with_caskade() {
             settings.register_core(&paths).unwrap();
             settings
         },
-        caskade_core::streaming::StreamingClient::new(ManagedTools::new(
+        caskade_streaming::StreamingClient::new(ManagedTools::new(
             LibraryStore::in_memory().await.unwrap(),
             Bus::default(),
             caskade_sources::tools::catalog().unwrap(),
@@ -128,7 +124,7 @@ async fn live_linux_host_answers_pinned_and_stops_with_caskade() {
     println!("found on the network: {found:?}");
     assert!(
         found.iter().any(|host| host.name == "Caskade live test"
-            && host.reach == caskade_core::streaming::hosts::HostReach::Ready),
+            && host.reach == caskade_streaming::hosts::HostReach::Ready),
         "{found:?}"
     );
 
@@ -156,8 +152,8 @@ async fn live_linux_client_keeps_its_own_state() {
         bus::Bus,
         db::LibraryStore,
         managed::{CancellationToken, ManagedTools},
-        streaming::client::{SETTINGS_DIR, SETTINGS_FILE, StreamingClient},
     };
+    use caskade_streaming::client::{SETTINGS_DIR, SETTINGS_FILE, StreamingClient};
     let temp = tempfile::tempdir().unwrap();
     let home = temp.path().join("home");
     let theirs = home.join(".config/Moonlight Game Streaming Project/Moonlight.conf");
@@ -224,19 +220,19 @@ async fn live_linux_pairing_needs_no_window() {
         AppPaths,
         bus::Bus,
         db::LibraryStore,
-        elevation::{Change, Elevation, Prompt, Request, Runner},
         emulation::OperatingSystem,
         managed::{CancellationToken, ManagedTools},
         settings::SettingsService,
-        streaming::{
-            HostState, StreamingClient, StreamingHost,
-            api::App,
-            client::{SETTINGS_DIR, SETTINGS_FILE},
-            host::{Parts, Timing, process::ChildRunner},
-            hosts::paired_hosts,
-            pairing::Paired,
-            secrets::HostSecrets,
-        },
+    };
+    use caskade_streaming::{
+        HostState, StreamingClient, StreamingHost,
+        api::App,
+        client::{SETTINGS_DIR, SETTINGS_FILE},
+        elevation::{Change, Elevation, Prompt, Request, Runner},
+        host::{Parts, Timing, process::ChildRunner},
+        hosts::paired_hosts,
+        pairing::Paired,
+        secrets::HostSecrets,
     };
     use std::{sync::Arc, time::Duration};
 
@@ -270,9 +266,9 @@ async fn live_linux_pairing_needs_no_window() {
             runner: Arc::new(ChildRunner::new(paths.data.join("streaming/run.json"))),
             secrets: HostSecrets::memory(),
             timing: Timing::default(),
-            api_base: caskade_core::streaming::api::LOCAL.parse().unwrap(),
-            http_port: caskade_core::streaming::host::HTTP_PORT,
-            checks: Arc::new(caskade_core::streaming::host::HostChecks::here),
+            api_base: caskade_streaming::api::LOCAL.parse().unwrap(),
+            http_port: caskade_streaming::host::HTTP_PORT,
+            checks: Arc::new(caskade_streaming::host::HostChecks::here),
         },
     );
     host.set_device_name("Caskade pairing test");
@@ -409,22 +405,22 @@ async fn live_linux_streaming_plays_from_the_host() {
         AppPaths,
         bus::Bus,
         db::{LibraryStore, StreamApp},
-        elevation::{Change, Elevation, Prompt, Request, Runner},
         emulation::OperatingSystem,
         launch::{LaunchError, LaunchService, SessionStatus},
         managed::{CancellationToken, ManagedTools},
         model::LaunchSpec,
         settings::SettingsService,
-        streaming::{
-            HostState, StreamingClient, StreamingHost,
-            api::App,
-            client::{SETTINGS_DIR, SETTINGS_FILE},
-            host::{Parts, Timing, process::ChildRunner},
-            hosts::{ask_server_info, paired_hosts},
-            pairing::Paired,
-            play::Streams,
-            secrets::HostSecrets,
-        },
+    };
+    use caskade_streaming::{
+        HostState, StreamingClient, StreamingHost,
+        api::App,
+        client::{SETTINGS_DIR, SETTINGS_FILE},
+        elevation::{Change, Elevation, Prompt, Request, Runner},
+        host::{Parts, Timing, process::ChildRunner},
+        hosts::{ask_server_info, paired_hosts},
+        pairing::Paired,
+        play::Streams,
+        secrets::HostSecrets,
     };
     use std::{
         sync::{Arc, Mutex},
@@ -461,9 +457,9 @@ async fn live_linux_streaming_plays_from_the_host() {
             runner: Arc::new(ChildRunner::new(paths.data.join("streaming/run.json"))),
             secrets: HostSecrets::memory(),
             timing: Timing::default(),
-            api_base: caskade_core::streaming::api::LOCAL.parse().unwrap(),
-            http_port: caskade_core::streaming::host::HTTP_PORT,
-            checks: Arc::new(caskade_core::streaming::host::HostChecks::here),
+            api_base: caskade_streaming::api::LOCAL.parse().unwrap(),
+            http_port: caskade_streaming::host::HTTP_PORT,
+            checks: Arc::new(caskade_streaming::host::HostChecks::here),
         },
     );
     host.set_device_name("Caskade streaming test");
@@ -765,25 +761,25 @@ async fn live_linux_published_game_plays_and_stops_with_the_stream() {
         AppPaths,
         bus::Bus,
         db::{LibraryStore, StreamApp},
-        elevation::{Change, Elevation, Prompt, Request, Runner},
         emulation::OperatingSystem,
         launch::{LaunchService, SessionStatus},
         managed::{CancellationToken, ManagedTools},
         model::{Game, GameEntry, InstallLocation, InstallState, LaunchSpec, SourceId},
         settings::SettingsService,
-        streaming::{
-            HostState, StreamingClient, StreamingHost,
-            client::{SETTINGS_DIR, SETTINGS_FILE},
-            host::{
-                Parts, Timing,
-                process::{ChildRunner, HostLaunch, HostRunner},
-            },
-            hosts::{ask_server_info, paired_hosts},
-            pairing::Paired,
-            play::Streams,
-            publish::Publisher,
-            secrets::HostSecrets,
+    };
+    use caskade_streaming::{
+        HostState, StreamingClient, StreamingHost,
+        client::{SETTINGS_DIR, SETTINGS_FILE},
+        elevation::{Change, Elevation, Prompt, Request, Runner},
+        host::{
+            Parts, Timing,
+            process::{ChildRunner, HostLaunch, HostRunner},
         },
+        hosts::{ask_server_info, paired_hosts},
+        pairing::Paired,
+        play::Streams,
+        publish::Publisher,
+        secrets::HostSecrets,
     };
     use std::{os::unix::fs::PermissionsExt, path::PathBuf, sync::Arc, time::Duration};
 
@@ -906,9 +902,9 @@ async fn live_linux_published_game_plays_and_stops_with_the_stream() {
             }),
             secrets: HostSecrets::memory(),
             timing: Timing::default(),
-            api_base: caskade_core::streaming::api::LOCAL.parse().unwrap(),
-            http_port: caskade_core::streaming::host::HTTP_PORT,
-            checks: Arc::new(caskade_core::streaming::host::HostChecks::here),
+            api_base: caskade_streaming::api::LOCAL.parse().unwrap(),
+            http_port: caskade_streaming::host::HTTP_PORT,
+            checks: Arc::new(caskade_streaming::host::HostChecks::here),
         },
     );
     host.set_device_name("Caskade published test");
@@ -1060,21 +1056,21 @@ async fn live_linux_pairing_survives_hosting_off_and_on() {
         AppPaths,
         bus::Bus,
         db::{LibraryStore, StreamApp},
-        elevation::{Change, Elevation, Prompt, Request, Runner},
         emulation::OperatingSystem,
         launch::LaunchService,
         managed::{CancellationToken, ManagedTools},
         settings::SettingsService,
-        streaming::{
-            HostOutcome, HostState, StreamingClient, StreamingHost,
-            api::App,
-            client::{SETTINGS_DIR, SETTINGS_FILE},
-            host::{Parts, Timing, process::ChildRunner},
-            hosts::{ask_server_info, paired_hosts},
-            pairing::Paired,
-            play::Streams,
-            secrets::HostSecrets,
-        },
+    };
+    use caskade_streaming::{
+        HostOutcome, HostState, StreamingClient, StreamingHost,
+        api::App,
+        client::{SETTINGS_DIR, SETTINGS_FILE},
+        elevation::{Change, Elevation, Prompt, Request, Runner},
+        host::{Parts, Timing, process::ChildRunner},
+        hosts::{ask_server_info, paired_hosts},
+        pairing::Paired,
+        play::Streams,
+        secrets::HostSecrets,
     };
     use std::{sync::Arc, time::Duration};
 
@@ -1108,9 +1104,9 @@ async fn live_linux_pairing_survives_hosting_off_and_on() {
             runner: Arc::new(ChildRunner::new(paths.data.join("streaming/run.json"))),
             secrets: HostSecrets::memory(),
             timing: Timing::default(),
-            api_base: caskade_core::streaming::api::LOCAL.parse().unwrap(),
-            http_port: caskade_core::streaming::host::HTTP_PORT,
-            checks: Arc::new(caskade_core::streaming::host::HostChecks::here),
+            api_base: caskade_streaming::api::LOCAL.parse().unwrap(),
+            http_port: caskade_streaming::host::HTTP_PORT,
+            checks: Arc::new(caskade_streaming::host::HostChecks::here),
         },
     );
     host.set_device_name("Caskade off and on");
@@ -1219,21 +1215,21 @@ async fn live_linux_sync_paired_devices_stream_with_no_code() {
         bus::Bus,
         db::{LibraryStore, StreamApp},
         devices::{Devices, MemoryKeyStore, Reach},
-        elevation::{Change, Elevation, Prompt, Request, Runner},
         emulation::OperatingSystem,
         launch::LaunchService,
         managed::{CancellationToken, ManagedTools},
         settings::SettingsService,
-        streaming::{
-            HostOutcome, HostState, StreamingClient, StreamingHost,
-            api::App,
-            host::{Parts, Timing, process::ChildRunner},
-            hosts::ask_server_info,
-            linked::{HostHandover, LinkedPairing},
-            pairing::Paired,
-            play::Streams,
-            secrets::HostSecrets,
-        },
+    };
+    use caskade_streaming::{
+        HostOutcome, HostState, StreamingClient, StreamingHost,
+        api::App,
+        elevation::{Change, Elevation, Prompt, Request, Runner},
+        host::{Parts, Timing, process::ChildRunner},
+        hosts::ask_server_info,
+        linked::{HostHandover, LinkedPairing},
+        pairing::Paired,
+        play::Streams,
+        secrets::HostSecrets,
     };
     use std::{
         sync::Arc,
@@ -1293,9 +1289,9 @@ async fn live_linux_sync_paired_devices_stream_with_no_code() {
             runner: Arc::new(ChildRunner::new(host_paths.data.join("streaming/run.json"))),
             secrets: HostSecrets::memory(),
             timing: Timing::default(),
-            api_base: caskade_core::streaming::api::LOCAL.parse().unwrap(),
-            http_port: caskade_core::streaming::host::HTTP_PORT,
-            checks: Arc::new(caskade_core::streaming::host::HostChecks::here),
+            api_base: caskade_streaming::api::LOCAL.parse().unwrap(),
+            http_port: caskade_streaming::host::HTTP_PORT,
+            checks: Arc::new(caskade_streaming::host::HostChecks::here),
         },
     );
     host.set_device_name("Den");
@@ -1343,7 +1339,7 @@ async fn live_linux_sync_paired_devices_stream_with_no_code() {
     let host_id = ask_server_info("127.0.0.1", 47989).await.unwrap().id;
 
     // Pairing: the code goes over sync; nobody types it.
-    let code = caskade_core::streaming::pairing::new_code().unwrap();
+    let code = caskade_streaming::pairing::new_code().unwrap();
     let pairing = tokio::spawn({
         let (client, code, name) = (client.clone(), code.clone(), name.clone());
         async move {

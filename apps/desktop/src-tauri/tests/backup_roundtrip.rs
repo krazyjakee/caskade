@@ -5,12 +5,12 @@
 //! scheduled backup; and a scheduled backup to a drive that isn't there
 //! failing without touching the last good one.
 
+use caskade_backup::{
+    BackupError, BackupSettings, Backups, CancellationToken, Component, ExportOptions, Exported,
+    NAMESPACE, ProgressFn, Schedule, restore,
+};
 use caskade_core::{
     AppPaths,
-    backup::{
-        BackupError, BackupSettings, Backups, CancellationToken, Component, ExportOptions,
-        Exported, NAMESPACE, ProgressFn, Schedule, restore,
-    },
     db::{LibraryStore, PlaytimeImport, RemoteTotal},
     model::{
         CollectionKind, Game, GameEntry, InstallLocation, InstallState, LaunchSpec, PlaySession,
@@ -120,7 +120,7 @@ async fn export(store: &LibraryStore, paths: &AppPaths, components: &[Component]
         )
         .await
         .unwrap();
-    caskade_core::backup::verify(&exported.path, &CancellationToken::new(), &|_| {}).unwrap();
+    caskade_backup::verify(&exported.path, &CancellationToken::new(), &|_| {}).unwrap();
     exported
 }
 

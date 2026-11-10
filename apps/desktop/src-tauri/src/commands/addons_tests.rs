@@ -4,11 +4,11 @@ use serde_json::json;
 use tauri::test::{mock_builder, mock_context, noop_assets};
 
 const CATALOGUE: &[u8] =
-    include_bytes!("../../../../../crates/caskade-core/src/addons/testdata/catalogue.json");
+    include_bytes!("../../../../../crates/caskade-addons/src/testdata/catalogue.json");
 const SIGNATURE: &[u8] =
-    include_bytes!("../../../../../crates/caskade-core/src/addons/testdata/catalogue.json.sig");
+    include_bytes!("../../../../../crates/caskade-addons/src/testdata/catalogue.json.sig");
 const KEY: &str =
-    include_str!("../../../../../crates/caskade-core/src/addons/testdata/test-signing.key.pub");
+    include_str!("../../../../../crates/caskade-addons/src/testdata/test-signing.key.pub");
 
 #[test]
 fn the_catalogue_reaches_the_webview_typed_and_offline() {

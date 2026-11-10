@@ -4,7 +4,7 @@
 //! its sharer says it shares; nothing is fetched until it's confirmed.
 
 use caskade_core::install::JobSnapshot;
-use caskade_core::share::{ReceivedShare, ShareExpiry, ShareInfo, ShareRecord, Shares};
+use caskade_share::{ReceivedShare, ShareExpiry, ShareInfo, ShareRecord, Shares};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use tauri::{AppHandle, Manager, Runtime, State};
@@ -166,7 +166,7 @@ pub fn setup<R: Runtime>(app: &AppHandle<R>, shares: &Shares) {
 
 /// Whether `link` is a share link (`caskade://receive?t=…`).
 pub fn is_share_link(link: &tauri::Url) -> bool {
-    caskade_core::share::is_link(link.as_str())
+    caskade_share::is_link(link.as_str())
 }
 
 /// Asks a share link's sharer what it shares, then queues it for
@@ -201,7 +201,7 @@ pub async fn queue_share_link<R: Runtime>(
 mod tests {
     use super::super::install_requests::InstallRequests;
     use crate::commands::test_ipc::invoke;
-    use caskade_core::share::{ShareContents, ShareInfo, ShareReach};
+    use caskade_share::{ShareContents, ShareInfo, ShareReach};
     use serde_json::json;
     use tauri::test::{mock_builder, mock_context, noop_assets};
 

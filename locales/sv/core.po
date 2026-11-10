@@ -114,260 +114,6 @@ msgstr "en PIN är 4 till 8 siffror"
 msgid "could not hash the PIN"
 msgstr "kunde inte hasha PIN-koden"
 
-#: crates/caskade-core/src/achievements/epic.rs
-#: crates/caskade-core/src/achievements/gog.rs
-#: crates/caskade-core/src/store_accounts/http.rs
-msgid "{store} refused the sign-in (HTTP {status})"
-msgstr "{store} nekade inloggningen (HTTP {status})"
-
-#: crates/caskade-core/src/achievements/epic.rs
-#: crates/caskade-core/src/achievements/gog.rs
-#: crates/caskade-core/src/achievements/retroachievements/mod.rs
-#: crates/caskade-core/src/achievements/steam.rs
-#: crates/caskade-core/src/store_accounts/epic.rs
-#: crates/caskade-core/src/store_accounts/gog.rs
-#: crates/caskade-core/src/store_accounts/mod.rs
-#: crates/caskade-core/src/store_accounts/steam.rs
-msgid "not signed in"
-msgstr "inte inloggad"
-
-#: crates/caskade-core/src/achievements/epic.rs
-msgid "this game uses no Epic achievements"
-msgstr "det här spelet använder inga Epic-prestationer"
-
-#: crates/caskade-core/src/achievements/epic.rs
-msgid "Epic doesn't show this account's achievements: check the account's privacy settings"
-msgstr "Epic visar inte det här kontots prestationer: kontrollera kontots sekretessinställningar"
-
-#: crates/caskade-core/src/achievements/gog.rs
-msgid "this game doesn't use GOG Galaxy's achievements"
-msgstr "det här spelet använder inte GOG Galaxys prestationer"
-
-#: crates/caskade-core/src/achievements/gog.rs
-msgid "GOG didn't renew the sign-in"
-msgstr "GOG förnyade inte inloggningen"
-
-#: crates/caskade-core/src/achievements/gog.rs
-msgid "GOG keeps no achievements for this game"
-msgstr "GOG har inga prestationer för det här spelet"
-
-#: crates/caskade-core/src/achievements/mod.rs
-msgid "Not every achievement came back; the rest show as last fetched."
-msgstr "Alla prestationer kom inte tillbaka; resten visas som de senast hämtades."
-
-#: crates/caskade-core/src/achievements/retroachievements/mod.rs
-msgid "RetroAchievements user name"
-msgstr "Användarnamn hos RetroAchievements"
-
-#: crates/caskade-core/src/achievements/retroachievements/mod.rs
-msgid "Web API key"
-msgstr "Webb-API-nyckel"
-
-#: crates/caskade-core/src/achievements/retroachievements/mod.rs
-msgid "From the Keys section of your RetroAchievements settings."
-msgstr "Från avsnittet Nycklar i dina RetroAchievements-inställningar."
-
-#: crates/caskade-core/src/achievements/retroachievements/mod.rs
-msgid "Caskade reads your progress only. Achievements are earned in an emulator core that supports RetroAchievements, signed in there."
-msgstr "Caskade läser bara dina framsteg. Prestationer tjänas in i en emulatorkärna som stöder RetroAchievements och är inloggad där."
-
-#: crates/caskade-core/src/achievements/retroachievements/mod.rs
-msgid "enter your user name and web API key"
-msgstr "ange ditt användarnamn och din webb-API-nyckel"
-
-#: crates/caskade-core/src/achievements/retroachievements/mod.rs
-msgid "RetroAchievements didn't accept that user name and key"
-msgstr "RetroAchievements godtog inte det användarnamnet och den nyckeln"
-
-#: crates/caskade-core/src/achievements/retroachievements/mod.rs
-msgid "RetroAchievements has no game {id}"
-msgstr "RetroAchievements har inget spel {id}"
-
-#: crates/caskade-core/src/achievements/retroachievements/mod.rs
-#: crates/caskade-core/src/emulation/service/games.rs
-msgid "not an emulated game"
-msgstr "inte ett emulerat spel"
-
-#: crates/caskade-core/src/achievements/retroachievements/mod.rs
-msgid "RetroAchievements doesn't cover this system"
-msgstr "RetroAchievements täcker inte det här systemet"
-
-#: crates/caskade-core/src/achievements/retroachievements/mod.rs
-msgid "RetroAchievements identifies this system's games by a hash Caskade doesn't compute: link the game by hand"
-msgstr "RetroAchievements identifierar det här systemets spel med en hash som Caskade inte beräknar: koppla spelet för hand"
-
-#: crates/caskade-core/src/achievements/retroachievements/mod.rs
-msgid "the ROM is compressed; RetroAchievements identifies what is inside: link the game by hand"
-msgstr "ROM-filen är komprimerad; RetroAchievements identifierar innehållet: koppla spelet för hand"
-
-#: crates/caskade-core/src/achievements/retroachievements/mod.rs
-msgid "the ROM is too large to be a cartridge: link the game by hand"
-msgstr "ROM-filen är för stor för att vara en kassett: koppla spelet för hand"
-
-#: crates/caskade-core/src/achievements/retroachievements/mod.rs
-msgid "the ROM couldn't be read: {why}"
-msgstr "ROM-filen kunde inte läsas: {why}"
-
-#: crates/caskade-core/src/achievements/retroachievements/mod.rs
-msgid "RetroAchievements doesn't know this ROM (hash {hash}): another revision, region or a modified copy"
-msgstr "RetroAchievements känner inte till den här ROM-filen (hash {hash}): en annan revision, region eller en ändrad kopia"
-
-#: crates/caskade-core/src/achievements/retroachievements/mod.rs
-msgid "this ROM's hash belongs to more than one RetroAchievements game: link it by hand"
-msgstr "den här ROM-filens hash hör till mer än ett RetroAchievements-spel: koppla det för hand"
-
-#: crates/caskade-core/src/achievements/retroachievements/mod.rs
-msgid "the release's ROMs are different RetroAchievements games: link it by hand"
-msgstr "utgåvans ROM-filer är olika RetroAchievements-spel: koppla det för hand"
-
-#: crates/caskade-core/src/achievements/steam.rs
-#: crates/caskade-core/src/store_accounts/steam.rs
-msgid "bad Steam API method"
-msgstr "felaktig Steam API-metod"
-
-#: crates/caskade-core/src/achievements/steam.rs
-#: crates/caskade-core/src/store_accounts/steam.rs
-msgid "Steam refused the Web API key"
-msgstr "Steam nekade Web API-nyckeln"
-
-#: crates/caskade-core/src/achievements/steam.rs
-msgid "the Steam profile's game details are private: make them public in Steam's privacy settings"
-msgstr "Steam-profilens speldetaljer är privata: gör dem offentliga i Steams sekretessinställningar"
-
-#: crates/caskade-core/src/achievements/steam.rs
-msgid "Steam keeps no achievements for this game"
-msgstr "Steam har inga prestationer för det här spelet"
-
-#: crates/caskade-core/src/achievements/steam.rs
-msgid "Steam answered HTTP {status}"
-msgstr "Steam svarade HTTP {status}"
-
-#: crates/caskade-core/src/addons/compat.rs
-msgid "{version} needs plugin API {api}; this Caskade has {host}"
-msgstr "{version} behöver plugin-API {api}; den här Caskade har {host}"
-
-#: crates/caskade-core/src/addons/compat.rs
-msgid "{version} doesn't run on this operating system"
-msgstr "{version} körs inte på det här operativsystemet"
-
-#: crates/caskade-core/src/addons/compat.rs
-msgid "Its pages work in desktop mode only."
-msgstr "Dess sidor fungerar bara i skrivbordsläge."
-
-#: crates/caskade-core/src/addons/compat.rs
-msgid "Its pages work in console mode only."
-msgstr "Dess sidor fungerar bara i konsolläge."
-
-#: crates/caskade-core/src/addons/compat.rs
-msgid "Something else is installed under the same id."
-msgstr "Något annat är installerat med samma id."
-
-#: crates/caskade-core/src/addons/package.rs
-msgid "the download's size doesn't match the catalogue"
-msgstr "nedladdningens storlek stämmer inte med katalogen"
-
-#: crates/caskade-core/src/addons/package.rs
-msgid "the download's checksum doesn't match the catalogue"
-msgstr "nedladdningens kontrollsumma stämmer inte med katalogen"
-
-#: crates/caskade-core/src/addons/package.rs
-msgid "the download failed: {error}"
-msgstr "nedladdningen misslyckades: {error}"
-
-#: crates/caskade-core/src/addons/package.rs
-msgid "the download server answered {status}"
-msgstr "nedladdningsservern svarade {status}"
-
-#: crates/caskade-core/src/addons/package.rs
-#: crates/caskade-core/src/emulation/setup/jobs.rs
-#: crates/caskade-core/src/install/downloads.rs
-#: crates/caskade-core/src/install/mod.rs
-#: crates/caskade-core/src/install/operations.rs
-#: crates/caskade-core/src/install/peer.rs
-#: crates/caskade-core/src/install/update.rs
-#: crates/caskade-core/src/managed/download.rs
-#: crates/caskade-core/src/managed/flatpak.rs
-#: crates/caskade-core/src/managed/release.rs
-msgid "cancelled"
-msgstr "avbruten"
-
-#: crates/caskade-core/src/addons/package.rs
-msgid "the download is larger than the catalogue says"
-msgstr "nedladdningen är större än katalogen anger"
-
-#: crates/caskade-core/src/addons/package.rs
-msgid "the download isn't a readable zip archive"
-msgstr "nedladdningen är inget läsbart zip-arkiv"
-
-#: crates/caskade-core/src/addons/package.rs
-msgid "the package has too many files"
-msgstr "paketet har för många filer"
-
-#: crates/caskade-core/src/addons/package.rs
-msgid "the package has an unsafe path: {path}"
-msgstr "paketet har en osäker sökväg: {path}"
-
-#: crates/caskade-core/src/addons/package.rs
-msgid "the package has a link: {path}"
-msgstr "paketet har en länk: {path}"
-
-#: crates/caskade-core/src/addons/package.rs
-msgid "the package unpacks to more than 512 MiB"
-msgstr "paketet packas upp till mer än 512 MiB"
-
-#: crates/caskade-core/src/addons/package.rs
-msgid "the package's sizes don't match its contents"
-msgstr "paketets storlekar stämmer inte med innehållet"
-
-#: crates/caskade-core/src/addons/package.rs
-msgid "the package has no readable {file}"
-msgstr "paketet har ingen läsbar {file}"
-
-#: crates/caskade-core/src/addons/package.rs
-msgid "the package provides metadata, which the catalogue doesn't offer"
-msgstr "paketet tillhandahåller metadata, vilket katalogen inte erbjuder"
-
-#: crates/caskade-core/src/addons/package.rs
-msgid "the package is {id} {version}, not {expected} {expected_version}"
-msgstr "paketet är {id} {version}, inte {expected} {expected_version}"
-
-#: crates/caskade-core/src/addons/service.rs
-msgid "the catalogue's signature doesn't match Caskade's key"
-msgstr "katalogens signatur stämmer inte med Caskades nyckel"
-
-#: crates/caskade-core/src/addons/service.rs
-msgid "the catalogue address isn't valid"
-msgstr "katalogens adress är ogiltig"
-
-#: crates/caskade-core/src/addons/service.rs
-msgid "the catalogue key can't be read"
-msgstr "katalognyckeln kan inte läsas"
-
-#: crates/caskade-core/src/addons/service.rs
-msgid "the catalogue couldn't be fetched: {error}"
-msgstr "katalogen kunde inte hämtas: {error}"
-
-#: crates/caskade-core/src/addons/service.rs
-msgid "the catalogue server answered {status}"
-msgstr "katalogservern svarade {status}"
-
-#: crates/caskade-core/src/addons/service.rs
-#: crates/caskade-core/src/addons/validate.rs
-msgid "the catalogue is larger than {mib} MiB"
-msgstr "katalogen är större än {mib} MiB"
-
-#: crates/caskade-core/src/addons/validate.rs
-msgid "the catalogue isn't readable JSON"
-msgstr "katalogen är inte läsbar JSON"
-
-#: crates/caskade-core/src/addons/validate.rs
-msgid "the catalogue is in a format this Caskade can't read; update Caskade"
-msgstr "katalogen har ett format som den här Caskade inte kan läsa; uppdatera Caskade"
-
-#: crates/caskade-core/src/addons/validate.rs
-msgid "the catalogue lists no packages"
-msgstr "katalogen listar inga paket"
-
 #: crates/caskade-core/src/artwork/cache.rs
 msgid "Preparing artwork"
 msgstr "Förbereder bilder"
@@ -380,127 +126,36 @@ msgstr "Kontrollerar bildcachen"
 msgid "Saving artwork"
 msgstr "Sparar bilder"
 
-#: crates/caskade-core/src/backup/archive.rs
-msgid "“{path}” is listed twice"
-msgstr "”{path}” finns med två gånger"
-
-#: crates/caskade-core/src/backup/archive.rs
-msgid "the backup has no library database"
-msgstr "säkerhetskopian saknar biblioteksdatabas"
-
-#: crates/caskade-core/src/backup/archive.rs
-msgid "the archive's index is damaged"
-msgstr "arkivets register är skadat"
-
-#: crates/caskade-core/src/backup/archive.rs
-msgid "the archive holds “{path}”, which its manifest doesn't list"
-msgstr "arkivet innehåller ”{path}”, som inte finns i dess manifest"
-
-#: crates/caskade-core/src/backup/archive.rs
-#: crates/caskade-core/src/backup/restore.rs
-msgid "“{path}” is missing"
-msgstr "”{path}” saknas"
-
-#: crates/caskade-core/src/backup/archive.rs
-#: crates/caskade-core/src/backup/restore.rs
-msgid "“{path}” doesn't match its checksum"
-msgstr "”{path}” stämmer inte med sin kontrollsumma"
-
-#: crates/caskade-core/src/backup/archive.rs
-msgid "the archive holds too many files"
-msgstr "arkivet innehåller för många filer"
-
-#: crates/caskade-core/src/backup/archive.rs
-msgid "this isn't a Caskade backup"
-msgstr "det här är ingen säkerhetskopia från Caskade"
-
-#: crates/caskade-core/src/backup/archive.rs
-msgid "the backup's manifest is too large"
-msgstr "säkerhetskopians manifest är för stort"
-
-#: crates/caskade-core/src/backup/archive.rs
-msgid "the backup's manifest is damaged"
-msgstr "säkerhetskopians manifest är skadat"
-
-#: crates/caskade-core/src/backup/archive.rs
-msgid "the backup holds an unsafe path: “{path}”"
-msgstr "säkerhetskopian innehåller en osäker sökväg: ”{path}”"
-
-#: crates/caskade-core/src/backup/archive.rs
-msgid "the file isn't a readable backup archive"
-msgstr "filen är inget läsbart säkerhetskopieringsarkiv"
-
-#: crates/caskade-core/src/backup/archive.rs
-#: crates/caskade-core/src/backup/restore.rs
-msgid "the backup archive is damaged"
-msgstr "säkerhetskopians arkiv är skadat"
-
-#: crates/caskade-core/src/backup/export.rs
-msgid "the backup read back differently from how it was written"
-msgstr "säkerhetskopian lästes tillbaka annorlunda än den skrevs"
-
-#: crates/caskade-core/src/backup/mod.rs
+#: crates/caskade-core/src/backup_error.rs
 msgid "Another backup or restore is under way."
 msgstr "En annan säkerhetskopiering eller återställning pågår."
 
-#: crates/caskade-core/src/backup/mod.rs
+#: crates/caskade-core/src/backup_error.rs
 msgid "The backup was cancelled."
 msgstr "Säkerhetskopieringen avbröts."
 
-#: crates/caskade-core/src/backup/mod.rs
+#: crates/caskade-core/src/backup_error.rs
 msgid "The backup folder “{path}” isn't there. Connect its drive or choose another folder."
 msgstr "Mappen för säkerhetskopior ”{path}” finns inte. Anslut dess enhet eller välj en annan mapp."
 
-#: crates/caskade-core/src/backup/mod.rs
+#: crates/caskade-core/src/backup_error.rs
 msgid "There isn't enough free space for the backup: it needs about {needed} MB and {available} MB are free."
 msgstr "Det finns inte tillräckligt med ledigt utrymme för säkerhetskopian: den behöver ungefär {needed} MB och {available} MB är lediga."
 
-#: crates/caskade-core/src/backup/mod.rs
+#: crates/caskade-core/src/backup_error.rs
 msgid "The backup is damaged: {why}."
 msgstr "Säkerhetskopian är skadad: {why}."
 
-#: crates/caskade-core/src/backup/mod.rs
+#: crates/caskade-core/src/backup_error.rs
 msgid "This backup was made by a newer version of Caskade."
 msgstr "Den här säkerhetskopian gjordes av en nyare version av Caskade."
-
-#: crates/caskade-core/src/backup/peers.rs
-msgid "That backup isn't on this device."
-msgstr "Den säkerhetskopian finns inte på den här enheten."
-
-#: crates/caskade-core/src/backup/peers.rs
-msgid "The backup didn't arrive from the other device. Make sure it's on and in reach, then try again."
-msgstr "Säkerhetskopian kom inte fram från den andra enheten. Se till att den är på och inom räckhåll och försök igen."
-
-#: crates/caskade-core/src/backup/peers.rs
-msgid "The backup that arrived can't be read."
-msgstr "Säkerhetskopian som kom fram kan inte läsas."
-
-#: crates/caskade-core/src/backup/restore.rs
-msgid "its database has no migration record"
-msgstr "dess databas saknar migreringsregister"
-
-#: crates/caskade-core/src/backup/restore.rs
-msgid "its database schema {version} differs from this Caskade's"
-msgstr "dess databasschema {version} skiljer sig från denna Caskades"
-
-#: crates/caskade-core/src/backup/restore.rs
-msgid "the restore journal can't be read"
-msgstr "återställningsjournalen kan inte läsas"
-
-#: crates/caskade-core/src/backup/restore.rs
-msgid "the restore was interrupted"
-msgstr "återställningen avbröts"
-
-#: crates/caskade-core/src/backup/snapshot.rs
-msgid "the library database failed its integrity check: {why}"
-msgstr "biblioteksdatabasen klarade inte sin integritetskontroll: {why}"
 
 #: crates/caskade-core/src/browse.rs
 msgid "{path} is not an absolute path"
 msgstr "{path} är inte en absolut sökväg"
 
 #: crates/caskade-core/src/browse.rs
-#: crates/caskade-core/src/streaming/client.rs
+#: crates/caskade-streaming/src/client.rs
 msgid "there is no home folder"
 msgstr "det finns ingen hemmapp"
 
@@ -855,42 +510,6 @@ msgstr "den andra enheten tar inte emot parkoppling just nu"
 msgid "that isn't a device id"
 msgstr "det där är inte ett enhets-id"
 
-#: crates/caskade-core/src/elevation/linux.rs
-msgid "the administrator step failed and was undone: {error}"
-msgstr "administratörssteget misslyckades och ångrades: {error}"
-
-#: crates/caskade-core/src/elevation/linux.rs
-msgid "couldn't ask for an administrator (pkexec): {error}"
-msgstr "kunde inte fråga efter en administratör (pkexec): {error}"
-
-#: crates/caskade-core/src/elevation/mod.rs
-msgid "The administrator step was cancelled, so nothing changed."
-msgstr "Administratörssteget avbröts, så inget ändrades."
-
-#: crates/caskade-core/src/elevation/mod.rs
-msgid "The administrator step wasn't allowed, so nothing changed. It needs an administrator's password."
-msgstr "Administratörssteget tilläts inte, så inget ändrades. Det kräver en administratörs lösenord."
-
-#: crates/caskade-core/src/elevation/mod.rs
-msgid "the record of administrator steps is unreadable: {error}"
-msgstr "registret över administratörssteg går inte att läsa: {error}"
-
-#: crates/caskade-core/src/elevation/mod.rs
-msgid "this system doesn't need or support these administrator steps"
-msgstr "det här systemet behöver inte eller stöder inte de här administratörsstegen"
-
-#: crates/caskade-core/src/elevation/windows.rs
-msgid "the streaming host isn't installed where Caskade keeps it"
-msgstr "streamingvärden är inte installerad där Caskade förvarar den"
-
-#: crates/caskade-core/src/elevation/windows.rs
-msgid "the administrator step failed and was undone"
-msgstr "administratörssteget misslyckades och ångrades"
-
-#: crates/caskade-core/src/elevation/windows.rs
-msgid "Caskade can't find its own program"
-msgstr "Caskade hittar inte sitt eget program"
-
 #: crates/caskade-core/src/emulation/catalog.rs
 msgid "the ROM file name {file} starts with `-`, which the emulator would read as an option; rename the file"
 msgstr "ROM-filnamnet {file} börjar med `-`, vilket emulatorn skulle läsa som ett alternativ; byt namn på filen"
@@ -1142,6 +761,11 @@ msgid "The ROM is missing: {path}"
 msgstr "ROM-filen saknas: {path}"
 
 #: crates/caskade-core/src/emulation/service/games.rs
+#: crates/caskade-achievements/src/achievements/retroachievements/mod.rs
+msgid "not an emulated game"
+msgstr "inte ett emulerat spel"
+
+#: crates/caskade-core/src/emulation/service/games.rs
 #: crates/caskade-core/src/emulation/service/platforms.rs
 msgid "That profile doesn't run this platform."
 msgstr "Den profilen kör inte den här plattformen."
@@ -1259,6 +883,19 @@ msgstr "jobbet finns inte längre"
 #: crates/caskade-core/src/emulation/setup/jobs.rs
 msgid "no install source on this system"
 msgstr "ingen installationskälla på det här systemet"
+
+#: crates/caskade-core/src/emulation/setup/jobs.rs
+#: crates/caskade-core/src/install/downloads.rs
+#: crates/caskade-core/src/install/mod.rs
+#: crates/caskade-core/src/install/operations.rs
+#: crates/caskade-core/src/install/peer.rs
+#: crates/caskade-core/src/install/update.rs
+#: crates/caskade-core/src/managed/download.rs
+#: crates/caskade-core/src/managed/flatpak.rs
+#: crates/caskade-core/src/managed/release.rs
+#: crates/caskade-addons/src/package.rs
+msgid "cancelled"
+msgstr "avbruten"
 
 #: crates/caskade-core/src/emulation/setup/jobs.rs
 msgid "{emulator}'s download doesn't contain the emulator"
@@ -3140,134 +2777,6 @@ msgstr "ogiltiga miniatyrmått"
 msgid "library page limit exceeds 1000"
 msgstr "bibliotekets sidgräns överskrider 1000"
 
-#: crates/caskade-core/src/notifications/mod.rs
-msgctxt "library source"
-msgid "ROM folders"
-msgstr "ROM-mappar"
-
-#: crates/caskade-core/src/notifications/mod.rs
-msgctxt "library source"
-msgid "Web games"
-msgstr "Webbspel"
-
-#: crates/caskade-core/src/notifications/mod.rs
-msgctxt "library source"
-msgid "Installs"
-msgstr "Installationer"
-
-#: crates/caskade-core/src/notifications/mod.rs
-msgctxt "library source"
-msgid "Desktop entries"
-msgstr "Skrivbordsposter"
-
-#: crates/caskade-core/src/notifications/mod.rs
-msgctxt "library source"
-msgid "Other devices"
-msgstr "Andra enheter"
-
-#: crates/caskade-core/src/notifications/mod.rs
-msgctxt "library source"
-msgid "Store accounts"
-msgstr "Butikskonton"
-
-#: crates/caskade-core/src/notifications/mod.rs
-msgctxt "library source"
-msgid "Added by hand"
-msgstr "Tillagda för hand"
-
-#: crates/caskade-core/src/notifications/mod.rs
-msgctxt "library source"
-msgid "Other"
-msgstr "Övrigt"
-
-#: crates/caskade-core/src/notifications/mod.rs
-msgid "{title} added"
-msgstr "{title} har lagts till"
-
-#: crates/caskade-core/src/notifications/mod.rs
-msgid "{n} game added"
-msgid_plural "{n} games added"
-msgstr[0] "{n} spel har lagts till"
-msgstr[1] "{n} spel har lagts till"
-
-#: crates/caskade-core/src/notifications/mod.rs
-msgctxt "games added from a library source"
-msgid "{source} {count}"
-msgstr "{source} {count}"
-
-#: crates/caskade-core/src/notifications/mod.rs
-msgctxt "list of library sources"
-msgid "{first} · {rest}"
-msgstr "{first} · {rest}"
-
-#: crates/caskade-core/src/notifications/service.rs
-msgid "{n} update available"
-msgid_plural "{n} updates available"
-msgstr[0] "{n} uppdatering tillgänglig"
-msgstr[1] "{n} uppdateringar tillgängliga"
-
-#: crates/caskade-core/src/notifications/service.rs
-msgid "Caskade {version} is available"
-msgstr "Caskade {version} är tillgänglig"
-
-#: crates/caskade-core/src/notifications/service.rs
-msgid "Download and install it from Settings → General."
-msgstr "Ladda ner och installera den under Inställningar → Allmänt."
-
-#: crates/caskade-core/src/notifications/service.rs
-msgid "Plugin {plugin} was turned off"
-msgstr "Tillägget {plugin} stängdes av"
-
-#: crates/caskade-core/src/notifications/service.rs
-msgid "{recipient} received {title}"
-msgstr "{recipient} tog emot {title}"
-
-#: crates/caskade-core/src/notifications/service.rs
-msgid "{title} arrived from {sharer}"
-msgstr "{title} kom från {sharer}"
-
-#: crates/caskade-core/src/notifications/service.rs
-msgid "A script after {game} started failed"
-msgstr "Ett skript efter att {game} startade misslyckades"
-
-#: crates/caskade-core/src/notifications/service.rs
-msgid "A cleanup script after {game} failed"
-msgstr "Ett städskript efter {game} misslyckades"
-
-#: crates/caskade-core/src/notifications/service.rs
-msgid "Achievement unlocked in {game}"
-msgid_plural "{n} achievements unlocked in {game}"
-msgstr[0] "Prestation upplåst i {game}"
-msgstr[1] "{n} prestationer upplåsta i {game}"
-
-#: crates/caskade-core/src/notifications/service.rs
-msgid "{names} ({provider}, {account})"
-msgstr "{names} ({provider}, {account})"
-
-#: crates/caskade-core/src/notifications/service.rs
-msgid "{game} couldn't install"
-msgstr "{game} kunde inte installeras"
-
-#: crates/caskade-core/src/notifications/service.rs
-msgid "{game} couldn't update"
-msgstr "{game} kunde inte uppdateras"
-
-#: crates/caskade-core/src/notifications/service.rs
-msgid "{game} couldn't uninstall"
-msgstr "{game} kunde inte avinstalleras"
-
-#: crates/caskade-core/src/notifications/service.rs
-msgid "{game} couldn't move"
-msgstr "{game} kunde inte flyttas"
-
-#: crates/caskade-core/src/notifications/service.rs
-msgid "{game} couldn't check"
-msgstr "{game} kunde inte kontrolleras"
-
-#: crates/caskade-core/src/notifications/service.rs
-msgid "{game} couldn't be copied"
-msgstr "{game} kunde inte kopieras"
-
 #: crates/caskade-core/src/paths.rs
 msgid "couldn't create “{dir}”: {error}"
 msgstr "kunde inte skapa ”{dir}”: {error}"
@@ -3504,7 +3013,7 @@ msgstr "den här versionen saknar nätverksstöd"
 
 #: crates/caskade-core/src/romm/secrets.rs
 #: crates/caskade-core/src/store_accounts/secrets.rs
-#: crates/caskade-core/src/streaming/secrets.rs
+#: crates/caskade-streaming/src/secrets.rs
 msgid "system keychain: {error}"
 msgstr "systemets nyckelring: {error}"
 
@@ -4144,128 +3653,6 @@ msgctxt "settings"
 msgid "Maximum simultaneous downloads. Active downloads finish when this limit is lowered."
 msgstr "Högsta antal samtidiga nedladdningar. Pågående nedladdningar slutförs när gränsen sänks."
 
-#: crates/caskade-core/src/share/items.rs
-msgid "saves aren't available"
-msgstr "sparningar är inte tillgängliga"
-
-#: crates/caskade-core/src/share/items.rs
-msgid "that save isn't here any more"
-msgstr "den sparningen finns inte här längre"
-
-#: crates/caskade-core/src/share/items.rs
-msgid "that save's files haven't all arrived on this device"
-msgstr "alla filer i den sparningen har inte kommit fram till den här enheten"
-
-#: crates/caskade-core/src/share/items.rs
-msgid "that save's files are only where this device keeps them, so they can't go elsewhere"
-msgstr "den sparningens filer finns bara där den här enheten har dem, så de kan inte flyttas någon annanstans"
-
-#: crates/caskade-core/src/share/items.rs
-#: crates/caskade-core/src/transfer/web.rs
-msgid "that isn't a web game"
-msgstr "det är inte ett webbspel"
-
-#: crates/caskade-core/src/share/items.rs
-msgid "save it for offline play first: only an offline copy can be shared"
-msgstr "spara det för spel utan uppkoppling först: bara en offlinekopia kan delas"
-
-#: crates/caskade-core/src/share/items.rs
-#: crates/caskade-core/src/transfer/mod.rs
-msgid "the game's storage isn't available"
-msgstr "spelets lagring är inte tillgänglig"
-
-#: crates/caskade-core/src/share/items.rs
-#: crates/caskade-core/src/transfer/mod.rs
-msgid "the offline copy's files aren't there"
-msgstr "offlinekopians filer finns inte där"
-
-#: crates/caskade-core/src/share/items.rs
-#: crates/caskade-core/src/transfer/rom.rs
-msgid "this share's description is damaged"
-msgstr "den här delningens beskrivning är skadad"
-
-#: crates/caskade-core/src/share/items.rs
-#: crates/caskade-core/src/share/mod.rs
-msgid "this share has no game"
-msgstr "den här delningen har inget spel"
-
-#: crates/caskade-core/src/share/items.rs
-msgid "a file of that save isn't on this device any more"
-msgstr "en fil i den sparningen finns inte på den här enheten längre"
-
-#: crates/caskade-core/src/share/items.rs
-msgid "a collection has no files to receive"
-msgstr "en samling har inga filer att ta emot"
-
-#: crates/caskade-core/src/share/items.rs
-msgid "that link doesn't share a collection"
-msgstr "den länken delar ingen samling"
-
-#: crates/caskade-core/src/share/items.rs
-msgid "Shared by {sharer}"
-msgstr "Delad av {sharer}"
-
-#: crates/caskade-core/src/share/mod.rs
-#: crates/caskade-core/src/transfer/mod.rs
-msgid "that game isn't installed on this device"
-msgstr "det spelet är inte installerat på den här enheten"
-
-#: crates/caskade-core/src/share/mod.rs
-msgid "this share has stopped; share the game again for a new link"
-msgstr "den här delningen har stoppats; dela spelet igen för en ny länk"
-
-#: crates/caskade-core/src/share/mod.rs
-msgid "this share's link is damaged"
-msgstr "den här delningens länk är skadad"
-
-#: crates/caskade-core/src/share/mod.rs
-msgid "stop sharing it first"
-msgstr "sluta dela det först"
-
-#: crates/caskade-core/src/share/mod.rs
-msgid "there's no such share"
-msgstr "det finns ingen sådan delning"
-
-#: crates/caskade-core/src/share/receive.rs
-msgid "This link expired on {date}. Ask whoever shared it for a new one."
-msgstr "Den här länken gick ut {date}. Be den som delade den om en ny."
-
-#: crates/caskade-core/src/share/receive.rs
-msgid "This link doesn't work any more: the share was stopped or has expired. Ask whoever shared it for a new one."
-msgstr "Den här länken fungerar inte längre: delningen stoppades eller har gått ut. Be den som delade den om en ny."
-
-#: crates/caskade-core/src/share/receive.rs
-msgid "Can't reach whoever shared this: their Caskade may be closed or offline. Caskade keeps trying."
-msgstr "Kan inte nå den som delade det här: personens Caskade kan vara stängt eller offline. Caskade fortsätter att försöka."
-
-#: crates/caskade-core/src/share/receive.rs
-msgid "Only a relay reaches {sharer}'s computer: the game waits for a direct connection"
-msgstr "Bara ett relä når {sharer}s dator: spelet väntar på en direkt anslutning"
-
-#: crates/caskade-core/src/share/receive.rs
-msgid "that isn't a Caskade share link"
-msgstr "det där är inte en delningslänk från Caskade"
-
-#: crates/caskade-core/src/share/receive.rs
-msgid "This Caskade can't receive what that link shares. Update Caskade, then try again."
-msgstr "Den här Caskade kan inte ta emot det som länken delar. Uppdatera Caskade och försök sedan igen."
-
-#: crates/caskade-core/src/share/receive.rs
-msgid "That link shares a collection: add it to your collections instead."
-msgstr "Länken delar en samling: lägg till den bland dina samlingar i stället."
-
-#: crates/caskade-core/src/share/receive.rs
-msgid "that share isn't here any more"
-msgstr "den delningen finns inte här längre"
-
-#: crates/caskade-core/src/share/receive.rs
-msgid "it's here already: it can help others only if that's chosen while it arrives"
-msgstr "det finns redan här: det kan bara hjälpa andra om det väljs medan det kommer fram"
-
-#: crates/caskade-core/src/share/receive.rs
-msgid "there isn't enough room for the game: {short} more is needed"
-msgstr "det finns inte tillräckligt med plats för spelet: {short} till behövs"
-
 #: crates/caskade-core/src/storage/catalogue.rs
 msgid "storage catalogue supports at most 128 locations"
 msgstr "lagringskatalogen stöder högst 128 platser"
@@ -4466,6 +3853,17 @@ msgstr "Epic Games godtog inte koden; logga in igen för en ny"
 msgid "it can't be renewed"
 msgstr "den kan inte förnyas"
 
+#: crates/caskade-core/src/store_accounts/epic.rs
+#: crates/caskade-core/src/store_accounts/gog.rs
+#: crates/caskade-core/src/store_accounts/mod.rs
+#: crates/caskade-core/src/store_accounts/steam.rs
+#: crates/caskade-achievements/src/achievements/epic.rs
+#: crates/caskade-achievements/src/achievements/gog.rs
+#: crates/caskade-achievements/src/achievements/retroachievements/mod.rs
+#: crates/caskade-achievements/src/achievements/steam.rs
+msgid "not signed in"
+msgstr "inte inloggad"
+
 #: crates/caskade-core/src/store_accounts/gog.rs
 msgid "bad GOG address"
 msgstr "felaktig GOG-adress"
@@ -4485,6 +3883,12 @@ msgstr "GOG godtog inte koden; logga in igen för en ny"
 #: crates/caskade-core/src/store_accounts/gog.rs
 msgid "GOG didn't sign the account in"
 msgstr "GOG loggade inte in kontot"
+
+#: crates/caskade-core/src/store_accounts/http.rs
+#: crates/caskade-achievements/src/achievements/epic.rs
+#: crates/caskade-achievements/src/achievements/gog.rs
+msgid "{store} refused the sign-in (HTTP {status})"
+msgstr "{store} nekade inloggningen (HTTP {status})"
 
 #: crates/caskade-core/src/store_accounts/http.rs
 msgid "{store} sent too large an answer"
@@ -4579,6 +3983,11 @@ msgid "that account belongs to another store"
 msgstr "kontot hör till en annan butik"
 
 #: crates/caskade-core/src/store_accounts/steam.rs
+#: crates/caskade-achievements/src/achievements/steam.rs
+msgid "bad Steam API method"
+msgstr "felaktig Steam API-metod"
+
+#: crates/caskade-core/src/store_accounts/steam.rs
 msgid "Steam keeps this profile's game details private. In Steam, set Privacy Settings → Game details to Public, or use a Web API key from this same account."
 msgstr "Steam håller den här profilens speldetaljer privata. Ställ in Sekretessinställningar → Speldetaljer på Offentlig i Steam, eller använd en Web API-nyckel från samma konto."
 
@@ -4607,188 +4016,17 @@ msgid "enter your Steam profile and Web API key"
 msgstr "ange din Steam-profil och Web API-nyckel"
 
 #: crates/caskade-core/src/store_accounts/steam.rs
+#: crates/caskade-achievements/src/achievements/steam.rs
+msgid "Steam refused the Web API key"
+msgstr "Steam nekade Web API-nyckeln"
+
+#: crates/caskade-core/src/store_accounts/steam.rs
 msgid "Steam has no profile called “{profile}”"
 msgstr "Steam har ingen profil som heter ”{profile}”"
 
 #: crates/caskade-core/src/store_accounts/steam.rs
 msgid "Steam has no profile with that SteamID"
 msgstr "Steam har ingen profil med det SteamID:t"
-
-#: crates/caskade-core/src/streaming/api.rs
-msgid "the streaming host's certificate is unreadable: {error}"
-msgstr "streamingvärdens certifikat går inte att läsa: {error}"
-
-#: crates/caskade-core/src/streaming/api.rs
-msgid "the streaming host refused Caskade's sign-in"
-msgstr "streamingvärden nekade Caskades inloggning"
-
-#: crates/caskade-core/src/streaming/api.rs
-msgid "the streaming host answered {status}"
-msgstr "streamingvärden svarade {status}"
-
-#: crates/caskade-core/src/streaming/api.rs
-msgid "the streaming host didn't say its version"
-msgstr "streamingvärden angav inte sin version"
-
-#: crates/caskade-core/src/streaming/client.rs
-msgid "Getting streaming ready"
-msgstr "Gör streaming redo"
-
-#: crates/caskade-core/src/streaming/client.rs
-msgid "streaming couldn't be set up"
-msgstr "streaming kunde inte konfigureras"
-
-#: crates/caskade-core/src/streaming/client.rs
-msgid "{address} isn't answering"
-msgstr "{address} svarar inte"
-
-#: crates/caskade-core/src/streaming/client.rs
-msgid "This device is streaming. Update once the game ends."
-msgstr "Den här enheten streamar. Uppdatera när spelet är slut."
-
-#: crates/caskade-core/src/streaming/client.rs
-msgid "Updating streaming to this device"
-msgstr "Uppdaterar streaming till den här enheten"
-
-#: crates/caskade-core/src/streaming/gamepads.rs
-msgid "the controller driver's download wasn't the expected file"
-msgstr "nedladdningen av handkontrollsdrivrutinen var inte den förväntade filen"
-
-#: crates/caskade-core/src/streaming/gamestream.rs
-msgid "the device didn't stop its game"
-msgstr "enheten stoppade inte sitt spel"
-
-#: crates/caskade-core/src/streaming/gamestream.rs
-msgid "the device no longer knows this one"
-msgstr "enheten känner inte längre till den här enheten"
-
-#: crates/caskade-core/src/streaming/gamestream.rs
-msgid "the wake-up message couldn't be sent"
-msgstr "väckningsmeddelandet kunde inte skickas"
-
-#: crates/caskade-core/src/streaming/host/mod.rs
-msgid "Other devices can't reach this PC while Windows treats its network as public. Set the network to private in Windows Settings → Network & internet."
-msgstr "Andra enheter kan inte nå den här datorn så länge Windows behandlar nätverket som offentligt. Ändra nätverket till privat i Windows-inställningar → Nätverk och internet."
-
-#: crates/caskade-core/src/streaming/host/mod.rs
-msgid "This device has no screen for other devices to see. Connect a monitor or a display dummy plug."
-msgstr "Den här enheten har ingen skärm som andra enheter kan se. Anslut en bildskärm eller en dummykontakt för skärm."
-
-#: crates/caskade-core/src/streaming/host/mod.rs
-msgid "Controllers on other devices won't work here: the controller driver isn't answering. Repair may fix it."
-msgstr "Handkontroller på andra enheter fungerar inte här: handkontrollsdrivrutinen svarar inte. Reparera kan lösa det."
-
-#: crates/caskade-core/src/streaming/host/mod.rs
-msgid "Controllers on other devices won't work here until Repair sets them up."
-msgstr "Handkontroller på andra enheter fungerar inte här förrän Reparera har konfigurerat dem."
-
-#: crates/caskade-core/src/streaming/host/mod.rs
-msgid "Streaming isn't working on this device"
-msgstr "Streaming fungerar inte på den här enheten"
-
-#: crates/caskade-core/src/streaming/host/mod.rs
-msgid "this system's streaming host can't be run by Caskade yet"
-msgstr "Caskade kan inte köra det här systemets streamingvärd än"
-
-#: crates/caskade-core/src/streaming/host/mod.rs
-msgid "the streaming host's sign-in couldn't be set"
-msgstr "streamingvärdens inloggning kunde inte ställas in"
-
-#: crates/caskade-core/src/streaming/host/mod.rs
-msgid "this device can't host game streams"
-msgstr "den här enheten kan inte vara värd för spelstreaming"
-
-#: crates/caskade-core/src/streaming/host/mod.rs
-msgid "Setting up streaming from this device"
-msgstr "Konfigurerar streaming från den här enheten"
-
-#: crates/caskade-core/src/streaming/host/mod.rs
-msgid "The streaming set up on this device before Caskade is updated the way it was installed."
-msgstr "Streamingen som konfigurerades på den här enheten före Caskade uppdateras på det sätt den installerades."
-
-#: crates/caskade-core/src/streaming/host/mod.rs
-msgid "A device is streaming from this one. Update once the game ends."
-msgstr "En enhet streamar från den här. Uppdatera när spelet är slut."
-
-#: crates/caskade-core/src/streaming/host/mod.rs
-msgid "Updating streaming from this device"
-msgstr "Uppdaterar streaming från den här enheten"
-
-#: crates/caskade-core/src/streaming/host/mod.rs
-msgid "Repairing streaming from this device"
-msgstr "Reparerar streaming från den här enheten"
-
-#: crates/caskade-core/src/streaming/host/mod.rs
-msgid "Caskade can't find the certificate of the streaming already set up here"
-msgstr "Caskade hittar inte certifikatet för den streaming som redan är konfigurerad här"
-
-#: crates/caskade-core/src/streaming/host/mod.rs
-msgid "That user name and password didn't work"
-msgstr "Användarnamnet och lösenordet fungerade inte"
-
-#: crates/caskade-core/src/streaming/host/mod.rs
-msgid "The code is four digits"
-msgstr "Koden består av fyra siffror"
-
-#: crates/caskade-core/src/streaming/host/process.rs
-msgid "the streaming host didn't start"
-msgstr "streamingvärden startade inte"
-
-#: crates/caskade-core/src/streaming/hosts.rs
-msgid "{address} isn't a device's address"
-msgstr "{address} är inte en enhets adress"
-
-#: crates/caskade-core/src/streaming/linked.rs
-msgid "the pairing request didn't arrive"
-msgstr "parkopplingsbegäran kom inte fram"
-
-#: crates/caskade-core/src/streaming/pairing.rs
-msgid "the device that answered isn't the one asked to pair"
-msgstr "enheten som svarade är inte den som ombads parkoppla"
-
-#: crates/caskade-core/src/streaming/play.rs
-msgid "{device} no longer knows this device. Pair them again in Settings → Streaming."
-msgstr "{device} känner inte längre till den här enheten. Parkoppla dem igen i Inställningar → Streaming."
-
-#: crates/caskade-core/src/streaming/play.rs
-msgid "{device} no longer offers {game}."
-msgstr "{device} erbjuder inte längre {game}."
-
-#: crates/caskade-core/src/streaming/play.rs
-msgid "{device} isn't answering. Check that it's switched on and on this network."
-msgstr "{device} svarar inte. Kontrollera att den är påslagen och i det här nätverket."
-
-#: crates/caskade-core/src/streaming/play.rs
-msgid "{device} didn't wake up. Check that it's plugged in and on this network."
-msgstr "{device} vaknade inte. Kontrollera att den är ansluten till ström och i det här nätverket."
-
-#: crates/caskade-core/src/streaming/play.rs
-msgid "The other device"
-msgstr "Den andra enheten"
-
-#: crates/caskade-core/src/streaming/play.rs
-msgid "{device} couldn't start {game}."
-msgstr "{device} kunde inte starta {game}."
-
-#: crates/caskade-core/src/streaming/play.rs
-msgid "{device} is playing a game another device started. Stop it there first."
-msgstr "{device} spelar ett spel som en annan enhet startade. Stoppa det där först."
-
-#: crates/caskade-core/src/streaming/play.rs
-msgid "Streaming from {device} failed."
-msgstr "Streaming från {device} misslyckades."
-
-#: crates/caskade-core/src/streaming/play.rs
-msgid "Streaming is busy with another device. Try again in a moment."
-msgstr "Streaming är upptagen med en annan enhet. Försök igen om en stund."
-
-#: crates/caskade-core/src/streaming/play.rs
-msgid "{device} stopped answering. Try again in a moment."
-msgstr "{device} slutade svara. Försök igen om en stund."
-
-#: crates/caskade-core/src/streaming/play.rs
-msgid "{device} didn't stop its game. Try again in a moment."
-msgstr "{device} stoppade inte sitt spel. Försök igen om en stund."
 
 #: crates/caskade-core/src/sync/blobs.rs
 #: crates/caskade-core/src/sync/exchange.rs
@@ -4804,87 +4042,6 @@ msgstr "den andra enheten skickade något i fel ordning"
 msgid "the other device didn't finish"
 msgstr "den andra enheten blev inte klar"
 
-#: crates/caskade-core/src/system_stats/aggregate.rs
-msgctxt "disk name"
-msgid "System"
-msgstr "System"
-
-#: crates/caskade-core/src/system_stats/aggregate.rs
-msgid "Removable disk"
-msgstr "Flyttbar disk"
-
-#: crates/caskade-core/src/system_stats/aggregate.rs
-msgid "Local disk"
-msgstr "Lokal disk"
-
-#: crates/caskade-core/src/system_stats/gpu.rs
-msgid "AMD GPU"
-msgstr "AMD-grafikkort"
-
-#: crates/caskade-core/src/system_stats/gpu.rs
-msgid "Intel GPU"
-msgstr "Intel-grafikkort"
-
-#: crates/caskade-core/src/system_stats/gpu.rs
-msgid "NVIDIA GPU"
-msgstr "NVIDIA-grafikkort"
-
-#: crates/caskade-core/src/system_stats/gpu.rs
-msgid "GPU"
-msgstr "Grafikkort"
-
-#: crates/caskade-core/src/system_stats/gpu.rs
-msgid "nvidia-smi didn't report this GPU."
-msgstr "nvidia-smi rapporterade inte det här grafikkortet."
-
-#: crates/caskade-core/src/system_stats/gpu.rs
-msgid "Intel's driver doesn't report GPU usage to apps."
-msgstr "Intels drivrutin rapporterar inte grafikkortets användning till program."
-
-#: crates/caskade-core/src/system_stats/gpu.rs
-msgid "This GPU's driver doesn't report its usage."
-msgstr "Det här grafikkortets drivrutin rapporterar inte dess användning."
-
-#: crates/caskade-core/src/system_stats/gpu.rs
-msgid "The NVIDIA driver doesn't report this GPU's usage."
-msgstr "NVIDIA-drivrutinen rapporterar inte det här grafikkortets användning."
-
-#: crates/caskade-core/src/system_stats/gpu.rs
-msgid "macOS doesn't report GPU usage to apps."
-msgstr "macOS rapporterar inte grafikkortets användning till program."
-
-#: crates/caskade-core/src/system_stats/gpu.rs
-msgid "GPU usage on Windows comes from NVIDIA's nvidia-smi; no NVIDIA GPU answered."
-msgstr "Grafikkortets användning på Windows kommer från NVIDIA:s nvidia-smi; inget NVIDIA-grafikkort svarade."
-
-#: crates/caskade-core/src/system_stats/gpu.rs
-msgid "No GPU found."
-msgstr "Inget grafikkort hittades."
-
-#: crates/caskade-core/src/system_stats/gpu.rs
-msgid "GPU usage isn't available on this system."
-msgstr "Grafikkortets användning är inte tillgänglig på det här systemet."
-
-#: crates/caskade-core/src/system_stats/gpu.rs
-msgid "Install NVIDIA's nvidia-smi to see this GPU's usage."
-msgstr "Installera NVIDIA:s nvidia-smi för att se det här grafikkortets användning."
-
-#: crates/caskade-core/src/system_stats/gpu.rs
-msgid "nvidia-smi didn't start: {error}"
-msgstr "nvidia-smi startade inte: {error}"
-
-#: crates/caskade-core/src/system_stats/gpu.rs
-msgid "nvidia-smi stopped."
-msgstr "nvidia-smi stoppades."
-
-#: crates/caskade-core/src/system_stats/gpu.rs
-msgid "Waiting for nvidia-smi's first reading."
-msgstr "Väntar på första avläsningen från nvidia-smi."
-
-#: crates/caskade-core/src/system_stats/mod.rs
-msgid "This sample couldn't be read."
-msgstr "Det här provet kunde inte läsas."
-
 #: crates/caskade-core/src/themes.rs
 msgid "This theme isn't installed."
 msgstr "Det här temat är inte installerat."
@@ -4896,6 +4053,11 @@ msgstr "Temat {name} kan inte användas: {problem}"
 #: crates/caskade-core/src/themes.rs
 msgid "The theme {name} can't be applied: it is invalid"
 msgstr "Temat {name} kan inte användas: det är ogiltigt"
+
+#: crates/caskade-core/src/transfer/mod.rs
+#: crates/caskade-share/src/lib.rs
+msgid "that game isn't installed on this device"
+msgstr "det spelet är inte installerat på den här enheten"
 
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "the other device didn't take the copy"
@@ -4918,12 +4080,22 @@ msgid "an emulated game goes as its ROM files, not its folder"
 msgstr "ett emulerat spel skickas som sina ROM-filer, inte sin mapp"
 
 #: crates/caskade-core/src/transfer/mod.rs
+#: crates/caskade-share/src/items.rs
+msgid "the game's storage isn't available"
+msgstr "spelets lagring är inte tillgänglig"
+
+#: crates/caskade-core/src/transfer/mod.rs
 msgid "it starts through its store's launcher here; install it from the store there"
 msgstr "här startar det via butikens startprogram; installera det från butiken där"
 
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "the game's folder isn't there"
 msgstr "spelets mapp finns inte där"
+
+#: crates/caskade-core/src/transfer/mod.rs
+#: crates/caskade-share/src/items.rs
+msgid "the offline copy's files aren't there"
+msgstr "offlinekopians filer finns inte där"
 
 #: crates/caskade-core/src/transfer/mod.rs
 msgid "that isn't a device"
@@ -4968,6 +4140,16 @@ msgstr "en ROM-fil för det spelet finns inte där"
 #: crates/caskade-core/src/transfer/rom.rs
 msgid "that storage location is gone"
 msgstr "den lagringsplatsen finns inte längre"
+
+#: crates/caskade-core/src/transfer/rom.rs
+#: crates/caskade-share/src/items.rs
+msgid "this share's description is damaged"
+msgstr "den här delningens beskrivning är skadad"
+
+#: crates/caskade-core/src/transfer/web.rs
+#: crates/caskade-share/src/items.rs
+msgid "that isn't a web game"
+msgstr "det är inte ett webbspel"
 
 #: crates/caskade-core/src/transfer/web.rs
 msgid "it plays from its web page and has no offline copy there; save it for offline play on that device first"
@@ -5020,6 +4202,824 @@ msgstr "spelet måste köpas innan det kan spelas: sidan visar bara butikssidan,
 #: crates/caskade-core/src/web/page.rs
 msgid "this game doesn't play in a browser: its page offers it as a download"
 msgstr "spelet går inte att spela i en webbläsare: sidan erbjuder det som en nedladdning"
+
+#: crates/caskade-achievements/src/achievements/epic.rs
+msgid "this game uses no Epic achievements"
+msgstr "det här spelet använder inga Epic-prestationer"
+
+#: crates/caskade-achievements/src/achievements/epic.rs
+msgid "Epic doesn't show this account's achievements: check the account's privacy settings"
+msgstr "Epic visar inte det här kontots prestationer: kontrollera kontots sekretessinställningar"
+
+#: crates/caskade-achievements/src/achievements/gog.rs
+msgid "this game doesn't use GOG Galaxy's achievements"
+msgstr "det här spelet använder inte GOG Galaxys prestationer"
+
+#: crates/caskade-achievements/src/achievements/gog.rs
+msgid "GOG didn't renew the sign-in"
+msgstr "GOG förnyade inte inloggningen"
+
+#: crates/caskade-achievements/src/achievements/gog.rs
+msgid "GOG keeps no achievements for this game"
+msgstr "GOG har inga prestationer för det här spelet"
+
+#: crates/caskade-achievements/src/achievements/mod.rs
+msgid "Not every achievement came back; the rest show as last fetched."
+msgstr "Alla prestationer kom inte tillbaka; resten visas som de senast hämtades."
+
+#: crates/caskade-achievements/src/achievements/retroachievements/mod.rs
+msgid "RetroAchievements user name"
+msgstr "Användarnamn hos RetroAchievements"
+
+#: crates/caskade-achievements/src/achievements/retroachievements/mod.rs
+msgid "Web API key"
+msgstr "Webb-API-nyckel"
+
+#: crates/caskade-achievements/src/achievements/retroachievements/mod.rs
+msgid "From the Keys section of your RetroAchievements settings."
+msgstr "Från avsnittet Nycklar i dina RetroAchievements-inställningar."
+
+#: crates/caskade-achievements/src/achievements/retroachievements/mod.rs
+msgid "Caskade reads your progress only. Achievements are earned in an emulator core that supports RetroAchievements, signed in there."
+msgstr "Caskade läser bara dina framsteg. Prestationer tjänas in i en emulatorkärna som stöder RetroAchievements och är inloggad där."
+
+#: crates/caskade-achievements/src/achievements/retroachievements/mod.rs
+msgid "enter your user name and web API key"
+msgstr "ange ditt användarnamn och din webb-API-nyckel"
+
+#: crates/caskade-achievements/src/achievements/retroachievements/mod.rs
+msgid "RetroAchievements didn't accept that user name and key"
+msgstr "RetroAchievements godtog inte det användarnamnet och den nyckeln"
+
+#: crates/caskade-achievements/src/achievements/retroachievements/mod.rs
+msgid "RetroAchievements has no game {id}"
+msgstr "RetroAchievements har inget spel {id}"
+
+#: crates/caskade-achievements/src/achievements/retroachievements/mod.rs
+msgid "RetroAchievements doesn't cover this system"
+msgstr "RetroAchievements täcker inte det här systemet"
+
+#: crates/caskade-achievements/src/achievements/retroachievements/mod.rs
+msgid "RetroAchievements identifies this system's games by a hash Caskade doesn't compute: link the game by hand"
+msgstr "RetroAchievements identifierar det här systemets spel med en hash som Caskade inte beräknar: koppla spelet för hand"
+
+#: crates/caskade-achievements/src/achievements/retroachievements/mod.rs
+msgid "the ROM is compressed; RetroAchievements identifies what is inside: link the game by hand"
+msgstr "ROM-filen är komprimerad; RetroAchievements identifierar innehållet: koppla spelet för hand"
+
+#: crates/caskade-achievements/src/achievements/retroachievements/mod.rs
+msgid "the ROM is too large to be a cartridge: link the game by hand"
+msgstr "ROM-filen är för stor för att vara en kassett: koppla spelet för hand"
+
+#: crates/caskade-achievements/src/achievements/retroachievements/mod.rs
+msgid "the ROM couldn't be read: {why}"
+msgstr "ROM-filen kunde inte läsas: {why}"
+
+#: crates/caskade-achievements/src/achievements/retroachievements/mod.rs
+msgid "RetroAchievements doesn't know this ROM (hash {hash}): another revision, region or a modified copy"
+msgstr "RetroAchievements känner inte till den här ROM-filen (hash {hash}): en annan revision, region eller en ändrad kopia"
+
+#: crates/caskade-achievements/src/achievements/retroachievements/mod.rs
+msgid "this ROM's hash belongs to more than one RetroAchievements game: link it by hand"
+msgstr "den här ROM-filens hash hör till mer än ett RetroAchievements-spel: koppla det för hand"
+
+#: crates/caskade-achievements/src/achievements/retroachievements/mod.rs
+msgid "the release's ROMs are different RetroAchievements games: link it by hand"
+msgstr "utgåvans ROM-filer är olika RetroAchievements-spel: koppla det för hand"
+
+#: crates/caskade-achievements/src/achievements/steam.rs
+msgid "the Steam profile's game details are private: make them public in Steam's privacy settings"
+msgstr "Steam-profilens speldetaljer är privata: gör dem offentliga i Steams sekretessinställningar"
+
+#: crates/caskade-achievements/src/achievements/steam.rs
+msgid "Steam keeps no achievements for this game"
+msgstr "Steam har inga prestationer för det här spelet"
+
+#: crates/caskade-achievements/src/achievements/steam.rs
+msgid "Steam answered HTTP {status}"
+msgstr "Steam svarade HTTP {status}"
+
+#: crates/caskade-achievements/src/notifications/mod.rs
+msgctxt "library source"
+msgid "ROM folders"
+msgstr "ROM-mappar"
+
+#: crates/caskade-achievements/src/notifications/mod.rs
+msgctxt "library source"
+msgid "Web games"
+msgstr "Webbspel"
+
+#: crates/caskade-achievements/src/notifications/mod.rs
+msgctxt "library source"
+msgid "Installs"
+msgstr "Installationer"
+
+#: crates/caskade-achievements/src/notifications/mod.rs
+msgctxt "library source"
+msgid "Desktop entries"
+msgstr "Skrivbordsposter"
+
+#: crates/caskade-achievements/src/notifications/mod.rs
+msgctxt "library source"
+msgid "Other devices"
+msgstr "Andra enheter"
+
+#: crates/caskade-achievements/src/notifications/mod.rs
+msgctxt "library source"
+msgid "Store accounts"
+msgstr "Butikskonton"
+
+#: crates/caskade-achievements/src/notifications/mod.rs
+msgctxt "library source"
+msgid "Added by hand"
+msgstr "Tillagda för hand"
+
+#: crates/caskade-achievements/src/notifications/mod.rs
+msgctxt "library source"
+msgid "Other"
+msgstr "Övrigt"
+
+#: crates/caskade-achievements/src/notifications/mod.rs
+msgid "{title} added"
+msgstr "{title} har lagts till"
+
+#: crates/caskade-achievements/src/notifications/mod.rs
+msgid "{n} game added"
+msgid_plural "{n} games added"
+msgstr[0] "{n} spel har lagts till"
+msgstr[1] "{n} spel har lagts till"
+
+#: crates/caskade-achievements/src/notifications/mod.rs
+msgctxt "games added from a library source"
+msgid "{source} {count}"
+msgstr "{source} {count}"
+
+#: crates/caskade-achievements/src/notifications/mod.rs
+msgctxt "list of library sources"
+msgid "{first} · {rest}"
+msgstr "{first} · {rest}"
+
+#: crates/caskade-achievements/src/notifications/service.rs
+msgid "{n} update available"
+msgid_plural "{n} updates available"
+msgstr[0] "{n} uppdatering tillgänglig"
+msgstr[1] "{n} uppdateringar tillgängliga"
+
+#: crates/caskade-achievements/src/notifications/service.rs
+msgid "Caskade {version} is available"
+msgstr "Caskade {version} är tillgänglig"
+
+#: crates/caskade-achievements/src/notifications/service.rs
+msgid "Download and install it from Settings → General."
+msgstr "Ladda ner och installera den under Inställningar → Allmänt."
+
+#: crates/caskade-achievements/src/notifications/service.rs
+msgid "Plugin {plugin} was turned off"
+msgstr "Tillägget {plugin} stängdes av"
+
+#: crates/caskade-achievements/src/notifications/service.rs
+msgid "{recipient} received {title}"
+msgstr "{recipient} tog emot {title}"
+
+#: crates/caskade-achievements/src/notifications/service.rs
+msgid "{title} arrived from {sharer}"
+msgstr "{title} kom från {sharer}"
+
+#: crates/caskade-achievements/src/notifications/service.rs
+msgid "A script after {game} started failed"
+msgstr "Ett skript efter att {game} startade misslyckades"
+
+#: crates/caskade-achievements/src/notifications/service.rs
+msgid "A cleanup script after {game} failed"
+msgstr "Ett städskript efter {game} misslyckades"
+
+#: crates/caskade-achievements/src/notifications/service.rs
+msgid "Achievement unlocked in {game}"
+msgid_plural "{n} achievements unlocked in {game}"
+msgstr[0] "Prestation upplåst i {game}"
+msgstr[1] "{n} prestationer upplåsta i {game}"
+
+#: crates/caskade-achievements/src/notifications/service.rs
+msgid "{names} ({provider}, {account})"
+msgstr "{names} ({provider}, {account})"
+
+#: crates/caskade-achievements/src/notifications/service.rs
+msgid "{game} couldn't install"
+msgstr "{game} kunde inte installeras"
+
+#: crates/caskade-achievements/src/notifications/service.rs
+msgid "{game} couldn't update"
+msgstr "{game} kunde inte uppdateras"
+
+#: crates/caskade-achievements/src/notifications/service.rs
+msgid "{game} couldn't uninstall"
+msgstr "{game} kunde inte avinstalleras"
+
+#: crates/caskade-achievements/src/notifications/service.rs
+msgid "{game} couldn't move"
+msgstr "{game} kunde inte flyttas"
+
+#: crates/caskade-achievements/src/notifications/service.rs
+msgid "{game} couldn't check"
+msgstr "{game} kunde inte kontrolleras"
+
+#: crates/caskade-achievements/src/notifications/service.rs
+msgid "{game} couldn't be copied"
+msgstr "{game} kunde inte kopieras"
+
+#: crates/caskade-addons/src/compat.rs
+msgid "{version} needs plugin API {api}; this Caskade has {host}"
+msgstr "{version} behöver plugin-API {api}; den här Caskade har {host}"
+
+#: crates/caskade-addons/src/compat.rs
+msgid "{version} doesn't run on this operating system"
+msgstr "{version} körs inte på det här operativsystemet"
+
+#: crates/caskade-addons/src/compat.rs
+msgid "Its pages work in desktop mode only."
+msgstr "Dess sidor fungerar bara i skrivbordsläge."
+
+#: crates/caskade-addons/src/compat.rs
+msgid "Its pages work in console mode only."
+msgstr "Dess sidor fungerar bara i konsolläge."
+
+#: crates/caskade-addons/src/compat.rs
+msgid "Something else is installed under the same id."
+msgstr "Något annat är installerat med samma id."
+
+#: crates/caskade-addons/src/package.rs
+msgid "the download's size doesn't match the catalogue"
+msgstr "nedladdningens storlek stämmer inte med katalogen"
+
+#: crates/caskade-addons/src/package.rs
+msgid "the download's checksum doesn't match the catalogue"
+msgstr "nedladdningens kontrollsumma stämmer inte med katalogen"
+
+#: crates/caskade-addons/src/package.rs
+msgid "the download failed: {error}"
+msgstr "nedladdningen misslyckades: {error}"
+
+#: crates/caskade-addons/src/package.rs
+msgid "the download server answered {status}"
+msgstr "nedladdningsservern svarade {status}"
+
+#: crates/caskade-addons/src/package.rs
+msgid "the download is larger than the catalogue says"
+msgstr "nedladdningen är större än katalogen anger"
+
+#: crates/caskade-addons/src/package.rs
+msgid "the download isn't a readable zip archive"
+msgstr "nedladdningen är inget läsbart zip-arkiv"
+
+#: crates/caskade-addons/src/package.rs
+msgid "the package has too many files"
+msgstr "paketet har för många filer"
+
+#: crates/caskade-addons/src/package.rs
+msgid "the package has an unsafe path: {path}"
+msgstr "paketet har en osäker sökväg: {path}"
+
+#: crates/caskade-addons/src/package.rs
+msgid "the package has a link: {path}"
+msgstr "paketet har en länk: {path}"
+
+#: crates/caskade-addons/src/package.rs
+msgid "the package unpacks to more than 512 MiB"
+msgstr "paketet packas upp till mer än 512 MiB"
+
+#: crates/caskade-addons/src/package.rs
+msgid "the package's sizes don't match its contents"
+msgstr "paketets storlekar stämmer inte med innehållet"
+
+#: crates/caskade-addons/src/package.rs
+msgid "the package has no readable {file}"
+msgstr "paketet har ingen läsbar {file}"
+
+#: crates/caskade-addons/src/package.rs
+msgid "the package provides metadata, which the catalogue doesn't offer"
+msgstr "paketet tillhandahåller metadata, vilket katalogen inte erbjuder"
+
+#: crates/caskade-addons/src/package.rs
+msgid "the package is {id} {version}, not {expected} {expected_version}"
+msgstr "paketet är {id} {version}, inte {expected} {expected_version}"
+
+#: crates/caskade-addons/src/service.rs
+msgid "the catalogue's signature doesn't match Caskade's key"
+msgstr "katalogens signatur stämmer inte med Caskades nyckel"
+
+#: crates/caskade-addons/src/service.rs
+msgid "the catalogue address isn't valid"
+msgstr "katalogens adress är ogiltig"
+
+#: crates/caskade-addons/src/service.rs
+msgid "the catalogue key can't be read"
+msgstr "katalognyckeln kan inte läsas"
+
+#: crates/caskade-addons/src/service.rs
+msgid "the catalogue couldn't be fetched: {error}"
+msgstr "katalogen kunde inte hämtas: {error}"
+
+#: crates/caskade-addons/src/service.rs
+msgid "the catalogue server answered {status}"
+msgstr "katalogservern svarade {status}"
+
+#: crates/caskade-addons/src/service.rs
+#: crates/caskade-addons/src/validate.rs
+msgid "the catalogue is larger than {mib} MiB"
+msgstr "katalogen är större än {mib} MiB"
+
+#: crates/caskade-addons/src/validate.rs
+msgid "the catalogue isn't readable JSON"
+msgstr "katalogen är inte läsbar JSON"
+
+#: crates/caskade-addons/src/validate.rs
+msgid "the catalogue is in a format this Caskade can't read; update Caskade"
+msgstr "katalogen har ett format som den här Caskade inte kan läsa; uppdatera Caskade"
+
+#: crates/caskade-addons/src/validate.rs
+msgid "the catalogue lists no packages"
+msgstr "katalogen listar inga paket"
+
+#: crates/caskade-backup/src/archive.rs
+msgid "“{path}” is listed twice"
+msgstr "”{path}” finns med två gånger"
+
+#: crates/caskade-backup/src/archive.rs
+msgid "the backup has no library database"
+msgstr "säkerhetskopian saknar biblioteksdatabas"
+
+#: crates/caskade-backup/src/archive.rs
+msgid "the archive's index is damaged"
+msgstr "arkivets register är skadat"
+
+#: crates/caskade-backup/src/archive.rs
+msgid "the archive holds “{path}”, which its manifest doesn't list"
+msgstr "arkivet innehåller ”{path}”, som inte finns i dess manifest"
+
+#: crates/caskade-backup/src/archive.rs
+#: crates/caskade-backup/src/restore.rs
+msgid "“{path}” is missing"
+msgstr "”{path}” saknas"
+
+#: crates/caskade-backup/src/archive.rs
+#: crates/caskade-backup/src/restore.rs
+msgid "“{path}” doesn't match its checksum"
+msgstr "”{path}” stämmer inte med sin kontrollsumma"
+
+#: crates/caskade-backup/src/archive.rs
+msgid "the archive holds too many files"
+msgstr "arkivet innehåller för många filer"
+
+#: crates/caskade-backup/src/archive.rs
+msgid "this isn't a Caskade backup"
+msgstr "det här är ingen säkerhetskopia från Caskade"
+
+#: crates/caskade-backup/src/archive.rs
+msgid "the backup's manifest is too large"
+msgstr "säkerhetskopians manifest är för stort"
+
+#: crates/caskade-backup/src/archive.rs
+msgid "the backup's manifest is damaged"
+msgstr "säkerhetskopians manifest är skadat"
+
+#: crates/caskade-backup/src/archive.rs
+msgid "the backup holds an unsafe path: “{path}”"
+msgstr "säkerhetskopian innehåller en osäker sökväg: ”{path}”"
+
+#: crates/caskade-backup/src/archive.rs
+msgid "the file isn't a readable backup archive"
+msgstr "filen är inget läsbart säkerhetskopieringsarkiv"
+
+#: crates/caskade-backup/src/archive.rs
+#: crates/caskade-backup/src/restore.rs
+msgid "the backup archive is damaged"
+msgstr "säkerhetskopians arkiv är skadat"
+
+#: crates/caskade-backup/src/export.rs
+msgid "the backup read back differently from how it was written"
+msgstr "säkerhetskopian lästes tillbaka annorlunda än den skrevs"
+
+#: crates/caskade-backup/src/peers.rs
+msgid "That backup isn't on this device."
+msgstr "Den säkerhetskopian finns inte på den här enheten."
+
+#: crates/caskade-backup/src/peers.rs
+msgid "The backup didn't arrive from the other device. Make sure it's on and in reach, then try again."
+msgstr "Säkerhetskopian kom inte fram från den andra enheten. Se till att den är på och inom räckhåll och försök igen."
+
+#: crates/caskade-backup/src/peers.rs
+msgid "The backup that arrived can't be read."
+msgstr "Säkerhetskopian som kom fram kan inte läsas."
+
+#: crates/caskade-backup/src/restore.rs
+msgid "its database has no migration record"
+msgstr "dess databas saknar migreringsregister"
+
+#: crates/caskade-backup/src/restore.rs
+msgid "its database schema {version} differs from this Caskade's"
+msgstr "dess databasschema {version} skiljer sig från denna Caskades"
+
+#: crates/caskade-backup/src/restore.rs
+msgid "the restore journal can't be read"
+msgstr "återställningsjournalen kan inte läsas"
+
+#: crates/caskade-backup/src/restore.rs
+msgid "the restore was interrupted"
+msgstr "återställningen avbröts"
+
+#: crates/caskade-backup/src/snapshot.rs
+msgid "the library database failed its integrity check: {why}"
+msgstr "biblioteksdatabasen klarade inte sin integritetskontroll: {why}"
+
+#: crates/caskade-share/src/items.rs
+msgid "saves aren't available"
+msgstr "sparningar är inte tillgängliga"
+
+#: crates/caskade-share/src/items.rs
+msgid "that save isn't here any more"
+msgstr "den sparningen finns inte här längre"
+
+#: crates/caskade-share/src/items.rs
+msgid "that save's files haven't all arrived on this device"
+msgstr "alla filer i den sparningen har inte kommit fram till den här enheten"
+
+#: crates/caskade-share/src/items.rs
+msgid "that save's files are only where this device keeps them, so they can't go elsewhere"
+msgstr "den sparningens filer finns bara där den här enheten har dem, så de kan inte flyttas någon annanstans"
+
+#: crates/caskade-share/src/items.rs
+msgid "save it for offline play first: only an offline copy can be shared"
+msgstr "spara det för spel utan uppkoppling först: bara en offlinekopia kan delas"
+
+#: crates/caskade-share/src/items.rs
+#: crates/caskade-share/src/lib.rs
+msgid "this share has no game"
+msgstr "den här delningen har inget spel"
+
+#: crates/caskade-share/src/items.rs
+msgid "a file of that save isn't on this device any more"
+msgstr "en fil i den sparningen finns inte på den här enheten längre"
+
+#: crates/caskade-share/src/items.rs
+msgid "a collection has no files to receive"
+msgstr "en samling har inga filer att ta emot"
+
+#: crates/caskade-share/src/items.rs
+msgid "that link doesn't share a collection"
+msgstr "den länken delar ingen samling"
+
+#: crates/caskade-share/src/items.rs
+msgid "Shared by {sharer}"
+msgstr "Delad av {sharer}"
+
+#: crates/caskade-share/src/lib.rs
+msgid "this share has stopped; share the game again for a new link"
+msgstr "den här delningen har stoppats; dela spelet igen för en ny länk"
+
+#: crates/caskade-share/src/lib.rs
+msgid "this share's link is damaged"
+msgstr "den här delningens länk är skadad"
+
+#: crates/caskade-share/src/lib.rs
+msgid "stop sharing it first"
+msgstr "sluta dela det först"
+
+#: crates/caskade-share/src/lib.rs
+msgid "there's no such share"
+msgstr "det finns ingen sådan delning"
+
+#: crates/caskade-share/src/receive.rs
+msgid "This link expired on {date}. Ask whoever shared it for a new one."
+msgstr "Den här länken gick ut {date}. Be den som delade den om en ny."
+
+#: crates/caskade-share/src/receive.rs
+msgid "This link doesn't work any more: the share was stopped or has expired. Ask whoever shared it for a new one."
+msgstr "Den här länken fungerar inte längre: delningen stoppades eller har gått ut. Be den som delade den om en ny."
+
+#: crates/caskade-share/src/receive.rs
+msgid "Can't reach whoever shared this: their Caskade may be closed or offline. Caskade keeps trying."
+msgstr "Kan inte nå den som delade det här: personens Caskade kan vara stängt eller offline. Caskade fortsätter att försöka."
+
+#: crates/caskade-share/src/receive.rs
+msgid "Only a relay reaches {sharer}'s computer: the game waits for a direct connection"
+msgstr "Bara ett relä når {sharer}s dator: spelet väntar på en direkt anslutning"
+
+#: crates/caskade-share/src/receive.rs
+msgid "that isn't a Caskade share link"
+msgstr "det där är inte en delningslänk från Caskade"
+
+#: crates/caskade-share/src/receive.rs
+msgid "This Caskade can't receive what that link shares. Update Caskade, then try again."
+msgstr "Den här Caskade kan inte ta emot det som länken delar. Uppdatera Caskade och försök sedan igen."
+
+#: crates/caskade-share/src/receive.rs
+msgid "That link shares a collection: add it to your collections instead."
+msgstr "Länken delar en samling: lägg till den bland dina samlingar i stället."
+
+#: crates/caskade-share/src/receive.rs
+msgid "that share isn't here any more"
+msgstr "den delningen finns inte här längre"
+
+#: crates/caskade-share/src/receive.rs
+msgid "it's here already: it can help others only if that's chosen while it arrives"
+msgstr "det finns redan här: det kan bara hjälpa andra om det väljs medan det kommer fram"
+
+#: crates/caskade-share/src/receive.rs
+msgid "there isn't enough room for the game: {short} more is needed"
+msgstr "det finns inte tillräckligt med plats för spelet: {short} till behövs"
+
+#: crates/caskade-streaming/src/api.rs
+msgid "the streaming host's certificate is unreadable: {error}"
+msgstr "streamingvärdens certifikat går inte att läsa: {error}"
+
+#: crates/caskade-streaming/src/api.rs
+msgid "the streaming host refused Caskade's sign-in"
+msgstr "streamingvärden nekade Caskades inloggning"
+
+#: crates/caskade-streaming/src/api.rs
+msgid "the streaming host answered {status}"
+msgstr "streamingvärden svarade {status}"
+
+#: crates/caskade-streaming/src/api.rs
+msgid "the streaming host didn't say its version"
+msgstr "streamingvärden angav inte sin version"
+
+#: crates/caskade-streaming/src/client.rs
+msgid "Getting streaming ready"
+msgstr "Gör streaming redo"
+
+#: crates/caskade-streaming/src/client.rs
+msgid "streaming couldn't be set up"
+msgstr "streaming kunde inte konfigureras"
+
+#: crates/caskade-streaming/src/client.rs
+msgid "{address} isn't answering"
+msgstr "{address} svarar inte"
+
+#: crates/caskade-streaming/src/client.rs
+msgid "This device is streaming. Update once the game ends."
+msgstr "Den här enheten streamar. Uppdatera när spelet är slut."
+
+#: crates/caskade-streaming/src/client.rs
+msgid "Updating streaming to this device"
+msgstr "Uppdaterar streaming till den här enheten"
+
+#: crates/caskade-streaming/src/elevation/linux.rs
+msgid "the administrator step failed and was undone: {error}"
+msgstr "administratörssteget misslyckades och ångrades: {error}"
+
+#: crates/caskade-streaming/src/elevation/linux.rs
+msgid "couldn't ask for an administrator (pkexec): {error}"
+msgstr "kunde inte fråga efter en administratör (pkexec): {error}"
+
+#: crates/caskade-streaming/src/elevation/mod.rs
+msgid "The administrator step was cancelled, so nothing changed."
+msgstr "Administratörssteget avbröts, så inget ändrades."
+
+#: crates/caskade-streaming/src/elevation/mod.rs
+msgid "The administrator step wasn't allowed, so nothing changed. It needs an administrator's password."
+msgstr "Administratörssteget tilläts inte, så inget ändrades. Det kräver en administratörs lösenord."
+
+#: crates/caskade-streaming/src/elevation/mod.rs
+msgid "the record of administrator steps is unreadable: {error}"
+msgstr "registret över administratörssteg går inte att läsa: {error}"
+
+#: crates/caskade-streaming/src/elevation/mod.rs
+msgid "this system doesn't need or support these administrator steps"
+msgstr "det här systemet behöver inte eller stöder inte de här administratörsstegen"
+
+#: crates/caskade-streaming/src/elevation/windows.rs
+msgid "the streaming host isn't installed where Caskade keeps it"
+msgstr "streamingvärden är inte installerad där Caskade förvarar den"
+
+#: crates/caskade-streaming/src/elevation/windows.rs
+msgid "the administrator step failed and was undone"
+msgstr "administratörssteget misslyckades och ångrades"
+
+#: crates/caskade-streaming/src/elevation/windows.rs
+msgid "Caskade can't find its own program"
+msgstr "Caskade hittar inte sitt eget program"
+
+#: crates/caskade-streaming/src/gamepads.rs
+msgid "the controller driver's download wasn't the expected file"
+msgstr "nedladdningen av handkontrollsdrivrutinen var inte den förväntade filen"
+
+#: crates/caskade-streaming/src/gamestream.rs
+msgid "the device didn't stop its game"
+msgstr "enheten stoppade inte sitt spel"
+
+#: crates/caskade-streaming/src/gamestream.rs
+msgid "the device no longer knows this one"
+msgstr "enheten känner inte längre till den här enheten"
+
+#: crates/caskade-streaming/src/gamestream.rs
+msgid "the wake-up message couldn't be sent"
+msgstr "väckningsmeddelandet kunde inte skickas"
+
+#: crates/caskade-streaming/src/host/mod.rs
+msgid "Other devices can't reach this PC while Windows treats its network as public. Set the network to private in Windows Settings → Network & internet."
+msgstr "Andra enheter kan inte nå den här datorn så länge Windows behandlar nätverket som offentligt. Ändra nätverket till privat i Windows-inställningar → Nätverk och internet."
+
+#: crates/caskade-streaming/src/host/mod.rs
+msgid "This device has no screen for other devices to see. Connect a monitor or a display dummy plug."
+msgstr "Den här enheten har ingen skärm som andra enheter kan se. Anslut en bildskärm eller en dummykontakt för skärm."
+
+#: crates/caskade-streaming/src/host/mod.rs
+msgid "Controllers on other devices won't work here: the controller driver isn't answering. Repair may fix it."
+msgstr "Handkontroller på andra enheter fungerar inte här: handkontrollsdrivrutinen svarar inte. Reparera kan lösa det."
+
+#: crates/caskade-streaming/src/host/mod.rs
+msgid "Controllers on other devices won't work here until Repair sets them up."
+msgstr "Handkontroller på andra enheter fungerar inte här förrän Reparera har konfigurerat dem."
+
+#: crates/caskade-streaming/src/host/mod.rs
+msgid "Streaming isn't working on this device"
+msgstr "Streaming fungerar inte på den här enheten"
+
+#: crates/caskade-streaming/src/host/mod.rs
+msgid "this system's streaming host can't be run by Caskade yet"
+msgstr "Caskade kan inte köra det här systemets streamingvärd än"
+
+#: crates/caskade-streaming/src/host/mod.rs
+msgid "the streaming host's sign-in couldn't be set"
+msgstr "streamingvärdens inloggning kunde inte ställas in"
+
+#: crates/caskade-streaming/src/host/mod.rs
+msgid "this device can't host game streams"
+msgstr "den här enheten kan inte vara värd för spelstreaming"
+
+#: crates/caskade-streaming/src/host/mod.rs
+msgid "Setting up streaming from this device"
+msgstr "Konfigurerar streaming från den här enheten"
+
+#: crates/caskade-streaming/src/host/mod.rs
+msgid "The streaming set up on this device before Caskade is updated the way it was installed."
+msgstr "Streamingen som konfigurerades på den här enheten före Caskade uppdateras på det sätt den installerades."
+
+#: crates/caskade-streaming/src/host/mod.rs
+msgid "A device is streaming from this one. Update once the game ends."
+msgstr "En enhet streamar från den här. Uppdatera när spelet är slut."
+
+#: crates/caskade-streaming/src/host/mod.rs
+msgid "Updating streaming from this device"
+msgstr "Uppdaterar streaming från den här enheten"
+
+#: crates/caskade-streaming/src/host/mod.rs
+msgid "Repairing streaming from this device"
+msgstr "Reparerar streaming från den här enheten"
+
+#: crates/caskade-streaming/src/host/mod.rs
+msgid "Caskade can't find the certificate of the streaming already set up here"
+msgstr "Caskade hittar inte certifikatet för den streaming som redan är konfigurerad här"
+
+#: crates/caskade-streaming/src/host/mod.rs
+msgid "That user name and password didn't work"
+msgstr "Användarnamnet och lösenordet fungerade inte"
+
+#: crates/caskade-streaming/src/host/mod.rs
+msgid "The code is four digits"
+msgstr "Koden består av fyra siffror"
+
+#: crates/caskade-streaming/src/host/process.rs
+msgid "the streaming host didn't start"
+msgstr "streamingvärden startade inte"
+
+#: crates/caskade-streaming/src/hosts.rs
+msgid "{address} isn't a device's address"
+msgstr "{address} är inte en enhets adress"
+
+#: crates/caskade-streaming/src/linked.rs
+msgid "the pairing request didn't arrive"
+msgstr "parkopplingsbegäran kom inte fram"
+
+#: crates/caskade-streaming/src/pairing.rs
+msgid "the device that answered isn't the one asked to pair"
+msgstr "enheten som svarade är inte den som ombads parkoppla"
+
+#: crates/caskade-streaming/src/play.rs
+msgid "{device} no longer knows this device. Pair them again in Settings → Streaming."
+msgstr "{device} känner inte längre till den här enheten. Parkoppla dem igen i Inställningar → Streaming."
+
+#: crates/caskade-streaming/src/play.rs
+msgid "{device} no longer offers {game}."
+msgstr "{device} erbjuder inte längre {game}."
+
+#: crates/caskade-streaming/src/play.rs
+msgid "{device} isn't answering. Check that it's switched on and on this network."
+msgstr "{device} svarar inte. Kontrollera att den är påslagen och i det här nätverket."
+
+#: crates/caskade-streaming/src/play.rs
+msgid "{device} didn't wake up. Check that it's plugged in and on this network."
+msgstr "{device} vaknade inte. Kontrollera att den är ansluten till ström och i det här nätverket."
+
+#: crates/caskade-streaming/src/play.rs
+msgid "The other device"
+msgstr "Den andra enheten"
+
+#: crates/caskade-streaming/src/play.rs
+msgid "{device} couldn't start {game}."
+msgstr "{device} kunde inte starta {game}."
+
+#: crates/caskade-streaming/src/play.rs
+msgid "{device} is playing a game another device started. Stop it there first."
+msgstr "{device} spelar ett spel som en annan enhet startade. Stoppa det där först."
+
+#: crates/caskade-streaming/src/play.rs
+msgid "Streaming from {device} failed."
+msgstr "Streaming från {device} misslyckades."
+
+#: crates/caskade-streaming/src/play.rs
+msgid "Streaming is busy with another device. Try again in a moment."
+msgstr "Streaming är upptagen med en annan enhet. Försök igen om en stund."
+
+#: crates/caskade-streaming/src/play.rs
+msgid "{device} stopped answering. Try again in a moment."
+msgstr "{device} slutade svara. Försök igen om en stund."
+
+#: crates/caskade-streaming/src/play.rs
+msgid "{device} didn't stop its game. Try again in a moment."
+msgstr "{device} stoppade inte sitt spel. Försök igen om en stund."
+
+#: crates/caskade-system-stats/src/aggregate.rs
+msgctxt "disk name"
+msgid "System"
+msgstr "System"
+
+#: crates/caskade-system-stats/src/aggregate.rs
+msgid "Removable disk"
+msgstr "Flyttbar disk"
+
+#: crates/caskade-system-stats/src/aggregate.rs
+msgid "Local disk"
+msgstr "Lokal disk"
+
+#: crates/caskade-system-stats/src/gpu.rs
+msgid "AMD GPU"
+msgstr "AMD-grafikkort"
+
+#: crates/caskade-system-stats/src/gpu.rs
+msgid "Intel GPU"
+msgstr "Intel-grafikkort"
+
+#: crates/caskade-system-stats/src/gpu.rs
+msgid "NVIDIA GPU"
+msgstr "NVIDIA-grafikkort"
+
+#: crates/caskade-system-stats/src/gpu.rs
+msgid "GPU"
+msgstr "Grafikkort"
+
+#: crates/caskade-system-stats/src/gpu.rs
+msgid "nvidia-smi didn't report this GPU."
+msgstr "nvidia-smi rapporterade inte det här grafikkortet."
+
+#: crates/caskade-system-stats/src/gpu.rs
+msgid "Intel's driver doesn't report GPU usage to apps."
+msgstr "Intels drivrutin rapporterar inte grafikkortets användning till program."
+
+#: crates/caskade-system-stats/src/gpu.rs
+msgid "This GPU's driver doesn't report its usage."
+msgstr "Det här grafikkortets drivrutin rapporterar inte dess användning."
+
+#: crates/caskade-system-stats/src/gpu.rs
+msgid "The NVIDIA driver doesn't report this GPU's usage."
+msgstr "NVIDIA-drivrutinen rapporterar inte det här grafikkortets användning."
+
+#: crates/caskade-system-stats/src/gpu.rs
+msgid "macOS doesn't report GPU usage to apps."
+msgstr "macOS rapporterar inte grafikkortets användning till program."
+
+#: crates/caskade-system-stats/src/gpu.rs
+msgid "GPU usage on Windows comes from NVIDIA's nvidia-smi; no NVIDIA GPU answered."
+msgstr "Grafikkortets användning på Windows kommer från NVIDIA:s nvidia-smi; inget NVIDIA-grafikkort svarade."
+
+#: crates/caskade-system-stats/src/gpu.rs
+msgid "No GPU found."
+msgstr "Inget grafikkort hittades."
+
+#: crates/caskade-system-stats/src/gpu.rs
+msgid "GPU usage isn't available on this system."
+msgstr "Grafikkortets användning är inte tillgänglig på det här systemet."
+
+#: crates/caskade-system-stats/src/gpu.rs
+msgid "Install NVIDIA's nvidia-smi to see this GPU's usage."
+msgstr "Installera NVIDIA:s nvidia-smi för att se det här grafikkortets användning."
+
+#: crates/caskade-system-stats/src/gpu.rs
+msgid "nvidia-smi didn't start: {error}"
+msgstr "nvidia-smi startade inte: {error}"
+
+#: crates/caskade-system-stats/src/gpu.rs
+msgid "nvidia-smi stopped."
+msgstr "nvidia-smi stoppades."
+
+#: crates/caskade-system-stats/src/gpu.rs
+msgid "Waiting for nvidia-smi's first reading."
+msgstr "Väntar på första avläsningen från nvidia-smi."
+
+#: crates/caskade-system-stats/src/lib.rs
+msgid "This sample couldn't be read."
+msgstr "Det här provet kunde inte läsas."
 
 #: apps/desktop/src-tauri/src/commands/achievements.rs
 msgid "choose the game to link"

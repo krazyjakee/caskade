@@ -1,0 +1,89 @@
+warning: missing `[lints]` to inherit `[workspace.lints]`
+  --> xtask/Cargo.toml
+   = note: `cargo::missing_lints_inheritance` is set to `warn` by default
+help: to inherit `workspace.lints, add:
+   |
+19 ~ tempfile = "=3.27.0"
+20 + [lints]
+21 + workspace = true
+   |
+help: to clarify your intent to not inherit, add:
+   |
+19 ~ tempfile = "=3.27.0"
+20 + [lints]
+   |
+warning: `xtask` (manifest) generated 1 warning
+   Compiling caskade-core v0.1.0 (/home/krazy/.paseo/worktrees/3c4l1xfr/white-pony/crates/caskade-core)
+time:   0.000; rss:   37MB ->   38MB (   +1MB)	parse_crate
+time:   0.000; rss:   40MB ->   40MB (   +0MB)	incr_comp_prepare_session_directory
+time:   0.000; rss:  525MB ->  525MB (   +0MB)	incr_comp_garbage_collect_session_directories
+time:   0.000; rss:  619MB ->  620MB (   +0MB)	crate_injection
+time:   1.829; rss:  620MB -> 1217MB ( +597MB)	expand_crate
+time:   1.829; rss:  620MB -> 1217MB ( +597MB)	macro_expand_crate
+time:   0.035; rss: 1217MB -> 1217MB (   +0MB)	AST_validation
+time:   0.010; rss: 1217MB -> 1218MB (   +1MB)	finalize_imports
+time:   0.004; rss: 1218MB -> 1218MB (   +0MB)	compute_effective_visibilities
+time:   0.001; rss: 1218MB -> 1218MB (   +0MB)	lint_reexports
+time:   0.012; rss: 1218MB -> 1218MB (   +0MB)	finalize_macro_resolutions
+time:   0.413; rss: 1218MB -> 1294MB (  +76MB)	late_resolve_crate
+time:   0.006; rss: 1294MB -> 1296MB (   +1MB)	resolve_check_unused
+time:   0.059; rss: 1296MB -> 1296MB (   +0MB)	resolve_postprocess
+time:   0.506; rss: 1217MB -> 1296MB (  +79MB)	resolve_crate
+time:   0.029; rss: 1299MB -> 1299MB (   +0MB)	write_dep_info
+time:   0.031; rss: 1299MB -> 1299MB (   +0MB)	complete_gated_feature_checking
+time:   0.000; rss: 1334MB -> 1334MB (   +0MB)	drop_ast
+time:   0.000; rss: 1349MB -> 1349MB (   -1MB)	drop_ast
+time:   0.000; rss: 1357MB -> 1357MB (   +0MB)	drop_ast
+time:   0.000; rss: 1361MB -> 1360MB (   +0MB)	drop_ast
+time:   0.000; rss: 1367MB -> 1367MB (   +0MB)	drop_ast
+time:   0.000; rss: 1370MB -> 1370MB (   +0MB)	drop_ast
+time:   0.000; rss: 1378MB -> 1377MB (   +0MB)	drop_ast
+time:   0.000; rss: 1387MB -> 1387MB (   +0MB)	drop_ast
+time:   0.000; rss: 1390MB -> 1389MB (   +0MB)	drop_ast
+time:   0.000; rss: 1396MB -> 1395MB (   +0MB)	drop_ast
+time:   0.000; rss: 1412MB -> 1412MB (   -1MB)	drop_ast
+time:   0.000; rss: 1423MB -> 1423MB (   +0MB)	drop_ast
+time:   0.000; rss: 1440MB -> 1439MB (   -1MB)	drop_ast
+time:   0.001; rss: 1451MB -> 1450MB (   -1MB)	drop_ast
+time:   0.000; rss: 1460MB -> 1460MB (   +0MB)	drop_ast
+time:   0.000; rss: 1464MB -> 1464MB (   +0MB)	drop_ast
+time:   0.000; rss: 1473MB -> 1473MB (   +0MB)	drop_ast
+time:   0.000; rss: 1477MB -> 1477MB (   +0MB)	drop_ast
+time:   0.000; rss: 1487MB -> 1486MB (   -1MB)	drop_ast
+time:   0.000; rss: 1496MB -> 1495MB (   -1MB)	drop_ast
+time:   0.000; rss: 1504MB -> 1503MB (   -1MB)	drop_ast
+time:   0.001; rss: 1510MB -> 1509MB (   -1MB)	drop_ast
+time:   0.000; rss: 1451MB -> 1451MB (   +0MB)	check_externally_implementable_items
+time:   0.000; rss: 1451MB -> 1451MB (   +0MB)	looking_for_derive_registrar
+time:   0.000; rss: 1451MB -> 1451MB (   +0MB)	unused_lib_feature_checking
+time:   0.158; rss: 1451MB -> 1466MB (  +15MB)	misc_checking_1
+time:   0.497; rss: 1466MB -> 1635MB ( +169MB)	coherence_checking
+time:   0.576; rss: 1466MB -> 1643MB ( +177MB)	type_check_crate
+time:   0.259; rss: 1643MB -> 1703MB (  +60MB)	MIR_borrow_checking
+time:   0.020; rss: 1985MB -> 1993MB (   +8MB)	module_lints
+time:   0.020; rss: 1985MB -> 1993MB (   +8MB)	lint_checking
+time:   0.004; rss: 1993MB -> 1994MB (   +1MB)	privacy_checking_modules
+time:   0.578; rss: 1703MB -> 1994MB ( +291MB)	misc_checking_3
+time:   0.025; rss: 2272MB -> 2271MB (   -1MB)	monomorphization_collector_root_collections
+time:   0.744; rss: 2271MB -> 2587MB ( +316MB)	monomorphization_collector_graph_walk
+time:   0.471; rss: 2581MB -> 2737MB ( +156MB)	partition_and_assert_distinct_symbols
+time:   0.001; rss: 2716MB -> 2716MB (   +0MB)	generate_crate_metadata_stub
+time:   2.346; rss: 1994MB -> 2716MB ( +722MB)	generate_crate_metadata
+time:   0.063; rss: 2716MB -> 2717MB (   +0MB)	find_cgu_reuse
+time:   0.000; rss: 2717MB -> 2714MB (   -3MB)	codegen_to_LLVM_IR
+time:   0.076; rss: 2716MB -> 2714MB (   -2MB)	codegen_crate
+time:   0.013; rss: 2717MB -> 2714MB (   -3MB)	LLVM_passes
+time:   0.574; rss: 2433MB -> 2463MB (  +31MB)	encode_query_values
+time:   0.616; rss: 2433MB -> 2436MB (   +3MB)	incr_comp_serialize_result_cache
+time:   0.777; rss: 2714MB -> 2436MB ( -278MB)	incr_comp_persist_result_cache
+time:   0.777; rss: 2714MB -> 2436MB ( -278MB)	serialize_dep_graph
+time:   0.004; rss: 1605MB -> 1597MB (   -8MB)	copy_all_cgu_workproducts_to_incr_comp_cache_dir
+time:   0.004; rss: 1605MB -> 1597MB (   -8MB)	finish_ongoing_codegen
+time:   0.000; rss: 1597MB -> 1597MB (   +0MB)	serialize_work_products
+time:   0.154; rss:  838MB ->  838MB (   +0MB)	incr_comp_finalize_session_directory
+time:   0.212; rss:  838MB ->  839MB (   +1MB)	link_rlib
+time:   0.214; rss:  838MB ->  839MB (   +1MB)	link_binary
+time:   0.214; rss:  838MB ->  839MB (   +1MB)	link_crate
+time:   0.429; rss: 1597MB ->  839MB ( -758MB)	link
+time:  10.059; rss:   26MB ->  123MB (  +97MB)	total
+    Finished `bench-llvm` profile [unoptimized + debuginfo] target(s) in 10.53s

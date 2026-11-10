@@ -39,6 +39,13 @@ tauri-build = { version = "2", features = [] }
 [dependencies]
 tracing-appender = "0.2"
 caskade-core = { path = "../../../crates/caskade-core" }
+caskade-achievements = { path = "../../../crates/caskade-achievements" }
+caskade-addons = { path = "../../../crates/caskade-addons" }
+caskade-backup = { path = "../../../crates/caskade-backup" }
+caskade-share = { path = "../../../crates/caskade-share" }
+# Game streaming and its administrator step (#254).
+caskade-streaming = { path = "../../../crates/caskade-streaming" }
+caskade-system-stats = { path = "../../../crates/caskade-system-stats" }
 caskade-sources = { path = "../../../crates/caskade-sources" }
 caskade-discovery = { path = "../../../crates/caskade-discovery" }
 caskade-plugin-host = { path = "../../../crates/caskade-plugin-host" }

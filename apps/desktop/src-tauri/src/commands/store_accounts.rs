@@ -59,7 +59,7 @@ pub async fn store_account_refresh(
     id: String,
 ) -> Result<RefreshOutcome, CommandError> {
     accounts
-        .refresh(&id, &caskade_core::backup::CancellationToken::new())
+        .refresh(&id, &caskade_backup::CancellationToken::new())
         .await
         .map_err(report)
 }
@@ -161,7 +161,7 @@ async fn complete<R: Runtime>(
     let (accounts, id) = (accounts.clone(), account.id.clone());
     tauri::async_runtime::spawn(async move {
         if let Err(error) = accounts
-            .refresh(&id, &caskade_core::backup::CancellationToken::new())
+            .refresh(&id, &caskade_backup::CancellationToken::new())
             .await
         {
             tracing::warn!(%error, "the new store account's library wasn't refreshed");

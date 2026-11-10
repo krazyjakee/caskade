@@ -24,7 +24,6 @@ async fn settings() -> SettingsService {
         .register_core(&AppPaths::under(Path::new("fixture")))
         .unwrap();
     caskade_core::romm::register_settings(&settings).unwrap();
-    caskade_core::backup::register_settings(&settings).unwrap();
     caskade_core::store_accounts::register_settings(&settings).unwrap();
     settings
 }
@@ -151,6 +150,10 @@ fn production_core_namespace_literals_have_no_unclassified_names() {
     );
     visit(
         &Path::new(env!("CARGO_MANIFEST_DIR")).join("../caskade-sources/src"),
+        &mut missing,
+    );
+    visit(
+        &Path::new(env!("CARGO_MANIFEST_DIR")).join("../caskade-backup/src"),
         &mut missing,
     );
     assert!(

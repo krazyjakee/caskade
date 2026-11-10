@@ -3,11 +3,10 @@
 //! `BackupChanged`; automatic backups run in the core's watch.
 
 use crate::error::{CommandError, ErrorCode, report};
-use caskade_core::{
-    backup::{BackupPlan, BackupStatus, Backups, Component, ExportOptions, Inspection, Journal},
-    install::InstallService,
-    launch::LaunchService,
+use caskade_backup::{
+    BackupPlan, BackupStatus, Backups, Component, ExportOptions, Inspection, Journal,
 };
+use caskade_core::{install::InstallService, launch::LaunchService};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::path::PathBuf;
@@ -75,7 +74,7 @@ pub async fn backup_plan(
 #[specta::specta]
 pub async fn backup_start(backups: State<'_, Backups>) -> Result<(), CommandError> {
     if backups.status().await.running.is_some() {
-        return Err(report(caskade_core::backup::BackupError::Busy));
+        return Err(report(caskade_backup::BackupError::Busy));
     }
     let backups = backups.inner().clone();
     tauri::async_runtime::spawn(async move {
@@ -116,7 +115,7 @@ pub async fn backup_restore(
     components: Vec<Component>,
 ) -> Result<Journal, CommandError> {
     backups
-        .restore_job(caskade_core::backup::RestoreOptions {
+        .restore_job(caskade_backup::RestoreOptions {
             archive: PathBuf::from(path),
             components: components.into_iter().collect(),
         })
@@ -165,7 +164,7 @@ pub async fn backup_restart<R: Runtime>(
         ));
     }
     if backups.status().await.running.is_some() {
-        return Err(report(caskade_core::backup::BackupError::Busy));
+        return Err(report(caskade_backup::BackupError::Busy));
     }
     crate::tray::restart(&app);
     Ok(())
@@ -181,8 +180,8 @@ pub async fn backup_reveal(backups: State<'_, Backups>, path: String) -> Result<
         .file_name()
         .and_then(|name| name.to_str())
         .is_some_and(|name| {
-            name.starts_with(caskade_core::backup::PREFIX)
-                && name.ends_with(&format!(".{}", caskade_core::backup::EXTENSION))
+            name.starts_with(caskade_backup::PREFIX)
+                && name.ends_with(&format!(".{}", caskade_backup::EXTENSION))
         });
     let status = backups.status().await;
     let folders = [

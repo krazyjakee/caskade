@@ -11,7 +11,9 @@ rust-version.workspace = true
 autotests = false
 [features]
 default = ["net"]
-net = ["dep:caskade-sync", "dep:base64", "dep:netdev", "dep:socket2", "dep:reqwest", "dep:rustls", "dep:hickory-proto", "dep:aes", "dep:ring", "dep:x509-parser", "dep:flate2", "dep:scraper", "caskade-installer/fetch", "caskade-installer/torrent"]
+net = ["dep:caskade-sync", "dep:base64", "dep:netdev", "dep:reqwest", "dep:flate2", "dep:scraper", "caskade-installer/fetch", "caskade-installer/torrent"]
+# `tracking::ClockStep`, a stepped clock for sibling crates' tests.
+test-utils = []
 
 [dependencies]
 caskade-jobs = { path = "../caskade-jobs" }
@@ -27,7 +29,6 @@ caskade-sync = { path = "../caskade-sync", optional = true }
 # Save files travel as base64 chunks on the sync session (#239).
 base64 = { version = "0.22", optional = true }
 # Network interfaces: Wake-on-LAN addresses and broadcasts (#234).
-socket2 = { version = "0.6", optional = true }
 netdev = { version = "=0.46.3", default-features = false, optional = true }
 # Dev themes (#140) are watched like dev plugins (#131); same pin.
 notify = { version = "8", default-features = false, features = ["macos_kqueue"] }
@@ -77,16 +78,6 @@ url = "2"
 percent-encoding = "2"
 trash = { version = "=5.2.9", default-features = false, features = ["coinit_multithreaded"] }
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream"], optional = true }
-# The streaming host's API, pinned to its own certificate (`streaming::api`);
-# reqwest's rustls, so it takes the configuration.
-rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"], optional = true }
-# Finding streaming hosts with mDNS (`streaming::mdns`); iroh's version.
-hickory-proto = { version = "0.26", default-features = false, features = ["std"], optional = true }
-# Pairing a streaming client with a host natively, over the GameStream
-# protocol (`streaming::pairing`): AES-128, RSA signatures, certificates.
-aes = { version = "0.8", optional = true }
-ring = { version = "0.17", optional = true }
-x509-parser = { version = "0.18", optional = true }
 # Gzip answers from the metadata server; the backend zip already uses.
 flate2 = { version = "1", default-features = false, features = ["rust_backend"], optional = true }
 # Web games' pages, same pin as the installer.
@@ -100,10 +91,6 @@ sha1 = "0.10"
 crc32fast = "1"
 # Account PINs (#202): argon2id hashes; pure Rust, so it builds for every target.
 argon2 = { version = "0.5", features = ["std"] }
-# The add-on catalogue (#181): its signature (minisign, the updater's key
-# and the same crate the updater uses) and plugin API ranges.
-minisign-verify = "=0.3.0"
-semver = { version = "1", features = ["serde"] }
 
 [dev-dependencies]
 # A local relay for relay-path tests (#250).
@@ -114,11 +101,6 @@ caskade-i18n = { path = "../caskade-i18n", features = ["extract"] }
 insta = { version = "1", features = ["json"] }
 tempfile = "=3.27.0"
 wiremock = "0.6"
-# A TLS front for wiremock, with certificates made per test (streaming::api).
-rcgen = { version = "0.14", default-features = false, features = ["ring", "pem"] }
-tokio-rustls = { version = "0.26", default-features = false, features = ["ring", "tls12"] }
-# Signs two versions of a catalogue with a throwaway key; the adapter's pin.
-minisign = "=0.10.0"
 
 [lints]
 workspace = true

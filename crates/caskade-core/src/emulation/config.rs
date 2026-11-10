@@ -276,7 +276,7 @@ impl GameRom {
     /// The ROM's file. The launcher and the readiness check both resolve
     /// ROMs here, so a path that escapes its scanner folder is rejected by
     /// both.
-    pub(crate) async fn path(&self, store: &crate::db::LibraryStore) -> crate::Result<PathBuf> {
+    pub async fn path(&self, store: &crate::db::LibraryStore) -> crate::Result<PathBuf> {
         match &self.location {
             RomLocation::Absolute { path } => Ok(path.clone()),
             RomLocation::Scanner { scanner_id, path } => {
