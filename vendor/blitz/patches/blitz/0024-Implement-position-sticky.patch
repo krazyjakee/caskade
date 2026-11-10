@@ -32,7 +32,7 @@ bottom insets, hit testing, a sticky thead, a stacked list header, paint).
  packages/blitz-dom/src/resolve.rs             |   6 +
  packages/blitz-dom/src/resolved_style.rs      |  20 +-
  packages/blitz-dom/src/scrolling.rs           |  10 +-
- packages/blitz-dom/src/sticky.rs              | 858 ++++++++++++++++++
+ packages/blitz-dom/src/sticky.rs              | 869 ++++++++++++++++++
  packages/blitz-paint/src/debug_overlay.rs     |   4 +-
  packages/blitz-paint/src/lib.rs               |   3 +
  packages/blitz-paint/src/render.rs            |   3 +-
@@ -40,8 +40,8 @@ bottom insets, hit testing, a sticky thead, a stacked list header, paint).
  packages/stylo_taffy/src/convert.rs           |  14 +-
  packages/stylo_taffy/src/wrapper.rs           |  12 +
  tests/blitz-tests/tests/all.rs                |   1 +
- tests/blitz-tests/tests/position_sticky.rs    | 210 +++++
- 20 files changed, 1238 insertions(+), 32 deletions(-)
+ tests/blitz-tests/tests/position_sticky.rs    | 227 +++++
+ 20 files changed, 1266 insertions(+), 32 deletions(-)
  create mode 100644 packages/blitz-dom/src/sticky.rs
  create mode 100644 tests/blitz-tests/tests/position_sticky.rs
 
@@ -413,10 +413,10 @@ index 9724e3da..de1ae74f 100644
              return;
 diff --git a/packages/blitz-dom/src/sticky.rs b/packages/blitz-dom/src/sticky.rs
 new file mode 100644
-index 00000000..6f71a531
+index 00000000..51b0d14c
 --- /dev/null
 +++ b/packages/blitz-dom/src/sticky.rs
-@@ -0,0 +1,858 @@
+@@ -0,0 +1,869 @@
 +//! `position: sticky`.
 +//!
 +//! A sticky box is laid out as if it were `position: relative`; then, once
@@ -649,6 +649,14 @@ index 00000000..6f71a531
 +        let viewport_scroll = (vs.x as f32, vs.y as f32);
 +
 +        let mut entries = std::mem::take(&mut self.sticky_nodes);
++        // A scroll can come between a node leaving the document and the next
++        // layout, which prunes it: skip it here, and an id the slab has
++        // reused for a node that isn't sticky.
++        entries.retain(|e| {
++            self.nodes.get(e.node).is_some_and(|n| {
++                n.flags.is_in_document() && n.flags.contains(crate::node::NodeFlags::IS_STICKY)
++            })
++        });
 +        // Pass 1: clear (shifts handed down by boxless table parts accumulate).
 +        for entry in &entries {
 +            if let Some(n) = self.nodes.get_mut(entry.node) {
@@ -665,7 +673,10 @@ index 00000000..6f71a531
 +                continue;
 +            };
 +            let (x, y) = self.shift_for(c, viewport_size, viewport_scroll);
-+            let ld = self.nodes[entry.node].layout_data_mut();
++            let Some(node) = self.nodes.get_mut(entry.node) else {
++                continue;
++            };
++            let ld = node.layout_data_mut();
 +            ld.sticky_offset.x += x;
 +            ld.sticky_offset.y += y;
 +            if c.boxless {
@@ -1420,10 +1431,10 @@ index 58dff7ba..e59c9151 100644
  mod pseudo_element_update;
 diff --git a/tests/blitz-tests/tests/position_sticky.rs b/tests/blitz-tests/tests/position_sticky.rs
 new file mode 100644
-index 00000000..3c20e4b3
+index 00000000..870bb023
 --- /dev/null
 +++ b/tests/blitz-tests/tests/position_sticky.rs
-@@ -0,0 +1,210 @@
+@@ -0,0 +1,227 @@
 +//! `position: sticky`: boxes laid out in flow, then shifted to stay inside
 +//! their scroller's inset edges without leaving their containing block. The
 +//! shift shows in geometry APIs, hit testing and paint.
@@ -1489,6 +1500,23 @@ index 00000000..3c20e4b3
 +
 +    scroll_to(&mut harness, "#scroller", 0.0);
 +    assert_eq!(client_y(&harness, "#header"), 50.0);
++}
++
++/// A sticky box removed (a view navigated away from) and a scroll before
++/// the next layout: the refresh skips it instead of indexing a slot that
++/// is gone, and a node given its id later isn't shifted.
++#[test]
++fn a_removed_sticky_box_is_skipped_when_scrolling_before_the_next_layout() {
++    let mut harness = Harness::from_html(SCROLLER);
++    scroll_to(&mut harness, "#scroller", 100.0);
++    assert_eq!(client_y(&harness, "#header"), 0.0);
++    let header = harness.node("#header");
++    harness.base_mut().mutate().remove_and_drop_node(header);
++    // No layout in between: the scroll refreshes the sticky offsets.
++    scroll_to(&mut harness, "#scroller", 120.0);
++    scroll_to(&mut harness, "#scroller", 0.0);
++    harness.pump();
++    assert_eq!(client_y(&harness, "#body"), 50.0);
 +}
 +
 +#[test]

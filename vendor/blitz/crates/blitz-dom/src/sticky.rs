@@ -230,6 +230,14 @@ impl BaseDocument {
         let viewport_scroll = (vs.x as f32, vs.y as f32);
 
         let mut entries = std::mem::take(&mut self.sticky_nodes);
+        // A scroll can come between a node leaving the document and the next
+        // layout, which prunes it: skip it here, and an id the slab has
+        // reused for a node that isn't sticky.
+        entries.retain(|e| {
+            self.nodes.get(e.node).is_some_and(|n| {
+                n.flags.is_in_document() && n.flags.contains(crate::node::NodeFlags::IS_STICKY)
+            })
+        });
         // Pass 1: clear (shifts handed down by boxless table parts accumulate).
         for entry in &entries {
             if let Some(n) = self.nodes.get_mut(entry.node) {
@@ -246,7 +254,10 @@ impl BaseDocument {
                 continue;
             };
             let (x, y) = self.shift_for(c, viewport_size, viewport_scroll);
-            let ld = self.nodes[entry.node].layout_data_mut();
+            let Some(node) = self.nodes.get_mut(entry.node) else {
+                continue;
+            };
+            let ld = node.layout_data_mut();
             ld.sticky_offset.x += x;
             ld.sticky_offset.y += y;
             if c.boxless {
