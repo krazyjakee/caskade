@@ -1,9 +1,11 @@
 //! Storage registry IPC. The source layer owns manifest adoption (#54).
-use crate::error::{CommandError, report};
+//! Forwarded to `caskade_app::commands::storage`, but for the folder picker.
+use crate::error::CommandError;
+use caskade_app::commands::storage as app;
 use caskade_core::{
-    accounts::{AccountService, Permission},
+    accounts::AccountService,
     install::{InstallService, JobSnapshot},
-    storage::{CancellationToken, RootSummary, StorageService},
+    storage::{RootSummary, StorageService},
 };
 use caskade_sources::storage::StorageSource;
 
@@ -12,7 +14,7 @@ use caskade_sources::storage::StorageSource;
 pub async fn storage_list(
     state: tauri::State<'_, StorageService>,
 ) -> Result<Vec<RootSummary>, CommandError> {
-    state.list_roots().await.map_err(report)
+    app::storage_list(&state).await
 }
 #[tauri::command]
 #[specta::specta]
@@ -22,34 +24,7 @@ pub async fn storage_add(
     path: String,
     label: Option<String>,
 ) -> Result<RootSummary, CommandError> {
-    let root = state
-        .register_root(path.into(), label)
-        .await
-        .map_err(report)?;
-    let adopted = source
-        .adopt_root(&root.root, CancellationToken::new())
-        .await
-        .map_err(report)?;
-    let mut summary = state
-        .list_roots()
-        .await
-        .map_err(report)?
-        .into_iter()
-        .find(|r| r.root.id == root.root.id)
-        .ok_or_else(|| caskade_core::tr!("The storage location was added, but it disappeared from the list before it could be shown. Reload Settings → Storage."))?;
-    summary
-        .capabilities
-        .warnings
-        .extend(adopted.warnings.into_iter().map(|w| w.message));
-    if let Some(error) = adopted.error {
-        summary.capabilities.warnings.push(error);
-    }
-    for game in adopted.games {
-        if let Some(error) = game.error {
-            summary.capabilities.warnings.push(error)
-        }
-    }
-    Ok(summary)
+    app::storage_add(&state, &source, path, label).await
 }
 #[tauri::command]
 #[specta::specta]
@@ -59,10 +34,7 @@ pub async fn storage_edit(
     label: Option<String>,
     folder_template: String,
 ) -> Result<RootSummary, CommandError> {
-    state
-        .edit_root(&id, label, folder_template)
-        .await
-        .map_err(report)
+    app::storage_edit(&state, &id, label, folder_template).await
 }
 #[tauri::command]
 #[specta::specta]
@@ -70,7 +42,7 @@ pub async fn storage_default(
     state: tauri::State<'_, StorageService>,
     id: String,
 ) -> Result<RootSummary, CommandError> {
-    state.set_default(&id).await.map_err(report)
+    app::storage_default(&state, &id).await
 }
 #[tauri::command]
 #[specta::specta]
@@ -78,7 +50,7 @@ pub async fn storage_remove(
     state: tauri::State<'_, StorageService>,
     id: String,
 ) -> Result<(), CommandError> {
-    state.remove_keep_files(&id).await.map_err(report)
+    app::storage_remove(&state, &id).await
 }
 /// Moves every game on location `id` to `target_id`, then removes `id`, as
 /// one job (#64). The gate checks the removal; moving games needs installs
@@ -92,11 +64,7 @@ pub async fn storage_move_and_remove(
     id: String,
     target_id: String,
 ) -> Result<JobSnapshot, CommandError> {
-    accounts.require(Permission::Install).map_err(report)?;
-    install
-        .move_location(id, target_id, storage.inner().clone())
-        .await
-        .map_err(report)
+    app::storage_move_and_remove(&accounts, &install, &storage, id, target_id).await
 }
 /// Directory-only native picker, no webview filesystem capability.
 #[tauri::command]

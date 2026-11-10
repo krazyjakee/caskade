@@ -1,7 +1,9 @@
 //! Fan ports of library games (`caskade_core::ports`): decompilations,
 //! recompilations and source ports from Decomp Buddy's install plans,
 //! listed on game pages and installed as another release of the game.
-use crate::error::{CommandError, report};
+//! Forwarded to `caskade_app::commands::ports`.
+use crate::error::CommandError;
+use caskade_app::commands::ports as app;
 use caskade_core::{
     db::LibraryStore,
     hasheous::Hasheous,
@@ -19,10 +21,7 @@ pub async fn game_ports(
     hasheous: State<'_, Hasheous>,
     game_id: String,
 ) -> Result<GamePorts, CommandError> {
-    ports
-        .for_game(&store, Some(&hasheous), &game_id)
-        .await
-        .map_err(report)
+    app::game_ports(&ports, &store, &hasheous, &game_id).await
 }
 
 /// Installs port `project` as another release of the game, into `root_id`
@@ -37,8 +36,5 @@ pub async fn game_port_install(
     project: String,
     root_id: Option<String>,
 ) -> Result<JobSnapshot, CommandError> {
-    ports
-        .install(&store, &installs, &game_id, &project, root_id)
-        .await
-        .map_err(report)
+    app::game_port_install(&ports, &store, &installs, &game_id, &project, root_id).await
 }

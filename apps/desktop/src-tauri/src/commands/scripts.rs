@@ -1,18 +1,16 @@
 //! Lifecycle scripts (#179): listing and changing the global, emulator
 //! profile and game scripts, and stopping a launch while its before-launch
 //! scripts run. Who may change a scope is
-//! `caskade_app::permissions::script_scope`.
-use crate::error::{CommandError, report};
+//! `caskade_app::permissions::script_scope`. Forwarded to
+//! `caskade_app::commands::scripts`.
+use crate::error::CommandError;
+use caskade_app::commands::scripts as app;
 use caskade_core::{
     db::LibraryStore,
     launch::LaunchService,
-    scripts::{self, LifecycleScript, ScriptScope, ScriptStep, ScriptTest, ScriptTests},
+    scripts::{LifecycleScript, ScriptScope, ScriptStep, ScriptTest},
 };
-use std::sync::LazyLock;
 use tauri::State;
-
-/// Tests running now, by the id the webview gave them.
-static TESTS: LazyLock<ScriptTests> = LazyLock::new(ScriptTests::default);
 
 /// One scope's scripts in their order, disabled ones included.
 #[tauri::command]
@@ -21,7 +19,7 @@ pub async fn lifecycle_scripts(
     store: State<'_, LibraryStore>,
     scope: ScriptScope,
 ) -> Result<Vec<LifecycleScript>, CommandError> {
-    store.lifecycle_scripts(&scope).await.map_err(report)
+    app::lifecycle_scripts(&store, &scope).await
 }
 
 /// Adds or changes a script of `scope`; an empty `id` adds one, last.
@@ -32,14 +30,7 @@ pub async fn lifecycle_script_save(
     scope: ScriptScope,
     script: LifecycleScript,
 ) -> Result<LifecycleScript, CommandError> {
-    let mut script = script;
-    if script.scope != scope {
-        return Err(mismatch());
-    }
-    if script.id.is_empty() {
-        script.id = caskade_core::model::new_id();
-    }
-    store.save_lifecycle_script(&script).await.map_err(report)
+    app::lifecycle_script_save(&store, &scope, script).await
 }
 
 #[tauri::command]
@@ -49,13 +40,7 @@ pub async fn lifecycle_script_delete(
     scope: ScriptScope,
     id: String,
 ) -> Result<bool, CommandError> {
-    match store.lifecycle_script(&id).await.map_err(report)? {
-        Some(script) if script.scope == scope => {
-            store.delete_lifecycle_script(&id).await.map_err(report)
-        }
-        Some(_) => Err(mismatch()),
-        None => Ok(false),
-    }
+    app::lifecycle_script_delete(&store, &scope, &id).await
 }
 
 /// Puts a scope's scripts in the order of `ids`.
@@ -66,10 +51,7 @@ pub async fn lifecycle_scripts_order(
     scope: ScriptScope,
     ids: Vec<String>,
 ) -> Result<(), CommandError> {
-    store
-        .order_lifecycle_scripts(&scope, &ids)
-        .await
-        .map_err(report)
+    app::lifecycle_scripts_order(&store, &scope, &ids).await
 }
 
 /// Stops the game's launch while its before-launch scripts run; false
@@ -80,7 +62,7 @@ pub async fn launch_cancel(
     service: State<'_, LaunchService>,
     game_id: String,
 ) -> Result<bool, CommandError> {
-    Ok(service.cancel_start(&game_id))
+    app::launch_cancel(&service, &game_id).await
 }
 
 /// The steps a launch of the game (through the profile) takes, in order,
@@ -92,9 +74,7 @@ pub async fn lifecycle_scripts_effective(
     game_id: Option<String>,
     profile_id: Option<String>,
 ) -> Result<Vec<ScriptStep>, CommandError> {
-    scripts::effective_order(&store, game_id.as_deref(), profile_id.as_deref())
-        .await
-        .map_err(report)
+    app::lifecycle_scripts_effective(&store, game_id.as_deref(), profile_id.as_deref()).await
 }
 
 /// Runs `script` of `scope` once as a test, saved or not, through the
@@ -109,30 +89,14 @@ pub async fn lifecycle_script_test(
     game_id: Option<String>,
     test_id: String,
 ) -> Result<ScriptTest, CommandError> {
-    if script.scope != scope {
-        return Err(mismatch());
-    }
-    let game_id = match &scope {
-        ScriptScope::Game { game_id } => Some(game_id.clone()),
-        _ => game_id,
-    };
-    let context = scripts::test_context(&store, game_id.as_deref())
-        .await
-        .map_err(report)?;
-    TESTS.run(&test_id, &script, &context).await.map_err(report)
+    app::lifecycle_script_test(&store, &scope, &script, game_id, &test_id).await
 }
 
 /// Stops a running test; false when it already finished.
 #[tauri::command]
 #[specta::specta]
 pub async fn lifecycle_script_test_cancel(test_id: String) -> Result<bool, CommandError> {
-    Ok(TESTS.cancel(&test_id))
-}
-
-fn mismatch() -> CommandError {
-    report(caskade_core::Error::Invalid(caskade_core::tr!(
-        "the script belongs to another scope"
-    )))
+    app::lifecycle_script_test_cancel(&test_id).await
 }
 
 #[cfg(test)]

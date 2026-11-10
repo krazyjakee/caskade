@@ -1,11 +1,14 @@
 //! Games added by hand (#174): what a program, shortcut or URI starts, games
 //! that may be the same, and adding the record. Nothing on disk is copied,
-//! moved or run.
-use crate::error::{CommandError, report};
+//! moved or run. Forwarded to `caskade_app::commands::manual_games`.
+use crate::error::CommandError;
+use caskade_app::commands::manual_games as app;
+#[cfg(test)]
+use caskade_core::bus::Event;
 use caskade_core::{
-    bus::{Bus, Event},
+    bus::Bus,
     db::LibraryStore,
-    manual::{DuplicateGame, ManualGame, ManualTarget, resolve_target},
+    manual::{DuplicateGame, ManualGame, ManualTarget},
 };
 use tauri::State;
 
@@ -14,10 +17,7 @@ use tauri::State;
 #[tauri::command]
 #[specta::specta]
 pub async fn manual_game_target(input: String) -> Result<ManualTarget, CommandError> {
-    tauri::async_runtime::spawn_blocking(move || resolve_target(&input))
-        .await
-        .map_err(|error| report(caskade_core::Error::Invalid(error.to_string())))?
-        .map_err(report)
+    app::manual_game_target(input).await
 }
 
 /// Games already in the library that may be the one being added.
@@ -28,10 +28,7 @@ pub async fn manual_game_duplicates(
     title: String,
     target: Option<ManualTarget>,
 ) -> Result<Vec<DuplicateGame>, CommandError> {
-    store
-        .manual_duplicates(&title, target.as_ref())
-        .await
-        .map_err(report)
+    app::manual_game_duplicates(&store, &title, target.as_ref()).await
 }
 
 /// Adds the game and returns its id: a new game, or the target as a
@@ -43,17 +40,7 @@ pub async fn manual_game_add(
     bus: State<'_, Bus>,
     game: ManualGame,
 ) -> Result<String, CommandError> {
-    let id = store.add_manual_game(&game).await.map_err(report)?;
-    bus.emit(if game.link_to.is_some() {
-        Event::LibraryGameUpdated {
-            game_id: id.clone(),
-        }
-    } else {
-        Event::LibraryGameAdded {
-            game_id: id.clone(),
-        }
-    });
-    Ok(id)
+    app::manual_game_add(&store, &bus, game).await
 }
 
 #[cfg(test)]

@@ -5,43 +5,24 @@
 //! The Store's catalog (#163) reads all of IGDB: `igdb_catalog_*`. The
 //! Store links out to storefronts and installs nothing itself; installs it
 //! may start later go through the install commands and their `install`
-//! permission (#205).
+//! permission (#205). Forwarded to `caskade_app::commands::igdb`.
+use caskade_app::commands::igdb as app;
 use caskade_core::{
     db::{GameAgeRatings, IgdbOwned, LibraryStore},
     igdb::{
-        self, CatalogReleases, CatalogSearch, Igdb, IgdbCatalogFilters, IgdbCatalogPage, IgdbGame,
+        CatalogReleases, CatalogSearch, Igdb, IgdbCatalogFilters, IgdbCatalogPage, IgdbGame,
         IgdbLookup,
     },
     metadata::{GameIgdb, Metadata},
 };
 use tauri::State;
 
-/// Ids cross as strings; anything that is not one is refused, and so is
-/// more than one request's worth.
-fn parse(ids: &[String]) -> Result<Vec<u64>, String> {
-    if ids.len() > igdb::BATCH {
-        return Err(caskade_core::tr!(
-            "at most {count} IGDB ids at a time",
-            count = igdb::BATCH
-        ));
-    }
-    ids.iter()
-        .map(|id| {
-            id.trim()
-                .parse()
-                .map_err(|_| caskade_core::tr!("{id} is not an IGDB id", id = format!("{id:?}")))
-        })
-        .collect()
-}
-
 /// The games with `ids`, from the cache or, for ids it has no answer for
 /// yet, the server.
 #[tauri::command]
 #[specta::specta]
 pub async fn igdb_games(igdb: State<'_, Igdb>, ids: Vec<String>) -> Result<IgdbLookup, String> {
-    igdb.games(&parse(&ids)?)
-        .await
-        .map_err(|error| error.to_string())
+    app::igdb_games(&igdb, &ids).await
 }
 
 /// Fetches `ids` again, replacing the cached answers older than ten
@@ -49,9 +30,7 @@ pub async fn igdb_games(igdb: State<'_, Igdb>, ids: Vec<String>) -> Result<IgdbL
 #[tauri::command]
 #[specta::specta]
 pub async fn igdb_refresh(igdb: State<'_, Igdb>, ids: Vec<String>) -> Result<IgdbLookup, String> {
-    igdb.refresh(&parse(&ids)?)
-        .await
-        .map_err(|error| error.to_string())
+    app::igdb_refresh(&igdb, &ids).await
 }
 
 /// IGDB's best matches for the title `query`, best first, at most
@@ -63,9 +42,7 @@ pub async fn igdb_search(
     query: String,
     limit: u32,
 ) -> Result<Vec<IgdbGame>, String> {
-    igdb.search(&query, limit as usize)
-        .await
-        .map_err(|error| error.to_string())
+    app::igdb_search(&igdb, &query, limit).await
 }
 
 /// A library game's IGDB match and its IGDB game; `null` before matching
@@ -76,10 +53,7 @@ pub async fn game_igdb(
     metadata: State<'_, Metadata>,
     game_id: String,
 ) -> Result<Option<GameIgdb>, String> {
-    metadata
-        .game(&game_id)
-        .await
-        .map_err(|error| error.to_string())
+    app::game_igdb(&metadata, &game_id).await
 }
 
 /// Matches a library game to an IGDB game by hand, or to none with
@@ -91,14 +65,7 @@ pub async fn game_igdb_set(
     game_id: String,
     igdb_id: Option<String>,
 ) -> Result<GameIgdb, String> {
-    let igdb_id = match igdb_id {
-        Some(id) => Some(parse(std::slice::from_ref(&id))?[0]),
-        None => None,
-    };
-    metadata
-        .set(&game_id, igdb_id)
-        .await
-        .map_err(|error| error.to_string())
+    app::game_igdb_set(&metadata, &game_id, igdb_id).await
 }
 
 /// Forgets a library game's match and matches it automatically again.
@@ -108,10 +75,7 @@ pub async fn game_igdb_rematch(
     metadata: State<'_, Metadata>,
     game_id: String,
 ) -> Result<Option<GameIgdb>, String> {
-    metadata
-        .rematch(&game_id)
-        .await
-        .map_err(|error| error.to_string())
+    app::game_igdb_rematch(&metadata, &game_id).await
 }
 
 /// Fetches a library game's IGDB game again and fills the game in from it.
@@ -121,10 +85,7 @@ pub async fn game_igdb_refresh(
     metadata: State<'_, Metadata>,
     game_id: String,
 ) -> Result<Option<GameIgdb>, String> {
-    metadata
-        .refresh(&game_id)
-        .await
-        .map_err(|error| error.to_string())
+    app::game_igdb_refresh(&metadata, &game_id).await
 }
 
 /// Moves an entry out of its game into a game of its own, which IGDB
@@ -136,10 +97,7 @@ pub async fn game_separate_entry(
     metadata: State<'_, Metadata>,
     entry_id: String,
 ) -> Result<String, String> {
-    metadata
-        .separate(&entry_id)
-        .await
-        .map_err(|error| error.to_string())
+    app::game_separate_entry(&metadata, &entry_id).await
 }
 
 /// A page of the IGDB catalog: games matching a search, or the most-rated
@@ -151,9 +109,7 @@ pub async fn igdb_catalog_search(
     igdb: State<'_, Igdb>,
     search: CatalogSearch,
 ) -> Result<IgdbCatalogPage, String> {
-    igdb.catalog_search(&search)
-        .await
-        .map_err(|error| error.to_string())
+    app::igdb_catalog_search(&igdb, &search).await
 }
 
 /// A page of the last 90 days' releases, newest first.
@@ -163,9 +119,7 @@ pub async fn igdb_catalog_recent(
     igdb: State<'_, Igdb>,
     releases: CatalogReleases,
 ) -> Result<IgdbCatalogPage, String> {
-    igdb.catalog_recent(&releases)
-        .await
-        .map_err(|error| error.to_string())
+    app::igdb_catalog_recent(&igdb, &releases).await
 }
 
 /// A page of releases to come, soonest first; with `tbd`, undated ones.
@@ -175,18 +129,14 @@ pub async fn igdb_catalog_upcoming(
     igdb: State<'_, Igdb>,
     releases: CatalogReleases,
 ) -> Result<IgdbCatalogPage, String> {
-    igdb.catalog_upcoming(&releases)
-        .await
-        .map_err(|error| error.to_string())
+    app::igdb_catalog_upcoming(&igdb, &releases).await
 }
 
 /// The platforms and genres the catalog can be narrowed by.
 #[tauri::command]
 #[specta::specta]
 pub async fn igdb_catalog_filters(igdb: State<'_, Igdb>) -> Result<IgdbCatalogFilters, String> {
-    igdb.catalog_filters()
-        .await
-        .map_err(|error| error.to_string())
+    app::igdb_catalog_filters(&igdb).await
 }
 
 /// Games for the Store's pages: cached answers younger than a day, the
@@ -197,9 +147,7 @@ pub async fn igdb_catalog_games(
     igdb: State<'_, Igdb>,
     ids: Vec<String>,
 ) -> Result<IgdbLookup, String> {
-    igdb.catalog_games(&parse(&ids)?)
-        .await
-        .map_err(|error| error.to_string())
+    app::igdb_catalog_games(&igdb, &ids).await
 }
 
 /// The library games matched to IGDB games `ids`: what the Store shows as
@@ -210,10 +158,7 @@ pub async fn igdb_owned(
     store: State<'_, LibraryStore>,
     ids: Vec<String>,
 ) -> Result<Vec<IgdbOwned>, String> {
-    store
-        .igdb_owned(&parse(&ids)?)
-        .await
-        .map_err(|error| error.to_string())
+    app::igdb_owned(&store, &ids).await
 }
 
 /// A library game's age ratings and the minimum age they come to; `null`
@@ -224,8 +169,5 @@ pub async fn game_age_ratings(
     store: State<'_, LibraryStore>,
     game_id: String,
 ) -> Result<Option<GameAgeRatings>, String> {
-    store
-        .game_age_ratings(&game_id)
-        .await
-        .map_err(|error| error.to_string())
+    app::game_age_ratings(&store, &game_id).await
 }

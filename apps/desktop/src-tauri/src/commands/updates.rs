@@ -1,7 +1,9 @@
 //! Game updates: newer releases of games installed from GitHub, checked
 //! without an account (`caskade_core::updates`). Updates are install jobs
-//! (`kind: update`), followed like any other.
-use crate::error::{CommandError, report};
+//! (`kind: update`), followed like any other. Forwarded to
+//! `caskade_app::commands::updates`.
+use crate::error::CommandError;
+use caskade_app::commands::updates as app;
 use caskade_core::{
     install::JobSnapshot,
     launch::LaunchService,
@@ -16,7 +18,7 @@ pub async fn game_updates(
     updates: State<'_, Updates>,
     game_id: String,
 ) -> Result<Vec<GameUpdate>, CommandError> {
-    updates.game(&game_id).await.map_err(report)
+    app::game_updates(&updates, &game_id).await
 }
 
 /// The installs with a newer release out.
@@ -25,7 +27,7 @@ pub async fn game_updates(
 pub async fn updates_available(
     updates: State<'_, Updates>,
 ) -> Result<Vec<GameUpdate>, CommandError> {
-    updates.available().await.map_err(report)
+    app::updates_available(&updates).await
 }
 
 /// Asks the install's provider for its newest release now.
@@ -35,7 +37,7 @@ pub async fn game_update_check(
     updates: State<'_, Updates>,
     entry_id: String,
 ) -> Result<GameUpdate, CommandError> {
-    updates.check(&entry_id).await.map_err(report)
+    app::game_update_check(&updates, &entry_id).await
 }
 
 /// The update to offer before the install is played; `null` to play
@@ -46,7 +48,7 @@ pub async fn game_update_before_play(
     updates: State<'_, Updates>,
     entry_id: String,
 ) -> Result<Option<GameUpdate>, CommandError> {
-    updates.before_play(&entry_id).await.map_err(report)
+    app::game_update_before_play(&updates, &entry_id).await
 }
 
 /// Stops offering release `version`; `null` offers every release again.
@@ -57,7 +59,7 @@ pub async fn game_update_skip(
     entry_id: String,
     version: Option<String>,
 ) -> Result<GameUpdate, CommandError> {
-    updates.skip(&entry_id, version).await.map_err(report)
+    app::game_update_skip(&updates, &entry_id, version).await
 }
 
 /// Offers prereleases too, or stops, and checks again.
@@ -68,10 +70,7 @@ pub async fn game_update_prereleases(
     entry_id: String,
     prereleases: bool,
 ) -> Result<GameUpdate, CommandError> {
-    updates
-        .set_prereleases(&entry_id, prereleases)
-        .await
-        .map_err(report)
+    app::game_update_prereleases(&updates, &entry_id, prereleases).await
 }
 
 /// Installs the newest release over the game, keeping the player's files.
@@ -82,8 +81,5 @@ pub async fn game_update_install(
     launch: State<'_, LaunchService>,
     entry_id: String,
 ) -> Result<JobSnapshot, CommandError> {
-    updates
-        .install(&entry_id, launch.inner().clone())
-        .await
-        .map_err(report)
+    app::game_update_install(&updates, &launch, &entry_id).await
 }

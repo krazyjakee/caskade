@@ -1,21 +1,18 @@
 //! Settings → Emulators → ROM scanners IPC (#119) over
-//! `caskade_core::emulation::ScannerService`.
+//! `caskade_core::emulation::ScannerService`. Forwarded to
+//! `caskade_app::commands::rom_scanners`.
 
-use crate::error::{CommandError, conflict, report};
+use crate::error::CommandError;
+use caskade_app::commands::rom_scanners as app;
 use caskade_core::{
     db::LibraryStore,
     emulation::{
         EmulationService, ReviewChoice, RomFolderSetup, RomScanner, ScanJob, ScanMode, ScanSummary,
         ScannerView,
     },
-    launch::EmulatorLaunches,
 };
 
 type State<'a> = tauri::State<'a, EmulationService>;
-
-fn no_scan() -> String {
-    caskade_core::tr!("This ROM scan is no longer available.")
-}
 
 /// Every scanner with its last scan, what it imports and any Flatpak hint.
 #[tauri::command]
@@ -24,12 +21,7 @@ pub async fn rom_scanners_list(
     state: State<'_>,
     store: tauri::State<'_, LibraryStore>,
 ) -> Result<Vec<ScannerView>, CommandError> {
-    let launches = EmulatorLaunches::new(store.inner().clone(), state.inner().clone());
-    state
-        .scanners()
-        .list(&|app_id, dir| launches.flatpak_sees(app_id, dir))
-        .await
-        .map_err(report)
+    app::rom_scanners_list(&state, &store).await
 }
 
 /// Creates (empty id) or updates a scanner.
@@ -39,7 +31,7 @@ pub async fn rom_scanner_save(
     state: State<'_>,
     scanner: RomScanner,
 ) -> Result<RomScanner, CommandError> {
-    state.scanners().save(scanner).await.map_err(report)
+    app::rom_scanner_save(&state, scanner).await
 }
 
 /// Gives each platform folder in a ROM collection a scanner (first-run
@@ -50,23 +42,14 @@ pub async fn rom_folder_setup(
     state: State<'_>,
     folder: String,
 ) -> Result<RomFolderSetup, CommandError> {
-    state
-        .scanners()
-        .setup_folder(std::path::Path::new(&folder))
-        .await
-        .map_err(report)
+    app::rom_folder_setup(&state, &folder).await
 }
 
 /// Deletes a scanner; its games stay in the library, not installed.
 #[tauri::command]
 #[specta::specta]
 pub async fn rom_scanner_delete(state: State<'_>, id: String) -> Result<(), CommandError> {
-    match state.scanners().delete(&id).await.map_err(report)? {
-        true => Ok(()),
-        false => Err(conflict(caskade_core::tr!(
-            "This ROM scanner no longer exists."
-        ))),
-    }
+    app::rom_scanner_delete(&state, &id).await
 }
 
 /// Starts a scan: `review` stops at a review list, `import` imports.
@@ -78,33 +61,26 @@ pub async fn rom_scan_start(
     scanner_id: String,
     mode: ScanMode,
 ) -> Result<ScanJob, CommandError> {
-    state
-        .scanners()
-        .start(&scanner_id, mode)
-        .await
-        .map_err(report)
+    app::rom_scan_start(&state, &scanner_id, mode).await
 }
 
 #[tauri::command]
 #[specta::specta]
 pub fn rom_scan_get(state: State<'_>, id: String) -> Result<ScanJob, CommandError> {
-    state.scanners().get(&id).ok_or_else(|| conflict(no_scan()))
+    app::rom_scan_get(&state, &id)
 }
 
 /// Retained scans, newest first, so a review survives a reload.
 #[tauri::command]
 #[specta::specta]
 pub fn rom_scan_jobs(state: State<'_>) -> Vec<ScanJob> {
-    state.scanners().jobs()
+    app::rom_scan_jobs(&state)
 }
 
 #[tauri::command]
 #[specta::specta]
 pub fn rom_scan_cancel(state: State<'_>, id: String) -> Result<ScanJob, CommandError> {
-    state
-        .scanners()
-        .cancel(&id)
-        .ok_or_else(|| conflict(no_scan()))
+    app::rom_scan_cancel(&state, &id)
 }
 
 /// Stores the choices of the reviewed revision and imports with them.
@@ -116,25 +92,21 @@ pub async fn rom_scan_submit(
     revision: u32,
     choices: Vec<ReviewChoice>,
 ) -> Result<ScanJob, CommandError> {
-    state
-        .scanners()
-        .submit(&id, revision, choices)
-        .await
-        .map_err(report)
+    app::rom_scan_submit(&state, &id, revision, choices).await
 }
 
 /// "Scan all": every scanner that takes part in library updates imports.
 #[tauri::command]
 #[specta::specta]
 pub async fn rom_scan_all(state: State<'_>) -> Result<Vec<ScanSummary>, CommandError> {
-    state.scanners().scan_all().await.map_err(report)
+    app::rom_scan_all(&state).await
 }
 
 /// Exclusions every scanner applies (#135).
 #[tauri::command]
 #[specta::specta]
 pub async fn rom_exclusions(state: State<'_>) -> Result<Vec<String>, CommandError> {
-    state.scanners().global_exclusions().await.map_err(report)
+    app::rom_exclusions(&state).await
 }
 
 /// Replaces the global exclusions and returns them as stored (trimmed,
@@ -145,11 +117,7 @@ pub async fn rom_exclusions_set(
     state: State<'_>,
     patterns: Vec<String>,
 ) -> Result<Vec<String>, CommandError> {
-    state
-        .scanners()
-        .set_global_exclusions(patterns)
-        .await
-        .map_err(report)
+    app::rom_exclusions_set(&state, patterns).await
 }
 
 #[cfg(test)]

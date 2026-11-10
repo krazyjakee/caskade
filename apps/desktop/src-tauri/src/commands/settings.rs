@@ -1,5 +1,7 @@
 //! Thin settings IPC contract; validation/persistence/events live in core.
-use crate::error::{CommandError, report};
+//! Forwarded to `caskade_app::commands::settings`.
+use crate::error::CommandError;
+use caskade_app::commands::settings as forwarded;
 use caskade_core::settings::{SettingsSection, SettingsService, SettingsSnapshot};
 use tauri::Manager;
 
@@ -11,15 +13,12 @@ pub fn settings_sections<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     state: tauri::State<'_, SettingsService>,
 ) -> Result<Vec<SettingsSection>, CommandError> {
-    let mut sections = state.sections().map_err(report)?;
-    if let Some(plugins) = app.try_state::<caskade_plugin_host::PluginHost>() {
-        for section in &mut sections {
-            if let Some(id) = section.namespace.strip_prefix("plugins.") {
-                plugins.translate_settings_schema(id, &mut section.schema);
-            }
+    let plugins = app.try_state::<caskade_plugin_host::PluginHost>();
+    forwarded::settings_sections(&state, |id, schema| {
+        if let Some(plugins) = &plugins {
+            plugins.translate_settings_schema(id, schema);
         }
-    }
-    Ok(sections)
+    })
 }
 
 #[tauri::command]
@@ -28,7 +27,7 @@ pub async fn settings_get(
     state: tauri::State<'_, SettingsService>,
     namespace: String,
 ) -> Result<SettingsSnapshot, CommandError> {
-    state.get(&namespace).await.map_err(report)
+    forwarded::settings_get(&state, &namespace).await
 }
 
 #[tauri::command]
@@ -39,10 +38,7 @@ pub async fn settings_set(
     value: serde_json::Value,
     expected_revision: Option<u32>,
 ) -> Result<SettingsSnapshot, CommandError> {
-    state
-        .set(&namespace, value, expected_revision)
-        .await
-        .map_err(report)
+    forwarded::settings_set(&state, &namespace, value, expected_revision).await
 }
 
 #[tauri::command]
@@ -52,10 +48,7 @@ pub async fn settings_reset(
     namespace: String,
     expected_revision: Option<u32>,
 ) -> Result<SettingsSnapshot, CommandError> {
-    state
-        .reset(&namespace, expected_revision)
-        .await
-        .map_err(report)
+    forwarded::settings_reset(&state, &namespace, expected_revision).await
 }
 
 #[cfg(test)]

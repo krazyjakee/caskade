@@ -1,8 +1,13 @@
 //! Library commands. Queries and persistence stay in caskade-core.
-use crate::error::{CommandError, report};
+//! Forwarded to `caskade_app::commands::library`.
+use crate::error::CommandError;
+use caskade_app::commands::library as app;
+
+/// The file manager, for the other commands that show a folder.
+pub(super) use app::open_file_manager;
 use caskade_core::{
     accounts::AccountService,
-    bus::{Bus, Event},
+    bus::Bus,
     db::LibraryStore,
     metadata::Metadata,
     model::{
@@ -21,10 +26,7 @@ pub async fn list_games(
     accounts: State<'_, AccountService>,
     query: ListGames,
 ) -> Result<GamePage, CommandError> {
-    store
-        .list_games_for_account(&query, accounts.active_id().as_deref())
-        .await
-        .map_err(report)
+    app::list_games(&store, &accounts, &query).await
 }
 
 #[tauri::command]
@@ -33,7 +35,7 @@ pub async fn get_game(
     store: State<'_, LibraryStore>,
     id: String,
 ) -> Result<Option<GameDetails>, CommandError> {
-    store.get_game(&id).await.map_err(report)
+    app::get_game(&store, &id).await
 }
 
 /// Downloads the images only a game's page shows, the first time it
@@ -47,19 +49,7 @@ pub async fn game_page_images(
     settings: State<'_, SettingsService>,
     game_id: String,
 ) -> Result<(), CommandError> {
-    // One after the other: IGDB's screenshots only fill in where RomM's
-    // aren't there. RomM's step skips offline servers and is quick.
-    if let Err(error) = romm.page_images(&game_id).await {
-        tracing::warn!(game = %game_id, %error, "RomM screenshots not fetched");
-    }
-    if !crate::onboarding::page_images_online(&settings).await {
-        return Ok(());
-    }
-    metadata
-        .page_images(&game_id)
-        .await
-        .map(drop)
-        .map_err(report)
+    app::game_page_images(&romm, &metadata, &settings, &game_id).await
 }
 
 /// The platforms of the games in a library filter, with their counts,
@@ -71,10 +61,7 @@ pub async fn library_platforms(
     accounts: State<'_, AccountService>,
     filter: GameFilter,
 ) -> Result<Vec<PlatformSummary>, CommandError> {
-    store
-        .library_platforms_for_account(filter, accounts.active_id().as_deref())
-        .await
-        .map_err(report)
+    app::library_platforms(&store, &accounts, filter).await
 }
 
 /// Where each initial letter starts in a library query sorted by title,
@@ -86,10 +73,7 @@ pub async fn title_letters(
     accounts: State<'_, AccountService>,
     query: ListGames,
 ) -> Result<Vec<TitleLetter>, CommandError> {
-    store
-        .title_letters_for_account(&query, accounts.active_id().as_deref())
-        .await
-        .map_err(report)
+    app::title_letters(&store, &accounts, &query).await
 }
 
 #[tauri::command]
@@ -98,10 +82,7 @@ pub async fn library_stats(
     store: State<'_, LibraryStore>,
     accounts: State<'_, AccountService>,
 ) -> Result<LibraryStats, CommandError> {
-    store
-        .library_stats_for_account(accounts.active_id().as_deref())
-        .await
-        .map_err(report)
+    app::library_stats(&store, &accounts).await
 }
 
 #[tauri::command]
@@ -112,15 +93,7 @@ pub async fn list_sessions(
     game_id: Option<String>,
     limit: u32,
 ) -> Result<Vec<PlaySession>, CommandError> {
-    let stored = match &game_id {
-        Some(id) => store.sessions_for_game(id, limit).await,
-        None => store.recent_sessions(limit).await,
-    }
-    .map_err(report)?;
-    // Streams running now (#264): followed like sessions, never stored.
-    let mut sessions = launch.running_streams(game_id.as_deref());
-    sessions.extend(stored);
-    Ok(sessions)
+    app::list_sessions(&store, &launch, game_id.as_deref(), limit).await
 }
 
 /// Hides a game from the library, or shows it again. A hidden game stays
@@ -133,9 +106,7 @@ pub async fn set_game_hidden(
     id: String,
     hidden: bool,
 ) -> Result<(), CommandError> {
-    store.set_game_hidden(&id, hidden).await.map_err(report)?;
-    bus.emit(Event::LibraryGameUpdated { game_id: id });
-    Ok(())
+    app::set_game_hidden(&store, &bus, &id, hidden).await
 }
 
 /// Marks a game as a favourite, or not.
@@ -147,12 +118,7 @@ pub async fn set_game_favorite(
     id: String,
     favorite: bool,
 ) -> Result<(), CommandError> {
-    store
-        .set_game_favorite(&id, favorite)
-        .await
-        .map_err(report)?;
-    bus.emit(Event::LibraryGameUpdated { game_id: id });
-    Ok(())
+    app::set_game_favorite(&store, &bus, &id, favorite).await
 }
 
 /// Chooses the entry a game's Play starts (`null`: the first that can
@@ -165,12 +131,7 @@ pub async fn set_game_default_entry(
     id: String,
     entry_id: Option<String>,
 ) -> Result<(), CommandError> {
-    store
-        .set_game_default_entry(&id, entry_id.as_deref())
-        .await
-        .map_err(report)?;
-    bus.emit(Event::LibraryGameUpdated { game_id: id });
-    Ok(())
+    app::set_game_default_entry(&store, &bus, &id, entry_id.as_deref()).await
 }
 
 /// Opens the folder an entry's files are in, in the file manager. The
@@ -181,8 +142,7 @@ pub async fn reveal_game_entry(
     store: State<'_, LibraryStore>,
     entry_id: String,
 ) -> Result<(), CommandError> {
-    let folder = store.entry_folder(&entry_id).await.map_err(report)?;
-    open_file_manager([&folder], &folder)
+    app::reveal_game_entry(&store, &entry_id).await
 }
 
 /// Where an entry's files are, for Copy path: a managed install's real
@@ -193,39 +153,7 @@ pub async fn game_entry_path(
     store: State<'_, LibraryStore>,
     entry_id: String,
 ) -> Result<String, CommandError> {
-    let path = store.entry_path(&entry_id).await.map_err(report)?;
-    Ok(path.display().to_string())
-}
-
-const FILE_MANAGER: &str = if cfg!(target_os = "windows") {
-    "explorer"
-} else if cfg!(target_os = "macos") {
-    "open"
-} else {
-    "xdg-open"
-};
-
-/// Starts the OS's file manager with `args`, to show `folder`.
-pub(super) fn open_file_manager(
-    args: impl IntoIterator<Item = impl AsRef<std::ffi::OsStr>>,
-    folder: &std::path::Path,
-) -> Result<(), CommandError> {
-    let mut manager = std::process::Command::new(FILE_MANAGER);
-    // Not inside Caskade's AppImage (#274).
-    caskade_core::managed::outside_own_appimage(&mut manager);
-    let mut child = manager.args(args).spawn().map_err(|error| {
-        // Name what couldn't be shown, keep the OS's reason as detail.
-        let mut failure = CommandError::from_error(&error);
-        failure.summary = caskade_core::tr!(
-            "Couldn't open the file manager ({opener}) to show “{folder}”.",
-            opener = FILE_MANAGER,
-            folder = folder.display()
-        );
-        crate::error::logged(failure)
-    })?;
-    // Reaped off the async runtime; the file manager outlives it.
-    std::thread::spawn(move || child.wait());
-    Ok(())
+    app::game_entry_path(&store, &entry_id).await
 }
 
 /// The hidden games, by title.
@@ -236,5 +164,5 @@ pub async fn hidden_games(
     offset: u32,
     limit: u32,
 ) -> Result<GamePage, CommandError> {
-    store.hidden_games(offset, limit).await.map_err(report)
+    app::hidden_games(&store, offset, limit).await
 }

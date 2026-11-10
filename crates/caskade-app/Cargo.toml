@@ -8,6 +8,14 @@ rust-version.workspace = true
 [dependencies]
 caskade-core = { path = "../caskade-core" }
 caskade-backup = { path = "../caskade-backup" }
+caskade-achievements = { path = "../caskade-achievements" }
+caskade-share = { path = "../caskade-share" }
+# The storage scanner the storage commands rescan with.
+caskade-sources = { path = "../caskade-sources" }
+# Installed-games discovery and its controller (`discovery/`).
+caskade-discovery = { path = "../caskade-discovery" }
+# Plugins, their UI and the themes they bundle.
+caskade-plugin-host = { path = "../caskade-plugin-host" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 specta = { version = "=2.0.0-rc.26", features = ["derive"] }

@@ -1,7 +1,9 @@
 //! One-click emulator installs over
-//! `caskade_core::emulation::EmulatorSetup`.
+//! `caskade_core::emulation::EmulatorSetup`. Forwarded to
+//! `caskade_app::commands::emulator_setup`.
 
-use crate::error::{CommandError, report};
+use crate::error::CommandError;
+use caskade_app::commands::emulator_setup as app;
 use caskade_core::emulation::{
     BiosFetch, EmulatorSetup, Installable, ManagedEmulator, MissingPlatform, SetupJob,
 };
@@ -14,7 +16,7 @@ type State<'a> = tauri::State<'a, EmulatorSetup>;
 pub async fn emulator_setup_installable(
     state: State<'_>,
 ) -> Result<Vec<Installable>, CommandError> {
-    state.installable().await.map_err(report)
+    app::emulator_setup_installable(&state).await
 }
 
 /// Platforms with games that no emulator runs yet.
@@ -23,7 +25,7 @@ pub async fn emulator_setup_installable(
 pub async fn emulator_setup_missing(
     state: State<'_>,
 ) -> Result<Vec<MissingPlatform>, CommandError> {
-    state.missing().await.map_err(report)
+    app::emulator_setup_missing(&state).await
 }
 
 /// Installs (or reinstalls) an emulator; progress arrives as
@@ -34,7 +36,7 @@ pub async fn emulator_setup_install(
     state: State<'_>,
     definition_id: String,
 ) -> Result<SetupJob, CommandError> {
-    state.install(&definition_id).await.map_err(report)
+    app::emulator_setup_install(&state, &definition_id).await
 }
 
 /// Installs the platform's recommended emulator.
@@ -44,20 +46,20 @@ pub async fn emulator_setup_install_for(
     state: State<'_>,
     platform_id: String,
 ) -> Result<SetupJob, CommandError> {
-    state.install_for(&platform_id).await.map_err(report)
+    app::emulator_setup_install_for(&state, &platform_id).await
 }
 
 /// Installs since startup.
 #[tauri::command]
 #[specta::specta]
 pub fn emulator_setup_jobs(state: State<'_>) -> Vec<SetupJob> {
-    state.jobs()
+    app::emulator_setup_jobs(&state)
 }
 
 #[tauri::command]
 #[specta::specta]
 pub fn emulator_setup_cancel(state: State<'_>, job_id: String) -> Result<SetupJob, CommandError> {
-    state.cancel(&job_id).map_err(report)
+    app::emulator_setup_cancel(&state, &job_id)
 }
 
 /// Checks a Caskade-installed emulator for a newer version now.
@@ -67,7 +69,7 @@ pub async fn emulator_setup_check(
     state: State<'_>,
     emulator_id: String,
 ) -> Result<ManagedEmulator, CommandError> {
-    state.check(&emulator_id).await.map_err(report)
+    app::emulator_setup_check(&state, &emulator_id).await
 }
 
 /// Stops offering the newest version found.
@@ -77,7 +79,7 @@ pub async fn emulator_setup_skip(
     state: State<'_>,
     emulator_id: String,
 ) -> Result<ManagedEmulator, CommandError> {
-    state.skip(&emulator_id, None).await.map_err(report)
+    app::emulator_setup_skip(&state, &emulator_id).await
 }
 
 /// Installs the newest version, keeping the user's files. Refused while a
@@ -88,7 +90,7 @@ pub async fn emulator_setup_update(
     state: State<'_>,
     emulator_id: String,
 ) -> Result<SetupJob, CommandError> {
-    state.update(&emulator_id).await.map_err(report)
+    app::emulator_setup_update(&state, &emulator_id).await
 }
 
 /// Fetches the platform's missing BIOS files from RomM into the folder its
@@ -99,5 +101,5 @@ pub async fn emulator_setup_fetch_bios(
     state: State<'_>,
     platform_id: String,
 ) -> Result<BiosFetch, CommandError> {
-    state.fetch_bios(&platform_id).await.map_err(report)
+    app::emulator_setup_fetch_bios(&state, &platform_id).await
 }

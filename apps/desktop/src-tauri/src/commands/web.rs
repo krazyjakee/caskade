@@ -1,6 +1,7 @@
 //! Web games: Add web game on the Library's Web tab, and
-//! keeping one for offline play.
-use crate::error::{CommandError, report};
+//! keeping one for offline play. Forwarded to `caskade_app::commands::web`.
+use crate::error::CommandError;
+use caskade_app::commands::web as app;
 use caskade_core::web::WebGames;
 use tauri::State;
 
@@ -9,7 +10,7 @@ use tauri::State;
 #[tauri::command]
 #[specta::specta]
 pub async fn add_web_game(web: State<'_, WebGames>, url: String) -> Result<String, CommandError> {
-    web.add(&url).await.map_err(report)
+    app::add_web_game(&web, &url).await
 }
 
 /// Opens the guided capture that keeps `game_id`'s web game in `root_id`
@@ -22,7 +23,7 @@ pub async fn save_web_game_offline(
     game_id: String,
     root_id: String,
 ) -> Result<(), CommandError> {
-    web.save_offline(&game_id, &root_id).await.map_err(report)
+    app::save_web_game_offline(&web, &game_id, &root_id).await
 }
 
 /// Removes a web game from the library, with its offline copy and saves.
@@ -32,7 +33,7 @@ pub async fn remove_web_game(
     web: State<'_, WebGames>,
     game_id: String,
 ) -> Result<(), CommandError> {
-    web.remove(&game_id).await.map_err(report)
+    app::remove_web_game(&web, &game_id).await
 }
 
 /// Deletes a web game's offline copy; it plays online again.
@@ -42,5 +43,5 @@ pub async fn remove_web_offline(
     web: State<'_, WebGames>,
     game_id: String,
 ) -> Result<(), CommandError> {
-    web.remove_offline(&game_id).await.map_err(report)
+    app::remove_web_offline(&web, &game_id).await
 }

@@ -4,14 +4,16 @@
 //! answers what it holds (`ShareInfo.contents`); `share_receive` receives
 //! all but a collection, which `share_receive_collection` adds to the
 //! signed-in account's collections without downloading anything.
-
+//!
+//! Forwarded to `caskade_app::commands::share_items`.
+use caskade_app::commands::share_items as app;
 use caskade_core::accounts::AccountService;
 use caskade_core::model::Collection;
 use caskade_share::{ShareExpiry, ShareItem, Shares};
 use tauri::State;
 
 use super::shares::ShareCreated;
-use crate::error::{CommandError, report};
+use crate::error::CommandError;
 
 /// Shares `item` until `expiry`. A collection is the signed-in account's.
 #[tauri::command]
@@ -22,12 +24,7 @@ pub async fn share_item(
     item: ShareItem,
     expiry: ShareExpiry,
 ) -> Result<ShareCreated, CommandError> {
-    let account = accounts.require_active().map_err(report)?;
-    let share = shares
-        .share_item(item, expiry, &account)
-        .await
-        .map_err(report)?;
-    let link = shares.link(&share.id).await.map_err(report)?;
+    let (share, link) = app::share_item(&shares, &accounts, item, expiry).await?;
     Ok(ShareCreated { share, link })
 }
 
@@ -41,9 +38,5 @@ pub async fn share_receive_collection(
     accounts: State<'_, AccountService>,
     link: String,
 ) -> Result<Collection, CommandError> {
-    let account = accounts.require_active().map_err(report)?;
-    shares
-        .receive_collection(&link, &account)
-        .await
-        .map_err(report)
+    app::share_receive_collection(&shares, &accounts, &link).await
 }
