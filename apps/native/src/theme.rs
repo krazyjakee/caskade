@@ -21,7 +21,6 @@
 //! orders author sheets by node, and the layers decide the rest. Its text
 //! is parsed as written (`upsert_stylesheet_for_node`), not as HTML.
 
-use std::cell::RefCell;
 use std::sync::{Arc, Mutex, OnceLock};
 
 use blitz_dom::{BaseDocument, LocalName, NodeId, QualName, ns};
@@ -64,18 +63,11 @@ struct Sheet {
     text: NodeId,
 }
 
-/// The three sheets, on the main thread.
+/// The theme's and the user's sheets (the app's never changes).
 #[derive(Clone, Copy)]
 struct Sheets {
     theme: Sheet,
     user: Sheet,
-}
-
-thread_local! {
-    static SHEETS: RefCell<Option<Sheets>> = const { RefCell::new(None) };
-    /// The theme stylesheet last given to Blitz, to skip a re-parse.
-    static APPLIED_THEME: RefCell<Option<Arc<str>>> = const { RefCell::new(None) };
-    static APPLIED_USER: RefCell<Option<Option<String>>> = const { RefCell::new(None) };
 }
 
 /// The settings' appearance, or the defaults.
@@ -86,12 +78,13 @@ async fn prefs(settings: &SettingsService) -> AppearanceSettings {
 }
 
 /// The look for `theme` (resolved, with its compiled sheet) and `prefs`.
-fn look(
+pub fn look(
     themes: &ThemeService,
     theme: &str,
     modes: Vec<String>,
     prefs: AppearanceSettings,
     safe: bool,
+    prefers_reduced_motion: bool,
 ) -> Look {
     let theme_css = themes.stylesheet(theme).unwrap_or_else(|error| {
         tracing::warn!(%error, theme, "theme not applied");
@@ -117,14 +110,19 @@ fn look(
         modes,
         user_css,
         prefs,
-        prefers_reduced_motion: prefers_reduced_motion(),
+        prefers_reduced_motion,
     }
+}
+
+/// Serves `themes`' assets to the documents (once).
+pub fn serve(themes: &ThemeService) {
+    let _ = THEMES.set(themes.clone());
 }
 
 /// The look before the window opens: the chosen theme from the themes
 /// found so far (plugins' come later), the settings and the user's CSS.
 pub fn first(themes: &ThemeService, settings: &SettingsService) -> Look {
-    let _ = THEMES.set(themes.clone());
+    serve(themes);
     let safe = caskade_app::commands::themes::safe_mode(None);
     let prefs = caskade_app::runtime::block_on(prefs(settings));
     let requested = if safe {
@@ -136,7 +134,14 @@ pub fn first(themes: &ThemeService, settings: &SettingsService) -> Look {
     if let Some(notice) = &active.notice {
         tracing::info!(notice, "the first frame has another theme");
     }
-    look(themes, &active.id, active.modes, prefs, safe)
+    look(
+        themes,
+        &active.id,
+        active.modes,
+        prefs,
+        safe,
+        prefers_reduced_motion(),
+    )
 }
 
 /// The look now, from the running services: plugin themes included, the
@@ -168,7 +173,14 @@ async fn current(services: &caskade_app::start::Services) -> Look {
             (fallback.id, fallback.modes)
         }
     };
-    look(&services.themes, &theme, modes, prefs, safe)
+    look(
+        &services.themes,
+        &theme,
+        modes,
+        prefs,
+        safe,
+        prefers_reduced_motion(),
+    )
 }
 
 /// Asks the main thread to apply `look`.
@@ -238,12 +250,31 @@ fn qual(name: &str) -> QualName {
     QualName::new(None, ns!(), LocalName::from(name))
 }
 
-/// The sheets, created in `<head>` the first time, the app's with its CSS.
+/// The `<style data-cs-sheet="which">` in `head` and its text node.
+fn find_sheet(doc: &BaseDocument, head: NodeId, which: &str) -> Option<Sheet> {
+    let head = doc.get_node(head)?;
+    head.children.iter().find_map(|&style| {
+        let node = doc.get_node(style)?;
+        if node.attr(LocalName::from("data-cs-sheet")) != Some(which) {
+            return None;
+        }
+        Some(Sheet {
+            style,
+            text: *node.children.first()?,
+        })
+    })
+}
+
+/// The document's sheets, created in `<head>` the first time, the app's
+/// with its CSS.
 fn sheets(doc: &mut BaseDocument) -> Option<Sheets> {
-    if let Some(sheets) = SHEETS.with(|sheets| *sheets.borrow()) {
-        return Some(sheets);
-    }
     let head = doc.find_head_node()?.id;
+    if let (Some(theme), Some(user)) = (
+        find_sheet(doc, head, "theme"),
+        find_sheet(doc, head, "user"),
+    ) {
+        return Some(Sheets { theme, user });
+    }
     let mut mutator = doc.mutate();
     let mut sheet = |which: &str, css: &str| {
         let style = mutator.create_element(qual("style"), Vec::new());
@@ -260,12 +291,18 @@ fn sheets(doc: &mut BaseDocument) -> Option<Sheets> {
     };
     drop(mutator);
     doc.upsert_stylesheet_for_node(app.style);
-    SHEETS.with(|cell| *cell.borrow_mut() = Some(sheets));
     Some(sheets)
 }
 
-/// Gives `sheet` the stylesheet `css`.
+/// Gives `sheet` the stylesheet `css`, unless it has it already (a
+/// stylesheet is parsed again only when it changed).
 fn set_sheet(doc: &mut BaseDocument, sheet: Sheet, css: &str) {
+    let same = doc
+        .get_node(sheet.text)
+        .is_some_and(|text| text.text_data().is_some_and(|data| data.content == css));
+    if same {
+        return;
+    }
     doc.mutate().set_node_text(sheet.text, css);
     // After the mutator's own pass, which reads the text as HTML.
     doc.upsert_stylesheet_for_node(sheet.style);
@@ -283,32 +320,15 @@ pub fn apply(doc: &mut BaseDocument, look: &Look) {
         tracing::warn!("the document has no <head>: no styles");
         return;
     };
-    let theme_changed = APPLIED_THEME.with(|applied| {
-        let mut applied = applied.borrow_mut();
-        let changed = applied
-            .as_ref()
-            .is_none_or(|css| !Arc::ptr_eq(css, &look.theme_css));
-        *applied = Some(look.theme_css.clone());
-        changed
-    });
-    if theme_changed {
-        set_sheet(doc, sheets.theme, &look.theme_css);
-    }
-    let user_changed = APPLIED_USER.with(|applied| {
-        let mut applied = applied.borrow_mut();
-        let changed = applied.as_ref() != Some(&look.user_css);
-        *applied = Some(look.user_css.clone());
-        changed
-    });
-    if user_changed {
-        set_sheet(doc, sheets.user, look.user_css.as_deref().unwrap_or(""));
-    }
+    set_sheet(doc, sheets.theme, &look.theme_css);
+    set_sheet(doc, sheets.user, look.user_css.as_deref().unwrap_or(""));
     let root = doc.root_element().id;
     let context = appearance::Context {
         modes: look.modes.clone(),
         prefers_light: *PREFERS_LIGHT.lock().unwrap_or_else(|e| e.into_inner()),
-        prefers_reduced_motion: look.prefers_reduced_motion,
     };
+    // `@media (prefers-reduced-motion)`, for "system" motion and themes.
+    doc.viewport_mut().prefers_reduced_motion = look.prefers_reduced_motion;
     {
         let mut mutator = doc.mutate();
         for (name, value) in appearance::attributes(&look.prefs, &context) {
@@ -351,25 +371,31 @@ pub fn apply(doc: &mut BaseDocument, look: &Look) {
 }
 
 /// The fonts the tokens name, bundled as the webview bundles them
-/// (`@fontsource-variable`), under the same family names, so a theme that
-/// names another font still wins.
+/// (`@fontsource-variable`, latin): family, file and bytes.
+pub const FONTS: [(&str, &str, &[u8]); 3] = [
+    (
+        "Inter Variable",
+        "inter-latin-wght-normal.woff2",
+        include_bytes!("../assets/fonts/inter-latin-wght-normal.woff2"),
+    ),
+    (
+        "Oxanium Variable",
+        "oxanium-latin-wght-normal.woff2",
+        include_bytes!("../assets/fonts/oxanium-latin-wght-normal.woff2"),
+    ),
+    (
+        "JetBrains Mono Variable",
+        "jetbrains-mono-latin-wght-normal.woff2",
+        include_bytes!("../assets/fonts/jetbrains-mono-latin-wght-normal.woff2"),
+    ),
+];
+
+/// [`FONTS`] under the tokens' family names, so a theme that names another
+/// font still wins.
 pub fn fonts() -> blitz_dom::FontContext {
     use parley::fontique::{Blob, FontInfoOverride};
     let mut fonts = blitz_dom::FontContext::default();
-    for (family, data) in [
-        (
-            "Inter Variable",
-            &include_bytes!("../assets/fonts/inter-latin-wght-normal.woff2")[..],
-        ),
-        (
-            "Oxanium Variable",
-            &include_bytes!("../assets/fonts/oxanium-latin-wght-normal.woff2")[..],
-        ),
-        (
-            "JetBrains Mono Variable",
-            &include_bytes!("../assets/fonts/jetbrains-mono-latin-wght-normal.woff2")[..],
-        ),
-    ] {
+    for (family, _, data) in FONTS {
         let decoded = blitz_dom::util::decode_font_bytes(data).into_owned();
         fonts.collection.register_fonts(
             Blob::new(Arc::new(decoded) as _),
@@ -429,7 +455,9 @@ impl NetProvider for Net {
     }
 }
 
-/// Whether the OS asks for less motion, which `system` motion follows.
+/// Whether the OS asks for less motion: Blitz evaluates
+/// `@media (prefers-reduced-motion)` with it, which "system" motion and
+/// themes follow.
 pub fn prefers_reduced_motion() -> bool {
     #[cfg(target_os = "linux")]
     {
@@ -564,6 +592,33 @@ mod tests {
         assert_eq!(computed(&mut doc, "--cs-color-accent"), own_accent);
     }
 
+    /// "system" motion follows the OS through tokens.css's
+    /// `@media (prefers-reduced-motion)`; "full" overrides it.
+    #[test]
+    fn system_motion_follows_the_os() {
+        let mut document = document();
+        let mut look = Look {
+            theme: "test".into(),
+            theme_css: Arc::from(""),
+            modes: vec!["dark".into()],
+            user_css: None,
+            prefs: AppearanceSettings::default(),
+            prefers_reduced_motion: true,
+        };
+        assert_eq!(look.prefs.motion, "system");
+        apply(&mut document.inner.borrow_mut(), &look);
+        document.initial_build();
+        let mut doc = document.inner.borrow_mut();
+        assert_eq!(computed(&mut doc, "--cs-motion-duration-fast"), "0ms");
+        look.prefs.motion = "full".into();
+        apply(&mut doc, &look);
+        assert_ne!(computed(&mut doc, "--cs-motion-duration-fast"), "0ms");
+        look.prefs.motion = "system".into();
+        look.prefers_reduced_motion = false;
+        apply(&mut doc, &look);
+        assert_ne!(computed(&mut doc, "--cs-motion-duration-fast"), "0ms");
+    }
+
     #[test]
     fn every_built_in_theme_sets_its_surfaces() {
         // Ember is the catalogue's: installed in the user's theme folder.
@@ -590,6 +645,7 @@ mod tests {
                 active.modes,
                 AppearanceSettings::default(),
                 false,
+                false,
             );
             apply(&mut document.inner.borrow_mut(), &look);
             document.initial_build();
@@ -599,9 +655,6 @@ mod tests {
             if !base.is_empty() {
                 assert_eq!(found, base, "{id}");
             }
-            SHEETS.with(|sheets| *sheets.borrow_mut() = None);
-            APPLIED_THEME.with(|applied| *applied.borrow_mut() = None);
-            APPLIED_USER.with(|applied| *applied.borrow_mut() = None);
         }
     }
 

@@ -15,10 +15,6 @@ pub struct Context {
     pub modes: Vec<String>,
     /// The OS asks for a light look.
     pub prefers_light: bool,
-    /// The OS asks for less motion. The webview leaves this to
-    /// `@media (prefers-reduced-motion)`, which Blitz doesn't evaluate, so
-    /// the native app reads it from the OS and sets `data-motion` instead.
-    pub prefers_reduced_motion: bool,
 }
 
 /// The scheme to show: the OS preference when the theme has it, otherwise
@@ -46,8 +42,9 @@ pub type Attributes = Vec<(&'static str, Option<String>)>;
 
 /// The attributes for `prefs` in `context`.
 pub fn attributes(prefs: &AppearanceSettings, context: &Context) -> Attributes {
+    // "system" is left to `@media (prefers-reduced-motion)`, as in the
+    // webview; the native app tells Blitz the OS's preference.
     let motion = match prefs.motion.as_str() {
-        "system" if context.prefers_reduced_motion => "reduced",
         "full" | "reduced" | "system" => prefs.motion.as_str(),
         _ => "system",
     };
@@ -145,18 +142,9 @@ mod tests {
         let changed = attributes(&prefs, &context);
         assert_eq!(get(&changed, "data-density").as_deref(), Some("compact"));
         assert_eq!(get(&changed, "data-effects").as_deref(), Some("reduced"));
-        // The OS's reduced motion applies to "system" only.
-        let reduced = Context {
-            prefers_reduced_motion: true,
-            ..context.clone()
-        };
-        assert_eq!(
-            get(&attributes(&prefs, &reduced), "data-motion").as_deref(),
-            Some("reduced")
-        );
         prefs.motion = "full".into();
         assert_eq!(
-            get(&attributes(&prefs, &reduced), "data-motion").as_deref(),
+            get(&attributes(&prefs, &context), "data-motion").as_deref(),
             Some("full")
         );
     }

@@ -10,5 +10,9 @@ publish = false
 # AppearanceSettings and translations.
 caskade-core = { path = "../caskade-core" }
 
+[dev-dependencies]
+# The webview catalogue's JSON, for the generator's test.
+serde_json = "1"
+
 [lints]
 workspace = true

@@ -7,6 +7,8 @@
 //! executable started again with `--web-game` or `--video`
 //! (`caskade-player`), so no webview shares the loop.
 
+// The anatomy catalogue (#90); the components (#93) add to it.
+mod anatomy;
 // The data hooks (#89); the views (#96 onwards) use them.
 mod data;
 mod dialogs;

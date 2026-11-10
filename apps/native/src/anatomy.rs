@@ -1,0 +1,106 @@
+//! The native UI's anatomy catalogue (#90): one entry per themeable root,
+//! declared beside its component and listed here. Each must match the
+//! webview's entry (`packages/ui/src/anatomy.ts`, the source of
+//! `docs/theming/anatomy.md` until the native UI is the default, BLITZ-33)
+//! word for word, apart from the component it names; the tests check that,
+//! and that every `data-cs` the native sources render is catalogued.
+//! `caskade_ui_theme::anatomy` writes the docs from it.
+
+use caskade_ui_theme::anatomy::{Entry, Source};
+
+/// Every catalogued root the native UI renders. The RSX components of #93
+/// add theirs here.
+// Read by the tests now, and by the docs at the cutover (BLITZ-33).
+#[cfg_attr(not(test), allow(dead_code))]
+pub const CATALOGUE: &[Entry] = &[OSK];
+
+/// The on-screen keyboard (`input/keyboard.rs`, #92).
+const OSK: Entry = Entry {
+    parts: &[
+        ("preview", "The field's text as it is typed."),
+        ("row", "A row of keys."),
+        (
+            "key",
+            "A key; `data-key` is its character or what it does (`shift`, `layer`, `backspace`, `space`, `left`, `right`, `done`), `data-focused` is the pad's place, `data-selected` an active shift.",
+        ),
+    ],
+    states: &[
+        ("data-layer", &["letters", "symbols"]),
+        ("data-shift", &["off", "once", "lock"]),
+    ],
+    ..Entry::new(
+        "osk",
+        "the on-screen keyboard (apps/native/src/input/keyboard.rs)",
+        Source::App,
+        "The on-screen keyboard a pad types with; it types into the focused field, which keeps focus.",
+    )
+};
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Roots the native UI renders that the webview doesn't catalogue yet,
+    /// with the issue that will.
+    const NOT_YET: &[(&str, &str)] = &[(
+        "guide-menu",
+        "#93: the webview's GuideMenu isn't catalogued either",
+    )];
+
+    #[test]
+    fn every_entry_is_the_webviews() {
+        let problems = caskade_ui_theme::anatomy::differences(
+            CATALOGUE,
+            include_str!("../../../docs/theming/anatomy.md"),
+        );
+        assert!(problems.is_empty(), "{}", problems.join("\n\n"));
+    }
+
+    /// Every `data-cs` a component renders is catalogued: it's the
+    /// theming API (smoke, test scaffolding and the screenshots' reference
+    /// screens aside).
+    #[test]
+    fn every_rendered_root_is_catalogued() {
+        let src = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
+        let mut files = vec![src];
+        let mut found = Vec::new();
+        while let Some(path) = files.pop() {
+            if path.is_dir() {
+                // The screenshot harness's reference screens: fixtures (#90).
+                if path.ends_with("shots") {
+                    continue;
+                }
+                files.extend(
+                    std::fs::read_dir(&path)
+                        .unwrap()
+                        .map(|entry| entry.unwrap().path()),
+                );
+                continue;
+            }
+            let name = path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or("");
+            if !name.ends_with(".rs") || matches!(name, "smoke.rs" | "tests.rs") {
+                continue;
+            }
+            let text = std::fs::read_to_string(&path).unwrap();
+            for (at, _) in text.match_indices("\"data-cs\":") {
+                let rest = text[at + "\"data-cs\":".len()..].trim_start();
+                if let Some(value) = rest
+                    .strip_prefix('"')
+                    .and_then(|rest| rest.split('"').next())
+                {
+                    found.push((value.to_owned(), path.display().to_string()));
+                }
+            }
+        }
+        let known = |name: &str| {
+            CATALOGUE.iter().any(|entry| entry.name == name)
+                || NOT_YET.iter().any(|(root, _)| *root == name)
+        };
+        let missing: Vec<_> = found.iter().filter(|(name, _)| !known(name)).collect();
+        assert!(missing.is_empty(), "not catalogued: {missing:?}");
+        assert!(found.iter().any(|(name, _)| name == "osk"), "{found:?}");
+    }
+}
