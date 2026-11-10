@@ -22,8 +22,16 @@ static ONE_WINDOW: Mutex<()> = Mutex::new(());
 /// What the demo's controls did.
 static DONE: Mutex<Vec<String>> = Mutex::new(Vec::new());
 
+fn done() -> std::sync::MutexGuard<'static, Vec<String>> {
+    DONE.lock().unwrap_or_else(|e| e.into_inner())
+}
+
+fn calls() -> std::sync::MutexGuard<'static, Vec<String>> {
+    GUIDE_CALLS.lock().unwrap_or_else(|e| e.into_inner())
+}
+
 fn did(what: impl Into<String>) {
-    DONE.lock().unwrap().push(what.into());
+    done().push(what.into());
 }
 
 /// Absolutely placed, as the webview's tests give jsdom boxes.
@@ -120,8 +128,12 @@ struct Window {
 
 impl Window {
     fn open() -> Self {
+        Self::open_with(app)
+    }
+
+    fn open_with(root: fn() -> Element) -> Self {
         let mut doc = DioxusDocument::new(
-            VirtualDom::new(app),
+            VirtualDom::new(root),
             DocumentConfig {
                 viewport: Some(Viewport::new(1600, 900, 1.0, ColorScheme::Light)),
                 ..Default::default()
@@ -296,7 +308,7 @@ fn a_pad_and_a_keyboard_each_work_the_grid_the_sidebar_and_a_dialog() {
     let _one = ONE_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
     let _runtime = caskade_app::runtime::handle().enter();
     for driver in [Driver::Pad, Driver::Keyboard] {
-        DONE.lock().unwrap().clear();
+        done().clear();
         let mut window = Window::open();
         // Nothing focused: the content's first control.
         window.press(driver, Action::NavDown);
@@ -313,10 +325,7 @@ fn a_pad_and_a_keyboard_each_work_the_grid_the_sidebar_and_a_dialog() {
         window.press(driver, Action::NavRight);
         assert_eq!(window.focused(), "Card 3");
         window.press(driver, Action::Confirm);
-        assert_eq!(
-            DONE.lock().unwrap().last().map(String::as_str),
-            Some("Card 3")
-        );
+        assert_eq!(done().last().map(String::as_str), Some("Card 3"));
         // A dialog: focus goes in on its default, stays in, and comes back.
         window.press(driver, Action::NavDown);
         assert_eq!(window.focused(), "Open dialog");
@@ -330,10 +339,7 @@ fn a_pad_and_a_keyboard_each_work_the_grid_the_sidebar_and_a_dialog() {
         assert_eq!(window.focused(), "Open dialog", "{driver:?}");
         // With no overlay, back goes back.
         window.press(driver, Action::Back);
-        assert_eq!(
-            DONE.lock().unwrap().last().map(String::as_str),
-            Some("back")
-        );
+        assert_eq!(done().last().map(String::as_str), Some("back"));
     }
 }
 
@@ -341,15 +347,12 @@ fn a_pad_and_a_keyboard_each_work_the_grid_the_sidebar_and_a_dialog() {
 fn a_click_focuses_the_control_without_a_ring_and_a_pad_types_in_a_field() {
     let _one = ONE_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
     let _runtime = caskade_app::runtime::handle().enter();
-    DONE.lock().unwrap().clear();
+    done().clear();
     let mut window = Window::open();
     window.click("Card 1");
     assert_eq!(window.focused(), "Card 1");
     assert!(!window.ringed(), "a click shows no ring");
-    assert_eq!(
-        DONE.lock().unwrap().last().map(String::as_str),
-        Some("Card 1")
-    );
+    assert_eq!(done().last().map(String::as_str), Some("Card 1"));
     // A pad on the field opens the on-screen keyboard; it types q, w and
     // submits with Start.
     window.click("Open dialog");
@@ -373,8 +376,139 @@ fn a_click_focuses_the_control_without_a_ring_and_a_pad_types_in_a_field() {
     window.pad(Action::Confirm);
     assert_eq!(window.focused_node(), field, "the field keeps focus");
     window.pad(Action::Menu);
-    assert_eq!(
-        DONE.lock().unwrap().last().map(String::as_str),
-        Some("search qw")
-    );
+    assert_eq!(done().last().map(String::as_str), Some("search qw"));
+}
+
+/// The guide menu's fake actions, and what they were asked.
+struct FakeGuide;
+
+static RUNNING: Mutex<Vec<super::guide::RunningGame>> = Mutex::new(Vec::new());
+static GUIDE_CALLS: Mutex<Vec<String>> = Mutex::new(Vec::new());
+
+impl super::guide::GuideApi for FakeGuide {
+    fn running(
+        &self,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Vec<super::guide::RunningGame>>>> {
+        calls().push("running".into());
+        let running = RUNNING.lock().unwrap_or_else(|e| e.into_inner()).clone();
+        Box::pin(async move { running })
+    }
+
+    fn return_to_game(
+        &self,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<(), String>>>> {
+        calls().push("return".into());
+        Box::pin(async { Ok(()) })
+    }
+
+    fn stop(
+        &self,
+        session_id: String,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<(), String>>>> {
+        GUIDE_CALLS
+            .lock()
+            .unwrap()
+            .push(format!("stop {session_id}"));
+        Box::pin(async { Ok(()) })
+    }
+}
+
+fn guide_app() -> Element {
+    let guide = use_hook(|| super::guide::Guide(std::rc::Rc::new(FakeGuide)));
+    rsx! {
+        InputRoot { console: true, guide, Details {} }
+    }
+}
+
+#[component]
+fn Details() -> Element {
+    let input = use_input();
+    use_hook(move || input.on_details(|id| did(format!("details {id}"))));
+    rsx! {}
+}
+
+impl Window {
+    fn menu_open(&self) -> bool {
+        let doc = self.doc.inner.borrow();
+        let mut open = false;
+        doc.visit(|_, node| {
+            open |= node.attr(blitz_dom::LocalName::from("data-cs")) == Some("guide-menu");
+        });
+        open
+    }
+}
+
+fn guide_window(running: bool) -> Window {
+    *RUNNING.lock().unwrap_or_else(|e| e.into_inner()) = if running {
+        vec![super::guide::RunningGame {
+            session_id: "s1".into(),
+            game_id: "g1".into(),
+            title: "Celeste".into(),
+            stream: false,
+        }]
+    } else {
+        Vec::new()
+    };
+    calls().clear();
+    done().clear();
+    Window::open_with(guide_app)
+}
+
+#[test]
+fn guide_opens_the_quick_menu_over_a_running_game_and_return_goes_back_to_it() {
+    let _one = ONE_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    let mut window = guide_window(true);
+    window.pad(Action::Guide);
+    assert!(window.menu_open());
+    window.find("Celeste");
+    assert_eq!(window.focused(), "Return to game");
+    window.pad(Action::Confirm);
+    assert!(!window.menu_open());
+    assert_eq!(*calls(), ["running", "return"]);
+}
+
+#[test]
+fn stopping_asks_first_by_pad_then_stops_the_session() {
+    let _one = ONE_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    let mut window = guide_window(true);
+    window.pad(Action::Guide);
+    assert_eq!(window.focused(), "Return to game");
+    window.pad(Action::NavDown);
+    assert_eq!(window.focused(), "Stop game");
+    window.pad(Action::Confirm);
+    assert_eq!(window.focused(), "Stop Celeste");
+    assert_eq!(*calls(), ["running"]);
+    window.pad(Action::Confirm);
+    assert!(!window.menu_open());
+    assert_eq!(*calls(), ["running", "stop s1"]);
+}
+
+#[test]
+fn the_menu_opens_the_games_details_and_back_or_guide_again_closes_it() {
+    let _one = ONE_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    let mut window = guide_window(true);
+    window.pad(Action::Guide);
+    window.pad(Action::Back);
+    assert!(!window.menu_open());
+    window.pad(Action::Guide);
+    assert!(window.menu_open());
+    window.pad(Action::Guide);
+    assert!(!window.menu_open(), "guide again closes it");
+    window.pad(Action::Guide);
+    window.click("Game details");
+    assert_eq!(done().last().map(String::as_str), Some("details g1"));
+    assert!(!window.menu_open());
+}
+
+#[test]
+fn guide_shows_no_menu_when_nothing_is_running() {
+    let _one = ONE_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    let mut window = guide_window(false);
+    window.pad(Action::Guide);
+    assert_eq!(*calls(), ["running"]);
+    assert!(!window.menu_open());
 }

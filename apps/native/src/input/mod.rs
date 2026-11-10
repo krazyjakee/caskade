@@ -24,6 +24,7 @@
 //! [`Input::scrolled`] counts them.
 
 mod doc;
+mod guide;
 mod keyboard;
 mod root;
 

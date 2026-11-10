@@ -10,6 +10,7 @@
 //! focus change's) runs last, as an [`Effect`].
 
 use super::doc::{BlitzUi, Effect};
+use super::guide::{Guide, GuideMenu, NativeGuide};
 use super::keyboard::OnScreenKeyboard;
 use blitz_dom::{BaseDocument, NodeId};
 use caskade_ui_input::bindings::{ActiveBinding, Binding, BindingId, Bindings};
@@ -66,6 +67,9 @@ pub struct Input {
     scrolled: Signal<u64>,
 }
 
+/// What opening a game's details does.
+type OpenDetails = Rc<dyn Fn(String)>;
+
 struct Inner {
     dispatcher: RefCell<Dispatcher<NodeId>>,
     /// The root's mounted element, for the document.
@@ -75,6 +79,7 @@ struct Inner {
     seen: Cell<Option<NodeId>>,
     frames: Cell<bool>,
     back: RefCell<Option<Rc<dyn Fn()>>>,
+    details: RefCell<Option<OpenDetails>>,
 }
 
 impl PartialEq for Input {
@@ -98,6 +103,7 @@ impl Input {
                 seen: Cell::new(None),
                 frames: Cell::new(false),
                 back: RefCell::new(None),
+                details: RefCell::new(None),
             }),
             changed: Signal::new(0),
             keyboard: Signal::new(None),
@@ -121,6 +127,27 @@ impl Input {
     /// What `back` does with no overlay and no binding: the previous view.
     pub fn on_back(&self, back: impl Fn() + 'static) {
         *self.inner.back.borrow_mut() = Some(Rc::new(back));
+    }
+
+    /// What opening a game's details does: the router's way there.
+    #[allow(dead_code, reason = "the views (#96 onwards) call it")]
+    pub fn on_details(&self, details: impl Fn(String) + 'static) {
+        *self.inner.details.borrow_mut() = Some(Rc::new(details));
+    }
+
+    /// Opens a game's details page.
+    pub fn open_details(&self, game_id: String) {
+        let details = self.inner.details.borrow().clone();
+        match details {
+            Some(details) => details(game_id),
+            None => tracing::debug!(game_id, "no details view yet"),
+        }
+    }
+
+    /// Something drawn from async code (a menu, a dialog) may need focus:
+    /// the next frames look.
+    pub fn settle(&self) {
+        self.frames();
     }
 
     /// Console mode: navigation is always on.
@@ -488,7 +515,13 @@ pub fn use_focus_location(key: String) {
 /// actions arrive from the app's events (`shell::events`). `console` turns
 /// navigation on from the start, as console mode does.
 #[component]
-pub fn InputRoot(#[props(default)] console: bool, children: Element) -> Element {
+pub fn InputRoot(
+    #[props(default)] console: bool,
+    /// The guide menu's actions: the running app's by default.
+    #[props(default = Guide(Rc::new(NativeGuide)))]
+    guide: Guide,
+    children: Element,
+) -> Element {
     let input = use_hook(|| {
         let (jobs, mut queue) = mpsc::unbounded_channel();
         let input = Input::new(console, jobs);
@@ -570,6 +603,7 @@ pub fn InputRoot(#[props(default)] console: bool, children: Element) -> Element 
                 }
             },
             {children}
+            GuideMenu { guide }
             if let Some(field) = typing {
                 OnScreenKeyboard { key: "{field:?}", field }
             }
