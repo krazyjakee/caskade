@@ -23,7 +23,14 @@ static KEEPER: OnceLock<shell::Keeper> = OnceLock::new();
 
 fn main() {
     // `caskade-native --web-game <url>` / `--video <id>`: a game's or a
-    // video's window, not the app.
+    // video's window, not the app. Their WebKitGTK first gets the renderer
+    // the Tauri app picks for its own (it may restart the process); Blitz's
+    // main window doesn't use WebKit.
+    if caskade_player::web_player::Options::from_args(std::env::args_os()).is_some()
+        || caskade_player::video_player::Options::from_args(std::env::args_os()).is_some()
+    {
+        caskade_player::webkit::prefer_gpu();
+    }
     if let Some(options) = caskade_player::web_player::Options::from_args(std::env::args_os()) {
         logging();
         exit_window(

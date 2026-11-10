@@ -9,3 +9,4 @@
 pub mod recovery;
 pub mod video_player;
 pub mod web_player;
+pub mod webkit;
