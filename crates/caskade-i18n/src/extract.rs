@@ -44,6 +44,7 @@ pub const CORE: Domain = Domain {
         "crates/caskade-system-stats/src",
         "crates/caskade-app/src",
         "crates/caskade-player/src",
+        "crates/caskade-ui-theme/src",
         "apps/desktop/src-tauri/src",
         "apps/native/src",
     ],
@@ -257,13 +258,27 @@ pub fn merge(template: &Po, catalog: &Po) -> Result<Po, String> {
     })
 }
 
-#[derive(Default)]
 struct Messages {
+    keywords: &'static [(&'static str, Kind)],
     list: Vec<Message>,
     index: HashMap<(Option<String>, String), usize>,
 }
 
+impl Default for Messages {
+    fn default() -> Self {
+        Self::with(KEYWORDS)
+    }
+}
+
 impl Messages {
+    fn with(keywords: &'static [(&'static str, Kind)]) -> Self {
+        Self {
+            keywords,
+            list: Vec::new(),
+            index: HashMap::new(),
+        }
+    }
+
     fn scan(&mut self, text: &str, file: &str) -> Result<(), ExtractError> {
         let tokens = TokenStream::from_str(text)
             .map_err(|error| ExtractError::Source(file.to_owned(), error.to_string()))?;
@@ -279,7 +294,8 @@ impl Messages {
             if let [.., TokenTree::Ident(name), TokenTree::Punct(bang)] = &trees[..at]
                 && bang.as_char() == '!'
                 && group.delimiter() != Delimiter::None
-                && let Some((keyword, kind)) = KEYWORDS.iter().find(|(keyword, _)| name == keyword)
+                && let Some((keyword, kind)) =
+                    self.keywords.iter().find(|(keyword, _)| name == keyword)
             {
                 self.call(keyword, *kind, group.stream(), file)?;
             }
@@ -298,7 +314,34 @@ impl Messages {
     ) -> Result<(), ExtractError> {
         let wanted = 1 + usize::from(kind.context) + usize::from(kind.plural);
         let mut strings = Vec::with_capacity(wanted);
-        let mut tokens = args.into_iter();
+        let mut tokens = args.into_iter().peekable();
+        // The native UI's macros take a translator note first:
+        // `t!(note = "…", "Open")`.
+        let mut notes = Vec::new();
+        if let Some(TokenTree::Ident(ident)) = tokens.peek()
+            && ident == "note"
+        {
+            tokens.next();
+            let literal = match (tokens.next(), tokens.next(), tokens.next()) {
+                (
+                    Some(TokenTree::Punct(equals)),
+                    Some(TokenTree::Literal(literal)),
+                    Some(TokenTree::Punct(comma)),
+                ) if equals.as_char() == '=' && comma.as_char() == ',' => {
+                    syn::parse_str::<syn::LitStr>(&literal.to_string())
+                        .ok()
+                        .map(|literal| literal.value())
+                }
+                _ => None,
+            };
+            let Some(note) = literal else {
+                return Err(ExtractError::Source(
+                    file.to_owned(),
+                    format!("{keyword}!'s note is `note = \"…\",` before the message"),
+                ));
+            };
+            notes.push(note);
+        }
         while strings.len() < wanted {
             let literal = match tokens.next() {
                 Some(TokenTree::Literal(literal)) => {
@@ -336,7 +379,14 @@ impl Messages {
                 format!("{keyword}! with an empty message"),
             ));
         }
-        self.add(context, id, plural, file)
+        let at = self.add(context, id, plural, file)?;
+        let comments = &mut self.list[at].extracted_comments;
+        for note in notes {
+            if !comments.contains(&note) {
+                comments.push(note);
+            }
+        }
+        Ok(())
     }
 
     fn add(
@@ -345,7 +395,7 @@ impl Messages {
         id: String,
         plural: Option<String>,
         file: &str,
-    ) -> Result<(), ExtractError> {
+    ) -> Result<usize, ExtractError> {
         let key = (context, id);
         if let Some(&at) = self.index.get(&key) {
             let message = &mut self.list[at];
@@ -361,14 +411,135 @@ impl Messages {
             if !message.references.iter().any(|known| known == file) {
                 message.references.push(file.to_owned());
             }
-            return Ok(());
+            return Ok(at);
         }
         let mut message = Message::new(key.0.as_deref(), &key.1, plural.as_deref());
         message.references.push(file.to_owned());
-        self.index.insert(key, self.list.len());
+        let at = self.list.len();
+        self.index.insert(key, at);
         self.list.push(message);
-        Ok(())
+        Ok(at)
     }
+}
+
+/// The native UI's sources. Their `t!`, `tn!`, `tp!`, `tnp!`, `trans!` and
+/// `transp!` messages share the webview's `app` and `ui` domains (the same
+/// English and contexts, so the same translations), and go into those
+/// templates through `locales/native.json`: `packages/i18n` writes the
+/// templates until the webview goes (BLITZ-33), adding the native UI's
+/// messages to Lingui's. (Their `tr!` family stays in [`CORE`].)
+pub const NATIVE_SOURCES: &[&str] = &["apps/native/src"];
+
+const NATIVE_KEYWORDS: &[(&str, Kind)] = &[
+    ("t", Kind::new(false, false)),
+    ("tn", Kind::new(false, true)),
+    ("tp", Kind::new(true, false)),
+    ("tnp", Kind::new(true, true)),
+    ("trans", Kind::new(false, false)),
+    ("transp", Kind::new(true, false)),
+];
+
+/// Where the native UI's messages are listed for `packages/i18n`.
+pub fn native_path(root: &Path) -> PathBuf {
+    root.join("locales").join("native.json")
+}
+
+/// The native UI's messages, by English and context. Test files aren't
+/// scanned: their text is test data.
+pub fn native_messages(root: &Path) -> Result<Vec<Message>, ExtractError> {
+    let mut messages = Messages::with(NATIVE_KEYWORDS);
+    for source in NATIVE_SOURCES {
+        let mut files = Vec::new();
+        rust_files(&root.join(source), &mut files)?;
+        for file in files {
+            let name = file
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or("");
+            if name == "tests.rs" || name.ends_with("_tests.rs") {
+                continue;
+            }
+            let text = std::fs::read_to_string(&file)
+                .map_err(|error| ExtractError::Io(file.clone(), error))?;
+            messages.scan(&text, &reference(root, &file))?;
+        }
+    }
+    let mut list = messages.list;
+    list.sort_by(|a, b| a.id.cmp(&b.id).then_with(|| a.context.cmp(&b.context)));
+    Ok(list)
+}
+
+fn reference(root: &Path, file: &Path) -> String {
+    file.strip_prefix(root)
+        .unwrap_or(file)
+        .components()
+        .map(|part| part.as_os_str().to_string_lossy())
+        .collect::<Vec<_>>()
+        .join("/")
+}
+
+/// `locales/native.json`: the native UI's messages for `packages/i18n`'s
+/// extraction, which adds them to the `app` and `ui` templates.
+pub fn native_output(root: &Path) -> Result<Output, ExtractError> {
+    let messages = native_messages(root)?;
+    let mut json = String::from(
+        "{\n  \"comment\": \"The native UI's messages, generated by `just i18n`; don't edit. packages/i18n adds them to the app and ui templates.\",\n  \"messages\": [",
+    );
+    for (at, message) in messages.iter().enumerate() {
+        json.push_str(if at == 0 { "\n" } else { ",\n" });
+        json.push_str("    {");
+        let mut fields = vec![format!("\"id\": {}", json_string(&message.id))];
+        if let Some(context) = &message.context {
+            fields.push(format!("\"context\": {}", json_string(context)));
+        }
+        if let Some(plural) = &message.plural {
+            fields.push(format!("\"plural\": {}", json_string(plural)));
+        }
+        if !message.extracted_comments.is_empty() {
+            fields.push(format!(
+                "\"comments\": {}",
+                json_list(&message.extracted_comments)
+            ));
+        }
+        fields.push(format!(
+            "\"references\": {}",
+            json_list(&message.references)
+        ));
+        json.push_str(&fields.join(", "));
+        json.push('}');
+    }
+    json.push_str(if messages.is_empty() {
+        "]\n}\n"
+    } else {
+        "\n  ]\n}\n"
+    });
+    Ok(Output {
+        path: native_path(root),
+        contents: json,
+    })
+}
+
+fn json_list(items: &[String]) -> String {
+    let items: Vec<String> = items.iter().map(|item| json_string(item)).collect();
+    format!("[{}]", items.join(", "))
+}
+
+fn json_string(text: &str) -> String {
+    let mut out = String::with_capacity(text.len() + 2);
+    out.push('"');
+    for c in text.chars() {
+        match c {
+            '"' => out.push_str("\\\""),
+            '\\' => out.push_str("\\\\"),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            '\t' => out.push_str("\\t"),
+            c if (c as u32) < 0x20 => out.push_str(&format!("\\u{:04x}", c as u32)),
+            c => out.push(c),
+        }
+    }
+    out.push('"');
+    out
 }
 
 fn sorted_entries(dir: &Path) -> Result<Vec<PathBuf>, ExtractError> {

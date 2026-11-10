@@ -51,6 +51,10 @@ pub struct Core {
     pub settings: SettingsService,
     /// Re-attached to games still running from the last session.
     pub launch: caskade_core::launch::LaunchService,
+    /// Built-in and installed themes (#139), before the window opens so its
+    /// first frame has the chosen one (#90); plugin-bundled themes join
+    /// once the plugin host starts.
+    pub themes: caskade_core::themes::ThemeService,
     plugin_runners: caskade_plugin_host::providers::PluginRunners,
 }
 
@@ -108,6 +112,12 @@ pub fn open(
     if let Some(item) = caskade_core::login_item::LoginItem::live() {
         crate::runtime::spawn(caskade_core::login_item::follow(settings.clone(), item));
     }
+    // Catalogue add-ons (#182): an install the app stopped in the middle of
+    // rolls back before plugins and themes load.
+    if let Err(error) = caskade_addons::package::recover(&paths.data.join("addons")) {
+        tracing::warn!(%error, "an interrupted add-on install wasn't rolled back");
+    }
+    let themes = caskade_core::themes::ThemeService::new(paths.data.join("themes"));
     Ok(Core {
         paths: paths.clone(),
         artwork,
@@ -117,6 +127,7 @@ pub fn open(
         notifications,
         settings,
         launch,
+        themes,
         plugin_runners,
     })
 }
@@ -191,6 +202,7 @@ pub fn start(core: Core, shell: Shell) -> Services {
         notifications,
         settings,
         launch,
+        themes,
         plugin_runners,
     } = core;
     let events = shell.events.clone();
@@ -488,12 +500,8 @@ pub fn start(core: Core, shell: Shell) -> Services {
         versions.attach(&bus);
         versions
     };
-    // Catalogue add-ons (#182): an install the app stopped in the middle of
-    // rolls back before plugins and themes load.
+    // An interrupted add-on install was rolled back in `open`.
     let addon_work = paths.data.join("addons");
-    if let Err(error) = caskade_addons::package::recover(&addon_work) {
-        tracing::warn!(%error, "an interrupted add-on install wasn't rolled back");
-    }
     let addon_folders = AddonFolders {
         plugins: paths.data.join("plugins"),
         themes: paths.data.join("themes"),
@@ -512,8 +520,7 @@ pub fn start(core: Core, shell: Shell) -> Services {
             (None, None)
         }
     };
-    // Built-in, installed and plugin-bundled themes (#139).
-    let themes = caskade_core::themes::ThemeService::new(paths.data.join("themes"));
+    // Plugin-bundled themes (#139) join the built-in and installed ones.
     if let Some(plugins) = &plugins {
         themes.set_plugin_folders(crate::runtime::block_on(
             crate::commands::themes::plugin_folders(plugins),

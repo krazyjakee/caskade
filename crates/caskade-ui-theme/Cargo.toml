@@ -1,0 +1,14 @@
+[package]
+name = "caskade-ui-theme"
+version = "0.1.0"
+description = "The native UI's look, free of any UI toolkit: Appearance settings as root attributes and tokens, the user accent, the user CSS check and the anatomy catalogue"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+# AppearanceSettings and translations.
+caskade-core = { path = "../caskade-core" }
+
+[lints]
+workspace = true

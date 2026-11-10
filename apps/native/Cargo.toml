@@ -44,6 +44,8 @@ caskade-ui-data = { path = "../../crates/caskade-ui-data" }
 # Pads (`src/input`), and the webview's input rules ported to Rust (#92).
 caskade-input = { path = "../../crates/caskade-input" }
 caskade-ui-input = { path = "../../crates/caskade-ui-input" }
+# Appearance, the accent and the user CSS check, as the webview has them (#90).
+caskade-ui-theme = { path = "../../crates/caskade-ui-theme" }
 # The game and video windows (`--web-game`, `--video`), shared with the
 # Tauri app.
 caskade-player = { path = "../../crates/caskade-player" }
@@ -60,6 +62,11 @@ blitz-traits = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e32173
 tray-icon = { version = "0.25", default-features = false, features = ["libappindicator"] }
 image = { version = "=0.25.10", default-features = false, features = ["png"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+# The bundled fonts under the tokens' family names, and theme asset URLs
+# (`theme.rs`), at the versions Blitz uses.
+parley = "0.12"
+url = "2"
+percent-encoding = "2"
 
 # Linux: the tray's GTK loop, and the AppIndicator library loaded at run time.
 [target.'cfg(target_os = "linux")'.dependencies]
@@ -69,6 +76,11 @@ libappindicator-sys = "0.9"
 # Windows and macOS: the OS's dialogs (`dialogs.rs`), as Tauri builds them.
 [target.'cfg(not(target_os = "linux"))'.dependencies]
 rfd = { version = "0.16", default-features = false, features = ["common-controls-v6"] }
+
+# Windows: whether the OS asks for less motion (`theme.rs`), as caskade-app
+# reads the registry.
+[target.'cfg(windows)'.dependencies]
+windows-registry = "0.6"
 
 [dev-dependencies]
 tempfile = "=3.27.0"

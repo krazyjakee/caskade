@@ -4,10 +4,12 @@
 //! the window to the tray instead ([`Shell::on_close`]), and the shell's
 //! own requests (show the window, quit) arrive through the loop's proxy.
 
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::sync::{Arc, Mutex, OnceLock, mpsc};
 
-use blitz_dom::DocumentConfig;
-use blitz_shell::{BlitzShellProxy, DataUriNetProvider, WindowConfig};
+use blitz_dom::{BaseDocument, DocumentConfig};
+use blitz_shell::{BlitzShellProxy, WindowConfig};
 use blitz_traits::net::NetProvider;
 use dioxus_native::prelude::*;
 use dioxus_native::winit::{
@@ -29,6 +31,8 @@ pub enum Request {
     /// where the tray lives on this thread).
     #[cfg_attr(target_os = "linux", allow(dead_code))]
     Relabel,
+    /// Apply the look waiting in `theme` (#90).
+    Restyle,
 }
 
 /// What a close request of the main window does.
@@ -68,8 +72,14 @@ pub fn ask(request: Request) {
     }
 }
 
-/// Runs the main window with `app` as its root until it closes for good.
-pub fn run(app: fn() -> Element, window: WindowAttributes, shell: impl Shell) {
+/// Runs the main window with `app` as its root until it closes for good,
+/// styled with `look` from its first frame.
+pub fn run(
+    app: fn() -> Element,
+    window: WindowAttributes,
+    look: &crate::theme::Look,
+    shell: impl Shell,
+) {
     let receiver = {
         requests();
         RECEIVER
@@ -85,18 +95,23 @@ pub fn run(app: fn() -> Element, window: WindowAttributes, shell: impl Shell) {
     // Dioxus tasks (timers, resources) run on the app's own runtime.
     let _runtime = caskade_app::runtime::handle().enter();
     let vdom = VirtualDom::new(app);
-    // Data URLs only: Caskade's pictures come from its artwork cache, never
-    // the network (Blitz's `net` feature stays off, #87).
-    let net: Arc<dyn NetProvider> = DataUriNetProvider::shared(Some(Arc::new(proxy.clone()) as _));
+    // Data URLs and theme assets only: Caskade's pictures come from its
+    // artwork cache, never the network (Blitz's `net` feature stays off, #87).
+    let net: Arc<dyn NetProvider> = crate::theme::Net::shared(Some(Arc::new(proxy.clone()) as _));
     vdom.provide_root_context(Arc::clone(&net));
     let document = dioxus_native::DioxusDocument::new(
         vdom,
         DocumentConfig {
             net_provider: Some(net),
+            base_url: Some(crate::theme::BASE_URL.to_owned()),
+            font_ctx: Some(crate::theme::fonts()),
             style_threading: blitz_dom::StyleThreading::Parallel,
             ..Default::default()
         },
     );
+    // The look before the first frame (#90).
+    let doc = Rc::clone(&document.inner);
+    crate::theme::apply(&mut doc.borrow_mut(), look);
     let config = WindowConfig::with_attributes(
         Box::new(document) as _,
         DioxusNativeWindowRenderer::new(),
@@ -108,6 +123,7 @@ pub fn run(app: fn() -> Element, window: WindowAttributes, shell: impl Shell) {
         shell,
         requests: receiver,
         main: None,
+        doc,
     }) {
         tracing::error!(%error, "the window's event loop failed");
     }
@@ -119,6 +135,8 @@ struct Loop<S> {
     requests: mpsc::Receiver<Request>,
     /// The main window, once it's open.
     main: Option<WindowId>,
+    /// Its document, for the look.
+    doc: Rc<RefCell<BaseDocument>>,
 }
 
 impl<S: Shell> Loop<S> {
@@ -133,6 +151,13 @@ impl<S: Shell> Loop<S> {
                     }
                 }
                 Request::Relabel => crate::tray::relabel(),
+                Request::Restyle => {
+                    if crate::theme::apply_pending(&mut self.doc.borrow_mut())
+                        && let Some(window) = crate::shell::main_window()
+                    {
+                        window.request_redraw();
+                    }
+                }
                 Request::Quit => match self.main {
                     // Through the shell's own close: the window goes for good.
                     Some(id) => {

@@ -4,8 +4,11 @@
 //! are up, `CASKADE_NATIVE_SMOKE_WEB_URL=<url>` adds a web game at `url` and
 //! plays it (for a manual run on another OS), `CASKADE_NATIVE_SMOKE_VIDEO=<YouTube
 //! id>` opens the video window,
-//! `CASKADE_NATIVE_SMOKE_GENERAL=<json>` merges into `core.general` before
-//! the window opens (Start minimized, launch at login), and
+//! `CASKADE_NATIVE_SMOKE_GENERAL=<json>` merges into `core.general` and
+//! `CASKADE_NATIVE_SMOKE_APPEARANCE=<json>` into `core.appearance` before
+//! the window opens (Start minimized, launch at login; a theme, accent or
+//! custom CSS), `CASKADE_NATIVE_SMOKE_RESTYLE=<json>` into `core.appearance`
+//! three seconds after the services start (a live change), and
 //! `CASKADE_NATIVE_SMOKE_QUIT=<seconds>` quits as closing the window does,
 //! and `CASKADE_NATIVE_SMOKE_PANIC=1` panics in the window's UI (crash
 //! recovery). Release builds ignore them unless built with the `smoke` feature.
@@ -22,35 +25,51 @@ fn var(name: &str) -> Option<String> {
     std::env::var(name).ok().filter(|value| !value.is_empty())
 }
 
-/// Before the window opens: `core.general` changed as asked.
-pub fn general(settings: &caskade_core::settings::SettingsService) {
-    let Some(change) = var("CASKADE_NATIVE_SMOKE_GENERAL") else {
-        return;
-    };
-    let changed = caskade_app::runtime::block_on(async {
+/// Before the window opens: `core.general` and `core.appearance` changed
+/// as asked.
+pub fn settings(settings: &caskade_core::settings::SettingsService) {
+    for (name, namespace) in [
+        ("CASKADE_NATIVE_SMOKE_GENERAL", "core.general"),
+        ("CASKADE_NATIVE_SMOKE_APPEARANCE", "core.appearance"),
+    ] {
+        if let Some(change) = var(name) {
+            caskade_app::runtime::block_on(merge(settings, namespace, &change));
+        }
+    }
+}
+
+/// Merges the JSON object `change` into `namespace`'s settings.
+async fn merge(settings: &caskade_core::settings::SettingsService, namespace: &str, change: &str) {
+    let changed = async {
         let current = settings
-            .get("core.general")
+            .get(namespace)
             .await
             .map_err(|error| error.to_string())?;
         let mut value = current.value;
         let change: serde_json::Value =
-            serde_json::from_str(&change).map_err(|error| error.to_string())?;
+            serde_json::from_str(change).map_err(|error| error.to_string())?;
         if let (Some(value), Some(change)) = (value.as_object_mut(), change.as_object()) {
             value.extend(change.clone());
         }
         settings
-            .set("core.general", value, None)
+            .set(namespace, value, None)
             .await
             .map_err(|error| error.to_string())
-    });
-    match changed {
-        Ok(_) => tracing::info!("smoke: core.general changed"),
-        Err(error) => tracing::error!(%error, "smoke: core.general unchanged"),
+    };
+    match changed.await {
+        Ok(_) => tracing::info!(namespace, "smoke: settings changed"),
+        Err(error) => tracing::error!(%error, namespace, "smoke: settings unchanged"),
     }
 }
 
 /// Once the services are up.
 pub fn after_start(services: &'static Services) {
+    if let Some(change) = var("CASKADE_NATIVE_SMOKE_RESTYLE") {
+        caskade_app::runtime::spawn(async move {
+            tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+            merge(&services.settings, "core.appearance", &change).await;
+        });
+    }
     if let Some(entry) = var("CASKADE_NATIVE_SMOKE_LAUNCH") {
         caskade_app::runtime::spawn(async move {
             match caskade_app::commands::launch::launch_game(&services.launch, &entry).await {

@@ -5546,6 +5546,54 @@ msgstr "Visa Caskade"
 msgid "Quit Caskade"
 msgstr "Avsluta Caskade"
 
+#: crates/caskade-ui-theme/src/accent.rs
+msgid "{colour} is not a #rrggbb colour"
+msgstr "{colour} är inte en #rrggbb-färg"
+
+#: crates/caskade-ui-theme/src/accent.rs
+msgid "The theme's surfaces are unknown"
+msgstr "Temats ytor är okända"
+
+#: crates/caskade-ui-theme/src/accent.rs
+msgid "{colour} was lightened to {accent} to stay readable on this theme."
+msgstr "{colour} gjordes ljusare till {accent} för att vara läsbar med det här temat."
+
+#: crates/caskade-ui-theme/src/accent.rs
+msgid "{colour} was darkened to {accent} to stay readable on this theme."
+msgstr "{colour} gjordes mörkare till {accent} för att vara läsbar med det här temat."
+
+#: crates/caskade-ui-theme/src/accent.rs
+msgid "{colour} can't be made readable on this theme's surfaces; pick another colour."
+msgstr "{colour} kan inte göras läsbar på det här temats ytor; välj en annan färg."
+
+#: crates/caskade-ui-theme/src/user_css.rs
+msgid "url({url}) is refused: custom CSS can't load anything from other origins."
+msgstr "url({url}) nekas: anpassad CSS kan inte läsa in något från andra ursprung."
+
+#: crates/caskade-ui-theme/src/user_css.rs
+msgid "@import of {url} is refused: custom CSS can't load anything from other origins."
+msgstr "@import av {url} nekas: anpassad CSS kan inte läsa in något från andra ursprung."
+
+#: crates/caskade-ui-theme/src/user_css.rs
+msgid "@import isn't supported in custom CSS: paste the rules in instead."
+msgstr "@import stöds inte i anpassad CSS: klistra in reglerna i stället."
+
+#: crates/caskade-ui-theme/src/user_css.rs
+msgid "A comment is never closed."
+msgstr "En kommentar stängs aldrig."
+
+#: crates/caskade-ui-theme/src/user_css.rs
+msgid "A closing brace closes nothing: custom CSS has to stay inside its layer."
+msgstr "En avslutande klammerparentes avslutar ingenting: anpassad CSS måste stanna inom sitt lager."
+
+#: crates/caskade-ui-theme/src/user_css.rs
+msgid "An opening brace is never closed."
+msgstr "En inledande klammerparentes stängs aldrig."
+
+#: crates/caskade-ui-theme/src/user_css.rs
+msgid "Line {line}: {problem}"
+msgstr "Rad {line}: {problem}"
+
 #: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "Caskade was installed as a system package: update it with your package manager."
 msgstr "Caskade installerades som ett systempaket: uppdatera det med din pakethanterare."
@@ -5677,7 +5725,7 @@ msgstr ""
 #: apps/desktop/src-tauri/src/lib.rs
 #: apps/native/src/updater.rs
 msgid "Try again"
-msgstr ""
+msgstr "Försök igen"
 
 #: apps/desktop/src-tauri/src/recovery.rs
 #: apps/native/src/main.rs

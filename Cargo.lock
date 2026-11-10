@@ -1995,11 +1995,14 @@ dependencies = [
  "caskade-player",
  "caskade-ui-data",
  "caskade-ui-input",
+ "caskade-ui-theme",
  "dioxus-native",
  "embed-resource",
  "gtk",
  "image",
  "libappindicator-sys",
+ "parley",
+ "percent-encoding",
  "rfd",
  "serde",
  "serde_json",
@@ -2008,6 +2011,8 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "tray-icon",
+ "url",
+ "windows-registry",
 ]
 
 [[package]]
@@ -2219,6 +2224,13 @@ name = "caskade-ui-input"
 version = "0.1.0"
 dependencies = [
  "caskade-input",
+]
+
+[[package]]
+name = "caskade-ui-theme"
+version = "0.1.0"
+dependencies = [
+ "caskade-core",
 ]
 
 [[package]]

@@ -19,6 +19,11 @@ native *args:
     flock /tmp/caskade-heavy.lock cargo build -p caskade-native
     "$(cargo metadata --format-version 1 --no-deps | python3 -c 'import json,sys;print(json.load(sys.stdin)["target_directory"])')/debug/caskade-native" {{args}}
 
+# The native app's stylesheet (#90): Tailwind 4 over apps/native/src, after
+# changing its classes or the webview's styles; CI fails while it's stale
+native-css:
+    node apps/native/scripts/build-css.mjs
+
 # Production build of the UI (no app bundle)
 build:
     pnpm build
@@ -57,7 +62,7 @@ i18n-check:
 
 # Run the app tests: core and Tauri adapter (Rust), then the frontend (Vitest)
 test-app *args:
-    flock /tmp/caskade-heavy.lock cargo test -p caskade-core -p caskade-achievements -p caskade-addons -p caskade-backup -p caskade-share -p caskade-streaming -p caskade-system-stats -p caskade-app -p caskade-ui-data -p caskade-ui-input -p caskade-player -p caskade-desktop -p caskade-native {{args}}
+    flock /tmp/caskade-heavy.lock cargo test -p caskade-core -p caskade-achievements -p caskade-addons -p caskade-backup -p caskade-share -p caskade-streaming -p caskade-system-stats -p caskade-app -p caskade-ui-data -p caskade-ui-input -p caskade-ui-theme -p caskade-player -p caskade-desktop -p caskade-native {{args}}
     pnpm test
 
 # Type-check every package

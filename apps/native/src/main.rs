@@ -15,6 +15,7 @@ mod input;
 mod launch;
 mod shell;
 mod smoke;
+mod theme;
 mod tray;
 mod updater;
 mod window_state;
@@ -112,7 +113,7 @@ fn main() {
     tray::follow(core.settings.clone());
     // Caskade's own updates: checked in the background.
     updater::watch(core.settings.clone());
-    smoke::general(&core.settings);
+    smoke::settings(&core.settings);
     let general: caskade_core::settings::GeneralSettings =
         caskade_app::runtime::block_on(core.settings.read_or_default("core.general"));
     let hidden =
@@ -125,8 +126,12 @@ fn main() {
     if let Some(listener) = instance {
         caskade_app::single_instance::serve(listener, forwarded::take);
     }
+    // The look of the first frame: the theme, the user's CSS and the
+    // Appearance settings (#90).
+    let look = theme::first(&core.themes, &core.settings);
     // Everything else starts while the window shows.
     shell::start(core, |services| {
+        theme::follow(services);
         caskade_app::launch_cli::server::listen(
             caskade_app::launch_cli::server::Services {
                 accounts: services.accounts.clone(),
@@ -151,7 +156,7 @@ fn main() {
     let restarts = caskade_player::recovery::Restarts::new(paths.cache.join("native-restarts"));
     // Nothing the window held is used after a panic: the process restarts.
     let ui = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-        launch::run(app, window, NativeShell);
+        launch::run(app, window, &look, NativeShell);
     }));
     // The window closed, or its UI panicked: save where it was and stop
     // what runs with Caskade.
@@ -264,6 +269,10 @@ fn app() -> Element {
         if let Some(keeper) = KEEPER.get() {
             keeper.follow(window.as_ref(), event);
         }
+        // Themes with a light and a dark scheme follow the OS's (#90).
+        if let dioxus_native::winit::event::WindowEvent::ThemeChanged(os) = event {
+            theme::prefers_light(*os == dioxus_native::winit::window::Theme::Light);
+        }
         let _ = event_loop;
         if matches!(
             event,
@@ -287,6 +296,7 @@ fn app() -> Element {
 /// The window is up: games may move it once the services are there.
 fn window_ready(window: Arc<dyn dioxus_native::winit::window::Window>) {
     shell::set_main_window(window.clone());
+    theme::prefers_light(window.theme() == Some(dioxus_native::winit::window::Theme::Light));
     // macOS: the menu bar's menus, on the main thread.
     #[cfg(target_os = "macos")]
     tray::app_menu();
