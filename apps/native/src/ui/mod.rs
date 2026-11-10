@@ -21,7 +21,7 @@ mod game_art;
 mod game_card;
 mod game_row;
 mod hero;
-pub(crate) mod icons;
+mod icons;
 mod ids;
 mod interact;
 mod link;
@@ -44,7 +44,7 @@ mod tooltip;
 
 #[allow(unused_imports)]
 pub use avatar::{
-    AvatarInfo, AvatarPicker, AvatarSize, Avatar, DEFAULT_AVATAR, avatar_info, avatars, initials,
+    Avatar, AvatarInfo, AvatarPicker, AvatarSize, DEFAULT_AVATAR, avatar_info, avatars, initials,
 };
 #[allow(unused_imports)]
 pub use button::{Button, ButtonSize, ButtonVariant};
@@ -67,8 +67,6 @@ pub use hero::{Hero, HeroGame};
 #[allow(unused_imports)]
 pub use icons::{Icon, Svg};
 #[allow(unused_imports)]
-pub use interact::Forced;
-#[allow(unused_imports)]
 pub use link::Link;
 #[allow(unused_imports)]
 pub use menu::{Menu, MenuButton, MenuEntry, MenuItem};
@@ -82,8 +80,6 @@ pub use radio::{RadioGroup, RadioOption};
 pub use segmented::{Segment, SegmentedControl};
 #[allow(unused_imports)]
 pub use select::{Select, SelectOption};
-#[allow(unused_imports)]
-pub(crate) use select::List as SelectList;
 #[allow(unused_imports)]
 pub use shelf::Shelf;
 #[allow(unused_imports)]
