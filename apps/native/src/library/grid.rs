@@ -509,6 +509,8 @@ fn Game(
                 "data-cs": "game-row",
                 "data-index": "{index}",
                 "data-focus-key": "game-{game.id}",
+                // A pad starts on the first game.
+                "data-focus-default": if index == 0 { "true" },
                 role: "row",
                 tabindex: "0",
                 class: "flex h-full items-center gap-4 border-b border-border px-3",
@@ -531,6 +533,8 @@ fn Game(
             "data-cs": "game-card",
             "data-index": "{index}",
             "data-focus-key": "game-{game.id}",
+            // A pad starts on the first game.
+            "data-focus-default": if index == 0 { "true" },
             role: "link",
             tabindex: "0",
             class: "flex min-w-0 flex-col gap-2",

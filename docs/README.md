@@ -17,6 +17,7 @@ Guides:
 - [Website](../apps/website/README.md): editing, translating, previewing and deploying the GitHub Pages landing page.
 - [Releasing](RELEASING.md): cutting a release, the updater signing key, testing an update before publishing.
 - [Translating Caskade](translating.md): languages, catalogs and `just i18n-check`.
+- [Laying out the native UI](native-layout.md): RSX on Blitz, scroll areas, virtualised lists and measuring.
 - [Manual checks](manual-checks.md): the real-machine, network and account checks still open on GitHub issues.
 - [Legal documents](legal/README.md): the terms, privacy policy and licences shown in Settings → About.
 - [Security policy](../SECURITY.md).

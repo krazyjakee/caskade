@@ -62,6 +62,10 @@ struct Measured {
 
 #[component]
 fn Bench() -> Element {
+    // Until the fixture library opens: DataRoot mounts this again then.
+    if try_consume_context::<crate::data::DataSource>().is_none() {
+        return rsx! {};
+    }
     let input = use_input();
     let layout = layout();
     let measured: Rc<RefCell<Measured>> = use_hook(Rc::default);
