@@ -1,0 +1,538 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Hugo <LinuxBoy-96@users.noreply.github.com>
+Date: Tue, 10 Nov 2026 12:15:57 +0000
+Subject: [PATCH] Implement text-overflow (ellipsis and string markers)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Rebased from DioxusLabs/blitz#893 (head 51fcffbe) onto the series.
+Overflowing lines in a clipping inline root (`overflow` other than
+`visible`) are cut at a glyph boundary and end with the `text-overflow`
+marker: `…` for `ellipsis`, the given string otherwise. Paint-time
+truncation (css-overflow §5.2 defines the ellipsis as a rendering
+effect): layout, scrollWidth, selection and hit testing keep the full
+text.
+
+- blitz-dom: after line breaking and alignment, `layout::text_overflow`
+  finds the lines wider than the content box and shapes the marker with
+  the block container's style. For an anonymous inline root (Blitz wraps
+  inline content in scroll containers), the block is the parent.
+- blitz-paint: `stroke_text` drops the glyphs past the cut and draws the
+  marker once after the kept glyphs, in the block's colour. Decorations
+  stop at the cut, and the marker is undecorated, as in Chrome. A focused
+  contenteditable paints as `clip`.
+
+Only the inline-end side is handled (no RTL start-side marker).
+---
+ .../blitz-dom/src/layout/inline/layout.rs     |  55 +++++
+ packages/blitz-dom/src/layout/mod.rs          |   1 +
+ .../blitz-dom/src/layout/text_overflow.rs     | 207 ++++++++++++++++++
+ packages/blitz-dom/src/lib.rs                 |   6 +
+ packages/blitz-dom/src/node/text.rs           |   3 +
+ packages/blitz-paint/src/render.rs            |  27 +++
+ packages/blitz-paint/src/text.rs              |  77 ++++++-
+ 7 files changed, 370 insertions(+), 6 deletions(-)
+ create mode 100644 packages/blitz-dom/src/layout/text_overflow.rs
+
+diff --git a/packages/blitz-dom/src/layout/inline/layout.rs b/packages/blitz-dom/src/layout/inline/layout.rs
+index 9d68d9e5..ae321a04 100644
+--- a/packages/blitz-dom/src/layout/inline/layout.rs
++++ b/packages/blitz-dom/src/layout/inline/layout.rs
+@@ -25,6 +25,7 @@ use stylo_taffy::StyleFlags;
+ 
+ use crate::layout::LayoutPassState;
+ use crate::layout::resolve_calc_value;
++use crate::node::TextBrush;
+ use crate::stylo_to_parley;
+ 
+ /// Subtract a child's margins from the definite axes of the available space it is laid out in.
+@@ -997,6 +998,60 @@ impl LayoutPassState<'_> {
+             },
+         );
+ 
++        // `text-overflow`: lines are final now; find the ones to truncate and
++        // shape their marker (layout units: `width` is already scaled). Read
++        // from style here, not at construction, so a style-only change (which
++        // relayouts without reconstructing) is honoured. The property belongs
++        // to the block container: for the anonymous block Blitz wraps mixed
++        // content in, that is the parent; the anonymous wrappers around
++        // flex/grid items do not qualify.
++        inline_layout.overflow = {
++            use crate::layout::text_overflow::{Marker, compute, is_block_container, side_for};
++            use style::values::specified::text::TextOverflowSide;
++            let node = &self.nodes[node_id];
++            let owner = if node.is_anonymous() {
++                node.parent.filter(|p| {
++                    self.nodes[*p]
++                        .primary_styles()
++                        .is_some_and(|s| is_block_container(&s))
++                })
++            } else {
++                Some(node_id)
++            };
++            let request = owner.and_then(|id| {
++                let styles = self.nodes[id].primary_styles()?;
++                let side = side_for(&styles)?;
++                let styles: style::servo_arc::Arc<style::properties::ComputedValues> =
++                    (*styles).clone();
++                Some((id, styles, side))
++            });
++            request.and_then(|(owner_id, styles, side)| {
++                // The marker is styled by the block (css-overflow §5.2): shape it
++                // with the block's parley style, which also gives font fallback.
++                let text: std::borrow::Cow<'_, str> = match &side {
++                    TextOverflowSide::Ellipsis => "\u{2026}".into(),
++                    TextOverflowSide::String(s) => s.as_ref().to_string().into(),
++                    TextOverflowSide::Clip => return None,
++                };
++                let parley_style = crate::stylo_to_parley::style(owner_id, &styles);
++                let mut marker_layout: parley::Layout<TextBrush> = parley::Layout::new();
++                {
++                    // Locked through its own handle, so `self.layout_ctx` can be borrowed.
++                    let font_ctx = self.font_ctx.clone();
++                    let mut font_ctx = font_ctx.lock().unwrap();
++                    let mut builder =
++                        self.layout_ctx
++                            .tree_builder(&mut font_ctx, scale, true, &parley_style);
++                    builder.push_text(&text);
++                    builder.build_into(&mut marker_layout);
++                }
++                marker_layout.break_all_lines(None);
++                let marker = Marker::from_layout(&marker_layout, parley_style.brush)?;
++                compute(&inline_layout.layout, marker, width)
++            })
++        };
++
++
+         // Parley lays out empty text as a single strut-height line (text-editor semantics),
+         // but a line box containing no text, inline boxes or other in-flow content is a
+         // zero-height line box in CSS (CSS2 §9.4.2).
+diff --git a/packages/blitz-dom/src/layout/mod.rs b/packages/blitz-dom/src/layout/mod.rs
+index d623c3e7..ecc9368c 100644
+--- a/packages/blitz-dom/src/layout/mod.rs
++++ b/packages/blitz-dom/src/layout/mod.rs
+@@ -30,6 +30,7 @@ pub(crate) mod list;
+ pub(crate) mod paint_tree;
+ pub(crate) mod replaced;
+ pub(crate) mod table;
++pub mod text_overflow;
+ pub(crate) mod text_transform;
+ #[cfg(feature = "writing-mode")]
+ pub(crate) mod writing_mode;
+diff --git a/packages/blitz-dom/src/layout/text_overflow.rs b/packages/blitz-dom/src/layout/text_overflow.rs
+new file mode 100644
+index 00000000..b7383766
+--- /dev/null
++++ b/packages/blitz-dom/src/layout/text_overflow.rs
+@@ -0,0 +1,207 @@
++//! `text-overflow`: which lines of an inline context are too wide for their
++//! box, and the shaped marker (`…` or a string) to draw at the cut.
++//!
++//! Split in two so that scrolling stays cheap:
++//! - **post-layout** ([`compute`], called from `inline.rs` right after the
++//!   lines are final): which lines overflow and where their content ends,
++//!   plus the marker shaped once from the block container's style (font,
++//!   size, colour — css-overflow §5.2). Stored on the [`TextLayout`] as
++//!   `Option<Box<TextOverflowLayout>>`.
++//! - **at paint time** ([`resolve`]): the cut position (on a grapheme-cluster
++//!   boundary) for the current horizontal scroll offset, and whether the
++//!   marker is needed at all — a scrolled box whose content end is in view
++//!   shows no marker (css-overflow §5, "ellipsis-scrolling").
++//!
++//! DOM-free on purpose, so it can move into Parley later.
++//!
++//! [`TextLayout`]: crate::node::TextLayout
++
++use parley::{FontData, Layout, Line, PositionedLayoutItem};
++use style::properties::ComputedValues;
++use style::values::computed::Overflow;
++use style::values::specified::box_::DisplayInside;
++use style::values::specified::text::TextOverflowSide;
++
++use crate::node::TextBrush;
++use stylo_taffy::CopyStyleGetters;
++
++/// One shaped run of the marker (Parley may split it across fonts when the
++/// block's font lacks a glyph).
++#[derive(Clone, Debug)]
++pub struct MarkerRun {
++    pub font: FontData,
++    pub font_size: f32,
++    pub normalized_coords: Vec<i16>,
++    /// Glyph ids with their x offset within the marker, in layout units.
++    pub glyphs: Vec<(u32, f32)>,
++}
++
++/// The marker, shaped once per inline context in the **block container's**
++/// style (css-overflow §5.2: styled and baseline-aligned according to the
++/// block), so a small block cuts a large span with a small marker.
++#[derive(Clone, Debug)]
++pub struct Marker {
++    pub runs: Vec<MarkerRun>,
++    pub advance: f32,
++    pub brush: TextBrush,
++}
++
++impl Marker {
++    /// Flattens a shaped marker layout (one line) into runs.
++    pub fn from_layout(layout: &Layout<TextBrush>, brush: TextBrush) -> Option<Self> {
++        let line = layout.lines().next()?;
++        let mut runs = Vec::new();
++        for item in line.items() {
++            if let PositionedLayoutItem::GlyphRun(run) = item {
++                let glyphs = run.positioned_glyphs().map(|g| (g.id, g.x)).collect();
++                runs.push(MarkerRun {
++                    font: run.run().font().clone(),
++                    font_size: run.run().font_size(),
++                    normalized_coords: run
++                        .run()
++                        .normalized_coords()
++                        .iter()
++                        .map(|c| c.to_bits())
++                        .collect(),
++                    glyphs,
++                });
++            }
++        }
++        (!runs.is_empty()).then(|| Self {
++            runs,
++            advance: line.metrics().advance,
++            brush,
++        })
++    }
++}
++
++/// A line whose content is wider than the box.
++#[derive(Clone, Debug)]
++pub struct TruncatedLine {
++    pub line_index: usize,
++    /// Where the line's content ends (`offset + advance`, hanging whitespace
++    /// excluded), in layout units: `text-indent` shifts it.
++    pub end: f32,
++    /// The line's baseline — the block's, not a run's (`vertical-align`).
++    pub baseline: f32,
++}
++
++/// Every candidate line of an inline context, the box width they are
++/// measured against, and the marker they share.
++#[derive(Clone, Debug)]
++pub struct TextOverflowLayout {
++    pub max_width: f32,
++    pub marker: Marker,
++    pub lines: Vec<TruncatedLine>,
++}
++
++/// Where paint cuts a line for the current scroll position.
++#[derive(Clone, Copy, Debug)]
++pub struct Cut {
++    /// Glyphs whose end is past this x (layout units, unscrolled) are not painted.
++    pub cut_x: f32,
++    /// Where the marker starts: right after the last glyph that fits.
++    pub marker_x: f32,
++}
++
++impl TextOverflowLayout {
++    pub fn line(&self, index: usize) -> Option<&TruncatedLine> {
++        self.lines.iter().find(|l| l.line_index == index)
++    }
++}
++
++/// The inline-end `text-overflow` value of a block container that clips its
++/// overflow; `None` otherwise (`text-overflow: clip`, or no clipping).
++pub fn side_for(styles: &ComputedValues) -> Option<TextOverflowSide> {
++    if matches!(styles.get_box().overflow_x, Overflow::Visible) {
++        return None;
++    }
++    // Stylo stores a single value as `(Clip, value)` with `sides_are_logical`,
++    // and two values as `(start, end)`: either way `second` is the inline-end
++    // side, the right edge in Blitz's left-to-right inline layout.
++    match &styles.get_text().text_overflow.second {
++        TextOverflowSide::Clip => None,
++        side => Some(side.clone()),
++    }
++}
++
++/// Whether `styles` describe a block container (`text-overflow` applies to
++/// block containers only, not to the anonymous wrappers of flex/grid items).
++pub fn is_block_container(styles: &ComputedValues) -> bool {
++    matches!(
++        styles.clone_display().inside(),
++        DisplayInside::Flow | DisplayInside::FlowRoot
++    )
++}
++
++/// Post-layout: the lines whose content ends past `max_width` (layout
++/// units), with the marker shaped from the block's style.
++pub fn compute(
++    layout: &Layout<TextBrush>,
++    marker: Marker,
++    max_width: f32,
++) -> Option<Box<TextOverflowLayout>> {
++    let mut lines = Vec::new();
++    for (index, line) in layout.lines().enumerate() {
++        let metrics = line.metrics();
++        let end = metrics.offset + metrics.advance - metrics.hanging_advance;
++        if end <= max_width + 0.5 {
++            continue;
++        }
++        // Lines made only of inline boxes have nothing to cut at glyph level.
++        let has_glyphs = line
++            .items()
++            .any(|item| matches!(item, PositionedLayoutItem::GlyphRun(_)));
++        if !has_glyphs {
++            continue;
++        }
++        lines.push(TruncatedLine {
++            line_index: index,
++            end,
++            baseline: metrics.baseline,
++        });
++    }
++    (!lines.is_empty()).then(|| {
++        Box::new(TextOverflowLayout {
++            max_width,
++            marker,
++            lines,
++        })
++    })
++}
++
++/// Paint time: the cut for one line given the box's horizontal scroll offset
++/// (layout units). `None` when the scrolled view already shows the end of the
++/// content, in which case the line is painted whole. The cut falls on a
++/// grapheme-cluster boundary: whole characters are elided, never half a
++/// base+combining pair.
++pub fn resolve(
++    layout: &TextOverflowLayout,
++    truncated: &TruncatedLine,
++    line: &Line<'_, TextBrush>,
++    scroll_x: f32,
++) -> Option<Cut> {
++    let visible_end = scroll_x + layout.max_width;
++    if truncated.end <= visible_end + 0.5 {
++        return None;
++    }
++    let limit = (visible_end - layout.marker.advance).max(scroll_x);
++    // Last cluster boundary that fits before the marker.
++    let mut cut_x = scroll_x;
++    for item in line.items() {
++        if let PositionedLayoutItem::GlyphRun(run) = item {
++            let mut x = run.offset();
++            for cluster in run.run().clusters() {
++                let end = x + cluster.advance();
++                if end <= limit + 0.01 {
++                    cut_x = cut_x.max(end);
++                }
++                x = end;
++            }
++        }
++    }
++    Some(Cut {
++        cut_x,
++        marker_x: cut_x,
++    })
++}
+diff --git a/packages/blitz-dom/src/lib.rs b/packages/blitz-dom/src/lib.rs
+index e4c268df..34f8ae5b 100644
+--- a/packages/blitz-dom/src/lib.rs
++++ b/packages/blitz-dom/src/lib.rs
+@@ -51,6 +51,12 @@ mod html;
+ mod iframe;
+ /// Integration of taffy and the DOM.
+ mod layout;
++/// `text-overflow` data computed after layout and consumed by painters.
++pub mod text_overflow {
++    pub use crate::layout::text_overflow::{
++        Cut, Marker, MarkerRun, TextOverflowLayout, TruncatedLine, compute, resolve, side_for,
++    };
++}
+ mod mutator;
+ mod paint_damage;
+ mod query_selector;
+diff --git a/packages/blitz-dom/src/node/text.rs b/packages/blitz-dom/src/node/text.rs
+index 2cec1f28..ad6822c1 100644
+--- a/packages/blitz-dom/src/node/text.rs
++++ b/packages/blitz-dom/src/node/text.rs
+@@ -26,6 +26,9 @@ pub struct TextLayout {
+     pub text: String,
+     pub content_widths: Option<ContentWidths>,
+     pub layout: parley::layout::Layout<TextBrush>,
++    /// Lines truncated by `text-overflow`, computed after layout
++    /// (`layout::text_overflow`), consumed by the painter.
++    pub overflow: Option<Box<crate::text_overflow::TextOverflowLayout>>,
+     /// Block-axis offset (in CSS px) of the line boxes from the top of the container's content
+     /// box, as applied by `align-content`.
+     pub block_offset: f32,
+diff --git a/packages/blitz-paint/src/render.rs b/packages/blitz-paint/src/render.rs
+index bb97fcc1..68f8ebd7 100644
+--- a/packages/blitz-paint/src/render.rs
++++ b/packages/blitz-paint/src/render.rs
+@@ -390,6 +390,7 @@ impl<'dom, 'a> BlitzDomPainter<'dom, 'a> {
+                     },
+                     node.id,
+                     &mut self.draw_text_context.borrow_mut(),
++                    None,
+                 );
+             }
+         }
+@@ -1066,6 +1067,30 @@ impl ElementCx<'_, '_> {
+                 },
+                 self.node.id,
+                 &mut draw_text_context,
++                text_layout.overflow.as_deref().and_then(|overflow| {
++                    // The clipping box (the parent for an anonymous root): its
++                    // horizontal scroll moves the cut.
++                    let block = if self.node.is_anonymous() {
++                        self.node.parent.and_then(|p| self.context.dom.get_node(p))
++                    } else {
++                        Some(self.node)
++                    };
++                    // A focused editing host is being edited: treat `ellipsis`
++                    // as `clip` (css-overflow §5.2, "user interaction with
++                    // ellipsis") so the marker never hides the caret's text.
++                    let editing = block.is_some_and(|b| {
++                        self.context.dom.get_focussed_node_id() == Some(b.id)
++                            && b.attr(local_name!("contenteditable"))
++                                .is_some_and(|v| !v.eq_ignore_ascii_case("false"))
++                    });
++                    if editing {
++                        return None;
++                    }
++                    let scroll_x = block
++                        .map(|n| (n.scroll_offset().x * self.scale) as f32)
++                        .unwrap_or(0.0);
++                    Some((overflow, scroll_x))
++                }),
+             );
+         }
+     }
+@@ -1161,6 +1186,7 @@ impl ElementCx<'_, '_> {
+                 },
+                 self.node.id,
+                 &mut draw_text_context,
++                None,
+             );
+         }
+     }
+@@ -1220,6 +1246,7 @@ impl ElementCx<'_, '_> {
+                 },
+                 self.node.id,
+                 &mut draw_text_context,
++                None,
+             );
+         }
+     }
+diff --git a/packages/blitz-paint/src/text.rs b/packages/blitz-paint/src/text.rs
+index b378aad4..46361507 100644
+--- a/packages/blitz-paint/src/text.rs
++++ b/packages/blitz-paint/src/text.rs
+@@ -585,6 +585,7 @@ pub(crate) fn stroke_text<'a>(
+     options: TextPaintOptions,
+     inline_root_id: NodeId,
+     context: &mut DrawTextContext,
++    text_overflow: Option<(&blitz_dom::text_overflow::TextOverflowLayout, f32)>,
+ ) {
+     let TextPaintOptions {
+         scale,
+@@ -607,7 +608,16 @@ pub(crate) fn stroke_text<'a>(
+     // ancestor chain on every run, we cache each node's resolved values here and,
+     // for each run, only resolve styles for the nodes newly descended into (popping
+     // as we ascend). `path_scratch` is a reusable buffer for the run's node path.
+-    for line in lines {
++    for (line_index, line) in lines.enumerate() {
++        // `text-overflow`: layout found the overflowing lines and shaped their
++        // marker; the cut itself depends on the scroll offset, so it is resolved
++        // here (cheaply) for every frame.
++        let truncated = text_overflow.and_then(|(o, scroll_x)| {
++            o.line(line_index).and_then(|l| {
++                blitz_dom::text_overflow::resolve(o, l, &line, scroll_x).map(|c| (l, c))
++            })
++        });
++        let mut marker_drawn = false;
+         // Decorations accumulated for this line, keyed by decorating box, so each box is
+         // painted once (spanning all its runs) using its own font — matching Firefox, which
+         // draws one decoration per box rather than one stepped segment per differently-sized
+@@ -675,14 +685,61 @@ pub(crate) fn stroke_text<'a>(
+                         1.0, // alpha
+                         transform,
+                         glyph_xform,
+-                        glyph_run.positioned_glyphs().map(|glyph| anyrender::Glyph {
+-                            id: glyph.id as _,
+-                            x: glyph.x,
+-                            y: glyph.y,
++                        glyph_run.positioned_glyphs().filter_map(|glyph| {
++                            // Truncated line: keep the glyphs that end before the cut.
++                            if let Some((_, cut)) = truncated
++                                && glyph.x + glyph.advance > cut.cut_x + 0.01
++                            {
++                                return None;
++                            }
++                            Some(anyrender::Glyph {
++                                id: glyph.id as _,
++                                x: glyph.x,
++                                y: glyph.y,
++                            })
+                         }),
+                     );
+                 }
+ 
++                // Draw the marker once, right after the kept glyphs, once the run that
++                // reaches the cut has been painted.
++                if let Some((truncated_line, cut)) = truncated {
++                    let run_end = glyph_run.offset() + glyph_run.advance();
++                    if !marker_drawn && run_end >= cut.cut_x - 0.01 {
++                        marker_drawn = true;
++                        // The marker is the block's: its own font(s), size and colour,
++                        // on the line's baseline.
++                        if let Some((overflow, _)) = text_overflow {
++                            let marker = &overflow.marker;
++                            let marker_color = brush_override.unwrap_or_else(|| {
++                                doc.get_node(marker.brush.id)
++                                    .and_then(|n| n.primary_styles())
++                                    .map(|s| s.get_inherited_text().color.as_srgb_color())
++                                    .unwrap_or(fill_color)
++                            });
++                            for mrun in &marker.runs {
++                                scene.draw_glyphs(
++                                    &mrun.font,
++                                    mrun.font_size,
++                                    !FONT_EMBOLDEN_ENABLED,
++                                    &mrun.normalized_coords,
++                                    embolden,
++                                    Fill::NonZero,
++                                    &anyrender::Paint::from(marker_color),
++                                    1.0,
++                                    transform,
++                                    glyph_xform,
++                                    mrun.glyphs.iter().map(|(id, gx)| anyrender::Glyph {
++                                        id: *id as _,
++                                        x: cut.marker_x + gx,
++                                        y: truncated_line.baseline,
++                                    }),
++                                );
++                            }
++                        }
++                    }
++                }
++
+                 // Accumulate this run's contribution to each decorating box on its ancestor
+                 // path. The decoration is drawn once per box after the whole line has been
+                 // walked (see `flush_line_decorations`), so mixed font sizes within a box
+@@ -700,7 +757,15 @@ pub(crate) fn stroke_text<'a>(
+                 };
+                 let run_node_id = style.brush.id;
+                 let run_x0 = glyph_run.offset() as f64;
+-                let run_x1 = run_x0 + glyph_run.advance() as f64;
++                let mut run_x1 = run_x0 + glyph_run.advance() as f64;
++                // On a truncated line, decorations stop before the marker (the
++                // marker itself is undecorated, as in Chrome).
++                if let Some((_, cut)) = truncated {
++                    run_x1 = run_x1.min(cut.cut_x as f64);
++                    if run_x1 <= run_x0 {
++                        continue;
++                    }
++                }
+ 
+                 for entry in stack.iter() {
+                     if entry.decoration.is_none() {

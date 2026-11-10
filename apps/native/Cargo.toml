@@ -40,6 +40,10 @@ path = "src/main.rs"
 name = "shots"
 required-features = ["shots"]
 
+[[test]]
+name = "text_pixels"
+required-features = ["shots"]
+
 [dependencies]
 # The BLITZ-0 baseline (#113, Pins): Blitz 9f9c8e3 with Dioxus 0.8.0-alpha.3,
 # anyrender 812644a and Stylo 2dca345, as apps/native-proto pins them. They

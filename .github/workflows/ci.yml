@@ -386,9 +386,10 @@ jobs:
       - name: Native app smoke test
         run: cargo test -p caskade-native --locked --test smoke --test console_e2e -- --ignored
       # Every theme on the reference screens, rendered with vello_cpu,
-      # against the committed images (#90).
+      # against the committed images (#90); cut titles and placeholders
+      # against Chromium's rendering (#80).
       - name: Native theme screenshots
-        run: cargo test -p caskade-native --features shots --locked --test shots
+        run: cargo test -p caskade-native --features shots --locked --test shots --test text_pixels
 
   # The installer suite (crates/caskade-installer/docs/ci.md).
   installer:

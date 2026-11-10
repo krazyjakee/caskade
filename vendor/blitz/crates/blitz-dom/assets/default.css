@@ -121,6 +121,11 @@ textarea:focus {
     outline: 2px solid #4D90FE;
 }
 
+/* An empty text field's hint: Chromium's light-scheme grey. */
+::placeholder {
+    color: #757575;
+}
+
 button,
 input[type="submit"],
 input[type="reset"],

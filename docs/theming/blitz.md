@@ -40,7 +40,6 @@ Serif 4) and every token-driven style match. What differs:
 | What | Where | In Blitz | Issue |
 | --- | --- | --- | --- |
 | `backdrop-filter` (the glass blur) | Nexus, Ember: cards, top bar, sidebar | Not drawn: the backdrop's grid lines and glows show through translucent surfaces | #85 (Skia only) |
-| `text-overflow: ellipsis` | Every theme: long card titles | The text is clipped with no "…" | #80 |
 | SVG filters in a background image | Paper's `grain.svg` (`feTurbulence`) | The filtered rectangle draws as solid colour, so the grain is a grey square | #85 |
 | A background image repeated at `background-size` | Paper's grain (240 px tiles) | Only the first tile is drawn | #85 |
 | Hairline `repeating-linear-gradient` stripes | Paper's placeholder art | The 1 px stripes draw heavier and darker | #85 |

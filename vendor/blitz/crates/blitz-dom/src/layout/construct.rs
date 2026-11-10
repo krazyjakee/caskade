@@ -854,50 +854,13 @@ fn collect_complex_layout_children(
     out.maybe_push_anon_block(doc);
 }
 
-fn create_text_editor(doc: &mut BaseDocument, input_element_id: NodeId, is_multiline: bool) {
-    let node = &mut doc.nodes[input_element_id];
-    let parley_style = node
-        .primary_styles()
-        .as_ref()
-        .map(|s| stylo_to_parley::style(node.id, s))
-        .unwrap_or_default();
-    let alignment = node
-        .primary_styles()
-        .map(|s| stylo_to_parley::text_align(s.clone_text_align()))
-        .unwrap_or(parley::layout::Alignment::Start);
-    let base_direction = node
-        .primary_styles()
-        .map(|s| stylo_to_parley::base_direction(s.clone_direction(), s.clone_unicode_bidi()))
-        .unwrap_or(parley::BaseDirection::Auto);
-
-    let initial_text = if is_multiline {
-        node.text_content()
-    } else {
-        node.attr(local_name!("value")).unwrap_or("").to_string()
-    };
-    let is_focussed = node.is_focussed();
-    let element = &mut node.data.downcast_element_mut().unwrap();
-    if !matches!(element.special_data, SpecialElementData::TextInput(_)) {
-        let mut text_input_data = TextInputData::new(is_multiline);
-        let editor = &mut text_input_data.editor;
-        editor.set_text(&initial_text);
-        element.special_data = SpecialElementData::TextInput(text_input_data);
-
-        // An input focused before its editor existed (e.g. focused before the first layout)
-        // could not enable IME when it was focused, so enable it now.
-        if is_focussed {
-            doc.shell_provider.set_ime_enabled(true);
-        }
-    }
-
-    let SpecialElementData::TextInput(text_input_data) = &mut element.special_data else {
-        unreachable!();
-    };
-
-    let editor = &mut text_input_data.editor;
-    editor.set_scale(doc.viewport.scale_f64() as f32);
-    editor.set_width(None);
-
+/// Applies a text input's text style to the editor that lays its text (or its placeholder) out.
+fn apply_text_style(
+    editor: &mut parley::PlainEditor<crate::node::TextBrush>,
+    parley_style: parley::TextStyle<'static, 'static, crate::node::TextBrush>,
+    alignment: parley::layout::Alignment,
+    base_direction: parley::BaseDirection,
+) {
     let styles = editor.edit_styles();
     styles.retain(|_| false);
     styles.insert(StyleProperty::FontFamily(parley_style.font_family));
@@ -919,8 +882,111 @@ fn create_text_editor(doc: &mut BaseDocument, input_element_id: NodeId, is_multi
     styles.insert(StyleProperty::Brush(parley_style.brush));
     editor.set_alignment(alignment);
     editor.set_base_direction(base_direction);
+}
 
-    editor.refresh_layout(&mut doc.font_ctx.lock().unwrap(), &mut doc.layout_ctx);
+/// A text input's `placeholder` text and its `::placeholder` style, which Stylo computes
+/// lazily. None without the attribute, or with an empty one.
+fn placeholder_style(
+    doc: &BaseDocument,
+    input_element_id: NodeId,
+    is_multiline: bool,
+) -> Option<(String, style::servo_arc::Arc<style::properties::ComputedValues>)> {
+    use style::selector_parser::PseudoElement;
+    use style::stylist::RuleInclusion;
+
+    let node = &doc.nodes[input_element_id];
+    let text = node.attr(local_name!("placeholder"))?;
+    // A single-line input's placeholder has its line breaks stripped (HTML's `placeholder`).
+    let text: String = if is_multiline {
+        text.to_string()
+    } else {
+        text.chars().filter(|c| !matches!(c, '\n' | '\r')).collect()
+    };
+    if text.is_empty() {
+        return None;
+    }
+    let originating = node.primary_styles()?;
+    let read_guard = doc.guard.read();
+    let guards = StylesheetGuards::same(&read_guard);
+    let style = doc.stylist.lazily_compute_pseudo_element_style(
+        &guards,
+        node,
+        &PseudoElement::Placeholder,
+        RuleInclusion::All,
+        &originating,
+        false,
+        None,
+    )?;
+    Some((text, style))
+}
+
+fn create_text_editor(doc: &mut BaseDocument, input_element_id: NodeId, is_multiline: bool) {
+    let placeholder = placeholder_style(doc, input_element_id, is_multiline);
+    let node = &mut doc.nodes[input_element_id];
+    let parley_style = node
+        .primary_styles()
+        .as_ref()
+        .map(|s| stylo_to_parley::style(node.id, s))
+        .unwrap_or_default();
+    let alignment = node
+        .primary_styles()
+        .map(|s| stylo_to_parley::text_align(s.clone_text_align()))
+        .unwrap_or(parley::layout::Alignment::Start);
+    let base_direction = node
+        .primary_styles()
+        .map(|s| stylo_to_parley::base_direction(s.clone_direction(), s.clone_unicode_bidi()))
+        .unwrap_or(parley::BaseDirection::Auto);
+
+    let initial_text = if is_multiline {
+        node.text_content()
+    } else {
+        node.attr(local_name!("value")).unwrap_or("").to_string()
+    };
+    let is_focussed = node.is_focussed();
+    let node_id = node.id;
+    let element = &mut node.data.downcast_element_mut().unwrap();
+    if !matches!(element.special_data, SpecialElementData::TextInput(_)) {
+        let mut text_input_data = TextInputData::new(is_multiline);
+        let editor = &mut text_input_data.editor;
+        editor.set_text(&initial_text);
+        element.special_data = SpecialElementData::TextInput(text_input_data);
+
+        // An input focused before its editor existed (e.g. focused before the first layout)
+        // could not enable IME when it was focused, so enable it now.
+        if is_focussed {
+            doc.shell_provider.set_ime_enabled(true);
+        }
+    }
+
+    let SpecialElementData::TextInput(text_input_data) = &mut element.special_data else {
+        unreachable!();
+    };
+
+    let scale = doc.viewport.scale_f64() as f32;
+    let mut font_ctx = doc.font_ctx.lock().unwrap();
+
+    text_input_data.placeholder = placeholder.map(|(text, style)| {
+        let mut editor = Box::new(parley::PlainEditor::new(16.0));
+        editor.set_text(&text);
+        apply_text_style(
+            &mut editor,
+            stylo_to_parley::style(node_id, &style),
+            alignment,
+            base_direction,
+        );
+        let current = style.get_inherited_text().color;
+        let mut color = current;
+        color.alpha *= style.get_effects().opacity;
+        let mut placeholder = crate::node::TextInputPlaceholder { editor, color };
+        placeholder.refresh_layout(&mut font_ctx, &mut doc.layout_ctx, None, scale);
+        placeholder
+    });
+
+    let editor = &mut text_input_data.editor;
+    editor.set_scale(scale);
+    editor.set_width(None);
+    apply_text_style(editor, parley_style, alignment, base_direction);
+    editor.refresh_layout(&mut font_ctx, &mut doc.layout_ctx);
 }
 
 fn create_checkbox_input(doc: &mut BaseDocument, input_element_id: NodeId) {

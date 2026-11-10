@@ -17,6 +17,20 @@ input and focus are in the [tech spec](TECH-SPEC.md) (*The native UI's input*).
   run from what you commit: CI checks `assets/app.css` and `shots.css` are
   current.
 
+## Text that doesn't fit, and empty fields
+
+- `truncate` (`overflow: hidden; text-overflow: ellipsis; white-space:
+  nowrap`) ends a cut title in "…" as in the webview: the vendored Blitz
+  series draws `text-overflow` (#80). A string marker (`text-overflow: "→"`)
+  works too. Something must stop the box growing to its text: a width, or
+  in flex layouts `min-w-0` on every flex item around it (as in the
+  webview).
+- A field's `placeholder` shows while it's empty and no IME is composing
+  in it, in its `::placeholder` style (`placeholder:text-fg-subtle`);
+  without one, Chromium's grey. `:placeholder-shown` isn't matched yet.
+- `apps/native/tests/text_pixels.rs` compares both with Chromium's
+  rendering (`scripts/text-oracle.sh` makes it again).
+
 ## Scroll areas in flex columns
 
 - The webview's "fill the view with a scroll area" pattern works as it is:

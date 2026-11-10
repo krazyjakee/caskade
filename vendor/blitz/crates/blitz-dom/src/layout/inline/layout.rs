@@ -25,6 +25,7 @@ use stylo_taffy::StyleFlags;
 
 use crate::layout::LayoutPassState;
 use crate::layout::resolve_calc_value;
+use crate::node::TextBrush;
 use crate::stylo_to_parley;
 
 /// Subtract a child's margins from the definite axes of the available space it is laid out in.
@@ -996,6 +997,60 @@ impl LayoutPassState<'_> {
                 last_line_alignment,
             },
         );
+
+        // `text-overflow`: lines are final now; find the ones to truncate and
+        // shape their marker (layout units: `width` is already scaled). Read
+        // from style here, not at construction, so a style-only change (which
+        // relayouts without reconstructing) is honoured. The property belongs
+        // to the block container: for the anonymous block Blitz wraps mixed
+        // content in, that is the parent; the anonymous wrappers around
+        // flex/grid items do not qualify.
+        inline_layout.overflow = {
+            use crate::layout::text_overflow::{Marker, compute, is_block_container, side_for};
+            use style::values::specified::text::TextOverflowSide;
+            let node = &self.nodes[node_id];
+            let owner = if node.is_anonymous() {
+                node.parent.filter(|p| {
+                    self.nodes[*p]
+                        .primary_styles()
+                        .is_some_and(|s| is_block_container(&s))
+                })
+            } else {
+                Some(node_id)
+            };
+            let request = owner.and_then(|id| {
+                let styles = self.nodes[id].primary_styles()?;
+                let side = side_for(&styles)?;
+                let styles: style::servo_arc::Arc<style::properties::ComputedValues> =
+                    (*styles).clone();
+                Some((id, styles, side))
+            });
+            request.and_then(|(owner_id, styles, side)| {
+                // The marker is styled by the block (css-overflow §5.2): shape it
+                // with the block's parley style, which also gives font fallback.
+                let text: std::borrow::Cow<'_, str> = match &side {
+                    TextOverflowSide::Ellipsis => "\u{2026}".into(),
+                    TextOverflowSide::String(s) => s.as_ref().to_string().into(),
+                    TextOverflowSide::Clip => return None,
+                };
+                let parley_style = crate::stylo_to_parley::style(owner_id, &styles);
+                let mut marker_layout: parley::Layout<TextBrush> = parley::Layout::new();
+                {
+                    // Locked through its own handle, so `self.layout_ctx` can be borrowed.
+                    let font_ctx = self.font_ctx.clone();
+                    let mut font_ctx = font_ctx.lock().unwrap();
+                    let mut builder =
+                        self.layout_ctx
+                            .tree_builder(&mut font_ctx, scale, true, &parley_style);
+                    builder.push_text(&text);
+                    builder.build_into(&mut marker_layout);
+                }
+                marker_layout.break_all_lines(None);
+                let marker = Marker::from_layout(&marker_layout, parley_style.brush)?;
+                compute(&inline_layout.layout, marker, width)
+            })
+        };
+
 
         // Parley lays out empty text as a single strut-height line (text-editor semantics),
         // but a line box containing no text, inline boxes or other in-flow content is a

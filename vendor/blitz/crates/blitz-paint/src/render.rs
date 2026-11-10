@@ -390,6 +390,7 @@ impl<'dom, 'a> BlitzDomPainter<'dom, 'a> {
                     },
                     node.id,
                     &mut self.draw_text_context.borrow_mut(),
+                    None,
                 );
             }
         }
@@ -1066,6 +1067,30 @@ impl ElementCx<'_, '_> {
                 },
                 self.node.id,
                 &mut draw_text_context,
+                text_layout.overflow.as_deref().and_then(|overflow| {
+                    // The clipping box (the parent for an anonymous root): its
+                    // horizontal scroll moves the cut.
+                    let block = if self.node.is_anonymous() {
+                        self.node.parent.and_then(|p| self.context.dom.get_node(p))
+                    } else {
+                        Some(self.node)
+                    };
+                    // A focused editing host is being edited: treat `ellipsis`
+                    // as `clip` (css-overflow §5.2, "user interaction with
+                    // ellipsis") so the marker never hides the caret's text.
+                    let editing = block.is_some_and(|b| {
+                        self.context.dom.get_focussed_node_id() == Some(b.id)
+                            && b.attr(local_name!("contenteditable"))
+                                .is_some_and(|v| !v.eq_ignore_ascii_case("false"))
+                    });
+                    if editing {
+                        return None;
+                    }
+                    let scroll_x = block
+                        .map(|n| (n.scroll_offset().x * self.scale) as f32)
+                        .unwrap_or(0.0);
+                    Some((overflow, scroll_x))
+                }),
             );
         }
     }
@@ -1094,6 +1119,34 @@ impl ElementCx<'_, '_> {
 
             let transform = self.transform
                 * Affine::translate((pos.x * self.scale - scroll_x, pos.y * self.scale - scroll_y));
+
+            // An empty input shows its placeholder, under the caret.
+            if input_data.shows_placeholder()
+                && let Some(placeholder) = &input_data.placeholder
+                && let Some(layout) = placeholder.editor.try_layout()
+            {
+                // A single-line input centres its placeholder as it does its text.
+                let shift = if input_data.is_multiline {
+                    0.0
+                } else {
+                    let text = input_data.editor.try_layout().map_or(0.0, |text| text.height());
+                    f64::from((text - layout.height()) / 2.0)
+                };
+                let mut draw_text_context = self.context.draw_text_context.borrow_mut();
+                crate::text::stroke_text(
+                    scene,
+                    layout.lines(),
+                    self.context.dom,
+                    transform * Affine::translate((0.0, shift)),
+                    TextPaintOptions {
+                        scale: self.scale,
+                        brush_override: Some(placeholder.color.as_srgb_color()),
+                    },
+                    self.node.id,
+                    &mut draw_text_context,
+                    None,
+                );
+            }
 
             if self.node.is_focussed() {
                 // Render selection/caret
@@ -1161,6 +1214,7 @@ impl ElementCx<'_, '_> {
                 },
                 self.node.id,
                 &mut draw_text_context,
+                None,
             );
         }
     }
@@ -1220,6 +1274,7 @@ impl ElementCx<'_, '_> {
                 },
                 self.node.id,
                 &mut draw_text_context,
+                None,
             );
         }
     }

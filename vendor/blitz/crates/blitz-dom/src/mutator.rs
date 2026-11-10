@@ -711,6 +711,7 @@ impl DocumentMutator<'_> {
                 *attr,
                 local_name!("type")
                     | local_name!("value")
+                    | local_name!("placeholder")
                     | local_name!("checked")
                     | local_name!("width")
                     | local_name!("height")
