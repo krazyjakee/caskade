@@ -297,7 +297,7 @@ msgstr ""
 #: crates/caskade-core/src/db/igdb.rs
 #: crates/caskade-core/src/igdb/catalog.rs
 #: crates/caskade-core/src/metadata/page.rs
-#: apps/desktop/src-tauri/src/commands/igdb.rs
+#: crates/caskade-app/src/commands/igdb.rs
 msgid "{id} is not an IGDB id"
 msgstr ""
 
@@ -335,8 +335,8 @@ msgstr ""
 
 #: crates/caskade-core/src/db/mod.rs
 #: crates/caskade-core/src/metadata/page.rs
-#: apps/desktop/src-tauri/src/commands/achievements.rs
-#: apps/desktop/src-tauri/src/commands/actions.rs
+#: crates/caskade-app/src/commands/achievements.rs
+#: crates/caskade-app/src/commands/actions.rs
 msgid "This copy of the game is no longer in the library."
 msgstr ""
 
@@ -638,7 +638,7 @@ msgstr ""
 
 #: crates/caskade-core/src/emulation/scanners/import.rs
 #: crates/caskade-core/src/emulation/scanners/jobs.rs
-#: apps/desktop/src-tauri/src/commands/rom_scanners.rs
+#: crates/caskade-app/src/commands/rom_scanners.rs
 msgid "This ROM scanner no longer exists."
 msgstr ""
 
@@ -647,7 +647,7 @@ msgid "{game}: skipped by {by}: {reason}"
 msgstr ""
 
 #: crates/caskade-core/src/emulation/scanners/jobs.rs
-#: apps/desktop/src-tauri/src/commands/rom_scanners.rs
+#: crates/caskade-app/src/commands/rom_scanners.rs
 msgid "This ROM scan is no longer available."
 msgstr ""
 
@@ -704,7 +704,7 @@ msgid "Detecting emulators"
 msgstr ""
 
 #: crates/caskade-core/src/emulation/service/detection.rs
-#: apps/desktop/src-tauri/src/commands/emulation.rs
+#: crates/caskade-app/src/commands/emulation.rs
 msgid "This detection is no longer available. Run it again."
 msgstr ""
 
@@ -5019,6 +5019,66 @@ msgstr ""
 msgid "This sample couldn't be read."
 msgstr ""
 
+#: crates/caskade-app/src/commands/achievements.rs
+msgid "choose the game to link"
+msgstr ""
+
+#: crates/caskade-app/src/commands/emulation.rs
+msgid "This emulator no longer exists."
+msgstr ""
+
+#: crates/caskade-app/src/commands/emulation.rs
+msgid "choose a folder"
+msgstr ""
+
+#: crates/caskade-app/src/commands/game_edit.rs
+msgid "the artwork cache isn't available"
+msgstr ""
+
+#: crates/caskade-app/src/commands/igdb.rs
+msgid "at most {count} IGDB ids at a time"
+msgstr ""
+
+#: crates/caskade-app/src/commands/library.rs
+msgid "Couldn't open the file manager ({opener}) to show “{folder}”."
+msgstr ""
+
+#: crates/caskade-app/src/commands/plugins.rs
+msgid "This plugin isn't installed any more."
+msgstr ""
+
+#: crates/caskade-app/src/commands/plugins.rs
+msgid "This isn't a valid plugin. The details say what's wrong."
+msgstr ""
+
+#: crates/caskade-app/src/commands/plugins.rs
+msgid "This plugin is turned off."
+msgstr ""
+
+#: crates/caskade-app/src/commands/plugins.rs
+msgid "This plugin has nothing to run."
+msgstr ""
+
+#: crates/caskade-app/src/commands/plugins.rs
+msgid "This plugin ran into a problem. The details say what."
+msgstr ""
+
+#: crates/caskade-app/src/commands/romm.rs
+msgid "the password or token is too long"
+msgstr ""
+
+#: crates/caskade-app/src/commands/saves.rs
+msgid "That save location isn't on this device."
+msgstr ""
+
+#: crates/caskade-app/src/commands/scripts.rs
+msgid "the script belongs to another scope"
+msgstr ""
+
+#: crates/caskade-app/src/commands/storage.rs
+msgid "The storage location was added, but it disappeared from the list before it could be shown. Reload Settings → Storage."
+msgstr ""
+
 #: crates/caskade-app/src/deep_link.rs
 msgid "not a {scheme}: link"
 msgstr ""
@@ -5041,6 +5101,94 @@ msgstr ""
 
 #: crates/caskade-app/src/deep_link.rs
 msgid "?path= takes a local path"
+msgstr ""
+
+#: crates/caskade-app/src/discovery/config.rs
+msgid "Installed games registry and Game Explorer"
+msgstr ""
+
+#: crates/caskade-app/src/discovery/config.rs
+msgid "Start Menu shortcuts"
+msgstr ""
+
+#: crates/caskade-app/src/discovery/config.rs
+msgid "Xbox and packaged apps"
+msgstr ""
+
+#: crates/caskade-app/src/discovery/config.rs
+msgid "System and user app bundles"
+msgstr ""
+
+#: crates/caskade-app/src/discovery/config.rs
+msgid "Desktop entries"
+msgstr ""
+
+#: crates/caskade-app/src/discovery/config.rs
+msgid "Flatpak and Snap application records"
+msgstr ""
+
+#: crates/caskade-app/src/discovery/config.rs
+msgid "Wine and Proton prefixes"
+msgstr ""
+
+#: crates/caskade-app/src/discovery/config.rs
+msgid "Custom scan folders must be absolute paths."
+msgstr ""
+
+#: crates/caskade-app/src/discovery/lifecycle.rs
+msgid "Discovery watcher stopped."
+msgstr ""
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "File: {path}"
+msgstr ""
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Registry: {key} ({value})"
+msgstr ""
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Registry: {key}"
+msgstr ""
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Enable library discovery before scanning."
+msgstr ""
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "A discovery scan is already running."
+msgstr ""
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Updating library"
+msgstr ""
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Choose between 1 and 1000 review items."
+msgstr ""
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Discovery changed. Review the latest list."
+msgstr ""
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Review item is no longer available."
+msgstr ""
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Some entries could not be imported; the review list was retained. Check the library before retrying."
+msgstr ""
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Scan cancelled"
+msgstr ""
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Storage {root}: {error}"
+msgstr ""
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Storage {root} / {folder} requires a decision"
 msgstr ""
 
 #: crates/caskade-app/src/permissions.rs
@@ -5069,10 +5217,6 @@ msgstr ""
 
 #: crates/caskade-app/src/torrent_links.rs
 msgid "Caskade couldn't open Default apps: {error}"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/achievements.rs
-msgid "choose the game to link"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/addon_packages.rs
@@ -5237,22 +5381,6 @@ msgstr ""
 msgid "the game isn't installed on this computer in a folder that can be copied"
 msgstr ""
 
-#: apps/desktop/src-tauri/src/commands/emulation.rs
-msgid "This emulator no longer exists."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/emulation.rs
-msgid "choose a folder"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/game_edit.rs
-msgid "the artwork cache isn't available"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/igdb.rs
-msgid "at most {count} IGDB ids at a time"
-msgstr ""
-
 #: apps/desktop/src-tauri/src/commands/install.rs
 msgid "storage locations unavailable"
 msgstr ""
@@ -5330,56 +5458,16 @@ msgstr ""
 msgid "path is not UTF-8"
 msgstr ""
 
-#: apps/desktop/src-tauri/src/commands/library.rs
-msgid "Couldn't open the file manager ({opener}) to show “{folder}”."
-msgstr ""
-
 #: apps/desktop/src-tauri/src/commands/peer_backups.rs
 msgid "Devices aren't ready on this device yet."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/plugins.rs
-msgid "This plugin isn't installed any more."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/plugins.rs
-msgid "This isn't a valid plugin. The details say what's wrong."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/plugins.rs
-msgid "This plugin is turned off."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/plugins.rs
-msgid "This plugin has nothing to run."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/plugins.rs
-msgid "This plugin ran into a problem. The details say what."
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/remote_play.rs
 msgid "it didn't start on that device"
 msgstr ""
 
-#: apps/desktop/src-tauri/src/commands/romm.rs
-msgid "the password or token is too long"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/saves.rs
-msgid "That save location isn't on this device."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/scripts.rs
-msgid "the script belongs to another scope"
-msgstr ""
-
 #: apps/desktop/src-tauri/src/commands/shares.rs
 msgid "the link is too long for a QR code"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/storage.rs
-msgid "The storage location was added, but it disappeared from the list before it could be shown. Reload Settings → Storage."
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/storage.rs
@@ -5428,94 +5516,6 @@ msgstr ""
 
 #: apps/desktop/src-tauri/src/dev_plugins.rs
 msgid "Load unpacked is only available in development builds"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/config.rs
-msgid "Installed games registry and Game Explorer"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/config.rs
-msgid "Start Menu shortcuts"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/config.rs
-msgid "Xbox and packaged apps"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/config.rs
-msgid "System and user app bundles"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/config.rs
-msgid "Desktop entries"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/config.rs
-msgid "Flatpak and Snap application records"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/config.rs
-msgid "Wine and Proton prefixes"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/config.rs
-msgid "Custom scan folders must be absolute paths."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/lifecycle.rs
-msgid "Discovery watcher stopped."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "File: {path}"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Registry: {key} ({value})"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Registry: {key}"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Enable library discovery before scanning."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "A discovery scan is already running."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Updating library"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Choose between 1 and 1000 review items."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Discovery changed. Review the latest list."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Review item is no longer available."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Some entries could not be imported; the review list was retained. Check the library before retrying."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Scan cancelled"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Storage {root}: {error}"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Storage {root} / {folder} requires a decision"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/launch_cli/mod.rs

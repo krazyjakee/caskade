@@ -298,7 +298,7 @@ msgstr "kan inte slå ihop två spel med öppna sessioner"
 #: crates/caskade-core/src/db/igdb.rs
 #: crates/caskade-core/src/igdb/catalog.rs
 #: crates/caskade-core/src/metadata/page.rs
-#: apps/desktop/src-tauri/src/commands/igdb.rs
+#: crates/caskade-app/src/commands/igdb.rs
 msgid "{id} is not an IGDB id"
 msgstr "{id} är inte ett IGDB-id"
 
@@ -336,8 +336,8 @@ msgstr "Den här samlingen finns inte längre."
 
 #: crates/caskade-core/src/db/mod.rs
 #: crates/caskade-core/src/metadata/page.rs
-#: apps/desktop/src-tauri/src/commands/achievements.rs
-#: apps/desktop/src-tauri/src/commands/actions.rs
+#: crates/caskade-app/src/commands/achievements.rs
+#: crates/caskade-app/src/commands/actions.rs
 msgid "This copy of the game is no longer in the library."
 msgstr "Den här kopian av spelet finns inte längre i biblioteket."
 
@@ -639,7 +639,7 @@ msgstr "Importerar ROM-filer"
 
 #: crates/caskade-core/src/emulation/scanners/import.rs
 #: crates/caskade-core/src/emulation/scanners/jobs.rs
-#: apps/desktop/src-tauri/src/commands/rom_scanners.rs
+#: crates/caskade-app/src/commands/rom_scanners.rs
 msgid "This ROM scanner no longer exists."
 msgstr "Den här ROM-skannern finns inte längre."
 
@@ -648,7 +648,7 @@ msgid "{game}: skipped by {by}: {reason}"
 msgstr "{game}: hoppades över av {by}: {reason}"
 
 #: crates/caskade-core/src/emulation/scanners/jobs.rs
-#: apps/desktop/src-tauri/src/commands/rom_scanners.rs
+#: crates/caskade-app/src/commands/rom_scanners.rs
 msgid "This ROM scan is no longer available."
 msgstr "Den här ROM-skanningen är inte längre tillgänglig."
 
@@ -705,7 +705,7 @@ msgid "Detecting emulators"
 msgstr "Identifierar emulatorer"
 
 #: crates/caskade-core/src/emulation/service/detection.rs
-#: apps/desktop/src-tauri/src/commands/emulation.rs
+#: crates/caskade-app/src/commands/emulation.rs
 msgid "This detection is no longer available. Run it again."
 msgstr "Den här identifieringen är inte längre tillgänglig. Kör den igen."
 
@@ -5021,6 +5021,66 @@ msgstr "Väntar på första avläsningen från nvidia-smi."
 msgid "This sample couldn't be read."
 msgstr "Det här provet kunde inte läsas."
 
+#: crates/caskade-app/src/commands/achievements.rs
+msgid "choose the game to link"
+msgstr "välj spelet att koppla"
+
+#: crates/caskade-app/src/commands/emulation.rs
+msgid "This emulator no longer exists."
+msgstr "Den här emulatorn finns inte längre."
+
+#: crates/caskade-app/src/commands/emulation.rs
+msgid "choose a folder"
+msgstr "välj en mapp"
+
+#: crates/caskade-app/src/commands/game_edit.rs
+msgid "the artwork cache isn't available"
+msgstr "bildcachen är inte tillgänglig"
+
+#: crates/caskade-app/src/commands/igdb.rs
+msgid "at most {count} IGDB ids at a time"
+msgstr "högst {count} IGDB-id:n åt gången"
+
+#: crates/caskade-app/src/commands/library.rs
+msgid "Couldn't open the file manager ({opener}) to show “{folder}”."
+msgstr "Det gick inte att öppna filhanteraren ({opener}) för att visa ”{folder}”."
+
+#: crates/caskade-app/src/commands/plugins.rs
+msgid "This plugin isn't installed any more."
+msgstr "Det här tillägget är inte längre installerat."
+
+#: crates/caskade-app/src/commands/plugins.rs
+msgid "This isn't a valid plugin. The details say what's wrong."
+msgstr "Det här är inte ett giltigt tillägg. Detaljerna visar vad som är fel."
+
+#: crates/caskade-app/src/commands/plugins.rs
+msgid "This plugin is turned off."
+msgstr "Det här tillägget är avstängt."
+
+#: crates/caskade-app/src/commands/plugins.rs
+msgid "This plugin has nothing to run."
+msgstr "Det här tillägget har inget att köra."
+
+#: crates/caskade-app/src/commands/plugins.rs
+msgid "This plugin ran into a problem. The details say what."
+msgstr "Det här tillägget stötte på ett problem. Detaljerna visar vad."
+
+#: crates/caskade-app/src/commands/romm.rs
+msgid "the password or token is too long"
+msgstr "lösenordet eller token är för lång"
+
+#: crates/caskade-app/src/commands/saves.rs
+msgid "That save location isn't on this device."
+msgstr "Den sparplatsen finns inte på den här enheten."
+
+#: crates/caskade-app/src/commands/scripts.rs
+msgid "the script belongs to another scope"
+msgstr "skriptet hör till en annan omfattning"
+
+#: crates/caskade-app/src/commands/storage.rs
+msgid "The storage location was added, but it disappeared from the list before it could be shown. Reload Settings → Storage."
+msgstr "Lagringsplatsen lades till, men den försvann från listan innan den kunde visas. Läs in Inställningar → Lagring igen."
+
 #: crates/caskade-app/src/deep_link.rs
 msgid "not a {scheme}: link"
 msgstr "inte en {scheme}:-länk"
@@ -5044,6 +5104,94 @@ msgstr "?url= tar en HTTP(S)-URL eller en magnetlänk"
 #: crates/caskade-app/src/deep_link.rs
 msgid "?path= takes a local path"
 msgstr "?path= tar en lokal sökväg"
+
+#: crates/caskade-app/src/discovery/config.rs
+msgid "Installed games registry and Game Explorer"
+msgstr "Register över installerade spel och Game Explorer"
+
+#: crates/caskade-app/src/discovery/config.rs
+msgid "Start Menu shortcuts"
+msgstr "Genvägar i Start-menyn"
+
+#: crates/caskade-app/src/discovery/config.rs
+msgid "Xbox and packaged apps"
+msgstr "Xbox och paketerade appar"
+
+#: crates/caskade-app/src/discovery/config.rs
+msgid "System and user app bundles"
+msgstr "System- och användarappaket"
+
+#: crates/caskade-app/src/discovery/config.rs
+msgid "Desktop entries"
+msgstr "Skrivbordsposter"
+
+#: crates/caskade-app/src/discovery/config.rs
+msgid "Flatpak and Snap application records"
+msgstr "Flatpak- och Snap-programposter"
+
+#: crates/caskade-app/src/discovery/config.rs
+msgid "Wine and Proton prefixes"
+msgstr "Wine- och Proton-prefix"
+
+#: crates/caskade-app/src/discovery/config.rs
+msgid "Custom scan folders must be absolute paths."
+msgstr "Anpassade skanningsmappar måste vara absoluta sökvägar."
+
+#: crates/caskade-app/src/discovery/lifecycle.rs
+msgid "Discovery watcher stopped."
+msgstr "Bevakningen för upptäckt stoppades."
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "File: {path}"
+msgstr "Fil: {path}"
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Registry: {key} ({value})"
+msgstr "Register: {key} ({value})"
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Registry: {key}"
+msgstr "Register: {key}"
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Enable library discovery before scanning."
+msgstr "Aktivera biblioteksidentifiering innan du skannar."
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "A discovery scan is already running."
+msgstr "En upptäcktsskanning pågår redan."
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Updating library"
+msgstr "Uppdaterar biblioteket"
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Choose between 1 and 1000 review items."
+msgstr "Välj mellan 1 och 1000 objekt att granska."
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Discovery changed. Review the latest list."
+msgstr "Upptäckten har ändrats. Granska den senaste listan."
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Review item is no longer available."
+msgstr "Granskningsobjektet är inte längre tillgängligt."
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Some entries could not be imported; the review list was retained. Check the library before retrying."
+msgstr "Vissa poster kunde inte importeras; granskningslistan behölls. Kontrollera biblioteket innan du försöker igen."
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Scan cancelled"
+msgstr "Skanningen avbröts"
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Storage {root}: {error}"
+msgstr "Lagring {root}: {error}"
+
+#: crates/caskade-app/src/discovery/mod.rs
+msgid "Storage {root} / {folder} requires a decision"
+msgstr "Lagring {root} / {folder} kräver ett beslut"
 
 #: crates/caskade-app/src/permissions.rs
 msgid "accounts are unavailable"
@@ -5072,10 +5220,6 @@ msgstr "HOME är inte satt"
 #: crates/caskade-app/src/torrent_links.rs
 msgid "Caskade couldn't open Default apps: {error}"
 msgstr "Caskade kunde inte öppna Standardappar: {error}"
-
-#: apps/desktop/src-tauri/src/commands/achievements.rs
-msgid "choose the game to link"
-msgstr "välj spelet att koppla"
 
 #: apps/desktop/src-tauri/src/commands/addon_packages.rs
 #: apps/desktop/src-tauri/src/commands/addons.rs
@@ -5239,22 +5383,6 @@ msgstr "den enheten har ingen kopia av spelet"
 msgid "the game isn't installed on this computer in a folder that can be copied"
 msgstr "spelet är inte installerat på den här datorn i en mapp som kan kopieras"
 
-#: apps/desktop/src-tauri/src/commands/emulation.rs
-msgid "This emulator no longer exists."
-msgstr "Den här emulatorn finns inte längre."
-
-#: apps/desktop/src-tauri/src/commands/emulation.rs
-msgid "choose a folder"
-msgstr "välj en mapp"
-
-#: apps/desktop/src-tauri/src/commands/game_edit.rs
-msgid "the artwork cache isn't available"
-msgstr "bildcachen är inte tillgänglig"
-
-#: apps/desktop/src-tauri/src/commands/igdb.rs
-msgid "at most {count} IGDB ids at a time"
-msgstr "högst {count} IGDB-id:n åt gången"
-
 #: apps/desktop/src-tauri/src/commands/install.rs
 msgid "storage locations unavailable"
 msgstr "lagringsplatserna är inte tillgängliga"
@@ -5332,57 +5460,17 @@ msgstr "indata är inte en fil eller mapp"
 msgid "path is not UTF-8"
 msgstr "sökvägen är inte UTF-8"
 
-#: apps/desktop/src-tauri/src/commands/library.rs
-msgid "Couldn't open the file manager ({opener}) to show “{folder}”."
-msgstr "Det gick inte att öppna filhanteraren ({opener}) för att visa ”{folder}”."
-
 #: apps/desktop/src-tauri/src/commands/peer_backups.rs
 msgid "Devices aren't ready on this device yet."
 msgstr "Enheter är inte redo på den här enheten än."
-
-#: apps/desktop/src-tauri/src/commands/plugins.rs
-msgid "This plugin isn't installed any more."
-msgstr "Det här tillägget är inte längre installerat."
-
-#: apps/desktop/src-tauri/src/commands/plugins.rs
-msgid "This isn't a valid plugin. The details say what's wrong."
-msgstr "Det här är inte ett giltigt tillägg. Detaljerna visar vad som är fel."
-
-#: apps/desktop/src-tauri/src/commands/plugins.rs
-msgid "This plugin is turned off."
-msgstr "Det här tillägget är avstängt."
-
-#: apps/desktop/src-tauri/src/commands/plugins.rs
-msgid "This plugin has nothing to run."
-msgstr "Det här tillägget har inget att köra."
-
-#: apps/desktop/src-tauri/src/commands/plugins.rs
-msgid "This plugin ran into a problem. The details say what."
-msgstr "Det här tillägget stötte på ett problem. Detaljerna visar vad."
 
 #: apps/desktop/src-tauri/src/commands/remote_play.rs
 msgid "it didn't start on that device"
 msgstr "det startade inte på den enheten"
 
-#: apps/desktop/src-tauri/src/commands/romm.rs
-msgid "the password or token is too long"
-msgstr "lösenordet eller token är för lång"
-
-#: apps/desktop/src-tauri/src/commands/saves.rs
-msgid "That save location isn't on this device."
-msgstr "Den sparplatsen finns inte på den här enheten."
-
-#: apps/desktop/src-tauri/src/commands/scripts.rs
-msgid "the script belongs to another scope"
-msgstr "skriptet hör till en annan omfattning"
-
 #: apps/desktop/src-tauri/src/commands/shares.rs
 msgid "the link is too long for a QR code"
 msgstr "länken är för lång för en QR-kod"
-
-#: apps/desktop/src-tauri/src/commands/storage.rs
-msgid "The storage location was added, but it disappeared from the list before it could be shown. Reload Settings → Storage."
-msgstr "Lagringsplatsen lades till, men den försvann från listan innan den kunde visas. Läs in Inställningar → Lagring igen."
 
 #: apps/desktop/src-tauri/src/commands/storage.rs
 msgid "Choose game storage location"
@@ -5431,94 +5519,6 @@ msgstr "tilläggen är inte redo"
 #: apps/desktop/src-tauri/src/dev_plugins.rs
 msgid "Load unpacked is only available in development builds"
 msgstr "Läs in uppackat är bara tillgängligt i utvecklingsversioner"
-
-#: apps/desktop/src-tauri/src/discovery/config.rs
-msgid "Installed games registry and Game Explorer"
-msgstr "Register över installerade spel och Game Explorer"
-
-#: apps/desktop/src-tauri/src/discovery/config.rs
-msgid "Start Menu shortcuts"
-msgstr "Genvägar i Start-menyn"
-
-#: apps/desktop/src-tauri/src/discovery/config.rs
-msgid "Xbox and packaged apps"
-msgstr "Xbox och paketerade appar"
-
-#: apps/desktop/src-tauri/src/discovery/config.rs
-msgid "System and user app bundles"
-msgstr "System- och användarappaket"
-
-#: apps/desktop/src-tauri/src/discovery/config.rs
-msgid "Desktop entries"
-msgstr "Skrivbordsposter"
-
-#: apps/desktop/src-tauri/src/discovery/config.rs
-msgid "Flatpak and Snap application records"
-msgstr "Flatpak- och Snap-programposter"
-
-#: apps/desktop/src-tauri/src/discovery/config.rs
-msgid "Wine and Proton prefixes"
-msgstr "Wine- och Proton-prefix"
-
-#: apps/desktop/src-tauri/src/discovery/config.rs
-msgid "Custom scan folders must be absolute paths."
-msgstr "Anpassade skanningsmappar måste vara absoluta sökvägar."
-
-#: apps/desktop/src-tauri/src/discovery/lifecycle.rs
-msgid "Discovery watcher stopped."
-msgstr "Bevakningen för upptäckt stoppades."
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "File: {path}"
-msgstr "Fil: {path}"
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Registry: {key} ({value})"
-msgstr "Register: {key} ({value})"
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Registry: {key}"
-msgstr "Register: {key}"
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Enable library discovery before scanning."
-msgstr "Aktivera biblioteksidentifiering innan du skannar."
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "A discovery scan is already running."
-msgstr "En upptäcktsskanning pågår redan."
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Updating library"
-msgstr "Uppdaterar biblioteket"
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Choose between 1 and 1000 review items."
-msgstr "Välj mellan 1 och 1000 objekt att granska."
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Discovery changed. Review the latest list."
-msgstr "Upptäckten har ändrats. Granska den senaste listan."
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Review item is no longer available."
-msgstr "Granskningsobjektet är inte längre tillgängligt."
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Some entries could not be imported; the review list was retained. Check the library before retrying."
-msgstr "Vissa poster kunde inte importeras; granskningslistan behölls. Kontrollera biblioteket innan du försöker igen."
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Scan cancelled"
-msgstr "Skanningen avbröts"
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Storage {root}: {error}"
-msgstr "Lagring {root}: {error}"
-
-#: apps/desktop/src-tauri/src/discovery/mod.rs
-msgid "Storage {root} / {folder} requires a decision"
-msgstr "Lagring {root} / {folder} kräver ett beslut"
 
 #: apps/desktop/src-tauri/src/launch_cli/mod.rs
 msgid "Caskade couldn't start: {error}"
