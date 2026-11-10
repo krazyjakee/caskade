@@ -16,6 +16,7 @@ use super::ids::use_id;
 use super::interact::{Keys, flag, use_interaction, use_interaction_where};
 use super::menu::roving;
 use super::popover::{Anchor, Popover, use_trigger};
+use super::settings::use_row_label;
 use crate::input::use_input;
 
 pub const ANATOMY: Entry = Entry {
@@ -109,10 +110,16 @@ pub fn Select(
             open.set(Some(anchor));
         }
     };
-    let labelledby = match &label {
-        Some(_) => format!("{label_id} {value_id}"),
-        None => value_id.clone(),
+    // Without a label of its own, a setting row's names it.
+    let row = use_row_label();
+    let labelledby = match (&label, &row) {
+        (Some(_), _) => format!("{label_id} {value_id}"),
+        (None, Some(row)) => format!("{} {value_id}", row.label_id),
+        (None, None) => value_id.clone(),
     };
+    let describedby = row
+        .filter(|_| label.is_none())
+        .and_then(|row| row.description_id);
     rsx! {
         div {
             "data-cs": "select",
@@ -130,6 +137,7 @@ pub fn Select(
                 "aria-haspopup": "listbox",
                 "aria-expanded": if open().is_some() { "true" } else { "false" },
                 "aria-labelledby": "{labelledby}",
+                "aria-describedby": describedby,
                 "aria-disabled": flag(disabled),
                 "aria-invalid": flag(invalid),
                 "data-hovered": interaction.hovered(),

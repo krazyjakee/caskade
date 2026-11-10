@@ -19,6 +19,7 @@ use super::ids::use_id;
 use super::interact::{flag, use_forced};
 use super::menu::{Menu, MenuEntry, MenuItem};
 use super::popover::Anchor;
+use super::settings::use_row_label;
 use crate::input::{Bind, use_input, use_input_action};
 
 pub const ANATOMY: Entry = Entry {
@@ -99,6 +100,8 @@ pub fn TextField(
     let mut hovered = use_signal(|| forced.hovered);
     let mut focused = use_signal(|| forced.focused || forced.focus_visible);
     let invalid = error.is_some();
+    // Without a label of its own, a setting row's names and describes it.
+    let row = use_row_label().filter(|_| label.is_none());
     let mut open_menu = move || {
         if let Some(anchor) = field.peek().as_ref().and_then(Anchor::of) {
             menu.set(Some(anchor));
@@ -172,8 +175,11 @@ pub fn TextField(
                         disabled,
                         readonly,
                         required,
-                        "aria-labelledby": label.as_ref().map(|_| label_id.clone()),
-                        "aria-describedby": described.then(|| help_id.clone()),
+                        "aria-labelledby": match &row {
+                            Some(row) => Some(row.label_id.clone()),
+                            None => label.as_ref().map(|_| label_id.clone()),
+                        },
+                        "aria-describedby": if described { Some(help_id.clone()) } else { row.as_ref().and_then(|row| row.description_id.clone()) },
                         "aria-invalid": flag(invalid),
                         "data-focused": flag(focused()),
                         "data-hovered": flag(hovered()),

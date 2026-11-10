@@ -31,6 +31,7 @@ mod progress;
 mod radio;
 mod segmented;
 mod select;
+mod settings;
 mod shelf;
 mod slider;
 mod status_badge;
@@ -85,6 +86,8 @@ pub(crate) use select::List as SelectList;
 #[allow(unused_imports)]
 pub use select::{Select, SelectOption};
 #[allow(unused_imports)]
+pub use settings::{DotTone, Pill, PillTone, SettingRow, SettingsSection, StatusDot};
+#[allow(unused_imports)]
 pub use shelf::Shelf;
 #[allow(unused_imports)]
 pub use slider::Slider;
@@ -117,6 +120,10 @@ pub const ANATOMY: &[Entry] = &[
     menu::ANATOMY,
     select::ANATOMY,
     select::POPOVER_ANATOMY,
+    settings::SECTION_ANATOMY,
+    settings::ROW_ANATOMY,
+    settings::DOT_ANATOMY,
+    settings::PILL_ANATOMY,
     segmented::ANATOMY,
     shelf::ANATOMY,
     slider::ANATOMY,

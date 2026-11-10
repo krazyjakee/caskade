@@ -7,6 +7,7 @@ use dioxus_native::prelude::*;
 
 use super::ids::use_id;
 use super::interact::{Keys, flag, use_interaction};
+use super::settings::use_row_label;
 
 pub const ANATOMY: Entry = Entry {
     parts: &[
@@ -79,11 +80,20 @@ pub fn Switch(
             "size-4.5 group-data-selected:translate-x-5",
         ),
     };
-    let labelledby = label.is_some().then(|| label_id.clone());
+    // Without a label of its own, a setting row's names it.
+    let row = use_row_label();
+    let labelledby = match &row {
+        Some(row) if label.is_none() => Some(row.label_id.clone()),
+        _ => label.is_some().then(|| label_id.clone()),
+    };
+    let describedby = row
+        .filter(|_| label.is_none())
+        .and_then(|row| row.description_id);
     rsx! {
         div {
             role: "switch",
             "aria-labelledby": labelledby,
+            "aria-describedby": describedby,
             tabindex: if disabled { "-1" } else { "0" },
             "aria-checked": if checked { "true" } else { "false" },
             "aria-disabled": flag(disabled),

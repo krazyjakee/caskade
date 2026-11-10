@@ -8,6 +8,7 @@ use dioxus_native::prelude::*;
 
 use super::icons::{Icon, Svg};
 use super::interact::{Keys, flag, use_interaction_where};
+use super::settings::use_row_label;
 
 pub const ANATOMY: Entry = Entry {
     parts: &[
@@ -52,9 +53,13 @@ pub fn SegmentedControl(
     #[props(default)] class: String,
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
 ) -> Element {
+    // In a setting row, the row names and describes it.
+    let row = use_row_label();
     rsx! {
         div {
             role: "group",
+            "aria-labelledby": row.as_ref().map(|row| row.label_id.clone()),
+            "aria-describedby": row.as_ref().and_then(|row| row.description_id.clone()),
             "data-cs": "segmented",
             "data-orientation": "horizontal",
             "data-disabled": flag(disabled),

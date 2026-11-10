@@ -22,6 +22,7 @@
       "!packages/tokens/tokens.css",
       "!packages/tokens/manifest.json",
       "!packages/ui/anatomy.json",
+      "!packages/ui/anatomy-entries.json",
       "!apps/native-proto/assets",
       "!apps/native/assets/app.css",
       "!apps/native/src/shots/shots.css",

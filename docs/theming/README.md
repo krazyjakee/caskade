@@ -59,11 +59,12 @@ CSS reaches components through attributes, never class names. Every
   `data-focus-visible`, `data-selected` and `data-disabled`.
 
 The full list of roots, parts and states is [anatomy.md](anatomy.md). It is
-generated from the catalogue in `packages/ui/src/anatomy.ts`, which plugins
-can also import from `@caskade/ui`. Anything not in the catalogue, including
-every class name, may change without notice. The native app (#90) renders the
-same roots, parts and states, catalogued again in `apps/native/src/anatomy.rs`
-and checked against `anatomy.ts`; themes apply to both unchanged. What
+generated from the native app's components (#93, catalogued in
+`apps/native/src/anatomy.rs`) and, for the roots only the webview renders
+yet, from the catalogue in `packages/ui/src/anatomy.ts`, which plugins can
+also import from `@caskade/ui`. The two catalogues are checked to agree word
+for word, so themes apply to both apps unchanged. Anything not in the
+catalogue, including every class name, may change without notice. What
 Blitz still renders differently is in [blitz.md](blitz.md).
 
 Tests check both directions:

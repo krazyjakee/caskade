@@ -13,6 +13,7 @@ use dioxus_native::prelude::*;
 
 use super::ids::use_id;
 use super::interact::{flag, use_forced};
+use super::settings::use_row_label;
 use crate::input::{Bind, use_input_action};
 
 pub const ANATOMY: Entry = Entry {
@@ -51,6 +52,8 @@ pub fn Slider(
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
 ) -> Element {
     let label_id = use_id("slider");
+    // Without a label of its own, a setting row's names it.
+    let row = use_row_label().filter(|_| label.is_none());
     let mut thumb = use_signal(|| None::<NodeId>);
     let mut track = use_signal(|| None::<NodeHandle>);
     let forced = use_forced();
@@ -147,6 +150,8 @@ pub fn Slider(
                         "aria-orientation": "horizontal",
                         "aria-disabled": flag(disabled),
                         "aria-labelledby": label.as_ref().map(|_| label_id.clone()),
+                        "aria-label": row.as_ref().map(|row| row.label.clone()),
+                        "aria-describedby": row.as_ref().and_then(|row| row.description_id.clone()),
                         "data-dragging": flag(dragging()),
                         "data-focus-visible": flag(forced.focus_visible),
                         class: "absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-accent-alt bg-white shadow-[0_0_10px] shadow-accent-alt/60 transition-[scale] duration-(--cs-motion-duration-fast) data-dragging:scale-115 data-focus-visible:focus-ring-outside",

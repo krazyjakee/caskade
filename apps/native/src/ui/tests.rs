@@ -1396,3 +1396,68 @@ fn a_combobox_opens_on_its_first_option_and_answers_a_pad() {
     assert!(!window.exists("listbox"));
     assert_eq!(window.focused(), Some(field));
 }
+
+// ── Settings sections and rows ──
+
+#[component]
+fn Settings() -> Element {
+    rsx! {
+        InputRoot {
+            SettingsSection {
+                id: "startup",
+                title: "Startup",
+                description: "What happens when Caskade opens.",
+                aside: rsx! { StatusDot { tone: DotTone::Ok, "Detected" } },
+                SettingRow { label: "Launch on system startup", description: "Start Caskade when you log in.",
+                    Switch { id: "launch", checked: true }
+                }
+                SettingRow { label: "Sort by",
+                    Select {
+                        id: "sort",
+                        options: vec![SelectOption::new("title", "Title")],
+                        value: Some("title".to_owned()),
+                        on_change: move |_| {},
+                    }
+                }
+                SettingRow { label: "Volume",
+                    Slider { id: "volume", value: 40.0, on_change: move |_| {} }
+                }
+                SettingRow { label: "Nickname",
+                    TextField { id: "nickname", value: "Ada", on_input: move |_| {} }
+                }
+            }
+        }
+    }
+}
+
+fn settings() -> Element {
+    rsx! { Settings {} }
+}
+
+#[test]
+fn a_setting_row_names_and_describes_its_controls() {
+    let _one = one_window();
+    let window = Window::open(settings);
+    let heard = window.heard("launch");
+    assert!(
+        heard.starts_with("Switch \"Launch on system startup\""),
+        "{heard}"
+    );
+    assert!(
+        window.attr("launch", "aria-describedby").is_some(),
+        "the row's description"
+    );
+    assert!(
+        window.heard("sort").contains("\"Sort by Title\""),
+        "{}",
+        window.heard("sort")
+    );
+    assert!(
+        window.heard("nickname").contains("\"Nickname\""),
+        "{}",
+        window.heard("nickname")
+    );
+    let heard = window.heard("startup");
+    assert!(heard.contains("\"Startup\""), "{heard}");
+    assert!(heard.contains("Detected"), "{heard}");
+}

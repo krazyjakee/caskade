@@ -37,7 +37,7 @@ pub struct Page {
 }
 
 /// Every page, in the list's order.
-pub const PAGES: [Page; 14] = [
+pub const PAGES: [Page; 15] = [
     Page {
         id: "buttons",
         title: "Buttons and links",
@@ -66,6 +66,12 @@ pub const PAGES: [Page; 14] = [
         id: "selects",
         title: "Selects",
         body: pages::Selects,
+        listed: true,
+    },
+    Page {
+        id: "settings",
+        title: "Settings",
+        body: pages::Settings,
         listed: true,
     },
     Page {
@@ -333,6 +339,7 @@ screens! {
     "values" => ShotValues,
     "fields" => ShotFields,
     "selects" => ShotSelects,
+    "settings" => ShotSettings,
     "feedback" => ShotFeedback,
     "cards" => ShotCards,
     "rows" => ShotRows,

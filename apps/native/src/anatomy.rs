@@ -1,10 +1,15 @@
 //! The native UI's anatomy catalogue (#90): one entry per themeable root,
 //! declared beside its component and listed here. Each must match the
-//! webview's entry (`packages/ui/src/anatomy.ts`, the source of
-//! `docs/theming/anatomy.md` until the native UI is the default, BLITZ-33)
-//! word for word, apart from the component it names; the tests check that,
-//! and that every `data-cs` the native sources render is catalogued.
-//! `caskade_ui_theme::anatomy` writes the docs from it.
+//! webview's entry (`packages/ui/src/anatomy.ts`) word for word, apart
+//! from the component it names; the tests check that, and that every
+//! `data-cs` the native sources render is catalogued.
+//!
+//! `docs/theming/anatomy.md` is written from it (#93) by
+//! `caskade_ui_theme::anatomy`: the native entry for each root the native
+//! UI renders, the webview's (`packages/ui/anatomy-entries.json`) for the
+//! rest until their views are ported. A test checks the docs are current;
+//! `CASKADE_WRITE_ANATOMY=1 cargo test -p caskade-native anatomy` writes
+//! them.
 
 use caskade_ui_theme::anatomy::{Entry, Source};
 
@@ -63,13 +68,41 @@ mod tests {
         ("alphabet-bar", "#99: the Library view's AlphabetBar"),
     ];
 
+    /// The webview's catalogue, as `pnpm --filter @caskade/ui docs`
+    /// writes it.
+    fn webview() -> Vec<Entry> {
+        caskade_ui_theme::anatomy::from_json(include_str!(
+            "../../../packages/ui/anatomy-entries.json"
+        ))
+        .expect("the webview's catalogue")
+    }
+
     #[test]
     fn every_entry_is_the_webviews() {
         let problems = caskade_ui_theme::anatomy::differences(
             &catalogue(),
-            include_str!("../../../docs/theming/anatomy.md"),
+            &caskade_ui_theme::anatomy::markdown(&webview()),
         );
         assert!(problems.is_empty(), "{}", problems.join("\n\n"));
+    }
+
+    /// `docs/theming/anatomy.md` is the native components' catalogue, with
+    /// the webview's entries for the roots only it renders yet.
+    #[test]
+    fn the_anatomy_docs_are_the_native_catalogues() {
+        use caskade_ui_theme::anatomy::{GENERATED, markdown_by, with_native};
+        let docs =
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../docs/theming/anatomy.md");
+        let text = markdown_by(&with_native(&webview(), &catalogue()), GENERATED);
+        if std::env::var_os("CASKADE_WRITE_ANATOMY").is_some() {
+            std::fs::write(&docs, &text).unwrap();
+            return;
+        }
+        let current = std::fs::read_to_string(&docs).unwrap_or_default();
+        assert!(
+            current == text,
+            "docs/theming/anatomy.md is stale: CASKADE_WRITE_ANATOMY=1 cargo test -p caskade-native anatomy"
+        );
     }
 
     /// Every `data-cs` a component renders is catalogued: it's the

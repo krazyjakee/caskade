@@ -16,6 +16,7 @@ use crate::ui::{
 use crate::ui::{
     Avatar, AvatarInfo, AvatarPicker, AvatarSize, DEFAULT_AVATAR, Hero, HeroGame, Shelf, avatars,
 };
+use crate::ui::{DotTone, Pill, PillTone, SettingRow, SettingsSection, StatusDot};
 
 /// A column heading in a grid of states.
 const HEADING: &str = "font-mono text-[10px] tracking-wider text-fg-subtle uppercase";
@@ -363,6 +364,70 @@ pub fn Selects() -> Element {
             }
             Specimen { label: "Focus visible", forced: FOCUS_VISIBLE,
                 Combobox { options: platforms, value: Some("n64".to_owned()), on_change: move |_| {}, label: "Platform", class: "w-full" }
+            }
+        }
+    }
+}
+
+// ── Settings ──
+
+pub fn Settings() -> Element {
+    let mut launch = use_signal(|| true);
+    let mut scale = use_signal(|| 100.0);
+    let mut format = use_signal(|| "system".to_owned());
+    let mut sort = use_signal(|| Some("played".to_owned()));
+    let mut name = use_signal(|| "Ada".to_owned());
+    rsx! {
+        div { class: "grid grid-cols-[1fr_18rem] items-start gap-6",
+            SettingsSection {
+                icon: Some(GAMEPAD),
+                title: "Startup and display",
+                description: "What happens when Caskade opens, and how it looks.",
+                aside: rsx! { Pill { tone: PillTone::Accent, icon: CLOCK, "Takes effect at once" } },
+                SettingRow { label: "Launch on system startup", description: "Start Caskade when you log in.",
+                    Switch { checked: launch(), on_change: move |on| launch.set(on) }
+                }
+                SettingRow { icon: Some(SEARCH), label: "Time format", description: "How times are shown.",
+                    SegmentedControl {
+                        options: vec![Segment::new("system", "By language"), Segment::new("12h", "12-hour"), Segment::new("24h", "24-hour")],
+                        value: format(),
+                        on_change: move |value| format.set(value),
+                    }
+                }
+                SettingRow { label: "Interface scale",
+                    Slider {
+                        value: scale(),
+                        on_change: move |value| scale.set(value),
+                        min: 75.0,
+                        max: 150.0,
+                        step: 5.0,
+                        format: Callback::new(|value: f64| format!("{value:.0} %")),
+                        class: "w-56",
+                    }
+                }
+                SettingRow { label: "Sort the library by",
+                    Select {
+                        options: vec![SelectOption::new("title", "Title"), SelectOption::new("played", "Last played")],
+                        value: sort(),
+                        on_change: move |value| sort.set(Some(value)),
+                        class: "w-48",
+                    }
+                }
+                SettingRow { label: "Device name", description: "How other devices see this one.",
+                    TextField { value: name(), on_input: move |value| name.set(value), class: "w-56" }
+                }
+            }
+            div { class: "flex flex-col gap-6",
+                Section { title: "Status dot", class: "flex-col gap-y-2",
+                    for (label, tone) in [("Detected", DotTone::Ok), ("Not found", DotTone::Off), ("Outdated", DotTone::Warning), ("Failed", DotTone::Danger)] {
+                        StatusDot { tone, "{label}" }
+                    }
+                }
+                Section { title: "Pill", class: "flex-col gap-y-2",
+                    Pill { tone: PillTone::Warning, icon: CLOCK, "Off by default" }
+                    Pill { tone: PillTone::Danger, icon: HARD_DRIVE, "Caution" }
+                    Pill { tone: PillTone::Accent, icon: STORE, "New" }
+                }
             }
         }
     }

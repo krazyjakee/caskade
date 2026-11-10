@@ -143,12 +143,10 @@ jobs:
       # The native app's stylesheet (#90): Tailwind over apps/native/src.
       - name: Native app stylesheet
         run: node apps/native/scripts/build-css.mjs --check
-      # The anatomy generator (#90) writes today's anatomy.md and anatomy.json
-      # from the webview's catalogue, byte for byte.
+      # The anatomy generator (#90, #93): the webview's catalogue as data
+      # writes its contract; caskade-native's tests check anatomy.md.
       - name: Native anatomy generator
-        run: |
-          node apps/native/scripts/anatomy-json.mjs > "$RUNNER_TEMP/anatomy.json"
-          CASKADE_ANATOMY_JSON="$RUNNER_TEMP/anatomy.json" cargo test -p caskade-ui-theme --locked anatomy
+        run: cargo test -p caskade-ui-theme --locked anatomy
       # `just i18n-check` (#220), Rust half.
       - name: Rust translation catalogs
         if: needs.changes.outputs.catalogs == 'true'
