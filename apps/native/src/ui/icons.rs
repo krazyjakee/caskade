@@ -130,6 +130,38 @@ pub const EXTERNAL_LINK: Icon = Icon(&[
     "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6",
 ]);
 
+// The library's (#99).
+/// lucide's `square-check-big`.
+pub const SQUARE_CHECK_BIG: Icon = Icon(&[
+    "M21 10.656V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.344",
+    "m9 11 3 3L22 4",
+]);
+/// lucide's `grid-2x2`.
+pub const GRID_2X2: Icon = Icon(&[
+    "M12 3v18",
+    "M3 12h18",
+    "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2z",
+]);
+/// lucide's `list`.
+pub const LIST: Icon = Icon(&[
+    "M3 5h.01",
+    "M3 12h.01",
+    "M3 19h.01",
+    "M8 5h13",
+    "M8 12h13",
+    "M8 19h13",
+]);
+/// lucide's `search-x`.
+pub const SEARCH_X: Icon = Icon(&[
+    "m13.5 8.5-5 5",
+    "m8.5 8.5 5 5",
+    "M11 3a8 8 0 1 0 0 16a8 8 0 1 0 0-16z",
+    "m21 21-4.3-4.3",
+]);
+/// lucide's `list-plus`.
+pub const LIST_PLUS: Icon = Icon(&["M16 5H3", "M11 12H3", "M16 19H3", "M18 9v6", "M21 12h-6"]);
+/// lucide's `arrow-left`.
+pub const ARROW_LEFT: Icon = Icon(&["m12 19-7-7 7-7", "M19 12H5"]);
 /// Draws `icon` with `class`, `stroke_width` (lucide's default is 2) and
 /// `data-part` when given.
 /// lucide's `plus`.

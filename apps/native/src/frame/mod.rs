@@ -18,7 +18,7 @@ mod views;
 pub mod window;
 
 #[cfg(test)]
-mod tests;
+pub(crate) mod tests;
 
 use crate::router::{RouterRoot, use_router};
 use crate::ui::ToastRegion;

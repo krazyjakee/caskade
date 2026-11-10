@@ -15,9 +15,10 @@ use super::art::{self, Variant};
 use super::window::{Frame, Layout, PAGE};
 use crate::data::{DataSource, change};
 use crate::input::{Bind, use_input, use_input_action};
+use crate::router::{LibraryRoute, RouteLink};
 use crate::ui::{CardGame, GameCard, GameRow};
 use blitz_dom::{BaseDocument, NodeId, ScrollBehavior};
-use caskade_core::model::{GameSummary, ListGames, TitleLetter};
+use caskade_core::model::{GameSort, GameSummary, ListGames, TitleLetter};
 use caskade_ui_data::{Changed, Key as DataKey};
 use caskade_ui_i18n::{t, tp};
 use caskade_ui_input::Action;
@@ -57,6 +58,9 @@ pub fn VirtualLibrary(
     #[props(default)]
     letters: Vec<TitleLetter>,
     #[props(default)] events: Events,
+    /// The library's route: the list's column headers sort it.
+    #[props(default)]
+    sorting: Option<LibraryRoute>,
 ) -> Element {
     let input = use_input();
     let source = use_context::<DataSource>();
@@ -369,10 +373,10 @@ pub fn VirtualLibrary(
                         role: "row",
                         class: "z-20 grid w-full items-center gap-3 border-b border-border-strong bg-surface-base px-2 font-mono text-[11px] font-normal tracking-widest text-fg-subtle uppercase",
                         style: "position: sticky; top: 0; height: {layout.rows_top()}px; grid-template-columns: {LIST_COLUMNS};",
-                        span { role: "columnheader", class: "truncate pl-10 text-left", {tp!("library column", "Title")} }
+                        SortHeader { route: sorting.clone(), sort: Some(GameSort::Title), descending: false, class: "pl-10 text-left", {tp!("library column", "Title")} }
                         span { role: "columnheader", class: "truncate text-left", {tp!("library column", "Status")} }
-                        span { role: "columnheader", class: "truncate text-left", {tp!("library column", "Last played")} }
-                        span { role: "columnheader", class: "truncate text-right", {tp!("library column", "Playtime")} }
+                        SortHeader { route: sorting.clone(), sort: Some(GameSort::Recent), descending: true, class: "text-left", {tp!("library column", "Last played")} }
+                        SortHeader { route: sorting.clone(), sort: Some(GameSort::Playtime), descending: true, class: "text-right", {tp!("library column", "Playtime")} }
                         span { role: "columnheader", class: "truncate text-right", {tp!("library column", "Size")} }
                         span { role: "columnheader", class: "sr-only", {tp!("library column", "Actions")} }
                     }
@@ -554,6 +558,46 @@ fn Game(
             on_focus,
             "data-index": "{index}",
             "data-focus-default": first,
+        }
+    }
+}
+
+/// A list column's header that sorts the library by it, when the view
+/// gives its route (`LibraryTableHeader`): the current sort says so in
+/// `aria-sort`.
+#[component]
+fn SortHeader(
+    route: Option<LibraryRoute>,
+    sort: Option<GameSort>,
+    descending: bool,
+    class: &'static str,
+    children: Element,
+) -> Element {
+    let (Some(route), Some(sort)) = (route, sort) else {
+        return rsx! {
+            span { role: "columnheader", class: "truncate {class}", {children} }
+        };
+    };
+    let active = route.sort == sort;
+    let order = if descending {
+        "descending"
+    } else {
+        "ascending"
+    };
+    let to = super::view::library_href(&route, |library| library.sort = sort);
+    rsx! {
+        span {
+            role: "columnheader",
+            "aria-sort": active.then_some(order),
+            class: "min-w-0 {class}",
+            // A block filling its cell: Blitz misses an inline link in a
+            // clipped, aligned cell when hit testing.
+            RouteLink {
+                to,
+                current: active,
+                class: "block truncate rounded-sm hover:text-fg data-[status=active]:text-fg data-focus-visible:focus-ring",
+                {children}
+            }
         }
     }
 }

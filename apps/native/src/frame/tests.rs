@@ -26,9 +26,19 @@ thread_local! {
 }
 
 static SOURCE: OnceLock<DataSource> = OnceLock::new();
+/// When the first window opened: animations' clock.
+static CLOCK: OnceLock<Instant> = OnceLock::new();
+
+/// The fixture data every window reads (Settings' tests check its saves).
+pub(crate) fn source() -> &'static DataSource {
+    SOURCE.get_or_init(|| caskade_app::runtime::block_on(DataSource::fixtures(40)).unwrap())
+}
 
 /// Pad actions reach every input root listening: one window at a time.
-use crate::input::tests::ONE_WINDOW as ONE;
+pub(crate) use crate::input::tests::ONE_WINDOW as ONE;
+
+/// The page the next window opens on.
+pub(crate) static START: std::sync::Mutex<&str> = std::sync::Mutex::new("/");
 
 fn app() -> Element {
     use_data_source(|| SOURCE.get().expect("the fixture library").clone());
@@ -36,18 +46,19 @@ fn app() -> Element {
         // The app's stylesheet: the frame lays out as in the app.
         style { {include_str!("../../assets/app.css")} }
         InputRoot {
-            super::Frame { start: "/" }
+            super::Frame { start: *START.lock().unwrap_or_else(|e| e.into_inner()) }
         }
     }
 }
 
-struct Window {
-    doc: DioxusDocument,
+/// A window over the fixture library with the frame, headless.
+pub(crate) struct Window {
+    pub(crate) doc: DioxusDocument,
 }
 
 impl Window {
-    fn open() -> Self {
-        SOURCE.get_or_init(|| caskade_app::runtime::block_on(DataSource::fixtures(40)).unwrap());
+    pub(crate) fn open() -> Self {
+        source();
         let mut doc = DioxusDocument::new(
             VirtualDom::new(app),
             DocumentConfig {
@@ -63,15 +74,18 @@ impl Window {
         window
     }
 
-    fn settle(&mut self) {
+    pub(crate) fn settle(&mut self) {
         for _ in 0..30 {
             blitz_dom::Document::poll(&mut self.doc, None);
-            self.doc.inner.borrow_mut().resolve(0.0);
+            // At the time that's passed, so entrances (`animate-enter`)
+            // finish as in the app; at 0 they'd stay where they start.
+            let now = CLOCK.get_or_init(Instant::now).elapsed().as_secs_f64();
+            self.doc.inner.borrow_mut().resolve(now);
             std::thread::sleep(Duration::from_millis(3));
         }
     }
 
-    fn settle_until(&mut self, what: &str, done: impl Fn(&Self) -> bool) {
+    pub(crate) fn settle_until(&mut self, what: &str, done: impl Fn(&Self) -> bool) {
         let until = Instant::now() + Duration::from_secs(20);
         while Instant::now() < until {
             self.settle();
@@ -90,30 +104,30 @@ impl Window {
         panic!("never: {what}; the window says: {body}");
     }
 
-    fn router(&self) -> Router {
+    pub(crate) fn router(&self) -> Router {
         ROUTER.with(Cell::get).expect("the shell rendered")
     }
 
-    fn href(&self) -> String {
+    pub(crate) fn href(&self) -> String {
         ROUTER
             .with(Cell::get)
             .map(|router| self.doc.vdom.in_runtime(|| router.peek().href()))
             .unwrap_or_default()
     }
 
-    fn route(&self) -> Route {
+    pub(crate) fn route(&self) -> Route {
         let router = self.router();
         self.doc.vdom.in_runtime(|| router.peek())
     }
 
-    fn go(&mut self, href: &str) {
+    pub(crate) fn go(&mut self, href: &str) {
         let router = self.router();
         self.doc.vdom.in_runtime(|| router.navigate(href));
         self.settle();
     }
 
     /// Every element whose `name` attribute is `value`.
-    fn find_all(&self, name: &str, value: &str) -> Vec<NodeId> {
+    pub(crate) fn find_all(&self, name: &str, value: &str) -> Vec<NodeId> {
         let doc = self.doc.inner.borrow();
         let mut found = Vec::new();
         doc.visit(|id, node| {
@@ -124,16 +138,16 @@ impl Window {
         found
     }
 
-    fn find(&self, name: &str, value: &str) -> Option<NodeId> {
+    pub(crate) fn find(&self, name: &str, value: &str) -> Option<NodeId> {
         self.find_all(name, value).into_iter().next()
     }
 
-    fn get(&self, name: &str, value: &str) -> NodeId {
+    pub(crate) fn get(&self, name: &str, value: &str) -> NodeId {
         self.find(name, value)
             .unwrap_or_else(|| panic!("no [{name}={value}] on {}", self.href()))
     }
 
-    fn text(&self, node: NodeId) -> String {
+    pub(crate) fn text(&self, node: NodeId) -> String {
         self.doc
             .inner
             .borrow()
@@ -142,7 +156,7 @@ impl Window {
             .unwrap_or_default()
     }
 
-    fn attr(&self, node: NodeId, name: &str) -> Option<String> {
+    pub(crate) fn attr(&self, node: NodeId, name: &str) -> Option<String> {
         self.doc
             .inner
             .borrow()
@@ -152,7 +166,7 @@ impl Window {
     }
 
     /// The link in the sidebar whose label is `label`.
-    fn nav_link(&self, label: &str) -> NodeId {
+    pub(crate) fn nav_link(&self, label: &str) -> NodeId {
         let links = [
             self.find_all("data-part", "nav-item"),
             self.find_all("data-part", "sub-item"),
@@ -164,7 +178,7 @@ impl Window {
             .unwrap_or_else(|| panic!("no sidebar link {label}"))
     }
 
-    fn middle(&self, node: NodeId) -> (f32, f32) {
+    pub(crate) fn middle(&self, node: NodeId) -> (f32, f32) {
         let rect = self
             .doc
             .inner
@@ -177,7 +191,7 @@ impl Window {
         )
     }
 
-    fn click(&mut self, node: NodeId) {
+    pub(crate) fn click(&mut self, node: NodeId) {
         let (x, y) = self.middle(node);
         for event in [
             UiEvent::PointerMove(pointer(x, y, false)),
@@ -190,12 +204,12 @@ impl Window {
     }
 
     /// A right click at `node`'s middle.
-    fn right_click(&mut self, node: NodeId) {
+    pub(crate) fn right_click(&mut self, node: NodeId) {
         let (x, y) = self.middle(node);
         self.right_click_at(x, y);
     }
 
-    fn right_click_at(&mut self, x: f32, y: f32) {
+    pub(crate) fn right_click_at(&mut self, x: f32, y: f32) {
         use blitz_traits::events::{MouseEventButton, MouseEventButtons};
         let mut down = pointer(x, y, true);
         down.button = MouseEventButton::Secondary;
@@ -212,16 +226,16 @@ impl Window {
         }
     }
 
-    fn focus(&mut self, node: NodeId) {
+    pub(crate) fn focus(&mut self, node: NodeId) {
         self.doc.inner.borrow_mut().set_focus_to(node);
         self.settle();
     }
 
-    fn focused(&self) -> Option<NodeId> {
+    pub(crate) fn focused(&self) -> Option<NodeId> {
         self.doc.inner.borrow().get_focussed_node_id()
     }
 
-    fn key_with(&mut self, key: Key, modifiers: Modifiers) {
+    pub(crate) fn key_with(&mut self, key: Key, modifiers: Modifiers) {
         for state in [KeyState::Pressed, KeyState::Released] {
             let text = match (&key, state) {
                 (Key::Character(text), KeyState::Pressed) if modifiers.is_empty() => {
@@ -248,17 +262,17 @@ impl Window {
         }
     }
 
-    fn key(&mut self, key: Key) {
+    pub(crate) fn key(&mut self, key: Key) {
         self.key_with(key, Modifiers::empty());
     }
 
-    fn type_text(&mut self, text: &str) {
+    pub(crate) fn type_text(&mut self, text: &str) {
         for c in text.chars() {
             self.key(Key::Character(c.to_string()));
         }
     }
 
-    fn pad(&mut self, action: Action) {
+    pub(crate) fn pad(&mut self, action: Action) {
         let _ = crate::shell::events().send(caskade_app::events::Event::InputActionEvent(
             InputActionEvent(InputAction {
                 action,
@@ -271,7 +285,7 @@ impl Window {
     }
 
     /// The page's heading, or what the main view says.
-    fn view_text(&self) -> String {
+    pub(crate) fn view_text(&self) -> String {
         self.text(self.get("data-cs", "view"))
     }
 }

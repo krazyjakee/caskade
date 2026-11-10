@@ -1124,6 +1124,9 @@
   .py-6 {
     padding-block: calc(calc(0.25rem * var(--cs-density-scale)) * 6);
   }
+  .py-16 {
+    padding-block: calc(calc(0.25rem * var(--cs-density-scale)) * 16);
+  }
   .pt-2 {
     padding-top: calc(calc(0.25rem * var(--cs-density-scale)) * 2);
   }
@@ -1132,6 +1135,9 @@
   }
   .pt-topbar {
     padding-top: var(--cs-topbar-height);
+  }
+  .pr-2 {
+    padding-right: calc(calc(0.25rem * var(--cs-density-scale)) * 2);
   }
   .pr-4 {
     padding-right: calc(calc(0.25rem * var(--cs-density-scale)) * 4);
@@ -1867,6 +1873,9 @@
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--cs-color-accent) 25%, transparent);
     }
+  }
+  .data-selected\:text-accent-alt[data-selected] {
+    color: var(--cs-color-accent-alt);
   }
   .data-selected\:text-fg[data-selected] {
     color: var(--cs-color-fg);

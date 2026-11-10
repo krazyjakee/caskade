@@ -3,9 +3,8 @@
 //! `PlaceholderView`, except the library, whose grid (#94) shows the
 //! route's filter, sort and search.
 
-use crate::library::VirtualLibrary;
 use crate::router::{LibraryRoute, Route, use_router};
-use caskade_core::model::{GameFilter, ListGames};
+use caskade_core::model::GameFilter;
 use caskade_ui_i18n::{t, tp};
 use dioxus_native::prelude::*;
 
@@ -67,24 +66,11 @@ fn Library(library: LibraryRoute) -> Element {
             router.replace(&route.href());
         }
     }));
-    let query = ListGames {
-        filter: library.filter,
-        sort: library.sort,
-        query: library.q.clone(),
-        platform: library.platform.clone(),
-        ..ListGames::default()
-    };
+    let mut library = library;
+    if nothing_recent {
+        library.filter = GameFilter::All;
+    }
     rsx! {
-        div {
-            "data-view": "library",
-            style: "display: flex; flex-direction: column; flex: 1; min-height: 0;",
-            VirtualLibrary {
-                query,
-                layout: library.layout,
-                events: crate::library::Events {
-                    open: Some(EventHandler::new(move |id: String| router.open_game(&id))),
-                },
-            }
-        }
+        crate::library::LibraryView { library }
     }
 }

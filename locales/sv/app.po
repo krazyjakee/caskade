@@ -2052,7 +2052,7 @@ msgstr "Alla genrer"
 
 #. Goes back from one platform's games to the list of platforms
 #: apps/desktop/src/views/library/LibraryView.tsx
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/library/view.rs
 msgid "All platforms"
 msgstr "Alla plattformar"
 
@@ -3513,7 +3513,7 @@ msgid "Clear Cache"
 msgstr "Rensa cache"
 
 #: apps/desktop/src/views/library/LibraryView.tsx
-#: apps/native/src/ui/text_field.rs
+#: apps/native/src/library/view.rs apps/native/src/ui/text_field.rs
 msgid "Clear search"
 msgstr "Rensa sökning"
 
@@ -3957,6 +3957,7 @@ msgid "Couldn't load the hidden games: {0}"
 msgstr "Kunde inte läsa in de dolda spelen: {0}"
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "Couldn't load your library"
 msgstr "Kunde inte läsa in ditt bibliotek"
 
@@ -5691,6 +5692,7 @@ msgid "Green"
 msgstr "Grön"
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "grid view"
 msgstr "rutnätsvy"
 
@@ -6886,7 +6888,7 @@ msgstr "Bokstäver"
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/frame/sidebar.rs
+#: apps/native/src/frame/sidebar.rs apps/native/src/library/view.rs
 msgid "Library"
 msgstr "Bibliotek"
 
@@ -6984,6 +6986,7 @@ msgid "Linux, Windows and macOS"
 msgstr "Linux, Windows och macOS"
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "list view"
 msgstr "listvy"
 
@@ -7821,7 +7824,7 @@ msgid "Next screenshot"
 msgstr "Nästa skärmbild"
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
-#: apps/desktop/src/input/hooks.tsx
+#: apps/desktop/src/input/hooks.tsx apps/native/src/library/view.rs
 msgid "Next tab"
 msgstr "Nästa flik"
 
@@ -7896,6 +7899,7 @@ msgid "No games awaiting review."
 msgstr "Inga spel väntar på granskning."
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "No games in this filter yet."
 msgstr "Inga spel i det här filtret än."
 
@@ -7912,6 +7916,7 @@ msgid "No games match these rules yet. They'll show up here as your library chan
 msgstr "Inga spel matchar de här reglerna än. De dyker upp här när ditt bibliotek ändras."
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "No games match your search in this filter."
 msgstr "Inga spel matchar din sökning i det här filtret."
 
@@ -8090,6 +8095,7 @@ msgid "No upcoming releases here."
 msgstr "Inga kommande utgåvor här."
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "No web games yet. Add one with Add web game."
 msgstr "Inga webbspel än. Lägg till ett med Lägg till webbspel."
 
@@ -9311,6 +9317,7 @@ msgstr "Speltid"
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Playtime"
 msgstr "Speltid"
@@ -9402,6 +9409,7 @@ msgstr "Populära"
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Popular"
 msgstr "Populära"
@@ -9472,7 +9480,7 @@ msgid "Previous screenshot"
 msgstr "Föregående skärmbild"
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
-#: apps/desktop/src/input/hooks.tsx
+#: apps/desktop/src/input/hooks.tsx apps/native/src/library/view.rs
 msgid "Previous tab"
 msgstr "Föregående flik"
 
@@ -9731,6 +9739,7 @@ msgstr "Tar emot"
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Recently added"
 msgstr "Nyligen tillagda"
@@ -9741,6 +9750,7 @@ msgstr "Nyligen tillagda"
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Recently played"
 msgstr "Nyligen spelade"
@@ -9918,6 +9928,7 @@ msgstr "Utgivningsdatum"
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Release date"
 msgstr "Utgivningsdatum"
@@ -10323,7 +10334,7 @@ msgid "Results"
 msgstr "Resultat"
 
 #: apps/desktop/src/views/library/LibraryView.tsx
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/library/view.rs
 msgid "Results for “{query}”"
 msgstr "Resultat för ”{query}”"
 
@@ -11313,6 +11324,7 @@ msgid "Show again"
 msgstr "Visa igen"
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "Show all games"
 msgstr "Visa alla spel"
 
@@ -11570,6 +11582,7 @@ msgid "Sort catalog games"
 msgstr "Sortera katalogens spel"
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "Sort games"
 msgstr "Sortera spel"
 
@@ -12723,6 +12736,7 @@ msgstr "Titel"
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Title"
 msgstr "Titel"
@@ -12815,6 +12829,7 @@ msgstr "systemfält, avsluta, stäng till systemfältet"
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/desktop/src/views/StoreView.tsx apps/native/src/flows/storage.rs
 #: apps/native/src/frame/error.rs apps/native/src/frame/notifications.rs
+#: apps/native/src/library/view.rs
 msgid "Try again"
 msgstr "Försök igen"
 
@@ -13812,6 +13827,7 @@ msgid "You have no collections to add games to yet."
 msgstr "Du har inga samlingar att lägga till spel i än."
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "You haven't played anything yet."
 msgstr "Du har inte spelat något än."
 

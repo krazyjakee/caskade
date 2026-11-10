@@ -7,6 +7,10 @@
 mod art;
 pub mod bench;
 mod grid;
+// The library view around the grid (#99).
+mod view;
+#[cfg(test)]
+mod view_tests;
 pub mod window;
 
 #[cfg(test)]
@@ -23,6 +27,7 @@ pub fn art_url(art: Option<&caskade_core::model::Artwork>) -> Option<String> {
 #[allow(unused_imports)]
 pub use grid::{Events, VirtualLibrary};
 #[allow(unused_imports)]
+pub use view::LibraryView;
 pub use window::Layout;
 
 /// A Unix time in milliseconds on the user's clock.

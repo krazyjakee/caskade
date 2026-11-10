@@ -2068,6 +2068,7 @@ msgstr ""
 #. Goes back from one platform's games to the list of platforms
 #: apps/desktop/src/views/library/LibraryView.tsx
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/library/view.rs
 msgid "All platforms"
 msgstr ""
 
@@ -3532,6 +3533,7 @@ msgid "Clear Cache"
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 #: apps/native/src/ui/text_field.rs
 msgid "Clear search"
 msgstr ""
@@ -3980,6 +3982,7 @@ msgid "Couldn't load the hidden games: {0}"
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "Couldn't load your library"
 msgstr ""
 
@@ -5722,6 +5725,7 @@ msgid "Green"
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "grid view"
 msgstr ""
 
@@ -6922,6 +6926,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/native/src/frame/sidebar.rs
+#: apps/native/src/library/view.rs
 msgid "Library"
 msgstr ""
 
@@ -7020,6 +7025,7 @@ msgid "Linux, Windows and macOS"
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "list view"
 msgstr ""
 
@@ -7867,6 +7873,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/input/hooks.tsx
+#: apps/native/src/library/view.rs
 msgid "Next tab"
 msgstr ""
 
@@ -7941,6 +7948,7 @@ msgid "No games awaiting review."
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "No games in this filter yet."
 msgstr ""
 
@@ -7957,6 +7965,7 @@ msgid "No games match these rules yet. They'll show up here as your library chan
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "No games match your search in this filter."
 msgstr ""
 
@@ -8136,6 +8145,7 @@ msgid "No upcoming releases here."
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "No web games yet. Add one with Add web game."
 msgstr ""
 
@@ -9362,6 +9372,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Playtime"
 msgstr ""
@@ -9453,6 +9464,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Popular"
 msgstr ""
@@ -9524,6 +9536,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/input/hooks.tsx
+#: apps/native/src/library/view.rs
 msgid "Previous tab"
 msgstr ""
 
@@ -9786,6 +9799,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Recently added"
 msgstr ""
@@ -9796,6 +9810,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Recently played"
 msgstr ""
@@ -9973,6 +9988,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Release date"
 msgstr ""
@@ -10384,6 +10400,7 @@ msgstr ""
 
 #: apps/desktop/src/views/library/LibraryView.tsx
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/library/view.rs
 msgid "Results for “{query}”"
 msgstr ""
 
@@ -11382,6 +11399,7 @@ msgid "Show again"
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "Show all games"
 msgstr ""
 
@@ -11633,6 +11651,7 @@ msgid "Sort catalog games"
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "Sort games"
 msgstr ""
 
@@ -12797,6 +12816,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Title"
 msgstr ""
@@ -12891,6 +12911,7 @@ msgstr ""
 #: apps/native/src/flows/storage.rs
 #: apps/native/src/frame/error.rs
 #: apps/native/src/frame/notifications.rs
+#: apps/native/src/library/view.rs
 msgid "Try again"
 msgstr ""
 
@@ -13889,6 +13910,7 @@ msgid "You have no collections to add games to yet."
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "You haven't played anything yet."
 msgstr ""
 
