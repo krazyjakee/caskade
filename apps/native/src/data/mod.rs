@@ -50,9 +50,10 @@ impl DataSource {
 }
 
 /// Whether the UI runs on the fixture library: `CASKADE_FIXTURES=1`, in
-/// debug builds only (the webview's `VITE_CASKADE_FIXTURES`).
+/// debug builds (and the `bench` feature's) only (the webview's `VITE_CASKADE_FIXTURES`).
 pub fn fixtures_mode() -> bool {
-    cfg!(debug_assertions) && std::env::var("CASKADE_FIXTURES").is_ok_and(|value| value == "1")
+    cfg!(any(debug_assertions, feature = "bench"))
+        && std::env::var("CASKADE_FIXTURES").is_ok_and(|value| value == "1")
 }
 
 /// How many plain games fixtures mode makes: `CASKADE_FIXTURE_COUNT`, or the

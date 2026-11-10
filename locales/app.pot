@@ -6527,6 +6527,7 @@ msgid "Jobs and notifications"
 msgstr ""
 
 #: apps/desktop/src/views/library/AlphabetBar.tsx
+#: apps/native/src/library/grid.rs
 msgid "Jump to letter"
 msgstr ""
 
@@ -6660,6 +6661,7 @@ msgid "Last played"
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryRow.tsx
+#: apps/native/src/library/grid.rs
 msgctxt "library column"
 msgid "Last played"
 msgstr ""
@@ -6829,6 +6831,7 @@ msgid "Library filters"
 msgstr ""
 
 #: apps/desktop/src/views/library/VirtualLibrary.tsx
+#: apps/native/src/library/grid.rs
 msgid "Library games"
 msgstr ""
 
@@ -6960,6 +6963,7 @@ msgid "Loading emulators…"
 msgstr ""
 
 #: apps/desktop/src/views/library/VirtualLibrary.tsx
+#: apps/native/src/library/grid.rs
 msgid "Loading game"
 msgstr ""
 
@@ -7688,6 +7692,7 @@ msgid "Next"
 msgstr ""
 
 #: apps/desktop/src/views/library/VirtualLibrary.tsx
+#: apps/native/src/library/grid.rs
 msgid "Next letter"
 msgstr ""
 
@@ -7699,6 +7704,7 @@ msgstr ""
 #: apps/desktop/src/components/ShelfRow.tsx
 #: apps/desktop/src/shell/console/ConsoleShell.tsx
 #: apps/desktop/src/views/library/VirtualLibrary.tsx
+#: apps/native/src/library/grid.rs
 msgid "Next page"
 msgstr ""
 
@@ -8298,6 +8304,7 @@ msgid "now"
 msgstr ""
 
 #: apps/desktop/src/views/library/AlphabetBar.tsx
+#: apps/native/src/library/grid.rs
 msgid "Numbers and symbols"
 msgstr ""
 
@@ -9172,6 +9179,7 @@ msgid "Playtime"
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryRow.tsx
+#: apps/native/src/library/grid.rs
 msgctxt "library column"
 msgid "Playtime"
 msgstr ""
@@ -9317,12 +9325,14 @@ msgid "Previous"
 msgstr ""
 
 #: apps/desktop/src/views/library/VirtualLibrary.tsx
+#: apps/native/src/library/grid.rs
 msgid "Previous letter"
 msgstr ""
 
 #: apps/desktop/src/components/ShelfRow.tsx
 #: apps/desktop/src/shell/console/ConsoleShell.tsx
 #: apps/desktop/src/views/library/VirtualLibrary.tsx
+#: apps/native/src/library/grid.rs
 msgid "Previous page"
 msgstr ""
 
@@ -12551,6 +12561,7 @@ msgid "Title"
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryRow.tsx
+#: apps/native/src/library/grid.rs
 msgctxt "library column"
 msgid "Title"
 msgstr ""

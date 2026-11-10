@@ -23,6 +23,9 @@ shots = ["dep:anyrender", "dep:anyrender_vello_cpu", "dep:blitz-paint"]
 # The end-to-end harness's scripted pad (`src/input/e2e.rs`) in a release
 # build; debug builds always have it.
 e2e = []
+# The library's scroll benchmark (`src/library/bench.rs`) and fixtures mode
+# in a release build, for measuring; debug builds always have them.
+bench = []
 
 [build-dependencies]
 # The Windows exe's manifest and icon (`build.rs`), as Tauri's build embeds.
@@ -54,6 +57,8 @@ caskade-input = { path = "../../crates/caskade-input" }
 caskade-ui-input = { path = "../../crates/caskade-ui-input" }
 # The UI's text: the webview's catalogs, t! and formatting (#91).
 caskade-ui-i18n = { path = "../../crates/caskade-ui-i18n" }
+# The user's clock, for dates in the library (#94).
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
 # Appearance, the accent and the user CSS check, as the webview has them (#90).
 caskade-ui-theme = { path = "../../crates/caskade-ui-theme" }
 # The game and video windows (`--web-game`, `--video`), shared with the

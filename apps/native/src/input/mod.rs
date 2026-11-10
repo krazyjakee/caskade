@@ -30,7 +30,7 @@ mod keyboard;
 mod root;
 
 #[cfg(test)]
-mod tests;
+pub(crate) mod tests;
 
 #[allow(unused_imports)]
 pub use root::{Bind, Input, InputRoot, use_focus_location, use_input, use_input_action};

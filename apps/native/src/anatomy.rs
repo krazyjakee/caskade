@@ -42,10 +42,22 @@ mod tests {
 
     /// Roots the native UI renders that the webview doesn't catalogue yet,
     /// with the issue that will.
-    const NOT_YET: &[(&str, &str)] = &[(
-        "guide-menu",
-        "#93: the webview's GuideMenu isn't catalogued either",
-    )];
+    const NOT_YET: &[(&str, &str)] = &[
+        (
+            "guide-menu",
+            "#93: the webview's GuideMenu isn't catalogued either",
+        ),
+        (
+            "virtual-library",
+            "#93: the webview's VirtualLibrary isn't catalogued either",
+        ),
+        // The virtual grid's (#94) minimal cards and rows; the full ones,
+        // with the webview's parts, are #93's components.
+        ("game-card", "#93: the full GameCard"),
+        ("game-art", "#93: the full GameCard's art"),
+        ("game-row", "#93: the full LibraryRow"),
+        ("alphabet-bar", "#99: the Library view's AlphabetBar"),
+    ];
 
     #[test]
     fn every_entry_is_the_webviews() {

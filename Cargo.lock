@@ -1992,6 +1992,7 @@ dependencies = [
  "caskade-ui-i18n",
  "caskade-ui-input",
  "caskade-ui-theme",
+ "chrono",
  "dioxus-native",
  "embed-resource",
  "gtk",

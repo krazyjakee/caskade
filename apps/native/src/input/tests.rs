@@ -17,7 +17,7 @@ use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
 /// One window at a time: pad actions go to every input root listening.
-static ONE_WINDOW: Mutex<()> = Mutex::new(());
+pub(crate) static ONE_WINDOW: Mutex<()> = Mutex::new(());
 
 /// What the demo's controls did.
 static DONE: Mutex<Vec<String>> = Mutex::new(Vec::new());

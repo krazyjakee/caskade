@@ -44,6 +44,9 @@ pub enum Job {
         hit: Option<NodeId>,
         touch: bool,
     },
+    /// Focus goes to `node` (shown as keyboard focus): a view put it there.
+    #[allow(dead_code, reason = "the library (#94, mounted by #99) sends it")]
+    Focus(NodeId),
 }
 
 /// Frames are checked for at least this long after an action or a click:
@@ -236,8 +239,22 @@ impl Input {
         .unwrap_or_default()
     }
 
-    #[allow(dead_code, reason = "the views (#96 onwards) call it")]
-    /// Changes each time the input layer scrolls a box.
+    #[allow(dead_code, reason = "the library (#94, mounted by #99) calls it")]
+    /// A view scrolled a box itself: what follows scrolling hears of it, as
+    /// Blitz sends no scroll event for a scroll made from code.
+    pub fn scrolled_by_code(&self) {
+        let mut scrolled = self.scrolled;
+        scrolled += 1;
+    }
+
+    #[allow(dead_code, reason = "the library (#94, mounted by #99) calls it")]
+    /// Puts focus on `node`, as keys or a pad would: remembered in its
+    /// sections, with the ring, scrolled into view.
+    pub fn focus(&self, node: NodeId) {
+        let _ = self.inner.jobs.send(Job::Focus(node));
+    }
+
+    /// Changes each time the input layer (or a view) scrolls a box.
     pub fn scrolled(&self) -> u64 {
         *self.scrolled.read()
     }
@@ -424,6 +441,9 @@ impl Input {
                 self.frames();
             }
             Job::Frame => self.act(true, |ui, dispatcher| dispatcher.frame(ui)),
+            Job::Focus(node) => {
+                self.act(true, |ui, dispatcher| dispatcher.focus(ui, node, false));
+            }
             Job::Navigated(key) => {
                 self.act(true, |ui, dispatcher| dispatcher.navigated(ui, &key));
                 self.frames();

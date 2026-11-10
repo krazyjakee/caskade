@@ -16,6 +16,7 @@ mod forwarded;
 mod i18n;
 mod input;
 mod launch;
+mod library;
 mod shell;
 #[cfg(feature = "shots")]
 mod shots;
@@ -311,6 +312,8 @@ fn app() -> Element {
         input::InputRoot {
             data::DataRoot {
                 {smoke::motion()}
+                // The library's scroll benchmark, when asked for (#94).
+                {library::bench::screen()}
                 div { style: "padding: 24px; font-family: sans-serif;", "Caskade" }
             }
         }

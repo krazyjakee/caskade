@@ -419,9 +419,10 @@ pub fn fonts() -> blitz_dom::FontContext {
     fonts
 }
 
-/// The document's resources: `data:` URLs (Blitz's own provider) and theme
+/// The document's resources: `data:` URLs (Blitz's own provider), theme
 /// assets on `caskade-theme://localhost/<id>/<path>`, read from the theme
-/// service. Nothing else: no network (#87).
+/// service, and game artwork on `caskade-asset://` (the library's cached
+/// thumbnails, `library::fetch_art`). Nothing else: no network (#87).
 pub struct Net {
     data: Arc<dyn NetProvider>,
 }
@@ -450,6 +451,10 @@ fn theme_asset(url: &url::Url) -> Option<(String, String)> {
 
 impl NetProvider for Net {
     fn fetch(&self, doc_id: usize, request: Request, handler: Box<dyn NetHandler>) {
+        let handler = match crate::library::fetch_art(&request, handler) {
+            Ok(()) => return,
+            Err(handler) => handler,
+        };
         if request.url.scheme() != "caskade-theme" {
             return self.data.fetch(doc_id, request, handler);
         }
