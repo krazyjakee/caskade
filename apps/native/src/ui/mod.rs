@@ -15,6 +15,9 @@ mod button;
 mod checkbox;
 mod dialog;
 mod error_notice;
+mod game_art;
+mod game_card;
+mod game_row;
 mod icons;
 mod ids;
 mod interact;
@@ -42,6 +45,12 @@ pub use checkbox::Checkbox;
 pub use dialog::{ConfirmDialog, Dialog};
 #[allow(unused_imports)]
 pub use error_notice::{ErrorNotice, NoticeVariant};
+#[allow(unused_imports)]
+pub use game_art::{GameArt, art_background};
+#[allow(unused_imports)]
+pub use game_card::{CardGame, CardVariant, GameCard, platform_line};
+#[allow(unused_imports)]
+pub use game_row::GameRow;
 #[allow(unused_imports)]
 pub use icons::{Icon, Svg};
 #[allow(unused_imports)]
@@ -78,6 +87,9 @@ pub const ANATOMY: &[Entry] = &[
     button::ANATOMY,
     checkbox::ANATOMY,
     error_notice::ANATOMY,
+    game_art::ANATOMY,
+    game_card::ANATOMY,
+    game_row::ANATOMY,
     menu::ANATOMY,
     select::ANATOMY,
     select::POPOVER_ANATOMY,
