@@ -56,17 +56,7 @@ pub mod updates;
 pub mod video;
 pub mod web;
 
-use serde::{Deserialize, Serialize};
-use specta::Type;
-use tauri_specta::Event;
-
-/// The core's answer to `hello`: proof that typed commands and events work.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct Greeting {
-    pub message: String,
-    pub core_version: String,
-}
+pub use caskade_app::commands::hello::Greeting;
 
 /// Greets `name` and emits the `hello` event with the same greeting.
 #[tauri::command]
@@ -75,16 +65,5 @@ pub fn hello<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     name: String,
 ) -> Result<Greeting, String> {
-    let name = name.trim();
-    if name.is_empty() {
-        return Err("name is empty".into());
-    }
-    let greeting = Greeting {
-        message: format!("Hello, {name}!"),
-        core_version: caskade_core::VERSION.into(),
-    };
-    crate::events::Hello(greeting.clone())
-        .emit(&app)
-        .map_err(|error| error.to_string())?;
-    Ok(greeting)
+    caskade_app::commands::hello::hello(&crate::events::sink(app), &name)
 }

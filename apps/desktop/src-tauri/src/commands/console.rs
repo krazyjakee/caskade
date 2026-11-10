@@ -6,15 +6,23 @@
 //! Caskade starts in console mode with `--console`, with `CASKADE_CONSOLE=1`
 //! (`0` keeps it out), or by the `core.console` setting: `auto` follows
 //! gamescope (Steam Deck game mode), then the mode it was last left in.
+//!
+//! Which mode to start in, and remembering it, are
+//! `caskade_app::commands::console`'s; the window is the adapter's.
 
 use crate::tray::Tray;
-use caskade_core::settings::{ConsoleSettings, SettingsService};
+use caskade_app::commands::console as app;
+use caskade_core::settings::SettingsService;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::sync::Mutex;
 use std::time::Duration;
 use tauri::{AppHandle, Manager, PhysicalPosition, PhysicalSize, Runtime, WebviewWindow};
 use tauri_specta::Event as _;
+
+pub use app::{Startup, in_gamescope, wants_console};
+#[cfg(test)]
+use {app::SETTINGS, caskade_core::settings::ConsoleSettings};
 
 /// Console mode went on or off.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type, tauri_specta::Event)]
@@ -29,63 +37,6 @@ pub struct ConsoleModeEvent {
 #[serde(rename_all = "camelCase")]
 pub struct ConsoleRequestEvent {
     pub active: bool,
-}
-
-/// How Caskade was started, for the first mode.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
-pub struct Startup {
-    /// `--console` on the command line.
-    pub flag: bool,
-    /// `CASKADE_CONSOLE`: `1` or `0` overrides the setting.
-    pub forced: Option<bool>,
-    /// Running inside gamescope.
-    pub gamescope: bool,
-}
-
-impl Startup {
-    pub fn read(args: &[String]) -> Self {
-        Self::from(args, |name| std::env::var(name).ok())
-    }
-
-    pub fn from(args: &[String], var: impl Fn(&str) -> Option<String>) -> Self {
-        Self {
-            flag: wants_console(args),
-            forced: match var("CASKADE_CONSOLE").as_deref().map(str::trim) {
-                Some("1" | "true") => Some(true),
-                Some("0" | "false") => Some(false),
-                _ => None,
-            },
-            gamescope: in_gamescope(var),
-        }
-    }
-
-    /// Whether to start in console mode.
-    pub fn console(&self, settings: &ConsoleSettings) -> bool {
-        if self.flag {
-            return true;
-        }
-        if let Some(forced) = self.forced {
-            return forced;
-        }
-        match settings.start.as_str() {
-            "console" => true,
-            "desktop" => false,
-            _ => self.gamescope || settings.active,
-        }
-    }
-}
-
-/// `--console` among `args` (the first one is the program).
-pub fn wants_console(args: &[String]) -> bool {
-    args.iter().skip(1).any(|arg| arg == "--console")
-}
-
-/// gamescope sets `GAMESCOPE_WAYLAND_DISPLAY` for its clients; Steam's game
-/// mode also sets `SteamGamepadUI`.
-pub fn in_gamescope(var: impl Fn(&str) -> Option<String>) -> bool {
-    var("GAMESCOPE_WAYLAND_DISPLAY").is_some_and(|value| !value.is_empty())
-        || var("XDG_CURRENT_DESKTOP").is_some_and(|value| value.eq_ignore_ascii_case("gamescope"))
-        || var("SteamGamepadUI").as_deref() == Some("1")
 }
 
 /// The desktop window, put back on leaving console mode.
@@ -235,23 +186,6 @@ fn change<R: Runtime>(
     Ok(())
 }
 
-const SETTINGS: &str = "core.console";
-
-/// Remembers the mode chosen with the toggle, for `auto` starts.
-async fn remember(service: &SettingsService, active: bool) -> Result<(), String> {
-    let mut value: ConsoleSettings = service.read_or_default(SETTINGS).await;
-    if value.active == active {
-        return Ok(());
-    }
-    value.active = active;
-    let value = serde_json::to_value(value).map_err(|error| error.to_string())?;
-    service
-        .set(SETTINGS, value, None)
-        .await
-        .map(drop)
-        .map_err(|error| error.to_string())
-}
-
 /// The desktop window as window-state saved it. Starting in console mode
 /// races window-state's restore, so the window itself isn't asked yet.
 fn saved_desktop<R: Runtime>(app: &AppHandle<R>) -> Option<DesktopFrame> {
@@ -294,8 +228,7 @@ const CLOSE_AFTER_RESTORE: Duration = Duration::from_millis(400);
 /// close in console mode put the desktop window back first.
 pub fn setup<R: Runtime>(app: &AppHandle<R>, startup: Startup, service: &SettingsService) {
     app.manage(ConsoleWindow::default());
-    let preferences = tauri::async_runtime::block_on(service.read_or_default(SETTINGS));
-    if startup.console(&preferences)
+    if tauri::async_runtime::block_on(app::starts_in_console(&startup, service))
         && let Err(error) = change(app, true, saved_desktop(app))
     {
         tracing::warn!(%error, "couldn't start in console mode");
@@ -350,7 +283,7 @@ pub async fn set_console_mode<R: Runtime>(
     if !keep {
         return Ok(());
     }
-    remember(&service, active)
+    app::remember(&service, active)
         .await
         .map_err(crate::error::internal)
 }

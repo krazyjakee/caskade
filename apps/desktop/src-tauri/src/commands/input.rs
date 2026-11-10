@@ -2,46 +2,29 @@
 //! to the webview as `inputActionEvent`s while a Caskade window has focus.
 //! `guide` is always forwarded, so it can summon Caskade over a game.
 
-use caskade_core::bus::{Bus, Event};
-use caskade_input::{Action, InputAction, InputEvent, InputService, PadInfo};
-use serde::{Deserialize, Serialize};
-use specta::Type;
+pub use app::Summoner;
+use caskade_app::commands::input as app;
+// The webview's event, which the app sends as `caskade_app`'s.
+pub use crate::events::InputActionEvent;
+use caskade_core::bus::Bus;
+use caskade_input::{InputEvent, InputService, PadInfo};
 use tauri::{AppHandle, Manager, Runtime};
-use tauri_specta::Event as _;
 
-/// One normalized action from a pad.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type, tauri_specta::Event)]
-pub struct InputActionEvent(pub InputAction);
-
-/// Where the service's events go. `focused` decides whether the user is in
-/// Caskade; `summon` runs on `guide` (#149) before the webview hears it;
-/// pad connects reach the bus as `input.devices.changed`.
+/// Where the service's events go (`caskade_app`'s sink, with the window's
+/// focus and raise).
 pub fn sink<R: Runtime>(
     app: AppHandle<R>,
     bus: Option<Bus>,
     focused: impl Fn(&AppHandle<R>) -> bool + Send + Sync + 'static,
     summon: impl Fn(&AppHandle<R>) + Send + Sync + 'static,
 ) -> impl Fn(InputEvent) + Send + Sync + 'static {
-    move |event| match event {
-        InputEvent::Action(action) => {
-            if action.action == Action::Guide {
-                summon(&app);
-            }
-            if (action.action == Action::Guide || focused(&app))
-                && let Err(error) = InputActionEvent(action).emit(&app)
-            {
-                tracing::warn!(%error, "input action not delivered");
-            }
-        }
-        InputEvent::Devices(pads) => {
-            tracing::info!(pads = pads.len(), "gamepads changed");
-            if let Some(bus) = &bus {
-                bus.emit(Event::InputDevicesChanged {
-                    connected: u32::try_from(pads.len()).unwrap_or(u32::MAX),
-                });
-            }
-        }
-    }
+    let (focus, raise) = (app.clone(), app.clone());
+    app::sink(
+        crate::events::sink(app),
+        bus,
+        move || focused(&focus),
+        move || summon(&raise),
+    )
 }
 
 /// Whether any Caskade window has focus.
@@ -75,28 +58,6 @@ pub fn setup<R: Runtime>(app: &AppHandle<R>, bus: Bus) {
     app.manage(service);
 }
 
-/// Repeated guide presses within this raise the window once.
-const SUMMON_DEBOUNCE: std::time::Duration = std::time::Duration::from_millis(600);
-
-/// Debounces `guide`.
-#[derive(Default)]
-pub struct Summoner(std::sync::Mutex<Option<std::time::Instant>>);
-
-impl Summoner {
-    /// Whether a press at `now` should raise the window.
-    pub fn due(&self, now: std::time::Instant) -> bool {
-        let mut last = self
-            .0
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner());
-        if last.is_some_and(|at| now.saturating_duration_since(at) < SUMMON_DEBOUNCE) {
-            return false;
-        }
-        *last = Some(now);
-        true
-    }
-}
-
 /// Brings the main window to the front for guide, even over a running game
 /// or from the tray.
 pub fn raise<R: Runtime>(app: &AppHandle<R>) {
@@ -108,7 +69,7 @@ pub fn raise<R: Runtime>(app: &AppHandle<R>) {
 #[tauri::command]
 #[specta::specta]
 pub fn input_devices(state: tauri::State<'_, InputService>) -> Vec<PadInfo> {
-    state.devices()
+    app::input_devices(&state)
 }
 
 #[cfg(test)]

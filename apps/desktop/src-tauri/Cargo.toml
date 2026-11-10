@@ -66,11 +66,6 @@ tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
 tauri-plugin-deep-link = "2"
 tauri-plugin-window-state = "2"
 tauri-plugin-dialog = "2"
-# The clipboard from Rust, for the on-screen keyboard's Paste and Copy
-# buttons a pad presses (a webview allows neither without a click). Text
-# only, and X11's clipboard on Linux (XWayland passes it on), as the app
-# itself runs on X11.
-arboard = { version = "3.6", default-features = false }
 # Caskade's own updates (`commands/app_update.rs`).
 tauri-plugin-updater = "2"
 time = { version = "0.3", features = ["formatting"] }

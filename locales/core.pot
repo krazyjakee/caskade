@@ -5068,6 +5068,42 @@ msgstr ""
 msgid "This add-on isn't installed."
 msgstr ""
 
+#: crates/caskade-app/src/commands/app_update.rs
+msgid "Caskade is already checking for or installing an update."
+msgstr ""
+
+#: crates/caskade-app/src/commands/app_update.rs
+msgid "An update is installed: restart Caskade to finish."
+msgstr ""
+
+#: crates/caskade-app/src/commands/app_update.rs
+msgid "Check for updates first: there's no new version to install."
+msgstr ""
+
+#: crates/caskade-app/src/commands/app_update.rs
+msgid "Install an update before restarting."
+msgstr ""
+
+#: crates/caskade-app/src/commands/app_update.rs
+msgid "the download isn't a Debian package"
+msgstr ""
+
+#: crates/caskade-app/src/commands/app_update.rs
+msgid "pkexec isn't installed, so Caskade can't ask for permission. Install the new .deb from the release page yourself."
+msgstr ""
+
+#: crates/caskade-app/src/commands/app_update.rs
+msgid "the password prompt was dismissed"
+msgstr ""
+
+#: crates/caskade-app/src/commands/app_update.rs
+msgid "this account may not install packages, or no password prompt could be shown"
+msgstr ""
+
+#: crates/caskade-app/src/commands/app_update.rs
+msgid "the package manager failed: {detail}"
+msgstr ""
+
 #: crates/caskade-app/src/commands/backup.rs
 msgid "That isn't a backup in the backup folder."
 msgstr ""
@@ -5082,6 +5118,14 @@ msgstr ""
 
 #: crates/caskade-app/src/commands/backup.rs
 msgid "Wait for installs, moves and updates to finish, or cancel them: restoring restarts Caskade."
+msgstr ""
+
+#: crates/caskade-app/src/commands/clipboard.rs
+msgid "the clipboard isn't available"
+msgstr ""
+
+#: crates/caskade-app/src/commands/clipboard.rs
+msgid "the clipboard couldn't be written"
 msgstr ""
 
 #: crates/caskade-app/src/commands/copies.rs
@@ -5402,22 +5446,6 @@ msgid "Development builds don't update themselves."
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "Caskade is already checking for or installing an update."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "An update is installed: restart Caskade to finish."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "Check for updates first: there's no new version to install."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "Install an update before restarting."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "The update feed's address is invalid: {error}"
 msgstr ""
 
@@ -5443,34 +5471,6 @@ msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "Couldn't install the update: {error}"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "the download isn't a Debian package"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "pkexec isn't installed, so Caskade can't ask for permission. Install the new .deb from the release page yourself."
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "the password prompt was dismissed"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "this account may not install packages, or no password prompt could be shown"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "the package manager failed: {detail}"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/clipboard.rs
-msgid "the clipboard isn't available"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/commands/clipboard.rs
-msgid "the clipboard couldn't be written"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/commands/console.rs

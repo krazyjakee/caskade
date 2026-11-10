@@ -1,7 +1,8 @@
 //! #146: an injected pad press reaches the webview as `inputActionEvent`,
 //! only while Caskade has focus (except `guide`), on Tauri's mock runtime.
 use super::*;
-use caskade_input::{Button, GlyphFamily, Raw, Timing};
+use caskade_core::bus::Event;
+use caskade_input::{Action, Button, GlyphFamily, InputAction, Raw, Timing};
 use std::{
     sync::{
         Arc, Mutex,
@@ -13,6 +14,7 @@ use tauri::{
     Listener,
     test::{mock_builder, mock_context, noop_assets},
 };
+use tauri_specta::Event as _;
 
 #[test]
 fn injected_pad_input_reaches_the_webview_while_focused() {

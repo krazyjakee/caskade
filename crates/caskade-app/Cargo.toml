@@ -20,6 +20,13 @@ caskade-discovery = { path = "../caskade-discovery" }
 caskade-addons = { path = "../caskade-addons" }
 # Game streaming: the managed host and client, and pairing.
 caskade-streaming = { path = "../caskade-streaming" }
+# Settings → Statistics' sampler.
+caskade-system-stats = { path = "../caskade-system-stats" }
+# The clipboard, for the on-screen keyboard's Paste and the Copy buttons a
+# pad presses: text only, and X11's clipboard on Linux.
+arboard = { version = "3.6", default-features = false }
+# Gamepads for console mode.
+caskade-input = { path = "../caskade-input" }
 # Plugins, their UI and the themes they bundle.
 caskade-plugin-host = { path = "../caskade-plugin-host" }
 serde = { version = "1", features = ["derive"] }

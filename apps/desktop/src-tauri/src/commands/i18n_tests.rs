@@ -1,11 +1,13 @@
 //! The language command and event on the mock runtime.
 use super::*;
 use crate::commands::test_ipc::invoke;
+use caskade_core::i18n;
 use std::sync::{Arc, Mutex};
 use tauri::{
     Listener,
     test::{MockRuntime, mock_builder, mock_context, noop_assets},
 };
+use tauri_specta::Event;
 
 fn app() -> (tauri::App<MockRuntime>, tauri::WebviewWindow<MockRuntime>) {
     let specta = tauri_specta::Builder::<MockRuntime>::new()
@@ -43,7 +45,8 @@ fn each_change_of_language_reaches_the_webview() {
     app.listen(LocaleChanged::NAME, {
         let seen = seen.clone();
         move |event| {
-            let payload: LocaleChanged = serde_json::from_str(event.payload()).unwrap();
+            let payload: caskade_app::events::LocaleChanged =
+                serde_json::from_str(event.payload()).unwrap();
             seen.lock().unwrap().push(payload.locale);
         }
     });

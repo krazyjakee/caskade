@@ -2,37 +2,14 @@
 //! watches while it is open and visible, renews its watch every few
 //! seconds, and gets each sample as a `SystemStatsSampled` event. Read-only:
 //! nothing here changes the machine or the library.
+pub use app::*;
+use caskade_app::commands::system_stats as app;
 
-use caskade_system_stats::{SystemSample, SystemStats, SystemStatsSnapshot};
-use serde::{Deserialize, Serialize};
-use specta::Type;
+use caskade_system_stats::{SystemStats, SystemStatsSnapshot};
 use tauri::{AppHandle, Manager, Runtime, State};
-use tauri_specta::Event;
-
-/// Each sample, while anyone watches.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type, Event)]
-pub struct SystemStatsSampled(pub SystemSample);
-
 /// Manages the sampler and forwards its samples to the webview.
 pub fn setup<R: Runtime>(app: &AppHandle<R>) {
-    let stats = SystemStats::new();
-    let mut samples = stats.subscribe();
-    app.manage(stats);
-    let handle = app.clone();
-    tauri::async_runtime::spawn(async move {
-        use tokio::sync::broadcast::error::RecvError;
-        loop {
-            match samples.recv().await {
-                Ok(sample) => {
-                    if let Err(error) = SystemStatsSampled(sample).emit(&handle) {
-                        tracing::debug!(%error, "system statistics sample not delivered");
-                    }
-                }
-                Err(RecvError::Lagged(_)) => continue,
-                Err(RecvError::Closed) => break,
-            }
-        }
-    });
+    app.manage(app::setup(crate::events::sink(app.clone())));
 }
 
 /// Starts or renews `watcher`'s watch (it lasts 30 s unless renewed) and
@@ -44,7 +21,7 @@ pub async fn system_stats_watch(
     watcher: String,
     history: bool,
 ) -> Result<SystemStatsSnapshot, String> {
-    Ok(stats.watch(&watcher, history))
+    app::system_stats_watch(&stats, watcher, history).await
 }
 
 /// Ends `watcher`'s watch; sampling stops when no watch is left.
@@ -54,8 +31,7 @@ pub async fn system_stats_unwatch(
     stats: State<'_, SystemStats>,
     watcher: String,
 ) -> Result<(), String> {
-    stats.unwatch(&watcher);
-    Ok(())
+    app::system_stats_unwatch(&stats, watcher).await
 }
 
 #[cfg(test)]

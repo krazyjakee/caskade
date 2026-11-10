@@ -9,10 +9,6 @@ use tauri_specta::Event;
 
 pub use caskade_app::events::{LIBRARY_WINDOW, LibraryChange};
 
-/// Emitted after every `hello` command.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type, Event)]
-pub struct Hello(pub crate::commands::Greeting);
-
 /// A webview event for each app layer event type, named as it is.
 macro_rules! webview_events {
     ($($name:ident),* $(,)?) => {
@@ -74,6 +70,11 @@ webview_events!(
     InstallRequested,
     InstallRefused,
     StreamingPairingFinished,
+    LocaleChanged,
+    SystemStatsSampled,
+    AppUpdateChanged,
+    InputActionEvent,
+    Hello,
 );
 
 /// The app layer's [`app::Emit`] sink for this app's webview.

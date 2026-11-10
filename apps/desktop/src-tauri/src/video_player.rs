@@ -17,10 +17,7 @@
 use caskade_core::launch::{FULLSCREEN_ARG, GEOMETRY_ARG, WindowPlacement};
 use std::ffi::OsString;
 
-/// The video-window argument `run` dispatches on, before the app starts.
-pub const VIDEO_ARG: &str = "--video";
-/// The window's title: the game's, and the video's name.
-pub const TITLE_ARG: &str = "--title";
+pub use caskade_app::commands::video::{TITLE_ARG, VIDEO_ARG, is_video_id};
 
 /// The player's own page; the id goes on the end.
 const EMBED: &str = "https://www.youtube-nocookie.com/embed/";
@@ -80,14 +77,6 @@ impl Options {
         }
         Some(options)
     }
-}
-
-/// A YouTube video id: 11 letters, digits, `-` or `_`.
-pub fn is_video_id(id: &str) -> bool {
-    id.len() == 11
-        && id
-            .bytes()
-            .all(|byte| byte.is_ascii_alphanumeric() || byte == b'-' || byte == b'_')
 }
 
 /// The player's address for `video_id`, playing at once.

@@ -18,7 +18,7 @@ pub fn setup<R: Runtime>(
     // Caskade's updates: noted while one is on offer, resolved once none is.
     super::app_update::AppUpdateChanged::listen_any(app, move |event| {
         use super::app_update::AppUpdatePhase::*;
-        let status = event.payload.0;
+        let status = event.payload.0.0;
         let version = match status.phase {
             Available => status.release.map(|release| release.version),
             UpToDate | Downloading | Installing | Ready => None,

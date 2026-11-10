@@ -1160,15 +1160,18 @@ dependencies = [
 name = "caskade-app"
 version = "0.1.0"
 dependencies = [
+ "arboard",
  "caskade-achievements",
  "caskade-addons",
  "caskade-backup",
  "caskade-core",
  "caskade-discovery",
+ "caskade-input",
  "caskade-plugin-host",
  "caskade-share",
  "caskade-sources",
  "caskade-streaming",
+ "caskade-system-stats",
  "qrcode",
  "serde",
  "serde_json",
@@ -1275,7 +1278,6 @@ dependencies = [
 name = "caskade-desktop"
 version = "0.1.4"
 dependencies = [
- "arboard",
  "caskade-achievements",
  "caskade-addons",
  "caskade-app",

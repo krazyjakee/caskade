@@ -5,7 +5,11 @@
 
 // The commands' own events.
 pub use crate::commands::addon_packages::AddonProgress;
+pub use crate::commands::app_update::AppUpdateChanged;
 pub use crate::commands::backup::BackupChanged;
+pub use crate::commands::hello::Hello;
+pub use crate::commands::i18n::LocaleChanged;
+pub use crate::commands::input::InputActionEvent;
 pub use crate::commands::install_requests::InstallRefused;
 pub use crate::commands::install_requests::InstallRequested;
 pub use crate::commands::notifications::NotificationsChanged;
@@ -17,6 +21,7 @@ pub use crate::commands::store_accounts::StoreAccountsChanged;
 pub use crate::commands::streaming::StreamingPairingFinished;
 pub use crate::commands::sync::DevicesChanged;
 pub use crate::commands::sync::PairingLinkOpened;
+pub use crate::commands::system_stats::SystemStatsSampled;
 pub use crate::commands::themes::ThemeReloaded;
 pub use crate::discovery::DiscoveryChanged;
 use caskade_core::bus::{Event as BusEvent, GameSession};
@@ -177,6 +182,11 @@ pub enum Event {
     InstallRequested(InstallRequested),
     InstallRefused(InstallRefused),
     StreamingPairingFinished(StreamingPairingFinished),
+    LocaleChanged(LocaleChanged),
+    SystemStatsSampled(SystemStatsSampled),
+    AppUpdateChanged(AppUpdateChanged),
+    InputActionEvent(InputActionEvent),
+    Hello(Hello),
 }
 
 /// Where a shell receives [`Event`]s: called on the async runtime, in the
@@ -250,6 +260,11 @@ impl Event {
             Self::InstallRequested(_) => "install.requested",
             Self::InstallRefused(_) => "install.refused",
             Self::StreamingPairingFinished(_) => "streaming.pairing.finished",
+            Self::LocaleChanged(_) => "locale.changed",
+            Self::SystemStatsSampled(_) => "system.stats.sampled",
+            Self::AppUpdateChanged(_) => "app_update.changed",
+            Self::InputActionEvent(_) => "input.action",
+            Self::Hello(_) => "hello",
         }
     }
 }

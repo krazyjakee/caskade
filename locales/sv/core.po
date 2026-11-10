@@ -5070,6 +5070,42 @@ msgstr "bara teman som Caskade har installerat kan tas bort"
 msgid "This add-on isn't installed."
 msgstr "Det här tillägget är inte installerat."
 
+#: crates/caskade-app/src/commands/app_update.rs
+msgid "Caskade is already checking for or installing an update."
+msgstr "Caskade söker redan efter eller installerar en uppdatering."
+
+#: crates/caskade-app/src/commands/app_update.rs
+msgid "An update is installed: restart Caskade to finish."
+msgstr "En uppdatering är installerad: starta om Caskade för att slutföra."
+
+#: crates/caskade-app/src/commands/app_update.rs
+msgid "Check for updates first: there's no new version to install."
+msgstr "Sök efter uppdateringar först: det finns ingen ny version att installera."
+
+#: crates/caskade-app/src/commands/app_update.rs
+msgid "Install an update before restarting."
+msgstr "Installera en uppdatering innan du startar om."
+
+#: crates/caskade-app/src/commands/app_update.rs
+msgid "the download isn't a Debian package"
+msgstr "nedladdningen är inte ett Debian-paket"
+
+#: crates/caskade-app/src/commands/app_update.rs
+msgid "pkexec isn't installed, so Caskade can't ask for permission. Install the new .deb from the release page yourself."
+msgstr "pkexec är inte installerat, så Caskade kan inte be om tillåtelse. Installera den nya .deb-filen från utgåvosidan själv."
+
+#: crates/caskade-app/src/commands/app_update.rs
+msgid "the password prompt was dismissed"
+msgstr "lösenordsfrågan stängdes"
+
+#: crates/caskade-app/src/commands/app_update.rs
+msgid "this account may not install packages, or no password prompt could be shown"
+msgstr "det här kontot får inte installera paket, eller så kunde ingen lösenordsfråga visas"
+
+#: crates/caskade-app/src/commands/app_update.rs
+msgid "the package manager failed: {detail}"
+msgstr "pakethanteraren misslyckades: {detail}"
+
 #: crates/caskade-app/src/commands/backup.rs
 msgid "That isn't a backup in the backup folder."
 msgstr "Det är ingen säkerhetskopia i mappen för säkerhetskopior."
@@ -5085,6 +5121,14 @@ msgstr "Stäng spelen som körs först: återställningen startar om Caskade."
 #: crates/caskade-app/src/commands/backup.rs
 msgid "Wait for installs, moves and updates to finish, or cancel them: restoring restarts Caskade."
 msgstr "Vänta tills installationer, flyttar och uppdateringar är klara, eller avbryt dem: återställningen startar om Caskade."
+
+#: crates/caskade-app/src/commands/clipboard.rs
+msgid "the clipboard isn't available"
+msgstr "urklipp är inte tillgängligt"
+
+#: crates/caskade-app/src/commands/clipboard.rs
+msgid "the clipboard couldn't be written"
+msgstr "det gick inte att skriva till urklipp"
 
 #: crates/caskade-app/src/commands/copies.rs
 msgid "that device has no copy of the game"
@@ -5404,22 +5448,6 @@ msgid "Development builds don't update themselves."
 msgstr "Utvecklingsversioner uppdaterar sig inte själva."
 
 #: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "Caskade is already checking for or installing an update."
-msgstr "Caskade söker redan efter eller installerar en uppdatering."
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "An update is installed: restart Caskade to finish."
-msgstr "En uppdatering är installerad: starta om Caskade för att slutföra."
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "Check for updates first: there's no new version to install."
-msgstr "Sök efter uppdateringar först: det finns ingen ny version att installera."
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "Install an update before restarting."
-msgstr "Installera en uppdatering innan du startar om."
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "The update feed's address is invalid: {error}"
 msgstr "Uppdateringsflödets adress är ogiltig: {error}"
 
@@ -5446,34 +5474,6 @@ msgstr "Installerar Caskade {version}"
 #: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "Couldn't install the update: {error}"
 msgstr "Det gick inte att installera uppdateringen: {error}"
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "the download isn't a Debian package"
-msgstr "nedladdningen är inte ett Debian-paket"
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "pkexec isn't installed, so Caskade can't ask for permission. Install the new .deb from the release page yourself."
-msgstr "pkexec är inte installerat, så Caskade kan inte be om tillåtelse. Installera den nya .deb-filen från utgåvosidan själv."
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "the password prompt was dismissed"
-msgstr "lösenordsfrågan stängdes"
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "this account may not install packages, or no password prompt could be shown"
-msgstr "det här kontot får inte installera paket, eller så kunde ingen lösenordsfråga visas"
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "the package manager failed: {detail}"
-msgstr "pakethanteraren misslyckades: {detail}"
-
-#: apps/desktop/src-tauri/src/commands/clipboard.rs
-msgid "the clipboard isn't available"
-msgstr "urklipp är inte tillgängligt"
-
-#: apps/desktop/src-tauri/src/commands/clipboard.rs
-msgid "the clipboard couldn't be written"
-msgstr "det gick inte att skriva till urklipp"
 
 #: apps/desktop/src-tauri/src/commands/console.rs
 #: apps/desktop/src-tauri/src/commands/guide.rs
