@@ -51,6 +51,15 @@ and pasting as before.
   field's text on that display's clipboard and Ctrl+V pastes from it,
   dropping the line break.
 
+- **Microsoft IME (Japanese) on Windows 10**, the test VM's desktop
+  session ([`apps/native/scripts/ime-windows.ps1`](../../apps/native/scripts/ime-windows.ps1),
+  the same demo built for Windows): on the Japanese layout with the IME
+  off, letters type as usual; with it on, "nihon" composes (the preedit
+  にほｎ underlined in the field, the candidate window opened under the
+  caret), Space converts and Enter commits: `compositionstart`,
+  `compositionupdate ｎ` … `にほｎ`, `日本`, `input abxy日本`,
+  `compositionend 日本`.
+
 The scripts start a session bus of their own after switching to a private
 HOME and runtime dir: services it activates (a portal, a keyring) get the
 private dirs. Under `dbus-run-session` alone they got the user's real ones
@@ -58,9 +67,9 @@ private dirs. Under `dbus-run-session` alone they got the user's real ones
 
 ## Gaps left
 
-- winit's Wayland, Windows and macOS IMEs and real-session input methods
-  (fcitx5 and IBus with CJK engines on a desktop, Microsoft IME, macOS input
-  sources) are user checks in #120.
+- Real-session input methods are user checks in #120: fcitx5 and IBus with
+  CJK engines on an X11 and a Wayland desktop (winit's Wayland IME is
+  untested here), Microsoft IME on Windows 11 hardware, macOS input sources.
 - No `beforeinput`, `paste`/`copy`/`cut` events (not needed by #93), no undo
   (parley's editor has none), no middle-click paste of the primary selection,
   `::selection` colours only the highlight (not the selected text).
