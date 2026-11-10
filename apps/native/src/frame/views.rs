@@ -1,0 +1,90 @@
+//! What each page shows. The views come with their issues (#97–#108):
+//! until then a page shows its name and "Not built yet.", as the webview's
+//! `PlaceholderView`, except the library, whose grid (#94) shows the
+//! route's filter, sort and search.
+
+use crate::library::VirtualLibrary;
+use crate::router::{LibraryRoute, Route, use_router};
+use caskade_core::model::{GameFilter, ListGames};
+use caskade_ui_i18n::{t, tp};
+use dioxus_native::prelude::*;
+
+/// The page the router shows.
+#[component]
+pub fn Outlet() -> Element {
+    let router = use_router();
+    let route = router.route();
+    match route {
+        Route::Home => placeholder(tp!(
+            note = "The sidebar link to the home view",
+            "navigation",
+            "Home"
+        )),
+        Route::Library(library) => rsx! {
+            Library { library }
+        },
+        Route::Game { .. } | Route::StoreGame { .. } => placeholder(t!("Game")),
+        Route::Activity { .. } => rsx! {
+            super::notifications::Activity { route }
+        },
+        Route::Store(_) => placeholder(t!("Store")),
+        Route::Collections { .. } | Route::Collection { .. } => placeholder(t!("Collections")),
+        Route::Settings { .. } => placeholder(t!("Settings")),
+        Route::Plugin { .. } | Route::NotFound { .. } => placeholder(t!("Not found")),
+    }
+}
+
+/// A page that isn't built yet: its name, as the webview's
+/// `PlaceholderView`.
+pub fn placeholder(title: String) -> Element {
+    rsx! {
+        div { class: "grid h-full flex-1 place-items-center",
+            div { class: "text-center",
+                h1 { class: "text-2xl font-semibold", "{title}" }
+                p { class: "mt-2 text-fg-subtle", {t!("Not built yet.")} }
+            }
+        }
+    }
+}
+
+/// The library's games for its route: the full view (filters bar,
+/// selection, sorting) is #99's.
+#[component]
+fn Library(library: LibraryRoute) -> Element {
+    let router = use_router();
+    let stats = crate::data::use_library_stats();
+    // With nothing played, the library opens on every game; choosing
+    // Recently Played by name keeps it (`router.tsx`).
+    let nothing_recent = library.opening
+        && library.filter == GameFilter::Recent
+        && matches!(&*stats.read(), Some(Ok(stats)) if stats.recent == 0);
+    use_effect(use_reactive!(|nothing_recent| {
+        if nothing_recent {
+            let mut route = router.peek();
+            if let Route::Library(library) = &mut route {
+                library.filter = GameFilter::All;
+            }
+            router.replace(&route.href());
+        }
+    }));
+    let query = ListGames {
+        filter: library.filter,
+        sort: library.sort,
+        query: library.q.clone(),
+        platform: library.platform.clone(),
+        ..ListGames::default()
+    };
+    rsx! {
+        div {
+            "data-view": "library",
+            style: "display: flex; flex-direction: column; flex: 1; min-height: 0;",
+            VirtualLibrary {
+                query,
+                layout: library.layout,
+                events: crate::library::Events {
+                    open: Some(EventHandler::new(move |id: String| router.open_game(&id))),
+                },
+            }
+        }
+    }
+}

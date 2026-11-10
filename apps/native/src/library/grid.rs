@@ -15,6 +15,7 @@ use super::art::{self, Variant};
 use super::window::{Frame, Layout, PAGE};
 use crate::data::{DataSource, change};
 use crate::input::{Bind, use_input, use_input_action};
+use crate::ui::{CardGame, GameCard, GameRow};
 use blitz_dom::{BaseDocument, NodeId, ScrollBehavior};
 use caskade_core::model::{GameSummary, ListGames, TitleLetter};
 use caskade_ui_data::{Changed, Key as DataKey};
@@ -366,11 +367,14 @@ pub fn VirtualLibrary(
                     div {
                         "data-part": "table-header",
                         role: "row",
-                        class: "z-20 items-center gap-4 bg-surface-base px-3 text-xs text-fg-muted",
-                        style: "position: sticky; top: 0; display: flex; height: {layout.rows_top()}px",
-                        span { role: "columnheader", class: "grow pl-10", {tp!("library column", "Title")} }
-                        span { role: "columnheader", class: "w-40", {tp!("library column", "Last played")} }
-                        span { role: "columnheader", class: "w-24 text-right", {tp!("library column", "Playtime")} }
+                        class: "z-20 grid w-full items-center gap-3 border-b border-border-strong bg-surface-base px-2 font-mono text-[11px] font-normal tracking-widest text-fg-subtle uppercase",
+                        style: "position: sticky; top: 0; height: {layout.rows_top()}px; grid-template-columns: {LIST_COLUMNS};",
+                        span { role: "columnheader", class: "truncate pl-10 text-left", {tp!("library column", "Title")} }
+                        span { role: "columnheader", class: "truncate text-left", {tp!("library column", "Status")} }
+                        span { role: "columnheader", class: "truncate text-left", {tp!("library column", "Last played")} }
+                        span { role: "columnheader", class: "truncate text-right", {tp!("library column", "Playtime")} }
+                        span { role: "columnheader", class: "truncate text-right", {tp!("library column", "Size")} }
+                        span { role: "columnheader", class: "sr-only", {tp!("library column", "Actions")} }
                     }
                 }
                 div {
@@ -496,7 +500,12 @@ fn card_node(doc: &BaseDocument, scroller: NodeId, index: usize) -> Option<NodeI
     found
 }
 
-/// One game: a card in the grid, a row in the list.
+/// The list's columns (`LibraryRow.tsx`'s `listColumns`): title, status,
+/// last played, playtime, size and actions; its header uses them too.
+pub const LIST_COLUMNS: &str = "minmax(0,1fr) 7.5rem 7.5rem 5rem 5.5rem 2rem";
+
+/// One game: a card in the grid, a row in the list (`ui::GameCard`,
+/// `ui::GameRow`, #93).
 #[component]
 fn Game(
     game: GameSummary,
@@ -506,7 +515,7 @@ fn Game(
     open: Option<EventHandler<String>>,
 ) -> Element {
     let id = game.id.clone();
-    let choose = move |_| {
+    let on_open = move |_| {
         if let Some(open) = open {
             open.call(id.clone());
         }
@@ -516,73 +525,35 @@ fn Game(
             focused.set(Some(index));
         }
     };
-    let platform = platform_line(&game.platforms);
+    let focus_key = format!("game-{}", game.id);
+    // A pad starts on the first game.
+    let first = (index == 0).then_some("true");
     if list {
         let icon = art::url(game.icon.as_ref(), Variant::Icon);
-        let last_played = game
-            .last_played_at_ms
-            .map(super::local_date_time)
-            .map(caskade_ui_i18n::format::date_time)
-            .unwrap_or_else(|| caskade_ui_i18n::format::last_played(None));
-        let playtime = caskade_ui_i18n::format::playtime(game.playtime_ms / 1000);
+        let card = CardGame::from_summary(&game, None);
         return rsx! {
-            div {
-                "data-cs": "game-row",
+            GameRow {
+                game: card,
+                icon,
+                columns: LIST_COLUMNS.to_owned(),
+                focus_key,
+                on_open,
+                on_focus,
                 "data-index": "{index}",
-                "data-focus-key": "game-{game.id}",
-                // A pad starts on the first game.
-                "data-focus-default": if index == 0 { "true" },
-                role: "row",
-                tabindex: "0",
-                class: "flex h-full items-center gap-4 border-b border-border px-3",
-                onfocusin: on_focus,
-                onclick: choose,
-                div { class: "size-7 shrink-0 overflow-hidden rounded",
-                    if let Some(icon) = icon {
-                        img { src: "{icon}", alt: "", class: "size-full object-cover" }
-                    }
-                }
-                span { "data-part": "title", class: "grow truncate text-sm", "{game.title}" }
-                span { class: "w-40 truncate text-xs text-fg-muted", "{last_played}" }
-                span { class: "w-24 text-right text-xs text-fg-muted", "{playtime}" }
+                "data-focus-default": first,
             }
         };
     }
     let cover = art::url(game.cover.as_ref(), Variant::Card);
     rsx! {
-        div {
-            "data-cs": "game-card",
+        GameCard {
+            game: CardGame::from_summary(&game, cover),
+            index,
+            focus_key,
+            on_open,
+            on_focus,
             "data-index": "{index}",
-            "data-focus-key": "game-{game.id}",
-            // A pad starts on the first game.
-            "data-focus-default": if index == 0 { "true" },
-            role: "link",
-            tabindex: "0",
-            class: "flex min-w-0 flex-col gap-2",
-            onfocusin: on_focus,
-            onclick: choose,
-            div {
-                "data-cs": "game-art",
-                class: "aspect-[2/3] w-full overflow-hidden rounded-card border border-border bg-surface-raised",
-                if let Some(cover) = cover {
-                    img { src: "{cover}", alt: "", class: "size-full object-cover" }
-                }
-            }
-            span { "data-part": "title", class: "truncate text-sm font-medium", "{game.title}" }
-            if let Some(platform) = platform {
-                span { "data-part": "platform", class: "truncate text-xs text-fg-muted", "{platform}" }
-            }
+            "data-focus-default": first,
         }
-    }
-}
-
-/// A game's platform under its title, unless it's a PC game, as the
-/// webview's `platformLine`.
-fn platform_line(platforms: &[String]) -> Option<String> {
-    match platforms {
-        [] => None,
-        [only] if only == "PC" || only == "Windows" => None,
-        [first] => Some(first.clone()),
-        [first, rest @ ..] => Some(format!("{first} +{}", rest.len())),
     }
 }

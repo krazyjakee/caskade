@@ -16,12 +16,16 @@ mod anatomy;
 mod data;
 mod dialogs;
 mod forwarded;
+// The frame around the views: sidebar, top bar, status bar (#96).
+mod frame;
 #[cfg(any(debug_assertions, feature = "gallery"))]
 mod gallery;
 mod i18n;
 mod input;
 mod launch;
 mod library;
+// Navigation between the pages (#96), in place of the webview's router.
+mod router;
 mod shell;
 #[cfg(feature = "shots")]
 mod shots;
@@ -283,10 +287,24 @@ fn attributes(restored: Option<window_state::WindowState>) -> dioxus_native::Win
     use dioxus_native::winit::dpi::{PhysicalPosition, PhysicalSize};
     let window = dioxus_native::WindowAttributes::default()
         .with_title("Caskade")
+        // Caskade draws the title bar on Windows and Linux (`frame::window`,
+        // #96).
+        .with_decorations(!frame::window::CUSTOM_FRAME)
         .with_min_surface_size(dioxus_native::LogicalSize::new(
             f64::from(window_state::MIN_WIDTH),
             f64::from(window_state::MIN_HEIGHT),
         ));
+    // macOS keeps its traffic lights, over the top of the sidebar.
+    #[cfg(target_os = "macos")]
+    let window = {
+        use dioxus_native::winit::platform::macos::WindowAttributesMacOS;
+        window.with_platform_attributes(Box::new(
+            WindowAttributesMacOS::default()
+                .with_titlebar_transparent(true)
+                .with_title_hidden(true)
+                .with_fullsize_content_view(true),
+        ))
+    };
     match restored {
         Some(state) => window
             .with_surface_size(PhysicalSize::new(state.width, state.height))
@@ -332,7 +350,7 @@ fn app() -> Element {
                 {smoke::motion()}
                 // The library's scroll benchmark, when asked for (#94).
                 {library::bench::screen()}
-                div { style: "padding: 24px; font-family: sans-serif;", "Caskade" }
+                frame::Frame {}
             }
         }
     }

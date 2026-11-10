@@ -31,6 +31,7 @@ msgid "({region} version)"
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "(no longer in the library)"
 msgstr ""
 
@@ -41,6 +42,7 @@ msgstr ""
 
 #. A game added to the library that was later merged into another game
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "(now part of {into})"
 msgstr ""
 
@@ -228,6 +230,7 @@ msgstr[1] ""
 #. placeholder {0}: page.total - page.items.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7BShow+more+%28%23+left%29%7D+other+%7BShow+more+%28%23+left%29%7D%7D&pluralize_on=0
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Show more (# left)"
 msgid_plural "Show more (# left)"
 msgstr[0] ""
@@ -344,6 +347,8 @@ msgstr ""
 #. js-lingui:icu=%7Bactive%2C+plural%2C+one+%7B%23+active+job%7D+other+%7B%23+active+jobs%7D%7D&pluralize_on=active
 #: apps/desktop/src/shell/ActivityLink.tsx
 #: apps/desktop/src/views/activity/ActivityView.tsx
+#: apps/native/src/frame/notifications.rs
+#: apps/native/src/frame/topbar.rs
 msgid "# active job"
 msgid_plural "# active jobs"
 msgstr[0] ""
@@ -351,6 +356,7 @@ msgstr[1] ""
 
 #. js-lingui:icu=%7Bactive%2C+plural%2C+one+%7B%23+active%7D+other+%7B%23+active%7D%7D&pluralize_on=active
 #: apps/desktop/src/views/activity/ActivityView.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "# active"
 msgid_plural "# active"
 msgstr[0] ""
@@ -397,6 +403,7 @@ msgstr ""
 
 #. js-lingui:icu=%7Bcount%2C+plural%2C+one+%7B%23+device+in+reach%7D+other+%7B%23+devices+in+reach%7D%7D&pluralize_on=count
 #: apps/desktop/src/shell/SyncStatusLink.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "# device in reach"
 msgid_plural "# devices in reach"
 msgstr[0] ""
@@ -452,6 +459,7 @@ msgstr ""
 
 #. The running task, then how many wait after it
 #: apps/desktop/src/shell/StatusBar.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "{description} · {queued} queued"
 msgstr ""
 
@@ -544,6 +552,7 @@ msgstr[1] ""
 
 #. The notifications shown, of how many: 1–20 of 45
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "{first}–{last} of {total}"
 msgstr ""
 
@@ -652,6 +661,7 @@ msgstr ""
 
 #. An Activity tab's name and what it holds: Jobs, 2 active
 #: apps/desktop/src/views/activity/ActivityView.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "{label}, {detail}"
 msgstr ""
 
@@ -868,6 +878,7 @@ msgstr ""
 
 #. The status bar's running job: its phase, then the game
 #: apps/desktop/src/shell/StatusBar.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "{phase}: {title}"
 msgstr ""
 
@@ -1102,6 +1113,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/frame/type_search.rs
 msgid "# game"
 msgid_plural "# games"
 msgstr[0] ""
@@ -1124,6 +1136,7 @@ msgstr[1] ""
 
 #. js-lingui:icu=%7Btotal%2C+plural%2C+one+%7BSee+%23+result+for+%E2%80%9C%7Bquery%7D%E2%80%9D%7D+other+%7BSee+all+%23+results+for+%E2%80%9C%7Bquery%7D%E2%80%9D%7D%7D&pluralize_on=total
 #: apps/desktop/src/shell/SearchBox.tsx
+#: apps/native/src/frame/search.rs
 msgid "See # result for “{query}”"
 msgid_plural "See all # results for “{query}”"
 msgstr[0] ""
@@ -1156,6 +1169,8 @@ msgstr ""
 #. js-lingui:icu=%7Bunread%2C+plural%2C+one+%7B%23+unread+notification%7D+other+%7B%23+unread+notifications%7D%7D&pluralize_on=unread
 #: apps/desktop/src/shell/ActivityLink.tsx
 #: apps/desktop/src/views/activity/ActivityView.tsx
+#: apps/native/src/frame/notifications.rs
+#: apps/native/src/frame/topbar.rs
 msgid "# unread notification"
 msgid_plural "# unread notifications"
 msgstr[0] ""
@@ -1163,6 +1178,7 @@ msgstr[1] ""
 
 #. js-lingui:icu=%7Bunread%2C+plural%2C+one+%7B%23+unread%7D+other+%7B%23+unread%7D%7D&pluralize_on=unread
 #: apps/desktop/src/views/activity/ActivityView.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "# unread"
 msgid_plural "# unread"
 msgstr[0] ""
@@ -1210,6 +1226,7 @@ msgstr ""
 
 #. js-lingui:icu=%7Bwaiting%2C+plural%2C+one+%7B%7Bactive%7D+active%2C+%23+needs+you%7D+other+%7B%7Bactive%7D+active%2C+%23+need+you%7D%7D&pluralize_on=waiting
 #: apps/desktop/src/views/activity/ActivityView.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "{active} active, # needs you"
 msgid_plural "{active} active, # need you"
 msgstr[0] ""
@@ -1218,6 +1235,7 @@ msgstr[1] ""
 #. Jobs waiting for an answer, after the Activity button's name
 #. js-lingui:icu=%7Bwaiting%2C+plural%2C+one+%7B%23+needs+your+attention%7D+other+%7B%23+need+your+attention%7D%7D&pluralize_on=waiting
 #: apps/desktop/src/shell/ActivityLink.tsx
+#: apps/native/src/frame/topbar.rs
 msgid "# needs your attention"
 msgid_plural "# need your attention"
 msgstr[0] ""
@@ -1225,6 +1243,7 @@ msgstr[1] ""
 
 #. js-lingui:icu=%7Bwaiting%2C+plural%2C+one+%7B%23+task+needs+attention%7D+other+%7B%23+tasks+need+attention%7D%7D&pluralize_on=waiting
 #: apps/desktop/src/shell/StatusBar.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "# task needs attention"
 msgid_plural "# tasks need attention"
 msgstr[0] ""
@@ -1644,6 +1663,7 @@ msgstr ""
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Achievements"
 msgstr ""
 
@@ -1672,6 +1692,7 @@ msgid "Actions"
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryRow.tsx
+#: apps/native/src/library/grid.rs
 msgctxt "library column"
 msgid "Actions"
 msgstr ""
@@ -1687,10 +1708,12 @@ msgstr ""
 
 #: apps/desktop/src/views/activity/ActivityView.tsx
 #: apps/desktop/src/views/game/origin.ts
+#: apps/native/src/frame/notifications.rs
 msgid "Activity"
 msgstr ""
 
 #: apps/desktop/src/shell/ActivityLink.tsx
+#: apps/native/src/frame/topbar.rs
 msgctxt "navigation"
 msgid "Activity"
 msgstr ""
@@ -1984,6 +2007,7 @@ msgstr ""
 
 #. The notification feed's filter: every notification
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "All"
 msgstr ""
 
@@ -2012,6 +2036,7 @@ msgid "All games"
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/frame/sidebar.rs
 msgctxt "library filter"
 msgid "All Games"
 msgstr ""
@@ -2508,6 +2533,7 @@ msgid "Background refresh"
 msgstr ""
 
 #: apps/desktop/src/shell/StatusBar.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "Background status unavailable"
 msgstr ""
 
@@ -2792,6 +2818,7 @@ msgid "Cancel"
 msgstr ""
 
 #: apps/desktop/src/shell/TypeSearch.tsx
+#: apps/native/src/frame/type_search.rs
 msgctxt "pad action"
 msgid "Cancel"
 msgstr ""
@@ -3047,6 +3074,7 @@ msgid "Caskade platform for {platform}"
 msgstr ""
 
 #: apps/desktop/src/shell/ErrorFallback.tsx
+#: apps/native/src/frame/error.rs
 msgid "Caskade ran into a problem"
 msgstr ""
 
@@ -3079,10 +3107,12 @@ msgstr ""
 
 #: apps/desktop/src/shell/StatusBar.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "Caskade v{version}"
 msgstr ""
 
 #: apps/desktop/src/shell/AppUpdateLink.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "Caskade v{version} available"
 msgstr ""
 
@@ -3220,6 +3250,7 @@ msgid "checked {checked}"
 msgstr ""
 
 #: apps/desktop/src/shell/StatusBar.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "Checking background tasks…"
 msgstr ""
 
@@ -3502,6 +3533,7 @@ msgstr ""
 
 #: apps/desktop/src/shell/Topbar.tsx
 #: apps/desktop/src/shell/WindowControls.tsx
+#: apps/native/src/frame/window.rs
 msgctxt "window"
 msgid "Close"
 msgstr ""
@@ -3532,6 +3564,8 @@ msgstr ""
 #: apps/desktop/src/views/CollectionsView.tsx
 #: apps/desktop/src/views/game/origin.ts
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/frame/sidebar.rs
+#: apps/native/src/frame/views.rs
 msgid "Collections"
 msgstr ""
 
@@ -3835,6 +3869,7 @@ msgid "Could not load more games."
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Could not load notifications."
 msgstr ""
 
@@ -3851,6 +3886,7 @@ msgid "Could not load the games."
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Could not load the list."
 msgstr ""
 
@@ -3975,6 +4011,7 @@ msgstr ""
 
 #. The keyboard shortcut that focuses the search
 #: apps/desktop/src/shell/SearchBox.tsx
+#: apps/native/src/frame/search.rs
 msgctxt "keyboard key"
 msgid "CTRL K"
 msgstr ""
@@ -4320,6 +4357,7 @@ msgid "Devices & streaming"
 msgstr ""
 
 #: apps/desktop/src/shell/SyncStatusLink.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "Devices out of reach"
 msgstr ""
 
@@ -4328,6 +4366,7 @@ msgid "Devices that can play from this one"
 msgstr ""
 
 #: apps/desktop/src/shell/SyncStatusLink.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "Devices: open Settings → Devices"
 msgstr ""
 
@@ -4500,6 +4539,7 @@ msgstr ""
 
 #. A background job's phase
 #: apps/desktop/src/views/activity/jobLabels.ts
+#: apps/native/src/frame/status_bar.rs
 msgid "Downloading"
 msgstr ""
 
@@ -4663,6 +4703,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/frame/sidebar.rs
 msgctxt "library filter"
 msgid "Emulated"
 msgstr ""
@@ -4836,6 +4877,7 @@ msgstr ""
 
 #. Keyboard keys in the search overlay
 #: apps/desktop/src/shell/TypeSearch.tsx
+#: apps/native/src/frame/type_search.rs
 msgid "Enter for results · Esc to cancel · Backspace to delete"
 msgstr ""
 
@@ -4999,6 +5041,7 @@ msgstr ""
 
 #. A notification's category
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Failed job"
 msgstr ""
 
@@ -5028,6 +5071,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/frame/sidebar.rs
 msgctxt "library filter"
 msgid "Favorites"
 msgstr ""
@@ -5297,6 +5341,7 @@ msgstr ""
 
 #. The IGDB game the library game is matched to
 #: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/native/src/frame/views.rs
 msgid "Game"
 msgstr ""
 
@@ -5411,6 +5456,7 @@ msgstr ""
 
 #. A notification's category
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Games added"
 msgstr ""
 
@@ -5724,6 +5770,7 @@ msgid "Hide from library"
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Hide list"
 msgstr ""
 
@@ -5749,6 +5796,8 @@ msgstr ""
 #: apps/desktop/src/shell/nav.ts
 #: apps/desktop/src/views/game/origin.ts
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/frame/sidebar.rs
+#: apps/native/src/frame/views.rs
 msgctxt "navigation"
 msgid "Home"
 msgstr ""
@@ -6206,6 +6255,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/frame/sidebar.rs
 msgctxt "library filter"
 msgid "Installed"
 msgstr ""
@@ -6274,6 +6324,7 @@ msgstr ""
 #. The stage a failed install stopped at
 #: apps/desktop/src/views/activity/jobLabels.ts
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "Installing"
 msgstr ""
 
@@ -6537,10 +6588,12 @@ msgstr ""
 
 #. An Activity tab: installs and other background jobs
 #: apps/desktop/src/views/activity/ActivityView.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Jobs"
 msgstr ""
 
 #: apps/desktop/src/views/activity/ActivityView.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Jobs and notifications"
 msgstr ""
 
@@ -6816,6 +6869,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/frame/sidebar.rs
 msgid "Library"
 msgstr ""
 
@@ -6845,6 +6899,7 @@ msgid "Library discovery is off, so the settings below don't apply until it's on
 msgstr ""
 
 #: apps/desktop/src/shell/LibraryNav.tsx
+#: apps/native/src/frame/sidebar.rs
 msgid "Library filters"
 msgstr ""
 
@@ -7008,6 +7063,7 @@ msgid "Loading launch actions…"
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Loading notifications…"
 msgstr ""
 
@@ -7062,6 +7118,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/about/AboutSettings.tsx
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Loading…"
 msgstr ""
 
@@ -7267,22 +7324,27 @@ msgid "Manual list or smart filter"
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Mark all read"
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Mark read"
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Mark read: {title}"
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Mark unread"
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Mark unread: {title}"
 msgstr ""
 
@@ -7341,6 +7403,7 @@ msgstr ""
 
 #: apps/desktop/src/shell/Topbar.tsx
 #: apps/desktop/src/shell/WindowControls.tsx
+#: apps/native/src/frame/window.rs
 msgctxt "window"
 msgid "Maximize"
 msgstr ""
@@ -7392,6 +7455,7 @@ msgstr ""
 #: apps/desktop/src/shell/Topbar.tsx
 #: apps/desktop/src/shell/WindowControls.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/frame/window.rs
 msgctxt "window"
 msgid "Minimize"
 msgstr ""
@@ -7520,6 +7584,7 @@ msgstr ""
 
 #. A background job's phase
 #: apps/desktop/src/views/activity/jobLabels.ts
+#: apps/native/src/frame/status_bar.rs
 msgid "Moving"
 msgstr ""
 
@@ -7695,6 +7760,7 @@ msgid "New Zealand"
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Newer"
 msgstr ""
 
@@ -7874,6 +7940,7 @@ msgid "No match found"
 msgstr ""
 
 #: apps/desktop/src/shell/SearchBox.tsx
+#: apps/native/src/frame/search.rs
 msgid "No matches. Search the library for “{query}”"
 msgstr ""
 
@@ -7890,6 +7957,7 @@ msgid "No new progress reported for {seconds} seconds. A scan or network request
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "No notifications yet. New games, failed jobs and updates show here."
 msgstr ""
 
@@ -7995,6 +8063,7 @@ msgid "No themes found. Rescan themes looks for them again."
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "No unread notifications."
 msgstr ""
 
@@ -8067,6 +8136,7 @@ msgid "Not available"
 msgstr ""
 
 #: apps/desktop/src/views/PlaceholderView.tsx
+#: apps/native/src/frame/views.rs
 msgid "Not built yet."
 msgstr ""
 
@@ -8122,6 +8192,7 @@ msgstr ""
 #. An emulator's status
 #: apps/desktop/src/views/PlaceholderView.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/frame/views.rs
 msgid "Not found"
 msgstr ""
 
@@ -8263,6 +8334,7 @@ msgid "Nothing launches this game yet. Add a play action to start it from Caskad
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Nothing left to show: they have all gone."
 msgstr ""
 
@@ -8299,12 +8371,14 @@ msgid "Notice games installed or removed while Caskade runs, in launchers instal
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Notification pages"
 msgstr ""
 
 #. An Activity tab
 #: apps/desktop/src/views/activity/ActivityView.tsx
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Notifications"
 msgstr ""
 
@@ -8412,6 +8486,7 @@ msgid "OK"
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Older"
 msgstr ""
 
@@ -8564,6 +8639,7 @@ msgstr ""
 
 #: apps/desktop/src/views/activity/ActivityView.tsx
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Open game"
 msgstr ""
 
@@ -8588,6 +8664,7 @@ msgid "Open installation folder"
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Open jobs"
 msgstr ""
 
@@ -8596,6 +8673,7 @@ msgid "Open my library"
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Open settings"
 msgstr ""
 
@@ -8608,6 +8686,7 @@ msgid "Open the activation page"
 msgstr ""
 
 #: apps/desktop/src/shell/ErrorFallback.tsx
+#: apps/native/src/frame/error.rs
 msgid "Open the library"
 msgstr ""
 
@@ -9242,6 +9321,7 @@ msgstr ""
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Plugin"
 msgstr ""
 
@@ -9480,11 +9560,13 @@ msgstr ""
 #. A job waiting for its turn
 #: apps/desktop/src/shell/StatusBar.tsx
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "Queued"
 msgstr ""
 
 #. A background task waiting for its turn
 #: apps/desktop/src/shell/StatusBar.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "Queued: {task}"
 msgstr ""
 
@@ -9570,6 +9652,7 @@ msgstr ""
 #: apps/desktop/src/shell/StatusBar.tsx
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "Ready"
 msgstr ""
 
@@ -9583,6 +9666,7 @@ msgstr ""
 #. Games a connected store account owns that aren't installed
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/frame/sidebar.rs
 msgctxt "library filter"
 msgid "Ready to Install"
 msgstr ""
@@ -9642,6 +9726,7 @@ msgid "Recently Played"
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/frame/sidebar.rs
 msgctxt "library filter"
 msgid "Recently Played"
 msgstr ""
@@ -9847,6 +9932,7 @@ msgid "Relevance"
 msgstr ""
 
 #: apps/desktop/src/shell/ErrorFallback.tsx
+#: apps/native/src/frame/error.rs
 msgid "Reload"
 msgstr ""
 
@@ -10138,6 +10224,7 @@ msgstr ""
 
 #. A notification whose problem was fixed
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Resolved"
 msgstr ""
 
@@ -10150,6 +10237,7 @@ msgid "Restart Caskade."
 msgstr ""
 
 #: apps/desktop/src/shell/AppUpdateLink.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "Restart for Caskade v{version}"
 msgstr ""
 
@@ -10165,6 +10253,7 @@ msgstr ""
 
 #: apps/desktop/src/shell/Topbar.tsx
 #: apps/desktop/src/shell/WindowControls.tsx
+#: apps/native/src/frame/window.rs
 msgctxt "window"
 msgid "Restore"
 msgstr ""
@@ -10209,6 +10298,7 @@ msgstr ""
 
 #. Hint bar: go down to the search results
 #: apps/desktop/src/shell/TypeSearch.tsx
+#: apps/native/src/frame/type_search.rs
 msgid "Results"
 msgstr ""
 
@@ -10796,6 +10886,7 @@ msgstr ""
 #. A notification's category
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Script"
 msgstr ""
 
@@ -10819,11 +10910,13 @@ msgid "Scroll"
 msgstr ""
 
 #: apps/desktop/src/shell/AppShell.tsx
+#: apps/native/src/frame/search.rs
 msgctxt "action"
 msgid "Search"
 msgstr ""
 
 #: apps/desktop/src/shell/TypeSearch.tsx
+#: apps/native/src/frame/type_search.rs
 msgctxt "noun"
 msgid "Search"
 msgstr ""
@@ -10837,6 +10930,7 @@ msgid "Search all reported volumes. This can be slow."
 msgstr ""
 
 #: apps/desktop/src/shell/SearchBox.tsx
+#: apps/native/src/frame/search.rs
 msgid "Search any game… (classic, modern, or something obscure)"
 msgstr ""
 
@@ -10850,6 +10944,8 @@ msgstr ""
 
 #: apps/desktop/src/shell/SearchBox.tsx
 #: apps/desktop/src/shell/TypeSearch.tsx
+#: apps/native/src/frame/search.rs
+#: apps/native/src/frame/type_search.rs
 msgid "Search games"
 msgstr ""
 
@@ -11082,6 +11178,8 @@ msgstr ""
 
 #: apps/desktop/src/shell/nav.ts
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/frame/sidebar.rs
+#: apps/native/src/frame/views.rs
 msgid "Settings"
 msgstr ""
 
@@ -11164,6 +11262,7 @@ msgstr ""
 #. A notification's category
 #. A notification's category
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Shared"
 msgstr ""
 
@@ -11204,6 +11303,7 @@ msgid "Show all games"
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Show games"
 msgstr ""
 
@@ -11235,6 +11335,7 @@ msgid "Show titles on artwork"
 msgstr ""
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Show updates"
 msgstr ""
 
@@ -11348,6 +11449,7 @@ msgid "Size"
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryRow.tsx
+#: apps/native/src/library/grid.rs
 msgctxt "library column"
 msgid "Size"
 msgstr ""
@@ -11627,6 +11729,7 @@ msgid "Status"
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryRow.tsx
+#: apps/native/src/library/grid.rs
 msgctxt "library column"
 msgid "Status"
 msgstr ""
@@ -11793,6 +11896,8 @@ msgstr ""
 #: apps/desktop/src/shell/nav.ts
 #: apps/desktop/src/views/game/origin.ts
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/frame/sidebar.rs
+#: apps/native/src/frame/views.rs
 msgid "Store"
 msgstr ""
 
@@ -12559,6 +12664,7 @@ msgid "This torrent holds more than one game or installer. Choose the one to dow
 msgstr ""
 
 #: apps/desktop/src/shell/ErrorFallback.tsx
+#: apps/native/src/frame/error.rs
 msgid "This view couldn't be shown"
 msgstr ""
 
@@ -12686,6 +12792,8 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/frame/error.rs
+#: apps/native/src/frame/notifications.rs
 msgid "Try again"
 msgstr ""
 
@@ -12822,6 +12930,7 @@ msgid "Unknown confidence"
 msgstr ""
 
 #: apps/desktop/src/shell/ErrorFallback.tsx
+#: apps/native/src/frame/error.rs
 msgid "Unknown error"
 msgstr ""
 
@@ -12895,6 +13004,7 @@ msgstr ""
 #. A notification not read yet
 #. The notification feed's filter
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Unread"
 msgstr ""
 
@@ -13030,6 +13140,7 @@ msgstr ""
 
 #. A notification's category
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Updates"
 msgstr ""
 
@@ -13334,6 +13445,7 @@ msgstr ""
 #. The library's tab of games played in the browser
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/frame/sidebar.rs
 msgctxt "library filter"
 msgid "Web"
 msgstr ""
@@ -13606,6 +13718,7 @@ msgstr ""
 
 #. A running job with no phase
 #: apps/desktop/src/views/activity/jobLabels.ts
+#: apps/native/src/frame/status_bar.rs
 msgid "Working"
 msgstr ""
 

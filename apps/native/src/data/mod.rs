@@ -125,6 +125,8 @@ fn Provided(source: DataSource, children: Element) -> Element {
 }
 
 mod probe;
+// The shell's status bar and Activity button (#96).
+pub mod status;
 
 /// The library, for a view's changes: run them through [`change`].
 pub fn use_library() -> Library {

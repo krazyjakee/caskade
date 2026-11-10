@@ -20,6 +20,7 @@ use caskade_ui_theme::anatomy::{Entry, Source};
 pub fn catalogue() -> Vec<Entry> {
     let mut all = vec![OSK];
     all.extend_from_slice(crate::ui::ANATOMY);
+    all.extend_from_slice(crate::frame::ANATOMY);
     all
 }
 

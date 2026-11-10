@@ -27,6 +27,9 @@ pub enum Request {
     Show,
     /// Quit: the main window closes for good.
     Quit,
+    /// The main window's close button, in the title bar Caskade draws
+    /// (#96): as the OS's own close, it hides to the tray or quits.
+    Close,
     /// Relabel the tray menu in the core's language (Windows and macOS,
     /// where the tray lives on this thread).
     #[cfg_attr(target_os = "linux", allow(dead_code))]
@@ -175,6 +178,11 @@ impl<S: Shell> Loop<S> {
                         && let Some(window) = crate::shell::main_window()
                     {
                         window.request_redraw();
+                    }
+                }
+                Request::Close => {
+                    if let Some(id) = self.main {
+                        self.window_event(event_loop, id, WindowEvent::CloseRequested);
                     }
                 }
                 Request::Quit => match self.main {

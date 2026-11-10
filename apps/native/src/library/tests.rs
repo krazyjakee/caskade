@@ -53,6 +53,8 @@ fn app() -> Element {
         ..ListGames::default()
     };
     rsx! {
+        // The app's stylesheet: the cards and rows lay out as in the app.
+        style { {include_str!("../../assets/app.css")} }
         InputRoot {
             div { style: "display: flex; flex-direction: column; height: 800px;",
                 VirtualLibrary { query, layout }

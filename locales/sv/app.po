@@ -32,6 +32,7 @@ msgid "({region} version)"
 msgstr "({region}-version)"
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "(no longer in the library)"
 msgstr "(finns inte längre i biblioteket)"
 
@@ -42,6 +43,7 @@ msgstr "(inga)"
 
 #. A game added to the library that was later merged into another game
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "(now part of {into})"
 msgstr "(nu en del av {into})"
 
@@ -229,6 +231,7 @@ msgstr[1] "Försök igen med de # spel som misslyckades"
 #. placeholder {0}: page.total - page.items.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7BShow+more+%28%23+left%29%7D+other+%7BShow+more+%28%23+left%29%7D%7D&pluralize_on=0
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Show more (# left)"
 msgid_plural "Show more (# left)"
 msgstr[0] "Visa fler (# kvar)"
@@ -345,6 +348,7 @@ msgstr "{action} misslyckades: {error}"
 #. js-lingui:icu=%7Bactive%2C+plural%2C+one+%7B%23+active+job%7D+other+%7B%23+active+jobs%7D%7D&pluralize_on=active
 #: apps/desktop/src/shell/ActivityLink.tsx
 #: apps/desktop/src/views/activity/ActivityView.tsx
+#: apps/native/src/frame/notifications.rs apps/native/src/frame/topbar.rs
 msgid "# active job"
 msgid_plural "# active jobs"
 msgstr[0] "# aktivt jobb"
@@ -352,6 +356,7 @@ msgstr[1] "# aktiva jobb"
 
 #. js-lingui:icu=%7Bactive%2C+plural%2C+one+%7B%23+active%7D+other+%7B%23+active%7D%7D&pluralize_on=active
 #: apps/desktop/src/views/activity/ActivityView.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "# active"
 msgid_plural "# active"
 msgstr[0] "# aktivt"
@@ -398,6 +403,7 @@ msgstr "{controller} är ansluten."
 
 #. js-lingui:icu=%7Bcount%2C+plural%2C+one+%7B%23+device+in+reach%7D+other+%7B%23+devices+in+reach%7D%7D&pluralize_on=count
 #: apps/desktop/src/shell/SyncStatusLink.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "# device in reach"
 msgid_plural "# devices in reach"
 msgstr[0] "# enhet inom räckhåll"
@@ -452,7 +458,7 @@ msgid "{count} versions"
 msgstr "{count} versioner"
 
 #. The running task, then how many wait after it
-#: apps/desktop/src/shell/StatusBar.tsx
+#: apps/desktop/src/shell/StatusBar.tsx apps/native/src/frame/status_bar.rs
 msgid "{description} · {queued} queued"
 msgstr "{description} · {queued} i kö"
 
@@ -544,6 +550,7 @@ msgstr[1] "Skannar… # filer"
 
 #. The notifications shown, of how many: 1–20 of 45
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "{first}–{last} of {total}"
 msgstr "{first}–{last} av {total}"
 
@@ -652,6 +659,7 @@ msgstr "{label} {0}"
 
 #. An Activity tab's name and what it holds: Jobs, 2 active
 #: apps/desktop/src/views/activity/ActivityView.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "{label}, {detail}"
 msgstr "{label}, {detail}"
 
@@ -867,7 +875,7 @@ msgid "{percent}% confidence"
 msgstr "{percent} % säkerhet"
 
 #. The status bar's running job: its phase, then the game
-#: apps/desktop/src/shell/StatusBar.tsx
+#: apps/desktop/src/shell/StatusBar.tsx apps/native/src/frame/status_bar.rs
 msgid "{phase}: {title}"
 msgstr "{phase}: {title}"
 
@@ -1100,6 +1108,7 @@ msgstr "{title}, skärmbilder"
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/frame/type_search.rs
 msgid "# game"
 msgid_plural "# games"
 msgstr[0] "# spel"
@@ -1121,7 +1130,7 @@ msgstr[0] "Importera # spel"
 msgstr[1] "Importera # spel"
 
 #. js-lingui:icu=%7Btotal%2C+plural%2C+one+%7BSee+%23+result+for+%E2%80%9C%7Bquery%7D%E2%80%9D%7D+other+%7BSee+all+%23+results+for+%E2%80%9C%7Bquery%7D%E2%80%9D%7D%7D&pluralize_on=total
-#: apps/desktop/src/shell/SearchBox.tsx
+#: apps/desktop/src/shell/SearchBox.tsx apps/native/src/frame/search.rs
 msgid "See # result for “{query}”"
 msgid_plural "See all # results for “{query}”"
 msgstr[0] "Visa # resultat för ”{query}”"
@@ -1154,6 +1163,7 @@ msgstr "{unlocked}/{total} prestationer"
 #. js-lingui:icu=%7Bunread%2C+plural%2C+one+%7B%23+unread+notification%7D+other+%7B%23+unread+notifications%7D%7D&pluralize_on=unread
 #: apps/desktop/src/shell/ActivityLink.tsx
 #: apps/desktop/src/views/activity/ActivityView.tsx
+#: apps/native/src/frame/notifications.rs apps/native/src/frame/topbar.rs
 msgid "# unread notification"
 msgid_plural "# unread notifications"
 msgstr[0] "# oläst avisering"
@@ -1161,6 +1171,7 @@ msgstr[1] "# olästa aviseringar"
 
 #. js-lingui:icu=%7Bunread%2C+plural%2C+one+%7B%23+unread%7D+other+%7B%23+unread%7D%7D&pluralize_on=unread
 #: apps/desktop/src/views/activity/ActivityView.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "# unread"
 msgid_plural "# unread"
 msgstr[0] "# oläst"
@@ -1208,6 +1219,7 @@ msgstr "{version} finns tillgänglig."
 
 #. js-lingui:icu=%7Bwaiting%2C+plural%2C+one+%7B%7Bactive%7D+active%2C+%23+needs+you%7D+other+%7B%7Bactive%7D+active%2C+%23+need+you%7D%7D&pluralize_on=waiting
 #: apps/desktop/src/views/activity/ActivityView.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "{active} active, # needs you"
 msgid_plural "{active} active, # need you"
 msgstr[0] "{active} aktiva, # behöver dig"
@@ -1215,14 +1227,14 @@ msgstr[1] "{active} aktiva, # behöver dig"
 
 #. Jobs waiting for an answer, after the Activity button's name
 #. js-lingui:icu=%7Bwaiting%2C+plural%2C+one+%7B%23+needs+your+attention%7D+other+%7B%23+need+your+attention%7D%7D&pluralize_on=waiting
-#: apps/desktop/src/shell/ActivityLink.tsx
+#: apps/desktop/src/shell/ActivityLink.tsx apps/native/src/frame/topbar.rs
 msgid "# needs your attention"
 msgid_plural "# need your attention"
 msgstr[0] "# behöver din uppmärksamhet"
 msgstr[1] "# behöver din uppmärksamhet"
 
 #. js-lingui:icu=%7Bwaiting%2C+plural%2C+one+%7B%23+task+needs+attention%7D+other+%7B%23+tasks+need+attention%7D%7D&pluralize_on=waiting
-#: apps/desktop/src/shell/StatusBar.tsx
+#: apps/desktop/src/shell/StatusBar.tsx apps/native/src/frame/status_bar.rs
 msgid "# task needs attention"
 msgid_plural "# tasks need attention"
 msgstr[0] "# uppgift behöver uppmärksamhet"
@@ -1641,6 +1653,7 @@ msgstr "prestationer"
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Achievements"
 msgstr "Prestationer"
 
@@ -1669,6 +1682,7 @@ msgid "Actions"
 msgstr "Åtgärder"
 
 #: apps/desktop/src/views/library/LibraryRow.tsx
+#: apps/native/src/library/grid.rs
 msgctxt "library column"
 msgid "Actions"
 msgstr "Åtgärder"
@@ -1683,11 +1697,11 @@ msgid "Actions for {title}"
 msgstr "Åtgärder för {title}"
 
 #: apps/desktop/src/views/activity/ActivityView.tsx
-#: apps/desktop/src/views/game/origin.ts
+#: apps/desktop/src/views/game/origin.ts apps/native/src/frame/notifications.rs
 msgid "Activity"
 msgstr "Aktivitet"
 
-#: apps/desktop/src/shell/ActivityLink.tsx
+#: apps/desktop/src/shell/ActivityLink.tsx apps/native/src/frame/topbar.rs
 msgctxt "navigation"
 msgid "Activity"
 msgstr "Aktivitet"
@@ -1981,6 +1995,7 @@ msgstr "Åldersgränser"
 
 #. The notification feed's filter: every notification
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "All"
 msgstr "Alla"
 
@@ -2009,6 +2024,7 @@ msgid "All games"
 msgstr "Alla spel"
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/frame/sidebar.rs
 msgctxt "library filter"
 msgid "All Games"
 msgstr "Alla spel"
@@ -2506,7 +2522,7 @@ msgstr "Bakgrund"
 msgid "Background refresh"
 msgstr "Uppdatering i bakgrunden"
 
-#: apps/desktop/src/shell/StatusBar.tsx
+#: apps/desktop/src/shell/StatusBar.tsx apps/native/src/frame/status_bar.rs
 msgid "Background status unavailable"
 msgstr "Bakgrundsstatus är inte tillgänglig"
 
@@ -2792,7 +2808,7 @@ msgctxt "emulator install"
 msgid "Cancel"
 msgstr "Avbryt"
 
-#: apps/desktop/src/shell/TypeSearch.tsx
+#: apps/desktop/src/shell/TypeSearch.tsx apps/native/src/frame/type_search.rs
 msgctxt "pad action"
 msgid "Cancel"
 msgstr "Avbryt"
@@ -3047,7 +3063,7 @@ msgstr "Caskade-plattform"
 msgid "Caskade platform for {platform}"
 msgstr "Caskade-plattform för {platform}"
 
-#: apps/desktop/src/shell/ErrorFallback.tsx
+#: apps/desktop/src/shell/ErrorFallback.tsx apps/native/src/frame/error.rs
 msgid "Caskade ran into a problem"
 msgstr "Caskade stötte på ett problem"
 
@@ -3080,10 +3096,11 @@ msgstr "Caskade-uppdateringar"
 
 #: apps/desktop/src/shell/StatusBar.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "Caskade v{version}"
 msgstr "Caskade v{version}"
 
-#: apps/desktop/src/shell/AppUpdateLink.tsx
+#: apps/desktop/src/shell/AppUpdateLink.tsx apps/native/src/frame/status_bar.rs
 msgid "Caskade v{version} available"
 msgstr "Caskade v{version} finns tillgänglig"
 
@@ -3220,7 +3237,7 @@ msgstr "Kontrollera serveradressen och inloggningsuppgifterna."
 msgid "checked {checked}"
 msgstr "kontrollerat {checked}"
 
-#: apps/desktop/src/shell/StatusBar.tsx
+#: apps/desktop/src/shell/StatusBar.tsx apps/native/src/frame/status_bar.rs
 msgid "Checking background tasks…"
 msgstr "Kontrollerar bakgrundsuppgifter…"
 
@@ -3502,6 +3519,7 @@ msgid "Close"
 msgstr "Stäng"
 
 #: apps/desktop/src/shell/Topbar.tsx apps/desktop/src/shell/WindowControls.tsx
+#: apps/native/src/frame/window.rs
 msgctxt "window"
 msgid "Close"
 msgstr "Stäng"
@@ -3531,6 +3549,7 @@ msgstr "Koden som visas på {device}"
 #: apps/desktop/src/shell/nav.ts apps/desktop/src/views/CollectionsView.tsx
 #: apps/desktop/src/views/game/origin.ts
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/frame/sidebar.rs apps/native/src/frame/views.rs
 msgid "Collections"
 msgstr "Samlingar"
 
@@ -3834,6 +3853,7 @@ msgid "Could not load more games."
 msgstr "Kunde inte läsa in fler spel."
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Could not load notifications."
 msgstr "Kunde inte läsa in aviseringar."
 
@@ -3850,6 +3870,7 @@ msgid "Could not load the games."
 msgstr "Kunde inte läsa in spelen."
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Could not load the list."
 msgstr "Kunde inte läsa in listan."
 
@@ -3973,7 +3994,7 @@ msgid "Credits"
 msgstr "Medverkande"
 
 #. The keyboard shortcut that focuses the search
-#: apps/desktop/src/shell/SearchBox.tsx
+#: apps/desktop/src/shell/SearchBox.tsx apps/native/src/frame/search.rs
 msgctxt "keyboard key"
 msgid "CTRL K"
 msgstr "CTRL K"
@@ -4319,6 +4340,7 @@ msgid "Devices & streaming"
 msgstr "Enheter och streaming"
 
 #: apps/desktop/src/shell/SyncStatusLink.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "Devices out of reach"
 msgstr "Enheter utom räckhåll"
 
@@ -4327,6 +4349,7 @@ msgid "Devices that can play from this one"
 msgstr "Enheter som kan spela från den här"
 
 #: apps/desktop/src/shell/SyncStatusLink.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "Devices: open Settings → Devices"
 msgstr "Enheter: öppna Inställningar → Enheter"
 
@@ -4498,6 +4521,7 @@ msgstr "Nedladdad metadata och bilder"
 
 #. A background job's phase
 #: apps/desktop/src/views/activity/jobLabels.ts
+#: apps/native/src/frame/status_bar.rs
 msgid "Downloading"
 msgstr "Laddar ner"
 
@@ -4661,6 +4685,7 @@ msgstr "Tomt: spelets installationsmapp."
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/frame/sidebar.rs
 msgctxt "library filter"
 msgid "Emulated"
 msgstr "Emulerade"
@@ -4833,7 +4858,7 @@ msgid "Enter API token"
 msgstr "API-token"
 
 #. Keyboard keys in the search overlay
-#: apps/desktop/src/shell/TypeSearch.tsx
+#: apps/desktop/src/shell/TypeSearch.tsx apps/native/src/frame/type_search.rs
 msgid "Enter for results · Esc to cancel · Backspace to delete"
 msgstr "Enter för resultat · Esc för att avbryta · Backspace för att radera"
 
@@ -4997,6 +5022,7 @@ msgstr "Misslyckades"
 
 #. A notification's category
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Failed job"
 msgstr "Misslyckat jobb"
 
@@ -5025,6 +5051,7 @@ msgstr "Favorit"
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/frame/sidebar.rs
 msgctxt "library filter"
 msgid "Favorites"
 msgstr "Favoriter"
@@ -5293,7 +5320,7 @@ msgid "Future scans skip it"
 msgstr "Framtida genomsökningar hoppar över det"
 
 #. The IGDB game the library game is matched to
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/frame/views.rs
 msgid "Game"
 msgstr "Spel"
 
@@ -5407,6 +5434,7 @@ msgstr "Spel och spelande"
 
 #. A notification's category
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Games added"
 msgstr "Tillagda spel"
 
@@ -5718,6 +5746,7 @@ msgid "Hide from library"
 msgstr "Dölj i biblioteket"
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Hide list"
 msgstr "Dölj listan"
 
@@ -5742,6 +5771,7 @@ msgstr "Högre ser skarpare ut och kräver ett snabbare nätverk."
 #. The sidebar link to the home view
 #: apps/desktop/src/shell/nav.ts apps/desktop/src/views/game/origin.ts
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/frame/sidebar.rs apps/native/src/frame/views.rs
 msgctxt "navigation"
 msgid "Home"
 msgstr "Hem"
@@ -6199,6 +6229,7 @@ msgstr "Installerat"
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/frame/sidebar.rs
 msgctxt "library filter"
 msgid "Installed"
 msgstr "Installerade"
@@ -6267,6 +6298,7 @@ msgstr "Installationsprogram"
 #. The stage a failed install stopped at
 #: apps/desktop/src/views/activity/jobLabels.ts
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "Installing"
 msgstr "Installation"
 
@@ -6528,10 +6560,12 @@ msgstr "Jobb"
 
 #. An Activity tab: installs and other background jobs
 #: apps/desktop/src/views/activity/ActivityView.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Jobs"
 msgstr "Jobb"
 
 #: apps/desktop/src/views/activity/ActivityView.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Jobs and notifications"
 msgstr "Jobb och aviseringar"
 
@@ -6808,6 +6842,7 @@ msgstr "Bokstäver"
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/frame/sidebar.rs
 msgid "Library"
 msgstr "Bibliotek"
 
@@ -6836,7 +6871,7 @@ msgstr "Biblioteksidentifiering"
 msgid "Library discovery is off, so the settings below don't apply until it's on."
 msgstr "Biblioteksidentifiering är av, så inställningarna nedan gäller inte förrän den är på."
 
-#: apps/desktop/src/shell/LibraryNav.tsx
+#: apps/desktop/src/shell/LibraryNav.tsx apps/native/src/frame/sidebar.rs
 msgid "Library filters"
 msgstr "Biblioteksfilter"
 
@@ -7000,6 +7035,7 @@ msgid "Loading launch actions…"
 msgstr "Läser in startåtgärder…"
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Loading notifications…"
 msgstr "Läser in aviseringar…"
 
@@ -7053,7 +7089,7 @@ msgstr "Läser in din profil…"
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
 #: apps/desktop/src/views/settings/about/AboutSettings.tsx
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/frame/notifications.rs
 msgid "Loading…"
 msgstr "Läser in…"
 
@@ -7258,22 +7294,27 @@ msgid "Manual list or smart filter"
 msgstr "Manuell lista eller smart filter"
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Mark all read"
 msgstr "Markera alla som lästa"
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Mark read"
 msgstr "Markera som läst"
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Mark read: {title}"
 msgstr "Markera som läst: {title}"
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Mark unread"
 msgstr "Markera som oläst"
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Mark unread: {title}"
 msgstr "Markera som oläst: {title}"
 
@@ -7331,6 +7372,7 @@ msgid "Matching games"
 msgstr "Matchande spel"
 
 #: apps/desktop/src/shell/Topbar.tsx apps/desktop/src/shell/WindowControls.tsx
+#: apps/native/src/frame/window.rs
 msgctxt "window"
 msgid "Maximize"
 msgstr "Maximera"
@@ -7380,6 +7422,7 @@ msgstr "MiB"
 
 #: apps/desktop/src/shell/Topbar.tsx apps/desktop/src/shell/WindowControls.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/frame/window.rs
 msgctxt "window"
 msgid "Minimize"
 msgstr "Minimera"
@@ -7508,6 +7551,7 @@ msgstr "flyttade spel"
 
 #. A background job's phase
 #: apps/desktop/src/views/activity/jobLabels.ts
+#: apps/native/src/frame/status_bar.rs
 msgid "Moving"
 msgstr "Flyttar"
 
@@ -7682,6 +7726,7 @@ msgid "New Zealand"
 msgstr "Nya Zeeland"
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Newer"
 msgstr "Nyare"
 
@@ -7860,7 +7905,7 @@ msgstr "Ingen gräns"
 msgid "No match found"
 msgstr "Ingen matchning hittades"
 
-#: apps/desktop/src/shell/SearchBox.tsx
+#: apps/desktop/src/shell/SearchBox.tsx apps/native/src/frame/search.rs
 msgid "No matches. Search the library for “{query}”"
 msgstr "Inga träffar. Sök i biblioteket efter ”{query}”"
 
@@ -7877,6 +7922,7 @@ msgid "No new progress reported for {seconds} seconds. A scan or network request
 msgstr "Inga nya framsteg har rapporterats på {seconds} sekunder. En skanning eller nätverksbegäran kan ta längre tid. Öppna ditt bibliotek nu; du kan kontrollera eller upprepa identifieringen i Inställningar → Bibliotek, och ROM-filer eller RomM i Inställningar."
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "No notifications yet. New games, failed jobs and updates show here."
 msgstr "Inga aviseringar än. Nya spel, misslyckade jobb och uppdateringar visas här."
 
@@ -7982,6 +8028,7 @@ msgid "No themes found. Rescan themes looks for them again."
 msgstr "Inga teman hittades. Sök efter teman igen letar efter dem på nytt."
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "No unread notifications."
 msgstr "Inga olästa aviseringar."
 
@@ -8053,7 +8100,7 @@ msgctxt "store account"
 msgid "Not available"
 msgstr "Inte tillgänglig"
 
-#: apps/desktop/src/views/PlaceholderView.tsx
+#: apps/desktop/src/views/PlaceholderView.tsx apps/native/src/frame/views.rs
 msgid "Not built yet."
 msgstr "Inte byggt än."
 
@@ -8109,6 +8156,7 @@ msgstr "inte ifyllt än"
 #. An emulator's status
 #: apps/desktop/src/views/PlaceholderView.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/frame/views.rs
 msgid "Not found"
 msgstr "Hittades inte"
 
@@ -8249,6 +8297,7 @@ msgid "Nothing launches this game yet. Add a play action to start it from Caskad
 msgstr "Inget startar det här spelet ännu. Lägg till en spelåtgärd för att starta det från Caskade, eller ett verktyg att köra bredvid."
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Nothing left to show: they have all gone."
 msgstr "Inget kvar att visa: alla har försvunnit."
 
@@ -8285,12 +8334,14 @@ msgid "Notice games installed or removed while Caskade runs, in launchers instal
 msgstr "Upptäck spel som installeras eller tas bort medan Caskade körs, även i startprogram som installeras senare."
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Notification pages"
 msgstr "Aviseringssidor"
 
 #. An Activity tab
 #: apps/desktop/src/views/activity/ActivityView.tsx
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Notifications"
 msgstr "Aviseringar"
 
@@ -8398,6 +8449,7 @@ msgid "OK"
 msgstr "OK"
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Older"
 msgstr "Äldre"
 
@@ -8550,6 +8602,7 @@ msgstr "Öppna Standardappar"
 
 #: apps/desktop/src/views/activity/ActivityView.tsx
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Open game"
 msgstr "Öppna spel"
 
@@ -8574,6 +8627,7 @@ msgid "Open installation folder"
 msgstr "Öppna installationsmappen"
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Open jobs"
 msgstr "Öppna jobb"
 
@@ -8582,6 +8636,7 @@ msgid "Open my library"
 msgstr "Öppna mitt bibliotek"
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Open settings"
 msgstr "Öppna inställningar"
 
@@ -8593,7 +8648,7 @@ msgstr "Öppna butikskonton"
 msgid "Open the activation page"
 msgstr "Öppna aktiveringssidan"
 
-#: apps/desktop/src/shell/ErrorFallback.tsx
+#: apps/desktop/src/shell/ErrorFallback.tsx apps/native/src/frame/error.rs
 msgid "Open the library"
 msgstr "Öppna biblioteket"
 
@@ -9227,6 +9282,7 @@ msgstr "speltid, spelade timmar"
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Plugin"
 msgstr "Tillägg"
 
@@ -9465,11 +9521,12 @@ msgstr "K{quarter} {year}"
 #. A job waiting for its turn
 #: apps/desktop/src/shell/StatusBar.tsx
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "Queued"
 msgstr "I kö"
 
 #. A background task waiting for its turn
-#: apps/desktop/src/shell/StatusBar.tsx
+#: apps/desktop/src/shell/StatusBar.tsx apps/native/src/frame/status_bar.rs
 msgid "Queued: {task}"
 msgstr "I kö: {task}"
 
@@ -9554,6 +9611,7 @@ msgstr "Läser spelen som {name}-startprogrammet på den här datorn vet att du 
 #: apps/desktop/src/shell/StatusBar.tsx
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/frame/status_bar.rs
 msgid "Ready"
 msgstr "Redo"
 
@@ -9566,6 +9624,7 @@ msgstr "Redo"
 #. Games a connected store account owns that aren't installed
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/frame/sidebar.rs
 msgctxt "library filter"
 msgid "Ready to Install"
 msgstr "Redo att installera"
@@ -9625,6 +9684,7 @@ msgid "Recently Played"
 msgstr "Nyligen spelade"
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/frame/sidebar.rs
 msgctxt "library filter"
 msgid "Recently Played"
 msgstr "Nyligen spelade"
@@ -9829,7 +9889,7 @@ msgstr "Kommande utgåvor, närmast först. Datum på månad, kvartal och år ä
 msgid "Relevance"
 msgstr "Relevans"
 
-#: apps/desktop/src/shell/ErrorFallback.tsx
+#: apps/desktop/src/shell/ErrorFallback.tsx apps/native/src/frame/error.rs
 msgid "Reload"
 msgstr "Läs in igen"
 
@@ -10121,6 +10181,7 @@ msgstr "Upplösning"
 
 #. A notification whose problem was fixed
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Resolved"
 msgstr "Löst"
 
@@ -10132,7 +10193,7 @@ msgstr "Tolkad kommandorad"
 msgid "Restart Caskade."
 msgstr "Starta om Caskade."
 
-#: apps/desktop/src/shell/AppUpdateLink.tsx
+#: apps/desktop/src/shell/AppUpdateLink.tsx apps/native/src/frame/status_bar.rs
 msgid "Restart for Caskade v{version}"
 msgstr "Starta om för Caskade v{version}"
 
@@ -10147,6 +10208,7 @@ msgid "Restore"
 msgstr "Återställ"
 
 #: apps/desktop/src/shell/Topbar.tsx apps/desktop/src/shell/WindowControls.tsx
+#: apps/native/src/frame/window.rs
 msgctxt "window"
 msgid "Restore"
 msgstr "Återställ"
@@ -10190,7 +10252,7 @@ msgid "Restoring waits until the game has closed."
 msgstr "Återställningen väntar tills spelet har stängts."
 
 #. Hint bar: go down to the search results
-#: apps/desktop/src/shell/TypeSearch.tsx
+#: apps/desktop/src/shell/TypeSearch.tsx apps/native/src/frame/type_search.rs
 msgid "Results"
 msgstr "Resultat"
 
@@ -10776,6 +10838,7 @@ msgstr "Skärmbilder"
 #. A notification's category
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Script"
 msgstr "Skript"
 
@@ -10798,12 +10861,12 @@ msgctxt "pad action"
 msgid "Scroll"
 msgstr "Rulla"
 
-#: apps/desktop/src/shell/AppShell.tsx
+#: apps/desktop/src/shell/AppShell.tsx apps/native/src/frame/search.rs
 msgctxt "action"
 msgid "Search"
 msgstr "Sök"
 
-#: apps/desktop/src/shell/TypeSearch.tsx
+#: apps/desktop/src/shell/TypeSearch.tsx apps/native/src/frame/type_search.rs
 msgctxt "noun"
 msgid "Search"
 msgstr "Sökning"
@@ -10816,7 +10879,7 @@ msgstr "Sök igen"
 msgid "Search all reported volumes. This can be slow."
 msgstr "Sök på alla rapporterade volymer. Det kan ta tid."
 
-#: apps/desktop/src/shell/SearchBox.tsx
+#: apps/desktop/src/shell/SearchBox.tsx apps/native/src/frame/search.rs
 msgid "Search any game… (classic, modern, or something obscure)"
 msgstr "Sök efter vilket spel som helst… (klassiskt, modernt eller något obskyrt)"
 
@@ -10829,6 +10892,7 @@ msgid "Search every game…"
 msgstr "Sök bland alla spel…"
 
 #: apps/desktop/src/shell/SearchBox.tsx apps/desktop/src/shell/TypeSearch.tsx
+#: apps/native/src/frame/search.rs apps/native/src/frame/type_search.rs
 msgid "Search games"
 msgstr "Sök spel"
 
@@ -11060,6 +11124,7 @@ msgid "Setting up… The first time takes a few minutes."
 msgstr "Konfigurerar… Första gången tar några minuter."
 
 #: apps/desktop/src/shell/nav.ts apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/frame/sidebar.rs apps/native/src/frame/views.rs
 msgid "Settings"
 msgstr "Inställningar"
 
@@ -11142,6 +11207,7 @@ msgstr "Dela…"
 #. A notification's category
 #. A notification's category
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Shared"
 msgstr "Delat"
 
@@ -11182,6 +11248,7 @@ msgid "Show all games"
 msgstr "Visa alla spel"
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Show games"
 msgstr "Visa spel"
 
@@ -11213,6 +11280,7 @@ msgid "Show titles on artwork"
 msgstr "Visa titlar på bilder"
 
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Show updates"
 msgstr "Visa uppdateringar"
 
@@ -11332,6 +11400,7 @@ msgid "Size"
 msgstr "Storlek"
 
 #: apps/desktop/src/views/library/LibraryRow.tsx
+#: apps/native/src/library/grid.rs
 msgctxt "library column"
 msgid "Size"
 msgstr "Storlek"
@@ -11610,6 +11679,7 @@ msgid "Status"
 msgstr "Status"
 
 #: apps/desktop/src/views/library/LibraryRow.tsx
+#: apps/native/src/library/grid.rs
 msgctxt "library column"
 msgid "Status"
 msgstr "Status"
@@ -11771,7 +11841,8 @@ msgid "Storage service is unavailable"
 msgstr "Lagringstjänsten är inte tillgänglig"
 
 #: apps/desktop/src/shell/nav.ts apps/desktop/src/views/game/origin.ts
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/frame/sidebar.rs
+#: apps/native/src/frame/views.rs
 msgid "Store"
 msgstr "Butik"
 
@@ -12537,7 +12608,7 @@ msgstr "Det tar en stund på samma nätverk, med eller utan internet."
 msgid "This torrent holds more than one game or installer. Choose the one to download and install."
 msgstr "Den här torrenten innehåller mer än ett spel eller installationsprogram. Välj det som ska laddas ner och installeras."
 
-#: apps/desktop/src/shell/ErrorFallback.tsx
+#: apps/desktop/src/shell/ErrorFallback.tsx apps/native/src/frame/error.rs
 msgid "This view couldn't be shown"
 msgstr "Den här vyn kunde inte visas"
 
@@ -12663,7 +12734,8 @@ msgstr "systemfält, avsluta, stäng till systemfältet"
 #: apps/desktop/src/views/settings/emulators/FromDevices.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/frame/error.rs
+#: apps/native/src/frame/notifications.rs
 msgid "Try again"
 msgstr "Försök igen"
 
@@ -12800,7 +12872,7 @@ msgstr "Okänd inbyggd profil"
 msgid "Unknown confidence"
 msgstr "Okänd säkerhet"
 
-#: apps/desktop/src/shell/ErrorFallback.tsx
+#: apps/desktop/src/shell/ErrorFallback.tsx apps/native/src/frame/error.rs
 msgid "Unknown error"
 msgstr "Okänt fel"
 
@@ -12874,6 +12946,7 @@ msgstr "Kan inte nås"
 #. A notification not read yet
 #. The notification feed's filter
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Unread"
 msgstr "Olästa"
 
@@ -13009,6 +13082,7 @@ msgstr "Uppdaterat."
 
 #. A notification's category
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/frame/notifications.rs
 msgid "Updates"
 msgstr "Uppdateringar"
 
@@ -13313,6 +13387,7 @@ msgstr "Bevakar mappar"
 #. The library's tab of games played in the browser
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/frame/sidebar.rs
 msgctxt "library filter"
 msgid "Web"
 msgstr "Webb"
@@ -13585,6 +13660,7 @@ msgstr "Wine, Proton, umu"
 
 #. A running job with no phase
 #: apps/desktop/src/views/activity/jobLabels.ts
+#: apps/native/src/frame/status_bar.rs
 msgid "Working"
 msgstr "Arbetar"
 

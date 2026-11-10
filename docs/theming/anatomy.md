@@ -556,7 +556,7 @@ Contains: [`avatar`](#avatar)
 
 ## `app-shell`
 
-The window: sidebar, topbar, current view and persistent status bar. Rendered by AppShell (app).
+The window: sidebar, topbar, current view and persistent status bar. Rendered by Frame (apps/native/src/frame/mod.rs); in the webview, AppShell (app).
 
 Root: `[data-cs="app-shell"]`
 
@@ -570,7 +570,7 @@ Contains: [`backdrop`](#backdrop), [`sidebar`](#sidebar), [`topbar`](#topbar), [
 
 ## `status-bar`
 
-Persistent background activity, application version and an available Caskade update. IGDB and Hasheous are credited in Settings → About (`about`). Rendered by StatusBar (app).
+Persistent background activity, application version and an available Caskade update. IGDB and Hasheous are credited in Settings → About (`about`). Rendered by StatusBar (apps/native/src/frame/status_bar.rs); in the webview, StatusBar (app).
 
 Root: `[data-cs="status-bar"]`
 
@@ -584,7 +584,7 @@ Root: `[data-cs="status-bar"]`
 
 ## `backdrop`
 
-The decorative layer behind everything. Rendered by AppShell (app).
+The decorative layer behind everything. Rendered by Frame (apps/native/src/frame/mod.rs); in the webview, AppShell (app).
 
 Root: `[data-cs="backdrop"]`
 
@@ -625,7 +625,7 @@ Contains: [`backdrop`](#backdrop), [`window-controls`](#window-controls), [`butt
 
 ## `sidebar`
 
-The navigation column. Rendered by Sidebar (app).
+The navigation column. Rendered by Sidebar (apps/native/src/frame/sidebar.rs); in the webview, Sidebar (app).
 
 Root: `[data-cs="sidebar"]`
 
@@ -646,7 +646,7 @@ Slots: `plugin-nav` hold the caller's content; parts inside them belong to that 
 
 ## `topbar`
 
-The bar above the view: search, quick actions and the window controls. It is the window's title bar: dragging it moves the window. Rendered by Topbar (app).
+The bar above the view: search, quick actions and the window controls. It is the window's title bar: dragging it moves the window. Rendered by Topbar (apps/native/src/frame/topbar.rs); in the webview, Topbar (app).
 
 Root: `[data-cs="topbar"]`
 
@@ -665,7 +665,7 @@ Contains: [`search`](#search), [`window-controls`](#window-controls), [`avatar`]
 
 ## `window-controls`
 
-Minimize, maximize and close at the end of the topbar (Windows and Linux; macOS keeps its traffic lights). Each button carries `data-hovered` and `data-pressed`. Rendered by WindowControls (app).
+Minimize, maximize and close at the end of the topbar (Windows and Linux; macOS keeps its traffic lights). Each button carries `data-hovered` and `data-pressed`. Rendered by WindowControls (apps/native/src/frame/window.rs); in the webview, WindowControls (app).
 
 Root: `[data-cs="window-controls"]`
 
@@ -682,7 +682,7 @@ State on the root:
 
 ## `view-error`
 
-Shown in place of a view that failed to render, with the shell around it; or in place of the whole window when the shell itself failed, with the window controls. Rendered by ViewError, AppCrash (app).
+Shown in place of a view that failed to render, with the shell around it; or in place of the whole window when the shell itself failed, with the window controls. Rendered by ViewError, AppCrash (apps/native/src/frame/error.rs); in the webview, ViewError, AppCrash (app).
 
 Root: `[data-cs="view-error"]`
 
@@ -745,7 +745,7 @@ Contains: [`search`](#search), [`select`](#select), [`avatar`](#avatar)
 
 ## `notifications`
 
-Activity's notification feed (#198): game additions in hourly batches, failed jobs, updates on offer and plugins turned off, newest change first. Rendered by NotificationFeed (app).
+Activity's notification feed (#198): game additions in hourly batches, failed jobs, updates on offer and plugins turned off, newest change first. Rendered by Feed (apps/native/src/frame/notifications.rs); in the webview, NotificationFeed (app).
 
 Root: `[data-cs="notifications"]`
 
@@ -761,7 +761,7 @@ Contains: [`notification`](#notification), [`button`](#button)
 
 ## `notification`
 
-One item of the notification feed. `data-category` is what it is about; `data-resolved` is set once its problem has cleared. Rendered by NotificationFeed (app).
+One item of the notification feed. `data-category` is what it is about; `data-resolved` is set once its problem has cleared. Rendered by Item (apps/native/src/frame/notifications.rs); in the webview, NotificationFeed (app).
 
 Root: `[data-cs="notification"]`
 
@@ -832,7 +832,7 @@ Slots: `items` hold the caller's content; parts inside them belong to that conte
 
 ## `search`
 
-The game search; suggestions open in a `search-popover`. Rendered by SearchBox (app).
+The game search; suggestions open in a `search-popover`. Rendered by SearchBox (apps/native/src/frame/search.rs); in the webview, SearchBox (app).
 
 Root: `[data-cs="search"]`
 
@@ -849,7 +849,7 @@ Contains: [`search-popover`](#search-popover)
 
 ## `search-popover`
 
-The search suggestions, rendered in a portal. Rendered by SearchBox (app).
+The search suggestions, rendered in a portal. Rendered by SearchBox (apps/native/src/frame/search.rs); in the webview, SearchBox (app).
 
 Root: `[data-cs="search-popover"]`
 
@@ -864,7 +864,7 @@ Contains: [`game-art`](#game-art), [`status-badge`](#status-badge)
 
 ## `view`
 
-The scrolling area that shows the current page. Rendered by AppShell (app).
+The scrolling area that shows the current page. Rendered by Frame (apps/native/src/frame/mod.rs); in the webview, AppShell (app).
 
 Root: `[data-cs="view"]`
 
@@ -1344,7 +1344,7 @@ State on the root:
 
 ## `type-search`
 
-Search from a keyboard, RetroArch style: a centred overlay with the text being typed and how many games match, opened by typing anywhere outside a text field or by `/`. Rendered by TypeSearch (app).
+Search from a keyboard, RetroArch style: a centred overlay with the text being typed and how many games match, opened by typing anywhere outside a text field or by `/`. Rendered by TypeSearch (apps/native/src/frame/type_search.rs); in the webview, TypeSearch (app).
 
 Root: `[data-cs="type-search"]`
 

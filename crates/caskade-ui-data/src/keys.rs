@@ -17,6 +17,16 @@ pub enum Key {
     Sessions(Option<String>),
     /// Collections and the games in them.
     Collections,
+    /// Install, download and other jobs (Activity).
+    Jobs,
+    /// The notification feed and its unread count.
+    Notifications,
+    /// Paired devices and how they're reached.
+    Devices,
+    /// Whether a new Caskade is available.
+    AppUpdate,
+    /// Background tasks (scans, metadata) and the app's version.
+    Background,
 }
 
 /// What an app event made stale.
@@ -54,7 +64,19 @@ impl Changed {
             // The library is the signed-in account's: favourites, hidden
             // games, collections and age limits all follow it.
             Event::AccountChanged(_) => Self::Everything,
+            Event::JobChanged(_) => Self::only(Key::Jobs),
+            Event::NotificationsChanged(_) => Self::only(Key::Notifications),
+            Event::DevicesChanged(_) => Self::only(Key::Devices),
+            Event::AppUpdateChanged(_) => Self::only(Key::AppUpdate),
+            Event::BackgroundChanged(_) => Self::only(Key::Background),
             _ => Self::Nothing,
+        }
+    }
+
+    fn only(key: Key) -> Self {
+        Self::Keys {
+            keys: vec![key],
+            all_games: false,
         }
     }
 
@@ -150,6 +172,30 @@ mod tests {
         }));
         assert!(changed.affects(&Key::Game("a".into())));
         assert!(changed.affects(&Key::Collections));
+    }
+
+    #[test]
+    fn status_events_make_only_their_status_stale() {
+        for (event, key) in [
+            (
+                Event::NotificationsChanged(
+                    caskade_app::commands::notifications::NotificationsChanged { unread: 2 },
+                ),
+                Key::Notifications,
+            ),
+            (
+                Event::BackgroundChanged(
+                    caskade_app::events::BackgroundChanged(Default::default()),
+                ),
+                Key::Background,
+            ),
+        ] {
+            let changed = Changed::from_event(&event);
+            assert!(changed.affects(&key), "{key:?}");
+            for other in [Key::Games, Key::Jobs, Key::Devices, Key::AppUpdate] {
+                assert!(!changed.affects(&other), "{key:?} made {other:?} stale");
+            }
+        }
     }
 
     #[test]

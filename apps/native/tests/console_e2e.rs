@@ -4,10 +4,10 @@
 //! window between presses, writes a report and quits. A pad-only run sees
 //! no key or pointer event.
 //!
-//! Until the views arrive (#96) the script only checks the plumbing: the
-//! window answers, presses go through, the guide button opens nothing with
-//! no game running. The webview's full console script runs here once the
-//! native views exist.
+//! The script drives the frame (#96): a pad goes into the sidebar, opens
+//! Store and goes back, and the guide button opens nothing with no game
+//! running. The webview's full console script runs here once the native
+//! views exist (#97 onwards).
 //!
 //! The app runs on a display and session bus of its own
 //! (`caskade-test-desktop`), never the developer's (#122):
@@ -23,17 +23,21 @@ use caskade_test_desktop::PrivateDesktop;
 use std::time::{Duration, Instant};
 
 const SCRIPT: &str = "\
-# The window is up, and shows the app.
-wait-text Caskade
-# Pad presses reach the input root; with nothing to focus, focus stays put.
+# The window is up, on Home (#96's frame; its view isn't built yet).
+wait-text Not built yet.
+# A pad: into the sidebar, down to Store, and A opens it.
 press nav.down
-press nav.right 2
-focus-is
+seek-section nav.left sidebar
+seek nav.down Store
+press confirm
+wait-text Store
+# B goes back a page.
+press back
+wait-text Home
 # With no game running, guide opens no quick menu.
 press guide
 sleep 300
-focus-is
-press back
+wait-text Home
 ";
 
 #[test]

@@ -14,6 +14,12 @@ mod tests;
 
 #[allow(unused_imports)]
 pub use art::{SCHEME as ART_SCHEME, fetch as fetch_art};
+
+/// A game's art for a small place (a search suggestion): the 96 px
+/// thumbnail.
+pub fn art_url(art: Option<&caskade_core::model::Artwork>) -> Option<String> {
+    art::url(art, art::Variant::Icon)
+}
 #[allow(unused_imports)]
 pub use grid::{Events, VirtualLibrary};
 #[allow(unused_imports)]

@@ -60,6 +60,8 @@ required-features = ["shots"]
 dioxus-native = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735890754b4a9970cb07765b8bf3c0c", default-features = false, features = ["prelude", "accessibility", "svg", "system-fonts", "woff"] }
 caskade-app = { path = "../../crates/caskade-app" }
 caskade-core = { path = "../../crates/caskade-core" }
+# The notification feed's types (#96).
+caskade-achievements = { path = "../../crates/caskade-achievements" }
 # What views read and change, and fixtures mode (#89, `src/data`).
 caskade-ui-data = { path = "../../crates/caskade-ui-data" }
 # Pads (`src/input`), and the webview's input rules ported to Rust (#92).
@@ -94,6 +96,8 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 # The bundled fonts under the tokens' family names, and theme asset URLs
 # (`theme.rs`), at the versions Blitz uses.
 parley = "0.12"
+# The search's accent-blind matching, as the webview's `foldSearch` (#96).
+unicode-normalization = "0.1"
 url = "2"
 percent-encoding = "2"
 

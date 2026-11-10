@@ -60,8 +60,18 @@ pub fn run(out: &Path, themes_folder: Option<&Path>) -> Result<(), String> {
             continue;
         }
         for &(screen, root) in screens::SCREENS.iter().chain(crate::gallery::SCREENS) {
-            render(out, &themes, &info.id, screen, root)?;
+            render(out, &themes, &info.id, screen, root, None)?;
         }
+        // The app's own frame over the fixture library (#96), once its data
+        // is there.
+        render(
+            out,
+            &themes,
+            &info.id,
+            "shell",
+            crate::frame::shot::screen,
+            Some(crate::frame::shot::ready),
+        )?;
     }
     Ok(())
 }
@@ -72,6 +82,9 @@ fn render(
     theme: &str,
     screen: &str,
     root: fn() -> dioxus_native::prelude::Element,
+    // A screen whose data loads after its first render: rendered once this
+    // says it's there.
+    ready: Option<fn(&BaseDocument) -> bool>,
 ) -> Result<(), String> {
     let active = themes.resolve(theme);
     let scheme = match caskade_ui_theme::appearance::color_scheme(&active.modes, false) {
@@ -102,6 +115,26 @@ fn render(
     // Effects (the gallery's toasts) and what they render.
     for _ in 0..3 {
         blitz_dom::Document::poll(&mut document, None);
+    }
+    if let Some(ready) = ready {
+        let until = std::time::Instant::now() + std::time::Duration::from_secs(20);
+        loop {
+            blitz_dom::Document::poll(&mut document, None);
+            document.inner.borrow_mut().resolve(0.0);
+            if ready(&document.inner.borrow()) {
+                break;
+            }
+            if std::time::Instant::now() > until {
+                return Err(format!("{screen}: its data never came"));
+            }
+            std::thread::sleep(std::time::Duration::from_millis(10));
+        }
+        // What the data brought in renders, and settles.
+        for _ in 0..10 {
+            blitz_dom::Document::poll(&mut document, None);
+            document.inner.borrow_mut().resolve(0.0);
+            std::thread::sleep(std::time::Duration::from_millis(10));
+        }
     }
     let mut doc = document.inner.borrow_mut();
     // Fonts a theme loads arrive as messages the next resolve takes, and

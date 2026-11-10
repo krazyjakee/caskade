@@ -92,6 +92,8 @@ struct Inner {
     back: RefCell<Option<Rc<dyn Fn()>>>,
     details: RefCell<Option<OpenDetails>>,
     typing: RefCell<Option<StartSearch>>,
+    /// What Ctrl K (⌘ K) does: the search's focus.
+    search_key: RefCell<Option<Rc<dyn Fn()>>>,
 }
 
 impl PartialEq for Input {
@@ -120,6 +122,7 @@ impl Input {
                 back: RefCell::new(None),
                 details: RefCell::new(None),
                 typing: RefCell::new(None),
+                search_key: RefCell::new(None),
             }),
             changed: Signal::new(0),
             keyboard: Signal::new(None),
@@ -156,6 +159,28 @@ impl Input {
     #[allow(dead_code, reason = "the shell's search (#96 onwards) calls it")]
     pub fn on_type(&self, start: impl Fn(String) + 'static) {
         *self.inner.typing.borrow_mut() = Some(Rc::new(start));
+    }
+
+    /// What Ctrl K (⌘ K on macOS) does from anywhere: the top bar's
+    /// search takes focus.
+    pub fn on_search_key(&self, focus: impl Fn() + 'static) {
+        *self.inner.search_key.borrow_mut() = Some(Rc::new(focus));
+    }
+
+    /// Ctrl K or ⌘ K: whether it went to the search.
+    fn search_key(&self, event: &KeyboardEvent) -> bool {
+        let held = event.modifiers();
+        let shortcut = (held.ctrl() || held.meta())
+            && !held.alt()
+            && event.key().to_string().eq_ignore_ascii_case("k");
+        let focus = self.inner.search_key.borrow().clone();
+        match focus {
+            Some(focus) if shortcut => {
+                focus();
+                true
+            }
+            _ => false,
+        }
     }
 
     /// A key the keyboard map left alone: whether it started a search.
@@ -268,6 +293,13 @@ impl Input {
         *self.keyboard.read()
     }
 
+    /// Opens the on-screen keyboard on `field`, which has focus: a pad
+    /// types there (the search, from the pad's Search).
+    pub fn open_keyboard(&self, field: NodeId) {
+        let mut keyboard = self.keyboard;
+        keyboard.set(Some(field));
+    }
+
     pub fn close_keyboard(&self) {
         let mut keyboard = self.keyboard;
         keyboard.set(None);
@@ -300,7 +332,7 @@ impl Input {
     }
 
     /// Runs `work` with the document borrowed.
-    pub(super) fn read<T>(&self, work: impl FnOnce(&BaseDocument) -> T) -> Option<T> {
+    pub(crate) fn read<T>(&self, work: impl FnOnce(&BaseDocument) -> T) -> Option<T> {
         let root = self.handle()?;
         let doc = root.doc();
         Some(work(&doc))
@@ -717,7 +749,7 @@ pub fn InputRoot(
             },
             onkeydown: move |event: KeyboardEvent| {
                 on_key.inner.keys.set(on_key.inner.keys.get() + 1);
-                if on_key.key(&event) || on_key.typing(&event) {
+                if on_key.search_key(&event) || on_key.key(&event) || on_key.typing(&event) {
                     event.prevent_default();
                     event.stop_propagation();
                 }

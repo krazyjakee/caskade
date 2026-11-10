@@ -2054,6 +2054,7 @@ dependencies = [
  "blitz-paint",
  "blitz-shell",
  "blitz-traits",
+ "caskade-achievements",
  "caskade-app",
  "caskade-core",
  "caskade-input",
@@ -2079,6 +2080,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "tray-icon",
+ "unicode-normalization",
  "url",
  "windows-registry",
 ]
