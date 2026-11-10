@@ -88,13 +88,48 @@ fn main() {
         );
         smoke::after_start(services);
     });
-    dioxus_native::launch_cfg(app, vec![], vec![Box::new(window)]);
-    // The window closed: save where it was and stop what runs with Caskade.
+    let restarts = caskade_player::recovery::Restarts::new(paths.cache.join("native-restarts"));
+    // Nothing the window held is used after a panic: the process restarts.
+    let ui = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        dioxus_native::launch_cfg(app, vec![], vec![Box::new(window)]);
+    }));
+    // The window closed, or its UI panicked: save where it was and stop
+    // what runs with Caskade.
     if let Some(keeper) = KEEPER.get() {
         keeper.save();
     }
     shell::stop();
+    if ui.is_err() {
+        restart_after_panic(&restarts);
+    }
     tracing::info!("Caskade (native) quit");
+}
+
+/// The UI panicked (`background::log_panics` logged where). One event loop
+/// is all a process gets, so the window comes back as a new process, within
+/// the restart budget the webviews share (`caskade_player::recovery`);
+/// past it Caskade stops rather than loop.
+fn restart_after_panic(restarts: &caskade_player::recovery::Restarts) -> ! {
+    if !restarts.claim(std::time::SystemTime::now()) {
+        tracing::error!("the window keeps failing: Caskade won't restart it again");
+        eprintln!(
+            "Caskade's window keeps failing, so it stopped. Start Caskade again, or see the log."
+        );
+        std::process::exit(1);
+    }
+    tracing::warn!("restarting after the window failed");
+    let started = std::env::current_exe().and_then(|program| {
+        std::process::Command::new(program)
+            .args(std::env::args_os().skip(1))
+            .spawn()
+    });
+    match started {
+        Ok(_) => std::process::exit(0),
+        Err(error) => {
+            tracing::error!(%error, "Caskade couldn't restart");
+            std::process::exit(1)
+        }
+    }
 }
 
 /// The main window's attributes, at its restored place and size.
@@ -129,6 +164,12 @@ fn app() -> Element {
             keeper.follow(window.as_ref(), event);
         }
         shell::quit_if_asked(event_loop);
+        if matches!(
+            event,
+            dioxus_native::winit::event::WindowEvent::RedrawRequested
+        ) {
+            smoke::panic_in_ui();
+        }
     });
     rsx! {
         div { style: "padding: 24px; font-family: sans-serif;", "Caskade" }
@@ -137,6 +178,12 @@ fn app() -> Element {
 
 /// The window is up: games may move it once the services are there.
 fn window_ready(window: Arc<dyn dioxus_native::winit::window::Window>) {
+    // A place saved on a monitor that's gone: back to the top left corner
+    // of the screen there is.
+    if window.current_monitor().is_none() {
+        tracing::info!("the saved window place is off every screen");
+        window.set_outer_position(dioxus_native::winit::dpi::PhysicalPosition::new(0, 0).into());
+    }
     smoke::window_ready(window.clone());
     caskade_app::runtime::spawn(async move {
         let services = loop {

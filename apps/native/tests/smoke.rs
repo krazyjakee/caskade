@@ -221,3 +221,56 @@ fn starts_restores_its_window_plays_a_web_game_and_a_video_and_quits() {
     let saved = std::fs::read_to_string(&state_file).unwrap();
     assert!(saved.contains("\"width\":1100"), "{saved}");
 }
+
+/// A panic in the window's UI restarts Caskade (one event loop is all a
+/// process gets), within the restart budget the webviews share; past it
+/// Caskade stops instead of looping.
+#[test]
+#[ignore = "needs an X display (Xvfb, no window manager): run with -- --ignored"]
+fn a_panicking_window_restarts_within_the_budget_then_stops() {
+    assert!(std::env::var_os("DISPLAY").is_some(), "run under Xvfb");
+    let temp = tempfile::tempdir().unwrap();
+    let home = temp.path().to_path_buf();
+    let runtime = home.join("run");
+    std::fs::create_dir_all(&runtime).unwrap();
+    let log_path = home.join("native.log");
+    let log = std::fs::File::create(&log_path).unwrap();
+    let mut app = Command::new(env!("CARGO_BIN_EXE_caskade-native"))
+        .env_clear()
+        .env("PATH", std::env::var_os("PATH").unwrap_or_default())
+        .env("DISPLAY", std::env::var_os("DISPLAY").unwrap())
+        .env("HOME", &home)
+        .env("XDG_DATA_HOME", home.join("data"))
+        .env("XDG_CONFIG_HOME", home.join("config"))
+        .env("XDG_CACHE_HOME", home.join("cache"))
+        .env("XDG_STATE_HOME", home.join("state"))
+        .env("XDG_RUNTIME_DIR", &runtime)
+        .env("RUST_LOG", "info")
+        .env("CASKADE_NATIVE_SMOKE_PANIC", "1")
+        .stdin(Stdio::null())
+        .stdout(log.try_clone().unwrap())
+        .stderr(log)
+        .spawn()
+        .expect("the native binary starts");
+    // The first process hands over to its restart and ends.
+    wait(&mut app, Duration::from_secs(60)).expect("the panicked process ends");
+    let deadline = Instant::now() + Duration::from_secs(120);
+    let output = loop {
+        let output = std::fs::read_to_string(&log_path).unwrap_or_default();
+        if output.contains("won't restart it again") || Instant::now() > deadline {
+            break output;
+        }
+        std::thread::sleep(Duration::from_millis(500));
+    };
+    assert!(output.contains("won't restart it again"), "{output}");
+    assert_eq!(
+        output.matches("restarting after the window failed").count(),
+        caskade_player::recovery::RESTARTS,
+        "{output}"
+    );
+    assert_eq!(
+        output.matches("Caskade (native) starting").count(),
+        caskade_player::recovery::RESTARTS + 1,
+        "{output}"
+    );
+}
