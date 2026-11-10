@@ -1212,6 +1212,7 @@ dependencies = [
  "blitz-dom",
  "blitz-paint",
  "blitz-traits",
+ "data-url",
  "futures-util",
  "keyboard-types",
  "wasm-bindgen",
@@ -1977,17 +1978,24 @@ dependencies = [
 name = "caskade-native"
 version = "0.1.4"
 dependencies = [
+ "blitz-dom",
+ "blitz-shell",
+ "blitz-traits",
  "caskade-app",
  "caskade-core",
  "caskade-player",
  "caskade-ui-data",
  "dioxus-native",
+ "gtk",
+ "image",
+ "libappindicator-sys",
  "serde",
  "serde_json",
  "tempfile",
  "tokio",
  "tracing",
  "tracing-subscriber",
+ "tray-icon",
 ]
 
 [[package]]

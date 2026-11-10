@@ -221,7 +221,6 @@ pub fn run() {
         manage(app, services);
         deep_link::listen(app.handle());
         app.manage(commands::video::VideoWindow::default());
-        app.manage(dev_plugins::DevPlugins::default());
         // `caskade dev <folder>`: load and watch a plugin in place (#131).
         let args: Vec<String> = std::env::args().collect();
         if let Some(folder) =
@@ -465,6 +464,8 @@ fn manage<R: tauri::Runtime>(app: &tauri::App<R>, services: caskade_app::start::
         sync,
         presence,
         peer_backups,
+        opened_pairing_link,
+        dev_plugins,
     } = services;
     app.manage(store);
     app.manage(settings);
@@ -513,5 +514,6 @@ fn manage<R: tauri::Runtime>(app: &tauri::App<R>, services: caskade_app::start::
     app.manage(sync);
     app.manage(presence);
     app.manage(peer_backups);
-    app.manage(commands::sync::OpenedPairingLink::default());
+    app.manage(opened_pairing_link);
+    app.manage(dev_plugins);
 }

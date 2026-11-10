@@ -12,7 +12,6 @@ use caskade_app::start::{Core, Services, Shell};
 use caskade_core::launch::WindowPlacement;
 use dioxus_native::winit::{
     event::WindowEvent,
-    event_loop::ActiveEventLoop,
     window::{Window, WindowLevel},
 };
 use tokio::sync::broadcast;
@@ -138,8 +137,7 @@ impl GameWindow for NativeWindow {
     }
 
     fn tray_shown(&self) -> bool {
-        // The tray comes with BLITZ-9 (#88): until then nothing hides to it.
-        false
+        crate::tray::state().shown()
     }
 }
 
@@ -205,21 +203,16 @@ impl Keeper {
     }
 }
 
-/// Asked to quit from outside the event loop (the smoke test, for now):
-/// the loop exits at its next event.
-static QUIT: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+static MAIN_WINDOW: OnceLock<Arc<dyn Window>> = OnceLock::new();
 
-/// Quits at the window's next event; `window` is woken to make one.
-pub fn quit(window: &dyn Window) {
-    QUIT.store(true, std::sync::atomic::Ordering::SeqCst);
-    window.request_redraw();
+/// The main window, once it's open.
+pub fn set_main_window(window: Arc<dyn Window>) {
+    let _ = MAIN_WINDOW.set(window);
 }
 
-/// Ends the event loop when a quit was asked for.
-pub fn quit_if_asked(event_loop: &dyn ActiveEventLoop) {
-    if QUIT.load(std::sync::atomic::Ordering::SeqCst) {
-        event_loop.exit();
-    }
+/// The main window, once it's open.
+pub fn main_window() -> Option<&'static Arc<dyn Window>> {
+    MAIN_WINDOW.get()
 }
 
 /// The video window open now (`caskade_app::commands::video`): one at a

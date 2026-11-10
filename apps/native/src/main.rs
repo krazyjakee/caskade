@@ -9,8 +9,11 @@
 
 // The data hooks (#89); the views (#96 onwards) use them.
 mod data;
+mod forwarded;
+mod launch;
 mod shell;
 mod smoke;
+mod tray;
 mod window_state;
 
 use std::sync::{Arc, OnceLock};
@@ -72,6 +75,22 @@ fn main() {
     {
         startup_failed("Caskade couldn't restore the backup", &error);
     }
+    // One Caskade per user: a second start hands its arguments (links,
+    // `--console`, a torrent file) to the running one and ends.
+    let instance = match caskade_app::runtime::block_on(caskade_app::single_instance::claim(
+        &caskade_app::single_instance::endpoint(&paths),
+        &caskade_app::single_instance::Forwarded::this_process(),
+    )) {
+        Ok(caskade_app::single_instance::Claim::First(listener)) => Some(listener),
+        Ok(caskade_app::single_instance::Claim::Forwarded) => {
+            tracing::info!("Caskade already runs: it has this start's arguments");
+            std::process::exit(0);
+        }
+        Err(error) => {
+            tracing::warn!(%error, "couldn't tell whether Caskade already runs");
+            None
+        }
+    };
     let artwork = caskade_core::artwork::ArtworkCache::new(paths.cache.join("artwork"))
         .inspect_err(|error| tracing::error!(%error, "artwork cache unavailable"))
         .ok();
@@ -83,7 +102,23 @@ fn main() {
     let state_file = window_state::file(&paths);
     let restored = window_state::WindowState::load(&state_file);
     let _ = KEEPER.set(shell::Keeper::new(state_file, restored));
-    let window = attributes(restored);
+    // The tray icon (Linux: before the window, on its own thread), and
+    // whether a login start stays in it (#114).
+    #[cfg(target_os = "linux")]
+    tray::start();
+    tray::follow(core.settings.clone());
+    let general: caskade_core::settings::GeneralSettings =
+        caskade_app::runtime::block_on(core.settings.read_or_default("core.general"));
+    let hidden =
+        caskade_core::login_item::starts_hidden(&std::env::args().collect::<Vec<_>>(), &general)
+            && (cfg!(not(target_os = "linux")) || tray::state().shown());
+    if hidden {
+        tracing::info!("started at login: Caskade stays in the tray");
+    }
+    let window = attributes(restored).with_visible(!hidden);
+    if let Some(listener) = instance {
+        caskade_app::single_instance::serve(listener, forwarded::take);
+    }
     // Everything else starts while the window shows.
     shell::start(core, |services| {
         caskade_app::launch_cli::server::listen(
@@ -96,11 +131,12 @@ fn main() {
             caskade_app::launch_cli::Endpoint::for_paths(&services.paths),
         );
         smoke::after_start(services);
+        forwarded::take_own();
     });
     let restarts = caskade_player::recovery::Restarts::new(paths.cache.join("native-restarts"));
     // Nothing the window held is used after a panic: the process restarts.
     let ui = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-        dioxus_native::launch_cfg(app, vec![], vec![Box::new(window)]);
+        launch::run(app, window, NativeShell);
     }));
     // The window closed, or its UI panicked: save where it was and stop
     // what runs with Caskade.
@@ -108,6 +144,7 @@ fn main() {
         keeper.save();
     }
     shell::stop();
+    tray::hide_before_exit();
     if let Err(panic) = ui {
         if no_renderer(caskade_app::background::panic_message(&*panic)) {
             tracing::error!("no GPU renderer for the window: Caskade won't restart it");
@@ -164,6 +201,23 @@ fn restart_after_panic(restarts: &caskade_player::recovery::Restarts) -> ! {
     }
 }
 
+/// What closing the main window does: hide it to the tray when the
+/// setting says so and the icon is up, otherwise quit.
+struct NativeShell;
+
+impl launch::Shell for NativeShell {
+    fn on_close(&mut self) -> launch::OnClose {
+        // Console mode isn't in the native app yet (#92), and nothing in its
+        // UI holds a close (#58).
+        match tray::state().close(false) {
+            caskade_app::tray::Close::Hide => launch::OnClose::Hide,
+            caskade_app::tray::Close::Go | caskade_app::tray::Close::Held(_) => {
+                launch::OnClose::Quit
+            }
+        }
+    }
+}
+
 /// The main window's attributes, at its restored place and size.
 fn attributes(restored: Option<window_state::WindowState>) -> dioxus_native::WindowAttributes {
     use dioxus_native::winit::dpi::{PhysicalPosition, PhysicalSize};
@@ -195,7 +249,7 @@ fn app() -> Element {
         if let Some(keeper) = KEEPER.get() {
             keeper.follow(window.as_ref(), event);
         }
-        shell::quit_if_asked(event_loop);
+        let _ = event_loop;
         if matches!(
             event,
             dioxus_native::winit::event::WindowEvent::RedrawRequested
@@ -213,6 +267,13 @@ fn app() -> Element {
 
 /// The window is up: games may move it once the services are there.
 fn window_ready(window: Arc<dyn dioxus_native::winit::window::Window>) {
+    shell::set_main_window(window.clone());
+    // Windows and macOS: the tray icon, here on the main thread.
+    #[cfg(not(target_os = "linux"))]
+    if !tray::start_here() && !window.is_visible().unwrap_or(true) {
+        // A login start without an icon to come back from shows the window.
+        window.set_visible(true);
+    }
     // A place saved on a monitor that's gone: back to the top left corner
     // of the screen there is.
     if window.current_monitor().is_none() {

@@ -173,6 +173,10 @@ pub struct Services {
     pub sync: caskade_core::sync::SyncService,
     pub presence: caskade_core::sync::presence::Presence,
     pub peer_backups: caskade_backup::peers::PeerBackups,
+    /// A `caskade://pair` link opened, waiting for an admin (#226).
+    pub opened_pairing_link: crate::commands::sync::OpenedPairingLink,
+    /// Plugins and themes loaded in place (`caskade dev`, #131).
+    pub dev_plugins: crate::dev_plugins::DevPlugins,
 }
 
 /// Starts every other service on `core`, wired to one another, with
@@ -781,6 +785,8 @@ pub fn start(core: Core, shell: Shell) -> Services {
         sync,
         presence,
         peer_backups,
+        opened_pairing_link: Default::default(),
+        dev_plugins: Default::default(),
     }
 }
 

@@ -5173,6 +5173,7 @@ msgid "request is expired or already being confirmed"
 msgstr ""
 
 #: crates/caskade-app/src/commands/install_requests.rs
+#: crates/caskade-app/src/deep_link.rs
 #: apps/desktop/src-tauri/src/commands/shares.rs
 msgid "receiving shares isn't available"
 msgstr ""
@@ -5477,6 +5478,14 @@ msgstr ""
 msgid "Caskade couldn't open Default apps: {error}"
 msgstr ""
 
+#: crates/caskade-app/src/tray.rs
+msgid "Show Caskade"
+msgstr ""
+
+#: crates/caskade-app/src/tray.rs
+msgid "Quit Caskade"
+msgstr ""
+
 #: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "Caskade was installed as a system package: update it with your package manager."
 msgstr ""
@@ -5611,14 +5620,6 @@ msgid ""
 "This backup can't be restored.\n"
 "\n"
 "{error}"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/tray.rs
-msgid "Show Caskade"
-msgstr ""
-
-#: apps/desktop/src-tauri/src/tray.rs
-msgid "Quit Caskade"
 msgstr ""
 
 #: apps/desktop/src-tauri/src/webview_recovery.rs

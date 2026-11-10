@@ -17,5 +17,7 @@ pub mod onboarding;
 pub mod permissions;
 pub mod recovery;
 pub mod runtime;
+pub mod single_instance;
 pub mod start;
 pub mod torrent_links;
+pub mod tray;

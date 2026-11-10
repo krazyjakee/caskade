@@ -5175,6 +5175,7 @@ msgid "request is expired or already being confirmed"
 msgstr "begäran har gått ut eller håller redan på att bekräftas"
 
 #: crates/caskade-app/src/commands/install_requests.rs
+#: crates/caskade-app/src/deep_link.rs
 #: apps/desktop/src-tauri/src/commands/shares.rs
 msgid "receiving shares isn't available"
 msgstr "mottagning av delningar är inte tillgänglig"
@@ -5479,6 +5480,14 @@ msgstr "HOME är inte satt"
 msgid "Caskade couldn't open Default apps: {error}"
 msgstr "Caskade kunde inte öppna Standardappar: {error}"
 
+#: crates/caskade-app/src/tray.rs
+msgid "Show Caskade"
+msgstr "Visa Caskade"
+
+#: crates/caskade-app/src/tray.rs
+msgid "Quit Caskade"
+msgstr "Avsluta Caskade"
+
 #: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "Caskade was installed as a system package: update it with your package manager."
 msgstr "Caskade installerades som ett systempaket: uppdatera det med din pakethanterare."
@@ -5622,14 +5631,6 @@ msgstr ""
 "Den här säkerhetskopian kan inte återställas.\n"
 "\n"
 "{error}"
-
-#: apps/desktop/src-tauri/src/tray.rs
-msgid "Show Caskade"
-msgstr "Visa Caskade"
-
-#: apps/desktop/src-tauri/src/tray.rs
-msgid "Quit Caskade"
-msgstr "Avsluta Caskade"
 
 #: apps/desktop/src-tauri/src/webview_recovery.rs
 msgid ""

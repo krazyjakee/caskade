@@ -86,6 +86,99 @@ pub async fn queue(
     (queued, raise)
 }
 
+/// What opening links reaches: the services, when they started.
+pub struct LinkServices<'a> {
+    pub events: crate::events::Events,
+    pub requests: Option<&'a crate::commands::install_requests::InstallRequests>,
+    pub accounts: Option<&'a caskade_core::accounts::AccountService>,
+    pub shares: Option<&'a caskade_share::Shares>,
+    pub store_accounts: Option<&'a caskade_core::store_accounts::StoreAccounts>,
+    pub opened_pairing_link: Option<&'a crate::commands::sync::OpenedPairingLink>,
+}
+
+impl<'a> LinkServices<'a> {
+    /// Everything [`crate::start::start`] started.
+    pub fn of(services: &'a crate::start::Services, events: crate::events::Events) -> Self {
+        Self {
+            events,
+            requests: services.install_requests.as_ref(),
+            accounts: Some(&services.accounts),
+            shares: services.shares.as_ref(),
+            store_accounts: Some(&services.store_accounts),
+            opened_pairing_link: Some(&services.opened_pairing_link),
+        }
+    }
+}
+
+/// Opens `caskade://` links from outside the app: pairing links wait for an
+/// admin (#226), share links ask their sharer (#246), store sign-ins finish
+/// (#165), and the rest are install requests. Whether the shell should
+/// bring its window up.
+pub async fn open(services: LinkServices<'_>, links: Vec<Url>) -> bool {
+    let mut raise = false;
+    let (pairs, links): (Vec<_>, Vec<_>) = links
+        .into_iter()
+        .partition(crate::commands::sync::is_pair_link);
+    for link in pairs {
+        raise |= crate::commands::sync::hold_pair_link(
+            &services.events,
+            services.opened_pairing_link,
+            &link,
+        );
+    }
+    let (shares, links): (Vec<_>, Vec<_>) = links
+        .into_iter()
+        .partition(crate::commands::shares::is_share_link);
+    for link in shares {
+        raise = true;
+        let queued = match (services.shares, services.requests) {
+            (Some(shares), Some(requests)) => {
+                match crate::permissions::require(
+                    services.accounts,
+                    caskade_core::accounts::Permission::Install,
+                ) {
+                    Ok(()) => crate::commands::shares::queue_share_link(
+                        &services.events,
+                        shares,
+                        requests,
+                        link.to_string(),
+                    )
+                    .await
+                    .map(|_| ()),
+                    Err(error) => Err(error),
+                }
+            }
+            _ => Err(caskade_core::tr!("receiving shares isn't available")),
+        };
+        if let Err(error) = queued {
+            tracing::info!("an opened share link didn't queue");
+            services
+                .events
+                .send(crate::events::Event::InstallRefused(crate::events::InstallRefused(error)));
+        }
+    }
+    let (callbacks, installs): (Vec<_>, Vec<_>) = links
+        .into_iter()
+        .partition(crate::commands::store_accounts::is_callback);
+    for link in callbacks {
+        if let Some(store_accounts) = services.store_accounts {
+            crate::commands::store_accounts::callback(store_accounts, services.accounts, &link)
+                .await;
+        }
+    }
+    if !installs.is_empty() {
+        let (_, raised) = queue(
+            &services.events,
+            services.requests,
+            services.accounts,
+            installs.iter().map(install_input).collect(),
+        )
+        .await;
+        raise |= raised;
+    }
+    raise
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

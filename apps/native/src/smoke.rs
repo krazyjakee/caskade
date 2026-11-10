@@ -90,6 +90,8 @@ pub fn window_ready(window: Arc<dyn Window>) {
     caskade_app::runtime::spawn(async move {
         tokio::time::sleep(std::time::Duration::from_secs_f64(seconds)).await;
         tracing::info!("smoke: quitting");
-        crate::shell::quit(window.as_ref());
+        let _ = window;
+        crate::tray::state().quit();
+        crate::launch::ask(crate::launch::Request::Quit);
     });
 }

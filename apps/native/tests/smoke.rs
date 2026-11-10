@@ -298,3 +298,68 @@ fn a_panicking_window_restarts_within_the_budget_then_stops() {
         "{output}"
     );
 }
+
+/// A second start hands its `caskade://` link to the running Caskade and
+/// ends; the running one queues the link's install for confirmation (#88).
+#[test]
+#[ignore = "needs an X display (Xvfb, no window manager): run with -- --ignored"]
+fn a_second_start_hands_its_link_to_the_running_caskade() {
+    assert!(std::env::var_os("DISPLAY").is_some(), "run under Xvfb");
+    let temp = tempfile::tempdir().unwrap();
+    let home = temp.path().to_path_buf();
+    let runtime = home.join("run");
+    std::fs::create_dir_all(&runtime).unwrap();
+    let start = |name: &str, args: &[&str], quit: Option<&str>| {
+        let log = std::fs::File::create(home.join(name)).unwrap();
+        let mut command = Command::new(env!("CARGO_BIN_EXE_caskade-native"));
+        command
+            .args(args)
+            .env_clear()
+            .env("PATH", std::env::var_os("PATH").unwrap_or_default())
+            .env("DISPLAY", std::env::var_os("DISPLAY").unwrap())
+            .envs(std::env::var_os("XAUTHORITY").map(|file| ("XAUTHORITY", file)))
+            .env("HOME", &home)
+            .env("XDG_DATA_HOME", home.join("data"))
+            .env("XDG_CONFIG_HOME", home.join("config"))
+            .env("XDG_CACHE_HOME", home.join("cache"))
+            .env("XDG_STATE_HOME", home.join("state"))
+            .env("XDG_RUNTIME_DIR", &runtime)
+            .env("RUST_LOG", "info")
+            .stdin(Stdio::null())
+            .stdout(log.try_clone().unwrap())
+            .stderr(log);
+        if let Some(seconds) = quit {
+            command.env("CASKADE_NATIVE_SMOKE_QUIT", seconds);
+        }
+        command.spawn().expect("the native binary starts")
+    };
+    let read = |name: &str| std::fs::read_to_string(home.join(name)).unwrap_or_default();
+    let mut first = start("first.log", &[], Some("20"));
+    let deadline = Instant::now() + Duration::from_secs(30);
+    while !read("first.log").contains("services started") {
+        assert!(Instant::now() < deadline, "{}", read("first.log"));
+        std::thread::sleep(Duration::from_millis(200));
+    }
+    let link = "caskade://install?url=http%3A%2F%2F127.0.0.1%3A1%2Fgame.zip";
+    let mut second = start("second.log", &[link], None);
+    let status = wait(&mut second, Duration::from_secs(20));
+    let deadline = Instant::now() + Duration::from_secs(20);
+    while !read("first.log").contains("deep link awaits confirmation") && Instant::now() < deadline
+    {
+        std::thread::sleep(Duration::from_millis(200));
+    }
+    let ended = wait(&mut first, Duration::from_secs(40));
+    if ended.is_none() {
+        let _ = first.kill();
+    }
+    let (first_log, second_log) = (read("first.log"), read("second.log"));
+    let status = status.unwrap_or_else(|| panic!("the second start didn't end:\n{second_log}"));
+    assert!(status.success(), "{status}\n{second_log}");
+    assert!(second_log.contains("Caskade already runs"), "{second_log}");
+    assert!(!second_log.contains("services started"), "{second_log}");
+    assert!(
+        first_log.contains("deep link awaits confirmation"),
+        "{first_log}"
+    );
+    assert!(ended.is_some_and(|status| status.success()), "{first_log}");
+}

@@ -35,8 +35,8 @@
 //! applet, and sometimes Cinnamon itself, down with it.
 
 use crate::main_window;
+pub use caskade_app::tray::{Close, Tray, quit_label, show_label};
 use caskade_core::settings::{GeneralSettings, SettingsService};
-use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::time::Duration;
 use tauri::image::Image;
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
@@ -59,101 +59,6 @@ const UNANSWERED: Duration = Duration::from_secs(5);
 const ICON: Image<'_> = tauri::include_image!("icons/tray-template.png");
 #[cfg(not(target_os = "macos"))]
 const ICON: Image<'_> = tauri::include_image!("icons/tray.png");
-
-/// Whether a close hides the main window or lets it close.
-#[derive(Debug, Default)]
-pub struct Tray {
-    /// The icon is up.
-    shown: AtomicBool,
-    /// `core.general.onClose` is `tray`.
-    close_to_tray: AtomicBool,
-    /// Something asked to quit: closes go through from now on.
-    quitting: AtomicBool,
-    /// The webview asks before a close that would quit goes through.
-    held: AtomicBool,
-    /// Closes held so far, and the last of them the webview heard.
-    held_closes: AtomicU64,
-    heard: AtomicU64,
-}
-
-/// What a close of the main window does.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Close {
-    /// It goes through, or console mode's restore takes it from here.
-    Go,
-    /// The window hides to the tray.
-    Hide,
-    /// It waits for the webview; the number names it to [`Tray::unanswered`].
-    Held(u64),
-}
-
-impl Tray {
-    /// The icon is up, so a hidden window can be brought back from it.
-    pub fn shown(&self) -> bool {
-        self.shown.load(Ordering::Relaxed)
-    }
-
-    /// Whether a close of the main window hides it instead.
-    pub fn hides_on_close(&self, console: bool) -> bool {
-        self.shown()
-            && self.close_to_tray.load(Ordering::Relaxed)
-            && !self.quitting.load(Ordering::Relaxed)
-            && !console
-    }
-
-    /// Whether the webview holds closes.
-    pub fn held(&self) -> bool {
-        self.held.load(Ordering::Relaxed)
-    }
-
-    /// Decides a close of the main window, and counts it if it's held.
-    pub fn close(&self, console: bool) -> Close {
-        if self.hides_on_close(console) {
-            Close::Hide
-        } else if self.held() {
-            Close::Held(self.held_closes.fetch_add(1, Ordering::Relaxed) + 1)
-        } else {
-            Close::Go
-        }
-    }
-
-    /// The webview's `close_hold`. `true` while it holds says it heard the
-    /// closes so far. `true` after `false` is a fresh hold, which forgets
-    /// a quit: that's the answer Stay. `false` keeps it, so the webview's
-    /// next close goes through.
-    pub fn hold(&self, held: bool) {
-        let was = self.held.swap(held, Ordering::Relaxed);
-        if !held {
-            return;
-        }
-        if !was {
-            self.quitting.store(false, Ordering::Relaxed);
-        }
-        self.heard
-            .store(self.held_closes.load(Ordering::Relaxed), Ordering::Relaxed);
-    }
-
-    /// Whether held close number `close` still has no word from the webview.
-    pub fn unanswered(&self, close: u64) -> bool {
-        self.held() && self.heard.load(Ordering::Relaxed) < close
-    }
-
-    /// Tests: as if the icon were up.
-    #[cfg(test)]
-    pub(crate) fn set_shown(&self, shown: bool) {
-        self.shown.store(shown, Ordering::Relaxed);
-    }
-
-    /// Lets the next close of the main window quit.
-    pub fn quit(&self) {
-        self.quitting.store(true, Ordering::Relaxed);
-    }
-
-    fn follow(&self, settings: &GeneralSettings) {
-        self.close_to_tray
-            .store(settings.on_close == "tray", Ordering::Relaxed);
-    }
-}
 
 /// Closes the main window for good, through console mode's restore and
 /// window-state's save; the app exits with its last window.
@@ -197,7 +102,7 @@ pub fn setup<R: Runtime>(app: &AppHandle<R>, settings: &SettingsService) {
         return;
     }
     match icon(app) {
-        Ok(()) => app.state::<Tray>().shown.store(true, Ordering::Relaxed),
+        Ok(()) => app.state::<Tray>().set_shown(true),
         Err(error) => tracing::warn!(%error, "no tray icon; closing the window quits"),
     }
 }
@@ -254,7 +159,7 @@ fn hide_before_exit<R: Runtime>(app: &AppHandle<R>) -> bool {
     let Some(tray) = app.try_state::<Tray>() else {
         return false;
     };
-    if !tray.shown.swap(false, Ordering::Relaxed) {
+    if !tray.take_shown() {
         return false;
     }
     if let Some(icon) = app.tray_by_id("main")
@@ -356,14 +261,6 @@ impl<R: Runtime> MenuItems<R> {
     }
 }
 
-fn show_label() -> String {
-    caskade_core::tr!("Show Caskade")
-}
-
-fn quit_label() -> String {
-    caskade_core::tr!("Quit Caskade")
-}
-
 /// Relabels the menu each time the core's language changes, until the
 /// core goes away. `changes` comes from before the items were made, so no
 /// change falls between the two.
@@ -435,80 +332,6 @@ fn indicator_available() -> bool {
 mod tests {
     use super::*;
 
-    fn tray(shown: bool, on_close: &str) -> Tray {
-        let tray = Tray::default();
-        tray.shown.store(shown, Ordering::Relaxed);
-        tray.follow(&GeneralSettings {
-            on_close: on_close.into(),
-            ..GeneralSettings::default()
-        });
-        tray
-    }
-
-    #[test]
-    fn a_close_hides_only_to_a_tray_icon_that_is_up() {
-        assert!(tray(true, "tray").hides_on_close(false));
-        assert!(!tray(true, "quit").hides_on_close(false));
-        assert!(!tray(false, "tray").hides_on_close(false));
-    }
-
-    #[test]
-    fn quitting_and_console_mode_close_for_good() {
-        let tray = tray(true, "tray");
-        assert!(!tray.hides_on_close(true));
-        tray.quit();
-        assert!(!tray.hides_on_close(false));
-    }
-
-    #[test]
-    fn a_held_close_waits_but_hiding_to_the_tray_does_not() {
-        let tray = tray(true, "tray");
-        tray.hold(true);
-        // The webview and its draft stay in the tray.
-        assert_eq!(tray.close(false), Close::Hide);
-        // A close that would quit waits, in console mode too.
-        assert_eq!(tray.close(true), Close::Held(1));
-        tray.quit();
-        assert_eq!(tray.close(false), Close::Held(2));
-
-        tray.hold(false);
-        assert_eq!(tray.close(false), Close::Go);
-    }
-
-    #[test]
-    fn a_close_nothing_holds_is_not_counted() {
-        let tray = tray(false, "quit");
-        assert_eq!(tray.close(false), Close::Go);
-        tray.hold(true);
-        assert_eq!(tray.close(false), Close::Held(1));
-    }
-
-    #[test]
-    fn only_a_webview_that_answers_keeps_a_held_close_waiting() {
-        let tray = tray(false, "quit");
-        tray.hold(true);
-        let Close::Held(first) = tray.close(false) else {
-            panic!("not held");
-        };
-        assert!(tray.unanswered(first));
-
-        tray.hold(true);
-        assert!(!tray.unanswered(first));
-        // Another close, say a second Quit, needs an answer of its own, so
-        // a webview that stopped since can't strand it.
-        let Close::Held(second) = tray.close(false) else {
-            panic!("not held");
-        };
-        assert!(!tray.unanswered(first));
-        assert!(tray.unanswered(second));
-
-        tray.hold(false);
-        assert!(
-            !tray.unanswered(second),
-            "released: nothing left to wait for"
-        );
-    }
-
     /// Polls `future` once, on this thread.
     fn poll_once<F: std::future::Future>(future: std::pin::Pin<&mut F>) {
         let mut context = std::task::Context::from_waker(std::task::Waker::noop());
@@ -558,7 +381,7 @@ mod tests {
             .unwrap();
         attach(app.handle(), &settings);
         let state = app.state::<Tray>();
-        state.shown.store(true, Ordering::Relaxed);
+        state.set_shown(true);
         // Hiding to the tray is the default.
         assert!(state.hides_on_close(false));
 
