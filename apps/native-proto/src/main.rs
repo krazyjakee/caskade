@@ -22,6 +22,8 @@ use dioxus_native::prelude::*;
 use options::{Bench, Options};
 
 const CSS: &str = include_str!("../assets/app.css");
+/// Every animation in themes/, for comparing with WebKit (scripts/gallery.sh).
+const GALLERY: &str = include_str!("../assets/gallery.html");
 /// The webview's grid (components/gameCardLayout.ts).
 const ROW_HEIGHT: f64 = 312.0;
 const GAP: f64 = 16.0;
@@ -337,7 +339,13 @@ fn app() -> Element {
         let page = state.pages.get(&((index as u32) / PAGE))?;
         page.get(index % PAGE as usize).cloned()
     };
-    let ambient = if opts.ambient { "running" } else { "paused" };
+    // Ambient on leaves the tokens' default (running, or paused by
+    // reduced motion and `data-paint="cpu"`); off pauses it here.
+    let ambient = if opts.ambient {
+        ""
+    } else {
+        "--cs-motion-ambient: paused"
+    };
     let growing_row = if opts.flex_fix { "height: 0" } else { "" };
     let label = if spinner() {
         "Checking for game updates"
@@ -345,13 +353,30 @@ fn app() -> Element {
         "Ready"
     };
 
+    if opts.gallery {
+        return rsx! {
+            style { {CSS} }
+            div { style: "--cs-motion-ambient: running; height: 100vh", dangerous_inner_html: GALLERY }
+        };
+    }
+    let spinner_steps = opts
+        .spinner_steps
+        .map(|n| format!(".animate-worker {{ animation-timing-function: steps({n}); }}"))
+        .unwrap_or_default();
+
     rsx! {
         style { {CSS} }
+        style { {spinner_steps} }
         div {
             "data-cs": "app-shell",
+            // The CPU renderer repaints the whole window per frame: the
+            // tokens pause the ambient loops for it (`data-paint="cpu"`).
+            "data-paint": cfg!(feature = "cpu").then_some("cpu"),
             class: "relative flex h-screen flex-col overflow-clip",
-            style: "--cs-motion-ambient: {ambient}",
-            div { "data-cs": "backdrop", "aria-hidden": "true" }
+            style: "{ambient}",
+            if !opts.no_backdrop {
+                div { "data-cs": "backdrop", "aria-hidden": "true" }
+            }
             div { class: "flex min-h-0 flex-1",
                 Sidebar {}
                 div { "data-part": "main", class: "relative flex min-w-0 flex-1 flex-col",
@@ -576,6 +601,15 @@ async fn run_bench(
         spinner.set(on);
     }
     mark("bench: start");
+    #[cfg(feature = "profile")]
+    let profiler = std::env::var_os("CASKADE_PROTO_PROFILE").map(|out| {
+        let guard = pprof::ProfilerGuardBuilder::default()
+            .frequency(2000)
+            .blocklist(&["libc", "libgcc", "pthread", "vdso"])
+            .build()
+            .expect("the profiler starts");
+        (guard, out)
+    });
     let start = Instant::now();
     if bench.scroll_px_per_s > 0.0 {
         let (width, height) = *viewport.peek();
@@ -599,9 +633,57 @@ async fn run_bench(
         tokio::time::sleep(Duration::from_secs_f64(bench.seconds)).await;
     }
     mark("bench: end");
+    #[cfg(feature = "profile")]
+    if let Some((guard, out)) = profiler {
+        write_profile(&guard, &out);
+    }
     if bench.exit {
         std::process::exit(0);
     }
+}
+
+/// Self and inclusive samples per function, most first, for the bench window.
+#[cfg(feature = "profile")]
+fn write_profile(guard: &pprof::ProfilerGuard<'_>, out: &std::ffi::OsStr) {
+    use std::collections::HashMap;
+    let Ok(report) = guard.report().build() else {
+        return;
+    };
+    let (mut own, mut all, mut total) = (
+        HashMap::<String, isize>::new(),
+        HashMap::<String, isize>::new(),
+        0isize,
+    );
+    for (frames, count) in &report.data {
+        total += count;
+        let names: Vec<String> = frames
+            .frames
+            .iter()
+            .flat_map(|f| f.iter().map(|s| s.name()))
+            .collect();
+        if let Some(leaf) = names.first() {
+            *own.entry(leaf.clone()).or_default() += count;
+        }
+        let mut seen = std::collections::HashSet::new();
+        for name in names {
+            if seen.insert(name.clone()) {
+                *all.entry(name).or_default() += count;
+            }
+        }
+    }
+    let mut text = format!("samples {total}\n\n# self\n");
+    let mut own: Vec<_> = own.into_iter().collect();
+    own.sort_by_key(|entry| std::cmp::Reverse(entry.1));
+    for (name, n) in own.iter().take(60) {
+        text += &format!("{:6.2}%  {name}\n", 100.0 * *n as f64 / total as f64);
+    }
+    text += "\n# inclusive\n";
+    let mut all: Vec<_> = all.into_iter().collect();
+    all.sort_by_key(|entry| std::cmp::Reverse(entry.1));
+    for (name, n) in all.iter().take(150) {
+        text += &format!("{:6.2}%  {name}\n", 100.0 * *n as f64 / total as f64);
+    }
+    let _ = std::fs::write(out, text);
 }
 
 #[component]

@@ -1,0 +1,4 @@
+# repo  url  revision  crates the prototype takes from it (all patched together)
+blitz https://github.com/DioxusLabs/blitz 9f9c8e321735890754b4a9970cb07765b8bf3c0c accesskit_xplat blitz-dom blitz-net blitz-paint blitz-shell blitz-traits debug_timer dioxus-native dioxus-native-dom stylo_taffy
+anyrender https://github.com/DioxusLabs/anyrender 812644a68722626e6755ca8319ffebf53c9cdc4e anyrender anyrender_skia anyrender_svg anyrender_vello anyrender_vello_cpu anyrender_vello_hybrid pixels_window_renderer softbuffer_window_renderer wgpu_context
+stylo https://github.com/servo/stylo 2dca34592ced37c6aa01733e94206a767194cf9d selectors servo_arc stylo stylo_atoms stylo_derive stylo_dom stylo_malloc_size_of stylo_static_prefs stylo_traits to_shmem to_shmem_derive

@@ -1,0 +1,283 @@
+From 52a685a6d24d5d4b646aa3e549d2c5f40554c350 Mon Sep 17 00:00:00 2001
+From: Jake Cattrall <krazyjakee@gmail.com>
+Date: Tue, 10 Nov 2026 02:07:02 +0000
+Subject: [PATCH 1/4] Repaint only the damaged part of a frame (vello_hybrid)
+
+Adds WindowRenderer::supports_damage and render_damage. A damaged frame
+clears and repaints only the damage rectangle of the persistent target,
+clipping the scene to it, and keeps every other pixel of the previous
+frame. vello_hybrid supports it when it renders to its intermediate
+texture and holds a complete frame at the current size; every other
+renderer keeps rendering full frames through the default.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ crates/anyrender/src/lib.rs                   |  18 +++
+ .../src/window_renderer.rs                    | 120 ++++++++++++++----
+ crates/wgpu_context/src/surface_renderer.rs   |   6 +
+ 3 files changed, 120 insertions(+), 24 deletions(-)
+
+diff --git a/crates/anyrender/src/lib.rs b/crates/anyrender/src/lib.rs
+index 0637cbc..917dbda 100644
+--- a/crates/anyrender/src/lib.rs
++++ b/crates/anyrender/src/lib.rs
+@@ -150,6 +150,24 @@ pub trait WindowRenderer: RenderContext {
+     }
+     fn set_size(&mut self, width: u32, height: u32);
+     fn render<F: FnOnce(&mut Self::ScenePainter<'_>)>(&mut self, draw_fn: F);
++
++    /// Whether [`render_damage`](Self::render_damage) can repaint part of the
++    /// window now: the backend keeps the previous frame's pixels and has a
++    /// complete frame at the current size. Defaults to `false`.
++    fn supports_damage(&self) -> bool {
++        false
++    }
++
++    /// Render a frame in which only `damage` (in surface pixels) differs from
++    /// the previous one. `draw_fn` only needs to draw what intersects
++    /// `damage`; the backend clips to it and keeps every pixel outside it.
++    ///
++    /// Only call this while [`supports_damage`](Self::supports_damage) returns
++    /// `true`. The default ignores `damage` and renders a full frame.
++    fn render_damage<F: FnOnce(&mut Self::ScenePainter<'_>)>(&mut self, damage: Rect, draw_fn: F) {
++        let _ = damage;
++        self.render(draw_fn)
++    }
+ }
+ 
+ /// Abstraction for rendering a scene to an image buffer
+diff --git a/crates/anyrender_vello_hybrid/src/window_renderer.rs b/crates/anyrender_vello_hybrid/src/window_renderer.rs
+index 579b455..5ef6ad1 100644
+--- a/crates/anyrender_vello_hybrid/src/window_renderer.rs
++++ b/crates/anyrender_vello_hybrid/src/window_renderer.rs
+@@ -174,6 +174,9 @@ pub struct VelloHybridWindowRenderer {
+     scene: VelloHybridScene,
+     config: VelloHybridRendererOptions,
+     cached_images: ImageCache,
++    /// The persistent target holds a complete frame at the current size, so a
++    /// damaged frame can repaint part of it.
++    has_full_frame: bool,
+ }
+ impl VelloHybridWindowRenderer {
+     #[allow(clippy::new_without_default)]
+@@ -192,6 +195,7 @@ impl VelloHybridWindowRenderer {
+             window_handle: None,
+             scene: VelloHybridScene::new_with(0, 0, render_settings.level),
+             cached_images: ImageCache::default(),
++            has_full_frame: false,
+         }
+     }
+ 
+@@ -376,23 +380,22 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+                     .expect("Surface didn't report any alpha modes");
+             }
+ 
+-            // Vello Hybrid emits premultiplied alpha and renders directly into
+-            // its target. That matches a `PreMultiplied` surface (and Opaque
+-            // ignores alpha), so those render straight to the surface. Only
+-            // `PostMultiplied` (straight alpha) needs conversion, which routes
+-            // through an intermediate texture (using the renderer's target
+-            // format) that is un-premultiplied while blitting to the surface.
++            // Vello Hybrid emits premultiplied alpha. It renders into an
++            // intermediate texture, which keeps each frame so that a damaged
++            // frame can repaint part of it (`render_damage`), and which is
++            // blitted to the surface: un-premultiplied for a `PostMultiplied`
++            // (straight alpha) surface, copied as it is otherwise.
+             #[cfg(not(target_vendor = "apple"))]
+-            let intermediate_texture = (composite_alpha_mode == CompositeAlphaMode::PostMultiplied)
+-                .then(|| {
+-                    use wgpu::TextureUsages;
+-                    use wgpu_context::{AlphaConversion, TextureConfiguration};
+-                    TextureConfiguration {
+-                        usage: TextureUsages::RENDER_ATTACHMENT | TextureUsages::TEXTURE_BINDING,
+-                        format: DEFAULT_TEXTURE_FORMAT,
+-                        alpha_conversion: Some(AlphaConversion::Unpremultiply),
+-                    }
+-                });
++            let intermediate_texture = {
++                use wgpu::TextureUsages;
++                use wgpu_context::{AlphaConversion, TextureConfiguration};
++                Some(TextureConfiguration {
++                    usage: TextureUsages::RENDER_ATTACHMENT | TextureUsages::TEXTURE_BINDING,
++                    format: DEFAULT_TEXTURE_FORMAT,
++                    alpha_conversion: (composite_alpha_mode == CompositeAlphaMode::PostMultiplied)
++                        .then_some(AlphaConversion::Unpremultiply),
++                })
++            };
+ 
+             // Apple is almost guaranteed to be premultiplied
+             // TODO: Remove below once gfx-rs/wgpu#9896 gets fixed
+@@ -470,6 +473,7 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+                     let device_handle = active.render_surface.device_handle.clone();
+                     self.wgpu_context.device_pool.push(device_handle);
+                     self.render_state = RenderState::Active(active);
++                    self.has_full_frame = false;
+                     true
+                 }
+                 _ => false,
+@@ -480,10 +484,12 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+     fn suspend(&mut self) {
+         self.render_state = RenderState::Suspended;
+         self.cached_images.clear();
++        self.has_full_frame = false;
+     }
+ 
+     fn set_size(&mut self, width: u32, height: u32) {
+         if width as u16 != self.scene.width() || height as u16 != self.scene.height() {
++            self.has_full_frame = false;
+             self.scene = VelloHybridScene::new_with(
+                 width as u16,
+                 height as u16,
+@@ -503,11 +509,63 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+     }
+ 
+     fn render<F: FnOnce(&mut Self::ScenePainter<'_>)>(&mut self, draw_fn: F) {
++        self.render_impl(None, draw_fn);
++    }
++
++    fn supports_damage(&self) -> bool {
++        match &self.render_state {
++            // Without an intermediate texture the target is the swapchain's,
++            // whose previous contents are undefined.
++            RenderState::Active(state) => {
++                self.has_full_frame && state.render_surface.has_intermediate_texture()
++            }
++            _ => false,
++        }
++    }
++
++    fn render_damage<F: FnOnce(&mut Self::ScenePainter<'_>)>(
++        &mut self,
++        damage: kurbo::Rect,
++        draw_fn: F,
++    ) {
++        if self.supports_damage() {
++            self.render_impl(Some(damage), draw_fn);
++        } else {
++            self.render_impl(None, draw_fn);
++        }
++    }
++}
++
++impl VelloHybridWindowRenderer {
++    fn render_impl<F: FnOnce(&mut VelloHybridScenePainter<'_>)>(
++        &mut self,
++        damage: Option<kurbo::Rect>,
++        draw_fn: F,
++    ) {
+         let RenderState::Active(state) = &mut self.render_state else {
+             return;
+         };
+ 
+         let render_surface = &mut state.render_surface;
++        let surface_rect = kurbo::Rect::new(
++            0.,
++            0.,
++            render_surface.config.width as f64,
++            render_surface.config.height as f64,
++        );
++        // A damaged frame repaints whole pixels inside the damage only.
++        let damage = damage.map(|damage| damage.intersect(surface_rect).expand());
++        if damage.is_some_and(|damage| damage.is_zero_area()) {
++            return;
++        }
++        let clear_rects = damage.map(|damage| {
++            [vello_common::geometry::RectU16::new(
++                damage.x0 as u16,
++                damage.y0 as u16,
++                damage.x1 as u16,
++                damage.y1 as u16,
++            )]
++        });
+ 
+         debug_timer!(timer, feature = "log_frame_times");
+ 
+@@ -535,22 +593,23 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+             device_handle: &render_surface.device_handle,
+             glyph_caching: self.config.glyph_caching,
+         };
++        if let Some(damage) = damage {
++            scene_painter.push_clip_layer(peniko::Fill::NonZero, kurbo::Affine::IDENTITY, &damage);
++        }
+         if self.config.base_color != Color::TRANSPARENT {
+             scene_painter.fill(
+                 peniko::Fill::NonZero,
+                 kurbo::Affine::IDENTITY,
+                 self.config.base_color,
+                 None,
+-                &kurbo::Rect::new(
+-                    0.,
+-                    0.,
+-                    render_surface.config.width as f64,
+-                    render_surface.config.height as f64,
+-                ),
++                &damage.unwrap_or(surface_rect),
+             );
+         }
+         // Regenerate the vello scene
+         draw_fn(&mut scene_painter);
++        if damage.is_some() {
++            scene_painter.pop_layer();
++        }
+         timer.record_time("cmd");
+ 
+         let Ok(texture_view) = render_surface.target_texture_view() else {
+@@ -567,6 +626,7 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+             )
+             .finish_frame();
+             render_surface.queue().submit([encoder.finish()]);
++            self.has_full_frame = false;
+             return;
+         };
+ 
+@@ -591,7 +651,14 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+                 &texture_view,
+                 Some(&state.depth_texture_view),
+                 &texture_bindings,
+-                TargetInit::Clear(ClearSettings::default()),
++                match &clear_rects {
++                    // Keep the previous frame outside the damage.
++                    Some(rects) => TargetInit::Clear(ClearSettings::Rects {
++                        color: peniko::color::AlphaColor::TRANSPARENT,
++                        rects,
++                    }),
++                    None => TargetInit::Clear(ClearSettings::default()),
++                },
+             )
+             .expect("failed to render to texture");
+         ImageManager::new(
+@@ -608,11 +675,16 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+ 
+         drop(texture_view);
+ 
++        // The persistent target now holds the whole frame (a damaged one
++        // rendered over a complete frame).
++        self.has_full_frame = true;
++
+         if render_surface.maybe_blit_and_present().is_err() {
+             self.scene.reset();
+             return;
+         }
+-        timer.record_time("present");
++        timer.record_time(if damage.is_some() { "present(damage)" } else { "present" });
++
+ 
+         render_surface
+             .device()
+diff --git a/crates/wgpu_context/src/surface_renderer.rs b/crates/wgpu_context/src/surface_renderer.rs
+index bde1c93..5daf415 100644
+--- a/crates/wgpu_context/src/surface_renderer.rs
++++ b/crates/wgpu_context/src/surface_renderer.rs
+@@ -304,6 +304,12 @@ impl<'s> SurfaceRenderer<'s> {
+             .ok_or(GetCurrentSurfaceTextureErr)
+     }
+ 
++    /// Whether rendering goes to an intermediate texture, which keeps its
++    /// contents between frames (unlike the swapchain's textures).
++    pub fn has_intermediate_texture(&self) -> bool {
++        self.intermediate_texture.is_some()
++    }
++
+     /// Get a target texture view to render to.
+     ///
+     /// If there is an intermediate texture, this is a view of that intermediate texture, otherwise

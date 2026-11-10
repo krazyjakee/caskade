@@ -25,6 +25,12 @@ pub struct Options {
     pub bench: Option<Bench>,
     /// Logs each render's scroll position and rows.
     pub debug: bool,
+    /// Leaves out the theme's backdrop (for measuring what it costs).
+    pub no_backdrop: bool,
+    /// The spinner turns in this many steps instead of continuously.
+    pub spinner_steps: Option<u32>,
+    /// Show the theme-animation gallery (assets/gallery.html) instead of the library.
+    pub gallery: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -95,6 +101,11 @@ impl Options {
             core_only: env::args().any(|a| a == "--core-only"),
             bench,
             debug: flag("CASKADE_PROTO_DEBUG"),
+            no_backdrop: flag("CASKADE_PROTO_NO_BACKDROP"),
+            gallery: flag("CASKADE_PROTO_GALLERY"),
+            spinner_steps: env::var("CASKADE_PROTO_SPINNER_STEPS")
+                .ok()
+                .and_then(|v| v.parse().ok()),
         }
     }
 }

@@ -1,0 +1,32 @@
+From 02373a4dc19fc38aa0057e10d3b3a0cd08a578c3 Mon Sep 17 00:00:00 2001
+From: Jake Cattrall <krazyjakee@gmail.com>
+Date: Tue, 10 Nov 2026 02:07:06 +0000
+Subject: [PATCH 3/4] Measurement only: ANYRENDER_PRESENT_MODE picks an
+ unthrottled present mode
+
+Not for upstream: lets a benchmark run frames as fast as they render.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ crates/anyrender_vello_hybrid/src/window_renderer.rs | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/crates/anyrender_vello_hybrid/src/window_renderer.rs b/crates/anyrender_vello_hybrid/src/window_renderer.rs
+index f6bc0b6..f077fc9 100644
+--- a/crates/anyrender_vello_hybrid/src/window_renderer.rs
++++ b/crates/anyrender_vello_hybrid/src/window_renderer.rs
+@@ -409,7 +409,13 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+                     formats: vec![DEFAULT_TEXTURE_FORMAT],
+                     width,
+                     height,
+-                    present_mode: PresentMode::AutoVsync,
++                    // Measurement only: ANYRENDER_PRESENT_MODE=immediate or
++                    // mailbox runs frames unthrottled.
++                    present_mode: match std::env::var("ANYRENDER_PRESENT_MODE").as_deref() {
++                        Ok("immediate") => PresentMode::AutoNoVsync,
++                        Ok("mailbox") => PresentMode::Mailbox,
++                        _ => PresentMode::AutoVsync,
++                    },
+                     desired_maximum_frame_latency,
+                     alpha_mode: composite_alpha_mode,
+                     view_formats: vec![],

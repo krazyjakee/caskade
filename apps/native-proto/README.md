@@ -20,6 +20,18 @@ dependencies never reach the main workspace. Blitz is pinned to `9f9c8e3`
 (0.3.0-beta.4, the PR #78 spike's commit) and anyrender to `812644a`; Dioxus
 is 0.8.0-alpha.3.
 
+## Patches (BLITZ-3, #82)
+
+`patches/` holds Caskade's patches to Blitz, anyrender and Stylo at the pins
+in `patches/PINS` (results in
+[`docs/spikes/blitz-3.md`](../../docs/spikes/blitz-3.md)).
+`patches/apply.sh [dir]` clones those revisions into `dir` (default
+`/mnt/Rusty/caskade-native-proto/vendor`; it must be outside the repo),
+applies the series and writes `.cargo/config.toml` (gitignored), after which
+the builds below use the patched crates. Delete `.cargo/config.toml` to build
+the upstream revisions again. To change a patch, commit in the checkout and
+regenerate the series with `git format-patch <pin>..caskade -o patches/<repo>`.
+
 ## Build
 
 ```sh
@@ -41,16 +53,23 @@ migrations): `CASKADE_PROTO_HOME` holds `data/caskade/library.sqlite` and
 `cache/caskade/artwork/` (or set `CASKADE_PROTO_DB` and
 `CASKADE_PROTO_ARTWORK`).
 
-| Variable                                               | Effect                                                                                                                                        |
-| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CASKADE_PROTO_SPINNER=1`                              | the status bar's spinner runs (the top bar's button toggles it too)                                                                           |
-| `CASKADE_PROTO_AMBIENT=1`                              | the default theme's ambient background animates (paused otherwise)                                                                            |
-| `CASKADE_PROTO_FLEX_BUG=1`                             | leaves out the BLITZ-2 workaround (`height: 0` on the grid's growing row)                                                                     |
-| `CASKADE_PROTO_WIDTH`, `_HEIGHT`                       | window size (1600×900)                                                                                                                        |
-| `CASKADE_PROTO_ON_TOP=1`, `CASKADE_PROTO_POSITION=x,y` | always on top without taking the focus, at a place: for real-display runs                                                                     |
-| `CASKADE_PROTO_BENCH=idle\|spinner\|scroll`            | after the first page and `_BENCH_SETTLE` s (5), idles or scrolls the grid at `_BENCH_SPEED` px/s (3000) for `_BENCH_SECONDS` (30), then exits |
-| `CASKADE_PROTO_DEBUG=1`                                | logs each render's scroll position and rows                                                                                                   |
-| `--core-only`                                          | no window: opens the library and reads the first page (the baseline without UI)                                                               |
+| Variable                                                          | Effect                                                                                                                                        |
+| ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CASKADE_PROTO_SPINNER=1`                                         | the status bar's spinner runs (the top bar's button toggles it too)                                                                           |
+| `CASKADE_PROTO_AMBIENT=1`                                         | the default theme's ambient background animates (paused otherwise)                                                                            |
+| `CASKADE_PROTO_FLEX_BUG=1`                                        | leaves out the BLITZ-2 workaround (`height: 0` on the grid's growing row)                                                                     |
+| `CASKADE_PROTO_WIDTH`, `_HEIGHT`                                  | window size (1600×900)                                                                                                                        |
+| `CASKADE_PROTO_ON_TOP=1`, `CASKADE_PROTO_POSITION=x,y`            | always on top without taking the focus, at a place: for real-display runs                                                                     |
+| `CASKADE_PROTO_BENCH=idle\|spinner\|scroll`                       | after the first page and `_BENCH_SETTLE` s (5), idles or scrolls the grid at `_BENCH_SPEED` px/s (3000) for `_BENCH_SECONDS` (30), then exits |
+| `CASKADE_PROTO_DEBUG=1`                                           | logs each render's scroll position and rows                                                                                                   |
+| `CASKADE_PROTO_SPINNER_STEPS=8`                                   | the spinner turns in that many steps a turn (`steps(n)`)                                                                                      |
+| `CASKADE_PROTO_GALLERY=1`                                         | shows `assets/gallery.html` (every animation in `themes/`) instead of the library                                                             |
+| `CASKADE_PROTO_NO_BACKDROP=1`                                     | leaves out the theme's backdrop                                                                                                               |
+| `CASKADE_PROTO_PROFILE=<file>`                                    | with `--features profile`: samples the bench window and writes self and inclusive time per function                                           |
+| `BLITZ_DAMAGE=0`                                                  | (patched) repaints every frame in full, for comparisons                                                                                       |
+| `BLITZ_PREFERS_REDUCED_MOTION=1`                                  | (patched) `prefers-reduced-motion: reduce`                                                                                                    |
+| `ANYRENDER_FRAME_LIMIT_HZ=60`, `ANYRENDER_PRESENT_MODE=immediate` | (patched, measurement only) unthrottled presents paced like a 60 Hz vsync, where no display paces them                                        |
+| `--core-only`                                                     | no window: opens the library and reads the first page (the baseline without UI)                                                               |
 
 ## Measure
 
@@ -66,6 +85,8 @@ migrations): `CASKADE_PROTO_HOME` holds `data/caskade/library.sqlite` and
   reports when the screen is visually complete (`startup.json`).
 - `scripts/latency.sh`: pointer event to the end of the frame that answers it,
   on a private Xvfb.
+- `scripts/gallery.sh`: every animation in `themes/` in Blitz and in
+  WebKitGTK, each on a private Xvfb: which ones move, and a contact sheet.
 - `scripts/display-suite.sh`: the real-display runs (idle, spinner, ambient,
   scroll), one window at a time, each driving itself: no synthetic input.
 - `scripts/windows/`: the same on Windows (`setup.ps1` places a library copy,

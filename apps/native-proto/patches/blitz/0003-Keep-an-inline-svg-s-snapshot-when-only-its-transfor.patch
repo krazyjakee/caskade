@@ -1,0 +1,111 @@
+From 1dcf53f19719c7a7856a52c1d22aed659614924c Mon Sep 17 00:00:00 2001
+From: Jake Cattrall <krazyjakee@gmail.com>
+Date: Tue, 10 Nov 2026 03:09:06 +0000
+Subject: [PATCH 3/5] Keep an inline <svg>'s snapshot when only its transform
+ changed
+
+An inline <svg> is rendered from a snapshot of its source, rebuilt on any
+damage in its subtree. Rotating an icon (a spinner) rebuilt and re-laid out
+the snapshot on every animation frame. The snapshot now records a hash of
+its source, and damage to the <svg> alone that is no worse than a transform
+change keeps it when the source still serializes to the same hash.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ packages/blitz-dom/src/layout/damage.rs | 20 ++++++++++++++++++++
+ packages/blitz-dom/src/node/mod.rs      |  2 +-
+ packages/blitz-dom/src/node/svg.rs      | 13 +++++++++++++
+ 3 files changed, 34 insertions(+), 1 deletion(-)
+
+diff --git a/packages/blitz-dom/src/layout/damage.rs b/packages/blitz-dom/src/layout/damage.rs
+index 3ebe0e7e..d25ecaee 100644
+--- a/packages/blitz-dom/src/layout/damage.rs
++++ b/packages/blitz-dom/src/layout/damage.rs
+@@ -120,11 +120,18 @@ impl BaseDocument {
+         // An inline `<svg>` is rendered from a snapshot of its subtree (with
+         // `currentColor` resolved) taken during box construction, so it must be
+         // rebuilt whenever the style of the `<svg>` or any descendant changes.
++        //
++        // A change to the `<svg>`'s own transform (or anything else outside its
++        // source) leaves the snapshot as it is: rebuild only when the
++        // serialized source changed.
+         #[cfg(feature = "svg")]
+         if !damage.is_empty()
+             && self.nodes[node_id]
+                 .data
+                 .is_element_with_tag_name(&local_name!("svg"))
++            && !(damage_from_children.is_empty()
++                && RestyleDamage::RECALCULATE_OVERFLOW.contains(own_damage)
++                && self.svg_source_unchanged(node_id))
+         {
+             damage.insert(CONSTRUCT_BOX);
+         }
+@@ -195,6 +202,19 @@ impl BaseDocument {
+         damage_for_parent
+     }
+ 
++    /// Whether an inline `<svg>`'s snapshot was built from the source it would
++    /// serialize to now.
++    #[cfg(feature = "svg")]
++    fn svg_source_unchanged(&self, node_id: NodeId) -> bool {
++        let node = &self.nodes[node_id];
++        let Some(crate::node::ImageData::Svg(svg)) =
++            node.element_data().and_then(|el| el.image_data())
++        else {
++            return false;
++        };
++        svg.source_hash == crate::node::svg_source_hash(node.svg_source().as_bytes())
++    }
++
+     /// Refresh owned anonymous boxes without revisiting their DOM children.
+     fn refresh_anonymous_block_styles(&mut self, node_id: NodeId) -> RestyleDamage {
+         // Skip owners with no anonymous boxes to refresh.
+diff --git a/packages/blitz-dom/src/node/mod.rs b/packages/blitz-dom/src/node/mod.rs
+index dfc9153e..506f4026 100644
+--- a/packages/blitz-dom/src/node/mod.rs
++++ b/packages/blitz-dom/src/node/mod.rs
+@@ -27,5 +27,5 @@ pub use node::*;
+ pub use scrollbar::{ScrollbarColor, ScrollbarRef, ScrollbarWidth};
+ pub use stylo_data::ComputedStyleRef;
+ #[cfg(feature = "svg")]
+-pub use svg::{SvgImageData, SvgIntrinsicDimensions};
++pub use svg::{SvgImageData, SvgIntrinsicDimensions, svg_source_hash};
+ pub use text::{GeneratedTextInputEvent, TextBrush, TextInputData, TextLayout};
+diff --git a/packages/blitz-dom/src/node/svg.rs b/packages/blitz-dom/src/node/svg.rs
+index 3b65ac59..c3a5949e 100644
+--- a/packages/blitz-dom/src/node/svg.rs
++++ b/packages/blitz-dom/src/node/svg.rs
+@@ -80,6 +80,17 @@ pub struct SvgImageData {
+     pub tree: Arc<usvg::Tree>,
+     /// The dimensions declared on the root `<svg>` element.
+     pub intrinsic_dimensions: SvgIntrinsicDimensions,
++    /// A hash of the source this was parsed from: an inline `<svg>` whose
++    /// serialized source still hashes the same needn't be rebuilt.
++    pub source_hash: u64,
++}
++
++/// The hash [`SvgImageData::source_hash`] holds for `data`.
++pub fn svg_source_hash(data: &[u8]) -> u64 {
++    use std::hash::{Hash, Hasher};
++    let mut hasher = std::collections::hash_map::DefaultHasher::new();
++    data.hash(&mut hasher);
++    hasher.finish()
+ }
+ 
+ impl SvgImageData {
+@@ -90,6 +101,7 @@ impl SvgImageData {
+     /// Like [`usvg::Tree::from_data`], gzip-compressed data (SVGZ) is
+     /// decompressed first.
+     pub fn from_data(data: &[u8], options: &usvg::Options) -> Result<Self, usvg::Error> {
++        let source_hash = svg_source_hash(data);
+         // Gzip magic bytes, matching the SVGZ detection in `usvg::Tree::from_data`.
+         let decompressed;
+         let data = if data.starts_with(&[0x1f, 0x8b]) {
+@@ -110,6 +122,7 @@ impl SvgImageData {
+         Ok(Self {
+             tree: Arc::new(tree),
+             intrinsic_dimensions: SvgIntrinsicDimensions::from_xmltree(&doc),
++            source_hash,
+         })
+     }
+ 

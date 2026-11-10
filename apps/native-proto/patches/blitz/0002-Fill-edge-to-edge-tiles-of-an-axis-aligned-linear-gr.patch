@@ -1,0 +1,116 @@
+From 4591cf7d9401a126a511c4c98dc982db698fdb7d Mon Sep 17 00:00:00 2001
+From: Jake Cattrall <krazyjakee@gmail.com>
+Date: Tue, 10 Nov 2026 03:09:06 +0000
+Subject: [PATCH 2/5] Fill edge-to-edge tiles of an axis-aligned linear
+ gradient in one go
+
+A linear gradient whose line runs edge to edge of its tile along one axis,
+over tiles laid without gaps (a grid of lines, stripes), is drawn as one
+fill of the tiled area with the gradient repeating, instead of a fill per
+tile. That draws the same pixels, costs one fill instead of hundreds, and
+no longer runs into the 500-tile limit, past which such backgrounds (a
+48px grid over a 1440x900 window) were not drawn at all.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ packages/blitz-paint/src/render/background.rs | 67 +++++++++++++++++--
+ 1 file changed, 61 insertions(+), 6 deletions(-)
+
+diff --git a/packages/blitz-paint/src/render/background.rs b/packages/blitz-paint/src/render/background.rs
+index 55f028ea..6dbc3fc8 100644
+--- a/packages/blitz-paint/src/render/background.rs
++++ b/packages/blitz-paint/src/render/background.rs
+@@ -629,11 +629,6 @@ impl ElementCx<'_, '_> {
+             bg_size.height,
+         );
+ 
+-        // FIXME: https://wpt.live/css/css-backgrounds/background-size/background-size-near-zero-gradient.html
+-        if x.count as u64 * y.count as u64 > 500 {
+-            return;
+-        }
+-
+         let tile_rect = Rect::new(0.0, 0.0, x.rect_len, y.rect_len);
+         let bounding_box = self.frame.border_box.bounding_box();
+         let current_color = self.style.clone_color();
+@@ -645,13 +640,38 @@ impl ElementCx<'_, '_> {
+             self.scale,
+             &current_color,
+         );
+-        let brush = anyrender::Paint::Gradient(&gradient);
+ 
+         let transform = base_transform.then_translate(Vec2 {
+             x: x.translate,
+             y: y.translate,
+         });
+ 
++        // A linear gradient along one axis of tiles laid edge to edge (a grid of
++        // lines, stripes) is one fill of the whole tiled area with the gradient
++        // repeating, rather than a fill per tile.
++        if let Some(repeating) = repeating_tile_gradient(&gradient, gradient_transform, &x, &y) {
++            let area = Rect::new(
++                0.0,
++                0.0,
++                x.count as f64 * x.stride,
++                y.count as f64 * y.stride,
++            );
++            scene.fill(
++                peniko::Fill::NonZero,
++                transform,
++                anyrender::Paint::Gradient(&repeating),
++                None,
++                &area,
++            );
++            return;
++        }
++
++        // FIXME: https://wpt.live/css/css-backgrounds/background-size/background-size-near-zero-gradient.html
++        if x.count as u64 * y.count as u64 > 500 {
++            return;
++        }
++        let brush = anyrender::Paint::Gradient(&gradient);
++
+         for hc in 0..y.count {
+             for wc in 0..x.count {
+                 let transform = transform.then_translate(Vec2 {
+@@ -671,6 +691,41 @@ impl ElementCx<'_, '_> {
+     }
+ }
+ 
++/// The gradient of a tile, repeating, when filling every tile at once with it
++/// draws exactly what a fill per tile would: a linear gradient (with nothing
++/// beyond its ends) whose line runs from edge to edge of the tile along one
++/// axis, over tiles that leave no gaps.
++fn repeating_tile_gradient(
++    gradient: &peniko::Gradient,
++    gradient_transform: Option<Affine>,
++    x: &AxisTiling,
++    y: &AxisTiling,
++) -> Option<peniko::Gradient> {
++    if gradient_transform.is_some_and(|t| t != Affine::IDENTITY)
++        || gradient.extend != peniko::Extend::Pad
++        || x.count * y.count < 2
++        || (x.count > 1 && (x.stride - x.rect_len).abs() > 1e-6)
++        || (y.count > 1 && (y.stride - y.rect_len).abs() > 1e-6)
++    {
++        return None;
++    }
++    let peniko::GradientKind::Linear(line) = gradient.kind else {
++        return None;
++    };
++    // Directions given as angles come out of trigonometry: allow rounding.
++    let near = |a: f64, b: f64| (a - b).abs() < 1e-3;
++    let spans =
++        |a: f64, b: f64, len: f64| (near(a, 0.0) && near(b, len)) || (near(a, len) && near(b, 0.0));
++    let along_y = near(line.start.x, line.end.x) && spans(line.start.y, line.end.y, y.rect_len);
++    let along_x = near(line.start.y, line.end.y) && spans(line.start.x, line.end.x, x.rect_len);
++    if !(along_x || along_y) {
++        return None;
++    }
++    let mut repeating = gradient.clone();
++    repeating.extend = peniko::Extend::Repeat;
++    Some(repeating)
++}
++
+ fn compute_layer_position_and_size(
+     layer: &ImageLayerStyles,
+     container_w: f64,

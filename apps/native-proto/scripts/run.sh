@@ -10,7 +10,7 @@
 #
 # --pristine holds data/caskade, config/caskade and cache/caskade (artwork
 # included); each run gets its own copy (artwork hard-linked, so --out must
-# be on the same file system).
+# be on the same file system), deleted when the run ends.
 #
 # xvfb (default): a user and network namespace (no network), a private Xvfb
 # and a private D-Bus with a throwaway keyring, so the live desktop and its
@@ -74,6 +74,8 @@ fi
 shift
 app=$1 out=$2 display=$3 size=$4 settle=$5 duration=$6 interval=$7 click=$8 exe=$9 startup=${10}
 shift 10
+# The run's library copy goes when the run ends; its logs and results stay.
+trap 'rm -rf "$out/home"' EXIT
 export HOME=$out/home XDG_DATA_HOME=$out/home/data XDG_CONFIG_HOME=$out/home/config
 export XDG_CACHE_HOME=$out/home/cache XDG_STATE_HOME=$out/home/state
 export CASKADE_PROTO_HOME=$out/home

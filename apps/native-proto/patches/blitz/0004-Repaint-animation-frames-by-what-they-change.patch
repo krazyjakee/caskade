@@ -1,0 +1,1047 @@
+From 54d426abc34a9503824c914997a586d226940689 Mon Sep 17 00:00:00 2001
+From: Jake Cattrall <krazyjakee@gmail.com>
+Date: Tue, 10 Nov 2026 03:09:20 +0000
+Subject: [PATCH 4/5] Repaint animation frames by what they change
+
+While any CSS animation runs, every frame restyled, repainted and
+re-rendered the whole window: a 14px spinner cost 4.7ms of CPU a frame.
+Now a frame whose only cause is an animation tick costs what it changes:
+
+- `BaseDocument::paint_damage()` says what such a frame changed: nothing,
+  a rectangle (where the animating elements painted last frame and where
+  they paint now), or everything (layout damage, or anything it can't
+  bound). The painter records, for each animating element, the transform
+  and clip its parent painted it with; nothing above it moves in such a
+  frame, so its new bounds follow from that and its new transform.
+- `paint_scene_damaged` culls to the damage, and layers whose clip covers
+  the damage clip to it instead (same pixels, far less work for renderers
+  whose cost follows a layer's area). Box-path containment closes the
+  open paths Blitz builds.
+- The shell repaints only the damage when the renderer supports it
+  (`WindowRenderer::render_damage`), keeps the last frame when nothing
+  visible changed, and wakes on a timer rather than spinning when it
+  didn't present. Any other cause of a frame still repaints everything.
+  `BLITZ_DAMAGE=0` turns this off, for comparisons.
+- Animation sets with nothing to tick (paused, finished) are no longer
+  restyled every frame.
+- When every running animation changes only in steps (`steps()` timing),
+  `next_animation_change()` says when the next step is due and the shell
+  sleeps until then: a `steps(48)` loop over 40s ticks 1.2 times a second,
+  not 60.
+
+Measured on an RTX 3090 / Ryzen 9 5900X at 60 frames a second: a running
+spinner went from 44% of a core to 8% (from 4.7 to ~1.4ms a frame), an
+8-step spinner to 1.7%; idle stays at 0.25%.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ packages/blitz-dom/src/document.rs            |   5 +-
+ packages/blitz-dom/src/lib.rs                 |   2 +
+ packages/blitz-dom/src/paint_damage.rs        | 269 ++++++++++++++++++
+ packages/blitz-dom/src/resolve.rs             |   7 +
+ packages/blitz-dom/src/stylo.rs               |  52 +++-
+ packages/blitz-paint/src/layers.rs            |  99 ++++++-
+ packages/blitz-paint/src/lib.rs               |  24 +-
+ packages/blitz-paint/src/render.rs            |  45 ++-
+ packages/blitz-paint/src/render/mask.rs       |  69 +++--
+ packages/blitz-shell/src/application.rs       |  21 ++
+ packages/blitz-shell/src/window.rs            | 103 ++++++-
+ packages/dioxus-native/src/dioxus_renderer.rs |  12 +
+ 12 files changed, 661 insertions(+), 47 deletions(-)
+ create mode 100644 packages/blitz-dom/src/paint_damage.rs
+
+diff --git a/packages/blitz-dom/src/document.rs b/packages/blitz-dom/src/document.rs
+index 5e334b87..79bbfe68 100644
+--- a/packages/blitz-dom/src/document.rs
++++ b/packages/blitz-dom/src/document.rs
+@@ -377,6 +377,8 @@ pub struct BaseDocument {
+     pub(crate) has_active_animations: bool,
+     /// Whether there is a `<canvas>` element in the DOM (so we should re-render every frame)
+     pub(crate) has_canvas: bool,
++    /// What animation-only frames change on screen (see `paint_damage`).
++    pub(crate) damage_state: crate::paint_damage::DamageState,
+     /// Whether there are subdocuments that are animating (so we should re-render every frame)
+     pub(crate) subdoc_is_animating: bool,
+ 
+@@ -564,6 +566,7 @@ impl BaseDocument {
+             has_active_animations: false,
+             subdoc_is_animating: false,
+             has_canvas: false,
++            damage_state: Default::default(),
+             sub_document_nodes: HashSet::new(),
+             iframe_loads: HashMap::new(),
+ 
+@@ -1965,7 +1968,7 @@ impl BaseDocument {
+ 
+     /// Whether any overlay scrollbars are awaiting or animating their
+     /// fade-out (so frames must keep rendering until they finish).
+-    fn scrollbars_animating(&self) -> bool {
++    pub(crate) fn scrollbars_animating(&self) -> bool {
+         use crate::node::scrollbar::{FADE_DELAY, FADE_DURATION};
+         self.scrollbar_activity
+             .values()
+diff --git a/packages/blitz-dom/src/lib.rs b/packages/blitz-dom/src/lib.rs
+index cf4e592d..3ab76ccb 100644
+--- a/packages/blitz-dom/src/lib.rs
++++ b/packages/blitz-dom/src/lib.rs
+@@ -52,6 +52,7 @@ mod iframe;
+ /// Integration of taffy and the DOM.
+ mod layout;
+ mod mutator;
++mod paint_damage;
+ mod query_selector;
+ mod resolve;
+ /// Computation of resolved CSS property values (`getComputedStyle()`)
+@@ -103,6 +104,7 @@ pub use markup5ever::{
+ };
+ pub use mutator::DocumentMutator;
+ pub use node::{Attribute, DocumentData, ElementData, Node, NodeData, TextNodeData};
++pub use paint_damage::{PaintDamage, PaintRecord};
+ pub use parley::FontContext;
+ pub use scrolling::{ScrollBehavior, ScrollLogicalPosition};
+ pub use tree::NodeTree;
+diff --git a/packages/blitz-dom/src/paint_damage.rs b/packages/blitz-dom/src/paint_damage.rs
+new file mode 100644
+index 00000000..1b1aeb99
+--- /dev/null
++++ b/packages/blitz-dom/src/paint_damage.rs
+@@ -0,0 +1,269 @@
++//! Damage-limited repaint of animation frames.
++//!
++//! While a CSS animation or transition runs, a frame whose only cause is the
++//! animation tick changes nothing but the animating elements. [`BaseDocument::resolve`]
++//! works out what such a frame changed ([`PaintDamage`]): nothing (a `steps()`
++//! animation between steps), a rectangle (the union of where the animating
++//! elements painted last frame and where they paint now), or everything
++//! (anything that changed layout, or that this module can't bound). An
++//! embedder that only ticked animations since the last frame can then repaint
++//! just that rectangle; any other cause of a frame still repaints it all.
++//!
++//! The painter records, for each animating element it visits, the transform
++//! and clip its parent painted it with ([`PaintRecord`]). Nothing above an
++//! animating element moves in an animation-only frame, so its new bounds
++//! follow from that record and its new layout and transform.
++
++use std::collections::{HashMap, HashSet};
++
++use blitz_traits::node_id::NodeId;
++use kurbo::{Affine, Rect, Vec2};
++use style::selector_parser::RestyleDamage;
++
++use crate::{BaseDocument, node::Node};
++
++/// What changed on screen in the last [`resolve`](BaseDocument::resolve), for
++/// a frame caused only by animations ticking.
++#[derive(Clone, Copy, Debug, PartialEq)]
++pub enum PaintDamage {
++    /// Nothing visible changed: the previous frame is still correct.
++    None,
++    /// Only this rectangle changed, in window pixels as the painter places
++    /// them (before its x/y offset).
++    Rect(Rect),
++    /// Repaint the whole window.
++    Full,
++}
++
++/// Where the painter drew an animating element in the last frame.
++#[derive(Clone, Copy, Debug)]
++pub struct PaintRecord {
++    /// The parent's transform to window pixels, as the painter applied it.
++    pub parent_transform: Affine,
++    /// The clip rectangle the element was painted (or culled) within.
++    pub clip_rect: Rect,
++    /// The window-pixel rectangle the element's painting covered, clipped.
++    pub bounds: Rect,
++}
++
++/// Damage no worse than this (transforms, text decorations, repaints) leaves
++/// layout alone.
++const PAINT_ONLY: RestyleDamage = RestyleDamage::RECALCULATE_OVERFLOW;
++
++/// Anti-aliased edges reach a little past the geometry.
++const AA_MARGIN: f64 = 2.0;
++
++impl Node {
++    /// How far this element's painting reaches beyond its border box, in
++    /// window pixels: outset box shadows, outlines, text shadows and filters.
++    pub fn ink_outset(&self, scale: f64) -> f64 {
++        let Some(style) = self.primary_styles() else {
++            return 0.0;
++        };
++        let mut outset: f64 = 0.0;
++        for shadow in style.get_effects().box_shadow.0.iter().filter(|s| !s.inset) {
++            let base = &shadow.base;
++            let offset = base.horizontal.px().abs().max(base.vertical.px().abs()) as f64;
++            outset = outset.max(offset + shadow.spread.px() as f64 + base.blur.px() as f64 * 2.5);
++        }
++        let outline = style.get_outline();
++        if !outline.outline_style.none_or_hidden() {
++            outset = outset.max(
++                outline.outline_width.0.to_f64_px() + outline.outline_offset.to_f64_px().max(0.0),
++            );
++        }
++        for shadow in style.get_inherited_text().text_shadow.0.iter() {
++            let offset = shadow.horizontal.px().abs().max(shadow.vertical.px().abs()) as f64;
++            outset = outset.max(offset + shadow.blur.px() as f64 * 2.5);
++        }
++        if !style.get_effects().filter.0.is_empty() {
++            // Blurs and drop shadows: bound them generously rather than exactly.
++            outset = outset.max(64.0);
++        }
++        outset * scale
++    }
++
++    /// The window-pixel bounds of this element's painting, drawn under
++    /// `parent_transform` (the painter's `screen_bbox`, plus ink overflow).
++    pub fn paint_bounds(&self, parent_transform: Affine, scale: f64) -> Rect {
++        let layout = self.final_layout();
++        let transform = parent_transform
++            * Affine::translate(
++                Vec2::new(layout.location.x as f64, layout.location.y as f64) * scale,
++            )
++            * self.transform().as_deref().copied().unwrap_or_default();
++        let border_box = Rect::new(
++            0.0,
++            0.0,
++            layout.size.width as f64 * scale,
++            layout.size.height as f64 * scale,
++        );
++        let ink = self.ink_outset(scale) + AA_MARGIN;
++        transform
++            .transform_rect_bbox(self.scrollable_overflow().union(border_box))
++            .inflate(ink, ink)
++    }
++}
++
++/// Damage bookkeeping carried by a [`BaseDocument`].
++#[derive(Default)]
++pub(crate) struct DamageState {
++    /// Elements (and pseudo-elements) with running animations or transitions.
++    pub(crate) animating: HashSet<NodeId>,
++    /// Where the painter drew each animating element last.
++    pub(crate) records: std::sync::Mutex<HashMap<NodeId, PaintRecord>>,
++    /// Elements with damage of their own in this resolve, before propagation.
++    pub(crate) damaged: Vec<(NodeId, RestyleDamage)>,
++    /// Something this module can't bound changed in this resolve.
++    pub(crate) force_full: bool,
++    /// The result of the last resolve.
++    pub(crate) last: Option<PaintDamage>,
++    /// When the running animations next change, if they only change in steps.
++    pub(crate) next_change: Option<f64>,
++}
++
++impl BaseDocument {
++    /// What the last [`resolve`](Self::resolve) changed on screen, if the frame
++    /// was caused only by animations ticking. Any other cause of a frame
++    /// (input, DOM changes, scrolling, resizing, loaded resources) needs a
++    /// full repaint whatever this says.
++    pub fn paint_damage(&self) -> PaintDamage {
++        self.damage_state.last.unwrap_or(PaintDamage::Full)
++    }
++
++    /// When (on the animation timeline passed to [`resolve`](Self::resolve))
++    /// the document next needs a frame, if animations are all that is
++    /// running and each changes only in steps (`steps()` timing): an embedder
++    /// can wait until then instead of ticking every frame. `None` means tick
++    /// every frame while [`is_animating`](Self::is_animating).
++    pub fn next_animation_change(&self) -> Option<f64> {
++        if self.has_canvas
++            || self.subdoc_is_animating
++            || self.scroll_animation != crate::scrolling::ScrollAnimationState::None
++            || self.scrollbars_animating()
++        {
++            return None;
++        }
++        self.damage_state.next_change
++    }
++
++    /// Whether `node_id` has a running animation or transition (the painter
++    /// records where it draws these).
++    pub fn is_animating_node(&self, node_id: NodeId) -> bool {
++        self.damage_state.animating.contains(&node_id)
++    }
++
++    /// Record where the painter drew an animating element.
++    pub fn record_paint(&self, node_id: NodeId, record: PaintRecord) {
++        if let Ok(mut records) = self.damage_state.records.lock() {
++            records.insert(node_id, record);
++        }
++    }
++
++    /// Where the painter last drew an animating element.
++    pub fn paint_record(&self, node_id: NodeId) -> Option<PaintRecord> {
++        self.damage_state
++            .records
++            .lock()
++            .ok()?
++            .get(&node_id)
++            .copied()
++    }
++
++    /// Forget every paint record: a full repaint records them afresh.
++    pub fn clear_paint_records(&self) {
++        if let Ok(mut records) = self.damage_state.records.lock() {
++            records.clear();
++        }
++    }
++
++    /// Collect the nodes carrying damage of their own, before it is
++    /// propagated to their ancestors.
++    pub(crate) fn collect_own_damage(&mut self) {
++        let mut damaged = std::mem::take(&mut self.damage_state.damaged);
++        damaged.clear();
++        let mut stack = vec![self.root_node().id];
++        while let Some(id) = stack.pop() {
++            let Some(node) = self.nodes.get(id) else {
++                continue;
++            };
++            let damage = node.damage().unwrap_or_else(RestyleDamage::empty);
++            if !damage.is_empty() {
++                damaged.push((id, damage));
++            }
++            if damage.is_empty() && !node.has_damaged_descendants() && id != self.root_node().id {
++                continue;
++            }
++            stack.extend(node.children.iter().copied());
++            stack.extend(node.before());
++            stack.extend(node.after());
++        }
++        self.damage_state.damaged = damaged;
++    }
++
++    /// The nearest element at or above `node_id` with a running animation.
++    fn animating_ancestor(&self, mut node_id: NodeId) -> Option<NodeId> {
++        loop {
++            if self.damage_state.animating.contains(&node_id) {
++                return Some(node_id);
++            }
++            node_id = self.nodes.get(node_id)?.parent?;
++        }
++    }
++
++    /// Work out [`PaintDamage`] for this resolve (after layout and
++    /// transforms).
++    pub(crate) fn compute_paint_damage(&mut self) {
++        let damage = self.paint_damage_inner();
++        self.damage_state.last = Some(damage);
++        self.damage_state.force_full = false;
++    }
++
++    fn paint_damage_inner(&self) -> PaintDamage {
++        let state = &self.damage_state;
++        if state.force_full
++            || self.has_canvas
++            || !self.sub_document_nodes.is_empty()
++            || self.scroll_animation != crate::scrolling::ScrollAnimationState::None
++            || self.scrollbars_animating()
++        {
++            return PaintDamage::Full;
++        }
++        if state.damaged.is_empty() {
++            return PaintDamage::None;
++        }
++        let mut changed = HashSet::new();
++        for &(node_id, damage) in &state.damaged {
++            if !PAINT_ONLY.contains(damage) {
++                return PaintDamage::Full;
++            }
++            match self.animating_ancestor(node_id) {
++                Some(animating) => {
++                    changed.insert(animating);
++                }
++                None => return PaintDamage::Full,
++            }
++        }
++        let Ok(records) = state.records.lock() else {
++            return PaintDamage::Full;
++        };
++        let scale = self.viewport.scale_f64();
++        let mut rect: Option<Rect> = None;
++        for node_id in changed {
++            // Never painted (new, or inside a culled subtree): no bounds to trust.
++            let (Some(record), Some(node)) = (records.get(&node_id), self.nodes.get(node_id))
++            else {
++                return PaintDamage::Full;
++            };
++            let now = node
++                .paint_bounds(record.parent_transform, scale)
++                .intersect(record.clip_rect);
++            for part in [record.bounds, now] {
++                if part.width() > 0.0 && part.height() > 0.0 {
++                    rect = Some(rect.map_or(part, |r| r.union(part)));
++                }
++            }
++        }
++        rect.map_or(PaintDamage::None, PaintDamage::Rect)
++    }
++}
+diff --git a/packages/blitz-dom/src/resolve.rs b/packages/blitz-dom/src/resolve.rs
+index c5c420a2..3f58d69c 100644
+--- a/packages/blitz-dom/src/resolve.rs
++++ b/packages/blitz-dom/src/resolve.rs
+@@ -77,10 +77,15 @@ impl BaseDocument {
+ 
+         // Apply any device changes (viewport resize, zoom, color-scheme, etc)
+         // accumulated since the last resolve as a single device rebuild.
++        if !self.pending_device_changes.is_empty() || !self.incremental_layout {
++            self.damage_state.force_full = true;
++        }
+         self.flush_pending_device_changes();
+ 
+         // we need to resolve stylist first since it will need to drive our layout bits
+         self.resolve_stylist(current_time_for_animations);
++        // What changed, before damage spreads to ancestors.
++        self.collect_own_damage();
+         timer.record_time("style");
+ 
+         // Non-incremental mode is "every node is damaged every frame": mark the
+@@ -117,6 +122,8 @@ impl BaseDocument {
+         self.resolve_transforms(root_node_id);
+         timer.record_time("transform");
+ 
++        self.compute_paint_damage();
++
+         // Build paint children / stacking contexts for damaged subtrees. Runs
+         // after layout and transforms so that stacking-context roots created by
+         // this frame's transforms are picked up, and before damage is cleared.
+diff --git a/packages/blitz-dom/src/stylo.rs b/packages/blitz-dom/src/stylo.rs
+index e9075c5c..6ae48999 100644
+--- a/packages/blitz-dom/src/stylo.rs
++++ b/packages/blitz-dom/src/stylo.rs
+@@ -107,7 +107,12 @@ impl crate::document::BaseDocument {
+                 continue;
+             }
+ 
+-            self.nodes[node_id].set_restyle_hint(RestyleHint::RESTYLE_SELF);
++            // Only sets with something to tick need restyling: a paused (or
++            // finished) animation's value doesn't change. One finishing on this
++            // tick still needs it, to drop its values.
++            if set.needs_animation_ticks() {
++                self.nodes[node_id].set_restyle_hint(RestyleHint::RESTYLE_SELF);
++            }
+ 
+             for animation in set.animations.iter_mut() {
+                 if animation.state == AnimationState::Pending && animation.started_at <= now {
+@@ -208,6 +213,51 @@ impl crate::document::BaseDocument {
+         }
+         self.has_active_animations = sets.values().any(|state| state.needs_animation_ticks());
+ 
++        // When every running animation changes only in steps, when the next
++        // change is due: nothing needs a frame before then.
++        self.damage_state.next_change = None;
++        if self.has_active_animations {
++            let mut next = f64::INFINITY;
++            'sets: for set in sets.values() {
++                if set
++                    .transitions
++                    .iter()
++                    .any(|t| matches!(t.state, AnimationState::Pending | AnimationState::Running))
++                {
++                    next = f64::NAN;
++                    break;
++                }
++                for animation in set.animations.iter() {
++                    if !matches!(
++                        animation.state,
++                        AnimationState::Pending | AnimationState::Running
++                    ) {
++                        continue;
++                    }
++                    match animation.next_change_after(now) {
++                        Some(at) => next = next.min(at),
++                        None => {
++                            next = f64::NAN;
++                            break 'sets;
++                        }
++                    }
++                }
++            }
++            self.damage_state.next_change = next.is_finite().then_some(next);
++        }
++
++        // The nodes those animations paint, for damage-limited repaint.
++        self.damage_state.animating.clear();
++        for key in sets.keys() {
++            let node_id = NodeId::from_u64(key.node.id() as u64);
++            let painted = match key.pseudo_element {
++                Some(PseudoElement::Before) => self.nodes.get(node_id).and_then(|n| n.before()),
++                Some(PseudoElement::After) => self.nodes.get(node_id).and_then(|n| n.after()),
++                _ => Some(node_id),
++            };
++            self.damage_state.animating.extend(painted);
++        }
++
+         // Maybe run garbage collection. Stylo has internal to determine whether to run or not.
+         self.stylist.rule_tree().maybe_gc();
+ 
+diff --git a/packages/blitz-paint/src/layers.rs b/packages/blitz-paint/src/layers.rs
+index 17764ca8..9e0a8a65 100644
+--- a/packages/blitz-paint/src/layers.rs
++++ b/packages/blitz-paint/src/layers.rs
+@@ -1,5 +1,5 @@
+ use anyrender::{Filter, PaintScene};
+-use kurbo::{Affine, Shape};
++use kurbo::{Affine, Point, Rect, Shape};
+ use peniko::{BlendMode, Fill};
+ use std::{cell::Cell, sync::Arc};
+ 
+@@ -13,6 +13,56 @@ pub(crate) struct LayerManager {
+ 
+     #[allow(unused)] // Only used for debugging. Enabled as required.
+     layer_depth_used: Cell<u32>,
++
++    /// When only this rectangle (scene coordinates) is repainted, a layer whose
++    /// clip covers it can clip to it instead: the same pixels, and renderers
++    /// whose cost grows with a layer's area do far less work.
++    pub(crate) damage: Cell<Option<Rect>>,
++}
++
++/// Whether `shape` (under `transform`) covers all of `rect`. Exact for convex
++/// shapes (rectangles, rounded rectangles, ellipses), which clips are.
++pub(crate) fn covers(shape: &impl Shape, transform: Affine, rect: Rect) -> bool {
++    if transform.determinant().abs() < 1e-12 {
++        return false;
++    }
++    let inverse = transform.inverse();
++    if let Some(shape_rect) = shape.as_rect() {
++        return shape_rect.contains_rect(inverse.transform_rect_bbox(rect))
++            && transform.as_coeffs()[1] == 0.0
++            && transform.as_coeffs()[2] == 0.0;
++    }
++    // Box paths are left open (renderers fill them closed): close every
++    // subpath, or their winding counts as zero everywhere.
++    let mut closed = kurbo::BezPath::new();
++    let mut open = false;
++    for el in shape.path_elements(0.1) {
++        match el {
++            kurbo::PathEl::MoveTo(_) if open => {
++                closed.close_path();
++                closed.push(el);
++            }
++            kurbo::PathEl::ClosePath => {
++                open = false;
++                closed.push(el);
++            }
++            _ => {
++                open = true;
++                closed.push(el);
++            }
++        }
++    }
++    if open {
++        closed.close_path();
++    }
++    [
++        Point::new(rect.x0, rect.y0),
++        Point::new(rect.x1, rect.y0),
++        Point::new(rect.x0, rect.y1),
++        Point::new(rect.x1, rect.y1),
++    ]
++    .into_iter()
++    .all(|corner| closed.contains(inverse * corner))
+ }
+ 
+ impl LayerManager {
+@@ -66,23 +116,42 @@ impl LayerManager {
+             return false;
+         }
+ 
++        // A layer clipped to more than the damage only draws the damage: clip it
++        // there. Filters read beyond the clip, so they keep their own.
++        let damage = self.damage.get().filter(|damage| {
++            filter.is_none() && backdrop_filter.is_none() && covers(shape, transform, *damage)
++        });
+         // Actually push the layer
+         if blend_mode == BlendMode::default()
+             && opacity == 1.0
+             && filter.is_none()
+             && backdrop_filter.is_none()
+         {
+-            scene.push_clip_layer(Fill::NonZero, transform, shape);
++            match damage {
++                Some(damage) => scene.push_clip_layer(Fill::NonZero, Affine::IDENTITY, &damage),
++                None => scene.push_clip_layer(Fill::NonZero, transform, shape),
++            }
+         } else {
+-            scene.push_layer(
+-                Fill::NonZero,
+-                blend_mode,
+-                opacity,
+-                transform,
+-                shape,
+-                filter,
+-                backdrop_filter,
+-            );
++            match damage {
++                Some(damage) => scene.push_layer(
++                    Fill::NonZero,
++                    blend_mode,
++                    opacity,
++                    Affine::IDENTITY,
++                    &damage,
++                    filter,
++                    backdrop_filter,
++                ),
++                None => scene.push_layer(
++                    Fill::NonZero,
++                    blend_mode,
++                    opacity,
++                    transform,
++                    shape,
++                    filter,
++                    backdrop_filter,
++                ),
++            }
+         };
+ 
+         // Update accounting
+@@ -93,6 +162,14 @@ impl LayerManager {
+         true
+     }
+ 
++    /// The damage rectangle when a filterless layer with this clip should
++    /// clip to it instead (see [`LayerManager::damage`]).
++    pub(crate) fn damage_clip(&self, transform: Affine, shape: &impl Shape) -> Option<Rect> {
++        self.damage
++            .get()
++            .filter(|damage| covers(shape, transform, *damage))
++    }
++
+     pub(crate) fn maybe_pop_layer(&self, scene: &mut impl PaintScene, condition: bool) {
+         if condition {
+             scene.pop_layer();
+diff --git a/packages/blitz-paint/src/lib.rs b/packages/blitz-paint/src/lib.rs
+index 1754970d..d7902b9b 100644
+--- a/packages/blitz-paint/src/lib.rs
++++ b/packages/blitz-paint/src/lib.rs
+@@ -49,6 +49,23 @@ pub fn paint_scene(
+     height: u32,
+     x_offset: u32,
+     y_offset: u32,
++) {
++    paint_scene_damaged(scene, doc, scale, width, height, x_offset, y_offset, None)
++}
++
++/// [`paint_scene`], drawing only what intersects `damage` (window pixels,
++/// before the x/y offset) when it is set: for a renderer that keeps the rest
++/// of the previous frame (`WindowRenderer::render_damage`).
++#[allow(clippy::too_many_arguments)]
++pub fn paint_scene_damaged(
++    scene: &mut impl PaintScene,
++    doc: &mut BaseDocument,
++    scale: f64,
++    width: u32,
++    height: u32,
++    x_offset: u32,
++    y_offset: u32,
++    damage: Option<kurbo::Rect>,
+ ) {
+     // Run `.paint()` on every custom widget in the document (and all subdocuments) ahead of time.
+     // This helps us avoid borrow-checker issues as we recurse down the tree (`.paint()` require `&mut self`).
+@@ -59,7 +76,7 @@ pub fn paint_scene(
+     #[cfg(feature = "custom-widget")]
+     build_custom_widget_scenes(&mut custom_widget_scenes, doc, scene, scale);
+ 
+-    let generator = BlitzDomPainter::new(
++    let mut generator = BlitzDomPainter::new(
+         doc,
+         scale,
+         width,
+@@ -68,6 +85,11 @@ pub fn paint_scene(
+         y_offset as f64,
+         &custom_widget_scenes,
+     );
++    generator.damage = damage;
++    generator
++        .layer_manager
++        .damage
++        .set(damage.map(|d| d + kurbo::Vec2::new(x_offset as f64, y_offset as f64)));
+     generator.paint_scene(scene);
+ 
+     // println!(
+diff --git a/packages/blitz-paint/src/render.rs b/packages/blitz-paint/src/render.rs
+index a32aa307..34bf2d0f 100644
+--- a/packages/blitz-paint/src/render.rs
++++ b/packages/blitz-paint/src/render.rs
+@@ -137,6 +137,10 @@ pub struct BlitzDomPainter<'dom, 'a> {
+ 
+     // Pre-computed `Scene`s for each CustomWidget
+     pub(crate) custom_widget_scenes: &'a CustomWidgetSceneMap,
++
++    /// When set, only this window-pixel rectangle is repainted: elements
++    /// outside it are culled (the renderer clips to it).
++    pub(crate) damage: Option<Rect>,
+ }
+ 
+ impl<'dom, 'a> BlitzDomPainter<'dom, 'a> {
+@@ -172,6 +176,7 @@ impl<'dom, 'a> BlitzDomPainter<'dom, 'a> {
+             #[cfg(feature = "scrollbars")]
+             scrollbar_drag_target: dom.scrollbar_drag_target(),
+             layer_manager,
++            damage: None,
+             draw_text_context: RefCell::new(DrawTextContext::default()),
+             selection_ranges,
+             custom_widget_scenes,
+@@ -243,7 +248,13 @@ impl<'dom, 'a> BlitzDomPainter<'dom, 'a> {
+         // The root clip rectangle is the viewport (in screen coordinates, with the
+         // initial offset already subtracted). Elements outside of this are culled, and
+         // scrollports narrow this rectangle further for their descendants.
+-        let viewport_clip_rect = Rect::new(0.0, 0.0, self.width as f64, self.height as f64);
++        let mut viewport_clip_rect = Rect::new(0.0, 0.0, self.width as f64, self.height as f64);
++        match self.damage {
++            // Only what intersects the damage needs drawing.
++            Some(damage) => viewport_clip_rect = viewport_clip_rect.intersect(damage),
++            // A full repaint records every animating element afresh.
++            None => self.dom.clear_paint_records(),
++        }
+ 
+         self.render_element(
+             scene,
+@@ -477,7 +488,37 @@ impl<'dom, 'a> BlitzDomPainter<'dom, 'a> {
+             x: -self.initial_x,
+             y: -self.initial_y,
+         }) * transform;
+-        let screen_bbox = screen_transform.transform_rect_bbox(overflow.union(border_box));
++        let ink = node.ink_outset(self.scale);
++        let screen_bbox = screen_transform
++            .transform_rect_bbox(overflow.union(border_box))
++            .inflate(ink, ink);
++
++        // Remember where animating elements paint (or are culled), so that an
++        // animation-only frame can repaint just what they cover.
++        if self.dom.is_animating_node(node_id) {
++            let parent_transform = Affine::translate(Vec2 {
++                x: -self.initial_x,
++                y: -self.initial_y,
++            }) * parent_style_transform;
++            // A damaged frame narrows the clip to the damage; the clip the
++            // element really paints within is the one the last full frame saw.
++            let record_clip = match self.damage {
++                None => Some(clip_rect),
++                Some(_) => self.dom.paint_record(node_id).map(|r| r.clip_rect),
++            };
++            if let Some(clip) = record_clip {
++                self.dom.record_paint(
++                    node_id,
++                    blitz_dom::PaintRecord {
++                        parent_transform,
++                        clip_rect: clip,
++                        bounds: node
++                            .paint_bounds(parent_transform, self.scale)
++                            .intersect(clip),
++                    },
++                );
++            }
++        }
+ 
+         // Cull elements that fall entirely outside the current clip rectangle. In addition to
+         // the viewport, `clip_rect` is narrowed by any ancestor scrollport (see below), so this
+diff --git a/packages/blitz-paint/src/render/mask.rs b/packages/blitz-paint/src/render/mask.rs
+index 5b395e92..71f4dde8 100644
+--- a/packages/blitz-paint/src/render/mask.rs
++++ b/packages/blitz-paint/src/render/mask.rs
+@@ -47,15 +47,31 @@ impl ElementCx<'_, '_> {
+ 
+         // Content outside of the mask painting area (at largest the border box) has
+         // a mask alpha of 0, so we can clip the isolation layer to the border box.
+-        scene.push_layer(
+-            Fill::NonZero,
+-            Mix::Normal,
+-            ALMOST_OPAQUE,
+-            self.transform,
+-            &self.frame.border_box_path(),
+-            None,
+-            None,
+-        );
++        let border_box = self.frame.border_box_path();
++        match self
++            .context
++            .layer_manager
++            .damage_clip(self.transform, &border_box)
++        {
++            Some(damage) => scene.push_layer(
++                Fill::NonZero,
++                Mix::Normal,
++                ALMOST_OPAQUE,
++                kurbo::Affine::IDENTITY,
++                &damage,
++                None,
++                None,
++            ),
++            None => scene.push_layer(
++                Fill::NonZero,
++                Mix::Normal,
++                ALMOST_OPAQUE,
++                self.transform,
++                &border_box,
++                None,
++                None,
++            ),
++        }
+         true
+     }
+ 
+@@ -67,15 +83,32 @@ impl ElementCx<'_, '_> {
+             return;
+         }
+ 
+-        scene.push_layer(
+-            Fill::NonZero,
+-            BlendMode::new(Mix::Normal, Compose::DestIn),
+-            1.0,
+-            self.transform,
+-            &self.frame.border_box_path(),
+-            None,
+-            None,
+-        );
++        let border_box = self.frame.border_box_path();
++        let blend = BlendMode::new(Mix::Normal, Compose::DestIn);
++        match self
++            .context
++            .layer_manager
++            .damage_clip(self.transform, &border_box)
++        {
++            Some(damage) => scene.push_layer(
++                Fill::NonZero,
++                blend,
++                1.0,
++                kurbo::Affine::IDENTITY,
++                &damage,
++                None,
++                None,
++            ),
++            None => scene.push_layer(
++                Fill::NonZero,
++                blend,
++                1.0,
++                self.transform,
++                &border_box,
++                None,
++                None,
++            ),
++        }
+         self.draw_css_mask(scene);
+         scene.pop_layer(); // Mask (DestIn) layer
+         scene.pop_layer(); // Isolation layer
+diff --git a/packages/blitz-shell/src/application.rs b/packages/blitz-shell/src/application.rs
+index 5a94d337..3b246918 100644
+--- a/packages/blitz-shell/src/application.rs
++++ b/packages/blitz-shell/src/application.rs
+@@ -257,6 +257,27 @@ impl<Rend: WindowRenderer> ApplicationHandler for BlitzApplication<Rend> {
+         Some(self)
+     }
+ 
++    /// Wake for animations that are waiting out a frame with nothing to paint.
++    #[cfg(not(target_os = "ios"))]
++    fn about_to_wait(&mut self, event_loop: &dyn ActiveEventLoop) {
++        let now = web_time::Instant::now();
++        let mut next: Option<web_time::Instant> = None;
++        for view in self.windows.values_mut() {
++            if let Some(at) = view.next_animation_frame {
++                if at <= now {
++                    view.next_animation_frame = None;
++                    view.request_animation_frame();
++                } else {
++                    next = Some(next.map_or(at, |next| next.min(at)));
++                }
++            }
++        }
++        event_loop.set_control_flow(match next {
++            Some(at) => winit::event_loop::ControlFlow::WaitUntil(at),
++            None => winit::event_loop::ControlFlow::Wait,
++        });
++    }
++
+     #[cfg(target_os = "ios")]
+     fn about_to_wait(&mut self, _event_loop: &dyn ActiveEventLoop) {
+         for view in self.windows.values_mut() {
+diff --git a/packages/blitz-shell/src/window.rs b/packages/blitz-shell/src/window.rs
+index 00779e26..a649a61d 100644
+--- a/packages/blitz-shell/src/window.rs
++++ b/packages/blitz-shell/src/window.rs
+@@ -7,7 +7,8 @@ use crate::convert_events::{
+ use crate::event::{BlitzShellEvent, BlitzShellProxy, create_waker};
+ use anyrender::WindowRenderer;
+ use blitz_dom::Document;
+-use blitz_paint::paint_scene;
++use blitz_dom::PaintDamage;
++use blitz_paint::{paint_scene, paint_scene_damaged};
+ use blitz_traits::events::{
+     BlitzPointerEvent, BlitzPointerId, BlitzWheelDelta, BlitzWheelEvent, MouseEventButton,
+     MouseEventButtons, PointerCoords, PointerDetails, UiEvent,
+@@ -95,6 +96,14 @@ pub struct View<Rend: WindowRenderer> {
+     /// avoid a reference cycle.
+     pub active_events: Arc<AtomicRefCell<Vec<BlitzPointerEvent>>>,
+     pub animation_timer: Option<Instant>,
++    /// Something other than an animation tick asked for the next frame, so it
++    /// repaints everything.
++    full_repaint: std::cell::Cell<bool>,
++    /// An animation runs but its last frame changed nothing visible: the next
++    /// tick waits for this time instead of the next vsync.
++    pub next_animation_frame: Option<Instant>,
++    /// `BLITZ_DAMAGE=0` turns damage-limited repaint off (for comparisons).
++    damage_enabled: bool,
+     pub is_visible: bool,
+     pub safe_area_insets: PhysicalInsets<u32>,
+ 
+@@ -120,6 +129,10 @@ pub struct View<Rend: WindowRenderer> {
+     pub ios_request_redraw: std::cell::Cell<bool>,
+ }
+ 
++/// How long an animation whose last frame changed nothing waits before ticking
++/// again: one frame at 60 Hz.
++const FRAME_INTERVAL: std::time::Duration = std::time::Duration::from_micros(16_667);
++
+ impl<Rend: WindowRenderer> Drop for View<Rend> {
+     fn drop(&mut self) {
+         // Release the renderer's window surface before the window is dropped.
+@@ -212,6 +225,9 @@ impl<Rend: WindowRenderer> View<Rend> {
+             renderer: config.renderer,
+             waker: None,
+             animation_timer: None,
++            full_repaint: std::cell::Cell::new(true),
++            next_animation_frame: None,
++            damage_enabled: std::env::var("BLITZ_DAMAGE").map_or(true, |v| v != "0"),
+             keyboard_modifiers: Default::default(),
+             proxy: proxy.clone(),
+             window: winit_window.clone(),
+@@ -383,6 +399,18 @@ impl<Rend: WindowRenderer> View<Rend> {
+     }
+ 
+     pub fn request_redraw(&self) {
++        self.full_repaint.set(true);
++        if self.renderer.is_active() {
++            self.window.request_redraw();
++            #[cfg(target_os = "ios")]
++            self.ios_request_redraw.set(true);
++        }
++    }
++
++    /// Ask for the next frame of a running animation: unlike
++    /// [`request_redraw`](Self::request_redraw), it may repaint only what the
++    /// animation changed.
++    pub fn request_animation_frame(&self) {
+         if self.renderer.is_active() {
+             self.window.request_redraw();
+             #[cfg(target_os = "ios")]
+@@ -393,6 +421,8 @@ impl<Rend: WindowRenderer> View<Rend> {
+     pub fn redraw(&mut self) {
+         #[cfg(target_os = "ios")]
+         self.ios_request_redraw.set(false);
++        let full_repaint = self.full_repaint.replace(false) || !self.damage_enabled;
++        self.next_animation_frame = None;
+         let animation_time = self.current_animation_time();
+         let is_visible = self.is_visible;
+ 
+@@ -408,6 +438,7 @@ impl<Rend: WindowRenderer> View<Rend> {
+         let (width, height) = inner.viewport().window_size;
+         let scale = inner.viewport().scale_f64();
+         let is_animating = inner.is_animating();
++        let next_change = inner.next_animation_change();
+         let is_blocked = inner.has_pending_critical_resources();
+         let insets = self.safe_area_insets;
+ 
+@@ -419,24 +450,70 @@ impl<Rend: WindowRenderer> View<Rend> {
+             inner.clear_changes();
+         }
+ 
++        let mut painted = false;
+         if !is_blocked && is_visible {
+-            self.renderer.render(|scene| {
+-                paint_scene(
+-                    scene,
+-                    &mut inner,
+-                    scale,
+-                    width,
+-                    height,
+-                    insets.left,
+-                    insets.top,
+-                )
+-            });
++            let damage = if full_repaint {
++                PaintDamage::Full
++            } else {
++                inner.paint_damage()
++            };
++            match damage {
++                // An animation that changed nothing visible (between the steps
++                // of a `steps()` timing function, say): keep the last frame.
++                PaintDamage::None => {}
++                PaintDamage::Rect(damage) if self.renderer.supports_damage() => {
++                    let mut surface_damage = damage;
++                    surface_damage.x0 += insets.left as f64;
++                    surface_damage.x1 += insets.left as f64;
++                    surface_damage.y0 += insets.top as f64;
++                    surface_damage.y1 += insets.top as f64;
++                    self.renderer.render_damage(surface_damage, |scene| {
++                        paint_scene_damaged(
++                            scene,
++                            &mut inner,
++                            scale,
++                            width,
++                            height,
++                            insets.left,
++                            insets.top,
++                            Some(damage),
++                        )
++                    });
++                    painted = true;
++                }
++                _ => {
++                    self.renderer.render(|scene| {
++                        paint_scene(
++                            scene,
++                            &mut inner,
++                            scale,
++                            width,
++                            height,
++                            insets.left,
++                            insets.top,
++                        )
++                    });
++                    painted = true;
++                }
++            }
+         }
+ 
+         drop(inner);
+ 
++        // Animations that only change in steps wake for their next step.
++        let next_change = next_change
++            .zip(self.animation_timer)
++            .map(|(at, start)| start + std::time::Duration::from_secs_f64(at.max(0.0)));
+         if !is_blocked && is_visible && is_animating {
+-            self.request_redraw();
++            if let Some(at) = next_change.filter(|at| *at > Instant::now() + FRAME_INTERVAL / 2) {
++                self.next_animation_frame = Some(at);
++            } else if painted {
++                // Presenting waited for vsync: tick again straight away.
++                self.request_animation_frame();
++            } else {
++                // Nothing was presented, so nothing paces the loop: wait a frame.
++                self.next_animation_frame = Some(Instant::now() + FRAME_INTERVAL);
++            }
+         }
+     }
+ 
+diff --git a/packages/dioxus-native/src/dioxus_renderer.rs b/packages/dioxus-native/src/dioxus_renderer.rs
+index f404f635..1f509bbb 100644
+--- a/packages/dioxus-native/src/dioxus_renderer.rs
++++ b/packages/dioxus-native/src/dioxus_renderer.rs
+@@ -166,4 +166,16 @@ impl WindowRenderer for DioxusNativeWindowRenderer {
+     fn render<F: FnOnce(&mut Self::ScenePainter<'_>)>(&mut self, draw_fn: F) {
+         self.inner.borrow_mut().render(draw_fn)
+     }
++
++    fn supports_damage(&self) -> bool {
++        self.inner.borrow().supports_damage()
++    }
++
++    fn render_damage<F: FnOnce(&mut Self::ScenePainter<'_>)>(
++        &mut self,
++        damage: peniko::kurbo::Rect,
++        draw_fn: F,
++    ) {
++        self.inner.borrow_mut().render_damage(damage, draw_fn)
++    }
+ }

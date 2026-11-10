@@ -1,0 +1,57 @@
+From 6324a4eba4b44607a9b08d223c6bc3b08efd91a0 Mon Sep 17 00:00:00 2001
+From: Jake Cattrall <krazyjakee@gmail.com>
+Date: Tue, 10 Nov 2026 02:18:41 +0000
+Subject: [PATCH 4/4] Measurement only: ANYRENDER_FRAME_LIMIT_HZ paces presents
+ like vsync
+
+Not for upstream: measures what a vsynced display would cost where no
+display paces presents (monitors off, Xvfb).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../src/window_renderer.rs                     | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/crates/anyrender_vello_hybrid/src/window_renderer.rs b/crates/anyrender_vello_hybrid/src/window_renderer.rs
+index f077fc9..d509963 100644
+--- a/crates/anyrender_vello_hybrid/src/window_renderer.rs
++++ b/crates/anyrender_vello_hybrid/src/window_renderer.rs
+@@ -177,6 +177,9 @@ pub struct VelloHybridWindowRenderer {
+     /// The persistent target holds a complete frame at the current size, so a
+     /// damaged frame can repaint part of it.
+     has_full_frame: bool,
++    /// Measurement only (`ANYRENDER_FRAME_LIMIT_HZ`): when the last frame
++    /// was presented, to pace frames like vsync without a display.
++    last_present: Option<std::time::Instant>,
+ }
+ impl VelloHybridWindowRenderer {
+     #[allow(clippy::new_without_default)]
+@@ -196,6 +199,7 @@ impl VelloHybridWindowRenderer {
+             scene: VelloHybridScene::new_with(0, 0, render_settings.level),
+             cached_images: ImageCache::default(),
+             has_full_frame: false,
++            last_present: None,
+         }
+     }
+ 
+@@ -696,6 +700,20 @@ impl VelloHybridWindowRenderer {
+             "present"
+         });
+ 
++        // Measurement only: pace presents to ANYRENDER_FRAME_LIMIT_HZ, as
++        // vsync would, when no display paces them (screen off, Xvfb).
++        static FRAME_LIMIT: std::sync::OnceLock<Option<f64>> = std::sync::OnceLock::new();
++        if let Some(hz) = *FRAME_LIMIT.get_or_init(|| {
++            std::env::var("ANYRENDER_FRAME_LIMIT_HZ").ok().and_then(|v| v.parse().ok())
++        }) {
++            let period = std::time::Duration::from_secs_f64(1.0 / hz);
++            let now = std::time::Instant::now();
++            let due = self.last_present.map_or(now, |last| last + period);
++            if due > now {
++                std::thread::sleep(due - now);
++            }
++            self.last_present = Some(due.max(now));
++        }
+ 
+         render_surface
+             .device()

@@ -20,10 +20,13 @@ skia = ["dioxus-native/skia"]
 log-frame-times = ["dioxus-native/log-frame-times"]
 # Blitz's style, layout and paint-tree timings per resolve.
 log-phase-times = ["dioxus-native/log-phase-times"]
+# CASKADE_PROTO_PROFILE=<file>: sample the bench window (SIGPROF) and write
+# self and inclusive time per function.
+profile = ["dep:pprof"]
 
 [dependencies]
 # Blitz 0.3.0-beta.4 at the spike's commit (PR #78), with Dioxus 0.8.0-alpha.3.
-dioxus-native = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735890754b4a9970cb07765b8bf3c0c", default-features = false, features = ["prelude", "accessibility", "net", "svg", "system-fonts", "woff"] }
+dioxus-native = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735890754b4a9970cb07765b8bf3c0c", default-features = false, features = ["prelude", "accessibility", "net", "svg", "system-fonts", "woff", "html"] }
 blitz-dom = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735890754b4a9970cb07765b8bf3c0c", default-features = false }
 # The core without `net` (sync, stores, downloads): the prototype only reads the library.
 caskade-core = { path = "../../crates/caskade-core", default-features = false }
@@ -33,6 +36,7 @@ tokio = { version = "1", features = ["rt-multi-thread", "time", "sync", "macros"
 image = { version = "0.25", default-features = false, features = ["webp", "png", "jpeg"] }
 parley = { version = "0.12", default-features = false, features = ["std"] }
 log = "0.4"
+pprof = { version = "0.15", default-features = false, optional = true }
 
 # The main workspace's patches (root Cargo.toml), for caskade-core's dependencies.
 [patch.crates-io]
