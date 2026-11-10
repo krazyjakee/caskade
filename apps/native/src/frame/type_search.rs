@@ -24,6 +24,12 @@ struct Typing {
     focus_before: Option<blitz_dom::NodeId>,
 }
 
+/// A page's own search, which typing goes to in place of the overlay
+/// while the page fills it (Settings' search, #103): it gets the first
+/// text typed.
+#[derive(Clone, Copy)]
+pub struct PageSearch(pub Signal<Option<Callback<String>>>);
+
 /// Opens the overlay with some text: what the search's keyboard action
 /// does.
 #[derive(Clone, Copy)]
@@ -37,8 +43,14 @@ pub fn TypeSearchRoot(children: Element) -> Element {
     let input = use_input();
     let mut typing = use_signal(|| None::<Typing>);
     let reader = input.clone();
+    let page = use_context_provider(|| PageSearch(Signal::new(None)));
     let open = use_callback(move |initial: String| {
         if typing.peek().is_some() {
+            return;
+        }
+        // The page searches itself.
+        if let Some(own) = *page.0.peek() {
+            own.call(initial);
             return;
         }
         let query_before = match router.peek() {

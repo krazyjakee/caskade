@@ -1063,6 +1063,7 @@ msgstr ""
 
 #. A settings search result: a preference and its section
 #: apps/desktop/src/views/settings/SettingsSearch.tsx
+#: apps/native/src/settings/search.rs
 msgid "{title} in {section}"
 msgstr ""
 
@@ -1254,11 +1255,13 @@ msgstr[1] ""
 
 #. {what} names a group of settings, such as Automatic backups
 #: apps/desktop/src/views/settings/useSettings.tsx
+#: apps/native/src/settings/state.rs
 msgid "{what} couldn't be loaded"
 msgstr ""
 
 #. {what} names a group of settings, such as Automatic backups
 #: apps/desktop/src/views/settings/useSettings.tsx
+#: apps/native/src/settings/state.rs
 msgid "{what}: your change didn't save"
 msgstr ""
 
@@ -1596,6 +1599,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 #: apps/desktop/src/views/settings/about/AboutSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "About"
 msgstr ""
@@ -1616,6 +1620,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Accent colour"
 msgstr ""
 
@@ -1626,6 +1631,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Accept copies from my devices"
 msgstr ""
 
@@ -1640,12 +1646,14 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Accounts"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Accounts and PINs"
 msgstr ""
 
@@ -1655,10 +1663,12 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Achievement links you made"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "achievement notifications"
 msgstr ""
 
@@ -1739,6 +1749,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Add a device by its address"
 msgstr ""
 
@@ -1919,10 +1930,12 @@ msgstr ""
 
 #. Search words for Settings → Plugins, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "add-ons, addons, extensions, catalogue, catalog, themes, permissions, uninstall, remove"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "add-ons, extensions"
 msgstr ""
 
@@ -2022,6 +2035,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Age ratings"
 msgstr ""
 
@@ -2113,6 +2127,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/search.rs
 msgid "Always use the default location"
 msgstr ""
 
@@ -2181,6 +2196,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Animations"
 msgstr ""
 
@@ -2249,6 +2265,7 @@ msgid "API token"
 msgstr ""
 
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings group"
 msgid "App"
 msgstr ""
@@ -2262,22 +2279,26 @@ msgstr ""
 
 #. Search words for Caskade's own updates, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "app updates, update Caskade, new version, self-update"
 msgstr ""
 
 #. Search words for Settings → General, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "app, language, region, startup, start, close, tray, minimize, quit, time format, cache, first-run setup, console mode, desktop mode, app updates, Caskade updates, self-update, new version, game updates, update games, GitHub releases"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Appearance"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Appearance"
 msgstr ""
@@ -2440,11 +2461,13 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Automatic backups"
 msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Automatic backups to keep"
 msgstr ""
 
@@ -2454,6 +2477,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Automatic Library Discovery"
 msgstr ""
 
@@ -2466,6 +2490,7 @@ msgid "Automatic runs the best Proton build installed each time the game starts.
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "autostart, login"
 msgstr ""
 
@@ -2530,11 +2555,13 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Back up"
 msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Back up automatically"
 msgstr ""
 
@@ -2552,6 +2579,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Background refresh"
 msgstr ""
 
@@ -2561,16 +2589,19 @@ msgid "Background status unavailable"
 msgstr ""
 
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Backup"
 msgstr ""
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Backup folder"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "backup now"
 msgstr ""
 
@@ -2596,6 +2627,7 @@ msgstr ""
 
 #. Search words for Settings → Backup, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "backups, back up, restore, archive, export, snapshot, recovery"
 msgstr ""
 
@@ -2614,6 +2646,7 @@ msgid "Before launch"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "before launch, after exit"
 msgstr ""
 
@@ -2645,15 +2678,18 @@ msgid "BIOS issues"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "BIOS, firmware, default emulator, consoles"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Bitrate"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "bitrate, resolution, frame rate"
 msgstr ""
 
@@ -2744,10 +2780,12 @@ msgstr ""
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Cache folder"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "cache size"
 msgstr ""
 
@@ -2836,6 +2874,7 @@ msgstr ""
 #: apps/native/src/flows/folder_browser.rs
 #: apps/native/src/flows/manual_game.rs
 #: apps/native/src/flows/storage.rs
+#: apps/native/src/settings/reset.rs
 #: apps/native/src/ui/dialog.rs
 msgid "Cancel"
 msgstr ""
@@ -2926,6 +2965,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Card size"
 msgstr ""
 
@@ -2958,18 +2998,22 @@ msgid "Caskade can't start this game: it has nothing to launch. Add a program or
 msgstr ""
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Caskade can't tell what else would change. Reset also puts the rest of these settings back to their defaults."
 msgstr ""
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Caskade can't tell what would change for some settings here, so those stay as they are."
 msgstr ""
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Caskade can't tell what would change, so these settings can't be reset here."
 msgstr ""
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Caskade can't tell what would change. Reset puts all of these settings back to their defaults."
 msgstr ""
 
@@ -2990,6 +3034,7 @@ msgid "Caskade couldn't check its version"
 msgstr ""
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Caskade couldn't check what would change"
 msgstr ""
 
@@ -3132,6 +3177,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Caskade updates"
 msgstr ""
 
@@ -3239,6 +3285,7 @@ msgid "Check each file against the hash RomM reports."
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "settings"
 msgid "Check every (hours)"
 msgstr ""
@@ -3248,6 +3295,7 @@ msgid "Check for add-on updates when Settings opens"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "settings"
 msgid "Check for game updates"
 msgstr ""
@@ -3323,6 +3371,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Checking what would change…"
 msgstr ""
 
@@ -3337,6 +3386,7 @@ msgid "Checking…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "checksum"
 msgstr ""
 
@@ -3539,10 +3589,12 @@ msgid "Clear search"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "client, Moonlight, pair"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "clock, 24-hour, 12-hour"
 msgstr ""
 
@@ -3556,6 +3608,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Close"
 msgstr ""
 
@@ -3574,6 +3627,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Close button"
 msgstr ""
 
@@ -3621,6 +3675,7 @@ msgid "Collections for {title}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "color, colour"
 msgstr ""
 
@@ -3653,6 +3708,7 @@ msgid "Compact"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "compact, comfortable"
 msgstr ""
 
@@ -3661,6 +3717,7 @@ msgid "Compatibility"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "settings"
 msgid "Compatibility runner"
 msgstr ""
@@ -3676,6 +3733,7 @@ msgid "Completed"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "settings"
 msgid "Concurrent downloads"
 msgstr ""
@@ -3695,6 +3753,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Confirm before quitting"
 msgstr ""
 
@@ -3720,6 +3779,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Connect only directly"
 msgstr ""
 
@@ -3785,6 +3845,7 @@ msgid "Console mode"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "console mode, desktop mode, big picture"
 msgstr ""
 
@@ -3834,6 +3895,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Copies and shares"
 msgstr ""
 
@@ -4026,6 +4088,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/search.rs
 msgid "CPU usage"
 msgstr ""
 
@@ -4041,6 +4104,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Credits"
 msgstr ""
 
@@ -4076,6 +4140,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Custom CSS"
 msgstr ""
 
@@ -4085,6 +4150,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Custom folders"
 msgstr ""
 
@@ -4109,10 +4175,12 @@ msgid "Daily"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "daily, weekly, schedule"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "dark, light, skin"
 msgstr ""
 
@@ -4140,6 +4208,7 @@ msgid "Decline"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "decompilation, recompilation, source port, Decomp Buddy"
 msgstr ""
 
@@ -4193,6 +4262,7 @@ msgid "Default emulator for {platform}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "default location"
 msgstr ""
 
@@ -4201,6 +4271,7 @@ msgid "Default profile is unavailable"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "default torrent app"
 msgstr ""
 
@@ -4259,6 +4330,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Density"
 msgstr ""
 
@@ -4312,11 +4384,13 @@ msgid "Desktop entries"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "desktop entries, Flatpak, Start Menu, Wine, Proton"
 msgstr ""
 
 #: apps/desktop/src/views/settings/EmulatorSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Desktop full screen"
 msgstr ""
 
@@ -4372,6 +4446,7 @@ msgid "Dev folder"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "device name"
 msgstr ""
 
@@ -4384,11 +4459,13 @@ msgid "Device not here? Guest Wi‑Fi and some routers keep devices apart, and d
 msgstr ""
 
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Devices"
 msgstr ""
 
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings group"
 msgid "Devices & streaming"
 msgstr ""
@@ -4414,6 +4491,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Disable custom CSS"
 msgstr ""
 
@@ -4427,6 +4505,7 @@ msgstr ""
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "Discard"
 msgstr ""
 
@@ -4470,6 +4549,7 @@ msgstr ""
 
 #. Search words for Settings → Storage, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "disk, drive, space, install location, install folder, library folders, move games, default location"
 msgstr ""
 
@@ -4550,6 +4630,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Download cache"
 msgstr ""
 
@@ -4623,6 +4704,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Downloads from my devices"
 msgstr ""
 
@@ -4632,6 +4714,7 @@ msgid "downloads from web pages"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "drives, disks, folders"
 msgstr ""
 
@@ -4752,6 +4835,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Emulation"
 msgstr ""
@@ -4781,6 +4865,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Emulator configuration"
 msgstr ""
 
@@ -4836,6 +4921,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "emulation section"
 msgid "Emulators"
 msgstr ""
@@ -4858,6 +4944,7 @@ msgstr ""
 
 #. Search words for Settings → Emulation, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "emulators, emulation, ROMs, retro, consoles, platforms, BIOS, firmware, RetroArch, cores, scanners, RomM, profiles"
 msgstr ""
 
@@ -4871,6 +4958,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Enable library discovery"
 msgstr ""
 
@@ -4905,6 +4993,7 @@ msgid "Enter {name}'s PIN"
 msgstr ""
 
 #: apps/desktop/src/views/settings/SchemaSettings.tsx
+#: apps/native/src/settings/schema.rs
 msgid "Enter a number."
 msgstr ""
 
@@ -5012,6 +5101,7 @@ msgid "Every session from every device, so play time adds up wherever you play."
 msgstr ""
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Every setting here already uses its default."
 msgstr ""
 
@@ -5052,6 +5142,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "External drives"
 msgstr ""
 
@@ -5118,6 +5209,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Fetch artwork and game info online"
 msgstr ""
 
@@ -5190,11 +5282,13 @@ msgid "Finishing"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "first view, home page"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "First-run setup"
 msgstr ""
 
@@ -5233,11 +5327,13 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Folder to search"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/search.rs
 msgid "Folder-name template"
 msgstr ""
 
@@ -5298,11 +5394,13 @@ msgid "Found"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "fps"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Frame rate"
 msgstr ""
 
@@ -5355,6 +5453,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Full disk scan"
 msgstr ""
 
@@ -5365,6 +5464,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Full scan on startup"
 msgstr ""
 
@@ -5373,6 +5473,7 @@ msgid "Full screen, made for a controller and a TV."
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "fullscreen"
 msgstr ""
 
@@ -5446,6 +5547,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Game scripts"
 msgstr ""
 
@@ -5460,6 +5562,8 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/UpdateSettings.tsx
+#: apps/native/src/settings/panels.rs
+#: apps/native/src/settings/search.rs
 msgid "Game updates"
 msgstr ""
 
@@ -5491,6 +5595,7 @@ msgid "Games {games}, other files {other}, free {free}"
 msgstr ""
 
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings group"
 msgid "Games & play"
 msgstr ""
@@ -5548,6 +5653,7 @@ msgid "Games from your own RomM server."
 msgstr ""
 
 #: apps/desktop/src/views/settings/UpdateSettings.tsx
+#: apps/native/src/settings/panels.rs
 msgid "Games installed from GitHub are checked for new releases without an account. Updating keeps your saves and settings."
 msgstr ""
 
@@ -5586,6 +5692,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Games that leave the library"
 msgstr ""
 
@@ -5628,6 +5735,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "General"
 msgstr ""
@@ -5654,6 +5762,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Get emulators"
 msgstr ""
 
@@ -5695,11 +5804,13 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Global exclusions"
 msgstr ""
 
 #: apps/desktop/src/views/settings/ScriptsSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Global scripts"
 msgstr ""
 
@@ -5806,6 +5917,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/HiddenGames.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Hidden games"
 msgstr ""
 
@@ -5852,10 +5964,12 @@ msgid "Home computer"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "host"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "host, hosting, Sunshine"
 msgstr ""
 
@@ -5864,6 +5978,7 @@ msgid "How and when games are scanned: <0>Library Discovery</0>"
 msgstr ""
 
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgid "How Caskade finds, installs and plays your games, and how it looks and syncs."
 msgstr ""
 
@@ -5902,6 +6017,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "How often"
 msgstr ""
 
@@ -6011,6 +6127,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Ignored results"
 msgstr ""
 
@@ -6038,6 +6155,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Import existing play history"
 msgstr ""
 
@@ -6051,6 +6169,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Import play time"
 msgstr ""
 
@@ -6179,6 +6298,7 @@ msgid "Install and allow"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "install emulators, download emulators, RetroArch"
 msgstr ""
 
@@ -6238,6 +6358,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/search.rs
 msgid "Install location preference"
 msgstr ""
 
@@ -6246,6 +6367,7 @@ msgid "Install location unknown"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "install picker"
 msgstr ""
 
@@ -6268,6 +6390,7 @@ msgstr ""
 
 #. Search words for Settings → Installer, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "install, installers, downloads, torrents, magnet links, Wine, Proton, compatibility"
 msgstr ""
 
@@ -6341,6 +6464,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Installed plugins"
 msgstr ""
 
@@ -6366,11 +6490,13 @@ msgid "Installed."
 msgstr ""
 
 #: apps/desktop/src/views/settings/InstallerSettings.tsx
+#: apps/native/src/settings/panels.rs
 msgid "Installer"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Installer"
 msgstr ""
@@ -6443,6 +6569,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Interface scale"
 msgstr ""
 
@@ -6460,6 +6587,7 @@ msgid "Invalid"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "IP address"
 msgstr ""
 
@@ -6665,6 +6793,7 @@ msgid "Keep"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "settings"
 msgid "Keep downloads"
 msgstr ""
@@ -6755,6 +6884,7 @@ msgstr ""
 #: apps/desktop/src/onboarding/LanguageStep.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Language"
 msgstr ""
 
@@ -6828,11 +6958,13 @@ msgstr ""
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Launch actions"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Launch on system startup"
 msgstr ""
 
@@ -6844,18 +6976,21 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Launchers"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Launchers"
 msgstr ""
 
 #. Search words for Settings → Launchers, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "launchers, launcher discovery, Steam, GOG, Epic, Heroic, Lutris, itch, Battle.net, sources, detect games"
 msgstr ""
 
@@ -6864,6 +6999,7 @@ msgid "Launchers, play history import and settings on other pages stay as they a
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "launchers, Steam, GOG, Epic, Heroic, Lutris"
 msgstr ""
 
@@ -6904,11 +7040,13 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Let other devices play"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Let other devices stream games from this one"
 msgstr ""
 
@@ -6927,10 +7065,12 @@ msgstr ""
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/native/src/frame/sidebar.rs
 #: apps/native/src/library/view.rs
+#: apps/native/src/settings/search.rs
 msgid "Library"
 msgstr ""
 
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings group"
 msgid "Library"
 msgstr ""
@@ -6947,6 +7087,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Library Discovery"
 msgstr ""
@@ -6970,6 +7111,7 @@ msgid "Library refreshed {refreshed}."
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "licences"
 msgstr ""
 
@@ -6981,6 +7123,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/about/legal.ts
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Licenses"
 msgstr ""
 
@@ -6990,6 +7133,7 @@ msgstr ""
 
 #. Search words for Settings → Scripts, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "lifecycle scripts, before launch, after exit, hooks, commands, shell"
 msgstr ""
 
@@ -7151,6 +7295,7 @@ msgid "Loading sessions…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/useSettings.tsx
+#: apps/native/src/settings/state.rs
 msgid "Loading settings…"
 msgstr ""
 
@@ -7283,6 +7428,7 @@ msgstr ""
 
 #. Search words for Settings → Appearance, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "look, theme, colour, color, accent, dark, light, density, card size, scale, zoom, animations, motion, effects, custom CSS, style"
 msgstr ""
 
@@ -7325,6 +7471,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Magnet links and torrent files"
 msgstr ""
 
@@ -7498,6 +7645,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/search.rs
 msgid "Memory used"
 msgstr ""
 
@@ -7506,6 +7654,7 @@ msgid "Merge into one game"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "metadata, IGDB, covers, offline"
 msgstr ""
 
@@ -7525,6 +7674,7 @@ msgid "Minimize"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "minimize, hide window"
 msgstr ""
 
@@ -7588,6 +7738,7 @@ msgid "Most rated this past year"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "motion"
 msgstr ""
 
@@ -7663,6 +7814,7 @@ msgstr ""
 #: apps/desktop/src/shell/accounts/AccountMenu.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "My profile"
 msgstr ""
@@ -7676,6 +7828,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "account"
 msgid "Name"
 msgstr ""
@@ -7703,6 +7856,7 @@ msgstr ""
 
 #. Search words for Settings → My profile, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "name, avatar, picture, PIN, me, my account"
 msgstr ""
 
@@ -7744,10 +7898,12 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/search.rs
 msgid "Network traffic"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "network, internet, relay, server"
 msgstr ""
 
@@ -8120,6 +8276,7 @@ msgid "No sessions yet. Pick something from your library."
 msgstr ""
 
 #: apps/desktop/src/views/settings/SettingsSearch.tsx
+#: apps/native/src/settings/search.rs
 msgid "No settings match “{query}”."
 msgstr ""
 
@@ -8211,6 +8368,7 @@ msgstr ""
 
 #: apps/desktop/src/views/PlaceholderView.tsx
 #: apps/native/src/frame/views.rs
+#: apps/native/src/settings/panels.rs
 msgid "Not built yet."
 msgstr ""
 
@@ -8464,6 +8622,7 @@ msgstr ""
 
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Notify new unlocks"
 msgstr ""
 
@@ -8513,6 +8672,7 @@ msgid "Offer this version again"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "settings"
 msgid "Offer updates before playing"
 msgstr ""
@@ -8621,6 +8781,7 @@ msgid "On-screen keyboard"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "onboarding, welcome"
 msgstr ""
 
@@ -8774,11 +8935,13 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Open them with Caskade"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Open to"
 msgstr ""
 
@@ -8786,6 +8949,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/about/legal.ts
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Open-source packages"
 msgstr ""
 
@@ -8800,6 +8964,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Operating-system checks"
 msgstr ""
 
@@ -8815,6 +8980,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Optional deep scans"
 msgstr ""
 
@@ -8912,6 +9078,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Pair a device"
 msgstr ""
 
@@ -8945,6 +9112,7 @@ msgid "Pair…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "paired devices"
 msgstr ""
 
@@ -8991,6 +9159,7 @@ msgid "Pairing with {name} was cancelled"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "pairing, link, add device"
 msgstr ""
 
@@ -8999,6 +9168,7 @@ msgid "Pairing…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "parental controls, PEGI, ESRB"
 msgstr ""
 
@@ -9022,6 +9192,7 @@ msgid "Password"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "password, lock"
 msgstr ""
 
@@ -9057,15 +9228,18 @@ msgid "Patterns"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "peer downloads"
 msgstr ""
 
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings group"
 msgid "People"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "performance, motion"
 msgstr ""
 
@@ -9094,12 +9268,14 @@ msgid "Pick up new and changed ROMs when Caskade opens."
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "picture"
 msgstr ""
 
 #: apps/desktop/src/onboarding/AccountStep.tsx
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "PIN"
 msgstr ""
 
@@ -9184,6 +9360,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "emulation section"
 msgid "Platforms"
 msgstr ""
@@ -9239,6 +9416,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Play from other devices"
 msgstr ""
 
@@ -9248,6 +9426,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Play history"
 msgstr ""
 
@@ -9278,6 +9457,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Play requests from my devices"
 msgstr ""
 
@@ -9293,6 +9473,7 @@ msgid "Play time a store reports is added to what Caskade tracked, counting time
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "play time, playtime"
 msgstr ""
 
@@ -9398,6 +9579,7 @@ msgid "Playtime tracking"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "playtime, hours played"
 msgstr ""
 
@@ -9440,6 +9622,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Plugins"
 msgstr ""
@@ -9450,6 +9633,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Plugins and themes"
 msgstr ""
 
@@ -9475,6 +9659,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Portable executables"
 msgstr ""
 
@@ -9487,11 +9672,13 @@ msgid "Ports of games"
 msgstr ""
 
 #: apps/desktop/src/views/settings/InstallerSettings.tsx
+#: apps/native/src/settings/panels.rs
 msgid "Preferences apply to the next install job. Jobs already running keep their current settings."
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Preferred emulators"
 msgstr ""
 
@@ -9544,6 +9731,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/about/legal.ts
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Privacy policy"
 msgstr ""
 
@@ -9579,6 +9767,7 @@ msgid "Profiles"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "profiles, arguments"
 msgstr ""
 
@@ -9679,6 +9868,7 @@ msgid "Quit this game before moving its files."
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "RAM"
 msgstr ""
 
@@ -9693,6 +9883,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Rating board"
 msgstr ""
 
@@ -9854,6 +10045,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Reduce effects"
 msgstr ""
 
@@ -9894,10 +10086,12 @@ msgstr ""
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Refresh in the background"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "refresh interval"
 msgstr ""
 
@@ -10036,6 +10230,7 @@ msgid "Reload to see the current state."
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "remote play"
 msgstr ""
 
@@ -10246,6 +10441,7 @@ msgid "Requires: {path}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "rescan"
 msgstr ""
 
@@ -10256,10 +10452,12 @@ msgstr ""
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
 #: apps/desktop/src/components/gameEditor/fields.tsx
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Reset"
 msgstr ""
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Reset {group} settings?"
 msgstr ""
 
@@ -10272,6 +10470,7 @@ msgid "Reset {name} to automatic"
 msgstr ""
 
 #: apps/desktop/src/views/settings/SchemaSettings.tsx
+#: apps/native/src/settings/schema.rs
 msgid "Reset {section} settings"
 msgstr ""
 
@@ -10288,6 +10487,7 @@ msgid "Reset general settings"
 msgstr ""
 
 #: apps/desktop/src/views/settings/InstallerSettings.tsx
+#: apps/native/src/settings/panels.rs
 msgid "Reset installer settings"
 msgstr ""
 
@@ -10301,19 +10501,23 @@ msgid "Reset to automatic"
 msgstr ""
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Reset to defaults…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/UpdateSettings.tsx
+#: apps/native/src/settings/panels.rs
 msgid "Reset update settings"
 msgstr ""
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Resetting…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Resolution"
 msgstr ""
 
@@ -10343,6 +10547,7 @@ msgstr ""
 #: apps/desktop/src/views/game/SavesPanel.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Restore"
 msgstr ""
 
@@ -10355,6 +10560,7 @@ msgid "Restore"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "restore a backup, recover"
 msgstr ""
 
@@ -10409,6 +10615,7 @@ msgid "Resume · View details"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "retention"
 msgstr ""
 
@@ -10423,6 +10630,7 @@ msgid "Retry"
 msgstr ""
 
 #: apps/desktop/src/views/settings/useSettings.tsx
+#: apps/native/src/settings/state.rs
 msgctxt "settings write"
 msgid "Retry"
 msgstr ""
@@ -10498,12 +10706,14 @@ msgid "ROM folders"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "ROM folders, scan ROMs"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "ROM scanners"
 msgstr ""
 
@@ -10512,6 +10722,7 @@ msgid "ROM scanners could not be loaded."
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "RomM"
 msgstr ""
 
@@ -10535,6 +10746,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "RomM servers"
 msgstr ""
 
@@ -10620,6 +10832,7 @@ msgid "Running"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "settings"
 msgid "Running installers"
 msgstr ""
@@ -10697,6 +10910,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "Save"
 msgstr ""
 
@@ -10729,6 +10943,7 @@ msgid "Save file and registry locations come from the Ludusavi manifest, an MIT-
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "save games, cloud saves, save sync"
 msgstr ""
 
@@ -10760,6 +10975,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Save locations list"
 msgstr ""
 
@@ -10768,6 +10984,7 @@ msgid "Save locations saved."
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "save manifest"
 msgstr ""
 
@@ -10788,10 +11005,12 @@ msgid "Save server"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "save versions, save history"
 msgstr ""
 
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "Save your changes?"
 msgstr ""
 
@@ -10821,6 +11040,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Saves"
 msgstr ""
 
@@ -10862,6 +11082,8 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
 #: apps/desktop/src/views/settings/useSettings.tsx
+#: apps/native/src/settings/state.rs
+#: apps/native/src/settings/unsaved.rs
 msgid "Saving…"
 msgstr ""
 
@@ -10904,6 +11126,7 @@ msgid "Scan failed: unknown error"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "scan folder, custom folder"
 msgstr ""
 
@@ -10916,11 +11139,13 @@ msgid "Scan subfolders"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "scan, find games"
 msgstr ""
 
 #. Search words for Settings → Library Discovery, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "scan, scanning, discovery, find games, detect games, import, launchers, folders, watch folders, hidden games, ignored games, play history, deep scan"
 msgstr ""
 
@@ -10965,6 +11190,7 @@ msgid "Scans won't bring it back. Show it again in Settings → Library Discover
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "schedule, daily, weekly, backups to keep"
 msgstr ""
 
@@ -10994,6 +11220,7 @@ msgid "Scripts"
 msgstr ""
 
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Scripts"
 msgstr ""
@@ -11009,6 +11236,7 @@ msgstr ""
 
 #: apps/desktop/src/shell/AppShell.tsx
 #: apps/native/src/frame/search.rs
+#: apps/native/src/settings/mod.rs
 msgctxt "action"
 msgid "Search"
 msgstr ""
@@ -11064,6 +11292,7 @@ msgid "Search removable volumes reported by this device."
 msgstr ""
 
 #: apps/desktop/src/views/settings/SettingsSearch.tsx
+#: apps/native/src/settings/search.rs
 msgid "Search settings"
 msgstr ""
 
@@ -11279,7 +11508,7 @@ msgstr ""
 #: apps/desktop/src/shell/nav.ts
 #: apps/desktop/src/views/SettingsView.tsx
 #: apps/native/src/frame/sidebar.rs
-#: apps/native/src/frame/views.rs
+#: apps/native/src/settings/mod.rs
 msgid "Settings"
 msgstr ""
 
@@ -11289,10 +11518,12 @@ msgid "settings changes"
 msgstr ""
 
 #: apps/desktop/src/views/settings/useSettings.tsx
+#: apps/native/src/settings/state.rs
 msgid "Settings couldn't be loaded"
 msgstr ""
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Settings on other pages stay as they are."
 msgstr ""
 
@@ -11301,10 +11532,12 @@ msgid "Settings page"
 msgstr ""
 
 #: apps/desktop/src/views/settings/SettingsSearch.tsx
+#: apps/native/src/settings/search.rs
 msgid "Settings search results"
 msgstr ""
 
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgid "Settings sections"
 msgstr ""
 
@@ -11339,6 +11572,7 @@ msgid "Share {title}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "share a game"
 msgstr ""
 
@@ -11391,6 +11625,7 @@ msgstr ""
 
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Show achievements"
 msgstr ""
 
@@ -11423,6 +11658,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Show ports of games"
 msgstr ""
 
@@ -11432,6 +11668,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Show titles on artwork"
 msgstr ""
 
@@ -11557,6 +11794,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Size limit"
 msgstr ""
 
@@ -11630,6 +11868,7 @@ msgid "Softcore only"
 msgstr ""
 
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "Some changes couldn't be saved. Stay to fix them, or discard them and leave."
 msgstr ""
 
@@ -11725,6 +11964,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Start in"
 msgstr ""
 
@@ -11735,6 +11975,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Start minimized"
 msgstr ""
 
@@ -11814,6 +12055,7 @@ msgid "Statistics"
 msgstr ""
 
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Statistics"
 msgstr ""
@@ -11824,6 +12066,7 @@ msgstr ""
 
 #. Search words for Settings → Statistics, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "stats, CPU, memory, RAM, network, performance, usage, system monitor"
 msgstr ""
 
@@ -11845,6 +12088,7 @@ msgstr ""
 
 #. Keep editing the unsaved settings
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "Stay"
 msgstr ""
 
@@ -11953,6 +12197,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Storage"
 msgstr ""
@@ -11977,6 +12222,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/search.rs
 msgid "Storage locations"
 msgstr ""
 
@@ -12019,6 +12265,7 @@ msgid "Store accounts"
 msgstr ""
 
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Store accounts"
 msgstr ""
@@ -12029,6 +12276,7 @@ msgstr ""
 
 #. Search words for Settings → Store accounts, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "stores, Steam, GOG, Epic, sign in, log in, owned games, library import, play time, achievements"
 msgstr ""
 
@@ -12048,11 +12296,13 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Stream quality"
 msgstr ""
 
 #. Search words for Settings → Streaming, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "stream, remote play, play on TV, Moonlight, Sunshine, host, quality, bitrate, resolution, frame rate"
 msgstr ""
 
@@ -12067,6 +12317,7 @@ msgid "Streaming"
 msgstr ""
 
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Streaming"
 msgstr ""
@@ -12077,10 +12328,12 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Streaming updates"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "style, stylesheet"
 msgstr ""
 
@@ -12104,6 +12357,7 @@ msgid "Symbols"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "sync"
 msgstr ""
 
@@ -12139,27 +12393,33 @@ msgid "Sync settings"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "sync, add-ons"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "sync, covers"
 msgstr ""
 
 #. Search words for Settings → Devices, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "sync, pair, pairing, other computers, saves, save games, save sync, cloud saves, save versions, copies, shares, relays, network, downloads from devices"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "sync, play time"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "sync, RetroArch config"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "sync, theme"
 msgstr ""
 
@@ -12182,6 +12442,7 @@ msgid "System"
 msgstr ""
 
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/mod.rs
 msgctxt "settings group"
 msgid "System"
 msgstr ""
@@ -12221,6 +12482,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/about/legal.ts
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Terms and conditions"
 msgstr ""
 
@@ -12483,6 +12745,7 @@ msgid "The script reads the launch's values from CASKADE_ variables, like \"$CAS
 msgstr ""
 
 #: apps/desktop/src/views/settings/useSettings.tsx
+#: apps/native/src/settings/state.rs
 msgid "The settings here show what's saved. Retry sends your change again."
 msgstr ""
 
@@ -12536,6 +12799,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Theme"
 msgstr ""
 
@@ -12578,18 +12842,22 @@ msgid "These belong to each device's own drives and hardware."
 msgstr ""
 
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "These changes aren't saved yet. Closing Caskade without saving loses them."
 msgstr ""
 
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "These changes aren't saved yet. Leaving this section without saving loses them."
 msgstr ""
 
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "These changes aren't saved yet. Switching accounts without saving loses them."
 msgstr ""
 
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "These changes aren't saved yet. Switching modes without saving loses them."
 msgstr ""
 
@@ -12602,6 +12870,7 @@ msgid "These settings are unavailable."
 msgstr ""
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "These settings go back to their defaults:"
 msgstr ""
 
@@ -12631,6 +12900,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "This device"
 msgstr ""
 
@@ -12754,6 +13024,7 @@ msgid "This server has no ROMs yet."
 msgstr ""
 
 #: apps/desktop/src/views/settings/useSettings.tsx
+#: apps/native/src/settings/state.rs
 msgid "This settings section is unavailable."
 msgstr ""
 
@@ -12794,6 +13065,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Time format"
 msgstr ""
 
@@ -12859,6 +13131,7 @@ msgid "Tools"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "torrents, magnet, BitTorrent"
 msgstr ""
 
@@ -12880,10 +13153,12 @@ msgid "Transfer progress"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "translation, locale"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "tray, quit, close to tray"
 msgstr ""
 
@@ -12983,6 +13258,7 @@ msgid "Under an age limit, games without a rating need an admin's PIN too."
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "unhide"
 msgstr ""
 
@@ -13132,10 +13408,12 @@ msgid "Unsaved changes"
 msgstr ""
 
 #: apps/desktop/src/views/settings/SchemaSettings.tsx
+#: apps/native/src/settings/schema.rs
 msgid "Unsupported setting type."
 msgstr ""
 
 #: apps/desktop/src/views/settings/SchemaSettings.tsx
+#: apps/native/src/settings/schema.rs
 msgid "Unsupported settings schema reference."
 msgstr ""
 
@@ -13211,10 +13489,12 @@ msgstr ""
 
 #. Search words for updates to installed games, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "update games, game patches, GitHub releases"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "update interval"
 msgstr ""
 
@@ -13297,6 +13577,7 @@ msgid "Usage"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "USB, removable"
 msgstr ""
 
@@ -13359,6 +13640,7 @@ msgstr ""
 
 #. Search words for Settings → Accounts, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "users, people, family, kids, children, parental controls, age ratings, PIN, permissions, admin"
 msgstr ""
 
@@ -13416,6 +13698,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Verify downloads"
 msgstr ""
 
@@ -13439,11 +13722,13 @@ msgstr ""
 
 #. Search words for Settings → About, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "version, licenses, licences, legal, credits, privacy, terms, open source, IGDB, Hasheous"
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Versions to keep"
 msgstr ""
 
@@ -13554,6 +13839,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Watch library folders"
 msgstr ""
 
@@ -13700,6 +13986,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "When a game launches"
 msgstr ""
 
@@ -13812,6 +14099,7 @@ msgid "Windows (runs through Proton on Linux)"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "settings"
 msgid "Windows install method"
 msgstr ""
@@ -13826,6 +14114,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Wine and Proton prefixes"
 msgstr ""
 
@@ -13835,6 +14124,7 @@ msgid "Wine and Proton prefixes"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Wine, Proton, umu"
 msgstr ""
 
@@ -13938,6 +14228,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Your artwork"
 msgstr ""
 
@@ -13955,6 +14246,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Your devices"
 msgstr ""
 
@@ -14047,5 +14339,6 @@ msgid "YYYY-MM-DD, or empty for none"
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "zoom, text size, bigger"
 msgstr ""

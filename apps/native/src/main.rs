@@ -27,6 +27,7 @@ mod launch;
 mod library;
 // Navigation between the pages (#96), in place of the webview's router.
 mod router;
+mod settings;
 mod shell;
 #[cfg(feature = "shots")]
 mod shots;
@@ -276,6 +277,12 @@ impl launch::Shell for NativeShell {
         // UI holds a close (#58).
         match tray::state().close(false) {
             caskade_app::tray::Close::Hide => launch::OnClose::Hide,
+            // Settings' unsaved edits ask before a quit (#103).
+            caskade_app::tray::Close::Go | caskade_app::tray::Close::Held(_)
+                if settings::holds_close() =>
+            {
+                launch::OnClose::Hold
+            }
             caskade_app::tray::Close::Go | caskade_app::tray::Close::Held(_) => {
                 launch::OnClose::Quit
             }

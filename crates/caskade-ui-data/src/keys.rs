@@ -27,6 +27,8 @@ pub enum Key {
     AppUpdate,
     /// Background tasks (scans, metadata) and the app's version.
     Background,
+    /// A settings section's value, by namespace (`core.appearance`).
+    Settings(String),
 }
 
 /// What an app event made stale.
@@ -69,6 +71,7 @@ impl Changed {
             Event::DevicesChanged(_) => Self::only(Key::Devices),
             Event::AppUpdateChanged(_) => Self::only(Key::AppUpdate),
             Event::BackgroundChanged(_) => Self::only(Key::Background),
+            Event::SettingsChanged(changed) => Self::only(Key::Settings(changed.namespace.clone())),
             _ => Self::Nothing,
         }
     }
@@ -198,14 +201,23 @@ mod tests {
         }
     }
 
+    /// A settings change makes its own section stale, and nothing else.
     #[test]
-    fn other_events_change_nothing_a_view_reads() {
+    fn a_settings_change_makes_only_its_section_stale() {
         let changed = Changed::from_event(&Event::SettingsChanged(
             caskade_app::events::SettingsChanged {
                 namespace: "core.appearance".into(),
                 version: 1,
             },
         ));
-        assert_eq!(changed, Changed::Nothing);
+        assert!(changed.affects(&Key::Settings("core.appearance".into())));
+        for other in [
+            Key::Settings("core.general".into()),
+            Key::Games,
+            Key::Summary,
+            Key::Jobs,
+        ] {
+            assert!(!changed.affects(&other), "{other:?}");
+        }
     }
 }

@@ -1058,6 +1058,7 @@ msgstr "{title} från {sharer}"
 
 #. A settings search result: a preference and its section
 #: apps/desktop/src/views/settings/SettingsSearch.tsx
+#: apps/native/src/settings/search.rs
 msgid "{title} in {section}"
 msgstr "{title} i {section}"
 
@@ -1244,11 +1245,13 @@ msgstr[1] "# uppgifter behöver uppmärksamhet"
 
 #. {what} names a group of settings, such as Automatic backups
 #: apps/desktop/src/views/settings/useSettings.tsx
+#: apps/native/src/settings/state.rs
 msgid "{what} couldn't be loaded"
 msgstr "{what} kunde inte läsas in"
 
 #. {what} names a group of settings, such as Automatic backups
 #: apps/desktop/src/views/settings/useSettings.tsx
+#: apps/native/src/settings/state.rs
 msgid "{what}: your change didn't save"
 msgstr "{what}: din ändring sparades inte"
 
@@ -1584,7 +1587,7 @@ msgstr "abc"
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 #: apps/desktop/src/views/settings/about/AboutSettings.tsx
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "About"
 msgstr "Om"
@@ -1605,6 +1608,7 @@ msgstr "Om butikskonton"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Accent colour"
 msgstr "Accentfärg"
 
@@ -1615,6 +1619,7 @@ msgstr "Godkänn"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Accept copies from my devices"
 msgstr "Ta emot kopior från mina enheter"
 
@@ -1628,13 +1633,14 @@ msgid "Accounts"
 msgstr "Konton"
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Accounts"
 msgstr "Konton"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Accounts and PINs"
 msgstr "Konton och PIN-koder"
 
@@ -1644,10 +1650,12 @@ msgstr "Konton kunde inte läsas in"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Achievement links you made"
 msgstr "Prestationslänkar du har skapat"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "achievement notifications"
 msgstr "prestationsaviseringar"
 
@@ -1726,6 +1734,7 @@ msgstr "Lägg till"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Add a device by its address"
 msgstr "Lägg till en enhet via dess adress"
 
@@ -1905,10 +1914,12 @@ msgstr "Lägg till webbspel"
 
 #. Search words for Settings → Plugins, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "add-ons, addons, extensions, catalogue, catalog, themes, permissions, uninstall, remove"
 msgstr "tillägg, plugins, utökningar, katalog, teman, behörigheter, avinstallera, ta bort"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "add-ons, extensions"
 msgstr "tillägg, utökningar"
 
@@ -2007,6 +2018,7 @@ msgstr "Efter att spelet startat"
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Age ratings"
 msgstr "Åldersgränser"
 
@@ -2097,6 +2109,7 @@ msgstr "Tillåt alltid det här spelet för det här kontot"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/search.rs
 msgid "Always use the default location"
 msgstr "Använd alltid standardplatsen"
 
@@ -2165,6 +2178,7 @@ msgstr "Och {0} till."
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Animations"
 msgstr "Animationer"
 
@@ -2232,7 +2246,7 @@ msgstr "API-nyckel"
 msgid "API token"
 msgstr "API-token"
 
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings group"
 msgid "App"
 msgstr "App"
@@ -2246,22 +2260,25 @@ msgstr "Appaket"
 
 #. Search words for Caskade's own updates, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "app updates, update Caskade, new version, self-update"
 msgstr "appuppdateringar, uppdatera Caskade, ny version, självuppdatering"
 
 #. Search words for Settings → General, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "app, language, region, startup, start, close, tray, minimize, quit, time format, cache, first-run setup, console mode, desktop mode, app updates, Caskade updates, self-update, new version, game updates, update games, GitHub releases"
 msgstr "app, språk, region, uppstart, start, stäng, systemfält, minimera, avsluta, tidsformat, cache, första konfigurationen, konsolläge, skrivbordsläge, appuppdateringar, Caskade-uppdateringar, självuppdatering, ny version, speluppdateringar, uppdatera spel, GitHub-utgåvor"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Appearance"
 msgstr "Utseende"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Appearance"
 msgstr "Utseende"
@@ -2427,11 +2444,13 @@ msgstr "Automatiskt ({platform})"
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Automatic backups"
 msgstr "Automatiska säkerhetskopior"
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Automatic backups to keep"
 msgstr "Automatiska säkerhetskopior att behålla"
 
@@ -2441,6 +2460,7 @@ msgstr "Automatiska detaljer uppdaterade"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Automatic Library Discovery"
 msgstr "Automatisk biblioteksidentifiering"
 
@@ -2453,6 +2473,7 @@ msgid "Automatic runs the best Proton build installed each time the game starts.
 msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "autostart, login"
 msgstr "autostart, inloggning"
 
@@ -2516,11 +2537,13 @@ msgstr "Tillbaka till Om"
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Back up"
 msgstr "Säkerhetskopiera"
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Back up automatically"
 msgstr "Säkerhetskopiera automatiskt"
 
@@ -2538,6 +2561,7 @@ msgstr "Bakgrund"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Background refresh"
 msgstr "Uppdatering i bakgrunden"
 
@@ -2545,17 +2569,19 @@ msgstr "Uppdatering i bakgrunden"
 msgid "Background status unavailable"
 msgstr "Bakgrundsstatus är inte tillgänglig"
 
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Backup"
 msgstr "Säkerhetskopiering"
 
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Backup folder"
 msgstr "Mapp för säkerhetskopior"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "backup now"
 msgstr "säkerhetskopiera nu"
 
@@ -2581,6 +2607,7 @@ msgstr "Säkerhetskopior innehåller aldrig lösenord eller inloggningar, webbsp
 
 #. Search words for Settings → Backup, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "backups, back up, restore, archive, export, snapshot, recovery"
 msgstr "säkerhetskopior, säkerhetskopiera, återställ, arkiv, export, ögonblicksbild, återställning"
 
@@ -2599,6 +2626,7 @@ msgid "Before launch"
 msgstr "Före start"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "before launch, after exit"
 msgstr "före start, efter avslut"
 
@@ -2630,15 +2658,18 @@ msgid "BIOS issues"
 msgstr "BIOS-problem"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "BIOS, firmware, default emulator, consoles"
 msgstr "BIOS, firmware, standardemulator, konsoler"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Bitrate"
 msgstr "Bithastighet"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "bitrate, resolution, frame rate"
 msgstr "bithastighet, upplösning, bildfrekvens"
 
@@ -2729,10 +2760,12 @@ msgstr "Kabinett"
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Cache folder"
 msgstr "Cachemapp"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "cache size"
 msgstr "cachestorlek"
 
@@ -2821,7 +2854,7 @@ msgstr "Avbryt inloggningen"
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/native/src/flows/add_game.rs apps/native/src/flows/folder_browser.rs
 #: apps/native/src/flows/manual_game.rs apps/native/src/flows/storage.rs
-#: apps/native/src/ui/dialog.rs
+#: apps/native/src/settings/reset.rs apps/native/src/ui/dialog.rs
 msgid "Cancel"
 msgstr "Avbryt"
 
@@ -2909,6 +2942,7 @@ msgstr "Kapacitet"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Card size"
 msgstr "Kortstorlek"
 
@@ -2941,18 +2975,22 @@ msgid "Caskade can't start this game: it has nothing to launch. Add a program or
 msgstr "Caskade kan inte starta det här spelet: det har inget att starta. Lägg till ett program eller en URI i Redigera detaljer → Åtgärder."
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Caskade can't tell what else would change. Reset also puts the rest of these settings back to their defaults."
 msgstr "Caskade kan inte avgöra vad mer som skulle ändras. Återställ sätter också tillbaka resten av de här inställningarna till standard."
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Caskade can't tell what would change for some settings here, so those stay as they are."
 msgstr "Caskade kan inte avgöra vad som skulle ändras för vissa inställningar här, så de förblir som de är."
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Caskade can't tell what would change, so these settings can't be reset here."
 msgstr "Caskade kan inte avgöra vad som skulle ändras, så de här inställningarna kan inte återställas här."
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Caskade can't tell what would change. Reset puts all of these settings back to their defaults."
 msgstr "Caskade kan inte avgöra vad som skulle ändras. Återställ sätter tillbaka alla de här inställningarna till standard."
 
@@ -2973,6 +3011,7 @@ msgid "Caskade couldn't check its version"
 msgstr "Caskade kunde inte kontrollera sin version"
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Caskade couldn't check what would change"
 msgstr "Caskade kunde inte kontrollera vad som skulle ändras"
 
@@ -3114,6 +3153,7 @@ msgstr "Caskade startar det där det ligger: inget kopieras, flyttas eller insta
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Caskade updates"
 msgstr "Caskade-uppdateringar"
 
@@ -3220,6 +3260,7 @@ msgid "Check each file against the hash RomM reports."
 msgstr "Kontrollera varje fil mot hashen som RomM rapporterar."
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "settings"
 msgid "Check every (hours)"
 msgstr "Kontrollera var (timmar)"
@@ -3229,6 +3270,7 @@ msgid "Check for add-on updates when Settings opens"
 msgstr "Sök efter tilläggsuppdateringar när Inställningar öppnas"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "settings"
 msgid "Check for game updates"
 msgstr "Sök efter speluppdateringar"
@@ -3303,6 +3345,7 @@ msgstr "Kontroll av installationen"
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Checking what would change…"
 msgstr "Kontrollerar vad som skulle ändras…"
 
@@ -3317,6 +3360,7 @@ msgid "Checking…"
 msgstr "Kontrollerar…"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "checksum"
 msgstr "kontrollsumma"
 
@@ -3518,10 +3562,12 @@ msgid "Clear search"
 msgstr "Rensa sökning"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "client, Moonlight, pair"
 msgstr "klient, Moonlight, parkoppla"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "clock, 24-hour, 12-hour"
 msgstr "klocka, 24-timmars, 12-timmars"
 
@@ -3535,6 +3581,7 @@ msgstr "klocka, 24-timmars, 12-timmars"
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Close"
 msgstr "Stäng"
 
@@ -3551,6 +3598,7 @@ msgstr "Stäng"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Close button"
 msgstr "Stängknappen"
 
@@ -3596,6 +3644,7 @@ msgid "Collections for {title}"
 msgstr "Samlingar för {title}"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "color, colour"
 msgstr "färg, kulör"
 
@@ -3628,6 +3677,7 @@ msgid "Compact"
 msgstr "Kompakt"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "compact, comfortable"
 msgstr "kompakt, bekväm"
 
@@ -3636,6 +3686,7 @@ msgid "Compatibility"
 msgstr "Kompatibilitet"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "settings"
 msgid "Compatibility runner"
 msgstr "Kompatibilitetslager"
@@ -3651,6 +3702,7 @@ msgid "Completed"
 msgstr "Slutfört"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "settings"
 msgid "Concurrent downloads"
 msgstr "Samtidiga nedladdningar"
@@ -3670,6 +3722,7 @@ msgstr "Bekräfta"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Confirm before quitting"
 msgstr "Bekräfta innan avslut"
 
@@ -3695,6 +3748,7 @@ msgstr "Anslut ett till"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Connect only directly"
 msgstr "Anslut bara direkt"
 
@@ -3760,6 +3814,7 @@ msgid "Console mode"
 msgstr "Konsolläge"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "console mode, desktop mode, big picture"
 msgstr "konsolläge, skrivbordsläge, big picture"
 
@@ -3809,6 +3864,7 @@ msgstr "Kopierat"
 
 #: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Copies and shares"
 msgstr "Kopior och delningar"
 
@@ -4001,6 +4057,7 @@ msgstr "CPU"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/search.rs
 msgid "CPU usage"
 msgstr "CPU-användning"
 
@@ -4016,6 +4073,7 @@ msgstr "Inloggningsuppgifterna sparas i systemets nyckelring."
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Credits"
 msgstr "Medverkande"
 
@@ -4050,6 +4108,7 @@ msgstr "Egen accentfärg"
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Custom CSS"
 msgstr "Anpassad CSS"
 
@@ -4059,6 +4118,7 @@ msgstr "Anpassad CSS sparades inte:"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Custom folders"
 msgstr "Egna mappar"
 
@@ -4083,10 +4143,12 @@ msgid "Daily"
 msgstr "Dagligen"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "daily, weekly, schedule"
 msgstr "dagligen, veckovis, schema"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "dark, light, skin"
 msgstr "mörkt, ljust, skal"
 
@@ -4114,6 +4176,7 @@ msgid "Decline"
 msgstr "Avböj"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "decompilation, recompilation, source port, Decomp Buddy"
 msgstr "dekompilering, omkompilering, källkodsport, Decomp Buddy"
 
@@ -4167,6 +4230,7 @@ msgid "Default emulator for {platform}"
 msgstr "Standardemulator för {platform}"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "default location"
 msgstr "standardplats"
 
@@ -4175,6 +4239,7 @@ msgid "Default profile is unavailable"
 msgstr "Standardprofilen är inte tillgänglig"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "default torrent app"
 msgstr "standardapp för torrenter"
 
@@ -4233,6 +4298,7 @@ msgstr "Borttaget från butiken"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Density"
 msgstr "Täthet"
 
@@ -4286,11 +4352,13 @@ msgid "Desktop entries"
 msgstr "Skrivbordsposter"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "desktop entries, Flatpak, Start Menu, Wine, Proton"
 msgstr "skrivbordsposter, Flatpak, Start-menyn, Wine, Proton"
 
 #: apps/desktop/src/views/settings/EmulatorSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Desktop full screen"
 msgstr "Helskärm i skrivbordsläge"
 
@@ -4346,6 +4414,7 @@ msgid "Dev folder"
 msgstr "Utvecklingsmapp"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "device name"
 msgstr "enhetsnamn"
 
@@ -4357,12 +4426,12 @@ msgstr "Enhetsnamn"
 msgid "Device not here? Guest Wi‑Fi and some routers keep devices apart, and devices elsewhere never show. Pair with a link instead: copy it here and paste it on the other device. It works once, for ten minutes."
 msgstr "Hittar du inte enheten? Gäst-wifi och vissa routrar håller enheter åtskilda, och enheter på andra platser visas aldrig. Parkoppla med en länk i stället: kopiera den här och klistra in den på den andra enheten. Den fungerar en gång, i tio minuter."
 
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Devices"
 msgstr "Enheter"
 
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings group"
 msgid "Devices & streaming"
 msgstr "Enheter och streaming"
@@ -4388,6 +4457,7 @@ msgstr "Startade inte"
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Disable custom CSS"
 msgstr "Stäng av egen CSS"
 
@@ -4401,6 +4471,7 @@ msgstr "Skiva"
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "Discard"
 msgstr "Kasta"
 
@@ -4444,6 +4515,7 @@ msgstr "Skivor"
 
 #. Search words for Settings → Storage, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "disk, drive, space, install location, install folder, library folders, move games, default location"
 msgstr "disk, hårddisk, utrymme, installationsplats, installationsmapp, biblioteksmappar, flytta spel, standardplats"
 
@@ -4523,6 +4595,7 @@ msgstr "Ladda ner och installera"
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Download cache"
 msgstr "Nedladdningscache"
 
@@ -4596,6 +4669,7 @@ msgstr "Nedladdningar"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Downloads from my devices"
 msgstr "Nedladdningar från mina enheter"
 
@@ -4605,6 +4679,7 @@ msgid "downloads from web pages"
 msgstr "nedladdningar från webbsidor"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "drives, disks, folders"
 msgstr "hårddiskar, diskar, mappar"
 
@@ -4724,7 +4799,7 @@ msgid "Emulation"
 msgstr "Emulering"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Emulation"
 msgstr "Emulering"
@@ -4754,6 +4829,7 @@ msgstr "emulatorändringar"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Emulator configuration"
 msgstr "Emulatorkonfiguration"
 
@@ -4809,6 +4885,7 @@ msgstr "Emulatorer"
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "emulation section"
 msgid "Emulators"
 msgstr "Emulatorer"
@@ -4831,6 +4908,7 @@ msgstr "Emulatorer att installera"
 
 #. Search words for Settings → Emulation, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "emulators, emulation, ROMs, retro, consoles, platforms, BIOS, firmware, RetroArch, cores, scanners, RomM, profiles"
 msgstr "emulatorer, emulering, ROM, retro, konsoler, plattformar, BIOS, firmware, RetroArch, kärnor, skannrar, RomM, profiler"
 
@@ -4844,6 +4922,7 @@ msgstr "Aktivera {plugin}"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Enable library discovery"
 msgstr "Aktivera biblioteksidentifiering"
 
@@ -4876,6 +4955,7 @@ msgid "Enter {name}'s PIN"
 msgstr "Ange PIN för {name}"
 
 #: apps/desktop/src/views/settings/SchemaSettings.tsx
+#: apps/native/src/settings/schema.rs
 msgid "Enter a number."
 msgstr "Ange ett tal."
 
@@ -4984,6 +5064,7 @@ msgid "Every session from every device, so play time adds up wherever you play."
 msgstr "Varje session från varje enhet, så att speltiden räknas ihop var du än spelar."
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Every setting here already uses its default."
 msgstr "Alla inställningar här använder redan sina standardvärden."
 
@@ -5024,6 +5105,7 @@ msgstr "Filändelser"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "External drives"
 msgstr "Externa enheter"
 
@@ -5089,6 +5171,7 @@ msgstr "Favoriter"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Fetch artwork and game info online"
 msgstr "Hämta bilder och spelinformation på nätet"
 
@@ -5161,11 +5244,13 @@ msgid "Finishing"
 msgstr "Slutför"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "first view, home page"
 msgstr "första vyn, startsida"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "First-run setup"
 msgstr "Första konfigurationen"
 
@@ -5204,11 +5289,13 @@ msgstr "Mappens innehåll"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Folder to search"
 msgstr "Mapp att söka i"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/search.rs
 msgid "Folder-name template"
 msgstr "Mall för mappnamn"
 
@@ -5269,11 +5356,13 @@ msgid "Found"
 msgstr "Hittad"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "fps"
 msgstr "fps"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Frame rate"
 msgstr "Bildfrekvens"
 
@@ -5326,6 +5415,7 @@ msgstr "Fullständiga"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Full disk scan"
 msgstr "Genomsök hela disken"
 
@@ -5336,6 +5426,7 @@ msgstr "Fullständig utgåva"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Full scan on startup"
 msgstr "Fullständig genomsökning vid start"
 
@@ -5344,6 +5435,7 @@ msgid "Full screen, made for a controller and a TV."
 msgstr "Helskärm, gjord för handkontroll och tv."
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "fullscreen"
 msgstr "helskärm"
 
@@ -5415,6 +5507,7 @@ msgstr "Sparfiler, med alla versioner sparade."
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Game scripts"
 msgstr "Spelskript"
 
@@ -5429,6 +5522,7 @@ msgstr "Spelstreaming har konfigurerats på den här enheten tidigare. Caskade k
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/UpdateSettings.tsx
+#: apps/native/src/settings/panels.rs apps/native/src/settings/search.rs
 msgid "Game updates"
 msgstr "Speluppdateringar"
 
@@ -5459,7 +5553,7 @@ msgstr "Spel ({count})"
 msgid "Games {games}, other files {other}, free {free}"
 msgstr "Spel {games}, andra filer {other}, ledigt {free}"
 
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings group"
 msgid "Games & play"
 msgstr "Spel och spelande"
@@ -5517,6 +5611,7 @@ msgid "Games from your own RomM server."
 msgstr "Spel från din egen RomM-server."
 
 #: apps/desktop/src/views/settings/UpdateSettings.tsx
+#: apps/native/src/settings/panels.rs
 msgid "Games installed from GitHub are checked for new releases without an account. Updating keeps your saves and settings."
 msgstr "Spel som installerats från GitHub kontrolleras efter nya versioner utan konto. Uppdateringar behåller dina sparfiler och inställningar."
 
@@ -5554,6 +5649,7 @@ msgstr "spel som startar, stoppar och flyttas"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Games that leave the library"
 msgstr "Spel som lämnar biblioteket"
 
@@ -5595,7 +5691,7 @@ msgstr "Spel, speltid, samlingar, ändringar, startåtgärder, konton och instä
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "General"
 msgstr "Allmänt"
@@ -5622,6 +5718,7 @@ msgstr "Skaffa en nyckel"
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Get emulators"
 msgstr "Skaffa emulatorer"
 
@@ -5662,11 +5759,13 @@ msgstr "Globalt"
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Global exclusions"
 msgstr "Globala undantag"
 
 #: apps/desktop/src/views/settings/ScriptsSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Global scripts"
 msgstr "Globala skript"
 
@@ -5773,6 +5872,7 @@ msgstr "Dolda i biblioteket. Genomsökningar som hittar dem igen låter dem för
 
 #: apps/desktop/src/views/settings/discovery/HiddenGames.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Hidden games"
 msgstr "Dolda spel"
 
@@ -5817,10 +5917,12 @@ msgid "Home computer"
 msgstr "Hemdator"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "host"
 msgstr "värd"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "host, hosting, Sunshine"
 msgstr "värd, hosting, Sunshine"
 
@@ -5828,7 +5930,7 @@ msgstr "värd, hosting, Sunshine"
 msgid "How and when games are scanned: <0>Library Discovery</0>"
 msgstr "Hur och när spel skannas: <0>Biblioteksidentifiering</0>"
 
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgid "How Caskade finds, installs and plays your games, and how it looks and syncs."
 msgstr "Hur Caskade hittar, installerar och spelar dina spel, och hur det ser ut och synkar."
 
@@ -5867,6 +5969,7 @@ msgstr "Hur spel som streamas till den här enheten ser ut. Automatiskt passar d
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "How often"
 msgstr "Hur ofta"
 
@@ -5976,6 +6079,7 @@ msgstr "Ignorera markerade"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Ignored results"
 msgstr "Ignorerade resultat"
 
@@ -6003,6 +6107,7 @@ msgstr "Importera allt, även plattformar som läggs till senare"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Import existing play history"
 msgstr "Importera befintlig spelhistorik"
 
@@ -6016,6 +6121,7 @@ msgstr "Importera nya ROM-filer varje gång biblioteket uppdateras, utan granskn
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Import play time"
 msgstr "Importera speltid"
 
@@ -6144,6 +6250,7 @@ msgid "Install and allow"
 msgstr "Installera och tillåt"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "install emulators, download emulators, RetroArch"
 msgstr "installera emulatorer, ladda ner emulatorer, RetroArch"
 
@@ -6202,6 +6309,7 @@ msgstr "Installationsplats"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/search.rs
 msgid "Install location preference"
 msgstr "Önskad installationsplats"
 
@@ -6210,6 +6318,7 @@ msgid "Install location unknown"
 msgstr "Okänd installationsplats"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "install picker"
 msgstr "installationsväljare"
 
@@ -6232,6 +6341,7 @@ msgstr "Installera med {0}"
 
 #. Search words for Settings → Installer, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "install, installers, downloads, torrents, magnet links, Wine, Proton, compatibility"
 msgstr "installera, installationsprogram, nedladdningar, torrenter, magnetlänkar, Wine, Proton, kompatibilitet"
 
@@ -6305,6 +6415,7 @@ msgstr "Installerad av Caskade"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Installed plugins"
 msgstr "Installerade tillägg"
 
@@ -6330,11 +6441,12 @@ msgid "Installed."
 msgstr "Installerat."
 
 #: apps/desktop/src/views/settings/InstallerSettings.tsx
+#: apps/native/src/settings/panels.rs
 msgid "Installer"
 msgstr "Installationsprogram"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Installer"
 msgstr "Installationsprogram"
@@ -6407,6 +6519,7 @@ msgstr "pågående installationer"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Interface scale"
 msgstr "Gränssnittets skala"
 
@@ -6424,6 +6537,7 @@ msgid "Invalid"
 msgstr "Ogiltigt"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "IP address"
 msgstr "IP-adress"
 
@@ -6627,6 +6741,7 @@ msgid "Keep"
 msgstr "Behåll"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "settings"
 msgid "Keep downloads"
 msgstr "Behåll nedladdningar"
@@ -6715,6 +6830,7 @@ msgstr "Etikett"
 #: apps/desktop/src/onboarding/LanguageStep.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Language"
 msgstr "Språk"
 
@@ -6792,11 +6908,13 @@ msgstr "Senaste försöket nådde den inte. Den synkar när den är tillbaka."
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Launch actions"
 msgstr "Startåtgärder"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Launch on system startup"
 msgstr "Starta när datorn startar"
 
@@ -6808,18 +6926,20 @@ msgstr "Starta med"
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Launchers"
 msgstr "Startprogram"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Launchers"
 msgstr "Startprogram"
 
 #. Search words for Settings → Launchers, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "launchers, launcher discovery, Steam, GOG, Epic, Heroic, Lutris, itch, Battle.net, sources, detect games"
 msgstr "startprogram, launchers, identifiering av startprogram, Steam, GOG, Epic, Heroic, Lutris, itch, Battle.net, källor, identifiera spel"
 
@@ -6828,6 +6948,7 @@ msgid "Launchers, play history import and settings on other pages stay as they a
 msgstr "Startprogram, import av spelhistorik och inställningar på andra sidor förblir som de är."
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "launchers, Steam, GOG, Epic, Heroic, Lutris"
 msgstr "startprogram, Steam, GOG, Epic, Heroic, Lutris"
 
@@ -6868,11 +6989,13 @@ msgstr "Låt pakethanteraren installera det"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Let other devices play"
 msgstr "Låt andra enheter spela"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Let other devices stream games from this one"
 msgstr "Låt andra enheter streama spel från den här"
 
@@ -6889,10 +7012,11 @@ msgstr "Bokstäver"
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/native/src/frame/sidebar.rs apps/native/src/library/view.rs
+#: apps/native/src/settings/search.rs
 msgid "Library"
 msgstr "Bibliotek"
 
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings group"
 msgid "Library"
 msgstr "Bibliotek"
@@ -6908,7 +7032,7 @@ msgstr "biblioteksändringar"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Library Discovery"
 msgstr "Biblioteksidentifiering"
@@ -6931,6 +7055,7 @@ msgid "Library refreshed {refreshed}."
 msgstr "Biblioteket uppdaterades {refreshed}."
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "licences"
 msgstr "licenser"
 
@@ -6942,6 +7067,7 @@ msgstr "Licenser"
 #: apps/desktop/src/views/settings/about/legal.ts
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Licenses"
 msgstr "Licenser"
 
@@ -6951,6 +7077,7 @@ msgstr "Licenser, villkor och integritet. De går att läsa offline."
 
 #. Search words for Settings → Scripts, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "lifecycle scripts, before launch, after exit, hooks, commands, shell"
 msgstr "livscykelskript, före start, efter avslut, hooks, kommandon, skal"
 
@@ -7112,6 +7239,7 @@ msgid "Loading sessions…"
 msgstr "Läser in sessioner…"
 
 #: apps/desktop/src/views/settings/useSettings.tsx
+#: apps/native/src/settings/state.rs
 msgid "Loading settings…"
 msgstr "Läser in inställningar…"
 
@@ -7242,6 +7370,7 @@ msgstr "Sök i arkiv"
 
 #. Search words for Settings → Appearance, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "look, theme, colour, color, accent, dark, light, density, card size, scale, zoom, animations, motion, effects, custom CSS, style"
 msgstr "utseende, tema, färg, accent, mörkt, ljust, täthet, kortstorlek, skala, zoom, animationer, rörelse, effekter, egen CSS, stil"
 
@@ -7284,6 +7413,7 @@ msgstr "Görs i bakgrunden till mappen för säkerhetskopior, med samma innehål
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Magnet links and torrent files"
 msgstr "Magnetlänkar och torrentfiler"
 
@@ -7454,6 +7584,7 @@ msgstr "Minnesanvändningen kunde inte läsas på det här systemet."
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/search.rs
 msgid "Memory used"
 msgstr "Använt minne"
 
@@ -7462,6 +7593,7 @@ msgid "Merge into one game"
 msgstr "Slå ihop till ett spel"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "metadata, IGDB, covers, offline"
 msgstr "metadata, IGDB, omslag, offline"
 
@@ -7478,6 +7610,7 @@ msgid "Minimize"
 msgstr "Minimera"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "minimize, hide window"
 msgstr "minimera, dölj fönster"
 
@@ -7541,6 +7674,7 @@ msgid "Most rated this past year"
 msgstr "Flest betyg det senaste året"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "motion"
 msgstr "rörelse"
 
@@ -7615,7 +7749,7 @@ msgstr "Flyttar…"
 
 #: apps/desktop/src/shell/accounts/AccountMenu.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "My profile"
 msgstr "Min profil"
@@ -7629,6 +7763,7 @@ msgstr "–"
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "account"
 msgid "Name"
 msgstr "Namn"
@@ -7656,6 +7791,7 @@ msgstr "Namn"
 
 #. Search words for Settings → My profile, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "name, avatar, picture, PIN, me, my account"
 msgstr "namn, avatar, bild, PIN, jag, mitt konto"
 
@@ -7697,10 +7833,12 @@ msgstr "Nätverk"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/search.rs
 msgid "Network traffic"
 msgstr "Nätverkstrafik"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "network, internet, relay, server"
 msgstr "nätverk, internet, relä, server"
 
@@ -8070,6 +8208,7 @@ msgid "No sessions yet. Pick something from your library."
 msgstr "Inga sessioner än. Välj något från ditt bibliotek."
 
 #: apps/desktop/src/views/settings/SettingsSearch.tsx
+#: apps/native/src/settings/search.rs
 msgid "No settings match “{query}”."
 msgstr "Inga inställningar matchar ”{query}”."
 
@@ -8160,6 +8299,7 @@ msgid "Not available"
 msgstr "Inte tillgänglig"
 
 #: apps/desktop/src/views/PlaceholderView.tsx apps/native/src/frame/views.rs
+#: apps/native/src/settings/panels.rs
 msgid "Not built yet."
 msgstr "Inte byggt än."
 
@@ -8411,6 +8551,7 @@ msgstr "Aviseringar"
 
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Notify new unlocks"
 msgstr "Avisera nya upplåsningar"
 
@@ -8460,6 +8601,7 @@ msgid "Offer this version again"
 msgstr "Erbjud den här versionen igen"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "settings"
 msgid "Offer updates before playing"
 msgstr "Erbjud uppdateringar innan du spelar"
@@ -8568,6 +8710,7 @@ msgid "On-screen keyboard"
 msgstr "Skärmtangentbord"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "onboarding, welcome"
 msgstr "introduktion, välkommen"
 
@@ -8720,11 +8863,13 @@ msgstr "Öppna inloggningssidan"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Open them with Caskade"
 msgstr "Öppna dem med Caskade"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Open to"
 msgstr "Öppna på"
 
@@ -8732,6 +8877,7 @@ msgstr "Öppna på"
 #: apps/desktop/src/views/settings/about/legal.ts
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Open-source packages"
 msgstr "Paket med öppen källkod"
 
@@ -8746,6 +8892,7 @@ msgstr "Öppnar webbspelet i dess spelfönster."
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Operating-system checks"
 msgstr "Kontroller i operativsystemet"
 
@@ -8761,6 +8908,7 @@ msgstr "Valfri"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Optional deep scans"
 msgstr "Valfria djupsökningar"
 
@@ -8858,6 +9006,7 @@ msgstr "Parkoppla"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Pair a device"
 msgstr "Parkoppla en enhet"
 
@@ -8891,6 +9040,7 @@ msgid "Pair…"
 msgstr "Parkoppla…"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "paired devices"
 msgstr "parkopplade enheter"
 
@@ -8937,6 +9087,7 @@ msgid "Pairing with {name} was cancelled"
 msgstr "Parkopplingen med {name} avbröts"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "pairing, link, add device"
 msgstr "parkoppling, länk, lägg till enhet"
 
@@ -8945,6 +9096,7 @@ msgid "Pairing…"
 msgstr "Parkopplar…"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "parental controls, PEGI, ESRB"
 msgstr "föräldrakontroll, PEGI, ESRB"
 
@@ -8968,6 +9120,7 @@ msgid "Password"
 msgstr "Lösenord"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "password, lock"
 msgstr "lösenord, lås"
 
@@ -9003,15 +9156,17 @@ msgid "Patterns"
 msgstr "Mönster"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "peer downloads"
 msgstr "nedladdningar från enheter"
 
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings group"
 msgid "People"
 msgstr "Personer"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "performance, motion"
 msgstr "prestanda, rörelse"
 
@@ -9039,12 +9194,14 @@ msgid "Pick up new and changed ROMs when Caskade opens."
 msgstr "Hämta nya och ändrade ROM:ar när Caskade öppnas."
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "picture"
 msgstr "bild"
 
 #: apps/desktop/src/onboarding/AccountStep.tsx
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "PIN"
 msgstr "PIN"
 
@@ -9129,6 +9286,7 @@ msgstr "Plattformar"
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "emulation section"
 msgid "Platforms"
 msgstr "Plattformar"
@@ -9184,6 +9342,7 @@ msgstr "Spela emulerade spel i helskärm även i skrivbordsläge. Konsolläget g
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Play from other devices"
 msgstr "Spela från andra enheter"
 
@@ -9193,6 +9352,7 @@ msgstr "Spela från ditt bibliotek"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Play history"
 msgstr "Spelhistorik"
 
@@ -9223,6 +9383,7 @@ msgstr "Spela slumpmässigt"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Play requests from my devices"
 msgstr "Spelförfrågningar från mina enheter"
 
@@ -9238,6 +9399,7 @@ msgid "Play time a store reports is added to what Caskade tracked, counting time
 msgstr "Speltid som en butik rapporterar läggs till det Caskade har mätt, och tid som spelats genom Caskade räknas en gång. En butik som sänker sin summa sänker aldrig din."
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "play time, playtime"
 msgstr "speltid"
 
@@ -9343,6 +9505,7 @@ msgid "Playtime tracking"
 msgstr "Speltidsmätning"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "playtime, hours played"
 msgstr "speltid, spelade timmar"
 
@@ -9384,7 +9547,7 @@ msgid "Plugins"
 msgstr "Tillägg"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Plugins"
 msgstr "Tillägg"
@@ -9395,6 +9558,7 @@ msgstr "Tillägg och tilläggsteman, och vad de får göra."
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Plugins and themes"
 msgstr "Tillägg och teman"
 
@@ -9420,6 +9584,7 @@ msgstr "Populära spel"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Portable executables"
 msgstr "Portabla körbara filer"
 
@@ -9432,11 +9597,13 @@ msgid "Ports of games"
 msgstr "Portar av spel"
 
 #: apps/desktop/src/views/settings/InstallerSettings.tsx
+#: apps/native/src/settings/panels.rs
 msgid "Preferences apply to the next install job. Jobs already running keep their current settings."
 msgstr "Inställningarna gäller nästa installationsjobb. Jobb som redan körs behåller sina nuvarande inställningar."
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Preferred emulators"
 msgstr "Föredragna emulatorer"
 
@@ -9488,6 +9655,7 @@ msgstr "Föregående flik"
 #: apps/desktop/src/views/settings/about/legal.ts
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Privacy policy"
 msgstr "Integritetspolicy"
 
@@ -9523,6 +9691,7 @@ msgid "Profiles"
 msgstr "Profiler"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "profiles, arguments"
 msgstr "profiler, argument"
 
@@ -9621,6 +9790,7 @@ msgid "Quit this game before moving its files."
 msgstr "Avsluta spelet innan du flyttar dess filer."
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "RAM"
 msgstr "RAM"
 
@@ -9635,6 +9805,7 @@ msgstr "Betygsatt"
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Rating board"
 msgstr "Klassificeringsorgan"
 
@@ -9794,6 +9965,7 @@ msgstr "Röd"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Reduce effects"
 msgstr "Minska effekter"
 
@@ -9834,10 +10006,12 @@ msgstr "Uppdatera detaljer…"
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Refresh in the background"
 msgstr "Uppdatera i bakgrunden"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "refresh interval"
 msgstr "uppdateringsintervall"
 
@@ -9975,6 +10149,7 @@ msgid "Reload to see the current state."
 msgstr "Läs in igen för att se det aktuella läget."
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "remote play"
 msgstr "fjärrspel"
 
@@ -10185,6 +10360,7 @@ msgid "Requires: {path}"
 msgstr "Kräver: {path}"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "rescan"
 msgstr "skanna igen"
 
@@ -10195,10 +10371,12 @@ msgstr "Sök efter teman igen"
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
 #: apps/desktop/src/components/gameEditor/fields.tsx
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Reset"
 msgstr "Återställ"
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Reset {group} settings?"
 msgstr "Återställ inställningar för {group}?"
 
@@ -10211,6 +10389,7 @@ msgid "Reset {name} to automatic"
 msgstr "Återställ {name} till automatiskt"
 
 #: apps/desktop/src/views/settings/SchemaSettings.tsx
+#: apps/native/src/settings/schema.rs
 msgid "Reset {section} settings"
 msgstr "Återställ inställningar för {section}"
 
@@ -10227,6 +10406,7 @@ msgid "Reset general settings"
 msgstr "Återställ allmänna inställningar"
 
 #: apps/desktop/src/views/settings/InstallerSettings.tsx
+#: apps/native/src/settings/panels.rs
 msgid "Reset installer settings"
 msgstr "Återställ installationsinställningar"
 
@@ -10240,19 +10420,23 @@ msgid "Reset to automatic"
 msgstr "Återställ till automatiskt"
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Reset to defaults…"
 msgstr "Återställ till standard…"
 
 #: apps/desktop/src/views/settings/UpdateSettings.tsx
+#: apps/native/src/settings/panels.rs
 msgid "Reset update settings"
 msgstr "Återställ uppdateringsinställningar"
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Resetting…"
 msgstr "Återställer…"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Resolution"
 msgstr "Upplösning"
 
@@ -10281,6 +10465,7 @@ msgstr "Starta om nu"
 #: apps/desktop/src/views/game/SavesPanel.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Restore"
 msgstr "Återställ"
 
@@ -10291,6 +10476,7 @@ msgid "Restore"
 msgstr "Återställ"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "restore a backup, recover"
 msgstr "återställ en säkerhetskopia, återställning"
 
@@ -10343,6 +10529,7 @@ msgid "Resume · View details"
 msgstr "Fortsätt · Visa detaljer"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "retention"
 msgstr "lagringstid"
 
@@ -10356,6 +10543,7 @@ msgid "Retry"
 msgstr "Försök igen"
 
 #: apps/desktop/src/views/settings/useSettings.tsx
+#: apps/native/src/settings/state.rs
 msgctxt "settings write"
 msgid "Retry"
 msgstr "Försök igen"
@@ -10430,12 +10618,14 @@ msgid "ROM folders"
 msgstr "ROM-mappar"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "ROM folders, scan ROMs"
 msgstr "ROM-mappar, skanna ROM"
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "ROM scanners"
 msgstr "ROM-skannrar"
 
@@ -10444,6 +10634,7 @@ msgid "ROM scanners could not be loaded."
 msgstr "ROM-skannrarna kunde inte läsas in."
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "RomM"
 msgstr "RomM"
 
@@ -10467,6 +10658,7 @@ msgstr "RomM-server"
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "RomM servers"
 msgstr "RomM-servrar"
 
@@ -10552,6 +10744,7 @@ msgid "Running"
 msgstr "Körs"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "settings"
 msgid "Running installers"
 msgstr "Körning av installationsprogram"
@@ -10629,6 +10822,7 @@ msgstr "Exempel-ROM: {0}"
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "Save"
 msgstr "Spara"
 
@@ -10661,6 +10855,7 @@ msgid "Save file and registry locations come from the Ludusavi manifest, an MIT-
 msgstr "Platser för sparfiler och register kommer från Ludusavi-manifestet, ett MIT-licensierat projekt."
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "save games, cloud saves, save sync"
 msgstr "sparfiler, molnsparningar, synk av sparfiler"
 
@@ -10692,6 +10887,7 @@ msgstr "Sparplatser från {title}."
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Save locations list"
 msgstr "Lista över sparplatser"
 
@@ -10700,6 +10896,7 @@ msgid "Save locations saved."
 msgstr "Sparplatserna sparades."
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "save manifest"
 msgstr "sparmanifest"
 
@@ -10720,10 +10917,12 @@ msgid "Save server"
 msgstr "Spara server"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "save versions, save history"
 msgstr "sparversioner, sparhistorik"
 
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "Save your changes?"
 msgstr "Spara dina ändringar?"
 
@@ -10753,6 +10952,7 @@ msgstr "Sparat."
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Saves"
 msgstr "Sparfiler"
 
@@ -10794,6 +10994,7 @@ msgstr "Sparar dina val innan biblioteket öppnas…"
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
 #: apps/desktop/src/views/settings/useSettings.tsx
+#: apps/native/src/settings/state.rs apps/native/src/settings/unsaved.rs
 msgid "Saving…"
 msgstr "Sparar…"
 
@@ -10836,6 +11037,7 @@ msgid "Scan failed: unknown error"
 msgstr "Skanningen misslyckades: okänt fel"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "scan folder, custom folder"
 msgstr "skanna mapp, egen mapp"
 
@@ -10848,11 +11050,13 @@ msgid "Scan subfolders"
 msgstr "Skanna undermappar"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "scan, find games"
 msgstr "skanna, hitta spel"
 
 #. Search words for Settings → Library Discovery, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "scan, scanning, discovery, find games, detect games, import, launchers, folders, watch folders, hidden games, ignored games, play history, deep scan"
 msgstr "skanna, skanning, identifiering, hitta spel, identifiera spel, importera, startprogram, mappar, bevaka mappar, dolda spel, ignorerade spel, spelhistorik, djupsökning"
 
@@ -10897,6 +11101,7 @@ msgid "Scans won't bring it back. Show it again in Settings → Library Discover
 msgstr "Skanningar tar inte tillbaka det. Visa det igen i Inställningar → Biblioteksidentifiering."
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "schedule, daily, weekly, backups to keep"
 msgstr "schema, dagligen, veckovis, säkerhetskopior att behålla"
 
@@ -10925,7 +11130,7 @@ msgstr "Skript"
 msgid "Scripts"
 msgstr "Skript"
 
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Scripts"
 msgstr "Skript"
@@ -10940,6 +11145,7 @@ msgid "Scroll"
 msgstr "Rulla"
 
 #: apps/desktop/src/shell/AppShell.tsx apps/native/src/frame/search.rs
+#: apps/native/src/settings/mod.rs
 msgctxt "action"
 msgid "Search"
 msgstr "Sök"
@@ -10991,6 +11197,7 @@ msgid "Search removable volumes reported by this device."
 msgstr "Sök på flyttbara volymer som enheten rapporterar."
 
 #: apps/desktop/src/views/settings/SettingsSearch.tsx
+#: apps/native/src/settings/search.rs
 msgid "Search settings"
 msgstr "Sök i inställningarna"
 
@@ -11204,7 +11411,7 @@ msgid "Setting up… The first time takes a few minutes."
 msgstr "Konfigurerar… Första gången tar några minuter."
 
 #: apps/desktop/src/shell/nav.ts apps/desktop/src/views/SettingsView.tsx
-#: apps/native/src/frame/sidebar.rs apps/native/src/frame/views.rs
+#: apps/native/src/frame/sidebar.rs apps/native/src/settings/mod.rs
 msgid "Settings"
 msgstr "Inställningar"
 
@@ -11214,10 +11421,12 @@ msgid "settings changes"
 msgstr "inställningsändringar"
 
 #: apps/desktop/src/views/settings/useSettings.tsx
+#: apps/native/src/settings/state.rs
 msgid "Settings couldn't be loaded"
 msgstr "Inställningarna kunde inte läsas in"
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "Settings on other pages stay as they are."
 msgstr "Inställningar på andra sidor förblir som de är."
 
@@ -11226,10 +11435,11 @@ msgid "Settings page"
 msgstr "Inställningssida"
 
 #: apps/desktop/src/views/settings/SettingsSearch.tsx
+#: apps/native/src/settings/search.rs
 msgid "Settings search results"
 msgstr "Sökresultat i inställningarna"
 
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgid "Settings sections"
 msgstr "Inställningsavsnitt"
 
@@ -11264,6 +11474,7 @@ msgid "Share {title}"
 msgstr "Dela {title}"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "share a game"
 msgstr "dela ett spel"
 
@@ -11316,6 +11527,7 @@ msgstr "Visa {title} igen"
 
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Show achievements"
 msgstr "Visa prestationer"
 
@@ -11348,6 +11560,7 @@ msgstr "Visa ingen"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Show ports of games"
 msgstr "Visa portar av spel"
 
@@ -11357,6 +11570,7 @@ msgstr "Visa inställningar"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Show titles on artwork"
 msgstr "Visa titlar på bilder"
 
@@ -11488,6 +11702,7 @@ msgstr "Storlek"
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Size limit"
 msgstr "Storleksgräns"
 
@@ -11561,6 +11776,7 @@ msgid "Softcore only"
 msgstr "Bara softcore"
 
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "Some changes couldn't be saved. Stay to fix them, or discard them and leave."
 msgstr "Vissa ändringar kunde inte sparas. Stanna för att rätta dem, eller kasta dem och lämna."
 
@@ -11656,6 +11872,7 @@ msgstr "Utgå från de nya argumenten"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Start in"
 msgstr "Starta i"
 
@@ -11666,6 +11883,7 @@ msgstr "Genvägar i Start-menyn"
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Start minimized"
 msgstr "Starta minimerad"
 
@@ -11743,7 +11961,7 @@ msgstr "Uppstart"
 msgid "Statistics"
 msgstr "Statistik"
 
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Statistics"
 msgstr "Statistik"
@@ -11754,6 +11972,7 @@ msgstr "Statistik är inte tillgänglig: {reason}. Försöker igen."
 
 #. Search words for Settings → Statistics, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "stats, CPU, memory, RAM, network, performance, usage, system monitor"
 msgstr "statistik, CPU, minne, RAM, nätverk, prestanda, användning, systemövervakning"
 
@@ -11775,6 +11994,7 @@ msgstr "Status"
 
 #. Keep editing the unsaved settings
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "Stay"
 msgstr "Stanna"
 
@@ -11879,7 +12099,7 @@ msgid "Storage"
 msgstr "Lagring"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Storage"
 msgstr "Lagring"
@@ -11904,6 +12124,7 @@ msgstr "Lagringsplats"
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/search.rs
 msgid "Storage locations"
 msgstr "Lagringsplatser"
 
@@ -11942,7 +12163,7 @@ msgstr "Butikskonto"
 msgid "Store accounts"
 msgstr "Butikskonton"
 
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Store accounts"
 msgstr "Butikskonton"
@@ -11953,6 +12174,7 @@ msgstr "Butiksinloggningar (anslut varje enhet)"
 
 #. Search words for Settings → Store accounts, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "stores, Steam, GOG, Epic, sign in, log in, owned games, library import, play time, achievements"
 msgstr "butiker, Steam, GOG, Epic, logga in, ägda spel, biblioteksimport, speltid, prestationer"
 
@@ -11972,11 +12194,13 @@ msgstr "Streama från en annan enhet"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Stream quality"
 msgstr "Streamingkvalitet"
 
 #. Search words for Settings → Streaming, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "stream, remote play, play on TV, Moonlight, Sunshine, host, quality, bitrate, resolution, frame rate"
 msgstr "streama, fjärrspel, spela på TV, Moonlight, Sunshine, värd, kvalitet, bithastighet, upplösning, bildfrekvens"
 
@@ -11990,7 +12214,7 @@ msgctxt "library source"
 msgid "Streaming"
 msgstr "Streaming"
 
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Streaming"
 msgstr "Streaming"
@@ -12001,10 +12225,12 @@ msgstr "Streaming är redan konfigurerad"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/search.rs
 msgid "Streaming updates"
 msgstr "Streaminguppdateringar"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "style, stylesheet"
 msgstr "stil, stilmall"
 
@@ -12028,6 +12254,7 @@ msgid "Symbols"
 msgstr "Symboler"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "sync"
 msgstr "synk"
 
@@ -12063,27 +12290,33 @@ msgid "Sync settings"
 msgstr "Synkinställningar"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "sync, add-ons"
 msgstr "synk, tillägg"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "sync, covers"
 msgstr "synk, omslag"
 
 #. Search words for Settings → Devices, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "sync, pair, pairing, other computers, saves, save games, save sync, cloud saves, save versions, copies, shares, relays, network, downloads from devices"
 msgstr "synk, parkoppla, parkoppling, andra datorer, sparfiler, sparade spel, synk av sparfiler, molnsparningar, sparversioner, kopior, delningar, reläer, nätverk, nedladdningar från enheter"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "sync, play time"
 msgstr "synk, speltid"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "sync, RetroArch config"
 msgstr "synk, RetroArch-konfiguration"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "sync, theme"
 msgstr "synk, tema"
 
@@ -12105,7 +12338,7 @@ msgctxt "animations setting"
 msgid "System"
 msgstr "System"
 
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
 msgctxt "settings group"
 msgid "System"
 msgstr "System"
@@ -12145,6 +12378,7 @@ msgstr "Tekniska detaljer"
 #: apps/desktop/src/views/settings/about/legal.ts
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Terms and conditions"
 msgstr "Allmänna villkor"
 
@@ -12407,6 +12641,7 @@ msgid "The script reads the launch's values from CASKADE_ variables, like \"$CAS
 msgstr "Skriptet läser startens värden från CASKADE_-variabler, som \"$CASKADE_INSTALL_DIR\". Inget klistras in i texten."
 
 #: apps/desktop/src/views/settings/useSettings.tsx
+#: apps/native/src/settings/state.rs
 msgid "The settings here show what's saved. Retry sends your change again."
 msgstr "Inställningarna här visar det som är sparat. Försök igen skickar din ändring på nytt."
 
@@ -12460,6 +12695,7 @@ msgstr "Deras butiker är inte tillgängliga i den här versionen av Caskade. De
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Theme"
 msgstr "Tema"
 
@@ -12502,18 +12738,22 @@ msgid "These belong to each device's own drives and hardware."
 msgstr "De här hör till varje enhets egna hårddiskar och hårdvara."
 
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "These changes aren't saved yet. Closing Caskade without saving loses them."
 msgstr "De här ändringarna är inte sparade än. Om du stänger Caskade utan att spara går de förlorade."
 
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "These changes aren't saved yet. Leaving this section without saving loses them."
 msgstr "De här ändringarna är inte sparade än. Om du lämnar det här avsnittet utan att spara går de förlorade."
 
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "These changes aren't saved yet. Switching accounts without saving loses them."
 msgstr "De här ändringarna är inte sparade än. Om du byter konto utan att spara går de förlorade."
 
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "These changes aren't saved yet. Switching modes without saving loses them."
 msgstr "De här ändringarna är inte sparade än. Om du byter läge utan att spara går de förlorade."
 
@@ -12526,6 +12766,7 @@ msgid "These settings are unavailable."
 msgstr "De här inställningarna är inte tillgängliga."
 
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
+#: apps/native/src/settings/reset.rs
 msgid "These settings go back to their defaults:"
 msgstr "De här inställningarna återgår till standard:"
 
@@ -12555,6 +12796,7 @@ msgstr "Den här samlingen är tom. Lägg till spel här, eller från ett spels 
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "This device"
 msgstr "Den här enheten"
 
@@ -12676,6 +12918,7 @@ msgid "This server has no ROMs yet."
 msgstr "Den här servern har inga ROM-filer än."
 
 #: apps/desktop/src/views/settings/useSettings.tsx
+#: apps/native/src/settings/state.rs
 msgid "This settings section is unavailable."
 msgstr "Det här inställningsavsnittet är inte tillgängligt."
 
@@ -12714,6 +12957,7 @@ msgstr "Kryssa i det som ska ändras. Allt annat förblir som varje spel har det
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Time format"
 msgstr "Tidsformat"
 
@@ -12779,6 +13023,7 @@ msgid "Tools"
 msgstr "Verktyg"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "torrents, magnet, BitTorrent"
 msgstr "torrenter, magnet, BitTorrent"
 
@@ -12800,10 +13045,12 @@ msgid "Transfer progress"
 msgstr "Överföringsförlopp"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "translation, locale"
 msgstr "översättning, språk"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "tray, quit, close to tray"
 msgstr "systemfält, avsluta, stäng till systemfältet"
 
@@ -12902,6 +13149,7 @@ msgid "Under an age limit, games without a rating need an admin's PIN too."
 msgstr "Med en åldersgräns behöver även spel utan klassificering en administratörs PIN."
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "unhide"
 msgstr "visa dolda"
 
@@ -13049,10 +13297,12 @@ msgid "Unsaved changes"
 msgstr "Osparade ändringar"
 
 #: apps/desktop/src/views/settings/SchemaSettings.tsx
+#: apps/native/src/settings/schema.rs
 msgid "Unsupported setting type."
 msgstr "Inställningstypen stöds inte."
 
 #: apps/desktop/src/views/settings/SchemaSettings.tsx
+#: apps/native/src/settings/schema.rs
 msgid "Unsupported settings schema reference."
 msgstr "Referensen i inställningsschemat stöds inte."
 
@@ -13128,10 +13378,12 @@ msgstr "Uppdateringen misslyckades: {error}"
 
 #. Search words for updates to installed games, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "update games, game patches, GitHub releases"
 msgstr "uppdatera spel, spelpatchar, GitHub-utgåvor"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "update interval"
 msgstr "uppdateringsintervall"
 
@@ -13214,6 +13466,7 @@ msgid "Usage"
 msgstr "Användning"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "USB, removable"
 msgstr "USB, flyttbar"
 
@@ -13276,6 +13529,7 @@ msgstr "Användarnamn och lösenord"
 
 #. Search words for Settings → Accounts, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "users, people, family, kids, children, parental controls, age ratings, PIN, permissions, admin"
 msgstr "användare, personer, familj, barn, föräldrakontroll, åldersgränser, PIN, behörigheter, administratör"
 
@@ -13333,6 +13587,7 @@ msgstr "Verifiering"
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Verify downloads"
 msgstr "Verifiera nedladdningar"
 
@@ -13356,11 +13611,13 @@ msgstr "Version {version} är installerad. Starta om Caskade för att använda d
 
 #. Search words for Settings → About, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "version, licenses, licences, legal, credits, privacy, terms, open source, IGDB, Hasheous"
 msgstr "version, licenser, juridik, medverkande, integritet, villkor, öppen källkod, IGDB, Hasheous"
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Versions to keep"
 msgstr "Versioner att behålla"
 
@@ -13471,6 +13728,7 @@ msgstr "Varningar"
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Watch library folders"
 msgstr "Bevaka biblioteksmappar"
 
@@ -13617,6 +13875,7 @@ msgstr "När ett spel läggs till i ditt bibliotek, ta med speltiden som dess st
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "When a game launches"
 msgstr "När ett spel startar"
 
@@ -13728,6 +13987,7 @@ msgid "Windows (runs through Proton on Linux)"
 msgstr "Windows (körs via Proton på Linux)"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgctxt "settings"
 msgid "Windows install method"
 msgstr "Installationsmetod för Windows"
@@ -13742,6 +14002,7 @@ msgstr "Windows öppnar magnetlänkar och .torrent-filer med Caskade."
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Wine and Proton prefixes"
 msgstr "Wine- och Proton-prefix"
 
@@ -13751,6 +14012,7 @@ msgid "Wine and Proton prefixes"
 msgstr "Wine- och Proton-prefix"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Wine, Proton, umu"
 msgstr "Wine, Proton, umu"
 
@@ -13854,6 +14116,7 @@ msgstr "Ditt konto har en PIN. Skriv en ny för att ändra den."
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Your artwork"
 msgstr "Dina bilder"
 
@@ -13871,6 +14134,7 @@ msgstr "Dina samlingar"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "Your devices"
 msgstr "Dina enheter"
 
@@ -13962,6 +14226,7 @@ msgid "YYYY-MM-DD, or empty for none"
 msgstr "ÅÅÅÅ-MM-DD, eller tomt för inget"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/search.rs
 msgid "zoom, text size, bigger"
 msgstr "zoom, textstorlek, större"
 

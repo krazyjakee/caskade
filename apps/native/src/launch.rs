@@ -45,6 +45,9 @@ pub enum OnClose {
     Quit,
     /// It hides; the tray brings it back.
     Hide,
+    /// It stays open: something asks first (Settings' unsaved edits, #103),
+    /// and closes it again once answered.
+    Hold,
 }
 
 /// The shell's say in the loop: how a close goes, and what to do once a
@@ -223,12 +226,17 @@ impl<S: Shell> ApplicationHandler for Loop<S> {
         event: WindowEvent,
     ) {
         self.main.get_or_insert(window_id);
-        if matches!(event, WindowEvent::CloseRequested)
-            && self.shell.on_close() == OnClose::Hide
-            && let Some(window) = crate::shell::main_window()
-        {
-            window.set_visible(false);
-            return;
+        if matches!(event, WindowEvent::CloseRequested) {
+            match self.shell.on_close() {
+                OnClose::Hold => return,
+                OnClose::Hide => {
+                    if let Some(window) = crate::shell::main_window() {
+                        window.set_visible(false);
+                        return;
+                    }
+                }
+                OnClose::Quit => {}
+            }
         }
         self.inner.window_event(event_loop, window_id, event);
     }

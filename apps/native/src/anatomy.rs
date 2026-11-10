@@ -20,6 +20,7 @@ use caskade_ui_theme::anatomy::{Entry, Source};
 pub fn catalogue() -> Vec<Entry> {
     let mut all = vec![OSK];
     all.extend_from_slice(crate::ui::ANATOMY);
+    all.push(crate::settings::ANATOMY);
     all.extend_from_slice(crate::frame::ANATOMY);
     all.extend_from_slice(crate::flows::ANATOMY);
     all
@@ -68,6 +69,10 @@ mod tests {
         ("game-art", "#93: the full GameCard's art"),
         ("game-row", "#93: the full LibraryRow"),
         ("alphabet-bar", "#99: the Library view's AlphabetBar"),
+        (
+            "schema-settings",
+            "#103: the webview's SchemaSettings isn't catalogued either",
+        ),
         (
             "add-game",
             "#108: the webview's AddGame isn't catalogued either",

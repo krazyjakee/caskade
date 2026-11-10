@@ -872,7 +872,7 @@ Container: its content comes from the caller, which may add parts of its own.
 
 ## `settings-nav`
 
-Settings' sections: a vertical tab list beside the open section's panel, in desktop and console modes, grouped under headings, with the settings search above it. It stays in view while the panel scrolls, and scrolls on its own when the sections don't fit. Rendered by SettingsView (app).
+Settings' sections: a vertical tab list beside the open section's panel, in desktop and console modes, grouped under headings, with the settings search above it. It stays in view while the panel scrolls, and scrolls on its own when the sections don't fit. Rendered by SettingsView (apps/native/src/settings/mod.rs); in the webview, SettingsView (app).
 
 Root: `[data-cs="settings-nav"]`
 

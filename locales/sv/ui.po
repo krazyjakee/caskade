@@ -57,7 +57,8 @@ msgid "Available to Buy"
 msgstr "Kan köpas"
 
 #. The picker of an account's picture
-#: packages/ui/src/Avatar.tsx apps/native/src/ui/avatar.rs
+#: packages/ui/src/Avatar.tsx apps/native/src/settings/search.rs
+#: apps/native/src/ui/avatar.rs
 msgid "Avatar"
 msgstr "Avatar"
 

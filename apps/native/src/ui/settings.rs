@@ -6,8 +6,12 @@
 //! contexts do in the webview: a switch, select, text field, slider or
 //! segmented control in it without a label of its own takes the row's.
 
+use std::time::Duration;
+
 use caskade_ui_theme::anatomy::{Entry, Source};
+use dioxus_native::NodeHandle;
 use dioxus_native::prelude::*;
+use unicode_normalization::UnicodeNormalization;
 
 use super::icons::{Icon, Svg};
 use super::ids::use_id;
@@ -84,11 +88,15 @@ pub fn SettingsSection(
     children: Element,
 ) -> Element {
     let heading = use_id("settings-section");
+    let mut node = use_signal(|| None::<NodeHandle>);
+    let found = use_found(&title, node);
     rsx! {
         section {
             "data-cs": "settings-section",
             "aria-labelledby": "{heading}",
-            class: "rounded-panel border border-border bg-surface-raised p-5 {class}",
+            "data-found": found.then_some(""),
+            onmounted: move |event| node.set(event.data().downcast::<NodeHandle>().cloned()),
+            class: "rounded-panel border border-border bg-surface-raised p-5 transition-[box-shadow] duration-(--cs-motion-duration-base) data-found:shadow-[0_0_0_2px] data-found:shadow-accent-alt/60 {class}",
             ..attributes,
             header { "data-part": "header", class: "mb-2 flex items-start gap-3",
                 if let Some(icon) = icon {
@@ -112,6 +120,58 @@ pub fn SettingsSection(
             {children}
         }
     }
+}
+
+/// A preference Settings' search asked to show (#103): the row or section
+/// whose label folds the same as it highlights itself (`data-found`) for a
+/// few seconds and takes focus, then the request is done.
+#[derive(Clone, Copy, PartialEq)]
+pub struct Found(pub Signal<Option<String>>);
+
+/// How long a found preference stays highlighted.
+pub const HIGHLIGHT: Duration = Duration::from_secs(4);
+
+/// Lower case without accents, so "Écran" finds "ecran".
+pub fn fold(text: &str) -> String {
+    text.nfd()
+        .filter(|c| !unicode_normalization::char::is_combining_mark(*c))
+        .flat_map(char::to_lowercase)
+        .collect()
+}
+
+/// Whether the search asked for `label`; while it does, `node` (once
+/// mounted) highlights and its first control takes focus.
+fn use_found(label: &str, node: Signal<Option<NodeHandle>>) -> bool {
+    let found = try_use_context::<Found>();
+    let mut lit = use_signal(|| false);
+    let input = crate::input::use_input();
+    let wanted = fold(label);
+    use_effect(move || {
+        let Some(Found(mut asked)) = found else {
+            return;
+        };
+        let matches = asked
+            .read()
+            .as_deref()
+            .is_some_and(|asked| fold(asked).trim() == wanted.trim());
+        let Some(handle) = node.read().clone() else {
+            return;
+        };
+        if !matches {
+            return;
+        }
+        asked.set(None);
+        lit.set(true);
+        let control = super::popover::start_in(&handle.doc(), handle.node_id());
+        input.focus(control.unwrap_or(handle.node_id()));
+        spawn(async move {
+            caskade_app::runtime::spawn(tokio::time::sleep(HIGHLIGHT))
+                .await
+                .ok();
+            lit.set(false);
+        });
+    });
+    lit()
 }
 
 /// What a [`SettingRow`] names and describes its controls with.
@@ -143,6 +203,8 @@ pub fn SettingRow(
 ) -> Element {
     let label_id = use_id("setting-label");
     let description_id = use_id("setting-description");
+    let mut node = use_signal(|| None::<NodeHandle>);
+    let found = use_found(&label, node);
     let described = description.is_some();
     use_context_provider({
         let label = label.clone();
@@ -157,7 +219,9 @@ pub fn SettingRow(
     rsx! {
         div {
             "data-cs": "setting-row",
-            class: "flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-border py-3 first-of-type:border-t-0",
+            "data-found": found.then_some(""),
+            onmounted: move |event| node.set(event.data().downcast::<NodeHandle>().cloned()),
+            class: "flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-border py-3 first-of-type:border-t-0 transition-[background-color,box-shadow] duration-(--cs-motion-duration-base) data-found:rounded-control data-found:bg-accent/15 data-found:shadow-[0_0_0_2px] data-found:shadow-accent-alt/60",
             ..attributes,
             // The icon stays with the text when the controls wrap; the basis
             // is the text's minimum width beside them, in rem.

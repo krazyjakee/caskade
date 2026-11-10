@@ -48,6 +48,10 @@ pub fn Slider(
     #[props(default)]
     format: Option<Callback<f64, String>>,
     #[props(default)] disabled: bool,
+    /// A change ended: each key or pad step, or the pointer let go after
+    /// a drag or a click on the track. For saving once (`DraftSlider`).
+    #[props(default)]
+    on_change_end: Option<EventHandler<f64>>,
     #[props(default)] class: String,
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
 ) -> Element {
@@ -63,10 +67,23 @@ pub fn Slider(
         let stepped = ((value - min) / step).round() * step + min;
         stepped.clamp(min, max)
     };
-    let set = move |next: f64| {
+    // The value the last change set, for its end; what's shown otherwise.
+    let mut latest = use_hook(|| CopyValue::new(value));
+    if !*dragging.peek() {
+        latest.set(value);
+    }
+    let mut set = move |next: f64| {
         let next = clamp(next);
         if !disabled && next != value {
+            latest.set(next);
             on_change.call(next);
+        }
+    };
+    let end = move || {
+        if let Some(on_change_end) = on_change_end
+            && !disabled
+        {
+            on_change_end.call(latest());
         }
     };
     let text = match format {
@@ -87,11 +104,12 @@ pub fn Slider(
             },
             move || {
                 set(value + sign * step);
+                end();
                 true
             },
         );
     }
-    let from_pointer = move |x: f64| {
+    let mut from_pointer = move |x: f64| {
         let rect = track
             .peek()
             .as_ref()
@@ -122,7 +140,13 @@ pub fn Slider(
                     class: "relative h-5 flex-1",
                     onmounted: move |event| track.set(event.data().downcast::<NodeHandle>().cloned()),
                     onmouseenter: move |_| hovered.set(true),
-                    onmouseleave: move |_| { hovered.set(false); dragging.set(false) },
+                    onmouseleave: move |_| {
+                        hovered.set(false);
+                        if *dragging.peek() {
+                            dragging.set(false);
+                            end();
+                        }
+                    },
                     onmousedown: move |event| {
                         dragging.set(true);
                         from_pointer(event.client_coordinates().x);
@@ -132,7 +156,12 @@ pub fn Slider(
                             from_pointer(event.client_coordinates().x);
                         }
                     },
-                    onmouseup: move |_| dragging.set(false),
+                    onmouseup: move |_| {
+                        if *dragging.peek() {
+                            dragging.set(false);
+                            end();
+                        }
+                    },
                     div { class: "absolute top-1/2 h-1.5 w-full -translate-y-1/2 rounded-full bg-surface-hover" }
                     div {
                         "data-part": "fill",
@@ -170,6 +199,7 @@ pub fn Slider(
                             event.prevent_default();
                             event.stop_propagation();
                             set(next);
+                            end();
                         },
                         ..attributes,
                     }

@@ -28,7 +28,9 @@ pub fn Outlet() -> Element {
         },
         Route::Store(_) => placeholder(t!("Store")),
         Route::Collections { .. } | Route::Collection { .. } => placeholder(t!("Collections")),
-        Route::Settings { .. } => placeholder(t!("Settings")),
+        Route::Settings { tab, section } => rsx! {
+            crate::settings::SettingsView { tab, section }
+        },
         Route::Plugin { .. } | Route::NotFound { .. } => placeholder(t!("Not found")),
     }
 }

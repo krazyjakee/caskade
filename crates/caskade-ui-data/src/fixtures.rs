@@ -21,7 +21,7 @@ use caskade_core::{
 };
 use tokio::sync::broadcast;
 
-use crate::Library;
+use crate::{Library, Settings};
 
 /// How many plain games fixtures mode makes unless asked for another number
 /// (`createFixtureGames`'s default).
@@ -190,6 +190,8 @@ pub struct Fixtures {
     pub accounts: AccountService,
     /// Every app event, as the native shell's `shell::events()`.
     pub events: broadcast::Sender<Event>,
+    /// The app's settings sections over the same store, at their defaults.
+    pub settings: Settings,
 }
 
 /// Opens the fixture library with `count` plain games (`DEFAULT_COUNT` is
@@ -203,7 +205,16 @@ pub async fn open(count: usize) -> caskade_core::Result<Fixtures> {
     let launch = LaunchService::new(store.clone()).with_bus(bus.clone());
     let (events, _) = broadcast::channel(1024);
     caskade_app::events::bridge(Events::new(Broadcast(events.clone())), &bus);
+    // The core's sections; nothing is written under these folders.
+    let service = caskade_core::settings::SettingsService::with_bus(store.clone(), bus.clone());
+    service
+        .register_core(&caskade_core::AppPaths::under(
+            &std::env::temp_dir().join("caskade-fixtures"),
+        ))
+        .map_err(|error| caskade_core::Error::Invalid(error.to_string()))?;
+    let settings = Settings::new(service, accounts.clone());
     Ok(Fixtures {
+        settings,
         library: Library::new(store.clone(), accounts.clone(), launch, bus.clone()),
         store,
         bus,

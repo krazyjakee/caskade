@@ -24,10 +24,10 @@ mod game_row;
 mod hero;
 pub(crate) mod icons;
 mod ids;
-mod interact;
+pub(crate) mod interact;
 mod link;
 mod menu;
-mod popover;
+pub(crate) mod popover;
 mod progress;
 mod radio;
 mod segmented;
@@ -89,7 +89,7 @@ pub(crate) use select::List as SelectList;
 #[allow(unused_imports)]
 pub use select::{Select, SelectOption};
 #[allow(unused_imports)]
-pub use settings::{DotTone, Pill, PillTone, SettingRow, SettingsSection, StatusDot};
+pub use settings::{DotTone, Found, Pill, PillTone, SettingRow, SettingsSection, StatusDot, fold};
 #[allow(unused_imports)]
 pub use shelf::Shelf;
 #[allow(unused_imports)]

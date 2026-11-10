@@ -9,6 +9,8 @@ publish = false
 [dependencies]
 caskade-app = { path = "../caskade-app" }
 caskade-core = { path = "../caskade-core" }
+# Settings sections' values (JSON Schema documents).
+serde_json = "1"
 tokio = { version = "1", features = ["sync", "rt", "macros", "time"] }
 tracing = "0.1"
 

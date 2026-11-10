@@ -22,6 +22,8 @@ pub use route::{
     filter_name,
 };
 
+use std::rc::Rc;
+
 use crate::input::{use_focus_location, use_input};
 use crate::ui::Link;
 use dioxus_native::prelude::*;
@@ -125,6 +127,23 @@ impl History {
         true
     }
 
+    /// The page `navigation` would show; `None` when it goes nowhere.
+    pub fn target(&self, navigation: &Navigation) -> Option<Route> {
+        match navigation {
+            Navigation::Push(href) | Navigation::Replace(href) => {
+                Some(Route::parse(href, self.memory.remembered()))
+            }
+            Navigation::Back => self
+                .at
+                .checked_sub(1)
+                .map(|at| self.entries[at].route.clone()),
+            Navigation::Forward => self
+                .entries
+                .get(self.at + 1)
+                .map(|entry| entry.route.clone()),
+        }
+    }
+
     /// Whether only the page the app opened on has been shown.
     pub fn untouched(&self) -> bool {
         self.entries.len() == 1 && self.current().key == "1"
@@ -136,10 +155,37 @@ impl History {
     }
 }
 
+/// A move through the pages, as a [`Guard`] sees it.
+#[derive(Debug, Clone, PartialEq)]
+pub enum Navigation {
+    Push(String),
+    Replace(String),
+    Back,
+    Forward,
+}
+
+/// Holds navigations away from a page whose edits aren't saved (Settings'
+/// forms, #103): given the page shown and the one a navigation would show,
+/// whether it must wait for an answer. It waits in [`Router::held`] until
+/// [`Router::proceed`] or [`Router::stay`].
+#[derive(Clone)]
+pub struct Guard(pub Holds);
+
+/// Whether a navigation from the first page to the second must wait.
+pub type Holds = Rc<dyn Fn(&Route, &Route) -> bool>;
+
+impl PartialEq for Guard {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+
 /// The app's navigation, from any component under [`RouterRoot`].
 #[derive(Clone, Copy, PartialEq)]
 pub struct Router {
     history: Signal<History>,
+    guard: Signal<Option<Guard>>,
+    held: Signal<Option<Navigation>>,
 }
 
 impl Router {
@@ -160,23 +206,79 @@ impl Router {
     }
 
     pub fn navigate(&self, href: &str) {
-        let mut history = self.history;
-        history.write().push(href);
+        self.go(Navigation::Push(href.to_owned()));
     }
 
     pub fn replace(&self, href: &str) {
-        let mut history = self.history;
-        history.write().replace(href);
+        self.go(Navigation::Replace(href.to_owned()));
     }
 
+    /// Back a page; whether there was one (a held one counts).
     pub fn back(&self) -> bool {
-        let mut history = self.history;
-        history.write().back()
+        self.go(Navigation::Back)
     }
 
     pub fn forward(&self) -> bool {
+        self.go(Navigation::Forward)
+    }
+
+    /// Goes, unless the guard holds it; whether it went or waits.
+    fn go(&self, navigation: Navigation) -> bool {
+        let guard = self.guard.peek().clone();
+        if let Some(Guard(holds)) = guard {
+            let history = self.history.peek();
+            if let Some(next) = history.target(&navigation)
+                && holds(&history.current().route, &next)
+            {
+                drop(history);
+                let mut held = self.held;
+                held.set(Some(navigation));
+                return true;
+            }
+        }
+        self.apply(navigation)
+    }
+
+    fn apply(&self, navigation: Navigation) -> bool {
         let mut history = self.history;
-        history.write().forward()
+        let mut history = history.write();
+        match navigation {
+            Navigation::Push(href) => {
+                history.push(&href);
+                true
+            }
+            Navigation::Replace(href) => {
+                history.replace(&href);
+                true
+            }
+            Navigation::Back => history.back(),
+            Navigation::Forward => history.forward(),
+        }
+    }
+
+    /// Holds navigations `guard` holds, or none.
+    pub fn set_guard(&self, guard: Option<Guard>) {
+        let mut slot = self.guard;
+        slot.set(guard);
+    }
+
+    /// The navigation waiting for an answer, if any.
+    pub fn held(&self) -> Option<Navigation> {
+        self.held.read().clone()
+    }
+
+    /// Goes where the held navigation was going.
+    pub fn proceed(&self) {
+        let mut held = self.held;
+        if let Some(navigation) = held.take() {
+            self.apply(navigation);
+        }
+    }
+
+    /// Drops the held navigation: the page stays.
+    pub fn stay(&self) {
+        let mut held = self.held;
+        held.set(None);
     }
 
     #[allow(dead_code, reason = "the game page's Back (#100) asks")]
@@ -217,6 +319,8 @@ pub fn RouterRoot(
 ) -> Element {
     let router = use_context_provider(|| Router {
         history: Signal::new(History::new(Memory::of_app())),
+        guard: Signal::new(None),
+        held: Signal::new(None),
     });
     let input = use_input();
     use_hook(move || {

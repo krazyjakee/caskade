@@ -13,15 +13,16 @@
 
 use caskade_app::events::Event;
 use caskade_core::model::{GameDetails, GamePage, LibraryStats, ListGames};
-use caskade_ui_data::{Changed, ErrorReport, Key as DataKey, Library, fixtures};
+use caskade_ui_data::{Changed, ErrorReport, Key as DataKey, Library, Settings, fixtures};
 use dioxus_native::prelude::*;
 use std::future::Future;
 use tokio::sync::broadcast;
 
-/// What views read through: the library and the app's events.
+/// What views read through: the library, settings and the app's events.
 #[derive(Clone)]
 pub struct DataSource {
     pub library: Library,
+    pub settings: Settings,
     pub events: broadcast::Sender<Event>,
 }
 
@@ -32,6 +33,7 @@ impl DataSource {
         let services = crate::shell::services()?;
         Some(Self {
             library: Library::of(services),
+            settings: Settings::of(services),
             events: crate::shell::events().clone(),
         })
     }
@@ -44,6 +46,7 @@ impl DataSource {
             .map_err(|error| caskade_core::Error::Invalid(error.to_string()))??;
         Ok(Self {
             library: fixtures.library,
+            settings: fixtures.settings,
             events: fixtures.events,
         })
     }
@@ -160,9 +163,36 @@ where
 {
     let source = use_context::<DataSource>();
     let library = source.library.clone();
-    let mut resource = use_resource(move || change(load(library.clone())));
+    let resource = use_resource(move || change(load(library.clone())));
+    reload_on(&source, key, resource);
+    resource
+}
+
+/// Settings' [`use_query`]: `load` reads through [`Settings`].
+pub fn use_settings_query<T, F, Fut>(key: DataKey, mut load: F) -> Query<T>
+where
+    T: Send + 'static,
+    F: FnMut(Settings) -> Fut + 'static,
+    Fut: Future<Output = Result<T, ErrorReport>> + Send + 'static,
+{
+    let source = use_context::<DataSource>();
+    let settings = source.settings.clone();
+    let resource = use_resource(move || change(load(settings.clone())));
+    reload_on(&source, key, resource);
+    resource
+}
+
+/// Settings, for a view's changes: run them through [`change`].
+pub fn use_settings() -> Settings {
+    use_context::<DataSource>().settings
+}
+
+/// Loads `resource` again whenever an app event makes `key` stale, or when
+/// events were missed.
+fn reload_on<T: 'static>(source: &DataSource, key: DataKey, mut resource: Query<T>) {
+    let events = source.events.clone();
     use_hook(move || {
-        let mut events = source.events.subscribe();
+        let mut events = events.subscribe();
         spawn(async move {
             loop {
                 match events.recv().await {
@@ -174,7 +204,6 @@ where
             }
         });
     });
-    resource
 }
 
 /// A page of the library for `query`; at most 100 summaries.

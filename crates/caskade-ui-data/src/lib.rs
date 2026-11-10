@@ -4,6 +4,8 @@
 //! - [`Library`] reads and changes library data through the app layer's
 //!   commands, with the core's [`ErrorReport`]s (codes, hints, references).
 //!   Pages stay bounded ([`PAGE_LIMIT`]).
+//! - [`Settings`] reads and changes settings sections, and says which ones
+//!   the signed-in account may change.
 //! - [`Key`] names what a view reads; [`Changed::from_event`] says which keys
 //!   an app event makes stale, so a view refetches only what changed.
 //! - [`fixtures`] is an in-memory library for UI development and tests:
@@ -19,8 +21,10 @@ pub mod keys;
 pub mod labels;
 pub mod library;
 mod manual;
+pub mod settings;
 pub mod storage;
 
 pub use caskade_core::error::{ErrorCode, ErrorReport, RecoveryHint};
 pub use keys::{Changed, Key};
 pub use library::{Library, PAGE_LIMIT, SEARCH_LIMIT};
+pub use settings::{Editable, Settings};
