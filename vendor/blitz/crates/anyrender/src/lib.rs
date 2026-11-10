@@ -56,6 +56,8 @@ mod null_backend;
 pub use null_backend::*;
 pub mod recording;
 pub use recording::Scene;
+pub mod dyn_scene;
+pub use dyn_scene::{DynPaintScene, DynScenePainter};
 
 mod resource_id;
 pub use resource_id::ResourceId;
@@ -184,6 +186,29 @@ pub trait ImageRenderer: RenderContext {
         vec: &mut Vec<u8>,
     );
     fn render<F: FnOnce(&mut Self::ScenePainter<'_>)>(&mut self, draw_fn: F, buffer: &mut [u8]);
+
+    /// Whether [`render_region`](Self::render_region) repaints part of an
+    /// image. Defaults to `false`.
+    fn supports_region(&self) -> bool {
+        false
+    }
+
+    /// Render the pixels of `region` (whole pixels, inside the renderer's
+    /// size) into `buffer`, an RGBA8 image of the renderer's size, leaving
+    /// every pixel outside `region` as it is. `draw_fn` draws the whole
+    /// scene in image coordinates; the renderer clips it to `region`.
+    ///
+    /// Only call this while [`supports_region`](Self::supports_region)
+    /// returns `true`. The default renders the whole image.
+    fn render_region<F: FnOnce(&mut Self::ScenePainter<'_>)>(
+        &mut self,
+        region: Rect,
+        draw_fn: F,
+        buffer: &mut [u8],
+    ) {
+        let _ = region;
+        self.render(draw_fn, buffer)
+    }
 }
 
 /// Draw a scene to a buffer using an `ImageRenderer`

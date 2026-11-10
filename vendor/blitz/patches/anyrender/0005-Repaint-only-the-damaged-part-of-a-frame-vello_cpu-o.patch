@@ -1,0 +1,580 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jake Cattrall <krazyjakee@gmail.com>
+Date: Tue, 10 Nov 2026 15:10:30 +0000
+Subject: [PATCH] Repaint only the damaged part of a frame (vello_cpu over
+ softbuffer)
+
+ImageRenderer gains supports_region and render_region: render the pixels
+of a region into a full-size image and leave the rest. vello_cpu renders
+the scene shifted into a region-sized context (kept while the size
+repeats) and copies it in; the result is pixel for pixel what a full
+render gives there.
+
+SoftbufferWindowRenderer implements supports_damage and render_damage
+with it: it keeps the last frame, repaints the damage into it, converts
+only that rectangle when the surface's buffer holds the last frame
+(buffer age 1), and presents it with present_with_damage. Without a GPU
+an animation then costs its own rectangle, not the window.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ crates/anyrender/src/lib.rs                   |  23 +++
+ .../anyrender_vello_cpu/src/image_renderer.rs | 165 ++++++++++++++++++
+ crates/anyrender_vello_cpu/src/scene.rs       |  10 ++
+ crates/softbuffer_window_renderer/src/lib.rs  | 147 +++++++++++++---
+ 4 files changed, 323 insertions(+), 22 deletions(-)
+
+diff --git a/crates/anyrender/src/lib.rs b/crates/anyrender/src/lib.rs
+index 917dbda..06b706e 100644
+--- a/crates/anyrender/src/lib.rs
++++ b/crates/anyrender/src/lib.rs
+@@ -184,6 +184,29 @@ pub trait ImageRenderer: RenderContext {
+         vec: &mut Vec<u8>,
+     );
+     fn render<F: FnOnce(&mut Self::ScenePainter<'_>)>(&mut self, draw_fn: F, buffer: &mut [u8]);
++
++    /// Whether [`render_region`](Self::render_region) repaints part of an
++    /// image. Defaults to `false`.
++    fn supports_region(&self) -> bool {
++        false
++    }
++
++    /// Render the pixels of `region` (whole pixels, inside the renderer's
++    /// size) into `buffer`, an RGBA8 image of the renderer's size, leaving
++    /// every pixel outside `region` as it is. `draw_fn` draws the whole
++    /// scene in image coordinates; the renderer clips it to `region`.
++    ///
++    /// Only call this while [`supports_region`](Self::supports_region)
++    /// returns `true`. The default renders the whole image.
++    fn render_region<F: FnOnce(&mut Self::ScenePainter<'_>)>(
++        &mut self,
++        region: Rect,
++        draw_fn: F,
++        buffer: &mut [u8],
++    ) {
++        let _ = region;
++        self.render(draw_fn, buffer)
++    }
+ }
+ 
+ /// Draw a scene to a buffer using an `ImageRenderer`
+diff --git a/crates/anyrender_vello_cpu/src/image_renderer.rs b/crates/anyrender_vello_cpu/src/image_renderer.rs
+index f331353..816c1fd 100644
+--- a/crates/anyrender_vello_cpu/src/image_renderer.rs
++++ b/crates/anyrender_vello_cpu/src/image_renderer.rs
+@@ -1,10 +1,15 @@
+ use crate::{ImageCacheConfig, VelloCpuScenePainter};
+ use anyrender::{ImageRenderer, RenderContext as AnyRenderContext};
+ use debug_timer::debug_timer;
++use kurbo::{Affine, Rect};
+ use vello_cpu::{PixmapMut, RenderContext};
+ 
+ pub struct VelloCpuImageRenderer {
+     scene: VelloCpuScenePainter,
++    /// The context a region renders into, kept while regions keep its size
++    /// (an animation damages the same rectangle each frame).
++    region_ctx: Option<RenderContext>,
++    region_pixels: Vec<u8>,
+ }
+ 
+ impl VelloCpuImageRenderer {
+@@ -16,6 +21,8 @@ impl VelloCpuImageRenderer {
+                 height as u16,
+                 config,
+             ),
++            region_ctx: None,
++            region_pixels: Vec::new(),
+         }
+     }
+ 
+@@ -41,6 +48,8 @@ impl ImageRenderer for VelloCpuImageRenderer {
+     fn new(width: u32, height: u32) -> Self {
+         Self {
+             scene: VelloCpuScenePainter::new(width as u16, height as u16),
++            region_ctx: None,
++            region_pixels: Vec::new(),
+         }
+     }
+ 
+@@ -78,6 +87,63 @@ impl ImageRenderer for VelloCpuImageRenderer {
+         timer.print_times("vello_cpu: ");
+     }
+ 
++    fn supports_region(&self) -> bool {
++        true
++    }
++
++    fn render_region<F: FnOnce(&mut Self::ScenePainter<'_>)>(
++        &mut self,
++        region: Rect,
++        draw_fn: F,
++        buffer: &mut [u8],
++    ) {
++        debug_timer!(timer, feature = "log_frame_times");
++
++        let full_width = self.scene.render_ctx.width() as usize;
++        let full_height = self.scene.render_ctx.height() as usize;
++        let x0 = region.x0.floor().max(0.0) as usize;
++        let y0 = region.y0.floor().max(0.0) as usize;
++        let x1 = (region.x1.ceil().max(0.0) as usize).min(full_width);
++        let y1 = (region.y1.ceil().max(0.0) as usize).min(full_height);
++        if x1 <= x0 || y1 <= y0 || buffer.len() < full_width * full_height * 4 {
++            return;
++        }
++        let (width, height) = (x1 - x0, y1 - y0);
++
++        // Render the scene shifted so the region's origin is the context's.
++        let region_ctx = match self.region_ctx.take() {
++            Some(ctx) if ctx.width() as usize == width && ctx.height() as usize == height => ctx,
++            _ => RenderContext::new(width as u16, height as u16),
++        };
++        let full_ctx = std::mem::replace(&mut self.scene.render_ctx, region_ctx);
++        self.scene.offset = Affine::translate((-(x0 as f64), -(y0 as f64)));
++        draw_fn(&mut self.scene);
++        timer.record_time("cmds");
++
++        self.scene.render_ctx.flush();
++        self.region_pixels.clear();
++        self.region_pixels.resize(width * height * 4, 0);
++        self.scene.render_ctx.render(
++            PixmapMut::new(width as u16, height as u16, &mut self.region_pixels).unwrap(),
++            &mut self.scene.resources,
++        );
++        timer.record_time("render");
++
++        let row = width * 4;
++        for (y, pixels) in self.region_pixels.chunks_exact(row).enumerate() {
++            let start = ((y0 + y) * full_width + x0) * 4;
++            buffer[start..start + row].copy_from_slice(pixels);
++        }
++        timer.record_time("copy");
++
++        self.scene.offset = Affine::IDENTITY;
++        let mut region_ctx = std::mem::replace(&mut self.scene.render_ctx, full_ctx);
++        region_ctx.reset();
++        self.region_ctx = Some(region_ctx);
++        self.scene.maintain();
++        timer.print_times("vello_cpu (region): ");
++    }
++
+     fn render_to_vec<F: FnOnce(&mut Self::ScenePainter<'_>)>(
+         &mut self,
+         draw_fn: F,
+@@ -89,3 +155,102 @@ impl ImageRenderer for VelloCpuImageRenderer {
+         self.render(draw_fn, buffer);
+     }
+ }
++
++#[cfg(test)]
++mod region_tests {
++    use anyrender::{ImageRenderer, PaintScene};
++    use kurbo::{Affine, Circle, Rect};
++    use peniko::{
++        Color, Fill,
++        color::palette::css::{BLUE, RED, WHITE},
++    };
++
++    use super::VelloCpuImageRenderer;
++    use crate::VelloCpuScenePainter;
++
++    const W: u32 = 64;
++    const H: u32 = 48;
++
++    fn scene(painter: &mut VelloCpuScenePainter, dot: Color) {
++        painter.fill(
++            Fill::NonZero,
++            Affine::IDENTITY,
++            WHITE,
++            None,
++            &Rect::new(0.0, 0.0, W as f64, H as f64),
++        );
++        // Fractional edges, so anti-aliasing is part of what's compared.
++        painter.fill(
++            Fill::NonZero,
++            Affine::translate((0.3, 0.6)),
++            BLUE,
++            None,
++            &Rect::new(5.0, 5.0, 40.5, 30.25),
++        );
++        painter.fill(
++            Fill::NonZero,
++            Affine::IDENTITY,
++            dot,
++            None,
++            &Circle::new((30.5, 20.5), 9.3),
++        );
++    }
++
++    fn full(dot: Color) -> Vec<u8> {
++        let mut renderer = VelloCpuImageRenderer::new(W, H);
++        let mut buffer = Vec::new();
++        renderer.render_to_vec(|p| scene(p, dot), &mut buffer);
++        buffer
++    }
++
++    #[test]
++    fn a_region_matches_a_full_render_inside_and_keeps_the_rest() {
++        let before = full(RED);
++        let after = full(BLUE);
++        let mut renderer = VelloCpuImageRenderer::new(W, H);
++        let mut buffer = before.clone();
++        let region = Rect::new(17.0, 9.0, 45.0, 33.0);
++        assert!(renderer.supports_region());
++        renderer.render_region(region, |p| scene(p, BLUE), &mut buffer);
++        for y in 0..H as usize {
++            for x in 0..W as usize {
++                let i = (y * W as usize + x) * 4;
++                let inside = (17..45).contains(&x) && (9..33).contains(&y);
++                let expected = if inside { &after } else { &before };
++                assert_eq!(
++                    &buffer[i..i + 4],
++                    &expected[i..i + 4],
++                    "pixel ({x}, {y}), inside: {inside}"
++                );
++            }
++        }
++    }
++
++    #[test]
++    fn regions_of_another_size_and_full_frames_render_after_a_region() {
++        let mut renderer = VelloCpuImageRenderer::new(W, H);
++        let mut buffer = full(RED);
++        renderer.render_region(
++            Rect::new(0.0, 0.0, 8.0, 8.0),
++            |p| scene(p, BLUE),
++            &mut buffer,
++        );
++        renderer.reset();
++        // Fractional bounds cover the pixels they touch; outside the image is cut.
++        renderer.render_region(
++            Rect::new(10.5, 10.5, 200.0, 200.0),
++            |p| scene(p, BLUE),
++            &mut buffer,
++        );
++        renderer.reset();
++        let after = full(BLUE);
++        let ok = |x: usize, y: usize| {
++            let i = (y * W as usize + x) * 4;
++            buffer[i..i + 4] == after[i..i + 4]
++        };
++        assert!(ok(30, 20) && ok(63, 47) && ok(10, 10) && ok(3, 3));
++        let mut whole = Vec::new();
++        renderer.render_to_vec(|p| scene(p, BLUE), &mut whole);
++        assert_eq!(whole, after, "a full frame after regions is unchanged");
++    }
++}
+diff --git a/crates/anyrender_vello_cpu/src/scene.rs b/crates/anyrender_vello_cpu/src/scene.rs
+index eb8e5bb..57c5cbf 100644
+--- a/crates/anyrender_vello_cpu/src/scene.rs
++++ b/crates/anyrender_vello_cpu/src/scene.rs
+@@ -117,6 +117,9 @@ pub struct VelloCpuScenePainter {
+     pub(crate) image_cache: ImageCache,
+     layer_stack: Vec<LayerKind>,
+     glyph_caching: bool,
++    /// Applied before every transform: a damaged frame renders a region of
++    /// the window into a region-sized context, shifted to its origin.
++    pub(crate) offset: Affine,
+ }
+ 
+ impl VelloCpuScenePainter {
+@@ -131,6 +134,7 @@ impl VelloCpuScenePainter {
+             image_cache: ImageCache::new(config),
+             layer_stack: Vec::new(),
+             glyph_caching: false,
++            offset: Affine::IDENTITY,
+         }
+     }
+ 
+@@ -206,6 +210,7 @@ impl PaintScene for VelloCpuScenePainter {
+             None
+         };
+ 
++        let transform = self.offset * transform;
+         self.render_ctx.set_transform(transform);
+         self.render_ctx.set_fill_rule(fill);
+         self.layer_stack.push(LayerKind::Layer);
+@@ -219,6 +224,7 @@ impl PaintScene for VelloCpuScenePainter {
+     }
+ 
+     fn push_clip_layer(&mut self, fill: Fill, transform: Affine, clip: &impl Shape) {
++        let transform = self.offset * transform;
+         self.render_ctx.set_transform(transform);
+         self.render_ctx.set_fill_rule(fill);
+         if let Some(rect) = clip.as_rect() {
+@@ -249,6 +255,7 @@ impl PaintScene for VelloCpuScenePainter {
+         brush_transform: Option<Affine>,
+         shape: &impl Shape,
+     ) {
++        let transform = self.offset * transform;
+         self.render_ctx.set_transform(transform);
+         self.render_ctx.set_stroke(style.clone());
+         let paint = self.convert_paint(paint.into());
+@@ -267,6 +274,7 @@ impl PaintScene for VelloCpuScenePainter {
+         brush_transform: Option<Affine>,
+         shape: &impl Shape,
+     ) {
++        let transform = self.offset * transform;
+         self.render_ctx.set_transform(transform);
+         self.render_ctx.set_fill_rule(style);
+         let paint = self.convert_paint(paint.into());
+@@ -295,6 +303,7 @@ impl PaintScene for VelloCpuScenePainter {
+         glyph_transform: Option<Affine>,
+         glyphs: impl Iterator<Item = anyrender::Glyph> + Clone,
+     ) {
++        let transform = self.offset * transform;
+         self.render_ctx.set_transform(transform);
+         let paint = self.convert_paint(paint.into());
+         self.render_ctx.set_paint(paint);
+@@ -347,6 +356,7 @@ impl PaintScene for VelloCpuScenePainter {
+         radius: f64,
+         std_dev: f64,
+     ) {
++        let transform = self.offset * transform;
+         self.render_ctx.set_transform(transform);
+         self.render_ctx.set_paint(PaintType::Solid(color));
+         self.render_ctx.reset_paint_transform();
+diff --git a/crates/softbuffer_window_renderer/src/lib.rs b/crates/softbuffer_window_renderer/src/lib.rs
+index 8a846fb..da4c929 100644
+--- a/crates/softbuffer_window_renderer/src/lib.rs
++++ b/crates/softbuffer_window_renderer/src/lib.rs
+@@ -68,6 +68,9 @@ pub struct SoftbufferWindowRenderer<Renderer: ImageRenderer> {
+     config: SoftbufferRendererOptions,
+     width: u32,
+     height: u32,
++    /// Whether `buffer` holds a complete frame at the current size, which a
++    /// damaged frame repaints part of.
++    has_frame: bool,
+ }
+ 
+ impl<Renderer: ImageRenderer> SoftbufferWindowRenderer<Renderer> {
+@@ -85,6 +88,7 @@ impl<Renderer: ImageRenderer> SoftbufferWindowRenderer<Renderer> {
+             config: SoftbufferRendererOptions::default(),
+             width: 0,
+             height: 0,
++            has_frame: false,
+         }
+     }
+ 
+@@ -97,6 +101,7 @@ impl<Renderer: ImageRenderer> SoftbufferWindowRenderer<Renderer> {
+             config: config.into(),
+             width: 0,
+             height: 0,
++            has_frame: false,
+         }
+     }
+ 
+@@ -111,6 +116,7 @@ impl<Renderer: ImageRenderer> SoftbufferWindowRenderer<Renderer> {
+             config: config.try_into()?,
+             width: 0,
+             height: 0,
++            has_frame: false,
+         })
+     }
+ 
+@@ -128,10 +134,60 @@ impl<Renderer: ImageRenderer> SoftbufferWindowRenderer<Renderer> {
+                 .expect("Invalid Softbuffer renderer configuration"),
+             width: 0,
+             height: 0,
++            has_frame: false,
+         }
+     }
+ }
+ 
++impl<Renderer: ImageRenderer> SoftbufferWindowRenderer<Renderer> {
++    /// Renders and presents a whole frame.
++    fn render_full<F: FnOnce(&mut Renderer::ScenePainter<'_>)>(&mut self, draw_fn: F) {
++        let RenderState::Active(state) = &mut self.render_state else {
++            return;
++        };
++
++        debug_timer!(timer, feature = "log_frame_times");
++
++        let Ok(mut surface_buffer) = state.surface.buffer_mut() else {
++            return;
++        };
++        timer.record_time("buffer_mut");
++
++        // Paint
++        let base_color = self.config.base_color;
++        let width = self.width as f64;
++        let height = self.height as f64;
++
++        let wrapped_draw_fn = |painter: &mut Renderer::ScenePainter<'_>| {
++            painter.fill(
++                peniko::Fill::NonZero,
++                Affine::IDENTITY,
++                base_color,
++                None,
++                &Rect::new(0.0, 0.0, width, height),
++            );
++            draw_fn(painter);
++        };
++
++        self.renderer
++            .render_to_vec(wrapped_draw_fn, &mut self.buffer);
++        timer.record_time("render");
++
++        let out = surface_buffer.as_mut();
++        assert_eq!(self.buffer.len(), out.len() * 4);
++        swizzle(&self.buffer, out);
++        timer.record_time("swizel");
++
++        surface_buffer.present().unwrap();
++        timer.record_time("present");
++        timer.print_times("softbuffer: ");
++        self.has_frame = true;
++
++        // Reset the renderer ready for the next render
++        self.renderer.reset();
++    }
++}
++
+ impl<Renderer: ImageRenderer> RenderContext for SoftbufferWindowRenderer<Renderer> {
+     fn try_register_custom_resource(
+         &mut self,
+@@ -168,6 +224,7 @@ impl<Renderer: ImageRenderer> WindowRenderer for SoftbufferWindowRenderer<Render
+             surface,
+         });
+         self.window_handle = Some(window_handle);
++        self.has_frame = false;
+ 
+         self.set_size(width, height);
+         on_ready();
+@@ -179,11 +236,13 @@ impl<Renderer: ImageRenderer> WindowRenderer for SoftbufferWindowRenderer<Render
+ 
+     fn suspend(&mut self) {
+         self.render_state = RenderState::Suspended;
++        self.has_frame = false;
+     }
+ 
+     fn set_size(&mut self, physical_width: u32, physical_height: u32) {
+         self.width = physical_width;
+         self.height = physical_height;
++        self.has_frame = false;
+         if let RenderState::Active(state) = &mut self.render_state {
+             state
+                 .surface
+@@ -197,9 +256,39 @@ impl<Renderer: ImageRenderer> WindowRenderer for SoftbufferWindowRenderer<Render
+     }
+ 
+     fn render<F: FnOnce(&mut Renderer::ScenePainter<'_>)>(&mut self, draw_fn: F) {
++        self.render_full(draw_fn);
++    }
++
++    fn supports_damage(&self) -> bool {
++        self.has_frame
++            && self.is_active()
++            && self.renderer.supports_region()
++            && self.buffer.len() == self.width as usize * self.height as usize * 4
++    }
++
++    /// Renders only `damage` into the kept frame, and copies and presents
++    /// only that rectangle when the surface's buffer holds the last frame.
++    fn render_damage<F: FnOnce(&mut Renderer::ScenePainter<'_>)>(
++        &mut self,
++        damage: Rect,
++        draw_fn: F,
++    ) {
++        if !self.supports_damage() {
++            return self.render_full(draw_fn);
++        }
+         let RenderState::Active(state) = &mut self.render_state else {
+             return;
+         };
++        let x0 = (damage.x0.floor().max(0.0) as u32).min(self.width);
++        let y0 = (damage.y0.floor().max(0.0) as u32).min(self.height);
++        let x1 = (damage.x1.ceil().max(0.0) as u32).min(self.width);
++        let y1 = (damage.y1.ceil().max(0.0) as u32).min(self.height);
++        let (Some(region_width), Some(region_height)) = (
++            NonZero::new(x1.saturating_sub(x0)),
++            NonZero::new(y1.saturating_sub(y0)),
++        ) else {
++            return;
++        };
+ 
+         debug_timer!(timer, feature = "log_frame_times");
+ 
+@@ -208,47 +297,61 @@ impl<Renderer: ImageRenderer> WindowRenderer for SoftbufferWindowRenderer<Render
+         };
+         timer.record_time("buffer_mut");
+ 
+-        // Paint
+         let base_color = self.config.base_color;
+-        let width = self.width as f64;
+-        let height = self.height as f64;
+-
++        let region = Rect::new(x0 as f64, y0 as f64, x1 as f64, y1 as f64);
+         let wrapped_draw_fn = |painter: &mut Renderer::ScenePainter<'_>| {
+             painter.fill(
+                 peniko::Fill::NonZero,
+                 Affine::IDENTITY,
+                 base_color,
+                 None,
+-                &Rect::new(0.0, 0.0, width, height),
++                &region,
+             );
+             draw_fn(painter);
+         };
+-
+         self.renderer
+-            .render_to_vec(wrapped_draw_fn, &mut self.buffer);
++            .render_region(region, wrapped_draw_fn, &mut self.buffer);
+         timer.record_time("render");
+ 
++        let age = surface_buffer.age();
+         let out = surface_buffer.as_mut();
+-
+-        let (chunks, remainder) = self.buffer.as_chunks::<4>();
+-        assert_eq!(chunks.len(), out.len());
+-        assert_eq!(remainder.len(), 0);
+-
+-        for (&src, dest) in chunks.iter().zip(out.iter_mut()) {
+-            let [r, g, b, _a] = src;
+-            let r = r as u32;
+-            let g = g as u32;
+-            let b = b as u32;
+-
+-            *dest = (r << 16) | (g << 8) | b;
++        if age == 1 {
++            // The buffer holds the last frame: only the region changed.
++            let width = self.width as usize;
++            let (x0, x1) = (x0 as usize, x1 as usize);
++            for y in y0 as usize..y1 as usize {
++                let row = y * width;
++                swizzle(
++                    &self.buffer[(row + x0) * 4..(row + x1) * 4],
++                    &mut out[row + x0..row + x1],
++                );
++            }
++        } else {
++            swizzle(&self.buffer, out);
+         }
+         timer.record_time("swizel");
+ 
+-        surface_buffer.present().unwrap();
++        surface_buffer
++            .present_with_damage(&[softbuffer::Rect {
++                x: x0,
++                y: y0,
++                width: region_width,
++                height: region_height,
++            }])
++            .unwrap();
+         timer.record_time("present");
+-        timer.print_times("softbuffer: ");
++        timer.print_times("softbuffer (damage): ");
+ 
+-        // Reset the renderer ready for the next render
+         self.renderer.reset();
+     }
+ }
++
++/// RGBA8 pixels to softbuffer's 0RGB.
++fn swizzle(src: &[u8], out: &mut [u32]) {
++    let (chunks, remainder) = src.as_chunks::<4>();
++    debug_assert_eq!(chunks.len(), out.len());
++    debug_assert_eq!(remainder.len(), 0);
++    for (&[r, g, b, _a], dest) in chunks.iter().zip(out.iter_mut()) {
++        *dest = ((r as u32) << 16) | ((g as u32) << 8) | b as u32;
++    }
++}

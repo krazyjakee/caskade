@@ -112,11 +112,8 @@ pub fn run(
     // The look before the first frame (#90).
     let doc = Rc::clone(&document.inner);
     crate::theme::apply(&mut doc.borrow_mut(), look);
-    let config = WindowConfig::with_attributes(
-        Box::new(document) as _,
-        DioxusNativeWindowRenderer::new(),
-        window,
-    );
+    let renderer = renderer();
+    let config = WindowConfig::with_attributes(Box::new(document) as _, renderer.clone(), window);
     let application = DioxusNativeApplication::new(proxy, event_queue, config);
     if let Err(error) = event_loop.run_app(Loop {
         inner: application,
@@ -124,9 +121,27 @@ pub fn run(
         requests: receiver,
         main: None,
         doc,
+        renderer,
+        paint_cpu: false,
     }) {
         tracing::error!(%error, "the window's event loop failed");
     }
+}
+
+/// The window's renderer (#110): vello_hybrid on a GPU, vello_cpu (which
+/// repaints only damage) where there's none or only a software one.
+/// `CASKADE_RENDERER=cpu` draws on the CPU anyway.
+#[cfg(feature = "auto")]
+fn renderer() -> DioxusNativeWindowRenderer {
+    DioxusNativeWindowRenderer::with_options(dioxus_native::RendererOptions {
+        cpu_only: std::env::var("CASKADE_RENDERER").is_ok_and(|renderer| renderer == "cpu"),
+        ..Default::default()
+    })
+}
+
+#[cfg(not(feature = "auto"))]
+fn renderer() -> DioxusNativeWindowRenderer {
+    DioxusNativeWindowRenderer::new()
 }
 
 struct Loop<S> {
@@ -137,6 +152,10 @@ struct Loop<S> {
     main: Option<WindowId>,
     /// Its document, for the look.
     doc: Rc<RefCell<BaseDocument>>,
+    /// The window's renderer, to tell when it draws on the CPU.
+    renderer: DioxusNativeWindowRenderer,
+    /// Whether the document says so (`data-paint="cpu"`).
+    paint_cpu: bool,
 }
 
 impl<S: Shell> Loop<S> {
@@ -216,6 +235,24 @@ impl<S: Shell> ApplicationHandler for Loop<S> {
     }
 
     fn about_to_wait(&mut self, event_loop: &dyn ActiveEventLoop) {
+        // Without a usable GPU the window falls back to the CPU as it
+        // starts (#110): ambient loops pause, as in a webview painting on
+        // the CPU.
+        if !self.paint_cpu && self.renderer.is_cpu() {
+            self.paint_cpu = true;
+            tracing::info!(
+                reason = self
+                    .renderer
+                    .fallback_reason()
+                    .as_deref()
+                    .unwrap_or("built for it"),
+                "the window draws on the CPU"
+            );
+            crate::theme::mark_cpu_paint(&mut self.doc.borrow_mut());
+            if let Some(window) = crate::shell::main_window() {
+                window.request_redraw();
+            }
+        }
         self.inner.about_to_wait(event_loop);
     }
 

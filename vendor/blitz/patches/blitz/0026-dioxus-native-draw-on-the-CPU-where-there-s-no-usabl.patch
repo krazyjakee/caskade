@@ -1,0 +1,334 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jake Cattrall <krazyjakee@gmail.com>
+Date: Tue, 10 Nov 2026 15:18:18 +0000
+Subject: [PATCH] dioxus-native: draw on the CPU where there's no usable GPU
+
+The gpu-cpu-fallback feature builds vello_hybrid and vello_cpu (over
+softbuffer) and picks at run time: vello_hybrid, refusing software
+adapters; when it can't start (no adapter, device or surface, or only
+llvmpipe, lavapipe or WARP) the window switches to vello_cpu on the same
+window, which repaints only damage. RendererOptions::cpu_only skips the
+GPU. DioxusNativeWindowRenderer::is_cpu and fallback_reason say which is
+drawing, so an app can lighten its look.
+
+Both backends paint through anyrender's DynScenePainter.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ packages/dioxus-native/Cargo.toml             |   2 +
+ packages/dioxus-native/src/dioxus_renderer.rs |  47 ++++-
+ .../dioxus-native/src/fallback_renderer.rs    | 191 ++++++++++++++++++
+ packages/dioxus-native/src/lib.rs             |   3 +
+ 4 files changed, 241 insertions(+), 2 deletions(-)
+ create mode 100644 packages/dioxus-native/src/fallback_renderer.rs
+
+diff --git a/packages/dioxus-native/Cargo.toml b/packages/dioxus-native/Cargo.toml
+index a647c3a2..3cab5454 100644
+--- a/packages/dioxus-native/Cargo.toml
++++ b/packages/dioxus-native/Cargo.toml
+@@ -34,6 +34,8 @@ data-uri = ["blitz-shell/data-uri"]
+ # Renderer features
+ vello = ["dep:anyrender_vello", "dep:wgpu_context"]
+ vello-hybrid = ["dep:anyrender_vello_hybrid", "dep:wgpu_context"]
++# vello_hybrid on a GPU, vello_cpu (repainting only damage) without a usable one.
++gpu-cpu-fallback = ["vello-hybrid", "vello-cpu-softbuffer"]
+ skia = ["dep:anyrender_skia"]
+ skia-pixels = ["skia-raster-base", "anyrender_skia/pixels_window_renderer"]
+ skia-softbuffer = ["skia-raster-base", "anyrender_skia/softbuffer_window_renderer"]
+diff --git a/packages/dioxus-native/src/dioxus_renderer.rs b/packages/dioxus-native/src/dioxus_renderer.rs
+index 1f509bbb..4154eb16 100644
+--- a/packages/dioxus-native/src/dioxus_renderer.rs
++++ b/packages/dioxus-native/src/dioxus_renderer.rs
+@@ -7,7 +7,13 @@ use peniko::Color;
+ 
+ // Renderer imports
+ cfg_if::cfg_if! {
+-    if #[cfg(feature = "vello")] {
++    if #[cfg(feature = "gpu-cpu-fallback")] {
++        use crate::fallback_renderer::FallbackWindowRenderer as InnerRenderer;
++        pub use anyrender_vello_hybrid::{
++            VelloHybridRendererOptions as InnerRendererOptions,
++            wgpu::{Features, Limits},
++        };
++    } else if #[cfg(feature = "vello")] {
+         pub use anyrender_vello::{
+             VelloRendererOptions as InnerRendererOptions, VelloWindowRenderer as InnerRenderer,
+             wgpu::{Features, Limits},
+@@ -44,6 +50,10 @@ pub struct RendererOptions {
+     /// wgpu limits to request from the GPU adapter.
+     #[cfg(any(feature = "vello", feature = "vello-hybrid"))]
+     pub limits: Option<Limits>,
++    /// Draw on the CPU even where a GPU renderer would start (only with
++    /// `gpu-cpu-fallback`).
++    #[cfg(feature = "gpu-cpu-fallback")]
++    pub cpu_only: bool,
+ }
+ 
+ #[derive(Clone)]
+@@ -83,7 +93,16 @@ impl DioxusNativeWindowRenderer {
+         config.composite_alpha_mode = options.alpha_mode;
+ 
+         cfg_if::cfg_if! {
+-            if #[cfg(any(feature = "vello", feature = "vello-hybrid"))] {
++            if #[cfg(feature = "gpu-cpu-fallback")] {
++                let mut inner_options: InnerRendererOptions = config.into();
++                if let Some(features) = options.features {
++                    inner_options = inner_options.features(features);
++                }
++                if let Some(limits) = options.limits {
++                    inner_options = inner_options.limits(limits);
++                }
++                let inner_renderer = InnerRenderer::new(inner_options, options.cpu_only);
++            } else if #[cfg(any(feature = "vello", feature = "vello-hybrid"))] {
+                 let mut inner_options: InnerRendererOptions = config.into();
+                 if let Some(features) = options.features {
+                     inner_options = inner_options.features(features);
+@@ -100,6 +119,30 @@ impl DioxusNativeWindowRenderer {
+         Self::with_inner_renderer(inner_renderer)
+     }
+ 
++    /// Whether the window is drawn on the CPU: always with a CPU renderer;
++    /// with `gpu-cpu-fallback`, once no usable GPU was found (known after
++    /// the window resumes) or when asked for.
++    pub fn is_cpu(&self) -> bool {
++        cfg_if::cfg_if! {
++            if #[cfg(feature = "gpu-cpu-fallback")] {
++                self.inner.borrow().is_cpu()
++            } else {
++                cfg!(any(feature = "vello-cpu-base", feature = "skia-raster-base"))
++            }
++        }
++    }
++
++    /// With `gpu-cpu-fallback`, why the window is drawn on the CPU.
++    pub fn fallback_reason(&self) -> Option<String> {
++        cfg_if::cfg_if! {
++            if #[cfg(feature = "gpu-cpu-fallback")] {
++                self.inner.borrow().fallback_reason().map(str::to_string)
++            } else {
++                None
++            }
++        }
++    }
++
+     fn with_inner_renderer(inner_renderer: InnerRenderer) -> Self {
+         Self {
+             inner: Rc::new(RefCell::new(inner_renderer)),
+diff --git a/packages/dioxus-native/src/fallback_renderer.rs b/packages/dioxus-native/src/fallback_renderer.rs
+new file mode 100644
+index 00000000..8693c58a
+--- /dev/null
++++ b/packages/dioxus-native/src/fallback_renderer.rs
+@@ -0,0 +1,191 @@
++//! The `gpu-cpu-fallback` renderer: vello_hybrid on a GPU, and vello_cpu
++//! where there's no usable one (no adapter, no device or surface, or only a
++//! software adapter such as llvmpipe, lavapipe or WARP, which rasterise in
++//! software through a GPU API and present the whole window every frame).
++//! vello_cpu repaints only damage, so an animation costs its own rectangle.
++
++use std::any::Any;
++use std::sync::Arc;
++
++use anyrender::{DynScenePainter, RenderContext, RendererConfig, WindowHandle, WindowRenderer};
++use anyrender_vello_cpu::VelloCpuWindowRenderer;
++use anyrender_vello_hybrid::{VelloHybridRendererOptions, VelloHybridWindowRenderer};
++
++#[allow(clippy::large_enum_variant)]
++enum Active {
++    Gpu(VelloHybridWindowRenderer),
++    Cpu(VelloCpuWindowRenderer),
++}
++
++pub struct FallbackWindowRenderer {
++    active: Active,
++    /// The CPU renderer's settings (the base colour).
++    cpu_config: RendererConfig,
++    /// The window and size of the last resume, to start the CPU renderer on.
++    window: Option<(Arc<dyn WindowHandle>, u32, u32)>,
++    /// Why the GPU renderer wasn't used, once it wasn't.
++    fallback_reason: Option<String>,
++}
++
++impl FallbackWindowRenderer {
++    /// Tries vello_hybrid with `options` first (refusing software adapters),
++    /// or goes straight to vello_cpu when `cpu_only`.
++    pub fn new(options: VelloHybridRendererOptions, cpu_only: bool) -> Self {
++        let mut cpu_config = RendererConfig::default();
++        cpu_config.base_color = Some(options.base_color);
++        let active = if cpu_only {
++            Active::Cpu(VelloCpuWindowRenderer::with_options(cpu_config.clone()))
++        } else {
++            Active::Gpu(VelloHybridWindowRenderer::with_options(
++                options.allow_software_adapter(false),
++            ))
++        };
++        Self {
++            active,
++            cpu_config,
++            window: None,
++            fallback_reason: cpu_only.then(|| "asked for".to_string()),
++        }
++    }
++
++    /// Whether the window is drawn on the CPU.
++    pub fn is_cpu(&self) -> bool {
++        matches!(self.active, Active::Cpu(_))
++    }
++
++    /// Why the window is drawn on the CPU, when it is.
++    pub fn fallback_reason(&self) -> Option<&str> {
++        self.fallback_reason.as_deref()
++    }
++
++    /// Switches to vello_cpu for good, on the window the GPU renderer had.
++    fn fall_back(&mut self, why: String) {
++        #[cfg(feature = "tracing")]
++        tracing::warn!("no usable GPU ({why}): drawing on the CPU");
++        self.fallback_reason = Some(why);
++        let mut cpu = VelloCpuWindowRenderer::with_options(self.cpu_config.clone());
++        if let Some((window, width, height)) = self.window.clone() {
++            cpu.resume(window, width, height, || {});
++        }
++        self.active = Active::Cpu(cpu);
++    }
++}
++
++impl RenderContext for FallbackWindowRenderer {
++    fn try_register_custom_resource(
++        &mut self,
++        resource: Box<dyn Any>,
++    ) -> Result<anyrender::ResourceId, anyrender::RegisterResourceError> {
++        match &mut self.active {
++            Active::Gpu(r) => r.try_register_custom_resource(resource),
++            Active::Cpu(r) => r.try_register_custom_resource(resource),
++        }
++    }
++
++    fn unregister_resource(&mut self, resource_id: anyrender::ResourceId) {
++        match &mut self.active {
++            Active::Gpu(r) => r.unregister_resource(resource_id),
++            Active::Cpu(r) => r.unregister_resource(resource_id),
++        }
++    }
++
++    fn renderer_specific_context(&self) -> Option<Box<dyn Any>> {
++        match &self.active {
++            Active::Gpu(r) => r.renderer_specific_context(),
++            Active::Cpu(r) => r.renderer_specific_context(),
++        }
++    }
++}
++
++impl WindowRenderer for FallbackWindowRenderer {
++    type ScenePainter<'a>
++        = DynScenePainter<'a>
++    where
++        Self: 'a;
++
++    fn resume<F: FnOnce() + 'static>(
++        &mut self,
++        window: Arc<dyn WindowHandle>,
++        width: u32,
++        height: u32,
++        on_ready: F,
++    ) {
++        self.window = Some((window.clone(), width, height));
++        match &mut self.active {
++            Active::Gpu(r) => r.resume(window, width, height, on_ready),
++            Active::Cpu(r) => r.resume(window, width, height, on_ready),
++        }
++    }
++
++    fn complete_resume(&mut self) -> bool {
++        match &mut self.active {
++            Active::Gpu(r) => {
++                if r.complete_resume() {
++                    return true;
++                }
++                let Some(why) = r.failure().map(str::to_string) else {
++                    return false;
++                };
++                self.fall_back(why);
++                self.complete_resume()
++            }
++            Active::Cpu(r) => r.complete_resume(),
++        }
++    }
++
++    fn suspend(&mut self) {
++        match &mut self.active {
++            Active::Gpu(r) => r.suspend(),
++            Active::Cpu(r) => r.suspend(),
++        }
++    }
++
++    fn is_active(&self) -> bool {
++        match &self.active {
++            Active::Gpu(r) => r.is_active(),
++            Active::Cpu(r) => r.is_active(),
++        }
++    }
++
++    fn is_pending(&self) -> bool {
++        match &self.active {
++            Active::Gpu(r) => r.is_pending(),
++            Active::Cpu(r) => r.is_pending(),
++        }
++    }
++
++    fn set_size(&mut self, width: u32, height: u32) {
++        if let Some((_, w, h)) = &mut self.window {
++            (*w, *h) = (width, height);
++        }
++        match &mut self.active {
++            Active::Gpu(r) => r.set_size(width, height),
++            Active::Cpu(r) => r.set_size(width, height),
++        }
++    }
++
++    fn render<F: FnOnce(&mut Self::ScenePainter<'_>)>(&mut self, draw_fn: F) {
++        match &mut self.active {
++            Active::Gpu(r) => r.render(|p| draw_fn(&mut DynScenePainter::new(p))),
++            Active::Cpu(r) => r.render(|p| draw_fn(&mut DynScenePainter::new(p))),
++        }
++    }
++
++    fn supports_damage(&self) -> bool {
++        match &self.active {
++            Active::Gpu(r) => r.supports_damage(),
++            Active::Cpu(r) => r.supports_damage(),
++        }
++    }
++
++    fn render_damage<F: FnOnce(&mut Self::ScenePainter<'_>)>(
++        &mut self,
++        damage: peniko::kurbo::Rect,
++        draw_fn: F,
++    ) {
++        match &mut self.active {
++            Active::Gpu(r) => r.render_damage(damage, |p| draw_fn(&mut DynScenePainter::new(p))),
++            Active::Cpu(r) => r.render_damage(damage, |p| draw_fn(&mut DynScenePainter::new(p))),
++        }
++    }
++}
+diff --git a/packages/dioxus-native/src/lib.rs b/packages/dioxus-native/src/lib.rs
+index a09b0b56..f60b5b1f 100644
+--- a/packages/dioxus-native/src/lib.rs
++++ b/packages/dioxus-native/src/lib.rs
+@@ -14,6 +14,8 @@ mod config;
+ mod contexts;
+ mod dioxus_application;
+ mod dioxus_renderer;
++#[cfg(feature = "gpu-cpu-fallback")]
++mod fallback_renderer;
+ mod event_handlers;
+ mod hooks;
+ mod link_handler;
+@@ -231,6 +233,7 @@ pub fn launch_cfg_with_props<P: Clone + 'static, M: 'static>(
+         alpha_mode: config.alpha_mode,
+         features,
+         limits,
++        ..Default::default()
+     });
+     #[cfg(not(any(feature = "vello", feature = "vello-hybrid")))]
+     let renderer = DioxusNativeWindowRenderer::with_options(RendererOptions {

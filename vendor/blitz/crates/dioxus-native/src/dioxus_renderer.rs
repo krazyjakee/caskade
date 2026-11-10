@@ -7,7 +7,13 @@ use peniko::Color;
 
 // Renderer imports
 cfg_if::cfg_if! {
-    if #[cfg(feature = "vello")] {
+    if #[cfg(feature = "gpu-cpu-fallback")] {
+        use crate::fallback_renderer::FallbackWindowRenderer as InnerRenderer;
+        pub use anyrender_vello_hybrid::{
+            VelloHybridRendererOptions as InnerRendererOptions,
+            wgpu::{Features, Limits},
+        };
+    } else if #[cfg(feature = "vello")] {
         pub use anyrender_vello::{
             VelloRendererOptions as InnerRendererOptions, VelloWindowRenderer as InnerRenderer,
             wgpu::{Features, Limits},
@@ -44,6 +50,10 @@ pub struct RendererOptions {
     /// wgpu limits to request from the GPU adapter.
     #[cfg(any(feature = "vello", feature = "vello-hybrid"))]
     pub limits: Option<Limits>,
+    /// Draw on the CPU even where a GPU renderer would start (only with
+    /// `gpu-cpu-fallback`).
+    #[cfg(feature = "gpu-cpu-fallback")]
+    pub cpu_only: bool,
 }
 
 #[derive(Clone)]
@@ -83,7 +93,16 @@ impl DioxusNativeWindowRenderer {
         config.composite_alpha_mode = options.alpha_mode;
 
         cfg_if::cfg_if! {
-            if #[cfg(any(feature = "vello", feature = "vello-hybrid"))] {
+            if #[cfg(feature = "gpu-cpu-fallback")] {
+                let mut inner_options: InnerRendererOptions = config.into();
+                if let Some(features) = options.features {
+                    inner_options = inner_options.features(features);
+                }
+                if let Some(limits) = options.limits {
+                    inner_options = inner_options.limits(limits);
+                }
+                let inner_renderer = InnerRenderer::new(inner_options, options.cpu_only);
+            } else if #[cfg(any(feature = "vello", feature = "vello-hybrid"))] {
                 let mut inner_options: InnerRendererOptions = config.into();
                 if let Some(features) = options.features {
                     inner_options = inner_options.features(features);
@@ -98,6 +117,30 @@ impl DioxusNativeWindowRenderer {
         }
 
         Self::with_inner_renderer(inner_renderer)
+    }
+
+    /// Whether the window is drawn on the CPU: always with a CPU renderer;
+    /// with `gpu-cpu-fallback`, once no usable GPU was found (known after
+    /// the window resumes) or when asked for.
+    pub fn is_cpu(&self) -> bool {
+        cfg_if::cfg_if! {
+            if #[cfg(feature = "gpu-cpu-fallback")] {
+                self.inner.borrow().is_cpu()
+            } else {
+                cfg!(any(feature = "vello-cpu-base", feature = "skia-raster-base"))
+            }
+        }
+    }
+
+    /// With `gpu-cpu-fallback`, why the window is drawn on the CPU.
+    pub fn fallback_reason(&self) -> Option<String> {
+        cfg_if::cfg_if! {
+            if #[cfg(feature = "gpu-cpu-fallback")] {
+                self.inner.borrow().fallback_reason().map(str::to_string)
+            } else {
+                None
+            }
+        }
     }
 
     fn with_inner_renderer(inner_renderer: InnerRenderer) -> Self {

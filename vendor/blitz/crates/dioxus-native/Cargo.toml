@@ -27,6 +27,7 @@ default = ["accessibility", "hot-reload", "net", "html", "svg", "system-fonts", 
 file-dialog = ["blitz-shell/file-dialog"]
 floats = ["blitz-dom/floats"]
 font-embolden = ["blitz-paint/font-embolden"]
+gpu-cpu-fallback = ["vello-hybrid", "vello-cpu-softbuffer"]
 hot-reload = ["dep:dioxus-devtools"]
 html = ["dep:blitz-html"]
 log-frame-times = ["anyrender_vello_cpu?/log_frame_times", "anyrender_vello?/log_frame_times", "anyrender_vello_hybrid?/log_frame_times", "anyrender_skia?/log_frame_times"]

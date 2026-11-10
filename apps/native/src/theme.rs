@@ -262,6 +262,13 @@ pub fn apply_pending(doc: &mut BaseDocument) -> bool {
     true
 }
 
+/// `data-paint="cpu"` on the root: the window draws on the CPU (#110), so
+/// the tokens' `paint-cpu` set pauses ambient loops.
+pub fn mark_cpu_paint(doc: &mut BaseDocument) {
+    let root = doc.root_element().id;
+    doc.mutate().set_attribute(root, qual("data-paint"), "cpu");
+}
+
 fn qual(name: &str) -> QualName {
     QualName::new(None, ns!(), LocalName::from(name))
 }

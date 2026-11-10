@@ -117,6 +117,9 @@ pub struct VelloCpuScenePainter {
     pub(crate) image_cache: ImageCache,
     layer_stack: Vec<LayerKind>,
     glyph_caching: bool,
+    /// Applied before every transform: a damaged frame renders a region of
+    /// the window into a region-sized context, shifted to its origin.
+    pub(crate) offset: Affine,
 }
 
 impl VelloCpuScenePainter {
@@ -131,6 +134,7 @@ impl VelloCpuScenePainter {
             image_cache: ImageCache::new(config),
             layer_stack: Vec::new(),
             glyph_caching: false,
+            offset: Affine::IDENTITY,
         }
     }
 
@@ -206,6 +210,7 @@ impl PaintScene for VelloCpuScenePainter {
             None
         };
 
+        let transform = self.offset * transform;
         self.render_ctx.set_transform(transform);
         self.render_ctx.set_fill_rule(fill);
         self.layer_stack.push(LayerKind::Layer);
@@ -219,6 +224,7 @@ impl PaintScene for VelloCpuScenePainter {
     }
 
     fn push_clip_layer(&mut self, fill: Fill, transform: Affine, clip: &impl Shape) {
+        let transform = self.offset * transform;
         self.render_ctx.set_transform(transform);
         self.render_ctx.set_fill_rule(fill);
         if let Some(rect) = clip.as_rect() {
@@ -249,6 +255,7 @@ impl PaintScene for VelloCpuScenePainter {
         brush_transform: Option<Affine>,
         shape: &impl Shape,
     ) {
+        let transform = self.offset * transform;
         self.render_ctx.set_transform(transform);
         self.render_ctx.set_stroke(style.clone());
         let paint = self.convert_paint(paint.into());
@@ -267,6 +274,7 @@ impl PaintScene for VelloCpuScenePainter {
         brush_transform: Option<Affine>,
         shape: &impl Shape,
     ) {
+        let transform = self.offset * transform;
         self.render_ctx.set_transform(transform);
         self.render_ctx.set_fill_rule(style);
         let paint = self.convert_paint(paint.into());
@@ -295,6 +303,7 @@ impl PaintScene for VelloCpuScenePainter {
         glyph_transform: Option<Affine>,
         glyphs: impl Iterator<Item = anyrender::Glyph> + Clone,
     ) {
+        let transform = self.offset * transform;
         self.render_ctx.set_transform(transform);
         let paint = self.convert_paint(paint.into());
         self.render_ctx.set_paint(paint);
@@ -347,6 +356,7 @@ impl PaintScene for VelloCpuScenePainter {
         radius: f64,
         std_dev: f64,
     ) {
+        let transform = self.offset * transform;
         self.render_ctx.set_transform(transform);
         self.render_ctx.set_paint(PaintType::Solid(color));
         self.render_ctx.reset_paint_transform();

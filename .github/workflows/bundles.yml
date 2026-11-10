@@ -1,0 +1,19 @@
+name: bundles
+# Builds the release's bundles from any commit (Actions → bundles → Run
+# workflow), as workflow artifacts only: no tag, no draft release, no
+# updater signatures and no secrets. For checking installers before a
+# release, e.g. the native app inside them (#110). See docs/RELEASING.md.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bundles-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    uses: ./.github/workflows/build-bundles.yml
+    with:
+      ref: ${{ github.sha }}
+      version: 0.0.0-${{ github.sha }}

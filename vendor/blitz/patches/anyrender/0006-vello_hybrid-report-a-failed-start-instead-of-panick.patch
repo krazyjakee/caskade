@@ -1,0 +1,253 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jake Cattrall <krazyjakee@gmail.com>
+Date: Tue, 10 Nov 2026 15:13:43 +0000
+Subject: [PATCH] vello_hybrid: report a failed start instead of panicking, and
+ optionally refuse software adapters
+
+When no surface, adapter, device or surface renderer can be had, resume
+leaves the renderer in a failed state (complete_resume returns false,
+failure() says why) and still calls on_ready, instead of panicking. With
+allow_software_adapter(false), starting on wgpu's DeviceType::Cpu (llvmpipe,
+lavapipe, WARP) fails the same way, so an embedder can draw with a CPU
+renderer that repaints only damage instead of rasterising in software
+through a GPU API.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../src/window_renderer.rs                    | 106 ++++++++++++++----
+ 1 file changed, 85 insertions(+), 21 deletions(-)
+
+diff --git a/crates/anyrender_vello_hybrid/src/window_renderer.rs b/crates/anyrender_vello_hybrid/src/window_renderer.rs
+index d509963..1abbe13 100644
+--- a/crates/anyrender_vello_hybrid/src/window_renderer.rs
++++ b/crates/anyrender_vello_hybrid/src/window_renderer.rs
+@@ -52,9 +52,12 @@ struct InitOutput {
+ enum RenderState {
+     Suspended,
+     Pending {
+-        receiver: oneshot::Receiver<InitOutput>,
++        receiver: oneshot::Receiver<Result<InitOutput, String>>,
+     },
+     Active(ActiveRenderState),
++    /// Starting failed: no adapter, device or surface (or only a software
++    /// adapter where one isn't allowed), with why.
++    Failed(String),
+ }
+ 
+ #[derive(Clone)]
+@@ -77,6 +80,11 @@ pub struct VelloHybridRendererOptions {
+     ///
+     /// Note: Vello considers atlas-backed glyph caching experimental.
+     pub glyph_caching: bool,
++    /// Whether a software adapter (wgpu's `DeviceType::Cpu`: llvmpipe,
++    /// lavapipe, WARP) may draw the window. When not, starting on one fails
++    /// ([`VelloHybridWindowRenderer::failure`]), so the embedder can use a
++    /// CPU renderer instead. Defaults to `true`.
++    pub allow_software_adapter: bool,
+ }
+ 
+ impl Default for VelloHybridRendererOptions {
+@@ -89,6 +97,7 @@ impl Default for VelloHybridRendererOptions {
+             composite_alpha_mode: anyrender::CompositeAlphaMode::Auto,
+             desired_maximum_frame_latency: 1,
+             glyph_caching: false,
++            allow_software_adapter: true,
+         }
+     }
+ }
+@@ -134,6 +143,14 @@ impl VelloHybridRendererOptions {
+         }
+     }
+ 
++    /// See [`Self::allow_software_adapter`](VelloHybridRendererOptions#structfield.allow_software_adapter).
++    pub const fn allow_software_adapter(self, allow_software_adapter: bool) -> Self {
++        Self {
++            allow_software_adapter,
++            ..self
++        }
++    }
++
+     pub const fn desired_maximum_frame_latency(self, desired_maximum_frame_latency: u32) -> Self {
+         Self {
+             desired_maximum_frame_latency,
+@@ -182,6 +199,15 @@ pub struct VelloHybridWindowRenderer {
+     last_present: Option<std::time::Instant>,
+ }
+ impl VelloHybridWindowRenderer {
++    /// Why the last resume failed, if it did: then `complete_resume` returns
++    /// `false` and the renderer stays inactive until suspended and resumed.
++    pub fn failure(&self) -> Option<&str> {
++        match &self.render_state {
++            RenderState::Failed(why) => Some(why),
++            _ => None,
++        }
++    }
++
+     #[allow(clippy::new_without_default)]
+     pub fn new() -> Self {
+         Self::with_options(VelloHybridRendererOptions::default())
+@@ -229,7 +255,7 @@ impl RenderContext for VelloHybridWindowRenderer {
+             RenderState::Active(state) => {
+                 Some(Box::new(state.render_surface.device_handle.clone()) as _)
+             }
+-            RenderState::Suspended => None,
++            RenderState::Suspended | RenderState::Failed(_) => None,
+             RenderState::Pending { .. } => None,
+         }
+     }
+@@ -298,7 +324,10 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+         // construction). Calling while `Pending` or `Active` is a state-machine bug
+         // in the embedder: it would orphan the in-flight init's `WGPUContext` and
+         // pay for a fresh adapter+device init on the fallback path below.
+-        if !matches!(self.render_state, RenderState::Suspended) {
++        if !matches!(
++            self.render_state,
++            RenderState::Suspended | RenderState::Failed(_)
++        ) {
+             // #[cfg(feature = "tracing")]
+             // tracing::warn!("WindowRenderer::resume called from non-Suspended state");
+             return;
+@@ -313,10 +342,15 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+         let render_settings = self.config.render_settings;
+         self.scene = VelloHybridScene::new_with(width as u16, height as u16, render_settings.level);
+ 
+-        let surface = self
+-            .wgpu_context
+-            .create_surface(window_handle)
+-            .expect("Error creating surface");
++        let surface = match self.wgpu_context.create_surface(window_handle) {
++            Ok(surface) => surface,
++            Err(error) => {
++                self.render_state = RenderState::Failed(format!("no surface: {error}"));
++                on_ready();
++                return;
++            }
++        };
++        let allow_software_adapter = self.config.allow_software_adapter;
+         let instance = self.wgpu_context.instance.clone();
+         let extra_features = self.wgpu_context.extra_features();
+         let override_limits = self.wgpu_context.override_limits();
+@@ -344,17 +378,33 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+         spawn_init(async move {
+             let device_handle = match existing_device_handle {
+                 Some(device_handle) => device_handle,
+-                None => DeviceHandle::new_from_compatible_surface(
++                None => match DeviceHandle::new_from_compatible_surface(
+                     instance,
+                     Some(&surface),
+                     extra_features,
+                     override_limits,
+                 )
+                 .await
+-                .expect("Error creating DeviceHandle"),
++                {
++                    Ok(device_handle) => device_handle,
++                    Err(error) => {
++                        let _ = sender.send(Err(format!("no device: {error}")));
++                        on_ready();
++                        return;
++                    }
++                },
+             };
+ 
+             let adapter = &device_handle.adapter;
++            let info = adapter.get_info();
++            if !allow_software_adapter && info.device_type == wgpu::DeviceType::Cpu {
++                let _ = sender.send(Err(format!(
++                    "a software adapter: {} ({:?})",
++                    info.name, info.backend
++                )));
++                on_ready();
++                return;
++            }
+             let caps = surface.get_capabilities(adapter);
+             let mut alpha_modes = caps.alpha_modes;
+ 
+@@ -378,10 +428,12 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+                         first_num.cmp(&second_num)
+                     },
+                 );
+-                composite_alpha_mode = alpha_modes
+-                    .first()
+-                    .copied()
+-                    .expect("Surface didn't report any alpha modes");
++                let Some(&first) = alpha_modes.first() else {
++                    let _ = sender.send(Err("the surface has no alpha modes".into()));
++                    on_ready();
++                    return;
++                };
++                composite_alpha_mode = first;
+             }
+ 
+             // Vello Hybrid emits premultiplied alpha. It renders into an
+@@ -406,7 +458,7 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+             #[cfg(target_vendor = "apple")]
+             let intermediate_texture = None;
+ 
+-            let render_surface = SurfaceRenderer::new(
++            let render_surface = match SurfaceRenderer::new(
+                 surface,
+                 SurfaceRendererConfiguration {
+                     usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+@@ -426,8 +478,14 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+                 },
+                 intermediate_texture,
+                 device_handle,
+-            )
+-            .expect("Error creating SurfaceRenderer");
++            ) {
++                Ok(render_surface) => render_surface,
++                Err(error) => {
++                    let _ = sender.send(Err(format!("no surface renderer: {error}")));
++                    on_ready();
++                    return;
++                }
++            };
+ 
+             let (renderer, resources) = VelloHybridRenderer::new_with(
+                 render_surface.device(),
+@@ -446,7 +504,7 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+                 },
+             );
+ 
+-            let _ = sender.send(InitOutput {
++            let _ = sender.send(Ok(InitOutput {
+                 active: ActiveRenderState {
+                     renderer,
+                     resources,
+@@ -454,7 +512,7 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+                     render_surface,
+                     texture_bindings: FxHashMap::default(),
+                 },
+-            });
++            }));
+             on_ready();
+         });
+     }
+@@ -462,9 +520,13 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+     fn complete_resume(&mut self) -> bool {
+         match &mut self.render_state {
+             RenderState::Active { .. } => true,
+-            RenderState::Suspended => false,
++            RenderState::Suspended | RenderState::Failed(_) => false,
+             RenderState::Pending { receiver } => match receiver.try_recv() {
+-                Ok(Some(InitOutput { active })) => {
++                Ok(Some(Err(why))) => {
++                    self.render_state = RenderState::Failed(why);
++                    false
++                }
++                Ok(Some(Ok(InitOutput { active }))) => {
+                     self.cached_images.clear();
+                     let max = active
+                         .render_surface
+@@ -704,7 +766,9 @@ impl VelloHybridWindowRenderer {
+         // vsync would, when no display paces them (screen off, Xvfb).
+         static FRAME_LIMIT: std::sync::OnceLock<Option<f64>> = std::sync::OnceLock::new();
+         if let Some(hz) = *FRAME_LIMIT.get_or_init(|| {
+-            std::env::var("ANYRENDER_FRAME_LIMIT_HZ").ok().and_then(|v| v.parse().ok())
++            std::env::var("ANYRENDER_FRAME_LIMIT_HZ")
++                .ok()
++                .and_then(|v| v.parse().ok())
+         }) {
+             let period = std::time::Duration::from_secs_f64(1.0 / hz);
+             let now = std::time::Instant::now();

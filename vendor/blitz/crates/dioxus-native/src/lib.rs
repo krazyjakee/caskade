@@ -14,6 +14,8 @@ mod config;
 mod contexts;
 mod dioxus_application;
 mod dioxus_renderer;
+#[cfg(feature = "gpu-cpu-fallback")]
+mod fallback_renderer;
 mod event_handlers;
 mod hooks;
 mod link_handler;
@@ -231,6 +233,7 @@ pub fn launch_cfg_with_props<P: Clone + 'static, M: 'static>(
         alpha_mode: config.alpha_mode,
         features,
         limits,
+        ..Default::default()
     });
     #[cfg(not(any(feature = "vello", feature = "vello-hybrid")))]
     let renderer = DioxusNativeWindowRenderer::with_options(RendererOptions {

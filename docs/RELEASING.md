@@ -14,19 +14,35 @@ you publish the draft: the updater reads
 `https://github.com/krazyjakee/caskade/releases/latest/download/latest.json`,
 and `releases/latest` skips drafts and prereleases.
 
+Every bundle carries both apps: the Tauri app, and the native app
+(`caskade-native`, #110) beside it as a second executable until the cutover
+(BLITZ-33). They install, update and uninstall together. `caskade --native`
+(or `Caskade.AppImage --native`) starts the native one from the same install;
+it is `/usr/bin/caskade-native` from the deb, `caskade-native.exe` in the
+install folder on Windows and `Caskade.app/Contents/MacOS/caskade-native` on
+macOS.
+
 The jobs, in order:
 
 - `prepare` checks the tag, the versions and the signing secrets, and makes
   the draft.
-- `build` (one leg per target) builds with a read-only token and no signing
-  key (`tauri build --no-sign`), and uploads its bundles as workflow
-  artifacts. Build scripts, proc-macros and npm packages run here, so the key
-  never does.
+- `build` (one leg per target, `.github/workflows/build-bundles.yml`) builds
+  the native app for the target, then the Tauri bundles with it inside, with
+  a read-only token and no signing key (`tauri build --no-sign`), and uploads
+  the bundles as workflow artifacts. Build scripts, proc-macros and npm
+  packages run here, so the key never does.
 - `sign` downloads the artifacts and signs the updater bundles with
   `tauri signer sign` from the Tauri CLI version in `pnpm-lock.yaml`. It runs
   no project code. It writes `latest.json` and uploads everything to the
   draft. Only this job and `prepare` see the key.
 - `verify` reads the draft back and checks `latest.json` against it.
+
+To check the bundles of any commit before tagging, run the `bundles`
+workflow (Actions → bundles → Run workflow, or
+`gh workflow run bundles.yml --repo krazyjakee/caskade --ref master`). It
+runs the same build legs and leaves the bundles as the run's artifacts
+(`bundles-<target>`, kept 7 days): no tag, no draft, no signatures, no
+secrets.
 
 ## One-time setup
 

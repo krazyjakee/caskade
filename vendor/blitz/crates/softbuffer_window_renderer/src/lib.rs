@@ -68,6 +68,9 @@ pub struct SoftbufferWindowRenderer<Renderer: ImageRenderer> {
     config: SoftbufferRendererOptions,
     width: u32,
     height: u32,
+    /// Whether `buffer` holds a complete frame at the current size, which a
+    /// damaged frame repaints part of.
+    has_frame: bool,
 }
 
 impl<Renderer: ImageRenderer> SoftbufferWindowRenderer<Renderer> {
@@ -85,6 +88,7 @@ impl<Renderer: ImageRenderer> SoftbufferWindowRenderer<Renderer> {
             config: SoftbufferRendererOptions::default(),
             width: 0,
             height: 0,
+            has_frame: false,
         }
     }
 
@@ -97,6 +101,7 @@ impl<Renderer: ImageRenderer> SoftbufferWindowRenderer<Renderer> {
             config: config.into(),
             width: 0,
             height: 0,
+            has_frame: false,
         }
     }
 
@@ -111,6 +116,7 @@ impl<Renderer: ImageRenderer> SoftbufferWindowRenderer<Renderer> {
             config: config.try_into()?,
             width: 0,
             height: 0,
+            has_frame: false,
         })
     }
 
@@ -128,7 +134,57 @@ impl<Renderer: ImageRenderer> SoftbufferWindowRenderer<Renderer> {
                 .expect("Invalid Softbuffer renderer configuration"),
             width: 0,
             height: 0,
+            has_frame: false,
         }
+    }
+}
+
+impl<Renderer: ImageRenderer> SoftbufferWindowRenderer<Renderer> {
+    /// Renders and presents a whole frame.
+    fn render_full<F: FnOnce(&mut Renderer::ScenePainter<'_>)>(&mut self, draw_fn: F) {
+        let RenderState::Active(state) = &mut self.render_state else {
+            return;
+        };
+
+        debug_timer!(timer, feature = "log_frame_times");
+
+        let Ok(mut surface_buffer) = state.surface.buffer_mut() else {
+            return;
+        };
+        timer.record_time("buffer_mut");
+
+        // Paint
+        let base_color = self.config.base_color;
+        let width = self.width as f64;
+        let height = self.height as f64;
+
+        let wrapped_draw_fn = |painter: &mut Renderer::ScenePainter<'_>| {
+            painter.fill(
+                peniko::Fill::NonZero,
+                Affine::IDENTITY,
+                base_color,
+                None,
+                &Rect::new(0.0, 0.0, width, height),
+            );
+            draw_fn(painter);
+        };
+
+        self.renderer
+            .render_to_vec(wrapped_draw_fn, &mut self.buffer);
+        timer.record_time("render");
+
+        let out = surface_buffer.as_mut();
+        assert_eq!(self.buffer.len(), out.len() * 4);
+        swizzle(&self.buffer, out);
+        timer.record_time("swizel");
+
+        surface_buffer.present().unwrap();
+        timer.record_time("present");
+        timer.print_times("softbuffer: ");
+        self.has_frame = true;
+
+        // Reset the renderer ready for the next render
+        self.renderer.reset();
     }
 }
 
@@ -168,6 +224,7 @@ impl<Renderer: ImageRenderer> WindowRenderer for SoftbufferWindowRenderer<Render
             surface,
         });
         self.window_handle = Some(window_handle);
+        self.has_frame = false;
 
         self.set_size(width, height);
         on_ready();
@@ -179,11 +236,13 @@ impl<Renderer: ImageRenderer> WindowRenderer for SoftbufferWindowRenderer<Render
 
     fn suspend(&mut self) {
         self.render_state = RenderState::Suspended;
+        self.has_frame = false;
     }
 
     fn set_size(&mut self, physical_width: u32, physical_height: u32) {
         self.width = physical_width;
         self.height = physical_height;
+        self.has_frame = false;
         if let RenderState::Active(state) = &mut self.render_state {
             state
                 .surface
@@ -197,7 +256,37 @@ impl<Renderer: ImageRenderer> WindowRenderer for SoftbufferWindowRenderer<Render
     }
 
     fn render<F: FnOnce(&mut Renderer::ScenePainter<'_>)>(&mut self, draw_fn: F) {
+        self.render_full(draw_fn);
+    }
+
+    fn supports_damage(&self) -> bool {
+        self.has_frame
+            && self.is_active()
+            && self.renderer.supports_region()
+            && self.buffer.len() == self.width as usize * self.height as usize * 4
+    }
+
+    /// Renders only `damage` into the kept frame, and copies and presents
+    /// only that rectangle when the surface's buffer holds the last frame.
+    fn render_damage<F: FnOnce(&mut Renderer::ScenePainter<'_>)>(
+        &mut self,
+        damage: Rect,
+        draw_fn: F,
+    ) {
+        if !self.supports_damage() {
+            return self.render_full(draw_fn);
+        }
         let RenderState::Active(state) = &mut self.render_state else {
+            return;
+        };
+        let x0 = (damage.x0.floor().max(0.0) as u32).min(self.width);
+        let y0 = (damage.y0.floor().max(0.0) as u32).min(self.height);
+        let x1 = (damage.x1.ceil().max(0.0) as u32).min(self.width);
+        let y1 = (damage.y1.ceil().max(0.0) as u32).min(self.height);
+        let (Some(region_width), Some(region_height)) = (
+            NonZero::new(x1.saturating_sub(x0)),
+            NonZero::new(y1.saturating_sub(y0)),
+        ) else {
             return;
         };
 
@@ -208,47 +297,61 @@ impl<Renderer: ImageRenderer> WindowRenderer for SoftbufferWindowRenderer<Render
         };
         timer.record_time("buffer_mut");
 
-        // Paint
         let base_color = self.config.base_color;
-        let width = self.width as f64;
-        let height = self.height as f64;
-
+        let region = Rect::new(x0 as f64, y0 as f64, x1 as f64, y1 as f64);
         let wrapped_draw_fn = |painter: &mut Renderer::ScenePainter<'_>| {
             painter.fill(
                 peniko::Fill::NonZero,
                 Affine::IDENTITY,
                 base_color,
                 None,
-                &Rect::new(0.0, 0.0, width, height),
+                &region,
             );
             draw_fn(painter);
         };
-
         self.renderer
-            .render_to_vec(wrapped_draw_fn, &mut self.buffer);
+            .render_region(region, wrapped_draw_fn, &mut self.buffer);
         timer.record_time("render");
 
+        let age = surface_buffer.age();
         let out = surface_buffer.as_mut();
-
-        let (chunks, remainder) = self.buffer.as_chunks::<4>();
-        assert_eq!(chunks.len(), out.len());
-        assert_eq!(remainder.len(), 0);
-
-        for (&src, dest) in chunks.iter().zip(out.iter_mut()) {
-            let [r, g, b, _a] = src;
-            let r = r as u32;
-            let g = g as u32;
-            let b = b as u32;
-
-            *dest = (r << 16) | (g << 8) | b;
+        if age == 1 {
+            // The buffer holds the last frame: only the region changed.
+            let width = self.width as usize;
+            let (x0, x1) = (x0 as usize, x1 as usize);
+            for y in y0 as usize..y1 as usize {
+                let row = y * width;
+                swizzle(
+                    &self.buffer[(row + x0) * 4..(row + x1) * 4],
+                    &mut out[row + x0..row + x1],
+                );
+            }
+        } else {
+            swizzle(&self.buffer, out);
         }
         timer.record_time("swizel");
 
-        surface_buffer.present().unwrap();
+        surface_buffer
+            .present_with_damage(&[softbuffer::Rect {
+                x: x0,
+                y: y0,
+                width: region_width,
+                height: region_height,
+            }])
+            .unwrap();
         timer.record_time("present");
-        timer.print_times("softbuffer: ");
+        timer.print_times("softbuffer (damage): ");
 
-        // Reset the renderer ready for the next render
         self.renderer.reset();
+    }
+}
+
+/// RGBA8 pixels to softbuffer's 0RGB.
+fn swizzle(src: &[u8], out: &mut [u32]) {
+    let (chunks, remainder) = src.as_chunks::<4>();
+    debug_assert_eq!(chunks.len(), out.len());
+    debug_assert_eq!(remainder.len(), 0);
+    for (&[r, g, b, _a], dest) in chunks.iter().zip(out.iter_mut()) {
+        *dest = ((r as u32) << 16) | ((g as u32) << 8) | b as u32;
     }
 }

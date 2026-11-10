@@ -7,9 +7,11 @@ rust-version.workspace = true
 publish = false
 
 [features]
-default = ["hybrid"]
-# Blitz's renderers (BLITZ-0 measured hybrid): vello_hybrid (its default),
-# vello (GPU compute), vello_cpu and skia.
+default = ["auto"]
+# Blitz's renderers (BLITZ-0 measured hybrid): vello_hybrid on a GPU and
+# vello_cpu without a usable one, chosen as the window opens (#110); or one
+# of vello_hybrid, vello (GPU compute), vello_cpu and skia alone.
+auto = ["dioxus-native/gpu-cpu-fallback"]
 hybrid = ["dioxus-native/vello-hybrid"]
 gpu = ["dioxus-native/vello"]
 cpu = ["dioxus-native/vello-cpu-softbuffer"]
