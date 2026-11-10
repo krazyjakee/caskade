@@ -20,12 +20,12 @@ formatting and i18n checks skip them.
 
 | Repo | Patches | Upstream |
 | --- | --- | --- |
-| blitz | 0001–0005: gradient centring and tiling, inline SVG snapshots, damage-limited repaint of animation frames, `prefers-reduced-motion` | not yet submitted |
+| blitz | 0001–0005: gradient centring and tiling, inline SVG snapshots, damage-limited repaint of animation frames, `prefers-reduced-motion`; 0006–0010: screen readers (ARIA states and properties, bounds, actions routed to DOM events, controls named by their labels, no stray `<main>` around a Dioxus app) | not yet submitted |
 | anyrender | 0001–0002: damage rendering in vello_hybrid; 0003–0004 measurement only (`ANYRENDER_PRESENT_MODE`, `ANYRENDER_FRAME_LIMIT_HZ`) | not yet submitted (0003–0004 never) |
 | stylo | 0001–0002: when a stepped animation next changes, the `prefers-reduced-motion` media feature | not yet submitted |
 
-What each does and why, with measurements: [`docs/spikes/blitz-3.md`](../../docs/spikes/blitz-3.md)
-(#82). When a patch lands upstream, drop it from the series at the next pin
+What each does and why: [`docs/spikes/blitz-3.md`](../../docs/spikes/blitz-3.md)
+(#82, with measurements) and [`docs/spikes/blitz-4.md`](../../docs/spikes/blitz-4.md) (#83). When a patch lands upstream, drop it from the series at the next pin
 bump.
 
 ## Regenerating
@@ -47,8 +47,13 @@ features that enable them. Run it twice and nothing changes.
 1. `vendor/blitz/update.sh <work dir>`, then edit the checkout in
    `<work dir>/<repo>` and commit there (one commit per change, with a
    message that can go upstream).
-2. Export the series again: delete `patches/<repo>/*.patch`, then
-   `git -C <work dir>/<repo> format-patch --no-signature -o vendor/blitz/patches/<repo> <pin>..caskade`.
+2. Export the series again: delete `patches/<repo>/*.patch`, then, from
+   the repo's root,
+   `git -C <work dir>/<repo> format-patch --zero-commit -N --no-signature -o "$PWD/vendor/blitz/patches/<repo>" <pin>..caskade`
+   (`-o` must be absolute: with `-C`, a relative path lands in the
+   checkout). Export before running `update.sh` again: it resets the
+   `caskade` branch to the exported series, and unexported commits are
+   left only in the checkout's reflog.
 3. `vendor/blitz/update.sh <work dir>` and build both:
    `cargo build -p caskade-native` and, in `apps/native-proto`,
    `cargo build --profile proto`.

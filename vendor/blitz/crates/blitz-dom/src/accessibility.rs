@@ -1,7 +1,10 @@
 use crate::{
     BaseDocument, ElementData, Node as BlitzDomNode, NodeData, NodeId as BlitzDomNodeId, local_name,
 };
-use accesskit::{Node as AccessKitNode, NodeId, Role, TreeId, TreeInfo, TreeUpdate};
+use accesskit::{
+    Action, Affine, AriaCurrent, HasPopup, Invalid, Live, Node as AccessKitNode, NodeId,
+    Orientation, Rect, Role, Toggled, TreeId, TreeInfo, TreeUpdate,
+};
 use style::properties::longhands::visibility;
 use stylo_taffy::CopyStyleGetters;
 
@@ -12,6 +15,8 @@ impl BaseDocument {
         let mut hidden_nodes = std::collections::HashSet::new();
         let mut labelled_by_nodes = Vec::new();
         let mut described_by_nodes = Vec::new();
+        let mut id_ref_nodes = Vec::new();
+        let mut labels = Vec::new();
 
         self.visit(|node_id, node| {
             if node.is_hidden_from_accessibility_tree()
@@ -35,6 +40,14 @@ impl BaseDocument {
             }
             if node.attr(local_name!("aria-describedby")).is_some() {
                 described_by_nodes.push(node_id);
+            }
+            if node.data.is_element_with_tag_name(&local_name!("label")) {
+                labels.push(node_id);
+            }
+            if node.attr(local_name!("aria-activedescendant")).is_some()
+                || node.attr(local_name!("aria-controls")).is_some()
+            {
+                id_ref_nodes.push(node_id);
             }
             nodes.insert(node_id, (id, builder));
         });
@@ -81,10 +94,78 @@ impl BaseDocument {
             nodes.insert(node_id, (id, builder));
         }
 
+        // A form control without `aria-label` or `aria-labelledby` is named
+        // by its labels: `<label for>` or the `<label>` around it
+        // (https://www.w3.org/TR/html-aam-1.0/#input-type-text-input-type-password-input-type-number-input-type-search-input-type-tel-input-type-email-input-type-url-and-textarea-element-accessible-name-computation).
+        let mut control_labels: Vec<(BlitzDomNodeId, FlatText)> = Vec::new();
+        for label_id in labels {
+            let Some(control) = self.labelled_control(label_id) else {
+                continue;
+            };
+            let control_node = &self.nodes[control];
+            if control_node.attr(local_name!("aria-label")).is_some()
+                || control_node.attr(local_name!("aria-labelledby")).is_some()
+            {
+                continue;
+            }
+            let index = match control_labels.iter().position(|(id, _)| *id == control) {
+                Some(index) => index,
+                None => {
+                    control_labels.push((control, FlatText::default()));
+                    control_labels.len() - 1
+                }
+            };
+            let text = &mut control_labels[index].1;
+            text.break_word();
+            self.nodes[label_id].write_flat_text_content_except(control, text);
+        }
+        for (control, text) in control_labels {
+            if let Some((_, builder)) = nodes.get_mut(&control)
+                && !text.text.is_empty()
+            {
+                builder.set_label(text.text.as_str());
+            }
+        }
+
+        // `aria-activedescendant` and `aria-controls` name other elements by
+        // id: like the labels above, they need every node built first.
+        for node_id in id_ref_nodes {
+            let Some((id, mut builder)) = nodes.remove(&node_id) else {
+                continue;
+            };
+            let node = &self.nodes[node_id];
+            if let Some(target) = node
+                .attr(local_name!("aria-activedescendant"))
+                .and_then(|id_ref| self.referenced_dom_ids_to_node_ids(id_ref).next())
+                .filter(|target| nodes.contains_key(target))
+            {
+                builder.set_active_descendant(NodeId(target.as_u64()));
+            }
+            if let Some(id_refs) = node.attr(local_name!("aria-controls")) {
+                for target in self.referenced_dom_ids_to_node_ids(id_refs) {
+                    if target == node_id || nodes.contains_key(&target) {
+                        builder.push_controlled(NodeId(target.as_u64()));
+                    }
+                }
+            }
+            nodes.insert(node_id, (id, builder));
+        }
+
         let mut nodes: Vec<_> = nodes
             .into_iter()
             .map(|(_, (id, node))| (id, node))
             .collect();
+        // Bounds are in CSS pixels, relative to the viewport: the window's
+        // transform scales them to the window's physical pixels.
+        let scale = self.viewport.scale_f64();
+        let (width, height) = self.viewport.window_size;
+        window.set_transform(Affine::scale(scale));
+        window.set_bounds(Rect::new(
+            0.0,
+            0.0,
+            width as f64 / scale,
+            height as f64 / scale,
+        ));
         nodes.push((NodeId(u64::MAX), window));
 
         let tree = TreeInfo::new(NodeId(u64::MAX));
@@ -93,6 +174,41 @@ impl BaseDocument {
             nodes,
             tree: Some(tree),
             focus: NodeId(self.focus_node_id.map(|id| id.as_u64()).unwrap_or(u64::MAX)),
+        }
+    }
+
+    /// The form control a `<label>` labels: the element its `for` names, or
+    /// the first labelable element inside it.
+    fn labelled_control(&self, label_id: BlitzDomNodeId) -> Option<BlitzDomNodeId> {
+        let is_labelable = |id: BlitzDomNodeId| {
+            self.nodes[id].element_data().is_some_and(|el| {
+                matches!(
+                    &*el.name.local,
+                    "button" | "input" | "meter" | "output" | "progress" | "select" | "textarea"
+                ) && !(el.name.local == local_name!("input")
+                    && el.attr(local_name!("type")) == Some("hidden"))
+            })
+        };
+        match self.nodes[label_id].attr(local_name!("for")) {
+            Some(for_id) => self
+                .referenced_dom_ids_to_node_ids(for_id.trim_ascii())
+                .next()
+                .filter(|id| is_labelable(*id)),
+            None => {
+                let mut stack: Vec<_> = self.nodes[label_id]
+                    .children
+                    .iter()
+                    .rev()
+                    .copied()
+                    .collect();
+                while let Some(id) = stack.pop() {
+                    if is_labelable(id) {
+                        return Some(id);
+                    }
+                    stack.extend(self.nodes[id].children.iter().rev().copied());
+                }
+                None
+            }
         }
     }
 
@@ -121,8 +237,9 @@ impl BaseDocument {
 
             // TODO: The roles of elements with strong native semantics cannot be overridden; see
             // https://www.w3.org/TR/wai-aria-1.2/#host_general_conflict.
+            // `role` is a list of tokens: the first one known wins.
             let role = role_attr
-                .and_then(role_from_name)
+                .and_then(|roles| roles.split_ascii_whitespace().find_map(role_from_name))
                 .or_else(|| role_from_element_data(element_data))
                 .unwrap_or(Role::Unknown);
 
@@ -139,7 +256,9 @@ impl BaseDocument {
                 builder.set_expanded(aria_expanded);
             }
 
-            if element_data.attr(local_name!("aria-disabled")) == Some("true") {
+            if element_data.attr(local_name!("aria-disabled")) == Some("true")
+                || (is_form_control(&name) && element_data.attr(local_name!("disabled")).is_some())
+            {
                 builder.set_disabled();
             }
 
@@ -166,6 +285,18 @@ impl BaseDocument {
                 builder.set_level(default_level);
             } else if let Some(default_level) = default_level_for_role(role) {
                 builder.set_level(default_level);
+            }
+
+            set_states_and_properties(&mut builder, element_data, &name, role);
+            add_actions(&mut builder, node, element_data, role);
+
+            if let Some(rect) = self.get_client_bounding_rect(node.id) {
+                builder.set_bounds(Rect::new(
+                    rect.x,
+                    rect.y,
+                    rect.x + rect.width,
+                    rect.y + rect.height,
+                ));
             }
 
             builder.set_html_tag(name);
@@ -208,11 +339,21 @@ impl BlitzDomNode {
     }
 
     fn write_flat_text_content(&self, out: &mut FlatText) {
+        self.write_flat_text_content_except(BlitzDomNodeId::default(), out);
+    }
+
+    /// The text content, leaving out the subtree of `except` (a labelled
+    /// control inside its label).
+    fn write_flat_text_content_except(&self, except: BlitzDomNodeId, out: &mut FlatText) {
+        if self.id == except {
+            return;
+        }
         match &self.data {
             NodeData::Text(data) => out.push(&data.content),
             NodeData::Element(..) | NodeData::AnonymousBlock(..) => {
                 for &child_id in &self.children {
-                    self.with(child_id).write_flat_text_content(out);
+                    self.with(child_id)
+                        .write_flat_text_content_except(except, out);
                 }
             }
             _ => {}
@@ -311,7 +452,249 @@ fn role_from_name(name: &str) -> Option<Role> {
         "main" => Some(Role::Main),
         "navigation" => Some(Role::Navigation),
         "search" => Some(Role::Search),
+        "switch" => Some(Role::Switch),
+        "searchbox" => Some(Role::SearchInput),
+        "separator" => Some(Role::Splitter),
+        "meter" => Some(Role::Meter),
+        "figure" => Some(Role::Figure),
+        "table" => Some(Role::Table),
+        "cell" => Some(Role::Cell),
+        "paragraph" => Some(Role::Paragraph),
+        "feed" => Some(Role::Feed),
+        "term" => Some(Role::Term),
+        "generic" | "none" | "presentation" => Some(Role::GenericContainer),
         _ => None,
+    }
+}
+
+fn is_form_control(tag: &str) -> bool {
+    matches!(
+        tag,
+        "button" | "input" | "select" | "textarea" | "option" | "optgroup" | "fieldset"
+    )
+}
+
+fn parse_f64(value: Option<&str>) -> Option<f64> {
+    value
+        .and_then(|value| value.trim_ascii().parse::<f64>().ok())
+        .filter(|value| value.is_finite())
+}
+
+/// ARIA's states and properties, and the native state of form controls
+/// (<https://www.w3.org/TR/wai-aria-1.2/#state_prop_def>,
+/// <https://www.w3.org/TR/html-aam-1.0/>).
+fn set_states_and_properties(
+    builder: &mut AccessKitNode,
+    element_data: &ElementData,
+    tag: &str,
+    role: Role,
+) {
+    let attr = |name| element_data.attr(name);
+    let is_true = |name| attr(name) == Some("true");
+    let input_type = (tag == "input").then(|| attr(local_name!("type")).unwrap_or("text"));
+
+    // Checked and pressed: native checkboxes and radio buttons first.
+    if let Some(checked) = element_data.checkbox_input_checked() {
+        builder.set_toggled(if checked {
+            Toggled::True
+        } else {
+            Toggled::False
+        });
+    } else {
+        let toggled = match role {
+            Role::Button => attr(local_name!("aria-pressed")),
+            _ => attr(local_name!("aria-checked")),
+        };
+        match toggled {
+            Some("true") => builder.set_toggled(Toggled::True),
+            Some("false") => builder.set_toggled(Toggled::False),
+            Some("mixed") => builder.set_toggled(Toggled::Mixed),
+            _ => {}
+        }
+    }
+
+    match attr(local_name!("aria-current")) {
+        Some("page") => builder.set_aria_current(AriaCurrent::Page),
+        Some("step") => builder.set_aria_current(AriaCurrent::Step),
+        Some("location") => builder.set_aria_current(AriaCurrent::Location),
+        Some("date") => builder.set_aria_current(AriaCurrent::Date),
+        Some("time") => builder.set_aria_current(AriaCurrent::Time),
+        Some("false") | Some("") | None => {}
+        Some(_) => builder.set_aria_current(AriaCurrent::True),
+    }
+
+    // Live regions: `aria-live`, or the implicit value of the live roles.
+    let live = match attr(local_name!("aria-live")) {
+        Some("assertive") => Some(Live::Assertive),
+        Some("polite") => Some(Live::Polite),
+        Some("off") => Some(Live::Off),
+        _ => match role {
+            Role::Alert => Some(Live::Assertive),
+            Role::Status | Role::Log => Some(Live::Polite),
+            _ => None,
+        },
+    };
+    if let Some(live) = live {
+        builder.set_live(live);
+    }
+    match attr(local_name!("aria-atomic")) {
+        Some("true") => builder.set_live_atomic(),
+        Some("false") => {}
+        _ if matches!(role, Role::Alert | Role::Status) => builder.set_live_atomic(),
+        _ => {}
+    }
+    if is_true(local_name!("aria-busy")) {
+        builder.set_busy();
+    }
+    if is_true(local_name!("aria-modal")) {
+        builder.set_modal();
+    }
+
+    // Values: `aria-value*`, then the native ones of range controls.
+    let (now, min, max) = match (tag, input_type) {
+        ("progress", _) => {
+            let max = parse_f64(attr(local_name!("max"))).filter(|max| *max > 0.0);
+            (
+                parse_f64(attr(local_name!("value"))),
+                Some(0.0),
+                Some(max.unwrap_or(1.0)),
+            )
+        }
+        ("meter", _) | (_, Some("range" | "number")) => (
+            parse_f64(attr(local_name!("value"))).or_else(|| {
+                element_data
+                    .text_input_data()
+                    .and_then(|input| input.editor.raw_text().trim_ascii().parse().ok())
+            }),
+            parse_f64(attr(local_name!("min"))),
+            parse_f64(attr(local_name!("max"))),
+        ),
+        _ => (None, None, None),
+    };
+    if let Some(now) = parse_f64(attr(local_name!("aria-valuenow"))).or(now) {
+        builder.set_numeric_value(now);
+    }
+    if let Some(min) = parse_f64(attr(local_name!("aria-valuemin"))).or(min) {
+        builder.set_min_numeric_value(min);
+    }
+    if let Some(max) = parse_f64(attr(local_name!("aria-valuemax"))).or(max) {
+        builder.set_max_numeric_value(max);
+    }
+    if let Some(text) = attr(local_name!("aria-valuetext")) {
+        builder.set_value(text);
+    } else if let Some(input) = element_data.text_input_data() {
+        // A password's characters are not read out.
+        if input_type == Some("password") {
+            builder.set_value("\u{2022}".repeat(input.editor.raw_text().chars().count()));
+        } else {
+            builder.set_value(input.editor.raw_text());
+        }
+    }
+    if let Some(placeholder) = attr(local_name!("aria-placeholder")).or_else(|| {
+        matches!(tag, "input" | "textarea").then(|| attr(local_name!("placeholder")))?
+    }) {
+        builder.set_placeholder(placeholder);
+    }
+
+    match attr(local_name!("aria-invalid")) {
+        Some("grammar") => builder.set_invalid(Invalid::Grammar),
+        Some("spelling") => builder.set_invalid(Invalid::Spelling),
+        Some("false") | Some("") | None => {}
+        Some(_) => builder.set_invalid(Invalid::True),
+    }
+    if is_true(local_name!("aria-required"))
+        || (matches!(tag, "input" | "select" | "textarea")
+            && attr(local_name!("required")).is_some())
+    {
+        builder.set_required();
+    }
+    if is_true(local_name!("aria-readonly"))
+        || (matches!(tag, "input" | "textarea") && attr(local_name!("readonly")).is_some())
+    {
+        builder.set_read_only();
+    }
+    if is_true(local_name!("aria-multiselectable"))
+        || (tag == "select" && attr(local_name!("multiple")).is_some())
+    {
+        builder.set_multiselectable();
+    }
+
+    match attr(local_name!("aria-haspopup")) {
+        Some("menu") | Some("true") => builder.set_has_popup(HasPopup::Menu),
+        Some("listbox") => builder.set_has_popup(HasPopup::Listbox),
+        Some("tree") => builder.set_has_popup(HasPopup::Tree),
+        Some("grid") => builder.set_has_popup(HasPopup::Grid),
+        Some("dialog") => builder.set_has_popup(HasPopup::Dialog),
+        _ => {}
+    }
+    match attr(local_name!("aria-orientation")) {
+        Some("horizontal") => builder.set_orientation(Orientation::Horizontal),
+        Some("vertical") => builder.set_orientation(Orientation::Vertical),
+        _ => {}
+    }
+
+    // `aria-posinset` and `aria-setsize` are 1-based, like AccessKit's.
+    let parse_usize =
+        |name| attr(name).and_then(|value: &str| value.trim_ascii().parse::<usize>().ok());
+    if let Some(position) = parse_usize(local_name!("aria-posinset")).filter(|p| *p > 0) {
+        builder.set_position_in_set(position);
+    }
+    if let Some(size) = parse_usize(local_name!("aria-setsize")) {
+        builder.set_size_of_set(size);
+    }
+
+    if role == Role::Link
+        && let Some(href) = attr(local_name!("href"))
+    {
+        builder.set_url(href);
+    }
+}
+
+/// What an assistive technology can do with the element; the shell routes
+/// its requests to DOM events (`UiEvent::Accessibility`).
+fn add_actions(
+    builder: &mut AccessKitNode,
+    node: &BlitzDomNode,
+    element_data: &ElementData,
+    role: Role,
+) {
+    builder.add_action(Action::ScrollIntoView);
+    if builder.is_disabled() {
+        return;
+    }
+    let focusable = node.is_focussable();
+    if focusable {
+        builder.add_action(Action::Focus);
+    }
+    if focusable
+        || matches!(
+            role,
+            Role::Button
+                | Role::DefaultButton
+                | Role::Link
+                | Role::CheckBox
+                | Role::RadioButton
+                | Role::Switch
+                | Role::MenuItem
+                | Role::MenuItemCheckBox
+                | Role::MenuItemRadio
+                | Role::Tab
+                | Role::ListBoxOption
+                | Role::TreeItem
+                | Role::DisclosureTriangle
+                | Role::ComboBox
+        )
+    {
+        builder.add_action(Action::Click);
+    }
+    match element_data.attr(local_name!("aria-expanded")) {
+        Some("true") => builder.add_action(Action::Collapse),
+        Some("false") => builder.add_action(Action::Expand),
+        _ => {}
+    }
+    if matches!(role, Role::Slider | Role::SpinButton) {
+        builder.add_action(Action::Increment);
+        builder.add_action(Action::Decrement);
     }
 }
 

@@ -812,8 +812,12 @@ pub(crate) fn handle_click(
         false
     };
 
-    // If nothing is matched then clear focus
-    if !matched {
+    // If nothing is matched then clear focus, unless the click landed in the
+    // focused element (a screen reader's click on the element it focused).
+    let in_focus = doc.focus_node_id.is_some_and(|focus| {
+        std::iter::successors(Some(target), |id| doc.nodes[*id].parent).any(|id| id == focus)
+    });
+    if !matched && !in_focus {
         generate_focus_events(doc, &mut |doc| doc.clear_focus(), dispatch_event);
     }
 

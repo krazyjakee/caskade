@@ -1691,6 +1691,10 @@ impl BaseDocument {
         if self.style_depends_on_state(state) {
             self.snapshot_node_state_only(node_id);
         }
+        // A checked state is in the accessibility tree.
+        if state.intersects(ElementState::CHECKED) {
+            self.has_changes = true;
+        }
         cb(&mut self.nodes[node_id]);
     }
 
@@ -2137,6 +2141,12 @@ impl BaseDocument {
 
     pub fn set_viewport(&mut self, viewport: Viewport) {
         let changes = DeviceChanges::from_viewports(&self.viewport, &viewport);
+        // The window's size and scale are in the accessibility tree's bounds.
+        if viewport.window_size != self.viewport.window_size
+            || viewport.scale_f64() != self.viewport.scale_f64()
+        {
+            self.has_changes = true;
+        }
         self.viewport = viewport;
         self.queue_device_changes(changes);
     }

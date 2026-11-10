@@ -132,8 +132,11 @@ impl<Rend: WindowRenderer> BlitzApplication<Rend> {
                         accesskit_xplat::WindowEvent::AccessibilityDeactivated => {
                             // TODO
                         }
-                        accesskit_xplat::WindowEvent::ActionRequested(_req) => {
-                            // TODO
+                        accesskit_xplat::WindowEvent::ActionRequested(req) => {
+                            if let Some(event) = crate::accessibility::ui_event_for_request(req) {
+                                window.doc.handle_ui_event(event);
+                                window.request_redraw();
+                            }
                         }
                     }
                 }

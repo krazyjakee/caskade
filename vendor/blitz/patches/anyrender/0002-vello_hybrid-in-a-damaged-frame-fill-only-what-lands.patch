@@ -1,8 +1,8 @@
-From 0bdd2ae40355869f9eb8952d3bd7fe7ea20481bc Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Jake Cattrall <krazyjakee@gmail.com>
 Date: Tue, 10 Nov 2026 03:08:17 +0000
-Subject: [PATCH 2/4] vello_hybrid: in a damaged frame, fill only what lands in
- the damage
+Subject: [PATCH] vello_hybrid: in a damaged frame, fill only what lands in the
+ damage
 
 A big box under the damage (a window-sized background, a status bar) is
 filled as the rectangle where it meets the damage when that draws the same

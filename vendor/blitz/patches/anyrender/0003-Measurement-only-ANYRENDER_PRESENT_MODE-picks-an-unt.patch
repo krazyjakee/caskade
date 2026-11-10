@@ -1,8 +1,8 @@
-From 02373a4dc19fc38aa0057e10d3b3a0cd08a578c3 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Jake Cattrall <krazyjakee@gmail.com>
 Date: Tue, 10 Nov 2026 02:07:06 +0000
-Subject: [PATCH 3/4] Measurement only: ANYRENDER_PRESENT_MODE picks an
- unthrottled present mode
+Subject: [PATCH] Measurement only: ANYRENDER_PRESENT_MODE picks an unthrottled
+ present mode
 
 Not for upstream: lets a benchmark run frames as fast as they render.
 

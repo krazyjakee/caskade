@@ -1,0 +1,517 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: caskade <caskade@localhost>
+Date: Tue, 10 Nov 2026 10:20:58 +0000
+Subject: [PATCH] Expose ARIA states and properties to AccessKit
+
+The AccessKit bridge mapped roles and a handful of attributes (label,
+description, disabled, expanded, hidden, level, selected). Screen readers
+also need the state and value of controls and how regions relate:
+
+- checked and pressed (`aria-checked`, `aria-pressed`, native checkboxes and
+  radio buttons) as `toggled`;
+- `aria-current`, `aria-modal`, `aria-busy`, `aria-invalid`,
+  `aria-required`, `aria-readonly`, `aria-multiselectable`,
+  `aria-haspopup`, `aria-orientation`, `aria-posinset`, `aria-setsize`;
+- live regions: `aria-live` and `aria-atomic`, with the implicit values of
+  `alert`, `status` and `log`;
+- values: `aria-valuenow`/`-valuemin`/`-valuemax`/`-valuetext`, the native
+  values of `<progress>`, `<meter>` and range and number inputs, a text
+  input's value (masked for passwords) and its placeholder;
+- `aria-activedescendant` and `aria-controls`, resolved after every node is
+  built, as `aria-labelledby` is;
+- native `disabled` and `required` on form controls, and a link's URL.
+
+`role` is read as a token list (the first known role wins), and `switch`,
+`searchbox`, `separator`, `meter`, `figure`, `table`, `cell`, `paragraph`,
+`feed`, `term`, `generic`, `none` and `presentation` are mapped.
+
+A checked state or a text input's value changing now marks the tree as
+changed, so the next frame sends it.
+---
+ packages/blitz-dom/src/accessibility.rs       | 238 +++++++++++++++++-
+ packages/blitz-dom/src/document.rs            |   4 +
+ packages/blitz-dom/src/events/keyboard.rs     |   2 +
+ .../blitz-tests/tests/accessibility_states.rs | 130 ++++++++++
+ tests/blitz-tests/tests/all.rs                |   1 +
+ 5 files changed, 372 insertions(+), 3 deletions(-)
+ create mode 100644 tests/blitz-tests/tests/accessibility_states.rs
+
+diff --git a/packages/blitz-dom/src/accessibility.rs b/packages/blitz-dom/src/accessibility.rs
+index a5641359..f08545c0 100644
+--- a/packages/blitz-dom/src/accessibility.rs
++++ b/packages/blitz-dom/src/accessibility.rs
+@@ -1,7 +1,10 @@
+ use crate::{
+     BaseDocument, ElementData, Node as BlitzDomNode, NodeData, NodeId as BlitzDomNodeId, local_name,
+ };
+-use accesskit::{Node as AccessKitNode, NodeId, Role, TreeId, TreeInfo, TreeUpdate};
++use accesskit::{
++    AriaCurrent, HasPopup, Invalid, Live, Node as AccessKitNode, NodeId, Orientation, Role,
++    Toggled, TreeId, TreeInfo, TreeUpdate,
++};
+ use style::properties::longhands::visibility;
+ use stylo_taffy::CopyStyleGetters;
+ 
+@@ -12,6 +15,7 @@ impl BaseDocument {
+         let mut hidden_nodes = std::collections::HashSet::new();
+         let mut labelled_by_nodes = Vec::new();
+         let mut described_by_nodes = Vec::new();
++        let mut id_ref_nodes = Vec::new();
+ 
+         self.visit(|node_id, node| {
+             if node.is_hidden_from_accessibility_tree()
+@@ -36,6 +40,11 @@ impl BaseDocument {
+             if node.attr(local_name!("aria-describedby")).is_some() {
+                 described_by_nodes.push(node_id);
+             }
++            if node.attr(local_name!("aria-activedescendant")).is_some()
++                || node.attr(local_name!("aria-controls")).is_some()
++            {
++                id_ref_nodes.push(node_id);
++            }
+             nodes.insert(node_id, (id, builder));
+         });
+ 
+@@ -81,6 +90,30 @@ impl BaseDocument {
+             nodes.insert(node_id, (id, builder));
+         }
+ 
++        // `aria-activedescendant` and `aria-controls` name other elements by
++        // id: like the labels above, they need every node built first.
++        for node_id in id_ref_nodes {
++            let Some((id, mut builder)) = nodes.remove(&node_id) else {
++                continue;
++            };
++            let node = &self.nodes[node_id];
++            if let Some(target) = node
++                .attr(local_name!("aria-activedescendant"))
++                .and_then(|id_ref| self.referenced_dom_ids_to_node_ids(id_ref).next())
++                .filter(|target| nodes.contains_key(target))
++            {
++                builder.set_active_descendant(NodeId(target.as_u64()));
++            }
++            if let Some(id_refs) = node.attr(local_name!("aria-controls")) {
++                for target in self.referenced_dom_ids_to_node_ids(id_refs) {
++                    if target == node_id || nodes.contains_key(&target) {
++                        builder.push_controlled(NodeId(target.as_u64()));
++                    }
++                }
++            }
++            nodes.insert(node_id, (id, builder));
++        }
++
+         let mut nodes: Vec<_> = nodes
+             .into_iter()
+             .map(|(_, (id, node))| (id, node))
+@@ -121,8 +154,9 @@ impl BaseDocument {
+ 
+             // TODO: The roles of elements with strong native semantics cannot be overridden; see
+             // https://www.w3.org/TR/wai-aria-1.2/#host_general_conflict.
++            // `role` is a list of tokens: the first one known wins.
+             let role = role_attr
+-                .and_then(role_from_name)
++                .and_then(|roles| roles.split_ascii_whitespace().find_map(role_from_name))
+                 .or_else(|| role_from_element_data(element_data))
+                 .unwrap_or(Role::Unknown);
+ 
+@@ -139,7 +173,9 @@ impl BaseDocument {
+                 builder.set_expanded(aria_expanded);
+             }
+ 
+-            if element_data.attr(local_name!("aria-disabled")) == Some("true") {
++            if element_data.attr(local_name!("aria-disabled")) == Some("true")
++                || (is_form_control(&name) && element_data.attr(local_name!("disabled")).is_some())
++            {
+                 builder.set_disabled();
+             }
+ 
+@@ -168,6 +204,8 @@ impl BaseDocument {
+                 builder.set_level(default_level);
+             }
+ 
++            set_states_and_properties(&mut builder, element_data, &name, role);
++
+             builder.set_html_tag(name);
+         } else if node.is_text_node() {
+             builder.set_role(Role::TextRun);
+@@ -311,10 +349,204 @@ fn role_from_name(name: &str) -> Option<Role> {
+         "main" => Some(Role::Main),
+         "navigation" => Some(Role::Navigation),
+         "search" => Some(Role::Search),
++        "switch" => Some(Role::Switch),
++        "searchbox" => Some(Role::SearchInput),
++        "separator" => Some(Role::Splitter),
++        "meter" => Some(Role::Meter),
++        "figure" => Some(Role::Figure),
++        "table" => Some(Role::Table),
++        "cell" => Some(Role::Cell),
++        "paragraph" => Some(Role::Paragraph),
++        "feed" => Some(Role::Feed),
++        "term" => Some(Role::Term),
++        "generic" | "none" | "presentation" => Some(Role::GenericContainer),
+         _ => None,
+     }
+ }
+ 
++fn is_form_control(tag: &str) -> bool {
++    matches!(
++        tag,
++        "button" | "input" | "select" | "textarea" | "option" | "optgroup" | "fieldset"
++    )
++}
++
++fn parse_f64(value: Option<&str>) -> Option<f64> {
++    value
++        .and_then(|value| value.trim_ascii().parse::<f64>().ok())
++        .filter(|value| value.is_finite())
++}
++
++/// ARIA's states and properties, and the native state of form controls
++/// (<https://www.w3.org/TR/wai-aria-1.2/#state_prop_def>,
++/// <https://www.w3.org/TR/html-aam-1.0/>).
++fn set_states_and_properties(
++    builder: &mut AccessKitNode,
++    element_data: &ElementData,
++    tag: &str,
++    role: Role,
++) {
++    let attr = |name| element_data.attr(name);
++    let is_true = |name| attr(name) == Some("true");
++    let input_type = (tag == "input").then(|| attr(local_name!("type")).unwrap_or("text"));
++
++    // Checked and pressed: native checkboxes and radio buttons first.
++    if let Some(checked) = element_data.checkbox_input_checked() {
++        builder.set_toggled(if checked {
++            Toggled::True
++        } else {
++            Toggled::False
++        });
++    } else {
++        let toggled = match role {
++            Role::Button => attr(local_name!("aria-pressed")),
++            _ => attr(local_name!("aria-checked")),
++        };
++        match toggled {
++            Some("true") => builder.set_toggled(Toggled::True),
++            Some("false") => builder.set_toggled(Toggled::False),
++            Some("mixed") => builder.set_toggled(Toggled::Mixed),
++            _ => {}
++        }
++    }
++
++    match attr(local_name!("aria-current")) {
++        Some("page") => builder.set_aria_current(AriaCurrent::Page),
++        Some("step") => builder.set_aria_current(AriaCurrent::Step),
++        Some("location") => builder.set_aria_current(AriaCurrent::Location),
++        Some("date") => builder.set_aria_current(AriaCurrent::Date),
++        Some("time") => builder.set_aria_current(AriaCurrent::Time),
++        Some("false") | Some("") | None => {}
++        Some(_) => builder.set_aria_current(AriaCurrent::True),
++    }
++
++    // Live regions: `aria-live`, or the implicit value of the live roles.
++    let live = match attr(local_name!("aria-live")) {
++        Some("assertive") => Some(Live::Assertive),
++        Some("polite") => Some(Live::Polite),
++        Some("off") => Some(Live::Off),
++        _ => match role {
++            Role::Alert => Some(Live::Assertive),
++            Role::Status | Role::Log => Some(Live::Polite),
++            _ => None,
++        },
++    };
++    if let Some(live) = live {
++        builder.set_live(live);
++    }
++    match attr(local_name!("aria-atomic")) {
++        Some("true") => builder.set_live_atomic(),
++        Some("false") => {}
++        _ if matches!(role, Role::Alert | Role::Status) => builder.set_live_atomic(),
++        _ => {}
++    }
++    if is_true(local_name!("aria-busy")) {
++        builder.set_busy();
++    }
++    if is_true(local_name!("aria-modal")) {
++        builder.set_modal();
++    }
++
++    // Values: `aria-value*`, then the native ones of range controls.
++    let (now, min, max) = match (tag, input_type) {
++        ("progress", _) => {
++            let max = parse_f64(attr(local_name!("max"))).filter(|max| *max > 0.0);
++            (
++                parse_f64(attr(local_name!("value"))),
++                Some(0.0),
++                Some(max.unwrap_or(1.0)),
++            )
++        }
++        ("meter", _) | (_, Some("range" | "number")) => (
++            parse_f64(attr(local_name!("value"))).or_else(|| {
++                element_data
++                    .text_input_data()
++                    .and_then(|input| input.editor.raw_text().trim_ascii().parse().ok())
++            }),
++            parse_f64(attr(local_name!("min"))),
++            parse_f64(attr(local_name!("max"))),
++        ),
++        _ => (None, None, None),
++    };
++    if let Some(now) = parse_f64(attr(local_name!("aria-valuenow"))).or(now) {
++        builder.set_numeric_value(now);
++    }
++    if let Some(min) = parse_f64(attr(local_name!("aria-valuemin"))).or(min) {
++        builder.set_min_numeric_value(min);
++    }
++    if let Some(max) = parse_f64(attr(local_name!("aria-valuemax"))).or(max) {
++        builder.set_max_numeric_value(max);
++    }
++    if let Some(text) = attr(local_name!("aria-valuetext")) {
++        builder.set_value(text);
++    } else if let Some(input) = element_data.text_input_data() {
++        // A password's characters are not read out.
++        if input_type == Some("password") {
++            builder.set_value("\u{2022}".repeat(input.editor.raw_text().chars().count()));
++        } else {
++            builder.set_value(input.editor.raw_text());
++        }
++    }
++    if let Some(placeholder) = attr(local_name!("aria-placeholder")).or_else(|| {
++        matches!(tag, "input" | "textarea").then(|| attr(local_name!("placeholder")))?
++    }) {
++        builder.set_placeholder(placeholder);
++    }
++
++    match attr(local_name!("aria-invalid")) {
++        Some("grammar") => builder.set_invalid(Invalid::Grammar),
++        Some("spelling") => builder.set_invalid(Invalid::Spelling),
++        Some("false") | Some("") | None => {}
++        Some(_) => builder.set_invalid(Invalid::True),
++    }
++    if is_true(local_name!("aria-required"))
++        || (matches!(tag, "input" | "select" | "textarea")
++            && attr(local_name!("required")).is_some())
++    {
++        builder.set_required();
++    }
++    if is_true(local_name!("aria-readonly"))
++        || (matches!(tag, "input" | "textarea") && attr(local_name!("readonly")).is_some())
++    {
++        builder.set_read_only();
++    }
++    if is_true(local_name!("aria-multiselectable"))
++        || (tag == "select" && attr(local_name!("multiple")).is_some())
++    {
++        builder.set_multiselectable();
++    }
++
++    match attr(local_name!("aria-haspopup")) {
++        Some("menu") | Some("true") => builder.set_has_popup(HasPopup::Menu),
++        Some("listbox") => builder.set_has_popup(HasPopup::Listbox),
++        Some("tree") => builder.set_has_popup(HasPopup::Tree),
++        Some("grid") => builder.set_has_popup(HasPopup::Grid),
++        Some("dialog") => builder.set_has_popup(HasPopup::Dialog),
++        _ => {}
++    }
++    match attr(local_name!("aria-orientation")) {
++        Some("horizontal") => builder.set_orientation(Orientation::Horizontal),
++        Some("vertical") => builder.set_orientation(Orientation::Vertical),
++        _ => {}
++    }
++
++    // `aria-posinset` and `aria-setsize` are 1-based, like AccessKit's.
++    let parse_usize =
++        |name| attr(name).and_then(|value: &str| value.trim_ascii().parse::<usize>().ok());
++    if let Some(position) = parse_usize(local_name!("aria-posinset")).filter(|p| *p > 0) {
++        builder.set_position_in_set(position);
++    }
++    if let Some(size) = parse_usize(local_name!("aria-setsize")) {
++        builder.set_size_of_set(size);
++    }
++
++    if role == Role::Link
++        && let Some(href) = attr(local_name!("href"))
++    {
++        builder.set_url(href);
++    }
++}
++
+ fn default_level_for_tag(name: &str) -> Option<usize> {
+     // Accesskit levels are 0-based, while ARIA levels are 1-based
+     // See https://docs.rs/accesskit/latest/accesskit/struct.Node.html#method.level
+diff --git a/packages/blitz-dom/src/document.rs b/packages/blitz-dom/src/document.rs
+index 97c8739f..dfba33a5 100644
+--- a/packages/blitz-dom/src/document.rs
++++ b/packages/blitz-dom/src/document.rs
+@@ -1691,6 +1691,10 @@ impl BaseDocument {
+         if self.style_depends_on_state(state) {
+             self.snapshot_node_state_only(node_id);
+         }
++        // A checked state is in the accessibility tree.
++        if state.intersects(ElementState::CHECKED) {
++            self.has_changes = true;
++        }
+         cb(&mut self.nodes[node_id]);
+     }
+ 
+diff --git a/packages/blitz-dom/src/events/keyboard.rs b/packages/blitz-dom/src/events/keyboard.rs
+index b2147e5c..21a2cd5b 100644
+--- a/packages/blitz-dom/src/events/keyboard.rs
++++ b/packages/blitz-dom/src/events/keyboard.rs
+@@ -114,6 +114,8 @@ impl BaseDocument {
+         match event {
+             GeneratedTextInputEvent::Input => {
+                 let value = input_data.editor.raw_text().to_string();
++                // The value is in the accessibility tree.
++                self.has_changes = true;
+                 dispatch_event(DomEvent::new(
+                     node_id,
+                     DomEventData::Input(BlitzInputEvent { value }),
+diff --git a/tests/blitz-tests/tests/accessibility_states.rs b/tests/blitz-tests/tests/accessibility_states.rs
+new file mode 100644
+index 00000000..48baab93
+--- /dev/null
++++ b/tests/blitz-tests/tests/accessibility_states.rs
+@@ -0,0 +1,130 @@
++use accesskit::{
++    AriaCurrent, HasPopup, Invalid, Live, Node as AccessKitNode, NodeId, Orientation, Role,
++    Toggled, TreeUpdate,
++};
++use blitz_dom::DocumentConfig;
++use blitz_html::{HtmlDocument, HtmlProvider};
++use blitz_traits::shell::{ColorScheme, Viewport};
++use std::sync::Arc;
++
++fn tree(body: &str) -> (HtmlDocument, TreeUpdate) {
++    let mut document = HtmlDocument::from_html(
++        &format!("<html><head></head><body>{body}</body></html>"),
++        DocumentConfig {
++            viewport: Some(Viewport::new(800, 600, 2.0, ColorScheme::Light)),
++            html_parser_provider: Some(Arc::new(HtmlProvider) as _),
++            ..Default::default()
++        },
++    );
++    document.resolve(0.0);
++    let tree = document.build_accessibility_tree();
++    (document, tree)
++}
++
++fn node<'a>(document: &HtmlDocument, tree: &'a TreeUpdate, id: &str) -> &'a AccessKitNode {
++    let node_id = document.get_element_by_id(id).expect("no such id");
++    let id = NodeId(node_id.as_u64());
++    &tree
++        .nodes
++        .iter()
++        .find(|(node, _)| *node == id)
++        .expect("not in the tree")
++        .1
++}
++
++#[test]
++fn checked_and_pressed() {
++    let (doc, tree) = tree(
++        r#"<input id="native" type="checkbox" checked>
++        <div id="mixed" role="checkbox" aria-checked="mixed"></div>
++        <div id="switch" role="switch" aria-checked="false"></div>
++        <button id="pressed" aria-pressed="true">Bold</button>
++        <button id="plain">Save</button>"#,
++    );
++    assert_eq!(node(&doc, &tree, "native").toggled(), Some(Toggled::True));
++    assert_eq!(node(&doc, &tree, "mixed").toggled(), Some(Toggled::Mixed));
++    assert_eq!(node(&doc, &tree, "switch").role(), Role::Switch);
++    assert_eq!(node(&doc, &tree, "switch").toggled(), Some(Toggled::False));
++    assert_eq!(node(&doc, &tree, "pressed").toggled(), Some(Toggled::True));
++    assert_eq!(node(&doc, &tree, "plain").toggled(), None);
++}
++
++#[test]
++fn live_regions() {
++    let (doc, tree) = tree(
++        r#"<div id="status" role="status">Installing</div>
++        <div id="alert" role="alert">Failed</div>
++        <div id="polite" aria-live="polite" aria-atomic="false"></div>
++        <div id="busy" aria-busy="true"></div>"#,
++    );
++    let status = node(&doc, &tree, "status");
++    assert_eq!(status.live(), Some(Live::Polite));
++    assert!(status.is_live_atomic());
++    assert_eq!(node(&doc, &tree, "alert").live(), Some(Live::Assertive));
++    assert_eq!(node(&doc, &tree, "polite").live(), Some(Live::Polite));
++    assert!(!node(&doc, &tree, "polite").is_live_atomic());
++    assert!(node(&doc, &tree, "busy").is_busy());
++}
++
++#[test]
++fn values() {
++    let (doc, tree) = tree(
++        r#"<div id="slider" role="slider" aria-valuenow="30" aria-valuemin="0" aria-valuemax="50" aria-valuetext="30 percent" aria-orientation="horizontal"></div>
++        <progress id="progress" value="0.25"></progress>
++        <input id="text" value="Hollow" placeholder="Search">
++        <input id="password" type="password" value="abc">"#,
++    );
++    let slider = node(&doc, &tree, "slider");
++    assert_eq!(slider.numeric_value(), Some(30.0));
++    assert_eq!(slider.min_numeric_value(), Some(0.0));
++    assert_eq!(slider.max_numeric_value(), Some(50.0));
++    assert_eq!(slider.value(), Some("30 percent"));
++    assert_eq!(slider.orientation(), Some(Orientation::Horizontal));
++    let progress = node(&doc, &tree, "progress");
++    assert_eq!(progress.numeric_value(), Some(0.25));
++    assert_eq!(progress.max_numeric_value(), Some(1.0));
++    assert_eq!(node(&doc, &tree, "text").value(), Some("Hollow"));
++    assert_eq!(node(&doc, &tree, "text").placeholder(), Some("Search"));
++    assert_eq!(
++        node(&doc, &tree, "password").value(),
++        Some("\u{2022}\u{2022}\u{2022}")
++    );
++}
++
++#[test]
++fn properties_and_relations() {
++    let (doc, tree) = tree(
++        r#"<a id="link" href="/library" aria-current="page">Library</a>
++        <div id="dialog" role="dialog" aria-modal="true"></div>
++        <input id="field" required aria-invalid="true">
++        <button id="menu" aria-haspopup="menu" aria-expanded="false" aria-controls="list">Sort</button>
++        <div id="list" role="listbox" aria-activedescendant="second">
++          <div id="first" role="option" aria-posinset="1" aria-setsize="2">A</div>
++          <div id="second" role="option" aria-posinset="2" aria-setsize="2">B</div>
++        </div>
++        <div id="tokens" role="unknown-role button"></div>
++        <button id="off" disabled>Off</button>"#,
++    );
++    let link = node(&doc, &tree, "link");
++    assert_eq!(link.aria_current(), Some(AriaCurrent::Page));
++    assert_eq!(link.url(), Some("/library"));
++    assert!(node(&doc, &tree, "dialog").is_modal());
++    let field = node(&doc, &tree, "field");
++    assert!(field.is_required());
++    assert_eq!(field.invalid(), Some(Invalid::True));
++    let menu = node(&doc, &tree, "menu");
++    assert_eq!(menu.has_popup(), Some(HasPopup::Menu));
++    let list_id = NodeId(doc.get_element_by_id("list").unwrap().as_u64());
++    assert_eq!(menu.controls(), &[list_id]);
++    let second_id = NodeId(doc.get_element_by_id("second").unwrap().as_u64());
++    assert_eq!(
++        node(&doc, &tree, "list").active_descendant(),
++        Some(second_id)
++    );
++    let second = node(&doc, &tree, "second");
++    assert_eq!(second.position_in_set(), Some(2));
++    assert_eq!(second.size_of_set(), Some(2));
++    assert_eq!(node(&doc, &tree, "tokens").role(), Role::Button);
++    let off = node(&doc, &tree, "off");
++    assert!(off.is_disabled());
++}
+diff --git a/tests/blitz-tests/tests/all.rs b/tests/blitz-tests/tests/all.rs
+index 18c7bdf9..e10c78a6 100644
+--- a/tests/blitz-tests/tests/all.rs
++++ b/tests/blitz-tests/tests/all.rs
+@@ -5,6 +5,7 @@ mod accessibility_description;
+ mod accessibility_hidden;
+ mod accessibility_label;
+ mod accessibility_roles;
++mod accessibility_states;
+ mod animations;
+ mod anonymous_block_cache_invalidation;
+ mod anonymous_block_leak;

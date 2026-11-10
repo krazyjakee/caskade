@@ -1,0 +1,498 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: caskade <caskade@localhost>
+Date: Tue, 10 Nov 2026 10:27:30 +0000
+Subject: [PATCH] Route screen-reader actions to DOM events
+
+AccessKit's action requests were dropped (`ActionRequested` was a TODO),
+so a screen reader could read the page but not use it. Nodes now say
+what can be done with them (focus, click, scroll into view, expand or
+collapse, increment and decrement), and the shell turns a request into a
+new `UiEvent::Accessibility`, which the event driver does as the user's
+own input would:
+
+- Focus moves the focus, with focus and blur events;
+- Click (and Expand and Collapse) focuses the element, as a browser does,
+  then dispatches a click event, so handlers and default actions run;
+- ScrollIntoView scrolls the element into view;
+- Increment and Decrement focus a slider or spin button and press its
+  up or down arrow key.
+
+A click that has no default action used to clear the focus; it now keeps
+it when the click lands in the focused element, so activating a focused
+button doesn't lose the focus.
+---
+ packages/blitz-dom/src/accessibility.rs       | 53 +++++++++-
+ packages/blitz-dom/src/events/driver.rs       | 99 ++++++++++++++++++-
+ packages/blitz-dom/src/events/pointer.rs      |  8 +-
+ packages/blitz-shell/src/accessibility.rs     | 25 ++++-
+ packages/blitz-shell/src/application.rs       |  7 +-
+ packages/blitz-traits/src/events.rs           | 29 ++++++
+ .../tests/accessibility_actions.rs            | 62 ++++++++++++
+ .../blitz-tests/tests/accessibility_states.rs | 10 +-
+ tests/blitz-tests/tests/all.rs                |  1 +
+ 9 files changed, 282 insertions(+), 12 deletions(-)
+ create mode 100644 tests/blitz-tests/tests/accessibility_actions.rs
+
+diff --git a/packages/blitz-dom/src/accessibility.rs b/packages/blitz-dom/src/accessibility.rs
+index c988d23c..c0b2916e 100644
+--- a/packages/blitz-dom/src/accessibility.rs
++++ b/packages/blitz-dom/src/accessibility.rs
+@@ -2,8 +2,8 @@ use crate::{
+     BaseDocument, ElementData, Node as BlitzDomNode, NodeData, NodeId as BlitzDomNodeId, local_name,
+ };
+ use accesskit::{
+-    Affine, AriaCurrent, HasPopup, Invalid, Live, Node as AccessKitNode, NodeId, Orientation, Rect,
+-    Role, Toggled, TreeId, TreeInfo, TreeUpdate,
++    Action, Affine, AriaCurrent, HasPopup, Invalid, Live, Node as AccessKitNode, NodeId,
++    Orientation, Rect, Role, Toggled, TreeId, TreeInfo, TreeUpdate,
+ };
+ use style::properties::longhands::visibility;
+ use stylo_taffy::CopyStyleGetters;
+@@ -216,6 +216,7 @@ impl BaseDocument {
+             }
+ 
+             set_states_and_properties(&mut builder, element_data, &name, role);
++            add_actions(&mut builder, node, element_data, role);
+ 
+             if let Some(rect) = self.get_client_bounding_rect(node.id) {
+                 builder.set_bounds(Rect::new(
+@@ -567,6 +568,54 @@ fn set_states_and_properties(
+     }
+ }
+ 
++/// What an assistive technology can do with the element; the shell routes
++/// its requests to DOM events (`UiEvent::Accessibility`).
++fn add_actions(
++    builder: &mut AccessKitNode,
++    node: &BlitzDomNode,
++    element_data: &ElementData,
++    role: Role,
++) {
++    builder.add_action(Action::ScrollIntoView);
++    if builder.is_disabled() {
++        return;
++    }
++    let focusable = node.is_focussable();
++    if focusable {
++        builder.add_action(Action::Focus);
++    }
++    if focusable
++        || matches!(
++            role,
++            Role::Button
++                | Role::DefaultButton
++                | Role::Link
++                | Role::CheckBox
++                | Role::RadioButton
++                | Role::Switch
++                | Role::MenuItem
++                | Role::MenuItemCheckBox
++                | Role::MenuItemRadio
++                | Role::Tab
++                | Role::ListBoxOption
++                | Role::TreeItem
++                | Role::DisclosureTriangle
++                | Role::ComboBox
++        )
++    {
++        builder.add_action(Action::Click);
++    }
++    match element_data.attr(local_name!("aria-expanded")) {
++        Some("true") => builder.add_action(Action::Collapse),
++        Some("false") => builder.add_action(Action::Expand),
++        _ => {}
++    }
++    if matches!(role, Role::Slider | Role::SpinButton) {
++        builder.add_action(Action::Increment);
++        builder.add_action(Action::Decrement);
++    }
++}
++
+ fn default_level_for_tag(name: &str) -> Option<usize> {
+     // Accesskit levels are 0-based, while ARIA levels are 1-based
+     // See https://docs.rs/accesskit/latest/accesskit/struct.Node.html#method.level
+diff --git a/packages/blitz-dom/src/events/driver.rs b/packages/blitz-dom/src/events/driver.rs
+index 60fd9609..e924b881 100644
+--- a/packages/blitz-dom/src/events/driver.rs
++++ b/packages/blitz-dom/src/events/driver.rs
+@@ -1,9 +1,11 @@
+-use crate::Document;
++use crate::events::focus::generate_focus_events;
++use crate::{Document, ScrollBehavior, ScrollLogicalPosition};
+ use blitz_traits::events::{
+-    BlitzPointerEvent, BlitzPointerId, DomEvent, DomEventData, EventState, Point, PointerCoords,
+-    UiEvent,
++    BlitzAccessibilityAction, BlitzAccessibilityEvent, BlitzKeyEvent, BlitzPointerEvent,
++    BlitzPointerId, DomEvent, DomEventData, EventState, KeyState, Point, PointerCoords, UiEvent,
+ };
+ use blitz_traits::node_id::NodeId;
++use keyboard_types::{Code, Key, Location, Modifiers, NamedKey};
+ use std::collections::VecDeque;
+ 
+ pub trait EventHandler {
+@@ -166,6 +168,10 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
+     }
+ 
+     pub fn handle_ui_event(&mut self, event: UiEvent) {
++        let event = match event {
++            UiEvent::Accessibility(event) => return self.handle_accessibility_event(event),
++            event => event,
++        };
+         let doc = self.doc.inner();
+ 
+         // A non-hovering pointer (finger) ends hover once it is lifted or cancelled
+@@ -226,6 +232,7 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
+             UiEvent::Ime(_) => focussed_node_id,
+             UiEvent::Paste(_) => focussed_node_id,
+             UiEvent::AppleStandardKeybinding(_) => focussed_node_id,
++            UiEvent::Accessibility(_) => None,
+         };
+         // Fall back to the root element. A document without a root element (e.g. an
+         // empty iframe sub-document) has no event target, so there is nothing to do.
+@@ -301,6 +308,7 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
+                 self.run_default_action(&mut dom_event);
+                 self.process_queue();
+             }
++            UiEvent::Accessibility(_) => {}
+         };
+ 
+         // Update document input state (hover, focus, active, etc)
+@@ -316,6 +324,91 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
+         }
+     }
+ 
++    /// An assistive technology's action, done as the user's own input
++    /// would do it: a click is a click event (with its default action),
++    /// focusing sends focus and blur events, and stepping a range control
++    /// presses its arrow keys.
++    fn handle_accessibility_event(&mut self, event: BlitzAccessibilityEvent) {
++        let BlitzAccessibilityEvent { target, action } = event;
++        let doc = self.doc.inner();
++        let Some(node) = doc.get_node(target) else {
++            return;
++        };
++        if !node.is_element() {
++            return;
++        }
++        let focusable = std::iter::successors(Some(node), |node| {
++            node.parent.and_then(|id| doc.get_node(id))
++        })
++        .find(|node| node.is_focussable())
++        .map(|node| node.id);
++        let click = node.synthetic_click_event(Modifiers::empty());
++        drop(doc);
++
++        match action {
++            BlitzAccessibilityAction::Focus => self.focus_for_accessibility(focusable),
++            // As a browser does, focus what is activated, then click it.
++            BlitzAccessibilityAction::Click
++            | BlitzAccessibilityAction::Expand
++            | BlitzAccessibilityAction::Collapse => {
++                self.focus_for_accessibility(focusable);
++                self.handle_dom_event(DomEvent::new(target, click));
++            }
++            BlitzAccessibilityAction::ScrollIntoView => {
++                self.doc.inner_mut().scroll_into_view(
++                    target,
++                    ScrollBehavior::Instant,
++                    ScrollLogicalPosition::Nearest,
++                    ScrollLogicalPosition::Nearest,
++                );
++            }
++            BlitzAccessibilityAction::Increment | BlitzAccessibilityAction::Decrement => {
++                self.focus_for_accessibility(focusable);
++                if self.doc.inner().focus_node_id != Some(target) {
++                    return;
++                }
++                let key = match action {
++                    BlitzAccessibilityAction::Increment => NamedKey::ArrowUp,
++                    _ => NamedKey::ArrowDown,
++                };
++                for state in [KeyState::Pressed, KeyState::Released] {
++                    let event = BlitzKeyEvent {
++                        key: Key::Named(key),
++                        code: match key {
++                            NamedKey::ArrowUp => Code::ArrowUp,
++                            _ => Code::ArrowDown,
++                        },
++                        modifiers: Modifiers::empty(),
++                        location: Location::Standard,
++                        is_auto_repeating: false,
++                        is_composing: false,
++                        state,
++                        text: None,
++                    };
++                    self.handle_ui_event(match state {
++                        KeyState::Pressed => UiEvent::KeyDown(event),
++                        KeyState::Released => UiEvent::KeyUp(event),
++                    });
++                }
++            }
++        }
++    }
++
++    fn focus_for_accessibility(&mut self, focusable: Option<NodeId>) {
++        let Some(focusable) = focusable else {
++            return;
++        };
++        let queue = &mut self.queue;
++        generate_focus_events(
++            &mut self.doc.inner_mut(),
++            &mut |doc| {
++                doc.set_focus_to(focusable);
++            },
++            &mut |event| queue.push_back(event),
++        );
++        self.process_queue();
++    }
++
+     pub fn handle_dom_event(&mut self, event: DomEvent) {
+         self.queue.push_back(event);
+         self.process_queue();
+diff --git a/packages/blitz-dom/src/events/pointer.rs b/packages/blitz-dom/src/events/pointer.rs
+index 9617ee68..e9b271a7 100644
+--- a/packages/blitz-dom/src/events/pointer.rs
++++ b/packages/blitz-dom/src/events/pointer.rs
+@@ -812,8 +812,12 @@ pub(crate) fn handle_click(
+         false
+     };
+ 
+-    // If nothing is matched then clear focus
+-    if !matched {
++    // If nothing is matched then clear focus, unless the click landed in the
++    // focused element (a screen reader's click on the element it focused).
++    let in_focus = doc.focus_node_id.is_some_and(|focus| {
++        std::iter::successors(Some(target), |id| doc.nodes[*id].parent).any(|id| id == focus)
++    });
++    if !matched && !in_focus {
+         generate_focus_events(doc, &mut |doc| doc.clear_focus(), dispatch_event);
+     }
+ 
+diff --git a/packages/blitz-shell/src/accessibility.rs b/packages/blitz-shell/src/accessibility.rs
+index dab01102..c11bbd49 100644
+--- a/packages/blitz-shell/src/accessibility.rs
++++ b/packages/blitz-shell/src/accessibility.rs
+@@ -1,7 +1,8 @@
+ use crate::{BlitzShellEvent, event::BlitzShellProxy};
+-use accesskit::Rect;
++use accesskit::{Action, ActionRequest, NodeId, Rect};
+ use accesskit_xplat::{Adapter, EventHandler, WindowEvent as AccessKitEvent};
+ use blitz_dom::BaseDocument;
++use blitz_traits::events::{BlitzAccessibilityAction, BlitzAccessibilityEvent, UiEvent};
+ use std::sync::Arc;
+ use winit::{
+     event::WindowEvent,
+@@ -75,3 +76,25 @@ impl AccessibilityState {
+         }
+     }
+ }
++
++/// The DOM event for an assistive technology's request, if Blitz does it.
++pub(crate) fn ui_event_for_request(request: &ActionRequest) -> Option<UiEvent> {
++    // The window node is AccessKit's, not the document's.
++    if request.target_node == NodeId(u64::MAX) {
++        return None;
++    }
++    let action = match request.action {
++        Action::Focus => BlitzAccessibilityAction::Focus,
++        Action::Click => BlitzAccessibilityAction::Click,
++        Action::ScrollIntoView => BlitzAccessibilityAction::ScrollIntoView,
++        Action::Increment => BlitzAccessibilityAction::Increment,
++        Action::Decrement => BlitzAccessibilityAction::Decrement,
++        Action::Expand => BlitzAccessibilityAction::Expand,
++        Action::Collapse => BlitzAccessibilityAction::Collapse,
++        _ => return None,
++    };
++    Some(UiEvent::Accessibility(BlitzAccessibilityEvent {
++        target: blitz_traits::node_id::NodeId::from_u64(request.target_node.0),
++        action,
++    }))
++}
+diff --git a/packages/blitz-shell/src/application.rs b/packages/blitz-shell/src/application.rs
+index 3b246918..81ce20fa 100644
+--- a/packages/blitz-shell/src/application.rs
++++ b/packages/blitz-shell/src/application.rs
+@@ -132,8 +132,11 @@ impl<Rend: WindowRenderer> BlitzApplication<Rend> {
+                         accesskit_xplat::WindowEvent::AccessibilityDeactivated => {
+                             // TODO
+                         }
+-                        accesskit_xplat::WindowEvent::ActionRequested(_req) => {
+-                            // TODO
++                        accesskit_xplat::WindowEvent::ActionRequested(req) => {
++                            if let Some(event) = crate::accessibility::ui_event_for_request(req) {
++                                window.doc.handle_ui_event(event);
++                                window.request_redraw();
++                            }
+                         }
+                     }
+                 }
+diff --git a/packages/blitz-traits/src/events.rs b/packages/blitz-traits/src/events.rs
+index 057d8481..1f0d95e2 100644
+--- a/packages/blitz-traits/src/events.rs
++++ b/packages/blitz-traits/src/events.rs
+@@ -72,6 +72,35 @@ pub enum UiEvent {
+     Ime(BlitzImeEvent),
+     AppleStandardKeybinding(SmolStr),
+     Paste(String),
++    /// An assistive technology (a screen reader, say) acting on an element.
++    Accessibility(BlitzAccessibilityEvent),
++}
++
++/// An action an assistive technology asks of an element: what a user does
++/// through it instead of with the pointer or the keyboard.
++#[derive(Clone, Debug, PartialEq)]
++pub enum BlitzAccessibilityAction {
++    /// Move the focus to the element.
++    Focus,
++    /// Activate the element, as a click does.
++    Click,
++    /// Scroll the element into view.
++    ScrollIntoView,
++    /// Step a range control (a slider, a spin button) up.
++    Increment,
++    /// Step a range control down.
++    Decrement,
++    /// Expand a collapsed element (`aria-expanded="false"`).
++    Expand,
++    /// Collapse an expanded element (`aria-expanded="true"`).
++    Collapse,
++}
++
++/// An assistive technology's action on the element `target`.
++#[derive(Clone, Debug)]
++pub struct BlitzAccessibilityEvent {
++    pub target: NodeId,
++    pub action: BlitzAccessibilityAction,
+ }
+ impl UiEvent {
+     pub fn discriminant(&self) -> u8 {
+diff --git a/tests/blitz-tests/tests/accessibility_actions.rs b/tests/blitz-tests/tests/accessibility_actions.rs
+new file mode 100644
+index 00000000..a54f2d5f
+--- /dev/null
++++ b/tests/blitz-tests/tests/accessibility_actions.rs
+@@ -0,0 +1,62 @@
++use blitz_dom::{Document, DocumentConfig};
++use blitz_html::{HtmlDocument, HtmlProvider};
++use blitz_traits::events::{BlitzAccessibilityAction, BlitzAccessibilityEvent, UiEvent};
++use blitz_traits::shell::{ColorScheme, Viewport};
++use std::sync::Arc;
++
++fn document(body: &str) -> HtmlDocument {
++    let mut document = HtmlDocument::from_html(
++        &format!("<html><head></head><body style=\"margin: 0\">{body}</body></html>"),
++        DocumentConfig {
++            viewport: Some(Viewport::new(800, 600, 1.0, ColorScheme::Light)),
++            html_parser_provider: Some(Arc::new(HtmlProvider) as _),
++            ..Default::default()
++        },
++    );
++    document.resolve(0.0);
++    document
++}
++
++fn act(document: &mut HtmlDocument, id: &str, action: BlitzAccessibilityAction) {
++    let target = document.get_element_by_id(id).expect("no such id");
++    document.handle_ui_event(UiEvent::Accessibility(BlitzAccessibilityEvent {
++        target,
++        action,
++    }));
++    document.resolve(0.0);
++}
++
++#[test]
++fn focus_moves_the_focus() {
++    let mut doc = document(r#"<button id="a">A</button><button id="b">B</button>"#);
++    act(&mut doc, "b", BlitzAccessibilityAction::Focus);
++    assert_eq!(doc.get_focussed_node_id(), doc.get_element_by_id("b"));
++}
++
++#[test]
++fn click_runs_the_default_action_and_keeps_the_focus() {
++    let mut doc = document(r#"<input id="box" type="checkbox"><button id="button">B</button>"#);
++    act(&mut doc, "box", BlitzAccessibilityAction::Click);
++    let checkbox = doc.get_element_by_id("box").unwrap();
++    assert_eq!(
++        doc.get_node(checkbox)
++            .unwrap()
++            .element_data()
++            .unwrap()
++            .checkbox_input_checked(),
++        Some(true)
++    );
++    assert_eq!(doc.get_focussed_node_id(), Some(checkbox));
++    // A button's click has no default action: it keeps the focus it was given.
++    act(&mut doc, "button", BlitzAccessibilityAction::Click);
++    assert_eq!(doc.get_focussed_node_id(), doc.get_element_by_id("button"));
++    assert!(doc.has_changes());
++}
++
++#[test]
++fn scroll_into_view_scrolls() {
++    let mut doc = document(r#"<div style="height: 3000px"></div><button id="far">Far</button>"#);
++    assert_eq!(doc.viewport_scroll().y, 0.0);
++    act(&mut doc, "far", BlitzAccessibilityAction::ScrollIntoView);
++    assert!(doc.viewport_scroll().y > 2000.0);
++}
+diff --git a/tests/blitz-tests/tests/accessibility_states.rs b/tests/blitz-tests/tests/accessibility_states.rs
+index 1afa84df..48f51ebb 100644
+--- a/tests/blitz-tests/tests/accessibility_states.rs
++++ b/tests/blitz-tests/tests/accessibility_states.rs
+@@ -1,5 +1,5 @@
+ use accesskit::{
+-    AriaCurrent, HasPopup, Invalid, Live, Node as AccessKitNode, NodeId, Orientation, Role,
++    Action, AriaCurrent, HasPopup, Invalid, Live, Node as AccessKitNode, NodeId, Orientation, Role,
+     Toggled, TreeUpdate,
+ };
+ use blitz_dom::DocumentConfig;
+@@ -80,6 +80,7 @@ fn values() {
+     assert_eq!(slider.max_numeric_value(), Some(50.0));
+     assert_eq!(slider.value(), Some("30 percent"));
+     assert_eq!(slider.orientation(), Some(Orientation::Horizontal));
++    assert!(slider.supports_action(Action::Increment));
+     let progress = node(&doc, &tree, "progress");
+     assert_eq!(progress.numeric_value(), Some(0.25));
+     assert_eq!(progress.max_numeric_value(), Some(1.0));
+@@ -114,6 +115,7 @@ fn properties_and_relations() {
+     assert_eq!(field.invalid(), Some(Invalid::True));
+     let menu = node(&doc, &tree, "menu");
+     assert_eq!(menu.has_popup(), Some(HasPopup::Menu));
++    assert!(menu.supports_action(Action::Expand));
+     let list_id = NodeId(doc.get_element_by_id("list").unwrap().as_u64());
+     assert_eq!(menu.controls(), &[list_id]);
+     let second_id = NodeId(doc.get_element_by_id("second").unwrap().as_u64());
+@@ -127,10 +129,11 @@ fn properties_and_relations() {
+     assert_eq!(node(&doc, &tree, "tokens").role(), Role::Button);
+     let off = node(&doc, &tree, "off");
+     assert!(off.is_disabled());
++    assert!(!off.supports_action(Action::Click));
+ }
+ 
+ #[test]
+-fn bounds() {
++fn bounds_and_actions() {
+     let (doc, tree) = tree(
+         r#"<button id="button" style="position: absolute; left: 10px; top: 20px; width: 100px; height: 30px; margin: 0; box-sizing: border-box">Play</button>"#,
+     );
+@@ -140,6 +143,9 @@ fn bounds() {
+         (bounds.x0, bounds.y0, bounds.x1, bounds.y1),
+         (10.0, 20.0, 110.0, 50.0)
+     );
++    assert!(button.supports_action(Action::Focus));
++    assert!(button.supports_action(Action::Click));
++    assert!(button.supports_action(Action::ScrollIntoView));
+     // The window scales CSS pixels to the window's.
+     let window = &tree
+         .nodes
+diff --git a/tests/blitz-tests/tests/all.rs b/tests/blitz-tests/tests/all.rs
+index e10c78a6..06924eae 100644
+--- a/tests/blitz-tests/tests/all.rs
++++ b/tests/blitz-tests/tests/all.rs
+@@ -1,6 +1,7 @@
+ //! All integration tests are compiled into this single test binary because linking
+ //! one binary per file dominates build time. New test files must be added here.
+ 
++mod accessibility_actions;
+ mod accessibility_description;
+ mod accessibility_hidden;
+ mod accessibility_label;

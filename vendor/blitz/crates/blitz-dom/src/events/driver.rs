@@ -1,9 +1,11 @@
-use crate::Document;
+use crate::events::focus::generate_focus_events;
+use crate::{Document, ScrollBehavior, ScrollLogicalPosition};
 use blitz_traits::events::{
-    BlitzPointerEvent, BlitzPointerId, DomEvent, DomEventData, EventState, Point, PointerCoords,
-    UiEvent,
+    BlitzAccessibilityAction, BlitzAccessibilityEvent, BlitzKeyEvent, BlitzPointerEvent,
+    BlitzPointerId, DomEvent, DomEventData, EventState, KeyState, Point, PointerCoords, UiEvent,
 };
 use blitz_traits::node_id::NodeId;
+use keyboard_types::{Code, Key, Location, Modifiers, NamedKey};
 use std::collections::VecDeque;
 
 pub trait EventHandler {
@@ -166,6 +168,10 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
     }
 
     pub fn handle_ui_event(&mut self, event: UiEvent) {
+        let event = match event {
+            UiEvent::Accessibility(event) => return self.handle_accessibility_event(event),
+            event => event,
+        };
         let doc = self.doc.inner();
 
         // A non-hovering pointer (finger) ends hover once it is lifted or cancelled
@@ -226,6 +232,7 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
             UiEvent::Ime(_) => focussed_node_id,
             UiEvent::Paste(_) => focussed_node_id,
             UiEvent::AppleStandardKeybinding(_) => focussed_node_id,
+            UiEvent::Accessibility(_) => None,
         };
         // Fall back to the root element. A document without a root element (e.g. an
         // empty iframe sub-document) has no event target, so there is nothing to do.
@@ -301,6 +308,7 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
                 self.run_default_action(&mut dom_event);
                 self.process_queue();
             }
+            UiEvent::Accessibility(_) => {}
         };
 
         // Update document input state (hover, focus, active, etc)
@@ -314,6 +322,91 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
         if !is_leave && doc.hover_state() != prev_hover {
             doc.update_cursor();
         }
+    }
+
+    /// An assistive technology's action, done as the user's own input
+    /// would do it: a click is a click event (with its default action),
+    /// focusing sends focus and blur events, and stepping a range control
+    /// presses its arrow keys.
+    fn handle_accessibility_event(&mut self, event: BlitzAccessibilityEvent) {
+        let BlitzAccessibilityEvent { target, action } = event;
+        let doc = self.doc.inner();
+        let Some(node) = doc.get_node(target) else {
+            return;
+        };
+        if !node.is_element() {
+            return;
+        }
+        let focusable = std::iter::successors(Some(node), |node| {
+            node.parent.and_then(|id| doc.get_node(id))
+        })
+        .find(|node| node.is_focussable())
+        .map(|node| node.id);
+        let click = node.synthetic_click_event(Modifiers::empty());
+        drop(doc);
+
+        match action {
+            BlitzAccessibilityAction::Focus => self.focus_for_accessibility(focusable),
+            // As a browser does, focus what is activated, then click it.
+            BlitzAccessibilityAction::Click
+            | BlitzAccessibilityAction::Expand
+            | BlitzAccessibilityAction::Collapse => {
+                self.focus_for_accessibility(focusable);
+                self.handle_dom_event(DomEvent::new(target, click));
+            }
+            BlitzAccessibilityAction::ScrollIntoView => {
+                self.doc.inner_mut().scroll_into_view(
+                    target,
+                    ScrollBehavior::Instant,
+                    ScrollLogicalPosition::Nearest,
+                    ScrollLogicalPosition::Nearest,
+                );
+            }
+            BlitzAccessibilityAction::Increment | BlitzAccessibilityAction::Decrement => {
+                self.focus_for_accessibility(focusable);
+                if self.doc.inner().focus_node_id != Some(target) {
+                    return;
+                }
+                let key = match action {
+                    BlitzAccessibilityAction::Increment => NamedKey::ArrowUp,
+                    _ => NamedKey::ArrowDown,
+                };
+                for state in [KeyState::Pressed, KeyState::Released] {
+                    let event = BlitzKeyEvent {
+                        key: Key::Named(key),
+                        code: match key {
+                            NamedKey::ArrowUp => Code::ArrowUp,
+                            _ => Code::ArrowDown,
+                        },
+                        modifiers: Modifiers::empty(),
+                        location: Location::Standard,
+                        is_auto_repeating: false,
+                        is_composing: false,
+                        state,
+                        text: None,
+                    };
+                    self.handle_ui_event(match state {
+                        KeyState::Pressed => UiEvent::KeyDown(event),
+                        KeyState::Released => UiEvent::KeyUp(event),
+                    });
+                }
+            }
+        }
+    }
+
+    fn focus_for_accessibility(&mut self, focusable: Option<NodeId>) {
+        let Some(focusable) = focusable else {
+            return;
+        };
+        let queue = &mut self.queue;
+        generate_focus_events(
+            &mut self.doc.inner_mut(),
+            &mut |doc| {
+                doc.set_focus_to(focusable);
+            },
+            &mut |event| queue.push_back(event),
+        );
+        self.process_queue();
     }
 
     pub fn handle_dom_event(&mut self, event: DomEvent) {

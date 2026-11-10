@@ -1,7 +1,8 @@
 use crate::{BlitzShellEvent, event::BlitzShellProxy};
-use accesskit::Rect;
+use accesskit::{Action, ActionRequest, NodeId, Rect};
 use accesskit_xplat::{Adapter, EventHandler, WindowEvent as AccessKitEvent};
 use blitz_dom::BaseDocument;
+use blitz_traits::events::{BlitzAccessibilityAction, BlitzAccessibilityEvent, UiEvent};
 use std::sync::Arc;
 use winit::{
     event::WindowEvent,
@@ -74,4 +75,26 @@ impl AccessibilityState {
             _ => (),
         }
     }
+}
+
+/// The DOM event for an assistive technology's request, if Blitz does it.
+pub(crate) fn ui_event_for_request(request: &ActionRequest) -> Option<UiEvent> {
+    // The window node is AccessKit's, not the document's.
+    if request.target_node == NodeId(u64::MAX) {
+        return None;
+    }
+    let action = match request.action {
+        Action::Focus => BlitzAccessibilityAction::Focus,
+        Action::Click => BlitzAccessibilityAction::Click,
+        Action::ScrollIntoView => BlitzAccessibilityAction::ScrollIntoView,
+        Action::Increment => BlitzAccessibilityAction::Increment,
+        Action::Decrement => BlitzAccessibilityAction::Decrement,
+        Action::Expand => BlitzAccessibilityAction::Expand,
+        Action::Collapse => BlitzAccessibilityAction::Collapse,
+        _ => return None,
+    };
+    Some(UiEvent::Accessibility(BlitzAccessibilityEvent {
+        target: blitz_traits::node_id::NodeId::from_u64(request.target_node.0),
+        action,
+    }))
 }

@@ -72,6 +72,35 @@ pub enum UiEvent {
     Ime(BlitzImeEvent),
     AppleStandardKeybinding(SmolStr),
     Paste(String),
+    /// An assistive technology (a screen reader, say) acting on an element.
+    Accessibility(BlitzAccessibilityEvent),
+}
+
+/// An action an assistive technology asks of an element: what a user does
+/// through it instead of with the pointer or the keyboard.
+#[derive(Clone, Debug, PartialEq)]
+pub enum BlitzAccessibilityAction {
+    /// Move the focus to the element.
+    Focus,
+    /// Activate the element, as a click does.
+    Click,
+    /// Scroll the element into view.
+    ScrollIntoView,
+    /// Step a range control (a slider, a spin button) up.
+    Increment,
+    /// Step a range control down.
+    Decrement,
+    /// Expand a collapsed element (`aria-expanded="false"`).
+    Expand,
+    /// Collapse an expanded element (`aria-expanded="true"`).
+    Collapse,
+}
+
+/// An assistive technology's action on the element `target`.
+#[derive(Clone, Debug)]
+pub struct BlitzAccessibilityEvent {
+    pub target: NodeId,
+    pub action: BlitzAccessibilityAction,
 }
 impl UiEvent {
     pub fn discriminant(&self) -> u8 {

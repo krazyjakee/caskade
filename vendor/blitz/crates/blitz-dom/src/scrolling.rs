@@ -291,6 +291,18 @@ impl BaseDocument {
         offset: Point<f64>,
         dispatch_event: &mut dyn FnMut(DomEvent),
     ) -> bool {
+        let has_changed = self.write_scroll_offset_inner(target, offset, dispatch_event);
+        // Scrolling moves elements' bounds in the accessibility tree.
+        self.has_changes |= has_changed;
+        has_changed
+    }
+
+    fn write_scroll_offset_inner(
+        &mut self,
+        target: ScrollTarget,
+        offset: Point<f64>,
+        dispatch_event: &mut dyn FnMut(DomEvent),
+    ) -> bool {
         match self.canonical_scroll_target(target) {
             ScrollTarget::Viewport => {
                 let initial = self.viewport_scroll();

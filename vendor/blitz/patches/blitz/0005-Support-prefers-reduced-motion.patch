@@ -1,7 +1,7 @@
-From d3bdc927907816c4960be755436640fe577e5af8 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Jake Cattrall <krazyjakee@gmail.com>
 Date: Tue, 10 Nov 2026 03:09:24 +0000
-Subject: [PATCH 5/5] Support prefers-reduced-motion
+Subject: [PATCH] Support prefers-reduced-motion
 
 `Viewport::prefers_reduced_motion` carries the user's setting into Stylo's
 device (with the matching Stylo patch adding the media feature), and a

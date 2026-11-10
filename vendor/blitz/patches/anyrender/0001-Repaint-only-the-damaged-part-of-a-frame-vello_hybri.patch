@@ -1,7 +1,7 @@
-From 52a685a6d24d5d4b646aa3e549d2c5f40554c350 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Jake Cattrall <krazyjakee@gmail.com>
 Date: Tue, 10 Nov 2026 02:07:02 +0000
-Subject: [PATCH 1/4] Repaint only the damaged part of a frame (vello_hybrid)
+Subject: [PATCH] Repaint only the damaged part of a frame (vello_hybrid)
 
 Adds WindowRenderer::supports_damage and render_damage. A damaged frame
 clears and repaints only the damage rectangle of the persistent target,

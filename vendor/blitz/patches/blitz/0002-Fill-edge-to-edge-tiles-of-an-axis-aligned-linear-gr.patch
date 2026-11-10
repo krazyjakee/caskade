@@ -1,8 +1,8 @@
-From c85e1959bf2f9209149739086be92a07ed6ba96e Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Jake Cattrall <krazyjakee@gmail.com>
 Date: Tue, 10 Nov 2026 03:09:06 +0000
-Subject: [PATCH 2/5] Fill edge-to-edge tiles of an axis-aligned linear
- gradient in one go
+Subject: [PATCH] Fill edge-to-edge tiles of an axis-aligned linear gradient in
+ one go
 
 A linear gradient whose line runs edge to edge of its tile along one axis,
 over tiles laid without gaps (a grid of lines, stripes), is drawn as one

@@ -9,8 +9,9 @@
 # The work dir (default ~/.cache/caskade-blitz-vendor) holds the upstream
 # checkouts, each on a `caskade` branch with the series applied; it must be
 # outside this repo. To change a patch: commit in the checkout, then
-#   git -C <work>/<repo> format-patch --no-signature -o vendor/blitz/patches/<repo> <pin>..caskade
-# (after deleting the old files) and run this again. README.md has the
+#   git -C <work>/<repo> format-patch --zero-commit -N --no-signature -o "$PWD/vendor/blitz/patches/<repo>" <pin>..caskade
+# (after deleting the old files; -o absolute) and run this again. This resets
+# the `caskade` branches to the exported series: export first. README.md has the
 # pin-bump procedure.
 set -euo pipefail
 here=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)

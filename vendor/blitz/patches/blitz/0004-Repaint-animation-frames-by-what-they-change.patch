@@ -1,7 +1,7 @@
-From 46e798d4001b24838fd03b28fdae77cb2834c0a9 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Jake Cattrall <krazyjakee@gmail.com>
 Date: Tue, 10 Nov 2026 03:09:20 +0000
-Subject: [PATCH 4/5] Repaint animation frames by what they change
+Subject: [PATCH] Repaint animation frames by what they change
 
 While any CSS animation runs, every frame restyled, repainted and
 re-rendered the whole window: a 14px spinner cost 4.7ms of CPU a frame.

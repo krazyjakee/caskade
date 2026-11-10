@@ -1,0 +1,137 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: caskade <caskade@localhost>
+Date: Tue, 10 Nov 2026 10:21:45 +0000
+Subject: [PATCH] Give AccessKit nodes their bounds
+
+Screen readers place their focus highlight and flat review by node
+bounds, and AT-SPI hit-tests with them; Blitz's nodes had none. Each
+element now has its border box relative to the viewport, in CSS pixels,
+and the window node scales them to physical pixels with its transform.
+
+Scrolling and a change of the window's size or scale move the bounds, so
+they mark the tree as changed.
+---
+ packages/blitz-dom/src/accessibility.rs       | 24 +++++++++++++++++--
+ packages/blitz-dom/src/document.rs            |  6 +++++
+ packages/blitz-dom/src/scrolling.rs           | 12 ++++++++++
+ .../blitz-tests/tests/accessibility_states.rs | 21 ++++++++++++++++
+ 4 files changed, 61 insertions(+), 2 deletions(-)
+
+diff --git a/packages/blitz-dom/src/accessibility.rs b/packages/blitz-dom/src/accessibility.rs
+index f08545c0..c988d23c 100644
+--- a/packages/blitz-dom/src/accessibility.rs
++++ b/packages/blitz-dom/src/accessibility.rs
+@@ -2,8 +2,8 @@ use crate::{
+     BaseDocument, ElementData, Node as BlitzDomNode, NodeData, NodeId as BlitzDomNodeId, local_name,
+ };
+ use accesskit::{
+-    AriaCurrent, HasPopup, Invalid, Live, Node as AccessKitNode, NodeId, Orientation, Role,
+-    Toggled, TreeId, TreeInfo, TreeUpdate,
++    Affine, AriaCurrent, HasPopup, Invalid, Live, Node as AccessKitNode, NodeId, Orientation, Rect,
++    Role, Toggled, TreeId, TreeInfo, TreeUpdate,
+ };
+ use style::properties::longhands::visibility;
+ use stylo_taffy::CopyStyleGetters;
+@@ -118,6 +118,17 @@ impl BaseDocument {
+             .into_iter()
+             .map(|(_, (id, node))| (id, node))
+             .collect();
++        // Bounds are in CSS pixels, relative to the viewport: the window's
++        // transform scales them to the window's physical pixels.
++        let scale = self.viewport.scale_f64();
++        let (width, height) = self.viewport.window_size;
++        window.set_transform(Affine::scale(scale));
++        window.set_bounds(Rect::new(
++            0.0,
++            0.0,
++            width as f64 / scale,
++            height as f64 / scale,
++        ));
+         nodes.push((NodeId(u64::MAX), window));
+ 
+         let tree = TreeInfo::new(NodeId(u64::MAX));
+@@ -206,6 +217,15 @@ impl BaseDocument {
+ 
+             set_states_and_properties(&mut builder, element_data, &name, role);
+ 
++            if let Some(rect) = self.get_client_bounding_rect(node.id) {
++                builder.set_bounds(Rect::new(
++                    rect.x,
++                    rect.y,
++                    rect.x + rect.width,
++                    rect.y + rect.height,
++                ));
++            }
++
+             builder.set_html_tag(name);
+         } else if node.is_text_node() {
+             builder.set_role(Role::TextRun);
+diff --git a/packages/blitz-dom/src/document.rs b/packages/blitz-dom/src/document.rs
+index dfba33a5..f104999c 100644
+--- a/packages/blitz-dom/src/document.rs
++++ b/packages/blitz-dom/src/document.rs
+@@ -2141,6 +2141,12 @@ impl BaseDocument {
+ 
+     pub fn set_viewport(&mut self, viewport: Viewport) {
+         let changes = DeviceChanges::from_viewports(&self.viewport, &viewport);
++        // The window's size and scale are in the accessibility tree's bounds.
++        if viewport.window_size != self.viewport.window_size
++            || viewport.scale_f64() != self.viewport.scale_f64()
++        {
++            self.has_changes = true;
++        }
+         self.viewport = viewport;
+         self.queue_device_changes(changes);
+     }
+diff --git a/packages/blitz-dom/src/scrolling.rs b/packages/blitz-dom/src/scrolling.rs
+index 7de35eee..9724e3da 100644
+--- a/packages/blitz-dom/src/scrolling.rs
++++ b/packages/blitz-dom/src/scrolling.rs
+@@ -290,6 +290,18 @@ impl BaseDocument {
+         target: ScrollTarget,
+         offset: Point<f64>,
+         dispatch_event: &mut dyn FnMut(DomEvent),
++    ) -> bool {
++        let has_changed = self.write_scroll_offset_inner(target, offset, dispatch_event);
++        // Scrolling moves elements' bounds in the accessibility tree.
++        self.has_changes |= has_changed;
++        has_changed
++    }
++
++    fn write_scroll_offset_inner(
++        &mut self,
++        target: ScrollTarget,
++        offset: Point<f64>,
++        dispatch_event: &mut dyn FnMut(DomEvent),
+     ) -> bool {
+         match self.canonical_scroll_target(target) {
+             ScrollTarget::Viewport => {
+diff --git a/tests/blitz-tests/tests/accessibility_states.rs b/tests/blitz-tests/tests/accessibility_states.rs
+index 48baab93..1afa84df 100644
+--- a/tests/blitz-tests/tests/accessibility_states.rs
++++ b/tests/blitz-tests/tests/accessibility_states.rs
+@@ -128,3 +128,24 @@ fn properties_and_relations() {
+     let off = node(&doc, &tree, "off");
+     assert!(off.is_disabled());
+ }
++
++#[test]
++fn bounds() {
++    let (doc, tree) = tree(
++        r#"<button id="button" style="position: absolute; left: 10px; top: 20px; width: 100px; height: 30px; margin: 0; box-sizing: border-box">Play</button>"#,
++    );
++    let button = node(&doc, &tree, "button");
++    let bounds = button.bounds().expect("bounds");
++    assert_eq!(
++        (bounds.x0, bounds.y0, bounds.x1, bounds.y1),
++        (10.0, 20.0, 110.0, 50.0)
++    );
++    // The window scales CSS pixels to the window's.
++    let window = &tree
++        .nodes
++        .iter()
++        .find(|(id, _)| *id == NodeId(u64::MAX))
++        .unwrap()
++        .1;
++    assert_eq!(window.transform().map(|t| t.as_coeffs()[0]), Some(2.0));
++}

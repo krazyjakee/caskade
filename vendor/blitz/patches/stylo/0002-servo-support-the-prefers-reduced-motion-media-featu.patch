@@ -1,7 +1,7 @@
-From 53cb0e5f3c14490f0edf9c0557df14441fed0856 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Jake Cattrall <krazyjakee@gmail.com>
 Date: Tue, 10 Nov 2026 08:19:11 +0000
-Subject: [PATCH 2/2] servo: support the prefers-reduced-motion media feature
+Subject: [PATCH] servo: support the prefers-reduced-motion media feature
 
 MediaData::prefers_reduced_motion and Device::set_prefers_reduced_motion
 carry the user's setting; @media (prefers-reduced-motion: reduce) and
