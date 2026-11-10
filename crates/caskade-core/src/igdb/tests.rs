@@ -41,10 +41,11 @@ fn respond(request: &Request) -> ResponseTemplate {
     }))
 }
 
-/// An address nothing listens on.
+/// An address nothing listens on: port 1, which nothing in the tests binds
+/// (it takes root on Unix). A port freed by a dropped listener could go to
+/// another test's server and answer (#119).
 fn unreachable() -> String {
-    let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
-    format!("http://{}", listener.local_addr().unwrap())
+    "http://127.0.0.1:1".to_owned()
 }
 
 async fn server() -> MockServer {

@@ -890,11 +890,11 @@ async fn a_new_cover_that_cannot_download_keeps_the_old_one() {
 #[tokio::test]
 async fn an_unreachable_image_host_stops_the_run() {
     let fixture = Fixture::new().await;
-    // The metadata server answers, but its images are somewhere unreachable.
-    let gone = {
-        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
-        format!("http://{}", listener.local_addr().unwrap())
-    };
+    // The metadata server answers, but its images are somewhere unreachable:
+    // port 1, which nothing in the tests binds (it takes root on Unix), so a
+    // connection is always refused. A port freed by a dropped listener could
+    // go to another test's server and answer (#119).
+    let gone = "http://127.0.0.1:1".to_owned();
     Mock::given(method("POST"))
         .and(path("/games"))
         .respond_with(move |request: &Request| {

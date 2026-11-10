@@ -311,11 +311,9 @@ async fn download_failures_say_whether_trying_again_can_help() {
     let busy = fail("busy").await;
     assert!(!busy.permanent() && !busy.unreachable(), "{busy}");
 
-    let port = std::net::TcpListener::bind("127.0.0.1:0")
-        .unwrap()
-        .local_addr()
-        .unwrap()
-        .port();
+    // Nothing in the tests binds port 1 (it takes root on Unix); a port freed
+    // by a dropped listener could go to another test's server (#119).
+    let port = 1;
     let gone = cache
         .download_error(format!("http://127.0.0.1:{port}/art.png"))
         .await;

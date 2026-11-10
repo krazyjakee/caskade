@@ -881,10 +881,9 @@ async fn launching_downloads_verifies_and_caches_then_plays_offline() {
     let before = fixture.requests().await;
     assert!(fixture.romm.prepare_entry(&record.entry_id).await.unwrap());
     assert_eq!(fixture.requests().await, before);
-    let closed = std::net::TcpListener::bind("127.0.0.1:0")
-        .unwrap()
-        .local_addr()
-        .unwrap();
+    // Port 1, which nothing in the tests binds: a port freed by a dropped
+    // listener could go to another test's server and answer (#119).
+    let closed = "127.0.0.1:1";
     let (romm, store) = (fixture.romm.clone(), fixture.store.clone());
     romm.save_server(server_config(&format!("http://{closed}")), None)
         .await
@@ -1555,10 +1554,9 @@ async fn a_stalled_server_is_not_taken_for_an_offline_one() {
     assert_eq!(entry_state(&fixture, 10).await, InstallState::Installed);
 
     // A refused connection is offline.
-    let closed = std::net::TcpListener::bind("127.0.0.1:0")
-        .unwrap()
-        .local_addr()
-        .unwrap();
+    // Port 1, which nothing in the tests binds: a port freed by a dropped
+    // listener could go to another test's server and answer (#119).
+    let closed = "127.0.0.1:1";
     fixture
         .romm
         .save_server(server_config(&format!("http://{closed}")), None)
@@ -1626,12 +1624,10 @@ async fn paging_stops_when_a_page_repeats() {
     assert_eq!(pages, 2);
 }
 
+/// Port 1, which nothing in the tests binds (it takes root on Unix): a port
+/// freed by a dropped listener could go to another test's server (#119).
 fn closed_port() -> String {
-    let addr = std::net::TcpListener::bind("127.0.0.1:0")
-        .unwrap()
-        .local_addr()
-        .unwrap();
-    format!("http://{addr}")
+    "http://127.0.0.1:1".to_owned()
 }
 
 async fn cached_ids(fixture: &Fixture) -> Vec<u32> {

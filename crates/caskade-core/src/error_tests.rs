@@ -312,12 +312,10 @@ msgstr "kan inte nå {host}"
 #[cfg(feature = "net")]
 #[tokio::test]
 async fn an_unreachable_server_reads_in_the_language_shown_also_once_stored() {
-    // A port nothing listens on.
-    let port = std::net::TcpListener::bind("127.0.0.1:0")
-        .unwrap()
-        .local_addr()
-        .unwrap()
-        .port();
+    // A port nothing listens on: port 1, which nothing in the tests binds
+    // (it takes root on Unix). A port freed by a dropped listener could go
+    // to another test's server and answer (#119).
+    let port = 1;
     let error = net(reqwest::get(format!("http://127.0.0.1:{port}/"))
         .await
         .unwrap_err());

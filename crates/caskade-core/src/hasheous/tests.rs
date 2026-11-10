@@ -288,12 +288,10 @@ async fn dumps_hasheous_lacks_are_reported() {
 #[tokio::test]
 async fn an_offline_first_sync_fails_so_the_watch_retries_soon() {
     let temp = tempfile::tempdir().unwrap();
-    // An address nothing listens on.
-    let port = std::net::TcpListener::bind("127.0.0.1:0")
-        .unwrap()
-        .local_addr()
-        .unwrap()
-        .port();
+    // An address nothing listens on: port 1, which nothing in the tests
+    // binds (it takes root on Unix). A port freed by a dropped listener
+    // could go to another test's server and answer (#119).
+    let port = 1;
     let hasheous = Hasheous::with_base_url(temp.path(), format!("http://127.0.0.1:{port}"));
     let outcome = hasheous.sync(&wanted_dump()).await;
     let report = outcome.as_ref().unwrap();
