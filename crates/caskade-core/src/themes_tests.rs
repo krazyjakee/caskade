@@ -65,6 +65,9 @@ fn lists_the_default_and_installed_themes_and_a_broken_one_hides_nothing() {
         summary,
         [
             ("caskade.default", ThemeSource::Builtin, 0),
+            ("caskade.cobalt-five", ThemeSource::Builtin, 0),
+            ("caskade.emerald-one", ThemeSource::Builtin, 0),
+            ("caskade.toggle-two", ThemeSource::Builtin, 0),
             ("dev.example.broken", ThemeSource::User, 2),
             ("caskade.default", ThemeSource::User, 1),
             ("dev.example.neon", ThemeSource::User, 0),
@@ -73,11 +76,11 @@ fn lists_the_default_and_installed_themes_and_a_broken_one_hides_nothing() {
         ]
     );
     assert_eq!(
-        themes[2].problems[0].message,
+        themes[5].problems[0].message,
         "id caskade.default is already used by the built-in theme Nexus"
     );
     assert_eq!(
-        themes[5].problems[0].message,
+        themes[8].problems[0].message,
         "dev.example.orphan extends dev.example.gone, which isn't installed or isn't valid"
     );
 

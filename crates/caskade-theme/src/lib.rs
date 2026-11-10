@@ -218,8 +218,67 @@ pub fn chain<'a>(
     Ok(chain)
 }
 
+/// A theme's CSS split into its top-level `@font-face` rules and the rest.
+/// The CSS has passed the lint, so its blocks balance; comments and strings
+/// are skipped over.
+fn font_faces(css: &str) -> (String, String) {
+    let bytes = css.as_bytes();
+    let (mut faces, mut rest) = (String::new(), String::new());
+    let (mut at, mut depth, mut copied) = (0, 0usize, 0);
+    while at < bytes.len() {
+        match bytes[at] {
+            b'/' if bytes.get(at + 1) == Some(&b'*') => {
+                at = css[at + 2..]
+                    .find("*/")
+                    .map_or(bytes.len(), |end| at + 2 + end + 2);
+                continue;
+            }
+            quote @ (b'"' | b'\'') => {
+                at += 1;
+                while at < bytes.len() && bytes[at] != quote {
+                    at += if bytes[at] == b'\\' { 2 } else { 1 };
+                }
+            }
+            b'{' => depth += 1,
+            b'}' => depth = depth.saturating_sub(1),
+            b'@' if depth == 0 && css[at..].to_ascii_lowercase().starts_with("@font-face") => {
+                // To the end of its block.
+                let mut end = at;
+                let mut inner = 0usize;
+                while end < bytes.len() {
+                    match bytes[end] {
+                        b'{' => inner += 1,
+                        b'}' => {
+                            inner -= 1;
+                            if inner == 0 {
+                                end += 1;
+                                break;
+                            }
+                        }
+                        _ => {}
+                    }
+                    end += 1;
+                }
+                rest.push_str(&css[copied..at]);
+                faces.push_str(css[at..end].trim_end());
+                faces.push('\n');
+                at = end;
+                copied = end;
+                continue;
+            }
+            _ => {}
+        }
+        at += 1;
+    }
+    rest.push_str(&css[copied.min(css.len())..]);
+    (faces, rest)
+}
+
 /// One stylesheet for a chain from [`chain`]: the tokens (a later theme's
-/// value wins) and then each theme's CSS, all in `@layer cs.theme`.
+/// value wins) and then each theme's CSS, all in `@layer cs.theme`. Its
+/// `@font-face` rules come first, outside the layer: a layer orders the
+/// cascade, which fonts aren't part of, and Blitz (the native UI) only loads
+/// the fonts of a stylesheet's top-level rules (#125).
 pub fn compile(chain: &[&Theme]) -> String {
     let Some(leaf) = chain.last() else {
         return String::new();
@@ -234,9 +293,14 @@ pub fn compile(chain: &[&Theme]) -> String {
         }
     }
     let mut out = format!(
-        "/* {} {}, compiled by caskade-theme. */\n@layer cs.theme {{\n",
+        "/* {} {}, compiled by caskade-theme. */\n",
         leaf.manifest.id, leaf.manifest.version
     );
+    let split: Vec<(String, String)> = chain.iter().map(|theme| font_faces(&theme.css)).collect();
+    for (faces, _) in &split {
+        out.push_str(faces);
+    }
+    out.push_str("@layer cs.theme {\n");
     if !tokens.is_empty() {
         out.push_str(":root {\n");
         for (name, value) in tokens {
@@ -244,10 +308,10 @@ pub fn compile(chain: &[&Theme]) -> String {
         }
         out.push_str("}\n");
     }
-    for theme in chain {
-        if !theme.css.trim().is_empty() {
-            out.push_str(&format!("\n/* {} */\n{}", theme.manifest.id, theme.css));
-            if !theme.css.ends_with('\n') {
+    for (theme, (_, css)) in chain.iter().zip(&split) {
+        if !css.trim().is_empty() {
+            out.push_str(&format!("\n/* {} */\n{}", theme.manifest.id, css));
+            if !css.ends_with('\n') {
                 out.push('\n');
             }
         }

@@ -1,0 +1,10 @@
+{
+  "id": "caskade.cobalt-five",
+  "name": "Cobalt Five",
+  "version": "1.0.0",
+  "description": "Deep cobalt and clean white: airy type, pill-shaped controls, soft rounded panels and a cool glow on focus.",
+  "author": "Caskade",
+  "extends": "caskade.default",
+  "modes": ["dark"],
+  "previews": ["previews/home.webp"]
+}

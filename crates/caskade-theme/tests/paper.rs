@@ -31,9 +31,14 @@ fn paper_compiles_into_the_theme_layer_with_its_tokens_and_assets() {
     .unwrap();
     assert_eq!(chain.len(), 1, "Paper stands alone");
     let css = compile(&chain);
-    assert!(css.starts_with(
-        "/* dev.caskade.paper 1.0.0, compiled by caskade-theme. */\n@layer cs.theme {\n:root {\n"
-    ));
+    assert!(
+        css.starts_with("/* dev.caskade.paper 1.0.0, compiled by caskade-theme. */\n@font-face {")
+    );
+    let layer = css.find("@layer cs.theme {\n:root {\n").expect("the layer");
+    assert!(
+        !css[layer..].contains("@font-face"),
+        "the fonts come before the layer"
+    );
     assert!(css.trim_end().ends_with('}'));
     for expected in [
         // Light paper and ink.

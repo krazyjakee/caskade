@@ -1,0 +1,151 @@
+/*
+ * Emerald One: near-black and one vivid emerald, in the spirit of today's
+ * console dashboards but Caskade's own layout and palette (#125). It
+ * extends caskade.default and turns its HUD off. Flat, square-cornered
+ * tiles; condensed, bold headings; the emerald marks focus, the active
+ * page and primary actions. Type: Barlow Semi Condensed for headings
+ * (OFL, assets/fonts/OFL.txt).
+ */
+
+/* ── Type ── */
+
+@font-face {
+  font-family: "Barlow Semi Condensed";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("assets/fonts/barlow-semi-condensed-latin-500-normal.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Barlow Semi Condensed";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("assets/fonts/barlow-semi-condensed-latin-ext-500-normal.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113,
+    U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Barlow Semi Condensed";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("assets/fonts/barlow-semi-condensed-latin-600-normal.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Barlow Semi Condensed";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113,
+    U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Barlow Semi Condensed";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("assets/fonts/barlow-semi-condensed-latin-700-normal.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Barlow Semi Condensed";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("assets/fonts/barlow-semi-condensed-latin-ext-700-normal.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113,
+    U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ── Backdrop: flat black with an emerald light in one corner ── */
+
+[data-cs="backdrop"] {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(70% 60% at 0% 0%, #19b85f24 0%, transparent 65%), #0b0d0c;
+}
+
+/* ── Shell: the active page an emerald bar ── */
+
+[data-part="nav-item"][data-status="active"] {
+  border-radius: 2px;
+  background: var(--cs-color-surface-hover);
+  box-shadow: inset 4px 0 0 var(--cs-color-accent);
+  color: var(--cs-color-fg);
+}
+
+[data-part="nav-item"][data-status="active"] [data-part="icon"] {
+  color: var(--cs-color-accent-alt);
+}
+
+/* ── Headings: condensed capitals ── */
+
+:is(
+  [data-cs="hero"] [data-part="title"],
+  [data-cs="shelf"] [data-part="title"],
+  [data-cs="shelf-row"] [data-part="title"],
+  [data-cs="settings-section"] [data-part="title"]
+) {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+[data-cs="hero"] [data-part="eyebrow"] {
+  color: var(--cs-color-accent-alt);
+}
+
+/* ── Cards: flat tiles with an emerald edge under focus ── */
+
+:is([data-cs="game-card"], [data-cs="collection-card"], [data-cs="platform-card"]) {
+  transition-property: box-shadow, background-color;
+  transition-duration: var(--cs-motion-duration-fast);
+  transition-timing-function: var(--cs-motion-ease-out);
+}
+
+:is([data-cs="game-card"], [data-cs="collection-card"], [data-cs="platform-card"]):is(
+  :hover,
+  :focus-visible,
+  :has(:focus-visible)
+) {
+  box-shadow: 0 0 0 3px var(--cs-color-accent);
+}
+
+/* ── Controls: flat, the primary emerald with dark text ── */
+
+[data-cs="button"][data-variant="primary"] {
+  background: var(--cs-color-accent);
+  color: var(--cs-color-accent-fg);
+}
+
+[data-cs="button"][data-variant="primary"][data-hovered] {
+  background: var(--cs-color-accent-alt);
+  box-shadow: none;
+  filter: none;
+}
+
+[data-cs="status-badge"] {
+  border-radius: 2px;
+}

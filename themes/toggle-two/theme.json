@@ -1,0 +1,9 @@
+{
+  "id": "caskade.toggle-two",
+  "name": "Toggle Two",
+  "version": "1.0.0",
+  "description": "Bright white and pale grey with a playful red-and-teal pair: chunky rounded shapes, soft shadows and crisp dark text.",
+  "author": "Caskade",
+  "modes": ["light"],
+  "previews": ["previews/home.webp"]
+}

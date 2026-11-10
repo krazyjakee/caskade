@@ -247,13 +247,23 @@ function settingsTabs() {
 const PLUGIN_NOTE =
   "The fixture build has no plugins (plugin UI halves come from the core over caskade-plugin://), so this route shows the shell and the view's 'isn't available' status, not a plugin's own UI.";
 
+/** Settings tabs whose fixtures show error states on purpose, and why. */
+const EXPECTED_ALERTS = {
+  stores:
+    "the fixtures' store accounts include one that can't be reached and one whose sign-in expired",
+};
+
 const views = [
   { name: "home", path: "/", ready: '[data-view="home"]' },
-  { name: "library-grid", path: "/library", ready: '[data-view="library"] [data-cs="game-card"]' },
+  {
+    name: "library-grid",
+    path: "/library?layout=grid",
+    ready: '[data-view="library"] [data-cs="game-card"]',
+  },
   {
     name: "library-list",
     path: "/library?layout=list",
-    ready: '[data-view="library"] [data-cs="game-card"][data-layout="list"]',
+    ready: '[data-view="library"] [data-cs="game-row"]',
   },
   { name: "game", path: "/games/fixture-1", ready: '[data-view="game"]' },
   { name: "store", path: "/store", ready: '[data-view="store"]' },
@@ -271,6 +281,7 @@ const views = [
     path: `/settings?tab=${tab}`,
     ready: '[data-view="settings"] [role="tabpanel"]',
     settings: true,
+    expectedAlerts: EXPECTED_ALERTS[tab],
   })),
 ];
 
@@ -282,8 +293,9 @@ function panelLoadedInPage() {
   return !/Loading [^…]*…/.test(panel.textContent ?? "");
 }
 
-/** What keeps a Settings panel from showing its real content. */
-function panelProblemsInPage() {
+/** What keeps a Settings panel from showing its real content. Alerts are
+ * one, unless the tab's fixtures show them on purpose (`expectedAlerts`). */
+function panelProblemsInPage(alertsExpected) {
   const panel = document.querySelector('[data-view="settings"] [role="tabpanel"]');
   if (!panel) return ["no tab panel"];
   const problems = [];
@@ -291,7 +303,7 @@ function panelProblemsInPage() {
   if (loading) problems.push(`still showing "${loading[0]}"`);
   if (!panel.querySelector("[data-cs]")) problems.push("no anatomy roots in the panel");
   if (/settings go here\./.test(panel.textContent ?? "")) problems.push("placeholder panel");
-  for (const alert of panel.querySelectorAll('[role="alert"]')) {
+  for (const alert of alertsExpected ? [] : panel.querySelectorAll('[role="alert"]')) {
     problems.push(`error state: "${(alert.textContent ?? "").trim().slice(0, 160)}"`);
   }
   return problems;
@@ -302,7 +314,7 @@ async function waitForView(page, view, timeout) {
   await page.waitForSelector(view.ready, { timeout });
   if (!view.settings) return [];
   await page.waitForFunction(panelLoadedInPage, undefined, { timeout: 30_000 }).catch(() => {});
-  return page.evaluate(panelProblemsInPage);
+  return page.evaluate(panelProblemsInPage, Boolean(view.expectedAlerts));
 }
 
 // ── In-page helpers (serialized into the page; self-contained) ──
@@ -643,6 +655,8 @@ try {
     reducedMotion: "reduce",
   });
   await context.route(`${THEME_ORIGIN}/**`, serveThemes(themes));
+  // Past first-run setup: the fixtures read this before they start.
+  await context.addInitScript(() => localStorage.setItem("caskade-fixtures-onboarded", "1"));
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));

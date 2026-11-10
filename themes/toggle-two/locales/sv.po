@@ -1,0 +1,12 @@
+# Machine-drafted Swedish; needs review by a native speaker (#220).
+msgid ""
+msgstr ""
+"Language: sv\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Toggle Two"
+msgstr "Växla två"
+
+msgid "Bright white and pale grey with a playful red-and-teal pair: chunky rounded shapes, soft shadows and crisp dark text."
+msgstr "Klart vitt och ljusgrått med ett lekfullt par i rött och turkos: knubbiga rundade former, mjuka skuggor och skarp mörk text."

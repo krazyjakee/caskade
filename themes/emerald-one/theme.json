@@ -1,0 +1,10 @@
+{
+  "id": "caskade.emerald-one",
+  "name": "Emerald One",
+  "version": "1.0.0",
+  "description": "Near-black and one vivid emerald: flat square tiles, bold condensed headings, and emerald for focus and the main actions.",
+  "author": "Caskade",
+  "extends": "caskade.default",
+  "modes": ["dark"],
+  "previews": ["previews/home.webp"]
+}

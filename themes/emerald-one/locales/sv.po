@@ -1,0 +1,12 @@
+# Machine-drafted Swedish; needs review by a native speaker (#220).
+msgid ""
+msgstr ""
+"Language: sv\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Emerald One"
+msgstr "Smaragd ett"
+
+msgid "Near-black and one vivid emerald: flat square tiles, bold condensed headings, and emerald for focus and the main actions."
+msgstr "Nästan svart och en klar smaragdgrön: platta fyrkantiga rutor, feta smala rubriker och smaragdgrönt för fokus och de viktigaste åtgärderna."

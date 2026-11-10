@@ -157,6 +157,16 @@ const installerSchema = {
   },
 };
 
+/** Whether the fixtures start past onboarding: `localStorage`'s
+ * `caskade-fixtures-onboarded` is `"1"` (set by `scripts/theme-exit.mjs`). */
+function fixturesOnboarded(): boolean {
+  try {
+    return globalThis.localStorage?.getItem("caskade-fixtures-onboarded") === "1";
+  } catch {
+    return false;
+  }
+}
+
 const sections: {
   namespace: string;
   version: number;
@@ -251,7 +261,12 @@ const sections: {
     schema: updatesSchema,
     defaults: { check: true, intervalHours: 6, askBeforePlay: true },
   },
-  { namespace: "core.onboarding", version: 1, defaults: { completed: false, sounds: true } },
+  {
+    namespace: "core.onboarding",
+    version: 1,
+    // First run, unless a script (the theme test) marked it done.
+    defaults: { completed: fixturesOnboarded(), sounds: true },
+  },
   { namespace: "core.metadata", version: 1, defaults: { online: true } },
   {
     namespace: "core.ports",

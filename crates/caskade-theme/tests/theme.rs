@@ -82,9 +82,14 @@ fn a_theme_overrides_tokens_and_restyles_anatomy_on_top_of_what_it_extends() {
         ["caskade.default", "dev.example.neon"]
     );
     let css = compile(&chain);
-    assert!(css.starts_with(
-        "/* dev.example.neon 0.1.0, compiled by caskade-theme. */\n@layer cs.theme {\n:root {\n"
-    ));
+    // Fonts sit outside the layer, before it (Blitz loads only top-level
+    // ones); everything else is in it.
+    assert!(css.starts_with(concat!(
+        "/* dev.example.neon 0.1.0, compiled by caskade-theme. */\n",
+        "@font-face { font-family: Neon; src: url(\"/dev.example.neon/assets/neon.woff2\") format(\"woff2\"); }\n",
+        "@layer cs.theme {\n:root {\n"
+    )), "{css}");
+    assert_eq!(css.matches("@font-face").count(), 1);
     for expected in [
         "  --cs-color-accent: #e0457b;\n",
         "  --cs-color-accent-alt: var(--cs-color-palette-cyan);\n",
@@ -363,4 +368,33 @@ fn broken_catalogs_are_lint_problems_but_the_theme_still_applies_in_english() {
         "{problems:?}"
     );
     assert_eq!(locales.text("sv", "Neon"), "Neon");
+}
+
+/// Only a top-level `@font-face` leaves the layer: one in a comment or a
+/// string stays where it is, and so does what follows a brace in a string.
+#[test]
+fn fonts_leave_the_layer_and_nothing_else_does() {
+    let theme = theme(&[
+        (
+            "theme.css",
+            r#"/* @font-face { a } */
+[data-cs="hero"]::after { content: "} @font-face {"; }
+@font-face { font-family: A; src: url("./assets/a.woff2") format("woff2"); }
+[data-cs="button"] { color: red; }
+"#,
+        ),
+        ("assets/a.woff2", "font"),
+    ])
+    .expect("the theme passes the lint");
+    let css = compile(&[&theme]);
+    let layer = css.find("@layer cs.theme {").unwrap();
+    let font = css.find("@font-face { font-family: A;").unwrap();
+    assert!(font < layer, "{css}");
+    for kept in [
+        "/* @font-face { a } */",
+        r#"content: "} @font-face {";"#,
+        r#"[data-cs="button"] { color: red; }"#,
+    ] {
+        assert!(css[layer..].contains(kept), "{kept:?} in\n{css}");
+    }
 }

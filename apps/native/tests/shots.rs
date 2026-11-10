@@ -82,7 +82,13 @@ fn every_theme_renders_the_reference_screens_as_before() {
     let log = String::from_utf8_lossy(&output.stderr);
     assert!(output.status.success(), "{log}");
     let rendered = pngs(&out);
-    for theme in ["caskade.default", "dev.caskade.ember"] {
+    for theme in [
+        "caskade.default",
+        "caskade.cobalt-five",
+        "caskade.emerald-one",
+        "caskade.toggle-two",
+        "dev.caskade.ember",
+    ] {
         assert!(
             rendered
                 .iter()

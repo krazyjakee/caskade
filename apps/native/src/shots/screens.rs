@@ -3,6 +3,8 @@
 //! classes and anatomy, no data and nothing animated, so two renders of a
 //! screen are the same pixels.
 //!
+//! - `preview`: the same library with genres for subtitles, which the
+//!   built-in themes' previews are rendered from (#125).
 //! - `library`: the BLITZ-0 prototype's library (`apps/native-proto`): the
 //!   shell's sidebar, top bar with search, status bar, the backdrop and a
 //!   grid of game cards with placeholder art, as the webview's. Until the
@@ -18,7 +20,7 @@ use dioxus_native::prelude::*;
 pub type Screen = (&'static str, fn() -> Element);
 
 /// Every reference screen.
-pub const SCREENS: [Screen; 1] = [("library", Library)];
+pub const SCREENS: [Screen; 2] = [("library", Library), ("preview", Preview)];
 
 /// A fixture game: title, subtitle, favourite.
 type Fixture = (&'static str, Option<&'static str>, bool);
@@ -46,12 +48,41 @@ const NAV: [(&str, &str); 4] = [
     ("Activity", "M3 12h4l3 8 4-16 3 8h4"),
 ];
 
+/// The preview's games: the library's, with genres for subtitles, so a
+/// theme's preview names no platform (#125).
+const PREVIEW_GAMES: [Fixture; 12] = [
+    ("Hollow Pines", None, true),
+    ("Star Courier 2", Some("Space trading"), false),
+    ("Tidewater", None, false),
+    ("Moss & Iron", Some("Platformer"), false),
+    ("Neon Drift Remastered Collector's Edition", None, true),
+    ("Quiet Harbour", Some("Puzzle"), false),
+    ("Lantern Keep", None, false),
+    ("Riverbend Rally", Some("Racing"), false),
+    ("Cinder Vale", None, false),
+    ("Paper Moons", Some("Adventure"), true),
+    ("Glasswing", None, false),
+    ("Orbit Gardens", None, false),
+];
+
 const COLUMNS: usize = 4;
 const ROW_HEIGHT: f64 = 312.0;
 
 #[allow(non_snake_case)]
 fn Library() -> Element {
-    let rows = GAMES.len().div_ceil(COLUMNS);
+    rsx! { LibraryOf { games: &GAMES } }
+}
+
+/// The library as a built-in theme's preview shows it
+/// (`themes/<theme>/previews/home.webp`).
+#[allow(non_snake_case)]
+fn Preview() -> Element {
+    rsx! { LibraryOf { games: &PREVIEW_GAMES } }
+}
+
+#[component]
+fn LibraryOf(games: &'static [Fixture; 12]) -> Element {
+    let rows = games.len().div_ceil(COLUMNS);
     rsx! {
         div { "data-cs": "app-shell", class: "relative flex h-screen flex-col overflow-clip",
             div { "data-cs": "backdrop", "aria-hidden": "true" }
@@ -81,7 +112,7 @@ fn Library() -> Element {
                         div { class: "flex min-h-full flex-col",
                             div { class: "flex items-baseline gap-3 pt-2 pb-4",
                                 h1 { class: "font-display text-2xl font-semibold", "Library" }
-                                span { class: "text-sm text-fg-muted", "{GAMES.len()} games" }
+                                span { class: "text-sm text-fg-muted", "{games.len()} games" }
                             }
                             section {
                                 "data-cs": "virtual-library",
@@ -95,7 +126,7 @@ fn Library() -> Element {
                                         "data-part": "virtual-row",
                                         class: "absolute top-0 left-0 grid w-full gap-4 pb-4",
                                         style: "height: {ROW_HEIGHT}px; transform: translateY({row as f64 * ROW_HEIGHT}px); grid-template-columns: repeat({COLUMNS}, minmax(0, 1fr))",
-                                        for (index, (title, subtitle, favorite)) in GAMES.iter().enumerate().skip(row * COLUMNS).take(COLUMNS) {
+                                        for (index, (title, subtitle, favorite)) in games.iter().enumerate().skip(row * COLUMNS).take(COLUMNS) {
                                             GameCard { key: "{index}", title, subtitle: *subtitle, favorite: *favorite, focused: index == 1 }
                                         }
                                     }

@@ -148,12 +148,51 @@ macro_rules! builtin_theme {
 /// The built-in themes, `caskade.default` first. A new one is a line here
 /// listing its folder and every file in it (previews and assets too).
 fn builtins() -> Vec<MemFiles> {
-    vec![builtin_theme!(
-        "default": "theme.json",
-        "tokens.json",
-        "theme.css",
-        "locales/sv.po",
-    )]
+    vec![
+        builtin_theme!(
+            "default": "theme.json",
+            "tokens.json",
+            "theme.css",
+            "locales/sv.po",
+        ),
+        // Deep cobalt and white, in the spirit of a console home screen (#125).
+        builtin_theme!(
+            "cobalt-five": "theme.json",
+            "tokens.json",
+            "theme.css",
+            "assets/fonts/OFL.txt",
+            "assets/fonts/manrope-latin-ext-wght-normal.woff2",
+            "assets/fonts/manrope-latin-wght-normal.woff2",
+            "locales/sv.po",
+            "previews/home.webp",
+        ),
+        // Near-black and emerald, in the spirit of a console dashboard (#125).
+        builtin_theme!(
+            "emerald-one": "theme.json",
+            "tokens.json",
+            "theme.css",
+            "assets/fonts/OFL.txt",
+            "assets/fonts/barlow-semi-condensed-latin-500-normal.woff2",
+            "assets/fonts/barlow-semi-condensed-latin-600-normal.woff2",
+            "assets/fonts/barlow-semi-condensed-latin-700-normal.woff2",
+            "assets/fonts/barlow-semi-condensed-latin-ext-500-normal.woff2",
+            "assets/fonts/barlow-semi-condensed-latin-ext-600-normal.woff2",
+            "assets/fonts/barlow-semi-condensed-latin-ext-700-normal.woff2",
+            "locales/sv.po",
+            "previews/home.webp",
+        ),
+        // Bright white with red and teal, in the spirit of a playful console home screen (#125).
+        builtin_theme!(
+            "toggle-two": "theme.json",
+            "tokens.json",
+            "theme.css",
+            "assets/fonts/OFL.txt",
+            "assets/fonts/nunito-latin-ext-wght-normal.woff2",
+            "assets/fonts/nunito-latin-wght-normal.woff2",
+            "locales/sv.po",
+            "previews/home.webp",
+        ),
+    ]
 }
 
 /// Themes that were built in and left the built-in set: Paper went to the

@@ -168,8 +168,9 @@ themes/neon/
 
 The core reads themes from these places:
 
-- the built-in themes, `caskade.default` (`themes/default` in the
-  repository) first;
+- the built-in themes: `caskade.default` (Nexus, `themes/default` in the
+  repository) first, then Cobalt Five, Emerald One and Toggle Two
+  (`caskade.cobalt-five`, `caskade.emerald-one`, `caskade.toggle-two`, #125);
 - the folders under `<app data>/themes/`;
 - folders bundled by plugins;
 - folders loaded in place in [dev mode](#dev-mode).
@@ -202,7 +203,9 @@ broken theme never hides the others. The rules:
 A theme compiles, together with everything it `extends`, into one
 stylesheet: the tokens on `:root`, then each theme's CSS, base first, all
 inside `@layer cs.theme`. The layer beats component and plugin styles and
-loses to the user's CSS. The app loads the stylesheet from
+loses to the user's CSS. A theme's `@font-face` rules come first, outside
+the layer: a layer orders the cascade, which fonts aren't part of, and the
+native app only loads the fonts of a stylesheet's top-level rules. The app loads the stylesheet from
 `caskade-theme://localhost/<id>/theme.css`
 (`http://caskade-theme.localhost/…` on Windows), which also serves the
 theme's `assets/` and previews.

@@ -670,7 +670,13 @@ mod tests {
             std::fs::copy(file.path(), ember.join(file.file_name())).unwrap();
         }
         let themes = ThemeService::new(folder.path());
-        for (id, base) in [("caskade.default", "#060914"), ("dev.caskade.ember", "")] {
+        for (id, base) in [
+            ("caskade.default", "#060914"),
+            ("caskade.cobalt-five", "#081433"),
+            ("caskade.emerald-one", "#0b0d0c"),
+            ("caskade.toggle-two", "#eef0f3"),
+            ("dev.caskade.ember", ""),
+        ] {
             let mut document = document();
             let active = themes.resolve(id);
             assert_eq!(active.id, id);

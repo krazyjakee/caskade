@@ -1,0 +1,320 @@
+/*
+ * Toggle Two: bright white and pale grey with a red-and-teal pair, in the
+ * spirit of today's playful console home screens but Caskade's own layout
+ * and palette (#125). A light theme that extends nothing, written only
+ * against the public contract (docs/theming/tokens.md, anatomy.md):
+ * chunky rounded shapes, soft shadows instead of glows, crisp dark text.
+ * Type: Nunito (OFL, assets/fonts/OFL.txt).
+ */
+
+/* ── Type ── */
+
+@font-face {
+  font-family: "Nunito Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 1000;
+  src: url("assets/fonts/nunito-latin-wght-normal.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Nunito Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 1000;
+  src: url("assets/fonts/nunito-latin-ext-wght-normal.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113,
+    U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ── Document: a light colour scheme for native controls and scrollbars ── */
+
+* {
+  color-scheme: light;
+  scrollbar-color: var(--cs-color-border-strong) transparent;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--cs-color-accent-alt) 25%, transparent);
+  color: var(--cs-color-fg);
+}
+
+/* ── Backdrop: a plain pale field ── */
+
+[data-cs="backdrop"] {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, #f5f6f8 0%, var(--cs-color-surface-base) 100%);
+}
+
+/* ── Shell: white rails, the active page a red pill ── */
+
+:is([data-cs="sidebar"], [data-cs="console-sidebar"]) {
+  background: var(--cs-color-surface-raised);
+  border-right: 1px solid var(--cs-color-border);
+}
+
+:is([data-cs="topbar"], [data-cs="console-topbar"]) {
+  border-bottom: 1px solid var(--cs-color-border);
+}
+
+:is([data-cs="status-bar"], [data-cs="hint-bar"]) {
+  background: var(--cs-color-surface-raised);
+  border-top: 1px solid var(--cs-color-border);
+}
+
+[data-cs="settings-section"] [data-part="icon"] {
+  color: var(--cs-color-accent);
+}
+
+[data-part="nav-item"][data-status="active"] {
+  border-radius: 9999px;
+  background: var(--cs-color-accent);
+  box-shadow: none;
+  color: var(--cs-color-accent-fg);
+  font-weight: 700;
+}
+
+[data-part="nav-item"][data-status="active"] [data-part="icon"] {
+  color: var(--cs-color-accent-fg);
+}
+
+[data-cs="settings-nav"] [data-part="tab"][data-selected] {
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--cs-color-accent) 12%, var(--cs-color-surface-raised));
+  color: var(--cs-color-fg);
+  font-weight: 700;
+}
+
+/* ── Hero: set on white, no glow ── */
+
+[data-cs="hero"] {
+  box-shadow: 0 10px 30px -18px #1c202666;
+}
+
+[data-cs="hero"] [data-part="glow"] {
+  display: none;
+}
+
+[data-cs="hero"] [data-part="shade"] {
+  background: linear-gradient(
+    90deg,
+    var(--cs-color-surface-raised) 35%,
+    color-mix(in oklab, var(--cs-color-surface-raised) 60%, transparent) 70%,
+    color-mix(in oklab, var(--cs-color-surface-raised) 30%, transparent)
+  );
+}
+
+[data-cs="hero"] [data-part="eyebrow"] {
+  color: var(--cs-color-accent);
+}
+
+[data-cs="hero"] [data-part="live-dot"] {
+  box-shadow: none;
+  background: var(--cs-color-accent);
+}
+
+[data-cs="hero"] [data-part="title"] {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+
+/* ── Cards: rounded tiles that pop up under focus ── */
+
+:is([data-cs="game-card"], [data-cs="collection-card"], [data-cs="platform-card"]) {
+  border-color: var(--cs-color-border);
+  box-shadow: 0 2px 8px -4px #1c202640;
+  transition-property: translate, box-shadow, background-color;
+  transition-duration: var(--cs-motion-duration-base);
+  transition-timing-function: var(--cs-motion-ease-out);
+}
+
+:is([data-cs="game-card"], [data-cs="collection-card"], [data-cs="platform-card"]):is(
+  :hover,
+  :focus-visible,
+  :has(:focus-visible)
+) {
+  box-shadow:
+    0 0 0 3px var(--cs-color-accent-alt),
+    0 12px 24px -14px #1c202680;
+}
+
+/* Console focus doesn't lift: a shelf's scrolling edge would cut the top of
+   its focus ring (#161). */
+:is([data-cs="game-card"], [data-cs="collection-card"], [data-cs="platform-card"]):is(
+  :hover,
+  :not([data-mode="console"] *):focus-visible
+) {
+  translate: 0 -3px;
+}
+
+:is([data-cs="game-card"], [data-cs="collection-card"], [data-cs="platform-card"])
+  [data-part="title"] {
+  font-weight: 700;
+}
+
+[data-cs="collection-card"] [data-part="count"] {
+  color: var(--cs-color-fg);
+  filter: none;
+}
+
+[data-cs="platform-card"] [data-part="art"] {
+  background-image: none;
+}
+
+/* Generated art is dark; wash it towards the white. */
+[data-cs="game-art"][data-source="placeholder"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--cs-color-surface-base);
+  mix-blend-mode: screen;
+  opacity: 0.6;
+}
+
+/* The status: a white label in the status colour. */
+[data-cs="status-badge"] {
+  border: 1.5px solid currentColor;
+  border-radius: 9999px;
+  background: var(--cs-color-surface-overlay);
+  backdrop-filter: none;
+  font-weight: 700;
+}
+
+[data-cs="status-badge"][data-status="installed"] {
+  color: var(--cs-color-status-installed);
+}
+
+[data-cs="status-badge"][data-status="not-installed"] {
+  color: var(--cs-color-status-missing);
+}
+
+[data-cs="status-badge"][data-status="available"] {
+  color: var(--cs-color-status-available);
+}
+
+[data-cs="status-badge"][data-status="emulated"] {
+  color: var(--cs-color-status-emulated);
+}
+
+/* ── Shelves and panels ── */
+
+:is([data-cs="shelf"], [data-cs="shelf-row"]) [data-part="title"] {
+  font-weight: 800;
+}
+
+:is([data-cs="shelf"], [data-cs="shelf-row"]) :is([data-part="view-all"], [data-part="icon"]) {
+  color: var(--cs-color-accent);
+}
+
+[data-cs="game-row"] [data-part="favorite"] {
+  fill: var(--cs-color-accent);
+  color: var(--cs-color-accent);
+}
+
+:is([data-cs="panel"], [data-cs="settings-section"]) {
+  border-color: var(--cs-color-border);
+  box-shadow: 0 2px 10px -6px #1c202640;
+}
+
+/* ── Controls: round, flat and bright ── */
+
+[data-cs="button"][data-variant="primary"] {
+  background: var(--cs-color-accent);
+}
+
+[data-cs="button"][data-variant="primary"][data-hovered] {
+  background: var(--cs-color-accent-strong);
+  box-shadow: none;
+  filter: none;
+}
+
+[data-cs="button"][data-variant="secondary"] {
+  background: var(--cs-color-surface-overlay);
+  backdrop-filter: none;
+}
+
+[data-cs="button"][data-variant="secondary"][data-hovered] {
+  border-color: var(--cs-color-fg);
+}
+
+[data-cs="button"][data-disabled] {
+  filter: grayscale(1);
+}
+
+/* In console mode the edge sits inside the button; on a filled one a white
+   keyline keeps it apart from the red. */
+[data-mode="console"] [data-cs="button"][data-variant="primary"][data-focus-visible],
+[data-mode="console"] [data-cs="hero"] [data-part="primary-action"] :focus-visible {
+  box-shadow: inset 0 0 0 calc(var(--cs-focus-ring-width) + 2px) var(--cs-color-accent-fg);
+}
+
+:is(
+  [data-cs="text-field"] [data-part="control"],
+  [data-cs="select"] [data-part="trigger"],
+  [data-cs="search"] [data-part="control"]
+) {
+  border-color: var(--cs-color-border-strong);
+  background: var(--cs-color-surface-overlay);
+  backdrop-filter: none;
+}
+
+[data-cs="text-field"] [data-part="control"]:focus-within,
+[data-cs="text-field"] [data-part="control"][data-focused],
+[data-cs="select"] [data-part="trigger"][data-hovered],
+[data-cs="select"][data-open] [data-part="trigger"],
+[data-cs="search"] [data-part="control"][data-focus-within] {
+  border-color: var(--cs-color-accent-alt);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--cs-color-accent-alt) 25%, transparent);
+}
+
+[data-cs="text-field"][data-invalid] [data-part="control"] {
+  border-color: var(--cs-color-danger);
+}
+
+[data-cs="switch"] :is([data-part="track"], [data-part="thumb"]) {
+  box-shadow: none;
+}
+
+[data-cs="checkbox"] [data-part="box"] {
+  background: var(--cs-color-surface-overlay);
+}
+
+[data-cs="checkbox"]:is([data-selected], [data-indeterminate]) [data-part="box"] {
+  border-color: var(--cs-color-accent);
+  background: var(--cs-color-accent);
+}
+
+[data-cs="segmented"] [data-part="segment"][data-selected] {
+  background: var(--cs-color-accent);
+  box-shadow: none;
+  color: var(--cs-color-accent-fg);
+}
+
+[data-cs="slider"] [data-part="fill"] {
+  background: var(--cs-color-accent);
+}
+
+[data-cs="slider"] [data-part="thumb"] {
+  border-color: var(--cs-color-accent);
+  background: var(--cs-color-surface-overlay);
+  box-shadow: 0 1px 4px #1c202640;
+}
+
+[data-cs="status-dot"] [data-part="dot"] {
+  box-shadow: none;
+}
+
+/* ── Popovers and menus: white cards with a soft shadow ── */
+
+:is([data-cs="select-popover"], [data-cs="search-popover"], [data-cs="menu"]) {
+  box-shadow: 0 16px 36px -18px #1c202680;
+}
