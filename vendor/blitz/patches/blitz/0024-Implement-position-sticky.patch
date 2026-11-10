@@ -1,0 +1,1636 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: caskade <caskade@localhost>
+Date: Tue, 10 Nov 2026 13:10:21 +0000
+Subject: [PATCH] Implement position: sticky
+
+Ports blitz#887 (by LinuxBoy-96) to this revision. A sticky box is laid out
+as relative, with its insets hidden from Taffy; after layout, sticky.rs
+resolves each registered box's constraints from its nearest scroller (or the
+viewport) and its containing block, and every scroll write and paint
+re-applies them as a per-box offset. The offset is applied in paint, hit
+testing, hoisted-child positions and the geometry APIs (absolute position,
+offsetTop, getBoundingClientRect, and so the accessibility bounds), while
+scrollIntoView keeps the in-flow position. In porting: IS_STICKY moved to a
+free NodeFlags bit; the offset goes into physical_unrounded_geometry (both
+the plain and the writing-mode versions) instead of a second unrounded
+position helper; paint applies it in node_transform and refreshes it at the
+top of paint_scene_damaged, and paint_bounds uses it so damage records match
+what is drawn; the inset override keeps stylo_taffy's writing-mode rect();
+a refresh that moves a box bumps the geometry generation; table row
+backgrounds and the debug overlay follow shifted cells. Adds
+position_sticky tests (stuck and released headers, containing-block end,
+bottom insets, hit testing, a sticky thead, a stacked list header, paint).
+---
+ packages/blitz-dom/src/document.rs            |  11 +-
+ packages/blitz-dom/src/layout/damage.rs       |  10 +
+ packages/blitz-dom/src/layout/paint_tree.rs   |   6 +-
+ packages/blitz-dom/src/layout/writing_mode.rs |  17 +-
+ packages/blitz-dom/src/lib.rs                 |   2 +
+ packages/blitz-dom/src/node/element.rs        |   3 +
+ packages/blitz-dom/src/node/node.rs           |  60 +-
+ packages/blitz-dom/src/paint_damage.rs        |   6 +-
+ packages/blitz-dom/src/resolve.rs             |   6 +
+ packages/blitz-dom/src/resolved_style.rs      |  20 +-
+ packages/blitz-dom/src/scrolling.rs           |  10 +-
+ packages/blitz-dom/src/sticky.rs              | 858 ++++++++++++++++++
+ packages/blitz-paint/src/debug_overlay.rs     |   4 +-
+ packages/blitz-paint/src/lib.rs               |   3 +
+ packages/blitz-paint/src/render.rs            |   3 +-
+ packages/blitz-paint/src/render/background.rs |  14 +-
+ packages/stylo_taffy/src/convert.rs           |  14 +-
+ packages/stylo_taffy/src/wrapper.rs           |  12 +
+ tests/blitz-tests/tests/all.rs                |   1 +
+ tests/blitz-tests/tests/position_sticky.rs    | 210 +++++
+ 20 files changed, 1238 insertions(+), 32 deletions(-)
+ create mode 100644 packages/blitz-dom/src/sticky.rs
+ create mode 100644 tests/blitz-tests/tests/position_sticky.rs
+
+diff --git a/packages/blitz-dom/src/document.rs b/packages/blitz-dom/src/document.rs
+index cacb74ea..2322cdc7 100644
+--- a/packages/blitz-dom/src/document.rs
++++ b/packages/blitz-dom/src/document.rs
+@@ -386,6 +386,9 @@ pub struct BaseDocument {
+     /// May contain multiple nodes for the same id: `get_element_by_id`
+     /// returns the first in tree order.
+     pub(crate) nodes_to_id: HashMap<String, SmallVec<[NodeId; 1]>>,
++    /// Registered `position: sticky` boxes with their layout-invariant
++    /// constraints, sorted by depth (see `sticky.rs`).
++    pub(crate) sticky_nodes: Vec<crate::sticky::StickyEntry>,
+     /// Map of `<style>` and `<link>` node IDs to their associated stylesheet
+     pub(crate) nodes_to_stylesheet: BTreeMap<NodeId, DocumentStyleSheet>,
+     /// Incremented whenever `nodes_to_stylesheet` changes (a stylesheet is
+@@ -543,6 +546,7 @@ impl BaseDocument {
+             animations: DocumentAnimationSet::default(),
+             snapshots,
+             nodes_to_id,
++            sticky_nodes: Vec::new(),
+             viewport,
+             media_type,
+             pending_device_changes: DeviceChanges::empty(),
+@@ -2507,6 +2511,7 @@ impl BaseDocument {
+ 
+     pub fn set_viewport_scroll(&mut self, scroll: crate::Point<f64>) {
+         self.nodes.set_viewport_scroll(scroll);
++        self.refresh_sticky_offsets();
+     }
+ 
+     /// Find the node targeted by a URL fragment (the `#...` part of a URL).
+@@ -2537,8 +2542,10 @@ impl BaseDocument {
+         let mut current = Some(node_id);
+         while let Some(id) = current {
+             let node = &self.nodes[id];
+-            pos.x += node.unrounded_layout().location.x - node.scroll_offset().x as f32;
+-            pos.y += node.unrounded_layout().location.y - node.scroll_offset().y as f32;
++            // Where the box is drawn: sticky shifts included.
++            let location = node.unrounded_visual_location();
++            pos.x += location.x - node.scroll_offset().x as f32;
++            pos.y += location.y - node.scroll_offset().y as f32;
+             current = node.containing_block();
+         }
+         (pos, *self.nodes[node_id].unrounded_layout())
+diff --git a/packages/blitz-dom/src/layout/damage.rs b/packages/blitz-dom/src/layout/damage.rs
+index a1633c0a..aeec9fd6 100644
+--- a/packages/blitz-dom/src/layout/damage.rs
++++ b/packages/blitz-dom/src/layout/damage.rs
+@@ -76,6 +76,16 @@ impl BaseDocument {
+             }
+         }
+ 
++        // Keep the `position: sticky` registry in step with this node: its
++        // own damage is non-empty exactly when it was restyled or (re)inserted
++        // into the document, the only ways for it to start or stop being sticky.
++        if !damage.is_empty() {
++            let is_sticky = self.nodes[node_id]
++                .primary_styles()
++                .is_some_and(|s| s.get_box().position == Position::Sticky);
++            self.note_sticky(node_id, is_sticky);
++        }
++
+         let mut damage_from_children = RestyleDamage::empty();
+         let children = std::mem::take(&mut self.nodes[node_id].children);
+         for child in children.iter() {
+diff --git a/packages/blitz-dom/src/layout/paint_tree.rs b/packages/blitz-dom/src/layout/paint_tree.rs
+index 0d127b30..4b2640aa 100644
+--- a/packages/blitz-dom/src/layout/paint_tree.rs
++++ b/packages/blitz-dom/src/layout/paint_tree.rs
+@@ -57,7 +57,9 @@ pub fn hoisted_child_position(tree: &NodeTree, sc_root_id: NodeId, child_id: Nod
+         let Some(node) = tree.get(id) else {
+             break;
+         };
+-        let location = node.final_layout().location;
++        // Where the box is drawn: a `position: sticky` ancestor carries its
++        // hoisted descendants along with its shift.
++        let location = node.visual_location();
+         let scroll_offset = *node.scroll_offset();
+         position.x += location.x - scroll_offset.x as f32;
+         position.y += location.y - scroll_offset.y as f32;
+@@ -147,7 +149,7 @@ impl StackingContext {
+         let child_rect = |child: &HoistedPaintChild| -> Option<Rect<f32>> {
+             let node = tree.get(child.node_id)?;
+             let position = child.position(tree, sc_root_id);
+-            let location = node.final_layout().location;
++            let location = node.visual_location();
+             let mut overflow = *node.scrollable_overflow();
+             if let Some(transform) = node.transform().as_deref() {
+                 overflow = transform.transform_rect_bbox(overflow);
+diff --git a/packages/blitz-dom/src/layout/writing_mode.rs b/packages/blitz-dom/src/layout/writing_mode.rs
+index bd0cf866..68cea838 100644
+--- a/packages/blitz-dom/src/layout/writing_mode.rs
++++ b/packages/blitz-dom/src/layout/writing_mode.rs
+@@ -545,8 +545,10 @@ impl BaseDocument {
+         let mut current = Some(node_id);
+         while let Some(id) = current {
+             let node = &self.nodes[id];
+-            pos.x += node.unrounded_layout().location.x - node.scroll_offset().x as f32;
+-            pos.y += node.unrounded_layout().location.y - node.scroll_offset().y as f32;
++            // Where the box is drawn: sticky shifts included.
++            let location = node.unrounded_visual_location();
++            pos.x += location.x - node.scroll_offset().x as f32;
++            pos.y += location.y - node.scroll_offset().y as f32;
+             has_vertical |= node.layout_data().writing_mode.is_vertical();
+             current = node.containing_block();
+         }
+@@ -564,8 +566,10 @@ impl BaseDocument {
+             placer_size,
+             overflow.x.is_scroll_container() || overflow.y.is_scroll_container(),
+         );
+-        pos.x += layout.location.x - node.scroll_offset().x as f32;
+-        pos.y += layout.location.y - node.scroll_offset().y as f32;
++        // The sticky shift is physical already.
++        let sticky = node.sticky_offset();
++        pos.x += layout.location.x + sticky.x - node.scroll_offset().x as f32;
++        pos.y += layout.location.y + sticky.y - node.scroll_offset().y as f32;
+         (pos, layout)
+     }
+ 
+@@ -603,8 +607,9 @@ impl BaseDocument {
+         } else {
+             (logical.location, logical.size)
+         };
+-        pos.x += location.x - placer.scroll_offset().x as f32;
+-        pos.y += location.y - placer.scroll_offset().y as f32;
++        let sticky = placer.sticky_offset();
++        pos.x += location.x + sticky.x - placer.scroll_offset().x as f32;
++        pos.y += location.y + sticky.y - placer.scroll_offset().y as f32;
+         (pos, placer.layout_data().writing_mode, size)
+     }
+ }
+diff --git a/packages/blitz-dom/src/lib.rs b/packages/blitz-dom/src/lib.rs
+index 34f8ae5b..02cdb6d7 100644
+--- a/packages/blitz-dom/src/lib.rs
++++ b/packages/blitz-dom/src/lib.rs
+@@ -66,6 +66,8 @@ mod resolved_style;
+ /// Scrolling of nodes and the viewport, and scroll animations.
+ mod scrolling;
+ mod selection;
++/// `position: sticky` offsets, resolved after layout.
++pub mod sticky;
+ /// Implementations that interact with servo's style engine
+ mod stylo;
+ mod stylo_device;
+diff --git a/packages/blitz-dom/src/node/element.rs b/packages/blitz-dom/src/node/element.rs
+index 6d4ccccf..23fe95ae 100644
+--- a/packages/blitz-dom/src/node/element.rs
++++ b/packages/blitz-dom/src/node/element.rs
+@@ -142,6 +142,8 @@ pub struct LayoutData {
+     pub unrounded_layout: Layout,
+     pub final_layout: Layout,
+     pub scroll_offset: crate::Point<f64>,
++    /// Shift applied to a `position: sticky` box after layout (see `sticky.rs`).
++    pub sticky_offset: crate::Point<f32>,
+     pub scrollable_overflow: KurboRect,
+     /// The writing mode this node's layout algorithm ran in (the root takes it from `<body>`),
+     /// recorded by the layout pass for CSSOM geometry lookups.
+@@ -156,6 +158,7 @@ impl LayoutData {
+             unrounded_layout: Layout::new(),
+             final_layout: Layout::new(),
+             scroll_offset: crate::Point::ZERO,
++            sticky_offset: crate::Point { x: 0.0, y: 0.0 },
+             scrollable_overflow: KurboRect::ZERO,
+             #[cfg(feature = "writing-mode")]
+             writing_mode: stylo_taffy::WritingMode::empty(),
+diff --git a/packages/blitz-dom/src/node/node.rs b/packages/blitz-dom/src/node/node.rs
+index 4e2b7c52..af511d83 100644
+--- a/packages/blitz-dom/src/node/node.rs
++++ b/packages/blitz-dom/src/node/node.rs
+@@ -60,6 +60,8 @@ bitflags! {
+         const IS_IN_DOCUMENT = 0b00000100;
+         /// Whether the node is an inline box whose in-flow content is block-level only
+         const IS_INLINE_WITH_ONLY_BLOCK_CHILDREN = 0b00001000;
++        /// Registered in the document's `position: sticky` list (`sticky.rs`).
++        const IS_STICKY = 0b00010000;
+     }
+ }
+ 
+@@ -292,6 +294,36 @@ impl Node {
+         &mut self.layout_data_mut().scroll_offset
+     }
+ 
++    /// Shift of a `position: sticky` box relative to its laid-out position.
++    #[inline]
++    pub fn sticky_offset(&self) -> crate::Point<f32> {
++        self.layout_data().sticky_offset
++    }
++
++    /// Where the box is drawn relative to its layout parent: the layout
++    /// location plus the paint-time `position: sticky` shift. Every geometry
++    /// consumer (paint, hit testing, CSSOM, caret and selection) reads this,
++    /// so none can drift out of step with what is on screen; only
++    /// `scrollIntoView` wants the in-flow location.
++    pub fn visual_location(&self) -> crate::Point<f32> {
++        let location = self.final_layout().location;
++        let sticky = self.sticky_offset();
++        crate::Point {
++            x: location.x + sticky.x,
++            y: location.y + sticky.y,
++        }
++    }
++
++    /// [`Self::visual_location`] from the unrounded layout (sub-pixel CSSOM).
++    pub fn unrounded_visual_location(&self) -> crate::Point<f32> {
++        let location = self.unrounded_layout().location;
++        let sticky = self.sticky_offset();
++        crate::Point {
++            x: location.x + sticky.x,
++            y: location.y + sticky.y,
++        }
++    }
++
+     #[inline]
+     pub fn scrollable_overflow(&self) -> &KurboRect {
+         &self.layout_data().scrollable_overflow
+@@ -1485,8 +1517,9 @@ impl Node {
+             .primary_styles()
+             .is_some_and(|style| style.clone_pointer_events() == PointerEvents::None);
+ 
+-        let mut x = x - self.final_layout().location.x + self.scroll_offset().x as f32;
+-        let mut y = y - self.final_layout().location.y + self.scroll_offset().y as f32;
++        let visual = self.visual_location();
++        let mut x = x - visual.x + self.scroll_offset().x as f32;
++        let mut y = y - visual.y + self.scroll_offset().y as f32;
+ 
+         if let Some(t) = self.transform().as_deref() {
+             let p = t.inverse() * kurbo::Point::new(x as f64 * scale, y as f64 * scale);
+@@ -1769,10 +1802,22 @@ impl Node {
+             .or_else(|| self.layout_parent.get())
+     }
+ 
+-    /// Computes the Document-relative coordinates of the `Node`
+-    pub fn absolute_position(&self, x: f32, y: f32) -> crate::util::Point<f32> {
++    /// Document-relative coordinates without sticky shifts: the in-flow
++    /// position, which `scrollIntoView` targets.
++    pub fn in_flow_absolute_position(&self, x: f32, y: f32) -> crate::util::Point<f32> {
+         let x = x + self.final_layout().location.x - self.scroll_offset().x as f32;
+         let y = y + self.final_layout().location.y - self.scroll_offset().y as f32;
++        self.containing_block()
++            .map(|i| self.with(i).in_flow_absolute_position(x, y))
++            .unwrap_or(crate::util::Point { x, y })
++    }
++
++    /// Computes the Document-relative coordinates of the `Node`
++    pub fn absolute_position(&self, x: f32, y: f32) -> crate::util::Point<f32> {
++        // Where the box is drawn: sticky shifts included (caret, selection, CSSOM).
++        let visual = self.visual_location();
++        let x = x + visual.x - self.scroll_offset().x as f32;
++        let y = y + visual.y - self.scroll_offset().y as f32;
+ 
+         // Recurse up the positioning hierarchy
+         self.containing_block()
+@@ -1949,9 +1994,10 @@ impl Node {
+         }
+ 
+         loop {
+-            let layout = current.final_layout();
+-            x += layout.location.x;
+-            y += layout.location.y;
++            // `offsetTop` of a sticky box reports where it is drawn.
++            let visual = current.visual_location();
++            x += visual.x;
++            y += visual.y;
+ 
+             let Some(parent_id) = current.containing_block() else {
+                 break;
+diff --git a/packages/blitz-dom/src/paint_damage.rs b/packages/blitz-dom/src/paint_damage.rs
+index 1b1aeb99..600ffc8f 100644
+--- a/packages/blitz-dom/src/paint_damage.rs
++++ b/packages/blitz-dom/src/paint_damage.rs
+@@ -87,10 +87,10 @@ impl Node {
+     /// `parent_transform` (the painter's `screen_bbox`, plus ink overflow).
+     pub fn paint_bounds(&self, parent_transform: Affine, scale: f64) -> Rect {
+         let layout = self.final_layout();
++        // Where the painter draws the box: sticky shift included.
++        let location = self.visual_location();
+         let transform = parent_transform
+-            * Affine::translate(
+-                Vec2::new(layout.location.x as f64, layout.location.y as f64) * scale,
+-            )
++            * Affine::translate(Vec2::new(location.x as f64, location.y as f64) * scale)
+             * self.transform().as_deref().copied().unwrap_or_default();
+         let border_box = Rect::new(
+             0.0,
+diff --git a/packages/blitz-dom/src/resolve.rs b/packages/blitz-dom/src/resolve.rs
+index 262a14aa..34a453fa 100644
+--- a/packages/blitz-dom/src/resolve.rs
++++ b/packages/blitz-dom/src/resolve.rs
+@@ -118,6 +118,12 @@ impl BaseDocument {
+         timer.record_time("layout");
+         self.nodes.bump_geometry_generation();
+ 
++        // Sticky shifts are part of this frame's geometry: resolve them before
++        // anything is memoised against the new generation (hoisted-child
++        // positions, the hit test in `refresh_hover`).
++        self.update_sticky_offsets();
++        timer.record_time("sticky");
++
+         // Resolve transforms
+         self.resolve_transforms(root_node_id);
+         timer.record_time("transform");
+diff --git a/packages/blitz-dom/src/resolved_style.rs b/packages/blitz-dom/src/resolved_style.rs
+index e491dba6..07fbf4ed 100644
+--- a/packages/blitz-dom/src/resolved_style.rs
++++ b/packages/blitz-dom/src/resolved_style.rs
+@@ -651,7 +651,25 @@ impl BaseDocument {
+                             return format_used_px(used);
+                         }
+                     }
+-                    // `static` and `sticky` boxes resolve to the computed value
++                    // A specified (non-`auto`) inset resolves to the sticking
++                    // threshold used by sticky positioning (percentages
++                    // resolved against the scrollport). An `auto` inset
++                    // resolves to the computed value.
++                    Position::Sticky => {
++                        if let Some(insets) = self.sticky_resolved_insets(node_id) {
++                            let inset = match property_name {
++                                "top" => insets.top,
++                                "bottom" => insets.bottom,
++                                "left" => insets.left,
++                                "right" => insets.right,
++                                _ => unreachable!(),
++                            };
++                            if let Some(value) = inset {
++                                return format_px(value);
++                            }
++                        }
++                    }
++                    // `static` boxes resolve to the computed value
+                     _ => {}
+                 }
+             }
+diff --git a/packages/blitz-dom/src/scrolling.rs b/packages/blitz-dom/src/scrolling.rs
+index 9724e3da..de1ae74f 100644
+--- a/packages/blitz-dom/src/scrolling.rs
++++ b/packages/blitz-dom/src/scrolling.rs
+@@ -310,6 +310,8 @@ impl BaseDocument {
+                 if offset == initial {
+                     return false;
+                 }
++                // Sticky boxes follow the scroll before any script can measure them.
++                self.refresh_sticky_offsets();
+ 
+                 if let Some(root) = self.try_root_element() {
+                     let root_id = root.id;
+@@ -352,6 +354,8 @@ impl BaseDocument {
+                     client_width: layout.size.width as i32,
+                     client_height: layout.size.height as i32,
+                 };
++                // Sticky boxes follow the scroll before any script can measure them.
++                self.refresh_sticky_offsets();
+                 dispatch_event(DomEvent::new(node_id, DomEventData::Scroll(event)));
+ 
+                 self.show_scrollbars(node_id);
+@@ -638,8 +642,10 @@ impl BaseDocument {
+         let Some(node) = self.nodes.get(node_id) else {
+             return;
+         };
+-        let target =
+-            node.absolute_position(node.scroll_offset().x as f32, node.scroll_offset().y as f32);
++        let target = node.in_flow_absolute_position(
++            node.scroll_offset().x as f32,
++            node.scroll_offset().y as f32,
++        );
+         let target_size = node.final_layout().size;
+         let Some(root_id) = self.try_root_element().map(|root| root.id) else {
+             return;
+diff --git a/packages/blitz-dom/src/sticky.rs b/packages/blitz-dom/src/sticky.rs
+new file mode 100644
+index 00000000..6f71a531
+--- /dev/null
++++ b/packages/blitz-dom/src/sticky.rs
+@@ -0,0 +1,858 @@
++//! `position: sticky`.
++//!
++//! A sticky box is laid out as if it were `position: relative`; then, once
++//! layout and scroll positions are known, it is shifted so that it stays
++//! within the inset rectangle of its nearest scrolling ancestor's scrollport,
++//! without ever leaving its containing block (its parent's content box).
++//!
++//! Two phases, so that scrolling is cheap:
++//! - after layout ([`BaseDocument::update_sticky_offsets`]): for every
++//!   registered sticky box, everything that does not depend on scroll
++//!   positions — the scroll container, the box's in-flow rect and margins,
++//!   the containing-block rect, the resolved insets, the overconstraint
++//!   winners — is computed once into a [`StickyConstraints`];
++//! - on every scroll write and paint ([`BaseDocument::refresh_sticky_offsets`]):
++//!   a handful of clamps per sticky box ([`axis_offset`]) using the current
++//!   scroll offsets. No tree walk, no style access.
++//!
++//! The list of sticky boxes is maintained by the damage pass
++//! ([`BaseDocument::note_sticky`], for every restyled or (re)inserted node),
++//! kept sorted by depth so an outer sticky box is always resolved before a
++//! nested one; entries of removed nodes are dropped at the next update.
++//!
++//! The shift is stored in [`LayoutData::sticky_offset`] and applied by
++//! painting, hit testing and CSSOM geometry. Covered: both axes, percentages
++//! against the scrollport, the margin box kept inside the containing block,
++//! nested sticky boxes, overconstrained insets resolved by writing mode and
++//! direction of the containing block, transforms (the shift is applied before
++//! the box's own transform), table parts (a sticky cell is constrained by the
++//! table; a sticky row/row group is measured from its cells and its shift
++//! handed down to them), the scrollport intersection of scrollers between the
++//! box and its containing block, and `position: fixed` ancestors (a scroller
++//! that never scrolls).
++//!
++//! [`LayoutData::sticky_offset`]: crate::node::LayoutData::sticky_offset
++
++use blitz_traits::node_id::NodeId;
++use style::computed_values::direction::T as Direction;
++use style::computed_values::position::T as Position;
++use style::logical_geometry::WritingModeProperty as WritingMode;
++use style::values::computed::LengthPercentage;
++use style::values::computed::Overflow;
++use style::values::computed::length::CSSPixelLength;
++use style::values::generics::position::Inset as GenericInset;
++use stylo_taffy::CopyStyleGetters as _;
++
++use crate::BaseDocument;
++
++/// A rectangle in the coordinate space of some ancestor's border box.
++#[derive(Clone, Copy, Debug)]
++struct Rect {
++    x0: f32,
++    y0: f32,
++    x1: f32,
++    y1: f32,
++}
++
++fn resolve_inset<P>(val: &GenericInset<P, LengthPercentage>, basis: f32) -> Option<f32> {
++    match val {
++        GenericInset::LengthPercentage(lp) => Some(lp.resolve(CSSPixelLength::new(basis)).px()),
++        _ => None,
++    }
++}
++
++fn scrolls(overflow: Overflow) -> bool {
++    !matches!(overflow, Overflow::Visible | Overflow::Clip)
++}
++
++/// A scroll container met between the box and its containing block, whose
++/// scrollport further clips the sticky view rectangle (css-position §3.5).
++#[derive(Clone, Copy, Debug)]
++struct ExtraScroller {
++    node: NodeId,
++    /// Origin of its border box in the primary container's space.
++    origin_x: f32,
++    origin_y: f32,
++}
++
++/// Everything about one sticky box that does not depend on scroll positions.
++#[derive(Clone, Debug)]
++pub struct StickyConstraints {
++    /// Nearest scroll container (or fixed ancestor); `None` = the viewport.
++    container: Option<NodeId>,
++    /// Sticky ancestors between the box and the container, outermost first:
++    /// their current shifts move this box's in-flow position.
++    sticky_ancestors: Vec<NodeId>,
++    /// In-flow border-box position and size in the container's space.
++    x: f32,
++    y: f32,
++    width: f32,
++    height: f32,
++    margin: taffy::Rect<f32>,
++    /// Containing block (content box), same space.
++    cb: Rect,
++    /// Resolved insets (against the scrollport size).
++    top: Option<f32>,
++    bottom: Option<f32>,
++    left: Option<f32>,
++    right: Option<f32>,
++    start_wins_x: bool,
++    start_wins_y: bool,
++    extra_scrollers: Vec<ExtraScroller>,
++    /// A sticky row / row group: hand the shift down to the cells.
++    boxless: bool,
++}
++
++/// Registry entry: depth keeps outer boxes before nested ones.
++#[derive(Clone, Debug)]
++pub struct StickyEntry {
++    pub node: NodeId,
++    depth: u32,
++    constraints: Option<StickyConstraints>,
++    /// The shift last applied, to tell when a refresh moved the box.
++    applied: crate::Point<f32>,
++}
++
++impl BaseDocument {
++    /// Registers or unregisters a node as `position: sticky`; called by
++    /// `propagate_damage_flags` for every damaged node, so the list follows
++    /// style changes and (re)insertions without any tree walk of its own.
++    pub(crate) fn note_sticky(&mut self, node_id: NodeId, is_sticky: bool) {
++        // The flag mirrors registration, so the common case (no change) costs
++        // one bit test and no search.
++        let registered = self.nodes[node_id]
++            .flags
++            .contains(crate::node::NodeFlags::IS_STICKY);
++        if registered == is_sticky {
++            return;
++        }
++        self.nodes[node_id]
++            .flags
++            .set(crate::node::NodeFlags::IS_STICKY, is_sticky);
++        let index = self.sticky_nodes.iter().position(|e| e.node == node_id);
++        match (index, is_sticky) {
++            (Some(_), true) | (None, false) => {}
++            (Some(i), false) => {
++                self.sticky_nodes.remove(i);
++            }
++            (None, true) => {
++                let mut depth = 0;
++                let mut cur = self.nodes[node_id].parent;
++                while let Some(p) = cur {
++                    depth += 1;
++                    cur = self.nodes[p].parent;
++                }
++                let at = self.sticky_nodes.partition_point(|e| e.depth <= depth);
++                self.sticky_nodes.insert(
++                    at,
++                    StickyEntry {
++                        node: node_id,
++                        depth,
++                        constraints: None,
++                        applied: crate::Point { x: 0.0, y: 0.0 },
++                    },
++                );
++            }
++        }
++    }
++
++    /// After layout: recomputes the layout-invariant constraints of every
++    /// registered sticky box, drops entries of nodes that left the document,
++    /// then applies the current scroll positions.
++    pub fn update_sticky_offsets(&mut self) {
++        if self.sticky_nodes.is_empty() {
++            return;
++        }
++        let root = self.root_node_id;
++        let viewport = self.viewport();
++        let scale = viewport.scale_f64() as f32;
++        let viewport_size = (
++            viewport.window_size.0 as f32 / scale,
++            viewport.window_size.1 as f32 / scale,
++        );
++        let mut entries = std::mem::take(&mut self.sticky_nodes);
++        // Drop nodes that left the document or have no box (`display: none`),
++        // clearing their flag so a node moved back in (keyed lists) registers
++        // again: the flag must mirror registration exactly. The split borrow
++        // lets the flag be cleared inside `retain`, without a scratch Vec.
++        let nodes = &mut self.nodes;
++        entries.retain(|e| {
++            let Some(n) = nodes.get_mut(e.node) else {
++                return false;
++            };
++            let keep = n.flags.is_in_document()
++                && n.element_data().is_some()
++                && n.display_style().is_some_and(|d| !d.is_none());
++            if !keep {
++                n.flags.set(crate::node::NodeFlags::IS_STICKY, false);
++            }
++            keep
++        });
++        for entry in entries.iter_mut() {
++            entry.constraints = self.constraints_for(entry.node, root, viewport_size);
++        }
++        self.sticky_nodes = entries;
++        self.refresh_sticky_offsets();
++    }
++
++    /// The insets of a registered sticky box as resolved by the last
++    /// [`update_sticky_offsets`](Self::update_sticky_offsets) (`None` for `auto`).
++    pub(crate) fn sticky_resolved_insets(
++        &self,
++        node_id: NodeId,
++    ) -> Option<taffy::Rect<Option<f32>>> {
++        let c = self
++            .sticky_nodes
++            .iter()
++            .find(|e| e.node == node_id)?
++            .constraints
++            .as_ref()?;
++        Some(taffy::Rect {
++            left: c.left,
++            right: c.right,
++            top: c.top,
++            bottom: c.bottom,
++        })
++    }
++
++    /// Applies the current scroll positions: a few clamps per sticky box.
++    pub fn refresh_sticky_offsets(&mut self) {
++        if self.sticky_nodes.is_empty() {
++            return;
++        }
++        let viewport = self.viewport();
++        let scale = viewport.scale_f64() as f32;
++        let viewport_size = (
++            viewport.window_size.0 as f32 / scale,
++            viewport.window_size.1 as f32 / scale,
++        );
++        let vs = self.viewport_scroll();
++        let viewport_scroll = (vs.x as f32, vs.y as f32);
++
++        let mut entries = std::mem::take(&mut self.sticky_nodes);
++        // Pass 1: clear (shifts handed down by boxless table parts accumulate).
++        for entry in &entries {
++            if let Some(n) = self.nodes.get_mut(entry.node) {
++                n.layout_data_mut().sticky_offset = crate::Point { x: 0.0, y: 0.0 };
++            }
++            if entry.constraints.as_ref().is_some_and(|c| c.boxless) {
++                self.hand_down_shift(entry.node, f32::NAN, f32::NAN);
++            }
++        }
++        // Pass 2: outer boxes first (sorted by depth), so a nested box reads
++        // its ancestors' shifts already resolved.
++        for entry in &entries {
++            let Some(c) = entry.constraints.as_ref() else {
++                continue;
++            };
++            let (x, y) = self.shift_for(c, viewport_size, viewport_scroll);
++            let ld = self.nodes[entry.node].layout_data_mut();
++            ld.sticky_offset.x += x;
++            ld.sticky_offset.y += y;
++            if c.boxless {
++                self.hand_down_shift(entry.node, x, y);
++            }
++        }
++        // A box that moved invalidates geometry memoised against the current
++        // generation (hoisted-child positions), whatever caused the refresh.
++        let mut moved = false;
++        for entry in entries.iter_mut() {
++            let Some(n) = self.nodes.get(entry.node) else {
++                continue;
++            };
++            let now = n.sticky_offset();
++            if now != entry.applied {
++                entry.applied = now;
++                moved = true;
++            }
++        }
++        if moved {
++            self.nodes.bump_geometry_generation();
++        }
++        self.sticky_nodes = entries;
++    }
++
++    /// The layout-invariant part: where the box and its containing block sit
++    /// relative to the scroll container, and what the insets resolve to.
++    fn constraints_for(
++        &self,
++        id: NodeId,
++        root: NodeId,
++        viewport_size: (f32, f32),
++    ) -> Option<StickyConstraints> {
++        let node = &self.nodes[id];
++        let styles = node.primary_styles()?;
++        let parent_id = node.parent?;
++        let layout = node.final_layout();
++        let boxless = is_boxless_table_part(node);
++        let (own_x, own_y, width, height, margin) = if !boxless {
++            (
++                layout.location.x,
++                layout.location.y,
++                layout.size.width,
++                layout.size.height,
++                layout.margin,
++            )
++        } else {
++            let (x0, y0, x1, y1) = self.cells_extent(id)?;
++            (x0, y0, x1 - x0, y1 - y0, taffy::Rect::zero())
++        };
++
++        // Walk up the *layout* parent chain (locations are relative to it: an
++        // inline-level box's layout parent is the inline root, not its span)
++        // to the nearest scroll container (or fixed ancestor), noting sticky
++        // ancestors on the way; positions stay in-flow here — the ancestors'
++        // shifts are applied at refresh time.
++        let mut x = own_x;
++        let mut y = own_y;
++        let mut container: Option<NodeId> = None;
++        let mut sticky_ancestors = Vec::new();
++        let mut cur = self.layout_ancestor(id);
++        while let Some(a) = cur {
++            if a == root {
++                break;
++            }
++            let anc = &self.nodes[a];
++            if let Some(s) = anc.primary_styles() {
++                let b = s.get_box();
++                let position = b.position;
++                if scrolls(b.overflow_x) || scrolls(b.overflow_y) || position == Position::Fixed {
++                    container = Some(a);
++                    break;
++                }
++                if position == Position::Sticky {
++                    sticky_ancestors.push(a);
++                }
++            }
++            let l = anc.final_layout();
++            x += l.location.x;
++            y += l.location.y;
++            cur = self.layout_ancestor(a);
++        }
++        sticky_ancestors.reverse();
++
++        // Percentage insets resolve against the scroll container's content box.
++        let (port_w, port_h) = match container {
++            Some(c) => {
++                let l = self.nodes[c].final_layout();
++                (
++                    l.size.width
++                        - l.border.left
++                        - l.border.right
++                        - l.padding.left
++                        - l.padding.right,
++                    l.size.height
++                        - l.border.top
++                        - l.border.bottom
++                        - l.padding.top
++                        - l.padding.bottom,
++                )
++            }
++            None => viewport_size,
++        };
++
++        // Containing block: the content box of the nearest layout ancestor
++        // that has a box (for a cell in a row: the table).
++        let mut cb_id = self.layout_ancestor(id).unwrap_or(parent_id);
++        let mut parent_x = x - own_x;
++        let mut parent_y = y - own_y;
++        while cb_id != root && is_boxless_table_part(&self.nodes[cb_id]) {
++            let Some(up) = self.layout_ancestor(cb_id) else {
++                break;
++            };
++            let l = self.nodes[cb_id].final_layout();
++            parent_x -= l.location.x;
++            parent_y -= l.location.y;
++            cb_id = up;
++        }
++        let parent = &self.nodes[cb_id];
++        let pl = parent.final_layout();
++        let mut cb = Rect {
++            x0: parent_x + pl.border.left + pl.padding.left,
++            y0: parent_y + pl.border.top + pl.padding.top,
++            x1: parent_x + pl.size.width - pl.border.right - pl.padding.right,
++            y1: parent_y + pl.size.height - pl.border.bottom - pl.padding.bottom,
++        };
++        if container == Some(cb_id) {
++            // The scroll container's content box is the whole scrollable area.
++            cb.x1 = cb
++                .x1
++                .max(parent_x + pl.border.left + parent.scroll_width() - pl.padding.right);
++            cb.y1 = cb
++                .y1
++                .max(parent_y + pl.border.top + parent.scroll_height() - pl.padding.bottom);
++        }
++
++        // Scrollers strictly between the box and its containing block (only
++        // when the container sits below the containing block): their
++        // scrollports further clip the view rectangle at refresh time.
++        let mut extra_scrollers = Vec::new();
++        if let Some(first) = container {
++            let below_cb = {
++                let mut cur = self.layout_ancestor(first);
++                let mut found = false;
++                while let Some(a) = cur {
++                    if a == cb_id {
++                        found = true;
++                        break;
++                    }
++                    cur = self.layout_ancestor(a);
++                }
++                found
++            };
++            if below_cb {
++                let mut origin_x = 0.0f32;
++                let mut origin_y = 0.0f32;
++                let mut cur = Some(first);
++                while let Some(c) = cur {
++                    if c == cb_id || c == root {
++                        break;
++                    }
++                    let cn = &self.nodes[c];
++                    let l = cn.final_layout();
++                    origin_x -= l.location.x;
++                    origin_y -= l.location.y;
++                    let Some(up) = self.layout_ancestor(c) else {
++                        break;
++                    };
++                    if up == root {
++                        break;
++                    }
++                    if let Some(s) = self.nodes[up].primary_styles() {
++                        let b = s.get_box();
++                        if scrolls(b.overflow_x) || scrolls(b.overflow_y) {
++                            extra_scrollers.push(ExtraScroller {
++                                node: up,
++                                origin_x,
++                                origin_y,
++                            });
++                        }
++                    }
++                    cur = Some(up);
++                }
++            }
++        }
++
++        let pos = styles.get_position();
++        let (writing_mode, direction) = match parent.primary_styles() {
++            Some(s) => (
++                s.get_inherited_box().writing_mode,
++                s.get_inherited_box().direction,
++            ),
++            None => (
++                styles.get_inherited_box().writing_mode,
++                styles.get_inherited_box().direction,
++            ),
++        };
++        let (start_wins_x, start_wins_y) = overconstraint_winners(writing_mode, direction);
++        Some(StickyConstraints {
++            container,
++            sticky_ancestors,
++            x,
++            y,
++            width,
++            height,
++            margin,
++            cb,
++            top: resolve_inset(&pos.top, port_h),
++            bottom: resolve_inset(&pos.bottom, port_h),
++            left: resolve_inset(&pos.left, port_w),
++            right: resolve_inset(&pos.right, port_w),
++            start_wins_x,
++            start_wins_y,
++            extra_scrollers,
++            boxless,
++        })
++    }
++
++    /// The node whose coordinate space `final_layout().location` is relative
++    /// to: the containing block (the out-of-flow containing block for a box
++    /// hoisted by Taffy, otherwise the layout parent), falling back to the
++    /// DOM parent for nodes that are not in the layout tree (boxless table
++    /// parts).
++    fn layout_ancestor(&self, id: NodeId) -> Option<NodeId> {
++        let node = &self.nodes[id];
++        node.containing_block().or(node.parent)
++    }
++
++    /// The scroll-dependent part: the shift for the current scroll offsets.
++    fn shift_for(
++        &self,
++        c: &StickyConstraints,
++        viewport_size: (f32, f32),
++        viewport_scroll: (f32, f32),
++    ) -> (f32, f32) {
++        // Ancestors' shifts (already resolved, outer first) move the in-flow
++        // position and the containing block alike.
++        let mut dx = 0.0f32;
++        let mut dy = 0.0f32;
++        for a in &c.sticky_ancestors {
++            if let Some(n) = self.nodes.get(*a) {
++                let s = n.sticky_offset();
++                dx += s.x;
++                dy += s.y;
++            }
++        }
++        let mut scrollport = match c.container {
++            Some(id) => scrollport_of(&self.nodes[id], 0.0, 0.0),
++            None => Rect {
++                x0: viewport_scroll.0,
++                y0: viewport_scroll.1,
++                x1: viewport_scroll.0 + viewport_size.0,
++                y1: viewport_scroll.1 + viewport_size.1,
++            },
++        };
++        for extra in &c.extra_scrollers {
++            if let Some(n) = self.nodes.get(extra.node) {
++                scrollport = scrollport.intersect(scrollport_of(n, extra.origin_x, extra.origin_y));
++            }
++        }
++        let cb = Rect {
++            x0: c.cb.x0 + dx,
++            y0: c.cb.y0 + dy,
++            x1: c.cb.x1 + dx,
++            y1: c.cb.y1 + dy,
++        };
++        (
++            axis_offset(
++                Axis {
++                    pos: c.x + dx,
++                    size: c.width,
++                    margin_start: c.margin.left,
++                    margin_end: c.margin.right,
++                    start_inset: c.left,
++                    end_inset: c.right,
++                    start_wins: c.start_wins_x,
++                },
++                scrollport.x0,
++                scrollport.x1,
++                cb.x0,
++                cb.x1,
++            ),
++            axis_offset(
++                Axis {
++                    pos: c.y + dy,
++                    size: c.height,
++                    margin_start: c.margin.top,
++                    margin_end: c.margin.bottom,
++                    start_inset: c.top,
++                    end_inset: c.bottom,
++                    start_wins: c.start_wins_y,
++                },
++                scrollport.y0,
++                scrollport.y1,
++                cb.y0,
++                cb.y1,
++            ),
++        )
++    }
++
++    /// Border-box extent (x0, y0, x1, y1) of the cells under a boxless table
++    /// part, in its table's coordinate space.
++    fn cells_extent(&self, id: NodeId) -> Option<(f32, f32, f32, f32)> {
++        let mut extent: Option<(f32, f32, f32, f32)> = None;
++        let mut stack: Vec<NodeId> = self.nodes[id].children.iter().copied().collect();
++        while let Some(c) = stack.pop() {
++            let node = &self.nodes[c];
++            if node.element_data().is_none() {
++                continue;
++            }
++            if !is_boxless_table_part(node) {
++                let l = node.final_layout();
++                let (x0, y0) = (l.location.x, l.location.y);
++                let (x1, y1) = (x0 + l.size.width, y0 + l.size.height);
++                extent = Some(match extent {
++                    None => (x0, y0, x1, y1),
++                    Some(e) => (e.0.min(x0), e.1.min(y0), e.2.max(x1), e.3.max(y1)),
++                });
++            } else {
++                stack.extend(node.children.iter().copied());
++            }
++        }
++        extent
++    }
++
++    /// Adds a boxless ancestor's shift to the cells that paint it (`NaN`
++    /// clears). Iterates by index to avoid allocating per child.
++    fn hand_down_shift(&mut self, id: NodeId, dx: f32, dy: f32) {
++        let count = self.nodes[id].children.len();
++        for i in 0..count {
++            let c = self.nodes[id].children[i];
++            if self.nodes[c].element_data().is_none() {
++                continue;
++            }
++            if !is_boxless_table_part(&self.nodes[c]) {
++                let ld = self.nodes[c].layout_data_mut();
++                if dx.is_nan() {
++                    ld.sticky_offset = crate::Point { x: 0.0, y: 0.0 };
++                } else {
++                    ld.sticky_offset.x += dx;
++                    ld.sticky_offset.y += dy;
++                }
++            } else {
++                self.hand_down_shift(c, dx, dy);
++            }
++        }
++    }
++}
++
++/// Table parts that get no box of their own in Blitz: their cells are laid
++/// out directly in the table's grid (`layout/table.rs`).
++fn is_boxless_table_part(node: &crate::node::Node) -> bool {
++    use style::values::specified::box_::DisplayInside;
++    node.primary_styles().is_some_and(|s| {
++        matches!(
++            s.clone_display().inside(),
++            DisplayInside::TableRow
++                | DisplayInside::TableRowGroup
++                | DisplayInside::TableHeaderGroup
++                | DisplayInside::TableFooterGroup
++                | DisplayInside::TableColumn
++                | DisplayInside::TableColumnGroup
++        )
++    })
++}
++
++/// Scrollport (padding box, offset by the current scroll) of a scroll
++/// container whose border-box origin is at (`ox`, `oy`) in the target space.
++fn scrollport_of(node: &crate::node::Node, ox: f32, oy: f32) -> Rect {
++    let l = node.final_layout();
++    let so = node.scroll_offset();
++    let x0 = ox + l.border.left + so.x as f32;
++    let y0 = oy + l.border.top + so.y as f32;
++    Rect {
++        x0,
++        y0,
++        x1: x0 + (l.size.width - l.border.left - l.border.right),
++        y1: y0 + (l.size.height - l.border.top - l.border.bottom),
++    }
++}
++
++impl Rect {
++    fn intersect(self, other: Rect) -> Rect {
++        Rect {
++            x0: self.x0.max(other.x0),
++            y0: self.y0.max(other.y0),
++            x1: self.x1.min(other.x1).max(self.x0.max(other.x0)),
++            y1: self.y1.min(other.y1).max(self.y0.max(other.y0)),
++        }
++    }
++}
++
++/// Which inset wins when both are given and cannot both be honoured: the
++/// block-start and inline-start insets, per writing mode and direction.
++/// Returns (`left` wins on x, `top` wins on y).
++fn overconstraint_winners(writing_mode: WritingMode, direction: Direction) -> (bool, bool) {
++    let ltr = direction == Direction::Ltr;
++    match writing_mode {
++        WritingMode::HorizontalTb => (ltr, true),
++        // Vertical: the block axis is horizontal (block-start = right for *-rl),
++        // the inline axis is vertical (inline-start = top when ltr).
++        WritingMode::VerticalRl => (false, ltr),
++        WritingMode::VerticalLr => (true, ltr),
++        // `sideways-*` only exists in Gecko builds of Stylo; treat any other
++        // mode like its vertical counterpart.
++        #[allow(unreachable_patterns)]
++        _ => (false, ltr),
++    }
++}
++
++/// One axis of the sticky computation.
++#[derive(Clone, Copy, Debug)]
++struct Axis {
++    /// Border-box start position of the box in the scroller's space.
++    pos: f32,
++    /// Border-box size on this axis.
++    size: f32,
++    margin_start: f32,
++    margin_end: f32,
++    start_inset: Option<f32>,
++    end_inset: Option<f32>,
++    /// When both insets are given and conflict, honour the start one.
++    start_wins: bool,
++}
++
++/// Positions the box inside the inset edges of the scrollport, then keeps its
++/// margin box inside its containing block. Returns the shift to apply.
++///
++/// Spec order (CSS Positioned Layout 3, §3.5): the end inset is applied first,
++/// then the start inset, so when the box is taller than the space between
++/// them the start inset wins (or the reverse in modes where the end wins).
++fn axis_offset(a: Axis, port_start: f32, port_end: f32, cb_start: f32, cb_end: f32) -> f32 {
++    let mut position = a.pos;
++    let apply_start = |position: &mut f32| {
++        if let Some(inset) = a.start_inset {
++            let limit = port_start + inset;
++            if *position < limit {
++                *position = limit;
++            }
++        }
++    };
++    let apply_end = |position: &mut f32| {
++        if let Some(inset) = a.end_inset {
++            let limit = port_end - inset - a.size;
++            if *position > limit {
++                *position = limit;
++            }
++        }
++    };
++    if a.start_wins {
++        apply_end(&mut position);
++        apply_start(&mut position);
++    } else {
++        apply_start(&mut position);
++        apply_end(&mut position);
++    }
++
++    // Never leave the containing block (margin box), and never move a box that
++    // would only be moved by the containing-block clamp itself.
++    let min = cb_start + a.margin_start;
++    let max = cb_end - a.margin_end - a.size;
++    if position > a.pos {
++        position = position.min(max.max(a.pos));
++    } else if position < a.pos {
++        position = position.max(min.min(a.pos));
++    }
++    position - a.pos
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    fn axis(pos: f32, size: f32, start: Option<f32>, end: Option<f32>) -> Axis {
++        Axis {
++            pos,
++            size,
++            margin_start: 0.0,
++            margin_end: 0.0,
++            start_inset: start,
++            end_inset: end,
++            start_wins: true,
++        }
++    }
++
++    #[test]
++    fn sticks_to_top_and_stops_at_containing_block_end() {
++        // Box at y=100, 20px tall, containing block 0..=400, viewport scrolled to 150 with top: 10.
++        assert_eq!(
++            axis_offset(
++                axis(100.0, 20.0, Some(10.0), None),
++                150.0,
++                750.0,
++                0.0,
++                400.0
++            ),
++            60.0
++        );
++        // Scrolled past the containing block: the box stops at cb_end - size.
++        assert_eq!(
++            axis_offset(
++                axis(100.0, 20.0, Some(10.0), None),
++                600.0,
++                1200.0,
++                0.0,
++                400.0
++            ),
++            280.0
++        );
++        // Not yet reached: no shift.
++        assert_eq!(
++            axis_offset(axis(100.0, 20.0, Some(10.0), None), 0.0, 600.0, 0.0, 400.0),
++            0.0
++        );
++    }
++
++    #[test]
++    fn sticks_to_bottom() {
++        // Box at y=900 in a 600px viewport at scroll 0 with bottom: 0 → pulled up to 580.
++        assert_eq!(
++            axis_offset(axis(900.0, 20.0, None, Some(0.0)), 0.0, 600.0, 0.0, 1000.0),
++            -320.0
++        );
++        // Cannot move above its containing block start.
++        assert_eq!(
++            axis_offset(
++                axis(900.0, 20.0, None, Some(0.0)),
++                0.0,
++                600.0,
++                700.0,
++                1000.0
++            ),
++            -200.0
++        );
++    }
++
++    #[test]
++    fn margins_stay_inside_the_containing_block() {
++        let mut a = axis(100.0, 20.0, Some(0.0), None);
++        a.margin_end = 10.0;
++        // Without the margin the box could reach y=380; the 10px margin stops it at 370.
++        assert_eq!(axis_offset(a, 600.0, 1200.0, 0.0, 400.0), 270.0);
++    }
++
++    #[test]
++    fn overconstrained_insets_follow_the_winner() {
++        // A 20px box with top: 0 and bottom: 0 in a 10px-tall scrollport: both pull.
++        let mut a = axis(50.0, 20.0, Some(0.0), Some(0.0));
++        assert_eq!(axis_offset(a, 100.0, 110.0, 0.0, 1000.0), 50.0); // top wins → y = 100
++        a.start_wins = false;
++        assert_eq!(axis_offset(a, 100.0, 110.0, 0.0, 1000.0), 40.0); // bottom wins → y = 90
++    }
++
++    #[test]
++    fn writing_mode_and_direction_pick_the_winner() {
++        assert_eq!(
++            overconstraint_winners(WritingMode::HorizontalTb, Direction::Ltr),
++            (true, true)
++        );
++        assert_eq!(
++            overconstraint_winners(WritingMode::HorizontalTb, Direction::Rtl),
++            (false, true)
++        );
++        assert_eq!(
++            overconstraint_winners(WritingMode::VerticalRl, Direction::Ltr),
++            (false, true)
++        );
++        assert_eq!(
++            overconstraint_winners(WritingMode::VerticalLr, Direction::Rtl),
++            (true, false)
++        );
++    }
++
++    #[test]
++    fn taller_than_the_space_between_insets_follows_the_winner() {
++        // WPT top-and-bottom-overconstrained: 200px box, scroller 100px, top: 20, bottom: 0,
++        // in-flow at y=200 in a 600px containing block.
++        let a = |start_wins| Axis {
++            pos: 200.0,
++            size: 200.0,
++            margin_start: 0.0,
++            margin_end: 0.0,
++            start_inset: Some(20.0),
++            end_inset: Some(0.0),
++            start_wins,
++        };
++        assert_eq!(200.0 + axis_offset(a(true), 0.0, 100.0, 0.0, 600.0), 20.0);
++        assert_eq!(
++            200.0 + axis_offset(a(true), 160.0, 260.0, 0.0, 600.0),
++            180.0
++        );
++        assert_eq!(
++            200.0 + axis_offset(a(true), 220.0, 320.0, 0.0, 600.0),
++            240.0
++        );
++        assert_eq!(
++            200.0 + axis_offset(a(true), 500.0, 600.0, 0.0, 600.0),
++            400.0
++        );
++    }
++
++    #[test]
++    fn auto_insets_do_nothing() {
++        assert_eq!(
++            axis_offset(axis(100.0, 20.0, None, None), 500.0, 1100.0, 0.0, 400.0),
++            0.0
++        );
++    }
++}
+diff --git a/packages/blitz-paint/src/debug_overlay.rs b/packages/blitz-paint/src/debug_overlay.rs
+index d768b622..4612ff4a 100644
+--- a/packages/blitz-paint/src/debug_overlay.rs
++++ b/packages/blitz-paint/src/debug_overlay.rs
+@@ -54,7 +54,7 @@ pub(crate) fn render_debug_overlay(
+     let content_width = width - padding_border.left - padding_border.right;
+     let content_height = height - padding_border.top - padding_border.bottom;
+ 
+-    let taffy::Point { x, y } = node.final_layout().location;
++    let blitz_dom::Point { x, y } = node.visual_location();
+ 
+     let mut abs_x = x;
+     let mut abs_y = y;
+@@ -65,7 +65,7 @@ pub(crate) fn render_debug_overlay(
+         let child_is_fixed = node.taffy_position() == taffy::Position::Fixed;
+         node = &dom.as_ref().tree()[parent_id];
+         fixed_to_viewport = child_is_fixed && node.containing_block().is_none();
+-        let taffy::Point { x, y } = node.final_layout().location;
++        let blitz_dom::Point { x, y } = node.visual_location();
+         abs_x += x;
+         abs_y += y;
+         if !fixed_to_viewport {
+diff --git a/packages/blitz-paint/src/lib.rs b/packages/blitz-paint/src/lib.rs
+index d7902b9b..fd96ea74 100644
+--- a/packages/blitz-paint/src/lib.rs
++++ b/packages/blitz-paint/src/lib.rs
+@@ -67,6 +67,9 @@ pub fn paint_scene_damaged(
+     y_offset: u32,
+     damage: Option<kurbo::Rect>,
+ ) {
++    // Sticky boxes follow the current scroll position.
++    doc.refresh_sticky_offsets();
++
+     // Run `.paint()` on every custom widget in the document (and all subdocuments) ahead of time.
+     // This helps us avoid borrow-checker issues as we recurse down the tree (`.paint()` require `&mut self`).
+     //
+diff --git a/packages/blitz-paint/src/render.rs b/packages/blitz-paint/src/render.rs
+index f3603328..1495cd34 100644
+--- a/packages/blitz-paint/src/render.rs
++++ b/packages/blitz-paint/src/render.rs
+@@ -300,7 +300,8 @@ impl<'dom, 'a> BlitzDomPainter<'dom, 'a> {
+     }
+ 
+     fn node_transform(&self, node: &Node, parent: Affine) -> Affine {
+-        let location = node.final_layout().location;
++        // Where the box is drawn: its layout location plus any sticky shift.
++        let location = node.visual_location();
+         parent
+             * Affine::translate(Vec2::new(location.x as f64, location.y as f64) * self.scale)
+             * node.transform().as_deref().copied().unwrap_or_default()
+diff --git a/packages/blitz-paint/src/render/background.rs b/packages/blitz-paint/src/render/background.rs
+index 6dbc3fc8..827abd11 100644
+--- a/packages/blitz-paint/src/render/background.rs
++++ b/packages/blitz-paint/src/render/background.rs
+@@ -315,12 +315,16 @@ impl ElementCx<'_, '_> {
+         }
+ 
+         let cell_rect = |cell_id: NodeId| -> Option<Rect> {
+-            let layout = self.context.dom.get_node(cell_id)?.final_layout();
++            let node = self.context.dom.get_node(cell_id)?;
++            // Where the cell is drawn: a sticky row or row group hands its
++            // shift down to its cells, and their row backgrounds follow.
++            let location = node.visual_location();
++            let size = node.final_layout().size;
+             Some(Rect::new(
+-                layout.location.x as f64,
+-                layout.location.y as f64,
+-                (layout.location.x + layout.size.width) as f64,
+-                (layout.location.y + layout.size.height) as f64,
++                location.x as f64,
++                location.y as f64,
++                (location.x + size.width) as f64,
++                (location.y + size.height) as f64,
+             ))
+         };
+ 
+diff --git a/packages/stylo_taffy/src/convert.rs b/packages/stylo_taffy/src/convert.rs
+index 50d395e9..c080d46a 100644
+--- a/packages/stylo_taffy/src/convert.rs
++++ b/packages/stylo_taffy/src/convert.rs
+@@ -997,7 +997,19 @@ pub fn to_taffy_style(style: &stylo::ComputedValues) -> taffy::Style<Atom> {
+         },
+         aspect_ratio: self::aspect_ratio(pos.aspect_ratio),
+ 
+-        inset: self::inset_rect(style),
++        // `position: sticky` is laid out as relative (see `position`), but its
++        // insets are sticking thresholds, not relative offsets: they are applied
++        // after layout by blitz-dom's sticky resolution, so Taffy must ignore them.
++        inset: if style.clone_position() == stylo::Position::Sticky {
++            taffy::Rect {
++                left: taffy::LengthPercentageAuto::AUTO,
++                right: taffy::LengthPercentageAuto::AUTO,
++                top: taffy::LengthPercentageAuto::AUTO,
++                bottom: taffy::LengthPercentageAuto::AUTO,
++            }
++        } else {
++            self::inset_rect(style)
++        },
+         margin: taffy::Rect {
+             left: self::margin(&margin.margin_left),
+             right: self::margin(&margin.margin_right),
+diff --git a/packages/stylo_taffy/src/wrapper.rs b/packages/stylo_taffy/src/wrapper.rs
+index 3fd6731a..e1aac5e4 100644
+--- a/packages/stylo_taffy/src/wrapper.rs
++++ b/packages/stylo_taffy/src/wrapper.rs
+@@ -9,6 +9,7 @@ use style::properties::ComputedValues;
+ use style::values::CustomIdent;
+ use style::{Atom, OwnedSlice};
+ use taffy::ResolveOrZero;
++use taffy::style_helpers::TaffyAuto as _;
+ 
+ #[cfg(feature = "grid")]
+ use style::values::{
+@@ -244,6 +245,17 @@ impl<T: Deref<Target = ComputedValues>> taffy::CoreStyle for TaffyStyloStyle<T>
+ 
+     #[inline]
+     fn inset(&self) -> taffy::Rect<taffy::LengthPercentageAuto> {
++        // `position: sticky` is laid out as relative, but its insets are
++        // sticking thresholds applied after layout (blitz-dom's sticky
++        // resolution), not relative offsets: Taffy must not see them.
++        if self.style.get_box().position == stylo::Position::Sticky {
++            return taffy::Rect {
++                left: taffy::LengthPercentageAuto::AUTO,
++                right: taffy::LengthPercentageAuto::AUTO,
++                top: taffy::LengthPercentageAuto::AUTO,
++                bottom: taffy::LengthPercentageAuto::AUTO,
++            };
++        }
+         self.rect(convert::inset_rect(&self.style))
+     }
+ 
+diff --git a/tests/blitz-tests/tests/all.rs b/tests/blitz-tests/tests/all.rs
+index 58dff7ba..e59c9151 100644
+--- a/tests/blitz-tests/tests/all.rs
++++ b/tests/blitz-tests/tests/all.rs
+@@ -56,6 +56,7 @@ mod paint_tree_bench;
+ mod paint_tree_incremental;
+ mod pointer_events;
+ mod pointer_leave;
++mod position_sticky;
+ mod pre_overflow_scroll;
+ mod pseudo_element_flow_classification;
+ mod pseudo_element_update;
+diff --git a/tests/blitz-tests/tests/position_sticky.rs b/tests/blitz-tests/tests/position_sticky.rs
+new file mode 100644
+index 00000000..3c20e4b3
+--- /dev/null
++++ b/tests/blitz-tests/tests/position_sticky.rs
+@@ -0,0 +1,210 @@
++//! `position: sticky`: boxes laid out in flow, then shifted to stay inside
++//! their scroller's inset edges without leaving their containing block. The
++//! shift shows in geometry APIs, hit testing and paint.
++
++use anyrender::render_to_buffer;
++use anyrender_vello_cpu::VelloCpuImageRenderer;
++use blitz_dom::{DocumentConfig, ScrollBehavior};
++use blitz_html::{HtmlDocument, HtmlProvider};
++use blitz_paint::paint_scene;
++use blitz_test_harness::Harness;
++use blitz_traits::shell::{ColorScheme, Viewport};
++use std::sync::Arc;
++
++/// A sticky header 50px down a 200px-tall scroller, in a 400px section that
++/// ends at 450px, followed by more content.
++const SCROLLER: &str = r#"<html><body style="margin: 0">
++    <div id="scroller" style="height: 200px; overflow: auto">
++        <div style="height: 50px"></div>
++        <div id="section" style="height: 400px">
++            <div id="header" style="position: sticky; top: 0; height: 20px"></div>
++            <div id="body" style="height: 380px"></div>
++        </div>
++        <div style="height: 600px"></div>
++    </div>
++</body></html>"#;
++
++/// A bar with `bottom: 8px` whose in-flow position (1000px) is below the
++/// fold of the 600px viewport.
++const BOTTOM_BAR: &str = r#"<html><body style="margin: 0">
++    <div style="height: 1000px"></div>
++    <div id="bar" style="position: sticky; bottom: 8px; height: 30px"></div>
++    <div style="height: 500px"></div>
++</body></html>"#;
++
++fn client_y(harness: &Harness<HtmlDocument>, selector: &str) -> f64 {
++    let id = harness.node(selector);
++    harness.base().get_client_bounding_rect(id).unwrap().y
++}
++
++fn scroll_to(harness: &mut Harness<HtmlDocument>, selector: &str, y: f64) {
++    let id = harness.node(selector);
++    harness
++        .base_mut()
++        .scroll_to(id, 0.0, y, ScrollBehavior::Instant);
++}
++
++#[test]
++fn a_sticky_header_sticks_to_the_scroller_top_and_comes_back() {
++    let mut harness = Harness::from_html(SCROLLER);
++    assert_eq!(client_y(&harness, "#header"), 50.0);
++
++    // Scrolled past its in-flow position: it stays at the scroller's top,
++    // straight away (no relayout needed) and after one.
++    scroll_to(&mut harness, "#scroller", 100.0);
++    assert_eq!(client_y(&harness, "#header"), 0.0);
++    assert_eq!(client_y(&harness, "#body"), -30.0);
++    harness.pump();
++    assert_eq!(client_y(&harness, "#header"), 0.0);
++
++    // Not yet reached: no shift.
++    scroll_to(&mut harness, "#scroller", 30.0);
++    assert_eq!(client_y(&harness, "#header"), 20.0);
++
++    scroll_to(&mut harness, "#scroller", 0.0);
++    assert_eq!(client_y(&harness, "#header"), 50.0);
++}
++
++#[test]
++fn a_sticky_header_stays_inside_its_containing_block() {
++    let mut harness = Harness::from_html(SCROLLER);
++    // The section ends at 450px: the 20px header can go no lower than 430px.
++    scroll_to(&mut harness, "#scroller", 420.0);
++    assert_eq!(client_y(&harness, "#header"), 0.0);
++    scroll_to(&mut harness, "#scroller", 440.0);
++    assert_eq!(client_y(&harness, "#header"), -10.0);
++    scroll_to(&mut harness, "#scroller", 500.0);
++    assert_eq!(client_y(&harness, "#header"), -70.0);
++    assert_eq!(client_y(&harness, "#section"), -450.0);
++}
++
++#[test]
++fn a_bottom_sticky_bar_sits_above_the_viewport_bottom() {
++    let mut harness = Harness::from_html(BOTTOM_BAR);
++    // 600px viewport - 8px - 30px.
++    assert_eq!(client_y(&harness, "#bar"), 562.0);
++
++    // Scrolled until its in-flow position is on screen: back in flow.
++    harness.base_mut().scroll_viewport_by(0.0, -600.0);
++    assert_eq!(harness.base().viewport_scroll().y, 600.0);
++    assert_eq!(client_y(&harness, "#bar"), 400.0);
++
++    harness.base_mut().scroll_viewport_by(0.0, 600.0);
++    assert_eq!(client_y(&harness, "#bar"), 562.0);
++}
++
++#[test]
++fn hit_testing_finds_a_stuck_box_where_it_is_drawn() {
++    let mut harness = Harness::from_html(SCROLLER);
++    let header = harness.node("#header");
++    let body = harness.node("#body");
++    assert_eq!(harness.hit_node(10.0, 60.0), header);
++
++    scroll_to(&mut harness, "#scroller", 100.0);
++    assert_eq!(harness.hit_node(10.0, 10.0), header);
++    // Where the header was laid out is now the section's body.
++    assert_eq!(harness.hit_node(10.0, 60.0), body);
++
++    let mut harness = Harness::from_html(BOTTOM_BAR);
++    let bar = harness.node("#bar");
++    assert_eq!(harness.hit_node(10.0, 570.0), bar);
++    assert_ne!(harness.hit_node(10.0, 550.0), bar);
++    harness.pump();
++    assert_eq!(harness.base().element_from_point(10.0, 570.0), Some(bar));
++}
++
++#[test]
++fn a_sticky_table_header_follows_a_scrolling_table() {
++    let mut harness = Harness::from_html(
++        r#"<html><body style="margin: 0">
++        <div id="scroller" style="height: 100px; overflow: auto">
++            <table style="border-spacing: 0">
++                <thead style="position: sticky; top: 0">
++                    <tr><th id="th" style="height: 20px; padding: 0">Name</th></tr>
++                </thead>
++                <tbody>
++                    <tr><td style="height: 300px; padding: 0">Row</td></tr>
++                </tbody>
++            </table>
++        </div>
++    </body></html>"#,
++    );
++    assert_eq!(client_y(&harness, "#th"), 0.0);
++    // The row group has no box of its own: its shift moves its cells.
++    scroll_to(&mut harness, "#scroller", 150.0);
++    assert_eq!(client_y(&harness, "#th"), 0.0);
++}
++
++/// The shape of a virtualised list: a block table under a sticky, stacked
++/// header, its rows absolutely placed in a tall body.
++#[test]
++fn a_virtual_list_header_stays_above_its_rows() {
++    let mut harness = Harness::from_html(
++        r#"<html><body style="margin: 0">
++        <div id="scroller" style="height: 200px; overflow: auto">
++            <table style="display: block; width: 100%">
++                <thead id="head" style="position: sticky; top: 0; z-index: 20; display: block; height: 32px; background: white"></thead>
++                <tbody style="position: relative; display: block; width: 100%; height: 4000px">
++                    <tr id="row" style="position: absolute; top: 380px; left: 0; display: block; width: 100%; height: 40px"></tr>
++                </tbody>
++            </table>
++        </div>
++    </body></html>"#,
++    );
++    let head = harness.node("#head");
++    let row = harness.node("#row");
++    scroll_to(&mut harness, "#scroller", 390.0);
++    harness.pump();
++    assert_eq!(client_y(&harness, "#head"), 0.0);
++    assert_eq!(client_y(&harness, "#row"), 32.0 + 380.0 - 390.0);
++    // The row runs under the header: the header is on top.
++    assert_eq!(harness.base().element_from_point(10.0, 25.0), Some(head));
++    assert_eq!(harness.base().element_from_point(10.0, 50.0), Some(row));
++}
++
++fn pixel(doc: &mut HtmlDocument, x: usize, y: usize) -> [u8; 3] {
++    let buffer = render_to_buffer::<VelloCpuImageRenderer, _>(
++        |scene| paint_scene(scene, doc, 1.0, 100, 100, 0, 0),
++        100,
++        100,
++    );
++    let idx = (y * 100 + x) * 4;
++    [buffer[idx], buffer[idx + 1], buffer[idx + 2]]
++}
++
++#[test]
++fn a_stuck_box_and_its_stacked_descendants_paint_where_it_sticks() {
++    let mut doc = HtmlDocument::from_html(
++        r#"<html><body style="margin: 0; background: white">
++        <div id="scroller" style="height: 100px; overflow: hidden">
++            <div style="height: 50px"></div>
++            <div style="height: 400px">
++                <div style="position: sticky; top: 0; height: 20px; background: #ff0000">
++                    <div style="position: absolute; z-index: 1; left: 0; top: 0; width: 50px; height: 20px; background: #0000ff"></div>
++                </div>
++            </div>
++        </div>
++    </body></html>"#,
++        DocumentConfig {
++            viewport: Some(Viewport::new(100, 100, 1.0, ColorScheme::Light)),
++            html_parser_provider: Some(Arc::new(HtmlProvider) as _),
++            ..Default::default()
++        },
++    );
++    doc.resolve(0.0);
++    assert_eq!(pixel(&mut doc, 75, 60), [255, 0, 0]);
++    assert_eq!(pixel(&mut doc, 25, 60), [0, 0, 255]);
++    assert_eq!(pixel(&mut doc, 75, 10), [255, 255, 255]);
++
++    // A scroll repaints without a relayout: the header and the descendant
++    // hoisted to the root's stacking context move together.
++    let scroller = doc.query_selector("#scroller").unwrap().unwrap();
++    doc.scroll_to(scroller, 0.0, 100.0, ScrollBehavior::Instant);
++    assert_eq!(pixel(&mut doc, 75, 10), [255, 0, 0]);
++    assert_eq!(pixel(&mut doc, 25, 10), [0, 0, 255]);
++    assert_eq!(pixel(&mut doc, 75, 60), [255, 255, 255]);
++
++    doc.scroll_to(scroller, 0.0, 0.0, ScrollBehavior::Instant);
++    assert_eq!(pixel(&mut doc, 25, 60), [0, 0, 255]);
++    assert_eq!(pixel(&mut doc, 25, 10), [255, 255, 255]);
++}

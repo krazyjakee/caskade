@@ -545,8 +545,10 @@ impl BaseDocument {
         let mut current = Some(node_id);
         while let Some(id) = current {
             let node = &self.nodes[id];
-            pos.x += node.unrounded_layout().location.x - node.scroll_offset().x as f32;
-            pos.y += node.unrounded_layout().location.y - node.scroll_offset().y as f32;
+            // Where the box is drawn: sticky shifts included.
+            let location = node.unrounded_visual_location();
+            pos.x += location.x - node.scroll_offset().x as f32;
+            pos.y += location.y - node.scroll_offset().y as f32;
             has_vertical |= node.layout_data().writing_mode.is_vertical();
             current = node.containing_block();
         }
@@ -564,8 +566,10 @@ impl BaseDocument {
             placer_size,
             overflow.x.is_scroll_container() || overflow.y.is_scroll_container(),
         );
-        pos.x += layout.location.x - node.scroll_offset().x as f32;
-        pos.y += layout.location.y - node.scroll_offset().y as f32;
+        // The sticky shift is physical already.
+        let sticky = node.sticky_offset();
+        pos.x += layout.location.x + sticky.x - node.scroll_offset().x as f32;
+        pos.y += layout.location.y + sticky.y - node.scroll_offset().y as f32;
         (pos, layout)
     }
 
@@ -603,8 +607,9 @@ impl BaseDocument {
         } else {
             (logical.location, logical.size)
         };
-        pos.x += location.x - placer.scroll_offset().x as f32;
-        pos.y += location.y - placer.scroll_offset().y as f32;
+        let sticky = placer.sticky_offset();
+        pos.x += location.x + sticky.x - placer.scroll_offset().x as f32;
+        pos.y += location.y + sticky.y - placer.scroll_offset().y as f32;
         (pos, placer.layout_data().writing_mode, size)
     }
 }

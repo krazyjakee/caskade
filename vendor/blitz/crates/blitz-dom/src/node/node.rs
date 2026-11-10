@@ -60,6 +60,8 @@ bitflags! {
         const IS_IN_DOCUMENT = 0b00000100;
         /// Whether the node is an inline box whose in-flow content is block-level only
         const IS_INLINE_WITH_ONLY_BLOCK_CHILDREN = 0b00001000;
+        /// Registered in the document's `position: sticky` list (`sticky.rs`).
+        const IS_STICKY = 0b00010000;
     }
 }
 
@@ -290,6 +292,36 @@ impl Node {
     #[inline]
     pub fn scroll_offset_mut(&mut self) -> &mut crate::Point<f64> {
         &mut self.layout_data_mut().scroll_offset
+    }
+
+    /// Shift of a `position: sticky` box relative to its laid-out position.
+    #[inline]
+    pub fn sticky_offset(&self) -> crate::Point<f32> {
+        self.layout_data().sticky_offset
+    }
+
+    /// Where the box is drawn relative to its layout parent: the layout
+    /// location plus the paint-time `position: sticky` shift. Every geometry
+    /// consumer (paint, hit testing, CSSOM, caret and selection) reads this,
+    /// so none can drift out of step with what is on screen; only
+    /// `scrollIntoView` wants the in-flow location.
+    pub fn visual_location(&self) -> crate::Point<f32> {
+        let location = self.final_layout().location;
+        let sticky = self.sticky_offset();
+        crate::Point {
+            x: location.x + sticky.x,
+            y: location.y + sticky.y,
+        }
+    }
+
+    /// [`Self::visual_location`] from the unrounded layout (sub-pixel CSSOM).
+    pub fn unrounded_visual_location(&self) -> crate::Point<f32> {
+        let location = self.unrounded_layout().location;
+        let sticky = self.sticky_offset();
+        crate::Point {
+            x: location.x + sticky.x,
+            y: location.y + sticky.y,
+        }
     }
 
     #[inline]
@@ -1485,8 +1517,9 @@ impl Node {
             .primary_styles()
             .is_some_and(|style| style.clone_pointer_events() == PointerEvents::None);
 
-        let mut x = x - self.final_layout().location.x + self.scroll_offset().x as f32;
-        let mut y = y - self.final_layout().location.y + self.scroll_offset().y as f32;
+        let visual = self.visual_location();
+        let mut x = x - visual.x + self.scroll_offset().x as f32;
+        let mut y = y - visual.y + self.scroll_offset().y as f32;
 
         if let Some(t) = self.transform().as_deref() {
             let p = t.inverse() * kurbo::Point::new(x as f64 * scale, y as f64 * scale);
@@ -1769,10 +1802,22 @@ impl Node {
             .or_else(|| self.layout_parent.get())
     }
 
-    /// Computes the Document-relative coordinates of the `Node`
-    pub fn absolute_position(&self, x: f32, y: f32) -> crate::util::Point<f32> {
+    /// Document-relative coordinates without sticky shifts: the in-flow
+    /// position, which `scrollIntoView` targets.
+    pub fn in_flow_absolute_position(&self, x: f32, y: f32) -> crate::util::Point<f32> {
         let x = x + self.final_layout().location.x - self.scroll_offset().x as f32;
         let y = y + self.final_layout().location.y - self.scroll_offset().y as f32;
+        self.containing_block()
+            .map(|i| self.with(i).in_flow_absolute_position(x, y))
+            .unwrap_or(crate::util::Point { x, y })
+    }
+
+    /// Computes the Document-relative coordinates of the `Node`
+    pub fn absolute_position(&self, x: f32, y: f32) -> crate::util::Point<f32> {
+        // Where the box is drawn: sticky shifts included (caret, selection, CSSOM).
+        let visual = self.visual_location();
+        let x = x + visual.x - self.scroll_offset().x as f32;
+        let y = y + visual.y - self.scroll_offset().y as f32;
 
         // Recurse up the positioning hierarchy
         self.containing_block()
@@ -1949,9 +1994,10 @@ impl Node {
         }
 
         loop {
-            let layout = current.final_layout();
-            x += layout.location.x;
-            y += layout.location.y;
+            // `offsetTop` of a sticky box reports where it is drawn.
+            let visual = current.visual_location();
+            x += visual.x;
+            y += visual.y;
 
             let Some(parent_id) = current.containing_block() else {
                 break;

@@ -23,6 +23,7 @@ The built-in theme is dark with restrained sci-fi accents: a faint backdrop grid
 - **Settings** are grouped tabs (App, Library, Play, Devices, People, System), each made of `SettingsSection`s and `SettingRow`s: a label and description on the left, the control on the right. Every setting is findable through the settings search.
 - **Dialogs** are for decisions. Editors that fit in place open in place.
 - View state lives in the URL (filters, search, tabs, sections), so Back, links and restarts return to the same place.
+- **Responsive layouts in the native UI** don't use container queries, which Blitz doesn't run: an intrinsic grid (`repeat(auto-fit, minmax(…))`) or a wrapping flex row where the layout follows its width, and a viewport media query, offset by the shell's chrome, where it must switch (a table becoming cards). `position: sticky` and `fixed` work as in a browser. Each feature's resolution: [`docs/spikes/blitz-6.md`](spikes/blitz-6.md) (#85).
 
 ## 3. Visual language
 
@@ -36,6 +37,7 @@ Style only through the `--cs-*` tokens, through their Tailwind utilities (`bg-su
 - **Icons**: lucide line icons, at the sizes the components set.
 - **Shape**: rounded cards and controls from the `radius.*` tokens. `chamfer` cuts corners for emphasis. A glow on a chamfered element goes on a wrapper with `filter: drop-shadow`, because the clip also cuts off `box-shadow`.
 - **Effects** (blur, glow, grid, scanlines) come from `effect.*` tokens so Reduce effects and slow GPUs can turn them off. They are decoration: the interface must read the same without them.
+- **Glass** surfaces keep their colour and opacity without the blur: the native UI draws no backdrop blur. Glass over imagery (art, a hero) is at least 80% opaque, so what shows through reads the same blurred or not ([`docs/spikes/blitz-6.md`](spikes/blitz-6.md), #85).
 
 ## 4. Motion
 

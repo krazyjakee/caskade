@@ -315,12 +315,16 @@ impl ElementCx<'_, '_> {
         }
 
         let cell_rect = |cell_id: NodeId| -> Option<Rect> {
-            let layout = self.context.dom.get_node(cell_id)?.final_layout();
+            let node = self.context.dom.get_node(cell_id)?;
+            // Where the cell is drawn: a sticky row or row group hands its
+            // shift down to its cells, and their row backgrounds follow.
+            let location = node.visual_location();
+            let size = node.final_layout().size;
             Some(Rect::new(
-                layout.location.x as f64,
-                layout.location.y as f64,
-                (layout.location.x + layout.size.width) as f64,
-                (layout.location.y + layout.size.height) as f64,
+                location.x as f64,
+                location.y as f64,
+                (location.x + size.width) as f64,
+                (location.y + size.height) as f64,
             ))
         };
 

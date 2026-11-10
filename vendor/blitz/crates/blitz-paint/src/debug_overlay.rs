@@ -54,7 +54,7 @@ pub(crate) fn render_debug_overlay(
     let content_width = width - padding_border.left - padding_border.right;
     let content_height = height - padding_border.top - padding_border.bottom;
 
-    let taffy::Point { x, y } = node.final_layout().location;
+    let blitz_dom::Point { x, y } = node.visual_location();
 
     let mut abs_x = x;
     let mut abs_y = y;
@@ -65,7 +65,7 @@ pub(crate) fn render_debug_overlay(
         let child_is_fixed = node.taffy_position() == taffy::Position::Fixed;
         node = &dom.as_ref().tree()[parent_id];
         fixed_to_viewport = child_is_fixed && node.containing_block().is_none();
-        let taffy::Point { x, y } = node.final_layout().location;
+        let blitz_dom::Point { x, y } = node.visual_location();
         abs_x += x;
         abs_y += y;
         if !fixed_to_viewport {

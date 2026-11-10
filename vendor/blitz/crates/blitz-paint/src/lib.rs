@@ -67,6 +67,9 @@ pub fn paint_scene_damaged(
     y_offset: u32,
     damage: Option<kurbo::Rect>,
 ) {
+    // Sticky boxes follow the current scroll position.
+    doc.refresh_sticky_offsets();
+
     // Run `.paint()` on every custom widget in the document (and all subdocuments) ahead of time.
     // This helps us avoid borrow-checker issues as we recurse down the tree (`.paint()` require `&mut self`).
     //

@@ -386,6 +386,9 @@ pub struct BaseDocument {
     /// May contain multiple nodes for the same id: `get_element_by_id`
     /// returns the first in tree order.
     pub(crate) nodes_to_id: HashMap<String, SmallVec<[NodeId; 1]>>,
+    /// Registered `position: sticky` boxes with their layout-invariant
+    /// constraints, sorted by depth (see `sticky.rs`).
+    pub(crate) sticky_nodes: Vec<crate::sticky::StickyEntry>,
     /// Map of `<style>` and `<link>` node IDs to their associated stylesheet
     pub(crate) nodes_to_stylesheet: BTreeMap<NodeId, DocumentStyleSheet>,
     /// Incremented whenever `nodes_to_stylesheet` changes (a stylesheet is
@@ -543,6 +546,7 @@ impl BaseDocument {
             animations: DocumentAnimationSet::default(),
             snapshots,
             nodes_to_id,
+            sticky_nodes: Vec::new(),
             viewport,
             media_type,
             pending_device_changes: DeviceChanges::empty(),
@@ -2507,6 +2511,7 @@ impl BaseDocument {
 
     pub fn set_viewport_scroll(&mut self, scroll: crate::Point<f64>) {
         self.nodes.set_viewport_scroll(scroll);
+        self.refresh_sticky_offsets();
     }
 
     /// Find the node targeted by a URL fragment (the `#...` part of a URL).
@@ -2537,8 +2542,10 @@ impl BaseDocument {
         let mut current = Some(node_id);
         while let Some(id) = current {
             let node = &self.nodes[id];
-            pos.x += node.unrounded_layout().location.x - node.scroll_offset().x as f32;
-            pos.y += node.unrounded_layout().location.y - node.scroll_offset().y as f32;
+            // Where the box is drawn: sticky shifts included.
+            let location = node.unrounded_visual_location();
+            pos.x += location.x - node.scroll_offset().x as f32;
+            pos.y += location.y - node.scroll_offset().y as f32;
             current = node.containing_block();
         }
         (pos, *self.nodes[node_id].unrounded_layout())

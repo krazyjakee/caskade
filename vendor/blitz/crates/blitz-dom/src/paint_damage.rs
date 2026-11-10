@@ -87,10 +87,10 @@ impl Node {
     /// `parent_transform` (the painter's `screen_bbox`, plus ink overflow).
     pub fn paint_bounds(&self, parent_transform: Affine, scale: f64) -> Rect {
         let layout = self.final_layout();
+        // Where the painter draws the box: sticky shift included.
+        let location = self.visual_location();
         let transform = parent_transform
-            * Affine::translate(
-                Vec2::new(layout.location.x as f64, layout.location.y as f64) * scale,
-            )
+            * Affine::translate(Vec2::new(location.x as f64, location.y as f64) * scale)
             * self.transform().as_deref().copied().unwrap_or_default();
         let border_box = Rect::new(
             0.0,

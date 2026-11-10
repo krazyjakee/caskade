@@ -300,7 +300,8 @@ impl<'dom, 'a> BlitzDomPainter<'dom, 'a> {
     }
 
     fn node_transform(&self, node: &Node, parent: Affine) -> Affine {
-        let location = node.final_layout().location;
+        // Where the box is drawn: its layout location plus any sticky shift.
+        let location = node.visual_location();
         parent
             * Affine::translate(Vec2::new(location.x as f64, location.y as f64) * self.scale)
             * node.transform().as_deref().copied().unwrap_or_default()
