@@ -212,7 +212,8 @@ fn a_dev_theme_folder_is_watched_and_the_webview_told_of_each_edit() {
     let run = Run::start(temp.path(), false);
     let (sender, receiver) = std::sync::mpsc::channel();
     run.app.listen(ThemeReloaded::NAME, move |event| {
-        let payload: ThemeReloaded = serde_json::from_str(event.payload()).unwrap();
+        let payload: caskade_app::events::ThemeReloaded =
+            serde_json::from_str(event.payload()).unwrap();
         let _ = sender.send(payload);
     });
     let id = tauri::async_runtime::block_on({
@@ -235,7 +236,7 @@ fn a_dev_theme_folder_is_watched_and_the_webview_told_of_each_edit() {
         .expect("the webview hears of the edit within a second");
     assert_eq!(
         reloaded,
-        ThemeReloaded {
+        caskade_app::events::ThemeReloaded {
             theme: "dev.example.neon".into(),
             error: None,
         }

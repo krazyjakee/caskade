@@ -4,6 +4,9 @@
 //! turns the core bus's events into these.
 
 // The commands' own events.
+pub use crate::commands::themes::ThemeReloaded;
+pub use crate::commands::backup::BackupChanged;
+pub use crate::commands::notifications::NotificationsChanged;
 pub use crate::commands::romm::RommDownloadChanged;
 pub use crate::discovery::DiscoveryChanged;
 use caskade_core::bus::{Event as BusEvent, GameSession};
@@ -151,6 +154,9 @@ pub enum Event {
     BackgroundChanged(BackgroundChanged),
     RommDownloadChanged(RommDownloadChanged),
     DiscoveryChanged(DiscoveryChanged),
+    NotificationsChanged(NotificationsChanged),
+    BackupChanged(BackupChanged),
+    ThemeReloaded(ThemeReloaded),
 }
 
 /// Where a shell receives [`Event`]s: called on the async runtime, in the
@@ -211,6 +217,9 @@ impl Event {
             Self::BackgroundChanged(_) => "background.changed",
             Self::RommDownloadChanged(_) => "romm.download.changed",
             Self::DiscoveryChanged(_) => "discovery.changed",
+            Self::NotificationsChanged(_) => "notifications.changed",
+            Self::BackupChanged(_) => "backup.changed",
+            Self::ThemeReloaded(_) => "theme.reloaded",
         }
     }
 }

@@ -3,8 +3,6 @@
 use crate::error::CommandError;
 use caskade_app::commands::library as app;
 
-/// The file manager, for the other commands that show a folder.
-pub(super) use app::open_file_manager;
 use caskade_core::{
     accounts::AccountService,
     bus::Bus,

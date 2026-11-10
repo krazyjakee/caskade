@@ -38,3 +38,7 @@ pub mod sync;
 pub mod torrent_links;
 pub mod updates;
 pub mod web;
+pub mod plugin_ui;
+pub mod notifications;
+pub mod backup;
+pub mod themes;

@@ -1,98 +1,22 @@
 //! The UI half of plugins (#127): which UI modules to load, and calls from a
 //! plugin's UI to its own backend half. Names and titles come in the
 //! language in use, from the plugin's own catalog (#219).
-use caskade_plugin_host::{PluginHost, PluginMessages, PluginStatus};
-use serde::Serialize;
-use specta::Type;
+pub use app::*;
 
+/// The UI plugins, with their files at `caskade-plugin://` URLs.
+pub async fn ui_plugins(host: &caskade_plugin_host::PluginHost) -> Vec<UiPlugin> {
+    app::ui_plugins(host, crate::plugin_scheme::url).await
+}
+use caskade_app::commands::plugin_ui as app;
+use caskade_plugin_host::{PluginHost, PluginMessages};
 type State<'a> = tauri::State<'a, PluginHost>;
-
-/// An enabled plugin with a UI half.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct UiPlugin {
-    pub id: String,
-    pub name: String,
-    pub version: String,
-    /// The `ui` module's `caskade-plugin://` URL.
-    pub entry: String,
-    /// `<ui stem>.css` next to the module, when there is one.
-    pub style: Option<String>,
-    /// Slots, views and commands from the manifest; the UI may only
-    /// register these.
-    pub contributes: Vec<UiContribution>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct UiContribution {
-    pub slot: String,
-    pub id: String,
-    pub title: Option<String>,
-    /// Where it shows (#152): `desktop`, `console`, or empty for the
-    /// slot's default.
-    pub modes: Vec<String>,
-}
 
 /// Enabled plugins whose UI half the webview should load. No plugin code
 /// runs here.
 #[tauri::command]
 #[specta::specta]
 pub async fn plugins_ui(state: State<'_>) -> Result<Vec<UiPlugin>, String> {
-    Ok(ui_plugins(&state).await)
-}
-
-pub(crate) async fn ui_plugins(host: &PluginHost) -> Vec<UiPlugin> {
-    let mut plugins = Vec::new();
-    for summary in host.list().await {
-        if !matches!(summary.status, PluginStatus::Enabled | PluginStatus::Active) {
-            continue;
-        }
-        let (Some(manifest), Some(folder)) = (
-            host.translated_manifest(&summary.id),
-            host.folder(&summary.id),
-        ) else {
-            continue;
-        };
-        let Some(ui) = &manifest.ui else {
-            continue;
-        };
-        let style = ui.with_extension("css");
-        let contributes = &manifest.contributes;
-        plugins.push(UiPlugin {
-            entry: crate::plugin_scheme::url(&manifest.id, ui),
-            style: folder
-                .join(&style)
-                .is_file()
-                .then(|| crate::plugin_scheme::url(&manifest.id, &style)),
-            contributes: contributes
-                .slots
-                .iter()
-                .map(|slot| UiContribution {
-                    slot: slot.slot.clone(),
-                    id: slot.id.clone(),
-                    title: slot.title.clone(),
-                    modes: slot.modes.clone(),
-                })
-                .chain(contributes.views.iter().map(|view| UiContribution {
-                    slot: "views".into(),
-                    id: view.id.clone(),
-                    title: Some(view.title.clone()),
-                    modes: view.modes.clone(),
-                }))
-                .chain(contributes.commands.iter().map(|command| UiContribution {
-                    slot: "commands".into(),
-                    id: command.id.clone(),
-                    title: Some(command.title.clone()),
-                    modes: Vec::new(),
-                }))
-                .collect(),
-            id: manifest.id,
-            name: manifest.name,
-            version: manifest.version.to_string(),
-        });
-    }
-    plugins
+    app::plugins_ui(&state, crate::plugin_scheme::url).await
 }
 
 /// The plugin's own catalog for the language in use (#219), for `t` and
@@ -104,9 +28,7 @@ pub async fn plugin_messages(
     state: State<'_>,
     plugin_id: String,
 ) -> Result<PluginMessages, String> {
-    state
-        .messages(&plugin_id)
-        .map_err(|error| error.to_string())
+    app::plugin_messages(&state, plugin_id).await
 }
 
 /// The UI opened one of the plugin's views: starts its backend when the
@@ -118,8 +40,7 @@ pub async fn plugin_view_opened(
     plugin_id: String,
     view_id: String,
 ) -> Result<(), String> {
-    hooks.view_opened(&plugin_id, &view_id).await;
-    Ok(())
+    app::plugin_view_opened(&hooks, plugin_id, view_id).await
 }
 
 /// `ctx.backend.call(method, payload)`: the plugin's `handle-request`
@@ -132,9 +53,5 @@ pub async fn plugin_request(
     method: String,
     payload: serde_json::Value,
 ) -> Result<serde_json::Value, String> {
-    let answer = state
-        .request(&plugin_id, &method, &payload.to_string())
-        .await
-        .map_err(|error| error.to_string())?;
-    Ok(serde_json::from_str(&answer).unwrap_or(serde_json::Value::String(answer)))
+    app::plugin_request(&state, plugin_id, method, payload).await
 }

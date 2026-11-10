@@ -61,6 +61,9 @@ webview_events!(
     BackgroundChanged,
     RommDownloadChanged,
     DiscoveryChanged,
+    NotificationsChanged,
+    BackupChanged,
+    ThemeReloaded,
 );
 
 /// The app layer's [`app::Emit`] sink for this app's webview.
