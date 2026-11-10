@@ -24,6 +24,7 @@
 //! [`Input::scrolled`] counts them.
 
 mod doc;
+pub mod e2e;
 mod guide;
 mod keyboard;
 mod root;
@@ -54,6 +55,20 @@ pub fn start_pads(
             tracing::info!("guide: Caskade raised");
         }
     };
+    // A scripted end-to-end run is the only "pad", and the window counts as
+    // focused (Xvfb may run without a window manager).
+    if e2e::enabled() {
+        let events = sink(
+            crate::shell::sink(),
+            Some(services.bus.clone()),
+            || true,
+            summon,
+        );
+        let service = PADS
+            .get_or_init(|| InputService::without_pads(events, caskade_input::Timing::default()));
+        e2e::start(service.clone());
+        return;
+    }
     let events = sink(
         crate::shell::sink(),
         Some(services.bus.clone()),

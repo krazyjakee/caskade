@@ -371,11 +371,12 @@ jobs:
           cargo test -p caskade-desktop --features e2e --locked --test it console_e2e:: -- --ignored
       # The native app (#87): its window restored, a web game and a video in
       # their own wry windows, a clean quit. No window manager, so windows
-      # go exactly where they ask.
+      # go exactly where they ask. Then a scripted pad drives it through the
+      # e2e harness (#92).
       - name: Native app smoke test
         run: >-
           xvfb-run -a -s "-screen 0 1920x1080x24"
-          cargo test -p caskade-native --locked --test smoke -- --ignored
+          cargo test -p caskade-native --locked --test smoke --test console_e2e -- --ignored
 
   # The installer suite (crates/caskade-installer/docs/ci.md).
   installer:

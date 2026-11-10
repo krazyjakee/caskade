@@ -274,9 +274,10 @@ fn app() -> Element {
     });
     // What the views read (#89), once the services are there.
     rsx! {
-        data::DataRoot {
-            // Keys, pads and focus (#92).
-            input::InputRoot {
+        // Keys, pads and focus (#92), around everything: it stays mounted
+        // while the data below it starts.
+        input::InputRoot {
+            data::DataRoot {
                 div { style: "padding: 24px; font-family: sans-serif;", "Caskade" }
             }
         }

@@ -77,6 +77,12 @@ struct Inner {
     jobs: mpsc::UnboundedSender<Job>,
     /// The focus the dispatcher last heard of.
     seen: Cell<Option<NodeId>>,
+    /// The input layer is running listeners itself: the root's own click
+    /// listener isn't hearing a click from the user.
+    synthetic: Cell<bool>,
+    /// Real key and pointer events the root heard, for the e2e report.
+    keys: Cell<u64>,
+    pointers: Cell<u64>,
     frames: Cell<bool>,
     back: RefCell<Option<Rc<dyn Fn()>>>,
     details: RefCell<Option<OpenDetails>>,
@@ -101,6 +107,9 @@ impl Input {
                 root: RefCell::new(None),
                 jobs,
                 seen: Cell::new(None),
+                synthetic: Cell::new(false),
+                keys: Cell::new(0),
+                pointers: Cell::new(0),
                 frames: Cell::new(false),
                 back: RefCell::new(None),
                 details: RefCell::new(None),
@@ -257,7 +266,59 @@ impl Input {
         let Some(runtime) = Runtime::try_current() else {
             return;
         };
+        let outer = self.inner.synthetic.replace(true);
         runtime.handle_event(name, Event::new(data, bubbles), id);
+        self.inner.synthetic.set(outer);
+    }
+
+    /// The window as the e2e driver reads it.
+    fn probe(&self) -> super::e2e::Probe {
+        let read = self.with_ui(|ui, _| {
+            use caskade_ui_input::FocusTree;
+            let collapse = |text: String| text.split_whitespace().collect::<Vec<_>>().join(" ");
+            let focused = caskade_ui_input::dispatch::Ui::focused(ui);
+            let name = focused.map(|node| {
+                let labelled = ui.attr(node, "aria-labelledby").map(|ids| {
+                    ids.split_whitespace()
+                        .filter_map(|id| {
+                            caskade_ui_input::tree::descendants(ui, ui.root())
+                                .into_iter()
+                                .find(|&at| ui.attr(at, "id") == Some(id))
+                        })
+                        .map(|at| ui.text(at))
+                        .collect::<Vec<_>>()
+                        .join(" ")
+                });
+                let label = caskade_ui_input::tree::closest(ui, node, |at| ui.tag(at) == "label")
+                    .map(|at| ui.text(at));
+                collapse(
+                    ui.attr(node, "aria-label")
+                        .map(str::to_owned)
+                        .or(labelled.filter(|text| !text.trim().is_empty()))
+                        .or(label)
+                        .unwrap_or_else(|| ui.text(node)),
+                )
+            });
+            let mut sections = Vec::new();
+            let mut at = focused.and_then(|node| spatial::section(ui, node));
+            while let Some(section) = at {
+                sections.extend(ui.attr(section, "data-focus-section").map(str::to_owned));
+                at = ui
+                    .parent(section)
+                    .and_then(|parent| spatial::section(ui, parent));
+            }
+            super::e2e::Probe {
+                focused: name.unwrap_or_default(),
+                sections,
+                text: collapse(ui.text(ui.root())),
+                keyboard: 0,
+                pointer: 0,
+            }
+        });
+        let mut probe = read.unwrap_or_default();
+        probe.keyboard = self.inner.keys.get();
+        probe.pointer = self.inner.pointers.get();
+        probe
     }
 
     fn apply(&self, effects: Vec<Effect>) {
@@ -550,6 +611,15 @@ pub fn InputRoot(
                 }
             }
         });
+        // A scripted run's questions about the window.
+        if let Some(mut asks) = super::e2e::take_asks() {
+            let answers = input.clone();
+            spawn(async move {
+                while let Some(reply) = asks.recv().await {
+                    let _ = reply.send(answers.probe());
+                }
+            });
+        }
         input
     });
     if input.inner.dispatcher.borrow().console != console {
@@ -583,12 +653,18 @@ pub fn InputRoot(
                 let _ = on_mount.inner.jobs.send(Job::Frame);
             },
             onkeydown: move |event: KeyboardEvent| {
+                on_key.inner.keys.set(on_key.inner.keys.get() + 1);
                 if on_key.key(&event) {
                     event.prevent_default();
                     event.stop_propagation();
                 }
             },
             onclick: move |_: MouseEvent| {
+                // A click the input layer sent (a pad's A) is no pointer's.
+                if on_click.inner.synthetic.get() {
+                    return;
+                }
+                on_click.inner.pointers.set(on_click.inner.pointers.get() + 1);
                 let touch = false;
                 let hit = on_click.read(|doc| doc.get_hover_node_id()).flatten();
                 let _ = on_click.inner.jobs.send(Job::Clicked { hit, touch });
