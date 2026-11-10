@@ -4,6 +4,7 @@
     {"id": "<{duration}", "comments": ["Under a minute of playtime: <1m"], "references": ["crates/caskade-ui-i18n/src/format.rs"]},
     {"id": "?123", "context": "on-screen keyboard", "references": ["apps/native/src/input/keyboard.rs"]},
     {"id": "B", "context": "byte unit", "references": ["crates/caskade-ui-i18n/src/format.rs"]},
+    {"id": "Cancel", "references": ["apps/native/src/ui/dialog.rs"]},
     {"id": "Close keyboard", "references": ["apps/native/src/input/keyboard.rs"]},
     {"id": "Cursor left", "references": ["apps/native/src/input/keyboard.rs"]},
     {"id": "Cursor right", "references": ["apps/native/src/input/keyboard.rs"]},
