@@ -815,6 +815,14 @@ fn a_radio_group_moves_and_checks_with_arrows_and_is_one_stop() {
     assert_eq!(window.focus_text(), "Large");
     window.key(Key::Named(NamedKey::ArrowDown));
     assert_eq!(take_done(), ["size sm"]);
+    // A pad moves through the group spatially, and its A checks.
+    window.pad(Action::NavDown);
+    assert_eq!(window.focus_text(), "Medium");
+    assert_eq!(take_done(), Vec::<String>::new());
+    window.pad(Action::Confirm);
+    assert_eq!(take_done(), ["size md"]);
+    window.key(Key::Named(NamedKey::ArrowUp));
+    assert_eq!(take_done(), ["size sm"]);
     let tree = window.heard("size");
     assert!(
         tree.contains("RadioGroup \"Card size\"")
@@ -918,6 +926,17 @@ fn an_error_notice_shows_its_details_and_a_toast_comes_and_goes() {
         Some("true")
     );
     assert!(window.tree().contains("Reference: E-42"));
+    // A pad's A hides them again, and shows them.
+    window.pad(Action::Confirm);
+    assert_eq!(
+        window.attr("failure", "data-expanded").as_deref(),
+        Some("false")
+    );
+    window.pad(Action::Confirm);
+    assert_eq!(
+        window.attr("failure", "data-expanded").as_deref(),
+        Some("true")
+    );
     window.click("toast");
     let tree = window.tree();
     assert!(
@@ -1008,6 +1027,9 @@ fn a_game_card_opens_by_mouse_enter_and_a_pad_and_reports_focus() {
     assert_eq!(take_done(), ["open card"]);
     window.click("row");
     assert_eq!(take_done(), ["open row"]);
+    window.key(ENTER);
+    window.pad(Action::Confirm);
+    assert_eq!(take_done(), ["open row", "open row"]);
 }
 
 #[test]
@@ -1326,6 +1348,23 @@ fn a_search_field_clears_on_escape_and_its_button() {
         found.expect("a clear button while there's text")
     };
     window.click_node(clear);
+    assert_eq!(take_done(), ["search \"\""]);
+    // A pad's A on the clear button clears too.
+    window.focus_node(field);
+    window.key(Key::Character("q".into()));
+    assert_eq!(take_done(), ["search \"q\""]);
+    let clear = {
+        let doc = window.doc.inner.borrow();
+        let mut found = None;
+        doc.visit(|id, node| {
+            if node.attr(LocalName::from("aria-label")) == Some("Clear search") {
+                found = Some(id);
+            }
+        });
+        found.expect("a clear button while there's text")
+    };
+    window.focus_node(clear);
+    window.pad(Action::Confirm);
     assert_eq!(take_done(), ["search \"\""]);
 }
 
