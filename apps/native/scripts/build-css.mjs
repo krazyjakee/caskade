@@ -47,5 +47,7 @@ if (process.argv.includes("--check")) {
   }
 } else {
   writeFileSync(out, css);
-  console.log(`${path.relative(repo, out)}: ${css.length} bytes, ${scanner.files.length} files scanned`);
+  console.log(
+    `${path.relative(repo, out)}: ${css.length} bytes, ${scanner.files.length} files scanned`,
+  );
 }
