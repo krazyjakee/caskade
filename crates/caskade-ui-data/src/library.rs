@@ -58,6 +58,14 @@ impl Library {
         )
     }
 
+    pub(crate) fn store(&self) -> &LibraryStore {
+        &self.store
+    }
+
+    pub(crate) fn bus(&self) -> &Bus {
+        &self.bus
+    }
+
     /// A page of the library as the signed-in account sees it; at most
     /// [`PAGE_LIMIT`] summaries, whatever `query.limit` asks.
     pub async fn page(&self, query: &ListGames) -> Result<GamePage> {

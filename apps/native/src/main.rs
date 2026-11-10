@@ -15,6 +15,7 @@ mod anatomy;
 // The data hooks (#89); the views (#96 onwards) use them.
 mod data;
 mod dialogs;
+mod flows;
 mod forwarded;
 // The frame around the views: sidebar, top bar, status bar (#96).
 mod frame;

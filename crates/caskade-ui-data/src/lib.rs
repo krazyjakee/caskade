@@ -18,6 +18,8 @@ pub mod fixtures;
 pub mod keys;
 pub mod labels;
 pub mod library;
+mod manual;
+pub mod storage;
 
 pub use caskade_core::error::{ErrorCode, ErrorReport, RecoveryHint};
 pub use keys::{Changed, Key};

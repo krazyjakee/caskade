@@ -578,7 +578,7 @@ msgid "{fps} frames a second"
 msgstr "{fps} bilder per sekund"
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
-#: apps/desktop/src/onboarding/Questions.tsx
+#: apps/desktop/src/onboarding/Questions.tsx apps/native/src/flows/storage.rs
 msgid "{free} free"
 msgstr "{free} ledigt"
 
@@ -695,6 +695,7 @@ msgstr "{length} / {max} tecken"
 #. A storage location to move games to, and its free space
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/flows/storage.rs
 msgid "{location} · {free} free"
 msgstr "{location} · {free} ledigt"
 
@@ -1039,6 +1040,7 @@ msgid "{title} · {size}"
 msgstr "{title} · {size}"
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "{title} · {size}. Playtime and library identity are kept."
 msgstr "{title} · {size}. Speltid och biblioteksidentitet behålls."
 
@@ -1392,10 +1394,12 @@ msgid "A device no longer paired"
 msgstr "En enhet som inte längre är parkopplad"
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "A download link or a magnet link"
 msgstr "En nedladdningslänk eller en magnetlänk"
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "A download link or a magnet link. The installer resolves it before downloading, and you may be asked to choose what to download."
 msgstr "En nedladdningslänk eller en magnetlänk. Installationsprogrammet löser upp den innan nedladdningen, och du kan bli ombedd att välja vad som ska laddas ner."
 
@@ -1466,6 +1470,7 @@ msgid "A panel on game pages"
 msgstr "En panel på spelsidor"
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "A path, a .desktop, .lnk or .url shortcut, or a URI like steam://rungameid/620. Or drop a file here."
 msgstr "En sökväg, en .desktop-, .lnk- eller .url-genväg eller en URI som steam://rungameid/620. Eller släpp en fil här."
 
@@ -1490,6 +1495,7 @@ msgid "A program or script file. Inside a Caskade install, a path relative to it
 msgstr "Ett program eller en skriptfil. I en Caskade-installation följer en sökväg relativ till dess mapp med när den flyttas."
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "A record for a game Caskade can't start, like a cartridge or a disc: it keeps your notes, artwork and collections. Add something to start later in Edit details."
 msgstr "En post för ett spel som Caskade inte kan starta, som en kassett eller en skiva: den behåller dina anteckningar, bilder och samlingar. Lägg till något att starta senare i Redigera detaljer."
 
@@ -1561,6 +1567,7 @@ msgid "a while ago"
 msgstr "för ett tag sedan"
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "a Windows compatibility tool"
 msgstr "ett Windows-kompatibilitetsverktyg"
 
@@ -1727,18 +1734,22 @@ msgid "Add a folder below to choose your first install location."
 msgstr "Lägg till en mapp nedan för att välja din första installationsplats."
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Add a game by title"
 msgstr "Lägg till ett spel med titel"
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Add a game by title…"
 msgstr "Lägg till ett spel med titel…"
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Add a game on this computer"
 msgstr "Lägg till ett spel på den här datorn"
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Add a game on this computer…"
 msgstr "Lägg till ett spel på den här datorn…"
 
@@ -1751,6 +1762,7 @@ msgid "Add a storage location"
 msgstr "Lägg till en lagringsplats"
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Add a storage location in Settings → Storage."
 msgstr "Lägg till en lagringsplats i Inställningar → Lagring."
 
@@ -1767,6 +1779,7 @@ msgid "Add an emulator with a profile first; its file types decide what a scanne
 msgstr "Lägg först till en emulator med en profil; dess filtyper avgör vad en skanner hittar."
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Add another eligible storage location in Settings → Storage."
 msgstr "Lägg till ytterligare en lämplig lagringsplats i Inställningar → Lagring."
 
@@ -1803,6 +1816,7 @@ msgstr "Lägg till mapp"
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs apps/native/src/flows/manual_game.rs
 msgid "Add game"
 msgstr "Lägg till spel"
 
@@ -1827,6 +1841,7 @@ msgid "Add global exclusion"
 msgstr "Lägg till global exkludering"
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Add installation"
 msgstr "Lägg till installation"
 
@@ -1872,6 +1887,7 @@ msgid "Add to my collections"
 msgstr "Lägg till i mina samlingar"
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Add to this game"
 msgstr "Lägg till i det här spelet"
 
@@ -1921,6 +1937,7 @@ msgstr "Om du lägger till den igen kommer dess spel tillbaka och kan laddas ner
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/views/activity/AddGame.tsx
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
+#: apps/native/src/flows/add_game.rs apps/native/src/flows/manual_game.rs
 msgid "Adding…"
 msgstr "Lägger till…"
 
@@ -2118,6 +2135,7 @@ msgid "An image for the {name}"
 msgstr "En bild för {name}"
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "An installer, archive, disc image or .torrent file"
 msgstr "Ett installationsprogram, ett arkiv, en skivavbild eller en .torrent-fil"
 
@@ -2288,6 +2306,7 @@ msgstr "Argument"
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Arguments"
 msgstr "Argument"
 
@@ -2665,6 +2684,7 @@ msgstr "Bläddra i biblioteket →"
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Browse…"
 msgstr "Bläddra…"
 
@@ -2799,6 +2819,8 @@ msgstr "Avbryt inloggningen"
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/flows/add_game.rs apps/native/src/flows/folder_browser.rs
+#: apps/native/src/flows/manual_game.rs apps/native/src/flows/storage.rs
 #: apps/native/src/ui/dialog.rs
 msgid "Cancel"
 msgstr "Avbryt"
@@ -2876,7 +2898,7 @@ msgctxt "discovery phase"
 msgid "Cancelling"
 msgstr "Avbryter"
 
-#: apps/desktop/src/api/storage.ts
+#: apps/desktop/src/api/storage.ts apps/native/src/flows/storage.rs
 msgid "Cannot run executables here"
 msgstr "Kan inte köra program här"
 
@@ -3085,6 +3107,7 @@ msgid "Caskade starting"
 msgstr "Caskades start"
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Caskade starts it where it is: nothing is copied, moved or installed. To install a game instead, use Install from file or drop it on the library."
 msgstr "Caskade startar det där det ligger: inget kopieras, flyttas eller installeras. Vill du installera ett spel i stället, använd Installera från fil eller släpp det på biblioteket."
 
@@ -3248,10 +3271,12 @@ msgstr "Söker efter uppdateringar…"
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Checking locations…"
 msgstr "Kontrollerar platser…"
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Checking storage locations…"
 msgstr "Kontrollerar lagringsplatser…"
 
@@ -4121,6 +4146,7 @@ msgid "Default"
 msgstr "Standard"
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/native/src/flows/storage.rs
 msgctxt "storage location"
 msgid "Default"
 msgstr "Standard"
@@ -4274,6 +4300,7 @@ msgid "Desktop mode"
 msgstr "Skrivbordsläge"
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Destination"
 msgstr "Mål"
 
@@ -4508,6 +4535,7 @@ msgid "Download only: Reinstall gets the newest build."
 msgstr "Endast nedladdning: Installera om hämtar det senaste bygget."
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Download or magnet link"
 msgstr "Nedladdnings- eller magnetlänk"
 
@@ -4905,10 +4933,12 @@ msgid "Esc"
 msgstr "Esc"
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Estimated space: {size}"
 msgstr "Uppskattat utrymme: {size}"
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Estimated space: Unknown — free space will be checked again before installation."
 msgstr "Uppskattat utrymme: Okänt – ledigt utrymme kontrolleras igen före installationen."
 
@@ -5167,6 +5197,7 @@ msgid "Folder"
 msgstr "Mapp"
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgid "Folder contents"
 msgstr "Mappens innehåll"
 
@@ -5502,6 +5533,7 @@ msgid "Games on this PC"
 msgstr "Spel på den här datorn"
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Games owned by other launchers stay in their launcher locations."
 msgstr "Spel som tillhör andra startprogram stannar där deras startprogram har dem."
 
@@ -5701,6 +5733,7 @@ msgid "has"
 msgstr "innehåller"
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "has the same title"
 msgstr "har samma titel"
 
@@ -5863,6 +5896,7 @@ msgstr "Ikon"
 #. The folder at the location's path isn't the location Caskade registered
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/flows/storage.rs
 msgctxt "storage location status"
 msgid "identity mismatch"
 msgstr "identiteten stämmer inte"
@@ -6116,27 +6150,33 @@ msgid "Install failed: {error}"
 msgstr "Installationen misslyckades: {error}"
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Install from file"
 msgstr "Installera från fil"
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Install from file…"
 msgstr "Installera från fil…"
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Install from folder"
 msgstr "Installera från mapp"
 
 #: apps/desktop/src/views/activity/AddGame.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Install from folder…"
 msgstr "Installera från mapp…"
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Install from link"
 msgstr "Installera från länk"
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Install from link…"
 msgstr "Installera från länk…"
 
@@ -6149,10 +6189,12 @@ msgid "Install games"
 msgstr "Installera spel"
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Install here"
 msgstr "Installera här"
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/native/src/flows/add_game.rs apps/native/src/flows/storage.rs
 msgid "Install location"
 msgstr "Installationsplats"
 
@@ -6196,6 +6238,7 @@ msgid "Install, uninstall and move games. Updates run for everyone."
 msgstr "Installera, avinstallera och flytta spel. Uppdateringar körs för alla."
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Installation"
 msgstr "Installation"
 
@@ -6620,6 +6663,7 @@ msgid "Keep playing"
 msgstr "Fortsätt spela"
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Keep separate"
 msgstr "Håll isär"
 
@@ -7118,7 +7162,7 @@ msgstr "Platsen har lagts till. Caskade letade där efter spel som det installer
 msgid "Location label"
 msgstr "Platsens etikett"
 
-#: apps/desktop/src/api/storage.ts
+#: apps/desktop/src/api/storage.ts apps/native/src/flows/storage.rs
 msgid "Location unavailable"
 msgstr "Platsen är inte tillgänglig"
 
@@ -7131,11 +7175,13 @@ msgid "Locations"
 msgstr "Platser"
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Locations could not be loaded."
 msgstr "Platserna kunde inte läsas in."
 
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Locations unavailable"
 msgstr "Platserna är inte tillgängliga"
 
@@ -7386,6 +7432,7 @@ msgid "May request elevation"
 msgstr "Kan begära administratörsbehörighet"
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Maybe already in your library"
 msgstr "Kanske redan i ditt bibliotek"
 
@@ -7517,6 +7564,7 @@ msgid "Move down"
 msgstr "Flytta ned"
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Move game"
 msgstr "Flytta spel"
 
@@ -7525,11 +7573,13 @@ msgid "Move games to"
 msgstr "Flytta spelen till"
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Move installed files"
 msgstr "Flytta installerade filer"
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Move installed files…"
 msgstr "Flytta installerade filer…"
 
@@ -7556,6 +7606,7 @@ msgid "Moving"
 msgstr "Flyttar"
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Moving…"
 msgstr "Flyttar…"
 
@@ -7761,6 +7812,7 @@ msgid "Next page"
 msgstr "Nästa sida"
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgid "Next place"
 msgstr "Nästa plats"
 
@@ -7795,6 +7847,7 @@ msgid "No console folders found (like snes or psx)"
 msgstr "Inga konsolmappar hittades (som snes eller psx)"
 
 #: apps/desktop/src/components/storage/StorageSummary.tsx
+#: apps/native/src/flows/storage.rs
 msgid "No default location configured"
 msgstr "Ingen standardplats har konfigurerats"
 
@@ -8136,7 +8189,7 @@ msgstr "Inte kompatibel"
 msgid "Not downloaded yet. It downloads once the internet can be reached; saves in folders you set and emulator saves work meanwhile."
 msgstr "Inte nedladdad än. Den laddas ned när internet kan nås; sparfiler i mappar du har angett och emulatorernas sparfiler fungerar under tiden."
 
-#: apps/desktop/src/api/storage.ts
+#: apps/desktop/src/api/storage.ts apps/native/src/flows/storage.rs
 msgid "Not enough free space"
 msgstr "Inte tillräckligt med ledigt utrymme"
 
@@ -8418,6 +8471,7 @@ msgstr "Officiell webbplats"
 
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/flows/storage.rs
 msgctxt "storage location status"
 msgid "offline"
 msgstr "offline"
@@ -8513,6 +8567,7 @@ msgstr "introduktion, välkommen"
 
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/flows/storage.rs
 msgctxt "storage location status"
 msgid "online"
 msgstr "online"
@@ -8551,6 +8606,7 @@ msgid "Only an admin can pair devices. Ask one to confirm here."
 msgstr "Bara en administratör kan parkoppla enheter. Be en att bekräfta här."
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Only Caskade-managed installations can be moved."
 msgstr "Bara installationer som hanteras av Caskade kan flyttas."
 
@@ -8674,6 +8730,7 @@ msgid "Open-source packages"
 msgstr "Paket med öppen källkod"
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Opens"
 msgstr "Öppnar"
 
@@ -8720,6 +8777,7 @@ msgid "Or drop a PNG, JPEG or WebP image here."
 msgstr "Eller släpp en PNG-, JPEG- eller WebP-bild här."
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Or keep it as a game of its own: Caskade won't merge them later."
 msgstr "Eller behåll det som ett eget spel: Caskade slår inte ihop dem senare."
 
@@ -8776,10 +8834,12 @@ msgid "Packages under {license}"
 msgstr "Paket under {license}"
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgid "Page down"
 msgstr "Sida ned"
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgid "Page up"
 msgstr "Sida upp"
 
@@ -9007,6 +9067,7 @@ msgid "Pinned"
 msgstr "Fästa"
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgctxt "folder browser"
 msgid "Places"
 msgstr "Platser"
@@ -9402,6 +9463,7 @@ msgid "Previous page"
 msgstr "Föregående sida"
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgid "Previous place"
 msgstr "Föregående plats"
 
@@ -9459,6 +9521,7 @@ msgstr "profiler, argument"
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Program"
 msgstr "Program"
 
@@ -9472,6 +9535,7 @@ msgid "Program name"
 msgstr "Programnamn"
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Program, shortcut or URI"
 msgstr "Program, genväg eller URI"
 
@@ -9544,6 +9608,7 @@ msgid "Quit the game first"
 msgstr "Avsluta spelet först"
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Quit this game before moving its files."
 msgstr "Avsluta spelet innan du flyttar dess filer."
 
@@ -9579,6 +9644,7 @@ msgstr "Läsa filer i {path}"
 
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/flows/storage.rs
 msgctxt "storage location status"
 msgid "read only"
 msgstr "skrivskyddad"
@@ -9587,7 +9653,7 @@ msgstr "skrivskyddad"
 msgid "Read your library"
 msgstr "Läsa ditt bibliotek"
 
-#: apps/desktop/src/api/storage.ts
+#: apps/desktop/src/api/storage.ts apps/native/src/flows/storage.rs
 msgid "Read-only location"
 msgstr "Skrivskyddad plats"
 
@@ -10513,6 +10579,7 @@ msgid "Runs through Proton"
 msgstr "Körs via Proton"
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Runs with"
 msgstr "Körs med"
 
@@ -10982,6 +11049,7 @@ msgid "Select all"
 msgstr "Markera alla"
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgid "Select folder"
 msgstr "Välj mapp"
 
@@ -10990,6 +11058,7 @@ msgid "Select loaded"
 msgstr "Välj inlästa"
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgid "Select this folder"
 msgstr "Välj den här mappen"
 
@@ -11636,6 +11705,7 @@ msgid "Starts"
 msgstr "Startar"
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Starts in"
 msgstr "Startar i"
 
@@ -11648,6 +11718,7 @@ msgid "Starts the game through a plugin."
 msgstr "Startar spelet via ett tillägg."
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "starts the same program"
 msgstr "startar samma program"
 
@@ -11813,6 +11884,7 @@ msgid "Storage is unavailable. Open the Caskade desktop app to manage locations.
 msgstr "Lagring är inte tillgänglig. Öppna Caskades skrivbordsapp för att hantera platser."
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Storage location"
 msgstr "Lagringsplats"
 
@@ -11823,6 +11895,7 @@ msgid "Storage locations"
 msgstr "Lagringsplatser"
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Storage locations could not be loaded."
 msgstr "Lagringsplatserna kunde inte läsas in."
 
@@ -11837,6 +11910,7 @@ msgstr "Val av lagring är inte tillgängligt"
 
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/add_game.rs apps/native/src/flows/storage.rs
 msgid "Storage service is unavailable"
 msgstr "Lagringstjänsten är inte tillgänglig"
 
@@ -12178,6 +12252,7 @@ msgid "The game's files couldn't be read: {reason}"
 msgstr "Spelets filer kunde inte läsas: {reason}"
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "The game's program or shortcut"
 msgstr "Spelets program eller genväg"
 
@@ -12267,6 +12342,7 @@ msgid "The metadata server sent nothing for this game yet. Try again later."
 msgstr "Metadataservern har inte skickat något för det här spelet än. Försök igen senare."
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "The move appears in Activity, where it can be cancelled."
 msgstr "Flytten visas i Aktivitet, där den kan avbrytas."
 
@@ -12499,6 +12575,7 @@ msgid "This emulator no longer exists. Refresh the list."
 msgstr "Emulatorn finns inte längre. Uppdatera listan."
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgid "This folder is empty."
 msgstr "Den här mappen är tom."
 
@@ -12524,7 +12601,7 @@ msgstr "Det här spelet har inga utgåvor."
 msgid "This game is no longer in the library."
 msgstr "Spelet finns inte längre i biblioteket."
 
-#: apps/desktop/src/api/storage.ts
+#: apps/desktop/src/api/storage.ts apps/native/src/flows/storage.rs
 msgid "This game needs symbolic links"
 msgstr "Det här spelet behöver symboliska länkar"
 
@@ -12540,7 +12617,7 @@ msgstr "Spelet har spelats på mer än en enhet sedan de senast delade sparfiler
 msgid "This GPU is gone."
 msgstr "Den här GPU:n finns inte längre."
 
-#: apps/desktop/src/api/storageNative.ts
+#: apps/desktop/src/api/storageNative.ts apps/native/src/flows/storage.rs
 msgid "This job needs a response in Activity before it can continue."
 msgstr "Det här jobbet behöver ett svar i Aktivitet innan det kan fortsätta."
 
@@ -12549,6 +12626,7 @@ msgid "This launch comes from where the game was found, which keeps it up to dat
 msgstr "Den här starten kommer från där spelet hittades, som håller den aktuell. Duplicera den för att ändra vad den startar."
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "This may already be in your library"
 msgstr "Det här kan redan finnas i ditt bibliotek"
 
@@ -12633,6 +12711,7 @@ msgstr "Tidsgräns (sekunder)"
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Title"
 msgstr "Titel"
 
@@ -12734,8 +12813,8 @@ msgstr "systemfält, avsluta, stäng till systemfältet"
 #: apps/desktop/src/views/settings/emulators/FromDevices.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
-#: apps/desktop/src/views/StoreView.tsx apps/native/src/frame/error.rs
-#: apps/native/src/frame/notifications.rs
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/flows/storage.rs
+#: apps/native/src/frame/error.rs apps/native/src/frame/notifications.rs
 msgid "Try again"
 msgstr "Försök igen"
 
@@ -12971,6 +13050,7 @@ msgid "Until I stop sharing"
 msgstr "Tills jag slutar dela"
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgid "Up one folder"
 msgstr "Upp en mapp"
 
@@ -13466,6 +13546,7 @@ msgid "What it runs"
 msgstr "Vad det kör"
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "What it starts"
 msgstr "Vad det startar"
 

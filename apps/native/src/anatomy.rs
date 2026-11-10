@@ -21,6 +21,7 @@ pub fn catalogue() -> Vec<Entry> {
     let mut all = vec![OSK];
     all.extend_from_slice(crate::ui::ANATOMY);
     all.extend_from_slice(crate::frame::ANATOMY);
+    all.extend_from_slice(crate::flows::ANATOMY);
     all
 }
 
@@ -67,6 +68,18 @@ mod tests {
         ("game-art", "#93: the full GameCard's art"),
         ("game-row", "#93: the full LibraryRow"),
         ("alphabet-bar", "#99: the Library view's AlphabetBar"),
+        (
+            "add-game",
+            "#108: the webview's AddGame isn't catalogued either",
+        ),
+        (
+            "install-root-picker",
+            "#108: the webview's InstallRootPicker isn't catalogued either",
+        ),
+        (
+            "install-url",
+            "#108: the webview's install-from-link dialog isn't catalogued either",
+        ),
     ];
 
     /// The webview's catalogue, as `pnpm --filter @caskade/ui docs`

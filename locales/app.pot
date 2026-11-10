@@ -581,6 +581,7 @@ msgstr ""
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/flows/storage.rs
 msgid "{free} free"
 msgstr ""
 
@@ -697,6 +698,7 @@ msgstr ""
 #. A storage location to move games to, and its free space
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/flows/storage.rs
 msgid "{location} · {free} free"
 msgstr ""
 
@@ -1043,6 +1045,7 @@ msgid "{title} · {size}"
 msgstr ""
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "{title} · {size}. Playtime and library identity are kept."
 msgstr ""
 
@@ -1402,10 +1405,12 @@ msgid "A device no longer paired"
 msgstr ""
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "A download link or a magnet link"
 msgstr ""
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "A download link or a magnet link. The installer resolves it before downloading, and you may be asked to choose what to download."
 msgstr ""
 
@@ -1476,6 +1481,7 @@ msgid "A panel on game pages"
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "A path, a .desktop, .lnk or .url shortcut, or a URI like steam://rungameid/620. Or drop a file here."
 msgstr ""
 
@@ -1500,6 +1506,7 @@ msgid "A program or script file. Inside a Caskade install, a path relative to it
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "A record for a game Caskade can't start, like a cartridge or a disc: it keeps your notes, artwork and collections. Add something to start later in Edit details."
 msgstr ""
 
@@ -1571,6 +1578,7 @@ msgid "a while ago"
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "a Windows compatibility tool"
 msgstr ""
 
@@ -1739,18 +1747,22 @@ msgid "Add a folder below to choose your first install location."
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Add a game by title"
 msgstr ""
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Add a game by title…"
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Add a game on this computer"
 msgstr ""
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Add a game on this computer…"
 msgstr ""
 
@@ -1763,6 +1775,7 @@ msgid "Add a storage location"
 msgstr ""
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Add a storage location in Settings → Storage."
 msgstr ""
 
@@ -1779,6 +1792,7 @@ msgid "Add an emulator with a profile first; its file types decide what a scanne
 msgstr ""
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Add another eligible storage location in Settings → Storage."
 msgstr ""
 
@@ -1815,6 +1829,8 @@ msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
+#: apps/native/src/flows/manual_game.rs
 msgid "Add game"
 msgstr ""
 
@@ -1839,6 +1855,7 @@ msgid "Add global exclusion"
 msgstr ""
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Add installation"
 msgstr ""
 
@@ -1884,6 +1901,7 @@ msgid "Add to my collections"
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Add to this game"
 msgstr ""
 
@@ -1933,6 +1951,8 @@ msgstr ""
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/views/activity/AddGame.tsx
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
+#: apps/native/src/flows/add_game.rs
+#: apps/native/src/flows/manual_game.rs
 msgid "Adding…"
 msgstr ""
 
@@ -2130,6 +2150,7 @@ msgid "An image for the {name}"
 msgstr ""
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "An installer, archive, disc image or .torrent file"
 msgstr ""
 
@@ -2300,6 +2321,7 @@ msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Arguments"
 msgstr ""
 
@@ -2676,6 +2698,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Browse…"
 msgstr ""
 
@@ -2808,6 +2831,10 @@ msgstr ""
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/flows/add_game.rs
+#: apps/native/src/flows/folder_browser.rs
+#: apps/native/src/flows/manual_game.rs
+#: apps/native/src/flows/storage.rs
 #: apps/native/src/ui/dialog.rs
 msgid "Cancel"
 msgstr ""
@@ -2887,6 +2914,7 @@ msgid "Cancelling"
 msgstr ""
 
 #: apps/desktop/src/api/storage.ts
+#: apps/native/src/flows/storage.rs
 msgid "Cannot run executables here"
 msgstr ""
 
@@ -3096,6 +3124,7 @@ msgid "Caskade starting"
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Caskade starts it where it is: nothing is copied, moved or installed. To install a game instead, use Install from file or drop it on the library."
 msgstr ""
 
@@ -3261,10 +3290,12 @@ msgstr ""
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Checking locations…"
 msgstr ""
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Checking storage locations…"
 msgstr ""
 
@@ -4139,6 +4170,7 @@ msgid "Default"
 msgstr ""
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/native/src/flows/storage.rs
 msgctxt "storage location"
 msgid "Default"
 msgstr ""
@@ -4292,6 +4324,7 @@ msgid "Desktop mode"
 msgstr ""
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Destination"
 msgstr ""
 
@@ -4527,6 +4560,7 @@ msgid "Download only: Reinstall gets the newest build."
 msgstr ""
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Download or magnet link"
 msgstr ""
 
@@ -4925,10 +4959,12 @@ msgid "Esc"
 msgstr ""
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Estimated space: {size}"
 msgstr ""
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Estimated space: Unknown — free space will be checked again before installation."
 msgstr ""
 
@@ -5188,6 +5224,7 @@ msgid "Folder"
 msgstr ""
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgid "Folder contents"
 msgstr ""
 
@@ -5526,6 +5563,7 @@ msgid "Games on this PC"
 msgstr ""
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Games owned by other launchers stay in their launcher locations."
 msgstr ""
 
@@ -5726,6 +5764,7 @@ msgid "has"
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "has the same title"
 msgstr ""
 
@@ -5890,6 +5929,7 @@ msgstr ""
 #. The folder at the location's path isn't the location Caskade registered
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/flows/storage.rs
 msgctxt "storage location status"
 msgid "identity mismatch"
 msgstr ""
@@ -6143,27 +6183,33 @@ msgid "Install failed: {error}"
 msgstr ""
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Install from file"
 msgstr ""
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Install from file…"
 msgstr ""
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Install from folder"
 msgstr ""
 
 #: apps/desktop/src/views/activity/AddGame.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Install from folder…"
 msgstr ""
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Install from link"
 msgstr ""
 
 #: apps/desktop/src/views/activity/AddGame.tsx
+#: apps/native/src/flows/add_game.rs
 msgid "Install from link…"
 msgstr ""
 
@@ -6176,10 +6222,13 @@ msgid "Install games"
 msgstr ""
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Install here"
 msgstr ""
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/native/src/flows/add_game.rs
+#: apps/native/src/flows/storage.rs
 msgid "Install location"
 msgstr ""
 
@@ -6223,6 +6272,7 @@ msgid "Install, uninstall and move games. Updates run for everyone."
 msgstr ""
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Installation"
 msgstr ""
 
@@ -6650,6 +6700,7 @@ msgid "Keep playing"
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Keep separate"
 msgstr ""
 
@@ -7149,6 +7200,7 @@ msgid "Location label"
 msgstr ""
 
 #: apps/desktop/src/api/storage.ts
+#: apps/native/src/flows/storage.rs
 msgid "Location unavailable"
 msgstr ""
 
@@ -7161,11 +7213,13 @@ msgid "Locations"
 msgstr ""
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Locations could not be loaded."
 msgstr ""
 
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Locations unavailable"
 msgstr ""
 
@@ -7419,6 +7473,7 @@ msgid "May request elevation"
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Maybe already in your library"
 msgstr ""
 
@@ -7553,6 +7608,7 @@ msgid "Move down"
 msgstr ""
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Move game"
 msgstr ""
 
@@ -7561,11 +7617,13 @@ msgid "Move games to"
 msgstr ""
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Move installed files"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Move installed files…"
 msgstr ""
 
@@ -7592,6 +7650,7 @@ msgid "Moving"
 msgstr ""
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Moving…"
 msgstr ""
 
@@ -7798,6 +7857,7 @@ msgid "Next page"
 msgstr ""
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgid "Next place"
 msgstr ""
 
@@ -7832,6 +7892,7 @@ msgid "No console folders found (like snes or psx)"
 msgstr ""
 
 #: apps/desktop/src/components/storage/StorageSummary.tsx
+#: apps/native/src/flows/storage.rs
 msgid "No default location configured"
 msgstr ""
 
@@ -8176,6 +8237,7 @@ msgid "Not downloaded yet. It downloads once the internet can be reached; saves 
 msgstr ""
 
 #: apps/desktop/src/api/storage.ts
+#: apps/native/src/flows/storage.rs
 msgid "Not enough free space"
 msgstr ""
 
@@ -8458,6 +8520,7 @@ msgstr ""
 
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/flows/storage.rs
 msgctxt "storage location status"
 msgid "offline"
 msgstr ""
@@ -8553,6 +8616,7 @@ msgstr ""
 
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/flows/storage.rs
 msgctxt "storage location status"
 msgid "online"
 msgstr ""
@@ -8591,6 +8655,7 @@ msgid "Only an admin can pair devices. Ask one to confirm here."
 msgstr ""
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Only Caskade-managed installations can be moved."
 msgstr ""
 
@@ -8715,6 +8780,7 @@ msgid "Open-source packages"
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Opens"
 msgstr ""
 
@@ -8761,6 +8827,7 @@ msgid "Or drop a PNG, JPEG or WebP image here."
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Or keep it as a game of its own: Caskade won't merge them later."
 msgstr ""
 
@@ -8817,10 +8884,12 @@ msgid "Packages under {license}"
 msgstr ""
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgid "Page down"
 msgstr ""
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgid "Page up"
 msgstr ""
 
@@ -9049,6 +9118,7 @@ msgid "Pinned"
 msgstr ""
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgctxt "folder browser"
 msgid "Places"
 msgstr ""
@@ -9444,6 +9514,7 @@ msgid "Previous page"
 msgstr ""
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgid "Previous place"
 msgstr ""
 
@@ -9501,6 +9572,7 @@ msgstr ""
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Program"
 msgstr ""
 
@@ -9514,6 +9586,7 @@ msgid "Program name"
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Program, shortcut or URI"
 msgstr ""
 
@@ -9588,6 +9661,7 @@ msgid "Quit the game first"
 msgstr ""
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Quit this game before moving its files."
 msgstr ""
 
@@ -9623,6 +9697,7 @@ msgstr ""
 
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/flows/storage.rs
 msgctxt "storage location status"
 msgid "read only"
 msgstr ""
@@ -9632,6 +9707,7 @@ msgid "Read your library"
 msgstr ""
 
 #: apps/desktop/src/api/storage.ts
+#: apps/native/src/flows/storage.rs
 msgid "Read-only location"
 msgstr ""
 
@@ -10565,6 +10641,7 @@ msgid "Runs through Proton"
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Runs with"
 msgstr ""
 
@@ -11039,6 +11116,7 @@ msgid "Select all"
 msgstr ""
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgid "Select folder"
 msgstr ""
 
@@ -11047,6 +11125,7 @@ msgid "Select loaded"
 msgstr ""
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgid "Select this folder"
 msgstr ""
 
@@ -11690,6 +11769,7 @@ msgid "Starts"
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Starts in"
 msgstr ""
 
@@ -11702,6 +11782,7 @@ msgid "Starts the game through a plugin."
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "starts the same program"
 msgstr ""
 
@@ -11870,6 +11951,7 @@ msgid "Storage is unavailable. Open the Caskade desktop app to manage locations.
 msgstr ""
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Storage location"
 msgstr ""
 
@@ -11880,6 +11962,7 @@ msgid "Storage locations"
 msgstr ""
 
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
+#: apps/native/src/flows/storage.rs
 msgid "Storage locations could not be loaded."
 msgstr ""
 
@@ -11894,6 +11977,8 @@ msgstr ""
 
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/add_game.rs
+#: apps/native/src/flows/storage.rs
 msgid "Storage service is unavailable"
 msgstr ""
 
@@ -12237,6 +12322,7 @@ msgid "The game's files couldn't be read: {reason}"
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "The game's program or shortcut"
 msgstr ""
 
@@ -12326,6 +12412,7 @@ msgid "The metadata server sent nothing for this game yet. Try again later."
 msgstr ""
 
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
+#: apps/native/src/flows/storage.rs
 msgid "The move appears in Activity, where it can be cancelled."
 msgstr ""
 
@@ -12558,6 +12645,7 @@ msgid "This emulator no longer exists. Refresh the list."
 msgstr ""
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgid "This folder is empty."
 msgstr ""
 
@@ -12584,6 +12672,7 @@ msgid "This game is no longer in the library."
 msgstr ""
 
 #: apps/desktop/src/api/storage.ts
+#: apps/native/src/flows/storage.rs
 msgid "This game needs symbolic links"
 msgstr ""
 
@@ -12600,6 +12689,7 @@ msgid "This GPU is gone."
 msgstr ""
 
 #: apps/desktop/src/api/storageNative.ts
+#: apps/native/src/flows/storage.rs
 msgid "This job needs a response in Activity before it can continue."
 msgstr ""
 
@@ -12608,6 +12698,7 @@ msgid "This launch comes from where the game was found, which keeps it up to dat
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "This may already be in your library"
 msgstr ""
 
@@ -12694,6 +12785,7 @@ msgstr ""
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "Title"
 msgstr ""
 
@@ -12796,6 +12888,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/flows/storage.rs
 #: apps/native/src/frame/error.rs
 #: apps/native/src/frame/notifications.rs
 msgid "Try again"
@@ -13033,6 +13126,7 @@ msgid "Until I stop sharing"
 msgstr ""
 
 #: apps/desktop/src/components/pathBrowser/FolderBrowser.tsx
+#: apps/native/src/flows/folder_browser.rs
 msgid "Up one folder"
 msgstr ""
 
@@ -13528,6 +13622,7 @@ msgid "What it runs"
 msgstr ""
 
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
+#: apps/native/src/flows/manual_game.rs
 msgid "What it starts"
 msgstr ""
 

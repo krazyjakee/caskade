@@ -132,6 +132,28 @@ pub const EXTERNAL_LINK: Icon = Icon(&[
 
 /// Draws `icon` with `class`, `stroke_width` (lucide's default is 2) and
 /// `data-part` when given.
+/// lucide's `plus`.
+pub const PLUS: Icon = Icon(&["M5 12h14", "M12 5v14"]);
+/// lucide's `file-search`.
+pub const FILE_SEARCH: Icon = Icon(&[
+    "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z",
+    "M14 2v5a1 1 0 0 0 1 1h5",
+    "M11.5 12a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5z",
+    "M13.3 16.3 15 18",
+]);
+
+/// lucide's `arrow-up`.
+pub const ARROW_UP: Icon = Icon(&["m5 12 7-7 7 7", "M12 19V5"]);
+/// lucide's `file`.
+pub const FILE: Icon = Icon(&[
+    "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z",
+    "M14 2v5a1 1 0 0 0 1 1h5",
+]);
+/// lucide's `folder`.
+pub const FOLDER: Icon = Icon(&[
+    "M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z",
+]);
+
 #[component]
 pub fn Svg(
     icon: Icon,

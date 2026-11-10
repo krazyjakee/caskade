@@ -1090,7 +1090,7 @@ Contains: [`button`](#button), [`text-field`](#text-field), [`checkbox`](#checkb
 
 ## `manual-game`
 
-Adds a game by hand from Add game: one on this computer or behind a URI, started where it is, or a title-only record; games that may be the same offer to join or keep apart. Rendered by ManualGameDialog (app).
+Adds a game by hand from Add game: one on this computer or behind a URI, started where it is, or a title-only record; games that may be the same offer to join or keep apart. Rendered by ManualGameDialog (apps/native/src/flows/manual_game.rs); in the webview, ManualGameDialog (app).
 
 Root: `[data-cs="manual-game"]`
 
@@ -1357,7 +1357,7 @@ Root: `[data-cs="type-search"]`
 
 ## `folder-browser`
 
-Console mode's file and folder picker, in place of the native dialogs a controller can't drive. A opens a folder or picks a file, B cancels, LB/RB go to the previous and next place, LT/RT page through the folder, Start picks the folder shown. `data-kind` is what it picks. Rendered by FolderBrowser (app).
+Console mode's file and folder picker, in place of the native dialogs a controller can't drive. A opens a folder or picks a file, B cancels, LB/RB go to the previous and next place, LT/RT page through the folder, Start picks the folder shown. `data-kind` is what it picks. Rendered by FolderBrowser (apps/native/src/flows/folder_browser.rs); in the webview, FolderBrowser (app).
 
 Root: `[data-cs="folder-browser"]`
 
