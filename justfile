@@ -19,6 +19,19 @@ native *args:
     flock /tmp/caskade-heavy.lock cargo build -p caskade-native
     "$(cargo metadata --format-version 1 --no-deps | python3 -c 'import json,sys;print(json.load(sys.stdin)["target_directory"])')/debug/caskade-native" {{args}}
 
+# Test the native UI as CI does (docs/native-testing.md): its headless component and view tests, then its screenshots (vello_cpu) against the committed images and Chromium's
+test-native *args:
+    flock /tmp/caskade-heavy.lock cargo test -p caskade-native {{args}}
+    flock /tmp/caskade-heavy.lock cargo test -p caskade-native --features shots --test shots --test text_pixels
+
+# The native app's window tests: the smoke test and a pad end to end, each on an Xvfb and session bus of its own (needs Xvfb, D-Bus and a Vulkan driver such as lavapipe)
+test-native-window:
+    flock /tmp/caskade-heavy.lock cargo test -p caskade-native --test smoke --test console_e2e -- --ignored
+
+# Rewrite the native screenshots' committed images, after deliberately changing how a reference screen or theme looks
+native-shots:
+    CASKADE_WRITE_SHOTS=1 flock /tmp/caskade-heavy.lock cargo test -p caskade-native --features shots --test shots
+
 # The native app's stylesheet (#90): Tailwind 4 over apps/native/src, after
 # changing its classes or the webview's styles; CI fails while it's stale
 native-css:

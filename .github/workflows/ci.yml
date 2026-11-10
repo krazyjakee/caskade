@@ -1,13 +1,14 @@
 name: ci
 # Every check, on GitHub-hosted runners: the desktop app (caskade-core, the
-# Tauri adapter, the React UI and the crates they build on), the installer and
-# discovery crates on Linux, Windows and macOS, and the translation catalogs.
+# Tauri adapter, the React UI and the crates they build on), the native UI
+# (caskade-native: Linux, and a macOS build), the installer and discovery
+# crates on Linux, Windows and macOS, and the translation catalogs.
 # Pull requests run only the checks their changes reach (scripts/ci-scope.py,
 # docs/TECH-SPEC.md); master pushes and manual runs run them all. The
 # jobs need no secrets and get a read-only token, so pull requests from forks
 # run too. The repository has no self-hosted runners, and no job here may ask
 # for one. Labels a maintainer adds to a pull request ask for more: `run-e2e`
-# the console-mode end-to-end run, `run-native` the installer's Linux native
+# the console-mode end-to-end runs (the webview's and the native UI's), `run-native` the installer's Linux native
 # profile and discovery's live-machine checks. release.yml builds the bundles.
 on:
   pull_request:
@@ -38,6 +39,7 @@ jobs:
       rust: ${{ steps.scope.outputs.rust }}
       catalogs: ${{ steps.scope.outputs.catalogs }}
       e2e: ${{ steps.scope.outputs.e2e }}
+      native: ${{ steps.scope.outputs.native }}
       cross: ${{ steps.scope.outputs.cross }}
       installer: ${{ steps.scope.outputs.installer }}
       discovery: ${{ steps.scope.outputs.discovery }}
@@ -239,8 +241,10 @@ jobs:
           save-if: ${{ env.SAVE_CACHE }}
       - name: Prepare SHA-pinned 7-Zip sidecar
         run: python3 scripts/tauri-sidecar.py --target x86_64-pc-windows-gnu
+      # caskade-native included: Clippy doesn't link, and a debug windows-gnu
+      # link of it fails (iroh-relay's DLL exports), so it isn't built here.
       - name: Windows GNU cross Clippy
-        run: cargo clippy -p caskade-core -p caskade-achievements -p caskade-addons -p caskade-backup -p caskade-share -p caskade-streaming -p caskade-system-stats -p caskade-app -p caskade-ui-data -p caskade-ui-input -p caskade-ui-i18n -p caskade-ui-theme -p caskade-player -p caskade-desktop -p caskade-plugin-host -p caskade-input -p caskade-sync --all-targets --locked --target x86_64-pc-windows-gnu -- -D warnings
+        run: cargo clippy -p caskade-core -p caskade-achievements -p caskade-addons -p caskade-backup -p caskade-share -p caskade-streaming -p caskade-system-stats -p caskade-app -p caskade-ui-data -p caskade-ui-input -p caskade-ui-i18n -p caskade-ui-theme -p caskade-player -p caskade-desktop -p caskade-native -p caskade-plugin-host -p caskade-input -p caskade-sync --all-targets --locked --target x86_64-pc-windows-gnu -- -D warnings
 
   # `caskade --launch` on real Windows (#22): the named pipe, a game of two
   # processes stopped whole, and WM_CLOSE to the real caller's hidden window.
@@ -348,9 +352,6 @@ jobs:
             libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libxdo-dev libssl-dev \
             libayatana-appindicator3-dev libudev-dev libdbus-1-dev \
             xvfb xauth dbus x11-utils
-          # winit (the native app's window) loads these at run time, and
-          # Blitz's renderer needs a wgpu adapter: Mesa's lavapipe, without a GPU.
-          sudo apt-get install -y --no-install-recommends libxkbcommon-x11-0 libxcursor1 libxi6 libxrandr2 mesa-vulkan-drivers
       - name: Rust toolchain
         run: |
           rustup toolchain install stable --profile minimal --component clippy
@@ -379,17 +380,78 @@ jobs:
       - name: Console mode end to end (pad only)
         run: >-
           cargo test -p caskade-desktop --features e2e --locked --test it console_e2e:: -- --ignored
+
+  # The native UI (Blitz, #95) beyond the headless tests the rust job runs:
+  # its window under Xvfb and its screenshots, on every change that reaches
+  # caskade-native (docs/native-testing.md).
+  native:
+    needs: changes
+    if: needs.changes.outputs.native == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          df -h /
+      - name: System libraries, Xvfb and D-Bus
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential pkg-config file \
+            libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libxdo-dev libssl-dev \
+            libayatana-appindicator3-dev libudev-dev libdbus-1-dev \
+            xvfb xauth dbus x11-utils
+          # winit (the native app's window) loads these at run time, and
+          # Blitz's renderer needs a wgpu adapter: Mesa's lavapipe, without a GPU.
+          sudo apt-get install -y --no-install-recommends libxkbcommon-x11-0 libxcursor1 libxi6 libxrandr2 mesa-vulkan-drivers
+      - name: Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustc -Vv
+      # Reads the rust job's cache, which tests caskade-native too.
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          shared-key: app-linux
+          save-if: false
       # The native app (#87): its window restored, a web game and a video in
       # their own wry windows, a clean quit. No window manager, so windows
       # go exactly where they ask. Then a scripted pad drives it through the
-      # e2e harness (#92).
-      - name: Native app smoke test
+      # e2e harness (#92). Each test starts its own Xvfb and session bus.
+      - name: Native app smoke test and end to end
         run: cargo test -p caskade-native --locked --test smoke --test console_e2e -- --ignored
       # Every theme on the reference screens, rendered with vello_cpu,
       # against the committed images (#90); cut titles and placeholders
       # against Chromium's rendering (#80).
-      - name: Native theme screenshots
+      - name: Native screenshots
         run: cargo test -p caskade-native --features shots --locked --test shots --test text_pixels
+
+  # The native app builds on macOS (#95). A check only: its window on a
+  # real Mac is a hardware check (#120).
+  native-macos:
+    needs: changes
+    if: needs.changes.outputs.native == 'true'
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustc -Vv
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: native-macos
+          save-if: ${{ env.SAVE_CACHE }}
+      - name: Check the native app
+        run: cargo check -p caskade-native --all-targets --locked
 
   # The installer suite (crates/caskade-installer/docs/ci.md).
   installer:
@@ -767,6 +829,8 @@ jobs:
       - windows-launch
       - windows-elevation
       - e2e
+      - native
+      - native-macos
       - installer
       - installer-linux-native
       - discovery
@@ -786,6 +850,7 @@ jobs:
           scope = needs['changes']['outputs']
           selected = {'frontend': 'frontend', 'rust': 'rust', 'windows-cross': 'cross',
                       'windows-launch': 'cross', 'windows-elevation': 'cross', 'e2e': 'e2e',
+                      'native': 'native', 'native-macos': 'native',
                       'installer': 'installer', 'discovery': 'discovery'}
           failed = []
           for job, output in selected.items():

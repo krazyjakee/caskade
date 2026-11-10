@@ -15,7 +15,7 @@ import tomllib
 ROOT = Path(__file__).resolve().parents[1]
 # GitHub cancels superseded PR runs itself (`concurrency` in each workflow).
 PR_EVENTS = ("pull_request", "pull_request_target")
-FIELDS = ("app", "frontend", "rust", "catalogs", "e2e", "cross", "installer", "discovery")
+FIELDS = ("app", "frontend", "rust", "catalogs", "e2e", "native", "cross", "installer", "discovery")
 
 
 def package_graph(root):
@@ -85,6 +85,10 @@ def scope(paths, root=ROOT):
             result["rust"] = result["frontend"] = result["catalogs"] = True
         elif path.startswith(("docs/legal/", "themes/", "plugins/", "wit/", "locales/")):
             result["rust"] = result["frontend"] = result["catalogs"] = True
+            # The native UI's screenshots install a catalogue theme, and its
+            # text comes from the bundled catalogs.
+            if path.startswith(("themes/", "locales/")):
+                result["native"] = True
         elif path.startswith("packages/") or path.startswith("apps/desktop/") or path in (
             "package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", "biome.json", "biome.jsonc",
             "docs/theming/anatomy.md", "docs/theming/tokens.md",
@@ -92,7 +96,7 @@ def scope(paths, root=ROOT):
             result["frontend"] = result["catalogs"] = True
             # The theme compiler embeds these generated contracts.
             if path.startswith("packages/tokens/") or path == "packages/ui/anatomy.json":
-                result["rust"] = True
+                result["rust"] = result["native"] = True
         elif path in ("README.md", "AGENTS.md", "CLAUDE.md", "SECURITY.md") or (
             path.startswith("docs/") and path.endswith(".md")
         ):
@@ -109,6 +113,9 @@ def scope(paths, root=ROOT):
         affected.update(more)
     result["installer"] = "caskade-installer" in affected
     result["discovery"] = "caskade-discovery" in affected
+    # The native UI's window, end-to-end and screenshot tests (the rust job
+    # runs its headless ones): whatever caskade-native builds on.
+    result["native"] = result["native"] or "caskade-native" in affected
     result["cross"] = result["rust"]
     result["app"] = result["frontend"] or result["rust"]
     return result
@@ -127,6 +134,7 @@ def select(event_name, event, root=ROOT):
         labels = {label.get("name") for label in pr.get("labels") or []}
         if "run-e2e" in labels:
             result["app"] = result["frontend"] = result["rust"] = result["catalogs"] = result["e2e"] = True
+            result["native"] = True
     return result
 
 

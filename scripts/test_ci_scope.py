@@ -38,6 +38,23 @@ class ScopeTests(unittest.TestCase):
         scope = ci.scope(["apps/desktop/src/views/LibraryView.tsx"])
         self.assertTrue(scope["app"] and scope["frontend"] and scope["catalogs"])
         self.assertFalse(scope["rust"] or scope["installer"] or scope["discovery"] or scope["e2e"])
+        self.assertFalse(scope["native"])
+
+    def test_native_ui_jobs_follow_what_caskade_native_builds_on(self):
+        for path in ["apps/native/src/main.rs", "apps/native/tests/shots/library-caskade.default.png",
+                     "crates/caskade-app/src/lib.rs", "crates/caskade-core/src/lib.rs",
+                     "crates/caskade-ui-theme/src/lib.rs", "crates/caskade-player/src/lib.rs",
+                     "crates/caskade-test-desktop/src/lib.rs", "themes/ember/theme.json",
+                     "locales/sv/app.po", "packages/tokens/tokens/sets/base.json"]:
+            with self.subTest(path=path):
+                scope = ci.scope([path])
+                self.assertTrue(scope["native"] and scope["rust"])
+        # Patched Blitz is a build input of everything it's vendored for.
+        self.assertTrue(all(ci.scope(["vendor/blitz/crates/blitz-dom/src/lib.rs"]).values()))
+        # The Tauri app is beside it, not under it.
+        for path in ["apps/desktop/src-tauri/src/lib.rs", "apps/desktop/src/App.tsx"]:
+            with self.subTest(path=path):
+                self.assertFalse(ci.scope([path])["native"])
 
     def test_installer_change_reaches_discovery_transitively(self):
         scope = ci.scope(["crates/caskade-installer/src/lib.rs"])
@@ -106,7 +123,7 @@ class ScopeTests(unittest.TestCase):
     def test_label_allows_e2e_for_an_otherwise_unaffected_pr(self):
         with patch.object(ci, "changed_paths", return_value=["docs/README.md"]):
             scope = ci.select("pull_request", {"pull_request": {"labels": [{"name": "run-e2e"}]}})
-            self.assertTrue(scope["app"] and scope["rust"] and scope["e2e"])
+            self.assertTrue(scope["app"] and scope["rust"] and scope["e2e"] and scope["native"])
             self.assertFalse(scope["installer"] or scope["discovery"])
 
     def test_dependency_graph_includes_target_build_dev_and_workspace_dependencies(self):
