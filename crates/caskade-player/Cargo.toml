@@ -1,0 +1,36 @@
+[package]
+name = "caskade-player"
+version = "0.1.0"
+description = "Caskade's own windows for web games and videos: tao and wry in a process of their own, which every app shell starts"
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+caskade-core = { path = "../caskade-core" }
+caskade-app = { path = "../caskade-app" }
+# Pads close the video window and work the game window's bar.
+caskade-input = { path = "../caskade-input" }
+# WebView2's process failures, for `recovery.rs` (#3); empty outside Windows.
+caskade-webview2 = { path = "../caskade-webview2" }
+# The windows: the tao and wry the Tauri app builds, with the same features.
+tao = { version = "0.37", default-features = false, features = ["rwh_06", "x11"] }
+wry = { version = "0.57", default-features = false, features = ["os-webview", "linux-body", "x11"] }
+url = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "sync", "net", "time", "macros"] }
+# Offline web games: the game window's MITM proxy (`web_player/proxy.rs`).
+hudsucker = "0.25"
+http-body-util = "0.1"
+
+# WebKitGTK's web process (`recovery.rs`) and the game window's bar.
+[target.'cfg(target_os = "linux")'.dependencies]
+webkit2gtk = { version = "2", features = ["v2_34"] }
+gtk = "0.18"
+
+[dev-dependencies]
+tempfile = "=3.27.0"
+
+[lints]
+workspace = true

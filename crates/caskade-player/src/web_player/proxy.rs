@@ -619,7 +619,7 @@ mod tests {
     #[test]
     fn the_lockfile_has_no_aws_lc() {
         let lock =
-            std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/../../../Cargo.lock"))
+            std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/../../Cargo.lock"))
                 .expect("the workspace's Cargo.lock");
         for name in ["aws-lc-rs", "aws-lc-sys"] {
             assert!(

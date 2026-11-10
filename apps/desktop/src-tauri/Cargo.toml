@@ -41,6 +41,9 @@ tracing-appender = "0.2"
 caskade-core = { path = "../../../crates/caskade-core" }
 # The application layer this adapter forwards to (#86).
 caskade-app = { path = "../../../crates/caskade-app" }
+# The game and video windows (`--web-game`, `--video`), shared with the
+# native app.
+caskade-player = { path = "../../../crates/caskade-player" }
 caskade-achievements = { path = "../../../crates/caskade-achievements" }
 caskade-addons = { path = "../../../crates/caskade-addons" }
 caskade-backup = { path = "../../../crates/caskade-backup" }
@@ -77,14 +80,11 @@ serde_json = "1"
 tracing = "0.1"
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "sync", "net", "fs", "io-util", "time", "macros"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-# The game window for web games (`web_player.rs`): the tao and wry Tauri
+# The `--launch` caller's hidden window on Windows (`launch_cli.rs`): the tao and wry Tauri
 # already builds, with the same features.
 tao = { version = "0.37", default-features = false, features = ["rwh_06", "x11"] }
 wry = { version = "0.57", default-features = false, features = ["os-webview", "linux-body", "x11"] }
 url = "2"
-# Offline web games: the game window's MITM proxy (web_player/proxy.rs).
-hudsucker = "0.25"
-http-body-util = "0.1"
 # A share link as a QR code in console mode (#247): SVG only, no image crates.
 qrcode = { version = "=0.14.1", default-features = false, features = ["svg"] }
 

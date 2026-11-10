@@ -333,10 +333,10 @@ pub fn run(options: Options) -> Result<i32, String> {
     load(&webview, &start).map_err(|error| error.to_string())?;
     // A webview that lost its processes would stay white (#3).
     {
-        use crate::webview_recovery::{Policy, Step as Recover, failure_of, log};
+        use crate::recovery::{Policy, Step as Recover, failure_of, log};
         let fails = event_loop.create_proxy();
         let policy = std::cell::RefCell::new(Policy::default());
-        let watched = crate::webview_recovery::watch_player(&webview, move |failed| {
+        let watched = crate::recovery::watch_player(&webview, move |failed| {
             log("game window", &failed);
             let event = match policy
                 .borrow_mut()

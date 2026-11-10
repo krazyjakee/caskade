@@ -23,7 +23,10 @@ path = "src/main.rs"
 # The BLITZ-0 baseline (#113, Pins): Blitz 9f9c8e3 with Dioxus 0.8.0-alpha.3,
 # anyrender 812644a and Stylo 2dca345, as apps/native-proto pins them. They
 # move together, and the BLITZ-0 measurements are rerun on every bump.
-dioxus-native = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735890754b4a9970cb07765b8bf3c0c", default-features = false, features = ["prelude", "accessibility", "net", "svg", "system-fonts", "woff"] }
+# Without `net` (blitz-net): its reqwest builds rustls on aws-lc, which the
+# workspace keeps out (`web_player/proxy.rs`'s lockfile test), and the app's
+# images come from the artwork cache, not the network.
+dioxus-native = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735890754b4a9970cb07765b8bf3c0c", default-features = false, features = ["prelude", "accessibility", "svg", "system-fonts", "woff"] }
 caskade-app = { path = "../../crates/caskade-app" }
 caskade-core = { path = "../../crates/caskade-core" }
 tracing = "0.1"

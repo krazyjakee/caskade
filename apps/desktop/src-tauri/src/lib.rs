@@ -23,14 +23,14 @@ pub mod plugin_scheme;
 pub mod recovery;
 pub mod theme_scheme;
 pub mod tray;
-pub mod video_player;
-pub mod web_player;
 pub mod webkit;
 pub mod webview_recovery;
 pub mod window_state;
 
 // The app layer's, under the paths the adapter has always used.
 pub use caskade_app::{discovery, error, onboarding, torrent_links};
+// The game and video windows, shared with the native app.
+pub use caskade_player::{video_player, web_player};
 
 /// Builds and runs the app.
 pub fn run() {
