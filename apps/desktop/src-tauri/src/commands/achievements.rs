@@ -6,16 +6,7 @@ use caskade_achievements::achievements::{
 };
 use caskade_app::commands::achievements as app;
 use caskade_core::{accounts::AccountService, bus::Bus, db::LibraryStore};
-use tauri::{AppHandle, Manager, Runtime, State};
-/// Manages `achievements` and starts its background refreshes.
-pub fn setup<R: Runtime>(app: &AppHandle<R>, achievements: Achievements) {
-    crate::background::supervise("achievements", {
-        let achievements = achievements.clone();
-        move || achievements.watch()
-    });
-    app.manage(achievements);
-}
-
+use tauri::State;
 /// The game's achievement sets the signed-in account sees, as last fetched.
 #[tauri::command]
 #[specta::specta]

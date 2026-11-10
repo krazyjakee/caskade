@@ -9,32 +9,7 @@ use caskade_core::romm::{
     CacheStatus, ConnectionReport, RommGameStatus, RommOverview, RommServerConfig, RommService,
     RommSettings, RommSyncReport,
 };
-use tauri::Manager;
 type State<'a> = tauri::State<'a, RommService>;
-
-/// Registers `core.romm`, builds the service (`caskade_app`'s), forwards
-/// download progress and starts the background sync.
-pub fn setup<R: tauri::Runtime>(
-    app: &tauri::AppHandle<R>,
-    store: caskade_core::db::LibraryStore,
-    bus: caskade_core::bus::Bus,
-    settings: &caskade_core::settings::SettingsService,
-    emulation: caskade_core::emulation::EmulationService,
-    paths: &caskade_core::AppPaths,
-    artwork: Option<caskade_core::artwork::ArtworkCache>,
-) -> Result<RommService, Box<dyn std::error::Error>> {
-    let romm = app::setup(
-        crate::events::sink(app.clone()),
-        store,
-        bus,
-        settings,
-        emulation,
-        paths,
-        artwork,
-    )?;
-    app.manage(romm.clone());
-    Ok(romm)
-}
 
 /// Settings, server states, the cache and running downloads.
 #[tauri::command]

@@ -17,13 +17,6 @@ use tauri::{AppHandle, Manager, Runtime, State};
 
 pub use app::is_callback;
 
-/// Manages the service, reconciles owned games after every library scan,
-/// and forwards its changes to the webview.
-pub fn setup<R: Runtime>(app: &AppHandle<R>, accounts: StoreAccounts) {
-    app::setup(crate::events::sink(app.clone()), &accounts);
-    app.manage(accounts);
-}
-
 /// The store providers available this session.
 #[tauri::command]
 #[specta::specta]

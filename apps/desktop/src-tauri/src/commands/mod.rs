@@ -24,7 +24,7 @@ pub mod i18n;
 pub mod igdb;
 pub mod input;
 pub mod install;
-mod install_picker;
+pub mod install_picker;
 pub mod install_requests;
 pub mod launch;
 pub mod library;

@@ -174,3 +174,23 @@ pub async fn saves_manifest_update(
     manifest.update_now().await.map_err(report)?;
     manifest.status().await.map_err(report)
 }
+
+/// Game ids whose save versions changed here (#241).
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, specta::Type)]
+pub struct SaveVersionsChanged(pub String);
+
+/// Sends each game whose versions or save in place changed to `events`.
+pub fn forward_changes(events: crate::events::Events, versions: &SaveVersions) {
+    let mut changes = versions.changes();
+    crate::runtime::spawn(async move {
+        loop {
+            match changes.recv().await {
+                Ok(game_id) => events.send(crate::events::Event::SaveVersionsChanged(
+                    SaveVersionsChanged(game_id),
+                )),
+                Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => continue,
+                Err(tokio::sync::broadcast::error::RecvError::Closed) => break,
+            }
+        }
+    });
+}

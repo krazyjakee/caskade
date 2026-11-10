@@ -167,3 +167,22 @@ pub fn games_refresh_cancel(metadata: &Metadata) -> bool {
 pub fn games_refresh_status(metadata: &Metadata) -> Option<RefreshStatus> {
     metadata.refresh_updates().borrow().clone()
 }
+
+/// How the refresh of chosen games' details is going (#176).
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, specta::Type)]
+pub struct GamesRefreshChanged(pub caskade_core::metadata::RefreshStatus);
+
+/// Sends every change of the refresh's status to `events`.
+pub fn forward_refresh(events: crate::events::Events, metadata: &Metadata) {
+    let mut updates = metadata.refresh_updates();
+    crate::runtime::spawn(async move {
+        while updates.changed().await.is_ok() {
+            let status = updates.borrow_and_update().clone();
+            if let Some(status) = status {
+                events.send(crate::events::Event::GamesRefreshChanged(
+                    GamesRefreshChanged(status),
+                ));
+            }
+        }
+    });
+}

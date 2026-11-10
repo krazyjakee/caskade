@@ -5319,6 +5319,14 @@ msgstr "?url= tar en HTTP(S)-URL eller en magnetlänk"
 msgid "?path= takes a local path"
 msgstr "?path= tar en lokal sökväg"
 
+#: crates/caskade-app/src/dev_plugins.rs
+msgid "plugins are not ready"
+msgstr "tilläggen är inte redo"
+
+#: crates/caskade-app/src/dev_plugins.rs
+msgid "Load unpacked is only available in development builds"
+msgstr "Läs in uppackat är bara tillgängligt i utvecklingsversioner"
+
 #: crates/caskade-app/src/discovery/config.rs
 msgid "Installed games registry and Game Explorer"
 msgstr "Register över installerade spel och Game Explorer"
@@ -5406,6 +5414,42 @@ msgstr "Lagring {root}: {error}"
 #: crates/caskade-app/src/discovery/mod.rs
 msgid "Storage {root} / {folder} requires a decision"
 msgstr "Lagring {root} / {folder} kräver ett beslut"
+
+#: crates/caskade-app/src/launch_cli/mod.rs
+msgid "Caskade couldn't start: {error}"
+msgstr "Caskade kunde inte starta: {error}"
+
+#: crates/caskade-app/src/launch_cli/mod.rs
+msgid "Caskade couldn't start"
+msgstr "Caskade kunde inte starta"
+
+#: crates/caskade-app/src/launch_cli/mod.rs
+msgid "Caskade didn't start in time"
+msgstr "Caskade startade inte i tid"
+
+#: crates/caskade-app/src/launch_cli/mod.rs
+msgid "Caskade closed"
+msgstr "Caskade stängdes"
+
+#: crates/caskade-app/src/launch_cli/mod.rs
+msgid "the launch request was incomplete"
+msgstr "startbegäran var ofullständig"
+
+#: crates/caskade-app/src/launch_cli/server.rs
+msgid "no game {id} in the library"
+msgstr "inget spel {id} i biblioteket"
+
+#: crates/caskade-app/src/launch_cli/server.rs
+msgid "{game} has no release {id}"
+msgstr "{game} har ingen utgåva {id}"
+
+#: crates/caskade-app/src/launch_cli/server.rs
+msgid "{game} has no release to play on this device"
+msgstr "{game} har ingen utgåva att spela på den här enheten"
+
+#: crates/caskade-app/src/launch_cli/server.rs
+msgid "{game} asks what to start; choose in Caskade, or name an action with --action"
+msgstr "{game} frågar vad som ska startas; välj i Caskade, eller ange en åtgärd med --action"
 
 #: crates/caskade-app/src/permissions.rs
 msgid "accounts are unavailable"
@@ -5511,54 +5555,6 @@ msgstr "Välj lagringsplats för spel"
 #: apps/desktop/src-tauri/src/commands/storage.rs
 msgid "The folder chooser closed without an answer."
 msgstr "Mappväljaren stängdes utan svar."
-
-#: apps/desktop/src-tauri/src/dev_plugins.rs
-msgid "plugins are not ready"
-msgstr "tilläggen är inte redo"
-
-#: apps/desktop/src-tauri/src/dev_plugins.rs
-msgid "Load unpacked is only available in development builds"
-msgstr "Läs in uppackat är bara tillgängligt i utvecklingsversioner"
-
-#: apps/desktop/src-tauri/src/launch_cli/mod.rs
-msgid "Caskade couldn't start: {error}"
-msgstr "Caskade kunde inte starta: {error}"
-
-#: apps/desktop/src-tauri/src/launch_cli/mod.rs
-msgid "Caskade couldn't start"
-msgstr "Caskade kunde inte starta"
-
-#: apps/desktop/src-tauri/src/launch_cli/mod.rs
-msgid "Caskade didn't start in time"
-msgstr "Caskade startade inte i tid"
-
-#: apps/desktop/src-tauri/src/launch_cli/mod.rs
-msgid "Caskade closed"
-msgstr "Caskade stängdes"
-
-#: apps/desktop/src-tauri/src/launch_cli/mod.rs
-msgid "the launch request was incomplete"
-msgstr "startbegäran var ofullständig"
-
-#: apps/desktop/src-tauri/src/launch_cli/server.rs
-msgid "the library isn't open"
-msgstr "biblioteket är inte öppet"
-
-#: apps/desktop/src-tauri/src/launch_cli/server.rs
-msgid "no game {id} in the library"
-msgstr "inget spel {id} i biblioteket"
-
-#: apps/desktop/src-tauri/src/launch_cli/server.rs
-msgid "{game} has no release {id}"
-msgstr "{game} har ingen utgåva {id}"
-
-#: apps/desktop/src-tauri/src/launch_cli/server.rs
-msgid "{game} has no release to play on this device"
-msgstr "{game} har ingen utgåva att spela på den här enheten"
-
-#: apps/desktop/src-tauri/src/launch_cli/server.rs
-msgid "{game} asks what to start; choose in Caskade, or name an action with --action"
-msgstr "{game} frågar vad som ska startas; välj i Caskade, eller ange en åtgärd med --action"
 
 #: apps/desktop/src-tauri/src/lib.rs
 msgid ""

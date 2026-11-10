@@ -6,12 +6,16 @@
 pub mod background;
 pub mod commands;
 pub mod deep_link;
+pub mod dev_plugins;
 pub mod discovery;
 pub mod error;
 pub mod events;
+pub mod game_focus;
+pub mod launch_cli;
 pub mod navigation;
 pub mod onboarding;
 pub mod permissions;
 pub mod recovery;
 pub mod runtime;
+pub mod start;
 pub mod torrent_links;

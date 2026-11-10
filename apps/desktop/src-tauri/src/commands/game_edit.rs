@@ -2,6 +2,8 @@
 //! Fields the user sets stay theirs through automatic refreshes until reset.
 use crate::error::CommandError;
 pub use app::*;
+// The webview's event, which the app sends as `caskade_app`'s.
+pub use crate::events::GamesRefreshChanged;
 use caskade_app::commands::game_edit as app;
 use caskade_core::{
     accounts::AccountService,
@@ -90,29 +92,6 @@ pub async fn library_game_ids(
     query: ListGames,
 ) -> Result<Vec<String>, CommandError> {
     app::library_game_ids(&store, &accounts, query).await
-}
-
-/// How the refresh of chosen games' details is going (#176).
-#[derive(
-    Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, specta::Type, tauri_specta::Event,
-)]
-pub struct GamesRefreshChanged(pub RefreshStatus);
-
-/// Sends every change of the refresh's status to the webview.
-pub fn forward_refresh<R: tauri::Runtime>(app: &tauri::AppHandle<R>, metadata: &Metadata) {
-    use tauri_specta::Event as _;
-    let mut updates = metadata.refresh_updates();
-    let handle = app.clone();
-    tauri::async_runtime::spawn(async move {
-        while updates.changed().await.is_ok() {
-            let status = updates.borrow_and_update().clone();
-            if let Some(status) = status
-                && let Err(error) = GamesRefreshChanged(status).emit(&handle)
-            {
-                tracing::warn!(%error, "refresh status not delivered");
-            }
-        }
-    });
 }
 
 /// Refreshes the chosen games' details and artwork from the built-in

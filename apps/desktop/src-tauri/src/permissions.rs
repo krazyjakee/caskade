@@ -53,11 +53,6 @@ pub fn require<R: Runtime>(app: &impl Manager<R>, permission: Permission) -> Res
     caskade_app::permissions::require(app.try_state::<AccountService>().as_deref(), permission)
 }
 
-/// Whether someone is signed in; the reason, for people, when not.
-pub(crate) fn signed_in<R: Runtime>(app: &impl Manager<R>) -> Result<(), String> {
-    caskade_app::permissions::signed_in(app.try_state::<AccountService>().as_deref())
-}
-
 #[cfg(test)]
 #[path = "permissions_tests.rs"]
 mod tests;

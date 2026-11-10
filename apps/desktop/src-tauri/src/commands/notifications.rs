@@ -6,15 +6,10 @@ use caskade_achievements::notifications::{MemberPage, NotificationPage, Notifica
 use caskade_app::commands::notifications as app;
 use tauri::{AppHandle, Manager, Runtime, State};
 use tauri_specta::Event as _;
-/// Manages the feed, follows the bus for it and forwards its changes to the
-/// webview (`caskade_app`'s), and notes Caskade's own updates.
-pub fn setup<R: Runtime>(
-    app: &AppHandle<R>,
-    notifications: Notifications,
-    bus: &caskade_core::bus::Bus,
-) {
+/// Manages the feed (which the app layer follows and sends to the webview)
+/// and notes Caskade's own updates in it.
+pub fn setup<R: Runtime>(app: &AppHandle<R>, notifications: Notifications) {
     app.manage(notifications.clone());
-    app::setup(crate::events::sink(app.clone()), &notifications, bus);
     // Caskade's updates: noted while one is on offer, resolved once none is.
     super::app_update::AppUpdateChanged::listen_any(app, move |event| {
         use super::app_update::AppUpdatePhase::*;

@@ -15,15 +15,18 @@ pub fn service(
     app: &tauri::AppHandle<impl Runtime>,
     dir: std::path::PathBuf,
 ) -> Option<CatalogueService> {
-    let key = app
-        .config()
+    app::service(dir, release_key(app))
+}
+
+/// The key Caskade's releases are signed with: the updater's.
+pub fn release_key(app: &tauri::AppHandle<impl Runtime>) -> Option<String> {
+    app.config()
         .plugins
         .0
         .get("updater")
         .and_then(|updater| updater.get("pubkey"))
         .and_then(|key| key.as_str())
-        .map(str::to_owned);
-    app::service(dir, key)
+        .map(str::to_owned)
 }
 
 /// What is installed: plugins and themes.

@@ -178,3 +178,53 @@ pub async fn devices_transfers(
         })
         .collect())
 }
+
+/// Takes the games other devices send here (#235): copied at once when
+/// copies are accepted without asking, otherwise queued for confirmation
+/// in `requests`, which tells `events`.
+pub fn take_sends(
+    events: crate::events::Events,
+    transfers: &Transfers,
+    devices: Devices,
+    settings: caskade_core::settings::SettingsService,
+    install: Option<InstallService>,
+    requests: Option<super::install_requests::InstallRequests>,
+) {
+    transfers.on_send(move |request| {
+        let (events, devices, settings) = (events.clone(), devices.clone(), settings.clone());
+        let (install, requests) = (install.clone(), requests.clone());
+        crate::runtime::spawn(async move {
+            let device_name = devices
+                .status()
+                .await
+                .devices
+                .into_iter()
+                .find(|device| device.id == request.device_id)
+                .map(|device| device.name)
+                .unwrap_or_default();
+            let send = super::install_requests::PeerSend {
+                device_id: request.device_id,
+                device_name,
+                entry_id: request.entry_id,
+                game_id: request.game_id,
+                title: request.title,
+                size_bytes: request.size,
+            };
+            let accept = settings
+                .read_or_default::<caskade_core::sync::policy::SyncSettings>("core.sync")
+                .await
+                .accept_copies;
+            if accept
+                && let Some(install) = &install
+                && install.copy_from_device(send.target(), None).await.is_ok()
+            {
+                return;
+            }
+            if let Some(requests) = &requests
+                && let Err(error) = requests.queue_peer(&events, send)
+            {
+                tracing::warn!(%error, "a copy from another device wasn't queued");
+            }
+        });
+    });
+}

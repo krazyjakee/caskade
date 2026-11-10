@@ -214,30 +214,6 @@ pub async fn streaming_forget_host(
     app::streaming_forget_host(host_id, &client, &hosts).await
 }
 
-/// Looks for devices to stream from while Caskade runs (#262).
-pub fn watch_hosts<R: Runtime>(app: &AppHandle<R>, hosts: StreamHosts, client: StreamingClient) {
-    app.manage(hosts.clone());
-    app.manage(client);
-    app::watch_hosts(hosts);
-}
-
-/// Runs the host at start when hosting is on, and keeps the library's
-/// games on it (#259) as the library and the signed-in account change.
-pub fn setup<R: Runtime>(
-    app: &AppHandle<R>,
-    host: StreamingHost,
-    store: caskade_core::db::LibraryStore,
-    bus: &caskade_core::bus::Bus,
-    artwork: Option<caskade_core::artwork::ArtworkCache>,
-    paths: &caskade_core::AppPaths,
-) {
-    app.manage(host.clone());
-    let accounts = app
-        .try_state::<caskade_core::accounts::AccountService>()
-        .map(|accounts| accounts.inner().clone());
-    app::setup(host, store, accounts, bus, artwork, paths);
-}
-
 /// When Caskade quits, the host stops with it. Closing the window to the
 /// tray isn't quitting, so the host keeps running then.
 pub fn on_exit<R: Runtime>(app: &AppHandle<R>) {

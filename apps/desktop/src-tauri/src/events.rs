@@ -75,6 +75,8 @@ webview_events!(
     AppUpdateChanged,
     InputActionEvent,
     Hello,
+    GamesRefreshChanged,
+    SaveVersionsChanged,
 );
 
 /// The app layer's [`app::Emit`] sink for this app's webview.

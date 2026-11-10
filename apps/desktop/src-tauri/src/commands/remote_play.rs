@@ -3,7 +3,7 @@
 //! PIN, console mode). Forwarded to `caskade_app::commands::remote_play`.
 use caskade_app::commands::remote_play as app;
 use caskade_core::remote_play::RemotePlay;
-use tauri::{AppHandle, Runtime, State};
+use tauri::State;
 
 use crate::error::CommandError;
 
@@ -31,11 +31,3 @@ pub fn remote_play_finished(
     app::remote_play_finished(&play, &request_id, started, reason)
 }
 
-/// Hands other devices' play requests to the webview.
-pub fn setup<R: Runtime>(
-    app: &AppHandle<R>,
-    play: &RemotePlay,
-    devices: caskade_core::devices::Devices,
-) {
-    app::setup(crate::events::sink(app.clone()), play, devices);
-}

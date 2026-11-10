@@ -118,11 +118,6 @@ pub async fn confirm_share_collection(
         .map_err(|reason| report(caskade_core::Error::Invalid(reason)))
 }
 
-/// Runs the shares that were running, and tells the UI of changes.
-pub fn setup<R: Runtime>(app: &AppHandle<R>, shares: &Shares) {
-    app::setup(crate::events::sink(app.clone()), shares);
-}
-
 /// Asks a share link's sharer what it shares, then queues it for
 /// confirmation and brings the window up; when the link doesn't work, the
 /// UI is told why. Never logs the link: it's a credential.

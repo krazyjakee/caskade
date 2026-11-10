@@ -7,21 +7,9 @@ use caskade_core::{
     launch::LaunchService,
     storage::StorageService,
 };
-/// The bundled utility is configured only at the native boundary, never from
-/// downloaded metadata or a webview-supplied executable path. Without it
-/// (missing, quarantined, not the pinned build) installs still work, except
-/// for the archive formats only 7-Zip reads.
-pub(crate) fn setup<R: tauri::Runtime>(
-    app: &tauri::AppHandle<R>,
-    store: caskade_core::db::LibraryStore,
-    bus: caskade_core::bus::Bus,
-    paths: &caskade_core::AppPaths,
-    settings: caskade_core::settings::SettingsService,
-) -> caskade_core::Result<()> {
-    setup_with_sidecar(app, store, bus, paths, settings, app::sidecar())
-}
-
-/// The install service (`caskade_app`'s) and what it works with, managed.
+/// The install service (`caskade_app`'s) and what it works with, managed,
+/// as the app's start does (tests).
+#[cfg(test)]
 pub(crate) fn setup_with_sidecar<R: tauri::Runtime>(
     app: &tauri::AppHandle<R>,
     store: caskade_core::db::LibraryStore,

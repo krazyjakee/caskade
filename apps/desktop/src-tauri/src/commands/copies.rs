@@ -7,7 +7,7 @@ use caskade_core::db::LibraryStore;
 use caskade_core::devices::Devices;
 use caskade_core::install::{InstallService, JobSnapshot};
 use caskade_core::transfer::Transfers;
-use tauri::{AppHandle, Manager, Runtime, State};
+use tauri::State;
 
 use crate::error::CommandError;
 
@@ -39,55 +39,6 @@ pub async fn game_send_to(
     device_id: String,
 ) -> Result<(), CommandError> {
     app::game_send_to(&transfers, &store, game_id, device_id).await
-}
-
-/// Takes other devices' requests to copy a game here (#235): queued in the
-/// install confirmations, or started at once into the default storage when
-/// `core.sync.acceptCopies` is on.
-pub fn take_sends<R: Runtime>(app: &AppHandle<R>, transfers: &Transfers, devices: Devices) {
-    let handle = app.clone();
-    transfers.on_send(move |request| {
-        let handle = handle.clone();
-        let devices = devices.clone();
-        caskade_app::runtime::spawn(async move {
-            let device_name = devices
-                .status()
-                .await
-                .devices
-                .into_iter()
-                .find(|device| device.id == request.device_id)
-                .map(|device| device.name)
-                .unwrap_or_default();
-            let send = super::install_requests::PeerSend {
-                device_id: request.device_id,
-                device_name,
-                entry_id: request.entry_id,
-                game_id: request.game_id,
-                title: request.title,
-                size_bytes: request.size,
-            };
-            let accept = match handle.try_state::<caskade_core::settings::SettingsService>() {
-                Some(settings) => {
-                    settings
-                        .read_or_default::<caskade_core::sync::policy::SyncSettings>("core.sync")
-                        .await
-                        .accept_copies
-                }
-                None => false,
-            };
-            if accept
-                && let Some(install) = handle.try_state::<InstallService>()
-                && install.copy_from_device(send.target(), None).await.is_ok()
-            {
-                return;
-            }
-            if let Some(requests) = handle.try_state::<super::install_requests::InstallRequests>()
-                && let Err(error) = requests.queue_peer(&crate::events::sink(handle.clone()), send)
-            {
-                tracing::warn!(%error, "a copy from another device wasn't queued");
-            }
-        });
-    });
 }
 
 /// Copies going on to and from this device.

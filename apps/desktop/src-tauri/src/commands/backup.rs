@@ -8,13 +8,6 @@ use crate::error::CommandError;
 use caskade_backup::{BackupPlan, BackupStatus, Backups, Component, Inspection, Journal};
 use caskade_core::{install::InstallService, launch::LaunchService};
 use tauri::{AppHandle, Manager, Runtime, State};
-/// Starts the backups' watch and forwards their status to the webview
-/// (`caskade_app`'s), and manages `backups`.
-pub fn setup<R: Runtime>(app: &AppHandle<R>, backups: Backups) {
-    app::setup(crate::events::sink(app.clone()), &backups);
-    app.manage(backups);
-}
-
 #[tauri::command]
 #[specta::specta]
 pub async fn backup_status(backups: State<'_, Backups>) -> Result<BackupStatus, CommandError> {

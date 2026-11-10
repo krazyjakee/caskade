@@ -191,24 +191,22 @@ impl Outcome {
     }
 }
 
-/// Runs the caller for `request` and exits with its [`Outcome`]. Never
-/// returns.
-pub fn main(request: Request) -> ! {
-    let work = move || {
-        let runtime = match tokio::runtime::Builder::new_current_thread()
-            .enable_all()
-            .build()
-        {
-            Ok(runtime) => runtime,
-            Err(error) => return finish(Outcome::failed(error.to_string())),
-        };
-        let endpoint = match caskade_core::AppPaths::standard() {
-            Ok(paths) => Endpoint::for_paths(&paths),
-            Err(error) => return finish(Outcome::failed(error.to_string())),
-        };
-        finish(runtime.block_on(run(&endpoint, &request, start_caskade, START_PATIENCE)))
+/// Runs the caller for `request` and gives its exit code. The shell holds
+/// the process while it runs: on Windows with a hidden window, so that
+/// WM_CLOSE ends the caller (and so the game).
+pub fn caller(request: Request) -> i32 {
+    let runtime = match tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+    {
+        Ok(runtime) => runtime,
+        Err(error) => return finish(Outcome::failed(error.to_string())),
     };
-    hold(work)
+    let endpoint = match caskade_core::AppPaths::standard() {
+        Ok(paths) => Endpoint::for_paths(&paths),
+        Err(error) => return finish(Outcome::failed(error.to_string())),
+    };
+    finish(runtime.block_on(run(&endpoint, &request, start_caskade, START_PATIENCE)))
 }
 
 /// Prints the outcome's message and gives its code.
@@ -218,56 +216,6 @@ fn finish(outcome: Outcome) -> i32 {
         tracing::info!(code = outcome.code, %message, "launch from another program ended");
     }
     outcome.code
-}
-
-/// Waits for `work` on POSIX, where a signal ends the process and so the
-/// channel.
-#[cfg(not(windows))]
-fn hold(work: impl FnOnce() -> i32) -> ! {
-    std::process::exit(work())
-}
-
-/// Waits for `work` with a hidden window, so that WM_CLOSE (what Sunshine
-/// sends a program when a stream ends) ends the caller, and so the game.
-#[cfg(windows)]
-fn hold(work: impl FnOnce() -> i32 + Send + 'static) -> ! {
-    use tao::{
-        event::{Event, WindowEvent},
-        event_loop::{ControlFlow, EventLoopBuilder},
-        window::WindowBuilder,
-    };
-    let event_loop = EventLoopBuilder::<i32>::with_user_event().build();
-    let window = match WindowBuilder::new()
-        .with_visible(false)
-        .with_title("Caskade")
-        .build(&event_loop)
-    {
-        Ok(window) => window,
-        Err(error) => {
-            tracing::warn!(%error, "no window for WM_CLOSE; waiting without one");
-            std::process::exit(work());
-        }
-    };
-    let proxy = event_loop.create_proxy();
-    std::thread::spawn(move || {
-        let code = work();
-        // Without the loop, the code is all that is left to give.
-        if proxy.send_event(code).is_err() {
-            std::process::exit(code);
-        }
-    });
-    event_loop.run(move |event, _, flow| {
-        let _ = &window;
-        *flow = ControlFlow::Wait;
-        match event {
-            Event::UserEvent(code) => std::process::exit(code),
-            Event::WindowEvent {
-                event: WindowEvent::CloseRequested,
-                ..
-            } => std::process::exit(code::STOPPED),
-            _ => {}
-        }
-    })
 }
 
 /// Starts Caskade on its own, so it outlives the caller: in a process group

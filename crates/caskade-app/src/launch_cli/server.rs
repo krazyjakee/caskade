@@ -4,12 +4,13 @@
 
 use super::{Ending, Reply, Request, channel, client_env, read_request};
 use caskade_core::{
+    accounts::AccountService,
     db::LibraryStore,
     launch::{LaunchChoice, LaunchError, LaunchHandle, LaunchService, SessionStatus},
     model::{GameEntry, InstallState, LaunchSpec, PlaySession},
+    saves::versions::SaveVersions,
 };
 use std::time::Duration;
-use tauri::{AppHandle, Manager, Runtime};
 use tokio::io::{AsyncReadExt, AsyncWriteExt, BufReader};
 
 /// How long Stop gives a game to quit before ending it, as the quick
@@ -18,10 +19,20 @@ const STOP_GRACE: Duration = Duration::from_secs(5);
 /// How often Stop is tried again while the game's processes aren't known.
 const STOP_RETRY: Duration = Duration::from_millis(250);
 
+/// What a launch from another program goes through: the shell's services
+/// once the library is open.
+#[derive(Clone)]
+pub struct Services {
+    pub accounts: AccountService,
+    pub store: LibraryStore,
+    pub launches: LaunchService,
+    /// A newer save from another device goes in place first, when there.
+    pub saves: Option<SaveVersions>,
+}
+
 /// Takes launches at `endpoint` for as long as the app runs.
-pub fn listen<R: Runtime>(app: &AppHandle<R>, endpoint: channel::Endpoint) {
-    let app = app.clone();
-    tauri::async_runtime::spawn(async move {
+pub fn listen(services: Services, endpoint: channel::Endpoint) {
+    crate::runtime::spawn(async move {
         let mut listener = match channel::Listener::bind(&endpoint).await {
             Ok(listener) => listener,
             Err(error) => {
@@ -32,8 +43,8 @@ pub fn listen<R: Runtime>(app: &AppHandle<R>, endpoint: channel::Endpoint) {
         loop {
             match listener.accept().await {
                 Ok(stream) => {
-                    let app = app.clone();
-                    tauri::async_runtime::spawn(async move { handle(&app, stream).await });
+                    let services = services.clone();
+                    crate::runtime::spawn(async move { handle(&services, stream).await });
                 }
                 Err(error) => {
                     tracing::warn!(%error, "a launch from another program wasn't taken");
@@ -45,7 +56,7 @@ pub fn listen<R: Runtime>(app: &AppHandle<R>, endpoint: channel::Endpoint) {
 }
 
 /// One caller: its request, the launch, and the session's end.
-pub async fn handle<R: Runtime>(app: &AppHandle<R>, stream: channel::Stream) {
+pub async fn handle(services: &Services, stream: channel::Stream) {
     let (read, mut write) = tokio::io::split(stream);
     let mut reader = BufReader::new(read);
     let request = match read_request(&mut reader).await {
@@ -55,7 +66,7 @@ pub async fn handle<R: Runtime>(app: &AppHandle<R>, stream: channel::Stream) {
             return;
         }
     };
-    let (launches, title, handle) = match start(app, &request).await {
+    let (launches, title, handle) = match start(services, &request).await {
         Ok(started) => started,
         Err(reply) => {
             if let Reply::Refused { message } | Reply::Failed { message } = &reply {
@@ -139,19 +150,12 @@ fn refused(message: String) -> Reply {
 
 /// Starts the request's launch as Play would: someone signed in, the
 /// release Play would pick unless the caller named one, the play gate.
-async fn start<R: Runtime>(
-    app: &AppHandle<R>,
+async fn start(
+    services: &Services,
     request: &Request,
 ) -> Result<(LaunchService, String, LaunchHandle), Reply> {
-    crate::permissions::signed_in(app).map_err(refused)?;
-    let (Some(store), Some(launches)) = (
-        app.try_state::<LibraryStore>(),
-        app.try_state::<LaunchService>(),
-    ) else {
-        return Err(Reply::Failed {
-            message: caskade_core::tr!("the library isn't open"),
-        });
-    };
+    crate::permissions::signed_in(Some(&services.accounts)).map_err(refused)?;
+    let (store, launches) = (&services.store, &services.launches);
     let failed = |error: caskade_core::Error| Reply::Failed {
         message: error.to_string(),
     };
@@ -193,13 +197,13 @@ async fn start<R: Runtime>(
     // (#239). Nobody may be there to answer which save to use, so both
     // devices' saves stay as they are until Play asks; a failed check never
     // stops the launch.
-    if let Some(versions) = app.try_state::<caskade_core::saves::versions::SaveVersions>()
+    if let Some(versions) = &services.saves
         && let Err(error) = versions.before_play(&entry.id).await
     {
         tracing::warn!(%error, "the game's saves weren't checked before the launch");
     }
     match launches.launch_with_env(&entry.id, &choice, &env).await {
-        Ok(handle) => Ok((launches.inner().clone(), game.title, handle)),
+        Ok(handle) => Ok((launches.clone(), game.title, handle)),
         // Nobody may be at the device to type an admin PIN: refuse plainly.
         Err(LaunchError::AgeRestricted(restriction)) => Err(refused(restriction.to_string())),
         Err(LaunchError::NeedsChoice(_)) => Err(refused(caskade_core::tr!(

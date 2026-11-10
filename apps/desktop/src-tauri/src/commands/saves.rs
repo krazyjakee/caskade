@@ -1,6 +1,8 @@
 //! Device-local save locations for the game editor (#238).
 use crate::error::CommandError;
 pub use app::*;
+// The webview's event, which the app sends as `caskade_app`'s.
+pub use crate::events::SaveVersionsChanged;
 use caskade_app::commands::saves as app;
 use caskade_core::{
     db::LibraryStore,
@@ -119,32 +121,6 @@ pub async fn saves_manifest_update(
     settings: State<'_, caskade_core::settings::SettingsService>,
 ) -> Result<caskade_core::ludusavi::ManifestStatus, CommandError> {
     app::saves_manifest_update(&manifest, &settings).await
-}
-
-/// Game ids whose save versions changed here (#241).
-#[derive(
-    Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, specta::Type, tauri_specta::Event,
-)]
-pub struct SaveVersionsChanged(pub String);
-
-/// Sends each game whose versions or save in place changed to the webview.
-pub fn forward_changes<R: tauri::Runtime>(app: &tauri::AppHandle<R>, versions: &SaveVersions) {
-    use tauri_specta::Event as _;
-    let mut changes = versions.changes();
-    let handle = app.clone();
-    caskade_app::runtime::spawn(async move {
-        loop {
-            match changes.recv().await {
-                Ok(game_id) => {
-                    if let Err(error) = SaveVersionsChanged(game_id).emit(&handle) {
-                        tracing::warn!(%error, "save versions change not delivered");
-                    }
-                }
-                Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => continue,
-                Err(tokio::sync::broadcast::error::RecvError::Closed) => break,
-            }
-        }
-    });
 }
 
 #[cfg(test)]

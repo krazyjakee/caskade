@@ -41,7 +41,7 @@ Cargo commands share one heavy lane: run them under `flock /tmp/caskade-heavy.lo
 
 ## Rules that tests or reviews enforce
 
-- `caskade-core` and `caskade-app` (the application layer every app shell runs) have no Tauri dependency. Commands go in `apps/desktop/src-tauri/src/commands/<area>.rs` and are registered in `bindings.rs`. 64-bit ids cross to the webview as strings.
+- `caskade-core` and `caskade-app` (the application layer every app shell runs) have no Tauri dependency. Command logic goes in `crates/caskade-app/src/commands/<area>.rs` as plain async fns; the Tauri command in `apps/desktop/src-tauri/src/commands/<area>.rs` forwards in one line, keeping its doc comment and params (they generate the bindings), and is registered in `bindings.rs`. Doc comments on types that cross to the webview reach `bindings.ts` too: move them word for word. An app event reaches the webview through the adapter's Type-transparent wrapper in `events.rs` (`webview_events!`). 64-bit ids cross to the webview as strings.
 - The webview never touches the OS: no `fs` or `shell` plugin, everything through commands. The active account comes from the adapter, never from the webview.
 - Secrets (device key, store sign-ins, RomM and streaming credentials) live only in the OS keychain: never in the database, settings, logs, events, backups or the webview.
 - A new migration starts with `-- older Caskade: compatible` or `-- older Caskade: incompatible` (see `db/compat.rs`); a test fails otherwise.

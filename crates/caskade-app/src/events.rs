@@ -4,6 +4,8 @@
 //! turns the core bus's events into these.
 
 // The commands' own events.
+pub use crate::commands::saves::SaveVersionsChanged;
+pub use crate::commands::game_edit::GamesRefreshChanged;
 pub use crate::commands::addon_packages::AddonProgress;
 pub use crate::commands::app_update::AppUpdateChanged;
 pub use crate::commands::backup::BackupChanged;
@@ -187,6 +189,8 @@ pub enum Event {
     AppUpdateChanged(AppUpdateChanged),
     InputActionEvent(InputActionEvent),
     Hello(Hello),
+    GamesRefreshChanged(GamesRefreshChanged),
+    SaveVersionsChanged(SaveVersionsChanged),
 }
 
 /// Where a shell receives [`Event`]s: called on the async runtime, in the
@@ -265,6 +269,8 @@ impl Event {
             Self::AppUpdateChanged(_) => "app_update.changed",
             Self::InputActionEvent(_) => "input.action",
             Self::Hello(_) => "hello",
+            Self::GamesRefreshChanged(_) => "games.refresh.changed",
+            Self::SaveVersionsChanged(_) => "save.versions.changed",
         }
     }
 }

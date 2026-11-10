@@ -1,4 +1,4 @@
-//! `caskade --launch` on Tauri's mock runtime (#256): forwarding to the
+//! `caskade --launch` (#256): forwarding to the
 //! running app (or starting it), the play gate, and the caller living as
 //! long as the session.
 use super::*;
@@ -17,7 +17,6 @@ use std::sync::{
     Arc,
     atomic::{AtomicUsize, Ordering},
 };
-use tauri::test::{MockRuntime, mock_builder, mock_context, noop_assets};
 
 const ADMIN_PIN: &str = "2468";
 
@@ -84,7 +83,6 @@ mod game {
 }
 
 struct Harness {
-    app: tauri::App<MockRuntime>,
     store: LibraryStore,
     accounts: AccountService,
     launches: LaunchService,
@@ -93,11 +91,11 @@ struct Harness {
 }
 
 fn block_on<F: std::future::Future>(future: F) -> F::Output {
-    tauri::async_runtime::block_on(future)
+    crate::runtime::block_on(future)
 }
 
-/// An app with the library, accounts (a lone admin, signed in) and fast
-/// launches managed, not yet listening.
+/// The library, accounts (a lone admin, signed in) and fast launches, not
+/// yet listening.
 fn harness() -> Harness {
     let temp = tempfile::tempdir().unwrap();
     let store = block_on(LibraryStore::in_memory()).unwrap();
@@ -112,15 +110,8 @@ fn harness() -> Harness {
             ..Default::default()
         })
         .with_play_gate(Arc::new(accounts.clone()));
-    let app = mock_builder()
-        .manage(store.clone())
-        .manage(accounts.clone())
-        .manage(launches.clone())
-        .build(mock_context(noop_assets()))
-        .unwrap();
     let endpoint = Endpoint::at(temp.path().join("run").join("launch.sock"));
     Harness {
-        app,
         store,
         accounts,
         launches,
@@ -130,8 +121,18 @@ fn harness() -> Harness {
 }
 
 impl Harness {
+    /// What the app hands the server once its library is open.
+    fn services(&self) -> server::Services {
+        server::Services {
+            accounts: self.accounts.clone(),
+            store: self.store.clone(),
+            launches: self.launches.clone(),
+            saves: None,
+        }
+    }
+
     fn listen(&self) {
-        server::listen(self.app.handle(), self.endpoint.clone());
+        server::listen(self.services(), self.endpoint.clone());
         // Bound once a connection gets through.
         let deadline = Instant::now() + Duration::from_secs(5);
         while block_on(channel::connect(&self.endpoint)).is_err() {
@@ -331,7 +332,7 @@ fn caskade_is_started_when_it_isnt_running() {
         || {
             starts.fetch_add(1, Ordering::SeqCst);
             // What the started Caskade does once its library is open.
-            server::listen(h.app.handle(), h.endpoint.clone());
+            server::listen(h.services(), h.endpoint.clone());
             Ok(None)
         },
         Duration::from_secs(10),
