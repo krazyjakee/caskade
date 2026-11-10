@@ -427,11 +427,8 @@ pub fn Avatar(
             class: "relative inline-grid shrink-0 place-items-center overflow-hidden rounded-full bg-linear-to-br from-accent-strong to-accent-alt font-display font-semibold text-accent-fg select-none {sized} {class}",
             ..attributes,
             if let Some(url) = url {
-                // `alt=""` is decorative, as the webview's; Blitz doesn't
-                // read it so yet, hence `aria-hidden`.
                 img {
                     "data-part": "image",
-                    "aria-hidden": "true",
                     src: url,
                     alt: "",
                     draggable: "false",
