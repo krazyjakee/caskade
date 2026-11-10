@@ -12,7 +12,11 @@ use caskade_ui_theme::anatomy::{Entry, Source};
 /// add theirs here.
 // Read by the tests now, and by the docs at the cutover (BLITZ-33).
 #[cfg_attr(not(test), allow(dead_code))]
-pub const CATALOGUE: &[Entry] = &[OSK];
+pub fn catalogue() -> Vec<Entry> {
+    let mut all = vec![OSK];
+    all.extend_from_slice(crate::ui::ANATOMY);
+    all
+}
 
 /// The on-screen keyboard (`input/keyboard.rs`, #92).
 const OSK: Entry = Entry {
@@ -62,7 +66,7 @@ mod tests {
     #[test]
     fn every_entry_is_the_webviews() {
         let problems = caskade_ui_theme::anatomy::differences(
-            CATALOGUE,
+            &catalogue(),
             include_str!("../../../docs/theming/anatomy.md"),
         );
         assert!(problems.is_empty(), "{}", problems.join("\n\n"));
@@ -108,7 +112,7 @@ mod tests {
             }
         }
         let known = |name: &str| {
-            CATALOGUE.iter().any(|entry| entry.name == name)
+            catalogue().iter().any(|entry| entry.name == name)
                 || NOT_YET.iter().any(|(root, _)| *root == name)
         };
         let missing: Vec<_> = found.iter().filter(|(name, _)| !known(name)).collect();
