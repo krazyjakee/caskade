@@ -15,7 +15,7 @@ use super::keyboard::OnScreenKeyboard;
 use blitz_dom::{BaseDocument, NodeId};
 use caskade_ui_input::bindings::{ActiveBinding, Binding, BindingId, Bindings};
 use caskade_ui_input::dispatch::Dispatcher;
-use caskade_ui_input::keys::{Modifiers as KeyModifiers, key_action};
+use caskade_ui_input::keys::{Modifiers as KeyModifiers, key_action, starts_typing};
 use caskade_ui_input::spatial;
 use caskade_ui_input::{Action, GlyphFamily, InputSource};
 use dioxus_native::NodeHandle;
@@ -69,6 +69,8 @@ pub struct Input {
 
 /// What opening a game's details does.
 type OpenDetails = Rc<dyn Fn(String)>;
+/// What typing outside a field does: the search, with what was typed.
+type StartSearch = Rc<dyn Fn(String)>;
 
 struct Inner {
     dispatcher: RefCell<Dispatcher<NodeId>>,
@@ -86,6 +88,7 @@ struct Inner {
     frames: Cell<bool>,
     back: RefCell<Option<Rc<dyn Fn()>>>,
     details: RefCell<Option<OpenDetails>>,
+    typing: RefCell<Option<StartSearch>>,
 }
 
 impl PartialEq for Input {
@@ -113,6 +116,7 @@ impl Input {
                 frames: Cell::new(false),
                 back: RefCell::new(None),
                 details: RefCell::new(None),
+                typing: RefCell::new(None),
             }),
             changed: Signal::new(0),
             keyboard: Signal::new(None),
@@ -142,6 +146,41 @@ impl Input {
     #[allow(dead_code, reason = "the views (#96 onwards) call it")]
     pub fn on_details(&self, details: impl Fn(String) + 'static) {
         *self.inner.details.borrow_mut() = Some(Rc::new(details));
+    }
+
+    /// What typing outside a field, a menu or a dialog does: the shell's
+    /// search opens with the character typed (empty for `/`).
+    #[allow(dead_code, reason = "the shell's search (#96 onwards) calls it")]
+    pub fn on_type(&self, start: impl Fn(String) + 'static) {
+        *self.inner.typing.borrow_mut() = Some(Rc::new(start));
+    }
+
+    /// A key the keyboard map left alone: whether it started a search.
+    fn typing(&self, event: &KeyboardEvent) -> bool {
+        let start = self.inner.typing.borrow().clone();
+        let Some(start) = start else {
+            return false;
+        };
+        if event.is_composing() {
+            return false;
+        }
+        let key = event.key().to_string();
+        let held = event.modifiers();
+        let modifiers = KeyModifiers {
+            ctrl: held.ctrl(),
+            meta: held.meta(),
+            alt: held.alt(),
+            shift: held.shift(),
+        };
+        let initial = self.with_ui(|ui, _| {
+            let target = caskade_ui_input::dispatch::Ui::focused(ui);
+            starts_typing(ui, target, &key, modifiers)
+        });
+        let Some(Some(initial)) = initial else {
+            return false;
+        };
+        start(initial);
+        true
     }
 
     /// Opens a game's details page.
@@ -654,7 +693,7 @@ pub fn InputRoot(
             },
             onkeydown: move |event: KeyboardEvent| {
                 on_key.inner.keys.set(on_key.inner.keys.get() + 1);
-                if on_key.key(&event) {
+                if on_key.key(&event) || on_key.typing(&event) {
                     event.prevent_default();
                     event.stop_propagation();
                 }

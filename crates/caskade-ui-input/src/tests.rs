@@ -1142,3 +1142,31 @@ fn an_overlay_that_opens_without_focus_gets_it_and_gives_it_back_when_it_closes(
     assert!(!crate::spatial::has_overlay(&app.ui));
     assert_eq!(app.focused(), "Open");
 }
+
+#[test]
+fn typing_outside_a_field_a_menu_or_a_dialog_starts_a_search() {
+    use crate::keys::starts_typing;
+    let mut app = App::new(layout(), false);
+    let none = Modifiers::default();
+    let card = app.by_text("Card 0");
+    let field = app.ui.tree.elements.iter().position(|e| e.tag == "input").unwrap();
+    assert_eq!(starts_typing(&app.ui, Some(card), "F", none), Some("F".into()));
+    assert_eq!(starts_typing(&app.ui, None, "8", none), Some("8".into()));
+    // `/` opens it empty.
+    assert_eq!(starts_typing(&app.ui, Some(card), "/", none), Some(String::new()));
+    for key in [" ", "ArrowUp", "Enter", "F3"] {
+        assert_eq!(starts_typing(&app.ui, Some(card), key, none), None, "{key}");
+    }
+    let ctrl = Modifiers {
+        ctrl: true,
+        ..Modifiers::default()
+    };
+    assert_eq!(starts_typing(&app.ui, Some(card), "f", ctrl), None);
+    assert_eq!(starts_typing(&app.ui, Some(field), "f", none), None, "a field types");
+    // Not over a dialog or a popover.
+    let open = app.by_text("Open dialog");
+    app.focus(open);
+    app.pad(Action::Confirm);
+    let yes = app.ui.focus.unwrap();
+    assert_eq!(starts_typing(&app.ui, Some(yes), "f", none), None);
+}

@@ -88,3 +88,37 @@ pub fn key_action<T: FocusTree + ?Sized>(
     }
     Some(action)
 }
+
+/// Whether `key` pressed on `target` starts a search, and the text it
+/// starts with: a printable character typed outside a text field, a menu, a
+/// popover or a dialog; `/` starts an empty one. Keys the keyboard map turns
+/// into actions are handled before this is asked (the webview's
+/// `startsTyping`).
+pub fn starts_typing<T: FocusTree + ?Sized>(
+    tree: &T,
+    target: Option<T::Node>,
+    key: &str,
+    modifiers: Modifiers,
+) -> Option<String> {
+    if modifiers.ctrl || modifiers.meta || modifiers.alt {
+        return None;
+    }
+    if key.chars().count() != 1 || key.trim().is_empty() {
+        return None;
+    }
+    if let Some(target) = target {
+        if is_text_entry(tree, target) {
+            return None;
+        }
+        let inside = closest(tree, target, |at| {
+            matches!(
+                tree.attr(at, "role"),
+                Some("dialog" | "alertdialog" | "menu" | "listbox")
+            ) || tree.attr(at, "data-placement").is_some()
+        });
+        if inside.is_some() {
+            return None;
+        }
+    }
+    Some(if key == "/" { String::new() } else { key.to_owned() })
+}

@@ -52,7 +52,10 @@ fn Demo() -> Element {
     let mut open = use_signal(|| false);
     let mut text = use_signal(String::new);
     let input = use_input();
-    use_hook(move || input.on_back(|| did("back")));
+    use_hook(move || {
+        input.on_back(|| did("back"));
+        input.on_type(|text| did(format!("type {text}")));
+    });
     rsx! {
         div { "data-focus-section": "sidebar",
             for (i, label) in ["Home", "Library", "Settings"].iter().enumerate() {
@@ -353,6 +356,9 @@ fn a_click_focuses_the_control_without_a_ring_and_a_pad_types_in_a_field() {
     assert_eq!(window.focused(), "Card 1");
     assert!(!window.ringed(), "a click shows no ring");
     assert_eq!(done().last().map(String::as_str), Some("Card 1"));
+    // Typing outside a field starts a search with what was typed.
+    window.key(Key::Character("f".into()));
+    assert_eq!(done().last().map(String::as_str), Some("type f"));
     // A pad on the field opens the on-screen keyboard; it types q, w and
     // submits with Start.
     window.click("Open dialog");
