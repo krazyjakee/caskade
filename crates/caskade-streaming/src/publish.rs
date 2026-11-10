@@ -54,6 +54,16 @@ pub struct Caskade {
 }
 
 impl Caskade {
+    /// This Caskade: the program the OS should start, so an AppImage's
+    /// entries name the AppImage, not its mount, which is gone once
+    /// Caskade quits (`caskade_core::program`, #116).
+    pub fn own(flatpak_host: bool) -> std::io::Result<Self> {
+        Ok(Self {
+            program: caskade_core::program::current()?,
+            flatpak_host,
+        })
+    }
+
     fn prefix(&self) -> String {
         let program = format!("\"{}\"", self.program.display());
         if self.flatpak_host {
@@ -260,7 +270,7 @@ impl Publisher {
                 target,
                 accounts,
                 artwork,
-                program: std::env::current_exe()?,
+                program: caskade_core::program::current()?,
                 covers: paths.data.join("streaming").join("covers"),
                 batch: Duration::from_secs(2),
                 batches: Mutex::new(0),

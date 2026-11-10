@@ -1,6 +1,7 @@
 //! Caskade's own program, as the OS should start it later: the login item
 //! (`login_item`) and the magnet and `.torrent` handler (the adapter's
-//! `torrent_links`) write it down (#114, #115).
+//! `torrent_links`) write it down, and so do the streaming host's app
+//! entries (`caskade-streaming`'s `publish`) (#114, #115, #116).
 //!
 //! From an AppImage that's the AppImage file, since the executable inside
 //! it is in a mount that moves on every start. `APPIMAGE` names it only
@@ -19,11 +20,13 @@ pub fn current() -> io::Result<PathBuf> {
     if !cfg!(target_os = "linux") {
         return Ok(exe);
     }
-    Ok(resolve(
-        exe,
-        std::env::var_os("APPIMAGE"),
-        std::env::var_os("APPDIR"),
-    ))
+    Ok(from(exe, |name| std::env::var_os(name)))
+}
+
+/// [`current`] for executable `exe`, with the environment read through
+/// `var` (tests pass their own).
+pub fn from(exe: PathBuf, var: impl Fn(&str) -> Option<OsString>) -> PathBuf {
+    resolve(exe, var("APPIMAGE"), var("APPDIR"))
 }
 
 /// `appimage` when `exe` is inside `appdir`, else `exe`.

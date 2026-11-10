@@ -304,3 +304,44 @@ async fn a_cover_goes_to_the_host_as_a_png() {
     );
     assert_eq!((png.width(), png.height()), (600, 800));
 }
+
+/// An AppImage start's entries start the AppImage, not the mount it runs
+/// from, which is gone once Caskade quits (#116).
+#[test]
+fn an_appimage_start_publishes_the_appimage_file() {
+    let env = |name: &str| match name {
+        "APPIMAGE" => Some("/home/p/Apps/Caskade.AppImage".into()),
+        "APPDIR" => Some("/tmp/.mount_CaskadXyz".into()),
+        _ => None,
+    };
+    let caskade = Caskade {
+        program: caskade_core::program::from(
+            std::path::PathBuf::from("/tmp/.mount_CaskadXyz/usr/bin/caskade"),
+            env,
+        ),
+        flatpak_host: false,
+    };
+    assert_eq!(
+        caskade.launch_command("g1"),
+        "\"/home/p/Apps/Caskade.AppImage\" --launch g1"
+    );
+    assert_eq!(
+        caskade.console_command(),
+        "\"/home/p/Apps/Caskade.AppImage\" --console"
+    );
+    // A Caskade another AppImage started publishes itself.
+    let inherited = Caskade {
+        program: caskade_core::program::from(std::path::PathBuf::from("/usr/bin/caskade"), env),
+        flatpak_host: true,
+    };
+    assert_eq!(
+        inherited.launch_command("g1"),
+        "flatpak-spawn --host \"/usr/bin/caskade\" --launch g1"
+    );
+}
+
+#[test]
+fn caskade_names_this_program() {
+    let own = Caskade::own(false).unwrap();
+    assert_eq!(own.program, caskade_core::program::current().unwrap());
+}

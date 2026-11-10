@@ -203,7 +203,7 @@ Sessions survive restarts: recovery state records running processes by `ProcessI
 ### Streaming
 
 - Sunshine (host) and Moonlight (client) are separate GPLv3 programs installed through managed tools, configured by Caskade and never shown.
-- **Host**: config in `<data>/streaming/host/`, random web credentials in the keychain, a child process under `setpriv --pdeathsig` (Linux) or an on-demand service (Windows), crash restarts with backoff, the local API pinned to its certificate by bytes. `Publisher` keeps one app per playable game, running `caskade --launch <id>`. A user's own Sunshine is detected and used instead of installing one.
+- **Host**: config in `<data>/streaming/host/`, random web credentials in the keychain, a child process under `setpriv --pdeathsig` (Linux) or an on-demand service (Windows), crash restarts with backoff, the local API pinned to its certificate by bytes. `Publisher` keeps one app per playable game, running `caskade --launch <id>` with Caskade's own program (`caskade_core::program`: the AppImage file from one, not its temporary mount). A user's own Sunshine is detected and used instead of installing one.
 - **Client**: Moonlight's own state directory with quiet settings; Caskade pairs over the GameStream protocol itself (no Moonlight window), finds hosts over mDNS `_nvstream._tcp`, wakes them with Wake-on-LAN, and starts streams fullscreen centred on Caskade's window.
 - **Elevation**: `Elevation::apply` asks once (pkexec on Linux, `runas` on Windows) for the missing changes in a named plan, records what appeared, and `undo` removes only those. ViGEmBus is installed on Windows hosts in the same prompt.
 

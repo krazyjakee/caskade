@@ -613,10 +613,7 @@ impl StreamingHost {
         if self.existing_mode().await {
             // Only Caskade's apps go; the host and its other apps stay.
             let api = self.api().await?;
-            let caskade = crate::publish::Caskade {
-                program: std::env::current_exe()?,
-                flatpak_host: self.host_is_flatpak(),
-            };
+            let caskade = crate::publish::Caskade::own(self.host_is_flatpak())?;
             crate::publish::withdraw(&api, &caskade).await?;
             self.set_mode(false, false).await?;
             self.set_status(HostState::Off, None, None);
