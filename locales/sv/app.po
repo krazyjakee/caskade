@@ -697,6 +697,7 @@ msgid "{latestVersion} is out. Updating keeps your saves and settings."
 msgstr "{latestVersion} har släppts. Uppdateringen behåller dina sparfiler och inställningar."
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "{length} / {max} characters"
 msgstr "{length} / {max} tecken"
 
@@ -1636,7 +1637,7 @@ msgstr "Om butikskonton"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/appearance.rs apps/native/src/settings/search.rs
 msgid "Accent colour"
 msgstr "Accentfärg"
 
@@ -2006,6 +2007,7 @@ msgid "Adds it to the library"
 msgstr "Lägger till det i biblioteket"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Adjust the theme to taste."
 msgstr "Anpassa temat efter tycke och smak."
 
@@ -2152,6 +2154,7 @@ msgid "Always use the default location"
 msgstr "Använd alltid standardplatsen"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "accent colour"
 msgid "Amber"
 msgstr "Bärnsten"
@@ -2217,7 +2220,7 @@ msgstr "Och {0} till."
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/appearance.rs apps/native/src/settings/search.rs
 msgid "Animations"
 msgstr "Animationer"
 
@@ -2319,7 +2322,8 @@ msgstr "Utseende"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
-#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
+#: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/appearance.rs apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Appearance"
 msgstr "Utseende"
@@ -2722,6 +2726,7 @@ msgid "bitrate, resolution, frame rate"
 msgstr "bithastighet, upplösning, bildfrekvens"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "accent colour"
 msgid "Blue"
 msgstr "Blå"
@@ -2786,12 +2791,14 @@ msgid "Built from source on this system"
 msgstr "Byggd från källkod på det här systemet"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Buttons, selection and glows; kept readable on the theme."
 msgstr "Knappar, markering och glöd; hålls läsbart med temat."
 
 #. A theme's author
 #. placeholder {0}: theme.author
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "by {0}"
 msgstr "av {0}"
 
@@ -2849,6 +2856,7 @@ msgid "Can't be reached"
 msgstr "Kan inte nås"
 
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Can't be used:"
 msgstr "Kan inte användas:"
 
@@ -2996,7 +3004,7 @@ msgstr "Kapacitet"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/appearance.rs apps/native/src/settings/search.rs
 msgid "Card size"
 msgstr "Kortstorlek"
 
@@ -3296,6 +3304,7 @@ msgid "Changed: {path}"
 msgstr "Ändrad: {path}"
 
 #: apps/desktop/src/views/settings/devices/SectionSync.tsx
+#: apps/native/src/settings/sync.rs
 msgid "Changes here reach your other devices."
 msgstr "Ändringar här når dina andra enheter."
 
@@ -3724,6 +3733,7 @@ msgid "color, colour"
 msgstr "färg, kulör"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "density"
 msgid "Comfortable"
 msgstr "Bekväm"
@@ -3747,6 +3757,7 @@ msgid "Community"
 msgstr "Gemenskap"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "density"
 msgid "Compact"
 msgstr "Kompakt"
@@ -4185,17 +4196,19 @@ msgid "Cursor right"
 msgstr "Markör höger"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Custom accent colour"
 msgstr "Egen accentfärg"
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/appearance.rs apps/native/src/settings/search.rs
 msgid "Custom CSS"
 msgstr "Anpassad CSS"
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Custom CSS wasn't saved:"
 msgstr "Anpassad CSS sparades inte:"
 
@@ -4215,6 +4228,7 @@ msgid "Cut"
 msgstr "Klipp ut"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "accent colour"
 msgid "Cyan"
 msgstr "Cyan"
@@ -4382,7 +4396,7 @@ msgstr "Borttaget från butiken"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/appearance.rs apps/native/src/settings/search.rs
 msgid "Density"
 msgstr "Täthet"
 
@@ -4499,6 +4513,7 @@ msgid "Dev"
 msgstr "Utv"
 
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "theme source"
 msgid "Dev folder"
 msgstr "Utvecklingsmapp"
@@ -4547,7 +4562,7 @@ msgstr "Startade inte"
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/appearance.rs apps/native/src/settings/search.rs
 msgid "Disable custom CSS"
 msgstr "Stäng av egen CSS"
 
@@ -5488,6 +5503,7 @@ msgid "From"
 msgstr "Från"
 
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "theme source"
 msgid "From a plugin"
 msgstr "Från ett tillägg"
@@ -5517,6 +5533,7 @@ msgid "From your sources"
 msgstr "Från dina källor"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "animations setting"
 msgid "Full"
 msgstr "Fullständiga"
@@ -5900,6 +5917,7 @@ msgid "GPU"
 msgstr "GPU"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "accent colour"
 msgid "Green"
 msgstr "Grön"
@@ -6055,6 +6073,7 @@ msgid "How Caskade finds, installs and plays your games, and how it looks and sy
 msgstr "Hur Caskade hittar, installerar och spelar dina spel, och hur det ser ut och synkar."
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "How Caskade looks. Themes restyle every view through design tokens."
 msgstr "Hur Caskade ser ut. Teman ändrar stilen på alla vyer via designtokens."
 
@@ -6071,6 +6090,7 @@ msgid "How far {name} got"
 msgstr "Hur långt {name} kom"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "How games are shown in grids."
 msgstr "Hur spel visas i rutnät."
 
@@ -6519,6 +6539,7 @@ msgid "Installed"
 msgstr "Installerad"
 
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "theme source"
 msgid "Installed"
 msgstr "Installerat"
@@ -6645,7 +6666,7 @@ msgstr "pågående installationer"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/appearance.rs apps/native/src/settings/search.rs
 msgid "Interface scale"
 msgstr "Gränssnittets skala"
 
@@ -6923,6 +6944,7 @@ msgid "Keep this device's emulator for {platform}"
 msgstr "Behåll den här enhetens emulator för {platform}"
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Keeps your CSS but stops applying it, to recover from a broken look."
 msgstr "Behåller din CSS men slutar tillämpa den, så att du kan återställa ett trasigt utseende."
 
@@ -6931,6 +6953,7 @@ msgid "Kept on {holder}"
 msgstr "Sparas på {holder}"
 
 #: apps/desktop/src/views/settings/devices/SectionSync.tsx
+#: apps/native/src/settings/sync.rs
 msgid "Kept on this device. Changes here stay here, and other devices' don't arrive."
 msgstr "Behålls på den här enheten. Ändringar här stannar här, och andra enheters kommer inte hit."
 
@@ -7146,7 +7169,8 @@ msgstr "Bokstäver"
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/native/src/frame/sidebar.rs apps/native/src/library/view.rs
-#: apps/native/src/settings/general.rs apps/native/src/settings/search.rs
+#: apps/native/src/settings/appearance.rs apps/native/src/settings/general.rs
+#: apps/native/src/settings/search.rs
 msgid "Library"
 msgstr "Bibliotek"
 
@@ -7270,6 +7294,7 @@ msgid "Load more"
 msgstr "Läs in fler"
 
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Load theme folder…"
 msgstr "Läs in temamapp…"
 
@@ -7400,6 +7425,7 @@ msgstr "Läser in din profil…"
 #: apps/desktop/src/views/settings/about/AboutSettings.tsx
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
 #: apps/desktop/src/views/StoreView.tsx apps/native/src/frame/notifications.rs
+#: apps/native/src/settings/appearance.rs
 msgid "Loading…"
 msgstr "Läser in…"
 
@@ -7475,6 +7501,7 @@ msgstr "Visa"
 
 #. The appearance
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "settings section"
 msgid "Look"
 msgstr "Utseende"
@@ -7757,6 +7784,7 @@ msgid "minimize, hide window"
 msgstr "minimera, dölj fönster"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Minimum width of a game card."
 msgstr "Minsta bredd för ett spelkort."
 
@@ -7804,6 +7832,7 @@ msgid "More than one manifest game matches: {titles}. Enter the right one's name
 msgstr "Fler än ett spel i manifestet matchar: {titles}. Ange det rätta namnet nedan."
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "More themes in the plugin and theme catalogue"
 msgstr "Fler teman i katalogen med plugins och teman"
 
@@ -7822,6 +7851,7 @@ msgid "motion"
 msgstr "rörelse"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Motion & Effects"
 msgstr "Rörelse och effekter"
 
@@ -8370,6 +8400,7 @@ msgid "No strategy details are available yet."
 msgstr "Det finns inga strategidetaljer än."
 
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "No themes found. Rescan themes looks for them again."
 msgstr "Inga teman hittades. Sök efter teman igen letar efter dem på nytt."
 
@@ -8592,6 +8623,7 @@ msgid "Not scanned"
 msgstr "Inte skannat"
 
 #: apps/desktop/src/views/settings/devices/SectionSync.tsx
+#: apps/native/src/settings/sync.rs
 msgid "Not synced: this kind of setting is This device only in Settings → Devices."
 msgstr "Synkas inte: den här typen av inställning är Bara den här enheten i Inställningar → Enheter."
 
@@ -9111,6 +9143,7 @@ msgid "Or use a pairing link"
 msgstr "Eller använd en parkopplingslänk"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "accent colour"
 msgid "Orange"
 msgstr "Orange"
@@ -9139,6 +9172,7 @@ msgid "Output"
 msgstr "Utdata"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Overlay the game title on cover art."
 msgstr "Visa speltiteln ovanpå omslagsbilden."
 
@@ -9383,6 +9417,7 @@ msgid "Pin to the top"
 msgstr "Fäst högst upp"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "accent colour"
 msgid "Pink"
 msgstr "Rosa"
@@ -10147,17 +10182,19 @@ msgid "Reconnect the drive or network share."
 msgstr "Anslut hårddisken eller nätverksresursen igen."
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "accent colour"
 msgid "Red"
 msgstr "Röd"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/appearance.rs apps/native/src/settings/search.rs
 msgid "Reduce effects"
 msgstr "Minska effekter"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "animations setting"
 msgid "Reduced"
 msgstr "Reducerade"
@@ -10567,6 +10604,7 @@ msgid "rescan"
 msgstr "skanna igen"
 
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Rescan themes"
 msgstr "Sök efter teman igen"
 
@@ -10596,6 +10634,7 @@ msgid "Reset {section} settings"
 msgstr "Återställ inställningar för {section}"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Reset appearance settings"
 msgstr "Återställ utseendeinställningar"
 
@@ -10775,6 +10814,7 @@ msgstr "Visa"
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Revert"
 msgstr "Återgå"
 
@@ -11002,6 +11042,7 @@ msgid "Rust crate"
 msgstr "Rust-crate"
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Safe mode is on: your custom CSS isn't applied until Caskade starts normally."
 msgstr "Felsäkert läge är på: din anpassade CSS används inte förrän Caskade startar normalt."
 
@@ -11014,6 +11055,7 @@ msgid "Same access as the app"
 msgstr "Samma åtkomst som appen"
 
 #: apps/desktop/src/views/settings/devices/SectionSync.tsx
+#: apps/native/src/settings/sync.rs
 msgid "Same on your other devices"
 msgstr "Samma på dina andra enheter"
 
@@ -11051,6 +11093,7 @@ msgid "Save changes"
 msgstr "Spara ändringar"
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Save CSS"
 msgstr "Spara CSS"
 
@@ -11515,6 +11558,7 @@ msgid "Selecting…"
 msgstr "Väljer…"
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "theming docs"
 msgid "Selectors"
 msgstr "Selektorer"
@@ -11788,7 +11832,7 @@ msgstr "Visa inställningar"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/appearance.rs apps/native/src/settings/search.rs
 msgid "Show titles on artwork"
 msgstr "Visa titlar på bilder"
 
@@ -12565,6 +12609,7 @@ msgstr "Synkar…"
 
 #. Follow the operating system's reduced-motion setting
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "animations setting"
 msgid "System"
 msgstr "System"
@@ -12581,6 +12626,7 @@ msgid "System ({systemName})"
 msgstr "System ({systemName})"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "System follows your OS reduced-motion setting."
 msgstr "System följer operativsystemets inställning för minskad rörelse."
 
@@ -12940,16 +12986,18 @@ msgstr "Deras butiker är inte tillgängliga i den här versionen av Caskade. De
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/appearance.rs apps/native/src/settings/search.rs
 msgid "Theme"
 msgstr "Tema"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Theme accent"
 msgstr "Temats accentfärg"
 
 #: apps/desktop/src/themes/api.ts
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Theme folder"
 msgstr "Temamapp"
 
@@ -12967,10 +13015,12 @@ msgid "Themes"
 msgstr "Teman"
 
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Themes couldn't be loaded"
 msgstr "Teman kunde inte läsas in"
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Theming guide"
 msgstr "Temaguide"
 
@@ -13257,6 +13307,7 @@ msgid "To move to another computer, copy a backup there, install Caskade, and re
 msgstr "För att flytta till en annan dator kopierar du dit en säkerhetskopia, installerar Caskade och återställer den härifrån. Spelen behåller sin plats i ditt bibliotek; Caskade hittar deras mappar igen när du söker, eller så kan du peka ut dem."
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "theming docs"
 msgid "Tokens"
 msgstr "Token"
@@ -13344,6 +13395,7 @@ msgid "Turn off"
 msgstr "Stäng av"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Turn off blur, glow, scanlines and the backdrop grid."
 msgstr "Stäng av oskärpa, glöd, scanlinjer och bakgrundsrutnätet."
 
@@ -13370,6 +13422,7 @@ msgid "Turn sounds on"
 msgstr "Slå på ljud"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Turn these down on slower machines."
 msgstr "Sänk dessa på långsammare datorer."
 
@@ -13552,6 +13605,7 @@ msgid "Unread"
 msgstr "Olästa"
 
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/unsaved.rs
 msgid "Unsaved changes"
 msgstr "Osparade ändringar"
 
@@ -13917,6 +13971,7 @@ msgid "View: {title}"
 msgstr "Vy: {title}"
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgctxt "accent colour"
 msgid "Violet"
 msgstr "Violett"
@@ -14464,6 +14519,7 @@ msgid "Your other devices play these platforms with an emulator this device does
 msgstr "Dina andra enheter spelar de här plattformarna med en emulator som den här enheten saknar. Installera den för att använda den här också, eller behåll den här enhetens."
 
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Your own rules, applied over the theme without a reload."
 msgstr "Dina egna regler, tillämpade över temat utan omladdning."
 
@@ -14478,6 +14534,7 @@ msgid "Your ROM folder"
 msgstr "Din ROM-mapp"
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
+#: apps/native/src/settings/appearance.rs
 msgid "Your rules beat the theme and every component. Style through the contract:"
 msgstr "Dina regler går före temat och alla komponenter. Styla via kontraktet:"
 

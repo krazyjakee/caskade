@@ -13,7 +13,7 @@
 
 use caskade_app::events::Event;
 use caskade_core::model::{GameDetails, GamePage, LibraryStats, ListGames};
-use caskade_ui_data::{Changed, ErrorReport, Key as DataKey, Library, Settings, fixtures};
+use caskade_ui_data::{Changed, ErrorReport, Key as DataKey, Library, Settings, Themes, fixtures};
 use dioxus_native::prelude::*;
 use std::future::Future;
 use tokio::sync::broadcast;
@@ -23,6 +23,7 @@ use tokio::sync::broadcast;
 pub struct DataSource {
     pub library: Library,
     pub settings: Settings,
+    pub themes: Themes,
     pub events: broadcast::Sender<Event>,
 }
 
@@ -34,6 +35,7 @@ impl DataSource {
         Some(Self {
             library: Library::of(services),
             settings: Settings::of(services),
+            themes: Themes::of(services, crate::shell::sink()),
             events: crate::shell::events().clone(),
         })
     }
@@ -47,6 +49,7 @@ impl DataSource {
         Ok(Self {
             library: fixtures.library,
             settings: fixtures.settings,
+            themes: fixtures.themes,
             events: fixtures.events,
         })
     }
@@ -180,6 +183,26 @@ where
     let resource = use_resource(move || change(load(settings.clone())));
     reload_on(&source, key, resource);
     resource
+}
+
+/// Themes, for Appearance (#104): what `load` reads, loaded again when a
+/// theme or a plugin bringing themes changes (`Key::Themes`).
+pub fn use_themes_query<T, F, Fut>(mut load: F) -> Query<T>
+where
+    T: Send + 'static,
+    F: FnMut(Themes) -> Fut + 'static,
+    Fut: Future<Output = Result<T, ErrorReport>> + Send + 'static,
+{
+    let source = use_context::<DataSource>();
+    let themes = source.themes.clone();
+    let resource = use_resource(move || change(load(themes.clone())));
+    reload_on(&source, DataKey::Themes, resource);
+    resource
+}
+
+/// Themes, for a view's changes (a rescan); `None` before the data source.
+pub fn try_use_themes() -> Option<Themes> {
+    try_use_context::<DataSource>().map(|source| source.themes)
 }
 
 /// Settings, for a view's changes: run them through [`change`].

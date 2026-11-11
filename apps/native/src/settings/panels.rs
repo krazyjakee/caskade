@@ -1,4 +1,5 @@
-//! Each section's panel: General (#104, `general.rs`); Installer's schema
+//! Each section's panel: General and Appearance (#104, `general.rs`,
+//! `appearance.rs`); Installer's schema
 //! (`core.installer`), as the webview's `InstallerSettings`. The others
 //! come with #104 and #105.
 
@@ -22,6 +23,9 @@ pub fn panel(tab: &'static str, sub: Option<String>) -> Element {
                 }
                 Pending {}
             }
+        },
+        "appearance" => rsx! {
+            super::appearance::AppearanceSettings {}
         },
         "general" => rsx! {
             super::general::GeneralSettings { sub }

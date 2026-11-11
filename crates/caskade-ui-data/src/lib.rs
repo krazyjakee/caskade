@@ -23,8 +23,10 @@ pub mod library;
 mod manual;
 pub mod settings;
 pub mod storage;
+pub mod themes;
 
 pub use caskade_core::error::{ErrorCode, ErrorReport, RecoveryHint};
 pub use keys::{Changed, Key};
 pub use library::{Library, PAGE_LIMIT, SEARCH_LIMIT};
 pub use settings::{Editable, Settings};
+pub use themes::Themes;

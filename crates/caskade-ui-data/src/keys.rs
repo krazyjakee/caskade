@@ -29,6 +29,8 @@ pub enum Key {
     Background,
     /// A settings section's value, by namespace (`core.appearance`).
     Settings(String),
+    /// The installed themes and the one applied (Appearance).
+    Themes,
 }
 
 /// What an app event made stale.
@@ -72,6 +74,11 @@ impl Changed {
             Event::AppUpdateChanged(_) => Self::only(Key::AppUpdate),
             Event::BackgroundChanged(_) => Self::only(Key::Background),
             Event::SettingsChanged(changed) => Self::only(Key::Settings(changed.namespace.clone())),
+            // A dev theme recompiled, or a plugin bringing themes came or
+            // went.
+            Event::ThemeReloaded(_) | Event::PluginsChanged(_) | Event::PluginDisabled(_) => {
+                Self::only(Key::Themes)
+            }
             _ => Self::Nothing,
         }
     }
@@ -212,12 +219,32 @@ mod tests {
         ));
         assert!(changed.affects(&Key::Settings("core.appearance".into())));
         for other in [
+            Key::Themes,
             Key::Settings("core.general".into()),
             Key::Games,
             Key::Summary,
             Key::Jobs,
         ] {
             assert!(!changed.affects(&other), "{other:?}");
+        }
+    }
+
+    /// A dev theme recompiling, or plugins changing, makes the theme list
+    /// stale.
+    #[test]
+    fn themes_follow_reloads_and_plugins() {
+        for event in [
+            Event::ThemeReloaded(caskade_app::commands::themes::ThemeReloaded {
+                theme: "dev.mine".into(),
+                error: None,
+            }),
+            Event::PluginsChanged(caskade_app::events::PluginsChanged {
+                plugin: "acme".into(),
+            }),
+        ] {
+            let changed = Changed::from_event(&event);
+            assert!(changed.affects(&Key::Themes));
+            assert!(!changed.affects(&Key::Games));
         }
     }
 }

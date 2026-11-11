@@ -245,6 +245,56 @@ pub const SPARKLES: Icon = Icon(&[
     "M22 4h-4",
     "M4 18a2 2 0 1 0 0 4a2 2 0 1 0 0-4z",
 ]);
+/// lucide's `rows-3`.
+pub const ROWS_3: Icon = Icon(&[
+    "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2z",
+    "M21 9H3",
+    "M21 15H3",
+]);
+/// lucide's `scaling`.
+pub const SCALING: Icon = Icon(&[
+    "M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7",
+    "M14 15H9v-5",
+    "M16 3h5v5",
+    "M21 3 9 15",
+]);
+/// lucide's `droplet`.
+pub const DROPLET: Icon = Icon(&[
+    "M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z",
+]);
+/// lucide's `image`.
+pub const IMAGE: Icon = Icon(&[
+    "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2z",
+    "M7 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0z",
+    "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21",
+]);
+/// lucide's `rectangle-horizontal`.
+pub const RECTANGLE_HORIZONTAL: Icon =
+    Icon(&["M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-16a2 2 0 0 1 -2 -2v-8a2 2 0 0 1 2 -2z"]);
+/// lucide's `captions`.
+pub const CAPTIONS: Icon = Icon(&[
+    "M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2z",
+    "M7 15h4M15 15h2M7 11h2M13 11h4",
+]);
+/// lucide's `contrast`.
+pub const CONTRAST: Icon = Icon(&[
+    "M2 12a10 10 0 1 0 20 0a10 10 0 1 0 -20 0z",
+    "M12 18a6 6 0 0 0 0-12v12z",
+]);
+/// lucide's `code`.
+pub const CODE: Icon = Icon(&["m16 18 6-6-6-6", "m8 6-6 6 6 6"]);
+/// lucide's `power-off`.
+pub const POWER_OFF: Icon = Icon(&[
+    "M18.36 6.64A9 9 0 0 1 20.77 15",
+    "M6.16 6.16a9 9 0 1 0 12.68 12.68",
+    "M12 2v4",
+    "m2 2 20 20",
+]);
+/// lucide's `book-open`.
+pub const BOOK_OPEN: Icon = Icon(&[
+    "M12 5v16",
+    "M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z",
+]);
 /// lucide's `wrench`.
 pub const WRENCH: Icon = Icon(&[
     "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z",

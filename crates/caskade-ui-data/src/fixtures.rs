@@ -21,7 +21,7 @@ use caskade_core::{
 };
 use tokio::sync::broadcast;
 
-use crate::{Library, Settings};
+use crate::{Library, Settings, Themes};
 
 /// How many plain games fixtures mode makes unless asked for another number
 /// (`createFixtureGames`'s default).
@@ -192,6 +192,15 @@ pub struct Fixtures {
     pub events: broadcast::Sender<Event>,
     /// The app's settings sections over the same store, at their defaults.
     pub settings: Settings,
+    /// The built-in themes, over the same settings (Appearance).
+    pub themes: Themes,
+}
+
+/// Where the fixture library's installed themes are: none until a test
+/// adds one. One folder per process, so a test's theme reaches no other
+/// run.
+pub fn themes_folder() -> std::path::PathBuf {
+    std::env::temp_dir().join(format!("caskade-fixture-themes-{}", std::process::id()))
 }
 
 /// Opens the fixture library with `count` plain games (`DEFAULT_COUNT` is
@@ -212,9 +221,16 @@ pub async fn open(count: usize) -> caskade_core::Result<Fixtures> {
             &std::env::temp_dir().join("caskade-fixtures"),
         ))
         .map_err(|error| caskade_core::Error::Invalid(error.to_string()))?;
+    let themes = Themes::new(
+        caskade_core::themes::ThemeService::new(themes_folder()),
+        service.clone(),
+        None,
+        Events::new(Broadcast(events.clone())),
+    );
     let settings = Settings::new(service, accounts.clone());
     Ok(Fixtures {
         settings,
+        themes,
         library: Library::new(store.clone(), accounts.clone(), launch, bus.clone()),
         store,
         bus,

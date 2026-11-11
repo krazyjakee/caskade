@@ -16,7 +16,8 @@ use caskade_ui_i18n::t;
 use dioxus_native::prelude::*;
 
 use crate::router::{Guard, Route, use_router};
-use crate::ui::{Button, ButtonVariant, Dialog};
+use crate::ui::icons::CIRCLE_ALERT;
+use crate::ui::{Button, ButtonVariant, Dialog, Svg};
 
 /// A form with edits, as the question names and settles it.
 #[derive(Clone)]
@@ -113,7 +114,6 @@ pub fn holds_close() -> bool {
 
 /// Registers a form while `dirty`, so leaving its section asks first.
 /// Outside Settings (no guard above it) it does nothing.
-#[allow(dead_code, reason = "the explicit-save forms of #104 and #105 call it")]
 pub fn use_unsaved_changes(dirty: bool, form: UnsavedForm) {
     let forms = try_use_context::<Forms>();
     let id = use_hook(|| {
@@ -319,6 +319,21 @@ fn UnsavedChangesDialog(
                         if pending { {t!("Saving…")} } else { {t!("Save")} }
                     }
                 }
+            }
+        }
+    }
+}
+
+/// Says a form has edits that its Save button keeps, beside that button.
+#[component]
+pub fn UnsavedHint(dirty: bool) -> Element {
+    rsx! {
+        span {
+            "aria-live": "polite",
+            class: "inline-flex items-center gap-1.5 text-xs text-warning",
+            if dirty {
+                Svg { icon: CIRCLE_ALERT, class: "size-3.5 shrink-0" }
+                {t!("Unsaved changes")}
             }
         }
     }

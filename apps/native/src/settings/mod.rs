@@ -12,6 +12,7 @@
 //! The panels themselves come with #104 and #105; until then most show
 //! what they will hold.
 
+mod appearance;
 mod drafts;
 mod general;
 mod panels;
@@ -19,6 +20,7 @@ mod reset;
 mod schema;
 mod search;
 mod state;
+mod sync;
 #[cfg(test)]
 mod tests;
 mod unsaved;

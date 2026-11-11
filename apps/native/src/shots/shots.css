@@ -453,6 +453,9 @@
   .inline {
     display: inline;
   }
+  .inline-block {
+    display: inline-block;
+  }
   .inline-flex {
     display: inline-flex;
   }
@@ -561,6 +564,9 @@
   .h-64 {
     height: calc(calc(0.25rem * var(--cs-density-scale)) * 64);
   }
+  .h-72 {
+    height: calc(calc(0.25rem * var(--cs-density-scale)) * 72);
+  }
   .h-\[85vh\] {
     height: 85vh;
   }
@@ -626,6 +632,9 @@
   }
   .w-24 {
     width: calc(calc(0.25rem * var(--cs-density-scale)) * 24);
+  }
+  .w-32 {
+    width: calc(calc(0.25rem * var(--cs-density-scale)) * 32);
   }
   .w-36 {
     width: calc(calc(0.25rem * var(--cs-density-scale)) * 36);
@@ -768,6 +777,12 @@
   }
   .list-disc {
     list-style-type: disc;
+  }
+  .auto-cols-fr {
+    grid-auto-columns: minmax(0, 1fr);
+  }
+  .grid-flow-col {
+    grid-auto-flow: column;
   }
   .auto-rows-min {
     grid-auto-rows: min-content;
@@ -1162,6 +1177,12 @@
   .bg-surface-overlay {
     background-color: var(--cs-color-surface-overlay);
   }
+  .bg-surface-overlay\/60 {
+    background-color: var(--cs-color-surface-overlay);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--cs-color-surface-overlay) 60%, transparent);
+    }
+  }
   .bg-surface-overlay\/70 {
     background-color: var(--cs-color-surface-overlay);
     @supports (color: color-mix(in lab, red, red)) {
@@ -1387,6 +1408,9 @@
   .pr-2 {
     padding-right: calc(calc(0.25rem * var(--cs-density-scale)) * 2);
   }
+  .pr-3 {
+    padding-right: calc(calc(0.25rem * var(--cs-density-scale)) * 3);
+  }
   .pr-4 {
     padding-right: calc(calc(0.25rem * var(--cs-density-scale)) * 4);
   }
@@ -1474,11 +1498,18 @@
     font-size: var(--text-xs);
     line-height: var(--tw-leading, var(--text-xs--line-height));
   }
+  .text-\[0\.7rem\] {
+    font-size: 0.7rem;
+  }
   .text-\[10px\] {
     font-size: 10px;
   }
   .text-\[11px\] {
     font-size: 11px;
+  }
+  .leading-5 {
+    --tw-leading: calc(calc(0.25rem * var(--cs-density-scale)) * 5);
+    line-height: calc(calc(0.25rem * var(--cs-density-scale)) * 5);
   }
   .leading-relaxed {
     --tw-leading: var(--leading-relaxed);
@@ -1652,6 +1683,9 @@
     @supports (color: color-mix(in lab, red, red)) {
       --tw-shadow-color: color-mix(in oklab, var(--cs-color-warning) var(--tw-shadow-alpha), transparent);
     }
+  }
+  .outline-offset-2 {
+    outline-offset: 2px;
   }
   .blur {
     --tw-blur: blur(min(8px, var(--cs-effect-glass-blur)));
@@ -2026,6 +2060,9 @@
   .data-disabled\:cursor-default[data-disabled] {
     cursor: default;
   }
+  .data-disabled\:cursor-not-allowed[data-disabled] {
+    cursor: not-allowed;
+  }
   .data-disabled\:opacity-40[data-disabled] {
     opacity: 40%;
   }
@@ -2181,6 +2218,9 @@
       border-color: color-mix(in oklab, var(--cs-color-accent-alt) 50%, transparent);
     }
   }
+  .data-hovered\:border-border-strong[data-hovered] {
+    border-color: var(--cs-color-border-strong);
+  }
   .data-hovered\:border-danger\/70[data-hovered] {
     border-color: var(--cs-color-danger);
     @supports (color: color-mix(in lab, red, red)) {
@@ -2222,6 +2262,9 @@
   .data-pressed\:scale-\[0\.97\][data-pressed] {
     scale: 0.97;
   }
+  .data-selected\:border-accent[data-selected] {
+    border-color: var(--cs-color-accent);
+  }
   .data-selected\:border-accent-alt[data-selected] {
     border-color: var(--cs-color-accent-alt);
   }
@@ -2242,6 +2285,9 @@
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--cs-color-accent) 25%, transparent);
     }
+  }
+  .data-selected\:bg-surface-hover[data-selected] {
+    background-color: var(--cs-color-surface-hover);
   }
   .data-selected\:text-accent-alt[data-selected] {
     color: var(--cs-color-accent-alt);
@@ -2272,6 +2318,13 @@
     @supports (color: color-mix(in lab, red, red)) {
       --tw-shadow-color: color-mix(in oklab, color-mix(in oklab, var(--cs-color-accent-alt) 50%, transparent) var(--tw-shadow-alpha), transparent);
     }
+  }
+  .data-selected\:outline-2[data-selected] {
+    outline-style: var(--tw-outline-style);
+    outline-width: 2px;
+  }
+  .data-selected\:outline-fg[data-selected] {
+    outline-color: var(--cs-color-fg);
   }
   .data-\[size\=md\]\:\[--avatar-cell\:3\.5rem\][data-size="md"] {
     --avatar-cell: 3.5rem;
@@ -2319,6 +2372,11 @@
   @media (width >= 64rem) {
     .lg\:w-60 {
       width: calc(calc(0.25rem * var(--cs-density-scale)) * 60);
+    }
+  }
+  @media (width >= 96rem) {
+    .\32 xl\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
   @media (width >= 102rem) {
@@ -2879,6 +2937,11 @@
   syntax: "*";
   inherits: false;
 }
+@property --tw-outline-style {
+  syntax: "*";
+  inherits: false;
+  initial-value: solid;
+}
 @layer properties {
   @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
     *, ::before, ::after, ::backdrop {
@@ -2946,6 +3009,7 @@
       --tw-backdrop-sepia: initial;
       --tw-duration: initial;
       --tw-ease: initial;
+      --tw-outline-style: solid;
     }
   }
 }
