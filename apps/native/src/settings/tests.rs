@@ -682,5 +682,6 @@ mod appearance;
 mod discovery;
 mod general;
 mod launchers;
+mod plugins;
 mod storage;
 mod stores;

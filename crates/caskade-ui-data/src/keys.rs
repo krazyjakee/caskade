@@ -35,6 +35,8 @@ pub enum Key {
     Discovery,
     /// Store accounts, the stores that can be connected and sign-ins.
     Stores,
+    /// The installed plugins and their status.
+    Plugins,
 }
 
 /// What an app event made stale.
@@ -82,8 +84,13 @@ impl Changed {
             Event::StoreAccountsChanged(_) => Self::only(Key::Stores),
             // A dev theme recompiled, or a plugin bringing themes came or
             // went.
-            Event::ThemeReloaded(_) | Event::PluginsChanged(_) | Event::PluginDisabled(_) => {
-                Self::only(Key::Themes)
+            Event::ThemeReloaded(_) => Self::only(Key::Themes),
+            // Themes come with plugins too.
+            Event::PluginsChanged(_) | Event::PluginDisabled(_) | Event::PluginReloaded(_) => {
+                Self::Keys {
+                    keys: vec![Key::Plugins, Key::Themes],
+                    all_games: false,
+                }
             }
             _ => Self::Nothing,
         }

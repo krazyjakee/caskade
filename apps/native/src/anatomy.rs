@@ -123,6 +123,10 @@ mod tests {
             "storage-settings",
             "#104: the webview's StoragePanel isn't catalogued either",
         ),
+        (
+            "plugin-review",
+            "#104: the webview's plugin ReviewDialog isn't catalogued either",
+        ),
     ];
 
     /// The webview's catalogue, as `pnpm --filter @caskade/ui docs`

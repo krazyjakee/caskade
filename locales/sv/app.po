@@ -933,6 +933,7 @@ msgid "{plugin} couldn't start: {error}"
 msgstr "{plugin} kunde inte starta: {error}"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "{plugin} details"
 msgstr "Detaljer för {plugin}"
 
@@ -1442,11 +1443,13 @@ msgid "A backup holds Caskade's library and settings in one file you can keep an
 msgstr "En säkerhetskopia innehåller Caskades bibliotek och inställningar i en fil som du kan förvara var som helst. Dina spel och deras sparfiler ingår inte."
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "A badge on game cards"
 msgstr "Ett märke på spelkort"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "A button in the top bar"
 msgstr "En knapp i det övre fältet"
@@ -1456,6 +1459,7 @@ msgid "A closing brace closes nothing: custom CSS has to stay inside its layer."
 msgstr "En avslutande klammerparentes avslutar ingenting: anpassad CSS måste stanna inom sitt lager."
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "A command"
 msgstr "Ett kommando"
@@ -1541,6 +1545,7 @@ msgid "A notification for achievements unlocked since the last refresh. The firs
 msgstr "En avisering för prestationer som låsts upp sedan den senaste uppdateringen. Ett spels första uppdatering hämtar historiken utan aviseringar."
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "A page of its own"
 msgstr "En egen sida"
@@ -1551,6 +1556,7 @@ msgid "A pairing link was opened. Pairing hands the device that made it (it star
 msgstr "En parkopplingslänk öppnades. Parkoppling ger enheten som skapade den (den börjar med {device}) ditt bibliotek och dina konton. Länken fungerar till {until}."
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "A panel on game pages"
 msgstr "En panel på spelsidor"
@@ -1607,11 +1613,13 @@ msgid "a save of {title}"
 msgstr "en sparning av {title}"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "A section on Home"
 msgstr "Ett avsnitt på Hem"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "A settings page"
 msgstr "En inställningssida"
@@ -1623,6 +1631,7 @@ msgid "A single folder name containing {title}."
 msgstr "Ett enda mappnamn som innehåller {title}."
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "A tab on game pages"
 msgstr "En flik på spelsidor"
@@ -1640,11 +1649,13 @@ msgid "A version of a game's saves is kept each time you finish playing, and the
 msgstr "En version av spelets sparfiler behålls varje gång du slutar spela, och den nyaste skickas till dina andra enheter, så att du kan fortsätta där du slutade."
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin provider"
 msgid "a way to install games"
 msgstr "ett sätt att installera spel"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin provider"
 msgid "a way to run games"
 msgstr "ett sätt att köra spel"
@@ -1748,6 +1759,7 @@ msgid "achievement notifications"
 msgstr "prestationsaviseringar"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin event"
 msgid "achievements"
 msgstr "prestationer"
@@ -2184,6 +2196,7 @@ msgid "All screenshots"
 msgstr "Alla skärmbilder"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin"
 msgid "Allow"
 msgstr "Tillåt"
@@ -2267,11 +2280,13 @@ msgid "An installer, archive, disc image or .torrent file"
 msgstr "Ett installationsprogram, ett arkiv, en skivavbild eller en .torrent-fil"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "An item in the game menu"
 msgstr "Ett objekt i spelmenyn"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "An item in the sidebar"
 msgstr "Ett objekt i sidofältet"
@@ -2281,6 +2296,7 @@ msgid "An opening brace is never closed."
 msgstr "En inledande klammerparentes stängs aldrig."
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "An overlay on game cards"
 msgstr "Ett överlägg på spelkort"
@@ -2920,6 +2936,7 @@ msgid "Call it"
 msgstr "Kalla den"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Can change {what}"
 msgstr "Kan ändra {what}"
 
@@ -2998,8 +3015,9 @@ msgstr "Avbryt inloggningen"
 #: apps/native/src/game_menu/play.rs apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/selection_bar.rs apps/native/src/library/web.rs
-#: apps/native/src/settings/reset.rs apps/native/src/settings/storage.rs
-#: apps/native/src/settings/stores.rs apps/native/src/ui/dialog.rs
+#: apps/native/src/settings/plugins.rs apps/native/src/settings/reset.rs
+#: apps/native/src/settings/storage.rs apps/native/src/settings/stores.rs
+#: apps/native/src/ui/dialog.rs
 msgid "Cancel"
 msgstr "Avbryt"
 
@@ -3302,6 +3320,7 @@ msgid "Caskade signs out of it and stops refreshing it. Its games stay in your l
 msgstr "Caskade loggar ut från det och slutar uppdatera det. Dess spel stannar i ditt bibliotek, och att ansluta det igen återställer det som det var. Ta bort det för att ta bort dess spel."
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin event"
 msgid "Caskade starting"
 msgstr "Caskades start"
@@ -3765,7 +3784,7 @@ msgstr "klocka, 24-timmars, 12-timmars"
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/native/src/flows/pairing.rs apps/native/src/library/selection_bar.rs
-#: apps/native/src/settings/reset.rs
+#: apps/native/src/settings/plugins.rs apps/native/src/settings/reset.rs
 msgid "Close"
 msgstr "Stäng"
 
@@ -3946,6 +3965,7 @@ msgid "Connect only directly"
 msgstr "Anslut bara direkt"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Connect to {hosts}"
 msgstr "Anslut till {hosts}"
 
@@ -4037,6 +4057,7 @@ msgid "Continue without copying"
 msgstr "Fortsätt utan att kopiera"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Contributions"
 msgstr "Bidrag"
 
@@ -4045,6 +4066,7 @@ msgid "Controller mappings, core options and shader presets, each in this device
 msgstr "Handkontrollsmappningar, kärninställningar och shaderförval, var och en i enhetens egna emulatormappar."
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin event"
 msgid "controllers connecting"
 msgstr "anslutning av handkontroller"
@@ -4611,6 +4633,7 @@ msgstr "Detaljer om {0}"
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Details…"
 msgstr "Detaljer…"
 
@@ -4626,6 +4649,7 @@ msgstr "Identifieringen avbröts · {found} hittades"
 
 #. Badge on a plugin loaded from its development folder
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Dev"
 msgstr "Utv"
 
@@ -4911,6 +4935,7 @@ msgid "Downloads from my devices"
 msgstr "Nedladdningar från mina enheter"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin provider"
 msgid "downloads from web pages"
 msgstr "nedladdningar från webbsidor"
@@ -5067,6 +5092,7 @@ msgid "Emulator · Profile"
 msgstr "Emulator · Profil"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin event"
 msgid "emulator changes"
 msgstr "emulatorändringar"
@@ -5161,6 +5187,7 @@ msgid "Emulators, ROM scanners, BIOS files and RomM servers."
 msgstr "Emulatorer, ROM-skannrar, BIOS-filer och RomM-servrar."
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Enable {plugin}"
 msgstr "Aktivera {plugin}"
 
@@ -5444,6 +5471,7 @@ msgid "File types: {extensions}"
 msgstr "Filtyper: {extensions}"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin access"
 msgid "files"
 msgstr "filer"
@@ -5489,6 +5517,7 @@ msgid "Finished"
 msgstr "Klart"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin hook"
 msgid "finished installs"
 msgstr "slutförda installationer"
@@ -5715,11 +5744,13 @@ msgid "Game"
 msgstr "Spel"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin hook"
 msgid "game details"
 msgstr "speldetaljer"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin provider"
 msgid "game details"
 msgstr "speldetaljer"
@@ -5851,6 +5882,7 @@ msgid "Games ask which emulator to use."
 msgstr "Spelen frågar vilken emulator som ska användas."
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin hook"
 msgid "games before they start"
 msgstr "spel innan de startar"
@@ -5860,6 +5892,7 @@ msgid "Games copied between your devices, and games you shared. Both computers n
 msgstr "Spel som kopierats mellan dina enheter, och spel som du har delat. Båda datorerna behöver ha Caskade öppet tills ett spel har kommit fram."
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin provider"
 msgid "games for your library"
 msgstr "spel till ditt bibliotek"
@@ -5891,6 +5924,7 @@ msgid "Games installed from GitHub are checked for new releases without an accou
 msgstr "Spel som installerats från GitHub kontrolleras efter nya versioner utan konto. Uppdateringar behåller dina sparfiler och inställningar."
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin hook"
 msgid "games joining the library"
 msgstr "spel som läggs till i biblioteket"
@@ -5919,6 +5953,7 @@ msgid "Games SSD"
 msgstr "Spel-SSD"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin event"
 msgid "games starting, stopping and moving"
 msgstr "spel som startar, stoppar och flyttas"
@@ -6260,6 +6295,7 @@ msgid "How games download and install, and torrent links."
 msgstr "Hur spel laddas ner och installeras, och torrentlänkar."
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin hook"
 msgid "how games install"
 msgstr "hur spel installeras"
@@ -6555,6 +6591,7 @@ msgstr "Installera {title}?"
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Install and allow"
 msgstr "Installera och tillåt"
 
@@ -6584,7 +6621,7 @@ msgstr "Installera från mapp"
 
 #: apps/desktop/src/views/activity/AddGame.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
-#: apps/native/src/flows/add_game.rs
+#: apps/native/src/flows/add_game.rs apps/native/src/settings/plugins.rs
 msgid "Install from folder…"
 msgstr "Installera från mapp…"
 
@@ -6727,7 +6764,7 @@ msgstr "Installerad av Caskade"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/plugins.rs apps/native/src/settings/search.rs
 msgid "Installed plugins"
 msgstr "Installerade tillägg"
 
@@ -6809,6 +6846,7 @@ msgid "Installing… {percent}%"
 msgstr "Installerar… {percent} %"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin event"
 msgid "installs"
 msgstr "installationer"
@@ -6847,6 +6885,7 @@ msgid "Internet, through a server"
 msgstr "Internet, via en server"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin status"
 msgid "Invalid"
 msgstr "Ogiltigt"
@@ -6872,11 +6911,13 @@ msgid "is streaming from another device."
 msgstr "streamas från en annan enhet."
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Is told about {what}"
 msgstr "Får veta om {what}"
 
 #. Heading over what a plugin contributes
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "It adds"
 msgstr "Det lägger till"
 
@@ -6896,6 +6937,7 @@ msgstr "Där frågar den innan kopieringen"
 
 #. Heading over a plugin's permissions
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "It asks to"
 msgstr "Det ber om att"
 
@@ -6906,6 +6948,7 @@ msgstr "Det blir offlinekopian av webbspelet du har på den här adressen."
 
 #. Heading over an installed plugin's permissions
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "It can"
 msgstr "Det kan"
 
@@ -7062,6 +7105,7 @@ msgstr "Hoppa till bokstav"
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Keep"
 msgstr "Behåll"
 
@@ -7363,6 +7407,7 @@ msgid "Library and settings"
 msgstr "Bibliotek och inställningar"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin event"
 msgid "library changes"
 msgstr "biblioteksändringar"
@@ -7486,6 +7531,7 @@ msgid "Load unpacked…"
 msgstr "Läs in uppackat…"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Loaded in place from its folder and reloaded on change; not installed"
 msgstr "Läses in direkt från sin mapp och läses in igen vid ändringar; inte installerat"
 
@@ -7560,6 +7606,7 @@ msgstr "Läser in aviseringar…"
 
 #: apps/desktop/src/plugins/PluginViews.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Loading plugins…"
 msgstr "Läser in tillägg…"
 
@@ -8103,6 +8150,7 @@ msgid "Move up"
 msgstr "Flytta upp"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin hook"
 msgid "moved games"
 msgstr "flyttade spel"
@@ -8185,6 +8233,7 @@ msgid "Needs setup"
 msgstr "Behöver konfigureras"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin status"
 msgid "Needs your approval"
 msgstr "Behöver ditt godkännande"
@@ -8195,6 +8244,7 @@ msgid "Needs your attention"
 msgstr "Kräver din uppmärksamhet"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin access"
 msgid "network"
 msgstr "nätverk"
@@ -8521,6 +8571,7 @@ msgid "No playtime is counted"
 msgstr "Ingen speltid räknas"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "No plugins yet. Get one from the catalogue below, install one from a folder, or drop its folder here."
 msgstr "Inga tillägg än. Hämta ett från katalogen nedan, installera ett från en mapp eller släpp dess mapp här."
 
@@ -8871,6 +8922,7 @@ msgstr "Anteckningar"
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Nothing beyond its own storage"
 msgstr "Inget utöver sin egen lagring"
 
@@ -8949,6 +9001,7 @@ msgid "Notifications"
 msgstr "Aviseringar"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "Notifications"
 msgstr "Aviseringar"
@@ -8980,6 +9033,7 @@ msgid "Off"
 msgstr "Av"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin status"
 msgid "Off"
 msgstr "Av"
@@ -9069,6 +9123,7 @@ msgid "Older ones are removed only after a new one has been checked. Backups you
 msgstr "Äldre tas bort först när en ny har kontrollerats. Säkerhetskopior du gör själv, och andra filer, tas aldrig bort."
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin status"
 msgid "On"
 msgstr "På"
@@ -9609,6 +9664,7 @@ msgid "performance, motion"
 msgstr "prestanda, rörelse"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Permissions"
 msgstr "Behörigheter"
 
@@ -9981,6 +10037,7 @@ msgstr "Katalog med plugins och teman"
 
 #: apps/desktop/src/api/pluginManager.ts
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Plugin folder"
 msgstr "Tilläggsmapp"
 
@@ -10120,6 +10177,7 @@ msgid "Privacy policy"
 msgstr "Integritetspolicy"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Problems"
 msgstr "Problem"
 
@@ -10177,6 +10235,7 @@ msgid "Program, shortcut or URI"
 msgstr "Program, genväg eller URI"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin access"
 msgid "programs"
 msgstr "program"
@@ -10207,6 +10266,7 @@ msgid "Proton build"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Provides {providers}"
 msgstr "Tillhandahåller {providers}"
 
@@ -10274,14 +10334,17 @@ msgid "Rating board"
 msgstr "Klassificeringsorgan"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Read and change files in {path}"
 msgstr "Läsa och ändra filer i {path}"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Read and change your library"
 msgstr "Läsa och ändra ditt bibliotek"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Read files in {path}"
 msgstr "Läsa filer i {path}"
 
@@ -10293,6 +10356,7 @@ msgid "read only"
 msgstr "skrivskyddad"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Read your library"
 msgstr "Läsa ditt bibliotek"
 
@@ -10840,6 +10904,7 @@ msgid "Replacement arguments"
 msgstr "Ersättningsargument"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Replaces the installed version {installedVersion}."
 msgstr "Ersätter den installerade versionen {installedVersion}."
 
@@ -11085,6 +11150,7 @@ msgid "Revert"
 msgstr "Återgå"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Review and allow…"
 msgstr "Granska och tillåt…"
 
@@ -11223,10 +11289,12 @@ msgid "Run emulator detection before importing."
 msgstr "Kör emulatoridentifieringen innan du importerar."
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Run interface code inside Caskade, with the same access as the app"
 msgstr "Köra gränssnittskod i Caskade, med samma åtkomst som appen"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Run programs and change how games are launched"
 msgstr "Köra program och ändra hur spel startas"
 
@@ -11253,6 +11321,7 @@ msgid "Running"
 msgstr "Körs"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin status"
 msgid "Running"
 msgstr "Körs"
@@ -11319,6 +11388,7 @@ msgid "Safe mode: Caskade started with the default theme and without your custom
 msgstr "Felsäkert läge: Caskade startade med standardtemat och utan din anpassade CSS."
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Same access as the app"
 msgstr "Samma åtkomst som appen"
 
@@ -11957,6 +12027,7 @@ msgid "Settings"
 msgstr "Inställningar"
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin event"
 msgid "settings changes"
 msgstr "inställningsändringar"
@@ -11972,6 +12043,7 @@ msgid "Settings on other pages stay as they are."
 msgstr "Inställningar på andra sidor förblir som de är."
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Settings page"
 msgstr "Inställningssida"
 
@@ -13717,6 +13789,7 @@ msgid "Trying again may work."
 msgstr "Det kan fungera att försöka igen."
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Turn off"
 msgstr "Stäng av"
 
@@ -13726,6 +13799,7 @@ msgid "Turn off blur, glow, scanlines and the backdrop grid."
 msgstr "Stäng av oskärpa, glöd, scanlinjer och bakgrundsrutnätet."
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Turn on"
 msgstr "Slå på"
 
@@ -13800,6 +13874,7 @@ msgstr "Avinstallation"
 
 #. placeholder {0}: plugin.name
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Uninstall {0}"
 msgstr "Avinstallera {0}"
 
@@ -13821,7 +13896,7 @@ msgstr "Avinstallera {title}?"
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
-#: apps/native/src/game_menu/menu.rs
+#: apps/native/src/game_menu/menu.rs apps/native/src/settings/plugins.rs
 msgid "Uninstall…"
 msgstr "Avinstallera…"
 
@@ -14175,6 +14250,7 @@ msgid "users, people, family, kids, children, parental controls, age ratings, PI
 msgstr "användare, personer, familj, barn, föräldrakontroll, åldersgränser, PIN, behörigheter, administratör"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Uses {what}"
 msgstr "Använder {what}"
 
@@ -14294,6 +14370,7 @@ msgid "View more"
 msgstr "Visa mer"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "View: {title}"
 msgstr "Vy: {title}"
 
@@ -14456,6 +14533,7 @@ msgid "What each source found in the last scan, and any problems."
 msgstr "Vad varje källa hittade vid den senaste skanningen, och eventuella problem."
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin hook"
 msgid "what happens after a game exits"
 msgstr "vad som händer när ett spel avslutas"
@@ -14514,6 +14592,7 @@ msgid "What went wrong"
 msgstr "Vad som gick fel"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "What you've added to Caskade. Drop a plugin's folder here to install it."
 msgstr "Det du har lagt till i Caskade. Släpp en tilläggsmapp här för att installera tillägget."
 
@@ -14837,6 +14916,7 @@ msgid "Your image"
 msgstr "Din bild"
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin access"
 msgid "your library"
 msgstr "ditt bibliotek"

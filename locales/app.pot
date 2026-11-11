@@ -939,6 +939,7 @@ msgid "{plugin} couldn't start: {error}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "{plugin} details"
 msgstr ""
 
@@ -1452,11 +1453,13 @@ msgid "A backup holds Caskade's library and settings in one file you can keep an
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "A badge on game cards"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "A button in the top bar"
 msgstr ""
@@ -1466,6 +1469,7 @@ msgid "A closing brace closes nothing: custom CSS has to stay inside its layer."
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "A command"
 msgstr ""
@@ -1551,6 +1555,7 @@ msgid "A notification for achievements unlocked since the last refresh. The firs
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "A page of its own"
 msgstr ""
@@ -1561,6 +1566,7 @@ msgid "A pairing link was opened. Pairing hands the device that made it (it star
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "A panel on game pages"
 msgstr ""
@@ -1617,11 +1623,13 @@ msgid "a save of {title}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "A section on Home"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "A settings page"
 msgstr ""
@@ -1633,6 +1641,7 @@ msgid "A single folder name containing {title}."
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "A tab on game pages"
 msgstr ""
@@ -1650,11 +1659,13 @@ msgid "A version of a game's saves is kept each time you finish playing, and the
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin provider"
 msgid "a way to install games"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin provider"
 msgid "a way to run games"
 msgstr ""
@@ -1761,6 +1772,7 @@ msgid "achievement notifications"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin event"
 msgid "achievements"
 msgstr ""
@@ -2205,6 +2217,7 @@ msgid "All screenshots"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin"
 msgid "Allow"
 msgstr ""
@@ -2289,11 +2302,13 @@ msgid "An installer, archive, disc image or .torrent file"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "An item in the game menu"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "An item in the sidebar"
 msgstr ""
@@ -2303,6 +2318,7 @@ msgid "An opening brace is never closed."
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "An overlay on game cards"
 msgstr ""
@@ -2949,6 +2965,7 @@ msgid "Call it"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Can change {what}"
 msgstr ""
 
@@ -3031,6 +3048,7 @@ msgstr ""
 #: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/selection_bar.rs
 #: apps/native/src/library/web.rs
+#: apps/native/src/settings/plugins.rs
 #: apps/native/src/settings/reset.rs
 #: apps/native/src/settings/storage.rs
 #: apps/native/src/settings/stores.rs
@@ -3341,6 +3359,7 @@ msgid "Caskade signs out of it and stops refreshing it. Its games stay in your l
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin event"
 msgid "Caskade starting"
 msgstr ""
@@ -3810,6 +3829,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/native/src/flows/pairing.rs
 #: apps/native/src/library/selection_bar.rs
+#: apps/native/src/settings/plugins.rs
 #: apps/native/src/settings/reset.rs
 msgid "Close"
 msgstr ""
@@ -3997,6 +4017,7 @@ msgid "Connect only directly"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Connect to {hosts}"
 msgstr ""
 
@@ -4088,6 +4109,7 @@ msgid "Continue without copying"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Contributions"
 msgstr ""
 
@@ -4096,6 +4118,7 @@ msgid "Controller mappings, core options and shader presets, each in this device
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin event"
 msgid "controllers connecting"
 msgstr ""
@@ -4666,6 +4689,7 @@ msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Details…"
 msgstr ""
 
@@ -4681,6 +4705,7 @@ msgstr ""
 
 #. Badge on a plugin loaded from its development folder
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Dev"
 msgstr ""
 
@@ -4971,6 +4996,7 @@ msgid "Downloads from my devices"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin provider"
 msgid "downloads from web pages"
 msgstr ""
@@ -5128,6 +5154,7 @@ msgid "Emulator · Profile"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin event"
 msgid "emulator changes"
 msgstr ""
@@ -5222,6 +5249,7 @@ msgid "Emulators, ROM scanners, BIOS files and RomM servers."
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Enable {plugin}"
 msgstr ""
 
@@ -5510,6 +5538,7 @@ msgid "File types: {extensions}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin access"
 msgid "files"
 msgstr ""
@@ -5555,6 +5584,7 @@ msgid "Finished"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin hook"
 msgid "finished installs"
 msgstr ""
@@ -5787,11 +5817,13 @@ msgid "Game"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin hook"
 msgid "game details"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin provider"
 msgid "game details"
 msgstr ""
@@ -5927,6 +5959,7 @@ msgid "Games ask which emulator to use."
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin hook"
 msgid "games before they start"
 msgstr ""
@@ -5936,6 +5969,7 @@ msgid "Games copied between your devices, and games you shared. Both computers n
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin provider"
 msgid "games for your library"
 msgstr ""
@@ -5967,6 +6001,7 @@ msgid "Games installed from GitHub are checked for new releases without an accou
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin hook"
 msgid "games joining the library"
 msgstr ""
@@ -5996,6 +6031,7 @@ msgid "Games SSD"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin event"
 msgid "games starting, stopping and moving"
 msgstr ""
@@ -6344,6 +6380,7 @@ msgid "How games download and install, and torrent links."
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin hook"
 msgid "how games install"
 msgstr ""
@@ -6644,6 +6681,7 @@ msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Install and allow"
 msgstr ""
 
@@ -6674,6 +6712,7 @@ msgstr ""
 #: apps/desktop/src/views/activity/AddGame.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 #: apps/native/src/flows/add_game.rs
+#: apps/native/src/settings/plugins.rs
 msgid "Install from folder…"
 msgstr ""
 
@@ -6818,6 +6857,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/plugins.rs
 #: apps/native/src/settings/search.rs
 msgid "Installed plugins"
 msgstr ""
@@ -6901,6 +6941,7 @@ msgid "Installing… {percent}%"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin event"
 msgid "installs"
 msgstr ""
@@ -6940,6 +6981,7 @@ msgid "Internet, through a server"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin status"
 msgid "Invalid"
 msgstr ""
@@ -6967,11 +7009,13 @@ msgid "is streaming from another device."
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Is told about {what}"
 msgstr ""
 
 #. Heading over what a plugin contributes
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "It adds"
 msgstr ""
 
@@ -6991,6 +7035,7 @@ msgstr ""
 
 #. Heading over a plugin's permissions
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "It asks to"
 msgstr ""
 
@@ -7001,6 +7046,7 @@ msgstr ""
 
 #. Heading over an installed plugin's permissions
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "It can"
 msgstr ""
 
@@ -7157,6 +7203,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Keep"
 msgstr ""
 
@@ -7464,6 +7511,7 @@ msgid "Library and settings"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin event"
 msgid "library changes"
 msgstr ""
@@ -7589,6 +7637,7 @@ msgid "Load unpacked…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Loaded in place from its folder and reloaded on change; not installed"
 msgstr ""
 
@@ -7663,6 +7712,7 @@ msgstr ""
 
 #: apps/desktop/src/plugins/PluginViews.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Loading plugins…"
 msgstr ""
 
@@ -8217,6 +8267,7 @@ msgid "Move up"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin hook"
 msgid "moved games"
 msgstr ""
@@ -8300,6 +8351,7 @@ msgid "Needs setup"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin status"
 msgid "Needs your approval"
 msgstr ""
@@ -8310,6 +8362,7 @@ msgid "Needs your attention"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin access"
 msgid "network"
 msgstr ""
@@ -8639,6 +8692,7 @@ msgid "No playtime is counted"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "No plugins yet. Get one from the catalogue below, install one from a folder, or drop its folder here."
 msgstr ""
 
@@ -8993,6 +9047,7 @@ msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Nothing beyond its own storage"
 msgstr ""
 
@@ -9071,6 +9126,7 @@ msgid "Notifications"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin slot"
 msgid "Notifications"
 msgstr ""
@@ -9103,6 +9159,7 @@ msgid "Off"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin status"
 msgid "Off"
 msgstr ""
@@ -9194,6 +9251,7 @@ msgid "Older ones are removed only after a new one has been checked. Backups you
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin status"
 msgid "On"
 msgstr ""
@@ -9742,6 +9800,7 @@ msgid "performance, motion"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Permissions"
 msgstr ""
 
@@ -10116,6 +10175,7 @@ msgstr ""
 
 #: apps/desktop/src/api/pluginManager.ts
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Plugin folder"
 msgstr ""
 
@@ -10259,6 +10319,7 @@ msgid "Privacy policy"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Problems"
 msgstr ""
 
@@ -10316,6 +10377,7 @@ msgid "Program, shortcut or URI"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin access"
 msgid "programs"
 msgstr ""
@@ -10346,6 +10408,7 @@ msgid "Proton build"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Provides {providers}"
 msgstr ""
 
@@ -10415,14 +10478,17 @@ msgid "Rating board"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Read and change files in {path}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Read and change your library"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Read files in {path}"
 msgstr ""
 
@@ -10435,6 +10501,7 @@ msgid "read only"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Read your library"
 msgstr ""
 
@@ -10993,6 +11060,7 @@ msgid "Replacement arguments"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Replaces the installed version {installedVersion}."
 msgstr ""
 
@@ -11245,6 +11313,7 @@ msgid "Revert"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Review and allow…"
 msgstr ""
 
@@ -11383,10 +11452,12 @@ msgid "Run emulator detection before importing."
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Run interface code inside Caskade, with the same access as the app"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Run programs and change how games are launched"
 msgstr ""
 
@@ -11413,6 +11484,7 @@ msgid "Running"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin status"
 msgid "Running"
 msgstr ""
@@ -11479,6 +11551,7 @@ msgid "Safe mode: Caskade started with the default theme and without your custom
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Same access as the app"
 msgstr ""
 
@@ -12127,6 +12200,7 @@ msgid "Settings"
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin event"
 msgid "settings changes"
 msgstr ""
@@ -12142,6 +12216,7 @@ msgid "Settings on other pages stay as they are."
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Settings page"
 msgstr ""
 
@@ -13914,6 +13989,7 @@ msgid "Trying again may work."
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Turn off"
 msgstr ""
 
@@ -13923,6 +13999,7 @@ msgid "Turn off blur, glow, scanlines and the backdrop grid."
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Turn on"
 msgstr ""
 
@@ -13995,6 +14072,7 @@ msgstr ""
 
 #. placeholder {0}: plugin.name
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Uninstall {0}"
 msgstr ""
 
@@ -14017,6 +14095,7 @@ msgstr ""
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 #: apps/native/src/game_menu/menu.rs
+#: apps/native/src/settings/plugins.rs
 msgid "Uninstall…"
 msgstr ""
 
@@ -14372,6 +14451,7 @@ msgid "users, people, family, kids, children, parental controls, age ratings, PI
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "Uses {what}"
 msgstr ""
 
@@ -14491,6 +14571,7 @@ msgid "View more"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "View: {title}"
 msgstr ""
 
@@ -14655,6 +14736,7 @@ msgid "What each source found in the last scan, and any problems."
 msgstr ""
 
 #: apps/desktop/src/views/settings/pluginTerms.ts
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin hook"
 msgid "what happens after a game exits"
 msgstr ""
@@ -14713,6 +14795,7 @@ msgid "What went wrong"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgid "What you've added to Caskade. Drop a plugin's folder here to install it."
 msgstr ""
 
@@ -15040,6 +15123,7 @@ msgid "Your image"
 msgstr ""
 
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/plugins.rs
 msgctxt "plugin access"
 msgid "your library"
 msgstr ""

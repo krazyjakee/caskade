@@ -15,7 +15,7 @@ use caskade_app::events::Event;
 use caskade_core::model::{GameDetails, GamePage, LibraryStats, ListGames};
 use caskade_ui_data::{
     Changed, Discovery, ErrorReport, Key as DataKey, Library, Settings, Themes, fixtures,
-    stores::Stores,
+    plugins::Plugins, stores::Stores,
 };
 use dioxus_native::prelude::*;
 use std::future::Future;
@@ -30,6 +30,7 @@ pub struct DataSource {
     /// `None` in fixtures mode without its fixture machine.
     pub discovery: Option<Discovery>,
     pub stores: Stores,
+    pub plugins: Plugins,
     pub events: broadcast::Sender<Event>,
 }
 
@@ -44,6 +45,7 @@ impl DataSource {
             themes: Themes::of(services, crate::shell::sink()),
             discovery: Some(Discovery::of(services)),
             stores: Stores::of(services),
+            plugins: Plugins::of(services),
             events: crate::shell::events().clone(),
         })
     }
@@ -60,6 +62,7 @@ impl DataSource {
             themes: fixtures.themes,
             discovery: fixtures.discovery,
             stores: fixtures.stores,
+            plugins: fixtures.plugins,
             events: fixtures.events,
         })
     }
@@ -255,6 +258,26 @@ where
     let resource = use_resource(move || change(load(stores.clone())));
     reload_on(&source, DataKey::Stores, resource);
     resource
+}
+
+/// Plugins, for Settings → Plugins (#104): what `load` reads, loaded again
+/// when plugins change.
+pub fn use_plugins_query<T, F, Fut>(mut load: F) -> Query<T>
+where
+    T: Send + 'static,
+    F: FnMut(Plugins) -> Fut + 'static,
+    Fut: Future<Output = Result<T, ErrorReport>> + Send + 'static,
+{
+    let source = use_context::<DataSource>();
+    let plugins = source.plugins.clone();
+    let resource = use_resource(move || change(load(plugins.clone())));
+    reload_on(&source, DataKey::Plugins, resource);
+    resource
+}
+
+/// Plugins, for a view's actions.
+pub fn use_plugins() -> Plugins {
+    use_context::<DataSource>().plugins
 }
 
 /// Store accounts, for a view's actions.

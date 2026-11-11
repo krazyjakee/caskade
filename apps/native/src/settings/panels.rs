@@ -30,6 +30,9 @@ pub fn panel(tab: &'static str, sub: Option<String>) -> Element {
         "library-discovery" => rsx! {
             super::discovery::LibraryDiscoverySettings {}
         },
+        "plugins" => rsx! {
+            super::plugins::PluginsSettings {}
+        },
         "stores" => rsx! {
             super::stores::StoreAccountsSettings {}
         },

@@ -18,6 +18,7 @@ mod drafts;
 mod general;
 mod launchers;
 mod panels;
+mod plugins;
 mod reset;
 mod schema;
 mod search;

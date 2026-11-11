@@ -21,6 +21,7 @@ use caskade_core::{
 };
 use tokio::sync::broadcast;
 
+use crate::plugins::Plugins;
 use crate::stores::Stores;
 use crate::{Discovery, Library, Settings, Themes};
 
@@ -201,6 +202,14 @@ pub struct Fixtures {
     pub discovery: Option<Discovery>,
     /// Store accounts in memory, with no store: tests add fake ones.
     pub stores: Stores,
+    /// A plugin host over this process's plugins folder
+    /// ([`plugins_folder`]): none installed until a test adds one.
+    pub plugins: Plugins,
+}
+
+/// Where the fixture library's plugins are, one folder per process.
+pub fn plugins_folder() -> std::path::PathBuf {
+    std::env::temp_dir().join(format!("caskade-fixture-plugins-{}", std::process::id()))
 }
 
 /// Where the fixture library's installed themes are: none until a test
@@ -259,12 +268,32 @@ pub async fn open(count: usize) -> caskade_core::Result<Fixtures> {
         &store_accounts,
     );
     let stores = Stores::new(store_accounts, Some(accounts.clone()));
+    let plugins = {
+        let folder = plugins_folder();
+        std::fs::create_dir_all(folder.join("installed"))?;
+        caskade_plugin_host::PluginHost::new(
+            caskade_plugin_host::PluginServices {
+                store: store.clone(),
+                bus: Some(bus.clone()),
+                settings: Some(service.clone()),
+            },
+            caskade_plugin_host::HostOptions {
+                folders: vec![folder.join("installed")],
+                data: folder.join("data"),
+                limits: caskade_plugin_host::Limits::default(),
+            },
+        )
+        .map_err(|error| tracing::warn!(%error, "the fixtures' plugin host didn't start"))
+        .ok()
+    };
+    let plugins = Plugins::new(plugins);
     let settings = Settings::new(service, accounts.clone());
     Ok(Fixtures {
         settings,
         themes,
         discovery,
         stores,
+        plugins,
         library: Library::new(store.clone(), accounts.clone(), launch, bus.clone()),
         store,
         bus,

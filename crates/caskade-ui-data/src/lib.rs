@@ -24,6 +24,7 @@ pub mod labels;
 pub mod library;
 mod manual;
 pub mod pairing;
+pub mod plugins;
 pub mod settings;
 pub mod shares;
 pub mod storage;
