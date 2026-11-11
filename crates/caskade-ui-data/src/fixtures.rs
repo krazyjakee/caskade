@@ -21,6 +21,7 @@ use caskade_core::{
 };
 use tokio::sync::broadcast;
 
+use crate::addons::{AddonParts, Addons};
 use crate::plugins::Plugins;
 use crate::stores::Stores;
 use crate::{Discovery, Library, Settings, Themes};
@@ -202,6 +203,9 @@ pub struct Fixtures {
     pub discovery: Option<Discovery>,
     /// Store accounts in memory, with no store: tests add fake ones.
     pub stores: Stores,
+    /// The add-on catalogue, empty until a test gives it one, at an
+    /// address nothing answers: a refresh or a download fails at once.
+    pub addons: Addons,
     /// A plugin host over this process's plugins folder
     /// ([`plugins_folder`]): none installed until a test adds one.
     pub plugins: Plugins,
@@ -237,8 +241,9 @@ pub async fn open(count: usize) -> caskade_core::Result<Fixtures> {
             &std::env::temp_dir().join("caskade-fixtures"),
         ))
         .map_err(|error| caskade_core::Error::Invalid(error.to_string()))?;
+    let theme_service = caskade_core::themes::ThemeService::new(themes_folder());
     let themes = Themes::new(
-        caskade_core::themes::ThemeService::new(themes_folder()),
+        theme_service.clone(),
         service.clone(),
         None,
         Events::new(Broadcast(events.clone())),
@@ -286,6 +291,29 @@ pub async fn open(count: usize) -> caskade_core::Result<Fixtures> {
         .map_err(|error| tracing::warn!(%error, "the fixtures' plugin host didn't start"))
         .ok()
     };
+    let addon_dir = plugins_folder().join("addons");
+    let addons = Addons::new(AddonParts {
+        catalogue: caskade_addons::CatalogueService::new(
+            addon_dir.join("catalogue"),
+            "http://127.0.0.1:1/",
+            None,
+        )
+        .ok(),
+        plugins: plugins.clone(),
+        themes: theme_service,
+        settings: service.clone(),
+        store: store.clone(),
+        bus: bus.clone(),
+        events: Events::new(Broadcast(events.clone())),
+        folders: caskade_app::commands::addon_packages::AddonFolders {
+            plugins: plugins_folder().join("installed"),
+            themes: themes_folder(),
+            work: addon_dir.join("work"),
+        },
+        media: caskade_app::commands::addons::AddonMedia(None),
+        sync: None,
+        devices: None,
+    });
     let plugins = Plugins::new(plugins);
     let settings = Settings::new(service, accounts.clone());
     Ok(Fixtures {
@@ -294,6 +322,7 @@ pub async fn open(count: usize) -> caskade_core::Result<Fixtures> {
         discovery,
         stores,
         plugins,
+        addons,
         library: Library::new(store.clone(), accounts.clone(), launch, bus.clone()),
         store,
         bus,

@@ -116,7 +116,7 @@ msgstr "Dölj detaljer"
 
 #. A game of a shared collection, on this device
 #: packages/ui/src/StatusBadge.tsx apps/native/src/flows/shares_common.rs
-#: apps/native/src/ui/status_badge.rs
+#: apps/native/src/settings/addons.rs apps/native/src/ui/status_badge.rs
 msgid "Installed"
 msgstr "Installerat"
 

@@ -13,6 +13,7 @@
 //! what they will hold.
 
 mod about;
+pub(crate) mod addons;
 mod appearance;
 mod discovery;
 mod drafts;

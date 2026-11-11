@@ -1623,7 +1623,7 @@ Contains: [`text-field`](#text-field), [`avatar-picker`](#avatar-picker), [`sett
 
 ## `addon-catalogue`
 
-Settings → Plugins' catalogue of curated plugins and themes: what each means here, searchable and by kind, from the last fetch when offline. Rendered by AddonCatalogue (app).
+Settings → Plugins' catalogue of curated plugins and themes: what each means here, searchable and by kind, from the last fetch when offline. Rendered by AddonCatalogue (apps/native/src/settings/addons.rs); in the webview, AddonCatalogue (app).
 
 Root: `[data-cs="addon-catalogue"]`
 
@@ -1641,7 +1641,7 @@ Contains: [`button`](#button), [`switch`](#switch), [`text-field`](#text-field),
 
 ## `addon-details`
 
-A catalogue add-on's details: screenshots, description as text, compatibility, the release an install gets, and installing, updating, applying and removing it. Rendered by AddonDetails (app).
+A catalogue add-on's details: screenshots, description as text, compatibility, the release an install gets, and installing, updating, applying and removing it. Rendered by AddonDetails (apps/native/src/settings/addons.rs); in the webview, AddonDetails (app).
 
 Root: `[data-cs="addon-details"]`
 

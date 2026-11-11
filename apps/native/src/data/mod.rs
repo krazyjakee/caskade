@@ -14,8 +14,8 @@
 use caskade_app::events::Event;
 use caskade_core::model::{GameDetails, GamePage, LibraryStats, ListGames};
 use caskade_ui_data::{
-    Changed, Discovery, ErrorReport, Key as DataKey, Library, Settings, Themes, fixtures,
-    plugins::Plugins, stores::Stores,
+    Changed, Discovery, ErrorReport, Key as DataKey, Library, Settings, Themes, addons::Addons,
+    fixtures, plugins::Plugins, stores::Stores,
 };
 use dioxus_native::prelude::*;
 use std::future::Future;
@@ -31,6 +31,7 @@ pub struct DataSource {
     pub discovery: Option<Discovery>,
     pub stores: Stores,
     pub plugins: Plugins,
+    pub addons: Addons,
     pub events: broadcast::Sender<Event>,
 }
 
@@ -46,6 +47,7 @@ impl DataSource {
             discovery: Some(Discovery::of(services)),
             stores: Stores::of(services),
             plugins: Plugins::of(services),
+            addons: Addons::of(services, crate::shell::sink()),
             events: crate::shell::events().clone(),
         })
     }
@@ -63,6 +65,7 @@ impl DataSource {
             discovery: fixtures.discovery,
             stores: fixtures.stores,
             plugins: fixtures.plugins,
+            addons: fixtures.addons,
             events: fixtures.events,
         })
     }
@@ -273,6 +276,26 @@ where
     let resource = use_resource(move || change(load(plugins.clone())));
     reload_on(&source, DataKey::Plugins, resource);
     resource
+}
+
+/// The add-on catalogue, for Settings → Plugins (#104): what `load` reads,
+/// loaded again when plugins (and so what's installed) change.
+pub fn use_addons_query<T, F, Fut>(mut load: F) -> Query<T>
+where
+    T: Send + 'static,
+    F: FnMut(Addons) -> Fut + 'static,
+    Fut: Future<Output = Result<T, ErrorReport>> + Send + 'static,
+{
+    let source = use_context::<DataSource>();
+    let addons = source.addons.clone();
+    let resource = use_resource(move || change(load(addons.clone())));
+    reload_on(&source, DataKey::Plugins, resource);
+    resource
+}
+
+/// The add-on catalogue, for a view's actions.
+pub fn use_addons() -> Addons {
+    use_context::<DataSource>().addons
 }
 
 /// Plugins, for a view's actions.

@@ -8,6 +8,8 @@ publish = false
 
 [dependencies]
 caskade-app = { path = "../caskade-app" }
+# The add-on catalogue for Settings → Plugins (`addons.rs`, #104).
+caskade-addons = { path = "../caskade-addons" }
 caskade-core = { path = "../caskade-core" }
 # Library discovery for Launchers and Library Discovery (`discovery.rs`,
 # #104), and the fixtures' discovery over a fixture machine.

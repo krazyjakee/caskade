@@ -466,7 +466,7 @@ pub fn PluginsSettings() -> Element {
                     },
                 }
             }
-            // The add-ons catalogue (#104) follows in `addons.rs`.
+            super::addons::AddonCatalogue {}
             if let Some(current) = review() {
                 ReviewDialog {
                     plugin: current.plugin.clone(),

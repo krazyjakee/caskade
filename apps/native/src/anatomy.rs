@@ -21,6 +21,7 @@ pub fn catalogue() -> Vec<Entry> {
     let mut all = vec![OSK];
     all.extend_from_slice(crate::ui::ANATOMY);
     all.push(crate::settings::ANATOMY);
+    all.extend_from_slice(&crate::settings::addons::ANATOMY);
     all.extend_from_slice(crate::frame::ANATOMY);
     all.extend_from_slice(crate::flows::ANATOMY);
     all.extend_from_slice(crate::game_menu::ANATOMY);

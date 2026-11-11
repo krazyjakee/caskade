@@ -278,16 +278,19 @@ msgstr ""
 
 #. placeholder {0}: outcome.version
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "{0} is installed."
 msgstr ""
 
 #. placeholder {0}: outcome.version
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "{0} is installed. It asks for more than before, so it's off until you allow it under Installed plugins."
 msgstr ""
 
 #. placeholder {0}: outcome.version
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "{0} is installed. Its pages change when Caskade restarts."
 msgstr ""
 
@@ -303,6 +306,7 @@ msgstr ""
 
 #. placeholder {0}: Math.max(1, Math.round(release.artifact.size / 1024))
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "{0} KB"
 msgstr ""
 
@@ -1282,6 +1286,7 @@ msgstr[1] ""
 
 #. js-lingui:icu=%7Bupdates%2C+plural%2C+one+%7B%23+update%7D+other+%7B%23+updates%7D%7D&pluralize_on=updates
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "# update"
 msgid_plural "# updates"
 msgstr[0] ""
@@ -2226,6 +2231,7 @@ msgid "All"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgctxt "add-on kind"
 msgid "All"
 msgstr ""
@@ -2604,6 +2610,7 @@ msgid "Asking whoever shared it…"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Asks for"
 msgstr ""
 
@@ -2705,6 +2712,7 @@ msgstr ""
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Available"
 msgstr ""
 
@@ -3142,6 +3150,7 @@ msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Cancel download"
 msgstr ""
 
@@ -3487,6 +3496,7 @@ msgid "Caskade's now: {args}"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Catalogue"
 msgstr ""
 
@@ -3571,6 +3581,7 @@ msgid "Check every (hours)"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Check for add-on updates when Settings opens"
 msgstr ""
 
@@ -3582,6 +3593,7 @@ msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Check for updates"
 msgstr ""
 
@@ -3636,6 +3648,7 @@ msgid "Checking the backup…"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Checking the download…"
 msgstr ""
 
@@ -3666,6 +3679,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/general.rs
 #: apps/native/src/settings/streaming.rs
 msgid "Checking…"
@@ -3910,6 +3924,7 @@ msgstr ""
 #: apps/native/src/flows/pairing.rs
 #: apps/native/src/game/launch.rs
 #: apps/native/src/library/selection_bar.rs
+#: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/plugins.rs
 #: apps/native/src/settings/reset.rs
 #: apps/native/src/settings/streaming.rs
@@ -4026,6 +4041,7 @@ msgid "compact, comfortable"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Compatibility"
 msgstr ""
 
@@ -4161,6 +4177,7 @@ msgstr ""
 #: apps/desktop/src/shell/AppShell.tsx
 #: apps/desktop/src/shell/console/ModeToggle.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/general.rs
 msgid "Console mode"
 msgstr ""
@@ -4456,6 +4473,7 @@ msgid "CTRL K"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Curated plugins and themes. Each says whether it fits this device."
 msgstr ""
 
@@ -4699,6 +4717,7 @@ msgstr ""
 
 #. placeholder {0}: entry.deprecated
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Deprecated: {0}"
 msgstr ""
 
@@ -4727,6 +4746,7 @@ msgid "Desktop"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Desktop and console modes"
 msgstr ""
 
@@ -4762,6 +4782,7 @@ msgstr ""
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/shell/AppShell.tsx
 #: apps/desktop/src/shell/console/ConsoleSidebar.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Desktop mode"
 msgstr ""
 
@@ -4784,11 +4805,13 @@ msgstr ""
 
 #. placeholder {0}: entry.name
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Details of {0}"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/plugins.rs
 msgid "Details…"
 msgstr ""
@@ -4999,6 +5022,7 @@ msgstr ""
 #. The stage a failed install stopped at
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Download"
 msgstr ""
 
@@ -5084,6 +5108,7 @@ msgstr ""
 
 #. placeholder {0}: Math.round((progress.received * 100) / Math.max(1, progress.total))
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Downloading… {0}%"
 msgstr ""
 
@@ -6733,6 +6758,7 @@ msgid "In progress"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "In use"
 msgstr ""
 
@@ -6771,6 +6797,7 @@ msgid "Insert {variable}: {description}"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Install"
 msgstr ""
 
@@ -6813,6 +6840,7 @@ msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/plugins.rs
 msgid "Install and allow"
 msgstr ""
@@ -6976,6 +7004,7 @@ msgid "Installed"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Installed {installedVersion}"
 msgstr ""
 
@@ -7043,6 +7072,7 @@ msgid "Installing copies yours in."
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Installing needs a connection."
 msgstr ""
 
@@ -7066,6 +7096,7 @@ msgstr ""
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/game/PortsPanel.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/general.rs
 msgid "Installing…"
 msgstr ""
@@ -7191,16 +7222,19 @@ msgstr ""
 
 #. placeholder {0}: failure.message
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "It didn't install, and the previous version is back: {0}"
 msgstr ""
 
 #. placeholder {0}: failure.message
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "It didn't install; try again later: {0}"
 msgstr ""
 
 #. placeholder {0}: failure.message
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "It didn't install: {0}"
 msgstr ""
 
@@ -7362,10 +7396,12 @@ msgid "Keep files and remove from library"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Keep it"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Keep its settings and data for a reinstall"
 msgstr ""
 
@@ -7750,6 +7786,7 @@ msgid "Links"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Linux, Windows and macOS"
 msgstr ""
 
@@ -7900,6 +7937,7 @@ msgid "Loading similar games…"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Loading the catalogue…"
 msgstr ""
 
@@ -8337,6 +8375,7 @@ msgid "Missing: {path}"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Modes"
 msgstr ""
 
@@ -9069,6 +9108,7 @@ msgid "Not checked yet."
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Not compatible"
 msgstr ""
 
@@ -9230,6 +9270,7 @@ msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/plugins.rs
 msgid "Nothing beyond its own storage"
 msgstr ""
@@ -9250,6 +9291,7 @@ msgid "Nothing ignored."
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Nothing in the catalogue matches."
 msgstr ""
 
@@ -9371,6 +9413,7 @@ msgid "Offer it again"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Offer this version again"
 msgstr ""
 
@@ -9420,6 +9463,7 @@ msgstr ""
 
 #. placeholder {0}: formatDateTime(status.fetchedAtMs)
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Offline: showing the catalogue from {0}. Installing needs a connection."
 msgstr ""
 
@@ -9458,10 +9502,12 @@ msgid "On {device}, someone signed in to Caskade as an admin enters this code in
 msgstr ""
 
 #: apps/desktop/src/components/addons/DeviceOffers.tsx
+#: apps/native/src/settings/addons.rs
 msgid "On {devices}"
 msgstr ""
 
 #: apps/desktop/src/components/addons/DeviceOffers.tsx
+#: apps/native/src/settings/addons.rs
 msgid "On {devices}. It isn't in the catalogue, so install it there the way it came."
 msgstr ""
 
@@ -9486,6 +9532,7 @@ msgstr ""
 #: apps/desktop/src/components/addons/DeviceOffers.tsx
 #: apps/desktop/src/views/game/OtherDevices.tsx
 #: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
+#: apps/native/src/settings/addons.rs
 msgid "On your other devices"
 msgstr ""
 
@@ -10378,10 +10425,12 @@ msgstr ""
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
 #: apps/native/src/frame/notifications.rs
+#: apps/native/src/settings/addons.rs
 msgid "Plugin"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Plugin and theme catalogue"
 msgstr ""
 
@@ -10403,6 +10452,7 @@ msgstr ""
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/plugins/PluginViews.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Plugins"
 msgstr ""
 
@@ -11743,6 +11793,7 @@ msgid "Runs it once now, as a launch would, without a game starting."
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Runs on"
 msgstr ""
 
@@ -12112,6 +12163,7 @@ msgid "schedule, daily, weekly, backups to keep"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Screenshot"
 msgstr ""
 
@@ -12121,6 +12173,7 @@ msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/game/Screenshots.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Screenshots"
 msgstr ""
 
@@ -12206,6 +12259,7 @@ msgid "Search only the custom paths listed below."
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Search plugins and themes"
 msgstr ""
 
@@ -12224,6 +12278,7 @@ msgid "Search the catalog"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Search the catalogue"
 msgstr ""
 
@@ -12244,6 +12299,7 @@ msgid "Searching… {found} found so far"
 msgstr ""
 
 #: apps/desktop/src/components/addons/DeviceOffers.tsx
+#: apps/native/src/settings/addons.rs
 msgid "See {name}"
 msgstr ""
 
@@ -12252,6 +12308,7 @@ msgid "See all results for {input}"
 msgstr ""
 
 #: apps/desktop/src/components/addons/DeviceOffers.tsx
+#: apps/native/src/settings/addons.rs
 msgid "See it…"
 msgstr ""
 
@@ -12562,6 +12619,7 @@ msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Show"
 msgstr ""
 
@@ -12645,6 +12703,7 @@ msgstr ""
 #. placeholder {0}: formatDateTime(status.fetchedAtMs)
 #. placeholder {1}: status.error
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Showing the catalogue from {0}; the last check failed: {1}"
 msgstr ""
 
@@ -12788,6 +12847,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 #: apps/native/src/game/launch.rs
+#: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/streaming.rs
 msgid "Skip this version"
 msgstr ""
@@ -13002,6 +13062,7 @@ msgstr ""
 #: apps/native/src/game_menu/play.rs
 #: apps/native/src/game_menu/quick_look.rs
 #: apps/native/src/library/web.rs
+#: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/streaming.rs
 #: apps/native/src/ui/game_card.rs
 #: apps/native/src/ui/game_row.rs
@@ -13580,14 +13641,17 @@ msgstr ""
 
 #. placeholder {0}: status.error
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "The catalogue couldn't be fetched: {0}"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "The catalogue hasn't been fetched yet."
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "The catalogue is empty."
 msgstr ""
 
@@ -13855,6 +13919,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/appearance.rs
 #: apps/native/src/settings/search.rs
 msgid "Theme"
@@ -13881,6 +13946,7 @@ msgstr ""
 
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Themes"
 msgstr ""
 
@@ -14273,6 +14339,7 @@ msgstr ""
 #: apps/native/src/game/page.rs
 #: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/view.rs
+#: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/general.rs
 #: apps/native/src/settings/streaming.rs
 #: apps/native/src/ui/failure.rs
@@ -14357,6 +14424,7 @@ msgstr ""
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
 #: apps/native/src/game_menu/dialogs.rs
+#: apps/native/src/settings/addons.rs
 msgid "Uninstall"
 msgstr ""
 
@@ -14373,11 +14441,13 @@ msgstr ""
 
 #. placeholder {0}: entry.name
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Uninstall {0}?"
 msgstr ""
 
 #. placeholder {0}: entry.name
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Uninstall {0}? If it's the theme in use, the default theme takes over."
 msgstr ""
 
@@ -14390,6 +14460,7 @@ msgstr ""
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 #: apps/native/src/game_menu/menu.rs
+#: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/plugins.rs
 msgid "Uninstall…"
 msgstr ""
@@ -14611,6 +14682,7 @@ msgstr ""
 #. placeholder {0}: release?.version ?? ""
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/components/addons/AddonDetails.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Update to {0}"
 msgstr ""
 
@@ -14626,6 +14698,7 @@ msgstr ""
 
 #. placeholder {0}: formatDateTime(status.fetchedAtMs)
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Updated {0}."
 msgstr ""
 
@@ -14721,6 +14794,7 @@ msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Use this theme"
 msgstr ""
 
@@ -14827,6 +14901,7 @@ msgstr ""
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 #: apps/native/src/settings/about.rs
+#: apps/native/src/settings/addons.rs
 msgid "Version"
 msgstr ""
 
@@ -15121,6 +15196,7 @@ msgstr ""
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
 #: apps/native/src/game/launch.rs
+#: apps/native/src/settings/addons.rs
 msgid "What's new"
 msgstr ""
 
@@ -15469,6 +15545,7 @@ msgid "Your other devices can start a game here, as Play here would."
 msgstr ""
 
 #: apps/desktop/src/components/addons/DeviceOffers.tsx
+#: apps/native/src/settings/addons.rs
 msgid "Your other devices have these. Nothing installs here until you choose to."
 msgstr ""
 
