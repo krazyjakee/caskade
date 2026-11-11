@@ -307,3 +307,94 @@ pub const TRANSFER: Entry = Entry {
         "A game copied between two of the user's devices (#233): its title, the other device, how it is reached and its progress. `data-status` is `running`, `waitingDirect` (game files wait for a direct path), `done` or `failed`.",
     )
 };
+
+pub const PIN_PAD: Entry = Entry {
+    parts: &[
+        ("title", "What the PIN is for."),
+        ("field", "The PIN, as dots."),
+        ("keys", "The number pad."),
+        ("key", "A digit."),
+        ("delete", "Deletes the last digit."),
+        ("submit", "Confirms the PIN."),
+        ("message", "Why the PIN was refused, or how long to wait."),
+    ],
+    states: &[("data-status", &["ready", "wrong", "locked"])],
+    ..Entry::new(
+        "pin-pad",
+        "PinPad (apps/native/src/flows/pin_pad.rs)",
+        Source::App,
+        "PIN entry: a field for keys and a number pad for a controller (A types a digit, B deletes, Start confirms). A wrong PIN shakes the field and clears it; after too many, `locked` counts the wait down.",
+    )
+};
+
+pub const ACCOUNT_LIST: Entry = Entry {
+    parts: &[
+        ("account", "One account's row."),
+        ("avatar", "Its picture (an `avatar`)."),
+        ("name", "Its name; the signed-in account's says so."),
+        (
+            "details",
+            "Its role, whether a PIN locks it, and what it may do.",
+        ),
+        ("edit", "Opens the `account-editor` (a `button`)."),
+        (
+            "delete",
+            "Asks before deleting the account and its collections (a `button`).",
+        ),
+    ],
+    contains: &["avatar", "button"],
+    ..Entry::new(
+        "account-list",
+        "AccountsSettings (apps/native/src/settings/accounts.rs)",
+        Source::App,
+        "Settings → Accounts, for admins: every account, with Edit and Delete.",
+    )
+};
+
+pub const ACCOUNT_EDITOR: Entry = Entry {
+    parts: &[
+        (
+            "avatars",
+            "The avatar choice (an `avatar-picker`) and its label.",
+        ),
+        (
+            "access",
+            "A standard account's permissions: Install games, one switch per Settings section, the maximum age rating and unrated games.",
+        ),
+    ],
+    contains: &[
+        "text-field",
+        "avatar-picker",
+        "setting-row",
+        "segmented",
+        "switch",
+        "select",
+        "button",
+    ],
+    ..Entry::new(
+        "account-editor",
+        "AccountEditor (apps/native/src/settings/accounts.rs)",
+        Source::App,
+        "The dialog that adds or changes an account: its name, avatar, role and PIN, and for a standard account what it may change and its age limit.",
+    )
+};
+
+pub const ACCOUNT_PROFILE: Entry = Entry {
+    parts: &[
+        (
+            "avatars",
+            "The avatar choice (an `avatar-picker`) and its label.",
+        ),
+        (
+            "pin",
+            "The PIN's row: set, change or remove it, after the current PIN.",
+        ),
+    ],
+    contains: &["text-field", "avatar-picker", "setting-row", "button"],
+    ..Entry::new(
+        "account-profile",
+        "ProfileSettings (apps/native/src/settings/accounts.rs)",
+        Source::App,
+        "Settings → My profile: the signed-in account's own name, avatar and PIN.",
+    )
+};

@@ -679,6 +679,7 @@ mod guard {
 }
 
 mod about;
+mod accounts;
 mod addons;
 mod appearance;
 mod backup;

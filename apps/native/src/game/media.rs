@@ -261,8 +261,8 @@ pub fn Videos(title: String, videos: Vec<IgdbVideo>) -> Element {
 }
 
 /// The board shown when none is preferred, and every known one in order.
-const DEFAULT_BOARD: &str = "pegi";
-const BOARDS: &[(&str, &str)] = &[
+pub(crate) const DEFAULT_BOARD: &str = "pegi";
+pub(crate) const BOARDS: &[(&str, &str)] = &[
     ("pegi", "PEGI"),
     ("esrb", "ESRB"),
     ("usk", "USK"),
@@ -272,7 +272,7 @@ const BOARDS: &[(&str, &str)] = &[
     ("classind", "ClassInd"),
 ];
 
-fn board_name(board: &str) -> String {
+pub(crate) fn board_name(board: &str) -> String {
     BOARDS
         .iter()
         .find(|(id, _)| *id == board)

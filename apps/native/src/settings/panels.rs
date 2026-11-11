@@ -63,6 +63,12 @@ pub fn panel(tab: &'static str, sub: Option<String>) -> Element {
         "backup" => rsx! {
             super::backup::BackupSettings {}
         },
+        "accounts" => rsx! {
+            super::accounts::AccountsSettings {}
+        },
+        "profile" => rsx! {
+            super::accounts::ProfileSettings {}
+        },
         _ => rsx! {
             Pending {}
         },

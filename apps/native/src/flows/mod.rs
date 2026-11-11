@@ -14,6 +14,7 @@ pub mod folder_browser;
 pub mod manual_game;
 pub mod pairing;
 pub mod paths;
+pub mod pin_pad;
 pub mod receive_share;
 pub mod remote_play;
 pub mod scripts;
@@ -46,6 +47,10 @@ pub const ANATOMY: &[Entry] = &[
     anatomy::PEER_LINK,
     anatomy::PAIRED_DEVICE,
     anatomy::TRANSFER,
+    anatomy::PIN_PAD,
+    anatomy::ACCOUNT_LIST,
+    anatomy::ACCOUNT_EDITOR,
+    anatomy::ACCOUNT_PROFILE,
 ];
 
 /// The flows that come over any view: pairing (#226), games other devices

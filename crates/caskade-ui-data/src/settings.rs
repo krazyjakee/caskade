@@ -50,6 +50,11 @@ impl Settings {
         Self::new(services.settings.clone(), services.accounts.clone())
     }
 
+    /// The accounts, for Settings → Accounts and My profile.
+    pub fn accounts(&self) -> crate::accounts::Accounts {
+        crate::accounts::Accounts::new(self.accounts.clone())
+    }
+
     /// Every section, with its schema and defaults. A plugin's titles stay
     /// in its own words until the native UI hosts plugins (#108).
     pub fn sections(&self) -> Result<Vec<SettingsSection>> {

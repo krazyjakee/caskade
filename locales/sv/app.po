@@ -56,6 +56,7 @@ msgstr "(nu en del av {into})"
 
 #. After the signed-in account's name
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "(you)"
 msgstr "(du)"
 
@@ -927,6 +928,7 @@ msgid "{name}'s achievements are private on {provider}. Make your game details p
 msgstr "{name}s prestationer är privata på {provider}. Gör dina speldetaljer offentliga där och uppdatera sedan."
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "{name}'s collections go with it. Games, installs and play history stay."
 msgstr "{name}s samlingar försvinner med kontot. Spel, installationer och spelhistorik finns kvar."
 
@@ -1710,14 +1712,17 @@ msgid "A path, a .desktop, .lnk or .url shortcut, or a URI like steam://rungamei
 msgstr "En sökväg, en .desktop-, .lnk- eller .url-genväg eller en URI som steam://rungameid/620. Eller släpp en fil här."
 
 #: apps/desktop/src/components/accounts/PinPad.tsx
+#: apps/native/src/flows/pin_pad.rs
 msgid "A PIN is 4 to 8 digits."
 msgstr "En PIN består av 4 till 8 siffror."
 
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#: apps/native/src/settings/pin.rs
 msgid "A PIN locks this account."
 msgstr "En PIN låser det här kontot."
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "A PIN locks this account. Changes at once."
 msgstr "En PIN låser det här kontot. Gäller direkt."
 
@@ -1881,7 +1886,8 @@ msgid "Accounts"
 msgstr "Konton"
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
-#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Accounts"
 msgstr "Konton"
@@ -1893,6 +1899,7 @@ msgid "Accounts and PINs"
 msgstr "Konton och PIN-koder"
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Accounts couldn't be loaded"
 msgstr "Konton kunde inte läsas in"
 
@@ -1991,7 +1998,7 @@ msgstr "Aktivitet"
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 #: apps/native/src/library/bulk_edit.rs apps/native/src/library/web.rs
-#: apps/native/src/settings/streaming.rs
+#: apps/native/src/settings/accounts.rs apps/native/src/settings/streaming.rs
 msgid "Add"
 msgstr "Lägg till"
 
@@ -2042,10 +2049,12 @@ msgid "Add a storage location in Settings → Storage."
 msgstr "Lägg till en lagringsplats i Inställningar → Lagring."
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Add account"
 msgstr "Lägg till konto"
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Add account…"
 msgstr "Lägg till konto…"
 
@@ -2260,6 +2269,7 @@ msgstr "Anpassa temat efter tycke och smak."
 #: apps/desktop/src/shell/accounts/AccountMenu.tsx
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgctxt "account role"
 msgid "Admin"
 msgstr "Administratör"
@@ -2305,7 +2315,7 @@ msgstr "Efter att spelet startat"
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/accounts.rs apps/native/src/settings/search.rs
 msgid "Age ratings"
 msgstr "Åldersgränser"
 
@@ -2414,6 +2424,7 @@ msgid "Amber"
 msgstr "Bärnsten"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "An admin changes everything, other accounts included."
 msgstr "En administratör kan ändra allt, även andra konton."
 
@@ -2538,6 +2549,7 @@ msgid "Any year"
 msgstr "Valfritt år"
 
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#: apps/native/src/settings/pin.rs
 msgid "Anyone can then sign in to {name} without a PIN. You can set a new one later."
 msgstr "Vem som helst kan då logga in på {name} utan PIN. Du kan ange en ny senare."
 
@@ -2584,7 +2596,7 @@ msgstr "Utseende"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/appearance.rs apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Appearance"
@@ -2849,6 +2861,7 @@ msgid "Back"
 msgstr "Tillbaka"
 
 #: apps/desktop/src/components/accounts/PinPad.tsx
+#: apps/native/src/flows/pin_pad.rs
 msgctxt "PIN pad"
 msgid "Back"
 msgstr "Tillbaka"
@@ -3215,10 +3228,10 @@ msgstr "Avbryt inloggningen"
 #: apps/native/src/game_menu/play.rs apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/selection_bar.rs apps/native/src/library/web.rs
-#: apps/native/src/settings/backup.rs apps/native/src/settings/plugins.rs
-#: apps/native/src/settings/reset.rs apps/native/src/settings/storage.rs
-#: apps/native/src/settings/stores.rs apps/native/src/settings/streaming.rs
-#: apps/native/src/ui/dialog.rs
+#: apps/native/src/settings/accounts.rs apps/native/src/settings/backup.rs
+#: apps/native/src/settings/plugins.rs apps/native/src/settings/reset.rs
+#: apps/native/src/settings/storage.rs apps/native/src/settings/stores.rs
+#: apps/native/src/settings/streaming.rs apps/native/src/ui/dialog.rs
 msgid "Cancel"
 msgstr "Avbryt"
 
@@ -3621,6 +3634,7 @@ msgid "Change IGDB game"
 msgstr "Byt IGDB-spel"
 
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#: apps/native/src/settings/pin.rs
 msgid "Change PIN…"
 msgstr "Byt PIN…"
 
@@ -3841,6 +3855,7 @@ msgid "Choose a launch target"
 msgstr "Välj vad som ska startas"
 
 #: apps/desktop/src/views/settings/accounts/PinDialog.tsx
+#: apps/native/src/settings/pin.rs
 msgid "Choose a new PIN for {name}"
 msgstr "Välj en ny PIN för {name}"
 
@@ -4172,6 +4187,7 @@ msgid "Configure emulators, choose platform defaults and find your ROM collectio
 msgstr "Konfigurera emulatorer, välj standardval för plattformar och hitta din ROM-samling."
 
 #: apps/desktop/src/components/accounts/PinPad.tsx
+#: apps/native/src/flows/pin_pad.rs
 msgctxt "PIN pad"
 msgid "Confirm"
 msgstr "Bekräfta"
@@ -4760,6 +4776,7 @@ msgstr "Standardvalen gäller för kompatibla spel som använder Plattformens st
 
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Delete"
 msgstr "Radera"
 
@@ -4771,6 +4788,7 @@ msgstr "Radera"
 
 #. Deletes the last digit
 #: apps/desktop/src/components/accounts/PinPad.tsx
+#: apps/native/src/flows/pin_pad.rs
 msgctxt "PIN pad"
 msgid "Delete"
 msgstr "Radera"
@@ -4783,11 +4801,13 @@ msgid "Delete “{0}”?"
 msgstr "Radera ”{0}”?"
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Delete {name}"
 msgstr "Radera {name}"
 
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Delete {name}?"
 msgstr "Radera {name}?"
 
@@ -4795,12 +4815,13 @@ msgstr "Radera {name}?"
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
-#: apps/native/src/flows/scripts.rs
+#: apps/native/src/flows/scripts.rs apps/native/src/settings/accounts.rs
 msgid "Delete…"
 msgstr "Radera…"
 
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Deleting…"
 msgstr "Raderar…"
 
@@ -5291,6 +5312,7 @@ msgstr "Redigera"
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 #: apps/native/src/library/collection_dialog.rs
+#: apps/native/src/settings/accounts.rs
 msgid "Edit {name}"
 msgstr "Redigera {name}"
 
@@ -5336,7 +5358,7 @@ msgstr "Redigera server"
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
-#: apps/native/src/game_menu/menu.rs
+#: apps/native/src/game_menu/menu.rs apps/native/src/settings/accounts.rs
 msgid "Edit…"
 msgstr "Redigera…"
 
@@ -5372,7 +5394,8 @@ msgid "Emulation"
 msgstr "Emulering"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
-#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Emulation"
 msgstr "Emulering"
@@ -5491,6 +5514,7 @@ msgid "emulators, emulation, ROMs, retro, consoles, platforms, BIOS, firmware, R
 msgstr "emulatorer, emulering, ROM, retro, konsoler, plattformar, BIOS, firmware, RetroArch, kärnor, skannrar, RomM, profiler"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Emulators, ROM scanners, BIOS files and RomM servers."
 msgstr "Emulatorer, ROM-skannrar, BIOS-filer och RomM-servrar."
 
@@ -5526,6 +5550,7 @@ msgid "Enter"
 msgstr "Enter"
 
 #: apps/desktop/src/views/settings/accounts/PinDialog.tsx
+#: apps/native/src/settings/pin.rs
 msgid "Enter {name}'s current PIN"
 msgstr "Ange nuvarande PIN för {name}"
 
@@ -5560,6 +5585,7 @@ msgid "Enter the code {device} shows to let it play this device's games."
 msgstr "Ange koden som {device} visar för att låta den spela den här enhetens spel."
 
 #: apps/desktop/src/views/settings/accounts/PinDialog.tsx
+#: apps/native/src/settings/pin.rs
 msgid "Enter the new PIN again"
 msgstr "Ange den nya PIN-koden igen"
 
@@ -5931,6 +5957,7 @@ msgid "For each game. The newest stay, and so does any save that isn't settled b
 msgstr "För varje spel. De nyaste stannar kvar, och så gör alla sparfiler som enheterna inte har enats om än."
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "For every account. Age limits are set on each account."
 msgstr "För alla konton. Åldersgränser ställs in för varje konto."
 
@@ -6281,6 +6308,7 @@ msgid "Games owned by other launchers stay in their launcher locations."
 msgstr "Spel som tillhör andra startprogram stannar där deras startprogram har dem."
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Games rated above it need an admin's PIN."
 msgstr "Spel med högre åldersgräns kräver en administratörs PIN."
 
@@ -6345,8 +6373,8 @@ msgstr "Spel, speltid, samlingar, ändringar, startåtgärder, konton och instä
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
-#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/general.rs
-#: apps/native/src/settings/mod.rs
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/general.rs apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "General"
 msgstr "Allmänt"
@@ -6648,6 +6676,7 @@ msgid "How games are shown in grids."
 msgstr "Hur spel visas i rutnät."
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "How games download and install, and torrent links."
 msgstr "Hur spel laddas ner och installeras, och torrentlänkar."
 
@@ -7008,6 +7037,7 @@ msgid "Install game from"
 msgstr "Installera spel från"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Install games"
 msgstr "Installera spel"
 
@@ -7068,6 +7098,7 @@ msgid "install, installers, downloads, torrents, magnet links, Wine, Proton, com
 msgstr "installera, installationsprogram, nedladdningar, torrenter, magnetlänkar, Wine, Proton, kompatibilitet"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Install, uninstall and move games. Updates run for everyone."
 msgstr "Installera, avinstallera och flytta spel. Uppdateringar körs för alla."
 
@@ -7176,7 +7207,8 @@ msgid "Installer"
 msgstr "Installationsprogram"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
-#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Installer"
 msgstr "Installationsprogram"
@@ -7248,6 +7280,7 @@ msgid "Installs"
 msgstr "Installationer"
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgctxt "account details"
 msgid "installs games"
 msgstr "installerar spel"
@@ -7621,6 +7654,7 @@ msgid "Language & Region"
 msgstr "Språk och region"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Language, startup, closing and updates."
 msgstr "Språk, start, stängning och uppdateringar."
 
@@ -7721,7 +7755,7 @@ msgstr "Startprogram"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/launchers.rs apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Launchers"
@@ -7832,7 +7866,7 @@ msgstr "biblioteksändringar"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
-#: apps/desktop/src/views/SettingsView.tsx
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/discovery.rs apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Library Discovery"
@@ -7960,6 +7994,7 @@ msgid "Loaded in place from its folder and reloaded on change; not installed"
 msgstr "Läses in direkt från sin mapp och läses in igen vid ändringar; inte installerat"
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Loading accounts…"
 msgstr "Läser in konton…"
 
@@ -8076,6 +8111,7 @@ msgid "Loading the IGDB match…"
 msgstr "Läser in IGDB-matchningen…"
 
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Loading your profile…"
 msgstr "Läser in din profil…"
 
@@ -8408,6 +8444,7 @@ msgid "Maximize"
 msgstr "Maximera"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Maximum age rating"
 msgstr "Högsta åldersgräns"
 
@@ -8619,7 +8656,8 @@ msgstr "Flyttar…"
 
 #: apps/desktop/src/shell/accounts/AccountMenu.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
-#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "My profile"
 msgstr "Min profil"
@@ -8634,7 +8672,7 @@ msgstr "–"
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/accounts.rs apps/native/src/settings/search.rs
 msgctxt "account"
 msgid "Name"
 msgstr "Namn"
@@ -8990,6 +9028,7 @@ msgid "No limit"
 msgstr "Ingen gräns"
 
 #: apps/desktop/src/views/settings/accounts/ageLimits.ts
+#: apps/native/src/settings/accounts.rs
 msgctxt "age limit"
 msgid "No limit"
 msgstr "Ingen gräns"
@@ -9021,15 +9060,18 @@ msgid "No notifications yet. New games, failed jobs and updates show here."
 msgstr "Inga aviseringar än. Nya spel, misslyckade jobb och uppdateringar visas här."
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgctxt "account details"
 msgid "no PIN"
 msgstr "ingen PIN"
 
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#: apps/native/src/settings/pin.rs
 msgid "No PIN: anyone can sign in to it."
 msgstr "Ingen PIN: vem som helst kan logga in på det."
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "No PIN: anyone can sign in to it. Changes at once."
 msgstr "Ingen PIN: vem som helst kan logga in på det. Ändras direkt."
 
@@ -10225,11 +10267,12 @@ msgstr "bild"
 #: apps/desktop/src/onboarding/AccountStep.tsx
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/pin.rs apps/native/src/settings/search.rs
 msgid "PIN"
 msgstr "PIN"
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgctxt "account details"
 msgid "PIN"
 msgstr "PIN"
@@ -10604,12 +10647,14 @@ msgid "Plugins"
 msgstr "Tillägg"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
-#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Plugins"
 msgstr "Tillägg"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Plugins and add-on themes, and what they may do."
 msgstr "Tillägg och tilläggsteman, och vad de får göra."
 
@@ -10878,7 +10923,7 @@ msgstr "Betygsatt"
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/accounts.rs apps/native/src/settings/search.rs
 msgid "Rating board"
 msgstr "Klassificeringsorgan"
 
@@ -11326,6 +11371,7 @@ msgid "Remove {name}?"
 msgstr "Ta bort {name}?"
 
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#: apps/native/src/settings/pin.rs
 msgid "Remove {name}'s PIN?"
 msgstr "Ta bort PIN för {name}?"
 
@@ -11393,10 +11439,12 @@ msgid "Remove offline copy"
 msgstr "Ta bort offlinekopia"
 
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#: apps/native/src/settings/pin.rs
 msgid "Remove PIN"
 msgstr "Ta bort PIN"
 
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#: apps/native/src/settings/pin.rs
 msgid "Remove PIN…"
 msgstr "Ta bort PIN…"
 
@@ -11436,6 +11484,7 @@ msgstr "Det går inte att ta bort spel här"
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/native/src/game_menu/dialogs.rs apps/native/src/library/web.rs
+#: apps/native/src/settings/pin.rs
 msgid "Removing…"
 msgstr "Tar bort…"
 
@@ -11746,6 +11795,7 @@ msgid "rmm_…"
 msgstr "rmm_…"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgctxt "account"
 msgid "Role"
 msgstr "Roll"
@@ -11995,7 +12045,7 @@ msgstr "Exempel-ROM: {0}"
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
 #: apps/native/src/game/emulation.rs
 #: apps/native/src/library/collection_dialog.rs
-#: apps/native/src/settings/unsaved.rs
+#: apps/native/src/settings/accounts.rs apps/native/src/settings/unsaved.rs
 msgid "Save"
 msgstr "Spara"
 
@@ -12182,8 +12232,8 @@ msgstr "Sparar dina val innan biblioteket öppnas…"
 #: apps/desktop/src/views/settings/useSettings.tsx
 #: apps/native/src/flows/scripts.rs apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/collection_dialog.rs
-#: apps/native/src/settings/devices.rs apps/native/src/settings/state.rs
-#: apps/native/src/settings/unsaved.rs
+#: apps/native/src/settings/accounts.rs apps/native/src/settings/devices.rs
+#: apps/native/src/settings/state.rs apps/native/src/settings/unsaved.rs
 msgid "Saving…"
 msgstr "Sparar…"
 
@@ -12578,6 +12628,7 @@ msgid "Set IGDB game"
 msgstr "Ange IGDB-spel"
 
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#: apps/native/src/settings/pin.rs
 msgid "Set PIN…"
 msgstr "Ange PIN…"
 
@@ -12669,6 +12720,7 @@ msgstr "Inställningsavsnitt"
 
 #. Over the Settings sections a standard account may change
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Settings sections it can change"
 msgstr "Inställningsavsnitt det kan ändra"
 
@@ -12878,6 +12930,7 @@ msgid "Sign in to an account that may do this."
 msgstr "Logga in på ett konto som får göra det här."
 
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Sign in to change your profile."
 msgstr "Logga in för att ändra din profil."
 
@@ -12920,10 +12973,12 @@ msgid "Sign-ins stay on each device. Sign in here to import this server's games.
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Signed in as {name}, a standard account."
 msgstr "Inloggad som {name}, ett standardkonto."
 
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Signed in as {name}, an admin."
 msgstr "Inloggad som {name}, en administratör."
 
@@ -13120,6 +13175,7 @@ msgstr "Delas upp i argument som i ett skal, men inget skal körs. Sätt citatte
 #: apps/desktop/src/shell/accounts/AccountMenu.tsx
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgctxt "account role"
 msgid "Standard"
 msgstr "Standard"
@@ -13390,7 +13446,8 @@ msgid "Storage"
 msgstr "Lagring"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
-#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Storage"
 msgstr "Lagring"
@@ -13728,11 +13785,13 @@ msgid "That isn't available in this copy of Caskade."
 msgstr "Den här butiken är inte tillgänglig i den här versionen av Caskade."
 
 #: apps/desktop/src/components/accounts/PinPad.tsx
+#: apps/native/src/flows/pin_pad.rs
 msgid "That PIN isn't right."
 msgstr "Den PIN-koden stämmer inte."
 
 #. Fills in for a new account's name: 'Choose a new PIN for the account'
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "the account"
 msgstr "kontot"
 
@@ -13954,6 +14013,7 @@ msgid "The output was long; its end is shown."
 msgstr "Utdata var lång; slutet visas."
 
 #: apps/desktop/src/views/settings/accounts/PinDialog.tsx
+#: apps/native/src/settings/pin.rs
 msgid "The PINs don't match. Try again."
 msgstr "PIN-koderna stämmer inte överens. Försök igen."
 
@@ -13962,6 +14022,7 @@ msgid "The profile decides which files match. Imported games launch with the cho
 msgstr "Profilen avgör vilka filer som matchar. Importerade spel startas med valet nedan."
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "The ratings games show, and the steps age limits are picked from."
 msgstr "Klassificeringarna som spel visar, och stegen som åldersgränser väljs bland."
 
@@ -14091,6 +14152,7 @@ msgid "Theme, accent and layout."
 msgstr "Tema, accentfärg och layout."
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Theme, look, motion and custom CSS."
 msgstr "Tema, utseende, rörelse och egen CSS."
 
@@ -14414,6 +14476,7 @@ msgid "Tokens"
 msgstr "Token"
 
 #: apps/desktop/src/components/accounts/PinPad.tsx
+#: apps/native/src/flows/pin_pad.rs
 msgid "Too many wrong PINs. Try again in {time}."
 msgstr "För många felaktiga PIN-koder. Försök igen om {time}."
 
@@ -14551,6 +14614,7 @@ msgstr "Skriv"
 
 #. Types the focused digit
 #: apps/desktop/src/components/accounts/PinPad.tsx
+#: apps/native/src/flows/pin_pad.rs
 msgctxt "PIN pad"
 msgid "Type"
 msgstr "Skriv"
@@ -14564,6 +14628,7 @@ msgid "Unable to confirm installation."
 msgstr "Det gick inte att bekräfta installationen."
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Under an age limit, games without a rating need an admin's PIN too."
 msgstr "Med en åldersgräns behöver även spel utan klassificering en administratörs PIN."
 
@@ -14716,6 +14781,7 @@ msgid "Unpin"
 msgstr "Lossa"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Unrated games need a PIN"
 msgstr "Spel utan klassificering kräver PIN"
 
@@ -14764,6 +14830,7 @@ msgstr "Upp en mapp"
 
 #. An age limit no step of the chosen rating board matches: 'Up to 13+'
 #: apps/desktop/src/views/settings/accounts/ageLimits.ts
+#: apps/native/src/settings/accounts.rs
 msgid "Up to {age}+"
 msgstr "Upp till {age}+"
 
@@ -15317,6 +15384,7 @@ msgstr "Vad som händer när Caskade öppnas."
 
 #. Over a standard account's permissions
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "What it can do"
 msgstr "Vad kontot kan göra"
 
@@ -15335,6 +15403,7 @@ msgid "What it starts"
 msgstr "Vad det startar"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "What scans look for, their folders and ignored results."
 msgstr "Vad skanningar letar efter, deras mappar och ignorerade resultat."
 
@@ -15417,6 +15486,7 @@ msgid "Where games are installed"
 msgstr "Var spel installeras"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Where games install, and the default location."
 msgstr "Var spel installeras, och standardplatsen."
 
@@ -15469,6 +15539,7 @@ msgid "Which launchers are scanned: <0>Launchers</0>"
 msgstr "Vilka startprogram som skannas: <0>Startprogram</0>"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Which launchers' games join the library."
 msgstr "Vilka startprograms spel som läggs till i biblioteket."
 
@@ -15491,6 +15562,7 @@ msgid "Who plays here, their age limits and PINs. Wrong PIN attempts are counted
 msgstr "Vilka som spelar här, deras åldersgränser och PIN-koder. Felaktiga PIN-försök räknas på varje enhet."
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Who uses Caskade here, and what each can change."
 msgstr "Vem som använder Caskade här, och vad var och en kan ändra."
 

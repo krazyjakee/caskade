@@ -1546,7 +1546,7 @@ Contains: [`avatar`](#avatar), [`pin-pad`](#pin-pad), [`window-controls`](#windo
 
 ## `pin-pad`
 
-PIN entry: a field for keys and a number pad for a controller (A types a digit, B deletes, Start confirms). A wrong PIN shakes the field and clears it; after too many, `locked` counts the wait down. Rendered by PinPad (app).
+PIN entry: a field for keys and a number pad for a controller (A types a digit, B deletes, Start confirms). A wrong PIN shakes the field and clears it; after too many, `locked` counts the wait down. Rendered by PinPad (apps/native/src/flows/pin_pad.rs); in the webview, PinPad (app).
 
 Root: `[data-cs="pin-pad"]`
 
@@ -1580,7 +1580,7 @@ Contains: [`avatar`](#avatar)
 
 ## `account-list`
 
-Settings → Accounts, for admins: every account, with Edit and Delete. Rendered by AccountsSettings (app).
+Settings → Accounts, for admins: every account, with Edit and Delete. Rendered by AccountsSettings (apps/native/src/settings/accounts.rs); in the webview, AccountsSettings (app).
 
 Root: `[data-cs="account-list"]`
 
@@ -1597,7 +1597,7 @@ Contains: [`avatar`](#avatar), [`button`](#button)
 
 ## `account-editor`
 
-The dialog that adds or changes an account: its name, avatar, role and PIN, and for a standard account what it may change and its age limit. Rendered by AccountEditor (app).
+The dialog that adds or changes an account: its name, avatar, role and PIN, and for a standard account what it may change and its age limit. Rendered by AccountEditor (apps/native/src/settings/accounts.rs); in the webview, AccountEditor (app).
 
 Root: `[data-cs="account-editor"]`
 
@@ -1610,7 +1610,7 @@ Contains: [`text-field`](#text-field), [`avatar-picker`](#avatar-picker), [`sett
 
 ## `account-profile`
 
-Settings → My profile: the signed-in account's own name, avatar and PIN. Rendered by ProfileSettings (app).
+Settings → My profile: the signed-in account's own name, avatar and PIN. Rendered by ProfileSettings (apps/native/src/settings/accounts.rs); in the webview, ProfileSettings (app).
 
 Root: `[data-cs="account-profile"]`
 

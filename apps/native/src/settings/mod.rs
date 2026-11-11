@@ -13,6 +13,7 @@
 //! what they will hold.
 
 mod about;
+mod accounts;
 pub(crate) mod addons;
 mod appearance;
 mod backup;
@@ -22,6 +23,7 @@ mod drafts;
 mod general;
 mod launchers;
 mod panels;
+mod pin;
 mod plugins;
 mod reset;
 mod schema;

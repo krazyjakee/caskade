@@ -54,6 +54,7 @@ msgstr ""
 
 #. After the signed-in account's name
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "(you)"
 msgstr ""
 
@@ -930,6 +931,7 @@ msgid "{name}'s achievements are private on {provider}. Make your game details p
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "{name}'s collections go with it. Games, installs and play history stay."
 msgstr ""
 
@@ -1715,14 +1717,17 @@ msgid "A path, a .desktop, .lnk or .url shortcut, or a URI like steam://rungamei
 msgstr ""
 
 #: apps/desktop/src/components/accounts/PinPad.tsx
+#: apps/native/src/flows/pin_pad.rs
 msgid "A PIN is 4 to 8 digits."
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#: apps/native/src/settings/pin.rs
 msgid "A PIN locks this account."
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "A PIN locks this account. Changes at once."
 msgstr ""
 
@@ -1892,6 +1897,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Accounts"
@@ -1905,6 +1911,7 @@ msgid "Accounts and PINs"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Accounts couldn't be loaded"
 msgstr ""
 
@@ -2006,6 +2013,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 #: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/web.rs
+#: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/streaming.rs
 msgid "Add"
 msgstr ""
@@ -2058,10 +2066,12 @@ msgid "Add a storage location in Settings → Storage."
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Add account"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Add account…"
 msgstr ""
 
@@ -2280,6 +2290,7 @@ msgstr ""
 #: apps/desktop/src/shell/accounts/AccountMenu.tsx
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgctxt "account role"
 msgid "Admin"
 msgstr ""
@@ -2328,6 +2339,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/search.rs
 msgid "Age ratings"
 msgstr ""
@@ -2439,6 +2451,7 @@ msgid "Amber"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "An admin changes everything, other accounts included."
 msgstr ""
 
@@ -2568,6 +2581,7 @@ msgid "Any year"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#: apps/native/src/settings/pin.rs
 msgid "Anyone can then sign in to {name} without a PIN. You can set a new one later."
 msgstr ""
 
@@ -2617,6 +2631,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/AppearanceSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/appearance.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
@@ -2885,6 +2900,7 @@ msgid "Back"
 msgstr ""
 
 #: apps/desktop/src/components/accounts/PinPad.tsx
+#: apps/native/src/flows/pin_pad.rs
 msgctxt "PIN pad"
 msgid "Back"
 msgstr ""
@@ -3272,6 +3288,7 @@ msgstr ""
 #: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/selection_bar.rs
 #: apps/native/src/library/web.rs
+#: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/backup.rs
 #: apps/native/src/settings/plugins.rs
 #: apps/native/src/settings/reset.rs
@@ -3692,6 +3709,7 @@ msgid "Change IGDB game"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#: apps/native/src/settings/pin.rs
 msgid "Change PIN…"
 msgstr ""
 
@@ -3923,6 +3941,7 @@ msgid "Choose a launch target"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/PinDialog.tsx
+#: apps/native/src/settings/pin.rs
 msgid "Choose a new PIN for {name}"
 msgstr ""
 
@@ -4272,6 +4291,7 @@ msgid "Configure emulators, choose platform defaults and find your ROM collectio
 msgstr ""
 
 #: apps/desktop/src/components/accounts/PinPad.tsx
+#: apps/native/src/flows/pin_pad.rs
 msgctxt "PIN pad"
 msgid "Confirm"
 msgstr ""
@@ -4871,6 +4891,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Delete"
 msgstr ""
 
@@ -4882,6 +4903,7 @@ msgstr ""
 
 #. Deletes the last digit
 #: apps/desktop/src/components/accounts/PinPad.tsx
+#: apps/native/src/flows/pin_pad.rs
 msgctxt "PIN pad"
 msgid "Delete"
 msgstr ""
@@ -4894,11 +4916,13 @@ msgid "Delete “{0}”?"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Delete {name}"
 msgstr ""
 
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Delete {name}?"
 msgstr ""
 
@@ -4907,11 +4931,13 @@ msgstr ""
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 #: apps/native/src/flows/scripts.rs
+#: apps/native/src/settings/accounts.rs
 msgid "Delete…"
 msgstr ""
 
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Deleting…"
 msgstr ""
 
@@ -5415,6 +5441,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 #: apps/native/src/library/collection_dialog.rs
+#: apps/native/src/settings/accounts.rs
 msgid "Edit {name}"
 msgstr ""
 
@@ -5461,6 +5488,7 @@ msgstr ""
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 #: apps/native/src/game_menu/menu.rs
+#: apps/native/src/settings/accounts.rs
 msgid "Edit…"
 msgstr ""
 
@@ -5497,6 +5525,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Emulation"
@@ -5617,6 +5646,7 @@ msgid "emulators, emulation, ROMs, retro, consoles, platforms, BIOS, firmware, R
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Emulators, ROM scanners, BIOS files and RomM servers."
 msgstr ""
 
@@ -5655,6 +5685,7 @@ msgid "Enter"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/PinDialog.tsx
+#: apps/native/src/settings/pin.rs
 msgid "Enter {name}'s current PIN"
 msgstr ""
 
@@ -5688,6 +5719,7 @@ msgid "Enter the code {device} shows to let it play this device's games."
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/PinDialog.tsx
+#: apps/native/src/settings/pin.rs
 msgid "Enter the new PIN again"
 msgstr ""
 
@@ -6068,6 +6100,7 @@ msgid "For each game. The newest stay, and so does any save that isn't settled b
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "For every account. Age limits are set on each account."
 msgstr ""
 
@@ -6430,6 +6463,7 @@ msgid "Games owned by other launchers stay in their launcher locations."
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Games rated above it need an admin's PIN."
 msgstr ""
 
@@ -6496,6 +6530,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/general.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
@@ -6806,6 +6841,7 @@ msgid "How games are shown in grids."
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "How games download and install, and torrent links."
 msgstr ""
 
@@ -7184,6 +7220,7 @@ msgid "Install game from"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Install games"
 msgstr ""
 
@@ -7246,6 +7283,7 @@ msgid "install, installers, downloads, torrents, magnet links, Wine, Proton, com
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Install, uninstall and move games. Updates run for everyone."
 msgstr ""
 
@@ -7359,6 +7397,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Installer"
@@ -7437,6 +7476,7 @@ msgid "Installs"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgctxt "account details"
 msgid "installs games"
 msgstr ""
@@ -7821,6 +7861,7 @@ msgid "Language & Region"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Language, startup, closing and updates."
 msgstr ""
 
@@ -7921,6 +7962,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/launchers.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
@@ -8041,6 +8083,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
@@ -8171,6 +8214,7 @@ msgid "Loaded in place from its folder and reloaded on change; not installed"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Loading accounts…"
 msgstr ""
 
@@ -8290,6 +8334,7 @@ msgid "Loading the IGDB match…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Loading your profile…"
 msgstr ""
 
@@ -8637,6 +8682,7 @@ msgid "Maximize"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Maximum age rating"
 msgstr ""
 
@@ -8857,6 +8903,7 @@ msgstr ""
 #: apps/desktop/src/shell/accounts/AccountMenu.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "My profile"
@@ -8872,6 +8919,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/search.rs
 msgctxt "account"
 msgid "Name"
@@ -9234,6 +9282,7 @@ msgid "No limit"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/ageLimits.ts
+#: apps/native/src/settings/accounts.rs
 msgctxt "age limit"
 msgid "No limit"
 msgstr ""
@@ -9267,15 +9316,18 @@ msgid "No notifications yet. New games, failed jobs and updates show here."
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgctxt "account details"
 msgid "no PIN"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#: apps/native/src/settings/pin.rs
 msgid "No PIN: anyone can sign in to it."
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "No PIN: anyone can sign in to it. Changes at once."
 msgstr ""
 
@@ -10510,11 +10562,13 @@ msgstr ""
 #: apps/desktop/src/onboarding/AccountStep.tsx
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/pin.rs
 #: apps/native/src/settings/search.rs
 msgid "PIN"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgctxt "account details"
 msgid "PIN"
 msgstr ""
@@ -10902,12 +10956,14 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Plugins"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Plugins and add-on themes, and what they may do."
 msgstr ""
 
@@ -11189,6 +11245,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/search.rs
 msgid "Rating board"
 msgstr ""
@@ -11656,6 +11713,7 @@ msgid "Remove {name}?"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#: apps/native/src/settings/pin.rs
 msgid "Remove {name}'s PIN?"
 msgstr ""
 
@@ -11723,10 +11781,12 @@ msgid "Remove offline copy"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#: apps/native/src/settings/pin.rs
 msgid "Remove PIN"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#: apps/native/src/settings/pin.rs
 msgid "Remove PIN…"
 msgstr ""
 
@@ -11767,6 +11827,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/native/src/game_menu/dialogs.rs
 #: apps/native/src/library/web.rs
+#: apps/native/src/settings/pin.rs
 msgid "Removing…"
 msgstr ""
 
@@ -12095,6 +12156,7 @@ msgid "rmm_…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgctxt "account"
 msgid "Role"
 msgstr ""
@@ -12352,6 +12414,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
 #: apps/native/src/game/emulation.rs
 #: apps/native/src/library/collection_dialog.rs
+#: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/unsaved.rs
 msgid "Save"
 msgstr ""
@@ -12543,6 +12606,7 @@ msgstr ""
 #: apps/native/src/flows/scripts.rs
 #: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/collection_dialog.rs
+#: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/devices.rs
 #: apps/native/src/settings/state.rs
 #: apps/native/src/settings/unsaved.rs
@@ -12955,6 +13019,7 @@ msgid "Set IGDB game"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
+#: apps/native/src/settings/pin.rs
 msgid "Set PIN…"
 msgstr ""
 
@@ -13049,6 +13114,7 @@ msgstr ""
 
 #. Over the Settings sections a standard account may change
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Settings sections it can change"
 msgstr ""
 
@@ -13263,6 +13329,7 @@ msgid "Sign in to an account that may do this."
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Sign in to change your profile."
 msgstr ""
 
@@ -13303,10 +13370,12 @@ msgid "Sign-ins stay on each device. Sign in here to import this server's games.
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Signed in as {name}, a standard account."
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Signed in as {name}, an admin."
 msgstr ""
 
@@ -13506,6 +13575,7 @@ msgstr ""
 #: apps/desktop/src/shell/accounts/AccountMenu.tsx
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgctxt "account role"
 msgid "Standard"
 msgstr ""
@@ -13794,6 +13864,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Storage"
@@ -14148,11 +14219,13 @@ msgid "That isn't available in this copy of Caskade."
 msgstr ""
 
 #: apps/desktop/src/components/accounts/PinPad.tsx
+#: apps/native/src/flows/pin_pad.rs
 msgid "That PIN isn't right."
 msgstr ""
 
 #. Fills in for a new account's name: 'Choose a new PIN for the account'
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "the account"
 msgstr ""
 
@@ -14378,6 +14451,7 @@ msgid "The output was long; its end is shown."
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/PinDialog.tsx
+#: apps/native/src/settings/pin.rs
 msgid "The PINs don't match. Try again."
 msgstr ""
 
@@ -14386,6 +14460,7 @@ msgid "The profile decides which files match. Imported games launch with the cho
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "The ratings games show, and the steps age limits are picked from."
 msgstr ""
 
@@ -14513,6 +14588,7 @@ msgid "Theme, accent and layout."
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Theme, look, motion and custom CSS."
 msgstr ""
 
@@ -14849,6 +14925,7 @@ msgid "Tokens"
 msgstr ""
 
 #: apps/desktop/src/components/accounts/PinPad.tsx
+#: apps/native/src/flows/pin_pad.rs
 msgid "Too many wrong PINs. Try again in {time}."
 msgstr ""
 
@@ -14991,6 +15068,7 @@ msgstr ""
 
 #. Types the focused digit
 #: apps/desktop/src/components/accounts/PinPad.tsx
+#: apps/native/src/flows/pin_pad.rs
 msgctxt "PIN pad"
 msgid "Type"
 msgstr ""
@@ -15004,6 +15082,7 @@ msgid "Unable to confirm installation."
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Under an age limit, games without a rating need an admin's PIN too."
 msgstr ""
 
@@ -15159,6 +15238,7 @@ msgid "Unpin"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Unrated games need a PIN"
 msgstr ""
 
@@ -15207,6 +15287,7 @@ msgstr ""
 
 #. An age limit no step of the chosen rating board matches: 'Up to 13+'
 #: apps/desktop/src/views/settings/accounts/ageLimits.ts
+#: apps/native/src/settings/accounts.rs
 msgid "Up to {age}+"
 msgstr ""
 
@@ -15775,6 +15856,7 @@ msgstr ""
 
 #. Over a standard account's permissions
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "What it can do"
 msgstr ""
 
@@ -15793,6 +15875,7 @@ msgid "What it starts"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "What scans look for, their folders and ignored results."
 msgstr ""
 
@@ -15877,6 +15960,7 @@ msgid "Where games are installed"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Where games install, and the default location."
 msgstr ""
 
@@ -15931,6 +16015,7 @@ msgid "Which launchers are scanned: <0>Launchers</0>"
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Which launchers' games join the library."
 msgstr ""
 
@@ -15953,6 +16038,7 @@ msgid "Who plays here, their age limits and PINs. Wrong PIN attempts are counted
 msgstr ""
 
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/settings/accounts.rs
 msgid "Who uses Caskade here, and what each can change."
 msgstr ""
 

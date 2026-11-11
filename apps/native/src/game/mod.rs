@@ -20,6 +20,7 @@ pub mod present;
 mod saves;
 
 pub use anatomy::ANATOMY;
+pub(crate) use media::{BOARDS, DEFAULT_BOARD, board_name};
 pub use page::GameView;
 
 #[cfg(test)]
