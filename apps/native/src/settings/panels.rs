@@ -57,6 +57,9 @@ pub fn panel(tab: &'static str, sub: Option<String>) -> Element {
         "statistics" => rsx! {
             super::statistics::StatisticsSettings {}
         },
+        "devices" => rsx! {
+            super::devices::DevicesSettings {}
+        },
         _ => rsx! {
             Pending {}
         },

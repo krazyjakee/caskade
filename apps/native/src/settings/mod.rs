@@ -15,6 +15,7 @@
 mod about;
 pub(crate) mod addons;
 mod appearance;
+mod devices;
 mod discovery;
 mod drafts;
 mod general;

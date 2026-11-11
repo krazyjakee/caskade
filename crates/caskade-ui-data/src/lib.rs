@@ -32,6 +32,7 @@ pub mod shares;
 pub mod storage;
 pub mod stores;
 pub mod streaming;
+pub mod sync;
 pub mod themes;
 
 pub use caskade_core::error::{ErrorCode, ErrorReport, RecoveryHint};

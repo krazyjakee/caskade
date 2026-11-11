@@ -237,6 +237,58 @@ pub const NETWORK: Icon = Icon(&[
     "M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3",
     "M12 12V8",
 ]);
+/// lucide's `arrow-down-to-line`.
+pub const ARROW_DOWN_TO_LINE: Icon = Icon(&["M12 17V3", "m6 11 6 6 6-6", "M19 21H5"]);
+/// lucide's `arrow-up-from-line`.
+pub const ARROW_UP_FROM_LINE: Icon = Icon(&["m18 9-6-6-6 6", "M12 3v14", "M5 21h14"]);
+/// lucide's `monitor`.
+pub const MONITOR: Icon = Icon(&[
+    "M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-16a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2z",
+    "M8 21L16 21",
+    "M12 17L12 21",
+]);
+/// lucide's `radar`.
+pub const RADAR: Icon = Icon(&[
+    "M19.07 4.93A10 10 0 0 0 6.99 3.34",
+    "M4 6h.01",
+    "M2.29 9.62A10 10 0 1 0 21.31 8.35",
+    "M16.24 7.76A6 6 0 1 0 8.23 16.67",
+    "M12 18h.01",
+    "M17.99 11.66A6 6 0 0 1 15.77 16.67",
+    "M12 10a2 2 0 1 0 0 4a2 2 0 1 0 0-4z",
+    "m13.41 10.59 5.66-5.66",
+]);
+/// lucide's `refresh-ccw`.
+pub const REFRESH_CCW: Icon = Icon(&[
+    "M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8",
+    "M3 3v5h5",
+    "M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16",
+    "M16 16h5v5",
+]);
+/// lucide's `save`.
+pub const SAVE: Icon = Icon(&[
+    "M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7",
+    "M7 3v4a1 1 0 0 0 1 1h7",
+]);
+/// lucide's `radio-tower`.
+pub const RADIO_TOWER: Icon = Icon(&[
+    "M4.9 16.1C1 12.2 1 5.8 4.9 1.9",
+    "M7.8 4.7a6.14 6.14 0 0 0-.8 7.5",
+    "M12 7a2 2 0 1 0 0 4a2 2 0 1 0 0-4z",
+    "M16.2 4.8c2 2 2.26 5.11.8 7.47",
+    "M19.1 1.9a9.96 9.96 0 0 1 0 14.1",
+    "M9.5 18h5",
+    "m8 22 4-11 4 11",
+]);
+/// lucide's `moon`.
+pub const MOON: Icon = Icon(&[]);
+/// lucide's `laptop`.
+pub const LAPTOP: Icon = Icon(&["M20.054 15.987H3.946"]);
+/// lucide's `tv`.
+pub const TV: Icon = Icon(&[
+    "m17 2-5 5-5-5",
+    "M4 7h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-16a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2z",
+]);
 /// lucide's `gauge`.
 pub const GAUGE: Icon = Icon(&["m12 14 4-4", "M3.34 19a10 10 0 1 1 17.32 0"]);
 

@@ -1395,7 +1395,7 @@ Root: `[data-cs="store-links"]`
 
 ## `peer-link`
 
-How another device is reached (#225, #231): an icon and a word. `data-status` is `lan` (on this network), `direct` (over the internet), `relay` (through a relay) or `offline`. Rendered by LinkBadge (app).
+How another device is reached (#225, #231): an icon and a word. `data-status` is `lan` (on this network), `direct` (over the internet), `relay` (through a relay) or `offline`. Rendered by LinkBadge (apps/native/src/settings/devices.rs); in the webview, LinkBadge (app).
 
 Root: `[data-cs="peer-link"]`
 
@@ -1405,7 +1405,7 @@ State on the root:
 
 ## `paired-device`
 
-A device paired with this one: its icon, name, how it is reached, its last sync, Sync now and (for an admin) Forget. `data-status` is how it is reached. Rendered by DeviceRow in Settings → Devices (app).
+A device paired with this one: its icon, name, how it is reached, its last sync, Sync now and (for an admin) Forget. `data-status` is how it is reached. Rendered by DeviceRow in Settings → Devices (apps/native/src/settings/devices.rs); in the webview, DeviceRow in Settings → Devices (app).
 
 Root: `[data-cs="paired-device"]`
 
@@ -1422,7 +1422,7 @@ Contains: [`peer-link`](#peer-link), [`button`](#button)
 
 ## `transfer`
 
-A game copied between two of the user's devices (#233): its title, the other device, how it is reached and its progress. `data-status` is `running`, `waitingDirect` (game files wait for a direct path), `done` or `failed`. Rendered by CopiesAndShares in Settings → Devices (app).
+A game copied between two of the user's devices (#233): its title, the other device, how it is reached and its progress. `data-status` is `running`, `waitingDirect` (game files wait for a direct path), `done` or `failed`. Rendered by CopiesAndShares in Settings → Devices (apps/native/src/settings/devices.rs); in the webview, CopiesAndShares in Settings → Devices (app).
 
 Root: `[data-cs="transfer"]`
 

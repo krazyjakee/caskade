@@ -265,3 +265,45 @@ pub const SYSTEM_STATS: Entry = Entry {
         "Settings → Statistics: this machine's CPU, GPUs, memory, network and storage capacity, live, as the same cards in desktop and console modes. `data-status` says whether readings are coming in.",
     )
 };
+
+pub const PEER_LINK: Entry = Entry {
+    states: &[("data-status", &["lan", "direct", "relay", "offline"])],
+    ..Entry::new(
+        "peer-link",
+        "LinkBadge (apps/native/src/settings/devices.rs)",
+        Source::App,
+        "How another device is reached (#225, #231): an icon and a word. `data-status` is `lan` (on this network), `direct` (over the internet), `relay` (through a relay) or `offline`.",
+    )
+};
+
+pub const PAIRED_DEVICE: Entry = Entry {
+    parts: &[
+        (
+            "sync",
+            "Its OS and the last sync, or that it is syncing now.",
+        ),
+        ("sync-error", "Shown when the last sync didn't reach it."),
+    ],
+    states: &[("data-status", &["lan", "direct", "relay", "offline"])],
+    contains: &["peer-link", "button"],
+    ..Entry::new(
+        "paired-device",
+        "DeviceRow in Settings → Devices (apps/native/src/settings/devices.rs)",
+        Source::App,
+        "A device paired with this one: its icon, name, how it is reached, its last sync, Sync now and (for an admin) Forget. `data-status` is how it is reached.",
+    )
+};
+
+pub const TRANSFER: Entry = Entry {
+    states: &[(
+        "data-status",
+        &["running", "waitingDirect", "done", "failed"],
+    )],
+    contains: &["peer-link"],
+    ..Entry::new(
+        "transfer",
+        "CopiesAndShares in Settings → Devices (apps/native/src/settings/devices.rs)",
+        Source::App,
+        "A game copied between two of the user's devices (#233): its title, the other device, how it is reached and its progress. `data-status` is `running`, `waitingDirect` (game files wait for a direct path), `done` or `failed`.",
+    )
+};

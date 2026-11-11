@@ -43,6 +43,9 @@ pub const ANATOMY: &[Entry] = &[
     anatomy::ABOUT,
     anatomy::LEGAL,
     anatomy::SYSTEM_STATS,
+    anatomy::PEER_LINK,
+    anatomy::PAIRED_DEVICE,
+    anatomy::TRANSFER,
 ];
 
 /// The flows that come over any view: pairing (#226), games other devices

@@ -480,6 +480,7 @@ msgid "{count} configured"
 msgstr "{count} konfigurerade"
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
+#: apps/native/src/settings/devices.rs
 msgid "{count} versions"
 msgstr "{count} versioner"
 
@@ -560,6 +561,7 @@ msgid "{done} of {all}"
 msgstr "{done} av {all}"
 
 #: apps/desktop/src/components/sync/common.tsx
+#: apps/native/src/settings/devices.rs
 msgid "{done} of {total} · {speed}/s"
 msgstr "{done} av {total} · {speed}/s"
 
@@ -691,6 +693,7 @@ msgid "{installedVersion} · up to date"
 msgstr "{installedVersion} · uppdaterad"
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
+#: apps/native/src/settings/devices.rs
 msgid "{keep} versions"
 msgstr "{keep} versioner"
 
@@ -916,14 +919,17 @@ msgid "{number} / {count}"
 msgstr "{number} / {count}"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "{os} · Not synced yet"
 msgstr "{os} · Inte synkad än"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "{os} · Synced {last}"
 msgstr "{os} · Synkad {last}"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "{os} · Syncing…"
 msgstr "{os} · Synkar…"
 
@@ -1156,6 +1162,7 @@ msgid "{title} didn't start"
 msgstr "{title} startade inte"
 
 #: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
+#: apps/native/src/settings/devices.rs
 msgid "{title} from {device}"
 msgstr "{title} från {device}"
 
@@ -1188,6 +1195,7 @@ msgid "{title} progress"
 msgstr "Förlopp för {title}"
 
 #: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
+#: apps/native/src/settings/devices.rs
 msgid "{title} to {device}"
 msgstr "{title} till {device}"
 
@@ -1565,6 +1573,7 @@ msgid "A full scan looks everywhere again and notices games that were removed. W
 msgstr "En fullständig skanning letar överallt igen och märker spel som har tagits bort. Bevakning fångar upp ändringar när de sker."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "A game another of your devices sends here is copied into the default storage without asking."
 msgstr "Ett spel som en annan av dina enheter skickar hit kopieras till standardlagringen utan att fråga."
 
@@ -1708,6 +1717,7 @@ msgid "A tool runs from the game's menu. It counts no playtime and doesn't chang
 msgstr "Ett verktyg körs från spelets meny. Det räknar ingen speltid och ändrar inte när spelet senast spelades."
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
+#: apps/native/src/settings/devices.rs
 msgid "A version of a game's saves is kept each time you finish playing, and the newest goes to your other devices, so you can carry on where you left off."
 msgstr "En version av spelets sparfiler behålls varje gång du slutar spela, och den nyaste skickas till dina andra enheter, så att du kan fortsätta där du slutade."
 
@@ -1782,7 +1792,7 @@ msgstr "Godkänn"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Accept copies from my devices"
 msgstr "Ta emot kopior från mina enheter"
 
@@ -1804,7 +1814,7 @@ msgstr "Konton"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Accounts and PINs"
 msgstr "Konton och PIN-koder"
 
@@ -1814,7 +1824,7 @@ msgstr "Konton kunde inte läsas in"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Achievement links you made"
 msgstr "Prestationslänkar du har skapat"
 
@@ -2480,7 +2490,7 @@ msgstr "app, språk, region, uppstart, start, stäng, systemfält, minimera, avs
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Appearance"
 msgstr "Utseende"
 
@@ -2728,6 +2738,7 @@ msgid "Avatar"
 msgstr "Avatar"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Away from home, devices that can't reach each other directly go through a server that can't read what passes. On, they connect only directly: on this network, or over the internet where the routers allow it, and some may then not connect."
 msgstr "Borta från hemmet går enheter som inte kan nå varandra direkt via en server som inte kan läsa det som passerar. När det här är på ansluter de bara direkt: i det här nätverket, eller över internet där routrarna tillåter det, och vissa kan då inte ansluta."
 
@@ -3285,6 +3296,7 @@ msgid "Caskade couldn't check who is signed in"
 msgstr "Caskade kunde inte kontrollera vem som är inloggad"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Caskade couldn't read this device's connections"
 msgstr "Caskade kunde inte läsa den här enhetens anslutningar"
 
@@ -3382,6 +3394,7 @@ msgid "Caskade makes a link. Whoever opens it in their Caskade sees the collecti
 msgstr "Caskade gör en länk. Den som öppnar den i sin Caskade ser samlingens spel och vilka av dem de har. Inget laddas ner."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Caskade on this network shows here. Both devices show a code: pair when they match."
 msgstr "Caskade i det här nätverket visas här. Båda enheterna visar en kod: parkoppla när de stämmer överens."
 
@@ -3521,6 +3534,7 @@ msgid "Changes here reach your other devices."
 msgstr "Ändringar här når dina andra enheter."
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Changes made on any device reach the others when they next connect. Where two devices changed the same thing, the later change wins. This device only keeps a kind out of sync here: this device neither sends its changes nor takes the others'."
 msgstr "Ändringar som görs på en enhet når de andra nästa gång de ansluter. Där två enheter har ändrat samma sak vinner den senare ändringen. Bara den här enheten håller en kategori utanför synkningen här: enheten varken skickar sina ändringar eller tar emot de andras."
 
@@ -3817,6 +3831,7 @@ msgid "Choose the working folder"
 msgstr "Välj arbetsmappen"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Choose what syncs"
 msgstr "Välj vad som synkas"
 
@@ -4070,7 +4085,7 @@ msgstr "Anslut ett till"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Connect only directly"
 msgstr "Anslut bara direkt"
 
@@ -4105,6 +4120,7 @@ msgid "Connected · v{version}"
 msgstr "Ansluten · v{version}"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Connected to the internet."
 msgstr "Ansluten till internet."
 
@@ -4116,6 +4132,7 @@ msgid "Connecting…"
 msgstr "Ansluter…"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Connections"
 msgstr "Anslutningar"
 
@@ -4145,6 +4162,7 @@ msgid "console mode, desktop mode, big picture"
 msgstr "konsolläge, skrivbordsläge, big picture"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Console mode, window and start-up choices"
 msgstr "Konsolläge, fönster och startval"
 
@@ -4172,6 +4190,7 @@ msgid "Contributions"
 msgstr "Bidrag"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Controller mappings, core options and shader presets, each in this device's own emulator folders."
 msgstr "Handkontrollsmappningar, kärninställningar och shaderförval, var och en i enhetens egna emulatormappar."
 
@@ -4193,7 +4212,7 @@ msgstr "Kopierat"
 
 #: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Copies and shares"
 msgstr "Kopior och delningar"
 
@@ -4212,6 +4231,7 @@ msgid "Copy {title} from {device}?"
 msgstr "Kopiera {title} från {device}?"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Copy a pairing link"
 msgstr "Kopiera en parkopplingslänk"
 
@@ -4378,6 +4398,7 @@ msgid "Covers and images you chose or imported, and web games' pictures."
 msgstr "Omslag och bilder som du valt eller importerat, och webbspels bilder."
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Covers and images you chose or imported."
 msgstr "Omslag och bilder som du valt eller importerat."
 
@@ -4687,6 +4708,7 @@ msgid "Description"
 msgstr "Beskrivning"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgctxt "device kind"
 msgid "Desktop"
 msgstr "Stationär dator"
@@ -4795,10 +4817,12 @@ msgid "device name"
 msgstr "enhetsnamn"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Device name"
 msgstr "Enhetsnamn"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Device not here? Guest Wi‑Fi and some routers keep devices apart, and devices elsewhere never show. Pair with a link instead: copy it here and paste it on the other device. It works once, for ten minutes."
 msgstr "Hittar du inte enheten? Gäst-wifi och vissa routrar håller enheter åtskilda, och enheter på andra platser visas aldrig. Parkoppla med en länk i stället: kopiera den här och klistra in den på den andra enheten. Den fungerar en gång, i tio minuter."
 
@@ -5012,6 +5036,7 @@ msgid "Downloaded artwork"
 msgstr "Nedladdade bilder"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Downloaded metadata and images"
 msgstr "Nedladdad metadata och bilder"
 
@@ -5068,7 +5093,7 @@ msgstr "Nedladdningar"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Downloads from my devices"
 msgstr "Nedladdningar från mina enheter"
 
@@ -5240,7 +5265,7 @@ msgstr "emulatorändringar"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Emulator configuration"
 msgstr "Emulatorkonfiguration"
 
@@ -5303,6 +5328,7 @@ msgid "Emulators"
 msgstr "Emulatorer"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Emulators and their profiles"
 msgstr "Emulatorer och deras profiler"
 
@@ -5478,6 +5504,7 @@ msgid "Every hour"
 msgstr "Varje timme"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Every session from every device, so play time adds up wherever you play."
 msgstr "Varje session från varje enhet, så att speltiden räknas ihop var du än spelar."
 
@@ -5752,6 +5779,7 @@ msgid "For a week"
 msgstr "I en vecka"
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
+#: apps/native/src/settings/devices.rs
 msgid "For each game. The newest stay, and so does any save that isn't settled between devices yet."
 msgstr "För varje spel. De nyaste stannar kvar, och så gör alla sparfiler som enheterna inte har enats om än."
 
@@ -5771,7 +5799,7 @@ msgstr "Glöm"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/settings/streaming.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/streaming.rs
 msgid "Forget {name}"
 msgstr "Glöm {name}"
 
@@ -5917,6 +5945,7 @@ msgid "Game details refreshed"
 msgstr "Speldetaljerna uppdaterades"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Game details you changed, favourites, hidden games, collections, matches you set and games you kept apart."
 msgstr "Speldetaljer du har ändrat, favoriter, dolda spel, samlingar, matchningar du har angett och spel du har hållit isär."
 
@@ -5958,12 +5987,13 @@ msgid "Game pages show the achievements of connected accounts. Caskade only read
 msgstr "Spelsidor visar prestationerna från anslutna konton. Caskade läser dem bara; inget låses upp eller ändras i en butik."
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Game saves, with every version kept."
 msgstr "Sparfiler, med alla versioner sparade."
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Game scripts"
 msgstr "Spelskript"
 
@@ -6045,6 +6075,7 @@ msgid "games before they start"
 msgstr "spel innan de startar"
 
 #: apps/desktop/src/views/settings/devices/CopiesAndShares.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Games copied between your devices, and games you shared. Both computers need Caskade open until a game arrives."
 msgstr "Spel som kopierats mellan dina enheter, och spel som du har delat. Båda datorerna behöver ha Caskade öppet tills ett spel har kommit fram."
 
@@ -6149,6 +6180,7 @@ msgid "Games you install with Caskade are kept here. You can add more places lat
 msgstr "Spel du installerar med Caskade sparas här. Du kan lägga till fler platser senare."
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Games you linked to their achievements by hand."
 msgstr "Spel du har länkat till deras prestationer för hand."
 
@@ -6181,6 +6213,7 @@ msgid "Genres"
 msgstr "Genrer"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Get a download from another of your devices on this network when it has the same file, before the internet. Game files only ever travel directly between your devices."
 msgstr "Hämta en nedladdning från en annan av dina enheter i det här nätverket när den har samma fil, före internet. Spelfiler går bara direkt mellan dina enheter."
 
@@ -6288,6 +6321,7 @@ msgid "Hand-pick games into lists, or save a filter as a smart collection that k
 msgstr "Välj spel för hand till listor, eller spara ett filter som en smart samling som håller sig uppdaterad."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgctxt "device kind"
 msgid "Handheld"
 msgstr "Handhållen"
@@ -7055,10 +7089,12 @@ msgid "Interface scale"
 msgstr "Gränssnittets skala"
 
 #: apps/desktop/src/components/sync/common.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Internet, direct"
 msgstr "Internet, direkt"
 
 #: apps/desktop/src/components/sync/common.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Internet, through a server"
 msgstr "Internet, via en server"
 
@@ -7190,6 +7226,7 @@ msgid "It starts through its store's launcher there. Install it from the store h
 msgstr "Där startar det via butikens startprogram. Installera det från butiken här."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "It stops syncing with this device. Nothing is deleted on either device, and what synced stays."
 msgstr "Den slutar synka med den här enheten. Inget raderas på någon av enheterna, och det som redan har synkats finns kvar."
 
@@ -7289,7 +7326,8 @@ msgstr "Hoppa till bokstav"
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/settings/plugins.rs apps/native/src/settings/streaming.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/plugins.rs
+#: apps/native/src/settings/streaming.rs
 msgid "Keep"
 msgstr "Behåll"
 
@@ -7369,6 +7407,7 @@ msgid "KiB"
 msgstr "KiB"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Kind"
 msgstr "Typ"
 
@@ -7405,6 +7444,7 @@ msgid "Language, startup, closing and updates."
 msgstr "Språk, start, stängning och uppdateringar."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgctxt "device kind"
 msgid "Laptop"
 msgstr "Bärbar dator"
@@ -7467,13 +7507,14 @@ msgid "Last sync"
 msgstr "Senaste synk"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Last try didn't reach it. It syncs when it's back."
 msgstr "Senaste försöket nådde den inte. Den synkar när den är tillbaka."
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Launch actions"
 msgstr "Startåtgärder"
 
@@ -7584,7 +7625,8 @@ msgstr "Bokstäver"
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/native/src/frame/sidebar.rs apps/native/src/game/back.rs
 #: apps/native/src/library/view.rs apps/native/src/settings/appearance.rs
-#: apps/native/src/settings/general.rs apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/general.rs
+#: apps/native/src/settings/search.rs
 msgid "Library"
 msgstr "Bibliotek"
 
@@ -7861,6 +7903,7 @@ msgid "Loading…"
 msgstr "Läser in…"
 
 #: apps/desktop/src/components/sync/common.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Local network"
 msgstr "Lokalt nätverk"
 
@@ -7982,6 +8025,7 @@ msgstr "Tittar på vad den har…"
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Looking for Caskade on this network…"
 msgstr "Letar efter Caskade på det här nätverket…"
 
@@ -8027,10 +8071,12 @@ msgid "Make a link"
 msgstr "Skapa en länk"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Make a new key"
 msgstr "Skapa en ny nyckel"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Make a new key…"
 msgstr "Skapa en ny nyckel…"
 
@@ -8498,6 +8544,7 @@ msgid "Never remove favourites"
 msgstr "Ta aldrig bort favoriter"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Never synced"
 msgstr "Aldrig synkad"
 
@@ -8646,6 +8693,7 @@ msgid "No detection run yet."
 msgstr "Ingen identifiering har körts än."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "No devices found on this network yet. Caskade keeps looking, and one that appears shows here. Otherwise, pair with a link below."
 msgstr "Inga enheter hittades i det här nätverket än. Caskade fortsätter leta, och en enhet som dyker upp visas här. Annars kan du parkoppla med en länk nedan."
 
@@ -8655,6 +8703,7 @@ msgid "No devices found on this network yet. On another device running Caskade, 
 msgstr "Inga enheter hittades i det här nätverket än. Slå på Låt andra enheter streama spel från den här på en annan enhet som kör Caskade, eller lägg till den via dess adress nedan."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "No devices paired yet."
 msgstr "Inga enheter parkopplade än."
 
@@ -8721,6 +8770,7 @@ msgid "No IGDB games match “{searched}”."
 msgstr "Inga IGDB-spel matchar ”{searched}”."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "No internet: devices on this network still sync."
 msgstr "Inget internet: enheter i det här nätverket synkar ändå."
 
@@ -9075,10 +9125,12 @@ msgstr "Behövs inte"
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/native/src/flows/pairing.rs apps/native/src/flows/streaming.rs
+#: apps/native/src/settings/devices.rs
 msgid "Not now"
 msgstr "Inte nu"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Not on a local network."
 msgstr "Inte i ett lokalt nätverk."
 
@@ -9185,6 +9237,7 @@ msgid "Nothing left to show: they have all gone."
 msgstr "Inget kvar att visa: alla har försvunnit."
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Nothing syncs until a device is paired. Then your library, play history and saves stay in step, unless you choose otherwise."
 msgstr "Inget synkas förrän en enhet har parkopplats. Sedan hålls ditt bibliotek, din spelhistorik och dina sparfiler i takt, om du inte väljer något annat."
 
@@ -9304,6 +9357,7 @@ msgid "Offer updates before playing"
 msgstr "Erbjud uppdateringar innan du spelar"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Offers to install the same ones. Plugins still ask for their permissions on each device."
 msgstr "Erbjuder att installera samma. Tillägg ber fortfarande om sina behörigheter på varje enhet."
 
@@ -9323,7 +9377,7 @@ msgstr "offline"
 
 #. A game's or release's status on IGDB
 #: apps/desktop/src/components/sync/common.tsx
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/settings/devices.rs
 msgid "Offline"
 msgstr "Offline"
 
@@ -9403,6 +9457,7 @@ msgid "On the other device, open Settings → Devices and copy a pairing link, t
 msgstr "Öppna Inställningar → Enheter på den andra enheten, kopiera en parkopplingslänk och klistra in den här."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "On this network at {addresses}."
 msgstr "I det här nätverket på {addresses}."
 
@@ -9456,6 +9511,7 @@ msgid "Only an admin can let other devices stream from this one. Anyone can pair
 msgstr "Bara en administratör kan låta andra enheter streama från den här. Alla kan parkoppla den här enheten med en annan för att spela dess spel, och ställa in streamingkvaliteten här."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Only an admin can pair devices, forget them or change what syncs."
 msgstr "Bara en administratör kan parkoppla enheter, glömma dem eller ändra vad som synkas."
 
@@ -9736,12 +9792,13 @@ msgstr "Sida upp"
 #: apps/desktop/src/onboarding/DeviceStep.tsx
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/native/src/flows/pairing.rs apps/native/src/flows/streaming.rs
+#: apps/native/src/settings/devices.rs
 msgid "Pair"
 msgstr "Parkoppla"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Pair a device"
 msgstr "Parkoppla en enhet"
 
@@ -9775,7 +9832,7 @@ msgstr "Parkoppla med enheten från den här länken?"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/settings/streaming.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/streaming.rs
 msgid "Pair…"
 msgstr "Parkoppla…"
 
@@ -9785,6 +9842,7 @@ msgid "paired devices"
 msgstr "parkopplade enheter"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Paired devices keep your library, play history and collections in step. Each keeps its own games, folders and emulators."
 msgstr "Parkopplade enheter håller ditt bibliotek, din spelhistorik och dina samlingar i takt. Var och en behåller sina egna spel, mappar och emulatorer."
 
@@ -9795,6 +9853,7 @@ msgstr "Parkopplad med {0}"
 
 #. placeholder {0}: accept.data.name
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Paired with {0}."
 msgstr "Parkopplad med {0}."
 
@@ -9813,6 +9872,7 @@ msgid "Pairing link"
 msgstr "Parkopplingslänk"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Pairing link copied"
 msgstr "Parkopplingslänken kopierad"
 
@@ -9895,6 +9955,7 @@ msgid "Paste a magnet link anywhere in Caskade, drop a .torrent file on it, or u
 msgstr "Klistra in en magnetlänk var som helst i Caskade, släpp en .torrent-fil på fönstret eller använd Lägg till spel. Inget laddas ner förrän du bekräftar, och inget delas vidare efteråt."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Paste a pairing link from another device"
 msgstr "Klistra in en parkopplingslänk från en annan enhet"
 
@@ -10086,6 +10147,7 @@ msgid "Play {name}"
 msgstr "Spela {name}"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Play and utility actions you added. Their programs must be at the same place on each device."
 msgstr "Spel- och verktygsåtgärder som du har lagt till. Deras program måste finnas på samma plats på varje enhet."
 
@@ -10110,7 +10172,7 @@ msgstr "Spela från ditt bibliotek"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Play history"
 msgstr "Spelhistorik"
 
@@ -10146,7 +10208,7 @@ msgstr "Spela slumpmässigt"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Play requests from my devices"
 msgstr "Spelförfrågningar från mina enheter"
 
@@ -10339,7 +10401,7 @@ msgstr "Tillägg och tilläggsteman, och vad de får göra."
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Plugins and themes"
 msgstr "Tillägg och teman"
 
@@ -10385,7 +10447,7 @@ msgstr "Inställningarna gäller nästa installationsjobb. Jobb som redan körs 
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Preferred emulators"
 msgstr "Föredragna emulatorer"
 
@@ -11470,6 +11532,7 @@ msgid "ROM folder"
 msgstr "ROM-mapp"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "ROM folders"
 msgstr "ROM-mappar"
 
@@ -11519,7 +11582,7 @@ msgstr "RomM-server"
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "RomM servers"
 msgstr "RomM-servrar"
 
@@ -11825,10 +11888,12 @@ msgid "Saved scans that turn ROM folders into games. Multi-disc games and playli
 msgstr "Sparade skanningar som gör ROM-mappar till spel. Spel med flera skivor och spellistor importeras som ett spel."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Saved when you leave the field or press Enter."
 msgstr "Sparas när du lämnar fältet eller trycker på Enter."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Saved."
 msgstr "Sparat."
 
@@ -11838,11 +11903,13 @@ msgstr "Sparat."
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/game/launch.rs apps/native/src/settings/search.rs
+#: apps/native/src/game/launch.rs apps/native/src/settings/devices.rs
+#: apps/native/src/settings/search.rs
 msgid "Saves"
 msgstr "Sparfiler"
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Saves go to your other devices. Saves in What syncs above changes that."
 msgstr "Sparfiler skickas till dina andra enheter. Sparfiler under Vad som synkas ovan ändrar det."
 
@@ -11851,6 +11918,7 @@ msgid "Saves stay on this device: syncing them is off in Settings → Devices."
 msgstr "Sparfilerna stannar på den här enheten: synkning av dem är avstängd i Inställningar → Enheter."
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Saves stay on this device. Saves in What syncs above changes that."
 msgstr "Sparfiler stannar på den här enheten. Sparfiler under Vad som synkas ovan ändrar det."
 
@@ -11882,7 +11950,8 @@ msgstr "Sparar dina val innan biblioteket öppnas…"
 #: apps/desktop/src/views/settings/useSettings.tsx
 #: apps/native/src/flows/scripts.rs apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/collection_dialog.rs
-#: apps/native/src/settings/state.rs apps/native/src/settings/unsaved.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/state.rs
+#: apps/native/src/settings/unsaved.rs
 msgid "Saving…"
 msgstr "Sparar…"
 
@@ -12032,6 +12101,7 @@ msgid "Scripts"
 msgstr "Skript"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Scripts that run with one game. They arrive turned off on other devices."
 msgstr "Skript som körs med ett spel. De kommer avstängda till andra enheter."
 
@@ -12142,6 +12212,7 @@ msgid "See it…"
 msgstr "Visa…"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "See what syncs"
 msgstr "Se vad som synkas"
 
@@ -12248,6 +12319,7 @@ msgid "Server address"
 msgstr "Serveradress"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Servers and what they import. Each device signs in with its own password."
 msgstr "Servrar och vad de importerar. Varje enhet loggar in med sitt eget lösenord."
 
@@ -13080,6 +13152,7 @@ msgid "Storage"
 msgstr "Lagring"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Storage folders"
 msgstr "Lagringsmappar"
 
@@ -13147,6 +13220,7 @@ msgid "Store accounts"
 msgstr "Butikskonton"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Store sign-ins (connect each device)"
 msgstr "Butiksinloggningar (anslut varje enhet)"
 
@@ -13238,6 +13312,7 @@ msgid "sync"
 msgstr "synk"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgctxt "sync choice"
 msgid "Sync"
 msgstr "Synka"
@@ -13251,12 +13326,14 @@ msgid "Sync in the background"
 msgstr "Synka i bakgrunden"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Sync is waiting for the system keychain"
 msgstr "Synkningen väntar på systemets nyckelring"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Sync now"
 msgstr "Synka nu"
 
@@ -13265,6 +13342,7 @@ msgid "Sync on startup"
 msgstr "Synka vid start"
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Sync settings"
 msgstr "Synkinställningar"
 
@@ -13540,10 +13618,12 @@ msgid "The job choice is invalid. Refresh Activity."
 msgstr "Jobbvalet är ogiltigt. Uppdatera Aktivitet."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "The keychain didn't answer. Unlock it, then try again. Everything else works meanwhile."
 msgstr "Nyckelringen svarade inte. Lås upp den och försök sedan igen. Allt annat fungerar under tiden."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "The keychain no longer holds the key your other devices know this one by. A new key makes this a new device to them: pair each of them again afterwards."
 msgstr "Nyckelringen innehåller inte längre nyckeln som dina andra enheter känner igen den här enheten med. En ny nyckel gör den till en ny enhet för dem: parkoppla var och en av dem igen efteråt."
 
@@ -13575,6 +13655,7 @@ msgid "The link as a QR code"
 msgstr "Länken som QR-kod"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "The link couldn't be copied. Select it above and copy it yourself."
 msgstr "Länken kunde inte kopieras. Markera den ovan och kopiera den själv."
 
@@ -13742,6 +13823,7 @@ msgid "Theme folder"
 msgstr "Temamapp"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Theme, accent and layout."
 msgstr "Tema, accentfärg och layout."
 
@@ -13770,6 +13852,7 @@ msgid "There isn't enough free space in this folder for a backup."
 msgstr "Det finns inte tillräckligt med ledigt utrymme i den här mappen för en säkerhetskopia."
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "These belong to each device's own drives and hardware."
 msgstr "De här hör till varje enhets egna hårddiskar och hårdvara."
 
@@ -13808,6 +13891,7 @@ msgid "These settings go back to their defaults:"
 msgstr "De här inställningarna återgår till standard:"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "These stay on each device until you choose to sync them."
 msgstr "De här stannar på varje enhet tills du väljer att synka dem."
 
@@ -13835,7 +13919,7 @@ msgstr "Den här samlingen är tom. Lägg till spel här, eller från ett spels 
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "This device"
 msgstr "Den här enheten"
 
@@ -13859,10 +13943,12 @@ msgid "This device has an emulator for it."
 msgstr "Den här enheten har en emulator för det."
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "This device only"
 msgstr "Bara den här enheten"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "This device's sync key is gone"
 msgstr "Den här enhetens synknyckel är borta"
 
@@ -14096,6 +14182,7 @@ msgid "Tracking folder"
 msgstr "Spårningsmapp"
 
 #: apps/desktop/src/components/sync/common.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Transfer progress"
 msgstr "Överföringsförlopp"
 
@@ -14133,8 +14220,8 @@ msgstr "systemfält, avsluta, stäng till systemfältet"
 #: apps/native/src/frame/error.rs apps/native/src/frame/notifications.rs
 #: apps/native/src/game/page.rs apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/view.rs apps/native/src/settings/addons.rs
-#: apps/native/src/settings/general.rs apps/native/src/settings/streaming.rs
-#: apps/native/src/ui/failure.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/general.rs
+#: apps/native/src/settings/streaming.rs apps/native/src/ui/failure.rs
 msgid "Try again"
 msgstr "Försök igen"
 
@@ -14181,6 +14268,7 @@ msgid "Turn these down on slower machines."
 msgstr "Sänk dessa på långsammare datorer."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgctxt "device kind"
 msgid "TV"
 msgstr "TV"
@@ -14637,6 +14725,7 @@ msgid "Using your chosen locations."
 msgstr "Använder dina valda platser."
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Usually different on each device"
 msgstr "Oftast olika på varje enhet"
 
@@ -14713,7 +14802,7 @@ msgstr "version, licenser, juridik, medverkande, integritet, villkor, öppen kä
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Versions to keep"
 msgstr "Versioner att behålla"
 
@@ -14784,6 +14873,7 @@ msgid "Waiting for {name} to confirm…"
 msgstr "Väntar på att {name} ska bekräfta…"
 
 #: apps/desktop/src/components/sync/common.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Waiting for a direct connection. Game files only travel directly between devices."
 msgstr "Väntar på en direkt anslutning. Spelfiler går bara direkt mellan enheter."
 
@@ -14961,6 +15051,7 @@ msgid "What should Caskade look for?"
 msgstr "Vad ska Caskade leta efter?"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "What syncs"
 msgstr "Vad som synkas"
 
@@ -15027,6 +15118,7 @@ msgid "Where Caskade installs games and keeps its data."
 msgstr "Var Caskade installerar spel och sparar sina data."
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Where games are installed"
 msgstr "Var spel installeras"
 
@@ -15068,6 +15160,7 @@ msgid "Which emulator"
 msgstr "Vilken emulator"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Which emulator each platform uses. One this device doesn't have is offered in Settings → Emulation."
 msgstr "Vilken emulator varje plattform använder. En som den här enheten saknar erbjuds i Inställningar → Emulering."
 
@@ -15099,6 +15192,7 @@ msgid "Who are you?"
 msgstr "Vem är du?"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Who plays here, their age limits and PINs. Wrong PIN attempts are counted on each device."
 msgstr "Vilka som spelar här, deras åldersgränser och PIN-koder. Felaktiga PIN-försök räknas på varje enhet."
 
@@ -15272,7 +15366,7 @@ msgstr "Ditt konto har en PIN. Skriv en ny för att ändra den."
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Your artwork"
 msgstr "Dina bilder"
 
@@ -15291,7 +15385,7 @@ msgstr "Dina samlingar"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Your devices"
 msgstr "Dina enheter"
 
@@ -15333,6 +15427,7 @@ msgid "Your other devices at home can play this device's games, streamed over th
 msgstr "Dina andra enheter hemma kan spela den här enhetens spel, streamade över nätverket, med sin egen handkontroll."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Your other devices can start a game here, as Play here would."
 msgstr "Dina andra enheter kan starta ett spel här, som Spela här skulle göra."
 
@@ -15342,6 +15437,7 @@ msgid "Your other devices have these. Nothing installs here until you choose to.
 msgstr "Dina andra enheter har dessa. Inget installeras här förrän du väljer det."
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/settings/devices.rs
 msgid "Your other devices know it by this name. Devices on the same network find each other and sync without the internet."
 msgstr "Dina andra enheter känner den under det här namnet. Enheter i samma nätverk hittar varandra och synkar utan internet."
 

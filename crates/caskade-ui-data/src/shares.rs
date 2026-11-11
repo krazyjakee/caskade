@@ -71,6 +71,11 @@ impl Shares {
     }
 
     /// Every share this device made, the newest first.
+    /// Anything shared from here or received here, to show at all.
+    pub async fn has_any(&self) -> Result<bool> {
+        Ok(!self.list().await?.is_empty() || !self.received().is_empty())
+    }
+
     pub async fn list(&self) -> Result<Vec<ShareRecord>> {
         shares::shares_list(&self.shares).await
     }
