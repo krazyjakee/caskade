@@ -17,6 +17,10 @@ use std::collections::HashMap;
 /// The most web games the mosaic shows: the core's page limit.
 const MOSAIC_LIMIT: u32 = 1000;
 
+/// Add web game's page field placeholder: a URL's start, the same in every
+/// language.
+const URL_PLACEHOLDER: &str = "https://";
+
 /// Played this recently, a game's tile is large.
 const RECENT_DAYS: i64 = 7;
 
@@ -332,7 +336,7 @@ pub fn AddWebGame() -> Element {
                             label: t!("Game page"),
                             "data-focus-default": "true",
                             kind: "url",
-                            placeholder: "https://".to_owned(),
+                            placeholder: URL_PLACEHOLDER.to_owned(),
                             description: t!("The address of the page the game plays on."),
                             value: url(),
                             disabled: pending(),
