@@ -194,6 +194,12 @@ use std::sync::Mutex;
 /// What the page's data answers, and what it was asked.
 #[derive(Default)]
 pub(crate) struct PageScript {
+    pub(crate) igdb: Option<caskade_core::metadata::GameIgdb>,
+    pub(crate) igdb_changes: Vec<super::data::IgdbChange>,
+    pub(crate) igdb_results: Vec<caskade_core::igdb::IgdbGame>,
+    pub(crate) searches: Vec<String>,
+    pub(crate) ratings: Vec<caskade_core::igdb::IgdbAgeRating>,
+    pub(crate) videos_played: Vec<(String, String)>,
     pub(crate) emulations: Vec<caskade_core::emulation::GameEmulation>,
     pub(crate) emulator_set: Vec<(String, caskade_core::emulation::EmulatorTarget)>,
     pub(crate) owned: Vec<caskade_core::store_accounts::OwnedRelease>,
@@ -304,6 +310,24 @@ pub(crate) fn fake_data() -> PageData {
         play_on: Rc::new(|_, device| {
             page(|script| script.played_on.push(device));
             answer(())
+        }),
+        igdb: Rc::new(|_| answer(page(|script| script.igdb.clone()))),
+        igdb_change: Rc::new(|_, what| {
+            answer(page(|script| {
+                script.igdb_changes.push(what);
+                script.igdb.clone()
+            }))
+        }),
+        igdb_search: Rc::new(|query| {
+            answer(page(|script| {
+                script.searches.push(query);
+                script.igdb_results.clone()
+            }))
+        }),
+        age_ratings: Rc::new(|_| answer(page(|script| script.ratings.clone()))),
+        play_video: Rc::new(|video, title| {
+            page(|script| script.videos_played.push((video, title)));
+            Ok(())
         }),
     }
 }
@@ -667,4 +691,126 @@ fn play_time_reported_by_stores_says_where_it_comes_from() {
         said.contains("in Caskade") && said.contains("more reported by Steam (me)"),
         "{said}"
     );
+}
+
+fn matched(game_id: &str) -> caskade_core::metadata::GameIgdb {
+    caskade_core::metadata::GameIgdb {
+        game_id: game_id.to_owned(),
+        igdb_id: Some(1942),
+        source: caskade_core::metadata::MatchSource::Store,
+        pending: false,
+        game: Some(caskade_core::igdb::IgdbGame {
+            id: 1942,
+            title: "Tidewater".to_owned(),
+            release_date: Some("2024-02-29".to_owned()),
+            total_rating: Some(86.4),
+            genres: vec!["Adventure".to_owned()],
+            videos: vec![caskade_core::igdb::IgdbVideo {
+                video_id: "dQw4w9WgXcQ".to_owned(),
+                name: Some("Trailer".to_owned()),
+            }],
+            ..caskade_core::igdb::IgdbGame::default()
+        }),
+    }
+}
+
+#[test]
+fn a_matched_game_shows_igdbs_facts_and_changes_its_match() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    let _script = page_script(PageScript {
+        igdb: Some(matched("fixture-1")),
+        igdb_results: vec![caskade_core::igdb::IgdbGame {
+            id: 77,
+            title: "Tidewater Remastered".to_owned(),
+            ..caskade_core::igdb::IgdbGame::default()
+        }],
+        ..PageScript::default()
+    });
+    let mut window = open("/games/fixture-1");
+    window.settle_until("the facts", |window| {
+        window.find("data-part", "igdb-facts").is_some()
+    });
+    let facts = text(&window, "igdb-facts");
+    assert!(
+        facts.contains("Tidewater") && facts.contains("86 / 100"),
+        "{facts}"
+    );
+    let source = text(&window, "igdb-source");
+    assert!(
+        source.contains("Matched by store id") && source.contains("IGDB ID 1942"),
+        "{source}"
+    );
+    // Not on IGDB.
+    let none = window.get("data-part", "igdb-none");
+    window.click(none);
+    window.settle_until("the change", |_| {
+        page(|script| script.igdb_changes.len()) == 1
+    });
+    assert_eq!(
+        page(|script| script.igdb_changes[0].clone()),
+        super::data::IgdbChange::Set(None)
+    );
+    // Change IGDB game: searches the title, then uses a result.
+    let change = window.get("data-part", "igdb-change");
+    window.click(change);
+    window.settle_until("the results", |window| {
+        window.find("data-part", "igdb-result").is_some()
+    });
+    assert_eq!(
+        page(|script| script.searches.clone()),
+        ["Fixture Game 0002"]
+    );
+    let result = window.get("data-part", "igdb-result");
+    let use_it = window.find_in(result, "data-part", "use").expect("Use");
+    window.click(use_it);
+    window.settle_until("the new match", |_| {
+        page(|script| script.igdb_changes.len()) == 2
+    });
+    assert_eq!(
+        page(|script| script.igdb_changes[1].clone()),
+        super::data::IgdbChange::Set(Some("77".to_owned()))
+    );
+}
+
+#[test]
+fn igdbs_videos_play_in_the_video_window_and_the_age_rating_shows() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    let _script = page_script(PageScript {
+        igdb: Some(matched("fixture-1")),
+        ratings: vec![
+            caskade_core::igdb::IgdbAgeRating {
+                board: "esrb".to_owned(),
+                rating: "T".to_owned(),
+            },
+            caskade_core::igdb::IgdbAgeRating {
+                board: "pegi".to_owned(),
+                rating: "12".to_owned(),
+            },
+        ],
+        ..PageScript::default()
+    });
+    let mut window = open("/games/fixture-1");
+    window.settle_until("the rating", |window| {
+        text(window, "meta").contains("PEGI 12")
+    });
+    window.settle_until("the videos", |window| {
+        window.find("data-cs", "videos").is_some()
+    });
+    let video = window.get("data-part", "video");
+    assert!(window.text(video).contains("Trailer"));
+    window.click(video);
+    window.settle_until("the video", |_| {
+        page(|script| script.videos_played.len()) == 1
+    });
+    assert_eq!(
+        page(|script| script.videos_played[0].clone()),
+        (
+            "dQw4w9WgXcQ".to_owned(),
+            "Fixture Game 0002 · Trailer".to_owned()
+        )
+    );
+    // No screenshots in the fixtures: the empty grid says so.
+    assert!(window.find("data-part", "screenshots-empty").is_some());
 }

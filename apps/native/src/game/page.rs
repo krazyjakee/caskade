@@ -132,6 +132,21 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
         .as_ref()
         .and_then(|list| list.as_ref().ok().cloned())
         .unwrap_or_default();
+    let router = crate::router::use_router();
+    // IGDB's videos, from the game's match.
+    let igdb = {
+        let (data, game_id) = (data.clone(), game.game.id.clone());
+        super::data::use_answer(caskade_ui_data::Key::Game(game_id.clone()), move || {
+            (data.igdb)(game_id.clone())
+        })
+    };
+    let igdb_videos: Vec<caskade_core::igdb::IgdbVideo> = igdb
+        .read()
+        .as_ref()
+        .and_then(|result| result.as_ref().ok().cloned().flatten())
+        .and_then(|matched| matched.game)
+        .map(|game| game.videos)
+        .unwrap_or_default();
     let list = entries(&game);
     // Other devices' copies are on their own panel, not releases here.
     let releases: Vec<EntryView> = list
@@ -338,8 +353,9 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
                     div { class: "min-w-0 flex-[1_1_32rem]",
                         StatusBadge { part: "badge", status }
                         h1 { "data-part": "title", class: "mt-3 font-display text-4xl font-semibold", "{game.game.title}" }
-                        if !meta.is_empty() {
-                            p { "data-part": "meta", class: "mt-2 text-sm text-fg-muted", "{meta}" }
+                        p { "data-part": "meta", class: "mt-2 text-sm text-fg-muted",
+                            "{meta}"
+                            super::media::AgeRating { game_id: game.game.id.clone() }
                         }
                         p { "data-part": "meta", class: "mt-3 flex items-center gap-2 text-fg-muted",
                             Svg { icon: icons::CLOCK, class: "size-4" }
@@ -451,6 +467,8 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
                     }
                 }
             }
+            super::media::Screenshots { title: game.game.title.clone(), shots: super::media::shots(&game.artwork) }
+            super::media::Videos { title: game.game.title.clone(), videos: igdb_videos }
             section { class: "mt-8", "aria-labelledby": "entries-heading",
                 h2 { id: "entries-heading", class: "font-display text-xl font-semibold", {t!("Play from your library")} }
                 if releases.is_empty() {
@@ -486,6 +504,16 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
                 }
             }
             Sessions { sessions }
+            super::igdb::IgdbPanel {
+                game_id: game.game.id.clone(),
+                title: game.game.title.clone(),
+                on_merged: {
+                    let from = from.clone();
+                    move |merged: String| {
+                        router.replace(&crate::router::Route::Game { id: merged, from: from.clone() }.href())
+                    }
+                },
+            }
         }
     }
 }

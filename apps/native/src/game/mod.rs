@@ -3,16 +3,20 @@
 //! and what Play asks before a game starts ([`launch`]), which every Play
 //! shares.
 
+mod anatomy;
 mod back;
 pub mod data;
 mod elsewhere;
 mod emulation;
 mod entry_update;
+mod igdb;
 pub mod launch;
+mod media;
 mod page;
 mod play_choice;
 pub mod present;
 
+pub use anatomy::ANATOMY;
 pub use page::GameView;
 
 #[cfg(test)]

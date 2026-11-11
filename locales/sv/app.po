@@ -918,6 +918,12 @@ msgstr "{neededText} valt, {freeText} ledigt här"
 msgid "{number} / {count}"
 msgstr "{number} / {count}"
 
+#: apps/native/src/game/media.rs
+#, fuzzy
+#| msgid "{number} / {count}"
+msgid "{number} of {count}"
+msgstr "{number} / {count}"
+
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/native/src/settings/devices.rs
 msgid "{os} · Not synced yet"
@@ -1018,7 +1024,7 @@ msgid "{provider}: {total}, read {read}"
 msgstr "{provider}: {total}, läst {read}"
 
 #. A rating out of 100
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "{rating} / 100"
 msgstr "{rating} / 100"
 
@@ -1206,7 +1212,7 @@ msgid "{title}, {games}"
 msgstr "{title}, {games}"
 
 #. {title} is the game's title
-#: apps/desktop/src/views/game/Screenshots.tsx
+#: apps/desktop/src/views/game/Screenshots.tsx apps/native/src/game/media.rs
 msgid "{title}, screenshot {number}"
 msgstr "{title}, skärmbild {number}"
 
@@ -1216,7 +1222,7 @@ msgid "{title}, screenshot {number} of {count}"
 msgstr "{title}, skärmbild {number} av {count}"
 
 #. {title} is the game's title
-#: apps/desktop/src/views/game/Screenshots.tsx
+#: apps/desktop/src/views/game/Screenshots.tsx apps/native/src/game/media.rs
 msgid "{title}, screenshots"
 msgstr "{title}, skärmbilder"
 
@@ -1708,7 +1714,7 @@ msgctxt "plugin slot"
 msgid "A tab on game pages"
 msgstr "En flik på spelsidor"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "A title, or the number listed as IGDB ID on the game's igdb.com page."
 msgstr "En titel, eller numret som anges som IGDB ID på spelets sida på igdb.com."
 
@@ -3109,9 +3115,9 @@ msgstr "Avbryt inloggningen"
 #: apps/native/src/flows/add_game.rs apps/native/src/flows/folder_browser.rs
 #: apps/native/src/flows/manual_game.rs apps/native/src/flows/receive_share.rs
 #: apps/native/src/flows/share_game.rs apps/native/src/flows/storage.rs
-#: apps/native/src/flows/streaming.rs apps/native/src/game/launch.rs
-#: apps/native/src/game_menu/dialogs.rs apps/native/src/game_menu/play.rs
-#: apps/native/src/library/bulk_edit.rs
+#: apps/native/src/flows/streaming.rs apps/native/src/game/igdb.rs
+#: apps/native/src/game/launch.rs apps/native/src/game_menu/dialogs.rs
+#: apps/native/src/game_menu/play.rs apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/selection_bar.rs apps/native/src/library/web.rs
 #: apps/native/src/settings/plugins.rs apps/native/src/settings/reset.rs
@@ -3320,7 +3326,7 @@ msgstr "Caskade hittar spelet på vanligt sätt: dess installationsmapp och vad 
 msgid "Caskade follows your system's language unless you pick another. You can change it later in Settings."
 msgstr "Caskade följer systemets språk om du inte väljer ett annat. Du kan ändra det senare i Inställningar."
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Caskade found no IGDB game for it."
 msgstr "Caskade hittade inget IGDB-spel för det."
 
@@ -3506,7 +3512,7 @@ msgstr "Ändra {label}"
 msgid "Change folder"
 msgstr "Byt mapp"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Change IGDB game"
 msgstr "Byt IGDB-spel"
 
@@ -3640,7 +3646,7 @@ msgstr "Kontrollerar nedladdningen…"
 msgid "Checking the emulator…"
 msgstr "Kontrollerar emulatorn…"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Checking the IGDB game…"
 msgstr "Kontrollerar IGDB-spelet…"
 
@@ -3865,7 +3871,7 @@ msgstr "Vald mellan enheter"
 
 #. How the game's IGDB match was made
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Chosen by you"
 msgstr "Valt av dig"
 
@@ -4452,7 +4458,7 @@ msgstr "CTRL K"
 msgid "Curated plugins and themes. Each says whether it fits this device."
 msgstr "Utvalda tillägg och teman. Vart och ett anger om det passar den här enheten."
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Current match"
 msgstr "Aktuell matchning"
 
@@ -5921,6 +5927,7 @@ msgstr "Framtida genomsökningar hoppar över det"
 
 #. The IGDB game the library game is matched to
 #: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/frame/views.rs
+#: apps/native/src/game/igdb.rs
 msgid "Game"
 msgstr "Spel"
 
@@ -6207,7 +6214,7 @@ msgstr "Genre"
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 #: apps/native/src/library/bulk_edit.rs
 msgid "Genres"
 msgstr "Genrer"
@@ -6568,11 +6575,11 @@ msgstr "Om du spelar här också behåller varje enhet sin egen sparfil, och nä
 msgid "IGDB catalog"
 msgstr "IGDB-katalogen"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "IGDB game {igdbId}. Its details show once Caskade can reach the metadata server."
 msgstr "IGDB-spel {igdbId}. Detaljerna visas när Caskade når metadataservern."
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "IGDB games"
 msgstr "IGDB-spel"
 
@@ -6584,11 +6591,11 @@ msgstr "IGDB har inget spel {igdbId}."
 msgid "IGDB has no release dates for this game."
 msgstr "IGDB har inga utgivningsdatum för det här spelet."
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "IGDB ID {id}"
 msgstr "IGDB-ID {id}"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "IGDB ID {igdbId}"
 msgstr "IGDB-ID {igdbId}"
 
@@ -6604,7 +6611,7 @@ msgstr "IGDB listar inga butiker för det här spelet."
 msgid "IGDB page"
 msgstr "IGDB-sida"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "IGDB rating"
 msgstr "IGDB-betyg"
 
@@ -7884,7 +7891,7 @@ msgstr "Läser in liknande spel…"
 msgid "Loading the catalogue…"
 msgstr "Läser in katalogen…"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Loading the IGDB match…"
 msgstr "Läser in IGDB-matchningen…"
 
@@ -8156,19 +8163,19 @@ msgstr "Markera som oläst: {title}"
 msgid "Match a platform to import these ROMs."
 msgstr "Koppla en plattform för att importera de här ROM-filerna."
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Match automatically"
 msgstr "Matcha automatiskt"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Match now"
 msgstr "Matcha nu"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Matched by name (Hasheous)"
 msgstr "Matchat via namn (Hasheous)"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Matched by store id"
 msgstr "Matchat via butiks-id"
 
@@ -8176,11 +8183,11 @@ msgstr "Matchat via butiks-id"
 msgid "Matched by title: check it's this game"
 msgstr "Matchad på titel: kontrollera att det är det här spelet"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Matched by your RomM server"
 msgstr "Matchat av din RomM-server"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Matched on another device"
 msgstr "Matchat på en annan enhet"
 
@@ -8618,7 +8625,7 @@ msgid "Newest games"
 msgstr "Nyaste spelen"
 
 #. Goes to the next screenshot
-#: apps/desktop/src/views/game/Screenshots.tsx
+#: apps/desktop/src/views/game/Screenshots.tsx apps/native/src/game/media.rs
 msgid "Next"
 msgstr "Nästa"
 
@@ -8765,7 +8772,7 @@ msgstr "Ingen GPU hittades."
 msgid "No hidden games. Hide one from its card's actions."
 msgstr "Inga dolda spel. Dölj ett via åtgärderna på dess kort."
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "No IGDB games match “{searched}”."
 msgstr "Inga IGDB-spel matchar ”{searched}”."
 
@@ -8793,7 +8800,7 @@ msgctxt "age limit"
 msgid "No limit"
 msgstr "Ingen gräns"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "No match found"
 msgstr "Ingen matchning hittades"
 
@@ -8889,7 +8896,7 @@ msgstr "Inga sparfiler eller mappar. Lägg till dem här eller släpp dem på de
 msgid "No saves kept yet. A version is kept each time you finish playing."
 msgstr "Inga sparfiler har behållits än. En version behålls varje gång du slutar spela."
 
-#: apps/desktop/src/views/game/Screenshots.tsx
+#: apps/desktop/src/views/game/Screenshots.tsx apps/native/src/game/media.rs
 msgid "No screenshots"
 msgstr "Inga skärmbilder"
 
@@ -9064,7 +9071,7 @@ msgid "Not fetched yet. Refresh achievements to see them."
 msgstr "Inte hämtade än. Uppdatera prestationerna för att se dem."
 
 #. The IGDB match's details aren't applied yet
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "not filled in yet"
 msgstr "inte ifyllt än"
 
@@ -9110,7 +9117,7 @@ msgstr "Inte installerat eller otillgängligt."
 msgid "Not matched"
 msgstr "Ingen matchning"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Not matched yet. Caskade matches games with IGDB in the background."
 msgstr "Inte matchat än. Caskade matchar spel med IGDB i bakgrunden."
 
@@ -9134,7 +9141,7 @@ msgstr "Inte nu"
 msgid "Not on a local network."
 msgstr "Inte i ett lokalt nätverk."
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Not on IGDB"
 msgstr "Inte på IGDB"
 
@@ -10093,7 +10100,7 @@ msgstr "Plattform för {title}"
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 #: apps/desktop/src/views/library/platforms/PlatformGrid.tsx
-#: apps/native/src/library/bulk_edit.rs
+#: apps/native/src/game/igdb.rs apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/platform_grid.rs
 msgid "Platforms"
 msgstr "Plattformar"
@@ -10142,7 +10149,7 @@ msgid "Play (modded)"
 msgstr "Spela (moddat)"
 
 #. {name} is a game's video: Trailer, Gameplay video, …
-#: apps/desktop/src/views/game/Videos.tsx
+#: apps/desktop/src/views/game/Videos.tsx apps/native/src/game/media.rs
 msgid "Play {name}"
 msgstr "Spela {name}"
 
@@ -10468,7 +10475,7 @@ msgid "Preview"
 msgstr "Förhandsgranska"
 
 #. Goes to the previous screenshot
-#: apps/desktop/src/views/game/Screenshots.tsx
+#: apps/desktop/src/views/game/Screenshots.tsx apps/native/src/game/media.rs
 msgid "Previous"
 msgstr "Föregående"
 
@@ -10852,8 +10859,8 @@ msgstr "Reducerade"
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
-#: apps/native/src/library/selection_bar.rs apps/native/src/settings/storage.rs
-#: apps/native/src/settings/stores.rs
+#: apps/native/src/game/igdb.rs apps/native/src/library/selection_bar.rs
+#: apps/native/src/settings/storage.rs apps/native/src/settings/stores.rs
 msgid "Refresh"
 msgstr "Uppdatera"
 
@@ -10999,7 +11006,7 @@ msgstr "Utgivningsår"
 #. A game's or release's status on IGDB
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
 #: apps/desktop/src/views/game/IgdbPanel.tsx
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/game/igdb.rs
 #: apps/native/src/game_menu/quick_look.rs
 msgid "Released"
 msgstr "Släppt"
@@ -12077,7 +12084,7 @@ msgid "Screenshot {number}"
 msgstr "Skärmbild {number}"
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
-#: apps/desktop/src/views/game/Screenshots.tsx
+#: apps/desktop/src/views/game/Screenshots.tsx apps/native/src/game/media.rs
 #: apps/native/src/settings/addons.rs
 msgid "Screenshots"
 msgstr "Skärmbilder"
@@ -12148,7 +12155,7 @@ msgstr "Sök bland alla spel…"
 msgid "Search games"
 msgstr "Sök spel"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Search IGDB"
 msgstr "Sök på IGDB"
 
@@ -12185,7 +12192,7 @@ msgstr "Sök i katalogen"
 msgid "Search the library"
 msgstr "Sök i biblioteket"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Searching IGDB…"
 msgstr "Söker på IGDB…"
 
@@ -12340,7 +12347,7 @@ msgstr "Inställt av Caskade för den här emulatorn"
 msgid "Set by you: refreshes keep it until you reset it."
 msgstr "Satt av dig: uppdateringar behåller det tills du återställer det."
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Set IGDB game"
 msgstr "Ange IGDB-spel"
 
@@ -13575,7 +13582,7 @@ msgstr "Spelkatalogen kan inte sortera så här än, så de visas i sin vanliga 
 msgid "The game stays, and plays online."
 msgstr "Spelet finns kvar och spelas online."
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "The game with this id on igdb.com"
 msgstr "Spelet med detta id på igdb.com"
 
@@ -14644,7 +14651,7 @@ msgid "USB, removable"
 msgstr "USB, flyttbar"
 
 #. Button: makes this the game's IGDB match
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Use"
 msgstr "Använd"
 
@@ -14654,7 +14661,7 @@ msgstr "Använd"
 msgid "Use {name} {0} from {1}"
 msgstr "Använd {name} {0} från {1}"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Use {title}"
 msgstr "Använd {title}"
 
@@ -14812,7 +14819,7 @@ msgid "Video"
 msgstr "Video"
 
 #. A game's video IGDB gives no name
-#: apps/desktop/src/views/game/Videos.tsx
+#: apps/desktop/src/views/game/Videos.tsx apps/native/src/game/media.rs
 msgid "Video {number}"
 msgstr "Video {number}"
 
@@ -14821,7 +14828,7 @@ msgstr "Video {number}"
 msgid "Video memory"
 msgstr "Videominne"
 
-#: apps/desktop/src/views/game/Videos.tsx
+#: apps/desktop/src/views/game/Videos.tsx apps/native/src/game/media.rs
 msgid "Videos"
 msgstr "Videor"
 
@@ -15342,7 +15349,7 @@ msgstr "Du har inga samlingar att lägga till spel i än."
 msgid "You haven't played anything yet."
 msgstr "Du har inte spelat något än."
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "You marked this game as not on IGDB."
 msgstr "Du markerade att det här spelet inte finns på IGDB."
 

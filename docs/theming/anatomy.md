@@ -1293,7 +1293,7 @@ Contains: [`button`](#button)
 
 ## `screenshot-viewer`
 
-A game's screenshots one at a time, filling the window, opened from its page; arrows, a swipe, a pad's left/right or LB/RB step through them. Rendered by ScreenshotViewer (app).
+A game's screenshots one at a time, filling the window, opened from its page; arrows, a swipe, a pad's left/right or LB/RB step through them. Rendered by ScreenshotViewer (apps/native/src/game/media.rs); in the webview, ScreenshotViewer (app).
 
 Root: `[data-cs="screenshot-viewer"]`
 
@@ -1311,7 +1311,7 @@ Root: `[data-cs="screenshot-viewer"]`
 
 ## `videos`
 
-A game's videos (IGDB's trailers) in a row on its page and its Store page; each plays in the video window. Rendered by Videos (app).
+A game's videos (IGDB's trailers) in a row on its page and its Store page; each plays in the video window. Rendered by Videos (apps/native/src/game/media.rs); in the webview, Videos (app).
 
 Root: `[data-cs="videos"]`
 

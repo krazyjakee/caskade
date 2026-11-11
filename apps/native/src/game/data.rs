@@ -16,6 +16,17 @@ use caskade_core::updates::GameUpdate;
 use dioxus_native::prelude::*;
 use std::rc::Rc;
 
+/// A change to a game's IGDB match.
+#[derive(Debug, Clone, PartialEq)]
+pub enum IgdbChange {
+    /// This IGDB game, or none ("Not on IGDB").
+    Set(Option<String>),
+    /// Match it again automatically.
+    Rematch,
+    /// Fetch the IGDB game's details again.
+    Refresh,
+}
+
 /// A change to an install's updates.
 #[derive(Debug, Clone, PartialEq)]
 pub enum UpdateChange {
@@ -62,6 +73,18 @@ pub struct PageData {
     pub copy_here: Rc<dyn Fn(String, String) -> Answer<()>>,
     /// Starts game `0` on device `1`, waking it first when it can.
     pub play_on: Rc<dyn Fn(String, String) -> Answer<()>>,
+    /// Game `0`'s IGDB match; `None` before one was tried.
+    pub igdb: Rc<dyn Fn(String) -> Answer<Option<caskade_core::metadata::GameIgdb>>>,
+    /// Changes game `0`'s match: the match after (another game's id when
+    /// the game merged into it).
+    pub igdb_change:
+        Rc<dyn Fn(String, IgdbChange) -> Answer<Option<caskade_core::metadata::GameIgdb>>>,
+    /// IGDB games for a title.
+    pub igdb_search: Rc<dyn Fn(String) -> Answer<Vec<caskade_core::igdb::IgdbGame>>>,
+    /// Game `0`'s age ratings.
+    pub age_ratings: Rc<dyn Fn(String) -> Answer<Vec<caskade_core::igdb::IgdbAgeRating>>>,
+    /// Plays YouTube video `0` in the video window, titled `1`.
+    pub play_video: Rc<dyn Fn(String, String) -> Result<(), String>>,
 }
 
 impl PartialEq for PageData {
@@ -297,6 +320,74 @@ impl PageData {
                         .ok_or_else(unavailable)?;
                     change(async move { devices.play_on(&game_id, &device_id).await }).await
                 })
+            }),
+            igdb: Rc::new(|game_id| {
+                Box::pin(async move {
+                    let services = services()?;
+                    change(async move {
+                        caskade_app::commands::igdb::game_igdb(&services.metadata, &game_id)
+                            .await
+                            .map_err(ErrorReport::from)
+                    })
+                    .await
+                })
+            }),
+            igdb_change: Rc::new(|game_id, what| {
+                Box::pin(async move {
+                    let services = services()?;
+                    change(async move {
+                        use caskade_app::commands::igdb as commands;
+                        let metadata = &services.metadata;
+                        match what {
+                            IgdbChange::Set(id) => commands::game_igdb_set(metadata, &game_id, id)
+                                .await
+                                .map(Some),
+                            IgdbChange::Rematch => {
+                                commands::game_igdb_rematch(metadata, &game_id).await
+                            }
+                            IgdbChange::Refresh => {
+                                commands::game_igdb_refresh(metadata, &game_id).await
+                            }
+                        }
+                        .map_err(ErrorReport::from)
+                    })
+                    .await
+                })
+            }),
+            igdb_search: Rc::new(|query| {
+                Box::pin(async move {
+                    let services = services()?;
+                    change(async move {
+                        caskade_app::commands::igdb::igdb_search(&services.igdb, &query, 12)
+                            .await
+                            .map_err(ErrorReport::from)
+                    })
+                    .await
+                })
+            }),
+            age_ratings: Rc::new(|game_id| {
+                Box::pin(async move {
+                    let Some(services) = crate::shell::services() else {
+                        return Ok(Vec::new());
+                    };
+                    change(async move {
+                        caskade_app::commands::igdb::game_age_ratings(&services.store, &game_id)
+                            .await
+                            .map(|ratings| {
+                                ratings.map(|ratings| ratings.ratings).unwrap_or_default()
+                            })
+                            .map_err(ErrorReport::from)
+                    })
+                    .await
+                })
+            }),
+            play_video: Rc::new(|video_id, title| {
+                caskade_app::commands::video::video_play(
+                    crate::shell::video_window(),
+                    &video_id,
+                    &title,
+                    caskade_app::commands::video::VideoPlacement::Anywhere,
+                )
             }),
         }
     }

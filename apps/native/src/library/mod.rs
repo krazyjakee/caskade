@@ -53,6 +53,17 @@ pub fn art_url_hero(artwork: &[caskade_core::model::Artwork]) -> Option<String> 
     art::url(hero, art::Variant::Hero)
 }
 
+/// A picture's original, for where it fills the window (a screenshot).
+pub fn art_url_original(art: &caskade_core::model::Artwork) -> Option<String> {
+    (!art.cached_path.is_empty()).then(|| {
+        format!(
+            "{}://localhost/{}",
+            art::SCHEME,
+            art.cached_path.trim_start_matches('/')
+        )
+    })
+}
+
 /// A game's art for a card or tile: the 320 px thumbnail.
 pub fn art_url_card(art: Option<&caskade_core::model::Artwork>) -> Option<String> {
     art::url(art, art::Variant::Card)
