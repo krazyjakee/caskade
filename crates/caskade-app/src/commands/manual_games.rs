@@ -34,6 +34,7 @@ pub async fn manual_game_add(
     bus: &Bus,
     game: ManualGame,
 ) -> Result<String, CommandError> {
+    crate::permissions::enforce("manual_game_add", serde_json::Value::default)?;
     let id = store.add_manual_game(&game).await.map_err(report)?;
     bus.emit(if game.link_to.is_some() {
         Event::LibraryGameUpdated {

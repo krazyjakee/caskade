@@ -55,6 +55,8 @@ pub fn video_play(
     title: &str,
     placement: VideoPlacement,
 ) -> Result<(), String> {
+    crate::permissions::enforce("video_play", serde_json::Value::default)
+        .map_err(|refusal| refusal.summary)?;
     if !is_video_id(video_id) {
         return Err(format!("{video_id} isn't a YouTube video"));
     }

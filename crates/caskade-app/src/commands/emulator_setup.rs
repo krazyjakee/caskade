@@ -26,6 +26,7 @@ pub async fn emulator_setup_install(
     setup: &EmulatorSetup,
     definition_id: &str,
 ) -> Result<SetupJob, CommandError> {
+    crate::permissions::enforce("emulator_setup_install", serde_json::Value::default)?;
     setup.install(definition_id).await.map_err(report)
 }
 
@@ -34,6 +35,7 @@ pub async fn emulator_setup_install_for(
     setup: &EmulatorSetup,
     platform_id: &str,
 ) -> Result<SetupJob, CommandError> {
+    crate::permissions::enforce("emulator_setup_install_for", serde_json::Value::default)?;
     setup.install_for(platform_id).await.map_err(report)
 }
 
@@ -47,6 +49,7 @@ pub fn emulator_setup_cancel(
     setup: &EmulatorSetup,
     job_id: &str,
 ) -> Result<SetupJob, CommandError> {
+    crate::permissions::enforce("emulator_setup_cancel", serde_json::Value::default)?;
     setup.cancel(job_id).map_err(report)
 }
 
@@ -55,6 +58,7 @@ pub async fn emulator_setup_check(
     setup: &EmulatorSetup,
     emulator_id: &str,
 ) -> Result<ManagedEmulator, CommandError> {
+    crate::permissions::enforce("emulator_setup_check", serde_json::Value::default)?;
     setup.check(emulator_id).await.map_err(report)
 }
 
@@ -63,6 +67,7 @@ pub async fn emulator_setup_skip(
     setup: &EmulatorSetup,
     emulator_id: &str,
 ) -> Result<ManagedEmulator, CommandError> {
+    crate::permissions::enforce("emulator_setup_skip", serde_json::Value::default)?;
     setup.skip(emulator_id, None).await.map_err(report)
 }
 
@@ -72,6 +77,7 @@ pub async fn emulator_setup_update(
     setup: &EmulatorSetup,
     emulator_id: &str,
 ) -> Result<SetupJob, CommandError> {
+    crate::permissions::enforce("emulator_setup_update", serde_json::Value::default)?;
     setup.update(emulator_id).await.map_err(report)
 }
 
@@ -81,5 +87,6 @@ pub async fn emulator_setup_fetch_bios(
     setup: &EmulatorSetup,
     platform_id: &str,
 ) -> Result<BiosFetch, CommandError> {
+    crate::permissions::enforce("emulator_setup_fetch_bios", serde_json::Value::default)?;
     setup.fetch_bios(platform_id).await.map_err(report)
 }

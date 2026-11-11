@@ -33,6 +33,7 @@ pub async fn game_port_install(
     project: &str,
     root_id: Option<String>,
 ) -> Result<JobSnapshot, CommandError> {
+    crate::permissions::enforce("game_port_install", serde_json::Value::default)?;
     ports
         .install(store, installs, game_id, project, root_id)
         .await

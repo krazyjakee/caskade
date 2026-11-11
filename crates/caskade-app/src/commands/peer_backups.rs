@@ -28,6 +28,7 @@ pub async fn backups_on_devices(
     peers: Option<&PeerBackups>,
     devices: Option<&Devices>,
 ) -> Result<Vec<DeviceBackups>, CommandError> {
+    crate::permissions::enforce("backups_on_devices", serde_json::Value::default)?;
     let (Some(peers), Some(devices)) = (peers, devices) else {
         return Ok(Vec::new());
     };
@@ -54,6 +55,7 @@ pub async fn backup_fetch_from_device(
     sync: Option<&SyncService>,
     hash: &str,
 ) -> Result<String, CommandError> {
+    crate::permissions::enforce("backup_fetch_from_device", serde_json::Value::default)?;
     let (Some(peers), Some(sync)) = (peers, sync) else {
         return Err(report(caskade_core::Error::Invalid(caskade_core::tr!(
             "Devices aren't ready on this device yet."

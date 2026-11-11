@@ -10,6 +10,8 @@ pub async fn install_start(
     input: String,
     root_id: Option<String>,
 ) -> Result<JobSnapshot, String> {
+    crate::permissions::enforce("install_start", serde_json::Value::default)
+        .map_err(|refusal| refusal.summary)?;
     if input.trim().is_empty() || input.len() > 32_768 || input.contains('\0') {
         return Err(caskade_core::tr!("input must be a nonempty path or URL"));
     }
@@ -30,11 +32,15 @@ pub fn job_get(state: &InstallService, id: String) -> Result<JobSnapshot, String
 }
 
 pub fn job_cancel(state: &InstallService, id: String) -> Result<JobSnapshot, String> {
+    crate::permissions::enforce("job_cancel", serde_json::Value::default)
+        .map_err(|refusal| refusal.summary)?;
     state.cancel(&id).map_err(|error| error.to_string())
 }
 
 /// Takes a finished job out of Activity. Its files stay.
 pub fn job_remove(state: &InstallService, id: String) -> Result<(), String> {
+    crate::permissions::enforce("job_remove", serde_json::Value::default)
+        .map_err(|refusal| refusal.summary)?;
     state.remove(&id).map_err(|error| error.to_string())
 }
 
@@ -52,6 +58,8 @@ pub async fn job_answer(
     revision: u32,
     answer: JobAnswer,
 ) -> Result<JobSnapshot, String> {
+    crate::permissions::enforce("job_answer", || serde_json::json!({ "id": id }))
+        .map_err(|refusal| refusal.summary)?;
     state
         .answer(&id, revision, answer)
         .await
@@ -65,6 +73,8 @@ pub async fn job_retry(
     id: String,
     candidate_index: Option<u32>,
 ) -> Result<JobSnapshot, String> {
+    crate::permissions::enforce("job_retry", || serde_json::json!({ "id": id }))
+        .map_err(|refusal| refusal.summary)?;
     state
         .retry(&id, candidate_index)
         .await
@@ -78,6 +88,8 @@ pub async fn job_recover(
     id: String,
     recovery: caskade_core::install::Recovery,
 ) -> Result<JobSnapshot, String> {
+    crate::permissions::enforce("job_recover", || serde_json::json!({ "id": id }))
+        .map_err(|refusal| refusal.summary)?;
     state
         .recover(&id, recovery)
         .await
@@ -89,6 +101,8 @@ pub async fn fetch_start(
     input: String,
     root_id: Option<String>,
 ) -> Result<JobSnapshot, String> {
+    crate::permissions::enforce("fetch_start", serde_json::Value::default)
+        .map_err(|refusal| refusal.summary)?;
     state.fetch(input, root_id).await.map_err(|e| e.to_string())
 }
 
@@ -97,6 +111,8 @@ pub async fn uninstall_game(
     launch: &LaunchService,
     entry_id: String,
 ) -> Result<JobSnapshot, String> {
+    crate::permissions::enforce("uninstall_game", serde_json::Value::default)
+        .map_err(|refusal| refusal.summary)?;
     state
         .uninstall(entry_id, launch.clone())
         .await
@@ -111,6 +127,7 @@ pub async fn remove_game(
     launch: &LaunchService,
     game_id: String,
 ) -> Result<Option<JobSnapshot>, crate::error::CommandError> {
+    crate::permissions::enforce("remove_game", serde_json::Value::default)?;
     state
         .remove_game(&game_id, launch.clone())
         .await
@@ -118,6 +135,8 @@ pub async fn remove_game(
 }
 
 pub async fn verify_game(state: &InstallService, entry_id: String) -> Result<JobSnapshot, String> {
+    crate::permissions::enforce("verify_game", serde_json::Value::default)
+        .map_err(|refusal| refusal.summary)?;
     state.verify(entry_id).await.map_err(|e| e.to_string())
 }
 
@@ -127,6 +146,8 @@ pub async fn move_game(
     entry_id: String,
     target_root_id: String,
 ) -> Result<JobSnapshot, String> {
+    crate::permissions::enforce("move_game", serde_json::Value::default)
+        .map_err(|refusal| refusal.summary)?;
     state
         .move_game(entry_id, target_root_id, storage.clone())
         .await

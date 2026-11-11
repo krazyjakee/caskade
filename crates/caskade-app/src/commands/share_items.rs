@@ -18,6 +18,7 @@ pub async fn share_item(
     item: ShareItem,
     expiry: ShareExpiry,
 ) -> Result<ShareCreated, CommandError> {
+    crate::permissions::enforce("share_item", serde_json::Value::default)?;
     let account = accounts.require_active().map_err(report)?;
     let share = shares
         .share_item(item, expiry, &account)
@@ -35,6 +36,7 @@ pub async fn share_receive_collection(
     accounts: &AccountService,
     link: &str,
 ) -> Result<Collection, CommandError> {
+    crate::permissions::enforce("share_receive_collection", serde_json::Value::default)?;
     let account = accounts.require_active().map_err(report)?;
     shares
         .receive_collection(link, &account)

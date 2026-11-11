@@ -58,6 +58,7 @@ pub async fn save_collection(
     accounts: &AccountService,
     collection: &SaveCollection,
 ) -> Result<Collection, CommandError> {
+    crate::permissions::enforce("save_collection", serde_json::Value::default)?;
     store
         .save_collection(&account(accounts)?, collection)
         .await
@@ -71,6 +72,7 @@ pub async fn set_collection_pinned(
     id: &str,
     pinned: bool,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("set_collection_pinned", serde_json::Value::default)?;
     store
         .set_collection_pinned(&account(accounts)?, id, pinned)
         .await
@@ -83,6 +85,7 @@ pub async fn delete_collection(
     accounts: &AccountService,
     id: &str,
 ) -> Result<bool, CommandError> {
+    crate::permissions::enforce("delete_collection", serde_json::Value::default)?;
     store
         .delete_collection(&account(accounts)?, id)
         .await
@@ -96,6 +99,7 @@ pub async fn add_to_collection(
     id: &str,
     game_ids: &[String],
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("add_to_collection", serde_json::Value::default)?;
     store
         .add_to_collection(&account(accounts)?, id, game_ids)
         .await
@@ -109,6 +113,7 @@ pub async fn remove_from_collection(
     id: &str,
     game_ids: &[String],
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("remove_from_collection", serde_json::Value::default)?;
     store
         .remove_from_collection(&account(accounts)?, id, game_ids)
         .await

@@ -16,12 +16,14 @@ pub async fn discovery_launchers(
 pub async fn discovery_scan(
     controller: &DiscoveryController,
 ) -> Result<DiscoverySnapshot, CommandError> {
+    crate::permissions::enforce("discovery_scan", serde_json::Value::default)?;
     controller.scan().await
 }
 
 pub async fn discovery_cancel(
     controller: &DiscoveryController,
 ) -> Result<DiscoverySnapshot, CommandError> {
+    crate::permissions::enforce("discovery_cancel", serde_json::Value::default)?;
     Ok(controller.cancel().await)
 }
 
@@ -31,5 +33,6 @@ pub async fn discovery_review(
     accept: bool,
     revision: u32,
 ) -> Result<DiscoverySnapshot, CommandError> {
+    crate::permissions::enforce("discovery_review", serde_json::Value::default)?;
     controller.review(ids, accept, revision).await
 }

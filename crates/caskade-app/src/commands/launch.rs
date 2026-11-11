@@ -27,6 +27,7 @@ pub async fn launch_game(
     service: &LaunchService,
     entry_id: &str,
 ) -> Result<LaunchTicket, CommandError> {
+    crate::permissions::enforce("launch_game", serde_json::Value::default)?;
     service
         .launch(entry_id)
         .await
@@ -41,6 +42,7 @@ pub async fn launch_game_with(
     entry_id: &str,
     choice: Option<LaunchChoice>,
 ) -> Result<LaunchOutcome, CommandError> {
+    crate::permissions::enforce("launch_game_with", serde_json::Value::default)?;
     match service
         .launch_with(entry_id, &choice.unwrap_or_default())
         .await
@@ -75,6 +77,7 @@ pub async fn game_age_approve(
     pin: String,
     permanent: bool,
 ) -> Result<PinCheck, CommandError> {
+    crate::permissions::enforce("game_age_approve", serde_json::Value::default)?;
     accounts
         .approve_play_for(account_id, game_id, pin, permanent)
         .await

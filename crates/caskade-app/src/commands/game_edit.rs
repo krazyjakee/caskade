@@ -35,6 +35,7 @@ pub async fn game_edit(
     edit: GameEdit,
     base: Option<Game>,
 ) -> Result<GameEditOutcome, CommandError> {
+    crate::permissions::enforce("game_edit", serde_json::Value::default)?;
     let outcome = store
         .edit_game(&game_id, &edit, base.as_ref())
         .await
@@ -81,6 +82,7 @@ pub async fn game_artwork_set(
     kind: ArtworkKind,
     change: ArtworkChange,
 ) -> Result<Vec<ArtworkSlot>, CommandError> {
+    crate::permissions::enforce("game_artwork_set", serde_json::Value::default)?;
     match change {
         ArtworkChange::Choose { artwork_id } => {
             store.choose_artwork(&game_id, kind, &artwork_id).await
@@ -120,6 +122,7 @@ pub async fn games_bulk_edit(
     edit: GameEdit,
     apply: bool,
 ) -> Result<Vec<BulkGameResult>, CommandError> {
+    crate::permissions::enforce("games_bulk_edit", serde_json::Value::default)?;
     let results = store
         .bulk_edit_games(&game_ids, &edit, apply)
         .await
@@ -155,11 +158,15 @@ pub async fn games_refresh_start(
     game_ids: Vec<String>,
     mode: RefreshMode,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("games_refresh_start", serde_json::Value::default)?;
     metadata.start_refresh(game_ids, mode).map_err(report)
 }
 
 /// Stops the refresh after its current batch; whether one was running.
 pub fn games_refresh_cancel(metadata: &Metadata) -> bool {
+    if crate::permissions::enforce("games_refresh_cancel", serde_json::Value::default).is_err() {
+        return false;
+    }
     metadata.cancel_refresh()
 }
 

@@ -33,6 +33,7 @@ pub async fn rom_scanner_save(
     emulation: &EmulationService,
     scanner: RomScanner,
 ) -> Result<RomScanner, CommandError> {
+    crate::permissions::enforce("rom_scanner_save", serde_json::Value::default)?;
     emulation.scanners().save(scanner).await.map_err(report)
 }
 
@@ -42,6 +43,7 @@ pub async fn rom_folder_setup(
     emulation: &EmulationService,
     folder: &str,
 ) -> Result<RomFolderSetup, CommandError> {
+    crate::permissions::enforce("rom_folder_setup", serde_json::Value::default)?;
     emulation
         .scanners()
         .setup_folder(std::path::Path::new(folder))
@@ -54,6 +56,7 @@ pub async fn rom_scanner_delete(
     emulation: &EmulationService,
     id: &str,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("rom_scanner_delete", serde_json::Value::default)?;
     match emulation.scanners().delete(id).await.map_err(report)? {
         true => Ok(()),
         false => Err(conflict(caskade_core::tr!(
@@ -69,6 +72,7 @@ pub async fn rom_scan_start(
     scanner_id: &str,
     mode: ScanMode,
 ) -> Result<ScanJob, CommandError> {
+    crate::permissions::enforce("rom_scan_start", serde_json::Value::default)?;
     emulation
         .scanners()
         .start(scanner_id, mode)
@@ -91,6 +95,7 @@ pub fn rom_scan_jobs(emulation: &EmulationService) -> Vec<ScanJob> {
 
 /// Cancels a scan.
 pub fn rom_scan_cancel(emulation: &EmulationService, id: &str) -> Result<ScanJob, CommandError> {
+    crate::permissions::enforce("rom_scan_cancel", serde_json::Value::default)?;
     emulation
         .scanners()
         .cancel(id)
@@ -104,6 +109,7 @@ pub async fn rom_scan_submit(
     revision: u32,
     choices: Vec<ReviewChoice>,
 ) -> Result<ScanJob, CommandError> {
+    crate::permissions::enforce("rom_scan_submit", serde_json::Value::default)?;
     emulation
         .scanners()
         .submit(id, revision, choices)
@@ -113,6 +119,7 @@ pub async fn rom_scan_submit(
 
 /// "Scan all": every scanner that takes part in library updates imports.
 pub async fn rom_scan_all(emulation: &EmulationService) -> Result<Vec<ScanSummary>, CommandError> {
+    crate::permissions::enforce("rom_scan_all", serde_json::Value::default)?;
     emulation.scanners().scan_all().await.map_err(report)
 }
 
@@ -131,6 +138,7 @@ pub async fn rom_exclusions_set(
     emulation: &EmulationService,
     patterns: Vec<String>,
 ) -> Result<Vec<String>, CommandError> {
+    crate::permissions::enforce("rom_exclusions_set", serde_json::Value::default)?;
     emulation
         .scanners()
         .set_global_exclusions(patterns)

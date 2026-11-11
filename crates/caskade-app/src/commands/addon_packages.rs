@@ -123,6 +123,9 @@ struct Prepared {
 
 /// Stops an install of `id` while it downloads; whether one was running.
 pub fn addons_install_cancel(jobs: &AddonJobs, id: String) -> bool {
+    if crate::permissions::enforce("addons_install_cancel", serde_json::Value::default).is_err() {
+        return false;
+    }
     jobs.0
         .lock()
         .unwrap_or_else(std::sync::PoisonError::into_inner)
@@ -157,6 +160,7 @@ pub async fn addons_skip_update(
     id: String,
     version: Option<String>,
 ) -> Result<AddonRecords, CommandError> {
+    crate::permissions::enforce("addons_skip_update", serde_json::Value::default)?;
     let mut records = AddonRecords::load(store).await.map_err(report)?;
     let record: &mut AddonRecord = records.addons.entry(id).or_default();
     record.skipped = version;
@@ -169,6 +173,7 @@ pub async fn addons_set_update_preference(
     store: &LibraryStore,
     preference: UpdatePreference,
 ) -> Result<AddonRecords, CommandError> {
+    crate::permissions::enforce("addons_set_update_preference", serde_json::Value::default)?;
     let mut records = AddonRecords::load(store).await.map_err(report)?;
     records.updates = preference;
     records.save(store).await.map_err(report)?;
@@ -483,6 +488,7 @@ pub async fn addons_install(
     accept: bool,
     retry: bool,
 ) -> Result<AddonOutcome, CommandError> {
+    crate::permissions::enforce("addons_install", serde_json::Value::default)?;
     let prepared = match prepare(app, &id, mode).await {
         Ok(prepared) => prepared,
         Err(error) => return Ok(failed(&id, error, false)),
@@ -564,6 +570,7 @@ pub async fn addons_uninstall(
     id: String,
     keep_data: bool,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("addons_uninstall", serde_json::Value::default)?;
     let invalid = |message: String| report(caskade_core::Error::Invalid(message));
     if let Some(host) = app.plugins
         && host

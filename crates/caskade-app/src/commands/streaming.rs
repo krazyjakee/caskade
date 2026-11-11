@@ -91,6 +91,7 @@ pub async fn streaming_set_hosting(
     on: bool,
     host: &StreamingHost,
 ) -> Result<HostOutcome, CommandError> {
+    crate::permissions::enforce("streaming_set_hosting", serde_json::Value::default)?;
     let host = host.clone();
     // Boxed: the host's setup is a deep future, and a shell's command
     // around it would overflow the compiler's layout limit.
@@ -108,6 +109,7 @@ pub async fn streaming_set_quality(
     settings: &SettingsService,
     quality: StreamQuality,
 ) -> Result<SettingsSnapshot, CommandError> {
+    crate::permissions::enforce("streaming_set_quality", serde_json::Value::default)?;
     settings.set_stream_quality(&quality).await.map_err(report)
 }
 
@@ -120,6 +122,7 @@ pub async fn streaming_use_existing(
     password: String,
     host: &StreamingHost,
 ) -> Result<HostOutcome, CommandError> {
+    crate::permissions::enforce("streaming_use_existing", serde_json::Value::default)?;
     let host = host.clone();
     host.use_existing(caskade_streaming::secrets::Credentials { user, password })
         .await
@@ -134,6 +137,7 @@ pub fn streaming_hosts(hosts: &StreamHosts) -> Vec<StreamHost> {
 
 /// Looks for devices now, and asks the paired ones for their games.
 pub async fn streaming_look_again(hosts: &StreamHosts) -> Result<Vec<StreamHost>, CommandError> {
+    crate::permissions::enforce("streaming_look_again", serde_json::Value::default)?;
     let hosts = hosts.clone();
     hosts.look_again().await.map_err(report)?;
     Ok(hosts.hosts())
@@ -145,6 +149,7 @@ pub async fn streaming_add_host(
     address: String,
     hosts: &StreamHosts,
 ) -> Result<Vec<StreamHost>, CommandError> {
+    crate::permissions::enforce("streaming_add_host", serde_json::Value::default)?;
     let hosts = hosts.clone();
     hosts.add_address(&address).await.map_err(report)?;
     hosts.look_again().await.map_err(report)?;
@@ -166,6 +171,7 @@ pub async fn streaming_accept_pairing(
     name: String,
     host: &StreamingHost,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("streaming_accept_pairing", serde_json::Value::default)?;
     host.clone()
         .accept_pairing(&id, &code, &name)
         .await
@@ -176,6 +182,7 @@ pub async fn streaming_decline_pairing(
     id: String,
     host: &StreamingHost,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("streaming_decline_pairing", serde_json::Value::default)?;
     host.clone().decline_pairing(&id).await.map_err(report)
 }
 
@@ -188,11 +195,13 @@ pub async fn streaming_paired_devices(
 
 /// Removes a device's pairing with this host.
 pub async fn streaming_unpair(uuid: String, host: &StreamingHost) -> Result<(), CommandError> {
+    crate::permissions::enforce("streaming_unpair", serde_json::Value::default)?;
     host.clone().unpair(&uuid).await.map_err(report)
 }
 
 /// Forgets every device paired with this host: each needs a code again.
 pub async fn streaming_unpair_all(host: &StreamingHost) -> Result<(), CommandError> {
+    crate::permissions::enforce("streaming_unpair_all", serde_json::Value::default)?;
     host.clone().unpair_all().await.map_err(report)
 }
 
@@ -200,6 +209,7 @@ pub async fn streaming_unpair_all(host: &StreamingHost) -> Result<(), CommandErr
 /// configuration and sign-in, and the administrator step's rules, service
 /// or firewall entries that went, behind one prompt.
 pub async fn streaming_repair(host: &StreamingHost) -> Result<HostOutcome, CommandError> {
+    crate::permissions::enforce("streaming_repair", serde_json::Value::default)?;
     host.clone().repair().await.map_err(report)
 }
 
@@ -267,6 +277,7 @@ pub async fn streaming_update(
     host: &StreamingHost,
     client: &StreamingClient,
 ) -> Result<HostOutcome, CommandError> {
+    crate::permissions::enforce("streaming_update", serde_json::Value::default)?;
     match part {
         StreamingPart::Host => host.clone().update().await.map_err(report),
         StreamingPart::Client => client
@@ -284,6 +295,7 @@ pub async fn streaming_skip(
     part: StreamingPart,
     tools: &caskade_core::managed::ManagedTools,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("streaming_skip", serde_json::Value::default)?;
     tools
         .skip(part.tool(), None)
         .await
@@ -302,6 +314,7 @@ pub async fn streaming_forget_host(
     client: &StreamingClient,
     hosts: &StreamHosts,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("streaming_forget_host", serde_json::Value::default)?;
     client.forget(&host_id).await.map_err(report)?;
     hosts.refresh().await.map_err(report)
 }
@@ -316,6 +329,7 @@ pub async fn streaming_pair_with(
     client: &StreamingClient,
     host_id: &str,
 ) -> Result<PairingStarted, CommandError> {
+    crate::permissions::enforce("streaming_pair_with", serde_json::Value::default)?;
     let host = hosts
         .hosts()
         .into_iter()

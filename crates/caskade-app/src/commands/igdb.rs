@@ -76,6 +76,8 @@ pub async fn game_igdb_set(
     game_id: &str,
     igdb_id: Option<String>,
 ) -> Result<GameIgdb, String> {
+    crate::permissions::enforce("game_igdb_set", serde_json::Value::default)
+        .map_err(|refusal| refusal.summary)?;
     let igdb_id = match igdb_id {
         Some(id) => Some(parse(std::slice::from_ref(&id))?[0]),
         None => None,
@@ -91,6 +93,8 @@ pub async fn game_igdb_rematch(
     metadata: &Metadata,
     game_id: &str,
 ) -> Result<Option<GameIgdb>, String> {
+    crate::permissions::enforce("game_igdb_rematch", serde_json::Value::default)
+        .map_err(|refusal| refusal.summary)?;
     metadata
         .rematch(game_id)
         .await
@@ -102,6 +106,8 @@ pub async fn game_igdb_refresh(
     metadata: &Metadata,
     game_id: &str,
 ) -> Result<Option<GameIgdb>, String> {
+    crate::permissions::enforce("game_igdb_refresh", serde_json::Value::default)
+        .map_err(|refusal| refusal.summary)?;
     metadata
         .refresh(game_id)
         .await
@@ -112,6 +118,8 @@ pub async fn game_igdb_refresh(
 /// matching never merges back: for releases merged as one game that aren't
 /// the same game. The new game's id.
 pub async fn game_separate_entry(metadata: &Metadata, entry_id: &str) -> Result<String, String> {
+    crate::permissions::enforce("game_separate_entry", serde_json::Value::default)
+        .map_err(|refusal| refusal.summary)?;
     metadata
         .separate(entry_id)
         .await

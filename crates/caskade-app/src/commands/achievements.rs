@@ -40,6 +40,7 @@ pub async fn game_achievements_refresh(
     accounts: &AccountService,
     game_id: String,
 ) -> Result<Vec<AchievementSet>, CommandError> {
+    crate::permissions::enforce("game_achievements_refresh", serde_json::Value::default)?;
     achievements
         .refresh_game_now(&game_id, accounts.active_id().as_deref())
         .await
@@ -51,6 +52,7 @@ pub async fn game_achievements_cancel(
     achievements: &Achievements,
     game_id: String,
 ) -> Result<bool, CommandError> {
+    crate::permissions::enforce("game_achievements_cancel", serde_json::Value::default)?;
     Ok(achievements.cancel_refresh(&game_id))
 }
 
@@ -74,6 +76,7 @@ pub async fn game_achievement_link_set(
     provider: String,
     product_id: String,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("game_achievement_link_set", serde_json::Value::default)?;
     release_of(store, &game_id, &entry_id).await?;
     if product_id.trim().is_empty() {
         return Err(report(caskade_core::Error::Invalid(caskade_core::tr!(
@@ -104,6 +107,7 @@ pub async fn game_achievement_link_clear(
     entry_id: String,
     provider: String,
 ) -> Result<bool, CommandError> {
+    crate::permissions::enforce("game_achievement_link_clear", serde_json::Value::default)?;
     release_of(store, &game_id, &entry_id).await?;
     let removed = store
         .delete_achievement_link(&entry_id, &provider)

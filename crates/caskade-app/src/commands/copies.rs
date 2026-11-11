@@ -54,6 +54,7 @@ pub async fn game_copy_here(
     device_id: String,
     root_id: Option<String>,
 ) -> Result<JobSnapshot, CommandError> {
+    crate::permissions::enforce("game_copy_here", serde_json::Value::default)?;
     let copy = store
         .sync_peer_copies(&game_id)
         .await
@@ -106,6 +107,7 @@ pub async fn game_send_to(
     game_id: String,
     device_id: String,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("game_send_to", serde_json::Value::default)?;
     let entries = store.entries_for_game(&game_id).await.map_err(report)?;
     // A release installed here in a folder that can be copied: a managed
     // one first.
@@ -145,6 +147,7 @@ pub async fn devices_transfers(
     transfers: &Transfers,
     devices: &Devices,
 ) -> Result<Vec<TransferView>, CommandError> {
+    crate::permissions::enforce("devices_transfers", serde_json::Value::default)?;
     let status = devices.status().await;
     let now = caskade_core::sync::clock::now_ms();
     Ok(transfers

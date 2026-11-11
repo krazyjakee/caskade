@@ -506,6 +506,67 @@ fn argument<'a>(args: &'a Value, name: &str) -> Option<&'a str> {
     args.get(name)?.as_str()
 }
 
+/// The native shell's gate (#106). The Tauri shell checks each command
+/// against the signed-in account before it runs it ([`check`]); the native
+/// app calls the command functions directly, so it installs this guard at
+/// start and every command function checks itself with [`enforce`]. Without
+/// a guard (the Tauri shell, tests, fixtures mode) commands don't check.
+static GUARD: std::sync::OnceLock<Guard> = std::sync::OnceLock::new();
+
+/// [`check`] over one app's accounts and, once they start, its installs
+/// (only a job's kind needs them, and there are no jobs before).
+#[derive(Clone)]
+pub struct Guard {
+    accounts: AccountService,
+    install: std::sync::Arc<std::sync::OnceLock<InstallService>>,
+}
+
+impl Guard {
+    pub fn new(accounts: AccountService) -> Self {
+        Self {
+            accounts,
+            install: std::sync::Arc::default(),
+        }
+    }
+
+    /// The installs, once they've started.
+    pub fn set_install(&self, install: InstallService) {
+        let _ = self.install.set(install);
+    }
+
+    /// Whether the signed-in account may call `command` with `args`; the
+    /// refusal, as the Tauri shell answers it, when not.
+    pub fn check(&self, command: &str, args: &Value) -> Result<(), crate::error::CommandError> {
+        check(command, args, Some(&self.accounts), self.install.get()).map_err(|reason| {
+            crate::error::CommandError::new(crate::error::ErrorCode::Forbidden, reason)
+        })
+    }
+}
+
+/// Makes every command function check `guard` (the native shell, once at
+/// start, before any command runs). A second guard is ignored.
+pub fn install_guard(guard: Guard) {
+    let _ = GUARD.set(guard);
+}
+
+/// The installed guard, to give it the installs once they start.
+pub fn guard() -> Option<&'static Guard> {
+    GUARD.get()
+}
+
+/// What a command function calls first: refused when the installed guard
+/// refuses `command` with the (camelCase, JSON) arguments `args`, which are
+/// only built when a guard is installed.
+pub fn enforce(
+    command: &str,
+    args: impl FnOnce() -> Value,
+) -> Result<(), crate::error::CommandError> {
+    match GUARD.get() {
+        Some(guard) => guard.check(command, &args()),
+        None => Ok(()),
+    }
+}
+
 #[cfg(test)]
 #[path = "permissions_tests.rs"]
 mod tests;

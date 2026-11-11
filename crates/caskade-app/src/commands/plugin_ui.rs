@@ -129,6 +129,8 @@ pub async fn plugin_request(
     method: String,
     payload: serde_json::Value,
 ) -> Result<serde_json::Value, String> {
+    crate::permissions::enforce("plugin_request", serde_json::Value::default)
+        .map_err(|refusal| refusal.summary)?;
     let answer = state
         .request(&plugin_id, &method, &payload.to_string())
         .await

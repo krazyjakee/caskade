@@ -43,11 +43,13 @@ pub async fn plugins_list(state: &PluginHost) -> Result<Vec<PluginSummary>, Comm
 
 /// Enables a plugin with the permissions its manifest asks for.
 pub async fn plugin_enable(state: &PluginHost, id: String) -> Result<PluginSummary, CommandError> {
+    crate::permissions::enforce("plugin_enable", serde_json::Value::default)?;
     state.set_enabled(&id, true).await.map_err(failure)
 }
 
 /// Disables a plugin and stops its backend.
 pub async fn plugin_disable(state: &PluginHost, id: String) -> Result<PluginSummary, CommandError> {
+    crate::permissions::enforce("plugin_disable", serde_json::Value::default)?;
     state.set_enabled(&id, false).await.map_err(failure)
 }
 
@@ -57,6 +59,7 @@ pub async fn plugin_install_preview(
     state: &PluginHost,
     folder: String,
 ) -> Result<PluginPreview, CommandError> {
+    crate::permissions::enforce("plugin_install_preview", serde_json::Value::default)?;
     state
         .preview_folder(std::path::Path::new(&folder))
         .await
@@ -69,6 +72,7 @@ pub async fn plugin_install(
     state: &PluginHost,
     folder: String,
 ) -> Result<PluginSummary, CommandError> {
+    crate::permissions::enforce("plugin_install", serde_json::Value::default)?;
     state
         .install_folder(std::path::Path::new(&folder))
         .await
@@ -77,5 +81,6 @@ pub async fn plugin_install(
 
 /// Removes a plugin with its settings, stored data and grants (#128).
 pub async fn plugin_uninstall(state: &PluginHost, id: String) -> Result<(), CommandError> {
+    crate::permissions::enforce("plugin_uninstall", serde_json::Value::default)?;
     state.uninstall(&id).await.map_err(failure)
 }

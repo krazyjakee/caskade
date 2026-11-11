@@ -126,6 +126,7 @@ pub async fn emulator_offer_keep(
     sync: Option<&SyncService>,
     platform_id: &str,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("emulator_offer_keep", serde_json::Value::default)?;
     let Some(sync) = sync else {
         return Ok(());
     };

@@ -26,6 +26,7 @@ pub async fn game_play_on(
     game_id: &str,
     device_id: &str,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("game_play_on", serde_json::Value::default)?;
     play.play_on(device_id, game_id, |_| {})
         .await
         .map_err(report)
@@ -38,6 +39,9 @@ pub fn remote_play_finished(
     started: bool,
     reason: Option<String>,
 ) {
+    if crate::permissions::enforce("remote_play_finished", serde_json::Value::default).is_err() {
+        return;
+    }
     let outcome = if started {
         PlayOutcome::Started
     } else {

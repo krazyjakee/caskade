@@ -45,6 +45,7 @@ pub async fn backup_plan(
 /// Back up now, with the settings' folder and components. Returns once it
 /// starts; `BackupChanged` follows it to its outcome.
 pub async fn backup_start(backups: &Backups) -> Result<(), CommandError> {
+    crate::permissions::enforce("backup_start", serde_json::Value::default)?;
     if backups.status().await.running.is_some() {
         return Err(report(caskade_backup::BackupError::Busy));
     }
@@ -59,11 +60,15 @@ pub async fn backup_start(backups: &Backups) -> Result<(), CommandError> {
 
 /// Cancels the backup, check or restore under way.
 pub fn backup_cancel(backups: &Backups) {
+    if crate::permissions::enforce("backup_cancel", serde_json::Value::default).is_err() {
+        return;
+    }
     backups.cancel();
 }
 
 /// Checks a backup and says what restoring it would do.
 pub async fn backup_inspect(backups: &Backups, path: String) -> Result<Inspection, CommandError> {
+    crate::permissions::enforce("backup_inspect", serde_json::Value::default)?;
     backups
         .inspect_job(&PathBuf::from(path))
         .await
@@ -77,6 +82,7 @@ pub async fn backup_restore(
     path: String,
     components: Vec<Component>,
 ) -> Result<Journal, CommandError> {
+    crate::permissions::enforce("backup_restore", serde_json::Value::default)?;
     backups
         .restore_job(caskade_backup::RestoreOptions {
             archive: PathBuf::from(path),
@@ -88,12 +94,14 @@ pub async fn backup_restore(
 
 /// Forgets the restore waiting for the restart.
 pub async fn backup_restore_discard(backups: &Backups) -> Result<(), CommandError> {
+    crate::permissions::enforce("backup_restore_discard", serde_json::Value::default)?;
     backups.discard_restore_job().await.map_err(report)
 }
 
 /// Shows a backup in the file manager: only a file named like one, in the
 /// backup folder or the last backup's.
 pub async fn backup_reveal(backups: &Backups, path: String) -> Result<(), CommandError> {
+    crate::permissions::enforce("backup_reveal", serde_json::Value::default)?;
     let path = PathBuf::from(path);
     let named = path
         .file_name()

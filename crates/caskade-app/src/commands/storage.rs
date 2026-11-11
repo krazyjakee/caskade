@@ -21,6 +21,7 @@ pub async fn storage_add(
     path: String,
     label: Option<String>,
 ) -> Result<RootSummary, CommandError> {
+    crate::permissions::enforce("storage_add", serde_json::Value::default)?;
     let root = storage
         .register_root(path.into(), label)
         .await
@@ -58,6 +59,7 @@ pub async fn storage_edit(
     label: Option<String>,
     folder_template: String,
 ) -> Result<RootSummary, CommandError> {
+    crate::permissions::enforce("storage_edit", serde_json::Value::default)?;
     storage
         .edit_root(id, label, folder_template)
         .await
@@ -69,11 +71,13 @@ pub async fn storage_default(
     storage: &StorageService,
     id: &str,
 ) -> Result<RootSummary, CommandError> {
+    crate::permissions::enforce("storage_default", serde_json::Value::default)?;
     storage.set_default(id).await.map_err(report)
 }
 
 /// Removes a location, keeping its files.
 pub async fn storage_remove(storage: &StorageService, id: &str) -> Result<(), CommandError> {
+    crate::permissions::enforce("storage_remove", serde_json::Value::default)?;
     storage.remove_keep_files(id).await.map_err(report)
 }
 
@@ -86,6 +90,7 @@ pub async fn storage_move_and_remove(
     id: String,
     target_id: String,
 ) -> Result<JobSnapshot, CommandError> {
+    crate::permissions::enforce("storage_move_and_remove", serde_json::Value::default)?;
     accounts.require(Permission::Install).map_err(report)?;
     install
         .move_location(id, target_id, storage.clone())

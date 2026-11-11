@@ -71,6 +71,11 @@ fn release_key() -> Option<String> {
 /// Starts every other service on `core`, off the main thread so the window
 /// shows at once. `ready` runs with them once they're up.
 pub fn start(core: Core, ready: impl FnOnce(&'static Services) + Send + 'static) {
+    // Every command checks the signed-in account's permissions from here
+    // on, as the Tauri shell checks each one before it runs (#106).
+    caskade_app::permissions::install_guard(caskade_app::permissions::Guard::new(
+        core.accounts.clone(),
+    ));
     let started = std::thread::Builder::new()
         .name("caskade-start".into())
         .spawn(move || {
@@ -83,6 +88,11 @@ pub fn start(core: Core, ready: impl FnOnce(&'static Services) + Send + 'static)
                 release_key: release_key(),
             };
             let services = caskade_app::start::start(core, shell);
+            if let (Some(guard), Some(install)) =
+                (caskade_app::permissions::guard(), &services.install)
+            {
+                guard.set_install(install.clone());
+            }
             if SERVICES.set(services).is_err() {
                 return;
             }

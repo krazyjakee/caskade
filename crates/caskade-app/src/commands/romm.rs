@@ -69,6 +69,7 @@ pub async fn romm_settings_set(
     state: &RommService,
     settings: RommSettings,
 ) -> Result<RommOverview, CommandError> {
+    crate::permissions::enforce("romm_settings_set", serde_json::Value::default)?;
     state.save_settings(settings).await.map_err(report)
 }
 
@@ -79,6 +80,7 @@ pub async fn romm_server_save(
     server: RommServerConfig,
     secret: Option<String>,
 ) -> Result<RommOverview, CommandError> {
+    crate::permissions::enforce("romm_server_save", serde_json::Value::default)?;
     if secret.as_ref().is_some_and(|secret| secret.len() > 4096) {
         return Err(refused(caskade_core::tr!(
             "the password or token is too long"
@@ -91,6 +93,7 @@ pub async fn romm_server_remove(
     state: &RommService,
     id: String,
 ) -> Result<RommOverview, CommandError> {
+    crate::permissions::enforce("romm_server_remove", serde_json::Value::default)?;
     state.remove_server(&id).await.map_err(report)
 }
 
@@ -100,6 +103,7 @@ pub async fn romm_server_test(
     server: RommServerConfig,
     secret: Option<String>,
 ) -> Result<ConnectionReport, CommandError> {
+    crate::permissions::enforce("romm_server_test", serde_json::Value::default)?;
     state.test_connection(server, secret).await.map_err(report)
 }
 
@@ -110,6 +114,7 @@ pub async fn romm_sync(
     state: &RommService,
     id: Option<String>,
 ) -> Result<Vec<RommSyncReport>, CommandError> {
+    crate::permissions::enforce("romm_sync", serde_json::Value::default)?;
     match id {
         Some(id) => Ok(vec![state.sync(&id).await.map_err(report)?]),
         None => all_synced(state.sync_all().await),
@@ -142,6 +147,7 @@ pub async fn romm_cache_status(state: &RommService) -> Result<CacheStatus, Comma
 
 /// Removes every download except pinned games.
 pub async fn romm_cache_clear(state: &RommService) -> Result<CacheStatus, CommandError> {
+    crate::permissions::enforce("romm_cache_clear", serde_json::Value::default)?;
     state.clear_cache().await.map_err(report)
 }
 
@@ -159,17 +165,22 @@ pub async fn romm_set_pinned(
     entry_id: String,
     pinned: bool,
 ) -> Result<RommGameStatus, CommandError> {
+    crate::permissions::enforce("romm_set_pinned", serde_json::Value::default)?;
     state.set_pinned(&entry_id, pinned).await.map_err(report)
 }
 
 /// Removes one game's download.
 pub async fn romm_evict(state: &RommService, entry_id: String) -> Result<bool, CommandError> {
+    crate::permissions::enforce("romm_evict", serde_json::Value::default)?;
     state.evict(&entry_id).await.map_err(report)
 }
 
 /// Cancels a running download; the launch that started it fails as
 /// cancelled and the partial file is kept for a resume.
 pub fn romm_cancel_download(state: &RommService, entry_id: String) -> bool {
+    if crate::permissions::enforce("romm_cancel_download", serde_json::Value::default).is_err() {
+        return false;
+    }
     state.cancel_download(&entry_id)
 }
 

@@ -307,3 +307,100 @@ fn each_group_is_allowed_for_admins_refused_without_it_and_allowed_once_granted(
         assert_eq!(call(command, body.clone()), Ok(ran), "{command}");
     }
 }
+
+#[test]
+fn the_native_guard_refuses_what_the_account_may_not_do_and_allows_it_once_granted() {
+    let (store, accounts, admin, kid) = setup();
+    let guard = Guard::new(accounts.clone());
+    guard.set_install(InstallService::new(
+        store,
+        Bus::default(),
+        InstallOptions::default(),
+    ));
+    // The admin may; the kid without permissions may not, with why.
+    assert_eq!(guard.check("install_start", &json!({})), Ok(()));
+    grant(&accounts, &admin, &kid, Permissions::default());
+    let refused = guard.check("install_start", &json!({})).unwrap_err();
+    assert_eq!(refused.code, crate::error::ErrorCode::Forbidden);
+    assert!(
+        refused.summary.to_lowercase().contains("admin"),
+        "{}",
+        refused.summary
+    );
+    assert!(
+        guard
+            .check("settings_set", &json!({ "namespace": "core.appearance" }))
+            .is_err()
+    );
+    // Reads stay open.
+    assert_eq!(guard.check("list_games", &json!({})), Ok(()));
+    // Granted, it may.
+    grant(
+        &accounts,
+        &admin,
+        &kid,
+        Permissions {
+            settings: vec!["appearance".into()],
+            install: true,
+        },
+    );
+    assert_eq!(guard.check("install_start", &json!({})), Ok(()));
+    assert_eq!(
+        guard.check("settings_set", &json!({ "namespace": "core.appearance" })),
+        Ok(())
+    );
+}
+
+/// Every command function the table checks calls [`enforce`] with its own
+/// name first, so the native app, which calls them directly, holds the same
+/// rules as the Tauri shell (#106).
+#[test]
+fn every_checked_command_function_enforces_its_permission() {
+    let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("src/commands");
+    let mut missing = Vec::new();
+    let mut checked = 0;
+    for entry in std::fs::read_dir(dir).unwrap() {
+        let path = entry.unwrap().path();
+        let name = path.file_name().unwrap().to_string_lossy().into_owned();
+        if !name.ends_with(".rs") || name.ends_with("_tests.rs") {
+            continue;
+        }
+        let source = std::fs::read_to_string(&path).unwrap();
+        let mut rest = source.as_str();
+        while let Some(start) = rest.find("\npub ") {
+            rest = &rest[start + 1..];
+            let signature = rest.trim_start_matches("pub ").trim_start_matches("async ");
+            let Some(function) = signature.strip_prefix("fn ") else {
+                continue;
+            };
+            let command: String = function
+                .chars()
+                .take_while(|c| c.is_ascii_alphanumeric() || *c == '_')
+                .collect();
+            if matches!(
+                access(&command),
+                None | Some(Access::Open | Access::Accounts)
+            ) {
+                continue;
+            }
+            checked += 1;
+            // The first statement of the body, however it's wrapped.
+            let body = rest.find("{\n").map_or("", |at| &rest[at + 2..]);
+            let first: String = body
+                .split(';')
+                .next()
+                .unwrap_or_default()
+                .split_whitespace()
+                .collect();
+            let expected = format!("enforce(\"{command}\"");
+            if !first.contains(&expected) {
+                missing.push(format!("{name}: {command}"));
+            }
+        }
+    }
+    assert!(checked > 150, "found {checked}");
+    assert!(
+        missing.is_empty(),
+        "these don't call enforce first: {missing:#?}"
+    );
+}

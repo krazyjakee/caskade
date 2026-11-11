@@ -27,6 +27,7 @@ pub async fn game_update_check(
     updates: &Updates,
     entry_id: &str,
 ) -> Result<GameUpdate, CommandError> {
+    crate::permissions::enforce("game_update_check", serde_json::Value::default)?;
     updates.check(entry_id).await.map_err(report)
 }
 
@@ -36,6 +37,7 @@ pub async fn game_update_before_play(
     updates: &Updates,
     entry_id: &str,
 ) -> Result<Option<GameUpdate>, CommandError> {
+    crate::permissions::enforce("game_update_before_play", serde_json::Value::default)?;
     updates.before_play(entry_id).await.map_err(report)
 }
 
@@ -45,6 +47,7 @@ pub async fn game_update_skip(
     entry_id: &str,
     version: Option<String>,
 ) -> Result<GameUpdate, CommandError> {
+    crate::permissions::enforce("game_update_skip", serde_json::Value::default)?;
     updates.skip(entry_id, version).await.map_err(report)
 }
 
@@ -54,6 +57,7 @@ pub async fn game_update_prereleases(
     entry_id: &str,
     prereleases: bool,
 ) -> Result<GameUpdate, CommandError> {
+    crate::permissions::enforce("game_update_prereleases", serde_json::Value::default)?;
     updates
         .set_prereleases(entry_id, prereleases)
         .await
@@ -66,6 +70,7 @@ pub async fn game_update_install(
     launch: &LaunchService,
     entry_id: &str,
 ) -> Result<JobSnapshot, CommandError> {
+    crate::permissions::enforce("game_update_install", serde_json::Value::default)?;
     updates
         .install(entry_id, launch.clone())
         .await

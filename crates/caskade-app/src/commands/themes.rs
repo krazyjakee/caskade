@@ -245,6 +245,7 @@ pub async fn theme_load_unpacked(
     themes: Option<&ThemeService>,
     folder: &str,
 ) -> Result<String, CommandError> {
+    crate::permissions::enforce("theme_load_unpacked", serde_json::Value::default)?;
     if !cfg!(debug_assertions) {
         return Err(refused(caskade_core::tr!(
             "Loading a theme folder is only available in development builds; run `caskade dev <folder>`"

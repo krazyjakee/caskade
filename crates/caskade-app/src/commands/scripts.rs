@@ -28,6 +28,10 @@ pub async fn lifecycle_script_save(
     scope: &ScriptScope,
     script: LifecycleScript,
 ) -> Result<LifecycleScript, CommandError> {
+    crate::permissions::enforce(
+        "lifecycle_script_save",
+        || serde_json::json!({ "scope": scope }),
+    )?;
     let mut script = script;
     if script.scope != *scope {
         return Err(mismatch());
@@ -44,6 +48,10 @@ pub async fn lifecycle_script_delete(
     scope: &ScriptScope,
     id: &str,
 ) -> Result<bool, CommandError> {
+    crate::permissions::enforce(
+        "lifecycle_script_delete",
+        || serde_json::json!({ "scope": scope }),
+    )?;
     match store.lifecycle_script(id).await.map_err(report)? {
         Some(script) if script.scope == *scope => {
             store.delete_lifecycle_script(id).await.map_err(report)
@@ -59,6 +67,10 @@ pub async fn lifecycle_scripts_order(
     scope: &ScriptScope,
     ids: &[String],
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce(
+        "lifecycle_scripts_order",
+        || serde_json::json!({ "scope": scope }),
+    )?;
     store
         .order_lifecycle_scripts(scope, ids)
         .await
@@ -68,6 +80,7 @@ pub async fn lifecycle_scripts_order(
 /// Stops the game's launch while its before-launch scripts run; false
 /// when it isn't at that point.
 pub async fn launch_cancel(service: &LaunchService, game_id: &str) -> Result<bool, CommandError> {
+    crate::permissions::enforce("launch_cancel", serde_json::Value::default)?;
     Ok(service.cancel_start(game_id))
 }
 
@@ -93,6 +106,10 @@ pub async fn lifecycle_script_test(
     game_id: Option<String>,
     test_id: &str,
 ) -> Result<ScriptTest, CommandError> {
+    crate::permissions::enforce(
+        "lifecycle_script_test",
+        || serde_json::json!({ "scope": scope }),
+    )?;
     if script.scope != *scope {
         return Err(mismatch());
     }
@@ -108,6 +125,7 @@ pub async fn lifecycle_script_test(
 
 /// Stops a running test; false when it already finished.
 pub async fn lifecycle_script_test_cancel(test_id: &str) -> Result<bool, CommandError> {
+    crate::permissions::enforce("lifecycle_script_test_cancel", serde_json::Value::default)?;
     Ok(TESTS.cancel(test_id))
 }
 

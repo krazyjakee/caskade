@@ -53,6 +53,7 @@ pub async fn store_account_refresh(
     accounts: &StoreAccounts,
     id: &str,
 ) -> Result<RefreshOutcome, CommandError> {
+    crate::permissions::enforce("store_account_refresh", serde_json::Value::default)?;
     accounts
         .refresh(id, &caskade_backup::CancellationToken::new())
         .await
@@ -64,6 +65,7 @@ pub async fn store_account_disconnect(
     accounts: &StoreAccounts,
     id: &str,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("store_account_disconnect", serde_json::Value::default)?;
     accounts.disconnect(id).await.map(|_| ()).map_err(report)
 }
 
@@ -80,11 +82,17 @@ pub async fn store_account_remove(
     accounts: &StoreAccounts,
     id: &str,
 ) -> Result<RemovalPreview, CommandError> {
+    crate::permissions::enforce("store_account_remove", serde_json::Value::default)?;
     accounts.remove(id).await.map_err(report)
 }
 
 /// Cancels an account's refresh under way.
 pub fn store_account_cancel_refresh(accounts: &StoreAccounts, id: &str) {
+    if crate::permissions::enforce("store_account_cancel_refresh", serde_json::Value::default)
+        .is_err()
+    {
+        return;
+    }
     accounts.cancel_refresh(id);
 }
 
@@ -100,6 +108,7 @@ pub async fn store_connect_begin(
     provider: &str,
     reconnect: Option<String>,
 ) -> Result<AuthFlow, CommandError> {
+    crate::permissions::enforce("store_connect_begin", serde_json::Value::default)?;
     accounts
         .begin_connect(provider, reconnect)
         .await
@@ -116,6 +125,7 @@ pub async fn store_connect_complete(
     flow_id: &str,
     input: &AuthInput,
 ) -> Result<StoreAccount, CommandError> {
+    crate::permissions::enforce("store_connect_complete", serde_json::Value::default)?;
     let owner = signed_in
         .and_then(|service| service.signed_in().ok())
         .map(|account| account.id);
@@ -137,6 +147,9 @@ pub async fn store_connect_complete(
 
 /// Abandons a sign-in.
 pub fn store_connect_cancel(accounts: &StoreAccounts, flow_id: &str) {
+    if crate::permissions::enforce("store_connect_cancel", serde_json::Value::default).is_err() {
+        return;
+    }
     accounts.cancel_connect(flow_id);
 }
 
@@ -222,12 +235,16 @@ pub async fn owned_install(
     discovery: Option<&DiscoveryController>,
     entry_id: &str,
 ) -> Result<OwnedRelease, CommandError> {
+    crate::permissions::enforce("owned_install", serde_json::Value::default)?;
     let launchers = launchers(discovery).await;
     accounts.install(entry_id, &launchers).await.map_err(report)
 }
 
 /// Stops waiting for a launcher's install (cancelled or failed there).
 pub fn owned_install_cancel(accounts: &StoreAccounts, entry_id: &str) {
+    if crate::permissions::enforce("owned_install_cancel", serde_json::Value::default).is_err() {
+        return;
+    }
     accounts.cancel_install(entry_id);
 }
 

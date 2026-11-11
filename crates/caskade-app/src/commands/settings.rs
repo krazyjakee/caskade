@@ -35,6 +35,10 @@ pub async fn settings_set(
     value: serde_json::Value,
     expected_revision: Option<u32>,
 ) -> Result<SettingsSnapshot, CommandError> {
+    crate::permissions::enforce(
+        "settings_set",
+        || serde_json::json!({ "namespace": namespace }),
+    )?;
     settings
         .set(namespace, value, expected_revision)
         .await
@@ -47,6 +51,10 @@ pub async fn settings_reset(
     namespace: &str,
     expected_revision: Option<u32>,
 ) -> Result<SettingsSnapshot, CommandError> {
+    crate::permissions::enforce(
+        "settings_reset",
+        || serde_json::json!({ "namespace": namespace }),
+    )?;
     settings
         .reset(namespace, expected_revision)
         .await

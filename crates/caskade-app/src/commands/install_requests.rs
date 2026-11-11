@@ -144,6 +144,8 @@ pub fn pending_install_requests(state: &InstallRequests) -> Vec<InstallRequest> 
 }
 
 pub fn dismiss_install_request(state: &InstallRequests, request_id: String) -> Result<(), String> {
+    crate::permissions::enforce("dismiss_install_request", serde_json::Value::default)
+        .map_err(|refusal| refusal.summary)?;
     state.dismiss(&request_id)
 }
 
@@ -153,6 +155,8 @@ pub async fn confirm_install_request(
     request_id: String,
     root_id: Option<String>,
 ) -> Result<JobSnapshot, String> {
+    crate::permissions::enforce("confirm_install_request", serde_json::Value::default)
+        .map_err(|refusal| refusal.summary)?;
     state.confirm(&request_id, root_id, service).await
 }
 
@@ -478,6 +482,8 @@ pub async fn request_install_input(
     shares: Option<&caskade_share::Shares>,
     value: String,
 ) -> Result<InstallRequest, String> {
+    crate::permissions::enforce("request_install_input", serde_json::Value::default)
+        .map_err(|refusal| refusal.summary)?;
     if caskade_share::is_link(&value) {
         crate::permissions::require(accounts, caskade_core::accounts::Permission::Install)?;
         let shares = shares.ok_or_else(|| caskade_core::tr!("receiving shares isn't available"))?;
@@ -494,6 +500,8 @@ pub async fn request_dropped_install(
     state: &InstallRequests,
     path: String,
 ) -> Result<InstallRequest, String> {
+    crate::permissions::enforce("request_dropped_install", serde_json::Value::default)
+        .map_err(|refusal| refusal.summary)?;
     if is_network_or_device_path(&path) {
         return Err(caskade_core::tr!(
             "choose a local path, not a network or device path"

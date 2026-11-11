@@ -120,6 +120,7 @@ pub async fn set_game_hidden(
     id: &str,
     hidden: bool,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("set_game_hidden", serde_json::Value::default)?;
     store.set_game_hidden(id, hidden).await.map_err(report)?;
     bus.emit(Event::LibraryGameUpdated {
         game_id: id.to_owned(),
@@ -134,6 +135,7 @@ pub async fn set_game_favorite(
     id: &str,
     favorite: bool,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("set_game_favorite", serde_json::Value::default)?;
     store
         .set_game_favorite(id, favorite)
         .await
@@ -152,6 +154,7 @@ pub async fn set_game_default_entry(
     id: &str,
     entry_id: Option<&str>,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("set_game_default_entry", serde_json::Value::default)?;
     store
         .set_game_default_entry(id, entry_id)
         .await
@@ -165,6 +168,7 @@ pub async fn set_game_default_entry(
 /// Opens the folder an entry's files are in, in the file manager. The UI
 /// names an entry, never a path.
 pub async fn reveal_game_entry(store: &LibraryStore, entry_id: &str) -> Result<(), CommandError> {
+    crate::permissions::enforce("reveal_game_entry", serde_json::Value::default)?;
     let folder = store.entry_folder(entry_id).await.map_err(report)?;
     open_file_manager([&folder], &folder)
 }
@@ -172,6 +176,7 @@ pub async fn reveal_game_entry(store: &LibraryStore, entry_id: &str) -> Result<(
 /// Where an entry's files are, for Copy path: a managed install's real
 /// folder, which the entry's own location doesn't spell out.
 pub async fn game_entry_path(store: &LibraryStore, entry_id: &str) -> Result<String, CommandError> {
+    crate::permissions::enforce("game_entry_path", serde_json::Value::default)?;
     let path = store.entry_path(entry_id).await.map_err(report)?;
     Ok(path.display().to_string())
 }

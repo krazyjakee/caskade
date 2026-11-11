@@ -47,6 +47,7 @@ impl OpenedPairingLink {
 }
 
 pub async fn devices_status(devices: &Devices) -> Result<DevicesStatus, CommandError> {
+    crate::permissions::enforce("devices_status", serde_json::Value::default)?;
     Ok(devices.status().await)
 }
 
@@ -58,6 +59,7 @@ pub async fn game_other_devices(
     presence: &caskade_core::sync::presence::Presence,
     game_id: &str,
 ) -> Result<Vec<caskade_core::sync::copies::PeerCopy>, CommandError> {
+    crate::permissions::enforce("game_other_devices", serde_json::Value::default)?;
     caskade_core::sync::copies::peer_copies(store, devices, Some(presence), game_id)
         .await
         .map_err(report)
@@ -65,10 +67,12 @@ pub async fn game_other_devices(
 
 /// Renames this device; an empty name goes back to the host name.
 pub async fn devices_rename(devices: &Devices, name: &str) -> Result<(), CommandError> {
+    crate::permissions::enforce("devices_rename", serde_json::Value::default)?;
     devices.rename(name).await.map_err(report)
 }
 
 pub async fn devices_set_kind(devices: &Devices, kind: DeviceKind) -> Result<(), CommandError> {
+    crate::permissions::enforce("devices_set_kind", serde_json::Value::default)?;
     devices.set_kind(kind).await.map_err(report)
 }
 
@@ -77,6 +81,7 @@ pub async fn devices_pair_nearby(
     devices: &Devices,
     device_id: &str,
 ) -> Result<Pairing, CommandError> {
+    crate::permissions::enforce("devices_pair_nearby", serde_json::Value::default)?;
     devices.pair_nearby(device_id).await.map_err(report)
 }
 
@@ -85,6 +90,7 @@ pub async fn devices_confirm_pairing(
     devices: &Devices,
     device_id: &str,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("devices_confirm_pairing", serde_json::Value::default)?;
     devices.confirm_pairing(device_id).await.map_err(report)
 }
 
@@ -93,12 +99,14 @@ pub async fn devices_cancel_pairing(
     devices: &Devices,
     device_id: &str,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("devices_cancel_pairing", serde_json::Value::default)?;
     devices.cancel_pairing(device_id).await.map_err(report)
 }
 
 /// A link that pairs another device with this one from anywhere: once, for
 /// ten minutes.
 pub async fn devices_pairing_link(devices: &Devices) -> Result<PairingLinkInfo, CommandError> {
+    crate::permissions::enforce("devices_pairing_link", serde_json::Value::default)?;
     devices.pairing_link().await.map_err(report)
 }
 
@@ -107,6 +115,7 @@ pub async fn devices_accept_pairing_link(
     devices: &Devices,
     link: &str,
 ) -> Result<PairedDevice, CommandError> {
+    crate::permissions::enforce("devices_accept_pairing_link", serde_json::Value::default)?;
     devices.accept_pairing_link(link).await.map_err(report)
 }
 
@@ -114,6 +123,7 @@ pub async fn devices_accept_pairing_link(
 pub async fn devices_opened_link(
     opened: &OpenedPairingLink,
 ) -> Result<Option<PairingLinkTarget>, CommandError> {
+    crate::permissions::enforce("devices_opened_link", serde_json::Value::default)?;
     Ok(opened.peek().and_then(|link| inspect_link(&link).ok()))
 }
 
@@ -122,6 +132,7 @@ pub async fn devices_accept_opened_link(
     devices: &Devices,
     opened: &OpenedPairingLink,
 ) -> Result<PairedDevice, CommandError> {
+    crate::permissions::enforce("devices_accept_opened_link", serde_json::Value::default)?;
     let Some(link) = opened.peek() else {
         return Err(report(caskade_core::Error::Invalid(caskade_core::tr!(
             "no pairing link is waiting"
@@ -133,6 +144,7 @@ pub async fn devices_accept_opened_link(
 }
 
 pub async fn devices_dismiss_opened_link(opened: &OpenedPairingLink) -> Result<(), CommandError> {
+    crate::permissions::enforce("devices_dismiss_opened_link", serde_json::Value::default)?;
     opened.take();
     Ok(())
 }
@@ -140,12 +152,14 @@ pub async fn devices_dismiss_opened_link(opened: &OpenedPairingLink) -> Result<(
 /// Forgets a paired device; it's refused from now on and told when it can
 /// be reached. Nothing synced is deleted.
 pub async fn devices_forget(devices: &Devices, device_id: &str) -> Result<(), CommandError> {
+    crate::permissions::enforce("devices_forget", serde_json::Value::default)?;
     devices.forget(device_id).await.map_err(report)
 }
 
 /// Syncs with a paired device now, instead of at the next poll. The result
 /// shows in `DevicesChanged`.
 pub async fn devices_sync_now(sync: &SyncService, device_id: &str) -> Result<(), CommandError> {
+    crate::permissions::enforce("devices_sync_now", serde_json::Value::default)?;
     sync.sync_now(device_id);
     Ok(())
 }
@@ -153,11 +167,13 @@ pub async fn devices_sync_now(sync: &SyncService, device_id: &str) -> Result<(),
 /// Makes a new identity after the keychain lost the old one: paired devices
 /// must pair again. Only after the user agreed.
 pub async fn devices_create_identity(devices: &Devices) -> Result<(), CommandError> {
+    crate::permissions::enforce("devices_create_identity", serde_json::Value::default)?;
     devices.create_identity().await.map_err(report)
 }
 
 /// Reads the keychain again after it didn't answer.
 pub async fn devices_retry_identity(devices: &Devices) -> Result<(), CommandError> {
+    crate::permissions::enforce("devices_retry_identity", serde_json::Value::default)?;
     devices.retry_identity().await.map_err(report)
 }
 

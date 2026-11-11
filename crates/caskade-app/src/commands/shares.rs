@@ -29,6 +29,7 @@ pub async fn share_game(
     entry_id: &str,
     expiry: ShareExpiry,
 ) -> Result<ShareCreated, CommandError> {
+    crate::permissions::enforce("share_game", serde_json::Value::default)?;
     let share = shares.share(entry_id, expiry).await.map_err(report)?;
     let link = shares.link(&share.id).await.map_err(report)?;
     Ok(ShareCreated { share, link })
@@ -36,17 +37,20 @@ pub async fn share_game(
 
 /// Every share this device made, the newest first.
 pub async fn shares_list(shares: &Shares) -> Result<Vec<ShareRecord>, CommandError> {
+    crate::permissions::enforce("shares_list", serde_json::Value::default)?;
     shares.list().await.map_err(report)
 }
 
 /// A running share's link again, to copy.
 pub async fn share_link(shares: &Shares, id: &str) -> Result<String, CommandError> {
+    crate::permissions::enforce("share_link", serde_json::Value::default)?;
     shares.link(id).await.map_err(report)
 }
 
 /// A running share's link as a QR code (an SVG document), for a phone or
 /// another screen to read in console mode (#247).
 pub async fn share_qr(shares: &Shares, id: &str) -> Result<String, CommandError> {
+    crate::permissions::enforce("share_qr", serde_json::Value::default)?;
     let link = shares.link(id).await.map_err(report)?;
     qr_svg(&link).map_err(report)
 }
@@ -67,16 +71,19 @@ fn qr_svg(text: &str) -> caskade_core::Result<String> {
 
 /// Stops share `id`: its link fails at once.
 pub async fn share_stop(shares: &Shares, id: &str) -> Result<(), CommandError> {
+    crate::permissions::enforce("share_stop", serde_json::Value::default)?;
     shares.stop(id).await.map_err(report)
 }
 
 /// Forgets a stopped or expired share.
 pub async fn share_forget(shares: &Shares, id: &str) -> Result<(), CommandError> {
+    crate::permissions::enforce("share_forget", serde_json::Value::default)?;
     shares.forget(id).await.map_err(report)
 }
 
 /// What a share link shares, asked of its sharer; nothing is fetched.
 pub async fn share_inspect(shares: &Shares, link: &str) -> Result<ShareInfo, CommandError> {
+    crate::permissions::enforce("share_inspect", serde_json::Value::default)?;
     shares.inspect(link).await.map_err(report)
 }
 
@@ -87,17 +94,22 @@ pub async fn share_receive(
     link: &str,
     root_id: Option<String>,
 ) -> Result<JobSnapshot, CommandError> {
+    crate::permissions::enforce("share_receive", serde_json::Value::default)?;
     shares.receive(link, root_id).await.map_err(report)
 }
 
 /// Shares received here that are arriving or helping others receive them.
 pub fn shares_received(shares: &Shares) -> Vec<ReceivedShare> {
+    if crate::permissions::enforce("shares_received", serde_json::Value::default).is_err() {
+        return Vec::new();
+    }
     shares.received()
 }
 
 /// Whether the share received as job `job` goes on helping the share's
 /// other recipients once it's here (#249).
 pub fn share_keep_helping(shares: &Shares, job: &str, on: bool) -> Result<(), CommandError> {
+    crate::permissions::enforce("share_keep_helping", serde_json::Value::default)?;
     shares.keep_helping(job, on).map_err(report)
 }
 
@@ -143,6 +155,7 @@ pub async fn confirm_share_collection(
     accounts: &caskade_core::accounts::AccountService,
     request_id: &str,
 ) -> Result<caskade_core::model::Collection, CommandError> {
+    crate::permissions::enforce("confirm_share_collection", serde_json::Value::default)?;
     let account = accounts.require_active().map_err(report)?;
     requests
         .confirm_collection(request_id, &account)

@@ -32,6 +32,7 @@ pub async fn game_action_save(
     game_id: &str,
     action: GameAction,
 ) -> Result<GameAction, CommandError> {
+    crate::permissions::enforce("game_action_save", serde_json::Value::default)?;
     let saved = launch::save_action(store, game_id, &action)
         .await
         .map_err(report)?;
@@ -48,6 +49,7 @@ pub async fn game_action_delete(
     game_id: &str,
     id: &str,
 ) -> Result<bool, CommandError> {
+    crate::permissions::enforce("game_action_delete", serde_json::Value::default)?;
     let deleted = launch::delete_action(store, game_id, id)
         .await
         .map_err(report)?;
@@ -65,6 +67,7 @@ pub async fn game_actions_order(
     entry_id: &str,
     ids: &[String],
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("game_actions_order", serde_json::Value::default)?;
     release_of(store, game_id, entry_id).await?;
     store
         .order_game_actions(entry_id, ids)
@@ -84,6 +87,7 @@ pub async fn game_action_settings_save(
     entry_id: &str,
     settings: EntryActionSettings,
 ) -> Result<EntryActionSettings, CommandError> {
+    crate::permissions::enforce("game_action_settings_save", serde_json::Value::default)?;
     release_of(store, game_id, entry_id).await?;
     let saved = store
         .save_entry_action_settings(entry_id, &settings)
@@ -116,6 +120,7 @@ pub async fn game_tool_run(
     entry_id: &str,
     action_id: &str,
 ) -> Result<ToolOutcome, CommandError> {
+    crate::permissions::enforce("game_tool_run", serde_json::Value::default)?;
     match service.run_tool(entry_id, action_id).await {
         Ok(()) => Ok(ToolOutcome::Started),
         Err(LaunchError::AgeRestricted(restriction)) => Ok(ToolOutcome::AgeRestricted {

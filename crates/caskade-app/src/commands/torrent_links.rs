@@ -22,11 +22,13 @@ pub async fn torrent_links_status() -> Result<TorrentLinks, CommandError> {
 /// the apps that had them. On Windows, opening shows Default apps, where
 /// the user chooses Caskade.
 pub async fn torrent_links_set(open: bool) -> Result<TorrentLinks, CommandError> {
+    crate::permissions::enforce("torrent_links_set", serde_json::Value::default)?;
     blocking(move || torrent_links::set(open)).await
 }
 
 /// Windows: opens Default apps at Caskade's page.
 pub async fn torrent_links_choose() -> Result<(), CommandError> {
+    crate::permissions::enforce("torrent_links_choose", serde_json::Value::default)?;
     blocking(torrent_links::choose).await
 }
 

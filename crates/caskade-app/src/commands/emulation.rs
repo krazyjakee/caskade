@@ -32,11 +32,13 @@ pub async fn emulator_save(
     emulation: &EmulationService,
     emulator: Emulator,
 ) -> Result<EmulatorView, CommandError> {
+    crate::permissions::enforce("emulator_save", serde_json::Value::default)?;
     emulation.save_emulator(emulator).await.map_err(report)
 }
 
 /// Deletes an emulator; a conflict when it's already gone.
 pub async fn emulator_delete(emulation: &EmulationService, id: &str) -> Result<(), CommandError> {
+    crate::permissions::enforce("emulator_delete", serde_json::Value::default)?;
     match emulation.delete_emulator(id).await.map_err(report)? {
         true => Ok(()),
         false => Err(conflict(caskade_core::tr!(
@@ -67,6 +69,7 @@ pub async fn platform_settings_set(
     emulation: &EmulationService,
     settings: PlatformSettings,
 ) -> Result<PlatformView, CommandError> {
+    crate::permissions::enforce("platform_settings_set", serde_json::Value::default)?;
     emulation
         .set_platform_settings(settings)
         .await
@@ -80,6 +83,7 @@ pub async fn emulation_detect_start(
     emulation: &EmulationService,
     folder: Option<String>,
 ) -> Result<DetectJob, CommandError> {
+    crate::permissions::enforce("emulation_detect_start", serde_json::Value::default)?;
     let folder = folder.map(std::path::PathBuf::from);
     if folder
         .as_deref()
@@ -112,6 +116,7 @@ pub fn emulation_detect_cancel(
     emulation: &EmulationService,
     id: &str,
 ) -> Result<DetectJob, CommandError> {
+    crate::permissions::enforce("emulation_detect_cancel", serde_json::Value::default)?;
     emulation.detect_cancel(id).map_err(report)
 }
 
@@ -122,6 +127,7 @@ pub async fn emulation_detect_import(
     revision: u32,
     keys: &[String],
 ) -> Result<DetectImport, CommandError> {
+    crate::permissions::enforce("emulation_detect_import", serde_json::Value::default)?;
     emulation
         .detect_import(id, revision, keys)
         .await
@@ -143,6 +149,7 @@ pub async fn emulation_game_set(
     target: EmulatorTarget,
     args: ArgsOverride,
 ) -> Result<GameEmulation, CommandError> {
+    crate::permissions::enforce("emulation_game_set", serde_json::Value::default)?;
     emulation
         .set_game(entry_id, target, args)
         .await

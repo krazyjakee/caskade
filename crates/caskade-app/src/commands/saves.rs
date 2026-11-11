@@ -71,6 +71,7 @@ pub async fn game_saves_edit(
     preferences: SavePreferences,
     revision: u32,
 ) -> Result<SaveLocationsState, CommandError> {
+    crate::permissions::enforce("game_saves_edit", serde_json::Value::default)?;
     Saves::new(store.clone(), manifest.clone())
         .with_catalog(emulation.catalog())
         .edit(&entry_id, preferences, revision)
@@ -86,6 +87,7 @@ pub async fn game_saves_before_play(
     versions: &SaveVersions,
     entry_id: String,
 ) -> Result<BeforePlay, CommandError> {
+    crate::permissions::enforce("game_saves_before_play", serde_json::Value::default)?;
     versions.before_play(&entry_id).await.map_err(report)
 }
 
@@ -96,6 +98,7 @@ pub async fn game_saves_choose(
     entry_id: String,
     version_id: String,
 ) -> Result<SaveVersion, CommandError> {
+    crate::permissions::enforce("game_saves_choose", serde_json::Value::default)?;
     versions
         .choose(&entry_id, &version_id)
         .await
@@ -117,6 +120,7 @@ pub async fn game_saves_restore(
     entry_id: String,
     version_id: String,
 ) -> Result<SaveVersion, CommandError> {
+    crate::permissions::enforce("game_saves_restore", serde_json::Value::default)?;
     versions
         .restore(&entry_id, &version_id)
         .await
@@ -130,6 +134,7 @@ pub async fn game_saves_reveal(
     entry_id: String,
     location: u32,
 ) -> Result<(), CommandError> {
+    crate::permissions::enforce("game_saves_reveal", serde_json::Value::default)?;
     let state = versions.saves().state(&entry_id).await.map_err(report)?;
     let missing = || {
         report(caskade_core::Error::Invalid(caskade_core::tr!(
