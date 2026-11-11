@@ -54,6 +54,7 @@ msgstr ""
 #. placeholder {0}: unchanged.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+already+has+it%7D+other+%7B%23+already+have+it%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "# already has it"
 msgid_plural "# already have it"
 msgstr[0] ""
@@ -62,6 +63,7 @@ msgstr[1] ""
 #. placeholder {0}: rejected.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+can%27t+take+it%7D+other+%7B%23+can%27t+take+it%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "# can't take it"
 msgid_plural "# can't take it"
 msgstr[0] ""
@@ -102,6 +104,7 @@ msgstr[1] ""
 #. placeholder {0}: changed.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+game+changes%7D+other+%7B%23+games+change%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "# game changes"
 msgid_plural "# games change"
 msgstr[0] ""
@@ -118,6 +121,7 @@ msgstr[1] ""
 #. placeholder {0}: changed.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+game+saved%7D+other+%7B%23+games+saved%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "# game saved"
 msgid_plural "# games saved"
 msgstr[0] ""
@@ -134,6 +138,7 @@ msgstr[1] ""
 #. placeholder {0}: missing.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+is+no+longer+in+the+library%7D+other+%7B%23+are+no+longer+in+the+library%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "# is no longer in the library"
 msgid_plural "# are no longer in the library"
 msgstr[0] ""
@@ -214,6 +219,7 @@ msgstr[1] ""
 #. placeholder {0}: gameIds.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7BRefresh+%23+game%27s+details%7D+other+%7BRefresh+%23+games%27+details%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Refresh # game's details"
 msgid_plural "Refresh # games' details"
 msgstr[0] ""
@@ -411,6 +417,7 @@ msgstr[1] ""
 
 #. js-lingui:icu=%7Bcount%2C+plural%2C+one+%7B%23+game+selected%7D+other+%7B%23+games+selected%7D%7D&pluralize_on=count
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "# game selected"
 msgid_plural "# games selected"
 msgstr[0] ""
@@ -439,6 +446,7 @@ msgstr[1] ""
 
 #. js-lingui:icu=%7Bcount%2C+plural%2C+one+%7BEdit+%23+game%7D+other+%7BEdit+%23+games%7D%7D&pluralize_on=count
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Edit # game"
 msgid_plural "Edit # games"
 msgstr[0] ""
@@ -1152,6 +1160,7 @@ msgstr[1] ""
 
 #. js-lingui:icu=%7Btotal%2C+plural%2C+one+%7BSelect+all+%23+game%7D+other+%7BSelect+all+%23+games%7D%7D&pluralize_on=total
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Select all # game"
 msgid_plural "Select all # games"
 msgstr[0] ""
@@ -1219,6 +1228,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "{value} / 100"
 msgstr ""
 
@@ -1727,6 +1737,7 @@ msgid "Actions"
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryRow.tsx
+#: apps/native/src/library/grid.rs
 msgid "Actions for {title}"
 msgstr ""
 
@@ -1750,6 +1761,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Add"
 msgstr ""
 
@@ -1901,6 +1913,7 @@ msgid "Add server"
 msgstr ""
 
 #: apps/desktop/src/components/gameEditor/fields.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Add to {label}"
 msgstr ""
 
@@ -1948,6 +1961,7 @@ msgid "add-ons, extensions"
 msgstr ""
 
 #: apps/desktop/src/components/gameEditor/fields.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Add, separated by commas"
 msgstr ""
 
@@ -2124,6 +2138,7 @@ msgid "Already configured"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Also fetches matched games again from the metadata server and replaces their automatic details and artwork."
 msgstr ""
 
@@ -2201,6 +2216,7 @@ msgstr ""
 
 #. placeholder {0}: changed.length - shown.length
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "And {0} more."
 msgstr ""
 
@@ -2329,6 +2345,7 @@ msgid "Applications"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Apply"
 msgstr ""
 
@@ -2545,6 +2562,7 @@ msgstr ""
 #. The game page's link back to where it was opened from
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/views/game/BackLink.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Back"
 msgstr ""
 
@@ -2893,6 +2911,8 @@ msgstr ""
 #: apps/native/src/flows/storage.rs
 #: apps/native/src/game_menu/dialogs.rs
 #: apps/native/src/game_menu/play.rs
+#: apps/native/src/library/bulk_edit.rs
+#: apps/native/src/library/selection_bar.rs
 #: apps/native/src/settings/reset.rs
 #: apps/native/src/ui/dialog.rs
 msgid "Cancel"
@@ -3250,6 +3270,10 @@ msgctxt "folder"
 msgid "Change"
 msgstr ""
 
+#: apps/native/src/library/bulk_edit.rs
+msgid "Change {0}"
+msgstr ""
+
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "Change {label}"
 msgstr ""
@@ -3525,6 +3549,7 @@ msgid "Choose folder"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Choose games: click them, Shift+click for a range."
 msgstr ""
 
@@ -3605,6 +3630,7 @@ msgid "Chosen by you"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Clear"
 msgstr ""
 
@@ -3638,6 +3664,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/library/selection_bar.rs
 #: apps/native/src/settings/reset.rs
 msgid "Close"
 msgstr ""
@@ -4386,6 +4413,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Description"
 msgstr ""
 
@@ -4455,6 +4483,7 @@ msgid "Details"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Details and artwork you set, and games you marked as not on IGDB, stay as they are."
 msgstr ""
 
@@ -4632,6 +4661,8 @@ msgstr ""
 #: apps/desktop/src/components/sync/PairingHost.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/native/src/game_menu/collections.rs
+#: apps/native/src/library/bulk_edit.rs
+#: apps/native/src/library/selection_bar.rs
 msgid "Done"
 msgstr ""
 
@@ -4648,6 +4679,7 @@ msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "Done selecting"
 msgstr ""
 
@@ -4837,10 +4869,12 @@ msgstr ""
 
 #. Button hint: a pad's Start in selection mode
 #: apps/desktop/src/views/library/GameActions.tsx
+#: apps/native/src/library/grid.rs
 msgid "Edit selected"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Edit selected…"
 msgstr ""
 
@@ -5806,6 +5840,7 @@ msgstr ""
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Genres"
 msgstr ""
 
@@ -6092,6 +6127,7 @@ msgstr ""
 #. placeholder {0}: labels.releaseDate
 #. placeholder {0}: labels[key]
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "How to change {0}"
 msgstr ""
 
@@ -7682,6 +7718,7 @@ msgid "Matches and downloads run in the background as games arrive. You can open
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Matches games that have no match yet and fills in what they lack from what Caskade already has."
 msgstr ""
 
@@ -7773,6 +7810,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameSelection/RefreshCard.tsx
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Missing details only"
 msgstr ""
 
@@ -8401,11 +8439,13 @@ msgid "Nobody has opened the link yet."
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "none"
 msgstr ""
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
 #: apps/desktop/src/components/gameEditor/fields.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "None"
 msgstr ""
 
@@ -8589,6 +8629,7 @@ msgid "Not refreshed yet."
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Not saved"
 msgstr ""
 
@@ -8628,6 +8669,7 @@ msgstr ""
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Notes"
 msgstr ""
 
@@ -9136,6 +9178,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Other names"
 msgstr ""
 
@@ -9454,6 +9497,7 @@ msgstr ""
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 #: apps/desktop/src/views/library/platforms/PlatformGrid.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Platforms"
 msgstr ""
 
@@ -9803,6 +9847,7 @@ msgid "Present"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Preview"
 msgstr ""
 
@@ -9991,6 +10036,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Rated"
 msgstr ""
 
@@ -10172,6 +10218,7 @@ msgstr ""
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Refresh"
 msgstr ""
 
@@ -10185,6 +10232,7 @@ msgid "Refresh achievements"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Refresh automatic details"
 msgstr ""
 
@@ -10193,6 +10241,7 @@ msgid "Refresh connected accounts in the background to bring in games you buy. F
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Refresh details…"
 msgstr ""
 
@@ -10229,6 +10278,7 @@ msgid "Refreshing game details was cancelled"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Refreshing in the background. <0>Follow it in Activity</0>."
 msgstr ""
 
@@ -10290,6 +10340,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Release date"
 msgstr ""
 
@@ -10364,6 +10415,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Remove"
 msgstr ""
 
@@ -10428,6 +10480,7 @@ msgid "Remove {title}?"
 msgstr ""
 
 #: apps/desktop/src/components/gameEditor/fields.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Remove {value}"
 msgstr ""
 
@@ -10518,6 +10571,7 @@ msgid "Repairing…"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Replace"
 msgstr ""
 
@@ -10617,6 +10671,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Reset to automatic"
 msgstr ""
 
@@ -11137,6 +11192,7 @@ msgid "Save your changes?"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Saved"
 msgstr ""
 
@@ -11204,6 +11260,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
 #: apps/desktop/src/views/settings/useSettings.tsx
+#: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/settings/state.rs
 #: apps/native/src/settings/unsaved.rs
 msgid "Saving…"
@@ -11463,6 +11520,7 @@ msgstr ""
 #. Starts choosing several games in the library
 #: apps/desktop/src/views/CollectionView.tsx
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "Select"
 msgstr ""
 
@@ -11490,6 +11548,7 @@ msgid "Select folder"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Select loaded"
 msgstr ""
 
@@ -11505,6 +11564,7 @@ msgid "Selected"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Selected games"
 msgstr ""
 
@@ -11513,6 +11573,7 @@ msgid "Selected location"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Selecting…"
 msgstr ""
 
@@ -11561,6 +11622,7 @@ msgid "Session history"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Set"
 msgstr ""
 
@@ -12005,6 +12067,7 @@ msgid "Some profiles missing"
 msgstr ""
 
 #: apps/desktop/src/api/reply.ts
+#: apps/native/src/library/selection_bar.rs
 msgid "Something went wrong."
 msgstr ""
 
@@ -12023,6 +12086,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Sort title"
 msgstr ""
 
@@ -12598,6 +12662,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Tags"
 msgstr ""
 
@@ -12644,6 +12709,7 @@ msgstr ""
 
 #. placeholder {0}: bulk.error.message
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "That didn't finish: {0}. Trying again is safe: what saved stays as it is."
 msgstr ""
 
@@ -13213,6 +13279,7 @@ msgid "TiB"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Tick what to change. Everything else stays as each game has it."
 msgstr ""
 
@@ -13231,6 +13298,7 @@ msgstr ""
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/native/src/flows/manual_game.rs
+#: apps/native/src/library/bulk_edit.rs
 msgid "Title"
 msgstr ""
 
@@ -13341,6 +13409,7 @@ msgstr ""
 #: apps/native/src/flows/storage.rs
 #: apps/native/src/frame/error.rs
 #: apps/native/src/frame/notifications.rs
+#: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/view.rs
 #: apps/native/src/settings/general.rs
 #: apps/native/src/ui/failure.rs
@@ -14066,6 +14135,7 @@ msgid "What Caskade looks up on the internet."
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "What changes"
 msgstr ""
 
@@ -14123,6 +14193,7 @@ msgid "What to back up"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "What to refresh"
 msgstr ""
 
@@ -14320,6 +14391,7 @@ msgid "Working folder"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Working out the changes…"
 msgstr ""
 
@@ -14479,6 +14551,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Your rating"
 msgstr ""
 
@@ -14507,6 +14580,7 @@ msgid "YYYY-MM-DD"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "YYYY-MM-DD, or empty for none"
 msgstr ""
 

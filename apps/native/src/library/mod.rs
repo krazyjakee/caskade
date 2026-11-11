@@ -4,15 +4,22 @@
 // benchmark do.
 #![allow(dead_code)]
 
+mod anatomy;
 mod art;
 pub mod bench;
 mod grid;
 // The library view around the grid (#99).
 mod view;
+// Choosing several games, and the bar and dialogs that act on them (#99).
+mod bulk_edit;
+mod selection;
+mod selection_bar;
 #[cfg(test)]
 pub(crate) mod view_tests;
 pub mod window;
 
+#[cfg(test)]
+mod selection_tests;
 #[cfg(test)]
 mod tests;
 
@@ -24,6 +31,7 @@ pub use art::{SCHEME as ART_SCHEME, fetch as fetch_art};
 pub fn art_url(art: Option<&caskade_core::model::Artwork>) -> Option<String> {
     art::url(art, art::Variant::Icon)
 }
+pub use anatomy::ANATOMY;
 #[allow(unused_imports)]
 pub use grid::{Events, VirtualLibrary};
 #[allow(unused_imports)]

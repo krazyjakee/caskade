@@ -24,6 +24,7 @@ pub fn catalogue() -> Vec<Entry> {
     all.extend_from_slice(crate::frame::ANATOMY);
     all.extend_from_slice(crate::flows::ANATOMY);
     all.extend_from_slice(crate::game_menu::ANATOMY);
+    all.extend_from_slice(crate::library::ANATOMY);
     all
 }
 

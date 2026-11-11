@@ -12,6 +12,7 @@
 //! (`Input::scrolled`).
 
 use super::art::{self, Variant};
+use super::selection::GameSelection;
 use super::window::{Frame, Layout, PAGE};
 use crate::data::{DataSource, change};
 use crate::input::{Bind, use_input, use_input_action};
@@ -65,6 +66,21 @@ pub fn VirtualLibrary(
     let input = use_input();
     let source = use_context::<DataSource>();
     let pages: Rc<RefCell<Pages>> = use_hook(Rc::default);
+    // The view's selection reads the games loaded (Shift ranges, "Select
+    // loaded").
+    {
+        let pages = pages.clone();
+        let selection = super::selection::use_selection();
+        use_hook(move || {
+            if let Some(selection) = selection {
+                selection.set_game_at(move |index| {
+                    let state = pages.borrow();
+                    let page = state.pages.get(&(index / PAGE))?;
+                    page.get(index % PAGE).map(|game| game.id.clone())
+                });
+            }
+        });
+    }
     // Bumped when a page arrives or the library changes: renders again.
     let mut loaded = use_signal(|| 0u64);
     let mut total = use_signal(|| None::<usize>);
@@ -525,15 +541,29 @@ fn Game(
         entry_id: None,
     };
     let mut wrapper = use_signal(|| None::<NodeHandle>);
+    // Selection mode: a click chooses it, Shift+click the games between.
+    let selection = super::selection::use_selection();
+    let selected = selection.and_then(|selection| selection.state(&game.id));
+    let mut shift = use_signal(|| false);
     // A click, Enter or a pad's A: its quick look beside the view (the
     // webview's desktop mode); without the host, `open`.
     let on_open = {
         let target = target.clone();
-        move |_| match menus {
-            Some(menus) => menus.look(target.clone()),
-            None => {
-                if let Some(open) = open {
-                    open.call(target.game_id.clone());
+        move |_| {
+            if let Some(mut selection) = selection.filter(GameSelection::active) {
+                if *shift.peek() {
+                    selection.extend(index);
+                } else {
+                    selection.toggle(&target.game_id, Some(index));
+                }
+                return;
+            }
+            match menus {
+                Some(menus) => menus.look(target.clone()),
+                None => {
+                    if let Some(open) = open {
+                        open.call(target.game_id.clone());
+                    }
                 }
             }
         }
@@ -557,18 +587,29 @@ fn Game(
         })
     };
     let owner = wrapper.read().as_ref().map(NodeHandle::node_id);
+    let choosing = selected.is_some();
     use_input_action(
         Action::Menu,
         Bind {
             owner,
-            label: Some(t!(
-                note = "Button hint: a pad's Start opens the focused item's menu",
-                "Options"
-            )),
+            label: Some(if choosing {
+                t!(
+                    note = "Button hint: a pad's Start in selection mode",
+                    "Edit selected"
+                )
+            } else {
+                t!(
+                    note = "Button hint: a pad's Start opens the focused item's menu",
+                    "Options"
+                )
+            }),
             ..Bind::default()
         },
         move || {
-            open_menu.call(None);
+            match selection.filter(GameSelection::active) {
+                Some(mut selection) => selection.edit(),
+                None => open_menu.call(None),
+            }
             true
         },
     );
@@ -602,8 +643,25 @@ fn Game(
             GameRow {
                 game: CardGame::from_summary(&game, None),
                 icon,
+                selected,
                 starting,
                 columns: LIST_COLUMNS.to_owned(),
+                // Its menu, from the "…" at the row's end.
+                actions: rsx! {
+                    button {
+                        r#type: "button",
+                        "aria-label": t!("Actions for {title}", title = game.title.clone()),
+                        "aria-haspopup": "menu",
+                        "data-part": "actions",
+                        "data-spatial": "focusable",
+                        class: "grid size-7 place-items-center rounded-control text-fg-muted outline-none hover:bg-surface-overlay hover:text-fg data-focus-visible:focus-ring",
+                        onclick: move |event: MouseEvent| {
+                            event.stop_propagation();
+                            open_menu.call(None);
+                        },
+                        crate::ui::Svg { icon: crate::ui::icons::ELLIPSIS, class: "size-4" }
+                    }
+                },
                 focus_key,
                 on_open,
                 on_focus,
@@ -617,6 +675,7 @@ fn Game(
             GameCard {
                 game: CardGame::from_summary(&game, cover),
                 index,
+                selected,
                 starting,
                 focus_key,
                 on_open,
@@ -631,9 +690,13 @@ fn Game(
             style: if list { "height: 100%;" } else { "display: flex; flex-direction: column; min-width: 0;" },
             onmounted: move |event: Event<MountedData>| wrapper.set(event.data().downcast::<NodeHandle>().cloned()),
             // A double click plays it, as its menu's Play does.
+            onmousedown: move |event: MouseEvent| shift.set(event.modifiers().shift()),
             ondoubleclick: {
                 let target = target.clone();
                 move |_| {
+                    if choosing {
+                        return;
+                    }
                     if let Some(menus) = menus {
                         menus.play(target.clone());
                     }

@@ -3,7 +3,7 @@
 //! commands (`caskade_app::commands`), so the rules, the signed-in account
 //! and the bus events are the same as the webview's.
 
-use caskade_app::commands::{collections, library};
+use caskade_app::commands::{collections, game_edit, library};
 use caskade_core::{
     accounts::AccountService,
     bus::Bus,
@@ -11,8 +11,8 @@ use caskade_core::{
     error::ErrorReport,
     launch::LaunchService,
     model::{
-        Collection, CollectionSummary, GameDetails, GameFilter, GamePage, LibraryStats, ListGames,
-        PlatformSummary, PlaySession, SaveCollection, TitleLetter,
+        BulkGameResult, Collection, CollectionSummary, GameDetails, GameEdit, GameFilter, GamePage,
+        LibraryStats, ListGames, PlatformSummary, PlaySession, SaveCollection, TitleLetter,
     },
 };
 
@@ -167,5 +167,22 @@ impl Library {
     /// The manual collections a game is in.
     pub async fn game_collections(&self, game_id: &str) -> Result<Vec<String>> {
         collections::game_collections(&self.store, &self.accounts, game_id).await
+    }
+
+    /// Every game `query` finds, in its order, for "select all" (at most
+    /// 10,000).
+    pub async fn game_ids(&self, query: &ListGames) -> Result<Vec<String>> {
+        game_edit::library_game_ids(&self.store, &self.accounts, query.clone()).await
+    }
+
+    /// One edit on many games: what it would change (`apply` false, which
+    /// saves nothing), or what it changed.
+    pub async fn bulk_edit(
+        &self,
+        game_ids: Vec<String>,
+        edit: GameEdit,
+        apply: bool,
+    ) -> Result<Vec<BulkGameResult>> {
+        game_edit::games_bulk_edit(&self.store, &self.bus, game_ids, edit, apply).await
     }
 }

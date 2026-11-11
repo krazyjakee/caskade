@@ -4,8 +4,10 @@
 //! sorted by title, and what it says when there are none or they didn't
 //! load. LB and RB step through the filters.
 
+use super::selection::use_selection_provider;
+use super::selection_bar::{AllIdsProp, SelectionBar};
 use super::{Events, Layout, VirtualLibrary};
-use crate::data::{Query, use_library_page, use_query};
+use crate::data::{Query, use_library, use_library_page, use_query};
 use crate::input::{Bind, use_input_action};
 use crate::router::{LIBRARY_FILTERS, LibraryRoute, Route, RouteLink, use_router};
 use crate::ui::{ErrorNotice, Select, SelectOption, Svg, icons};
@@ -236,6 +238,37 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
         }
     };
     let (drop_over, mut drop_error) = use_library_drop();
+    // Choosing several games for one edit (the webview's #173). Changing
+    // the filter, sort or search keeps the games chosen.
+    let mut selection = use_selection_provider();
+    let selectable = !web && total.is_some_and(|total| total > 0);
+    let choosing = selection.active();
+    use_input_action(
+        Action::Back,
+        Bind {
+            label: choosing.then(|| t!("Done selecting")),
+            ..Bind::default()
+        },
+        move || {
+            if !selection.active() {
+                return false;
+            }
+            selection.stop();
+            true
+        },
+    );
+    let all_ids = {
+        let data = use_library();
+        let query = query.clone();
+        let all: super::selection_bar::AllIds = std::rc::Rc::new(move || {
+            let data = data.clone();
+            let query = query.clone();
+            Box::pin(async move {
+                crate::data::change(async move { data.game_ids(&query).await }).await
+            })
+        });
+        AllIdsProp(all)
+    };
     let control = "flex items-center gap-1.5 rounded-control border border-border px-3 py-2 text-sm text-fg-muted outline-none hover:text-fg data-focus-visible:focus-ring";
     rsx! {
         div { "data-view": "library", class: "relative flex flex-1 flex-col",
@@ -265,6 +298,16 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
                 }
             }
             div { "data-part": "toolbar", class: "mt-4 mb-4 flex flex-wrap items-center gap-2",
+                if selectable {
+                    crate::ui::Button {
+                        "data-part": "select",
+                        "aria-pressed": if choosing { "true" } else { "false" },
+                        class: "flex items-center gap-1.5 rounded-control border border-border px-3 py-2 text-sm text-fg-muted outline-none data-focus-visible:focus-ring data-hovered:text-fg aria-pressed:border-accent-alt aria-pressed:text-fg",
+                        on_press: move |_| if selection.active() { selection.stop() } else { selection.start() },
+                        Svg { icon: icons::SQUARE_CHECK_BIG, class: "size-4" }
+                        {t!(note = "Starts choosing several games in the library", "Select")}
+                    }
+                }
                 // Install from a file, a folder or a link, receive a share,
                 // or add a game by hand (#108); a game added by hand opens.
                 if !web {
@@ -340,7 +383,7 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
                         }
                     },
                 }
-            } else if total.is_some_and(|total| total > 0) {
+            } else if let Some(total) = total.filter(|&total| total > 0) {
                 VirtualLibrary {
                     query,
                     layout: library.layout,
@@ -350,6 +393,7 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
                         open: Some(EventHandler::new(move |id: String| router.open_game(&id))),
                     },
                 }
+                SelectionBar { selection, total: total as usize, all_ids }
             } else if total == Some(0) {
                 Empty { library: library.clone() }
             }

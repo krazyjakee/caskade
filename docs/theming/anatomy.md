@@ -1112,7 +1112,7 @@ Contains: [`button`](#button), [`text-field`](#text-field)
 
 ## `selection-bar`
 
-The bar of a library or collection view in selection mode: how many games are chosen, choosing the loaded ones or all of them, clearing, the bulk editor and Done. Rendered by SelectionBar (app).
+The bar of a library or collection view in selection mode: how many games are chosen, choosing the loaded ones or all of them, clearing, the bulk editor and Done. Rendered by SelectionBar (apps/native/src/library/selection_bar.rs); in the webview, SelectionBar (app).
 
 Root: `[data-cs="selection-bar"]`
 
@@ -1130,7 +1130,7 @@ Contains: [`button`](#button)
 
 ## `games-refresh-start`
 
-Starts refreshing the chosen games' details and artwork from the built-in sources: missing details only, or the automatic ones fetched again. Rendered by RefreshDialog (app).
+Starts refreshing the chosen games' details and artwork from the built-in sources: missing details only, or the automatic ones fetched again. Rendered by RefreshDialog (apps/native/src/library/selection_bar.rs); in the webview, RefreshDialog (app).
 
 Root: `[data-cs="games-refresh-start"]`
 
@@ -1164,7 +1164,7 @@ Contains: [`button`](#button)
 
 ## `bulk-editor`
 
-One edit on the chosen games: the fields to change, a preview of what changes in which game, and what saved. Rendered by BulkEditDialog (app).
+One edit on the chosen games: the fields to change, a preview of what changes in which game, and what saved. Rendered by BulkEditDialog (apps/native/src/library/bulk_edit.rs); in the webview, BulkEditDialog (app).
 
 Root: `[data-cs="bulk-editor"]`
 

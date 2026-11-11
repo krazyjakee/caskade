@@ -203,11 +203,20 @@ impl Window {
     }
 
     pub(crate) fn click(&mut self, node: NodeId) {
+        self.click_with(node, Modifiers::empty());
+    }
+
+    /// A click on `node`'s middle with `mods` held (Shift+click).
+    pub(crate) fn click_with(&mut self, node: NodeId, mods: Modifiers) {
         let (x, y) = self.middle(node);
+        let with = |mut event: blitz_traits::events::BlitzPointerEvent| {
+            event.mods = mods;
+            event
+        };
         for event in [
-            UiEvent::PointerMove(pointer(x, y, false)),
-            UiEvent::PointerDown(pointer(x, y, true)),
-            UiEvent::PointerUp(pointer(x, y, false)),
+            UiEvent::PointerMove(with(pointer(x, y, false))),
+            UiEvent::PointerDown(with(pointer(x, y, true))),
+            UiEvent::PointerUp(with(pointer(x, y, false))),
         ] {
             blitz_dom::Document::handle_ui_event(&mut self.doc, event);
             self.settle();

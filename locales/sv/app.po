@@ -55,6 +55,7 @@ msgstr "(du)"
 #. placeholder {0}: unchanged.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+already+has+it%7D+other+%7B%23+already+have+it%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "# already has it"
 msgid_plural "# already have it"
 msgstr[0] "# har det redan"
@@ -63,6 +64,7 @@ msgstr[1] "# har det redan"
 #. placeholder {0}: rejected.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+can%27t+take+it%7D+other+%7B%23+can%27t+take+it%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "# can't take it"
 msgid_plural "# can't take it"
 msgstr[0] "# kan inte ta emot det"
@@ -103,6 +105,7 @@ msgstr[1] "# filer kontrollerade"
 #. placeholder {0}: changed.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+game+changes%7D+other+%7B%23+games+change%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "# game changes"
 msgid_plural "# games change"
 msgstr[0] "# spel ändras"
@@ -119,6 +122,7 @@ msgstr[1] "# spel finns inte längre i kontot; de stannar i ditt bibliotek."
 #. placeholder {0}: changed.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+game+saved%7D+other+%7B%23+games+saved%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "# game saved"
 msgid_plural "# games saved"
 msgstr[0] "# spel sparat"
@@ -135,6 +139,7 @@ msgstr[1] "# spels mappar finns inte på den här datorn; nästa skanning hittar
 #. placeholder {0}: missing.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+is+no+longer+in+the+library%7D+other+%7B%23+are+no+longer+in+the+library%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "# is no longer in the library"
 msgid_plural "# are no longer in the library"
 msgstr[0] "# finns inte längre i biblioteket"
@@ -215,6 +220,7 @@ msgstr[1] "Fortsätt med de # spel som är kvar"
 #. placeholder {0}: gameIds.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7BRefresh+%23+game%27s+details%7D+other+%7BRefresh+%23+games%27+details%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Refresh # game's details"
 msgid_plural "Refresh # games' details"
 msgstr[0] "Uppdatera detaljerna för # spel"
@@ -411,6 +417,7 @@ msgstr[1] "# enheter inom räckhåll"
 
 #. js-lingui:icu=%7Bcount%2C+plural%2C+one+%7B%23+game+selected%7D+other+%7B%23+games+selected%7D%7D&pluralize_on=count
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "# game selected"
 msgid_plural "# games selected"
 msgstr[0] "# spel valt"
@@ -439,6 +446,7 @@ msgstr[1] "Kopiera # spel"
 
 #. js-lingui:icu=%7Bcount%2C+plural%2C+one+%7BEdit+%23+game%7D+other+%7BEdit+%23+games%7D%7D&pluralize_on=count
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Edit # game"
 msgid_plural "Edit # games"
 msgstr[0] "Redigera # spel"
@@ -1144,6 +1152,7 @@ msgstr[1] "Visa alla # resultat för ”{query}”"
 
 #. js-lingui:icu=%7Btotal%2C+plural%2C+one+%7BSelect+all+%23+game%7D+other+%7BSelect+all+%23+games%7D%7D&pluralize_on=total
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Select all # game"
 msgid_plural "Select all # games"
 msgstr[0] "Välj alla # spel"
@@ -1210,6 +1219,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "{value} / 100"
 msgstr "{value} / 100"
 
@@ -1713,6 +1723,7 @@ msgid "Actions"
 msgstr "Åtgärder"
 
 #: apps/desktop/src/views/library/LibraryRow.tsx
+#: apps/native/src/library/grid.rs
 msgid "Actions for {title}"
 msgstr "Åtgärder för {title}"
 
@@ -1734,6 +1745,7 @@ msgstr "Aktivitet"
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Add"
 msgstr "Lägg till"
 
@@ -1884,6 +1896,7 @@ msgid "Add server"
 msgstr "Lägg till server"
 
 #: apps/desktop/src/components/gameEditor/fields.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Add to {label}"
 msgstr "Lägg till i {label}"
 
@@ -1931,6 +1944,7 @@ msgid "add-ons, extensions"
 msgstr "tillägg, utökningar"
 
 #: apps/desktop/src/components/gameEditor/fields.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Add, separated by commas"
 msgstr "Lägg till, åtskilda med kommatecken"
 
@@ -2104,6 +2118,7 @@ msgid "Already configured"
 msgstr "Redan konfigurerad"
 
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Also fetches matched games again from the metadata server and replaces their automatic details and artwork."
 msgstr "Hämtar också matchade spel igen från metadataservern och ersätter deras automatiska detaljer och bilder."
 
@@ -2181,6 +2196,7 @@ msgstr "Ett överlägg på spelkort"
 
 #. placeholder {0}: changed.length - shown.length
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "And {0} more."
 msgstr "Och {0} till."
 
@@ -2307,6 +2323,7 @@ msgid "Applications"
 msgstr "Program"
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Apply"
 msgstr "Verkställ"
 
@@ -2525,6 +2542,7 @@ msgstr "B"
 #. The game page's link back to where it was opened from
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/views/game/BackLink.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Back"
 msgstr "Tillbaka"
 
@@ -2869,7 +2887,9 @@ msgstr "Avbryt inloggningen"
 #: apps/native/src/flows/add_game.rs apps/native/src/flows/folder_browser.rs
 #: apps/native/src/flows/manual_game.rs apps/native/src/flows/storage.rs
 #: apps/native/src/game_menu/dialogs.rs apps/native/src/game_menu/play.rs
-#: apps/native/src/settings/reset.rs apps/native/src/ui/dialog.rs
+#: apps/native/src/library/bulk_edit.rs
+#: apps/native/src/library/selection_bar.rs apps/native/src/settings/reset.rs
+#: apps/native/src/ui/dialog.rs
 msgid "Cancel"
 msgstr "Avbryt"
 
@@ -3219,6 +3239,12 @@ msgctxt "folder"
 msgid "Change"
 msgstr "Ändra"
 
+#: apps/native/src/library/bulk_edit.rs
+#, fuzzy
+#| msgid "Change {label}"
+msgid "Change {0}"
+msgstr "Ändra {label}"
+
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 msgid "Change {label}"
 msgstr "Ändra {label}"
@@ -3493,6 +3519,7 @@ msgid "Choose folder"
 msgstr "Välj mapp"
 
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Choose games: click them, Shift+click for a range."
 msgstr "Välj spel: klicka på dem, Skift+klick för ett intervall."
 
@@ -3573,6 +3600,7 @@ msgid "Chosen by you"
 msgstr "Valt av dig"
 
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Clear"
 msgstr "Rensa"
 
@@ -3605,7 +3633,7 @@ msgstr "klocka, 24-timmars, 12-timmars"
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
-#: apps/native/src/settings/reset.rs
+#: apps/native/src/library/selection_bar.rs apps/native/src/settings/reset.rs
 msgid "Close"
 msgstr "Stäng"
 
@@ -4346,6 +4374,7 @@ msgstr "Utfasat: {0}"
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Description"
 msgstr "Beskrivning"
 
@@ -4415,6 +4444,7 @@ msgid "Details"
 msgstr "Detaljer"
 
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Details and artwork you set, and games you marked as not on IGDB, stay as they are."
 msgstr "Detaljer och bilder som du har angett, och spel som du har markerat som inte på IGDB, förblir som de är."
 
@@ -4589,6 +4619,8 @@ msgstr "Försök inte igen automatiskt"
 #: apps/desktop/src/components/sync/PairingHost.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/native/src/game_menu/collections.rs
+#: apps/native/src/library/bulk_edit.rs
+#: apps/native/src/library/selection_bar.rs
 msgid "Done"
 msgstr "Klar"
 
@@ -4605,6 +4637,7 @@ msgstr "Klar"
 
 #: apps/desktop/src/views/CollectionView.tsx
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "Done selecting"
 msgstr "Klar med valet"
 
@@ -4794,10 +4827,12 @@ msgstr "Redigera skanner"
 
 #. Button hint: a pad's Start in selection mode
 #: apps/desktop/src/views/library/GameActions.tsx
+#: apps/native/src/library/grid.rs
 msgid "Edit selected"
 msgstr "Redigera valda"
 
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Edit selected…"
 msgstr "Redigera valda…"
 
@@ -5752,6 +5787,7 @@ msgstr "Genre"
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Genres"
 msgstr "Genrer"
 
@@ -6034,6 +6070,7 @@ msgstr "Hur text, datum och tider visas."
 #. placeholder {0}: labels.releaseDate
 #. placeholder {0}: labels[key]
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "How to change {0}"
 msgstr "Hur {0} ska ändras"
 
@@ -7610,6 +7647,7 @@ msgid "Matches and downloads run in the background as games arrive. You can open
 msgstr "Matchningar och nedladdningar körs i bakgrunden när spel kommer in. Du kan öppna ditt bibliotek nu."
 
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Matches games that have no match yet and fills in what they lack from what Caskade already has."
 msgstr "Matchar spel som saknar matchning och fyller i det som saknas utifrån det Caskade redan har."
 
@@ -7696,6 +7734,7 @@ msgstr "Saknas"
 
 #: apps/desktop/src/components/gameSelection/RefreshCard.tsx
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Missing details only"
 msgstr "Bara saknade detaljer"
 
@@ -8319,11 +8358,13 @@ msgid "Nobody has opened the link yet."
 msgstr "Ingen har öppnat länken än."
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "none"
 msgstr "inget"
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
 #: apps/desktop/src/components/gameEditor/fields.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "None"
 msgstr "Inga"
 
@@ -8504,6 +8545,7 @@ msgid "Not refreshed yet."
 msgstr "Inte uppdaterat ännu."
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Not saved"
 msgstr "Inte sparat"
 
@@ -8543,6 +8585,7 @@ msgstr "Inte medan ett spel körs."
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Notes"
 msgstr "Anteckningar"
 
@@ -9049,6 +9092,7 @@ msgstr "Andra konton"
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Other names"
 msgstr "Andra namn"
 
@@ -9365,6 +9409,7 @@ msgstr "Plattform för {title}"
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 #: apps/desktop/src/views/library/platforms/PlatformGrid.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Platforms"
 msgstr "Plattformar"
 
@@ -9714,6 +9759,7 @@ msgid "Present"
 msgstr "Finns"
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Preview"
 msgstr "Förhandsgranska"
 
@@ -9899,6 +9945,7 @@ msgstr "Fick slut på tid"
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Rated"
 msgstr "Betygsatt"
 
@@ -10078,6 +10125,7 @@ msgstr "Reducerade"
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Refresh"
 msgstr "Uppdatera"
 
@@ -10091,6 +10139,7 @@ msgid "Refresh achievements"
 msgstr "Uppdatera prestationer"
 
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Refresh automatic details"
 msgstr "Uppdatera automatiska detaljer"
 
@@ -10099,6 +10148,7 @@ msgid "Refresh connected accounts in the background to bring in games you buy. F
 msgstr "Uppdatera anslutna konton i bakgrunden för att ta med spel du köper. Fel visas på kontot; inget dyker upp."
 
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Refresh details…"
 msgstr "Uppdatera detaljer…"
 
@@ -10135,6 +10185,7 @@ msgid "Refreshing game details was cancelled"
 msgstr "Uppdateringen av speldetaljer avbröts"
 
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Refreshing in the background. <0>Follow it in Activity</0>."
 msgstr "Uppdaterar i bakgrunden. <0>Följ den i Aktivitet</0>."
 
@@ -10196,6 +10247,7 @@ msgstr "Releasebygge"
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Release date"
 msgstr "Utgivningsdatum"
 
@@ -10269,6 +10321,7 @@ msgstr "Flyttbar"
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Remove"
 msgstr "Ta bort"
 
@@ -10333,6 +10386,7 @@ msgid "Remove {title}?"
 msgstr "Ta bort {title}?"
 
 #: apps/desktop/src/components/gameEditor/fields.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Remove {value}"
 msgstr "Ta bort {value}"
 
@@ -10423,6 +10477,7 @@ msgid "Repairing…"
 msgstr "Reparerar…"
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Replace"
 msgstr "Ersätt"
 
@@ -10522,6 +10577,7 @@ msgstr "Återställ inställningar för startprogram"
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Reset to automatic"
 msgstr "Återställ till automatiskt"
 
@@ -11035,6 +11091,7 @@ msgid "Save your changes?"
 msgstr "Spara dina ändringar?"
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Saved"
 msgstr "Sparat"
 
@@ -11102,7 +11159,8 @@ msgstr "Sparar dina val innan biblioteket öppnas…"
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
 #: apps/desktop/src/views/settings/useSettings.tsx
-#: apps/native/src/settings/state.rs apps/native/src/settings/unsaved.rs
+#: apps/native/src/library/bulk_edit.rs apps/native/src/settings/state.rs
+#: apps/native/src/settings/unsaved.rs
 msgid "Saving…"
 msgstr "Sparar…"
 
@@ -11354,6 +11412,7 @@ msgstr "Se vad som synkas"
 #. Starts choosing several games in the library
 #: apps/desktop/src/views/CollectionView.tsx
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "Select"
 msgstr "Välj"
 
@@ -11381,6 +11440,7 @@ msgid "Select folder"
 msgstr "Välj mapp"
 
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Select loaded"
 msgstr "Välj inlästa"
 
@@ -11396,6 +11456,7 @@ msgid "Selected"
 msgstr "Vald"
 
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Selected games"
 msgstr "Valda spel"
 
@@ -11404,6 +11465,7 @@ msgid "Selected location"
 msgstr "Vald plats"
 
 #: apps/desktop/src/components/gameSelection/SelectionBar.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "Selecting…"
 msgstr "Väljer…"
 
@@ -11452,6 +11514,7 @@ msgid "Session history"
 msgstr "Sessionshistorik"
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Set"
 msgstr "Ange"
 
@@ -11897,7 +11960,7 @@ msgstr "Vissa ändringar kunde inte sparas. Stanna för att rätta dem, eller ka
 msgid "Some profiles missing"
 msgstr "Vissa profiler saknas"
 
-#: apps/desktop/src/api/reply.ts
+#: apps/desktop/src/api/reply.ts apps/native/src/library/selection_bar.rs
 msgid "Something went wrong."
 msgstr "Något gick fel."
 
@@ -11916,6 +11979,7 @@ msgstr "Sortera spel"
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Sort title"
 msgstr "Sorteringstitel"
 
@@ -12474,6 +12538,7 @@ msgstr "System följer operativsystemets inställning för minskad rörelse."
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Tags"
 msgstr "Taggar"
 
@@ -12520,6 +12585,7 @@ msgstr "Testar…"
 
 #. placeholder {0}: bulk.error.message
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "That didn't finish: {0}. Trying again is safe: what saved stays as it is."
 msgstr "Det blev inte klart: {0}. Det är säkert att försöka igen: det som sparades förblir som det är."
 
@@ -13089,6 +13155,7 @@ msgid "TiB"
 msgstr "TiB"
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Tick what to change. Everything else stays as each game has it."
 msgstr "Kryssa i det som ska ändras. Allt annat förblir som varje spel har det."
 
@@ -13105,7 +13172,7 @@ msgstr "Tidsgräns (sekunder)"
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
-#: apps/native/src/flows/manual_game.rs
+#: apps/native/src/flows/manual_game.rs apps/native/src/library/bulk_edit.rs
 msgid "Title"
 msgstr "Titel"
 
@@ -13214,8 +13281,8 @@ msgstr "systemfält, avsluta, stäng till systemfältet"
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/desktop/src/views/StoreView.tsx apps/native/src/flows/storage.rs
 #: apps/native/src/frame/error.rs apps/native/src/frame/notifications.rs
-#: apps/native/src/library/view.rs apps/native/src/settings/general.rs
-#: apps/native/src/ui/failure.rs
+#: apps/native/src/library/bulk_edit.rs apps/native/src/library/view.rs
+#: apps/native/src/settings/general.rs apps/native/src/ui/failure.rs
 msgid "Try again"
 msgstr "Försök igen"
 
@@ -13938,6 +14005,7 @@ msgid "What Caskade looks up on the internet."
 msgstr "Vad Caskade slår upp på internet."
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "What changes"
 msgstr "Vad som ändras"
 
@@ -13995,6 +14063,7 @@ msgid "What to back up"
 msgstr "Vad som ska säkerhetskopieras"
 
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
+#: apps/native/src/library/selection_bar.rs
 msgid "What to refresh"
 msgstr "Vad som ska uppdateras"
 
@@ -14190,6 +14259,7 @@ msgid "Working folder"
 msgstr "Arbetsmapp"
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Working out the changes…"
 msgstr "Räknar fram ändringarna…"
 
@@ -14348,6 +14418,7 @@ msgstr "Dina egna regler, tillämpade över temat utan omladdning."
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "Your rating"
 msgstr "Ditt betyg"
 
@@ -14376,6 +14447,7 @@ msgid "YYYY-MM-DD"
 msgstr "ÅÅÅÅ-MM-DD"
 
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
+#: apps/native/src/library/bulk_edit.rs
 msgid "YYYY-MM-DD, or empty for none"
 msgstr "ÅÅÅÅ-MM-DD, eller tomt för inget"
 
