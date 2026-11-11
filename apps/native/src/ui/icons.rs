@@ -289,6 +289,32 @@ pub const TV: Icon = Icon(&[
     "m17 2-5 5-5-5",
     "M4 7h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-16a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2z",
 ]);
+/// lucide's `archive-restore`.
+pub const ARCHIVE_RESTORE: Icon = Icon(&[
+    "M3 3h18a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-18a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1z",
+    "M4 8v11a2 2 0 0 0 2 2h2",
+    "M20 8v11a2 2 0 0 1-2 2h-2",
+    "m9 15 3-3 3 3",
+    "M12 12v9",
+]);
+/// lucide's `calendar-clock`.
+pub const CALENDAR_CLOCK: Icon = Icon(&[
+    "M16 14v2.2l1.6 1",
+    "M16 2v3",
+    "M21 7.338V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h2.338",
+    "M3 9h5.859",
+    "M8 2v3",
+    "M16 10a6 6 0 1 0 0 12a6 6 0 1 0 0-12z",
+]);
+/// lucide's `life-buoy`.
+pub const LIFE_BUOY: Icon = Icon(&[
+    "M12 2a10 10 0 1 0 0 20a10 10 0 1 0 0-20z",
+    "m4.93 4.93 4.24 4.24",
+    "m14.83 9.17 4.24-4.24",
+    "m14.83 14.83 4.24 4.24",
+    "m9.17 14.83-4.24 4.24",
+    "M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8z",
+]);
 /// lucide's `gauge`.
 pub const GAUGE: Icon = Icon(&["m12 14 4-4", "M3.34 19a10 10 0 1 1 17.32 0"]);
 

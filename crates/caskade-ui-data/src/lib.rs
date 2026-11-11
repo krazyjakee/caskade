@@ -17,6 +17,7 @@
 //! and loads into signals and resources.
 
 pub mod addons;
+pub mod backups;
 pub mod devices;
 pub mod discovery;
 pub mod fixtures;

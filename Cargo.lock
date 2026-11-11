@@ -2056,6 +2056,7 @@ dependencies = [
  "blitz-traits",
  "caskade-achievements",
  "caskade-app",
+ "caskade-backup",
  "caskade-core",
  "caskade-input",
  "caskade-installer",
@@ -2295,6 +2296,7 @@ version = "0.1.0"
 dependencies = [
  "caskade-addons",
  "caskade-app",
+ "caskade-backup",
  "caskade-core",
  "caskade-discovery",
  "caskade-plugin-host",

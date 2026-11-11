@@ -60,6 +60,9 @@ pub fn panel(tab: &'static str, sub: Option<String>) -> Element {
         "devices" => rsx! {
             super::devices::DevicesSettings {}
         },
+        "backup" => rsx! {
+            super::backup::BackupSettings {}
+        },
         _ => rsx! {
             Pending {}
         },

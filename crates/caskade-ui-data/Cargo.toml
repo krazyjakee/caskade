@@ -20,6 +20,9 @@ caskade-plugin-host = { path = "../caskade-plugin-host" }
 # One-off shares' types (ShareRecord, ShareInfo, ShareItem) for the share
 # flows' data handle (`shares.rs`, #108).
 caskade-share = { path = "../caskade-share" }
+# Backups and the ones paired devices keep, for Settings → Backup
+# (`backups.rs`, #105).
+caskade-backup = { path = "../caskade-backup" }
 # The streaming host behind the stream pairing prompt (`streaming.rs`, #108).
 caskade-streaming = { path = "../caskade-streaming" }
 # Settings sections' values (JSON Schema documents).

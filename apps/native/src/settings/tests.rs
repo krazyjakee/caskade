@@ -681,6 +681,7 @@ mod guard {
 mod about;
 mod addons;
 mod appearance;
+mod backup;
 mod devices;
 mod discovery;
 mod general;

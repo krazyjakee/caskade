@@ -126,6 +126,8 @@ caskade-test-desktop = { path = "../../crates/caskade-test-desktop" }
 # The share flows' tests: two cores sharing a game on loopback, as
 # caskade-share's own tests set them up (#108).
 caskade-share = { path = "../../crates/caskade-share" }
+# Settings → Backup's tests: backups over a fixture library (#105).
+caskade-backup = { path = "../../crates/caskade-backup" }
 caskade-installer = { path = "../../crates/caskade-installer" }
 
 [lints]
