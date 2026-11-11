@@ -15,7 +15,7 @@ use caskade_app::events::Event;
 use caskade_core::model::{GameDetails, GamePage, LibraryStats, ListGames};
 use caskade_ui_data::{
     Changed, Discovery, ErrorReport, Key as DataKey, Library, Settings, Themes, addons::Addons,
-    fixtures, plugins::Plugins, stores::Stores,
+    fixtures, jobs::Jobs, plugins::Plugins, stores::Stores,
 };
 use dioxus_native::prelude::*;
 use std::future::Future;
@@ -32,7 +32,21 @@ pub struct DataSource {
     pub stores: Stores,
     pub plugins: Plugins,
     pub addons: Addons,
+    pub jobs: Jobs,
+    /// The fixtures' fake job queue, details refresh and install
+    /// requests, for tests.
+    #[cfg_attr(not(test), allow(dead_code))]
+    pub job_fakes: Option<JobFakes>,
     pub events: broadcast::Sender<Event>,
+}
+
+/// The fixtures' fakes behind [`DataSource::jobs`].
+#[derive(Clone)]
+#[cfg_attr(not(test), allow(dead_code))]
+pub struct JobFakes {
+    pub queue: std::sync::Arc<caskade_ui_data::jobs::FakeQueue>,
+    pub refresh: std::sync::Arc<caskade_ui_data::jobs::FakeRefresh>,
+    pub requests: std::sync::Arc<caskade_ui_data::jobs::requests::FakeInbox>,
 }
 
 impl DataSource {
@@ -48,6 +62,8 @@ impl DataSource {
             stores: Stores::of(services),
             plugins: Plugins::of(services),
             addons: Addons::of(services, crate::shell::sink()),
+            jobs: Jobs::of(services, crate::shell::sink()),
+            job_fakes: None,
             events: crate::shell::events().clone(),
         })
     }
@@ -66,6 +82,12 @@ impl DataSource {
             stores: fixtures.stores,
             plugins: fixtures.plugins,
             addons: fixtures.addons,
+            jobs: fixtures.jobs,
+            job_fakes: Some(JobFakes {
+                queue: fixtures.job_queue,
+                refresh: fixtures.refresh,
+                requests: fixtures.requests,
+            }),
             events: fixtures.events,
         })
     }
@@ -291,6 +313,49 @@ where
     let resource = use_resource(move || change(load(addons.clone())));
     reload_on(&source, DataKey::Plugins, resource);
     resource
+}
+
+/// Every job, newest first, loaded again on every `JobChanged` (#101).
+pub fn use_jobs_query() -> Query<Vec<caskade_core::install::JobSnapshot>> {
+    let source = use_context::<DataSource>();
+    let jobs = source.jobs.clone();
+    let resource = use_resource(move || {
+        let jobs = jobs.clone();
+        change(async move { Ok(jobs.list()) })
+    });
+    reload_on(&source, DataKey::Jobs, resource);
+    resource
+}
+
+/// The details refresh's status, `None` when none ran.
+pub fn use_refresh_query() -> Query<Option<caskade_core::metadata::RefreshStatus>> {
+    let source = use_context::<DataSource>();
+    let jobs = source.jobs.clone();
+    let resource = use_resource(move || {
+        let jobs = jobs.clone();
+        change(async move { Ok(jobs.refresh_status()) })
+    });
+    reload_on(&source, DataKey::Jobs, resource);
+    resource
+}
+
+/// The install requests waiting for the user, oldest first: loaded again
+/// as one arrives (`InstallRequested`) or a job changes.
+pub fn use_install_requests_query()
+-> Query<Vec<caskade_app::commands::install_requests::InstallRequest>> {
+    let source = use_context::<DataSource>();
+    let jobs = source.jobs.clone();
+    let resource = use_resource(move || {
+        let jobs = jobs.clone();
+        change(async move { Ok(jobs.pending_requests()) })
+    });
+    reload_on(&source, DataKey::Jobs, resource);
+    resource
+}
+
+/// Jobs, for a view's actions; `None` before the data source.
+pub fn use_jobs_handle() -> Option<Jobs> {
+    try_use_context::<DataSource>().map(|source| source.jobs)
 }
 
 /// The add-on catalogue, for a view's actions.

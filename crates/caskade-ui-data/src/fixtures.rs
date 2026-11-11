@@ -22,6 +22,7 @@ use caskade_core::{
 use tokio::sync::broadcast;
 
 use crate::addons::{AddonParts, Addons};
+use crate::jobs::{FakeQueue, FakeRefresh, Jobs, requests::FakeInbox};
 use crate::plugins::Plugins;
 use crate::stores::Stores;
 use crate::{Discovery, Library, Settings, Themes};
@@ -203,6 +204,13 @@ pub struct Fixtures {
     pub discovery: Option<Discovery>,
     /// Store accounts in memory, with no store: tests add fake ones.
     pub stores: Stores,
+    /// Jobs over a fake queue, details refresh and install requests, empty
+    /// until a test puts some there ([`Fixtures::job_queue`],
+    /// [`Fixtures::refresh`], [`Fixtures::requests`]).
+    pub jobs: Jobs,
+    pub job_queue: std::sync::Arc<FakeQueue>,
+    pub refresh: std::sync::Arc<FakeRefresh>,
+    pub requests: std::sync::Arc<FakeInbox>,
     /// The add-on catalogue, empty until a test gives it one, at an
     /// address nothing answers: a refresh or a download fails at once.
     pub addons: Addons,
@@ -315,6 +323,17 @@ pub async fn open(count: usize) -> caskade_core::Result<Fixtures> {
         devices: None,
     });
     let plugins = Plugins::new(plugins);
+    let job_queue = std::sync::Arc::new(FakeQueue::new(Events::new(Broadcast(events.clone()))));
+    let refresh = std::sync::Arc::new(FakeRefresh::new(Events::new(Broadcast(events.clone()))));
+    let requests = std::sync::Arc::new(FakeInbox::new(
+        Events::new(Broadcast(events.clone())),
+        job_queue.clone(),
+    ));
+    let jobs = Jobs::new(
+        Some(job_queue.clone() as std::sync::Arc<dyn crate::jobs::JobQueue>),
+        Some(refresh.clone() as std::sync::Arc<dyn crate::jobs::DetailsRefresh>),
+    )
+    .with_requests(requests.clone());
     let settings = Settings::new(service, accounts.clone());
     Ok(Fixtures {
         settings,
@@ -323,6 +342,10 @@ pub async fn open(count: usize) -> caskade_core::Result<Fixtures> {
         stores,
         plugins,
         addons,
+        jobs,
+        job_queue,
+        refresh,
+        requests,
         library: Library::new(store.clone(), accounts.clone(), launch, bus.clone()),
         store,
         bus,

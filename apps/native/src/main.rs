@@ -11,6 +11,8 @@
 #[cfg(test)]
 mod a11y_snapshot;
 // The anatomy catalogue (#90); the components (#93) add to it.
+// Activity's jobs (#101).
+mod activity;
 mod anatomy;
 // The data hooks (#89); the views (#96 onwards) use them.
 mod data;

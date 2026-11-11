@@ -22,6 +22,7 @@ pub fn catalogue() -> Vec<Entry> {
     all.extend_from_slice(crate::ui::ANATOMY);
     all.push(crate::settings::ANATOMY);
     all.extend_from_slice(&crate::settings::addons::ANATOMY);
+    all.extend_from_slice(&crate::activity::ANATOMY);
     all.extend_from_slice(crate::frame::ANATOMY);
     all.extend_from_slice(crate::flows::ANATOMY);
     all.extend_from_slice(crate::game_menu::ANATOMY);
@@ -59,6 +60,18 @@ mod tests {
     /// Roots the native UI renders that the webview doesn't catalogue yet,
     /// with the issue that will.
     const NOT_YET: &[(&str, &str)] = &[
+        (
+            "activity-job",
+            "#101: the webview's JobCard isn't catalogued either",
+        ),
+        (
+            "job-question",
+            "#101: the webview's QuestionDialog isn't catalogued either",
+        ),
+        (
+            "install-confirmation",
+            "#101: the webview's InstallConfirmation isn't catalogued either",
+        ),
         (
             "guide-menu",
             "#93: the webview's GuideMenu isn't catalogued either",

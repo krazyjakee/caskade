@@ -60,6 +60,8 @@ required-features = ["shots"]
 dioxus-native = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735890754b4a9970cb07765b8bf3c0c", default-features = false, features = ["prelude", "accessibility", "svg", "system-fonts", "woff"] }
 caskade-app = { path = "../../crates/caskade-app" }
 caskade-core = { path = "../../crates/caskade-core" }
+# A job's install ways, questions and failures, for Activity (#101).
+caskade-installer = { path = "../../crates/caskade-installer" }
 # The notification feed's types (#96).
 caskade-achievements = { path = "../../crates/caskade-achievements" }
 # What views read and change, and fixtures mode (#89, `src/data`).
@@ -128,7 +130,6 @@ caskade-test-desktop = { path = "../../crates/caskade-test-desktop" }
 caskade-share = { path = "../../crates/caskade-share" }
 # Settings → Backup's tests: backups over a fixture library (#105).
 caskade-backup = { path = "../../crates/caskade-backup" }
-caskade-installer = { path = "../../crates/caskade-installer" }
 
 [lints]
 workspace = true

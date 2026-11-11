@@ -47,6 +47,10 @@ pub fn Frame(
                     type_search::TypeSearchRoot {
                         // Pairing, remote play and stream requests (#108).
                         crate::flows::Hosts {}
+                        // A followed job's questions (#101).
+                        crate::activity::JobQuestionHost {}
+                        // Install requests waiting for the user (#101).
+                        crate::activity::InstallIngress {}
                         crate::game_menu::GameMenuHost {
                             Shell {}
                         }

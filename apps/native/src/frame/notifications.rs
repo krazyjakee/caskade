@@ -7,7 +7,7 @@
 //! or marked read.
 
 use crate::data::status::{
-    NOTIFICATION_PAGE, ReadChange, change_read, is_active, use_jobs, use_notification_members,
+    NOTIFICATION_PAGE, ReadChange, change_read, is_active, use_notification_members,
     use_notifications, use_unread_notifications,
 };
 use crate::library::local_date_time;
@@ -68,12 +68,13 @@ pub fn Activity(route: Route) -> Element {
     let Route::Activity { tab, unread, open } = route else {
         return rsx! {};
     };
-    let jobs = use_jobs();
+    // The data source's queue: the app's, or the fixtures' (#101).
+    let jobs = crate::data::use_jobs_query();
     let unread_count = use_unread_notifications();
     let jobs = jobs
         .read()
         .as_ref()
-        .and_then(|jobs| jobs.as_ref().ok().cloned().flatten())
+        .and_then(|jobs| jobs.as_ref().ok().cloned())
         .unwrap_or_default();
     let unread_count = unread_count
         .read()
@@ -156,7 +157,7 @@ pub fn Activity(route: Route) -> Element {
             }
             div { role: "tabpanel", "aria-label": "{panel_label}",
                 match tab {
-                    ActivityTab::Jobs => super::views::placeholder(t!("Jobs")),
+                    ActivityTab::Jobs => rsx! { crate::activity::JobsPanel {} },
                     ActivityTab::Notifications => rsx! {
                         Feed { key: "{unread}", unread_only: unread, open }
                     },

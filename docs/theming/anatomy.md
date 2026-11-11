@@ -1142,7 +1142,7 @@ Contains: [`button`](#button), [`segmented`](#segmented)
 
 ## `games-refresh`
 
-The refresh of chosen games' details in Activity: progress, counts, Cancel, and retrying failed games or continuing a cancelled refresh. Rendered by RefreshCard (app).
+The refresh of chosen games' details in Activity: progress, counts, Cancel, and retrying failed games or continuing a cancelled refresh. Rendered by RefreshCard (apps/native/src/activity/refresh.rs); in the webview, RefreshCard (app).
 
 Root: `[data-cs="games-refresh"]`
 

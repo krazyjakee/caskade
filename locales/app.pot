@@ -78,6 +78,7 @@ msgstr[1] ""
 #. placeholder {0}: job.verification.changed.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+changed%7D+other+%7B%23+changed%7D%7D&pluralize_on=0
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "# changed"
 msgid_plural "# changed"
 msgstr[0] ""
@@ -94,6 +95,7 @@ msgstr[1] ""
 #. placeholder {0}: status.failed.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+failed%7D+other+%7B%23+failed%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/RefreshCard.tsx
+#: apps/native/src/activity/refresh.rs
 msgid "# failed"
 msgid_plural "# failed"
 msgstr[0] ""
@@ -102,6 +104,7 @@ msgstr[1] ""
 #. placeholder {0}: job.verification.checkedFiles
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+file+checked%7D+other+%7B%23+files+checked%7D%7D&pluralize_on=0
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "# file checked"
 msgid_plural "# files checked"
 msgstr[0] ""
@@ -155,6 +158,7 @@ msgstr[1] ""
 #. placeholder {0}: job.verification.missing.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+missing%7D+other+%7B%23+missing%7D%7D&pluralize_on=0
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "# missing"
 msgid_plural "# missing"
 msgstr[0] ""
@@ -163,6 +167,7 @@ msgstr[1] ""
 #. placeholder {0}: status.unmatched
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+not+found+on+IGDB%7D+other+%7B%23+not+found+on+IGDB%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/RefreshCard.tsx
+#: apps/native/src/activity/refresh.rs
 msgid "# not found on IGDB"
 msgid_plural "# not found on IGDB"
 msgstr[0] ""
@@ -188,6 +193,7 @@ msgstr[1] ""
 #. placeholder {0}: status.skipped
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+skipped%7D+other+%7B%23+skipped%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/RefreshCard.tsx
+#: apps/native/src/activity/refresh.rs
 msgid "# skipped"
 msgid_plural "# skipped"
 msgstr[0] ""
@@ -196,6 +202,7 @@ msgstr[1] ""
 #. placeholder {0}: failure.occurrences
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+time+in+a+row%7D+other+%7B%23+times+in+a+row%7D%7D&pluralize_on=0
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/activity/card.rs
 msgid "# time in a row"
 msgid_plural "# times in a row"
 msgstr[0] ""
@@ -204,6 +211,7 @@ msgstr[1] ""
 #. placeholder {0}: status.unchanged
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+unchanged%7D+other+%7B%23+unchanged%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/RefreshCard.tsx
+#: apps/native/src/activity/refresh.rs
 msgid "# unchanged"
 msgid_plural "# unchanged"
 msgstr[0] ""
@@ -212,6 +220,7 @@ msgstr[1] ""
 #. placeholder {0}: status.updated
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+updated%7D+other+%7B%23+updated%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/RefreshCard.tsx
+#: apps/native/src/activity/refresh.rs
 msgid "# updated"
 msgid_plural "# updated"
 msgstr[0] ""
@@ -220,6 +229,7 @@ msgstr[1] ""
 #. placeholder {0}: status.remaining.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7BContinue+with+the+last+game%7D+other+%7BContinue+with+the+%23+games+left%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/RefreshCard.tsx
+#: apps/native/src/activity/refresh.rs
 msgid "Continue with the last game"
 msgid_plural "Continue with the # games left"
 msgstr[0] ""
@@ -237,6 +247,7 @@ msgstr[1] ""
 #. placeholder {0}: status.failed.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7BRetry+the+failed+game%7D+other+%7BRetry+the+%23+failed+games%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/gameSelection/RefreshCard.tsx
+#: apps/native/src/activity/refresh.rs
 msgid "Retry the failed game"
 msgid_plural "Retry the # failed games"
 msgstr[0] ""
@@ -328,6 +339,7 @@ msgstr ""
 #. placeholder {0}: status.done
 #. placeholder {1}: status.total
 #: apps/desktop/src/components/gameSelection/RefreshCard.tsx
+#: apps/native/src/activity/refresh.rs
 msgid "{0} of {1} games"
 msgstr ""
 
@@ -417,6 +429,7 @@ msgstr ""
 
 #. js-lingui:icu=%7Bcompleted%2C+plural%2C+one+%7B%23+file%7D+other+%7B%23+files%7D%7D&pluralize_on=completed
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "# file"
 msgid_plural "# files"
 msgstr[0] ""
@@ -536,10 +549,12 @@ msgid "{device} is playing another game. Stop it and stream this game?"
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "{device} sends {title} ({size}) to this computer. It's copied straight from {device} and installed like any other game; nothing is written until you say so."
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "{device} sends {title} to this computer. It's copied straight from {device} and installed like any other game; nothing is written until you say so."
 msgstr ""
 
@@ -979,6 +994,7 @@ msgid "{percent}, high"
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "{percent}% confidence"
 msgstr ""
 
@@ -1065,14 +1081,17 @@ msgid "{rating} / 100"
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "{reason} · Arguments: {args}"
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "{reason} Start a new installation from the retained source after reviewing the moved game."
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "{reason} This folder requires explicit adoption or a new installation. It will not be moved automatically."
 msgstr ""
 
@@ -1230,6 +1249,7 @@ msgid "{title} isn't available in desktop mode."
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "{title} progress"
 msgstr ""
 
@@ -2163,6 +2183,7 @@ msgstr ""
 
 #: apps/desktop/src/components/shares/ReceiveShareDialog.tsx
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 #: apps/native/src/flows/receive_share.rs
 msgid "Add to my collections"
 msgstr ""
@@ -2274,6 +2295,7 @@ msgid "Admin PIN needed"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "Advanced strategies"
 msgstr ""
 
@@ -2434,10 +2456,12 @@ msgid "An admin PIN is needed to play {game}, which is unrated"
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "An external link asked Caskade to install from this path. Confirm only if you trust its source."
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "An external link asked Caskade to install from this URL. Confirm only if you trust its source."
 msgstr ""
 
@@ -2785,6 +2809,7 @@ msgid "Automatic backups to keep"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/RefreshCard.tsx
+#: apps/native/src/activity/refresh.rs
 msgid "Automatic details refreshed"
 msgstr ""
 
@@ -3230,6 +3255,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/activity/refresh.rs
 #: apps/native/src/flows/add_game.rs
 #: apps/native/src/flows/folder_browser.rs
 #: apps/native/src/flows/manual_game.rs
@@ -3282,6 +3308,7 @@ msgid "Cancel installing {name}"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "Cancel job"
 msgstr ""
 
@@ -3321,6 +3348,7 @@ msgid "Cancelled"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/labels.rs
 msgctxt "job status"
 msgid "Cancelled"
 msgstr ""
@@ -3472,14 +3500,17 @@ msgid "Caskade gives it yours when it starts."
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "Caskade installs the game folder this program is in and launches it from there."
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "Caskade installs this folder and picks the game's executable."
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "Caskade installs what this shortcut opens, with the shortcut's options."
 msgstr ""
 
@@ -3499,6 +3530,7 @@ msgid "Caskade is up to date. Checked {time}."
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/activity/card.rs
 msgid "Caskade isn't retrying this on its own now. Choose what to do next."
 msgstr ""
 
@@ -3604,10 +3636,12 @@ msgid "Caskade v{version} available"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/activity/card.rs
 msgid "Caskade will try again at {retryAt}."
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "Caskade works out how to install this file: an installer runs, an archive is unpacked."
 msgstr ""
 
@@ -3673,6 +3707,7 @@ msgid "Changed outside Caskade"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "Changed: {path}"
 msgstr ""
 
@@ -3800,6 +3835,7 @@ msgstr ""
 
 #. The stage a failed install stopped at
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/activity/card.rs
 msgid "Checking the install"
 msgstr ""
 
@@ -3860,6 +3896,7 @@ msgid "Choose a disc"
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Choose a download asset"
 msgstr ""
 
@@ -3881,6 +3918,7 @@ msgid "Choose a folder to scan"
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Choose a launch target"
 msgstr ""
 
@@ -3906,14 +3944,17 @@ msgid "Choose a save…"
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Choose an installation strategy"
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Choose an installer"
 msgstr ""
 
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
+#: apps/native/src/activity/question.rs
 msgid "Choose an option"
 msgstr ""
 
@@ -3928,10 +3969,12 @@ msgid "Choose another default first"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/activity/card.rs
 msgid "Choose another install location"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/activity/card.rs
 msgid "Choose another location…"
 msgstr ""
 
@@ -3956,6 +3999,7 @@ msgstr ""
 
 #: apps/desktop/src/views/activity/AddGame.tsx
 #: apps/desktop/src/views/activity/InstallIngress.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "Choose installation storage"
 msgstr ""
 
@@ -3972,6 +4016,7 @@ msgid "Choose the games to copy here over your network. They copy in the backgro
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Choose the installed folder"
 msgstr ""
 
@@ -3982,6 +4027,7 @@ msgid "Choose the program"
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Choose the release file to download and install."
 msgstr ""
 
@@ -3997,6 +4043,7 @@ msgid "Choose what syncs"
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Choose what to download"
 msgstr ""
 
@@ -4205,6 +4252,7 @@ msgstr ""
 
 #. A background job's status
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/labels.rs
 msgid "Completed"
 msgstr ""
 
@@ -4236,6 +4284,7 @@ msgid "Confirm before quitting"
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "Confirm installation"
 msgstr ""
 
@@ -4345,6 +4394,7 @@ msgstr ""
 #: apps/desktop/src/onboarding/DeviceStep.tsx
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
+#: apps/native/src/activity/question.rs
 msgid "Continue"
 msgstr ""
 
@@ -4404,6 +4454,7 @@ msgid "Copy"
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "Copy {title} from {device}?"
 msgstr ""
 
@@ -4414,11 +4465,13 @@ msgstr ""
 
 #. A game copied from another of the user's devices
 #: apps/desktop/src/views/activity/jobLabels.ts
+#: apps/native/src/activity/labels.rs
 msgctxt "job kind"
 msgid "Copy from another device"
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "Copy here"
 msgstr ""
 
@@ -4433,7 +4486,9 @@ msgctxt "game action"
 msgid "Copy path"
 msgstr ""
 
+#. A way to install a game, offered when there is more than one
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Copy the files"
 msgstr ""
 
@@ -4873,6 +4928,7 @@ msgid "Density"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "Dependencies"
 msgstr ""
 
@@ -5126,12 +5182,14 @@ msgstr ""
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/activity/ingress.rs
 #: apps/native/src/library/view.rs
 #: apps/native/src/ui/toast.rs
 msgid "Dismiss"
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Does not run installer code"
 msgstr ""
 
@@ -5145,6 +5203,7 @@ msgid "Don't restore"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/activity/card.rs
 msgid "Don't retry automatically"
 msgstr ""
 
@@ -5188,16 +5247,19 @@ msgstr ""
 #. The stage a failed install stopped at
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/activity/card.rs
 #: apps/native/src/settings/addons.rs
 msgid "Download"
 msgstr ""
 
 #: apps/desktop/src/views/activity/jobLabels.ts
+#: apps/native/src/activity/labels.rs
 msgctxt "job kind"
 msgid "Download"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/activity/card.rs
 msgid "Download again"
 msgstr ""
 
@@ -5238,6 +5300,7 @@ msgstr ""
 
 #. A background job's phase
 #: apps/desktop/src/views/activity/jobLabels.ts
+#: apps/native/src/activity/labels.rs
 #: apps/native/src/frame/status_bar.rs
 msgid "Downloading"
 msgstr ""
@@ -5312,6 +5375,7 @@ msgstr ""
 
 #. The file or folder dropped on Caskade
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "Dropped"
 msgstr ""
 
@@ -5644,7 +5708,9 @@ msgstr ""
 msgid "Environment variables"
 msgstr ""
 
+#. How close an install way comes to the installer's own result
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "equivalent result"
 msgstr ""
 
@@ -5733,7 +5799,9 @@ msgstr ""
 msgid "Evidence for {title}"
 msgstr ""
 
+#. How close an install way comes to the installer's own result
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "exact result"
 msgstr ""
 
@@ -5775,6 +5843,7 @@ msgstr ""
 
 #. A background job's status
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/labels.rs
 msgid "Failed"
 msgstr ""
 
@@ -5909,6 +5978,7 @@ msgstr ""
 
 #. The stage a failed install stopped at
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/activity/card.rs
 msgid "Finishing"
 msgstr ""
 
@@ -6162,6 +6232,7 @@ msgid "Game details"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/RefreshCard.tsx
+#: apps/native/src/activity/refresh.rs
 msgid "Game details refreshed"
 msgstr ""
 
@@ -6547,7 +6618,9 @@ msgctxt "pad button"
 msgid "Guide"
 msgstr ""
 
+#. A way to install a game, offered when there is more than one
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Hand it to another program"
 msgstr ""
 
@@ -6934,6 +7007,7 @@ msgid "Import selected ({count})"
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Imported from where they are now"
 msgstr ""
 
@@ -6964,6 +7038,7 @@ msgstr ""
 
 #. A background job's status
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/labels.rs
 msgid "In progress"
 msgstr ""
 
@@ -7015,6 +7090,7 @@ msgstr ""
 
 #. Starts an install
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgctxt "button"
 msgid "Install"
 msgstr ""
@@ -7025,6 +7101,7 @@ msgid "Install"
 msgstr ""
 
 #: apps/desktop/src/views/activity/jobLabels.ts
+#: apps/native/src/activity/labels.rs
 msgctxt "job kind"
 msgid "Install"
 msgstr ""
@@ -7049,6 +7126,7 @@ msgid "Install {repository}?"
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "Install {title}?"
 msgstr ""
 
@@ -7144,6 +7222,7 @@ msgid "Install plans from Decomp Buddy"
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "Install this game?"
 msgstr ""
 
@@ -7176,6 +7255,7 @@ msgid "Installation"
 msgstr ""
 
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
+#: apps/native/src/activity/question.rs
 msgid "Installation details"
 msgstr ""
 
@@ -7188,6 +7268,7 @@ msgid "Installed"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgctxt "dependency status"
 msgid "Installed"
 msgstr ""
@@ -7287,6 +7368,8 @@ msgstr ""
 #. The stage a failed install stopped at
 #: apps/desktop/src/views/activity/jobLabels.ts
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/activity/card.rs
+#: apps/native/src/activity/labels.rs
 #: apps/native/src/frame/status_bar.rs
 msgid "Installing"
 msgstr ""
@@ -7312,6 +7395,7 @@ msgid "Installing the update… {percent}%"
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Installing this game means running its installer program on this computer, with your account's access to your files. Run it only if you trust where it came from, or choose a way that doesn't run it."
 msgstr ""
 
@@ -7342,6 +7426,7 @@ msgstr ""
 
 #. The file or folder an install request installs
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "Installs"
 msgstr ""
 
@@ -7450,6 +7535,7 @@ msgid "It can"
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "It comes straight from their computer and installs like any other game; nothing is written until you say so."
 msgstr ""
 
@@ -7591,6 +7677,7 @@ msgstr ""
 
 #. A background job of a kind the app has no name for (a plugin's own)
 #: apps/desktop/src/views/activity/jobLabels.ts
+#: apps/native/src/activity/labels.rs
 msgctxt "job kind"
 msgid "Job"
 msgstr ""
@@ -7858,6 +7945,7 @@ msgstr ""
 
 #. The command an installed game launches with
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "Launches"
 msgstr ""
 
@@ -7890,7 +7978,9 @@ msgstr ""
 msgid "Legal sections"
 msgstr ""
 
+#. A way to install a game, offered when there is more than one
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Let its package manager install it"
 msgstr ""
 
@@ -8090,6 +8180,7 @@ msgid "Loading achievements…"
 msgstr ""
 
 #: apps/desktop/src/views/activity/ActivityView.tsx
+#: apps/native/src/activity/mod.rs
 msgid "Loading activity…"
 msgstr ""
 
@@ -8219,10 +8310,12 @@ msgid "Local network"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/activity/card.rs
 msgid "Locate the installer"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/activity/card.rs
 msgid "Locate the installer…"
 msgstr ""
 
@@ -8548,6 +8641,7 @@ msgid "Maximum age rating"
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "May request elevation"
 msgstr ""
 
@@ -8625,6 +8719,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameSelection/RefreshCard.tsx
 #: apps/desktop/src/components/gameSelection/RefreshDialog.tsx
+#: apps/native/src/activity/refresh.rs
 #: apps/native/src/library/selection_bar.rs
 msgid "Missing details only"
 msgstr ""
@@ -8642,6 +8737,7 @@ msgstr ""
 #. A file an emulator profile needs
 #: apps/desktop/src/views/activity/JobCard.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/activity/card.rs
 msgid "Missing: {path}"
 msgstr ""
 
@@ -8684,6 +8780,7 @@ msgid "Motion & Effects"
 msgstr ""
 
 #: apps/desktop/src/views/activity/jobLabels.ts
+#: apps/native/src/activity/labels.rs
 msgctxt "job kind"
 msgid "Move"
 msgstr ""
@@ -8728,6 +8825,7 @@ msgstr ""
 
 #. Every game on a storage location moved to another, then the location removed
 #: apps/desktop/src/views/activity/jobLabels.ts
+#: apps/native/src/activity/labels.rs
 msgctxt "job kind"
 msgid "Move location"
 msgstr ""
@@ -8746,6 +8844,7 @@ msgstr ""
 
 #. A background job's phase
 #: apps/desktop/src/views/activity/jobLabels.ts
+#: apps/native/src/activity/labels.rs
 #: apps/native/src/frame/status_bar.rs
 msgid "Moving"
 msgstr ""
@@ -8834,6 +8933,7 @@ msgstr ""
 
 #. A background job's status
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/labels.rs
 msgid "Needs your attention"
 msgstr ""
 
@@ -9119,6 +9219,7 @@ msgid "No internet: devices on this network still sync."
 msgstr ""
 
 #: apps/desktop/src/views/activity/ActivityView.tsx
+#: apps/native/src/activity/mod.rs
 msgid "No jobs yet. Install a game from a file, folder or URL."
 msgstr ""
 
@@ -9253,6 +9354,7 @@ msgid "No scripts run at launch."
 msgstr ""
 
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
+#: apps/native/src/activity/question.rs
 msgid "No selectable options were supplied. Leave this job waiting or cancel it in Activity."
 msgstr ""
 
@@ -9271,6 +9373,7 @@ msgid "No store can be connected in this version of Caskade yet. Games your laun
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "No strategy details are available yet."
 msgstr ""
 
@@ -9480,6 +9583,7 @@ msgstr ""
 #: apps/desktop/src/onboarding/GamesStep.tsx
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/activity/question.rs
 #: apps/native/src/flows/pairing.rs
 #: apps/native/src/flows/streaming.rs
 #: apps/native/src/settings/devices.rs
@@ -9628,6 +9732,7 @@ msgid "Nothing was saved. Check the marked fields."
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "Nothing will be downloaded until you confirm. If the download is an installer program, Caskade runs it, unless Settings → Installer asks first for downloaded installers."
 msgstr ""
 
@@ -9955,6 +10060,7 @@ msgstr ""
 
 #: apps/desktop/src/views/activity/ActivityView.tsx
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
+#: apps/native/src/activity/mod.rs
 #: apps/native/src/frame/notifications.rs
 msgid "Open game"
 msgstr ""
@@ -10291,7 +10397,9 @@ msgstr ""
 msgid "parental controls, PEGI, ESRB"
 msgstr ""
 
+#. How close an install way comes to the installer's own result
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "partial result"
 msgstr ""
 
@@ -11031,6 +11139,7 @@ msgstr ""
 #. A job waiting for its turn
 #: apps/desktop/src/shell/StatusBar.tsx
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/labels.rs
 #: apps/native/src/frame/status_bar.rs
 msgid "Queued"
 msgstr ""
@@ -11119,6 +11228,7 @@ msgstr ""
 
 #. The stage a failed install stopped at
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/activity/card.rs
 msgid "Reading the installer"
 msgstr ""
 
@@ -11172,11 +11282,13 @@ msgid "Receive"
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgctxt "button"
 msgid "Receive"
 msgstr ""
 
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
+#: apps/native/src/activity/ingress.rs
 msgid "Receive {shared}?"
 msgstr ""
 
@@ -11340,10 +11452,12 @@ msgid "Refreshing achievements…"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/RefreshCard.tsx
+#: apps/native/src/activity/refresh.rs
 msgid "Refreshing game details"
 msgstr ""
 
 #: apps/desktop/src/components/gameSelection/RefreshCard.tsx
+#: apps/native/src/activity/refresh.rs
 msgid "Refreshing game details was cancelled"
 msgstr ""
 
@@ -11390,10 +11504,12 @@ msgid "Reinstall {name}"
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Reinstall {title}?"
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Reinstall from the retained source"
 msgstr ""
 
@@ -11493,6 +11609,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/activity/card.rs
 #: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/stores.rs
@@ -11699,6 +11816,7 @@ msgid "Required"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgctxt "dependency status"
 msgid "Required"
 msgstr ""
@@ -11911,6 +12029,7 @@ msgid "Retro games"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgctxt "job"
 msgid "Retry"
 msgstr ""
@@ -11928,6 +12047,7 @@ msgstr ""
 #. Runs a failed job again with another install strategy, named by the installer
 #. Runs a failed job again with another install strategy, named by the installer
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "Retry with {strategyLabel}"
 msgstr ""
 
@@ -11956,6 +12076,7 @@ msgid "Review and allow…"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "Review choices"
 msgstr ""
 
@@ -12109,15 +12230,20 @@ msgstr ""
 msgid "Run setup again"
 msgstr ""
 
+#. A way to install a game, offered when there is more than one
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Run the installer"
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Run the installer program?"
 msgstr ""
 
+#. A way to install a game, offered when there is more than one
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Run the installer silently"
 msgstr ""
 
@@ -12145,6 +12271,7 @@ msgid "Runs beside the game once it is found. A failure is noted; the game carri
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Runs installer code"
 msgstr ""
 
@@ -12738,6 +12865,7 @@ msgstr ""
 #. The install strategy the installer chose
 #: apps/desktop/src/views/activity/JobCard.tsx
 #: apps/desktop/src/views/library/LibraryCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "Selected"
 msgstr ""
 
@@ -12939,10 +13067,12 @@ msgid "Setup will keep running in the background."
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Several installers were found in this input."
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Several possible launch targets were found. Choose the game you want to launch."
 msgstr ""
 
@@ -13820,6 +13950,7 @@ msgid "style, stylesheet"
 msgstr ""
 
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
+#: apps/native/src/activity/question.rs
 msgid "Submitting…"
 msgstr ""
 
@@ -13952,6 +14083,7 @@ msgid "Tags"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "Target: {targetDir}"
 msgstr ""
 
@@ -13965,6 +14097,7 @@ msgid "TBD"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/activity/card.rs
 msgid "Technical details"
 msgstr ""
 
@@ -14146,10 +14279,13 @@ msgid "The install was cancelled."
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "The installer could not confidently select a strategy. Review its requirements before continuing."
 msgstr ""
 
+#. How close an install way comes to the installer's own result
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "the installer's own result"
 msgstr ""
 
@@ -14578,6 +14714,7 @@ msgid "This name in any folder; * stands for any text"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/activity/card.rs
 msgid "This needs you: choose what to do next."
 msgstr ""
 
@@ -14631,6 +14768,7 @@ msgid "This takes a moment on the same network, with or without the internet."
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "This torrent holds more than one game or installer. Choose the one to download and install."
 msgstr ""
 
@@ -14781,6 +14919,8 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/activity/card.rs
+#: apps/native/src/activity/mod.rs
 #: apps/native/src/flows/storage.rs
 #: apps/native/src/frame/error.rs
 #: apps/native/src/frame/notifications.rs
@@ -14880,6 +15020,7 @@ msgid "Uninstall"
 msgstr ""
 
 #: apps/desktop/src/views/activity/jobLabels.ts
+#: apps/native/src/activity/labels.rs
 msgctxt "job kind"
 msgid "Uninstall"
 msgstr ""
@@ -14993,7 +15134,9 @@ msgstr ""
 msgid "Unnamed server"
 msgstr ""
 
+#. A way to install a game, offered when there is more than one
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Unpack the files"
 msgstr ""
 
@@ -15094,6 +15237,7 @@ msgid "Update"
 msgstr ""
 
 #: apps/desktop/src/views/activity/jobLabels.ts
+#: apps/native/src/activity/labels.rs
 msgctxt "job kind"
 msgid "Update"
 msgstr ""
@@ -15344,18 +15488,22 @@ msgid "Vector console"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "Verification found problems"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "Verification passed"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "Verification results"
 msgstr ""
 
 #: apps/desktop/src/views/activity/jobLabels.ts
+#: apps/native/src/activity/labels.rs
 msgctxt "job kind"
 msgid "Verify"
 msgstr ""
@@ -15477,6 +15625,7 @@ msgid "Waiting for detection results…"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "Waiting for progress"
 msgstr ""
 
@@ -15525,6 +15674,7 @@ msgid "Waking {device}…"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "Warnings"
 msgstr ""
 
@@ -15671,6 +15821,7 @@ msgid "What to refresh"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobRecovery.tsx
+#: apps/native/src/activity/card.rs
 msgid "What went wrong"
 msgstr ""
 
@@ -15734,6 +15885,7 @@ msgid "Where should new games go?"
 msgstr ""
 
 #: apps/desktop/src/api/installMapping.ts
+#: apps/native/src/activity/labels.rs
 msgid "Where should these ROMs go?"
 msgstr ""
 
@@ -15865,6 +16017,7 @@ msgstr ""
 
 #. A running job with no phase
 #: apps/desktop/src/views/activity/jobLabels.ts
+#: apps/native/src/activity/labels.rs
 #: apps/native/src/frame/status_bar.rs
 msgid "Working"
 msgstr ""
@@ -15890,6 +16043,7 @@ msgid "Working out the changes…"
 msgstr ""
 
 #: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
 msgid "Working…"
 msgstr ""
 

@@ -74,7 +74,11 @@ impl Changed {
             // The library is the signed-in account's: favourites, hidden
             // games, collections and age limits all follow it.
             Event::AccountChanged(_) => Self::Everything,
-            Event::JobChanged(_) => Self::only(Key::Jobs),
+            // The details refresh's card and the install requests waiting
+            // for the user sit with the jobs (#101).
+            Event::JobChanged(_) | Event::GamesRefreshChanged(_) | Event::InstallRequested(_) => {
+                Self::only(Key::Jobs)
+            }
             Event::NotificationsChanged(_) => Self::only(Key::Notifications),
             Event::DevicesChanged(_) => Self::only(Key::Devices),
             Event::AppUpdateChanged(_) => Self::only(Key::AppUpdate),

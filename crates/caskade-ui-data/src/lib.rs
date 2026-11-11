@@ -21,6 +21,7 @@ pub mod backups;
 pub mod devices;
 pub mod discovery;
 pub mod fixtures;
+pub mod jobs;
 pub mod keys;
 pub mod labels;
 pub mod library;
