@@ -503,6 +503,12 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
                     }
                 }
             }
+            super::saves::SavesPanel {
+                game_id: game.game.id.clone(),
+                title: game.game.title.clone(),
+                entry_id: chosen.as_ref().map(|entry| entry.id.clone()),
+                running: running.is_some(),
+            }
             Sessions { sessions }
             super::igdb::IgdbPanel {
                 game_id: game.game.id.clone(),

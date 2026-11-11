@@ -110,6 +110,10 @@ mod tests {
             "#100: the webview's EmulatedEntry isn't catalogued either",
         ),
         (
+            "saves-panel",
+            "#100: the webview's SavesPanel isn't catalogued either",
+        ),
+        (
             "add-game",
             "#108: the webview's AddGame isn't catalogued either",
         ),

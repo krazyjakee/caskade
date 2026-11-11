@@ -1686,7 +1686,7 @@ msgstr "En borttagen emulator"
 msgid "A ROMs folder with a folder per console, like snes or psx."
 msgstr "En ROM-mapp med en mapp per konsol, till exempel snes eller psx."
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgid "a save of {title}"
 msgstr "en sparning av {title}"
 
@@ -2209,7 +2209,7 @@ msgstr "När ett spel avslutas, och då och då för spel som spelats nyligen."
 msgid "After exit"
 msgstr "Efter avslut"
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgctxt "save version"
 msgid "After playing"
 msgstr "Efter spelande"
@@ -2406,7 +2406,7 @@ msgstr "Animationer"
 msgid "Announced releases without a date yet."
 msgstr "Utannonserade utgåvor som ännu saknar datum."
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgctxt "save version"
 msgid "Another account"
 msgstr "Ett annat konto"
@@ -2856,7 +2856,7 @@ msgstr "Säkerhetskopior innehåller aldrig lösenord eller inloggningar, webbsp
 msgid "backups, back up, restore, archive, export, snapshot, recovery"
 msgstr "säkerhetskopior, säkerhetskopiera, återställ, arkiv, export, ögonblicksbild, återställning"
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgctxt "save version"
 msgid "Before a restore"
 msgstr "Före en återställning"
@@ -3525,7 +3525,7 @@ msgstr "Byt PIN…"
 msgid "Changed elsewhere since you opened the editor; it is now “{0}”."
 msgstr "Ändrades någon annanstans sedan du öppnade redigeraren; nu är det ”{0}”."
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgctxt "save version"
 msgid "Changed outside Caskade"
 msgstr "Ändrad utanför Caskade"
@@ -3746,7 +3746,7 @@ msgstr "Välj en sparfil"
 msgid "Choose a save folder"
 msgstr "Välj en sparmapp"
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgid "Choose a save…"
 msgstr "Välj en sparfil…"
 
@@ -3864,7 +3864,7 @@ msgstr "Välj din spelmapp, vad som ska letas efter och hur du spelar, på nytt.
 msgid "Choose your language"
 msgstr "Välj språk"
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgctxt "save version"
 msgid "Chosen between devices"
 msgstr "Vald mellan enheter"
@@ -6721,7 +6721,7 @@ msgstr "Pågår"
 msgid "In use"
 msgstr "Används"
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgctxt "save version"
 msgid "In use"
 msgstr "Används"
@@ -8892,7 +8892,7 @@ msgstr "Inga ROM:ar matchade den här skannerns profil."
 msgid "No save files or folders. Add them here, or drop them on this tab."
 msgstr "Inga sparfiler eller mappar. Lägg till dem här eller släpp dem på den här fliken."
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgid "No saves kept yet. A version is kept each time you finish playing."
 msgstr "Inga sparfiler har behållits än. En version behålls varje gång du slutar spela."
 
@@ -9145,7 +9145,7 @@ msgstr "Inte i ett lokalt nätverk."
 msgid "Not on IGDB"
 msgstr "Inte på IGDB"
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgid "Not on this device yet"
 msgstr "Inte på den här enheten än"
 
@@ -11390,7 +11390,7 @@ msgstr "Starta om nu"
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
-#: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/desktop/src/views/settings/searchIndex.ts apps/native/src/game/saves.rs
 #: apps/native/src/settings/search.rs
 msgid "Restore"
 msgstr "Återställ"
@@ -11418,7 +11418,7 @@ msgstr "Återställ säkerhetskopian av {from} från {when}"
 msgid "Restore…"
 msgstr "Återställ…"
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgctxt "save version"
 msgid "Restored"
 msgstr "Återställd"
@@ -11428,7 +11428,7 @@ msgstr "Återställd"
 msgid "Restored from {0}."
 msgstr "Återställt från {0}."
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgid "Restored. The save that was in use is kept as a version."
 msgstr "Återställd. Sparfilen som användes behålls som en version."
 
@@ -11436,7 +11436,7 @@ msgstr "Återställd. Sparfilen som användes behålls som en version."
 msgid "Restoring replaces this library and its settings with the backup's, then restarts Caskade. Nothing is merged, and your games' files aren't touched."
 msgstr "Återställning ersätter detta bibliotek och dess inställningar med säkerhetskopians och startar sedan om Caskade. Inget slås ihop, och dina spels filer rörs inte."
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgid "Restoring waits until the game has closed."
 msgstr "Återställningen väntar tills spelet har stängts."
 
@@ -11910,8 +11910,8 @@ msgstr "Sparat."
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/game/launch.rs apps/native/src/settings/devices.rs
-#: apps/native/src/settings/search.rs
+#: apps/native/src/game/launch.rs apps/native/src/game/saves.rs
+#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
 msgid "Saves"
 msgstr "Sparfiler"
 
@@ -11920,7 +11920,7 @@ msgstr "Sparfiler"
 msgid "Saves go to your other devices. Saves in What syncs above changes that."
 msgstr "Sparfiler skickas till dina andra enheter. Sparfiler under Vad som synkas ovan ändrar det."
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgid "Saves stay on this device: syncing them is off in Settings → Devices."
 msgstr "Sparfilerna stannar på den här enheten: synkning av dem är avstängd i Inställningar → Enheter."
 
@@ -12483,7 +12483,7 @@ msgstr "dela ett spel"
 msgid "Share link"
 msgstr "Delningslänk"
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgid "Share this save with someone…"
 msgstr "Dela den här sparningen med någon…"
 
@@ -12493,7 +12493,7 @@ msgstr "Dela den här sparningen med någon…"
 msgid "Share with someone…"
 msgstr "Dela med någon…"
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgid "Share…"
 msgstr "Dela…"
 
@@ -12504,7 +12504,7 @@ msgstr "Dela…"
 msgid "Shared"
 msgstr "Delat"
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgctxt "save version"
 msgid "Shared by someone"
 msgstr "Delad av någon"
@@ -12554,10 +12554,11 @@ msgstr "Visa spel"
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+#: apps/native/src/game/saves.rs
 msgid "Show in folder"
 msgstr "Visa i mapp"
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgid "Show in folder: {path}"
 msgstr "Visa i mapp: {path}"
 
@@ -13995,7 +13996,7 @@ msgstr "Spelet finns inte längre i biblioteket."
 msgid "This game needs symbolic links"
 msgstr "Det här spelet behöver symboliska länkar"
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgid "This game was played on more than one device since they last shared saves. Choose which save to play with; the other is kept."
 msgstr "Spelet har spelats på mer än en enhet sedan de senast delade sparfiler. Välj vilken sparfil du vill spela med; den andra behålls."
 
@@ -14674,7 +14675,7 @@ msgstr "Använd den"
 msgid "Use theirs"
 msgstr "Använd deras"
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgid "Use this save"
 msgstr "Använd den här sparfilen"
 
@@ -15141,7 +15142,7 @@ msgstr "Var ska nya spel hamna?"
 msgid "Where should these ROMs go?"
 msgstr "Var ska de här ROM-filerna hamna?"
 
-#: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgid "Where they are on this device"
 msgstr "Var de finns på den här enheten"
 

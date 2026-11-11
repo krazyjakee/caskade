@@ -16,6 +16,9 @@ use caskade_core::updates::GameUpdate;
 use dioxus_native::prelude::*;
 use std::rc::Rc;
 
+/// A local account: its id and name.
+pub type Account = (String, String);
+
 /// A change to a game's IGDB match.
 #[derive(Debug, Clone, PartialEq)]
 pub enum IgdbChange {
@@ -85,6 +88,19 @@ pub struct PageData {
     pub age_ratings: Rc<dyn Fn(String) -> Answer<Vec<caskade_core::igdb::IgdbAgeRating>>>,
     /// Plays YouTube video `0` in the video window, titled `1`.
     pub play_video: Rc<dyn Fn(String, String) -> Result<(), String>>,
+    /// Game `0`'s save versions; `None` where saves aren't kept.
+    pub save_history:
+        Rc<dyn Fn(String) -> Answer<Option<caskade_core::saves::versions::SaveHistory>>>,
+    /// Where entry `0`'s saves are on this device.
+    pub save_locations: Rc<dyn Fn(String) -> Answer<Vec<String>>>,
+    /// Puts version `1` of entry `0`'s saves in place.
+    pub save_restore: Rc<dyn Fn(String, String) -> Answer<()>>,
+    /// Settles a conflict: version `1` for entry `0`.
+    pub save_choose: Rc<dyn Fn(String, String) -> Answer<()>>,
+    /// Shows entry `0`'s save location `1` in the file manager.
+    pub save_reveal: Rc<dyn Fn(String, u32) -> Answer<()>>,
+    /// The local accounts, by id, with their names.
+    pub accounts: Rc<dyn Fn() -> Answer<Vec<Account>>>,
 }
 
 impl PartialEq for PageData {
@@ -388,6 +404,109 @@ impl PageData {
                     &title,
                     caskade_app::commands::video::VideoPlacement::Anywhere,
                 )
+            }),
+            save_history: Rc::new(|game_id| {
+                Box::pin(async move {
+                    let Some(services) = crate::shell::services() else {
+                        return Ok(None);
+                    };
+                    change(async move {
+                        caskade_app::commands::saves::game_save_history(
+                            &services.save_versions,
+                            game_id,
+                        )
+                        .await
+                        .map(Some)
+                    })
+                    .await
+                })
+            }),
+            save_locations: Rc::new(|entry_id| {
+                Box::pin(async move {
+                    let Some(services) = crate::shell::services() else {
+                        return Ok(Vec::new());
+                    };
+                    change(async move {
+                        caskade_core::saves::Saves::new(
+                            services.store.clone(),
+                            services.ludusavi.clone(),
+                        )
+                        .with_catalog(services.emulation.catalog())
+                        .state(&entry_id)
+                        .await
+                        .map(|state| {
+                            state
+                                .locations
+                                .into_iter()
+                                .map(|location| location.spec.path)
+                                .collect()
+                        })
+                        .map_err(|error| ErrorReport::from_error(&error))
+                    })
+                    .await
+                })
+            }),
+            save_restore: Rc::new(|entry_id, version_id| {
+                Box::pin(async move {
+                    let services = services()?;
+                    change(async move {
+                        caskade_app::commands::saves::game_saves_restore(
+                            &services.save_versions,
+                            entry_id,
+                            version_id,
+                        )
+                        .await
+                        .map(drop)
+                    })
+                    .await
+                })
+            }),
+            save_choose: Rc::new(|entry_id, version_id| {
+                Box::pin(async move {
+                    let services = services()?;
+                    change(async move {
+                        caskade_app::commands::saves::game_saves_choose(
+                            &services.save_versions,
+                            entry_id,
+                            version_id,
+                        )
+                        .await
+                        .map(drop)
+                    })
+                    .await
+                })
+            }),
+            save_reveal: Rc::new(|entry_id, location| {
+                Box::pin(async move {
+                    let services = services()?;
+                    change(async move {
+                        caskade_app::commands::saves::game_saves_reveal(
+                            &services.save_versions,
+                            entry_id,
+                            location,
+                        )
+                        .await
+                    })
+                    .await
+                })
+            }),
+            accounts: Rc::new(|| {
+                Box::pin(async move {
+                    let Some(services) = crate::shell::services() else {
+                        return Ok(Vec::new());
+                    };
+                    change(async move {
+                        caskade_app::commands::accounts::accounts_list(&services.accounts)
+                            .await
+                            .map(|list| {
+                                list.accounts
+                                    .into_iter()
+                                    .map(|account| (account.id, account.name))
+                                    .collect()
+                            })
+                    })
+                    .await
+                })
             }),
         }
     }

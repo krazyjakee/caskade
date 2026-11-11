@@ -1695,6 +1695,7 @@ msgid "A ROMs folder with a folder per console, like snes or psx."
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgid "a save of {title}"
 msgstr ""
 
@@ -2234,6 +2235,7 @@ msgid "After exit"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgctxt "save version"
 msgid "After playing"
 msgstr ""
@@ -2434,6 +2436,7 @@ msgid "Announced releases without a date yet."
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgctxt "save version"
 msgid "Another account"
 msgstr ""
@@ -2895,6 +2898,7 @@ msgid "backups, back up, restore, archive, export, snapshot, recovery"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgctxt "save version"
 msgid "Before a restore"
 msgstr ""
@@ -3586,6 +3590,7 @@ msgid "Changed elsewhere since you opened the editor; it is now “{0}”."
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgctxt "save version"
 msgid "Changed outside Caskade"
 msgstr ""
@@ -3814,6 +3819,7 @@ msgid "Choose a save folder"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgid "Choose a save…"
 msgstr ""
 
@@ -3932,6 +3938,7 @@ msgid "Choose your language"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgctxt "save version"
 msgid "Chosen between devices"
 msgstr ""
@@ -6861,6 +6868,7 @@ msgid "In use"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgctxt "save version"
 msgid "In use"
 msgstr ""
@@ -9088,6 +9096,7 @@ msgid "No save files or folders. Add them here, or drop them on this tab."
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgid "No saves kept yet. A version is kept each time you finish playing."
 msgstr ""
 
@@ -9348,6 +9357,7 @@ msgid "Not on IGDB"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgid "Not on this device yet"
 msgstr ""
 
@@ -11656,6 +11666,7 @@ msgstr ""
 #: apps/desktop/src/views/game/SavesPanel.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/game/saves.rs
 #: apps/native/src/settings/search.rs
 msgid "Restore"
 msgstr ""
@@ -11686,6 +11697,7 @@ msgid "Restore…"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgctxt "save version"
 msgid "Restored"
 msgstr ""
@@ -11696,6 +11708,7 @@ msgid "Restored from {0}."
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgid "Restored. The save that was in use is kept as a version."
 msgstr ""
 
@@ -11704,6 +11717,7 @@ msgid "Restoring replaces this library and its settings with the backup's, then 
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgid "Restoring waits until the game has closed."
 msgstr ""
 
@@ -12186,6 +12200,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/native/src/game/launch.rs
+#: apps/native/src/game/saves.rs
 #: apps/native/src/settings/devices.rs
 #: apps/native/src/settings/search.rs
 msgid "Saves"
@@ -12197,6 +12212,7 @@ msgid "Saves go to your other devices. Saves in What syncs above changes that."
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgid "Saves stay on this device: syncing them is off in Settings → Devices."
 msgstr ""
 
@@ -12780,6 +12796,7 @@ msgid "Share link"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgid "Share this save with someone…"
 msgstr ""
 
@@ -12790,6 +12807,7 @@ msgid "Share with someone…"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgid "Share…"
 msgstr ""
 
@@ -12801,6 +12819,7 @@ msgid "Shared"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgctxt "save version"
 msgid "Shared by someone"
 msgstr ""
@@ -12851,10 +12870,12 @@ msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+#: apps/native/src/game/saves.rs
 msgid "Show in folder"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgid "Show in folder: {path}"
 msgstr ""
 
@@ -14326,6 +14347,7 @@ msgid "This game needs symbolic links"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgid "This game was played on more than one device since they last shared saves. Choose which save to play with; the other is kept."
 msgstr ""
 
@@ -15026,6 +15048,7 @@ msgid "Use theirs"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgid "Use this save"
 msgstr ""
 
@@ -15500,6 +15523,7 @@ msgid "Where should these ROMs go?"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesPanel.tsx
+#: apps/native/src/game/saves.rs
 msgid "Where they are on this device"
 msgstr ""
 

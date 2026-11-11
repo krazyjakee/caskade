@@ -119,7 +119,7 @@ pub(crate) fn launches() -> usize {
     with(|script| script.launches.len())
 }
 
-fn version(id: &str, local: bool) -> SaveVersion {
+pub(crate) fn version(id: &str, local: bool) -> SaveVersion {
     SaveVersion {
         id: id.to_owned(),
         game_id: String::new(),

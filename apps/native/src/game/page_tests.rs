@@ -194,6 +194,11 @@ use std::sync::Mutex;
 /// What the page's data answers, and what it was asked.
 #[derive(Default)]
 pub(crate) struct PageScript {
+    pub(crate) saves: Option<caskade_core::saves::versions::SaveHistory>,
+    pub(crate) save_paths: Vec<String>,
+    pub(crate) restored: Vec<(String, String)>,
+    pub(crate) save_chosen: Vec<(String, String)>,
+    pub(crate) revealed: Vec<(String, u32)>,
     pub(crate) igdb: Option<caskade_core::metadata::GameIgdb>,
     pub(crate) igdb_changes: Vec<super::data::IgdbChange>,
     pub(crate) igdb_results: Vec<caskade_core::igdb::IgdbGame>,
@@ -329,6 +334,21 @@ pub(crate) fn fake_data() -> PageData {
             page(|script| script.videos_played.push((video, title)));
             Ok(())
         }),
+        save_history: Rc::new(|_| answer(page(|script| script.saves.clone()))),
+        save_locations: Rc::new(|_| answer(page(|script| script.save_paths.clone()))),
+        save_restore: Rc::new(|entry, version| {
+            page(|script| script.restored.push((entry, version)));
+            answer(())
+        }),
+        save_choose: Rc::new(|entry, version| {
+            page(|script| script.save_chosen.push((entry, version)));
+            answer(())
+        }),
+        save_reveal: Rc::new(|entry, location| {
+            page(|script| script.revealed.push((entry, location)));
+            answer(())
+        }),
+        accounts: Rc::new(|| answer(vec![("acct-1".to_owned(), "Robin".to_owned())])),
     }
 }
 
@@ -813,4 +833,86 @@ fn igdbs_videos_play_in_the_video_window_and_the_age_rating_shows() {
     );
     // No screenshots in the fixtures: the empty grid says so.
     assert!(window.find("data-part", "screenshots-empty").is_some());
+}
+
+#[test]
+fn the_saves_panel_restores_shows_where_they_are_and_settles_a_conflict() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    use caskade_core::saves::versions::{SaveHistory, VersionState};
+    let ours = super::launch_tests::version("ours", true);
+    let theirs = super::launch_tests::version("theirs", false);
+    let _script = page_script(PageScript {
+        saves: Some(SaveHistory {
+            account_id: String::new(),
+            versions: vec![
+                VersionState {
+                    version: ours.clone(),
+                    current: true,
+                    complete: true,
+                },
+                VersionState {
+                    version: theirs.clone(),
+                    current: false,
+                    complete: true,
+                },
+            ],
+            conflict: vec!["ours".to_owned(), "theirs".to_owned()],
+            syncing: true,
+        }),
+        save_paths: vec!["/home/me/.local/share/Tidewater/saves".to_owned()],
+        ..PageScript::default()
+    });
+    let mut window = open("/games/fixture-emulated-0-0");
+    window.settle_until("the saves", |window| {
+        window.find("data-cs", "saves-panel").is_some()
+    });
+    let panel = window.get("data-cs", "saves-panel");
+    let said = window.text(panel);
+    assert!(
+        said.contains("In use") && said.contains("After playing"),
+        "{said}"
+    );
+    assert!(
+        said.contains("/home/me/.local/share/Tidewater/saves"),
+        "{said}"
+    );
+    // Show in folder.
+    let reveal = window
+        .find_in(panel, "data-part", "reveal")
+        .expect("Show in folder");
+    window.click(reveal);
+    window.settle_until("revealed", |_| page(|script| script.revealed.len()) == 1);
+    // Restore the other device's.
+    let versions = window.find_all("data-part", "version");
+    let theirs_row = versions
+        .into_iter()
+        .find(|&row| window.attr(row, "data-status").as_deref() == Some("kept"))
+        .expect("the kept version");
+    let restore = window
+        .find_in(theirs_row, "data-part", "restore")
+        .expect("Restore");
+    window.click(restore);
+    window.settle_until("restored", |_| page(|script| script.restored.len()) == 1);
+    assert_eq!(page(|script| script.restored[0].1.clone()), "theirs");
+    // Both played: choose one.
+    let panel = window.get("data-cs", "saves-panel");
+    let conflict = window
+        .find_in(panel, "data-part", "conflict")
+        .expect("the conflict");
+    let choose = window
+        .find_in(conflict, "data-part", "choose")
+        .expect("Choose a save…");
+    window.click(choose);
+    window.settle_until("the question", |window| {
+        window.find("data-cs", "save-conflict").is_some()
+    });
+    let dialog = window.get("data-cs", "save-conflict");
+    let confirm = window
+        .find_in(dialog, "data-part", "choose")
+        .expect("Use this save");
+    assert!(window.text(confirm).contains("Use this save"));
+    window.click(confirm);
+    window.settle_until("chosen", |_| page(|script| script.save_chosen.len()) == 1);
+    assert_eq!(page(|script| script.save_chosen[0].1.clone()), "ours");
 }
