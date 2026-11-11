@@ -2294,8 +2294,10 @@ version = "0.1.0"
 dependencies = [
  "caskade-app",
  "caskade-core",
+ "caskade-discovery",
  "caskade-plugin-host",
  "caskade-share",
+ "caskade-sources",
  "caskade-streaming",
  "serde_json",
  "tokio",

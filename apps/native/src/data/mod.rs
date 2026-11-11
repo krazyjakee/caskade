@@ -13,7 +13,9 @@
 
 use caskade_app::events::Event;
 use caskade_core::model::{GameDetails, GamePage, LibraryStats, ListGames};
-use caskade_ui_data::{Changed, ErrorReport, Key as DataKey, Library, Settings, Themes, fixtures};
+use caskade_ui_data::{
+    Changed, Discovery, ErrorReport, Key as DataKey, Library, Settings, Themes, fixtures,
+};
 use dioxus_native::prelude::*;
 use std::future::Future;
 use tokio::sync::broadcast;
@@ -24,6 +26,8 @@ pub struct DataSource {
     pub library: Library,
     pub settings: Settings,
     pub themes: Themes,
+    /// `None` in fixtures mode without its fixture machine.
+    pub discovery: Option<Discovery>,
     pub events: broadcast::Sender<Event>,
 }
 
@@ -36,6 +40,7 @@ impl DataSource {
             library: Library::of(services),
             settings: Settings::of(services),
             themes: Themes::of(services, crate::shell::sink()),
+            discovery: Some(Discovery::of(services)),
             events: crate::shell::events().clone(),
         })
     }
@@ -50,6 +55,7 @@ impl DataSource {
             library: fixtures.library,
             settings: fixtures.settings,
             themes: fixtures.themes,
+            discovery: fixtures.discovery,
             events: fixtures.events,
         })
     }
@@ -198,6 +204,38 @@ where
     let resource = use_resource(move || change(load(themes.clone())));
     reload_on(&source, DataKey::Themes, resource);
     resource
+}
+
+/// Library discovery's snapshot, for Launchers and Library Discovery
+/// (#104): what `load` reads, loaded again on every `DiscoveryChanged`.
+pub fn use_discovery_query<T, F, Fut>(mut load: F) -> Query<T>
+where
+    T: Send + 'static,
+    F: FnMut(Discovery) -> Fut + 'static,
+    Fut: Future<Output = Result<T, ErrorReport>> + Send + 'static,
+{
+    let source = use_context::<DataSource>();
+    let discovery = source.discovery.clone();
+    let resource = use_resource(move || {
+        let work = discovery.clone().map(&mut load);
+        change(async move {
+            match work {
+                Some(work) => work.await,
+                None => Err(ErrorReport::new(
+                    caskade_ui_data::ErrorCode::Other,
+                    caskade_core::tr!("Library discovery isn't available here."),
+                )),
+            }
+        })
+    });
+    reload_on(&source, DataKey::Discovery, resource);
+    resource
+}
+
+/// Library discovery, for a view's actions; `None` before the data source
+/// or without discovery.
+pub fn try_use_discovery() -> Option<Discovery> {
+    try_use_context::<DataSource>().and_then(|source| source.discovery)
 }
 
 /// Themes, for a view's changes (a rescan); `None` before the data source.

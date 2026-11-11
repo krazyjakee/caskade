@@ -17,6 +17,7 @@
 //! and loads into signals and resources.
 
 pub mod devices;
+pub mod discovery;
 pub mod fixtures;
 pub mod keys;
 pub mod labels;
@@ -30,6 +31,7 @@ pub mod streaming;
 pub mod themes;
 
 pub use caskade_core::error::{ErrorCode, ErrorReport, RecoveryHint};
+pub use discovery::Discovery;
 pub use keys::{Changed, Key};
 pub use library::{Library, PAGE_LIMIT, SEARCH_LIMIT};
 pub use settings::{Editable, Settings};

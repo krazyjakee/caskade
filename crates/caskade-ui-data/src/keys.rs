@@ -31,6 +31,8 @@ pub enum Key {
     Settings(String),
     /// The installed themes and the one applied (Appearance).
     Themes,
+    /// Library discovery's snapshot: launchers, scans, results to review.
+    Discovery,
 }
 
 /// What an app event made stale.
@@ -74,6 +76,7 @@ impl Changed {
             Event::AppUpdateChanged(_) => Self::only(Key::AppUpdate),
             Event::BackgroundChanged(_) => Self::only(Key::Background),
             Event::SettingsChanged(changed) => Self::only(Key::Settings(changed.namespace.clone())),
+            Event::DiscoveryChanged(_) => Self::only(Key::Discovery),
             // A dev theme recompiled, or a plugin bringing themes came or
             // went.
             Event::ThemeReloaded(_) | Event::PluginsChanged(_) | Event::PluginDisabled(_) => {

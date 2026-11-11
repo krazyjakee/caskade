@@ -9,6 +9,10 @@ publish = false
 [dependencies]
 caskade-app = { path = "../caskade-app" }
 caskade-core = { path = "../caskade-core" }
+# Library discovery for Launchers and Library Discovery (`discovery.rs`,
+# #104), and the fixtures' discovery over a fixture machine.
+caskade-discovery = { path = "../caskade-discovery" }
+caskade-sources = { path = "../caskade-sources" }
 # Themes bundled by plugins, for Appearance's list (`themes.rs`, #104).
 caskade-plugin-host = { path = "../caskade-plugin-host" }
 # One-off shares' types (ShareRecord, ShareInfo, ShareItem) for the share

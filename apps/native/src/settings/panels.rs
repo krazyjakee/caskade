@@ -21,8 +21,11 @@ pub fn panel(tab: &'static str, sub: Option<String>) -> Element {
                     description: t!("Preferences apply to the next install job. Jobs already running keep their current settings."),
                     reset_label: t!("Reset installer settings"),
                 }
-                Pending {}
+                super::torrent::TorrentLinksSettings {}
             }
+        },
+        "launchers" => rsx! {
+            super::launchers::LaunchersSettings {}
         },
         "appearance" => rsx! {
             super::appearance::AppearanceSettings {}

@@ -21,7 +21,7 @@ use caskade_core::{
 };
 use tokio::sync::broadcast;
 
-use crate::{Library, Settings, Themes};
+use crate::{Discovery, Library, Settings, Themes};
 
 /// How many plain games fixtures mode makes unless asked for another number
 /// (`createFixtureGames`'s default).
@@ -194,6 +194,10 @@ pub struct Fixtures {
     pub settings: Settings,
     /// The built-in themes, over the same settings (Appearance).
     pub themes: Themes,
+    /// Library discovery over the discovery crate's `linux-mixed` fixture
+    /// machine (Steam, Lutris and a few games), never this device; `None`
+    /// where the fixture isn't there (a build moved away from its sources).
+    pub discovery: Option<Discovery>,
 }
 
 /// Where the fixture library's installed themes are: none until a test
@@ -227,10 +231,24 @@ pub async fn open(count: usize) -> caskade_core::Result<Fixtures> {
         None,
         Events::new(Broadcast(events.clone())),
     );
+    let discovery = caskade_discovery::env::HostEnv::fixture(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../caskade-discovery/tests/fixtures/machines/linux-mixed"
+    ))
+    .ok()
+    .map(|env| {
+        let controller = caskade_app::discovery::DiscoveryController::new(
+            caskade_sources::DiscoveryService::new(store.clone(), bus.clone(), env),
+            service.clone(),
+        );
+        controller.bridge(Events::new(Broadcast(events.clone())));
+        Discovery::new(controller)
+    });
     let settings = Settings::new(service, accounts.clone());
     Ok(Fixtures {
         settings,
         themes,
+        discovery,
         library: Library::new(store.clone(), accounts.clone(), launch, bus.clone()),
         store,
         bus,

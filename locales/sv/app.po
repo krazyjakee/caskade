@@ -3107,6 +3107,7 @@ msgid "Caskade checks the profile when you save. Nothing here starts the emulato
 msgstr "Caskade kontrollerar profilen när du sparar. Inget här startar emulatorn."
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/torrent.rs
 msgid "Caskade couldn't check how this system opens them"
 msgstr "Caskade kunde inte kontrollera hur det här systemet öppnar dem"
 
@@ -3203,6 +3204,7 @@ msgid "Caskade keeps versions of each game's saves and sends the newest to your 
 msgstr "Caskade sparar versioner av varje spels sparfiler och skickar de nyaste till dina parkopplade enheter. Du hittar dem i Inställningar → Enheter → Sparfiler och återställer en från spelets sida."
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Caskade knows no launchers for this device's system."
 msgstr "Caskade känner inte till några startprogram för den här enhetens system."
 
@@ -3588,6 +3590,7 @@ msgid "Choose another location…"
 msgstr "Välj en annan plats…"
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/torrent.rs
 msgid "Choose Caskade for magnet links and .torrent files in Windows' Default apps."
 msgstr "Välj Caskade för magnetlänkar och .torrent-filer under Standardappar i Windows."
 
@@ -5795,6 +5798,7 @@ msgid "Games from a server you can't reach stay in your library. Downloaded ones
 msgstr "Spel från en server du inte når finns kvar i ditt bibliotek. Nedladdade spel går fortfarande att spela; resten visas som otillgängliga tills servern är tillbaka."
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Games from the launchers turned on here join your library. Turning one off removes the games only it found at the next scan."
 msgstr "Spel från startprogrammen som är påslagna här läggs till i ditt bibliotek. Stänger du av ett tas spelen som bara det hittade bort vid nästa skanning."
 
@@ -6136,6 +6140,7 @@ msgid "host, hosting, Sunshine"
 msgstr "värd, hosting, Sunshine"
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "How and when games are scanned: <0>Library Discovery</0>"
 msgstr "Hur och när spel skannas: <0>Biblioteksidentifiering</0>"
 
@@ -7163,13 +7168,14 @@ msgstr "Starta med"
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/launchers.rs apps/native/src/settings/search.rs
 msgid "Launchers"
 msgstr "Startprogram"
 
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
-#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
+#: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/launchers.rs apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Launchers"
 msgstr "Startprogram"
@@ -7541,6 +7547,7 @@ msgid "Location unavailable"
 msgstr "Platsen är inte tillgänglig"
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Location unknown"
 msgstr "Okänd plats"
 
@@ -7591,6 +7598,7 @@ msgstr "Utseende"
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Look again"
 msgstr "Sök igen"
 
@@ -7635,6 +7643,7 @@ msgid "Looking for installed emulators…"
 msgstr "Letar efter installerade emulatorer…"
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Looking for launchers on this device…"
 msgstr "Letar efter startprogram på den här enheten…"
 
@@ -7660,7 +7669,7 @@ msgstr "Görs i bakgrunden till mappen för säkerhetskopior, med samma innehål
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/search.rs apps/native/src/settings/torrent.rs
 msgid "Magnet links and torrent files"
 msgstr "Magnetlänkar och torrentfiler"
 
@@ -8628,6 +8637,7 @@ msgid "Not found"
 msgstr "Hittades inte"
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Not found on this device"
 msgstr "Hittades inte på den här enheten"
 
@@ -8706,6 +8716,7 @@ msgid "Not saved"
 msgstr "Inte sparat"
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Not scanned"
 msgstr "Inte skannat"
 
@@ -8868,6 +8879,7 @@ msgid "Off."
 msgstr "Av."
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/torrent.rs
 msgid "Offer Caskade for them"
 msgstr "Erbjud Caskade för dem"
 
@@ -9089,6 +9101,7 @@ msgid "Open Caskade on the device you already use, on the same network. Pair wit
 msgstr "Öppna Caskade på enheten du redan använder, på samma nätverk. Parkoppla med den här och jämför koderna som båda visar."
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/torrent.rs
 msgid "Open Default apps"
 msgstr "Öppna Standardappar"
 
@@ -9154,7 +9167,7 @@ msgstr "Öppna inloggningssidan"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/search.rs apps/native/src/settings/torrent.rs
 msgid "Open them with Caskade"
 msgstr "Öppna dem med Caskade"
 
@@ -9445,6 +9458,7 @@ msgid "Paste"
 msgstr "Klistra in"
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/torrent.rs
 msgid "Paste a magnet link anywhere in Caskade, drop a .torrent file on it, or use Add game. Nothing downloads until you confirm, and nothing is seeded afterwards."
 msgstr "Klistra in en magnetlänk var som helst i Caskade, släpp en .torrent-fil på fönstret eller använd Lägg till spel. Inget laddas ner förrän du bekräftar, och inget delas vidare efteråt."
 
@@ -10766,6 +10780,7 @@ msgid "Reset installer settings"
 msgstr "Återställ installationsinställningar"
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Reset launcher settings"
 msgstr "Återställ inställningar för startprogram"
 
@@ -11428,6 +11443,7 @@ msgid "scan, scanning, discovery, find games, detect games, import, launchers, f
 msgstr "skanna, skanning, identifiering, hitta spel, identifiera spel, importera, startprogram, mappar, bevaka mappar, dolda spel, ignorerade spel, spelhistorik, djupsökning"
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Scanned"
 msgstr "Skannat"
 
@@ -13370,6 +13386,7 @@ msgid "This store isn't available in this version of Caskade."
 msgstr "Den här butiken är inte tillgänglig i den här versionen av Caskade."
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/torrent.rs
 msgid "This system can't send magnet links and .torrent files to Caskade yet."
 msgstr "Det här systemet kan inte skicka magnetlänkar och .torrent-filer till Caskade än."
 
@@ -14405,6 +14422,7 @@ msgid "Which emulator each platform uses. One this device doesn't have is offere
 msgstr "Vilken emulator varje plattform använder. En som den här enheten saknar erbjuds i Inställningar → Emulering."
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Which launchers are scanned"
 msgstr "Vilka startprogram som skannas"
 
@@ -14468,10 +14486,12 @@ msgid "Windows install method"
 msgstr "Installationsmetod för Windows"
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/torrent.rs
 msgid "Windows lists Caskade in Default apps, where you choose it for magnet links and .torrent files."
 msgstr "Windows visar Caskade under Standardappar, där du väljer det för magnetlänkar och .torrent-filer."
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/torrent.rs
 msgid "Windows opens magnet links and .torrent files with Caskade."
 msgstr "Windows öppnar magnetlänkar och .torrent-filer med Caskade."
 
@@ -14600,6 +14620,7 @@ msgid "Your artwork"
 msgstr "Dina bilder"
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/torrent.rs
 msgid "Your browser and file manager send magnet links and .torrent files to Caskade instead of your torrent client. Turning this off gives them back."
 msgstr "Webbläsaren och filhanteraren skickar magnetlänkar och .torrent-filer till Caskade i stället för till din torrentklient. Stäng av det här för att lämna tillbaka dem."
 

@@ -3137,6 +3137,7 @@ msgid "Caskade checks the profile when you save. Nothing here starts the emulato
 msgstr ""
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/torrent.rs
 msgid "Caskade couldn't check how this system opens them"
 msgstr ""
 
@@ -3233,6 +3234,7 @@ msgid "Caskade keeps versions of each game's saves and sends the newest to your 
 msgstr ""
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Caskade knows no launchers for this device's system."
 msgstr ""
 
@@ -3621,6 +3623,7 @@ msgid "Choose another location…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/torrent.rs
 msgid "Choose Caskade for magnet links and .torrent files in Windows' Default apps."
 msgstr ""
 
@@ -5853,6 +5856,7 @@ msgid "Games from a server you can't reach stay in your library. Downloaded ones
 msgstr ""
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Games from the launchers turned on here join your library. Turning one off removes the games only it found at the next scan."
 msgstr ""
 
@@ -6199,6 +6203,7 @@ msgid "host, hosting, Sunshine"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "How and when games are scanned: <0>Library Discovery</0>"
 msgstr ""
 
@@ -7232,6 +7237,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/launchers.rs
 #: apps/native/src/settings/search.rs
 msgid "Launchers"
 msgstr ""
@@ -7239,6 +7245,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/launchers.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Launchers"
@@ -7619,6 +7626,7 @@ msgid "Location unavailable"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Location unknown"
 msgstr ""
 
@@ -7669,6 +7677,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Look again"
 msgstr ""
 
@@ -7713,6 +7722,7 @@ msgid "Looking for installed emulators…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Looking for launchers on this device…"
 msgstr ""
 
@@ -7739,6 +7749,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
 #: apps/native/src/settings/search.rs
+#: apps/native/src/settings/torrent.rs
 msgid "Magnet links and torrent files"
 msgstr ""
 
@@ -8719,6 +8730,7 @@ msgid "Not found"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Not found on this device"
 msgstr ""
 
@@ -8799,6 +8811,7 @@ msgid "Not saved"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Not scanned"
 msgstr ""
 
@@ -8961,6 +8974,7 @@ msgid "Off."
 msgstr ""
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/torrent.rs
 msgid "Offer Caskade for them"
 msgstr ""
 
@@ -9183,6 +9197,7 @@ msgid "Open Caskade on the device you already use, on the same network. Pair wit
 msgstr ""
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/torrent.rs
 msgid "Open Default apps"
 msgstr ""
 
@@ -9250,6 +9265,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
 #: apps/native/src/settings/search.rs
+#: apps/native/src/settings/torrent.rs
 msgid "Open them with Caskade"
 msgstr ""
 
@@ -9542,6 +9558,7 @@ msgid "Paste"
 msgstr ""
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/torrent.rs
 msgid "Paste a magnet link anywhere in Caskade, drop a .torrent file on it, or use Add game. Nothing downloads until you confirm, and nothing is seeded afterwards."
 msgstr ""
 
@@ -10879,6 +10896,7 @@ msgid "Reset installer settings"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Reset launcher settings"
 msgstr ""
 
@@ -11549,6 +11567,7 @@ msgid "scan, scanning, discovery, find games, detect games, import, launchers, f
 msgstr ""
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Scanned"
 msgstr ""
 
@@ -13516,6 +13535,7 @@ msgid "This store isn't available in this version of Caskade."
 msgstr ""
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/torrent.rs
 msgid "This system can't send magnet links and .torrent files to Caskade yet."
 msgstr ""
 
@@ -14561,6 +14581,7 @@ msgid "Which emulator each platform uses. One this device doesn't have is offere
 msgstr ""
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
+#: apps/native/src/settings/launchers.rs
 msgid "Which launchers are scanned"
 msgstr ""
 
@@ -14625,10 +14646,12 @@ msgid "Windows install method"
 msgstr ""
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/torrent.rs
 msgid "Windows lists Caskade in Default apps, where you choose it for magnet links and .torrent files."
 msgstr ""
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/torrent.rs
 msgid "Windows opens magnet links and .torrent files with Caskade."
 msgstr ""
 
@@ -14757,6 +14780,7 @@ msgid "Your artwork"
 msgstr ""
 
 #: apps/desktop/src/views/settings/TorrentLinksSettings.tsx
+#: apps/native/src/settings/torrent.rs
 msgid "Your browser and file manager send magnet links and .torrent files to Caskade instead of your torrent client. Turning this off gives them back."
 msgstr ""
 

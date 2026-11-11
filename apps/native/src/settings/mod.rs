@@ -15,6 +15,7 @@
 mod appearance;
 mod drafts;
 mod general;
+mod launchers;
 mod panels;
 mod reset;
 mod schema;
@@ -23,6 +24,7 @@ mod state;
 mod sync;
 #[cfg(test)]
 mod tests;
+mod torrent;
 mod unsaved;
 
 #[allow(unused_imports)]

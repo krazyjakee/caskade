@@ -5762,6 +5762,10 @@ msgstr ""
 msgid "Restart Caskade"
 msgstr "Starta om Caskade"
 
+#: apps/native/src/data/mod.rs
+msgid "Library discovery isn't available here."
+msgstr ""
+
 #: apps/native/src/input/guide.rs
 msgid "Caskade is starting"
 msgstr "Caskade startar"
