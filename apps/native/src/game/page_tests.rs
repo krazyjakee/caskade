@@ -194,6 +194,10 @@ use std::sync::Mutex;
 /// What the page's data answers, and what it was asked.
 #[derive(Default)]
 pub(crate) struct PageScript {
+    pub(crate) ports: Option<caskade_core::ports::GamePorts>,
+    pub(crate) ports_installed: Vec<String>,
+    pub(crate) achievement_sets: Vec<caskade_achievements::achievements::AchievementSet>,
+    pub(crate) achievement_refreshes: usize,
     pub(crate) saves: Option<caskade_core::saves::versions::SaveHistory>,
     pub(crate) save_paths: Vec<String>,
     pub(crate) restored: Vec<(String, String)>,
@@ -349,6 +353,19 @@ pub(crate) fn fake_data() -> PageData {
             answer(())
         }),
         accounts: Rc::new(|| answer(vec![("acct-1".to_owned(), "Robin".to_owned())])),
+        achievements: Rc::new(|_| answer(page(|script| script.achievement_sets.clone()))),
+        achievements_refresh: Rc::new(|_| {
+            answer(page(|script| {
+                script.achievement_refreshes += 1;
+                script.achievement_sets.clone()
+            }))
+        }),
+        achievements_cancel: Rc::new(|_| answer(())),
+        ports: Rc::new(|_| answer(page(|script| script.ports.clone()))),
+        install_port: Rc::new(|_, project| {
+            page(|script| script.ports_installed.push(project));
+            answer("job-port".to_owned())
+        }),
     }
 }
 
@@ -915,4 +932,187 @@ fn the_saves_panel_restores_shows_where_they_are_and_settles_a_conflict() {
     window.click(confirm);
     window.settle_until("chosen", |_| page(|script| script.save_chosen.len()) == 1);
     assert_eq!(page(|script| script.save_chosen[0].1.clone()), "ours");
+}
+
+fn achievement(
+    id: &str,
+    name: &str,
+    unlocked: bool,
+    hidden: bool,
+) -> caskade_achievements::achievements::Achievement {
+    use caskade_achievements::achievements::{
+        Achievement, AchievementDefinition, AchievementState,
+    };
+    Achievement {
+        definition: AchievementDefinition {
+            id: id.to_owned(),
+            name: name.to_owned(),
+            description: Some(format!("{name}'s description")),
+            hidden,
+            icon_url: None,
+            locked_icon_url: None,
+            progress_max: None,
+            rarity_percent: Some(12.5),
+            points: Some(10),
+        },
+        state: AchievementState {
+            unlocked,
+            ..AchievementState::default()
+        },
+    }
+}
+
+#[test]
+fn achievements_show_the_counts_and_hidden_ones_stay_concealed_until_revealed() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    use caskade_achievements::achievements::{
+        AchievementCapabilities, AchievementSet, SetAccount, SetStatus, SetSync,
+    };
+    let _script = page_script(PageScript {
+        achievement_sets: vec![AchievementSet {
+            id: Some("set-1".to_owned()),
+            account: SetAccount {
+                store_account_id: "steam-me".to_owned(),
+                provider: "steam".to_owned(),
+                provider_name: "Steam".to_owned(),
+                display_name: "Robin".to_owned(),
+            },
+            product_id: "1".to_owned(),
+            entry_ids: Vec::new(),
+            sync: SetSync {
+                status: SetStatus::Ready,
+                ..SetSync::default()
+            },
+            capabilities: AchievementCapabilities {
+                points: true,
+                rarity: true,
+                ..AchievementCapabilities::default()
+            },
+            unlocked: 1,
+            total: 2,
+            hardcore_unlocked: None,
+            achievements: vec![
+                achievement("first", "First steps", true, false),
+                achievement("secret", "The secret ending", false, true),
+            ],
+        }],
+        ..PageScript::default()
+    });
+    let mut window = open("/games/fixture-1");
+    window.settle_until("the achievements", |window| {
+        window.find("data-cs", "achievements").is_some()
+    });
+    let panel = window.get("data-cs", "achievements");
+    assert_eq!(window.attr(panel, "data-state").as_deref(), Some("ready"));
+    let said = window.text(panel);
+    assert!(said.contains("1 of 2 unlocked (50%)"), "{said}");
+    assert!(said.contains("10 of 20 points"), "{said}");
+    assert!(
+        said.contains("Hidden achievement") && !said.contains("The secret ending"),
+        "{said}"
+    );
+    let reveal = window
+        .find_in(panel, "data-part", "reveal")
+        .expect("Reveal");
+    window.click(reveal);
+    window.settle_until("revealed", |window| {
+        window
+            .text(window.get("data-cs", "achievements"))
+            .contains("The secret ending")
+    });
+    // The hero's summary moves to them.
+    let summary = window.get("data-cs", "achievement-summary");
+    assert!(
+        window.text(summary).contains("1/2 achievements"),
+        "{}",
+        window.text(summary)
+    );
+    window.click(summary);
+    window.settle_until("the heading focused", |window| {
+        window.focused() == window.find("id", "achievements-heading")
+    });
+    let refresh = window.get("data-part", "refresh");
+    window.click(refresh);
+    window.settle_until("refreshed", |_| {
+        page(|script| script.achievement_refreshes) == 1
+    });
+}
+
+#[test]
+fn a_fan_port_shows_what_it_needs_and_installs_after_asking() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    use caskade_core::ports::{
+        GamePorts, Port, PortFileHow, PortHere, PortMatch, PortNeeds, PortsStatus,
+    };
+    let _script = page_script(PageScript {
+        ports: Some(GamePorts {
+            status: PortsStatus {
+                enabled: true,
+                available: true,
+                projects: 1,
+                checked_at_ms: None,
+                credit_url: "https://example.invalid/decomp-buddy".to_owned(),
+            },
+            ports: vec![Port {
+                project: "tide-recomp".to_owned(),
+                name: "TideRecomp".to_owned(),
+                owner: "fans".to_owned(),
+                url: "https://example.invalid/fans/TideRecomp".to_owned(),
+                game_title: "Tidewater".to_owned(),
+                console: "N64".to_owned(),
+                matched_by: PortMatch::Igdb,
+                runs_on: vec!["linux".to_owned(), "windows".to_owned()],
+                here: PortHere::Installable {
+                    asset: "TideRecomp-linux.zip".to_owned(),
+                    release: "v1.0".to_owned(),
+                    checked: true,
+                },
+                needs: vec![PortNeeds {
+                    label: "Tidewater ROM".to_owned(),
+                    kind: "game".to_owned(),
+                    region: Some("USA".to_owned()),
+                    how: PortFileHow::InAppPicker,
+                    have: true,
+                }],
+                notes: Vec::new(),
+                unsure: Vec::new(),
+                entry_id: None,
+            }],
+        }),
+        ..PageScript::default()
+    });
+    let mut window = open("/games/fixture-1");
+    window.settle_until("the ports", |window| {
+        window.find("data-part", "port").is_some()
+    });
+    let port = window.get("data-part", "port");
+    let said = window.text(port);
+    assert!(
+        said.contains("fans/TideRecomp") && said.contains("runs on Linux, Windows"),
+        "{said}"
+    );
+    assert!(
+        said.contains("Tidewater ROM")
+            && said.contains("(USA version)")
+            && said.contains("in your library"),
+        "{said}"
+    );
+    let install = window
+        .find_in(port, "data-part", "install")
+        .expect("Install");
+    window.click(install);
+    window.settle_until("the question", |window| {
+        window.find("data-part", "confirm").is_some()
+    });
+    let confirm = window.get("data-part", "confirm");
+    window.click(confirm);
+    window.settle_until("the install", |_| {
+        page(|script| script.ports_installed.len()) == 1
+    });
+    assert_eq!(
+        page(|script| script.ports_installed[0].clone()),
+        "tide-recomp"
+    );
 }

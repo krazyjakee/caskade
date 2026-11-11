@@ -3,6 +3,7 @@
 //! and what Play asks before a game starts ([`launch`]), which every Play
 //! shares.
 
+mod achievements;
 mod anatomy;
 mod back;
 pub mod data;
@@ -14,6 +15,7 @@ pub mod launch;
 mod media;
 mod page;
 mod play_choice;
+mod ports;
 pub mod present;
 mod saves;
 

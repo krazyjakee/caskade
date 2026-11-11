@@ -750,6 +750,11 @@ pub const CLOUD_OFF: Icon = Icon(&[
     "M18.796 18.81A4.5 4.5 0 0 1 17.5 19H9A7 7 0 0 1 5.79 5.78",
     "m2 2 20 20",
 ]);
+/// lucide's `lock`.
+pub const LOCK: Icon = Icon(&[
+    "M5 11h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z",
+    "M7 11V7a5 5 0 0 1 10 0v4",
+]);
 /// lucide's `list-checks`.
 pub const LIST_CHECKS: Icon = Icon(&[
     "M13 5h8",

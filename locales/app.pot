@@ -32,6 +32,7 @@ msgstr ""
 
 #. The region of a game file, e.g. USA
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "({region} version)"
 msgstr ""
 
@@ -178,6 +179,7 @@ msgstr[1] ""
 #. placeholder {0}: definition.points
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+point%7D+other+%7B%23+points%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "# point"
 msgid_plural "# points"
 msgstr[0] ""
@@ -479,6 +481,10 @@ msgstr ""
 msgid "{count} configured"
 msgstr ""
 
+#: apps/native/src/game/achievements.rs
+msgid "{count} in hardcore"
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/native/src/settings/devices.rs
 msgid "{count} versions"
@@ -570,6 +576,10 @@ msgstr ""
 #: apps/desktop/src/api/presentation.ts
 #: crates/caskade-ui-i18n/src/format.rs
 msgid "{duration} played"
+msgstr ""
+
+#: apps/native/src/game/achievements.rs
+msgid "{earned} of {total} points"
 msgstr ""
 
 #. An emulator and its profile, whose files are missing
@@ -681,6 +691,7 @@ msgstr ""
 
 #. js-lingui:icu=%7BhiddenLocked%2C+plural%2C+one+%7BShow+%23+hidden+achievement%7D+other+%7BShow+%23+hidden+achievements%7D%7D&pluralize_on=hiddenLocked
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Show # hidden achievement"
 msgid_plural "Show # hidden achievements"
 msgstr[0] ""
@@ -899,6 +910,7 @@ msgid "{name}'s account"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "{name}'s achievements are private on {provider}. Make your game details public there, then refresh."
 msgstr ""
 
@@ -970,6 +982,10 @@ msgstr ""
 msgid "{percent}% confidence"
 msgstr ""
 
+#: apps/native/src/game/achievements.rs
+msgid "{percent}% of players"
+msgstr ""
+
 #. The status bar's running job: its phase, then the game
 #: apps/desktop/src/shell/StatusBar.tsx
 #: apps/native/src/frame/status_bar.rs
@@ -1005,7 +1021,12 @@ msgstr ""
 msgid "{plugin}: rebuild failed: {error}"
 msgstr ""
 
+#: apps/native/src/game/achievements.rs
+msgid "{provider} · {name}"
+msgstr ""
+
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "{provider} account {name}"
 msgstr ""
 
@@ -1014,12 +1035,22 @@ msgstr ""
 msgid "{provider} asked Caskade to wait; refreshing works again after {0}."
 msgstr ""
 
+#: apps/native/src/game/achievements.rs
+msgid "{provider} asked Caskade to wait; refreshing works again after {when}."
+msgstr ""
+
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "{provider} doesn't offer this game's achievements."
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "{provider} lists no achievements for this game."
+msgstr ""
+
+#: apps/native/src/game/achievements.rs
+msgid "{provider} shows its description once it's unlocked."
 msgstr ""
 
 #: apps/desktop/src/views/game/PlaytimeSources.tsx
@@ -1292,10 +1323,16 @@ msgid "{tracked} in Caskade, {reported} more reported by {names}"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "{unlocked} of {total} achievements unlocked. Go to achievements"
 msgstr ""
 
+#: apps/native/src/game/achievements.rs
+msgid "{unlocked} of {total} unlocked ({percent}%)"
+msgstr ""
+
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "{unlocked}/{total} achievements"
 msgstr ""
 
@@ -1874,6 +1911,7 @@ msgstr ""
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
 #: apps/native/src/frame/notifications.rs
+#: apps/native/src/game/achievements.rs
 #: apps/native/src/settings/stores.rs
 msgid "Achievements"
 msgstr ""
@@ -1883,6 +1921,10 @@ msgstr ""
 msgid "Achievements couldn't be read: {0}"
 msgstr ""
 
+#: apps/native/src/game/achievements.rs
+msgid "Achievements couldn't be read: {error}"
+msgstr ""
+
 #. placeholder {0}: formatDateTime(new Date(synced))
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 #: apps/native/src/settings/stores.rs
@@ -1890,10 +1932,12 @@ msgid "Achievements last refreshed {0}."
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Achievements of"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Achievements unlocked"
 msgstr ""
 
@@ -2273,6 +2317,7 @@ msgid "All"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgctxt "achievements"
 msgid "All"
 msgstr ""
@@ -3056,6 +3101,7 @@ msgid "Build"
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "Built from source on this system"
 msgstr ""
 
@@ -3193,6 +3239,7 @@ msgstr ""
 #: apps/native/src/flows/streaming.rs
 #: apps/native/src/game/igdb.rs
 #: apps/native/src/game/launch.rs
+#: apps/native/src/game/ports.rs
 #: apps/native/src/game_menu/dialogs.rs
 #: apps/native/src/game_menu/play.rs
 #: apps/native/src/library/bulk_edit.rs
@@ -3398,6 +3445,7 @@ msgid "Caskade couldn't read this source."
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "Caskade downloads {asset} ({release}) from {repository} on GitHub and adds it to this game as another way to play. It's a fan project, not the publisher's: installing it runs code from that repository."
 msgstr ""
 
@@ -3419,6 +3467,7 @@ msgid "Caskade found no IGDB game for it."
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "Caskade gives it yours when it starts."
 msgstr ""
 
@@ -5670,6 +5719,7 @@ msgid "Every setting here already uses its default."
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Everything is unlocked."
 msgstr ""
 
@@ -5758,6 +5808,7 @@ msgid "Fan decompilations, recompilations and source ports on game pages, from D
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "Fan decompilations, recompilations and source ports that run this game natively, from your own copy."
 msgstr ""
 
@@ -6517,12 +6568,17 @@ msgid "Handheld"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Hardcore"
 msgstr ""
 
 #. placeholder {0}: formatDateTime(hardcore.unlockedAtMs)
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "Hardcore {0}"
+msgstr ""
+
+#: apps/native/src/game/achievements.rs
+msgid "Hardcore {when}"
 msgstr ""
 
 #. As in “Title has ‘mario’”
@@ -6567,6 +6623,7 @@ msgid "Here."
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Hidden achievement"
 msgstr ""
 
@@ -6922,6 +6979,7 @@ msgid "In use"
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "in your library"
 msgstr ""
 
@@ -6972,6 +7030,7 @@ msgid "Install"
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgctxt "port"
 msgid "Install"
 msgstr ""
@@ -6985,6 +7044,7 @@ msgid "Install {name}"
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "Install {repository}?"
 msgstr ""
 
@@ -7005,6 +7065,7 @@ msgid "install emulators, download emulators, RetroArch"
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "Install failed: {error}"
 msgstr ""
 
@@ -7078,6 +7139,7 @@ msgid "install picker"
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "Install plans from Decomp Buddy"
 msgstr ""
 
@@ -7200,6 +7262,7 @@ msgid "Installed themes."
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "Installed: it's in Play from your library."
 msgstr ""
 
@@ -7229,6 +7292,7 @@ msgid "Installing"
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "Installing copies yours in."
 msgstr ""
 
@@ -7259,12 +7323,14 @@ msgstr ""
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/game/PortsPanel.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/game/ports.rs
 #: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/general.rs
 msgid "Installing…"
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "Installing… {percent}%"
 msgstr ""
 
@@ -7357,6 +7423,7 @@ msgid "It arrives as a new version of your saves of {game}. Your own saves stay:
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "It asks for the file the first time it starts."
 msgstr ""
 
@@ -7428,6 +7495,7 @@ msgid "It leaves your library: the offline copy and the progress saved in the ga
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "It needs"
 msgstr ""
 
@@ -7447,6 +7515,7 @@ msgid "It stops syncing with this device. Nothing is deleted on either device, a
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "It takes the file when it starts."
 msgstr ""
 
@@ -7478,6 +7547,7 @@ msgid "Its games stay in your library as not installed, because Caskade no longe
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "Its install plan has no checksum for the download, so it can't be checked."
 msgstr ""
 
@@ -7492,6 +7562,7 @@ msgid "Its installed files are deleted, with the play sessions recorded for this
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Its name and description are a spoiler until you unlock it."
 msgstr ""
 
@@ -8014,6 +8085,7 @@ msgid "Loading accounts…"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Loading achievements…"
 msgstr ""
 
@@ -8197,14 +8269,17 @@ msgid "Locations unavailable"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "locked"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Locked"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgctxt "achievements"
 msgid "Locked"
 msgstr ""
@@ -8424,6 +8499,7 @@ msgid "Matched by store id"
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "Matched by title: check it's this game"
 msgstr ""
 
@@ -9136,6 +9212,7 @@ msgid "No recent releases here."
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "No release for this system"
 msgstr ""
 
@@ -9289,6 +9366,7 @@ msgid "Not built yet."
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "Not certain in the plan"
 msgstr ""
 
@@ -9334,6 +9412,7 @@ msgid "Not every paired device could be reached, so one of them may have a newer
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Not fetched yet. Refresh achievements to see them."
 msgstr ""
 
@@ -9356,6 +9435,7 @@ msgid "Not found on this device"
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "not in your library"
 msgstr ""
 
@@ -9477,6 +9557,7 @@ msgstr ""
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 #: apps/native/src/library/bulk_edit.rs
 msgid "Notes"
 msgstr ""
@@ -9533,6 +9614,7 @@ msgid "Nothing to launch."
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Nothing unlocked yet."
 msgstr ""
 
@@ -9916,6 +9998,7 @@ msgid "Open settings"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Open store accounts"
 msgstr ""
 
@@ -10757,6 +10840,7 @@ msgid "Portable executables"
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "Ports"
 msgstr ""
 
@@ -10910,6 +10994,7 @@ msgid "Programs in a folder"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Progress"
 msgstr ""
 
@@ -10933,6 +11018,7 @@ msgid "Provides {providers}"
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "Put it in the port's folder once installed."
 msgstr ""
 
@@ -11206,6 +11292,7 @@ msgid "Refresh {0}"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Refresh achievements"
 msgstr ""
 
@@ -11248,6 +11335,7 @@ msgid "Refreshing"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Refreshing achievements…"
 msgstr ""
 
@@ -11849,6 +11937,7 @@ msgid "Return to game"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Reveal"
 msgstr ""
 
@@ -12071,6 +12160,7 @@ msgstr ""
 
 #. Operating systems a port has releases for, e.g. Windows, Linux
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "runs on {systems}"
 msgstr ""
 
@@ -12913,6 +13003,7 @@ msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
+#: apps/native/src/game/achievements.rs
 #: apps/native/src/settings/addons.rs
 msgid "Show"
 msgstr ""
@@ -12993,6 +13084,10 @@ msgstr ""
 msgid "Showing achievements from {0}. The last refresh failed: {1}"
 msgstr ""
 
+#: apps/native/src/game/achievements.rs
+msgid "Showing achievements from {when}. The last refresh failed: {reason}"
+msgstr ""
+
 #: apps/desktop/src/views/StoreView.tsx
 msgid "Showing saved results: the metadata server can't be reached right now."
 msgstr ""
@@ -13025,6 +13120,7 @@ msgid "Sign in to {name}"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Sign in to {provider} as {name} again to see these achievements."
 msgstr ""
 
@@ -13189,6 +13285,7 @@ msgid "Social"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Softcore only"
 msgstr ""
 
@@ -13334,6 +13431,7 @@ msgid "Starting on {device}…"
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "Starting the install…"
 msgstr ""
 
@@ -13359,6 +13457,7 @@ msgstr ""
 #: apps/native/src/flows/streaming.rs
 #: apps/native/src/game/launch.rs
 #: apps/native/src/game/page.rs
+#: apps/native/src/game/ports.rs
 #: apps/native/src/game_menu/play.rs
 #: apps/native/src/game_menu/quick_look.rs
 #: apps/native/src/library/web.rs
@@ -13510,6 +13609,7 @@ msgid "Stop game"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Stop refreshing"
 msgstr ""
 
@@ -13984,6 +14084,7 @@ msgid "The devices lost each other, or nobody confirmed in time. Nothing was pai
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "The download is checked against the checksum in its install plan."
 msgstr ""
 
@@ -14035,10 +14136,12 @@ msgid "The install failed"
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "The install needs a choice in Activity."
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "The install was cancelled."
 msgstr ""
 
@@ -14072,6 +14175,10 @@ msgstr ""
 #. placeholder {0}: sync.error.summary
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "The last refresh failed: {0}"
+msgstr ""
+
+#: apps/native/src/game/achievements.rs
+msgid "The last refresh failed: {reason}"
 msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
@@ -14151,6 +14258,10 @@ msgstr ""
 msgid "The refresh didn't finish: {0}"
 msgstr ""
 
+#: apps/native/src/game/achievements.rs
+msgid "The refresh didn't finish: {error}"
+msgstr ""
+
 #. placeholder {0}: outcome.journal.archive
 #. placeholder {1}: outcome.error
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
@@ -14159,6 +14270,7 @@ msgid "The restore of {0} was undone, and the library from before is back: {1}"
 msgstr ""
 
 #: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/native/src/game/ports.rs
 msgid "The same game on IGDB"
 msgstr ""
 
@@ -14672,6 +14784,7 @@ msgstr ""
 #: apps/native/src/flows/storage.rs
 #: apps/native/src/frame/error.rs
 #: apps/native/src/frame/notifications.rs
+#: apps/native/src/game/achievements.rs
 #: apps/native/src/game/page.rs
 #: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/view.rs
@@ -14843,14 +14956,17 @@ msgid "Unlock this time"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "unlocked"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Unlocked"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgctxt "achievements"
 msgid "Unlocked"
 msgstr ""
@@ -14858,6 +14974,10 @@ msgstr ""
 #. placeholder {0}: formatDateTime(state.unlockedAtMs)
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "Unlocked {0}"
+msgstr ""
+
+#: apps/native/src/game/achievements.rs
+msgid "Unlocked {when}"
 msgstr ""
 
 #. A RomM server without a name
@@ -15043,6 +15163,10 @@ msgstr ""
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/native/src/settings/addons.rs
 msgid "Updated {0}."
+msgstr ""
+
+#: apps/native/src/game/achievements.rs
+msgid "updated {when}"
 msgstr ""
 
 #. {when} is a day: “today”, “3 days ago”

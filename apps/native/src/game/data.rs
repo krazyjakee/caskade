@@ -101,6 +101,18 @@ pub struct PageData {
     pub save_reveal: Rc<dyn Fn(String, u32) -> Answer<()>>,
     /// The local accounts, by id, with their names.
     pub accounts: Rc<dyn Fn() -> Answer<Vec<Account>>>,
+    /// Game `0`'s achievement sets, one per store account that has it.
+    pub achievements:
+        Rc<dyn Fn(String) -> Answer<Vec<caskade_achievements::achievements::AchievementSet>>>,
+    /// Fetches game `0`'s sets now.
+    pub achievements_refresh:
+        Rc<dyn Fn(String) -> Answer<Vec<caskade_achievements::achievements::AchievementSet>>>,
+    /// Stops a refresh of game `0`'s sets.
+    pub achievements_cancel: Rc<dyn Fn(String) -> Answer<()>>,
+    /// Game `0`'s fan ports; `None` where the catalogue isn't there.
+    pub ports: Rc<dyn Fn(String) -> Answer<Option<caskade_core::ports::GamePorts>>>,
+    /// Installs project `1` as a port of game `0`: the job's id.
+    pub install_port: Rc<dyn Fn(String, String) -> Answer<String>>,
 }
 
 impl PartialEq for PageData {
@@ -504,6 +516,87 @@ impl PageData {
                                     .map(|account| (account.id, account.name))
                                     .collect()
                             })
+                    })
+                    .await
+                })
+            }),
+            achievements: Rc::new(|game_id| {
+                Box::pin(async move {
+                    let Some(services) = crate::shell::services() else {
+                        return Ok(Vec::new());
+                    };
+                    change(async move {
+                        caskade_app::commands::achievements::game_achievements(
+                            &services.achievements,
+                            &services.accounts,
+                            game_id,
+                        )
+                        .await
+                    })
+                    .await
+                })
+            }),
+            achievements_refresh: Rc::new(|game_id| {
+                Box::pin(async move {
+                    let services = services()?;
+                    change(async move {
+                        caskade_app::commands::achievements::game_achievements_refresh(
+                            &services.achievements,
+                            &services.accounts,
+                            game_id,
+                        )
+                        .await
+                    })
+                    .await
+                })
+            }),
+            achievements_cancel: Rc::new(|game_id| {
+                Box::pin(async move {
+                    let services = services()?;
+                    change(async move {
+                        caskade_app::commands::achievements::game_achievements_cancel(
+                            &services.achievements,
+                            game_id,
+                        )
+                        .await
+                        .map(drop)
+                    })
+                    .await
+                })
+            }),
+            ports: Rc::new(|game_id| {
+                Box::pin(async move {
+                    let Some(services) = crate::shell::services() else {
+                        return Ok(None);
+                    };
+                    change(async move {
+                        caskade_app::commands::ports::game_ports(
+                            &services.ports,
+                            &services.store,
+                            &services.hasheous,
+                            &game_id,
+                        )
+                        .await
+                        .map(Some)
+                    })
+                    .await
+                })
+            }),
+            install_port: Rc::new(|game_id, project| {
+                Box::pin(async move {
+                    let services = services()?;
+                    let install = services.install.as_ref().ok_or_else(unavailable)?;
+                    change(async move {
+                        caskade_app::commands::ports::game_port_install(
+                            &services.ports,
+                            &services.store,
+                            install,
+                            &game_id,
+                            &project,
+                            None,
+                        )
+                        .await
+                        .map(|job| job.id)
                     })
                     .await
                 })

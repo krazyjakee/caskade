@@ -1673,7 +1673,7 @@ Contains: [`button`](#button), [`checkbox`](#checkbox)
 
 ## `achievements`
 
-A game page's achievements: one store account's set at a time, its counts and how its last fetch went, and every achievement with its state, progress, unlock time, rarity and points where the service gives them. Hidden achievements stay concealed until unlocked or revealed. Rendered by GameAchievements (app).
+A game page's achievements: one store account's set at a time, its counts and how its last fetch went, and every achievement with its state, progress, unlock time, rarity and points where the service gives them. Hidden achievements stay concealed until unlocked or revealed. Rendered by GameAchievements (apps/native/src/game/achievements.rs); in the webview, GameAchievements (app).
 
 Root: `[data-cs="achievements"]`
 
@@ -1705,7 +1705,7 @@ Contains: [`button`](#button), [`segmented`](#segmented), [`switch`](#switch)
 
 ## `achievement-summary`
 
-A game's achievement counts in its hero, across its sets; pressing it moves to the achievements. Rendered by AchievementSummary (app).
+A game's achievement counts in its hero, across its sets; pressing it moves to the achievements. Rendered by AchievementSummary (apps/native/src/game/achievements.rs); in the webview, AchievementSummary (app).
 
 Root: `[data-cs="achievement-summary"]`
 

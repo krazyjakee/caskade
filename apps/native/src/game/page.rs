@@ -121,6 +121,8 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
     let mut stop_error = use_signal(|| None::<String>);
 
     let data = super::data::use_page_data();
+    // The hero's achievement summary moves to the achievements' heading.
+    use_context_provider(|| super::achievements::AchievementsHeading(Signal::new(None)));
     let updates = {
         let (data, game_id) = (data.clone(), game.game.id.clone());
         super::data::use_answer(caskade_ui_data::Key::Game(game_id.clone()), move || {
@@ -361,6 +363,7 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
                             Svg { icon: icons::CLOCK, class: "size-4" }
                             span { "{playtime}" }
                             super::elsewhere::PlaytimeSources { game_id: game.game.id.clone() }
+                            super::achievements::AchievementSummary { game_id: game.game.id.clone() }
                         }
                         super::elsewhere::PlayingElsewhereLine { game_id: game.game.id.clone() }
                         p { "data-part": "description", class: "mt-4 max-w-3xl text-sm leading-relaxed text-fg-muted",
@@ -509,6 +512,8 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
                 entry_id: chosen.as_ref().map(|entry| entry.id.clone()),
                 running: running.is_some(),
             }
+            super::ports::PortsPanel { game_id: game.game.id.clone() }
+            super::achievements::GameAchievements { game_id: game.game.id.clone() }
             Sessions { sessions }
             super::igdb::IgdbPanel {
                 game_id: game.game.id.clone(),

@@ -34,7 +34,7 @@ msgid "“{text}”"
 msgstr "”{text}”"
 
 #. The region of a game file, e.g. USA
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "({region} version)"
 msgstr "({region}-version)"
 
@@ -181,6 +181,7 @@ msgstr[1] "# plattformar"
 #. placeholder {0}: definition.points
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+point%7D+other+%7B%23+points%7D%7D&pluralize_on=0
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "# point"
 msgid_plural "# points"
 msgstr[0] "# poäng"
@@ -481,6 +482,12 @@ msgstr "{count} väntar på granskning i Inställningar → Bibliotek."
 msgid "{count} configured"
 msgstr "{count} konfigurerade"
 
+#: apps/native/src/game/achievements.rs
+#, fuzzy
+#| msgid "{0} in hardcore"
+msgid "{count} in hardcore"
+msgstr "{0} i hardcore"
+
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/native/src/settings/devices.rs
 msgid "{count} versions"
@@ -571,6 +578,12 @@ msgstr "{done} av {total} · {speed}/s"
 #: apps/desktop/src/api/presentation.ts crates/caskade-ui-i18n/src/format.rs
 msgid "{duration} played"
 msgstr "{duration} spelat"
+
+#: apps/native/src/game/achievements.rs
+#, fuzzy
+#| msgid "{used} of {total}"
+msgid "{earned} of {total} points"
+msgstr "{used} av {total}"
 
 #. An emulator and its profile, whose files are missing
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
@@ -679,6 +692,7 @@ msgstr "{games} · {free} ledigt / {size} totalt"
 
 #. js-lingui:icu=%7BhiddenLocked%2C+plural%2C+one+%7BShow+%23+hidden+achievement%7D+other+%7BShow+%23+hidden+achievements%7D%7D&pluralize_on=hiddenLocked
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Show # hidden achievement"
 msgid_plural "Show # hidden achievements"
 msgstr[0] "Visa # dold prestation"
@@ -897,6 +911,7 @@ msgid "{name}'s account"
 msgstr "{name}s konto"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "{name}'s achievements are private on {provider}. Make your game details public there, then refresh."
 msgstr "{name}s prestationer är privata på {provider}. Gör dina speldetaljer offentliga där och uppdatera sedan."
 
@@ -970,6 +985,12 @@ msgstr "{percent}, högt"
 msgid "{percent}% confidence"
 msgstr "{percent} % säkerhet"
 
+#: apps/native/src/game/achievements.rs
+#, fuzzy
+#| msgid "{0}% of players"
+msgid "{percent}% of players"
+msgstr "{0} % av spelarna"
+
 #. The status bar's running job: its phase, then the game
 #: apps/desktop/src/shell/StatusBar.tsx apps/native/src/frame/status_bar.rs
 msgid "{phase}: {title}"
@@ -1004,7 +1025,14 @@ msgstr "{plugin} stängdes av: {reason}"
 msgid "{plugin}: rebuild failed: {error}"
 msgstr "{plugin}: ombyggnaden misslyckades: {error}"
 
+#: apps/native/src/game/achievements.rs
+#, fuzzy
+#| msgid "{provider} account {name}"
+msgid "{provider} · {name}"
+msgstr "{provider}-kontot {name}"
+
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "{provider} account {name}"
 msgstr "{provider}-kontot {name}"
 
@@ -1013,13 +1041,27 @@ msgstr "{provider}-kontot {name}"
 msgid "{provider} asked Caskade to wait; refreshing works again after {0}."
 msgstr "{provider} bad Caskade att vänta; uppdatering fungerar igen efter {0}."
 
+#: apps/native/src/game/achievements.rs
+#, fuzzy
+#| msgid "{provider} asked Caskade to wait; refreshing works again after {0}."
+msgid "{provider} asked Caskade to wait; refreshing works again after {when}."
+msgstr "{provider} bad Caskade att vänta; uppdatering fungerar igen efter {0}."
+
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "{provider} doesn't offer this game's achievements."
 msgstr "{provider} erbjuder inte det här spelets prestationer."
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "{provider} lists no achievements for this game."
 msgstr "{provider} listar inga prestationer för det här spelet."
+
+#: apps/native/src/game/achievements.rs
+#, fuzzy
+#| msgid "{0} shows its description once it's unlocked."
+msgid "{provider} shows its description once it's unlocked."
+msgstr "{0} visar beskrivningen när den är upplåst."
 
 #: apps/desktop/src/views/game/PlaytimeSources.tsx
 #: apps/native/src/game/elsewhere.rs
@@ -1287,10 +1329,18 @@ msgid "{tracked} in Caskade, {reported} more reported by {names}"
 msgstr "{tracked} i Caskade, {reported} till rapporterat av {names}"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "{unlocked} of {total} achievements unlocked. Go to achievements"
 msgstr "{unlocked} av {total} prestationer upplåsta. Gå till prestationerna"
 
+#: apps/native/src/game/achievements.rs
+#, fuzzy
+#| msgid "{0} of {1} unlocked ({percent}%)"
+msgid "{unlocked} of {total} unlocked ({percent}%)"
+msgstr "{0} av {1} upplåsta ({percent} %)"
+
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "{unlocked}/{total} achievements"
 msgstr "{unlocked}/{total} prestationer"
 
@@ -1856,13 +1906,20 @@ msgstr "prestationer"
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
-#: apps/native/src/frame/notifications.rs apps/native/src/settings/stores.rs
+#: apps/native/src/frame/notifications.rs apps/native/src/game/achievements.rs
+#: apps/native/src/settings/stores.rs
 msgid "Achievements"
 msgstr "Prestationer"
 
 #. placeholder {0}: query.error.message
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "Achievements couldn't be read: {0}"
+msgstr "Prestationerna kunde inte läsas: {0}"
+
+#: apps/native/src/game/achievements.rs
+#, fuzzy
+#| msgid "Achievements couldn't be read: {0}"
+msgid "Achievements couldn't be read: {error}"
 msgstr "Prestationerna kunde inte läsas: {0}"
 
 #. placeholder {0}: formatDateTime(new Date(synced))
@@ -1872,10 +1929,12 @@ msgid "Achievements last refreshed {0}."
 msgstr "Prestationerna uppdaterades senast {0}."
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Achievements of"
 msgstr "Prestationer för"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Achievements unlocked"
 msgstr "Upplåsta prestationer"
 
@@ -2246,6 +2305,7 @@ msgid "All"
 msgstr "Alla"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgctxt "achievements"
 msgid "All"
 msgstr "Alla"
@@ -3003,7 +3063,7 @@ msgctxt "app build"
 msgid "Build"
 msgstr "Bygge"
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "Built from source on this system"
 msgstr "Byggd från källkod på det här systemet"
 
@@ -3136,8 +3196,9 @@ msgstr "Avbryt inloggningen"
 #: apps/native/src/flows/manual_game.rs apps/native/src/flows/receive_share.rs
 #: apps/native/src/flows/share_game.rs apps/native/src/flows/storage.rs
 #: apps/native/src/flows/streaming.rs apps/native/src/game/igdb.rs
-#: apps/native/src/game/launch.rs apps/native/src/game_menu/dialogs.rs
-#: apps/native/src/game_menu/play.rs apps/native/src/library/bulk_edit.rs
+#: apps/native/src/game/launch.rs apps/native/src/game/ports.rs
+#: apps/native/src/game_menu/dialogs.rs apps/native/src/game_menu/play.rs
+#: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/selection_bar.rs apps/native/src/library/web.rs
 #: apps/native/src/settings/backup.rs apps/native/src/settings/plugins.rs
@@ -3331,7 +3392,7 @@ msgstr "Caskade kunde inte läsa den här enhetens anslutningar"
 msgid "Caskade couldn't read this source."
 msgstr "Caskade kunde inte läsa den här källan."
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "Caskade downloads {asset} ({release}) from {repository} on GitHub and adds it to this game as another way to play. It's a fan project, not the publisher's: installing it runs code from that repository."
 msgstr "Caskade laddar ned {asset} ({release}) från {repository} på GitHub och lägger till det i det här spelet som ett annat sätt att spela. Det är ett fanprojekt, inte utgivarens: när du installerar det körs kod från det förrådet."
 
@@ -3351,7 +3412,7 @@ msgstr "Caskade följer systemets språk om du inte väljer ett annat. Du kan ä
 msgid "Caskade found no IGDB game for it."
 msgstr "Caskade hittade inget IGDB-spel för det."
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "Caskade gives it yours when it starts."
 msgstr "Caskade ger den din när den startar."
 
@@ -5556,6 +5617,7 @@ msgid "Every setting here already uses its default."
 msgstr "Alla inställningar här använder redan sina standardvärden."
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Everything is unlocked."
 msgstr "Allt är upplåst."
 
@@ -5642,7 +5704,7 @@ msgstr "Misslyckades med slutkod {0}"
 msgid "Fan decompilations, recompilations and source ports on game pages, from Decomp Buddy's install plans, checked daily."
 msgstr "Dekompileringar, omkompileringar och källkodsportar gjorda av fans på spelsidorna, från Decomp Buddys installationsplaner, kontrolleras dagligen."
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "Fan decompilations, recompilations and source ports that run this game natively, from your own copy."
 msgstr "Dekompileringar, omkompileringar och källkodsportar gjorda av fans som kör det här spelet direkt, från din egen kopia."
 
@@ -6380,12 +6442,19 @@ msgid "Handheld"
 msgstr "Handhållen"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Hardcore"
 msgstr "Hardcore"
 
 #. placeholder {0}: formatDateTime(hardcore.unlockedAtMs)
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "Hardcore {0}"
+msgstr "Hardcore {0}"
+
+#: apps/native/src/game/achievements.rs
+#, fuzzy
+#| msgid "Hardcore {0}"
+msgid "Hardcore {when}"
 msgstr "Hardcore {0}"
 
 #. As in “Title has ‘mario’”
@@ -6430,6 +6499,7 @@ msgid "Here."
 msgstr "Framme."
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Hidden achievement"
 msgstr "Dold prestation"
 
@@ -6768,7 +6838,7 @@ msgctxt "save version"
 msgid "In use"
 msgstr "Används"
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "in your library"
 msgstr "i ditt bibliotek"
 
@@ -6818,7 +6888,7 @@ msgctxt "job kind"
 msgid "Install"
 msgstr "Installation"
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgctxt "port"
 msgid "Install"
 msgstr "Installera"
@@ -6831,7 +6901,7 @@ msgstr "Installera {emulator}"
 msgid "Install {name}"
 msgstr "Installera {name}"
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "Install {repository}?"
 msgstr "Installera {repository}?"
 
@@ -6850,7 +6920,7 @@ msgstr "Installera och tillåt"
 msgid "install emulators, download emulators, RetroArch"
 msgstr "installera emulatorer, ladda ner emulatorer, RetroArch"
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "Install failed: {error}"
 msgstr "Installationen misslyckades: {error}"
 
@@ -6919,7 +6989,7 @@ msgstr "Okänd installationsplats"
 msgid "install picker"
 msgstr "installationsväljare"
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "Install plans from Decomp Buddy"
 msgstr "Installationsplaner från Decomp Buddy"
 
@@ -7041,7 +7111,7 @@ msgstr "Installerade program"
 msgid "Installed themes."
 msgstr "Installerade teman."
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "Installed: it's in Play from your library."
 msgstr "Installerad: den finns under Spela från ditt bibliotek."
 
@@ -7069,7 +7139,7 @@ msgstr "Installationsprogram"
 msgid "Installing"
 msgstr "Installation"
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "Installing copies yours in."
 msgstr "Installationen kopierar in din."
 
@@ -7100,11 +7170,12 @@ msgstr "Installerar version {version}…"
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/game/PortsPanel.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
-#: apps/native/src/settings/addons.rs apps/native/src/settings/general.rs
+#: apps/native/src/game/ports.rs apps/native/src/settings/addons.rs
+#: apps/native/src/settings/general.rs
 msgid "Installing…"
 msgstr "Installerar…"
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "Installing… {percent}%"
 msgstr "Installerar… {percent} %"
 
@@ -7192,7 +7263,7 @@ msgstr "Det lägger till"
 msgid "It arrives as a new version of your saves of {game}. Your own saves stay: the next Play asks which to use."
 msgstr "Den kommer som en ny version av dina sparfiler för {game}. Dina egna sparfiler finns kvar: nästa Spela frågar vilken som ska användas."
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "It asks for the file the first time it starts."
 msgstr "Den frågar efter filen första gången den startar."
 
@@ -7263,7 +7334,7 @@ msgstr "Spelet tas bort från ditt bibliotek tillsammans med dess spelsessioner.
 msgid "It leaves your library: the offline copy and the progress saved in the game window are deleted, with its play sessions. Add its page again to play it again."
 msgstr "Det tas bort från biblioteket: offlinekopian och framstegen som sparats i spelfönstret raderas, tillsammans med dess spelsessioner. Lägg till sidan igen för att spela det igen."
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "It needs"
 msgstr "Den behöver"
 
@@ -7282,7 +7353,7 @@ msgstr "Där startar det via butikens startprogram. Installera det från butiken
 msgid "It stops syncing with this device. Nothing is deleted on either device, and what synced stays."
 msgstr "Den slutar synka med den här enheten. Inget raderas på någon av enheterna, och det som redan har synkats finns kvar."
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "It takes the file when it starts."
 msgstr "Den tar filen när den startar."
 
@@ -7313,7 +7384,7 @@ msgstr "Dess spel försvinner från ditt bibliotek, ROM-filerna som laddats ner 
 msgid "Its games stay in your library as not installed, because Caskade no longer looks for their ROMs. Your ROM files aren't touched."
 msgstr "Dess spel stannar i ditt bibliotek som ej installerade, eftersom Caskade inte längre letar efter deras ROM-filer. Dina ROM-filer rörs inte."
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "Its install plan has no checksum for the download, so it can't be checked."
 msgstr "Installationsplanen har ingen kontrollsumma för nedladdningen, så den kan inte kontrolleras."
 
@@ -7328,6 +7399,7 @@ msgid "Its installed files are deleted, with the play sessions recorded for this
 msgstr "De installerade filerna raderas, tillsammans med de spelsessioner som registrerats för den här installationen. Spelet finns kvar i ditt bibliotek. Avinstallationen visas i Aktivitet."
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Its name and description are a spoiler until you unlock it."
 msgstr "Namnet och beskrivningen avslöjar för mycket tills du låser upp den."
 
@@ -7836,6 +7908,7 @@ msgid "Loading accounts…"
 msgstr "Läser in konton…"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Loading achievements…"
 msgstr "Läser in prestationer…"
 
@@ -8013,14 +8086,17 @@ msgid "Locations unavailable"
 msgstr "Platserna är inte tillgängliga"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "locked"
 msgstr "låst"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Locked"
 msgstr "Låst"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgctxt "achievements"
 msgid "Locked"
 msgstr "Låst"
@@ -8232,7 +8308,7 @@ msgstr "Matchat via namn (Hasheous)"
 msgid "Matched by store id"
 msgstr "Matchat via butiks-id"
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "Matched by title: check it's this game"
 msgstr "Matchad på titel: kontrollera att det är det här spelet"
 
@@ -8926,7 +9002,7 @@ msgstr "Ingen avläsning den här gången."
 msgid "No recent releases here."
 msgstr "Inga nya utgåvor här."
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "No release for this system"
 msgstr "Ingen utgåva för det här systemet"
 
@@ -9076,7 +9152,7 @@ msgstr "Inte tillgänglig"
 msgid "Not built yet."
 msgstr "Inte byggt än."
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "Not certain in the plan"
 msgstr "Inte säkert i planen"
 
@@ -9121,6 +9197,7 @@ msgid "Not every paired device could be reached, so one of them may have a newer
 msgstr "Alla parkopplade enheter kunde inte nås, så någon av dem kan ha en nyare sparfil."
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Not fetched yet. Refresh achievements to see them."
 msgstr "Inte hämtade än. Uppdatera prestationerna för att se dem."
 
@@ -9141,7 +9218,7 @@ msgstr "Hittades inte"
 msgid "Not found on this device"
 msgstr "Hittades inte på den här enheten"
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "not in your library"
 msgstr "inte i ditt bibliotek"
 
@@ -9257,7 +9334,7 @@ msgstr "Inte medan ett spel körs."
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 #: apps/native/src/library/bulk_edit.rs
 msgid "Notes"
 msgstr "Anteckningar"
@@ -9313,6 +9390,7 @@ msgid "Nothing to launch."
 msgstr "Inget att starta."
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Nothing unlocked yet."
 msgstr "Inget upplåst än."
 
@@ -9688,6 +9766,7 @@ msgid "Open settings"
 msgstr "Öppna inställningar"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Open store accounts"
 msgstr "Öppna butikskonton"
 
@@ -10500,7 +10579,7 @@ msgstr "Populära spel"
 msgid "Portable executables"
 msgstr "Portabla körbara filer"
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "Ports"
 msgstr "Portar"
 
@@ -10649,6 +10728,7 @@ msgid "Programs in a folder"
 msgstr "Program i en mapp"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Progress"
 msgstr "Förlopp"
 
@@ -10671,7 +10751,7 @@ msgstr ""
 msgid "Provides {providers}"
 msgstr "Tillhandahåller {providers}"
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "Put it in the port's folder once installed."
 msgstr "Lägg den i portens mapp när den är installerad."
 
@@ -10933,6 +11013,7 @@ msgid "Refresh {0}"
 msgstr "Uppdatera {0}"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Refresh achievements"
 msgstr "Uppdatera prestationer"
 
@@ -10974,6 +11055,7 @@ msgid "Refreshing"
 msgstr "Uppdatering"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Refreshing achievements…"
 msgstr "Uppdaterar prestationer…"
 
@@ -11556,6 +11638,7 @@ msgid "Return to game"
 msgstr "Tillbaka till spelet"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Reveal"
 msgstr "Visa"
 
@@ -11773,7 +11856,7 @@ msgid "Runs on"
 msgstr "Körs på"
 
 #. Operating systems a port has releases for, e.g. Windows, Linux
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "runs on {systems}"
 msgstr "körs på {systems}"
 
@@ -12590,7 +12673,7 @@ msgstr "Skalskript"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
-#: apps/native/src/settings/addons.rs
+#: apps/native/src/game/achievements.rs apps/native/src/settings/addons.rs
 msgid "Show"
 msgstr "Visa"
 
@@ -12665,6 +12748,12 @@ msgstr "Visar {shown} av {total}. Sök för att hitta resten."
 msgid "Showing achievements from {0}. The last refresh failed: {1}"
 msgstr "Visar prestationer från {0}. Den senaste uppdateringen misslyckades: {1}"
 
+#: apps/native/src/game/achievements.rs
+#, fuzzy
+#| msgid "Showing achievements from {0}. The last refresh failed: {1}"
+msgid "Showing achievements from {when}. The last refresh failed: {reason}"
+msgstr "Visar prestationer från {0}. Den senaste uppdateringen misslyckades: {1}"
+
 #: apps/desktop/src/views/StoreView.tsx
 msgid "Showing saved results: the metadata server can't be reached right now."
 msgstr "Visar sparade resultat: metadataservern går inte att nå just nu."
@@ -12699,6 +12788,7 @@ msgid "Sign in to {name}"
 msgstr "Logga in på {name}"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Sign in to {provider} as {name} again to see these achievements."
 msgstr "Logga in på {provider} som {name} igen för att se de här prestationerna."
 
@@ -12865,6 +12955,7 @@ msgid "Social"
 msgstr "Sociala medier"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Softcore only"
 msgstr "Bara softcore"
 
@@ -13006,7 +13097,7 @@ msgstr "Startade med sparfilen från {device}."
 msgid "Starting on {device}…"
 msgstr "Startar på {device}…"
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "Starting the install…"
 msgstr "Startar installationen…"
 
@@ -13030,11 +13121,11 @@ msgstr "Startar uppdateringen…"
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 #: apps/native/src/flows/streaming.rs apps/native/src/game/launch.rs
-#: apps/native/src/game/page.rs apps/native/src/game_menu/play.rs
-#: apps/native/src/game_menu/quick_look.rs apps/native/src/library/web.rs
-#: apps/native/src/settings/addons.rs apps/native/src/settings/backup.rs
-#: apps/native/src/settings/streaming.rs apps/native/src/ui/game_card.rs
-#: apps/native/src/ui/game_row.rs
+#: apps/native/src/game/page.rs apps/native/src/game/ports.rs
+#: apps/native/src/game_menu/play.rs apps/native/src/game_menu/quick_look.rs
+#: apps/native/src/library/web.rs apps/native/src/settings/addons.rs
+#: apps/native/src/settings/backup.rs apps/native/src/settings/streaming.rs
+#: apps/native/src/ui/game_card.rs apps/native/src/ui/game_row.rs
 msgid "Starting…"
 msgstr "Startar…"
 
@@ -13173,6 +13264,7 @@ msgid "Stop game"
 msgstr "Stoppa spelet"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Stop refreshing"
 msgstr "Sluta uppdatera"
 
@@ -13627,7 +13719,7 @@ msgstr "Samlingen tas bort. Dess spel finns kvar i ditt bibliotek."
 msgid "The devices lost each other, or nobody confirmed in time. Nothing was paired."
 msgstr "Enheterna tappade kontakten med varandra, eller ingen bekräftade i tid. Inget parkopplades."
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "The download is checked against the checksum in its install plan."
 msgstr "Nedladdningen kontrolleras mot kontrollsumman i installationsplanen."
 
@@ -13677,11 +13769,11 @@ msgstr "Bilden ändrades inte: {error}"
 msgid "The install failed"
 msgstr "Installationen misslyckades"
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "The install needs a choice in Activity."
 msgstr "Installationen behöver ett val i Aktivitet."
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "The install was cancelled."
 msgstr "Installationen avbröts."
 
@@ -13715,6 +13807,12 @@ msgstr "Den senaste kontrollen misslyckades: {lastError}"
 #. placeholder {0}: sync.error.summary
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "The last refresh failed: {0}"
+msgstr "Den senaste uppdateringen misslyckades: {0}"
+
+#: apps/native/src/game/achievements.rs
+#, fuzzy
+#| msgid "The last refresh failed: {0}"
+msgid "The last refresh failed: {reason}"
 msgstr "Den senaste uppdateringen misslyckades: {0}"
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
@@ -13794,6 +13892,12 @@ msgstr "Klassificeringarna som spel visar, och stegen som åldersgränser väljs
 msgid "The refresh didn't finish: {0}"
 msgstr "Uppdateringen blev inte klar: {0}"
 
+#: apps/native/src/game/achievements.rs
+#, fuzzy
+#| msgid "The refresh didn't finish: {0}"
+msgid "The refresh didn't finish: {error}"
+msgstr "Uppdateringen blev inte klar: {0}"
+
 #. placeholder {0}: outcome.journal.archive
 #. placeholder {1}: outcome.error
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
@@ -13801,7 +13905,7 @@ msgstr "Uppdateringen blev inte klar: {0}"
 msgid "The restore of {0} was undone, and the library from before is back: {1}"
 msgstr "Återställningen av {0} ångrades, och biblioteket från tidigare är tillbaka: {1}"
 
-#: apps/desktop/src/views/game/PortsPanel.tsx
+#: apps/desktop/src/views/game/PortsPanel.tsx apps/native/src/game/ports.rs
 msgid "The same game on IGDB"
 msgstr "Samma spel på IGDB"
 
@@ -14302,10 +14406,11 @@ msgstr "systemfält, avsluta, stäng till systemfältet"
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/desktop/src/views/StoreView.tsx apps/native/src/flows/storage.rs
 #: apps/native/src/frame/error.rs apps/native/src/frame/notifications.rs
-#: apps/native/src/game/page.rs apps/native/src/library/bulk_edit.rs
-#: apps/native/src/library/view.rs apps/native/src/settings/addons.rs
-#: apps/native/src/settings/devices.rs apps/native/src/settings/general.rs
-#: apps/native/src/settings/streaming.rs apps/native/src/ui/failure.rs
+#: apps/native/src/game/achievements.rs apps/native/src/game/page.rs
+#: apps/native/src/library/bulk_edit.rs apps/native/src/library/view.rs
+#: apps/native/src/settings/addons.rs apps/native/src/settings/devices.rs
+#: apps/native/src/settings/general.rs apps/native/src/settings/streaming.rs
+#: apps/native/src/ui/failure.rs
 msgid "Try again"
 msgstr "Försök igen"
 
@@ -14467,14 +14572,17 @@ msgid "Unlock this time"
 msgstr "Lås upp den här gången"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "unlocked"
 msgstr "upplåst"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgid "Unlocked"
 msgstr "Upplåst"
 
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
+#: apps/native/src/game/achievements.rs
 msgctxt "achievements"
 msgid "Unlocked"
 msgstr "Upplåst"
@@ -14482,6 +14590,12 @@ msgstr "Upplåst"
 #. placeholder {0}: formatDateTime(state.unlockedAtMs)
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 msgid "Unlocked {0}"
+msgstr "Upplåst {0}"
+
+#: apps/native/src/game/achievements.rs
+#, fuzzy
+#| msgid "Unlocked {0}"
+msgid "Unlocked {when}"
 msgstr "Upplåst {0}"
 
 #. A RomM server without a name
@@ -14667,6 +14781,12 @@ msgstr "uppdaterad {0}"
 #: apps/native/src/settings/addons.rs
 msgid "Updated {0}."
 msgstr "Uppdaterad {0}."
+
+#: apps/native/src/game/achievements.rs
+#, fuzzy
+#| msgid "Updated {when}"
+msgid "updated {when}"
+msgstr "Uppdaterad {when}"
 
 #. {when} is a day: “today”, “3 days ago”
 #: apps/desktop/src/components/CollectionCard.tsx

@@ -4,7 +4,7 @@
 use caskade_ui_theme::anatomy::{Entry, Source};
 
 /// Every catalogued root the game page renders.
-pub const ANATOMY: &[Entry] = &[SCREENSHOT_VIEWER, VIDEOS];
+pub const ANATOMY: &[Entry] = &[SCREENSHOT_VIEWER, VIDEOS, ACHIEVEMENTS, ACHIEVEMENT_SUMMARY];
 
 pub const SCREENSHOT_VIEWER: Entry = Entry {
     parts: &[
@@ -48,3 +48,85 @@ pub const VIDEOS: Entry = Entry {
         "A game's videos (IGDB's trailers) in a row on its page and its Store page; each plays in the video window.",
     )
 };
+
+pub const ACHIEVEMENTS: Entry = Entry {
+    parts: &[
+        (
+            "refresh",
+            "Refresh achievements: fetches the game's sets now (a `button`).",
+        ),
+        ("cancel", "Stops a refresh under way (a `button`)."),
+        (
+            "sets",
+            "Which store account's set is shown, when there are several (a `segmented`).",
+        ),
+        (
+            "account",
+            "The set's service and account, and when it was last fetched.",
+        ),
+        (
+            "stale",
+            "The last refresh failed: what is shown is the last answer, and why.",
+        ),
+        ("wait", "The service asked Caskade to wait, and until when."),
+        (
+            "notice",
+            "Not fetched yet, no achievements, not offered, private, or signed out, with what to do.",
+        ),
+        (
+            "reconnect",
+            "Opens Settings → Store accounts to sign in again (a `button`).",
+        ),
+        (
+            "summary",
+            "Unlocked of total, hardcore unlocks and points, with a meter.",
+        ),
+        ("filter", "All, unlocked or locked (a `segmented`)."),
+        ("reveal-all", "Shows every hidden achievement (a `switch`)."),
+        ("list", "The achievements, in the service's order."),
+        (
+            "achievement",
+            "One achievement (`data-state`: `unlocked` or `locked`; `data-concealed` while a hidden one is concealed; `data-hardcore` when unlocked in hardcore).",
+        ),
+        (
+            "icon",
+            "Its icon from the service, or a drawn trophy, lock or concealed mark.",
+        ),
+        ("details", "Unlock time, hardcore, rarity and points."),
+        (
+            "hardcore",
+            "Its hardcore unlock, or that it was unlocked in softcore only.",
+        ),
+        (
+            "reveal",
+            "Shows a hidden achievement's name and description (a `button`).",
+        ),
+    ],
+    states: &[(
+        "data-state",
+        &[
+            "loading",
+            "error",
+            "not_fetched",
+            "ready",
+            "no_achievements",
+            "unsupported",
+            "private",
+            "sign_in_needed",
+        ],
+    )],
+    contains: &["button", "segmented", "switch"],
+    ..Entry::new(
+        "achievements",
+        "GameAchievements (apps/native/src/game/achievements.rs)",
+        Source::App,
+        "A game page's achievements: one store account's set at a time, its counts and how its last fetch went, and every achievement with its state, progress, unlock time, rarity and points where the service gives them. Hidden achievements stay concealed until unlocked or revealed.",
+    )
+};
+
+pub const ACHIEVEMENT_SUMMARY: Entry = Entry::new(
+    "achievement-summary",
+    "AchievementSummary (apps/native/src/game/achievements.rs)",
+    Source::App,
+    "A game's achievement counts in its hero, across its sets; pressing it moves to the achievements.",
+);

@@ -2623,6 +2623,9 @@
   .data-\[size\=xl\]\:\[--avatar-cell\:9rem\][data-size="xl"] {
     --avatar-cell: 9rem;
   }
+  .data-\[state\=locked\]\:text-fg-muted[data-state="locked"] {
+    color: var(--cs-color-fg-muted);
+  }
   .data-\[status\=active\]\:bg-accent\/15[data-status="active"] {
     background-color: var(--cs-color-accent);
     @supports (color: color-mix(in lab, red, red)) {
