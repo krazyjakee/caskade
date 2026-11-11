@@ -84,6 +84,22 @@ mod tests {
             "#99: the webview's AddWebGame isn't catalogued either",
         ),
         (
+            "update-offer",
+            "#100: the webview's UpdateBeforePlayDialog isn't catalogued either",
+        ),
+        (
+            "playing-elsewhere",
+            "#100: the webview's PlayingElsewhereDialog isn't catalogued either",
+        ),
+        (
+            "save-conflict",
+            "#100: the webview's SaveConflictDialog isn't catalogued either",
+        ),
+        (
+            "save-arriving",
+            "#100: the webview's WaitForSave isn't catalogued either",
+        ),
+        (
             "add-game",
             "#108: the webview's AddGame isn't catalogued either",
         ),

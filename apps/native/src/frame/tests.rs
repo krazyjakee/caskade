@@ -44,6 +44,8 @@ fn app() -> Element {
     use_data_source(|| SOURCE.get().expect("the fixture library").clone());
     // Files dropped on the library go to a fake install.
     use_context_provider(crate::library::view_tests::fake_drop_install);
+    // Play asks scripted steps, not the app's services.
+    use_context_provider(crate::game::launch_tests::fake_steps);
     rsx! {
         // The app's stylesheet: the frame lays out as in the app.
         style { {include_str!("../../assets/app.css")} }

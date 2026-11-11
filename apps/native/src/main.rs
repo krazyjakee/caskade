@@ -23,6 +23,8 @@ mod forwarded;
 mod frame;
 #[cfg(any(debug_assertions, feature = "gallery"))]
 mod gallery;
+// A game's page, and what Play asks before a game starts (#100).
+mod game;
 // Games' menus, quick looks and the dialogs they open (#99).
 mod game_menu;
 mod i18n;

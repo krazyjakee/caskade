@@ -711,11 +711,13 @@ msgstr ""
 
 #. Versions, e.g. v1.2
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "{latestVersion} is out, and you have {installedVersion}. Updating keeps your saves and settings."
 msgstr ""
 
 #. A version, e.g. v1.2
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "{latestVersion} is out. Updating keeps your saves and settings."
 msgstr ""
 
@@ -1122,6 +1124,7 @@ msgid "{title} in {section}"
 msgstr ""
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
+#: apps/native/src/game/launch.rs
 msgid "{title} is running on {device}"
 msgstr ""
 
@@ -1542,6 +1545,7 @@ msgid "A link someone sent you from their Caskade"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "A newer save from {device} hasn't arrived yet, so the game started with the save on this device."
 msgstr ""
 
@@ -2346,6 +2350,7 @@ msgid "Another account"
 msgstr ""
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
+#: apps/native/src/game/launch.rs
 msgctxt "playing on"
 msgid "another device"
 msgstr ""
@@ -2356,6 +2361,7 @@ msgid "Another device"
 msgstr ""
 
 #: apps/desktop/src/components/saves/devices.ts
+#: apps/native/src/game/launch.rs
 msgctxt "save version"
 msgid "Another device"
 msgstr ""
@@ -3042,6 +3048,7 @@ msgstr ""
 #: apps/native/src/flows/share_game.rs
 #: apps/native/src/flows/storage.rs
 #: apps/native/src/flows/streaming.rs
+#: apps/native/src/game/launch.rs
 #: apps/native/src/game_menu/dialogs.rs
 #: apps/native/src/game_menu/play.rs
 #: apps/native/src/library/bulk_edit.rs
@@ -3769,6 +3776,7 @@ msgid "Choose where Caskade installs games. Disconnected locations remain in you
 msgstr ""
 
 #: apps/desktop/src/components/saves/SaveConflictDialog.tsx
+#: apps/native/src/game/launch.rs
 msgid "Choose which save to play with"
 msgstr ""
 
@@ -3828,6 +3836,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/native/src/flows/pairing.rs
+#: apps/native/src/game/launch.rs
 #: apps/native/src/library/selection_bar.rs
 #: apps/native/src/settings/plugins.rs
 #: apps/native/src/settings/reset.rs
@@ -6448,6 +6457,7 @@ msgid "If it fails or runs out of time, the game doesn't start and the after-exi
 msgstr ""
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
+#: apps/native/src/game/launch.rs
 msgid "If you play here too, each device keeps its own save, and the next time you play you choose which one to carry on with."
 msgstr ""
 
@@ -7114,6 +7124,7 @@ msgid "It takes the file when it starts."
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "It was just played there, and its save is on its way. Skip to play with the save on this device."
 msgstr ""
 
@@ -8902,6 +8913,7 @@ msgid "Not enough free space"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "Not every paired device could be reached, so one of them may have a newer save."
 msgstr ""
 
@@ -9276,6 +9288,7 @@ msgid "On {devices}. It isn't in the catalogue, so install it there the way it c
 msgstr ""
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
+#: apps/native/src/game/launch.rs
 msgid "On {name} since {since}"
 msgstr ""
 
@@ -9972,6 +9985,7 @@ msgid "Play and utility actions you added. Their programs must be at the same pl
 msgstr ""
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
+#: apps/native/src/game/launch.rs
 msgid "Play anyway"
 msgstr ""
 
@@ -9996,6 +10010,7 @@ msgid "Play history"
 msgstr ""
 
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "Play now"
 msgstr ""
 
@@ -10058,6 +10073,7 @@ msgid "Play with {name}"
 msgstr ""
 
 #: apps/desktop/src/components/saves/SaveConflictDialog.tsx
+#: apps/native/src/game/launch.rs
 msgid "Play with this save"
 msgstr ""
 
@@ -11706,6 +11722,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/game/launch.rs
 #: apps/native/src/settings/search.rs
 msgid "Saves"
 msgstr ""
@@ -12512,6 +12529,7 @@ msgid "Size unknown"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "Skip"
 msgstr ""
 
@@ -12533,6 +12551,7 @@ msgstr ""
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/game/launch.rs
 msgid "Skip this version"
 msgstr ""
 
@@ -12709,6 +12728,7 @@ msgid "Started on {device}."
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "Started with the save from {device}."
 msgstr ""
 
@@ -12740,6 +12760,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 #: apps/native/src/flows/streaming.rs
+#: apps/native/src/game/launch.rs
 #: apps/native/src/game_menu/play.rs
 #: apps/native/src/game_menu/quick_look.rs
 #: apps/native/src/library/web.rs
@@ -13260,6 +13281,7 @@ msgid "That didn't work"
 msgstr ""
 
 #: apps/native/src/flows/tool_request.rs
+#: apps/native/src/game/launch.rs
 #: apps/native/src/game_menu/actions.rs
 msgid "That isn't available in this copy of Caskade."
 msgstr ""
@@ -13540,6 +13562,10 @@ msgstr ""
 msgid "The theme's surfaces are unknown"
 msgstr ""
 
+#: apps/native/src/game/launch.rs
+msgid "The update didn't finish."
+msgstr ""
+
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 #: apps/native/src/settings/general.rs
 msgid "The update failed."
@@ -13681,6 +13707,7 @@ msgid "This device"
 msgstr ""
 
 #: apps/desktop/src/components/saves/devices.ts
+#: apps/native/src/game/launch.rs
 msgctxt "save version"
 msgid "This device"
 msgstr ""
@@ -13696,10 +13723,6 @@ msgstr ""
 #: apps/desktop/src/components/shares/ShareInfoDetails.tsx
 #: apps/native/src/flows/shares_common.rs
 msgid "This device has an emulator for it."
-msgstr ""
-
-#: apps/native/src/game_menu/play.rs
-msgid "This device is streaming a game to another one."
 msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
@@ -13751,6 +13774,7 @@ msgid "This game was played on more than one device since they last shared saves
 msgstr ""
 
 #: apps/desktop/src/components/saves/SaveConflictDialog.tsx
+#: apps/native/src/game/launch.rs
 msgid "This game was played on more than one device since they last shared saves. The save you don't choose is kept as a version."
 msgstr ""
 
@@ -14273,10 +14297,12 @@ msgid "Update {name} to {version}"
 msgstr ""
 
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "Update and play"
 msgstr ""
 
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "Update before playing?"
 msgstr ""
 
@@ -14341,6 +14367,7 @@ msgid "Updated by Flatpak"
 msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/launch.rs
 msgid "Updated."
 msgstr ""
 
@@ -14370,6 +14397,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/game/launch.rs
 msgid "Updating…"
 msgstr ""
 
@@ -14616,6 +14644,7 @@ msgid "Waiting for the first reading…"
 msgstr ""
 
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "Waiting for the save from {device}"
 msgstr ""
 
@@ -14802,6 +14831,7 @@ msgstr ""
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "What's new"
 msgstr ""
 

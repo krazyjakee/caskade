@@ -707,11 +707,13 @@ msgstr "{latestVersion} har släppts <0>· du har {installedVersion}</0>"
 
 #. Versions, e.g. v1.2
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "{latestVersion} is out, and you have {installedVersion}. Updating keeps your saves and settings."
 msgstr "{latestVersion} har släppts och du har {installedVersion}. Uppdateringen behåller dina sparfiler och inställningar."
 
 #. A version, e.g. v1.2
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "{latestVersion} is out. Updating keeps your saves and settings."
 msgstr "{latestVersion} har släppts. Uppdateringen behåller dina sparfiler och inställningar."
 
@@ -1119,6 +1121,7 @@ msgid "{title} in {section}"
 msgstr "{title} i {section}"
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
+#: apps/native/src/game/launch.rs
 msgid "{title} is running on {device}"
 msgstr "{title} körs på {device}"
 
@@ -1532,6 +1535,7 @@ msgid "A link someone sent you from their Caskade"
 msgstr "En länk som någon skickade till dig från sin Caskade"
 
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "A newer save from {device} hasn't arrived yet, so the game started with the save on this device."
 msgstr "En nyare sparfil från {device} har inte kommit fram än, så spelet startade med sparfilen på den här enheten."
 
@@ -2323,6 +2327,7 @@ msgid "Another account"
 msgstr "Ett annat konto"
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
+#: apps/native/src/game/launch.rs
 msgctxt "playing on"
 msgid "another device"
 msgstr "en annan enhet"
@@ -2332,7 +2337,7 @@ msgctxt "backup of"
 msgid "Another device"
 msgstr "En annan enhet"
 
-#: apps/desktop/src/components/saves/devices.ts
+#: apps/desktop/src/components/saves/devices.ts apps/native/src/game/launch.rs
 msgctxt "save version"
 msgid "Another device"
 msgstr "En annan enhet"
@@ -3011,8 +3016,9 @@ msgstr "Avbryt inloggningen"
 #: apps/native/src/flows/add_game.rs apps/native/src/flows/folder_browser.rs
 #: apps/native/src/flows/manual_game.rs apps/native/src/flows/receive_share.rs
 #: apps/native/src/flows/share_game.rs apps/native/src/flows/storage.rs
-#: apps/native/src/flows/streaming.rs apps/native/src/game_menu/dialogs.rs
-#: apps/native/src/game_menu/play.rs apps/native/src/library/bulk_edit.rs
+#: apps/native/src/flows/streaming.rs apps/native/src/game/launch.rs
+#: apps/native/src/game_menu/dialogs.rs apps/native/src/game_menu/play.rs
+#: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/selection_bar.rs apps/native/src/library/web.rs
 #: apps/native/src/settings/plugins.rs apps/native/src/settings/reset.rs
@@ -3726,6 +3732,7 @@ msgid "Choose where Caskade installs games. Disconnected locations remain in you
 msgstr "Välj var Caskade installerar spel. Frånkopplade platser finns kvar i ditt bibliotek."
 
 #: apps/desktop/src/components/saves/SaveConflictDialog.tsx
+#: apps/native/src/game/launch.rs
 msgid "Choose which save to play with"
 msgstr "Välj vilken sparfil du vill spela med"
 
@@ -3783,8 +3790,9 @@ msgstr "klocka, 24-timmars, 12-timmars"
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
-#: apps/native/src/flows/pairing.rs apps/native/src/library/selection_bar.rs
-#: apps/native/src/settings/plugins.rs apps/native/src/settings/reset.rs
+#: apps/native/src/flows/pairing.rs apps/native/src/game/launch.rs
+#: apps/native/src/library/selection_bar.rs apps/native/src/settings/plugins.rs
+#: apps/native/src/settings/reset.rs
 msgid "Close"
 msgstr "Stäng"
 
@@ -6361,6 +6369,7 @@ msgid "If it fails or runs out of time, the game doesn't start and the after-exi
 msgstr "Om det misslyckas eller får slut på tid startar inte spelet, och skripten efter avslut städar upp."
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
+#: apps/native/src/game/launch.rs
 msgid "If you play here too, each device keeps its own save, and the next time you play you choose which one to carry on with."
 msgstr "Om du spelar här också behåller varje enhet sin egen sparfil, och nästa gång du spelar väljer du vilken du vill fortsätta med."
 
@@ -7016,6 +7025,7 @@ msgid "It takes the file when it starts."
 msgstr "Den tar filen när den startar."
 
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "It was just played there, and its save is on its way. Skip to play with the save on this device."
 msgstr "Spelet spelades nyss där, och sparfilen är på väg. Hoppa över för att spela med sparfilen på den här enheten."
 
@@ -8779,6 +8789,7 @@ msgid "Not enough free space"
 msgstr "Inte tillräckligt med ledigt utrymme"
 
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "Not every paired device could be reached, so one of them may have a newer save."
 msgstr "Alla parkopplade enheter kunde inte nås, så någon av dem kan ha en nyare sparfil."
 
@@ -9148,6 +9159,7 @@ msgid "On {devices}. It isn't in the catalogue, so install it there the way it c
 msgstr "På {devices}. Det finns inte i katalogen, så installera det på samma sätt som där."
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
+#: apps/native/src/game/launch.rs
 msgid "On {name} since {since}"
 msgstr "På {name} sedan {since}"
 
@@ -9833,6 +9845,7 @@ msgid "Play and utility actions you added. Their programs must be at the same pl
 msgstr "Spel- och verktygsåtgärder som du har lagt till. Deras program måste finnas på samma plats på varje enhet."
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
+#: apps/native/src/game/launch.rs
 msgid "Play anyway"
 msgstr "Spela ändå"
 
@@ -9857,6 +9870,7 @@ msgid "Play history"
 msgstr "Spelhistorik"
 
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "Play now"
 msgstr "Spela nu"
 
@@ -9921,6 +9935,7 @@ msgid "Play with {name}"
 msgstr "Parkoppla med {name}"
 
 #: apps/desktop/src/components/saves/SaveConflictDialog.tsx
+#: apps/native/src/game/launch.rs
 msgid "Play with this save"
 msgstr "Spela med den här sparfilen"
 
@@ -11543,7 +11558,7 @@ msgstr "Sparat."
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/game/launch.rs apps/native/src/settings/search.rs
 msgid "Saves"
 msgstr "Sparfiler"
 
@@ -12341,6 +12356,7 @@ msgid "Size unknown"
 msgstr "Okänd storlek"
 
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "Skip"
 msgstr "Hoppa över"
 
@@ -12362,6 +12378,7 @@ msgstr "Hoppa över väljaren när standardplatsen är tillgänglig. En enda gil
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/game/launch.rs
 msgid "Skip this version"
 msgstr "Hoppa över den här versionen"
 
@@ -12535,6 +12552,7 @@ msgid "Started on {device}."
 msgstr "Startat på {device}."
 
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "Started with the save from {device}."
 msgstr "Startade med sparfilen från {device}."
 
@@ -12565,9 +12583,10 @@ msgstr "Startar uppdateringen…"
 #: apps/desktop/src/views/library/StartingMark.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/flows/streaming.rs apps/native/src/game_menu/play.rs
-#: apps/native/src/game_menu/quick_look.rs apps/native/src/library/web.rs
-#: apps/native/src/ui/game_card.rs apps/native/src/ui/game_row.rs
+#: apps/native/src/flows/streaming.rs apps/native/src/game/launch.rs
+#: apps/native/src/game_menu/play.rs apps/native/src/game_menu/quick_look.rs
+#: apps/native/src/library/web.rs apps/native/src/ui/game_card.rs
+#: apps/native/src/ui/game_row.rs
 msgid "Starting…"
 msgstr "Startar…"
 
@@ -13068,7 +13087,8 @@ msgstr "Det blev inte klart: {0}. Det är säkert att försöka igen: det som sp
 msgid "That didn't work"
 msgstr "Det fungerade inte"
 
-#: apps/native/src/flows/tool_request.rs apps/native/src/game_menu/actions.rs
+#: apps/native/src/flows/tool_request.rs apps/native/src/game/launch.rs
+#: apps/native/src/game_menu/actions.rs
 #, fuzzy
 #| msgid "This store isn't available in this version of Caskade."
 msgid "That isn't available in this copy of Caskade."
@@ -13350,6 +13370,12 @@ msgstr "Temat {theme} behöver Caskade-kärnan. Förhandsvisningen i webbläsare
 msgid "The theme's surfaces are unknown"
 msgstr "Temats ytor är okända"
 
+#: apps/native/src/game/launch.rs
+#, fuzzy
+#| msgid "The scan didn't finish."
+msgid "The update didn't finish."
+msgstr "Skanningen blev inte klar."
+
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 #: apps/native/src/settings/general.rs
 msgid "The update failed."
@@ -13489,7 +13515,7 @@ msgstr "Den här samlingen är tom. Lägg till spel här, eller från ett spels 
 msgid "This device"
 msgstr "Den här enheten"
 
-#: apps/desktop/src/components/saves/devices.ts
+#: apps/desktop/src/components/saves/devices.ts apps/native/src/game/launch.rs
 msgctxt "save version"
 msgid "This device"
 msgstr "Den här enheten"
@@ -13506,12 +13532,6 @@ msgstr ""
 #: apps/native/src/flows/shares_common.rs
 msgid "This device has an emulator for it."
 msgstr "Den här enheten har en emulator för det."
-
-#: apps/native/src/game_menu/play.rs
-#, fuzzy
-#| msgid "Let other devices stream games from this one"
-msgid "This device is streaming a game to another one."
-msgstr "Låt andra enheter streama spel från den här"
 
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 msgid "This device only"
@@ -13561,6 +13581,7 @@ msgid "This game was played on more than one device since they last shared saves
 msgstr "Spelet har spelats på mer än en enhet sedan de senast delade sparfiler. Välj vilken sparfil du vill spela med; den andra behålls."
 
 #: apps/desktop/src/components/saves/SaveConflictDialog.tsx
+#: apps/native/src/game/launch.rs
 msgid "This game was played on more than one device since they last shared saves. The save you don't choose is kept as a version."
 msgstr "Spelet har spelats på mer än en enhet sedan de senast delade sparfiler. Sparfilen du inte väljer behålls som en version."
 
@@ -14072,10 +14093,12 @@ msgid "Update {name} to {version}"
 msgstr "Uppdatera {name} till {version}"
 
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "Update and play"
 msgstr "Uppdatera och spela"
 
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "Update before playing?"
 msgstr "Uppdatera innan du spelar?"
 
@@ -14139,7 +14162,7 @@ msgstr "Uppdaterad {when}"
 msgid "Updated by Flatpak"
 msgstr "Uppdateras av Flatpak"
 
-#: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/desktop/src/views/game/EntryUpdate.tsx apps/native/src/game/launch.rs
 msgid "Updated."
 msgstr "Uppdaterat."
 
@@ -14169,6 +14192,7 @@ msgstr "Uppdaterar biblioteket…"
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/game/launch.rs
 msgid "Updating…"
 msgstr "Uppdaterar…"
 
@@ -14415,6 +14439,7 @@ msgid "Waiting for the first reading…"
 msgstr "Väntar på den första mätningen…"
 
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "Waiting for the save from {device}"
 msgstr "Väntar på sparfilen från {device}"
 
@@ -14599,6 +14624,7 @@ msgstr "Det du har lagt till i Caskade. Släpp en tilläggsmapp här för att in
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
+#: apps/native/src/game/launch.rs
 msgid "What's new"
 msgstr "Nyheter"
 
@@ -14995,6 +15021,11 @@ msgstr "ÅÅÅÅ-MM-DD, eller tomt för inget"
 #: apps/native/src/settings/search.rs
 msgid "zoom, text size, bigger"
 msgstr "zoom, textstorlek, större"
+
+#, fuzzy
+#~| msgid "Let other devices stream games from this one"
+#~ msgid "This device is streaming a game to another one."
+#~ msgstr "Låt andra enheter streama spel från den här"
 
 #~ msgid "A name or path at any depth (glob)"
 #~ msgstr "Ett namn eller en sökväg på valfritt djup (glob)"
