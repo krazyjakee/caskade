@@ -420,6 +420,20 @@ pub const FILE_PLUS_CORNER: Icon = Icon(&[
     "M14 19h6",
     "M17 16v6",
 ]);
+/// lucide's `history` (`rotate-ccw-clock`).
+pub const HISTORY: Icon = Icon(&[
+    "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8",
+    "M3 3v5h5",
+    "M12 7v5l4 2",
+]);
+/// lucide's `list-checks`.
+pub const LIST_CHECKS: Icon = Icon(&[
+    "M13 5h8",
+    "M13 12h8",
+    "M13 19h8",
+    "m3 17 2 2 4-4",
+    "m3 7 2 2 4-4",
+]);
 
 /// Draws `icon` with `class`, `stroke_width` (lucide's default is 2) and
 /// `data-part` when given.

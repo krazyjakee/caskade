@@ -76,6 +76,14 @@ mod tests {
             "#99: the webview's CollectionPicker isn't catalogued either",
         ),
         (
+            "collection-dialog",
+            "#99: the webview's CollectionDialog isn't catalogued either",
+        ),
+        (
+            "add-web-game",
+            "#99: the webview's AddWebGame isn't catalogued either",
+        ),
+        (
             "add-game",
             "#108: the webview's AddGame isn't catalogued either",
         ),

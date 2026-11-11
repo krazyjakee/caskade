@@ -4,6 +4,8 @@
 //! sorted by title, and what it says when there are none or they didn't
 //! load. LB and RB step through the filters.
 
+use super::collection_dialog::{CollectionDialog, smart_preset};
+use super::platform_grid::{PlatformGrid, breakdown};
 use super::selection::use_selection_provider;
 use super::selection_bar::{AllIdsProp, SelectionBar};
 use super::{Events, Layout, VirtualLibrary};
@@ -176,6 +178,25 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
         && library.sort == GameSort::Title
         && total.is_some_and(|total| total >= ALPHABET_BAR_MIN_GAMES);
     let letters = use_title_letters(counted.into());
+    // Emulated's games by platform, when they span several.
+    let platforms = use_query(DataKey::Summary, move |data| {
+        let query = counted();
+        async move {
+            let wanted = query.filter == GameFilter::Emulated
+                && query.platform.is_none()
+                && query.query.is_none();
+            if wanted {
+                data.platforms(GameFilter::Emulated).await
+            } else {
+                Ok(Vec::new())
+            }
+        }
+    });
+    let platforms = platforms
+        .read()
+        .as_ref()
+        .and_then(|list| list.as_ref().ok())
+        .and_then(|list| breakdown(&library, list));
     let letters = if alphabet {
         letters
             .read()
@@ -238,6 +259,9 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
         }
     };
     let (drop_over, mut drop_error) = use_library_drop();
+    // Save as collection: the view's filter, sort, search and platform as
+    // a smart collection's rules.
+    let mut saving = use_signal(|| false);
     // Choosing several games for one edit (the webview's #173). Changing
     // the filter, sort or search keeps the games chosen.
     let mut selection = use_selection_provider();
@@ -272,6 +296,13 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
     let control = "flex items-center gap-1.5 rounded-control border border-border px-3 py-2 text-sm text-fg-muted outline-none hover:text-fg data-focus-visible:focus-ring";
     rsx! {
         div { "data-view": "library", class: "relative flex flex-1 flex-col",
+            if saving() {
+                CollectionDialog {
+                    preset: caskade_core::model::CollectionKind::Smart { query: smart_preset(&query) },
+                    on_close: move |_| saving.set(false),
+                    on_saved: move |id: String| router.navigate(&Route::Collection { id }.href()),
+                }
+            }
             h1 { class: "sr-only", "{heading}" }
             if drop_over() {
                 div {
@@ -344,6 +375,13 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
                     }
                 }
                 div { class: "ml-auto flex flex-wrap items-center gap-2",
+                    crate::ui::Button {
+                        "data-part": "save-collection",
+                        class: "flex items-center gap-1.5 rounded-control border border-border px-3 py-2 text-sm text-fg-muted outline-none data-focus-visible:focus-ring data-hovered:text-fg",
+                        on_press: move |_| saving.set(true),
+                        Svg { icon: icons::LIST_PLUS, class: "size-4" }
+                        {t!("Save as collection")}
+                    }
                     Select {
                         "aria-label": t!("Sort games"),
                         "data-part": "sort",
@@ -383,6 +421,8 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
                         }
                     },
                 }
+            } else if let Some(platforms) = platforms {
+                PlatformGrid { platforms, library: library.clone() }
             } else if let Some(total) = total.filter(|&total| total > 0) {
                 VirtualLibrary {
                     query,

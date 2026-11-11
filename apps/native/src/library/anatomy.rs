@@ -1,11 +1,16 @@
-//! The library's themeable roots for choosing several games (#99), word for
-//! word the webview's (`packages/ui/src/anatomy.ts`) apart from the
-//! component each names.
+//! The library's themeable roots (#99): choosing several games and the
+//! Emulated tab's platforms, word for word the webview's
+//! (`packages/ui/src/anatomy.ts`) apart from the component each names.
 
 use caskade_ui_theme::anatomy::{Entry, Source};
 
-/// Every catalogued root the library's selection renders.
-pub const ANATOMY: &[Entry] = &[SELECTION_BAR, GAMES_REFRESH_START, BULK_EDITOR];
+/// Every catalogued root the library view renders.
+pub const ANATOMY: &[Entry] = &[
+    SELECTION_BAR,
+    GAMES_REFRESH_START,
+    BULK_EDITOR,
+    PLATFORM_CARD,
+];
 
 pub const SELECTION_BAR: Entry = Entry {
     parts: &[
@@ -78,5 +83,24 @@ pub const BULK_EDITOR: Entry = Entry {
         "BulkEditDialog (apps/native/src/library/bulk_edit.rs)",
         Source::App,
         "One edit on the chosen games: the fields to change, a preview of what changes in which game, and what saved.",
+    )
+};
+
+pub const PLATFORM_CARD: Entry = Entry {
+    parts: &[
+        ("art", "The hardware render on its glow."),
+        ("title", "The platform's short name."),
+        ("subtitle", "Its maker and kind of machine."),
+        ("count", "How many games it has."),
+        ("meta", "Playtime and last play."),
+        ("playtime", "Time played on it."),
+        ("last-played", "When one of its games was last played."),
+    ],
+    states: &[("data-art", &["platform", "generic"])],
+    ..Entry::new(
+        "platform-card",
+        "PlatformGrid (apps/native/src/library/platform_grid.rs)",
+        Source::App,
+        "A platform in the library's breakdown of emulated games; opens its games.",
     )
 };

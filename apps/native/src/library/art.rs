@@ -49,6 +49,14 @@ pub fn fetch(request: &Request, handler: Box<dyn NetHandler>) -> Result<(), Box<
         return Err(handler);
     }
     let url = request.url.to_string();
+    // The platforms' renders, built in.
+    if request.url.host_str() == Some(super::platforms::ART_HOST) {
+        match super::platforms::art(request.url.path()) {
+            Some(bytes) => handler.bytes(url, bytes.to_vec().into()),
+            None => handler.error(url, "no such platform render".into()),
+        }
+        return Ok(());
+    }
     caskade_app::runtime::handle().spawn(async move {
         let Some(cache) = cache() else {
             handler.error(url, "no artwork cache".into());

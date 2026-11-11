@@ -10,6 +10,11 @@ pub mod bench;
 mod grid;
 // The library view around the grid (#99).
 mod view;
+// Making and editing collections; the library saves its view as one (#99).
+pub mod collection_dialog;
+// The Emulated tab's breakdown by platform, and how platforms show (#99).
+mod platform_grid;
+pub mod platforms;
 // Choosing several games, and the bar and dialogs that act on them (#99).
 mod bulk_edit;
 mod selection;
@@ -18,6 +23,10 @@ mod selection_bar;
 pub(crate) mod view_tests;
 pub mod window;
 
+#[cfg(test)]
+mod collection_tests;
+#[cfg(test)]
+mod platform_tests;
 #[cfg(test)]
 mod selection_tests;
 #[cfg(test)]

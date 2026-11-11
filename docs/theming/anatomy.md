@@ -967,7 +967,7 @@ State on the root:
 
 ## `platform-card`
 
-A platform in the library's breakdown of emulated games; opens its games. Rendered by PlatformGrid (app).
+A platform in the library's breakdown of emulated games; opens its games. Rendered by PlatformGrid (apps/native/src/library/platform_grid.rs); in the webview, PlatformGrid (app).
 
 Root: `[data-cs="platform-card"]`
 

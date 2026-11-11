@@ -720,6 +720,7 @@ msgstr[1] ""
 
 #. js-lingui:icu=%7Bmatching%2C+plural%2C+one+%7B%23+game+matches+now%7D+other+%7B%23+games+match+now%7D%7D&pluralize_on=matching
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
+#: apps/native/src/library/collection_dialog.rs
 msgid "# game matches now"
 msgid_plural "# games match now"
 msgstr[0] ""
@@ -1101,6 +1102,7 @@ msgstr ""
 
 #. A platform's card: its name and how many games it has
 #: apps/desktop/src/views/library/platforms/PlatformGrid.tsx
+#: apps/native/src/library/platform_grid.rs
 msgid "{title}, {games}"
 msgstr ""
 
@@ -1130,6 +1132,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/native/src/frame/type_search.rs
+#: apps/native/src/library/platform_grid.rs
 msgid "# game"
 msgid_plural "# games"
 msgstr[0] ""
@@ -1320,6 +1323,7 @@ msgid "12-hour"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "16-bit console"
 msgstr ""
@@ -1335,16 +1339,19 @@ msgid "24-hour"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "2nd gen console"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "32-bit console"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "3rd gen console"
 msgstr ""
@@ -1355,11 +1362,13 @@ msgid "6 hours"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "64-bit console"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "6th gen console"
 msgstr ""
@@ -1369,21 +1378,25 @@ msgid "7-Zip {version} licence ({platforms})"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "7th gen console"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "8-bit console"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "8th gen console"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "9th gen console"
 msgstr ""
@@ -1868,6 +1881,7 @@ msgid "Add Games"
 msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
+#: apps/native/src/library/collection_dialog.rs
 msgid "Add games from their menu, or from the collection's Add games."
 msgstr ""
 
@@ -2089,6 +2103,7 @@ msgid "All Collections"
 msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
+#: apps/native/src/library/collection_dialog.rs
 msgctxt "library filter"
 msgid "All games"
 msgstr ""
@@ -2260,6 +2275,7 @@ msgid "Another of your devices uses {emulator}"
 msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
+#: apps/native/src/library/collection_dialog.rs
 msgid "Any platform"
 msgstr ""
 
@@ -2269,6 +2285,7 @@ msgid "Any process in folder"
 msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
+#: apps/native/src/library/collection_dialog.rs
 msgid "Any title"
 msgstr ""
 
@@ -2807,6 +2824,7 @@ msgid "By language"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "Cabinet"
 msgstr ""
@@ -2912,6 +2930,7 @@ msgstr ""
 #: apps/native/src/game_menu/dialogs.rs
 #: apps/native/src/game_menu/play.rs
 #: apps/native/src/library/bulk_edit.rs
+#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/selection_bar.rs
 #: apps/native/src/settings/reset.rs
 #: apps/native/src/ui/dialog.rs
@@ -3261,6 +3280,7 @@ msgid "Catalogue"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "CD console"
 msgstr ""
@@ -3894,6 +3914,7 @@ msgid "Console"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "Console add-on"
 msgstr ""
@@ -4123,6 +4144,7 @@ msgid "Counted"
 msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
+#: apps/native/src/library/collection_dialog.rs
 msgid "Counting games…"
 msgstr ""
 
@@ -4161,6 +4183,7 @@ msgstr ""
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
 #: apps/native/src/game_menu/collections.rs
+#: apps/native/src/library/collection_dialog.rs
 msgctxt "collection"
 msgid "Create"
 msgstr ""
@@ -4418,6 +4441,7 @@ msgid "Description"
 msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
+#: apps/native/src/library/collection_dialog.rs
 msgctxt "collection"
 msgid "Description"
 msgstr ""
@@ -4439,6 +4463,7 @@ msgid "Desktop and console modes"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "Desktop computer"
 msgstr ""
@@ -4840,6 +4865,7 @@ msgstr ""
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/library/collection_dialog.rs
 msgid "Edit {name}"
 msgstr ""
 
@@ -4910,6 +4936,7 @@ msgstr ""
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
 #: apps/native/src/frame/sidebar.rs
+#: apps/native/src/library/collection_dialog.rs
 msgctxt "library filter"
 msgid "Emulated"
 msgstr ""
@@ -5290,6 +5317,7 @@ msgstr ""
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
 #: apps/native/src/frame/sidebar.rs
+#: apps/native/src/library/collection_dialog.rs
 msgctxt "library filter"
 msgid "Favorites"
 msgstr ""
@@ -5671,6 +5699,7 @@ msgstr ""
 #. The first word of a rule such as “Games are Installed”
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/rules.ts
+#: apps/native/src/library/collection_dialog.rs
 msgctxt "smart collection rule"
 msgid "Games"
 msgstr ""
@@ -5788,6 +5817,7 @@ msgid "Games that leave the library"
 msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
+#: apps/native/src/library/collection_dialog.rs
 msgid "Games that match every rule, as the library changes"
 msgstr ""
 
@@ -5952,6 +5982,7 @@ msgid "Handheld"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "Handheld"
 msgstr ""
@@ -6056,6 +6087,7 @@ msgid "Home"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "Home computer"
 msgstr ""
@@ -6137,6 +6169,7 @@ msgid "https://romm.example.com"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "Hybrid console"
 msgstr ""
@@ -6533,6 +6566,7 @@ msgstr ""
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
 #: apps/native/src/frame/sidebar.rs
+#: apps/native/src/library/collection_dialog.rs
 msgctxt "library filter"
 msgid "Installed"
 msgstr ""
@@ -6973,6 +7007,7 @@ msgid "Kind"
 msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
+#: apps/native/src/library/collection_dialog.rs
 msgid "Kind of collection"
 msgstr ""
 
@@ -7633,6 +7668,7 @@ msgstr ""
 
 #: apps/desktop/src/components/CollectionCard.tsx
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
+#: apps/native/src/library/collection_dialog.rs
 msgctxt "collection kind"
 msgid "Manual"
 msgstr ""
@@ -7956,6 +7992,7 @@ msgstr ""
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
 #: apps/native/src/game_menu/collections.rs
+#: apps/native/src/library/collection_dialog.rs
 msgctxt "collection"
 msgid "Name"
 msgstr ""
@@ -8055,6 +8092,7 @@ msgstr ""
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
 #: apps/native/src/game_menu/collections.rs
+#: apps/native/src/library/collection_dialog.rs
 msgid "New collection"
 msgstr ""
 
@@ -9467,6 +9505,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/rules.ts
+#: apps/native/src/library/collection_dialog.rs
 msgctxt "smart collection rule"
 msgid "Platform"
 msgstr ""
@@ -9498,6 +9537,7 @@ msgstr ""
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 #: apps/desktop/src/views/library/platforms/PlatformGrid.tsx
 #: apps/native/src/library/bulk_edit.rs
+#: apps/native/src/library/platform_grid.rs
 msgid "Platforms"
 msgstr ""
 
@@ -9642,6 +9682,7 @@ msgstr ""
 
 #. Games that have been played
 #: apps/desktop/src/components/collections/rules.ts
+#: apps/native/src/library/collection_dialog.rs
 msgctxt "library filter"
 msgid "Played"
 msgstr ""
@@ -9707,6 +9748,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Playtime"
@@ -9802,6 +9844,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Popular"
@@ -10109,6 +10152,7 @@ msgstr ""
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
 #: apps/native/src/frame/sidebar.rs
+#: apps/native/src/library/collection_dialog.rs
 msgctxt "library filter"
 msgid "Ready to Install"
 msgstr ""
@@ -10149,6 +10193,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Recently added"
@@ -10160,6 +10205,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Recently played"
@@ -10346,6 +10392,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Release date"
@@ -11087,6 +11134,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/settings/unsaved.rs
 msgid "Save"
 msgstr ""
@@ -11100,6 +11148,7 @@ msgid "Save and scan"
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 msgid "Save as collection"
 msgstr ""
 
@@ -11261,6 +11310,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
 #: apps/desktop/src/views/settings/useSettings.tsx
 #: apps/native/src/library/bulk_edit.rs
+#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/settings/state.rs
 #: apps/native/src/settings/unsaved.rs
 msgid "Saving…"
@@ -12027,6 +12077,7 @@ msgstr ""
 
 #: apps/desktop/src/components/CollectionCard.tsx
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
+#: apps/native/src/library/collection_dialog.rs
 msgctxt "collection kind"
 msgid "Smart"
 msgstr ""
@@ -12072,6 +12123,7 @@ msgid "Something went wrong."
 msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
+#: apps/native/src/library/collection_dialog.rs
 msgid "Sort by"
 msgstr ""
 
@@ -12310,6 +12362,7 @@ msgid "Step {step} of {total}"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "Stereoscopic console"
 msgstr ""
@@ -13310,6 +13363,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Title"
@@ -13321,6 +13375,7 @@ msgid "Title"
 msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
+#: apps/native/src/library/collection_dialog.rs
 msgctxt "smart collection rule"
 msgid "Title has"
 msgstr ""
@@ -13905,6 +13960,7 @@ msgid "Variable {0} value"
 msgstr ""
 
 #: apps/desktop/src/views/library/platforms/catalog.ts
+#: apps/native/src/library/platforms.rs
 msgctxt "platform kind"
 msgid "Vector console"
 msgstr ""
@@ -14085,6 +14141,7 @@ msgstr ""
 #: apps/desktop/src/components/collections/rules.ts
 #: apps/desktop/src/views/library/LibraryView.tsx
 #: apps/native/src/frame/sidebar.rs
+#: apps/native/src/library/collection_dialog.rs
 msgctxt "library filter"
 msgid "Web"
 msgstr ""
