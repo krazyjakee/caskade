@@ -1711,7 +1711,7 @@ Root: `[data-cs="achievement-summary"]`
 
 ## `romm`
 
-Settings → RomM servers: the server list, the selected server's editor, downloads and the cache. Rendered by RommPanel (app).
+Settings → RomM servers: the server list, the selected server's editor, downloads and the cache. Rendered by RommPanel (apps/native/src/settings/emulation/romm.rs); in the webview, RommPanel (app).
 
 Root: `[data-cs="romm"]`
 
@@ -1721,7 +1721,7 @@ Contains: [`settings-section`](#settings-section), [`romm-servers`](#romm-server
 
 ## `romm-servers`
 
-The RomM server list: each server's state, games, last sync and its action (Sync now, or Sign in when this device can't sign in). Rendered by RommPanel (app).
+The RomM server list: each server's state, games, last sync and its action (Sync now, or Sign in when this device can't sign in). Rendered by RommPanel (apps/native/src/settings/emulation/romm.rs); in the webview, RommPanel (app).
 
 Root: `[data-cs="romm-servers"]`
 

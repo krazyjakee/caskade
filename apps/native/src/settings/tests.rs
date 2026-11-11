@@ -685,6 +685,7 @@ mod appearance;
 mod backup;
 mod devices;
 mod discovery;
+mod emulation;
 mod general;
 mod launchers;
 mod plugins;

@@ -141,6 +141,7 @@ msgstr ""
 #: apps/native/src/flows/shares_common.rs
 #: apps/native/src/game/ports.rs
 #: apps/native/src/settings/addons.rs
+#: apps/native/src/settings/emulation/setup.rs
 #: apps/native/src/ui/status_badge.rs
 msgid "Installed"
 msgstr ""

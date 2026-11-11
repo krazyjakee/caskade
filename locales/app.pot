@@ -43,6 +43,7 @@ msgstr ""
 
 #. No arguments
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "(none)"
 msgstr ""
 
@@ -88,6 +89,7 @@ msgstr[1] ""
 #. placeholder {0}: value.results.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+emulator+installation+found%7D+other+%7B%23+emulator+installations+found%7D%7D&pluralize_on=0
 #: apps/desktop/src/api/emulationTransport.ts
+#: apps/native/src/settings/emulation/detection.rs
 msgid "# emulator installation found"
 msgid_plural "# emulator installations found"
 msgstr[0] ""
@@ -177,6 +179,7 @@ msgstr[1] ""
 #. placeholder {0}: platforms.length
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+platform%7D+other+%7B%23+platforms%7D%7D&pluralize_on=0
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "# platform"
 msgid_plural "# platforms"
 msgstr[0] ""
@@ -359,6 +362,7 @@ msgstr ""
 #. How many games of the scan review are selected
 #. placeholder {0}: picked.length
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "{0} selected"
 msgstr ""
 
@@ -402,6 +406,7 @@ msgstr[1] ""
 
 #. js-lingui:icu=%7Badded%2C+plural%2C+one+%7B%23+new+game%7D+other+%7B%23+new+games%7D%7D&pluralize_on=added
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/mod.rs
 msgid "# new game"
 msgid_plural "# new games"
 msgstr[0] ""
@@ -409,6 +414,7 @@ msgstr[1] ""
 
 #. What a RomM sync changed: counts of games
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "{added} added · {updated} updated · {removed} removed"
 msgstr ""
 
@@ -492,6 +498,7 @@ msgstr ""
 
 #. How many emulators are configured
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "{count} configured"
 msgstr ""
 
@@ -560,6 +567,7 @@ msgid "{device} sends {title} to this computer. It's copied straight from {devic
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/FromDevices.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "{device} uses {emulator}"
 msgstr ""
 
@@ -606,11 +614,13 @@ msgstr ""
 
 #. How many ROM scanners failed, and their errors
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/mod.rs
 msgid "{failed} failed ({errors})"
 msgstr ""
 
 #. js-lingui:icu=%7Bfiles%2C+plural%2C+one+%7BScanning%E2%80%A6+%23+file%7D+other+%7BScanning%E2%80%A6+%23+files%7D%7D&pluralize_on=files
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Scanning… # file"
 msgid_plural "Scanning… # files"
 msgstr[0] ""
@@ -635,11 +645,13 @@ msgstr ""
 
 #. BIOS files found out of all the platform needs
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
+#: apps/native/src/settings/emulation/fields.rs
 msgid "{found}/{total} found"
 msgstr ""
 
 #. BIOS files found out of all the platform needs
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
+#: apps/native/src/settings/emulation/fields.rs
 msgid "{found}/{total} found · {unknown} not checked"
 msgstr ""
 
@@ -825,6 +837,7 @@ msgstr ""
 
 #. ROMs a scan no longer found
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/mod.rs
 msgid "{missing} missing"
 msgstr ""
 
@@ -1012,6 +1025,7 @@ msgstr ""
 
 #. js-lingui:icu=%7Bplatforms%2C+plural%2C+one+%7B%23+platform+has+no+emulator%7D+other+%7B%23+platforms+have+no+emulator%7D%7D&pluralize_on=platforms
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "# platform has no emulator"
 msgid_plural "# platforms have no emulator"
 msgstr[0] ""
@@ -1113,6 +1127,7 @@ msgstr ""
 
 #. js-lingui:icu=%7Broms%2C+plural%2C+one+%7B%23+ROM+on+the+server%7D+other+%7B%23+ROMs+on+the+server%7D%7D&pluralize_on=roms
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "# ROM on the server"
 msgid_plural "# ROMs on the server"
 msgstr[0] ""
@@ -1120,6 +1135,7 @@ msgstr[1] ""
 
 #. js-lingui:icu=%7Bscanners%2C+plural%2C+one+%7BScanned+%23+scanner%7D+other+%7BScanned+%23+scanners%7D%7D&pluralize_on=scanners
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/mod.rs
 msgid "Scanned # scanner"
 msgid_plural "Scanned # scanners"
 msgstr[0] ""
@@ -1127,6 +1143,7 @@ msgstr[1] ""
 
 #. “Scanned 2 scanners: 5 new games”
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/mod.rs
 msgid "{scanners}: {games}"
 msgstr ""
 
@@ -1297,6 +1314,8 @@ msgstr ""
 #: apps/native/src/library/platform_grid.rs
 #: apps/native/src/settings/backup.rs
 #: apps/native/src/settings/discovery.rs
+#: apps/native/src/settings/emulation/romm.rs
+#: apps/native/src/settings/emulation/setup.rs
 #: apps/native/src/settings/storage.rs
 msgid "# game"
 msgid_plural "# games"
@@ -1313,6 +1332,7 @@ msgstr[1] ""
 
 #. js-lingui:icu=%7Btotal%2C+plural%2C+one+%7BImport+%23+game%7D+other+%7BImport+%23+games%7D%7D&pluralize_on=total
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Import # game"
 msgid_plural "Import # games"
 msgstr[0] ""
@@ -1413,11 +1433,13 @@ msgstr ""
 
 #. A size in gigabytes
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "{value} GB"
 msgstr ""
 
 #. A newer version of an emulator
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "{version} is available."
 msgstr ""
 
@@ -1480,6 +1502,8 @@ msgstr ""
 #. How an emulator is installed: a program found on the PATH
 #: apps/desktop/src/api/emulation.ts
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
+#: apps/native/src/settings/emulation/fields.rs
 msgid "$PATH binary"
 msgstr ""
 
@@ -1745,10 +1769,12 @@ msgid "A record for a game Caskade can't start, like a cartridge or a disc: it k
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "A regular expression, anywhere in the path"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "A regular expression, from the start of the path"
 msgstr ""
 
@@ -2014,6 +2040,7 @@ msgstr ""
 #: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/web.rs
 #: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/emulation/scanners.rs
 #: apps/native/src/settings/streaming.rs
 msgid "Add"
 msgstr ""
@@ -2076,6 +2103,7 @@ msgid "Add account…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Add an emulator with a profile first; its file types decide what a scanner finds."
 msgstr ""
 
@@ -2091,19 +2119,24 @@ msgid "Add argument"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Add built-in profile"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Add custom profile"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/emulators.rs
+#: apps/native/src/settings/emulation/mod.rs
 msgid "Add emulator"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Add environment variable"
 msgstr ""
 
@@ -2142,6 +2175,7 @@ msgid "Add games…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Add global exclusion"
 msgstr ""
 
@@ -2164,6 +2198,7 @@ msgid "Add program name"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Add scanner"
 msgstr ""
 
@@ -2173,6 +2208,7 @@ msgid "Add script"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Add server"
 msgstr ""
 
@@ -2249,6 +2285,7 @@ msgid "Adding discovered games — {count} found"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Adding it again brings its games back, to download again."
 msgstr ""
 
@@ -2316,6 +2353,7 @@ msgid "After a game exits, and now and then for games played lately."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "After exit"
 msgstr ""
 
@@ -2410,6 +2448,7 @@ msgid "Allow again"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Allow self-signed certificates"
 msgstr ""
 
@@ -2420,6 +2459,7 @@ msgstr ""
 
 #. A detected emulator Caskade already has
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
+#: apps/native/src/settings/emulation/detection.rs
 msgid "Already configured"
 msgstr ""
 
@@ -2558,6 +2598,7 @@ msgid "Another of your devices"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/FromDevices.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Another of your devices uses {emulator}"
 msgstr ""
 
@@ -2567,6 +2608,7 @@ msgid "Any platform"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgctxt "playtime tracking"
 msgid "Any process in folder"
 msgstr ""
@@ -2593,6 +2635,7 @@ msgstr ""
 #. How Caskade signs in to a RomM server
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "API token"
 msgstr ""
 
@@ -2606,6 +2649,8 @@ msgstr ""
 #. How an emulator is installed: a macOS app
 #: apps/desktop/src/api/emulation.ts
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
+#: apps/native/src/settings/emulation/fields.rs
 msgid "App bundle"
 msgstr ""
 
@@ -2640,11 +2685,13 @@ msgstr ""
 
 #. Add arguments after the specification's
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgctxt "emulator arguments"
 msgid "Append"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "AppImage file"
 msgstr ""
 
@@ -2682,10 +2729,12 @@ msgstr ""
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
 #: apps/native/src/flows/manual_game.rs
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Arguments"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Arguments mode"
 msgstr ""
 
@@ -2720,10 +2769,12 @@ msgid "Ask each time"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Ask for a profile of this emulator"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Ask for any emulator"
 msgstr ""
 
@@ -2770,6 +2821,7 @@ msgstr ""
 
 #. ROM scanners table column: whether library updates run the scanner
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Auto"
 msgstr ""
 
@@ -2806,6 +2858,7 @@ msgstr ""
 
 #. The Caskade platform matched to a RomM platform
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Automatic ({platform})"
 msgstr ""
 
@@ -2855,6 +2908,8 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
 #: apps/native/src/settings/addons.rs
+#: apps/native/src/settings/emulation/detection.rs
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Available"
 msgstr ""
 
@@ -3012,6 +3067,7 @@ msgid "Before a restore"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Before launch"
 msgstr ""
 
@@ -3037,21 +3093,25 @@ msgid "Beta"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Binary name"
 msgstr ""
 
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
 #: apps/native/src/game/emulation.rs
+#: apps/native/src/settings/emulation/platforms.rs
 msgctxt "table column"
 msgid "BIOS"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
+#: apps/native/src/settings/emulation/platforms.rs
 msgid "BIOS folder for {platform}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/mod.rs
 msgid "BIOS issues"
 msgstr ""
 
@@ -3105,6 +3165,7 @@ msgstr ""
 
 #. A path field's browse button; {label} is the field's own label
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
+#: apps/native/src/settings/emulation/fields.rs
 msgid "Browse for {label}"
 msgstr ""
 
@@ -3227,11 +3288,14 @@ msgstr ""
 #. A RomM server's status
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm.rs
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Can't connect"
 msgstr ""
 
 #. A RomM server's status: it refused the username and password or API token
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Can't sign in"
 msgstr ""
 
@@ -3290,6 +3354,8 @@ msgstr ""
 #: apps/native/src/library/web.rs
 #: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/backup.rs
+#: apps/native/src/settings/emulation/emulators.rs
+#: apps/native/src/settings/emulation/romm.rs
 #: apps/native/src/settings/plugins.rs
 #: apps/native/src/settings/reset.rs
 #: apps/native/src/settings/storage.rs
@@ -3300,6 +3366,7 @@ msgid "Cancel"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgctxt "emulator install"
 msgid "Cancel"
 msgstr ""
@@ -3311,16 +3378,19 @@ msgid "Cancel"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
+#: apps/native/src/settings/emulation/detection.rs
 msgid "Cancel detection"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/native/src/settings/addons.rs
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Cancel download"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Cancel installing {name}"
 msgstr ""
 
@@ -3350,6 +3420,7 @@ msgstr ""
 #: apps/desktop/src/api/emulatorSetup.ts
 #: apps/desktop/src/views/store/CatalogCard.tsx
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Cancelled"
 msgstr ""
 
@@ -3360,6 +3431,7 @@ msgid "Cancelled"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgctxt "download status"
 msgid "Cancelled"
 msgstr ""
@@ -3410,10 +3482,12 @@ msgid "Caskade can't fetch BIOS files here."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/FromDevices.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Caskade can't install {emulator} on this system."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Caskade can't install an emulator for {platform} on this system. Add one you have installed with Add emulator."
 msgstr ""
 
@@ -3422,6 +3496,7 @@ msgid "Caskade can't install emulators here."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Caskade can't install emulators on this system yet."
 msgstr ""
 
@@ -3451,10 +3526,12 @@ msgid "Caskade can't tell what would change. Reset puts all of these settings ba
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Caskade checks the emulator is there when you save. Nothing here starts it."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Caskade checks the profile when you save. Nothing here starts the emulator."
 msgstr ""
 
@@ -3495,6 +3572,7 @@ msgid "Caskade downloads {asset} ({release}) from {repository} on GitHub and add
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Caskade downloads these for you, sets them up and makes them the default for platforms that have none. Emulators from GitHub are kept up to date."
 msgstr ""
 
@@ -3592,11 +3670,13 @@ msgid "Caskade on this network shows here. Both devices show a code: pair when t
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgctxt "RomM platform column"
 msgid "Caskade platform"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Caskade platform for {platform}"
 msgstr ""
 
@@ -3663,15 +3743,18 @@ msgid "Caskade works out how to install this file: an installer runs, an archive
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Caskade's arguments for this emulator changed since you replaced them."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Caskade's arguments for this emulator changed since you replaced them. Edit the profile to review them."
 msgstr ""
 
 #. The arguments Caskade's definition of the emulator gives now
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Caskade's now: {args}"
 msgstr ""
 
@@ -3757,6 +3840,7 @@ msgid "Check automatically"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Check each file against the hash RomM reports."
 msgstr ""
 
@@ -3780,6 +3864,7 @@ msgstr ""
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/native/src/settings/addons.rs
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Check for updates"
 msgstr ""
 
@@ -3873,6 +3958,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 #: apps/native/src/game/entry_update.rs
 #: apps/native/src/settings/addons.rs
+#: apps/native/src/settings/emulation/setup.rs
 #: apps/native/src/settings/general.rs
 #: apps/native/src/settings/streaming.rs
 msgid "Checking…"
@@ -3946,6 +4032,7 @@ msgid "Choose a new PIN for {name}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Choose a profile"
 msgstr ""
 
@@ -4104,6 +4191,7 @@ msgid "Clear"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Clear Cache"
 msgstr ""
 
@@ -4137,6 +4225,7 @@ msgstr ""
 #: apps/native/src/game/launch.rs
 #: apps/native/src/library/selection_bar.rs
 #: apps/native/src/settings/addons.rs
+#: apps/native/src/settings/emulation/detection.rs
 #: apps/native/src/settings/plugins.rs
 #: apps/native/src/settings/reset.rs
 #: apps/native/src/settings/streaming.rs
@@ -4165,6 +4254,7 @@ msgid "Close button"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
+#: apps/native/src/settings/emulation/detection.rs
 msgid "Close emulator detection"
 msgstr ""
 
@@ -4174,6 +4264,7 @@ msgid "Close keyboard"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Close profile editor"
 msgstr ""
 
@@ -4194,6 +4285,7 @@ msgid "Collections"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgctxt "RomM server"
 msgid "Collections"
 msgstr ""
@@ -4224,10 +4316,12 @@ msgstr ""
 
 #. <none> is typed as is; don't translate it
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Comma-separated, without dots. <none> matches a file without an extension."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
+#: apps/native/src/settings/emulation/fields.rs
 msgid "Command line"
 msgstr ""
 
@@ -4287,6 +4381,7 @@ msgid "Configure"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/mod.rs
 msgid "Configure emulators, choose platform defaults and find your ROM collection."
 msgstr ""
 
@@ -4314,10 +4409,12 @@ msgid "Connect"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Connect a RomM server to add its ROMs to your library. Each game downloads when you first play it and runs with your emulators."
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Connect a server"
 msgstr ""
 
@@ -4343,6 +4440,7 @@ msgstr ""
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Connected"
 msgstr ""
 
@@ -4360,6 +4458,7 @@ msgstr ""
 #. A RomM server's status, with the server's version
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Connected · v{version}"
 msgstr ""
 
@@ -4372,6 +4471,7 @@ msgstr ""
 #. A RomM server's status
 #: apps/desktop/src/onboarding/run.ts
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Connecting…"
 msgstr ""
 
@@ -4611,6 +4711,7 @@ msgid "Could not review the dropped file."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Couldn't check which platforms need an emulator: {error}"
 msgstr ""
 
@@ -4689,6 +4790,7 @@ msgid "Create"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Credentials are kept in the system keychain."
 msgstr ""
 
@@ -4753,6 +4855,7 @@ msgstr ""
 
 #: apps/desktop/src/api/emulation.ts
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Custom profile"
 msgstr ""
 
@@ -4770,6 +4873,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/native/src/settings/backup.rs
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Daily"
 msgstr ""
 
@@ -4823,11 +4927,13 @@ msgstr ""
 #. The release the game's Play starts
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Default"
 msgstr ""
 
 #. Use the specification's arguments
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgctxt "emulator arguments"
 msgid "Default"
 msgstr ""
@@ -4840,6 +4946,7 @@ msgid "Default"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgctxt "playtime tracking"
 msgid "Default"
 msgstr ""
@@ -4863,11 +4970,13 @@ msgid "Default · {status}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
+#: apps/native/src/settings/emulation/platforms.rs
 msgctxt "table column"
 msgid "Default emulator"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
+#: apps/native/src/settings/emulation/platforms.rs
 msgid "Default emulator for {platform}"
 msgstr ""
 
@@ -4877,6 +4986,7 @@ msgid "default location"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
+#: apps/native/src/settings/emulation/platforms.rs
 msgid "Default profile is unavailable"
 msgstr ""
 
@@ -4886,6 +4996,7 @@ msgid "default torrent app"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
+#: apps/native/src/settings/emulation/platforms.rs
 msgid "Defaults apply to compatible games that use Platform default. BIOS folders are saved per platform."
 msgstr ""
 
@@ -5019,6 +5130,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/EmulatorSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/emulation/mod.rs
 #: apps/native/src/settings/search.rs
 msgid "Desktop full screen"
 msgstr ""
@@ -5063,10 +5175,14 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/detection.rs
+#: apps/native/src/settings/emulation/mod.rs
+#: apps/native/src/settings/emulation/platforms.rs
 msgid "Detect emulators"
 msgstr ""
 
 #: apps/desktop/src/api/emulationTransport.ts
+#: apps/native/src/settings/emulation/detection.rs
 msgid "Detection cancelled · {found} found"
 msgstr ""
 
@@ -5148,11 +5264,13 @@ msgstr ""
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 #: apps/native/src/settings/unsaved.rs
 msgid "Discard"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Discard review"
 msgstr ""
 
@@ -5220,6 +5338,7 @@ msgid "Does not run installer code"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Don't download OneDrive, Dropbox or iCloud placeholders to scan them."
 msgstr ""
 
@@ -5250,6 +5369,7 @@ msgid "Done"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgctxt "download status"
 msgid "Done"
 msgstr ""
@@ -5296,16 +5416,19 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/emulation/romm.rs
 #: apps/native/src/settings/search.rs
 msgid "Download cache"
 msgstr ""
 
 #. How an emulator Caskade installs is updated
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Download only"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Download only: Reinstall gets the newest build."
 msgstr ""
 
@@ -5332,15 +5455,18 @@ msgid "Downloading"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgctxt "download status"
 msgid "Downloading"
 msgstr ""
 
 #: apps/desktop/src/api/emulatorSetup.ts
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Downloading {done}"
 msgstr ""
 
 #: apps/desktop/src/api/emulatorSetup.ts
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Downloading {done} of {total}"
 msgstr ""
 
@@ -5361,6 +5487,7 @@ msgstr ""
 
 #: apps/desktop/src/api/emulatorSetup.ts
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/emulation/setup.rs
 #: apps/native/src/settings/general.rs
 msgid "Downloading…"
 msgstr ""
@@ -5372,6 +5499,7 @@ msgid "Downloading… {0}%"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgctxt "RomM"
 msgid "Downloads"
 msgstr ""
@@ -5446,6 +5574,7 @@ msgid "Edit {name}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Edit {profile}"
 msgstr ""
 
@@ -5466,6 +5595,7 @@ msgid "Edit rules…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Edit scanner"
 msgstr ""
 
@@ -5481,6 +5611,7 @@ msgid "Edit selected…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Edit server"
 msgstr ""
 
@@ -5502,6 +5633,7 @@ msgstr ""
 
 #. romm-cache is a folder name; keep it as is
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Empty uses romm-cache on your default storage location. Now: {folder}"
 msgstr ""
 
@@ -5520,6 +5652,7 @@ msgid "Emulated"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/mod.rs
 msgid "Emulation"
 msgstr ""
 
@@ -5532,10 +5665,12 @@ msgid "Emulation"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/mod.rs
 msgid "Emulation overview"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/mod.rs
 msgid "Emulation section"
 msgstr ""
 
@@ -5547,6 +5682,7 @@ msgstr ""
 
 #. ROM scanners table column
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Emulator · Profile"
 msgstr ""
 
@@ -5564,6 +5700,7 @@ msgid "Emulator configuration"
 msgstr ""
 
 #: apps/desktop/src/api/emulationTransport.ts
+#: apps/native/src/settings/emulation/detection.rs
 msgid "Emulator detection failed."
 msgstr ""
 
@@ -5576,26 +5713,32 @@ msgid "Emulator detection was cancelled."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Emulator executable"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Emulator folder"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Emulator for {platform}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Emulator name"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Emulator not found"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Emulator profile"
 msgstr ""
 
@@ -5616,6 +5759,8 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/emulation/emulators.rs
+#: apps/native/src/settings/emulation/mod.rs
 #: apps/native/src/settings/search.rs
 msgctxt "emulation section"
 msgid "Emulators"
@@ -5632,10 +5777,12 @@ msgid "emulators Caskade installed"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/mod.rs
 msgid "Emulators could not be loaded."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Emulators to install"
 msgstr ""
 
@@ -5700,6 +5847,7 @@ msgstr ""
 
 #. Opens a RomM server's editor at its API token
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Enter API token"
 msgstr ""
 
@@ -5710,6 +5858,7 @@ msgid "Enter for results · Esc to cancel · Backspace to delete"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Enter the API token for {server}"
 msgstr ""
 
@@ -5725,14 +5874,17 @@ msgstr ""
 
 #. Environment variables
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Environment"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Environment name {row}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Environment value {row}"
 msgstr ""
 
@@ -5784,6 +5936,7 @@ msgstr ""
 
 #. How often a RomM server syncs
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Every 6 hours"
 msgstr ""
 
@@ -5803,6 +5956,7 @@ msgstr ""
 
 #. How often a RomM server syncs
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Every hour"
 msgstr ""
 
@@ -5838,11 +5992,13 @@ msgid "exact result"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Exclusions"
 msgstr ""
 
 #. An emulator profile's program
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Executable"
 msgstr ""
 
@@ -5852,6 +6008,7 @@ msgid "Expired: the link doesn't work any more."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
+#: apps/native/src/settings/emulation/platforms.rs
 msgctxt "table column"
 msgid "Extensions"
 msgstr ""
@@ -5866,10 +6023,12 @@ msgstr ""
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
 #: apps/native/src/game/emulation.rs
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Extra arguments"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
+#: apps/native/src/settings/emulation/detection.rs
 msgid "Extra folder"
 msgstr ""
 
@@ -5886,6 +6045,7 @@ msgid "Failed"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgctxt "download status"
 msgid "Failed"
 msgstr ""
@@ -5944,6 +6104,7 @@ msgid "File"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "File types"
 msgstr ""
 
@@ -5951,6 +6112,7 @@ msgstr ""
 #. The file extensions an emulator profile opens
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "File types: {extensions}"
 msgstr ""
 
@@ -5966,10 +6128,12 @@ msgid "Files"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Files and folders every scanner skips, from its next scan."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Files and folders this scanner always skips. Unticking a game in a review adds it here."
 msgstr ""
 
@@ -5984,6 +6148,7 @@ msgid "Files your plugins keep."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Find ROMs inside zip and 7z files the profile can't open directly."
 msgstr ""
 
@@ -6031,6 +6196,7 @@ msgid "Flatpak app id"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Flatpak app ID"
 msgstr ""
 
@@ -6041,6 +6207,7 @@ msgid "Flatpak apps"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Flatpak keeps it up to date."
 msgstr ""
 
@@ -6052,6 +6219,9 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/emulation/emulators.rs
+#: apps/native/src/settings/emulation/fields.rs
+#: apps/native/src/settings/emulation/scanners.rs
 #: apps/native/src/settings/storage.rs
 msgid "Folder"
 msgstr ""
@@ -6086,6 +6256,7 @@ msgid "For a device on another network, or one that isn't found by itself."
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "For a server on your home network without a public certificate."
 msgstr ""
 
@@ -6141,6 +6312,7 @@ msgstr ""
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
 #: apps/native/src/game/emulation.rs
+#: apps/native/src/settings/emulation/fields.rs
 msgid "Found"
 msgstr ""
 
@@ -6182,10 +6354,12 @@ msgid "From plugins"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "From profile"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "From profile ({platforms})"
 msgstr ""
 
@@ -6194,6 +6368,7 @@ msgid "From Steam, Epic, GOG, Heroic, Lutris and more."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/FromDevices.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "From your other devices"
 msgstr ""
 
@@ -6351,6 +6526,7 @@ msgstr ""
 #. ROM scanners table column
 #: apps/desktop/src/views/library/VirtualLibrary.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Games"
 msgstr ""
 
@@ -6396,6 +6572,7 @@ msgid "games and their saves"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
+#: apps/native/src/settings/emulation/platforms.rs
 msgid "Games ask which emulator to use."
 msgstr ""
 
@@ -6425,6 +6602,7 @@ msgid "Games from {name}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Games from a server you can't reach stay in your library. Downloaded ones still play; the rest show as unavailable until the server is back."
 msgstr ""
 
@@ -6449,6 +6627,7 @@ msgid "games joining the library"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Games launch with"
 msgstr ""
 
@@ -6492,6 +6671,7 @@ msgid "Games that match every rule, as the library changes"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Games that play with this profile need another one."
 msgstr ""
 
@@ -6563,11 +6743,14 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/emulation/mod.rs
+#: apps/native/src/settings/emulation/setup.rs
 #: apps/native/src/settings/search.rs
 msgid "Get emulators"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Get from RomM"
 msgstr ""
 
@@ -6609,6 +6792,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/emulation/scanners.rs
 #: apps/native/src/settings/search.rs
 msgid "Global exclusions"
 msgstr ""
@@ -6622,11 +6806,13 @@ msgstr ""
 
 #. BIOS files downloaded from the user's RomM server
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Got {files} from RomM."
 msgstr ""
 
 #. BIOS files downloaded from RomM
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Got {files}."
 msgstr ""
 
@@ -6827,6 +7013,7 @@ msgid "How do you play?"
 msgstr ""
 
 #: apps/desktop/src/views/settings/EmulatorSettings.tsx
+#: apps/native/src/settings/emulation/mod.rs
 msgid "How emulated games open."
 msgstr ""
 
@@ -6996,6 +7183,7 @@ msgstr ""
 
 #. Import this game from the scan
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Import"
 msgstr ""
 
@@ -7005,10 +7193,12 @@ msgid "Import"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Import {platform}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Import everything, including platforms added later"
 msgstr ""
 
@@ -7024,6 +7214,7 @@ msgid "Import image…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Import new ROMs whenever the library updates, without a review."
 msgstr ""
 
@@ -7035,10 +7226,12 @@ msgid "Import play time"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
+#: apps/native/src/settings/emulation/detection.rs
 msgid "Import selected"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
+#: apps/native/src/settings/emulation/detection.rs
 msgid "Import selected ({count})"
 msgstr ""
 
@@ -7055,6 +7248,8 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/detection.rs
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Importing…"
 msgstr ""
 
@@ -7068,6 +7263,7 @@ msgid "In library"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgctxt "RomM server column"
 msgid "In library"
 msgstr ""
@@ -7103,19 +7299,23 @@ msgid "In your library"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Include {name} in library update"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Include in library update"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Include in library updates"
 msgstr ""
 
 #. Inserts a launch variable into the arguments
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Insert {variable}: {description}"
 msgstr ""
 
@@ -7132,6 +7332,7 @@ msgid "Install"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgctxt "emulator"
 msgid "Install"
 msgstr ""
@@ -7153,6 +7354,7 @@ msgid "Install {emulator}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Install {name}"
 msgstr ""
 
@@ -7264,6 +7466,7 @@ msgid "Install this game?"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Install type"
 msgstr ""
 
@@ -7312,6 +7515,7 @@ msgid "Installed"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgctxt "emulator"
 msgid "Installed"
 msgstr ""
@@ -7350,10 +7554,12 @@ msgstr ""
 #. An emulator's installed version
 #: apps/desktop/src/api/emulatorSetup.ts
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Installed {version}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Installed by Caskade"
 msgstr ""
 
@@ -7665,10 +7871,12 @@ msgid "It's checked once a day while online."
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Its games leave your library, the ROMs downloaded from it are deleted and its sign-in is forgotten. Devices that sync RomM servers remove it too."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Its games stay in your library as not installed, because Caskade no longer looks for their ROMs. Your ROM files aren't touched."
 msgstr ""
 
@@ -7693,6 +7901,7 @@ msgid "Its name and description are a spoiler until you unlock it."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Its profiles go with it, and platforms that played with it need another emulator. Its own files stay where they are."
 msgstr ""
 
@@ -7775,10 +7984,12 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/fields.tsx
 #: apps/desktop/src/views/settings/emulators/FromDevices.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Keep mine"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Keep my arguments"
 msgstr ""
 
@@ -7802,6 +8013,7 @@ msgid "Keep them"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/FromDevices.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Keep this device's emulator for {platform}"
 msgstr ""
 
@@ -7908,10 +8120,12 @@ msgstr ""
 
 #. ROM scanners table column
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Last scan"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Last scan: {added} added, {updated} updated, {missing} missing."
 msgstr ""
 
@@ -7921,6 +8135,7 @@ msgid "Last source reports"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgctxt "RomM server column"
 msgid "Last sync"
 msgstr ""
@@ -7949,6 +8164,7 @@ msgstr ""
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/native/src/game/emulation.rs
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Launch with"
 msgstr ""
 
@@ -7992,6 +8208,7 @@ msgid "Launches"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgctxt "RomM platform column"
 msgid "Launches with"
 msgstr ""
@@ -8006,6 +8223,7 @@ msgid "Leave it off"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Leave out of library updates"
 msgstr ""
 
@@ -8146,6 +8364,7 @@ msgstr ""
 
 #. The download cache's size limit, as a size
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "limit {size}"
 msgstr ""
 
@@ -8249,6 +8468,8 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/mod.rs
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Loading emulators…"
 msgstr ""
 
@@ -8269,6 +8490,7 @@ msgid "Loading games…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Loading global exclusions…"
 msgstr ""
 
@@ -8297,10 +8519,12 @@ msgid "Loading recent games…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Loading ROM scanners…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Loading RomM servers…"
 msgstr ""
 
@@ -8365,6 +8589,7 @@ msgid "Locate the installer…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgctxt "RomM download cache"
 msgid "Location"
 msgstr ""
@@ -8462,10 +8687,12 @@ msgid "Look for compatibility prefixes inside your home directory."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Look in every folder below the scan folder."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Look inside archives"
 msgstr ""
 
@@ -8495,6 +8722,7 @@ msgid "Looking for launchers on this device…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Looking on RomM…"
 msgstr ""
 
@@ -8613,6 +8841,7 @@ msgid "Mark unread: {title}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Match a platform to import these ROMs."
 msgstr ""
 
@@ -8653,6 +8882,7 @@ msgstr ""
 
 #. Followed by the file extensions the scanner's profile matches
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Matches"
 msgstr ""
 
@@ -8720,6 +8950,7 @@ msgid "Memory used"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Merge into one game"
 msgstr ""
 
@@ -8760,6 +8991,7 @@ msgstr ""
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
 #: apps/native/src/game/emulation.rs
+#: apps/native/src/settings/emulation/fields.rs
 msgid "Missing"
 msgstr ""
 
@@ -8773,10 +9005,12 @@ msgstr ""
 #. An emulator profile's status
 #. An emulator profile's status
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Missing files"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
+#: apps/native/src/settings/emulation/detection.rs
 msgid "Missing required files"
 msgstr ""
 
@@ -8784,6 +9018,7 @@ msgstr ""
 #: apps/desktop/src/views/activity/JobCard.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/native/src/activity/card.rs
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Missing: {path}"
 msgstr ""
 
@@ -8939,6 +9174,7 @@ msgid "Name"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgctxt "RomM server"
 msgid "Name"
 msgstr ""
@@ -9011,6 +9247,7 @@ msgstr ""
 
 #. A scanner's last scan
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Never"
 msgstr ""
 
@@ -9027,6 +9264,7 @@ msgid "Never played"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Never remove favourites"
 msgstr ""
 
@@ -9048,23 +9286,28 @@ msgstr ""
 
 #. The name a new emulator starts with
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "New emulator"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "New exclusion pattern"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "New global exclusion pattern"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "New ROM scanner"
 msgstr ""
 
 #. A new ROM scanner's name until it's renamed
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "New scanner"
 msgstr ""
 
@@ -9074,6 +9317,7 @@ msgid "New script"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "New server"
 msgstr ""
 
@@ -9154,10 +9398,12 @@ msgstr ""
 
 #. After a RomM sync's counts: RomM platforms, by slug, that match none of Caskade's
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "no Caskade platform for {platforms}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
+#: apps/native/src/settings/emulation/platforms.rs
 msgid "No configured profiles or ROMs yet."
 msgstr ""
 
@@ -9180,6 +9426,7 @@ msgid "No description yet."
 msgstr ""
 
 #: apps/desktop/src/api/emulationTransport.ts
+#: apps/native/src/settings/emulation/detection.rs
 msgid "No detection run yet."
 msgstr ""
 
@@ -9208,10 +9455,12 @@ msgid "No emulator for {platforms}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "No emulators yet. Detect installed emulators or add one by hand."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "No exclusions."
 msgstr ""
 
@@ -9273,11 +9522,13 @@ msgstr ""
 
 #. The download cache has no size limit
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "no limit"
 msgstr ""
 
 #. The download cache's size limit
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "No limit"
 msgstr ""
 
@@ -9298,6 +9549,7 @@ msgid "No matches. Search the library for “{query}”"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
+#: apps/native/src/settings/emulation/detection.rs
 msgid "No matching emulators found. Try a portable emulator folder."
 msgstr ""
 
@@ -9342,6 +9594,7 @@ msgid "No plugins yet. Get one from the catalogue below, install one from a fold
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "No profiles yet. Add a built-in or custom profile before launching games."
 msgstr ""
 
@@ -9370,14 +9623,17 @@ msgid "No release for this system"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "No ROM scanners yet. Add one for each ROM folder."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "No RomM server has them."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "No ROMs matched this scanner's profile."
 msgstr ""
 
@@ -9470,6 +9726,7 @@ msgid "None"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
+#: apps/native/src/settings/emulation/platforms.rs
 msgctxt "default emulator"
 msgid "None"
 msgstr ""
@@ -9477,11 +9734,14 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
+#: apps/native/src/settings/emulation/platforms.rs
 msgctxt "file extensions"
 msgid "None"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "None (custom)"
 msgstr ""
 
@@ -9491,6 +9751,7 @@ msgstr ""
 
 #. An emulator profile's platforms
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "None selected"
 msgstr ""
 
@@ -9530,10 +9791,13 @@ msgstr ""
 #. BIOS issues
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/fields.rs
+#: apps/native/src/settings/emulation/mod.rs
 msgid "Not checked"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Not checked for updates yet."
 msgstr ""
 
@@ -9581,6 +9845,7 @@ msgstr ""
 #: apps/desktop/src/views/PlaceholderView.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/native/src/frame/views.rs
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Not found"
 msgstr ""
 
@@ -9617,6 +9882,7 @@ msgstr ""
 
 #. No Caskade platform matches a RomM platform
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Not matched"
 msgstr ""
 
@@ -9627,6 +9893,7 @@ msgstr ""
 
 #. No BIOS files are needed
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
+#: apps/native/src/settings/emulation/fields.rs
 msgid "Not needed"
 msgstr ""
 
@@ -9687,11 +9954,13 @@ msgstr ""
 #. A RomM server's status: its connection hasn't been tried
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Not tested"
 msgstr ""
 
 #. A RomM server's last sync: none yet
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Not this session"
 msgstr ""
 
@@ -10073,6 +10342,7 @@ msgstr ""
 
 #. How often a RomM server syncs
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Only when I ask"
 msgstr ""
 
@@ -10222,6 +10492,7 @@ msgstr ""
 
 #. A BIOS file
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
+#: apps/native/src/settings/emulation/fields.rs
 msgid "Optional"
 msgstr ""
 
@@ -10237,6 +10508,7 @@ msgid "Optional while you're the only account: 4 to 8 digits that lock it."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Optional. A command to run first; if it fails, the game doesn't start."
 msgstr ""
 
@@ -10277,6 +10549,7 @@ msgid "Order at launch"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgctxt "playtime tracking"
 msgid "Original process only"
 msgstr ""
@@ -10469,6 +10742,7 @@ msgstr ""
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 #: apps/native/src/settings/streaming.rs
 msgid "Password"
 msgstr ""
@@ -10510,6 +10784,7 @@ msgstr ""
 
 #. How to write an exclusion pattern
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Patterns"
 msgstr ""
 
@@ -10551,6 +10826,7 @@ msgid "PiB"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Pick up new and changed ROMs when Caskade opens."
 msgstr ""
 
@@ -10609,6 +10885,7 @@ msgstr ""
 #: apps/desktop/src/views/store/StoreGameView.tsx
 #: apps/desktop/src/views/StoreView.tsx
 #: apps/native/src/flows/shares_common.rs
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Platform"
 msgstr ""
 
@@ -10629,6 +10906,8 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/native/src/game/emulation.rs
+#: apps/native/src/settings/emulation/romm_editor.rs
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Platform default"
 msgstr ""
 
@@ -10639,6 +10918,7 @@ msgid "Platform default ({resolvedProfile})"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Platform of {title}"
 msgstr ""
 
@@ -10657,17 +10937,22 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/emulation/emulators.rs
+#: apps/native/src/settings/emulation/mod.rs
+#: apps/native/src/settings/emulation/platforms.rs
 #: apps/native/src/settings/search.rs
 msgctxt "emulation section"
 msgid "Platforms"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgctxt "RomM server"
 msgid "Platforms"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/mod.rs
 msgid "Platforms ready"
 msgstr ""
 
@@ -10675,6 +10960,7 @@ msgstr ""
 #. An emulator profile's platforms
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Platforms: {platforms}"
 msgstr ""
 
@@ -10715,6 +11001,7 @@ msgid "Play anyway"
 msgstr ""
 
 #: apps/desktop/src/views/settings/EmulatorSettings.tsx
+#: apps/native/src/settings/emulation/mod.rs
 msgid "Play emulated games fullscreen in desktop mode too. Console mode always does."
 msgstr ""
 
@@ -10827,6 +11114,7 @@ msgstr ""
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/settings/EmulatorSettings.tsx
 #: apps/native/src/game/page.rs
+#: apps/native/src/settings/emulation/mod.rs
 msgid "Playing"
 msgstr ""
 
@@ -10860,6 +11148,7 @@ msgid "Playing on {devices}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Playlists absorb the files they list, so disc tracks aren't separate games."
 msgstr ""
 
@@ -10904,6 +11193,7 @@ msgid "Playtime counts while the program or anything it started runs."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Playtime tracking"
 msgstr ""
 
@@ -11089,20 +11379,24 @@ msgid "Problems"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgctxt "playtime tracking"
 msgid "Process name"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgctxt "playtime tracking"
 msgid "Process tree"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Profile name"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Profile scripts"
 msgstr ""
 
@@ -11111,6 +11405,7 @@ msgid "Profile status is missing for {profile}. Refresh the list."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgctxt "emulator profiles"
 msgid "Profiles"
 msgstr ""
@@ -11290,6 +11585,7 @@ msgid "Reading the installer"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
+#: apps/native/src/settings/emulation/detection.rs
 msgid "Reads standard locations and the optional folder. Detection does not launch emulators."
 msgstr ""
 
@@ -11307,6 +11603,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/native/src/frame/status_bar.rs
 #: apps/native/src/game/emulation.rs
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Ready"
 msgstr ""
 
@@ -11411,6 +11708,7 @@ msgstr ""
 
 #. The emulator Caskade recommends for a platform
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Recommended: {name}"
 msgstr ""
 
@@ -11535,15 +11833,18 @@ msgid "Region"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Regions for selected games"
 msgstr ""
 
 #. Regions are comma-separated region codes; keep the example code
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Regions, e.g. usa"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Regions: {regions}"
 msgstr ""
 
@@ -11552,11 +11853,13 @@ msgid "Registry key"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgctxt "emulator"
 msgid "Reinstall"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Reinstall {name}"
 msgstr ""
 
@@ -11669,11 +11972,15 @@ msgstr ""
 #: apps/native/src/activity/card.rs
 #: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/settings/discovery.rs
+#: apps/native/src/settings/emulation/emulators.rs
+#: apps/native/src/settings/emulation/romm_editor.rs
+#: apps/native/src/settings/emulation/scanners.rs
 #: apps/native/src/settings/stores.rs
 msgid "Remove"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgctxt "environment row"
 msgid "Remove"
 msgstr ""
@@ -11708,6 +12015,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 #: apps/native/src/settings/stores.rs
 msgid "Remove {name}?"
 msgstr ""
@@ -11718,14 +12026,17 @@ msgid "Remove {name}'s PIN?"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Remove {profile}…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Remove {scanner}?"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Remove {server}?"
 msgstr ""
 
@@ -11745,14 +12056,17 @@ msgid "Remove {value}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Remove emulator…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Remove environment row {row}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Remove exclusion {pattern}"
 msgstr ""
 
@@ -11767,6 +12081,7 @@ msgid "Remove from library…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Remove global exclusion {pattern}"
 msgstr ""
 
@@ -11805,6 +12120,8 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
+#: apps/native/src/settings/emulation/scanners.rs
 #: apps/native/src/settings/stores.rs
 msgid "Remove…"
 msgstr ""
@@ -11827,6 +12144,9 @@ msgstr ""
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/native/src/game_menu/dialogs.rs
 #: apps/native/src/library/web.rs
+#: apps/native/src/settings/emulation/emulators.rs
+#: apps/native/src/settings/emulation/romm_editor.rs
+#: apps/native/src/settings/emulation/scanners.rs
 #: apps/native/src/settings/pin.rs
 msgid "Removing…"
 msgstr ""
@@ -11848,16 +12168,19 @@ msgstr ""
 
 #. Replace the specification's arguments
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgctxt "emulator arguments"
 msgid "Replace"
 msgstr ""
 
 #. The arguments a Replace override was saved with
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Replaced then: {args}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Replacement arguments"
 msgstr ""
 
@@ -11873,6 +12196,7 @@ msgstr ""
 
 #. A BIOS file
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
+#: apps/native/src/settings/emulation/fields.rs
 msgid "Required"
 msgstr ""
 
@@ -11884,6 +12208,7 @@ msgstr ""
 
 #. A file an emulator profile needs
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Requires: {path}"
 msgstr ""
 
@@ -11982,6 +12307,7 @@ msgid "Resolved"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
+#: apps/native/src/settings/emulation/fields.rs
 msgid "Resolved command line"
 msgstr ""
 
@@ -12147,6 +12473,7 @@ msgid "Review possible games"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Review scan results"
 msgstr ""
 
@@ -12168,6 +12495,7 @@ msgid "ROM"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "ROM folder"
 msgstr ""
 
@@ -12190,11 +12518,14 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/emulation/mod.rs
+#: apps/native/src/settings/emulation/scanners.rs
 #: apps/native/src/settings/search.rs
 msgid "ROM scanners"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "ROM scanners could not be loaded."
 msgstr ""
 
@@ -12204,10 +12535,12 @@ msgid "RomM"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "RomM downloads"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "RomM is a self-hosted ROM manager. Connect yours and every ROM on it shows up in your library, with artwork, without downloading anything up front."
 msgstr ""
 
@@ -12217,6 +12550,7 @@ msgid "RomM platform"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/mod.rs
 msgid "RomM server"
 msgstr ""
 
@@ -12224,25 +12558,30 @@ msgstr ""
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/native/src/settings/devices.rs
+#: apps/native/src/settings/emulation/romm.rs
 #: apps/native/src/settings/search.rs
 msgid "RomM servers"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "RomM servers couldn't be loaded"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgctxt "RomM platform column"
 msgid "ROMs"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
+#: apps/native/src/settings/emulation/platforms.rs
 msgctxt "table column"
 msgid "ROMs"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "ROMs download the first time you play them and stay here, so they start instantly and work offline."
 msgstr ""
 
@@ -12252,14 +12591,17 @@ msgid "ROMs downloaded from RomM"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/mod.rs
 msgid "ROMs found"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "ROMs of {title}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "ROMs on this server appear in your library. They download the first time you play them."
 msgstr ""
 
@@ -12403,6 +12745,7 @@ msgstr ""
 
 #. placeholder {0}: preview.sampleRom
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
+#: apps/native/src/settings/emulation/fields.rs
 msgid "Sample ROM: {0}"
 msgstr ""
 
@@ -12424,6 +12767,7 @@ msgid "Save action"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Save and scan"
 msgstr ""
 
@@ -12433,6 +12777,7 @@ msgid "Save as collection"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Save changes"
 msgstr ""
 
@@ -12442,6 +12787,7 @@ msgid "Save CSS"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Save emulator"
 msgstr ""
 
@@ -12500,10 +12846,12 @@ msgid "save manifest"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Save profile"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Save scanner"
 msgstr ""
 
@@ -12513,6 +12861,7 @@ msgid "Save script"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Save server"
 msgstr ""
 
@@ -12532,10 +12881,12 @@ msgid "Saved"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Saved in keychain"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Saved scans that turn ROM folders into games. Multi-disc games and playlists import as one game."
 msgstr ""
 
@@ -12578,6 +12929,7 @@ msgid "Saves stay on this device. Saves in What syncs above changes that."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Saving another emulator here removes the old one's built-in profiles. Your own profiles are kept."
 msgstr ""
 
@@ -12608,6 +12960,8 @@ msgstr ""
 #: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/devices.rs
+#: apps/native/src/settings/emulation/emulators.rs
+#: apps/native/src/settings/emulation/scanners.rs
 #: apps/native/src/settings/state.rs
 #: apps/native/src/settings/unsaved.rs
 msgid "Saving…"
@@ -12616,18 +12970,22 @@ msgstr ""
 #. Run the ROM scanner
 #. Run the ROM scanner
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Scan"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Scan {name}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/mod.rs
 msgid "Scan all"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
+#: apps/native/src/settings/emulation/mod.rs
 msgid "Scan all runs the ROM scanners included in library updates. Add one under ROM Scanners."
 msgstr ""
 
@@ -12637,6 +12995,7 @@ msgid "Scan behaviour"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Scan cancelled."
 msgstr ""
 
@@ -12645,10 +13004,12 @@ msgid "Scan cancelled. Retry in Settings → Library."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Scan failed: {error}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Scan failed: unknown error"
 msgstr ""
 
@@ -12663,6 +13024,7 @@ msgid "Scan now"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Scan subfolders"
 msgstr ""
 
@@ -12688,6 +13050,7 @@ msgid "Scanner"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Scanner name"
 msgstr ""
 
@@ -12712,6 +13075,8 @@ msgstr ""
 #: apps/desktop/src/onboarding/run.ts
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/mod.rs
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Scanning…"
 msgstr ""
 
@@ -12785,6 +13150,7 @@ msgid "Search"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
+#: apps/native/src/settings/emulation/detection.rs
 msgid "Search again"
 msgstr ""
 
@@ -12858,10 +13224,12 @@ msgid "Searching IGDB…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
+#: apps/native/src/settings/emulation/detection.rs
 msgid "Searching…"
 msgstr ""
 
 #: apps/desktop/src/api/emulationTransport.ts
+#: apps/native/src/settings/emulation/detection.rs
 msgid "Searching… {found} found so far"
 msgstr ""
 
@@ -12901,12 +13269,14 @@ msgid "Select"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Select {title}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
 #: apps/native/src/settings/discovery.rs
+#: apps/native/src/settings/emulation/scanners.rs
 #: apps/native/src/ui/text_field.rs
 msgid "Select all"
 msgstr ""
@@ -12982,11 +13352,13 @@ msgid "Separating…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgctxt "RomM server column"
 msgid "Server"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Server address"
 msgstr ""
 
@@ -13006,6 +13378,7 @@ msgid "Set"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Set by Caskade for this emulator"
 msgstr ""
 
@@ -13024,14 +13397,17 @@ msgid "Set PIN…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Set platform of selected games"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Set platform…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Set regions"
 msgstr ""
 
@@ -13066,6 +13442,7 @@ msgid "Setting up asks once for an administrator's permission."
 msgstr ""
 
 #: apps/desktop/src/api/emulatorSetup.ts
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Setting up…"
 msgstr ""
 
@@ -13255,6 +13632,7 @@ msgid "Show ports of games"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Show settings"
 msgstr ""
 
@@ -13302,6 +13680,7 @@ msgstr ""
 
 #. Opens a RomM server's editor at its password
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Sign in"
 msgstr ""
 
@@ -13321,6 +13700,7 @@ msgid "Sign in to {provider} as {name} again to see these achievements."
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Sign in to {server}"
 msgstr ""
 
@@ -13336,6 +13716,7 @@ msgstr ""
 #. Followed by the ways to sign in to a RomM server
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Sign in with"
 msgstr ""
 
@@ -13349,6 +13730,7 @@ msgstr ""
 #. A RomM server's status: this device has no working password or API token for it
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Sign-in needed on this device"
 msgstr ""
 
@@ -13358,14 +13740,17 @@ msgid "Sign-ins are kept in your system's keychain, never in Caskade's settings 
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Sign-ins don't: each device signs in to a server on its own."
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Sign-ins stay on each device. Enter this server's API token here to import its games."
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Sign-ins stay on each device. Sign in here to import this server's games."
 msgstr ""
 
@@ -13404,6 +13789,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/emulation/romm.rs
 #: apps/native/src/settings/search.rs
 msgid "Size limit"
 msgstr ""
@@ -13421,6 +13807,7 @@ msgid "Skip"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Skip cloud-only files"
 msgstr ""
 
@@ -13441,11 +13828,13 @@ msgstr ""
 #: apps/native/src/game/entry_update.rs
 #: apps/native/src/game/launch.rs
 #: apps/native/src/settings/addons.rs
+#: apps/native/src/settings/emulation/setup.rs
 #: apps/native/src/settings/streaming.rs
 msgid "Skip this version"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Skip this version of {name}"
 msgstr ""
 
@@ -13495,6 +13884,7 @@ msgstr ""
 
 #. An emulator's status
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Some profiles missing"
 msgstr ""
 
@@ -13565,10 +13955,12 @@ msgid "Space"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Split discs"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Split into arguments as a shell would, but no shell runs. Quote a value that has spaces."
 msgstr ""
 
@@ -13586,6 +13978,7 @@ msgid "Start Caskade when you log in."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Start from the new arguments"
 msgstr ""
 
@@ -13730,6 +14123,7 @@ msgid "Status"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgctxt "RomM server column"
 msgid "Status"
 msgstr ""
@@ -13769,11 +14163,13 @@ msgstr ""
 
 #. BIOS files
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Still missing: {files}."
 msgstr ""
 
 #. BIOS files; the folder to put them in
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Still missing: {files}. Put them in {dir}."
 msgstr ""
 
@@ -14052,10 +14448,12 @@ msgid "Sync"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Sync {server}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Sync in the background"
 msgstr ""
 
@@ -14068,10 +14466,13 @@ msgstr ""
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/native/src/settings/devices.rs
+#: apps/native/src/settings/emulation/romm.rs
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Sync now"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Sync on startup"
 msgstr ""
 
@@ -14120,6 +14521,8 @@ msgstr ""
 #: apps/desktop/src/onboarding/run.ts
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm.rs
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Syncing…"
 msgstr ""
 
@@ -14187,10 +14590,12 @@ msgid "Test"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Test connection"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Test the connection to see this server's platforms."
 msgstr ""
 
@@ -14338,6 +14743,7 @@ msgid "The image wasn't changed: {error}"
 msgstr ""
 
 #: apps/desktop/src/api/emulatorSetup.ts
+#: apps/native/src/settings/emulation/setup.rs
 msgid "The install failed"
 msgstr ""
 
@@ -14395,10 +14801,12 @@ msgid "The last try didn't reach {name}. It tries again in a moment."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "The last update check failed: {error}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "The least recently played games are removed first. 0 is no limit."
 msgstr ""
 
@@ -14456,6 +14864,7 @@ msgid "The PINs don't match. Try again."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "The profile decides which files match. Imported games launch with the choice below."
 msgstr ""
 
@@ -14552,6 +14961,7 @@ msgid "The update was cancelled."
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Their ROMs are imported even when their platform is off."
 msgstr ""
 
@@ -14718,6 +15128,7 @@ msgid "This device's sync key is gone"
 msgstr ""
 
 #: apps/desktop/src/api/emulationTransport.ts
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "This emulator no longer exists. Refresh the list."
 msgstr ""
 
@@ -14732,6 +15143,7 @@ msgid "This folder isn't there. Connect its drive, or choose another folder. Aut
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "This folder or file in the scan folder"
 msgstr ""
 
@@ -14786,6 +15198,7 @@ msgid "This may already be in your library"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "This name in any folder; * stands for any text"
 msgstr ""
 
@@ -14800,6 +15213,8 @@ msgid "This pairing link has expired. Make a new one on the other device (it sta
 msgstr ""
 
 #: apps/desktop/src/api/reply.ts
+#: apps/native/src/settings/emulation/mod.rs
+#: apps/native/src/settings/emulation/romm.rs
 msgid "This part of Caskade didn't start this session. Restarting Caskade may fix it."
 msgstr ""
 
@@ -14813,10 +15228,12 @@ msgid "This release is being updated. Play is available again when the update fi
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "This scanner's profile"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "This server has no ROMs yet."
 msgstr ""
 
@@ -14910,6 +15327,7 @@ msgid "Title has"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Title of {rom}"
 msgstr ""
 
@@ -14957,6 +15375,7 @@ msgid "Totals add up physical interfaces only, so traffic through a VPN, a conta
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Tracking folder"
 msgstr ""
 
@@ -15007,6 +15426,8 @@ msgstr ""
 #: apps/native/src/library/view.rs
 #: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/devices.rs
+#: apps/native/src/settings/emulation/scanners.rs
+#: apps/native/src/settings/emulation/setup.rs
 #: apps/native/src/settings/general.rs
 #: apps/native/src/settings/streaming.rs
 #: apps/native/src/ui/failure.rs
@@ -15074,6 +15495,7 @@ msgid "Type"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Type a path to skip that folder or file. Start with > to skip a name wherever it turns up: >*.txt skips every text file."
 msgstr ""
 
@@ -15159,6 +15581,7 @@ msgid "Unknown"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Unknown built-in profile"
 msgstr ""
 
@@ -15202,14 +15625,17 @@ msgstr ""
 
 #. A RomM server without a name
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgid "Unnamed"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Unnamed scanner"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Unnamed server"
 msgstr ""
 
@@ -15220,6 +15646,7 @@ msgid "Unpack the files"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgctxt "download status"
 msgid "Unpacking"
 msgstr ""
@@ -15230,6 +15657,7 @@ msgid "Unpacking the backup…"
 msgstr ""
 
 #: apps/desktop/src/api/emulatorSetup.ts
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Unpacking…"
 msgstr ""
 
@@ -15246,6 +15674,8 @@ msgstr ""
 #. A RomM server's status
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm.rs
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Unreachable"
 msgstr ""
 
@@ -15272,6 +15702,7 @@ msgid "Unsupported settings schema reference."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/emulation/scanners.rs
 msgid "Untick what isn't a game, fix titles, platforms and regions, and merge or split discs. Your choices are kept for later automatic scans."
 msgstr ""
 
@@ -15292,6 +15723,7 @@ msgid "Up to {age}+"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Up to date (checked {checked})."
 msgstr ""
 
@@ -15324,6 +15756,7 @@ msgid "Update"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Update {name} to {version}"
 msgstr ""
 
@@ -15376,6 +15809,7 @@ msgstr ""
 
 #. Updates an emulator to the named version
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Update to {version}"
 msgstr ""
 
@@ -15401,6 +15835,7 @@ msgstr ""
 
 #. How an emulator Caskade installs is updated
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Updated by Flatpak"
 msgstr ""
 
@@ -15418,6 +15853,7 @@ msgstr ""
 
 #. How an emulator Caskade installs is updated
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Updates automatically"
 msgstr ""
 
@@ -15428,6 +15864,7 @@ msgid "Updating"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
+#: apps/native/src/settings/emulation/fields.rs
 msgid "Updating preview…"
 msgstr ""
 
@@ -15514,12 +15951,14 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Username"
 msgstr ""
 
 #. How Caskade signs in to a RomM server
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Username & password"
 msgstr ""
 
@@ -15591,11 +16030,13 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/emulation/romm.rs
 #: apps/native/src/settings/search.rs
 msgid "Verify downloads"
 msgstr ""
 
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
+#: apps/native/src/settings/emulation/romm.rs
 msgctxt "download status"
 msgid "Verifying"
 msgstr ""
@@ -15702,6 +16143,7 @@ msgid "Waiting for a direct connection. Game files only travel directly between 
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/DetectionReview.tsx
+#: apps/native/src/settings/emulation/detection.rs
 msgid "Waiting for detection results…"
 msgstr ""
 
@@ -15736,6 +16178,7 @@ msgid "Waiting to pair"
 msgstr ""
 
 #: apps/desktop/src/api/emulatorSetup.ts
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Waiting…"
 msgstr ""
 
@@ -15992,10 +16435,12 @@ msgid "Where to keep the game"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Whether each profile can play, the files it needs and the command it runs."
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Which emulator"
 msgstr ""
 
@@ -16109,11 +16554,13 @@ msgid "Working"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/settings/emulation/emulators.rs
 msgid "Working directory"
 msgstr ""
 
 #. placeholder {0}: preview.cwd
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
+#: apps/native/src/settings/emulation/fields.rs
 msgid "Working directory: {0}"
 msgstr ""
 
@@ -16166,6 +16613,7 @@ msgstr ""
 
 #. A BIOS file's state
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
+#: apps/native/src/settings/emulation/fields.rs
 msgid "Wrong file"
 msgstr ""
 
@@ -16176,6 +16624,7 @@ msgid "Xbox and packaged apps"
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "You have games for these, but nothing to play them with. Caskade can download, install and set up an emulator for each in one click."
 msgstr ""
 
@@ -16295,6 +16744,7 @@ msgid "Your other devices know it by this name. Devices on the same network find
 msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/FromDevices.tsx
+#: apps/native/src/settings/emulation/setup.rs
 msgid "Your other devices play these platforms with an emulator this device doesn't have. Install it to use it here too, or keep this device's."
 msgstr ""
 

@@ -398,3 +398,38 @@ pub const ACCOUNT_PROFILE: Entry = Entry {
         "Settings → My profile: the signed-in account's own name, avatar and PIN.",
     )
 };
+
+pub const ROMM: Entry = Entry {
+    contains: &["settings-section", "romm-servers"],
+    container: true,
+    ..Entry::new(
+        "romm",
+        "RommPanel (apps/native/src/settings/emulation/romm.rs)",
+        Source::App,
+        "Settings → RomM servers: the server list, the selected server's editor, downloads and the cache.",
+    )
+};
+
+pub const ROMM_SERVERS: Entry = Entry {
+    parts: &[
+        (
+            "romm-server",
+            "A server's row (`data-status`: `untested`, `connected`, `offline`, `error` or `sign_in_needed`; `data-selected` while its editor is open).",
+        ),
+        (
+            "sign-in",
+            "Sign in or Enter API token on a server this device can't sign in to: opens its editor at the password or token (a `button`).",
+        ),
+        (
+            "sign-in-reason",
+            "Why a server needs signing in on this device: sign-ins stay on each device, or the server refused the saved one.",
+        ),
+    ],
+    contains: &["button", "status-dot"],
+    ..Entry::new(
+        "romm-servers",
+        "RommPanel (apps/native/src/settings/emulation/romm.rs)",
+        Source::App,
+        "The RomM server list: each server's state, games, last sync and its action (Sync now, or Sign in when this device can't sign in).",
+    )
+};

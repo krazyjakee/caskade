@@ -20,6 +20,7 @@ mod backup;
 mod devices;
 mod discovery;
 mod drafts;
+mod emulation;
 mod general;
 mod launchers;
 mod panels;

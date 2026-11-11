@@ -69,6 +69,9 @@ pub fn panel(tab: &'static str, sub: Option<String>) -> Element {
         "profile" => rsx! {
             super::accounts::ProfileSettings {}
         },
+        "emulators" => rsx! {
+            super::emulation::EmulationSettings { section: sub }
+        },
         _ => rsx! {
             Pending {}
         },

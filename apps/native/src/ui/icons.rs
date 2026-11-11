@@ -738,6 +738,86 @@ pub const TRASH: Icon = Icon(&[
     "M3 6h18",
     "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2",
 ]);
+/// lucide's `archive`.
+pub const ARCHIVE: Icon = Icon(&[
+    "M3 3h18a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-18a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1z",
+    "M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8",
+    "M10 12h4",
+]);
+/// lucide's `cloud-download`.
+pub const CLOUD_DOWNLOAD: Icon = Icon(&[
+    "M12 13v8l-4-4",
+    "m12 21 4-4",
+    "M4.393 15.269A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.436 8.284",
+]);
+/// lucide's `combine`.
+pub const COMBINE: Icon = Icon(&[
+    "M14 3a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1",
+    "M19 3a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1",
+    "m7 15 3 3",
+    "m7 21 3-3H5a2 2 0 0 1-2-2v-2",
+    "M15 14h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-5a1 1 0 0 1 1-1z",
+    "M4 3h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-5a1 1 0 0 1 1-1z",
+]);
+/// lucide's `funnel-x` (`filter-x`).
+pub const FILTER_X: Icon = Icon(&[
+    "M12.531 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14v6a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341l.427-.473",
+    "m16.5 3.5 5 5",
+    "m21.5 3.5-5 5",
+]);
+/// lucide's `folder-tree`.
+pub const FOLDER_TREE: Icon = Icon(&[
+    "M20 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2.5a1 1 0 0 1-.8-.4l-.9-1.2A1 1 0 0 0 15 3h-2a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1Z",
+    "M20 21a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-2.9a1 1 0 0 1-.88-.55l-.42-.85a1 1 0 0 0-.92-.6H13a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1Z",
+    "M3 5a2 2 0 0 0 2 2h3",
+    "M3 3v13a2 2 0 0 0 2 2h3",
+]);
+/// lucide's `layers`.
+pub const LAYERS: Icon = Icon(&[
+    "M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z",
+    "M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12",
+    "M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17",
+]);
+/// lucide's `maximize`.
+pub const MAXIMIZE: Icon = Icon(&[
+    "M8 3H5a2 2 0 0 0-2 2v3",
+    "M21 8V5a2 2 0 0 0-2-2h-3",
+    "M3 16v3a2 2 0 0 0 2 2h3",
+    "M16 21h3a2 2 0 0 0 2-2v-3",
+]);
+/// lucide's `plug`.
+pub const PLUG: Icon = Icon(&[
+    "M12 22v-5",
+    "M15 8V2",
+    "M17 8a1 1 0 0 1 1 1v4a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1z",
+    "M9 8V2",
+]);
+/// lucide's `server`.
+pub const SERVER: Icon = Icon(&[
+    "M4 2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-16a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z",
+    "M4 14h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-16a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z",
+    "M6 6L6.01 6",
+    "M6 18L6.01 18",
+]);
+/// lucide's `shield-alert`.
+pub const SHIELD_ALERT: Icon = Icon(&[
+    "M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z",
+    "M12 8v4",
+    "M12 16h.01",
+]);
+/// lucide's `split`.
+pub const SPLIT: Icon = Icon(&[
+    "M16 3h5v5",
+    "M8 3H3v5",
+    "M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3",
+    "m15 9 6-6",
+]);
+/// lucide's `triangle-alert`.
+pub const TRIANGLE_ALERT: Icon = Icon(&[
+    "m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3",
+    "M12 9v4",
+    "M12 17h.01",
+]);
 /// lucide's `delete`.
 pub const DELETE: Icon = Icon(&[
     "M10 5a2 2 0 0 0-1.344.519l-6.328 5.74a1 1 0 0 0 0 1.481l6.328 5.741A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z",

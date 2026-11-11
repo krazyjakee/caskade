@@ -51,6 +51,8 @@ pub const ANATOMY: &[Entry] = &[
     anatomy::ACCOUNT_LIST,
     anatomy::ACCOUNT_EDITOR,
     anatomy::ACCOUNT_PROFILE,
+    anatomy::ROMM,
+    anatomy::ROMM_SERVERS,
 ];
 
 /// The flows that come over any view: pairing (#226), games other devices
