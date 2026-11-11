@@ -15,6 +15,8 @@ pub mod collection_dialog;
 // The Emulated tab's breakdown by platform, and how platforms show (#99).
 mod platform_grid;
 pub mod platforms;
+// The Web tab: its mosaic, Add web game and the web games' dialogs (#99).
+pub mod web;
 // Choosing several games, and the bar and dialogs that act on them (#99).
 mod bulk_edit;
 mod selection;
@@ -39,6 +41,11 @@ pub use art::{SCHEME as ART_SCHEME, fetch as fetch_art};
 /// thumbnail.
 pub fn art_url(art: Option<&caskade_core::model::Artwork>) -> Option<String> {
     art::url(art, art::Variant::Icon)
+}
+
+/// A game's art for a card or tile: the 320 px thumbnail.
+pub fn art_url_card(art: Option<&caskade_core::model::Artwork>) -> Option<String> {
+    art::url(art, art::Variant::Card)
 }
 pub use anatomy::ANATOMY;
 #[allow(unused_imports)]

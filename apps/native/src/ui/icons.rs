@@ -485,6 +485,12 @@ pub const HISTORY: Icon = Icon(&[
     "M3 3v5h5",
     "M12 7v5l4 2",
 ]);
+/// lucide's `cloud-off`.
+pub const CLOUD_OFF: Icon = Icon(&[
+    "M10.94 5.274A7 7 0 0 1 15.71 10h1.79a4.5 4.5 0 0 1 4.222 6.057",
+    "M18.796 18.81A4.5 4.5 0 0 1 17.5 19H9A7 7 0 0 1 5.79 5.78",
+    "m2 2 20 20",
+]);
 /// lucide's `list-checks`.
 pub const LIST_CHECKS: Icon = Icon(&[
     "M13 5h8",

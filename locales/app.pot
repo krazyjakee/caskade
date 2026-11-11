@@ -1802,6 +1802,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 #: apps/native/src/library/bulk_edit.rs
+#: apps/native/src/library/web.rs
 msgid "Add"
 msgstr ""
 
@@ -1988,6 +1989,7 @@ msgid "Add variable"
 msgstr ""
 
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
+#: apps/native/src/library/web.rs
 msgid "Add web game"
 msgstr ""
 
@@ -2030,6 +2032,7 @@ msgstr ""
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
 #: apps/native/src/flows/add_game.rs
 #: apps/native/src/flows/manual_game.rs
+#: apps/native/src/library/web.rs
 msgid "Adding…"
 msgstr ""
 
@@ -2976,6 +2979,7 @@ msgstr ""
 #: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/selection_bar.rs
+#: apps/native/src/library/web.rs
 #: apps/native/src/settings/reset.rs
 #: apps/native/src/ui/dialog.rs
 msgid "Cancel"
@@ -3213,6 +3217,7 @@ msgid "Caskade isn't retrying this on its own now. Choose what to do next."
 msgstr ""
 
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
+#: apps/native/src/library/web.rs
 msgid "Caskade keeps a copy of the game. You'll play it for a minute so it can see what the game needs."
 msgstr ""
 
@@ -5380,6 +5385,7 @@ msgstr ""
 #: apps/desktop/src/views/library/LibraryCard.tsx
 #: apps/desktop/src/views/library/LibraryRow.tsx
 #: apps/desktop/src/views/library/web/WebMosaic.tsx
+#: apps/native/src/library/web.rs
 #: apps/native/src/ui/game_card.rs
 #: apps/native/src/ui/game_row.rs
 msgid "Favorite"
@@ -5728,6 +5734,7 @@ msgid "Game not found"
 msgstr ""
 
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
+#: apps/native/src/library/web.rs
 msgid "Game page"
 msgstr ""
 
@@ -6910,6 +6917,7 @@ msgid "It leaves your library with its play sessions. Its files, if it has any, 
 msgstr ""
 
 #: apps/desktop/src/views/library/web/RemoveWebGame.tsx
+#: apps/native/src/library/web.rs
 msgid "It leaves your library: the offline copy and the progress saved in the game window are deleted, with its play sessions. Add its page again to play it again."
 msgstr ""
 
@@ -6984,6 +6992,7 @@ msgid "its UI module has no definePlugin() default export"
 msgstr ""
 
 #: apps/desktop/src/views/library/web/RemoveWebGame.tsx
+#: apps/native/src/library/web.rs
 msgid "Its web version is removed: the offline copy and the progress saved in the game window are deleted, with its play sessions. The game's other versions stay in your library."
 msgstr ""
 
@@ -8994,6 +9003,7 @@ msgstr ""
 
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
 #: apps/desktop/src/views/library/web/SaveOffline.tsx
+#: apps/native/src/library/web.rs
 msgid "Offline web games aren't available here"
 msgstr ""
 
@@ -9753,10 +9763,12 @@ msgid "Play now"
 msgstr ""
 
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
+#: apps/native/src/library/web.rs
 msgid "Play offline"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Play offline…"
 msgstr ""
 
@@ -10616,6 +10628,7 @@ msgid "Remove"
 msgstr ""
 
 #: apps/desktop/src/views/library/web/RemoveWebGame.tsx
+#: apps/native/src/library/web.rs
 msgctxt "web game"
 msgid "Remove"
 msgstr ""
@@ -10661,6 +10674,7 @@ msgid "Remove {title} from your library?"
 msgstr ""
 
 #: apps/desktop/src/views/library/web/RemoveWebGame.tsx
+#: apps/native/src/library/web.rs
 msgid "Remove {title}?"
 msgstr ""
 
@@ -10700,6 +10714,7 @@ msgid "Remove location…"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Remove offline copy"
 msgstr ""
 
@@ -10729,6 +10744,7 @@ msgid "Remove…"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgctxt "web game"
 msgid "Remove…"
 msgstr ""
@@ -10744,6 +10760,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/native/src/game_menu/dialogs.rs
+#: apps/native/src/library/web.rs
 msgid "Removing…"
 msgstr ""
 
@@ -12421,6 +12438,7 @@ msgstr ""
 #: apps/native/src/flows/streaming.rs
 #: apps/native/src/game_menu/play.rs
 #: apps/native/src/game_menu/quick_look.rs
+#: apps/native/src/library/web.rs
 #: apps/native/src/ui/game_card.rs
 #: apps/native/src/ui/game_row.rs
 msgid "Starting…"
@@ -12955,6 +12973,7 @@ msgid "The account no longer owns it."
 msgstr ""
 
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
+#: apps/native/src/library/web.rs
 msgid "The address of the page the game plays on."
 msgstr ""
 
@@ -13021,6 +13040,7 @@ msgid "The game catalog can't sort this way yet, so these are in its usual order
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "The game stays, and plays online."
 msgstr ""
 
@@ -14334,6 +14354,7 @@ msgstr ""
 
 #. The Web tab's mosaic of games
 #: apps/desktop/src/views/library/web/WebMosaic.tsx
+#: apps/native/src/library/web.rs
 msgid "Web games"
 msgstr ""
 
@@ -14344,6 +14365,7 @@ msgstr ""
 
 #: apps/desktop/src/views/library/web/AddWebGame.tsx
 #: apps/desktop/src/views/library/web/RemoveWebGame.tsx
+#: apps/native/src/library/web.rs
 msgid "Web games aren't available here"
 msgstr ""
 
@@ -14508,6 +14530,7 @@ msgid "Where to buy"
 msgstr ""
 
 #: apps/desktop/src/views/library/web/SaveOffline.tsx
+#: apps/native/src/library/web.rs
 msgid "Where to keep {title}"
 msgstr ""
 

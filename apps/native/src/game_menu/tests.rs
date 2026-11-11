@@ -304,3 +304,37 @@ fn a_double_click_plays_and_says_why_it_didnt_start() {
     });
     assert!(matches!(window.route(), Route::Library(_)));
 }
+
+#[test]
+fn a_web_games_menu_plays_it_offline_or_online_and_removes_it() {
+    let online = Facts {
+        entries: vec![entry("web", "web", true, None)],
+        storage: true,
+        ..Facts::default()
+    };
+    let menu = labels(&items(&target(Some("web")), &online));
+    assert!(menu.contains(&"offline".to_owned()), "{menu:?}");
+    assert!(menu.contains(&"remove-web".to_owned()), "{menu:?}");
+    assert!(!menu.contains(&"online".to_owned()), "{menu:?}");
+    // Without storage it can't be kept offline.
+    let menu = labels(&items(
+        &target(Some("web")),
+        &Facts {
+            storage: false,
+            ..Facts {
+                entries: vec![entry("web", "web", true, None)],
+                ..Facts::default()
+            }
+        },
+    ));
+    assert!(!menu.contains(&"offline".to_owned()), "{menu:?}");
+    // Kept offline: Remove offline copy instead.
+    let offline = Facts {
+        entries: vec![entry("web", "web", true, Some("/games/web/Tidewater"))],
+        storage: true,
+        ..Facts::default()
+    };
+    let menu = labels(&items(&target(Some("web")), &offline));
+    assert!(menu.contains(&"online".to_owned()), "{menu:?}");
+    assert!(!menu.contains(&"offline".to_owned()), "{menu:?}");
+}

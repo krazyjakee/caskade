@@ -8,6 +8,7 @@ use super::collection_dialog::{CollectionDialog, smart_preset};
 use super::platform_grid::{PlatformGrid, breakdown};
 use super::selection::use_selection_provider;
 use super::selection_bar::{AllIdsProp, SelectionBar};
+use super::web::{AddWebGame, WebMosaic, use_web_games};
 use super::{Events, Layout, VirtualLibrary};
 use crate::data::{Query, use_library, use_library_page, use_query};
 use crate::input::{Bind, use_input_action};
@@ -178,6 +179,17 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
         && library.sort == GameSort::Title
         && total.is_some_and(|total| total >= ALPHABET_BAR_MIN_GAMES);
     let letters = use_title_letters(counted.into());
+    // The Web tab shows its games as a mosaic, every one at once.
+    let mosaic = use_web_games(counted.into());
+    let mosaic = if web {
+        mosaic
+            .read()
+            .as_ref()
+            .and_then(|games| games.as_ref().ok().cloned())
+            .filter(|games| !games.is_empty())
+    } else {
+        None
+    };
     // Emulated's games by platform, when they span several.
     let platforms = use_query(DataKey::Summary, move |data| {
         let query = counted();
@@ -341,7 +353,9 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
                 }
                 // Install from a file, a folder or a link, receive a share,
                 // or add a game by hand (#108); a game added by hand opens.
-                if !web {
+                if web {
+                    AddWebGame {}
+                } else {
                     crate::flows::add_game::AddGame { on_open_game: move |id: String| router.open_game(&id) }
                 }
                 if let Some(platform) = &library.platform {
@@ -421,9 +435,11 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
                         }
                     },
                 }
+            } else if let Some(games) = mosaic {
+                WebMosaic { games }
             } else if let Some(platforms) = platforms {
                 PlatformGrid { platforms, library: library.clone() }
-            } else if let Some(total) = total.filter(|&total| total > 0) {
+            } else if let Some(total) = total.filter(|&total| total > 0 && !web) {
                 VirtualLibrary {
                     query,
                     layout: library.layout,

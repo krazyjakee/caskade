@@ -49,6 +49,12 @@ pub enum MenuDialog {
     Remove {
         uninstalls: bool,
     },
+    /// A web game's Play offline…: where to keep it.
+    Offline,
+    /// A web game's Remove…; `keeps_game` when it has other entries.
+    RemoveWeb {
+        keeps_game: bool,
+    },
     /// Share with someone… (#247): a release, or a web game's offline copy
     /// or a ROM rather than the folder they're in (#248).
     Share {
@@ -194,6 +200,21 @@ pub fn GameMenuHost(children: Element) -> Element {
                             on_close: close,
                         }
                     },
+                    MenuDialog::Offline => rsx! {
+                        crate::library::web::SaveOfflineDialog {
+                            game_id: target.game_id.clone(),
+                            title: target.title.clone(),
+                            on_close: close,
+                        }
+                    },
+                    MenuDialog::RemoveWeb { keeps_game } => rsx! {
+                        crate::library::web::RemoveWebGameDialog {
+                            game_id: target.game_id.clone(),
+                            title: target.title.clone(),
+                            keeps_game,
+                            on_close: close,
+                        }
+                    },
                     MenuDialog::Remove { uninstalls } => rsx! {
                         dialogs::RemoveGameDialog {
                             title: target.title.clone(),
@@ -316,6 +337,8 @@ fn OpenMenu(target: Target, anchor: Anchor, failure: Option<String>) -> Element 
     let running = menu::running(&target, &facts).map(|session| session.id.clone());
     let favorite = game.as_ref().map(|game| game.game.favorite);
     let uninstalls = entries.iter().any(EntryView::managed);
+    // A web game's other entries stay when its web version goes.
+    let keeps_game = entries.iter().any(|entry| !entry.web());
     let mut slot = menus.menu;
     // A failed action keeps the menu open with why.
     let fail = {
@@ -368,6 +391,16 @@ fn OpenMenu(target: Target, anchor: Anchor, failure: Option<String>) -> Element 
                     running: running.is_some(),
                 }),
                 "remove" => open_dialog(MenuDialog::Remove { uninstalls }),
+                "offline" => open_dialog(MenuDialog::Offline),
+                "remove-web" => open_dialog(MenuDialog::RemoveWeb { keeps_game }),
+                "online" => {
+                    let game_id = target.game_id.clone();
+                    spawn_forever(async move {
+                        if let Err(report) = crate::library::web::remove_offline(game_id).await {
+                            fail(report);
+                        }
+                    });
+                }
                 "share" => {
                     if let Some(entry) = menu::copyable(&entries) {
                         use caskade_ui_data::shares::ShareItem;

@@ -222,6 +222,34 @@ pub fn items(target: &Target, facts: &Facts) -> Vec<MenuEntry> {
             }));
         }
     }
+    // A web game plays online, or from its offline copy (a location).
+    if let Some(web) = owned.iter().find(|entry| entry.web()) {
+        if web.location.is_none() && facts.storage {
+            second.push(MenuEntry::Item(MenuItem {
+                disabled: running.is_some(),
+                description: running.is_some().then(quit_first),
+                ..item("offline", t!("Play offline…"), icons::DOWNLOAD)
+            }));
+        }
+        if web.location.is_some() {
+            second.push(MenuEntry::Item(MenuItem {
+                danger: true,
+                disabled: running.is_some(),
+                description: Some(if running.is_some() {
+                    quit_first()
+                } else {
+                    t!("The game stays, and plays online.")
+                }),
+                ..item("online", t!("Remove offline copy"), icons::CLOUD_OFF)
+            }));
+        }
+        second.push(MenuEntry::Item(MenuItem {
+            danger: true,
+            disabled: running.is_some(),
+            description: running.is_some().then(quit_first),
+            ..item("remove-web", tp!("web game", "Remove…"), icons::TRASH)
+        }));
+    }
     let all = &facts.entries;
     let scanned = all.iter().any(|entry| !entry.web());
     if !scoped && facts.storage && super::entries::added_by_caskade(all) {
