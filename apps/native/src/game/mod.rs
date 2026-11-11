@@ -1,12 +1,13 @@
 //! A game's page (#100, the webview's `views/game`): its art, Play and its
 //! choices, details, entries, saves, achievements, streaming and ports,
 //! and what Play asks before a game starts ([`launch`]), which every Play
-//! shares.
+//! shares; and its editor ([`editor`]).
 
 mod achievements;
 mod anatomy;
 mod back;
 pub mod data;
+pub mod editor;
 mod elsewhere;
 mod emulation;
 mod entry_update;

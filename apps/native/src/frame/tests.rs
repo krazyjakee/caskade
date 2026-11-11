@@ -48,6 +48,8 @@ fn app() -> Element {
     use_context_provider(crate::game::launch_tests::fake_steps);
     // The game page's data, scripted.
     use_context_provider(crate::game::page_tests::fake_data);
+    // The game editor's data, scripted.
+    use_context_provider(crate::game::editor::tests::fake_edit_data);
     rsx! {
         // The app's stylesheet: the frame lays out as in the app.
         style { {include_str!("../../assets/app.css")} }

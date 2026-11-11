@@ -469,6 +469,7 @@ msgstr[1] "# paket"
 
 #. js-lingui:icu=%7Bcount%2C+plural%2C+one+%7B%23+save+file%7D+other+%7B%23+save+files%7D%7D&pluralize_on=count
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#: apps/native/src/game/editor/saves.rs
 msgid "# save file"
 msgid_plural "# save files"
 msgstr[0] "# sparfil"
@@ -860,6 +861,12 @@ msgstr "{name} ({percent} % översatt)"
 msgid "{name} ({state})"
 msgstr "{name} ({state})"
 
+#: apps/native/src/game/editor/actions.rs
+#, fuzzy
+#| msgid "{0} (copy)"
+msgid "{name} (copy)"
+msgstr "{0} (kopia)"
+
 #. A language chosen earlier that this version of Caskade doesn't have
 #: apps/desktop/src/locale/LocaleProvider.tsx
 #: apps/native/src/settings/general.rs
@@ -889,6 +896,7 @@ msgid "{name} options"
 msgstr "Alternativ för {name}"
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
+#: apps/native/src/game/editor/artwork.rs
 msgid "{name} shown now"
 msgstr "{name} som visas nu"
 
@@ -1421,12 +1429,13 @@ msgstr "{used} använt av {total}, {free} ledigt"
 
 #. A chosen Proton build this device doesn't have
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "{value} (not installed here)"
 msgstr ""
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
-#: apps/native/src/library/bulk_edit.rs
+#: apps/native/src/game/editor/details.rs apps/native/src/library/bulk_edit.rs
 msgid "{value} / 100"
 msgstr "{value} / 100"
 
@@ -1653,6 +1662,7 @@ msgid "A download link or a magnet link. The installer resolves it before downlo
 msgstr "En nedladdningslänk eller en magnetlänk. Installationsprogrammet löser upp den innan nedladdningen, och du kan bli ombedd att välja vad som ska laddas ner."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "A Flatpak app"
 msgstr "En Flatpak-app"
 
@@ -1677,6 +1687,7 @@ msgid "A game another of your devices sends here is copied into the default stor
 msgstr "Ett spel som en annan av dina enheter skickar hit kopieras till standardlagringen utan att fråga."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "A game launcher's link, like steam://rungameid/620."
 msgstr "En spelstartares länk, som steam://rungameid/620."
 
@@ -1686,6 +1697,7 @@ msgid "A game library and launcher for Windows, Linux and macOS, with a desktop 
 msgstr "Ett spelbibliotek och startprogram för Windows, Linux och macOS, med ett skrivbordsläge och ett konsolläge i helskärm för handkontroller."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "A launcher link"
 msgstr "En startarlänk"
 
@@ -1752,10 +1764,12 @@ msgid "A PIN locks this account. Changes at once."
 msgstr "En PIN låser det här kontot. Gäller direkt."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "A program"
 msgstr "Ett program"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "A program or script file. Inside a Caskade install, a path relative to its folder moves with it."
 msgstr "Ett program eller en skriptfil. I en Caskade-installation följer en sökväg relativ till dess mapp med när den flyttas."
 
@@ -1817,6 +1831,7 @@ msgid "A title, or the number listed as IGDB ID on the game's igdb.com page."
 msgstr "En titel, eller numret som anges som IGDB ID på spelets sida på igdb.com."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "A tool runs from the game's menu. It counts no playtime and doesn't change when the game was last played."
 msgstr "Ett verktyg körs från spelets meny. Det räknar ingen speltid och ändrar inte när spelet senast spelades."
 
@@ -1986,6 +2001,7 @@ msgstr "Upplåsta prestationer"
 #. ROM scanners table column
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/game/editor/mod.rs
 msgid "Actions"
 msgstr "Åtgärder"
 
@@ -2099,7 +2115,7 @@ msgstr "Lägg till ytterligare en lämplig lagringsplats i Inställningar → La
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
-#: apps/native/src/flows/scripts.rs
+#: apps/native/src/flows/scripts.rs apps/native/src/game/editor/action_form.rs
 msgid "Add argument"
 msgstr "Lägg till argument"
 
@@ -2126,12 +2142,13 @@ msgid "Add environment variable"
 msgstr "Lägg till miljövariabel"
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#: apps/native/src/game/editor/saves.rs
 msgid "Add file"
 msgstr "Lägg till fil"
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
-#: apps/native/src/settings/discovery.rs
+#: apps/native/src/game/editor/saves.rs apps/native/src/settings/discovery.rs
 msgid "Add folder"
 msgstr "Lägg till mapp"
 
@@ -2174,10 +2191,12 @@ msgid "Add location"
 msgstr "Lägg till plats"
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
+#: apps/native/src/game/editor/actions.rs
 msgid "Add play action"
 msgstr "Lägg till spelåtgärd"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Add program name"
 msgstr "Lägg till programnamn"
 
@@ -2223,10 +2242,12 @@ msgid "Add to this game"
 msgstr "Lägg till i det här spelet"
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
+#: apps/native/src/game/editor/actions.rs
 msgid "Add tool"
 msgstr "Lägg till verktyg"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Add variable"
 msgstr "Lägg till variabel"
 
@@ -2494,6 +2515,7 @@ msgid "An external link asked Caskade to install from this URL. Confirm only if 
 msgstr "En extern länk bad Caskade att installera från den här URL:en. Bekräfta bara om du litar på källan."
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
+#: apps/native/src/game/editor/artwork.rs
 msgid "An image for the {name}"
 msgstr "En bild för {name}"
 
@@ -2687,7 +2709,7 @@ msgstr "är"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
-#: apps/native/src/flows/scripts.rs
+#: apps/native/src/flows/scripts.rs apps/native/src/game/editor/action_form.rs
 msgctxt "a program's command-line argument"
 msgid "Argument"
 msgstr "Argument"
@@ -2710,6 +2732,7 @@ msgid "Arriving: follow it in Activity."
 msgstr "På väg: följ det under Aktivitet."
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
+#: apps/native/src/game/editor/mod.rs
 msgid "Artwork"
 msgstr "Bilder"
 
@@ -2729,7 +2752,7 @@ msgstr "Asien"
 
 #: apps/desktop/src/components/gameActions/PlayChoice.tsx
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
-#: apps/native/src/game/play_choice.rs
+#: apps/native/src/game/editor/actions.rs apps/native/src/game/play_choice.rs
 msgid "Ask each time"
 msgstr "Fråga varje gång"
 
@@ -2790,15 +2813,18 @@ msgid "Auto"
 msgstr "Auto"
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
+#: apps/native/src/game/editor/artwork.rs
 msgid "Automatic"
 msgstr "Automatiskt"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgctxt "game tracking"
 msgid "Automatic"
 msgstr "Automatiskt"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 #, fuzzy
 #| msgid "Automatic"
 msgctxt "Proton build"
@@ -2819,6 +2845,7 @@ msgstr "Automatiskt"
 
 #. The Proton build choice that runs the best one installed, which is named
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 #, fuzzy
 #| msgid "Automatic ({platform})"
 msgid "Automatic ({automatic})"
@@ -2859,6 +2886,7 @@ msgid "Automatic opens console mode in Steam Deck game mode (gamescope), otherwi
 msgstr "Automatiskt öppnar konsolläge i Steam Decks spelläge (gamescope), annars läget du använde senast."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Automatic runs the best Proton build installed each time the game starts. Choose a build to keep this action on it."
 msgstr ""
 
@@ -2956,6 +2984,7 @@ msgid "Backed up {time} ({size}), checked."
 msgstr "Säkerhetskopierat {time} ({size}), kontrollerat."
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
+#: apps/native/src/game/editor/artwork.rs
 msgid "Background"
 msgstr "Bakgrund"
 
@@ -3289,9 +3318,10 @@ msgstr "Avbryt inloggningen"
 #: apps/native/src/flows/folder_browser.rs apps/native/src/flows/manual_game.rs
 #: apps/native/src/flows/receive_share.rs apps/native/src/flows/share_game.rs
 #: apps/native/src/flows/storage.rs apps/native/src/flows/streaming.rs
-#: apps/native/src/game/igdb.rs apps/native/src/game/launch.rs
-#: apps/native/src/game/ports.rs apps/native/src/game_menu/dialogs.rs
-#: apps/native/src/game_menu/play.rs apps/native/src/library/bulk_edit.rs
+#: apps/native/src/game/editor/mod.rs apps/native/src/game/igdb.rs
+#: apps/native/src/game/launch.rs apps/native/src/game/ports.rs
+#: apps/native/src/game_menu/dialogs.rs apps/native/src/game_menu/play.rs
+#: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/selection_bar.rs apps/native/src/library/web.rs
 #: apps/native/src/settings/accounts.rs apps/native/src/settings/backup.rs
@@ -3509,6 +3539,7 @@ msgid "Caskade downloads these for you, sets them up and makes them the default 
 msgstr "Caskade laddar ner dessa åt dig, ställer in dem och gör dem till standard för plattformar som saknar en. Emulatorer från GitHub hålls uppdaterade."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Caskade finds the game the usual way: its install folder and what the store says."
 msgstr "Caskade hittar spelet på vanligt sätt: dess installationsmapp och vad butiken anger."
 
@@ -3726,6 +3757,12 @@ msgstr "Byt PIN…"
 #. placeholder {0}: conflict.theirs
 #: apps/desktop/src/components/gameEditor/fields.tsx
 msgid "Changed elsewhere since you opened the editor; it is now “{0}”."
+msgstr "Ändrades någon annanstans sedan du öppnade redigeraren; nu är det ”{0}”."
+
+#: apps/native/src/game/editor/details.rs
+#, fuzzy
+#| msgid "Changed elsewhere since you opened the editor; it is now “{0}”."
+msgid "Changed elsewhere since you opened the editor; it is now “{theirs}”."
 msgstr "Ändrades någon annanstans sedan du öppnade redigeraren; nu är det ”{0}”."
 
 #: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
@@ -3953,10 +3990,12 @@ msgid "Choose a profile"
 msgstr "Välj en profil"
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#: apps/native/src/game/editor/saves.rs
 msgid "Choose a save file"
 msgstr "Välj en sparfil"
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#: apps/native/src/game/editor/saves.rs
 msgid "Choose a save folder"
 msgstr "Välj en sparmapp"
 
@@ -4027,6 +4066,7 @@ msgid "Choose one path."
 msgstr "Välj en sökväg."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Choose the game's folder"
 msgstr "Välj spelets mapp"
 
@@ -4040,7 +4080,7 @@ msgstr "Välj den installerade mappen"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
-#: apps/native/src/flows/scripts.rs
+#: apps/native/src/flows/scripts.rs apps/native/src/game/editor/action_form.rs
 msgid "Choose the program"
 msgstr "Välj programmet"
 
@@ -4050,7 +4090,7 @@ msgstr "Välj versionsfilen som ska laddas ner och installeras."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
-#: apps/native/src/flows/scripts.rs
+#: apps/native/src/flows/scripts.rs apps/native/src/game/editor/action_form.rs
 msgid "Choose the working folder"
 msgstr "Välj arbetsmappen"
 
@@ -4089,7 +4129,8 @@ msgstr "Vald mellan enheter"
 
 #. How the game's IGDB match was made
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
-#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
+#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/native/src/game/editor/artwork.rs apps/native/src/game/igdb.rs
 msgid "Chosen by you"
 msgstr "Valt av dig"
 
@@ -4128,8 +4169,9 @@ msgstr "klocka, 24-timmars, 12-timmars"
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
-#: apps/native/src/flows/pairing.rs apps/native/src/game/launch.rs
-#: apps/native/src/library/selection_bar.rs apps/native/src/settings/addons.rs
+#: apps/native/src/flows/pairing.rs apps/native/src/game/editor/mod.rs
+#: apps/native/src/game/launch.rs apps/native/src/library/selection_bar.rs
+#: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/emulation/detection.rs
 #: apps/native/src/settings/plugins.rs apps/native/src/settings/reset.rs
 #: apps/native/src/settings/streaming.rs
@@ -4637,6 +4679,7 @@ msgid "Counting games…"
 msgstr "Räknar spel…"
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
+#: apps/native/src/game/editor/artwork.rs
 msgid "Cover"
 msgstr "Omslag"
 
@@ -4825,7 +4868,7 @@ msgstr "Standard"
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
-#: apps/native/src/game_menu/play.rs
+#: apps/native/src/game/editor/actions.rs apps/native/src/game_menu/play.rs
 msgctxt "launch action"
 msgid "Default"
 msgstr "Standard"
@@ -4913,6 +4956,12 @@ msgstr "Radera"
 msgid "Delete “{0}”?"
 msgstr "Radera ”{0}”?"
 
+#: apps/native/src/game/editor/actions.rs
+#, fuzzy
+#| msgid "Delete “{0}”?"
+msgid "Delete “{name}”?"
+msgstr "Radera ”{0}”?"
+
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
 #: apps/native/src/settings/accounts.rs
 msgid "Delete {name}"
@@ -4928,7 +4977,8 @@ msgstr "Radera {name}?"
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
-#: apps/native/src/flows/scripts.rs apps/native/src/settings/accounts.rs
+#: apps/native/src/flows/scripts.rs apps/native/src/game/editor/actions.rs
+#: apps/native/src/settings/accounts.rs
 msgid "Delete…"
 msgstr "Radera…"
 
@@ -5032,7 +5082,7 @@ msgstr "Mål"
 #. Button hint: a pad's X opens the game's quick look
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/views/library/GameActions.tsx
-#: apps/native/src/library/grid.rs
+#: apps/native/src/game/editor/mod.rs apps/native/src/library/grid.rs
 msgid "Details"
 msgstr "Detaljer"
 
@@ -5142,6 +5192,7 @@ msgstr "Skiva"
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/game/editor/mod.rs
 #: apps/native/src/settings/emulation/romm_editor.rs
 #: apps/native/src/settings/unsaved.rs
 msgid "Discard"
@@ -5153,6 +5204,7 @@ msgid "Discard review"
 msgstr "Kasta granskningen"
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
+#: apps/native/src/game/editor/mod.rs
 msgid "Discard your changes?"
 msgstr "Kasta dina ändringar?"
 
@@ -5412,7 +5464,7 @@ msgstr "Dags nu: den startar inom några minuter."
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
-#: apps/native/src/flows/scripts.rs
+#: apps/native/src/flows/scripts.rs apps/native/src/game/editor/actions.rs
 msgid "Duplicate"
 msgstr "Duplicera"
 
@@ -5451,10 +5503,11 @@ msgid "Edit {profile}"
 msgstr "Redigera {profile}"
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
+#: apps/native/src/game/editor/mod.rs
 msgid "Edit {title}"
 msgstr "Redigera {title}"
 
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "Edit details"
 msgstr "Redigera detaljer"
 
@@ -5495,6 +5548,7 @@ msgid "Edit…"
 msgstr "Redigera…"
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
+#: apps/native/src/game/editor/mod.rs
 msgid "Editor sections"
 msgstr "Redigerarens avsnitt"
 
@@ -5510,7 +5564,7 @@ msgstr "Tomt använder romm-cache på din standardlagringsplats. Nu: {folder}"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
-#: apps/native/src/flows/scripts.rs
+#: apps/native/src/flows/scripts.rs apps/native/src/game/editor/action_form.rs
 msgid "Empty: the game's install folder."
 msgstr "Tomt: spelets installationsmapp."
 
@@ -5755,6 +5809,7 @@ msgid "Environment value {row}"
 msgstr "Miljövariabelns värde {row}"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Environment variables"
 msgstr "Miljövariabler"
 
@@ -5841,6 +5896,7 @@ msgid "Everything is unlocked."
 msgstr "Allt är upplåst."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Everything it starts"
 msgstr "Allt det startar"
 
@@ -5960,6 +6016,7 @@ msgid "Fetch artwork and game info online"
 msgstr "Hämta bilder och spelinformation på nätet"
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#: apps/native/src/game/editor/saves.rs
 msgid "File"
 msgstr "Fil"
 
@@ -6013,6 +6070,7 @@ msgid "Find ROMs inside zip and 7z files the profile can't open directly."
 msgstr "Hitta ROM-filer i zip- och 7z-filer som profilen inte kan öppna direkt."
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#: apps/native/src/game/editor/saves.rs
 msgid "Finding save locations…"
 msgstr "Letar efter sparplatser…"
 
@@ -6051,6 +6109,7 @@ msgid "First-run setup"
 msgstr "Första konfigurationen"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Flatpak app id"
 msgstr "Flatpak-app-id"
 
@@ -6078,6 +6137,8 @@ msgstr "Flatpak håller den uppdaterad."
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/game/editor/action_form.rs
+#: apps/native/src/game/editor/saves.rs
 #: apps/native/src/settings/emulation/emulators.rs
 #: apps/native/src/settings/emulation/fields.rs
 #: apps/native/src/settings/emulation/scanners.rs
@@ -6228,6 +6289,7 @@ msgid "From your other devices"
 msgstr "Från dina andra enheter"
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
+#: apps/native/src/game/editor/artwork.rs
 msgid "From your sources"
 msgstr "Från dina källor"
 
@@ -6909,6 +6971,7 @@ msgid "Hybrid console"
 msgstr "Hybridkonsol"
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
+#: apps/native/src/game/editor/artwork.rs
 msgid "Icon"
 msgstr "Ikon"
 
@@ -7036,6 +7099,7 @@ msgid "Import existing play history"
 msgstr "Importera befintlig spelhistorik"
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
+#: apps/native/src/game/editor/artwork.rs
 msgid "Import image…"
 msgstr "Importera bild…"
 
@@ -7760,6 +7824,7 @@ msgid "Keep downloads"
 msgstr "Behåll nedladdningar"
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
+#: apps/native/src/game/editor/mod.rs
 msgid "Keep editing"
 msgstr "Fortsätt redigera"
 
@@ -7780,6 +7845,7 @@ msgstr "Behåll dess inställningar och data för en ominstallation"
 
 #: apps/desktop/src/components/gameEditor/fields.tsx
 #: apps/desktop/src/views/settings/emulators/FromDevices.tsx
+#: apps/native/src/game/editor/details.rs
 #: apps/native/src/settings/emulation/setup.rs
 msgid "Keep mine"
 msgstr "Behåll mitt"
@@ -7945,7 +8011,8 @@ msgstr "Senaste försöket nådde den inte. Den synkar när den är tillbaka."
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
+#: apps/native/src/game/editor/actions.rs apps/native/src/settings/devices.rs
+#: apps/native/src/settings/search.rs
 msgid "Launch actions"
 msgstr "Startåtgärder"
 
@@ -8006,6 +8073,7 @@ msgid "Launches with"
 msgstr "Startas med"
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#: apps/native/src/game/editor/saves.rs
 msgid "Leave blank to match automatically. A name from the Ludusavi manifest sets the match by hand."
 msgstr "Lämna tomt för automatisk matchning. Ett namn från Ludusavi-manifestet anger matchningen för hand."
 
@@ -8139,6 +8207,7 @@ msgid "lifecycle scripts, before launch, after exit, hooks, commands, shell"
 msgstr "livscykelskript, före start, efter avslut, hooks, kommandon, skal"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Like org.example.Game."
 msgstr "Som org.example.Game."
 
@@ -8156,6 +8225,7 @@ msgstr "Rad {line}: {problem}"
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/shares/ShareInfoDetails.tsx
 #: apps/native/src/flows/shares_common.rs
+#: apps/native/src/game/editor/action_form.rs
 msgid "Link"
 msgstr "Länk"
 
@@ -8279,6 +8349,7 @@ msgid "Loading hidden games…"
 msgstr "Läser in dolda spel…"
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
+#: apps/native/src/game/editor/actions.rs
 msgid "Loading launch actions…"
 msgstr "Läser in startåtgärder…"
 
@@ -8345,6 +8416,7 @@ msgstr "Läser in din profil…"
 #: apps/desktop/src/views/settings/about/AboutSettings.tsx
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
 #: apps/desktop/src/views/StoreView.tsx apps/native/src/frame/notifications.rs
+#: apps/native/src/game/editor/artwork.rs apps/native/src/game/editor/mod.rs
 #: apps/native/src/settings/appearance.rs
 msgid "Loading…"
 msgstr "Läser in…"
@@ -8566,6 +8638,7 @@ msgid "Managed copy unavailable"
 msgstr "Den hanterade kopian är inte tillgänglig"
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#: apps/native/src/game/editor/saves.rs
 msgid "Manifest game name"
 msgstr "Spelnamn i manifestet"
 
@@ -8789,6 +8862,7 @@ msgid "More"
 msgstr "Mer"
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#: apps/native/src/game/editor/saves.rs
 msgid "More than one manifest game matches: {titles}. Enter the right one's name below."
 msgstr "Fler än ett spel i manifestet matchar: {titles}. Ange det rätta namnet nedan."
 
@@ -8834,7 +8908,7 @@ msgstr "Flytten är klar. Biblioteksidentitet och speltid har bevarats."
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
-#: apps/native/src/flows/scripts.rs
+#: apps/native/src/flows/scripts.rs apps/native/src/game/editor/actions.rs
 msgid "Move down"
 msgstr "Flytta ned"
 
@@ -8868,7 +8942,7 @@ msgstr "Flytt av plats"
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
-#: apps/native/src/flows/scripts.rs
+#: apps/native/src/flows/scripts.rs apps/native/src/game/editor/actions.rs
 msgid "Move up"
 msgstr "Flytta upp"
 
@@ -8921,6 +8995,7 @@ msgid "Name"
 msgstr "Namn"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgctxt "launch action"
 msgid "Name"
 msgstr "Namn"
@@ -9072,6 +9147,7 @@ msgid "New server"
 msgstr "Ny server"
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
+#: apps/native/src/game/editor/actions.rs
 msgid "New tool"
 msgstr "Nytt verktyg"
 
@@ -9141,6 +9217,7 @@ msgid "No {name} account is connected."
 msgstr "Inget {name}-konto är anslutet."
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#: apps/native/src/game/editor/saves.rs
 msgid "No automatic save locations are known for this release. Add its save folders or files below, or set the manifest game it matches."
 msgstr "Inga automatiska sparplatser är kända för den här utgåvan. Lägg till dess sparmappar eller filer nedan, eller ange vilket spel i manifestet den matchar."
 
@@ -9384,6 +9461,12 @@ msgstr "Inga ROM:ar matchade den här skannerns profil."
 msgid "No save files or folders. Add them here, or drop them on this tab."
 msgstr "Inga sparfiler eller mappar. Lägg till dem här eller släpp dem på den här fliken."
 
+#: apps/native/src/game/editor/saves.rs
+#, fuzzy
+#| msgid "No save files or folders. Add them here, or drop them on this tab."
+msgid "No save files or folders. Add them here."
+msgstr "Inga sparfiler eller mappar. Lägg till dem här eller släpp dem på den här fliken."
+
 #: apps/desktop/src/views/game/SavesPanel.tsx apps/native/src/game/saves.rs
 msgid "No saves kept yet. A version is kept each time you finish playing."
 msgstr "Inga sparfiler har behållits än. En version behålls varje gång du slutar spela."
@@ -9461,7 +9544,7 @@ msgstr "inget"
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
 #: apps/desktop/src/components/gameEditor/fields.tsx
-#: apps/native/src/library/bulk_edit.rs
+#: apps/native/src/game/editor/artwork.rs apps/native/src/library/bulk_edit.rs
 msgid "None"
 msgstr "Inga"
 
@@ -9501,6 +9584,7 @@ msgid "None yet. On another device, open Settings → Streaming in Caskade and c
 msgstr "Inga än. Öppna Inställningar → Streaming i Caskade på en annan enhet och välj Parkoppla med den här."
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
+#: apps/native/src/game/editor/artwork.rs
 msgid "None, by your choice"
 msgstr "Ingen, enligt ditt val"
 
@@ -9742,6 +9826,7 @@ msgid "Nothing in the catalogue matches."
 msgstr "Inget i katalogen matchar."
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
+#: apps/native/src/game/editor/actions.rs
 msgid "Nothing launches this game yet. Add a play action to start it from Caskade, or a tool to run alongside it."
 msgstr "Inget startar det här spelet ännu. Lägg till en spelåtgärd för att starta det från Caskade, eller ett verktyg att köra bredvid."
 
@@ -9776,6 +9861,7 @@ msgid "Nothing was paired. Start again from either device."
 msgstr "Inget parkopplades. Börja om från någon av enheterna."
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
+#: apps/native/src/game/editor/mod.rs
 msgid "Nothing was saved. Check the marked fields."
 msgstr "Inget sparades. Kontrollera de markerade fälten."
 
@@ -10015,7 +10101,7 @@ msgstr "Online"
 msgid "Online lookups"
 msgstr "Onlineuppslag"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Online lookups are off on this device, so Caskade doesn't match games with IGDB or fetch their details and artwork."
 msgstr ""
 
@@ -10050,6 +10136,7 @@ msgid "Only Caskade-managed installations can be moved."
 msgstr "Bara installationer som hanteras av Caskade kan flyttas."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Only the program it starts"
 msgstr "Bara programmet det startar"
 
@@ -10188,6 +10275,7 @@ msgid "Opens"
 msgstr "Öppnar"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Opens the web game in its game window."
 msgstr "Öppnar webbspelet i dess spelfönster."
 
@@ -10681,6 +10769,7 @@ msgid "Play"
 msgstr "Spela"
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
+#: apps/native/src/game/editor/actions.rs
 msgid "Play (modded)"
 msgstr "Spela (moddat)"
 
@@ -10760,7 +10849,7 @@ msgstr "Spelförfrågningar från mina enheter"
 #. Picks which of a release's launch actions Play starts
 #: apps/desktop/src/components/gameActions/PlayChoice.tsx
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
-#: apps/native/src/game/play_choice.rs
+#: apps/native/src/game/editor/actions.rs apps/native/src/game/play_choice.rs
 msgid "Play starts"
 msgstr "Spela startar"
 
@@ -10847,6 +10936,7 @@ msgid "Playlists absorb the files they list, so disc tracks aren't separate game
 msgstr "Spellistor tar över filerna de listar, så skivspår blir inte egna spel."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgctxt "launch action kind"
 msgid "Plays the game"
 msgstr "Spelar spelet"
@@ -10870,18 +10960,22 @@ msgid "Playtime"
 msgstr "Speltid"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Playtime counts only while the program Caskade started runs."
 msgstr "Speltid räknas bara medan programmet Caskade startade körs."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Playtime counts while a program from this folder runs: for a mod manager, the game's folder."
 msgstr "Speltid räknas medan ett program från den här mappen körs: för en modhanterare, spelets mapp."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Playtime counts while a program with one of these names runs: for a mod manager, the game's own program."
 msgstr "Speltid räknas medan ett program med ett av de här namnen körs: för en modhanterare, spelets eget program."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Playtime counts while the program or anything it started runs."
 msgstr "Speltid räknas medan programmet eller något det startade körs."
 
@@ -11101,6 +11195,7 @@ msgstr "profiler, argument"
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 #: apps/native/src/flows/manual_game.rs apps/native/src/flows/scripts.rs
+#: apps/native/src/game/editor/action_form.rs
 msgid "Program"
 msgstr "Program"
 
@@ -11111,6 +11206,7 @@ msgid "Program"
 msgstr "Program"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Program name"
 msgstr "Programnamn"
 
@@ -11126,10 +11222,12 @@ msgid "programs"
 msgstr "program"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Programs by name"
 msgstr "Program efter namn"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Programs in a folder"
 msgstr "Program i en mapp"
 
@@ -11149,6 +11247,7 @@ msgid "Project page"
 msgstr "Projektsida"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Proton build"
 msgstr ""
 
@@ -11211,7 +11310,7 @@ msgstr "Fick slut på tid"
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
-#: apps/native/src/library/bulk_edit.rs
+#: apps/native/src/game/editor/details.rs apps/native/src/library/bulk_edit.rs
 msgid "Rated"
 msgstr "Betygsatt"
 
@@ -11514,6 +11613,7 @@ msgid "Regions: {regions}"
 msgstr "Regioner: {regions}"
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#: apps/native/src/game/editor/saves.rs
 msgid "Registry key"
 msgstr "Registernyckel"
 
@@ -11540,7 +11640,15 @@ msgstr "Installera om från den sparade källan"
 #. Picks which release's actions to edit
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
-#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
+#: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/editor/saves.rs apps/native/src/game/page.rs
+msgid "Release"
+msgstr "Utgåva"
+
+#: apps/native/src/game/editor/actions.rs
+#, fuzzy
+#| msgid "Release"
+msgctxt "Picks which release's actions to edit"
 msgid "Release"
 msgstr "Utgåva"
 
@@ -11683,6 +11791,12 @@ msgstr "Ta bort {name}?"
 msgid "Remove {name}'s PIN?"
 msgstr "Ta bort PIN för {name}?"
 
+#: apps/native/src/game/editor/saves.rs
+#, fuzzy
+#| msgid "Remove {0}"
+msgid "Remove {path}"
+msgstr "Ta bort {0}"
+
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/native/src/settings/emulation/emulators.rs
 msgid "Remove {profile}…"
@@ -11770,6 +11884,7 @@ msgstr "Ta bort den här platsen från biblioteket? Filerna på disken behålls.
 
 #. placeholder {0}: index + 1
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Remove variable {0}"
 msgstr "Ta bort variabel {0}"
 
@@ -11881,7 +11996,8 @@ msgstr "Sök efter teman igen"
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
 #: apps/desktop/src/components/gameEditor/fields.tsx
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
-#: apps/native/src/settings/reset.rs
+#: apps/native/src/game/editor/artwork.rs
+#: apps/native/src/game/editor/details.rs apps/native/src/settings/reset.rs
 msgid "Reset"
 msgstr "Återställ"
 
@@ -11891,10 +12007,12 @@ msgid "Reset {group} settings?"
 msgstr "Återställ inställningar för {group}?"
 
 #: apps/desktop/src/components/gameEditor/fields.tsx
+#: apps/native/src/game/editor/details.rs
 msgid "Reset {label} to automatic"
 msgstr "Återställ {label} till automatiskt"
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
+#: apps/native/src/game/editor/artwork.rs
 msgid "Reset {name} to automatic"
 msgstr "Återställ {name} till automatiskt"
 
@@ -11930,7 +12048,7 @@ msgstr "Återställ inställningar för startprogram"
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
-#: apps/native/src/library/bulk_edit.rs
+#: apps/native/src/game/editor/saves.rs apps/native/src/library/bulk_edit.rs
 msgid "Reset to automatic"
 msgstr "Återställ till automatiskt"
 
@@ -12093,7 +12211,8 @@ msgstr "Visa"
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
-#: apps/native/src/flows/scripts.rs apps/native/src/settings/appearance.rs
+#: apps/native/src/flows/scripts.rs apps/native/src/game/editor/actions.rs
+#: apps/native/src/game/editor/saves.rs apps/native/src/settings/appearance.rs
 msgid "Revert"
 msgstr "Återgå"
 
@@ -12387,13 +12506,14 @@ msgstr "Exempel-ROM: {0}"
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
-#: apps/native/src/game/emulation.rs
+#: apps/native/src/game/editor/mod.rs apps/native/src/game/emulation.rs
 #: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/settings/accounts.rs apps/native/src/settings/unsaved.rs
 msgid "Save"
 msgstr "Spara"
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
+#: apps/native/src/game/editor/actions.rs
 msgid "Save action"
 msgstr "Spara åtgärd"
 
@@ -12444,6 +12564,7 @@ msgid "Save location data"
 msgstr "Data om sparplatser"
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#: apps/native/src/game/editor/saves.rs
 msgid "Save locations"
 msgstr "Sparplatser"
 
@@ -12458,6 +12579,7 @@ msgid "Save locations are unavailable here."
 msgstr "Sparplatser är inte tillgängliga här."
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#: apps/native/src/game/editor/saves.rs
 msgid "Save locations from {title}."
 msgstr "Sparplatser från {title}."
 
@@ -12468,6 +12590,7 @@ msgid "Save locations list"
 msgstr "Lista över sparplatser"
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#: apps/native/src/game/editor/saves.rs
 msgid "Save locations saved."
 msgstr "Sparplatserna sparades."
 
@@ -12537,8 +12660,9 @@ msgstr "Sparat."
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/game/launch.rs apps/native/src/game/saves.rs
-#: apps/native/src/settings/devices.rs apps/native/src/settings/search.rs
+#: apps/native/src/game/editor/mod.rs apps/native/src/game/launch.rs
+#: apps/native/src/game/saves.rs apps/native/src/settings/devices.rs
+#: apps/native/src/settings/search.rs
 msgid "Saves"
 msgstr "Sparfiler"
 
@@ -12583,7 +12707,9 @@ msgstr "Sparar dina val innan biblioteket öppnas…"
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
 #: apps/desktop/src/views/settings/useSettings.tsx
-#: apps/native/src/flows/scripts.rs apps/native/src/library/bulk_edit.rs
+#: apps/native/src/flows/scripts.rs apps/native/src/game/editor/actions.rs
+#: apps/native/src/game/editor/mod.rs apps/native/src/game/editor/saves.rs
+#: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/settings/accounts.rs apps/native/src/settings/devices.rs
 #: apps/native/src/settings/emulation/emulators.rs
@@ -12739,7 +12865,7 @@ msgstr "Skript"
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
-#: apps/native/src/flows/scripts.rs
+#: apps/native/src/flows/scripts.rs apps/native/src/game/editor/mod.rs
 msgid "Scripts"
 msgstr "Skript"
 
@@ -12995,6 +13121,7 @@ msgid "Set by Caskade for this emulator"
 msgstr "Inställt av Caskade för den här emulatorn"
 
 #: apps/desktop/src/components/gameEditor/fields.tsx
+#: apps/native/src/game/editor/details.rs
 msgid "Set by you: refreshes keep it until you reset it."
 msgstr "Satt av dig: uppdateringar behåller det tills du återställer det."
 
@@ -13220,6 +13347,7 @@ msgid "Show in folder: {path}"
 msgstr "Visa i mapp: {path}"
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
+#: apps/native/src/game/editor/artwork.rs
 msgid "Show none"
 msgstr "Visa ingen"
 
@@ -13657,6 +13785,7 @@ msgid "Starting…"
 msgstr "Startar…"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Starts"
 msgstr "Startar"
 
@@ -13666,10 +13795,12 @@ msgid "Starts in"
 msgstr "Startar i"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Starts the game in its emulator."
 msgstr "Startar spelet i dess emulator."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Starts the game through a plugin."
 msgstr "Startar spelet via ett tillägg."
 
@@ -14186,7 +14317,8 @@ msgid "That didn't work"
 msgstr "Det fungerade inte"
 
 #: apps/native/src/flows/tool_request.rs apps/native/src/game/data.rs
-#: apps/native/src/game/launch.rs apps/native/src/game_menu/actions.rs
+#: apps/native/src/game/editor/data.rs apps/native/src/game/launch.rs
+#: apps/native/src/game_menu/actions.rs
 #, fuzzy
 #| msgid "This store isn't available in this version of Caskade."
 msgid "That isn't available in this copy of Caskade."
@@ -14306,6 +14438,7 @@ msgid "The game's program or shortcut"
 msgstr "Spelets program eller genväg"
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
+#: apps/native/src/game/editor/artwork.rs
 msgid "The image wasn't changed: {error}"
 msgstr "Bilden ändrades inte: {error}"
 
@@ -14673,6 +14806,7 @@ msgid "This device can't share its games yet."
 msgstr "Den här enheten kan inte dela sina spel än."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "This device doesn't have it, so the best build installed runs instead."
 msgstr ""
 
@@ -14718,11 +14852,13 @@ msgid "This game"
 msgstr "Det här spelet"
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#: apps/native/src/game/editor/saves.rs
 msgid "This game has no releases."
 msgstr "Det här spelet har inga utgåvor."
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
+#: apps/native/src/game/editor/artwork.rs apps/native/src/game/editor/mod.rs
 msgid "This game is no longer in the library."
 msgstr "Spelet finns inte längre i biblioteket."
 
@@ -14750,6 +14886,7 @@ msgid "This job needs a response in Activity before it can continue."
 msgstr "Det här jobbet behöver ett svar i Aktivitet innan det kan fortsätta."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "This launch comes from where the game was found, which keeps it up to date. Duplicate it to change what it starts."
 msgstr "Den här starten kommer från där spelet hittades, som håller den aktuell. Duplicera den för att ändra vad den startar."
 
@@ -14901,6 +15038,7 @@ msgid "Too many wrong PINs. Try again in {time}."
 msgstr "För många felaktiga PIN-koder. Försök igen om {time}."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgctxt "launch action kind"
 msgid "Tool"
 msgstr "Verktyg"
@@ -14970,9 +15108,10 @@ msgstr "systemfält, avsluta, stäng till systemfältet"
 #: apps/desktop/src/views/StoreView.tsx apps/native/src/activity/card.rs
 #: apps/native/src/activity/mod.rs apps/native/src/flows/storage.rs
 #: apps/native/src/frame/error.rs apps/native/src/frame/notifications.rs
-#: apps/native/src/game/achievements.rs apps/native/src/game/page.rs
-#: apps/native/src/library/bulk_edit.rs apps/native/src/library/view.rs
-#: apps/native/src/settings/addons.rs apps/native/src/settings/devices.rs
+#: apps/native/src/game/achievements.rs apps/native/src/game/editor/mod.rs
+#: apps/native/src/game/page.rs apps/native/src/library/bulk_edit.rs
+#: apps/native/src/library/view.rs apps/native/src/settings/addons.rs
+#: apps/native/src/settings/devices.rs
 #: apps/native/src/settings/emulation/scanners.rs
 #: apps/native/src/settings/emulation/setup.rs
 #: apps/native/src/settings/general.rs apps/native/src/settings/streaming.rs
@@ -14999,7 +15138,7 @@ msgstr "Stäng av oskärpa, glöd, scanlinjer och bakgrundsrutnätet."
 msgid "Turn on"
 msgstr "Slå på"
 
-#: apps/desktop/src/views/game/IgdbPanel.tsx
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 #, fuzzy
 #| msgid "Online lookups"
 msgid "Turn on online lookups"
@@ -15449,6 +15588,12 @@ msgstr "Använd"
 msgid "Use {name} {0} from {1}"
 msgstr "Använd {name} {0} från {1}"
 
+#: apps/native/src/game/editor/artwork.rs
+#, fuzzy
+#| msgid "Use {name} {0} from {1}"
+msgid "Use {name} {0} from {source}"
+msgstr "Använd {name} {0} från {1}"
+
 #: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Use {title}"
 msgstr "Använd {title}"
@@ -15459,6 +15604,7 @@ msgid "Use it"
 msgstr "Använd den"
 
 #: apps/desktop/src/components/gameEditor/fields.tsx
+#: apps/native/src/game/editor/details.rs
 msgid "Use theirs"
 msgstr "Använd deras"
 
@@ -15514,10 +15660,12 @@ msgid "Uses {what}"
 msgstr "Använder {what}"
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#: apps/native/src/game/editor/saves.rs
 msgid "Using automatic locations."
 msgstr "Använder automatiska platser."
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
+#: apps/native/src/game/editor/saves.rs
 msgid "Using your chosen locations."
 msgstr "Använder dina valda platser."
 
@@ -15533,11 +15681,13 @@ msgstr "Värden det såg"
 
 #. placeholder {0}: index + 1
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Variable {0} name"
 msgstr "Variabel {0}, namn"
 
 #. placeholder {0}: index + 1
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Variable {0} value"
 msgstr "Variabel {0}, värde"
 
@@ -15834,6 +15984,7 @@ msgid "What it can do"
 msgstr "Vad kontot kan göra"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "What it does"
 msgstr "Vad den gör"
 
@@ -15991,6 +16142,7 @@ msgid "Which launchers' games join the library."
 msgstr "Vilka startprograms spel som läggs till i biblioteket."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/game/editor/action_form.rs
 msgid "Which programs are the game"
 msgstr "Vilka program som är spelet"
 
@@ -16089,7 +16241,7 @@ msgstr "Arbetskatalog: {0}"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
-#: apps/native/src/flows/scripts.rs
+#: apps/native/src/flows/scripts.rs apps/native/src/game/editor/action_form.rs
 msgid "Working folder"
 msgstr "Arbetsmapp"
 
@@ -16223,6 +16375,7 @@ msgid "Your game"
 msgstr "Ditt spel"
 
 #: apps/desktop/src/components/gameEditor/ArtworkTab.tsx
+#: apps/native/src/game/editor/artwork.rs
 msgid "Your image"
 msgstr "Din bild"
 
@@ -16291,14 +16444,17 @@ msgid "Your system has no keychain Caskade can use, so this sign-in lasts until 
 msgstr "Ditt system har ingen nyckelring som Caskade kan använda, så den här inloggningen varar tills Caskade stängs."
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
+#: apps/native/src/game/editor/mod.rs
 msgid "Your unsaved changes to {title} will be lost."
 msgstr "Dina osparade ändringar i {title} går förlorade."
 
 #: apps/desktop/src/components/gameEditor/fields.tsx
+#: apps/native/src/game/editor/details.rs
 msgid "Yours"
 msgstr "Ditt"
 
 #: apps/desktop/src/components/gameEditor/DetailsTab.tsx
+#: apps/native/src/game/editor/details.rs
 msgid "YYYY-MM-DD"
 msgstr "ÅÅÅÅ-MM-DD"
 

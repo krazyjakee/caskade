@@ -7,12 +7,14 @@
 //! are drawn (a trophy, a lock, a concealed mark); the services' own
 //! pictures aren't fetched natively yet.
 
-use super::data::{use_answer, use_page_data};
+use super::data::{AchievementIcon, use_answer, use_page_data};
+use crate::input::use_input;
 use crate::router::{Route, use_router};
 use crate::ui::{Button, ButtonSize, ButtonVariant, Segment, SegmentedControl, Svg, Switch, icons};
 use caskade_achievements::achievements::{Achievement, AchievementSet, SetStatus};
 use caskade_ui_data::Key as DataKey;
 use caskade_ui_i18n::{format, t, tn, tp};
+use dioxus_native::NodeHandle;
 use dioxus_native::prelude::*;
 use std::collections::HashSet;
 use std::rc::Rc;
@@ -212,14 +214,14 @@ pub fn GameAchievements(game_id: String) -> Element {
                 }
             }
             for set in [set] {
-                SetView { key: "{set_key(&set)}", set }
+                SetView { key: "{set_key(&set)}", game_id: game_id.clone(), set }
             }
         }
     }
 }
 
 #[component]
-fn SetView(set: AchievementSet) -> Element {
+fn SetView(game_id: String, set: AchievementSet) -> Element {
     let router = use_router();
     let provider = set.account.provider_name.clone();
     let name = set.account.display_name.clone();
@@ -277,7 +279,7 @@ fn SetView(set: AchievementSet) -> Element {
                     }
                 }
             },
-            SetStatus::Ready => rsx! { Achievements { set: set.clone() } },
+            SetStatus::Ready => rsx! { Achievements { game_id: game_id.clone(), set: set.clone() } },
         }
     }
 }
@@ -290,7 +292,7 @@ enum Show {
 }
 
 #[component]
-fn Achievements(set: AchievementSet) -> Element {
+fn Achievements(game_id: String, set: AchievementSet) -> Element {
     let mut show = use_signal(|| Show::All);
     let mut reveal_all = use_signal(|| false);
     let mut revealed = use_signal(HashSet::<String>::new);
@@ -388,6 +390,13 @@ fn Achievements(set: AchievementSet) -> Element {
                 for achievement in shown {
                     Row {
                         key: "{achievement.definition.id}",
+                        icon: AchievementIcon {
+                            game_id: game_id.clone(),
+                            store_account_id: set.account.store_account_id.clone(),
+                            product_id: set.product_id.clone(),
+                            achievement_id: achievement.definition.id.clone(),
+                            locked: !achievement.state.unlocked,
+                        },
                         provider: set.account.provider_name.clone(),
                         capabilities: capabilities.clone(),
                         revealed: reveal_all() || revealed.read().contains(&achievement.definition.id),
@@ -406,6 +415,8 @@ fn Achievements(set: AchievementSet) -> Element {
 #[component]
 fn Row(
     achievement: Achievement,
+    /// Its picture's request.
+    icon: AchievementIcon,
     provider: String,
     capabilities: caskade_achievements::achievements::AchievementCapabilities,
     revealed: bool,
@@ -414,6 +425,30 @@ fn Row(
     let definition = &achievement.definition;
     let state = &achievement.state;
     let concealed = definition.hidden && !state.unlocked && !revealed;
+    // The service's picture once the row nears the screen; the drawn icon
+    // when there is none, it can't load, or it would give a hidden one
+    // away.
+    let wanted = !concealed
+        && if state.unlocked {
+            definition.icon_url.is_some()
+        } else {
+            definition.locked_icon_url.is_some() || definition.icon_url.is_some()
+        };
+    let (near, mut row) = use_near();
+    let data = use_page_data();
+    let picture = use_resource(use_reactive!(|(wanted, icon)| {
+        let data = data.clone();
+        let go = wanted && near();
+        async move {
+            if go {
+                (data.achievement_icon)(icon).await.ok().flatten()
+            } else {
+                None
+            }
+        }
+    }));
+    let picture = picture.read().clone().flatten().filter(|_| wanted);
+    let greyed = !state.unlocked && definition.locked_icon_url.is_none();
     let name = if concealed {
         t!("Hidden achievement")
     } else {
@@ -473,7 +508,7 @@ fn Row(
     let progress = (capabilities.progress && !state.unlocked)
         .then_some(())
         .and(definition.progress_max.zip(state.progress));
-    let icon = if concealed {
+    let drawn = if concealed {
         icons::EYE_OFF
     } else if state.unlocked {
         icons::TROPHY
@@ -498,8 +533,13 @@ fn Row(
             "data-hardcore": hardcore.as_ref().is_some_and(|hardcore| hardcore.unlocked).then_some("true"),
             "aria-label": label,
             class: "flex items-start gap-3 rounded-control border border-border bg-surface-raised p-3 outline-none data-[state=locked]:text-fg-muted",
+            onmounted: move |event| row.set(event.data().downcast::<NodeHandle>().cloned()),
             span { "aria-hidden": "true", "data-part": "icon", class: "grid size-12 shrink-0 place-items-center overflow-hidden rounded-control border border-border bg-surface-base text-fg-subtle",
-                Svg { icon, class: "size-5" }
+                if let Some(url) = picture {
+                    img { src: "{url}", alt: "", class: if greyed { "size-full object-cover grayscale" } else { "size-full object-cover" } }
+                } else {
+                    Svg { icon: drawn, class: "size-5" }
+                }
             }
             div { class: "min-w-0 flex-1",
                 p { class: "font-semibold", "{name}" }
@@ -541,4 +581,40 @@ fn Row(
             }
         }
     }
+}
+
+/// The game page moved (a wheel turned over it): rows waiting to come near
+/// the screen look again. The input layer's own scrolls say so too.
+#[derive(Clone, Copy)]
+pub struct PageMoved(pub Signal<u64>);
+
+/// Whether the element mounted into the signal returned has come within
+/// 400 px of the window; it stays true once it has.
+fn use_near() -> (Signal<bool>, Signal<Option<NodeHandle>>) {
+    let input = use_input();
+    let moved = try_use_context::<PageMoved>();
+    let mut near = use_signal(|| false);
+    let row = use_signal(|| None::<NodeHandle>);
+    use_effect(move || {
+        let _ = input.scrolled();
+        if let Some(moved) = moved {
+            let _ = (moved.0)();
+        }
+        let Some(handle) = row.read().clone() else {
+            return;
+        };
+        if *near.peek() {
+            return;
+        }
+        let doc = handle.doc();
+        let viewport = doc.viewport();
+        let height = f64::from(viewport.window_size.1) / viewport.scale_f64();
+        if let Some(rect) = doc.get_client_bounding_rect(handle.node_id())
+            && rect.y < height + 400.0
+            && rect.y + rect.height > -400.0
+        {
+            near.set(true);
+        }
+    });
+    (near, row)
 }

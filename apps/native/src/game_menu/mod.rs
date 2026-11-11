@@ -61,6 +61,8 @@ pub enum MenuDialog {
         entry_id: String,
         item: Option<caskade_ui_data::shares::ShareItem>,
     },
+    /// Edit…: the game's editor (#100).
+    Edit,
     /// One of a release's tools, run once (#108's `ToolRequest`).
     Tool {
         entry_id: String,
@@ -244,6 +246,13 @@ pub fn GameMenuHost(children: Element) -> Element {
                         },
                         None => rsx! {},
                     },
+                    MenuDialog::Edit => rsx! {
+                        crate::game::editor::GameEditor {
+                            game_id: target.game_id.clone(),
+                            title: target.title.clone(),
+                            on_close: close,
+                        }
+                    },
                     MenuDialog::Tool { entry_id, action_id, name } => rsx! {
                         crate::flows::tool_request::ToolRequest {
                             entry_id,
@@ -345,6 +354,7 @@ fn OpenMenu(target: Target, anchor: Anchor, failure: Option<String>) -> Element 
     // Console mode's shell (#107) has no "Open installation folder"; the
     // native app has no console mode yet.
     let console = false;
+    let edits = crate::game::editor::use_edits();
     let facts = menu::Facts {
         game: game.as_ref(),
         entries: entries.clone(),
@@ -352,7 +362,7 @@ fn OpenMenu(target: Target, anchor: Anchor, failure: Option<String>) -> Element 
         actions: game_actions,
         console,
         storage: crate::shell::services().is_some_and(|services| services.install.is_some()),
-        edits: false,
+        edits,
         failure: failure.clone(),
         shares: crate::flows::receive_share::use_shares().is_some(),
         peers,
@@ -412,6 +422,7 @@ fn OpenMenu(target: Target, anchor: Anchor, failure: Option<String>) -> Element 
                     });
                 }
                 "collections" => open_dialog(MenuDialog::Collections),
+                "edit" => open_dialog(MenuDialog::Edit),
                 "move" => open_dialog(MenuDialog::Move {
                     entry_id: target.entry_id.clone(),
                     running: running.is_some(),

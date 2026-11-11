@@ -162,7 +162,9 @@ pub fn IgdbPanel(
                     None => rsx! { p { role: "status", class: "text-fg-muted", {t!("Loading the IGDB match…")} } },
                     Some(Err(error)) => rsx! { p { class: "text-fg-muted", "{error}" } },
                     Some(Ok(None)) => rsx! {
-                        p { class: "text-fg-muted", {t!("Not matched yet. Caskade matches games with IGDB in the background.")} }
+                        OnlineLookups {
+                            p { class: "text-fg-muted", {t!("Not matched yet. Caskade matches games with IGDB in the background.")} }
+                        }
                     },
                     Some(Ok(Some(current))) => rsx! {
                         Facts { current: current.clone() }
@@ -328,15 +330,21 @@ fn Facts(current: GameIgdb) -> Element {
     let Some(game) = current.game.clone() else {
         return match current.igdb_id {
             Some(id) => rsx! {
-                p { class: "text-fg-muted",
-                    {t!("IGDB game {igdbId}. Its details show once Caskade can reach the metadata server.", igdbId = id.to_string())}
+                OnlineLookups {
+                    p { class: "text-fg-muted",
+                        {t!("IGDB game {igdbId}. Its details show once Caskade can reach the metadata server.", igdbId = id.to_string())}
+                    }
                 }
             },
             None if current.source == MatchSource::Manual => rsx! {
                 p { class: "text-fg-muted", {t!("You marked this game as not on IGDB.")} }
             },
             None => {
-                rsx! { p { class: "text-fg-muted", {t!("Caskade found no IGDB game for it.")} } }
+                rsx! {
+                    OnlineLookups {
+                        p { class: "text-fg-muted", {t!("Caskade found no IGDB game for it.")} }
+                    }
+                }
             }
         };
     };
@@ -409,6 +417,37 @@ fn ResultRow(
                     on_press: move |_| on_use.call(()),
                     {t!("Use")}
                 }
+            }
+        }
+    }
+}
+
+/// `children`, or while online lookups are off on this device, why the
+/// game isn't matched or filled in and the switch to turn them on.
+#[component]
+fn OnlineLookups(children: Element) -> Element {
+    let metadata = crate::settings::use_settings_section("core.metadata");
+    let off = metadata
+        .value()
+        .is_some_and(|value| value.get("online") == Some(&serde_json::Value::Bool(false)));
+    if !off {
+        return children;
+    }
+    rsx! {
+        div { "data-part": "igdb-lookups-off",
+            p { class: "text-fg-muted",
+                {t!("Online lookups are off on this device, so Caskade doesn't match games with IGDB or fetch their details and artwork.")}
+            }
+            Button {
+                size: ButtonSize::Sm,
+                icon: icons::CLOUD,
+                class: "mt-3",
+                disabled: metadata.saving(),
+                on_press: move |_| metadata.set_field("online", serde_json::Value::Bool(true)),
+                {t!("Turn on online lookups")}
+            }
+            if let Some(error) = metadata.save_error() {
+                p { role: "alert", class: "mt-2 text-sm text-danger", "{error.summary}" }
             }
         }
     }

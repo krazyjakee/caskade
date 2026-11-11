@@ -55,11 +55,17 @@ pub fn art_url_hero(artwork: &[caskade_core::model::Artwork]) -> Option<String> 
 
 /// A picture's original, for where it fills the window (a screenshot).
 pub fn art_url_original(art: &caskade_core::model::Artwork) -> Option<String> {
-    (!art.cached_path.is_empty()).then(|| {
+    cached_url(&art.cached_path)
+}
+
+/// A file in the artwork cache (an achievement's picture, say), by its
+/// cached path.
+pub fn cached_url(cached_path: &str) -> Option<String> {
+    (!cached_path.is_empty()).then(|| {
         format!(
             "{}://localhost/{}",
             art::SCHEME,
-            art.cached_path.trim_start_matches('/')
+            cached_path.trim_start_matches('/')
         )
     })
 }
@@ -69,6 +75,7 @@ pub fn art_url_card(art: Option<&caskade_core::model::Artwork>) -> Option<String
     art::url(art, art::Variant::Card)
 }
 pub use anatomy::ANATOMY;
+pub(crate) use bulk_edit::{ListInput, TextAreaField, field_label};
 #[allow(unused_imports)]
 pub use grid::{Events, VirtualLibrary};
 #[allow(unused_imports)]

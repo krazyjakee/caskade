@@ -104,6 +104,7 @@ pub fn GameView(id: String, from: Option<String>) -> Element {
 #[component]
 fn Page(game: GameDetails, from: Option<String>) -> Element {
     let menus = use_game_menus();
+    let edits = super::editor::use_edits();
     let library = use_library();
     let sessions_query = use_sessions(game.game.id.clone());
     let sessions: Option<Result<Vec<PlaySession>, String>> = sessions_query
@@ -123,6 +124,7 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
     let data = super::data::use_page_data();
     // The hero's achievement summary moves to the achievements' heading.
     use_context_provider(|| super::achievements::AchievementsHeading(Signal::new(None)));
+    let mut moved = use_context_provider(|| super::achievements::PageMoved(Signal::new(0))).0;
     let updates = {
         let (data, game_id) = (data.clone(), game.game.id.clone());
         super::data::use_answer(caskade_ui_data::Key::Game(game_id.clone()), move || {
@@ -341,6 +343,7 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
             "data-view": "game",
             "data-status": if running.is_some() { "running" } else { status.name() },
             class: "mt-4",
+            onwheel: move |_| moved += 1,
             GameBackLink { game_id: game.game.id.clone(), from: from.clone(), class: "text-sm text-fg-muted" }
             section {
                 "data-cs": "hero",
@@ -459,6 +462,18 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
                             super::elsewhere::OtherDevices {
                                 game_id: game.game.id.clone(),
                                 primary: !list.iter().any(|entry| entry.can_launch),
+                            }
+                        }
+                        if edits && let Some(menus) = menus {
+                            Button {
+                                "data-part": "edit",
+                                "data-spatial": "focusable",
+                                icon: Some(icons::PENCIL),
+                                on_press: {
+                                    let target = target.clone();
+                                    move |_| menus.dialog(target(None), crate::game_menu::MenuDialog::Edit)
+                                },
+                                {t!("Edit details")}
                             }
                         }
                         if let Some(error) = default_error() {

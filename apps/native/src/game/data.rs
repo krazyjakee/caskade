@@ -41,6 +41,16 @@ pub enum UpdateChange {
     Prereleases(bool),
 }
 
+/// One achievement's picture, as its service has it: locked or not.
+#[derive(Debug, Clone, PartialEq)]
+pub struct AchievementIcon {
+    pub game_id: String,
+    pub store_account_id: String,
+    pub product_id: String,
+    pub achievement_id: String,
+    pub locked: bool,
+}
+
 #[derive(Clone)]
 pub struct PageData {
     /// The updates of game `0`'s followed installs.
@@ -109,6 +119,9 @@ pub struct PageData {
         Rc<dyn Fn(String) -> Answer<Vec<caskade_achievements::achievements::AchievementSet>>>,
     /// Stops a refresh of game `0`'s sets.
     pub achievements_cancel: Rc<dyn Fn(String) -> Answer<()>>,
+    /// An achievement's picture from its service, cached: its URL; `None`
+    /// without one, or when it can't load.
+    pub achievement_icon: Rc<dyn Fn(AchievementIcon) -> Answer<Option<String>>>,
     /// Game `0`'s fan ports; `None` where the catalogue isn't there.
     pub ports: Rc<dyn Fn(String) -> Answer<Option<caskade_core::ports::GamePorts>>>,
     /// Installs project `1` as a port of game `0`: the job's id.
@@ -562,6 +575,30 @@ impl PageData {
                         .map(drop)
                     })
                     .await
+                })
+            }),
+            achievement_icon: Rc::new(|icon| {
+                Box::pin(async move {
+                    let Some(services) = crate::shell::services() else {
+                        return Ok(None);
+                    };
+                    change(async move {
+                        caskade_app::commands::achievement_icons::game_achievement_icon(
+                            &services.achievements,
+                            &services.accounts,
+                            &services.achievement_icons,
+                            &icon.game_id,
+                            &icon.store_account_id,
+                            &icon.product_id,
+                            &icon.achievement_id,
+                            icon.locked,
+                        )
+                        .await
+                    })
+                    .await
+                    .map(|cached| {
+                        cached.and_then(|cached| crate::library::cached_url(&cached.cached_path))
+                    })
                 })
             }),
             ports: Rc::new(|game_id| {

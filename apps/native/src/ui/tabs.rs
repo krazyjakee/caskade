@@ -18,6 +18,8 @@ use crate::input::{Bind, use_input, use_input_action};
 pub struct Tab {
     pub id: String,
     pub label: String,
+    /// It holds unsaved changes (`data-dirty`, and a dot after its label).
+    pub dirty: bool,
 }
 
 impl Tab {
@@ -25,7 +27,13 @@ impl Tab {
         Self {
             id: id.into(),
             label: label.into(),
+            dirty: false,
         }
+    }
+
+    /// Marked as holding unsaved changes, or not.
+    pub fn dirty(self, dirty: bool) -> Self {
+        Self { dirty, ..self }
     }
 }
 
@@ -144,6 +152,7 @@ fn TabButton(
             "aria-controls": "{panel}",
             "data-part": "tab",
             "data-selected": flag(selected),
+            "data-dirty": flag(tab.dirty),
             "data-hovered": interaction.hovered(),
             "data-focus-visible": interaction.ring(),
             class: "-mb-px border-b-2 border-transparent px-3 py-2 text-sm text-fg-muted transition-[color,border-color] duration-(--cs-motion-duration-fast) data-focus-visible:focus-ring data-hovered:text-fg data-selected:border-accent-alt data-selected:text-fg",
@@ -158,6 +167,9 @@ fn TabButton(
             onmouseleave: move |_| interaction.leave(),
             onclick: move |_| on_select.call(()),
             "{tab.label}"
+            if tab.dirty {
+                span { "aria-hidden": "true", class: "ml-1 text-accent-alt", "•" }
+            }
         }
     }
 }

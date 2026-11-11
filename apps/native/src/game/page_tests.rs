@@ -198,6 +198,10 @@ pub(crate) struct PageScript {
     pub(crate) ports_installed: Vec<String>,
     pub(crate) achievement_sets: Vec<caskade_achievements::achievements::AchievementSet>,
     pub(crate) achievement_refreshes: usize,
+    /// Achievements' pictures by achievement id: their URLs.
+    pub(crate) achievement_icons: Vec<(String, String)>,
+    /// The achievements whose pictures were asked for.
+    pub(crate) icons_asked: Vec<String>,
     pub(crate) saves: Option<caskade_core::saves::versions::SaveHistory>,
     pub(crate) save_paths: Vec<String>,
     pub(crate) restored: Vec<(String, String)>,
@@ -361,6 +365,16 @@ pub(crate) fn fake_data() -> PageData {
             }))
         }),
         achievements_cancel: Rc::new(|_| answer(())),
+        achievement_icon: Rc::new(|icon| {
+            answer(page(|script| {
+                script.icons_asked.push(icon.achievement_id.clone());
+                script
+                    .achievement_icons
+                    .iter()
+                    .find(|(id, _)| *id == icon.achievement_id)
+                    .map(|(_, url)| url.clone())
+            }))
+        }),
         ports: Rc::new(|_| answer(page(|script| script.ports.clone()))),
         install_port: Rc::new(|_, project| {
             page(|script| script.ports_installed.push(project));
@@ -1037,6 +1051,109 @@ fn achievements_show_the_counts_and_hidden_ones_stay_concealed_until_revealed() 
     window.settle_until("refreshed", |_| {
         page(|script| script.achievement_refreshes) == 1
     });
+}
+
+#[test]
+fn achievements_show_their_services_pictures_and_hidden_ones_stay_drawn() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    use caskade_achievements::achievements::{
+        AchievementCapabilities, AchievementSet, SetAccount, SetStatus, SetSync,
+    };
+    let mut first = achievement("first", "First steps", true, false);
+    first.definition.icon_url = Some("https://example.invalid/first.png".to_owned());
+    let mut secret = achievement("secret", "The secret ending", false, true);
+    secret.definition.locked_icon_url = Some("https://example.invalid/secret.png".to_owned());
+    let _script = page_script(PageScript {
+        achievement_sets: vec![AchievementSet {
+            id: Some("set-1".to_owned()),
+            account: SetAccount {
+                store_account_id: "steam-me".to_owned(),
+                provider: "steam".to_owned(),
+                provider_name: "Steam".to_owned(),
+                display_name: "Robin".to_owned(),
+            },
+            product_id: "1".to_owned(),
+            entry_ids: Vec::new(),
+            sync: SetSync {
+                status: SetStatus::Ready,
+                ..SetSync::default()
+            },
+            capabilities: AchievementCapabilities::default(),
+            unlocked: 1,
+            total: 2,
+            hardcore_unlocked: None,
+            achievements: vec![first, secret],
+        }],
+        achievement_icons: vec![(
+            "first".to_owned(),
+            "caskade-asset://localhost/first.png".to_owned(),
+        )],
+        ..PageScript::default()
+    });
+    let mut window = open("/games/fixture-1");
+    window.settle_until("the achievements", |window| {
+        window.find("data-cs", "achievements").is_some()
+    });
+    // The panel comes near the screen.
+    let summary = window.get("data-cs", "achievement-summary");
+    window.click(summary);
+    window.settle_until("the picture", |window| {
+        window
+            .find_all("data-part", "icon")
+            .into_iter()
+            .any(|icon| {
+                window
+                    .find_in(icon, "src", "caskade-asset://localhost/first.png")
+                    .is_some()
+            })
+    });
+    // A hidden one's picture would give it away: not even asked for.
+    assert_eq!(page(|script| script.icons_asked.clone()), ["first"]);
+}
+
+#[test]
+fn with_online_lookups_off_the_igdb_panel_says_so_and_turns_them_on() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    let settings = &crate::frame::tests::source().settings;
+    let before = caskade_app::runtime::block_on(settings.get("core.metadata"))
+        .unwrap()
+        .value;
+    let off = {
+        let mut value = before.clone();
+        value["online"] = serde_json::Value::Bool(false);
+        value
+    };
+    caskade_app::runtime::block_on(settings.update("core.metadata", |_| off.clone())).unwrap();
+    let _script = page_script(PageScript::default());
+    let mut window = open("/games/fixture-1");
+    window.settle_until("the note", |window| {
+        window.find("data-part", "igdb-lookups-off").is_some()
+    });
+    let note = window.get("data-part", "igdb-lookups-off");
+    assert!(
+        window
+            .text(note)
+            .contains("Online lookups are off on this device"),
+        "{}",
+        window.text(note)
+    );
+    let turn_on = window
+        .find_all("data-spatial", "focusable")
+        .into_iter()
+        .chain(window.find_all("type", "button"))
+        .find(|&node| window.text(node).contains("Turn on online lookups"))
+        .expect("Turn on online lookups");
+    window.click(turn_on);
+    window.settle_until("on again", |window| {
+        window.find("data-part", "igdb-lookups-off").is_none()
+    });
+    let now = caskade_app::runtime::block_on(settings.get("core.metadata"))
+        .unwrap()
+        .value;
+    assert_eq!(now["online"], serde_json::Value::Bool(true));
+    caskade_app::runtime::block_on(settings.update("core.metadata", |_| before.clone())).unwrap();
 }
 
 #[test]

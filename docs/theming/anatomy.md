@@ -1054,7 +1054,7 @@ Contains: [`game-art`](#game-art), [`status-badge`](#status-badge), [`button`](#
 
 ## `game-editor`
 
-A game's editor, from its menu's Edit… or its page's Edit details: its details as one draft saved together, its artwork, and tabs for its launch actions and scripts. A dialog in desktop mode, the whole window in console mode. Rendered by GameEditor (app).
+A game's editor, from its menu's Edit… or its page's Edit details: its details as one draft saved together, its artwork, and tabs for its launch actions and scripts. A dialog in desktop mode, the whole window in console mode. Rendered by GameEditor (apps/native/src/game/editor/mod.rs); in the webview, GameEditor (app).
 
 Root: `[data-cs="game-editor"]`
 
@@ -1192,7 +1192,7 @@ Contains: [`button`](#button), [`checkbox`](#checkbox), [`segmented`](#segmented
 
 ## `game-editor-discard`
 
-Asks before an editor with unsaved changes closes: Keep editing or Discard. Rendered by GameEditor (app).
+Asks before an editor with unsaved changes closes: Keep editing or Discard. Rendered by GameEditor (apps/native/src/game/editor/mod.rs); in the webview, GameEditor (app).
 
 Root: `[data-cs="game-editor-discard"]`
 
@@ -1200,7 +1200,7 @@ Contains: [`button`](#button)
 
 ## `game-actions`
 
-The game editor's Actions tab (#178): a release's launch actions, its own launch first, with the form for the one chosen and what Play starts. Rendered by ActionsTab (app).
+The game editor's Actions tab (#178): a release's launch actions, its own launch first, with the form for the one chosen and what Play starts. Rendered by ActionsTab (apps/native/src/game/editor/actions.rs); in the webview, ActionsTab (app).
 
 Root: `[data-cs="game-actions"]`
 
@@ -1225,7 +1225,7 @@ Contains: [`button`](#button), [`select`](#select), [`segmented`](#segmented), [
 
 ## `game-saves`
 
-The game editor's Saves tab (#238): one release's save locations on this device, automatic or the user's own, and the manifest game it matches. Files and folders dropped on it are added. Rendered by SavesTab (app).
+The game editor's Saves tab (#238): one release's save locations on this device, automatic or the user's own, and the manifest game it matches. Files and folders dropped on it are added. Rendered by SavesTab (apps/native/src/game/editor/saves.rs); in the webview, SavesTab (app).
 
 Root: `[data-cs="game-saves"]`
 
