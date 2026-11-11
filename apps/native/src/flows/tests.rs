@@ -1031,3 +1031,364 @@ fn a_game_installed_from_a_link_goes_where_the_user_chose() {
     assert_eq!(job.status, JobStatus::Completed, "{job:?}");
     assert_eq!(job.root_id.as_deref(), Some(locations.archive.as_str()));
 }
+
+// The hosts over any view (#108): stream pairing requests, games other
+// devices ask to start here, and a release's tools.
+
+use super::remote_play::{RemotePlayHost, RemotePlays};
+use super::streaming::{HostBusy, StopHostDialog, StreamPairingHost};
+use super::tool_request::ToolRequest;
+use caskade_ui_data::streaming::{PairRequest, PairRequestHost, StreamPairing};
+
+/// A streaming host that lists `requests` and takes the code 4321.
+#[derive(Default)]
+struct FakeStreamHost {
+    requests: Mutex<Vec<PairRequest>>,
+    accepted: Mutex<Vec<(String, String, String)>>,
+    declined: Mutex<Vec<String>>,
+}
+
+type Pending<'a, T> = std::pin::Pin<
+    Box<dyn std::future::Future<Output = Result<T, caskade_core::error::ErrorReport>> + Send + 'a>,
+>;
+
+impl PairRequestHost for FakeStreamHost {
+    fn ready(&self) -> bool {
+        true
+    }
+
+    fn requests(&self) -> Pending<'_, Vec<PairRequest>> {
+        let list = self.requests.lock().unwrap().clone();
+        Box::pin(async move { Ok(list) })
+    }
+
+    fn accept<'a>(&'a self, id: &'a str, code: &'a str, name: &'a str) -> Pending<'a, ()> {
+        Box::pin(async move {
+            if code != "4321" {
+                return Err("The code didn't match".into());
+            }
+            self.requests
+                .lock()
+                .unwrap()
+                .retain(|request| request.id != id);
+            self.accepted
+                .lock()
+                .unwrap()
+                .push((id.to_owned(), code.to_owned(), name.to_owned()));
+            Ok(())
+        })
+    }
+
+    fn decline<'a>(&'a self, id: &'a str) -> Pending<'a, ()> {
+        Box::pin(async move {
+            self.requests
+                .lock()
+                .unwrap()
+                .retain(|request| request.id != id);
+            self.declined.lock().unwrap().push(id.to_owned());
+            Ok(())
+        })
+    }
+}
+
+/// What a host test shows.
+#[derive(Clone)]
+enum HostShown {
+    Stream(StreamPairing),
+    Stop { launching: bool },
+    Tool(Box<caskade_core::launch::LaunchService>),
+    Remote(RemotePlays),
+}
+static HOST_SHOWN: Mutex<Option<HostShown>> = Mutex::new(None);
+/// What the host test heard: closed, confirmed, or a remote play's answer.
+static HOST_HEARD: Mutex<Vec<String>> = Mutex::new(Vec::new());
+
+fn host_heard(what: impl Into<String>) {
+    HOST_HEARD
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .push(what.into());
+}
+
+fn host_heard_all() -> Vec<String> {
+    HOST_HEARD.lock().unwrap_or_else(|e| e.into_inner()).clone()
+}
+
+fn host_app() -> Element {
+    use_data_source(|| source().clone());
+    let shown = HOST_SHOWN
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .clone()
+        .unwrap();
+    if let HostShown::Tool(launch) = &shown {
+        let launch = (**launch).clone();
+        use_context_provider(move || launch);
+    }
+    rsx! {
+        style { {include_str!("../../assets/app.css")} }
+        InputRoot {
+            div { id: "hosts-ready",
+                match shown {
+                    HostShown::Stream(pairing) => rsx! {
+                        StreamPairingHost { pairing }
+                    },
+                    HostShown::Stop { launching } => rsx! {
+                        StopHostDialog {
+                            busy: HostBusy { device: "Desk".into(), playing: Some("Celeste".into()) },
+                            title: Some("Hades".to_owned()),
+                            launching,
+                            on_close: |_| host_heard("closed"),
+                            on_confirm: |_| host_heard("confirmed"),
+                        }
+                    },
+                    HostShown::Tool(_) => rsx! {
+                        ToolRequest {
+                            entry_id: "no-such-entry",
+                            action_id: "defrag",
+                            name: "Defragmenter",
+                            on_close: |_| host_heard("closed"),
+                        }
+                    },
+                    HostShown::Remote(plays) => rsx! {
+                        RemotePlayHost { plays }
+                    },
+                }
+            }
+        }
+    }
+}
+
+fn open_host(shown: HostShown) -> Window {
+    source();
+    *HOST_SHOWN.lock().unwrap_or_else(|e| e.into_inner()) = Some(shown);
+    HOST_HEARD.lock().unwrap_or_else(|e| e.into_inner()).clear();
+    Window::open_root(host_app, "the host", "#hosts-ready")
+}
+
+/// An account service whose first account, signed in, is an admin.
+fn admin_accounts() -> caskade_core::accounts::AccountService {
+    caskade_app::runtime::block_on(async {
+        let store = caskade_core::db::LibraryStore::in_memory().await.unwrap();
+        caskade_core::accounts::AccountService::open(store, caskade_core::bus::Bus::default())
+            .await
+            .unwrap()
+    })
+}
+
+#[test]
+fn a_device_asking_to_stream_is_prompted_and_paired_with_the_code_it_shows() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let host = std::sync::Arc::new(FakeStreamHost::default());
+    host.requests.lock().unwrap().push(PairRequest {
+        id: "tv".into(),
+        name: "Living room TV".into(),
+        address: "192.0.2.7".into(),
+    });
+    let pairing = StreamPairing::new(host.clone(), admin_accounts());
+    let mut window = open_host(HostShown::Stream(pairing));
+    window.until("the prompt", |w| {
+        w.find("[data-cs=stream-pair-prompt]").is_some()
+    });
+    assert_eq!(
+        window.text("[data-cs=stream-pair-prompt] h2"),
+        "Living room TV wants to play from this device"
+    );
+    assert_eq!(
+        window.text("[data-cs=pair-request] [data-part=ask]"),
+        "Living room TV wants to stream games from this device."
+    );
+    assert_eq!(
+        window
+            .attr("#pair-request-accept", "aria-disabled")
+            .as_deref(),
+        Some("true"),
+        "no code yet"
+    );
+    // Only digits, four of them.
+    window.focus("#pair-request-code");
+    window.type_text("12a345");
+    assert_eq!(
+        window.attr("#pair-request-code", "value").as_deref(),
+        Some("1234")
+    );
+    window.press("#pair-request-accept");
+    window.until("why it didn't pair", |w| {
+        w.text("[data-cs=pair-request]")
+            .contains("The code didn't match")
+    });
+    assert!(host.accepted.lock().unwrap().is_empty());
+    window.focus("#pair-request-code");
+    for _ in 0..4 {
+        window.key(Key::Named(NamedKey::Backspace));
+    }
+    window.type_text("4321");
+    window.focus("#pair-request-name");
+    window.key(Key::Named(NamedKey::End));
+    window.type_text(" (den)");
+    window.press("#pair-request-accept");
+    window.until("the prompt gone", |w| {
+        w.find("[data-cs=stream-pair-prompt]").is_none()
+    });
+    assert_eq!(
+        *host.accepted.lock().unwrap(),
+        [(
+            "tv".to_owned(),
+            "4321".to_owned(),
+            "Living room TV (den)".to_owned()
+        )]
+    );
+}
+
+#[test]
+fn a_stream_request_put_off_stays_away_and_the_next_one_shows() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let host = std::sync::Arc::new(FakeStreamHost::default());
+    for (id, name) in [("tv", "Living room TV"), ("deck", "Deck")] {
+        host.requests.lock().unwrap().push(PairRequest {
+            id: id.into(),
+            name: name.into(),
+            address: "192.0.2.7".into(),
+        });
+    }
+    let pairing = StreamPairing::new(host.clone(), admin_accounts());
+    let mut window = open_host(HostShown::Stream(pairing));
+    window.until("the first prompt", |w| {
+        w.text("[data-cs=stream-pair-prompt] h2") == "Living room TV wants to play from this device"
+    });
+    window.press("#stream-pair-not-now");
+    window.until("the second prompt", |w| {
+        w.text("[data-cs=stream-pair-prompt] h2") == "Deck wants to play from this device"
+    });
+    assert!(host.declined.lock().unwrap().is_empty(), "not now isn't no");
+    window.press("#pair-request-decline");
+    window.until("no prompt", |w| {
+        w.find("[data-cs=stream-pair-prompt]").is_none()
+    });
+    assert_eq!(*host.declined.lock().unwrap(), ["deck"]);
+    // The one put off still waits, for Settings → Streaming.
+    assert_eq!(host.requests.lock().unwrap().len(), 1);
+}
+
+#[test]
+fn stopping_the_other_game_asks_in_the_webviews_words() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let mut window = open_host(HostShown::Stop { launching: false });
+    window.until("the dialog", |w| w.find("[data-cs=stop-host]").is_some());
+    assert_eq!(
+        window.text("[data-cs=stop-host] h2"),
+        "Stop the other game?"
+    );
+    assert_eq!(
+        window.text("[data-cs=stop-host] [data-part=question]"),
+        "Desk is playing Celeste. Stop it and stream Hades?"
+    );
+    window.press("#stop-host-confirm");
+    window.press("#stop-host-cancel");
+    assert_eq!(host_heard_all(), ["confirmed", "closed"]);
+
+    let window = open_host(HostShown::Stop { launching: true });
+    assert_eq!(window.text("#stop-host-confirm"), "Starting…");
+    assert_eq!(
+        window.attr("#stop-host-cancel", "aria-disabled").as_deref(),
+        Some("true")
+    );
+}
+
+#[test]
+fn a_tool_that_cant_start_says_why() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let launch = caskade_app::runtime::block_on(async {
+        let store = caskade_core::db::LibraryStore::in_memory().await.unwrap();
+        caskade_core::launch::LaunchService::new(store).with_aliases(None)
+    });
+    let mut window = open_host(HostShown::Tool(Box::new(launch)));
+    window.until("why", |w| w.find("[data-cs=tool-failed]").is_some());
+    assert_eq!(
+        window.text("[data-cs=tool-failed] h2"),
+        "Defragmenter didn't start"
+    );
+    assert!(!window.text("[data-cs=tool-failed] p").is_empty());
+    window.press("#tool-failed-ok");
+    assert_eq!(host_heard_all(), ["closed"]);
+}
+
+#[test]
+fn a_game_another_device_asks_for_is_answered_with_how_it_went() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let (events, _keep) = tokio::sync::broadcast::channel(16);
+    let plays = RemotePlays::new(
+        events.clone(),
+        std::sync::Arc::new(|id: &str, started: bool, reason: Option<String>| {
+            host_heard(format!("{id} {started} {}", reason.unwrap_or_default()));
+        }),
+    );
+    let mut window = open_host(HostShown::Remote(plays));
+    let _ = events.send(caskade_app::events::Event::RemotePlayRequested(
+        caskade_app::events::RemotePlayRequested {
+            request_id: "r1".into(),
+            game_id: "no-such-game".into(),
+            device_name: "Deck".into(),
+        },
+    ));
+    window.until("the answer", |_| !host_heard_all().is_empty());
+    assert_eq!(
+        host_heard_all(),
+        ["r1 false It has nothing installed that can launch."]
+    );
+    window.settle();
+    assert!(
+        window.find("[role=dialog], [role=alertdialog]").is_none(),
+        "the other device hears why; nothing stays open here"
+    );
+}
+
+/// The game menu's Your devices → Share with someone…: for a release
+/// installed here with its files here, while the app shares; not for a
+/// store's copy, and not on one entry's row.
+#[test]
+fn share_with_someone_is_in_the_menu_for_a_copy_here() {
+    use crate::game_menu::entries::EntryView;
+    use crate::game_menu::menu::{Facts, Target, items};
+    use crate::ui::MenuEntry;
+    let entry = |source: &str| EntryView {
+        id: "e1".into(),
+        source: source.into(),
+        installed: true,
+        location: Some("/games/Celeste".into()),
+        can_launch: true,
+        emulated: false,
+        stream: false,
+    };
+    let target = |entry_id: Option<&str>| Target {
+        game_id: "g1".into(),
+        title: "Celeste".into(),
+        entry_id: entry_id.map(str::to_owned),
+    };
+    let share = |target: &Target, facts: &Facts| {
+        items(target, facts)
+            .iter()
+            .find_map(|section| match section {
+                MenuEntry::Section { title, items } => items
+                    .iter()
+                    .find(|item| item.id == "share")
+                    .map(|item| (title.clone(), item.label.clone())),
+                _ => None,
+            })
+    };
+    let facts = |source: &str, shares: bool| Facts {
+        entries: vec![entry(source)],
+        shares,
+        ..Facts::default()
+    };
+    assert_eq!(
+        share(&target(None), &facts("manual", true)),
+        Some((
+            Some("Your devices".to_owned()),
+            "Share with someone…".to_owned()
+        ))
+    );
+    assert_eq!(share(&target(None), &facts("store:steam", true)), None);
+    assert_eq!(share(&target(None), &facts("manual", false)), None);
+    assert_eq!(share(&target(Some("e1")), &facts("manual", true)), None);
+}

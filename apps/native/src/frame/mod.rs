@@ -44,6 +44,8 @@ pub fn Frame(
             RouterRoot { start,
                 ToastRegion {
                     type_search::TypeSearchRoot {
+                        // Pairing, remote play and stream requests (#108).
+                        crate::flows::Hosts {}
                         crate::game_menu::GameMenuHost {
                             Shell {}
                         }

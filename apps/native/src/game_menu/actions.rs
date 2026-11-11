@@ -39,24 +39,6 @@ pub async fn launch(
     .await
 }
 
-/// Runs entry `entry_id`'s tool `action_id` once: no play session. An age
-/// limit holding it back is a failure here until the age gate (#106) and
-/// #108's `ToolRequest` ask for an admin's PIN.
-pub async fn run_tool(entry_id: String, action_id: String) -> Result<(), ErrorReport> {
-    use caskade_app::commands::actions::ToolOutcome;
-    let services = services()?;
-    let outcome = crate::data::change(async move {
-        caskade_app::commands::actions::game_tool_run(&services.launch, &entry_id, &action_id).await
-    })
-    .await?;
-    match outcome {
-        ToolOutcome::Started => Ok(()),
-        ToolOutcome::AgeRestricted { .. } => {
-            Err(ErrorReport::from(caskade_ui_i18n::t!("Admin PIN needed")))
-        }
-    }
-}
-
 /// Stops the running session `session_id`, keeping its playtime so far.
 pub async fn stop(session_id: String) -> Result<(), ErrorReport> {
     let services = services()?;

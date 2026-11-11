@@ -14,6 +14,7 @@ use crate::ui::{Button, ButtonVariant, Dialog, MenuButton, MenuEntry, MenuItem, 
 
 use super::manual_game::{ManualGameDialog, ManualMode};
 use super::paths::{PathRequest, PickKind, use_path_picker};
+use super::receive_share::{ReceiveShareDialog, use_shares};
 use super::storage::{InstallRootPicker, use_storage};
 
 /// The button and the dialogs it opens. `on_open_game` gets the id of a
@@ -25,6 +26,8 @@ pub fn AddGame(on_open_game: EventHandler<String>) -> Element {
     let manual = try_use_context::<DataSource>().is_some();
     let storage = use_storage().filter(Storage::can_install);
     let picker = use_path_picker();
+    let shares = use_shares();
+    let mut receiving = use_signal(|| false);
     let mut adding = use_signal(|| None::<ManualMode>);
     let mut url_open = use_signal(|| false);
     let mut url = use_signal(String::new);
@@ -45,6 +48,12 @@ pub fn AddGame(on_open_game: EventHandler<String>) -> Element {
         items.push(MenuEntry::Item(MenuItem {
             description: Some(t!("A download link or a magnet link")),
             ..MenuItem::new("url", t!("Install from link…"))
+        }));
+    }
+    if shares.is_some() {
+        items.push(MenuEntry::Item(MenuItem {
+            description: Some(t!("A link someone sent you from their Caskade")),
+            ..MenuItem::new("share", t!("Receive a shared game…"))
         }));
     }
     if manual {
@@ -162,6 +171,7 @@ pub fn AddGame(on_open_game: EventHandler<String>) -> Element {
                         "file" => choose(PickKind::File),
                         "folder" => choose(PickKind::Folder),
                         "url" => url_open.set(true),
+                        "share" => receiving.set(true),
                         "manual-target" => adding.set(Some(ManualMode::Target)),
                         "manual-title" => adding.set(Some(ManualMode::Title)),
                         _ => {}
@@ -173,6 +183,13 @@ pub fn AddGame(on_open_game: EventHandler<String>) -> Element {
                     mode,
                     on_close: move |_| adding.set(None),
                     on_added: move |id| on_open_game.call(id),
+                }
+            }
+            if let (true, Some(shares)) = (receiving(), shares.clone()) {
+                ReceiveShareDialog {
+                    shares,
+                    storage: storage.clone(),
+                    on_close: move |_| receiving.set(false),
                 }
             }
             if let (Some(message), false) = (error(), url_open()) {

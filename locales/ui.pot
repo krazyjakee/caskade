@@ -135,7 +135,9 @@ msgstr ""
 msgid "Hide details"
 msgstr ""
 
+#. A game of a shared collection, on this device
 #: packages/ui/src/StatusBadge.tsx
+#: apps/native/src/flows/shares_common.rs
 #: apps/native/src/ui/status_badge.rs
 msgid "Installed"
 msgstr ""
@@ -172,7 +174,9 @@ msgid "Not Installed"
 msgstr ""
 
 #. A store game the user already owns
+#. A game of a shared collection a store account owns
 #: packages/ui/src/GameCard.tsx
+#: apps/native/src/flows/shares_common.rs
 #: apps/native/src/ui/game_card.rs
 msgid "Owned"
 msgstr ""

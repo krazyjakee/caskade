@@ -12,7 +12,7 @@ mod collections;
 mod dialogs;
 pub mod entries;
 pub mod menu;
-mod play;
+pub(crate) mod play;
 mod quick_look;
 
 #[cfg(test)]
@@ -48,6 +48,18 @@ pub enum MenuDialog {
     },
     Remove {
         uninstalls: bool,
+    },
+    /// Share with someone… (#247): a release, or a web game's offline copy
+    /// or a ROM rather than the folder they're in (#248).
+    Share {
+        entry_id: String,
+        item: Option<caskade_ui_data::shares::ShareItem>,
+    },
+    /// One of a release's tools, run once (#108's `ToolRequest`).
+    Tool {
+        entry_id: String,
+        action_id: String,
+        name: String,
     },
 }
 
@@ -132,6 +144,7 @@ pub fn GameMenuHost(children: Element) -> Element {
     let mut dialog = menus.dialog;
     // Moving a game's files (#108's dialog), where the app has storage.
     let storage = crate::flows::storage::use_storage();
+    let shares = crate::flows::receive_share::use_shares();
     rsx! {
         {children}
         if let Some((target, anchor, failure)) = menu() {
@@ -186,6 +199,33 @@ pub fn GameMenuHost(children: Element) -> Element {
                             title: target.title.clone(),
                             game_id: target.game_id.clone(),
                             uninstalls,
+                            on_close: close,
+                        }
+                    },
+                    MenuDialog::Share { entry_id, item } => match shares.clone() {
+                        Some(shares) => rsx! {
+                            crate::flows::share_game::ShareGameDialog {
+                                shares,
+                                target: match item {
+                                    Some(item) => crate::flows::share_game::ShareTarget::Item {
+                                        item,
+                                        title: target.title.clone(),
+                                    },
+                                    None => crate::flows::share_game::ShareTarget::Game {
+                                        entry_id,
+                                        title: target.title.clone(),
+                                    },
+                                },
+                                on_close: close,
+                            }
+                        },
+                        None => rsx! {},
+                    },
+                    MenuDialog::Tool { entry_id, action_id, name } => rsx! {
+                        crate::flows::tool_request::ToolRequest {
+                            entry_id,
+                            action_id,
+                            name,
                             on_close: close,
                         }
                     },
@@ -247,9 +287,15 @@ fn OpenMenu(target: Target, anchor: Anchor, failure: Option<String>) -> Element 
         .and_then(|list| list.as_ref().ok().cloned())
         .unwrap_or_default();
     let entries: Vec<EntryView> = game.as_ref().map(entries::entries).unwrap_or_default();
-    let tools: Vec<(String, String)> = game_actions
+    let tools: Vec<(String, String, String)> = game_actions
         .iter()
-        .map(|action| (action.entry_id.clone(), action.id.clone()))
+        .map(|action| {
+            (
+                action.entry_id.clone(),
+                action.id.clone(),
+                action.name.clone(),
+            )
+        })
         .collect();
     // Console mode's shell (#107) has no "Open installation folder"; the
     // native app has no console mode yet.
@@ -263,6 +309,7 @@ fn OpenMenu(target: Target, anchor: Anchor, failure: Option<String>) -> Element 
         storage: crate::shell::services().is_some_and(|services| services.install.is_some()),
         edits: false,
         failure: failure.clone(),
+        shares: crate::flows::receive_share::use_shares().is_some(),
         ..menu::Facts::default()
     };
     let items = menu::items(&target, &facts);
@@ -321,6 +368,26 @@ fn OpenMenu(target: Target, anchor: Anchor, failure: Option<String>) -> Element 
                     running: running.is_some(),
                 }),
                 "remove" => open_dialog(MenuDialog::Remove { uninstalls }),
+                "share" => {
+                    if let Some(entry) = menu::copyable(&entries) {
+                        use caskade_ui_data::shares::ShareItem;
+                        let item = if entry.web() {
+                            Some(ShareItem::Web {
+                                game_id: target.game_id.clone(),
+                            })
+                        } else if entry.emulated {
+                            Some(ShareItem::Rom {
+                                entry_id: entry.id.clone(),
+                            })
+                        } else {
+                            None
+                        };
+                        open_dialog(MenuDialog::Share {
+                            entry_id: entry.id.clone(),
+                            item,
+                        });
+                    }
+                }
                 "hide" => {
                     let library = library.clone();
                     let game_id = target.game_id.clone();
@@ -343,16 +410,15 @@ fn OpenMenu(target: Target, anchor: Anchor, failure: Option<String>) -> Element 
                             entry_id: entry,
                             action: Some(action.to_owned()),
                         });
-                    } else if let Some((entry, action)) = tools
+                    } else if let Some((entry_id, action_id, name)) = tools
                         .iter()
-                        .find(|(entry, action)| other == format!("tool:{entry}:{action}"))
+                        .find(|(entry, action, _)| other == format!("tool:{entry}:{action}"))
                         .cloned()
                     {
-                        // #108's ToolRequest takes this over.
-                        spawn_forever(async move {
-                            if let Err(report) = actions::run_tool(entry, action).await {
-                                fail(report);
-                            }
+                        open_dialog(MenuDialog::Tool {
+                            entry_id,
+                            action_id,
+                            name,
                         });
                     } else if let Some(entry) = other.strip_prefix("reveal:") {
                         let entry = entry.to_owned();

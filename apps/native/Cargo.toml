@@ -121,6 +121,10 @@ accesskit = "0.25"
 tempfile = "=3.27.0"
 # The smoke and e2e tests' own display and session bus (#122).
 caskade-test-desktop = { path = "../../crates/caskade-test-desktop" }
+# The share flows' tests: two cores sharing a game on loopback, as
+# caskade-share's own tests set them up (#108).
+caskade-share = { path = "../../crates/caskade-share" }
+caskade-installer = { path = "../../crates/caskade-installer" }
 
 [lints]
 workspace = true

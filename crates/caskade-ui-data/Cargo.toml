@@ -11,6 +11,11 @@ caskade-app = { path = "../caskade-app" }
 caskade-core = { path = "../caskade-core" }
 # Themes bundled by plugins, for Appearance's list (`themes.rs`, #104).
 caskade-plugin-host = { path = "../caskade-plugin-host" }
+# One-off shares' types (ShareRecord, ShareInfo, ShareItem) for the share
+# flows' data handle (`shares.rs`, #108).
+caskade-share = { path = "../caskade-share" }
+# The streaming host behind the stream pairing prompt (`streaming.rs`, #108).
+caskade-streaming = { path = "../caskade-streaming" }
 # Settings sections' values (JSON Schema documents).
 serde_json = "1"
 tokio = { version = "1", features = ["sync", "rt", "macros", "time"] }

@@ -38,6 +38,21 @@ pub struct Facts<'a> {
     pub failure: Option<String>,
     /// Hiding failed: shown on Hide itself.
     pub hide_failure: Option<String>,
+    /// The app shares games through links (its share service, #247).
+    pub shares: bool,
+}
+
+/// The release a share link would carry: installed here, with files here,
+/// and not another device's or a store's copy (`GameMenu.tsx`'s
+/// `copyable`).
+pub fn copyable(entries: &[EntryView]) -> Option<&EntryView> {
+    entries.iter().find(|entry| {
+        !["peer:", "store:", "stream:"]
+            .iter()
+            .any(|prefix| entry.source.starts_with(prefix))
+            && entry.installed
+            && entry.location.is_some()
+    })
 }
 
 /// The session running the target, if any.
@@ -248,6 +263,19 @@ pub fn items(target: &Target, facts: &Facts) -> Vec<MenuEntry> {
         title: None,
         items: second.into_iter().filter_map(only_item).collect(),
     });
+
+    // Your devices: Share with someone… (#247). Playing on and copying to
+    // paired devices join it with sync's views.
+    if !scoped && facts.shares && copyable(&facts.entries).is_some() {
+        menu.push(MenuEntry::Separator);
+        menu.push(MenuEntry::Section {
+            title: Some(tp!("game menu section", "Your devices")),
+            items: vec![MenuItem {
+                description: Some(t!("A link for someone else's Caskade")),
+                ..item("share", t!("Share with someone…"), icons::SHARE_2)
+            }],
+        });
+    }
 
     // Tools: a release's utilities, which count no playtime.
     let ids: HashSet<&str> = owned.iter().map(|entry| entry.id.as_str()).collect();

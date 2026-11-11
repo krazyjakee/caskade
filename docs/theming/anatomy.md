@@ -1285,7 +1285,7 @@ Contains: [`button`](#button), [`select`](#select)
 
 ## `tool-failed`
 
-Says why a game's tool didn't start. Rendered by ToolRequest (app).
+Says why a game's tool didn't start. Rendered by ToolRequest (apps/native/src/flows/tool_request.rs); in the webview, ToolRequest (app).
 
 Root: `[data-cs="tool-failed"]`
 
@@ -1434,7 +1434,7 @@ Contains: [`peer-link`](#peer-link)
 
 ## `share`
 
-A game this device shared once with someone else (#246, #247): its title and size, Copy link and Stop sharing while it runs (Forget after), what it is doing and who received it. `data-status` is `preparing` (its files are being read; the link works already), `ready`, `failed`, `stopped` or `expired`. Rendered by SharesList in Settings → Devices → Copies and shares (app).
+A game this device shared once with someone else (#246, #247): its title and size, Copy link and Stop sharing while it runs (Forget after), what it is doing and who received it. `data-status` is `preparing` (its files are being read; the link works already), `ready`, `failed`, `stopped` or `expired`. Rendered by SharesList (apps/native/src/flows/shares_list.rs); in the webview, SharesList in Settings → Devices → Copies and shares (app).
 
 Root: `[data-cs="share"]`
 
@@ -1451,7 +1451,7 @@ Contains: [`share-recipient`](#share-recipient)
 
 ## `share-recipient`
 
-Someone who opened a share's link (#247): their device's name, whether they help others receive it, and a bar of how far they got. `data-status` is `receiving`, `away` (not connected now) or `done`. Rendered by ShareRecipients (app).
+Someone who opened a share's link (#247): their device's name, whether they help others receive it, and a bar of how far they got. `data-status` is `receiving`, `away` (not connected now) or `done`. Rendered by ShareRecipients (apps/native/src/flows/shares_common.rs); in the webview, ShareRecipients (app).
 
 Root: `[data-cs="share-recipient"]`
 
@@ -1461,7 +1461,7 @@ State on the root:
 
 ## `received-share`
 
-A game someone shared with this device (#249): its title and sharer, and the Help others receive it switch. `data-status` is `receiving`, `serving` (it helps the share's other recipients) or `done`. Rendered by SharesList in Settings → Devices → Copies and shares (app).
+A game someone shared with this device (#249): its title and sharer, and the Help others receive it switch. `data-status` is `receiving`, `serving` (it helps the share's other recipients) or `done`. Rendered by SharesList (apps/native/src/flows/shares_list.rs); in the webview, SharesList in Settings → Devices → Copies and shares (app).
 
 Root: `[data-cs="received-share"]`
 
@@ -1471,7 +1471,7 @@ State on the root:
 
 ## `share-game`
 
-Share with someone… (#247): how long the link works, then the link with Copy (and, in console mode, a QR code), what the share is doing, who received it, and Stop sharing. Rendered by ShareGameDialog (app).
+Share with someone… (#247): how long the link works, then the link with Copy (and, in console mode, a QR code), what the share is doing, who received it, and Stop sharing. Rendered by ShareGameDialog (apps/native/src/flows/share_game.rs); in the webview, ShareGameDialog (app).
 
 Root: `[data-cs="share-game"]`
 
@@ -1486,7 +1486,7 @@ Contains: [`share-recipient`](#share-recipient)
 
 ## `receive-share`
 
-Add game → Receive a shared game… (#247): the link, what its sharer says it shares, Help others receive it, and Receive. Rendered by ReceiveShareDialog (app).
+Add game → Receive a shared game… (#247): the link, what its sharer says it shares, Help others receive it, and Receive. Rendered by ReceiveShareDialog (apps/native/src/flows/receive_share.rs); in the webview, ReceiveShareDialog (app).
 
 Root: `[data-cs="receive-share"]`
 
@@ -1494,7 +1494,7 @@ Contains: [`share-info`](#share-info)
 
 ## `share-info`
 
-What a share link shares, as its sharer says (#247, #248): who, what, its size and build, until when the link works; for a save, web game or ROM, where it goes here; for a collection, which of its games this device has. `data-status` is `direct`, or `relayOnly` when only a relay reaches the sharer and files wait for a direct connection. Rendered by ShareInfoDetails (app).
+What a share link shares, as its sharer says (#247, #248): who, what, its size and build, until when the link works; for a save, web game or ROM, where it goes here; for a collection, which of its games this device has. `data-status` is `direct`, or `relayOnly` when only a relay reaches the sharer and files wait for a direct connection. Rendered by ShareInfoDetails (apps/native/src/flows/shares_common.rs); in the webview, ShareInfoDetails (app).
 
 Root: `[data-cs="share-info"]`
 
@@ -1509,7 +1509,7 @@ State on the root:
 
 ## `pair-device`
 
-Pairing over any view (#226, #231): the code both devices show, for a pairing this device or the other one started; or a `caskade://pair` link opened from outside, waiting for an admin. Rendered by PairingHost (app).
+Pairing over any view (#226, #231): the code both devices show, for a pairing this device or the other one started; or a `caskade://pair` link opened from outside, waiting for an admin. Rendered by PairingHost (apps/native/src/flows/pairing.rs); in the webview, PairingHost (app).
 
 Root: `[data-cs="pair-device"]`
 

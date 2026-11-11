@@ -114,7 +114,9 @@ msgstr "Spöke"
 msgid "Hide details"
 msgstr "Dölj detaljer"
 
-#: packages/ui/src/StatusBadge.tsx apps/native/src/ui/status_badge.rs
+#. A game of a shared collection, on this device
+#: packages/ui/src/StatusBadge.tsx apps/native/src/flows/shares_common.rs
+#: apps/native/src/ui/status_badge.rs
 msgid "Installed"
 msgstr "Installerat"
 
@@ -144,7 +146,9 @@ msgid "Not Installed"
 msgstr "Inte installerat"
 
 #. A store game the user already owns
-#: packages/ui/src/GameCard.tsx apps/native/src/ui/game_card.rs
+#. A game of a shared collection a store account owns
+#: packages/ui/src/GameCard.tsx apps/native/src/flows/shares_common.rs
+#: apps/native/src/ui/game_card.rs
 msgid "Owned"
 msgstr "Ägs"
 

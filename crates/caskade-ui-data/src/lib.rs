@@ -21,8 +21,11 @@ pub mod keys;
 pub mod labels;
 pub mod library;
 mod manual;
+pub mod pairing;
 pub mod settings;
+pub mod shares;
 pub mod storage;
+pub mod streaming;
 pub mod themes;
 
 pub use caskade_core::error::{ErrorCode, ErrorReport, RecoveryHint};

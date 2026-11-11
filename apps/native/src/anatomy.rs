@@ -96,6 +96,18 @@ mod tests {
             "#108: the webview's install-from-link dialog isn't catalogued either",
         ),
         (
+            "stream-pair-prompt",
+            "#108: the webview's StreamPairingHost isn't catalogued either",
+        ),
+        (
+            "pair-request",
+            "#108: the webview's PairRequestForm isn't catalogued either",
+        ),
+        (
+            "stop-host",
+            "#108: the webview's StopHostDialog isn't catalogued either",
+        ),
+        (
             "schema-settings",
             "#103: the webview's SchemaSettings isn't catalogued either",
         ),

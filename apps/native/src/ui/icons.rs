@@ -123,6 +123,15 @@ pub const BELL_DOT: Icon = Icon(&[
     "M18 2a3 3 0 1 0 0 6a3 3 0 1 0 0-6z",
 ]);
 
+/// lucide's `share-2`.
+pub const SHARE_2: Icon = Icon(&[
+    "M18 2a3 3 0 1 0 0 6a3 3 0 1 0 0-6z",
+    "M6 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6z",
+    "M18 16a3 3 0 1 0 0 6a3 3 0 1 0 0-6z",
+    "M8.59 13.51 15.42 17.49",
+    "M15.41 6.51 8.59 10.49",
+]);
+
 /// lucide's `external-link`.
 pub const EXTERNAL_LINK: Icon = Icon(&[
     "M15 3h6v6",

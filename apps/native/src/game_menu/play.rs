@@ -35,9 +35,26 @@ pub fn PlayRequest(
     action: Option<String>,
     starting: Signal<Option<String>>,
     on_close: EventHandler<()>,
+    /// How it went, once (another device's request, #108): started; or why
+    /// not, `None` when the choice was closed unanswered. With it, a
+    /// failure goes there instead of into a dialog here.
+    #[props(default)]
+    on_outcome: Option<EventHandler<Result<(), Option<String>>>>,
 ) -> Element {
-    let game = use_game(game_id.clone());
     let mut stage = use_signal(|| Stage::Waiting);
+    let tell = move |result: Result<(), Option<String>>| {
+        if let Some(on_outcome) = on_outcome {
+            on_outcome.call(result);
+        }
+    };
+    let mut fail = move |reason: String| {
+        if on_outcome.is_some() {
+            tell(Err(Some(reason)));
+        } else {
+            stage.set(Stage::Failed(reason));
+        }
+    };
+    let game = use_game(game_id.clone());
     let mut started = use_signal(|| false);
     // The entry, once known.
     let entry = entry_id.clone().or_else(|| {
@@ -61,17 +78,18 @@ pub fn PlayRequest(
                     starting.set(None);
                 }
                 match outcome {
-                    Ok(LaunchOutcome::Started { .. }) => on_close.call(()),
+                    Ok(LaunchOutcome::Started { .. }) => {
+                        tell(Ok(()));
+                        on_close.call(());
+                    }
                     Ok(LaunchOutcome::Choose { prompt }) => {
                         stage.set(Stage::Choose(Box::new(prompt)))
                     }
-                    Ok(LaunchOutcome::AgeRestricted { .. }) => {
-                        stage.set(Stage::Failed(t!("Admin PIN needed")))
+                    Ok(LaunchOutcome::AgeRestricted { .. }) => fail(t!("Admin PIN needed")),
+                    Ok(LaunchOutcome::HostBusy { .. }) => {
+                        fail(t!("This device is streaming a game to another one."))
                     }
-                    Ok(LaunchOutcome::HostBusy { .. }) => stage.set(Stage::Failed(t!(
-                        "This device is streaming a game to another one."
-                    ))),
-                    Err(report) => stage.set(Stage::Failed(report.summary)),
+                    Err(report) => fail(report.summary),
                 }
             });
         })
@@ -89,9 +107,7 @@ pub fn PlayRequest(
             ));
         } else if loaded {
             started.set(true);
-            stage.set(Stage::Failed(t!(
-                "It has nothing installed that can launch."
-            )));
+            fail(t!("It has nothing installed that can launch."));
         }
     }
 
@@ -101,7 +117,10 @@ pub fn PlayRequest(
             LaunchChoiceDialog {
                 prompt: *prompt,
                 action: action.clone(),
-                on_close: move |_| on_close.call(()),
+                on_close: move |_| {
+                    tell(Err(None));
+                    on_close.call(());
+                },
                 on_choose: move |choice: LaunchChoice| {
                     if let Some(entry) = entry.clone() {
                         launch((entry, choice));
