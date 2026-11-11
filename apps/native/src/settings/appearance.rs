@@ -31,6 +31,11 @@ use crate::ui::{
 /// The default theme, when the setting is empty.
 const DEFAULT_THEME: &str = "caskade.default";
 
+/// Examples in empty fields: code, as the webview's, so not translated.
+const ACCENT_EXAMPLE: &str = "#5b5ff7";
+const CSS_EXAMPLE: &str =
+    "[data-cs=\"game-card\"] [data-part=\"title\"] {\n  color: var(--cs-color-accent);\n}";
+
 /// The theming contract's documentation (`docs/theming/`).
 const THEMING_DOCS: &str = "https://github.com/krazyjakee/caskade/blob/master/docs/theming/";
 
@@ -727,7 +732,7 @@ fn AccentPicker(value: Option<String>, on_change: EventHandler<Option<String>>) 
                     TextField {
                         value: shown,
                         mono: true,
-                        placeholder: "#5b5ff7".to_owned(),
+                        placeholder: ACCENT_EXAMPLE.to_owned(),
                         "aria-label": t!("Custom accent colour"),
                         on_input: move |next: String| typed.set(Some(next)),
                         on_submit: move |next: String| {
@@ -900,7 +905,7 @@ fn CustomCssEditor(
                     spellcheck: "false",
                     wrap: "off",
                     rows: "14",
-                    placeholder: "[data-cs=\"game-card\"] [data-part=\"title\"] {{\n  color: var(--cs-color-accent);\n}}",
+                    placeholder: CSS_EXAMPLE,
                     value: "{text}",
                     class: "block h-72 w-full flex-1 resize-y bg-transparent py-2 pr-3 pl-2 text-fg outline-none placeholder:text-fg-subtle",
                     oninput: move |event| draft.set(Some(event.value())),
