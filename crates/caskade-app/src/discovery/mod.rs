@@ -24,7 +24,7 @@ use std::{
 };
 use tokio::sync::{Mutex, watch};
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct ReviewItem {
     pub id: String,

@@ -61,7 +61,7 @@ pub struct RootCapabilities {
     pub volume: Option<String>,
     pub warnings: Vec<String>,
 }
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct StorageGame {
     pub entry_id: String,
@@ -72,7 +72,7 @@ pub struct StorageGame {
     pub available: bool,
     pub move_blocked: Option<String>,
 }
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct RootSummary {
     pub root: StorageRoot,

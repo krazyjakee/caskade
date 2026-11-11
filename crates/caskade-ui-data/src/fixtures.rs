@@ -21,6 +21,7 @@ use caskade_core::{
 };
 use tokio::sync::broadcast;
 
+use crate::stores::Stores;
 use crate::{Discovery, Library, Settings, Themes};
 
 /// How many plain games fixtures mode makes unless asked for another number
@@ -198,6 +199,8 @@ pub struct Fixtures {
     /// machine (Steam, Lutris and a few games), never this device; `None`
     /// where the fixture isn't there (a build moved away from its sources).
     pub discovery: Option<Discovery>,
+    /// Store accounts in memory, with no store: tests add fake ones.
+    pub stores: Stores,
 }
 
 /// Where the fixture library's installed themes are: none until a test
@@ -231,6 +234,9 @@ pub async fn open(count: usize) -> caskade_core::Result<Fixtures> {
         None,
         Events::new(Broadcast(events.clone())),
     );
+    // Play history import's section, as the app registers it.
+    caskade_sources::register_settings(&service)
+        .map_err(|error| caskade_core::Error::Invalid(error.to_string()))?;
     let discovery = caskade_discovery::env::HostEnv::fixture(concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/../caskade-discovery/tests/fixtures/machines/linux-mixed"
@@ -244,11 +250,21 @@ pub async fn open(count: usize) -> caskade_core::Result<Fixtures> {
         controller.bridge(Events::new(Broadcast(events.clone())));
         Discovery::new(controller)
     });
+    caskade_core::store_accounts::register_settings(&service)
+        .map_err(|error| caskade_core::Error::Invalid(error.to_string()))?;
+    let store_accounts =
+        caskade_core::store_accounts::StoreAccounts::new(store.clone(), bus.clone());
+    caskade_app::commands::store_accounts::setup(
+        Events::new(Broadcast(events.clone())),
+        &store_accounts,
+    );
+    let stores = Stores::new(store_accounts, Some(accounts.clone()));
     let settings = Settings::new(service, accounts.clone());
     Ok(Fixtures {
         settings,
         themes,
         discovery,
+        stores,
         library: Library::new(store.clone(), accounts.clone(), launch, bus.clone()),
         store,
         bus,

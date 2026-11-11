@@ -13,6 +13,7 @@
 //! what they will hold.
 
 mod appearance;
+mod discovery;
 mod drafts;
 mod general;
 mod launchers;
@@ -21,6 +22,8 @@ mod reset;
 mod schema;
 mod search;
 mod state;
+mod storage;
+mod stores;
 mod sync;
 #[cfg(test)]
 mod tests;

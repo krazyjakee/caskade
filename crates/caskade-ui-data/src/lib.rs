@@ -27,6 +27,7 @@ pub mod pairing;
 pub mod settings;
 pub mod shares;
 pub mod storage;
+pub mod stores;
 pub mod streaming;
 pub mod themes;
 

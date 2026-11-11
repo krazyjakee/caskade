@@ -111,6 +111,18 @@ mod tests {
             "schema-settings",
             "#103: the webview's SchemaSettings isn't catalogued either",
         ),
+        (
+            "discovery-settings",
+            "#104: the webview's LibraryDiscoverySettings isn't catalogued either",
+        ),
+        (
+            "discovery-review",
+            "#104: the webview's ReviewList isn't catalogued either",
+        ),
+        (
+            "storage-settings",
+            "#104: the webview's StoragePanel isn't catalogued either",
+        ),
     ];
 
     /// The webview's catalogue, as `pnpm --filter @caskade/ui docs`

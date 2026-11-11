@@ -113,6 +113,7 @@ msgstr[1] ""
 #. placeholder {0}: summary.lost
 #. js-lingui:icu=%7B0%2C+plural%2C+one+%7B%23+game+is+no+longer+in+this+account%3B+it+stays+in+your+library.%7D+other+%7B%23+games+are+no+longer+in+this+account%3B+they+stay+in+your+library.%7D%7D&pluralize_on=0
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "# game is no longer in this account; it stays in your library."
 msgid_plural "# games are no longer in this account; they stay in your library."
 msgstr[0] ""
@@ -580,6 +581,7 @@ msgstr ""
 
 #. Games discovery found, counting each game's copies once
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "{found} games found"
 msgstr ""
 
@@ -609,6 +611,7 @@ msgid "{free} free of {total}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "{from} is removed once every game has moved. If you cancel, or a game can't move, it stays and the games already moved stay on {target}."
 msgstr ""
 
@@ -623,6 +626,7 @@ msgstr ""
 
 #. js-lingui:icu=%7Bgames%2C+plural%2C+one+%7BMove+its+game+there%2C+then+remove%E2%80%A6%7D+other+%7BMove+its+%23+games+there%2C+then+remove%E2%80%A6%7D%7D&pluralize_on=games
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Move its game there, then remove…"
 msgid_plural "Move its # games there, then remove…"
 msgstr[0] ""
@@ -630,6 +634,7 @@ msgstr[1] ""
 
 #. js-lingui:icu=%7Bgames%2C+plural%2C+one+%7BMove+its+game+to+%7Btarget%7D%3F%7D+other+%7BMove+its+%23+games+to+%7Btarget%7D%3F%7D%7D&pluralize_on=games
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Move its game to {target}?"
 msgid_plural "Move its # games to {target}?"
 msgstr[0] ""
@@ -637,6 +642,7 @@ msgstr[1] ""
 
 #. js-lingui:icu=%7Bgames%2C+plural%2C+one+%7BRemove+this+location+from+the+library%3F+Its+game+leaves+your+library%2C+with+its+play+time%2C+favourite+and+collections.+If+you+also+have+that+game+another+way%2C+it+stays%2C+without+this+copy%27s+play+time.%7D+other+%7BRemove+this+location+from+the+library%3F+Its+%23+games+leave+your+library%2C+with+their+play+time%2C+favourites+and+collections.+A+game+you+also+have+another+way+stays%2C+without+this+copy%27s+play+time.%7D%7D&pluralize_on=games
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Remove this location from the library? Its game leaves your library, with its play time, favourite and collections. If you also have that game another way, it stays, without this copy's play time."
 msgid_plural "Remove this location from the library? Its # games leave your library, with their play time, favourites and collections. A game you also have another way stays, without this copy's play time."
 msgstr[0] ""
@@ -644,6 +650,7 @@ msgstr[1] ""
 
 #. A storage location's games, free space and size
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "{games} · {free} free / {size} total"
 msgstr ""
 
@@ -655,6 +662,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "{imported} imported"
 msgstr ""
 
@@ -669,6 +677,7 @@ msgstr ""
 
 #. js-lingui:icu=%7Bkept%2C+plural%2C+one+%7B%23+game+stays%2C+because+it%27s+installed%2C+added+another+way+or+owned+by+another+account.%7D+other+%7B%23+games+stay%2C+because+they%27re+installed%2C+added+another+way+or+owned+by+another+account.%7D%7D&pluralize_on=kept
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "# game stays, because it's installed, added another way or owned by another account."
 msgid_plural "# games stay, because they're installed, added another way or owned by another account."
 msgstr[0] ""
@@ -719,11 +728,13 @@ msgstr ""
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/native/src/flows/storage.rs
+#: apps/native/src/settings/storage.rs
 msgid "{location} · {free} free"
 msgstr ""
 
 #. js-lingui:icu=%7Blocations%2C+plural%2C+one+%7B%23+registered+location%7D+other+%7B%23+registered+locations%7D%7D&pluralize_on=locations
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "# registered location"
 msgid_plural "# registered locations"
 msgstr[0] ""
@@ -882,6 +893,7 @@ msgstr ""
 
 #. placeholder {0}: formatDateTime(new Date(synced))
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "{owned, plural, one {# game owned} other {# games owned}}, {installed} installed. Last refreshed {0}."
 msgstr ""
 
@@ -978,6 +990,7 @@ msgstr ""
 
 #. js-lingui:icu=%7Bremoved%2C+plural%2C+one+%7B%23+game+only+this+account+brought+leaves+your+library.%7D+other+%7B%23+games+only+this+account+brought+leave+your+library.%7D%7D&pluralize_on=removed
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "# game only this account brought leaves your library."
 msgid_plural "# games only this account brought leave your library."
 msgstr[0] ""
@@ -1047,6 +1060,7 @@ msgid "{size} RAM"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "{size} to move, as one job you can follow or cancel in Activity."
 msgstr ""
 
@@ -1057,6 +1071,7 @@ msgstr ""
 
 #. A discovery source's last report: its name and the games it found
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "{source}: {games}"
 msgstr ""
 
@@ -1158,6 +1173,8 @@ msgstr ""
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/native/src/frame/type_search.rs
 #: apps/native/src/library/platform_grid.rs
+#: apps/native/src/settings/discovery.rs
+#: apps/native/src/settings/storage.rs
 msgid "# game"
 msgid_plural "# games"
 msgstr[0] ""
@@ -1334,11 +1351,13 @@ msgstr ""
 
 #. How often discovery refreshes
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "1 hour"
 msgstr ""
 
 #. How often discovery refreshes
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "12 hours"
 msgstr ""
 
@@ -1355,6 +1374,7 @@ msgstr ""
 
 #. How often discovery refreshes
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "24 hours"
 msgstr ""
 
@@ -1383,6 +1403,7 @@ msgstr ""
 
 #. How often discovery refreshes
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "6 hours"
 msgstr ""
 
@@ -1476,14 +1497,17 @@ msgid "A Flatpak app"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "A full path on this device. Caskade only reads it."
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "A full path on this device. Folders are searched while Custom folders is on."
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "A full scan looks everywhere again and notices games that were removed. Watching picks up changes as they happen."
 msgstr ""
 
@@ -1522,6 +1546,7 @@ msgid "A newer version, {latest}, is ready."
 msgstr ""
 
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "A notification for achievements unlocked since the last refresh. The first refresh of a game brings its history in without notifications."
 msgstr ""
 
@@ -1603,6 +1628,7 @@ msgstr ""
 
 #. {title} is shown as is: the template's placeholder for the game's title
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "A single folder name containing {title}."
 msgstr ""
 
@@ -1673,6 +1699,7 @@ msgid "About backups"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "About store accounts"
 msgstr ""
 
@@ -1684,6 +1711,7 @@ msgid "Accent colour"
 msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
+#: apps/native/src/settings/discovery.rs
 msgctxt "discovery review"
 msgid "Accept"
 msgstr ""
@@ -1696,6 +1724,7 @@ msgstr ""
 
 #. Accepts the checked discovery results; {count} is how many are checked
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Accept selected ({count})"
 msgstr ""
 
@@ -1741,6 +1770,7 @@ msgstr ""
 #: apps/desktop/src/components/achievements/GameAchievements.tsx
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
 #: apps/native/src/frame/notifications.rs
+#: apps/native/src/settings/stores.rs
 msgid "Achievements"
 msgstr ""
 
@@ -1751,6 +1781,7 @@ msgstr ""
 
 #. placeholder {0}: formatDateTime(new Date(synced))
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Achievements last refreshed {0}."
 msgstr ""
 
@@ -1816,6 +1847,7 @@ msgid "Add a device by its address"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Add a folder below to choose your first install location."
 msgstr ""
 
@@ -1840,10 +1872,12 @@ msgid "Add a game on this computer…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Add a location"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Add a storage location"
 msgstr ""
 
@@ -1897,6 +1931,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Add folder"
 msgstr ""
 
@@ -1934,6 +1969,7 @@ msgid "Add installation"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Add location"
 msgstr ""
 
@@ -2051,10 +2087,12 @@ msgid "Address"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Address or code"
 msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Adds it to the library"
 msgstr ""
 
@@ -2085,6 +2123,7 @@ msgid "Advanced strategies"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "After a game exits, and now and then for games played lately."
 msgstr ""
 
@@ -2171,6 +2210,7 @@ msgid "Allow"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Allow again"
 msgstr ""
 
@@ -2204,6 +2244,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/native/src/settings/search.rs
+#: apps/native/src/settings/storage.rs
 msgid "Always use the default location"
 msgstr ""
 
@@ -2336,6 +2377,7 @@ msgid "Anyone can then sign in to {name} without a PIN. You can set a new one la
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "API key"
 msgstr ""
 
@@ -2396,6 +2438,7 @@ msgid "AppImage file"
 msgstr ""
 
 #: apps/desktop/src/views/settings/launchers.ts
+#: apps/native/src/settings/launchers.rs
 msgctxt "discovery source"
 msgid "Applications"
 msgstr ""
@@ -2565,6 +2608,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/search.rs
 msgid "Automatic Library Discovery"
 msgstr ""
@@ -2669,6 +2713,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/search.rs
 msgid "Background refresh"
 msgstr ""
@@ -2800,6 +2845,7 @@ msgid "Bringing your library from {name}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Brings in every game your {name} account owns, installed or not."
 msgstr ""
 
@@ -2828,6 +2874,8 @@ msgstr ""
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/native/src/flows/manual_game.rs
+#: apps/native/src/settings/discovery.rs
+#: apps/native/src/settings/storage.rs
 msgid "Browse…"
 msgstr ""
 
@@ -2984,6 +3032,8 @@ msgstr ""
 #: apps/native/src/library/selection_bar.rs
 #: apps/native/src/library/web.rs
 #: apps/native/src/settings/reset.rs
+#: apps/native/src/settings/storage.rs
+#: apps/native/src/settings/stores.rs
 #: apps/native/src/ui/dialog.rs
 msgid "Cancel"
 msgstr ""
@@ -3017,10 +3067,12 @@ msgid "Cancel job"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Cancel scan"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Cancel sign-in"
 msgstr ""
 
@@ -3038,6 +3090,7 @@ msgid "Cancelled"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgctxt "discovery phase"
 msgid "Cancelled"
 msgstr ""
@@ -3058,6 +3111,7 @@ msgid "Cancelled"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgctxt "discovery phase"
 msgid "Cancelling"
 msgstr ""
@@ -3282,6 +3336,7 @@ msgid "Caskade sets up an emulator to play it."
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Caskade signs out of it and stops refreshing it. Its games stay in your library, and connecting it again brings it back as it was. Remove it to take its games out."
 msgstr ""
 
@@ -3472,6 +3527,7 @@ msgstr ""
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/native/src/flows/storage.rs
+#: apps/native/src/settings/storage.rs
 msgid "Checking locations…"
 msgstr ""
 
@@ -3504,6 +3560,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/ResetDefaults.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 #: apps/native/src/settings/reset.rs
+#: apps/native/src/settings/stores.rs
 msgid "Checking what would change…"
 msgstr ""
 
@@ -3567,6 +3624,7 @@ msgid "Choose a folder for your games."
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Choose a folder to scan"
 msgstr ""
 
@@ -3607,10 +3665,12 @@ msgid "Choose an option"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Choose another default before removing this location."
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Choose another default first"
 msgstr ""
 
@@ -3685,6 +3745,7 @@ msgid "Choose what to download"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Choose where Caskade installs games. Disconnected locations remain in your library."
 msgstr ""
 
@@ -3871,6 +3932,7 @@ msgid "Compatibility runner"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgctxt "discovery phase"
 msgid "Complete"
 msgstr ""
@@ -3911,6 +3973,7 @@ msgid "Confirm installation"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Connect"
 msgstr ""
 
@@ -3923,6 +3986,7 @@ msgid "Connect a server"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Connect another"
 msgstr ""
 
@@ -3945,6 +4009,7 @@ msgid "Connected"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgctxt "store account"
 msgid "Connected"
 msgstr ""
@@ -4197,6 +4262,7 @@ msgstr ""
 
 #. placeholder {0}: games.error.message
 #: apps/desktop/src/views/settings/discovery/HiddenGames.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Couldn't load the hidden games: {0}"
 msgstr ""
 
@@ -4314,6 +4380,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/search.rs
 msgid "Custom folders"
 msgstr ""
@@ -4379,6 +4446,7 @@ msgid "decompilation, recompilation, source port, Decomp Buddy"
 msgstr ""
 
 #: apps/desktop/src/views/settings/launchers.ts
+#: apps/native/src/settings/launchers.rs
 msgctxt "discovery source"
 msgid "Deep scans"
 msgstr ""
@@ -4416,6 +4484,7 @@ msgstr ""
 
 #. The default storage location and its status
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Default · {status}"
 msgstr ""
 
@@ -4546,6 +4615,7 @@ msgid "Desktop computer"
 msgstr ""
 
 #: apps/desktop/src/views/settings/launchers.ts
+#: apps/native/src/settings/launchers.rs
 msgctxt "discovery source"
 msgid "Desktop entries"
 msgstr ""
@@ -4695,23 +4765,28 @@ msgid "Discard your changes?"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Disconnect"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Disconnect {name}?"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Disconnect…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgctxt "store account"
 msgid "Disconnected"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Disconnecting keeps the account's games. Removing it takes out the games only it brought; installed games stay."
 msgstr ""
 
@@ -5152,6 +5227,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/search.rs
 msgid "Enable library discovery"
 msgstr ""
@@ -5262,10 +5338,12 @@ msgstr ""
 
 #. placeholder {0}: settings.intervalHours
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Every {0} hours"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Every {hours} hours"
 msgstr ""
 
@@ -5310,6 +5388,7 @@ msgstr ""
 
 #. The reasons discovery thinks a result is a game
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Evidence for {title}"
 msgstr ""
 
@@ -5338,6 +5417,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/search.rs
 msgid "External drives"
 msgstr ""
@@ -5357,6 +5437,7 @@ msgid "Failed"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgctxt "discovery phase"
 msgid "Failed"
 msgstr ""
@@ -5447,6 +5528,7 @@ msgid "Files and folders this scanner always skips. Unticking a game in a review
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Files on disk are kept. Add this folder again and Caskade finds them, as new games: what left the library doesn't come back."
 msgstr ""
 
@@ -5463,6 +5545,7 @@ msgid "Finding save locations…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Finds the games your launchers and your system already know about. It reads their records and never starts a launcher."
 msgstr ""
 
@@ -5502,6 +5585,7 @@ msgid "Flatpak app ID"
 msgstr ""
 
 #: apps/desktop/src/views/settings/launchers.ts
+#: apps/native/src/settings/launchers.rs
 msgctxt "discovery source"
 msgid "Flatpak apps"
 msgstr ""
@@ -5518,6 +5602,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Folder"
 msgstr ""
 
@@ -5528,6 +5613,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/search.rs
 msgid "Folder to search"
 msgstr ""
@@ -5535,6 +5621,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/native/src/settings/search.rs
+#: apps/native/src/settings/storage.rs
 msgid "Folder-name template"
 msgstr ""
 
@@ -5565,6 +5652,7 @@ msgid "For every account. Age limits are set on each account."
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "For new games only"
 msgstr ""
 
@@ -5613,6 +5701,7 @@ msgid "Free some disk space."
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Free space and required capabilities are checked for every job."
 msgstr ""
 
@@ -5660,6 +5749,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/search.rs
 msgid "Full disk scan"
 msgstr ""
@@ -5671,6 +5761,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/search.rs
 msgid "Full scan on startup"
 msgstr ""
@@ -5685,6 +5776,7 @@ msgid "fullscreen"
 msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Future scans skip it"
 msgstr ""
 
@@ -5722,6 +5814,7 @@ msgid "Game details, artwork and matches come from the Internet Game Database."
 msgstr ""
 
 #: apps/desktop/src/views/settings/launchers.ts
+#: apps/native/src/settings/launchers.rs
 msgctxt "discovery source"
 msgid "Game Explorer"
 msgstr ""
@@ -5746,6 +5839,7 @@ msgid "Game page"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Game pages show the achievements of connected accounts. Caskade only reads them; nothing is unlocked or changed at a store."
 msgstr ""
 
@@ -5762,6 +5856,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/native/src/settings/general.rs
+#: apps/native/src/settings/storage.rs
 msgid "Game storage"
 msgstr ""
 
@@ -5802,6 +5897,7 @@ msgstr ""
 
 #. How a storage location's space is used
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Games {games}, other files {other}, free {free}"
 msgstr ""
 
@@ -5818,6 +5914,7 @@ msgid "Games added"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Games an account owns join your library even when they aren't installed. When a launcher installs one, Caskade shows it as the same game."
 msgstr ""
 
@@ -5894,6 +5991,7 @@ msgstr ""
 
 #. An example name for a storage location
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Games SSD"
 msgstr ""
 
@@ -5905,6 +6003,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 #: apps/native/src/settings/search.rs
+#: apps/native/src/settings/stores.rs
 msgid "Games that leave the library"
 msgstr ""
 
@@ -5918,6 +6017,7 @@ msgid "Games that play with this profile need another one."
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Games the system itself keeps a record of, besides launchers' own."
 msgstr ""
 
@@ -5926,6 +6026,7 @@ msgid "Games to copy"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Games you chose to ignore. Scans leave them out of your library."
 msgstr ""
 
@@ -5971,6 +6072,7 @@ msgid "Get a download from another of your devices on this network when it has t
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Get a key"
 msgstr ""
 
@@ -6136,11 +6238,13 @@ msgid "Hidden achievement"
 msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/HiddenGames.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Hidden from the library. Scans that find them again leave them hidden."
 msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/HiddenGames.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/search.rs
 msgid "Hidden games"
 msgstr ""
@@ -6251,6 +6355,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 #: apps/native/src/settings/search.rs
+#: apps/native/src/settings/stores.rs
 msgid "How often"
 msgstr ""
 
@@ -6286,11 +6391,13 @@ msgstr ""
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/native/src/flows/storage.rs
+#: apps/native/src/settings/storage.rs
 msgctxt "storage location status"
 msgid "identity mismatch"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgctxt "discovery phase"
 msgid "Idle"
 msgstr ""
@@ -6353,16 +6460,19 @@ msgid "IGDB rating"
 msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
+#: apps/native/src/settings/discovery.rs
 msgctxt "discovery review"
 msgid "Ignore"
 msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Ignore selected"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/search.rs
 msgid "Ignored results"
 msgstr ""
@@ -6391,6 +6501,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/search.rs
 msgid "Import existing play history"
 msgstr ""
@@ -6406,6 +6517,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 #: apps/native/src/settings/search.rs
+#: apps/native/src/settings/stores.rs
 msgid "Import play time"
 msgstr ""
 
@@ -6422,6 +6534,7 @@ msgid "Imported from where they are now"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgctxt "discovery phase"
 msgid "Importing"
 msgstr ""
@@ -6597,6 +6710,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/native/src/settings/search.rs
+#: apps/native/src/settings/storage.rs
 msgid "Install location preference"
 msgstr ""
 
@@ -6713,6 +6827,7 @@ msgid "Installed plugins."
 msgstr ""
 
 #: apps/desktop/src/views/settings/launchers.ts
+#: apps/native/src/settings/launchers.rs
 msgctxt "discovery source"
 msgid "Installed programs"
 msgstr ""
@@ -7056,6 +7171,7 @@ msgid "Keep editing"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Keep files and remove from library"
 msgstr ""
 
@@ -7134,6 +7250,7 @@ msgstr ""
 
 #. A storage location's name
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Label"
 msgstr ""
 
@@ -7203,6 +7320,7 @@ msgid "Last scan: {added} added, {updated} updated, {missing} missing."
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Last source reports"
 msgstr ""
 
@@ -7258,6 +7376,7 @@ msgid "launchers, launcher discovery, Steam, GOG, Epic, Heroic, Lutris, itch, Ba
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Launchers, play history import and settings on other pages stay as they are."
 msgstr ""
 
@@ -7352,12 +7471,14 @@ msgstr ""
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Library Discovery"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Library discovery is off, so the settings below don't apply until it's on."
 msgstr ""
 
@@ -7498,6 +7619,7 @@ msgid "Loading detection status…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Loading discovery status…"
 msgstr ""
 
@@ -7526,6 +7648,7 @@ msgid "Loading global exclusions…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/HiddenGames.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Loading hidden games…"
 msgstr ""
 
@@ -7613,10 +7736,12 @@ msgid "Location"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Location added. Caskade looked there for games it installed before."
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Location label"
 msgstr ""
 
@@ -7643,6 +7768,7 @@ msgstr ""
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/native/src/flows/storage.rs
+#: apps/native/src/settings/storage.rs
 msgid "Locations unavailable"
 msgstr ""
 
@@ -7682,6 +7808,7 @@ msgid "Look again"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Look everywhere again each time Caskade starts."
 msgstr ""
 
@@ -7691,6 +7818,7 @@ msgid "Look for a new version when Caskade starts and every six hours."
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Look for compatibility prefixes inside your home directory."
 msgstr ""
 
@@ -7767,6 +7895,7 @@ msgid "Make a new key…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgctxt "storage location"
 msgid "Make default"
 msgstr ""
@@ -8040,10 +8169,12 @@ msgid "Move"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Move and remove"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Move completed. Library identity and playtime were preserved."
 msgstr ""
 
@@ -8058,6 +8189,7 @@ msgid "Move game"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Move games to"
 msgstr ""
 
@@ -8204,6 +8336,7 @@ msgid "Never"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgctxt "import play time"
 msgid "Never"
 msgstr ""
@@ -8328,6 +8461,7 @@ msgid "Next tab"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "No {name} account is connected."
 msgstr ""
 
@@ -8394,6 +8528,7 @@ msgid "No exclusions."
 msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "No games awaiting review."
 msgstr ""
 
@@ -8428,6 +8563,7 @@ msgid "No GPU found."
 msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/HiddenGames.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "No hidden games. Hide one from its card's actions."
 msgstr ""
 
@@ -8576,6 +8712,7 @@ msgid "No settings match “{query}”."
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "No store can be connected in this version of Caskade yet. Games your launchers have installed are still found by Library Discovery."
 msgstr ""
 
@@ -8661,6 +8798,7 @@ msgid "North America"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgctxt "store account"
 msgid "Not available"
 msgstr ""
@@ -8802,6 +8940,7 @@ msgid "Not played"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Not refreshed yet."
 msgstr ""
 
@@ -8866,6 +9005,7 @@ msgid "Nothing changed: the system didn't allow it."
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Nothing ignored."
 msgstr ""
 
@@ -8914,6 +9054,7 @@ msgid "Nothing will be downloaded until you confirm. If the download is an insta
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Notice games installed or removed while Caskade runs, in launchers installed later too."
 msgstr ""
 
@@ -8937,6 +9078,7 @@ msgstr ""
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/native/src/settings/search.rs
+#: apps/native/src/settings/stores.rs
 msgid "Notify new unlocks"
 msgstr ""
 
@@ -8966,6 +9108,7 @@ msgid "Off"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Off stops every scan, Scan now included, and watching folders."
 msgstr ""
 
@@ -9006,6 +9149,7 @@ msgstr ""
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/native/src/flows/storage.rs
+#: apps/native/src/settings/storage.rs
 msgctxt "storage location status"
 msgid "offline"
 msgstr ""
@@ -9017,6 +9161,7 @@ msgid "Offline"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgctxt "store account"
 msgid "Offline"
 msgstr ""
@@ -9077,6 +9222,7 @@ msgid "On {name} since {since}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "On every refresh"
 msgstr ""
 
@@ -9107,6 +9253,7 @@ msgstr ""
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/native/src/flows/storage.rs
+#: apps/native/src/settings/storage.rs
 msgctxt "storage location status"
 msgid "online"
 msgstr ""
@@ -9169,6 +9316,7 @@ msgid "Only when I ask"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Open {name}'s activation page and enter this code:"
 msgstr ""
 
@@ -9250,6 +9398,7 @@ msgid "Open store accounts"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Open the activation page"
 msgstr ""
 
@@ -9259,6 +9408,7 @@ msgid "Open the library"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Open the sign-in page"
 msgstr ""
 
@@ -9295,6 +9445,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/search.rs
 msgid "Operating-system checks"
 msgstr ""
@@ -9311,6 +9462,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/search.rs
 msgid "Optional deep scans"
 msgstr ""
@@ -9340,6 +9492,7 @@ msgid "Or keep it as a game of its own: Caskade won't merge them later."
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Or paste the code the page shows"
 msgstr ""
 
@@ -9363,6 +9516,7 @@ msgid "Original process only"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Other accounts"
 msgstr ""
 
@@ -9824,6 +9978,7 @@ msgid "Play starts"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Play time a store reports is added to what Caskade tracked, counting time played through Caskade once. A store that lowers its total never lowers yours."
 msgstr ""
 
@@ -10024,6 +10179,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/search.rs
 msgid "Portable executables"
 msgstr ""
@@ -10273,6 +10429,7 @@ msgstr ""
 #: apps/desktop/src/components/storage/StorageSummary.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/native/src/flows/storage.rs
+#: apps/native/src/settings/storage.rs
 msgctxt "storage location status"
 msgid "read only"
 msgstr ""
@@ -10296,6 +10453,7 @@ msgid "Reads standard locations and the optional folder. Detection does not laun
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Reads the games the {name} launcher on this computer knows you own."
 msgstr ""
 
@@ -10409,6 +10567,7 @@ msgid "Recommended: {name}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Reconnect"
 msgstr ""
 
@@ -10441,11 +10600,14 @@ msgstr ""
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 #: apps/native/src/library/selection_bar.rs
+#: apps/native/src/settings/storage.rs
+#: apps/native/src/settings/stores.rs
 msgid "Refresh"
 msgstr ""
 
 #. placeholder {0}: account.displayName
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Refresh {0}"
 msgstr ""
 
@@ -10459,6 +10621,7 @@ msgid "Refresh automatic details"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Refresh connected accounts in the background to bring in games you buy. Failures show on the account; nothing pops up."
 msgstr ""
 
@@ -10471,6 +10634,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 #: apps/native/src/settings/search.rs
+#: apps/native/src/settings/stores.rs
 msgid "Refresh in the background"
 msgstr ""
 
@@ -10480,10 +10644,12 @@ msgid "refresh interval"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Refresh interval"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Refreshing"
 msgstr ""
 
@@ -10505,6 +10671,7 @@ msgid "Refreshing in the background. <0>Follow it in Activity</0>."
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgctxt "store account"
 msgid "Refreshing…"
 msgstr ""
@@ -10639,6 +10806,8 @@ msgstr ""
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
 #: apps/native/src/library/bulk_edit.rs
+#: apps/native/src/settings/discovery.rs
+#: apps/native/src/settings/stores.rs
 msgid "Remove"
 msgstr ""
 
@@ -10665,6 +10834,7 @@ msgid "Remove {0}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Remove {folder}"
 msgstr ""
 
@@ -10675,6 +10845,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Remove {name}?"
 msgstr ""
 
@@ -10736,6 +10907,7 @@ msgid "Remove global exclusion {pattern}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Remove location…"
 msgstr ""
 
@@ -10753,6 +10925,7 @@ msgid "Remove PIN…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Remove this location from the library? Files on disk are kept."
 msgstr ""
 
@@ -10766,6 +10939,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Remove…"
 msgstr ""
 
@@ -10882,6 +11056,7 @@ msgid "Reset appearance settings"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Reset discovery settings"
 msgstr ""
 
@@ -11078,6 +11253,7 @@ msgid "Review choices"
 msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Review possible games"
 msgstr ""
 
@@ -11198,6 +11374,7 @@ msgid "Rumoured"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Run a full scan on the selected schedule."
 msgstr ""
 
@@ -11362,6 +11539,7 @@ msgid "save games, cloud saves, save sync"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Save location"
 msgstr ""
 
@@ -11523,6 +11701,7 @@ msgid "Scan all runs the ROM scanners included in library updates. Add one under
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Scan behaviour"
 msgstr ""
 
@@ -11548,6 +11727,7 @@ msgid "scan folder, custom folder"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Scan now"
 msgstr ""
 
@@ -11581,6 +11761,7 @@ msgid "Scanner name"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgctxt "discovery phase"
 msgid "Scanning"
 msgstr ""
@@ -11671,6 +11852,7 @@ msgid "Search again"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Search all reported volumes. This can be slow."
 msgstr ""
 
@@ -11680,6 +11862,7 @@ msgid "Search any game… (classic, modern, or something obscure)"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Search Applications and Games inside your home directory."
 msgstr ""
 
@@ -11699,6 +11882,7 @@ msgid "Search IGDB"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Search only the custom paths listed below."
 msgstr ""
 
@@ -11707,6 +11891,7 @@ msgid "Search plugins and themes"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Search removable volumes reported by this device."
 msgstr ""
 
@@ -11777,6 +11962,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
 #: apps/desktop/src/views/settings/emulators/ScanReview.tsx
+#: apps/native/src/settings/discovery.rs
 #: apps/native/src/ui/text_field.rs
 msgid "Select all"
 msgstr ""
@@ -11808,6 +11994,7 @@ msgid "Selected games"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Selected location"
 msgstr ""
 
@@ -12051,16 +12238,19 @@ msgid "Show"
 msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/HiddenGames.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Show {title} again"
 msgstr ""
 
 #: apps/desktop/src/components/achievements/AchievementSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/native/src/settings/search.rs
+#: apps/native/src/settings/stores.rs
 msgid "Show achievements"
 msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/HiddenGames.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Show again"
 msgstr ""
 
@@ -12131,6 +12321,7 @@ msgid "Showing the catalogue from {0}; the last check failed: {1}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Shows your {name} achievements on the games in your library."
 msgstr ""
 
@@ -12140,10 +12331,12 @@ msgid "Sign in"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Sign in on {name}'s page in your browser. Caskade continues when the page sends you back."
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Sign in to {name}"
 msgstr ""
 
@@ -12170,6 +12363,7 @@ msgid "Sign in with"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgctxt "store account"
 msgid "Sign-in expired"
 msgstr ""
@@ -12182,6 +12376,7 @@ msgid "Sign-in needed on this device"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Sign-ins are kept in your system's keychain, never in Caskade's settings or backups. After restoring a backup or moving computer, reconnect each account."
 msgstr ""
 
@@ -12206,6 +12401,7 @@ msgid "Signed in as {name}, an admin."
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgctxt "store account"
 msgid "Signing in…"
 msgstr ""
@@ -12253,6 +12449,7 @@ msgid "Skip setup"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Skip the picker when the default location is available. A single eligible location is selected automatically."
 msgstr ""
 
@@ -12269,6 +12466,7 @@ msgid "Skip this version of {name}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Slower searches for games that no launcher knows about. Each is off until you turn it on."
 msgstr ""
 
@@ -12291,6 +12489,7 @@ msgid "Smart collections pick their own games."
 msgstr ""
 
 #: apps/desktop/src/views/settings/launchers.ts
+#: apps/native/src/settings/launchers.rs
 msgctxt "discovery source"
 msgid "Snap apps"
 msgstr ""
@@ -12370,6 +12569,7 @@ msgstr ""
 #. The discovery sources that found a game
 #. placeholder {0}: item.sources.join(", ")
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Sources: {0}"
 msgstr ""
 
@@ -12411,6 +12611,7 @@ msgid "Start in"
 msgstr ""
 
 #: apps/desktop/src/views/settings/launchers.ts
+#: apps/native/src/settings/launchers.rs
 msgctxt "discovery source"
 msgid "Start Menu shortcuts"
 msgstr ""
@@ -12551,6 +12752,7 @@ msgid "Steam shortcuts"
 msgstr ""
 
 #: apps/desktop/src/views/settings/launchers.ts
+#: apps/native/src/settings/launchers.rs
 msgctxt "discovery source"
 msgid "Steam shortcuts"
 msgstr ""
@@ -12579,6 +12781,7 @@ msgstr ""
 #. Button: ends the running game
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Stop"
 msgstr ""
 
@@ -12670,6 +12873,7 @@ msgid "Storage is unavailable."
 msgstr ""
 
 #: apps/desktop/src/views/settings/StorageSettings.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Storage is unavailable. Open the Caskade desktop app to manage locations."
 msgstr ""
 
@@ -12683,6 +12887,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/StoragePanel.tsx
 #: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
+#: apps/native/src/settings/storage.rs
 msgid "Storage locations"
 msgstr ""
 
@@ -12721,6 +12926,7 @@ msgid "Store account"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Store accounts"
 msgstr ""
 
@@ -13239,6 +13445,7 @@ msgstr ""
 
 #. placeholder {0}: formatDateTime(new Date(flow.expiresAtMs))
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "The sign-in expires {0}. Caskade keeps it in your system's keychain, never in its settings or backups."
 msgstr ""
 
@@ -13276,6 +13483,7 @@ msgid "Their ROMs are imported even when their platform is off."
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Their stores aren't available in this version of Caskade. Their games stay in your library."
 msgstr ""
 
@@ -13352,6 +13560,7 @@ msgid "These changes aren't saved yet. Switching modes without saving loses them
 msgstr ""
 
 #: apps/desktop/src/views/settings/discovery/ReviewList.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "These results need your decision. Accept adds them to the library. Ignore saves a source exclusion for future scans."
 msgstr ""
 
@@ -13476,6 +13685,7 @@ msgstr ""
 
 #: apps/desktop/src/api/storageNative.ts
 #: apps/native/src/flows/storage.rs
+#: apps/native/src/settings/storage.rs
 msgid "This job needs a response in Activity before it can continue."
 msgstr ""
 
@@ -14334,6 +14544,7 @@ msgid "Waiting for them to come back"
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Waiting for you to finish on the other device…"
 msgstr ""
 
@@ -14364,11 +14575,13 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/search.rs
 msgid "Watch library folders"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Watching folders"
 msgstr ""
 
@@ -14412,6 +14625,8 @@ msgstr ""
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/discovery.rs
+#: apps/native/src/settings/stores.rs
 msgid "Weekly"
 msgstr ""
 
@@ -14435,6 +14650,7 @@ msgid "What changes"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "What each source found in the last scan, and any problems."
 msgstr ""
 
@@ -14516,6 +14732,7 @@ msgid "When"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "When a game joins your library, bring in the play time its launcher recorded. Time is never counted twice."
 msgstr ""
 
@@ -14586,6 +14803,7 @@ msgid "Which launchers are scanned"
 msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
+#: apps/native/src/settings/discovery.rs
 msgid "Which launchers are scanned: <0>Launchers</0>"
 msgstr ""
 
@@ -14657,11 +14875,13 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/search.rs
 msgid "Wine and Proton prefixes"
 msgstr ""
 
 #: apps/desktop/src/views/settings/launchers.ts
+#: apps/native/src/settings/launchers.rs
 msgctxt "discovery source"
 msgid "Wine and Proton prefixes"
 msgstr ""
@@ -14701,6 +14921,7 @@ msgid "Working…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/storage.rs
 msgid "Working… progress and cancellation are available in Activity."
 msgstr ""
 
@@ -14734,6 +14955,7 @@ msgid "Wrong file"
 msgstr ""
 
 #: apps/desktop/src/views/settings/launchers.ts
+#: apps/native/src/settings/launchers.rs
 msgctxt "discovery source"
 msgid "Xbox and packaged apps"
 msgstr ""
@@ -14871,6 +15093,7 @@ msgid "Your rules beat the theme and every component. Style through the contract
 msgstr ""
 
 #: apps/desktop/src/views/settings/stores/StoreAccountsSettings.tsx
+#: apps/native/src/settings/stores.rs
 msgid "Your system has no keychain Caskade can use, so this sign-in lasts until Caskade closes."
 msgstr ""
 

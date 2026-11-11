@@ -679,5 +679,8 @@ mod guard {
 }
 
 mod appearance;
+mod discovery;
 mod general;
 mod launchers;
+mod storage;
+mod stores;

@@ -68,6 +68,28 @@ fn known(source: &str) -> Option<(usize, Launcher)> {
         })
 }
 
+/// A discovery source's name for people: its launcher's, or the system
+/// record's. An unknown id shows as it is.
+pub fn source_name(source: &str) -> String {
+    let system = match source {
+        "desktop" => Some(tp!("discovery source", "Desktop entries")),
+        "flatpak" => Some(tp!("discovery source", "Flatpak apps")),
+        "snap" => Some(tp!("discovery source", "Snap apps")),
+        "prefixes" => Some(tp!("discovery source", "Wine and Proton prefixes")),
+        "startmenu" => Some(tp!("discovery source", "Start Menu shortcuts")),
+        "uninstall" => Some(tp!("discovery source", "Installed programs")),
+        "gameux" => Some(tp!("discovery source", "Game Explorer")),
+        "xbox" => Some(tp!("discovery source", "Xbox and packaged apps")),
+        "macos.apps" => Some(tp!("discovery source", "Applications")),
+        "steam.shortcuts" => Some(tp!("discovery source", "Steam shortcuts")),
+        "deep" => Some(tp!("discovery source", "Deep scans")),
+        _ => None,
+    };
+    system
+        .or_else(|| known(source).map(|(_, launcher)| launcher.name))
+        .unwrap_or_else(|| source.to_owned())
+}
+
 /// A launcher and where discovery found it on this device (empty when it
 /// didn't).
 #[derive(Clone, Debug, PartialEq)]

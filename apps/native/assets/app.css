@@ -383,6 +383,9 @@
   .my-1 {
     margin-block: calc(0.25rem * var(--cs-density-scale));
   }
+  .my-3 {
+    margin-block: calc(calc(0.25rem * var(--cs-density-scale)) * 3);
+  }
   .my-4 {
     margin-block: calc(calc(0.25rem * var(--cs-density-scale)) * 4);
   }
@@ -549,6 +552,9 @@
   .h-1\.5 {
     height: calc(calc(0.25rem * var(--cs-density-scale)) * 1.5);
   }
+  .h-2 {
+    height: calc(calc(0.25rem * var(--cs-density-scale)) * 2);
+  }
   .h-5 {
     height: calc(calc(0.25rem * var(--cs-density-scale)) * 5);
   }
@@ -584,6 +590,9 @@
   }
   .h-topbar {
     height: var(--cs-topbar-height);
+  }
+  .max-h-40 {
+    max-height: calc(calc(0.25rem * var(--cs-density-scale)) * 40);
   }
   .max-h-48 {
     max-height: calc(calc(0.25rem * var(--cs-density-scale)) * 48);
@@ -639,6 +648,9 @@
   .w-32 {
     width: calc(calc(0.25rem * var(--cs-density-scale)) * 32);
   }
+  .w-36 {
+    width: calc(calc(0.25rem * var(--cs-density-scale)) * 36);
+  }
   .w-40 {
     width: calc(calc(0.25rem * var(--cs-density-scale)) * 40);
   }
@@ -647,6 +659,9 @@
   }
   .w-48 {
     width: calc(calc(0.25rem * var(--cs-density-scale)) * 48);
+  }
+  .w-52 {
+    width: calc(calc(0.25rem * var(--cs-density-scale)) * 52);
   }
   .w-56 {
     width: calc(calc(0.25rem * var(--cs-density-scale)) * 56);
@@ -1089,6 +1104,12 @@
   }
   .bg-fg-muted {
     background-color: var(--cs-color-fg-muted);
+  }
+  .bg-fg-subtle\/40 {
+    background-color: var(--cs-color-fg-subtle);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--cs-color-fg-subtle) 40%, transparent);
+    }
   }
   .bg-status-available\/90 {
     background-color: var(--cs-color-status-available);
@@ -1620,6 +1641,9 @@
   .no-underline {
     text-decoration-line: none;
   }
+  .underline {
+    text-decoration-line: underline;
+  }
   .underline-offset-2 {
     text-underline-offset: 2px;
   }
@@ -2081,6 +2105,9 @@
   .data-disabled\:opacity-40[data-disabled] {
     opacity: 40%;
   }
+  .data-disabled\:opacity-50[data-disabled] {
+    opacity: 50%;
+  }
   .data-dragging\:scale-115[data-dragging] {
     --tw-scale-x: 115%;
     --tw-scale-y: 115%;
@@ -2357,6 +2384,14 @@
     }
     .sm\:gap-6 {
       gap: calc(calc(0.25rem * var(--cs-density-scale)) * 6);
+    }
+  }
+  @media (width >= 48rem) {
+    .md\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .md\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
   @media (width >= 64rem) {

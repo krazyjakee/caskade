@@ -24,6 +24,15 @@ pub fn panel(tab: &'static str, sub: Option<String>) -> Element {
                 super::torrent::TorrentLinksSettings {}
             }
         },
+        "storage" => rsx! {
+            super::storage::StorageSettings {}
+        },
+        "library-discovery" => rsx! {
+            super::discovery::LibraryDiscoverySettings {}
+        },
+        "stores" => rsx! {
+            super::stores::StoreAccountsSettings {}
+        },
         "launchers" => rsx! {
             super::launchers::LaunchersSettings {}
         },

@@ -15,6 +15,7 @@ use caskade_app::events::Event;
 use caskade_core::model::{GameDetails, GamePage, LibraryStats, ListGames};
 use caskade_ui_data::{
     Changed, Discovery, ErrorReport, Key as DataKey, Library, Settings, Themes, fixtures,
+    stores::Stores,
 };
 use dioxus_native::prelude::*;
 use std::future::Future;
@@ -28,6 +29,7 @@ pub struct DataSource {
     pub themes: Themes,
     /// `None` in fixtures mode without its fixture machine.
     pub discovery: Option<Discovery>,
+    pub stores: Stores,
     pub events: broadcast::Sender<Event>,
 }
 
@@ -41,6 +43,7 @@ impl DataSource {
             settings: Settings::of(services),
             themes: Themes::of(services, crate::shell::sink()),
             discovery: Some(Discovery::of(services)),
+            stores: Stores::of(services),
             events: crate::shell::events().clone(),
         })
     }
@@ -56,6 +59,7 @@ impl DataSource {
             settings: fixtures.settings,
             themes: fixtures.themes,
             discovery: fixtures.discovery,
+            stores: fixtures.stores,
             events: fixtures.events,
         })
     }
@@ -236,6 +240,26 @@ where
 /// or without discovery.
 pub fn try_use_discovery() -> Option<Discovery> {
     try_use_context::<DataSource>().and_then(|source| source.discovery)
+}
+
+/// Store accounts, for Settings → Store accounts (#104): what `load`
+/// reads, loaded again on every `StoreAccountsChanged`.
+pub fn use_stores_query<T, F, Fut>(mut load: F) -> Query<T>
+where
+    T: Send + 'static,
+    F: FnMut(Stores) -> Fut + 'static,
+    Fut: Future<Output = Result<T, ErrorReport>> + Send + 'static,
+{
+    let source = use_context::<DataSource>();
+    let stores = source.stores.clone();
+    let resource = use_resource(move || change(load(stores.clone())));
+    reload_on(&source, DataKey::Stores, resource);
+    resource
+}
+
+/// Store accounts, for a view's actions.
+pub fn use_stores() -> Stores {
+    use_context::<DataSource>().stores
 }
 
 /// Themes, for a view's changes (a rescan); `None` before the data source.
