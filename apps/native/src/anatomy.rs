@@ -101,6 +101,10 @@ mod tests {
             "#100: the webview's WaitForSave isn't catalogued either",
         ),
         (
+            "play-choice",
+            "#100: the webview's PlayChoice isn't catalogued either",
+        ),
+        (
             "add-game",
             "#108: the webview's AddGame isn't catalogued either",
         ),

@@ -21,6 +21,13 @@ msgctxt "on-screen keyboard"
 msgid "?123"
 msgstr "?123"
 
+#. A version, e.g. v1.2
+#: apps/native/src/game/entry_update.rs
+#, fuzzy
+#| msgid "Installed {installedVersion}"
+msgid "· you have {installedVersion}"
+msgstr "Installerad {installedVersion}"
+
 #. The title text a smart collection looks for, in quotes
 #: apps/desktop/src/components/collections/rules.ts
 msgid "“{text}”"
@@ -678,6 +685,7 @@ msgstr "{imported} importerade"
 
 #. {installedVersion} is a version, e.g. v1.2
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "{installedVersion} · up to date"
 msgstr "{installedVersion} · uppdaterad"
 
@@ -713,6 +721,7 @@ msgstr "{label}, senaste {span}. {summary}."
 
 #. A version, e.g. v1.2
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "{latestVersion} is out"
 msgstr "{latestVersion} har släppts"
 
@@ -2548,6 +2557,7 @@ msgstr "Asien"
 
 #: apps/desktop/src/components/gameActions/PlayChoice.tsx
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
+#: apps/native/src/game/play_choice.rs
 msgid "Ask each time"
 msgstr "Fråga varje gång"
 
@@ -3545,7 +3555,7 @@ msgstr "Sök efter uppdateringar"
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
-#: apps/native/src/settings/general.rs
+#: apps/native/src/game/entry_update.rs apps/native/src/settings/general.rs
 msgid "Check now"
 msgstr "Kontrollera nu"
 
@@ -3563,6 +3573,7 @@ msgstr "Kontrollera serveradressen och inloggningsuppgifterna."
 
 #. When updates were last checked for; {checked} is a date
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "checked {checked}"
 msgstr "kontrollerat {checked}"
 
@@ -3622,8 +3633,8 @@ msgstr "Kontrollerar vad som skulle ändras…"
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/settings/addons.rs apps/native/src/settings/general.rs
-#: apps/native/src/settings/streaming.rs
+#: apps/native/src/game/entry_update.rs apps/native/src/settings/addons.rs
+#: apps/native/src/settings/general.rs apps/native/src/settings/streaming.rs
 msgid "Checking…"
 msgstr "Kontrollerar…"
 
@@ -5005,10 +5016,12 @@ msgid "Downloading {done} of {total}"
 msgstr "Laddar ner {done} av {total}"
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "Downloading the update…"
 msgstr "Laddar ner uppdateringen…"
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "Downloading the update… {percent}%"
 msgstr "Laddar ner uppdateringen… {percent} %"
 
@@ -6953,10 +6966,12 @@ msgid "Installing needs a connection."
 msgstr "Installation kräver en anslutning."
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "Installing the update…"
 msgstr "Installerar uppdateringen…"
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "Installing the update… {percent}%"
 msgstr "Installerar uppdateringen… {percent} %"
 
@@ -8935,6 +8950,7 @@ msgid "Not checked for updates yet."
 msgstr "Har inte sökt efter uppdateringar än."
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "Not checked yet"
 msgstr "Inte kontrollerat än"
 
@@ -9240,6 +9256,7 @@ msgid "Offer Caskade for them"
 msgstr "Erbjud Caskade för dem"
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "Offer it again"
 msgstr "Erbjud den igen"
 
@@ -10100,6 +10117,7 @@ msgstr "Spelförfrågningar från mina enheter"
 #. Picks which of a release's launch actions Play starts
 #: apps/desktop/src/components/gameActions/PlayChoice.tsx
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
+#: apps/native/src/game/play_choice.rs
 msgid "Play starts"
 msgstr "Spela startar"
 
@@ -10334,6 +10352,7 @@ msgid "Preferred emulators"
 msgstr "Föredragna emulatorer"
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "Prereleases"
 msgstr "Förhandsversioner"
 
@@ -10886,6 +10905,7 @@ msgstr "Släppt"
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "Releases"
 msgstr "Versioner"
 
@@ -12168,11 +12188,11 @@ msgid "Sending"
 msgstr "Skickar"
 
 #. Button: moves this release out of the merged game into a game of its own
-#: apps/desktop/src/views/game/SeparateEntry.tsx
+#: apps/desktop/src/views/game/SeparateEntry.tsx apps/native/src/game/page.rs
 msgid "Separate"
 msgstr "Separera"
 
-#: apps/desktop/src/views/game/SeparateEntry.tsx
+#: apps/desktop/src/views/game/SeparateEntry.tsx apps/native/src/game/page.rs
 msgid "Separating…"
 msgstr "Separerar…"
 
@@ -12611,8 +12631,8 @@ msgstr "Hoppa över väljaren när standardplatsen är tillgänglig. En enda gil
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/game/launch.rs apps/native/src/settings/addons.rs
-#: apps/native/src/settings/streaming.rs
+#: apps/native/src/game/entry_update.rs apps/native/src/game/launch.rs
+#: apps/native/src/settings/addons.rs apps/native/src/settings/streaming.rs
 msgid "Skip this version"
 msgstr "Hoppa över den här versionen"
 
@@ -13330,8 +13350,8 @@ msgstr "Det blev inte klart: {0}. Det är säkert att försöka igen: det som sp
 msgid "That didn't work"
 msgstr "Det fungerade inte"
 
-#: apps/native/src/flows/tool_request.rs apps/native/src/game/launch.rs
-#: apps/native/src/game_menu/actions.rs
+#: apps/native/src/flows/tool_request.rs apps/native/src/game/data.rs
+#: apps/native/src/game/launch.rs apps/native/src/game_menu/actions.rs
 #, fuzzy
 #| msgid "This store isn't available in this version of Caskade."
 msgid "That isn't available in this copy of Caskade."
@@ -13481,6 +13501,7 @@ msgid "The keychain no longer holds the key your other devices know this one by.
 msgstr "Nyckelringen innehåller inte längre nyckeln som dina andra enheter känner igen den här enheten med. En ny nyckel gör den till en ny enhet för dem: parkoppla var och en av dem igen efteråt."
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "The last check failed: {lastError}"
 msgstr "Den senaste kontrollen misslyckades: {lastError}"
 
@@ -13633,10 +13654,12 @@ msgid "The update failed."
 msgstr "Uppdateringen misslyckades."
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "The update needs a choice in Activity."
 msgstr "Uppdateringen behöver ett val i Aktivitet."
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "The update was cancelled."
 msgstr "Uppdateringen avbröts."
 
@@ -14345,7 +14368,7 @@ msgstr "Kommande utgåvor"
 #. Button: installs the newer release
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/settings/streaming.rs
+#: apps/native/src/game/entry_update.rs apps/native/src/settings/streaming.rs
 msgid "Update"
 msgstr "Uppdatera"
 
@@ -14378,6 +14401,7 @@ msgid "Update download"
 msgstr "Nedladdning av uppdatering"
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "Update failed: {error}"
 msgstr "Uppdateringen misslyckades: {error}"
 
@@ -14430,7 +14454,8 @@ msgstr "Uppdaterad {when}"
 msgid "Updated by Flatpak"
 msgstr "Uppdateras av Flatpak"
 
-#: apps/desktop/src/views/game/EntryUpdate.tsx apps/native/src/game/launch.rs
+#: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs apps/native/src/game/launch.rs
 msgid "Updated."
 msgstr "Uppdaterat."
 
@@ -14906,7 +14931,8 @@ msgstr "Det du har lagt till i Caskade. Släpp en tilläggsmapp här för att in
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
-#: apps/native/src/game/launch.rs apps/native/src/settings/addons.rs
+#: apps/native/src/game/entry_update.rs apps/native/src/game/launch.rs
+#: apps/native/src/settings/addons.rs
 msgid "What's new"
 msgstr "Nyheter"
 
@@ -15167,6 +15193,7 @@ msgid "You marked this game as not on IGDB."
 msgstr "Du markerade att det här spelet inte finns på IGDB."
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "You skipped {skipped}."
 msgstr "Du hoppade över {skipped}."
 

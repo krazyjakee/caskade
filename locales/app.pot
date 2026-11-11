@@ -20,6 +20,11 @@ msgctxt "on-screen keyboard"
 msgid "?123"
 msgstr ""
 
+#. A version, e.g. v1.2
+#: apps/native/src/game/entry_update.rs
+msgid "· you have {installedVersion}"
+msgstr ""
+
 #. The title text a smart collection looks for, in quotes
 #: apps/desktop/src/components/collections/rules.ts
 msgid "“{text}”"
@@ -682,6 +687,7 @@ msgstr ""
 
 #. {installedVersion} is a version, e.g. v1.2
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "{installedVersion} · up to date"
 msgstr ""
 
@@ -717,6 +723,7 @@ msgstr ""
 
 #. A version, e.g. v1.2
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "{latestVersion} is out"
 msgstr ""
 
@@ -2579,6 +2586,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameActions/PlayChoice.tsx
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
+#: apps/native/src/game/play_choice.rs
 msgid "Ask each time"
 msgstr ""
 
@@ -3599,6 +3607,7 @@ msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/game/entry_update.rs
 #: apps/native/src/settings/general.rs
 msgid "Check now"
 msgstr ""
@@ -3617,6 +3626,7 @@ msgstr ""
 
 #. When updates were last checked for; {checked} is a date
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "checked {checked}"
 msgstr ""
 
@@ -3679,6 +3689,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/game/entry_update.rs
 #: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/general.rs
 #: apps/native/src/settings/streaming.rs
@@ -5088,10 +5099,12 @@ msgid "Downloading {done} of {total}"
 msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "Downloading the update…"
 msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "Downloading the update… {percent}%"
 msgstr ""
 
@@ -7077,10 +7090,12 @@ msgid "Installing needs a connection."
 msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "Installing the update…"
 msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "Installing the update… {percent}%"
 msgstr ""
 
@@ -9099,6 +9114,7 @@ msgid "Not checked for updates yet."
 msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "Not checked yet"
 msgstr ""
 
@@ -9409,6 +9425,7 @@ msgid "Offer Caskade for them"
 msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "Offer it again"
 msgstr ""
 
@@ -10288,6 +10305,7 @@ msgstr ""
 #. Picks which of a release's launch actions Play starts
 #: apps/desktop/src/components/gameActions/PlayChoice.tsx
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
+#: apps/native/src/game/play_choice.rs
 msgid "Play starts"
 msgstr ""
 
@@ -10527,6 +10545,7 @@ msgid "Preferred emulators"
 msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "Prereleases"
 msgstr ""
 
@@ -11095,6 +11114,7 @@ msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "Releases"
 msgstr ""
 
@@ -12403,10 +12423,12 @@ msgstr ""
 
 #. Button: moves this release out of the merged game into a game of its own
 #: apps/desktop/src/views/game/SeparateEntry.tsx
+#: apps/native/src/game/page.rs
 msgid "Separate"
 msgstr ""
 
 #: apps/desktop/src/views/game/SeparateEntry.tsx
+#: apps/native/src/game/page.rs
 msgid "Separating…"
 msgstr ""
 
@@ -12846,6 +12868,7 @@ msgstr ""
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/game/entry_update.rs
 #: apps/native/src/game/launch.rs
 #: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/streaming.rs
@@ -13599,6 +13622,7 @@ msgid "That didn't work"
 msgstr ""
 
 #: apps/native/src/flows/tool_request.rs
+#: apps/native/src/game/data.rs
 #: apps/native/src/game/launch.rs
 #: apps/native/src/game_menu/actions.rs
 msgid "That isn't available in this copy of Caskade."
@@ -13748,6 +13772,7 @@ msgid "The keychain no longer holds the key your other devices know this one by.
 msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "The last check failed: {lastError}"
 msgstr ""
 
@@ -13898,10 +13923,12 @@ msgid "The update failed."
 msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "The update needs a choice in Activity."
 msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "The update was cancelled."
 msgstr ""
 
@@ -14627,6 +14654,7 @@ msgstr ""
 #. Button: installs the newer release
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/game/entry_update.rs
 #: apps/native/src/settings/streaming.rs
 msgid "Update"
 msgstr ""
@@ -14660,6 +14688,7 @@ msgid "Update download"
 msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "Update failed: {error}"
 msgstr ""
 
@@ -14713,6 +14742,7 @@ msgid "Updated by Flatpak"
 msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 #: apps/native/src/game/launch.rs
 msgid "Updated."
 msgstr ""
@@ -15195,6 +15225,7 @@ msgstr ""
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
+#: apps/native/src/game/entry_update.rs
 #: apps/native/src/game/launch.rs
 #: apps/native/src/settings/addons.rs
 msgid "What's new"
@@ -15460,6 +15491,7 @@ msgid "You marked this game as not on IGDB."
 msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
+#: apps/native/src/game/entry_update.rs
 msgid "You skipped {skipped}."
 msgstr ""
 

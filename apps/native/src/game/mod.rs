@@ -4,8 +4,11 @@
 //! shares.
 
 mod back;
+pub mod data;
+mod entry_update;
 pub mod launch;
 mod page;
+mod play_choice;
 pub mod present;
 
 pub use page::GameView;
@@ -13,7 +16,7 @@ pub use page::GameView;
 #[cfg(test)]
 pub(crate) mod launch_tests;
 #[cfg(test)]
-mod page_tests;
+pub(crate) mod page_tests;
 
 use crate::ui::{Link, Svg, icons};
 use dioxus_native::prelude::*;

@@ -120,6 +120,18 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
     let mut stopping = use_signal(|| false);
     let mut stop_error = use_signal(|| None::<String>);
 
+    let data = super::data::use_page_data();
+    let updates = {
+        let (data, game_id) = (data.clone(), game.game.id.clone());
+        super::data::use_answer(caskade_ui_data::Key::Game(game_id.clone()), move || {
+            (data.updates)(game_id.clone())
+        })
+    };
+    let updates: Vec<caskade_core::updates::GameUpdate> = updates
+        .read()
+        .as_ref()
+        .and_then(|list| list.as_ref().ok().cloned())
+        .unwrap_or_default();
     let list = entries(&game);
     // Other devices' copies are on their own panel, not releases here.
     let releases: Vec<EntryView> = list
@@ -384,6 +396,14 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
                                 },
                             }
                         }
+                        if running.is_none() && let Some(entry) = chosen.clone() {
+                            super::play_choice::PlayChoice {
+                                game_id: game.game.id.clone(),
+                                title: game.game.title.clone(),
+                                entry_id: entry.id.clone(),
+                                disabled: busy,
+                            }
+                        }
                         if let Some(error) = default_error() {
                             p { role: "alert", class: "text-sm text-danger", "{error}" }
                         }
@@ -413,6 +433,7 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
                             busy,
                             play_label: label_for(Some(&entry)),
                             game_id: game.game.id.clone(),
+                            update: updates.iter().find(|update| update.entry_id == entry.id).cloned(),
                             on_play: {
                                 let play = play.clone();
                                 move |id: String| play(id)
@@ -447,6 +468,8 @@ fn Release(
     busy: bool,
     play_label: String,
     game_id: String,
+    /// Its updates, when a provider follows it.
+    update: Option<caskade_core::updates::GameUpdate>,
     on_play: EventHandler<String>,
     on_menu: EventHandler<(String, MouseEvent)>,
 ) -> Element {
@@ -496,6 +519,9 @@ fn Release(
                         }
                     }
                     if several {
+                        Separate { entry_id: entry.id.clone(), running: playing }
+                    }
+                    if several {
                         if playing {
                             span { "data-part": "playing", class: "self-center font-mono text-xs tracking-widest text-accent-alt uppercase",
                                 {t!(note = "The game is running", "Playing")}
@@ -512,6 +538,46 @@ fn Release(
                         }
                     }
                 }
+            }
+            if let Some(update) = update {
+                super::entry_update::EntryUpdate { update, is_running: running }
+            }
+        }
+    }
+}
+
+/// On a game with several releases (merged because IGDB counts them as one
+/// game): moves this one out into a game of its own. Matching never merges
+/// it back.
+#[component]
+fn Separate(entry_id: String, running: bool) -> Element {
+    let data = super::data::use_page_data();
+    let mut pending = use_signal(|| false);
+    let mut error = use_signal(|| None::<String>);
+    rsx! {
+        div { class: "flex shrink-0 flex-col items-end gap-1",
+            Button {
+                "data-part": "separate",
+                disabled: running || pending(),
+                on_press: move |_| {
+                    let (data, entry_id) = (data.clone(), entry_id.clone());
+                    pending.set(true);
+                    error.set(None);
+                    spawn(async move {
+                        if let Err(report) = (data.separate)(entry_id).await {
+                            error.set(Some(report.summary));
+                        }
+                        pending.set(false);
+                    });
+                },
+                if pending() {
+                    {t!("Separating…")}
+                } else {
+                    {t!(note = "Button: moves this release out of the merged game into a game of its own", "Separate")}
+                }
+            }
+            if let Some(error) = error() {
+                p { role: "alert", class: "text-xs text-danger", "{error}" }
             }
         }
     }
