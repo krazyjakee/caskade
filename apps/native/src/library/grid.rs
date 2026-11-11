@@ -518,10 +518,24 @@ fn Game(
     focused: Signal<Option<usize>>,
     open: Option<EventHandler<String>>,
 ) -> Element {
-    let id = game.id.clone();
-    let on_open = move |_| {
-        if let Some(open) = open {
-            open.call(id.clone());
+    let menus = crate::game_menu::use_game_menus();
+    let target = crate::game_menu::Target {
+        game_id: game.id.clone(),
+        title: game.title.clone(),
+        entry_id: None,
+    };
+    let mut wrapper = use_signal(|| None::<NodeHandle>);
+    // A click, Enter or a pad's A: its quick look beside the view (the
+    // webview's desktop mode); without the host, `open`.
+    let on_open = {
+        let target = target.clone();
+        move |_| match menus {
+            Some(menus) => menus.look(target.clone()),
+            None => {
+                if let Some(open) = open {
+                    open.call(target.game_id.clone());
+                }
+            }
         }
     };
     let on_focus = move |_| {
@@ -529,16 +543,66 @@ fn Game(
             focused.set(Some(index));
         }
     };
+    // Its menu: a right click at the pointer, the menu key or Shift F10 at
+    // the game, a pad's Start while it has focus; a pad's X opens its quick
+    // look.
+    let open_menu = {
+        let target = target.clone();
+        use_callback(move |anchor: Option<crate::ui::Anchor>| {
+            let Some(menus) = menus else { return };
+            let anchor = anchor.or_else(|| wrapper.peek().as_ref().and_then(crate::ui::Anchor::of));
+            if let Some(anchor) = anchor {
+                menus.open(target.clone(), anchor);
+            }
+        })
+    };
+    let owner = wrapper.read().as_ref().map(NodeHandle::node_id);
+    use_input_action(
+        Action::Menu,
+        Bind {
+            owner,
+            label: Some(t!(
+                note = "Button hint: a pad's Start opens the focused item's menu",
+                "Options"
+            )),
+            ..Bind::default()
+        },
+        move || {
+            open_menu.call(None);
+            true
+        },
+    );
+    {
+        let target = target.clone();
+        use_input_action(
+            Action::Details,
+            Bind {
+                owner,
+                label: Some(t!(
+                    note = "Button hint: a pad's X opens the game's quick look",
+                    "Details"
+                )),
+                ..Bind::default()
+            },
+            move || {
+                if let Some(menus) = menus {
+                    menus.look(target.clone());
+                }
+                true
+            },
+        );
+    }
+    let starting = menus.is_some_and(|menus| menus.starting(&game.id));
     let focus_key = format!("game-{}", game.id);
     // A pad starts on the first game.
     let first = (index == 0).then_some("true");
-    if list {
+    let card = if list {
         let icon = art::url(game.icon.as_ref(), Variant::Icon);
-        let card = CardGame::from_summary(&game, None);
-        return rsx! {
+        rsx! {
             GameRow {
-                game: card,
+                game: CardGame::from_summary(&game, None),
                 icon,
+                starting,
                 columns: LIST_COLUMNS.to_owned(),
                 focus_key,
                 on_open,
@@ -546,18 +610,48 @@ fn Game(
                 "data-index": "{index}",
                 "data-focus-default": first,
             }
-        };
-    }
-    let cover = art::url(game.cover.as_ref(), Variant::Card);
+        }
+    } else {
+        let cover = art::url(game.cover.as_ref(), Variant::Card);
+        rsx! {
+            GameCard {
+                game: CardGame::from_summary(&game, cover),
+                index,
+                starting,
+                focus_key,
+                on_open,
+                on_focus,
+                "data-index": "{index}",
+                "data-focus-default": first,
+            }
+        }
+    };
     rsx! {
-        GameCard {
-            game: CardGame::from_summary(&game, cover),
-            index,
-            focus_key,
-            on_open,
-            on_focus,
-            "data-index": "{index}",
-            "data-focus-default": first,
+        div {
+            style: if list { "height: 100%;" } else { "display: flex; flex-direction: column; min-width: 0;" },
+            onmounted: move |event: Event<MountedData>| wrapper.set(event.data().downcast::<NodeHandle>().cloned()),
+            // A double click plays it, as its menu's Play does.
+            ondoubleclick: {
+                let target = target.clone();
+                move |_| {
+                    if let Some(menus) = menus {
+                        menus.play(target.clone());
+                    }
+                }
+            },
+            oncontextmenu: move |event: MouseEvent| {
+                event.stop_propagation();
+                open_menu.call(Some(crate::frame::pointer_anchor(wrapper.peek().as_ref(), &event)));
+            },
+            onkeydown: move |event: KeyboardEvent| {
+                let shift_f10 = event.key() == Key::Named(NamedKey::F10) && event.modifiers().shift();
+                if event.key() == Key::Named(NamedKey::ContextMenu) || shift_f10 {
+                    event.prevent_default();
+                    event.stop_propagation();
+                    open_menu.call(None);
+                }
+            },
+            {card}
         }
     }
 }

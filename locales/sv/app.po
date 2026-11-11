@@ -554,7 +554,7 @@ msgstr[1] "Skannar… # filer"
 msgid "{first}–{last} of {total}"
 msgstr "{first}–{last} av {total}"
 
-#: apps/desktop/src/api/mapping.ts
+#: apps/desktop/src/api/mapping.ts apps/native/src/game_menu/entries.rs
 msgid "{folder} in game storage"
 msgstr "{folder} i spellagringen"
 
@@ -1045,6 +1045,7 @@ msgid "{title} · {size}. Playtime and library identity are kept."
 msgstr "{title} · {size}. Speltid och biblioteksidentitet behålls."
 
 #: apps/desktop/src/components/gameMenu/GameMenuHost.tsx
+#: apps/native/src/game_menu/play.rs
 msgid "{title} didn't start"
 msgstr "{title} startade inte"
 
@@ -1883,10 +1884,12 @@ msgid "Add to {label}"
 msgstr "Lägg till i {label}"
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Add to collection…"
 msgstr "Lägg till i samling…"
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Add to favourites"
 msgstr "Lägg till i favoriter"
 
@@ -1985,7 +1988,8 @@ msgstr "Administratör"
 msgid "Admin approval isn't available here"
 msgstr "Administratörsgodkännande är inte tillgängligt här"
 
-#: apps/desktop/src/views/game/AgeGate.tsx
+#: apps/desktop/src/views/game/AgeGate.tsx apps/native/src/game_menu/actions.rs
+#: apps/native/src/game_menu/play.rs
 msgid "Admin PIN needed"
 msgstr "Administratörens PIN krävs"
 
@@ -2854,6 +2858,7 @@ msgstr "Avbryt inloggningen"
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/native/src/flows/add_game.rs apps/native/src/flows/folder_browser.rs
 #: apps/native/src/flows/manual_game.rs apps/native/src/flows/storage.rs
+#: apps/native/src/game_menu/dialogs.rs apps/native/src/game_menu/play.rs
 #: apps/native/src/settings/reset.rs apps/native/src/ui/dialog.rs
 msgid "Cancel"
 msgstr "Avbryt"
@@ -3387,6 +3392,7 @@ msgid "Choose a Caskade backup"
 msgstr "Välj en säkerhetskopia från Caskade"
 
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
+#: apps/native/src/game_menu/play.rs
 msgid "Choose a disc"
 msgstr "Välj en skiva"
 
@@ -3475,6 +3481,7 @@ msgid "Choose games: click them, Shift+click for a range."
 msgstr "Välj spel: klicka på dem, Skift+klick för ett intervall."
 
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
+#: apps/native/src/game_menu/play.rs
 msgid "Choose how to play"
 msgstr "Välj hur du vill spela"
 
@@ -3586,6 +3593,7 @@ msgid "Close"
 msgstr "Stäng"
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
+#: apps/native/src/game_menu/quick_look.rs
 msgctxt "dialog"
 msgid "Close"
 msgstr "Stäng"
@@ -3640,6 +3648,7 @@ msgid "Collections aren't available here."
 msgstr "Samlingar är inte tillgängliga här."
 
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
+#: apps/native/src/game_menu/collections.rs
 msgid "Collections for {title}"
 msgstr "Samlingar för {title}"
 
@@ -3900,6 +3909,7 @@ msgid "Copy link"
 msgstr "Kopiera länk"
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgctxt "game action"
 msgid "Copy path"
 msgstr "Kopiera sökväg"
@@ -3926,6 +3936,7 @@ msgid "Copying to this computer. Follow it in Activity."
 msgstr "Kopierar till den här datorn. Följ det under Aktivitet."
 
 #: apps/desktop/src/views/library/LibraryDrop.tsx
+#: apps/native/src/library/view.rs
 msgid "Could not add the dropped file."
 msgstr "Kunde inte lägga till den släppta filen."
 
@@ -4063,6 +4074,7 @@ msgstr "CPU-användning"
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
+#: apps/native/src/game_menu/collections.rs
 msgctxt "collection"
 msgid "Create"
 msgstr "Skapa"
@@ -4200,6 +4212,7 @@ msgstr "Standard"
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
+#: apps/native/src/game_menu/play.rs
 msgctxt "launch action"
 msgid "Default"
 msgstr "Standard"
@@ -4376,6 +4389,7 @@ msgstr "Mål"
 #. Button hint: a pad's X opens the game's quick look
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/views/library/GameActions.tsx
+#: apps/native/src/library/grid.rs
 msgid "Details"
 msgstr "Detaljer"
 
@@ -4462,6 +4476,7 @@ msgid "Disable custom CSS"
 msgstr "Stäng av egen CSS"
 
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
+#: apps/native/src/game_menu/play.rs
 msgctxt "launch choice"
 msgid "Disc"
 msgstr "Skiva"
@@ -4524,7 +4539,8 @@ msgstr "disk, hårddisk, utrymme, installationsplats, installationsmapp, bibliot
 #: apps/desktop/src/plugins/PluginViews.tsx
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
-#: apps/desktop/src/views/library/LibraryView.tsx apps/native/src/ui/toast.rs
+#: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs apps/native/src/ui/toast.rs
 msgid "Dismiss"
 msgstr "Stäng"
 
@@ -4551,6 +4567,7 @@ msgstr "Försök inte igen automatiskt"
 #: apps/desktop/src/components/shares/ShareGameDialog.tsx
 #: apps/desktop/src/components/sync/PairingHost.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/game_menu/collections.rs
 msgid "Done"
 msgstr "Klar"
 
@@ -4684,6 +4701,7 @@ msgid "drives, disks, folders"
 msgstr "hårddiskar, diskar, mappar"
 
 #: apps/desktop/src/views/library/LibraryDrop.tsx
+#: apps/native/src/library/view.rs
 msgid "Drop to install into your library"
 msgstr "Släpp för att installera i ditt bibliotek"
 
@@ -4766,6 +4784,7 @@ msgstr "Redigera server"
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Edit…"
 msgstr "Redigera…"
 
@@ -4813,6 +4832,7 @@ msgid "Emulation section"
 msgstr "Emuleringsavsnitt"
 
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
+#: apps/native/src/game_menu/play.rs
 msgctxt "launch choice"
 msgid "Emulator"
 msgstr "Emulator"
@@ -5877,6 +5897,7 @@ msgid "Hidden games"
 msgstr "Dolda spel"
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Hide from library"
 msgstr "Dölj i biblioteket"
 
@@ -6615,6 +6636,7 @@ msgid "It has nothing installed here that can launch."
 msgstr "Det har inget installerat här som kan startas."
 
 #: apps/desktop/src/components/gameMenu/GameMenuHost.tsx
+#: apps/native/src/game_menu/play.rs
 msgid "It has nothing installed that can launch."
 msgstr "Det har inget installerat som kan startas."
 
@@ -6623,6 +6645,7 @@ msgid "It has problems"
 msgstr "Det har problem"
 
 #: apps/desktop/src/components/gameMenu/RemoveGameDialog.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgid "It leaves your library with its play sessions. Its files, if it has any, stay where they are."
 msgstr "Spelet tas bort från ditt bibliotek tillsammans med dess spelsessioner. Dess filer, om det har några, ligger kvar där de är."
 
@@ -6679,10 +6702,12 @@ msgid "Its install plan has no checksum for the download, so it can't be checked
 msgstr "Installationsplanen har ingen kontrollsumma för nedladdningen, så den kan inte kontrolleras."
 
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgid "Its installed files are deleted from {location}, with the play sessions recorded for this install. The game stays in your library. The uninstall shows in Activity."
 msgstr "De installerade filerna raderas från {location}, tillsammans med de spelsessioner som registrerats för den här installationen. Spelet finns kvar i ditt bibliotek. Avinstallationen visas i Aktivitet."
 
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgid "Its installed files are deleted, with the play sessions recorded for this install. The game stays in your library. The uninstall shows in Activity."
 msgstr "De installerade filerna raderas, tillsammans med de spelsessioner som registrerats för den här installationen. Spelet finns kvar i ditt bibliotek. Avinstallationen visas i Aktivitet."
 
@@ -6860,6 +6885,7 @@ msgid "Last opened view"
 msgstr "Senast öppnade vy"
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
+#: apps/native/src/game_menu/quick_look.rs
 msgid "Last played"
 msgstr "Senast spelat"
 
@@ -7165,6 +7191,7 @@ msgstr "Läser in samlingen…"
 
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/game_menu/collections.rs
 msgid "Loading collections…"
 msgstr "Läser in samlingar…"
 
@@ -7716,7 +7743,7 @@ msgstr "Flytta installerade filer"
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
-#: apps/native/src/flows/storage.rs
+#: apps/native/src/flows/storage.rs apps/native/src/game_menu/menu.rs
 msgid "Move installed files…"
 msgstr "Flytta installerade filer…"
 
@@ -7770,6 +7797,7 @@ msgstr "Namn"
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
+#: apps/native/src/game_menu/collections.rs
 msgctxt "collection"
 msgid "Name"
 msgstr "Namn"
@@ -7867,6 +7895,7 @@ msgstr "Aldrig synkad"
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
+#: apps/native/src/game_menu/collections.rs
 msgid "New collection"
 msgstr "Ny samling"
 
@@ -8136,6 +8165,7 @@ msgid "No PIN: anyone can sign in to it. Changes at once."
 msgstr "Ingen PIN: vem som helst kan logga in på det. Ändras direkt."
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "No playtime is counted"
 msgstr "Ingen speltid räknas"
 
@@ -8373,14 +8403,17 @@ msgid "Not in your library"
 msgstr "Inte i ditt bibliotek"
 
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
+#: apps/native/src/game_menu/play.rs
 msgid "Not installed"
 msgstr "Inte installerat"
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Not installed or unavailable"
 msgstr "Inte installerat eller otillgängligt"
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
+#: apps/native/src/game_menu/quick_look.rs
 msgid "Not installed or unavailable."
 msgstr "Inte installerat eller otillgängligt."
 
@@ -8505,10 +8538,12 @@ msgid "Nothing syncs until a device is paired. Then your library, play history a
 msgstr "Inget synkas förrän en enhet har parkopplats. Sedan hålls ditt bibliotek, din spelhistorik och dina sparfiler i takt, om du inte väljer något annat."
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Nothing to launch"
 msgstr "Inget att starta"
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
+#: apps/native/src/game_menu/quick_look.rs
 msgid "Nothing to launch."
 msgstr "Inget att starta."
 
@@ -8647,6 +8682,7 @@ msgstr "Offline: visar katalogen från {0}. Installation kräver en anslutning."
 
 #: apps/desktop/src/components/gameActions/ToolRequest.tsx
 #: apps/desktop/src/components/gameMenu/GameMenuHost.tsx
+#: apps/native/src/game_menu/play.rs
 msgid "OK"
 msgstr "OK"
 
@@ -8812,6 +8848,7 @@ msgid "Open game"
 msgstr "Öppna spel"
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Open game details"
 msgstr "Öppna speldetaljer"
 
@@ -8828,6 +8865,7 @@ msgid "Open in the system tray instead of a window. Needs Launch on system start
 msgstr "Öppna i systemfältet i stället för i ett fönster. Kräver Starta när datorn startar."
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Open installation folder"
 msgstr "Öppna installationsmappen"
 
@@ -8923,6 +8961,7 @@ msgstr "Valfritt. Ett kommando att köra först; om det misslyckas startar inte 
 #. Button hint: a pad's Start opens the focused item's menu
 #: apps/desktop/src/views/CollectionsView.tsx
 #: apps/desktop/src/views/library/GameActions.tsx
+#: apps/native/src/library/grid.rs
 msgid "Options"
 msgstr "Alternativ"
 
@@ -9315,6 +9354,8 @@ msgstr "Spela"
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
+#: apps/native/src/game_menu/menu.rs apps/native/src/game_menu/play.rs
+#: apps/native/src/game_menu/quick_look.rs
 msgctxt "game action"
 msgid "Play"
 msgstr "Spela"
@@ -9409,6 +9450,13 @@ msgstr "speltid"
 msgid "Play with {0}"
 msgstr "Spela med {0}"
 
+#. Starts the game with one of its launch actions
+#: apps/native/src/game_menu/menu.rs
+#, fuzzy
+#| msgid "Pair with {name}"
+msgid "Play with {name}"
+msgstr "Parkoppla med {name}"
+
 #: apps/desktop/src/components/saves/SaveConflictDialog.tsx
 msgid "Play with this save"
 msgstr "Spela med den här sparfilen"
@@ -9468,6 +9516,7 @@ msgid "Plays the game"
 msgstr "Spelar spelet"
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
+#: apps/native/src/game_menu/quick_look.rs
 msgid "Playtime"
 msgstr "Speltid"
 
@@ -9781,6 +9830,7 @@ msgid "Quit"
 msgstr "Avsluta"
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Quit the game first"
 msgstr "Avsluta spelet först"
 
@@ -10115,6 +10165,7 @@ msgstr "Utgivningsår"
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/game_menu/quick_look.rs
 msgid "Released"
 msgstr "Släppt"
 
@@ -10178,6 +10229,7 @@ msgid "Remove"
 msgstr "Ta bort"
 
 #: apps/desktop/src/components/gameMenu/RemoveGameDialog.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgctxt "library game"
 msgid "Remove"
 msgstr "Ta bort"
@@ -10223,6 +10275,7 @@ msgid "Remove {server}?"
 msgstr "Ta bort {server}?"
 
 #: apps/desktop/src/components/gameMenu/RemoveGameDialog.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgid "Remove {title} from your library?"
 msgstr "Ta bort {title} från ditt bibliotek?"
 
@@ -10247,10 +10300,12 @@ msgid "Remove exclusion {pattern}"
 msgstr "Ta bort undantag {pattern}"
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Remove from favourites"
 msgstr "Ta bort från favoriter"
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Remove from library…"
 msgstr "Ta bort från biblioteket…"
 
@@ -10306,6 +10361,7 @@ msgstr "Det går inte att ta bort spel här"
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgid "Removing…"
 msgstr "Tar bort…"
 
@@ -11097,6 +11153,7 @@ msgid "Scanning…"
 msgstr "Skannar…"
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Scans won't bring it back. Show it again in Settings → Library Discovery."
 msgstr "Skanningar tar inte tillbaka det. Visa det igen i Inställningar → Biblioteksidentifiering."
 
@@ -11691,6 +11748,7 @@ msgstr "Liknande spel"
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
 #: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+#: apps/native/src/game_menu/quick_look.rs
 msgid "Size"
 msgstr "Storlek"
 
@@ -11758,6 +11816,7 @@ msgid "Smart"
 msgstr "Smarta"
 
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
+#: apps/native/src/game_menu/collections.rs
 msgid "Smart collections pick their own games."
 msgstr "Smarta samlingar väljer sina egna spel."
 
@@ -11888,6 +11947,7 @@ msgid "Start minimized"
 msgstr "Starta minimerad"
 
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
+#: apps/native/src/game_menu/play.rs
 msgctxt "launch choice"
 msgid "Start with"
 msgstr "Starta med"
@@ -11927,6 +11987,7 @@ msgstr "Startar uppdateringen…"
 #: apps/desktop/src/views/library/StartingMark.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/game_menu/play.rs apps/native/src/game_menu/quick_look.rs
 #: apps/native/src/ui/game_card.rs apps/native/src/ui/game_row.rs
 msgid "Starting…"
 msgstr "Startar…"
@@ -12039,6 +12100,7 @@ msgstr "Stoppa"
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
+#: apps/native/src/game_menu/menu.rs apps/native/src/game_menu/quick_look.rs
 msgctxt "game action"
 msgid "Stop"
 msgstr "Stoppa"
@@ -12090,6 +12152,7 @@ msgstr "Stoppad: länken fungerar inte längre."
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game_menu/quick_look.rs
 msgid "Stopping…"
 msgstr "Stoppar…"
 
@@ -12405,8 +12468,15 @@ msgstr "Det blev inte klart: {0}. Det är säkert att försöka igen: det som sp
 
 #. A menu action failed; the reason is below
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "That didn't work"
 msgstr "Det fungerade inte"
+
+#: apps/native/src/game_menu/actions.rs
+#, fuzzy
+#| msgid "This store isn't available in this version of Caskade."
+msgid "That isn't available in this copy of Caskade."
+msgstr "Den här butiken är inte tillgänglig i den här versionen av Caskade."
 
 #: apps/desktop/src/components/accounts/PinPad.tsx
 msgid "That PIN isn't right."
@@ -12471,6 +12541,7 @@ msgid "The download is checked against the checksum in its install plan."
 msgstr "Nedladdningen kontrolleras mot kontrollsumman i installationsplanen."
 
 #: apps/desktop/src/components/gameMenu/RemoveGameDialog.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgid "The files Caskade installed for it are deleted, then it leaves your library with its play sessions. Files it didn't install stay where they are. The uninstall shows in Activity."
 msgstr "Filerna som Caskade installerade för spelet raderas, sedan tas det bort från ditt bibliotek tillsammans med dess spelsessioner. Filer som Caskade inte installerade ligger kvar där de är. Avinstallationen visas i Aktivitet."
 
@@ -12817,6 +12888,12 @@ msgstr ""
 msgid "This device has an emulator for it."
 msgstr "Den här enheten har en emulator för det."
 
+#: apps/native/src/game_menu/play.rs
+#, fuzzy
+#| msgid "Let other devices stream games from this one"
+msgid "This device is streaming a game to another one."
+msgstr "Låt andra enheter streama spel från den här"
+
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 msgid "This device only"
 msgstr "Bara den här enheten"
@@ -13018,6 +13095,7 @@ msgid "Tool"
 msgstr "Verktyg"
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgctxt "game menu section"
 msgid "Tools"
 msgstr "Verktyg"
@@ -13155,6 +13233,7 @@ msgstr "visa dolda"
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgid "Uninstall"
 msgstr "Avinstallera"
 
@@ -13179,16 +13258,19 @@ msgid "Uninstall {0}? If it's the theme in use, the default theme takes over."
 msgstr "Avinstallera {0}? Om det är temat som används tar standardtemat över."
 
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgid "Uninstall {title}?"
 msgstr "Avinstallera {title}?"
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Uninstall…"
 msgstr "Avinstallera…"
 
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgid "Uninstalling…"
 msgstr "Avinstallerar…"
 
@@ -13645,6 +13727,7 @@ msgid "View all →"
 msgstr "Visa alla →"
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
+#: apps/native/src/game_menu/quick_look.rs
 msgid "View more"
 msgstr "Visa mer"
 
@@ -14085,6 +14168,7 @@ msgid "You have games for these, but nothing to play them with. Caskade can down
 msgstr "Du har spel för dessa, men inget att spela dem med. Caskade kan ladda ner, installera och ställa in en emulator för var och en med ett klick."
 
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
+#: apps/native/src/game_menu/collections.rs
 msgid "You have no collections to add games to yet."
 msgstr "Du har inga samlingar att lägga till spel i än."
 
@@ -14229,6 +14313,16 @@ msgstr "ÅÅÅÅ-MM-DD, eller tomt för inget"
 #: apps/native/src/settings/search.rs
 msgid "zoom, text size, bigger"
 msgstr "zoom, textstorlek, större"
+
+#, fuzzy
+#~| msgid "{sharer} shares a save of {0} with you."
+#~ msgid "{sharer} shares a save of {game} with you."
+#~ msgstr "{sharer} delar en sparfil från {0} med dig."
+
+#, fuzzy
+#~| msgid "{sharer} shares the collection {0} with you."
+#~ msgid "{sharer} shares the collection {name} with you."
+#~ msgstr "{sharer} delar samlingen {0} med dig."
 
 #~ msgid "A name or path at any depth (glob)"
 #~ msgstr "Ett namn eller en sökväg på valfritt djup (glob)"

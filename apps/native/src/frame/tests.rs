@@ -42,6 +42,8 @@ pub(crate) static START: std::sync::Mutex<&str> = std::sync::Mutex::new("/");
 
 fn app() -> Element {
     use_data_source(|| SOURCE.get().expect("the fixture library").clone());
+    // Files dropped on the library go to a fake install.
+    use_context_provider(crate::library::view_tests::fake_drop_install);
     rsx! {
         // The app's stylesheet: the frame lays out as in the app.
         style { {include_str!("../../assets/app.css")} }
@@ -138,6 +140,15 @@ impl Window {
         found
     }
 
+    /// The first element under `root` whose `name` attribute is `value`.
+    pub(crate) fn find_in(&self, root: NodeId, name: &str, value: &str) -> Option<NodeId> {
+        let doc = self.doc.inner.borrow();
+        self.find_all(name, value).into_iter().find(|&node| {
+            std::iter::successors(Some(node), |&id| doc.get_node(id).and_then(|n| n.parent))
+                .any(|id| id == root)
+        })
+    }
+
     pub(crate) fn find(&self, name: &str, value: &str) -> Option<NodeId> {
         self.find_all(name, value).into_iter().next()
     }
@@ -201,6 +212,26 @@ impl Window {
             blitz_dom::Document::handle_ui_event(&mut self.doc, event);
             self.settle();
         }
+    }
+
+    /// Two clicks in quick succession on `node`'s middle.
+    pub(crate) fn double_click(&mut self, node: NodeId) {
+        let (x, y) = self.middle(node);
+        blitz_dom::Document::handle_ui_event(
+            &mut self.doc,
+            UiEvent::PointerMove(pointer(x, y, false)),
+        );
+        for _ in 0..2 {
+            blitz_dom::Document::handle_ui_event(
+                &mut self.doc,
+                UiEvent::PointerDown(pointer(x, y, true)),
+            );
+            blitz_dom::Document::handle_ui_event(
+                &mut self.doc,
+                UiEvent::PointerUp(pointer(x, y, false)),
+            );
+        }
+        self.settle();
     }
 
     /// A right click at `node`'s middle.

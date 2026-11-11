@@ -64,6 +64,80 @@ fn use_title_letters(query: ReadSignal<ListGames>) -> Query<Vec<TitleLetter>> {
     })
 }
 
+/// Installs a file dropped on the library: asks for its install, which
+/// opens the install confirmation, or says why it can't.
+pub type DropFuture = std::pin::Pin<Box<dyn std::future::Future<Output = Result<(), String>>>>;
+
+/// What installs dropped files: a test's, else the running app's install
+/// requests.
+#[derive(Clone)]
+pub struct DropInstall(pub std::rc::Rc<dyn Fn(String) -> DropFuture>);
+
+impl DropInstall {
+    /// The running app's; `None` where it can't install (no drop zone then,
+    /// as the webview has it).
+    fn of_app() -> Option<Self> {
+        crate::shell::services()?.install_requests.as_ref()?;
+        Some(Self(std::rc::Rc::new(|path: String| {
+            Box::pin(async move {
+                caskade_app::runtime::spawn(async move {
+                    let requests = crate::shell::services()
+                        .and_then(|services| services.install_requests.as_ref())
+                        .ok_or_else(|| t!("Could not add the dropped file."))?;
+                    caskade_app::commands::install_requests::request_dropped_install(
+                        &crate::shell::sink(),
+                        requests,
+                        path,
+                    )
+                    .await
+                    .map(drop)
+                })
+                .await
+                .unwrap_or_else(|_| Err(t!("Could not add the dropped file.")))
+            })
+        })))
+    }
+}
+
+/// Files dropped on the library install (`LibraryDrop.tsx`): a shortcut, a
+/// game's program or folder, an installer or an archive. The core works out
+/// what each installs and the install confirmation opens with it. Whether
+/// files are over the window now, and why the last drop failed.
+fn use_library_drop() -> (Signal<bool>, Signal<Option<String>>) {
+    let mut over = use_signal(|| false);
+    let mut error = use_signal(|| None::<String>);
+    use_hook(move || {
+        let Some(install) = try_consume_context::<DropInstall>().or_else(DropInstall::of_app)
+        else {
+            return;
+        };
+        let mut drops = crate::drops::drops().subscribe();
+        spawn(async move {
+            loop {
+                let event = match drops.recv().await {
+                    Ok(event) => event,
+                    Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => continue,
+                    Err(tokio::sync::broadcast::error::RecvError::Closed) => break,
+                };
+                match event {
+                    crate::drops::DropEvent::Over => over.set(true),
+                    crate::drops::DropEvent::Left => over.set(false),
+                    crate::drops::DropEvent::Dropped(paths) => {
+                        over.set(false);
+                        error.set(None);
+                        for path in paths {
+                            if let Err(message) = (install.0)(path.display().to_string()).await {
+                                error.set(Some(message));
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+    (over, error)
+}
+
 #[component]
 pub fn LibraryView(library: LibraryRoute) -> Element {
     let router = use_router();
@@ -161,10 +235,35 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
             }
         }
     };
+    let (drop_over, mut drop_error) = use_library_drop();
     let control = "flex items-center gap-1.5 rounded-control border border-border px-3 py-2 text-sm text-fg-muted outline-none hover:text-fg data-focus-visible:focus-ring";
     rsx! {
         div { "data-view": "library", class: "relative flex flex-1 flex-col",
             h1 { class: "sr-only", "{heading}" }
+            if drop_over() {
+                div {
+                    "data-part": "drop-hint",
+                    class: "pointer-events-none fixed inset-x-0 bottom-10 z-40 flex justify-center",
+                    p { class: "flex items-center gap-2 rounded-full border border-accent-strong bg-surface-overlay px-5 py-2 text-sm shadow-lg",
+                        Svg { icon: icons::FILE_PLUS_CORNER, class: "size-4 text-accent-alt" }
+                        {t!("Drop to install into your library")}
+                    }
+                }
+            }
+            if let Some(error) = drop_error() {
+                p {
+                    role: "alert",
+                    "data-part": "drop-error",
+                    class: "mt-4 flex items-start justify-between gap-3 rounded-control border border-danger p-3 text-sm text-danger",
+                    "{error}"
+                    crate::ui::Button {
+                        "aria-label": t!("Dismiss"),
+                        class: "shrink-0",
+                        on_press: move |_| drop_error.set(None),
+                        Svg { icon: icons::X, class: "size-4" }
+                    }
+                }
+            }
             div { "data-part": "toolbar", class: "mt-4 mb-4 flex flex-wrap items-center gap-2",
                 // Install from a file, a folder or a link, receive a share,
                 // or add a game by hand (#108); a game added by hand opens.

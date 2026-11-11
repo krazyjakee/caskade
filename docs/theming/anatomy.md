@@ -1028,7 +1028,7 @@ Root: `[data-cs="alphabet-bar"]`
 
 ## `quick-look`
 
-A game at a glance over the current view: in desktop mode a column on the right that a click on a game opens, in console mode a modal from a pad's X on a card; X again plays it. Rendered by QuickLook (app).
+A game at a glance over the current view: in desktop mode a column on the right that a click on a game opens, in console mode a modal from a pad's X on a card; X again plays it. Rendered by QuickLook (apps/native/src/game_menu/quick_look.rs); in the webview, QuickLook (app).
 
 Root: `[data-cs="quick-look"]`
 

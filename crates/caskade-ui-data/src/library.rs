@@ -158,4 +158,14 @@ impl Library {
     pub async fn add_to_collection(&self, id: &str, game_ids: &[String]) -> Result<()> {
         collections::add_to_collection(&self.store, &self.accounts, id, game_ids).await
     }
+
+    /// Takes games out of a manual collection.
+    pub async fn remove_from_collection(&self, id: &str, game_ids: &[String]) -> Result<()> {
+        collections::remove_from_collection(&self.store, &self.accounts, id, game_ids).await
+    }
+
+    /// The manual collections a game is in.
+    pub async fn game_collections(&self, game_id: &str) -> Result<Vec<String>> {
+        collections::game_collections(&self.store, &self.accounts, game_id).await
+    }
 }

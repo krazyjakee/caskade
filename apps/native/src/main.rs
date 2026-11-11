@@ -16,11 +16,15 @@ mod anatomy;
 mod data;
 mod dialogs;
 mod flows;
+// Files dragged onto the window: the library installs them (#99).
+mod drops;
 mod forwarded;
 // The frame around the views: sidebar, top bar, status bar (#96).
 mod frame;
 #[cfg(any(debug_assertions, feature = "gallery"))]
 mod gallery;
+// Games' menus, quick looks and the dialogs they open (#99).
+mod game_menu;
 mod i18n;
 mod input;
 mod launch;

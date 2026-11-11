@@ -174,3 +174,66 @@ fn an_empty_filter_says_so_and_offers_every_game() {
     assert_eq!(shown.sort, GameSort::Title);
     assert_eq!(shown.layout, crate::library::Layout::List);
 }
+
+/// The paths dropped files asked to install, in the order asked.
+static DROPPED: std::sync::Mutex<Vec<String>> = std::sync::Mutex::new(Vec::new());
+
+/// Installs every dropped file but a `.bad` one, which it says it can't.
+pub(crate) fn fake_drop_install() -> super::DropInstall {
+    super::DropInstall(std::rc::Rc::new(|path: String| {
+        Box::pin(async move {
+            if path.ends_with(".bad") {
+                return Err(format!("can't add {path}"));
+            }
+            DROPPED.lock().unwrap_or_else(|e| e.into_inner()).push(path);
+            Ok(())
+        })
+    }))
+}
+
+#[test]
+fn files_dropped_on_the_library_ask_to_install_and_say_why_not() {
+    use crate::drops::{DropEvent, drops};
+    use std::path::PathBuf;
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    DROPPED.lock().unwrap_or_else(|e| e.into_inner()).clear();
+    let mut window = open("/library?filter=all&sort=title&layout=grid");
+    // Dragged over: the hint.
+    let _ = drops().send(DropEvent::Over);
+    window.settle_until("the hint", |window| {
+        window.find("data-part", "drop-hint").is_some()
+    });
+    let hint = window.get("data-part", "drop-hint");
+    assert!(
+        window
+            .text(hint)
+            .contains("Drop to install into your library")
+    );
+    let _ = drops().send(DropEvent::Left);
+    window.settle_until("no hint", |window| {
+        window.find("data-part", "drop-hint").is_none()
+    });
+    // Dropped: each asks to install; one that can't says why.
+    let _ = drops().send(DropEvent::Over);
+    let _ = drops().send(DropEvent::Dropped(vec![
+        PathBuf::from("/games/Setup.exe"),
+        PathBuf::from("/games/broken.bad"),
+    ]));
+    window.settle_until("why one can't", |window| {
+        window.find("data-part", "drop-error").is_some()
+    });
+    assert!(window.find("data-part", "drop-hint").is_none());
+    assert_eq!(
+        *DROPPED.lock().unwrap_or_else(|e| e.into_inner()),
+        ["/games/Setup.exe"]
+    );
+    let error = window.get("data-part", "drop-error");
+    assert_eq!(window.attr(error, "role").as_deref(), Some("alert"));
+    assert!(window.text(error).contains("can't add /games/broken.bad"));
+    let dismiss = window
+        .find_in(error, "aria-label", "Dismiss")
+        .expect("Dismiss");
+    window.click(dismiss);
+    assert!(window.find("data-part", "drop-error").is_none());
+}

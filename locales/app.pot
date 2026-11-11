@@ -557,6 +557,7 @@ msgid "{first}–{last} of {total}"
 msgstr ""
 
 #: apps/desktop/src/api/mapping.ts
+#: apps/native/src/game_menu/entries.rs
 msgid "{folder} in game storage"
 msgstr ""
 
@@ -1050,6 +1051,7 @@ msgid "{title} · {size}. Playtime and library identity are kept."
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenuHost.tsx
+#: apps/native/src/game_menu/play.rs
 msgid "{title} didn't start"
 msgstr ""
 
@@ -1899,10 +1901,12 @@ msgid "Add to {label}"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Add to collection…"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Add to favourites"
 msgstr ""
 
@@ -2003,6 +2007,8 @@ msgid "Admin approval isn't available here"
 msgstr ""
 
 #: apps/desktop/src/views/game/AgeGate.tsx
+#: apps/native/src/game_menu/actions.rs
+#: apps/native/src/game_menu/play.rs
 msgid "Admin PIN needed"
 msgstr ""
 
@@ -2874,6 +2880,8 @@ msgstr ""
 #: apps/native/src/flows/folder_browser.rs
 #: apps/native/src/flows/manual_game.rs
 #: apps/native/src/flows/storage.rs
+#: apps/native/src/game_menu/dialogs.rs
+#: apps/native/src/game_menu/play.rs
 #: apps/native/src/settings/reset.rs
 #: apps/native/src/ui/dialog.rs
 msgid "Cancel"
@@ -3413,6 +3421,7 @@ msgid "Choose a Caskade backup"
 msgstr ""
 
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
+#: apps/native/src/game_menu/play.rs
 msgid "Choose a disc"
 msgstr ""
 
@@ -3501,6 +3510,7 @@ msgid "Choose games: click them, Shift+click for a range."
 msgstr ""
 
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
+#: apps/native/src/game_menu/play.rs
 msgid "Choose how to play"
 msgstr ""
 
@@ -3613,6 +3623,7 @@ msgid "Close"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
+#: apps/native/src/game_menu/quick_look.rs
 msgctxt "dialog"
 msgid "Close"
 msgstr ""
@@ -3671,6 +3682,7 @@ msgid "Collections aren't available here."
 msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
+#: apps/native/src/game_menu/collections.rs
 msgid "Collections for {title}"
 msgstr ""
 
@@ -3931,6 +3943,7 @@ msgid "Copy link"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgctxt "game action"
 msgid "Copy path"
 msgstr ""
@@ -3957,6 +3970,7 @@ msgid "Copying to this computer. Follow it in Activity."
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryDrop.tsx
+#: apps/native/src/library/view.rs
 msgid "Could not add the dropped file."
 msgstr ""
 
@@ -4094,6 +4108,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
+#: apps/native/src/game_menu/collections.rs
 msgctxt "collection"
 msgid "Create"
 msgstr ""
@@ -4232,6 +4247,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
+#: apps/native/src/game_menu/play.rs
 msgctxt "launch action"
 msgid "Default"
 msgstr ""
@@ -4408,6 +4424,7 @@ msgstr ""
 #. Button hint: a pad's X opens the game's quick look
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/views/library/GameActions.tsx
+#: apps/native/src/library/grid.rs
 msgid "Details"
 msgstr ""
 
@@ -4496,6 +4513,7 @@ msgid "Disable custom CSS"
 msgstr ""
 
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
+#: apps/native/src/game_menu/play.rs
 msgctxt "launch choice"
 msgid "Disc"
 msgstr ""
@@ -4559,6 +4577,7 @@ msgstr ""
 #: apps/desktop/src/views/activity/InstallConfirmation.tsx
 #: apps/desktop/src/views/game/SavesBeforePlay.tsx
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/library/view.rs
 #: apps/native/src/ui/toast.rs
 msgid "Dismiss"
 msgstr ""
@@ -4586,6 +4605,7 @@ msgstr ""
 #: apps/desktop/src/components/shares/ShareGameDialog.tsx
 #: apps/desktop/src/components/sync/PairingHost.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/game_menu/collections.rs
 msgid "Done"
 msgstr ""
 
@@ -4719,6 +4739,7 @@ msgid "drives, disks, folders"
 msgstr ""
 
 #: apps/desktop/src/views/library/LibraryDrop.tsx
+#: apps/native/src/library/view.rs
 msgid "Drop to install into your library"
 msgstr ""
 
@@ -4801,6 +4822,7 @@ msgstr ""
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Edit…"
 msgstr ""
 
@@ -4849,6 +4871,7 @@ msgid "Emulation section"
 msgstr ""
 
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
+#: apps/native/src/game_menu/play.rs
 msgctxt "launch choice"
 msgid "Emulator"
 msgstr ""
@@ -5922,6 +5945,7 @@ msgid "Hidden games"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Hide from library"
 msgstr ""
 
@@ -6667,6 +6691,7 @@ msgid "It has nothing installed here that can launch."
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenuHost.tsx
+#: apps/native/src/game_menu/play.rs
 msgid "It has nothing installed that can launch."
 msgstr ""
 
@@ -6675,6 +6700,7 @@ msgid "It has problems"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/RemoveGameDialog.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgid "It leaves your library with its play sessions. Its files, if it has any, stay where they are."
 msgstr ""
 
@@ -6731,10 +6757,12 @@ msgid "Its install plan has no checksum for the download, so it can't be checked
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgid "Its installed files are deleted from {location}, with the play sessions recorded for this install. The game stays in your library. The uninstall shows in Activity."
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgid "Its installed files are deleted, with the play sessions recorded for this install. The game stays in your library. The uninstall shows in Activity."
 msgstr ""
 
@@ -6914,6 +6942,7 @@ msgid "Last opened view"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
+#: apps/native/src/game_menu/quick_look.rs
 msgid "Last played"
 msgstr ""
 
@@ -7221,6 +7250,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/game_menu/collections.rs
 msgid "Loading collections…"
 msgstr ""
 
@@ -7781,6 +7811,7 @@ msgstr ""
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/components/storage/MoveGameAction.tsx
 #: apps/native/src/flows/storage.rs
+#: apps/native/src/game_menu/menu.rs
 msgid "Move installed files…"
 msgstr ""
 
@@ -7835,6 +7866,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
+#: apps/native/src/game_menu/collections.rs
 msgctxt "collection"
 msgid "Name"
 msgstr ""
@@ -7933,6 +7965,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
+#: apps/native/src/game_menu/collections.rs
 msgid "New collection"
 msgstr ""
 
@@ -8204,6 +8237,7 @@ msgid "No PIN: anyone can sign in to it. Changes at once."
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "No playtime is counted"
 msgstr ""
 
@@ -8443,14 +8477,17 @@ msgid "Not in your library"
 msgstr ""
 
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
+#: apps/native/src/game_menu/play.rs
 msgid "Not installed"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Not installed or unavailable"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
+#: apps/native/src/game_menu/quick_look.rs
 msgid "Not installed or unavailable."
 msgstr ""
 
@@ -8576,10 +8613,12 @@ msgid "Nothing syncs until a device is paired. Then your library, play history a
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Nothing to launch"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
+#: apps/native/src/game_menu/quick_look.rs
 msgid "Nothing to launch."
 msgstr ""
 
@@ -8718,6 +8757,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameActions/ToolRequest.tsx
 #: apps/desktop/src/components/gameMenu/GameMenuHost.tsx
+#: apps/native/src/game_menu/play.rs
 msgid "OK"
 msgstr ""
 
@@ -8883,6 +8923,7 @@ msgid "Open game"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Open game details"
 msgstr ""
 
@@ -8899,6 +8940,7 @@ msgid "Open in the system tray instead of a window. Needs Launch on system start
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Open installation folder"
 msgstr ""
 
@@ -8995,6 +9037,7 @@ msgstr ""
 #. Button hint: a pad's Start opens the focused item's menu
 #: apps/desktop/src/views/CollectionsView.tsx
 #: apps/desktop/src/views/library/GameActions.tsx
+#: apps/native/src/library/grid.rs
 msgid "Options"
 msgstr ""
 
@@ -9389,6 +9432,9 @@ msgstr ""
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
+#: apps/native/src/game_menu/menu.rs
+#: apps/native/src/game_menu/play.rs
+#: apps/native/src/game_menu/quick_look.rs
 msgctxt "game action"
 msgid "Play"
 msgstr ""
@@ -9483,6 +9529,11 @@ msgstr ""
 msgid "Play with {0}"
 msgstr ""
 
+#. Starts the game with one of its launch actions
+#: apps/native/src/game_menu/menu.rs
+msgid "Play with {name}"
+msgstr ""
+
 #: apps/desktop/src/components/saves/SaveConflictDialog.tsx
 msgid "Play with this save"
 msgstr ""
@@ -9542,6 +9593,7 @@ msgid "Plays the game"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
+#: apps/native/src/game_menu/quick_look.rs
 msgid "Playtime"
 msgstr ""
 
@@ -9859,6 +9911,7 @@ msgid "Quit"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Quit the game first"
 msgstr ""
 
@@ -10195,6 +10248,7 @@ msgstr ""
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/game_menu/quick_look.rs
 msgid "Released"
 msgstr ""
 
@@ -10259,6 +10313,7 @@ msgid "Remove"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/RemoveGameDialog.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgctxt "library game"
 msgid "Remove"
 msgstr ""
@@ -10304,6 +10359,7 @@ msgid "Remove {server}?"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/RemoveGameDialog.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgid "Remove {title} from your library?"
 msgstr ""
 
@@ -10328,10 +10384,12 @@ msgid "Remove exclusion {pattern}"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Remove from favourites"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Remove from library…"
 msgstr ""
 
@@ -10387,6 +10445,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgid "Removing…"
 msgstr ""
 
@@ -11186,6 +11245,7 @@ msgid "Scanning…"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Scans won't bring it back. Show it again in Settings → Library Discovery."
 msgstr ""
 
@@ -11783,6 +11843,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
 #: apps/desktop/src/components/shares/ShareInfoDetails.tsx
+#: apps/native/src/game_menu/quick_look.rs
 msgid "Size"
 msgstr ""
 
@@ -11850,6 +11911,7 @@ msgid "Smart"
 msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
+#: apps/native/src/game_menu/collections.rs
 msgid "Smart collections pick their own games."
 msgstr ""
 
@@ -11980,6 +12042,7 @@ msgid "Start minimized"
 msgstr ""
 
 #: apps/desktop/src/components/LaunchChoiceDialog.tsx
+#: apps/native/src/game_menu/play.rs
 msgctxt "launch choice"
 msgid "Start with"
 msgstr ""
@@ -12019,6 +12082,8 @@ msgstr ""
 #: apps/desktop/src/views/library/StartingMark.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/game_menu/play.rs
+#: apps/native/src/game_menu/quick_look.rs
 #: apps/native/src/ui/game_card.rs
 #: apps/native/src/ui/game_row.rs
 msgid "Starting…"
@@ -12133,6 +12198,8 @@ msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
+#: apps/native/src/game_menu/menu.rs
+#: apps/native/src/game_menu/quick_look.rs
 msgctxt "game action"
 msgid "Stop"
 msgstr ""
@@ -12187,6 +12254,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game_menu/quick_look.rs
 msgid "Stopping…"
 msgstr ""
 
@@ -12509,7 +12577,12 @@ msgstr ""
 
 #. A menu action failed; the reason is below
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "That didn't work"
+msgstr ""
+
+#: apps/native/src/game_menu/actions.rs
+msgid "That isn't available in this copy of Caskade."
 msgstr ""
 
 #: apps/desktop/src/components/accounts/PinPad.tsx
@@ -12575,6 +12648,7 @@ msgid "The download is checked against the checksum in its install plan."
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/RemoveGameDialog.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgid "The files Caskade installed for it are deleted, then it leaves your library with its play sessions. Files it didn't install stay where they are. The uninstall shows in Activity."
 msgstr ""
 
@@ -12921,6 +12995,10 @@ msgstr ""
 msgid "This device has an emulator for it."
 msgstr ""
 
+#: apps/native/src/game_menu/play.rs
+msgid "This device is streaming a game to another one."
+msgstr ""
+
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 msgid "This device only"
 msgstr ""
@@ -13126,6 +13204,7 @@ msgid "Tool"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgctxt "game menu section"
 msgid "Tools"
 msgstr ""
@@ -13264,6 +13343,7 @@ msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgid "Uninstall"
 msgstr ""
 
@@ -13288,16 +13368,19 @@ msgid "Uninstall {0}? If it's the theme in use, the default theme takes over."
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgid "Uninstall {title}?"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Uninstall…"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/UninstallDialog.tsx
+#: apps/native/src/game_menu/dialogs.rs
 msgid "Uninstalling…"
 msgstr ""
 
@@ -13756,6 +13839,7 @@ msgid "View all →"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
+#: apps/native/src/game_menu/quick_look.rs
 msgid "View more"
 msgstr ""
 
@@ -14197,6 +14281,7 @@ msgid "You have games for these, but nothing to play them with. Caskade can down
 msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
+#: apps/native/src/game_menu/collections.rs
 msgid "You have no collections to add games to yet."
 msgstr ""
 

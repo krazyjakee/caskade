@@ -44,7 +44,9 @@ pub fn Frame(
             RouterRoot { start,
                 ToastRegion {
                     type_search::TypeSearchRoot {
-                        Shell {}
+                        crate::game_menu::GameMenuHost {
+                            Shell {}
+                        }
                     }
                 }
             }

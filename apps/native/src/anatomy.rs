@@ -23,6 +23,7 @@ pub fn catalogue() -> Vec<Entry> {
     all.push(crate::settings::ANATOMY);
     all.extend_from_slice(crate::frame::ANATOMY);
     all.extend_from_slice(crate::flows::ANATOMY);
+    all.extend_from_slice(crate::game_menu::ANATOMY);
     all
 }
 
@@ -70,8 +71,8 @@ mod tests {
         ("game-row", "#93: the full LibraryRow"),
         ("alphabet-bar", "#99: the Library view's AlphabetBar"),
         (
-            "schema-settings",
-            "#103: the webview's SchemaSettings isn't catalogued either",
+            "collection-picker",
+            "#99: the webview's CollectionPicker isn't catalogued either",
         ),
         (
             "add-game",
@@ -84,6 +85,10 @@ mod tests {
         (
             "install-url",
             "#108: the webview's install-from-link dialog isn't catalogued either",
+        ),
+        (
+            "schema-settings",
+            "#103: the webview's SchemaSettings isn't catalogued either",
         ),
     ];
 

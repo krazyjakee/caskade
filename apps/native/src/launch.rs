@@ -226,6 +226,13 @@ impl<S: Shell> ApplicationHandler for Loop<S> {
         event: WindowEvent,
     ) {
         self.main.get_or_insert(window_id);
+        // Files dragged onto the window (#99); a file list it asked for is
+        // its own, not the shell's.
+        if crate::drops::follow(event_loop, &event)
+            && matches!(event, WindowEvent::DataTransferReceived { .. })
+        {
+            return;
+        }
         if matches!(event, WindowEvent::CloseRequested) {
             match self.shell.on_close() {
                 OnClose::Hold => return,

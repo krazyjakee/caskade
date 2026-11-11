@@ -162,6 +162,14 @@ pub const SEARCH_X: Icon = Icon(&[
 pub const LIST_PLUS: Icon = Icon(&["M16 5H3", "M11 12H3", "M16 19H3", "M18 9v6", "M21 12h-6"]);
 /// lucide's `arrow-left`.
 pub const ARROW_LEFT: Icon = Icon(&["m12 19-7-7 7-7", "M19 12H5"]);
+/// lucide's `folder-open`.
+pub const FOLDER_OPEN: Icon = Icon(&[
+    "m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2",
+]);
+/// lucide's `wrench`.
+pub const WRENCH: Icon = Icon(&[
+    "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z",
+]);
 /// lucide's `rotate-ccw`.
 pub const ROTATE_CCW: Icon = Icon(&[
     "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8",
@@ -270,8 +278,6 @@ pub const REFRESH_CW: Icon = Icon(&[
     "M8 16H3v5",
 ]);
 
-/// Draws `icon` with `class`, `stroke_width` (lucide's default is 2) and
-/// `data-part` when given.
 /// lucide's `plus`.
 pub const PLUS: Icon = Icon(&["M5 12h14", "M12 5v14"]);
 /// lucide's `file-search`.
@@ -294,6 +300,49 @@ pub const FOLDER: Icon = Icon(&[
     "M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z",
 ]);
 
+// The game menu's (#99).
+/// lucide's `heart-off`.
+pub const HEART_OFF: Icon = Icon(&[
+    "M10.5 4.893a5.5 5.5 0 0 1 1.091.931.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 1.872-1.002 3.356-2.187 4.655",
+    "m16.967 16.967-3.459 3.346a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5a5.5 5.5 0 0 1 2.747-4.761",
+    "m2 2 20 20",
+]);
+/// lucide's `pencil`.
+pub const PENCIL: Icon = Icon(&[
+    "M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z",
+    "m15 5 4 4",
+]);
+/// lucide's `folder-input`.
+pub const FOLDER_INPUT: Icon = Icon(&[
+    "M2 9V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1",
+    "M2 13h10",
+    "m9 16 3-3-3-3",
+]);
+/// lucide's `trash`.
+pub const TRASH: Icon = Icon(&[
+    "M10 11v6",
+    "M14 11v6",
+    "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6",
+    "M3 6h18",
+    "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2",
+]);
+/// lucide's `eye-off`.
+pub const EYE_OFF: Icon = Icon(&[
+    "M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49",
+    "M14.084 14.158a3 3 0 0 1-4.242-4.242",
+    "M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143",
+    "m2 2 20 20",
+]);
+/// lucide's `file-plus-corner`.
+pub const FILE_PLUS_CORNER: Icon = Icon(&[
+    "M11.35 22H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v5.35",
+    "M14 2v5a1 1 0 0 0 1 1h5",
+    "M14 19h6",
+    "M17 16v6",
+]);
+
+/// Draws `icon` with `class`, `stroke_width` (lucide's default is 2) and
+/// `data-part` when given.
 #[component]
 pub fn Svg(
     icon: Icon,
