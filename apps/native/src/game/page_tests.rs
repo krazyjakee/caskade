@@ -194,6 +194,14 @@ use std::sync::Mutex;
 /// What the page's data answers, and what it was asked.
 #[derive(Default)]
 pub(crate) struct PageScript {
+    pub(crate) emulations: Vec<caskade_core::emulation::GameEmulation>,
+    pub(crate) emulator_set: Vec<(String, caskade_core::emulation::EmulatorTarget)>,
+    pub(crate) owned: Vec<caskade_core::store_accounts::OwnedRelease>,
+    pub(crate) owned_installs: Vec<String>,
+    pub(crate) playtime: Option<caskade_core::db::PlaytimeBreakdown>,
+    pub(crate) copies: Vec<caskade_core::sync::copies::PeerCopy>,
+    pub(crate) copied: Vec<String>,
+    pub(crate) played_on: Vec<String>,
     pub(crate) updates: Vec<GameUpdate>,
     pub(crate) actions: Vec<ReleaseActions>,
     pub(crate) changes: Vec<(String, UpdateChange)>,
@@ -263,6 +271,67 @@ pub(crate) fn fake_data() -> PageData {
             page(|script| script.separated.push(entry_id));
             answer("separated".to_owned())
         }),
+        emulation: Rc::new(|entry_id| {
+            answer(page(|script| {
+                script
+                    .emulations
+                    .iter()
+                    .find(|each| each.entry_id == entry_id)
+                    .cloned()
+                    .unwrap_or_else(|| ready_emulation(&entry_id))
+            }))
+        }),
+        set_emulation: Rc::new(|entry_id, target, _| {
+            let emulation = page(|script| {
+                script.emulator_set.push((entry_id.clone(), target.clone()));
+                ready_emulation(&entry_id)
+            });
+            answer(emulation)
+        }),
+        split_args: Rc::new(|text| answer(text.split_whitespace().map(str::to_owned).collect())),
+        owned: Rc::new(|_| answer(page(|script| script.owned.clone()))),
+        owned_install: Rc::new(|entry_id| {
+            page(|script| script.owned_installs.push(entry_id));
+            answer(())
+        }),
+        owned_cancel: Rc::new(|_| answer(())),
+        playtime: Rc::new(|_| answer(page(|script| script.playtime.clone().unwrap_or_default()))),
+        copies: Rc::new(|_| answer(page(|script| script.copies.clone()))),
+        copy_here: Rc::new(|_, device| {
+            page(|script| script.copied.push(device));
+            answer(())
+        }),
+        play_on: Rc::new(|_, device| {
+            page(|script| script.played_on.push(device));
+            answer(())
+        }),
+    }
+}
+
+/// An emulated release that can start, with one profile to choose.
+pub(crate) fn ready_emulation(entry_id: &str) -> caskade_core::emulation::GameEmulation {
+    use caskade_core::emulation::{
+        ArgsOverride, CompatibleProfile, EmulatorTarget, GameEmulation, Readiness,
+    };
+    let profile = CompatibleProfile {
+        emulator_id: "retroarch".to_owned(),
+        profile_id: "mupen".to_owned(),
+        emulator_name: "RetroArch".to_owned(),
+        profile_name: "Mupen64Plus".to_owned(),
+        available: true,
+    };
+    GameEmulation {
+        entry_id: entry_id.to_owned(),
+        platform_id: "nintendo_n64".to_owned(),
+        platform: None,
+        target: EmulatorTarget::PlatformDefault,
+        args: ArgsOverride::Default,
+        discs: Vec::new(),
+        profile: Some(profile.clone()),
+        compatible: vec![profile],
+        bios: Vec::new(),
+        readiness: Readiness::Ready,
+        message: None,
     }
 }
 
@@ -406,4 +475,196 @@ fn a_release_with_several_launch_actions_picks_the_one_play_starts_and_lists_its
     assert_eq!(entry, "fixture-emulated-entry-0-0");
     assert_eq!(settings.default_action.as_deref(), Some("vr"));
     assert!(!settings.ask);
+}
+
+#[test]
+fn an_emulated_release_shows_its_emulator_and_picks_another() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    let _script = page_script(PageScript::default());
+    let mut window = open("/games/fixture-emulated-0-0");
+    window.settle_until("the emulator", |window| {
+        window.find("data-cs", "emulation").is_some()
+    });
+    let panel = window.get("data-cs", "emulation");
+    assert_eq!(window.attr(panel, "data-status").as_deref(), Some("ready"));
+    assert!(
+        window.text(panel).contains("Ready"),
+        "{}",
+        window.text(panel)
+    );
+    let select = window
+        .find_in(panel, "data-part", "launch-with")
+        .expect("Launch with");
+    window.focus(select);
+    window.key(dioxus_native::prelude::keyboard_types::Key::Character(
+        " ".into(),
+    ));
+    window.settle_until("its options", |window| {
+        window.find("role", "listbox").is_some()
+    });
+    window.key(dioxus_native::prelude::keyboard_types::Key::Named(
+        dioxus_native::prelude::keyboard_types::NamedKey::ArrowDown,
+    ));
+    window.key(dioxus_native::prelude::keyboard_types::Key::Named(
+        dioxus_native::prelude::keyboard_types::NamedKey::Enter,
+    ));
+    window.settle_until("the emulator set", |_| {
+        page(|script| script.emulator_set.len()) == 1
+    });
+    let (_, target) = page(|script| script.emulator_set[0].clone());
+    assert_eq!(
+        target,
+        caskade_core::emulation::EmulatorTarget::Profile {
+            emulator_id: "retroarch".to_owned(),
+            profile_id: "mupen".to_owned(),
+        }
+    );
+}
+
+#[test]
+fn an_emulated_release_that_needs_setup_says_how_and_play_waits() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    let mut emulation = ready_emulation("fixture-emulated-entry-0-0");
+    emulation.readiness = caskade_core::emulation::Readiness::NoEmulator;
+    emulation.message = Some("No emulator for N64".to_owned());
+    let _script = page_script(PageScript {
+        emulations: vec![emulation],
+        ..PageScript::default()
+    });
+    let mut window = open("/games/fixture-emulated-0-0");
+    window.settle_until("the setup note", |window| {
+        window.find("data-part", "readiness").is_some()
+    });
+    let note = window.text(window.get("data-part", "readiness"));
+    assert!(
+        note.contains("No emulator for N64") && note.contains("Configure"),
+        "{note}"
+    );
+    window.settle_until("Play waiting", |window| {
+        window.attr(play_button(window), "data-disabled").as_deref() == Some("true")
+    });
+}
+
+#[test]
+fn an_owned_release_installs_through_its_store() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    use caskade_core::store_accounts::{OwnedInstallState, OwnedRelease};
+    let _script = page_script(PageScript {
+        owned: vec![OwnedRelease {
+            entry_id: "owned-1".to_owned(),
+            store_account_id: "steam-me".to_owned(),
+            provider: "steam".to_owned(),
+            provider_name: "Steam".to_owned(),
+            account_name: "me".to_owned(),
+            product_id: "1".to_owned(),
+            title: "Fixture Game 0001".to_owned(),
+            state: OwnedInstallState::Available {
+                launcher: "Steam".to_owned(),
+            },
+            refreshed_at_ms: None,
+        }],
+        ..PageScript::default()
+    });
+    let mut window = open("/games/fixture-0");
+    window.settle_until("the owned release", |window| {
+        window.find("data-part", "owned-release").is_some()
+    });
+    let owned = window.get("data-part", "owned-release");
+    assert!(
+        window.text(owned).contains("Owned on Steam (me)"),
+        "{}",
+        window.text(owned)
+    );
+    let install = window
+        .find_in(owned, "data-part", "install")
+        .expect("Install with Steam");
+    assert!(window.text(install).contains("Install with Steam"));
+    window.click(install);
+    window.settle_until("the install", |_| {
+        page(|script| script.owned_installs.len()) == 1
+    });
+}
+
+#[test]
+fn a_copy_on_another_device_copies_here_or_plays_there() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    use caskade_core::db::CopyLocation;
+    use caskade_core::devices::{DeviceKind, DeviceLink, DeviceOs};
+    use caskade_core::sync::copies::PeerCopy;
+    let _script = page_script(PageScript {
+        copies: vec![PeerCopy {
+            device_id: "den".to_owned(),
+            device_name: "Den PC".to_owned(),
+            kind: DeviceKind::Desktop,
+            os: DeviceOs::Linux,
+            link: DeviceLink::Lan,
+            size_bytes: Some(2 * 1024 * 1024 * 1024),
+            location: CopyLocation::Managed,
+            blocked: None,
+            through_proton: false,
+            playing: false,
+            wakeable: false,
+        }],
+        ..PageScript::default()
+    });
+    let mut window = open("/games/fixture-0");
+    window.settle_until("the copy", |window| {
+        window.find("data-part", "peer-copy").is_some()
+    });
+    let row = window.get("data-part", "peer-copy");
+    assert!(
+        window.text(row).contains("On Den PC"),
+        "{}",
+        window.text(row)
+    );
+    let copy = window
+        .find_in(row, "data-part", "copy-here")
+        .expect("Copy to this computer");
+    window.click(copy);
+    window.settle_until("the copy", |_| page(|script| script.copied.len()) == 1);
+    let row = window.get("data-part", "peer-copy");
+    let play = window
+        .find_in(row, "data-part", "play-there")
+        .expect("Play on Den PC");
+    window.click(play);
+    window.settle_until("played there", |_| {
+        page(|script| script.played_on.len()) == 1
+    });
+}
+
+#[test]
+fn play_time_reported_by_stores_says_where_it_comes_from() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    use caskade_core::db::{PlaytimeBreakdown, ReportedPlaytime};
+    let _script = page_script(PageScript {
+        playtime: Some(PlaytimeBreakdown {
+            total_ms: 3 * 3_600_000,
+            tracked_ms: 3_600_000,
+            reported_ms: 2 * 3_600_000,
+            last_played_ms: None,
+            sources: vec![ReportedPlaytime {
+                provider: "steam".to_owned(),
+                account_name: Some("me".to_owned()),
+                total_ms: Some(2 * 3_600_000),
+                counted_ms: 2 * 3_600_000,
+                last_played_ms: None,
+                observed_at_ms: 1_700_000_000_000,
+            }],
+        }),
+        ..PageScript::default()
+    });
+    let mut window = open("/games/fixture-1");
+    window.settle_until("the sources", |window| {
+        window.find("data-part", "playtime-sources").is_some()
+    });
+    let said = text(&window, "playtime-sources");
+    assert!(
+        said.contains("in Caskade") && said.contains("more reported by Steam (me)"),
+        "{said}"
+    );
 }

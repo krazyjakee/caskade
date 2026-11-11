@@ -5,9 +5,13 @@
 
 use super::launch::Answer;
 use crate::data::change;
+use caskade_core::db::PlaytimeBreakdown;
+use caskade_core::emulation::{ArgsOverride, EmulatorTarget, GameEmulation};
 use caskade_core::error::ErrorReport;
 use caskade_core::launch::ReleaseActions;
 use caskade_core::model::EntryActionSettings;
+use caskade_core::store_accounts::OwnedRelease;
+use caskade_core::sync::copies::PeerCopy;
 use caskade_core::updates::GameUpdate;
 use dioxus_native::prelude::*;
 use std::rc::Rc;
@@ -38,6 +42,26 @@ pub struct PageData {
         Rc<dyn Fn(String, String, EntryActionSettings) -> Answer<EntryActionSettings>>,
     /// Moves entry `0` out into a game of its own: that game's id.
     pub separate: Rc<dyn Fn(String) -> Answer<String>>,
+    /// Emulated entry `0`'s emulator, discs, BIOS and readiness.
+    pub emulation: Rc<dyn Fn(String) -> Answer<GameEmulation>>,
+    /// Sets entry `0`'s emulator and arguments.
+    pub set_emulation: Rc<dyn Fn(String, EmulatorTarget, ArgsOverride) -> Answer<GameEmulation>>,
+    /// Splits a command line into arguments, as a shell would.
+    pub split_args: Rc<dyn Fn(String) -> Answer<Vec<String>>>,
+    /// Game `0`'s releases its store accounts own.
+    pub owned: Rc<dyn Fn(String) -> Answer<Vec<OwnedRelease>>>,
+    /// Installs owned entry `0` through its store's launcher.
+    pub owned_install: Rc<dyn Fn(String) -> Answer<()>>,
+    /// Stops waiting for owned entry `0`'s install.
+    pub owned_cancel: Rc<dyn Fn(String) -> Answer<()>>,
+    /// Where game `0`'s play time comes from.
+    pub playtime: Rc<dyn Fn(String) -> Answer<PlaytimeBreakdown>>,
+    /// Game `0`'s copies on paired devices.
+    pub copies: Rc<dyn Fn(String) -> Answer<Vec<PeerCopy>>>,
+    /// Copies game `0` here from device `1`: an install job.
+    pub copy_here: Rc<dyn Fn(String, String) -> Answer<()>>,
+    /// Starts game `0` on device `1`, waking it first when it can.
+    pub play_on: Rc<dyn Fn(String, String) -> Answer<()>>,
 }
 
 impl PartialEq for PageData {
@@ -150,6 +174,128 @@ impl PageData {
                         .map_err(ErrorReport::from)
                     })
                     .await
+                })
+            }),
+            emulation: Rc::new(|entry_id| {
+                Box::pin(async move {
+                    let services = services()?;
+                    change(async move {
+                        caskade_app::commands::emulation::emulation_game(
+                            &services.emulation,
+                            &entry_id,
+                        )
+                        .await
+                    })
+                    .await
+                })
+            }),
+            set_emulation: Rc::new(|entry_id, target, args| {
+                Box::pin(async move {
+                    let services = services()?;
+                    change(async move {
+                        caskade_app::commands::emulation::emulation_game_set(
+                            &services.emulation,
+                            &entry_id,
+                            target,
+                            args,
+                        )
+                        .await
+                    })
+                    .await
+                })
+            }),
+            split_args: Rc::new(|text| {
+                Box::pin(async move { caskade_app::commands::emulation::args_split(&text) })
+            }),
+            owned: Rc::new(|game_id| {
+                Box::pin(async move {
+                    let Some(services) = crate::shell::services() else {
+                        return Ok(Vec::new());
+                    };
+                    change(async move {
+                        caskade_app::commands::store_accounts::game_owned_releases(
+                            &services.store_accounts,
+                            Some(&services.discovery_controller),
+                            &game_id,
+                        )
+                        .await
+                    })
+                    .await
+                })
+            }),
+            owned_install: Rc::new(|entry_id| {
+                Box::pin(async move {
+                    let services = services()?;
+                    change(async move {
+                        caskade_app::commands::store_accounts::owned_install(
+                            &services.store_accounts,
+                            Some(&services.discovery_controller),
+                            &entry_id,
+                        )
+                        .await
+                        .map(drop)
+                    })
+                    .await
+                })
+            }),
+            owned_cancel: Rc::new(|entry_id| {
+                Box::pin(async move {
+                    let services = services()?;
+                    caskade_app::commands::store_accounts::owned_install_cancel(
+                        &services.store_accounts,
+                        &entry_id,
+                    );
+                    Ok(())
+                })
+            }),
+            playtime: Rc::new(|game_id| {
+                Box::pin(async move {
+                    let services = services()?;
+                    change(async move {
+                        caskade_app::commands::store_accounts::game_playtime(
+                            &services.store,
+                            &game_id,
+                        )
+                        .await
+                    })
+                    .await
+                })
+            }),
+            copies: Rc::new(|game_id| {
+                Box::pin(async move {
+                    let Some(devices) = crate::shell::services()
+                        .and_then(caskade_ui_data::devices::OtherDevices::of)
+                    else {
+                        return Ok(Vec::new());
+                    };
+                    change(async move { devices.copies(&game_id).await }).await
+                })
+            }),
+            copy_here: Rc::new(|game_id, device_id| {
+                Box::pin(async move {
+                    let services = services()?;
+                    let install = services.install.as_ref().ok_or_else(unavailable)?;
+                    change(async move {
+                        caskade_app::commands::copies::game_copy_here(
+                            install,
+                            &services.store,
+                            &services.devices,
+                            game_id,
+                            device_id,
+                            None,
+                        )
+                        .await
+                        .map(drop)
+                    })
+                    .await
+                })
+            }),
+            play_on: Rc::new(|game_id, device_id| {
+                Box::pin(async move {
+                    let devices = crate::shell::services()
+                        .and_then(caskade_ui_data::devices::OtherDevices::of)
+                        .ok_or_else(unavailable)?;
+                    change(async move { devices.play_on(&game_id, &device_id).await }).await
                 })
             }),
         }

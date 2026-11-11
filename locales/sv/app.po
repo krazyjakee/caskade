@@ -570,6 +570,7 @@ msgstr "{duration} spelat"
 
 #. An emulator and its profile, whose files are missing
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
+#: apps/native/src/game/emulation.rs
 msgid "{emulator} · {profile} (missing files)"
 msgstr "{emulator} · {profile} (filer saknas)"
 
@@ -741,6 +742,12 @@ msgstr "{latestVersion} har släppts och du har {installedVersion}. Uppdateringe
 #: apps/native/src/game/launch.rs
 msgid "{latestVersion} is out. Updating keeps your saves and settings."
 msgstr "{latestVersion} har släppts. Uppdateringen behåller dina sparfiler och inställningar."
+
+#: apps/native/src/game/elsewhere.rs
+#, fuzzy
+#| msgid "{0} isn't installed on this computer."
+msgid "{launcher} isn't installed on this computer."
+msgstr "{0} är inte installerat på den här datorn."
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
 #: apps/native/src/settings/appearance.rs
@@ -1000,6 +1007,7 @@ msgid "{provider} lists no achievements for this game."
 msgstr "{provider} listar inga prestationer för det här spelet."
 
 #: apps/desktop/src/views/game/PlaytimeSources.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "{provider}: {total}, read {read}"
 msgstr "{provider}: {total}, läst {read}"
 
@@ -1257,6 +1265,7 @@ msgid "{total} total · {active} running"
 msgstr "{total} totalt · {active} körs"
 
 #: apps/desktop/src/views/game/PlaytimeSources.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "{tracked} in Caskade, {reported} more reported by {names}"
 msgstr "{tracked} i Caskade, {reported} till rapporterat av {names}"
 
@@ -1653,6 +1662,7 @@ msgid "A regular expression, from the start of the path"
 msgstr "Ett reguljärt uttryck, från början av sökvägen"
 
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
+#: apps/native/src/game/emulation.rs
 msgid "A removed emulator"
 msgstr "En borttagen emulator"
 
@@ -2103,6 +2113,7 @@ msgstr "Lägg till, åtskilda med kommatecken"
 
 #. {variable} is a launch variable, e.g. {RomPath}
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
+#: apps/native/src/game/emulation.rs
 msgid "Added after the profile's arguments; variables like {variable} work."
 msgstr "Läggs till efter profilens argument; variabler som {variable} fungerar."
 
@@ -2385,7 +2396,7 @@ msgid "Another account"
 msgstr "Ett annat konto"
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
-#: apps/native/src/game/launch.rs
+#: apps/native/src/game/elsewhere.rs apps/native/src/game/launch.rs
 msgctxt "playing on"
 msgid "another device"
 msgstr "en annan enhet"
@@ -2570,6 +2581,7 @@ msgid "Ask for any emulator"
 msgstr "Fråga efter valfri emulator"
 
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
+#: apps/native/src/game/emulation.rs
 msgid "Ask when launching"
 msgstr "Fråga vid start"
 
@@ -2594,6 +2606,7 @@ msgid "Asks for"
 msgstr "Ber om"
 
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
+#: apps/native/src/game/emulation.rs
 msgid "Asks for an emulator when launching"
 msgstr "Frågar efter en emulator vid start"
 
@@ -2862,6 +2875,7 @@ msgstr "Programnamn"
 
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredPlatforms.tsx
+#: apps/native/src/game/emulation.rs
 msgctxt "table column"
 msgid "BIOS"
 msgstr "BIOS"
@@ -3608,6 +3622,7 @@ msgid "Checking the download…"
 msgstr "Kontrollerar nedladdningen…"
 
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
+#: apps/native/src/game/emulation.rs
 msgid "Checking the emulator…"
 msgstr "Kontrollerar emulatorn…"
 
@@ -4012,6 +4027,7 @@ msgid "Concurrent downloads"
 msgstr "Samtidiga nedladdningar"
 
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
+#: apps/native/src/game/emulation.rs
 msgid "Configure"
 msgstr "Konfigurera"
 
@@ -4231,6 +4247,7 @@ msgid "Copy to {name}"
 msgstr "Kopiera till {name}"
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "Copy to this computer"
 msgstr "Kopiera till den här datorn"
 
@@ -4239,6 +4256,7 @@ msgid "Copying the library…"
 msgstr "Kopierar biblioteket…"
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "Copying to this computer. Follow it in Activity."
 msgstr "Kopierar till den här datorn. Följ det under Aktivitet."
 
@@ -4876,6 +4894,7 @@ msgstr "Identifieringen är klar. Granska eventuella varningar nedan eller öppn
 
 #. The heading over a game's disc images
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
+#: apps/native/src/game/emulation.rs
 msgid "Discs"
 msgstr "Skivor"
 
@@ -5512,6 +5531,7 @@ msgstr "Externa enheter"
 
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 #: apps/desktop/src/views/settings/emulators/ProfileEditor.tsx
+#: apps/native/src/game/emulation.rs
 msgid "Extra arguments"
 msgstr "Extra argument"
 
@@ -5774,6 +5794,7 @@ msgstr "Glöm…"
 #. A BIOS file's state
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
+#: apps/native/src/game/emulation.rs
 msgid "Found"
 msgstr "Hittad"
 
@@ -6832,6 +6853,12 @@ msgstr "Installationstyp"
 msgid "Install with {0}"
 msgstr "Installera med {0}"
 
+#: apps/native/src/game/elsewhere.rs
+#, fuzzy
+#| msgid "Install with {0}"
+msgid "Install with {launcher}"
+msgstr "Installera med {0}"
+
 #. Search words for Settings → Installer, separated by commas
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/native/src/settings/search.rs
@@ -6934,6 +6961,7 @@ msgid "Installed: it's in Play from your library."
 msgstr "Installerad: den finns under Spela från ditt bibliotek."
 
 #: apps/desktop/src/views/game/OwnedReleases.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "Installed."
 msgstr "Installerat."
 
@@ -7458,6 +7486,7 @@ msgstr "Starta när datorn startar"
 #. ROM scanners table column
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/game/emulation.rs
 msgid "Launch with"
 msgstr "Starta med"
 
@@ -7597,6 +7626,7 @@ msgid "Library games"
 msgstr "Bibliotekets spel"
 
 #: apps/desktop/src/views/game/OwnedReleases.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "Library refreshed {refreshed}."
 msgstr "Biblioteket uppdaterades {refreshed}."
 
@@ -8208,6 +8238,7 @@ msgstr "Minsta bredd för ett spelkort."
 #. A file's state
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 #: apps/desktop/src/views/settings/emulators/EmulationFields.tsx
+#: apps/native/src/game/emulation.rs
 msgid "Missing"
 msgstr "Saknas"
 
@@ -8408,6 +8439,7 @@ msgid "Needs attention."
 msgstr "Kräver uppmärksamhet."
 
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
+#: apps/native/src/game/emulation.rs
 msgid "Needs setup"
 msgstr "Behöver konfigureras"
 
@@ -9337,7 +9369,7 @@ msgstr "På"
 #. The game is installed on another of the user's devices
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/views/game/OtherDevices.tsx
-#: apps/native/src/game_menu/menu.rs
+#: apps/native/src/game/elsewhere.rs apps/native/src/game_menu/menu.rs
 msgid "On {device}"
 msgstr "På {device}"
 
@@ -9377,7 +9409,7 @@ msgstr "I det här nätverket på {addresses}."
 #: apps/desktop/src/components/addons/DeviceOffers.tsx
 #: apps/desktop/src/views/game/OtherDevices.tsx
 #: apps/desktop/src/views/settings/backup/DeviceBackups.tsx
-#: apps/native/src/settings/addons.rs
+#: apps/native/src/game/elsewhere.rs apps/native/src/settings/addons.rs
 msgid "On your other devices"
 msgstr "På dina andra enheter"
 
@@ -9589,6 +9621,7 @@ msgstr "Kontroller i operativsystemet"
 
 #. A BIOS file the platform can do without
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
+#: apps/native/src/game/emulation.rs
 msgid "optional"
 msgstr "valfri"
 
@@ -9679,6 +9712,7 @@ msgid "Owned"
 msgstr "Ägt"
 
 #: apps/desktop/src/views/game/OwnedReleases.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "Owned on {provider} ({account})"
 msgstr "Ägs på {provider} ({account})"
 
@@ -9979,11 +10013,13 @@ msgstr "Plattform"
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/game/emulation.rs
 msgid "Platform default"
 msgstr "Plattformens standard"
 
 #. The platform's default emulator, then the emulator and profile it resolves to
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
+#: apps/native/src/game/emulation.rs
 msgid "Platform default ({resolvedProfile})"
 msgstr "Plattformens standard ({resolvedProfile})"
 
@@ -10094,6 +10130,7 @@ msgid "Play offline…"
 msgstr "Spela offline…"
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "Play on {device}"
 msgstr "Spela på {device}"
 
@@ -10194,6 +10231,7 @@ msgid "Playing on {device} now."
 msgstr "Spelas på {device} just nu."
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "Playing on {devices}"
 msgstr "Spelas på {devices}"
 
@@ -10358,6 +10396,7 @@ msgstr "Förhandsversioner"
 
 #. A file's state
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
+#: apps/native/src/game/emulation.rs
 msgid "Present"
 msgstr "Finns"
 
@@ -10617,7 +10656,7 @@ msgstr "Läser spelen som {name}-startprogrammet på den här datorn vet att du 
 #: apps/desktop/src/shell/StatusBar.tsx
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
 #: apps/desktop/src/views/settings/emulators/ConfiguredEmulators.tsx
-#: apps/native/src/frame/status_bar.rs
+#: apps/native/src/frame/status_bar.rs apps/native/src/game/emulation.rs
 msgid "Ready"
 msgstr "Redo"
 
@@ -11422,6 +11461,7 @@ msgstr "Roll"
 
 #. The heading over a game's single ROM file
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
+#: apps/native/src/game/emulation.rs
 msgid "ROM"
 msgstr "ROM"
 
@@ -11600,6 +11640,7 @@ msgid "runs on {systems}"
 msgstr "körs på {systems}"
 
 #: apps/desktop/src/views/game/OwnedReleases.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "Runs on {systems}, not on this computer's system."
 msgstr "Körs på {systems}, inte på den här datorns system."
 
@@ -11657,6 +11698,7 @@ msgstr "Exempel-ROM: {0}"
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
+#: apps/native/src/game/emulation.rs
 #: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/settings/unsaved.rs
 msgid "Save"
@@ -12802,6 +12844,7 @@ msgid "Start with"
 msgstr "Starta med"
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "Started on {device}."
 msgstr "Startat på {device}."
 
@@ -12811,6 +12854,7 @@ msgid "Started with the save from {device}."
 msgstr "Startade med sparfilen från {device}."
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "Starting on {device}…"
 msgstr "Startar på {device}…"
 
@@ -12999,6 +13043,7 @@ msgid "Stop the other game?"
 msgstr "Stoppa det andra spelet?"
 
 #: apps/desktop/src/views/game/OwnedReleases.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "Stop waiting"
 msgstr "Sluta vänta"
 
@@ -13367,10 +13412,12 @@ msgid "the account"
 msgstr "kontot"
 
 #: apps/desktop/src/views/game/OwnedReleases.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "The account is disconnected. Connect it again in Settings → Store accounts."
 msgstr "Kontot är frånkopplat. Anslut det igen i Inställningar → Butikskonton."
 
 #: apps/desktop/src/views/game/OwnedReleases.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "The account no longer owns it."
 msgstr "Kontot äger det inte längre."
 
@@ -13631,6 +13678,7 @@ msgid "The similar games aren't available yet."
 msgstr "Liknande spel är inte tillgängliga än."
 
 #: apps/desktop/src/views/game/OwnedReleases.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "The store can't install games from Caskade."
 msgstr "Butiken kan inte installera spel från Caskade."
 
@@ -13925,6 +13973,7 @@ msgid "This source took too long to answer."
 msgstr "Den här källan tog för lång tid på sig att svara."
 
 #: apps/desktop/src/views/game/OwnedReleases.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "This store isn't available in this version of Caskade."
 msgstr "Den här butiken är inte tillgänglig i den här versionen av Caskade."
 
@@ -14214,11 +14263,13 @@ msgid "Uninstalling…"
 msgstr "Avinstallerar…"
 
 #: apps/desktop/src/views/game/PlaytimeSources.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "unknown"
 msgstr "okänd"
 
 #. A BIOS file's state
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
+#: apps/native/src/game/emulation.rs
 msgid "Unknown"
 msgstr "Okänd"
 
@@ -14721,6 +14772,12 @@ msgstr "Väntar på att {0} ska bli klar med installationen."
 msgid "Waiting for {device}…"
 msgstr "Väntar på {device}…"
 
+#: apps/native/src/game/elsewhere.rs
+#, fuzzy
+#| msgid "Waiting for {0} to finish installing it."
+msgid "Waiting for {launcher} to finish installing it."
+msgstr "Väntar på att {0} ska bli klar med installationen."
+
 #: apps/desktop/src/components/sync/PairingHost.tsx
 #: apps/native/src/flows/pairing.rs
 msgid "Waiting for {name} to confirm…"
@@ -14768,6 +14825,7 @@ msgid "Waiting…"
 msgstr "Väntar…"
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "Wake and play on {device}"
 msgstr "Väck och spela på {device}"
 
@@ -14777,6 +14835,7 @@ msgid "Wakes it first"
 msgstr "Väcker den först"
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "Waking {device}…"
 msgstr "Väcker {device}…"
 
@@ -15160,6 +15219,7 @@ msgstr "Skriver säkerhetskopian…"
 
 #. A BIOS file's state: the file's hash doesn't match
 #: apps/desktop/src/views/game/EmulatedEntry.tsx
+#: apps/native/src/game/emulation.rs
 msgid "Wrong dump"
 msgstr "Fel dump"
 

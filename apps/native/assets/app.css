@@ -883,6 +883,9 @@
   .grid-cols-\[repeat\(auto-fill\,var\(--tile\)\)\] {
     grid-template-columns: repeat(auto-fill,var(--tile));
   }
+  .grid-cols-\[repeat\(auto-fit\,minmax\(min\(100\%\,18rem\)\,1fr\)\)\] {
+    grid-template-columns: repeat(auto-fit,minmax(min(100%, 18rem),1fr));
+  }
   .grid-cols-\[repeat\(auto-fit\,minmax\(min\(100\%\,34rem\)\,1fr\)\)\] {
     grid-template-columns: repeat(auto-fit,minmax(min(100%, 34rem),1fr));
   }
@@ -894,6 +897,9 @@
   }
   .place-items-center {
     place-items: center;
+  }
+  .content-start {
+    align-content: flex-start;
   }
   .items-baseline {
     align-items: baseline;
@@ -1000,6 +1006,9 @@
   }
   .gap-y-2 {
     row-gap: calc(calc(0.25rem * var(--cs-density-scale)) * 2);
+  }
+  .gap-y-3 {
+    row-gap: calc(calc(0.25rem * var(--cs-density-scale)) * 3);
   }
   :where(.divide-y > :not(:last-child)) {
     --tw-divide-y-reverse: 0;

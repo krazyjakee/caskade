@@ -157,6 +157,32 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
         .and_then(|id| list.iter().find(|entry| &entry.id == id))
         .or_else(|| playable(&list, &none, None))
         .cloned();
+    // An emulated release starts only with its emulator ready (or asking).
+    let mut chosen_emulated = use_signal(|| None::<String>);
+    let wanted = chosen
+        .as_ref()
+        .filter(|entry| entry.emulated)
+        .map(|entry| entry.id.clone());
+    if *chosen_emulated.peek() != wanted {
+        chosen_emulated.set(wanted);
+    }
+    let emulation = {
+        let data = data.clone();
+        super::data::use_answer(
+            caskade_ui_data::Key::Game(game.game.id.clone()),
+            move || {
+                let (data, entry) = (data.clone(), chosen_emulated());
+                Box::pin(async move {
+                    match entry {
+                        Some(entry) => (data.emulation)(entry).await.map(Some),
+                        None => Ok(None),
+                    }
+                })
+            },
+        )
+    };
+    let emulator_ready = chosen.as_ref().is_none_or(|entry| !entry.emulated)
+        || matches!(&*emulation.read(), Some(Ok(Some(game))) if super::emulation::can_start(Some(game)));
     let starting = menus.is_some_and(|menus| menus.starting(&game.game.id));
     let busy = starting || running.is_some();
     let target = {
@@ -318,7 +344,9 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
                         p { "data-part": "meta", class: "mt-3 flex items-center gap-2 text-fg-muted",
                             Svg { icon: icons::CLOCK, class: "size-4" }
                             span { "{playtime}" }
+                            super::elsewhere::PlaytimeSources { game_id: game.game.id.clone() }
                         }
+                        super::elsewhere::PlayingElsewhereLine { game_id: game.game.id.clone() }
                         p { "data-part": "description", class: "mt-4 max-w-3xl text-sm leading-relaxed text-fg-muted",
                             if game.game.description.is_empty() { {t!("No description yet.")} } else { "{game.game.description}" }
                         }
@@ -366,7 +394,7 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
                                 "data-focus-default": "true",
                                 variant: ButtonVariant::Primary,
                                 icon: Some(icons::PLAY),
-                                disabled: chosen.as_ref().is_none_or(|entry| !launchable(entry)) || busy,
+                                disabled: chosen.as_ref().is_none_or(|entry| !launchable(entry)) || busy || !emulator_ready,
                                 on_press: {
                                     let chosen = chosen.clone();
                                     let play = play.clone();
@@ -402,6 +430,16 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
                                 title: game.game.title.clone(),
                                 entry_id: entry.id.clone(),
                                 disabled: busy,
+                            }
+                        }
+                        if running.is_none() {
+                            super::elsewhere::OwnedReleases {
+                                game_id: game.game.id.clone(),
+                                primary: !list.iter().any(|entry| entry.can_launch),
+                            }
+                            super::elsewhere::OtherDevices {
+                                game_id: game.game.id.clone(),
+                                primary: !list.iter().any(|entry| entry.can_launch),
                             }
                         }
                         if let Some(error) = default_error() {
@@ -538,6 +576,9 @@ fn Release(
                         }
                     }
                 }
+            }
+            if entry.emulated {
+                super::emulation::EmulatedEntry { game_id: game_id.clone(), entry_id: entry.id.clone() }
             }
             if let Some(update) = update {
                 super::entry_update::EntryUpdate { update, is_running: running }

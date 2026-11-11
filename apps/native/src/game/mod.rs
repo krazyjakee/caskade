@@ -5,6 +5,8 @@
 
 mod back;
 pub mod data;
+mod elsewhere;
+mod emulation;
 mod entry_update;
 pub mod launch;
 mod page;
