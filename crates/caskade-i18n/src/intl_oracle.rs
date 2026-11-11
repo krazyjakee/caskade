@@ -222,7 +222,12 @@ fn matches_intl() {
     check!(relative_day("sv", 20, true).unwrap(), "F\u{f6}r 2 veckor sedan");
     check!(relative_day("sv", 59, false).unwrap(), "f\u{f6}r 8 veckor sedan");
     check!(relative_day("sv", 59, true).unwrap(), "F\u{f6}r 8 veckor sedan");
-    assert!(wrong.is_empty(), "{} of 207 differ:
+    check!(language_name("en").unwrap(), "English");
+    check!(language_name("en-GB").unwrap(), "British English");
+    check!(language_name("en-US").unwrap(), "American English");
+    check!(language_name("en-XA").unwrap(), "English (Pseudo-Accents)");
+    check!(language_name("sv").unwrap(), "Svenska");
+    assert!(wrong.is_empty(), "{} of 212 differ:
 {}", wrong.len(), wrong.join("
 "));
 }

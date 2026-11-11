@@ -9,6 +9,10 @@ publish = false
 [dependencies]
 caskade-i18n = { path = "../caskade-i18n" }
 
+[build-dependencies]
+# Counts each language's translated messages (`completeness.rs`).
+caskade-i18n = { path = "../caskade-i18n" }
+
 [lints]
 workspace = true
 

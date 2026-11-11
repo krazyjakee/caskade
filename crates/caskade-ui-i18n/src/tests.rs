@@ -160,3 +160,15 @@ fn every_rsx_text_people_see_goes_through_a_macro() {
         "mark these with t! (or list them in NOT_TRANSLATED if no language translates them): {untranslated:#?}"
     );
 }
+
+/// The Language setting's choices: Swedish's share as the webview's build
+/// counts it, English's none, and languages by their own names.
+#[test]
+fn languages_name_themselves_and_count_their_translations() {
+    let swedish = translated("sv").expect("Swedish has catalogs");
+    assert!(swedish > 0.0 && swedish <= 1.0, "{swedish}");
+    assert_eq!(translated("en"), None);
+    assert_eq!(language_name("sv"), "Svenska");
+    assert_eq!(language_name("en"), "English");
+    assert_eq!(language_name("xx-YY"), "xx-YY");
+}

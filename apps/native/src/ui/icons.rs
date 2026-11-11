@@ -162,14 +162,94 @@ pub const SEARCH_X: Icon = Icon(&[
 pub const LIST_PLUS: Icon = Icon(&["M16 5H3", "M11 12H3", "M16 19H3", "M18 9v6", "M21 12h-6"]);
 /// lucide's `arrow-left`.
 pub const ARROW_LEFT: Icon = Icon(&["m12 19-7-7 7-7", "M19 12H5"]);
+/// lucide's `cloud`.
+pub const CLOUD: Icon = Icon(&["M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"]);
+/// lucide's `download`.
+pub const DOWNLOAD: Icon = Icon(&[
+    "M12 15V3",
+    "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4",
+    "m7 10 5 5 5-5",
+]);
 /// lucide's `folder-open`.
 pub const FOLDER_OPEN: Icon = Icon(&[
     "m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2",
+]);
+/// lucide's `gamepad-2`.
+pub const GAMEPAD_2: Icon = Icon(&[
+    "M6 11L10 11",
+    "M8 9L8 13",
+    "M15 12L15.01 12",
+    "M18 10L18.01 10",
+    "M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z",
+]);
+/// lucide's `globe`.
+pub const GLOBE: Icon = Icon(&[
+    "M12 2a10 10 0 1 0 0 20a10 10 0 1 0 0-20z",
+    "M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20",
+    "M2 12h20",
+]);
+/// lucide's `image-down`.
+pub const IMAGE_DOWN: Icon = Icon(&[
+    "M10.3 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-3.1-3.1a2 2 0 0 0-2.814.014L6 21",
+    "m14 19 3 3v-5.5",
+    "m17 22 3-3",
+    "M9 7a2 2 0 1 0 0 4a2 2 0 1 0 0-4z",
+]);
+/// lucide's `languages`.
+pub const LANGUAGES: Icon = Icon(&[
+    "m5 8 6 6",
+    "m4 14 6-6 2-3",
+    "M2 5h12",
+    "M7 2h1",
+    "m22 22-5-10-5 10",
+    "M14 18h6",
+]);
+/// lucide's `log-out`.
+pub const LOG_OUT: Icon = Icon(&[
+    "m16 17 5-5-5-5",
+    "M21 12H9",
+    "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4",
+]);
+/// lucide's `message-square-warning`.
+pub const MESSAGE_SQUARE_WARNING: Icon = Icon(&[
+    "M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z",
+    "M12 15h.01",
+    "M12 7v4",
+]);
+/// lucide's `monitor-play`.
+pub const MONITOR_PLAY: Icon = Icon(&[
+    "M15.033 9.44a.647.647 0 0 1 0 1.12l-4.065 2.352a.645.645 0 0 1-.968-.56V7.648a.645.645 0 0 1 .967-.56z",
+    "M12 17v4",
+    "M8 21h8",
+    "M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-16a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2z",
+]);
+/// lucide's `monitor-up`.
+pub const MONITOR_UP: Icon = Icon(&[
+    "m9 10 3-3 3 3",
+    "M12 13V7",
+    "M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-16a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2z",
+    "M12 17v4",
+    "M8 21h8",
+]);
+/// lucide's `power`.
+pub const POWER: Icon = Icon(&["M12 2v10", "M18.4 6.6a9 9 0 1 1-12.77.04"]);
+/// lucide's `rotate-cw`.
+pub const ROTATE_CW: Icon = Icon(&[
+    "M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8",
+    "M21 3v5h-5",
+]);
+/// lucide's `sparkles`.
+pub const SPARKLES: Icon = Icon(&[
+    "M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z",
+    "M20 2v4",
+    "M22 4h-4",
+    "M4 18a2 2 0 1 0 0 4a2 2 0 1 0 0-4z",
 ]);
 /// lucide's `wrench`.
 pub const WRENCH: Icon = Icon(&[
     "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z",
 ]);
+
 /// lucide's `rotate-ccw`.
 pub const ROTATE_CCW: Icon = Icon(&[
     "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8",

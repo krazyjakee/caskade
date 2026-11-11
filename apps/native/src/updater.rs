@@ -42,10 +42,11 @@ static UPDATER: LazyLock<AppUpdater<Release>> = LazyLock::new(|| {
 });
 
 /// The update status, for the UI.
-// Settings → General calls this (#104); the startup dialog and the
-// schedule use the rest.
-#[allow(dead_code)]
 pub fn status() -> AppUpdateStatus {
+    #[cfg(test)]
+    if let Some(status) = fake::status() {
+        return status;
+    }
     UPDATER.status()
 }
 
@@ -64,6 +65,10 @@ fn release(release: &Release) -> AppRelease {
 
 /// Asks the release feed for a newer version.
 pub async fn check() -> Result<AppUpdateStatus, String> {
+    #[cfg(test)]
+    if let Some(status) = fake::call("check") {
+        return Ok(status);
+    }
     emit(UPDATER.begin_check()?);
     let bundle = Bundle::of_this_copy()
         .ok_or_else(|| caskade_core::tr!("Development builds don't update themselves."))?;
@@ -77,10 +82,11 @@ pub async fn check() -> Result<AppUpdateStatus, String> {
 }
 
 /// Downloads and installs the release a check found, in the background.
-// Settings → General calls this (#104); the startup dialog and the
-// schedule use the rest.
-#[allow(dead_code)]
 pub fn install() -> Result<AppUpdateStatus, String> {
+    #[cfg(test)]
+    if let Some(status) = fake::call("install") {
+        return Ok(status);
+    }
     let (pending, status) = UPDATER.begin_install()?;
     caskade_app::runtime::spawn(async move {
         let Some(key) = self_update::public_key() else {
@@ -137,6 +143,17 @@ pub fn install() -> Result<AppUpdateStatus, String> {
         }
     });
     Ok(emit(status))
+}
+
+/// Starts the version just installed, as Settings' Restart now: only once
+/// an update is ready.
+pub fn restart() -> Result<(), String> {
+    #[cfg(test)]
+    if fake::call("restart").is_some() {
+        return Ok(());
+    }
+    UPDATER.ensure_ready()?;
+    crate::restart()
 }
 
 /// Checks in the background while automatic checks are on.
@@ -233,4 +250,88 @@ async fn install_now() -> Result<Option<String>, String> {
         })?;
     tracing::info!(version = %found.version, "app update installed from the startup dialog");
     Ok(Some(found.version))
+}
+
+/// A test's stand-in for the release feed, as the webview's tests fake
+/// `AppUpdateApi`: a check finds 0.2.0, an install starts downloading, and
+/// the test moves the status on with [`fake::emit`].
+#[cfg(test)]
+pub(crate) mod fake {
+    use super::*;
+    use caskade_app::commands::app_update::AppUpdatePhase;
+    use std::sync::Mutex;
+
+    struct Fake {
+        status: AppUpdateStatus,
+        calls: Vec<&'static str>,
+    }
+
+    static FAKE: Mutex<Option<Fake>> = Mutex::new(None);
+
+    fn fake() -> std::sync::MutexGuard<'static, Option<Fake>> {
+        FAKE.lock().unwrap_or_else(|e| e.into_inner())
+    }
+
+    /// Fakes the updater from `status` until the guard drops.
+    pub(crate) fn start(status: AppUpdateStatus) -> Faked {
+        *fake() = Some(Fake {
+            status,
+            calls: Vec::new(),
+        });
+        Faked
+    }
+
+    pub(crate) struct Faked;
+
+    impl Drop for Faked {
+        fn drop(&mut self) {
+            *fake() = None;
+        }
+    }
+
+    pub(super) fn status() -> Option<AppUpdateStatus> {
+        fake().as_ref().map(|fake| fake.status.clone())
+    }
+
+    /// What the UI asked for, in order.
+    pub(crate) fn calls() -> Vec<&'static str> {
+        fake()
+            .as_ref()
+            .map(|fake| fake.calls.clone())
+            .unwrap_or_default()
+    }
+
+    pub(super) fn call(what: &'static str) -> Option<AppUpdateStatus> {
+        let next = {
+            let mut fake = fake();
+            let fake = fake.as_mut()?;
+            fake.calls.push(what);
+            match what {
+                "check" => {
+                    fake.status.phase = AppUpdatePhase::Available;
+                    fake.status.release = Some(AppRelease {
+                        version: "0.2.0".into(),
+                        notes: Some("Faster library scans.".into()),
+                        date: None,
+                    });
+                    fake.status.checked_at = Some(1_700_000_000_000);
+                }
+                "install" => fake.status.phase = AppUpdatePhase::Downloading,
+                _ => {}
+            }
+            fake.status.clone()
+        };
+        emit(next.clone());
+        Some(next)
+    }
+
+    /// Moves the status on, as the running updater's events do.
+    pub(crate) fn emit(status: AppUpdateStatus) {
+        if let Some(fake) = fake().as_mut() {
+            fake.status = status.clone();
+        }
+        let _ = crate::frame::tests::source()
+            .events
+            .send(Event::AppUpdateChanged(AppUpdateChanged(status)));
+    }
 }

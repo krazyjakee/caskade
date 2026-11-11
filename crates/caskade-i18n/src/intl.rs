@@ -371,6 +371,20 @@ pub fn relative_day(locale: &str, days: u64, standalone: bool) -> Option<String>
     })
 }
 
+/// A language by its own name, as `Intl.DisplayNames([tag]).of(tag)` names
+/// it with its first letter capitalised (the Language setting's choices):
+/// `Svenska`, `British English`. `None` for a language without data here.
+pub fn language_name(tag: &str) -> Option<&'static str> {
+    Some(match tag.replace('_', "-").to_ascii_lowercase().as_str() {
+        "en" => "English",
+        "en-gb" => "British English",
+        "en-us" => "American English",
+        "en-xa" => "English (Pseudo-Accents)",
+        "sv" | "sv-se" => "Svenska",
+        _ => return None,
+    })
+}
+
 /// The CLDR plural category of `n` in `locale`, for messages' plurals:
 /// English and Swedish (and an unknown language) have `one` for 1 and
 /// `other` for the rest.

@@ -743,6 +743,7 @@ msgstr ""
 
 #. A language in the Language setting, and how much of Caskade is translated to it
 #: apps/desktop/src/locale/LocaleProvider.tsx
+#: apps/native/src/settings/general.rs
 msgid "{name} ({percent}% translated)"
 msgstr ""
 
@@ -753,6 +754,7 @@ msgstr ""
 
 #. A language chosen earlier that this version of Caskade doesn't have
 #: apps/desktop/src/locale/LocaleProvider.tsx
+#: apps/native/src/settings/general.rs
 msgid "{name} (not available, shown in English)"
 msgstr ""
 
@@ -1303,6 +1305,7 @@ msgid "12 hours"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "12-hour"
 msgstr ""
 
@@ -1317,6 +1320,7 @@ msgid "24 hours"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "24-hour"
 msgstr ""
 
@@ -2371,6 +2375,7 @@ msgid "Artwork and game info"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Artwork, thumbnails and game details that Caskade can download again."
 msgstr ""
 
@@ -2397,6 +2402,7 @@ msgid "Ask when launching"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Ask while a game is running."
 msgstr ""
 
@@ -2446,6 +2452,7 @@ msgid "Automatic"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgctxt "start mode"
 msgid "Automatic"
 msgstr ""
@@ -2488,6 +2495,7 @@ msgid "Automatic Library Discovery"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Automatic opens console mode in Steam Deck game mode (gamescope), otherwise the mode you last used."
 msgstr ""
 
@@ -2657,6 +2665,7 @@ msgid "before launch, after exit"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Behaviour"
 msgstr ""
 
@@ -2775,6 +2784,7 @@ msgstr ""
 
 #. Time format: 12 or 24 hours, whichever the app's language uses
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "By language"
 msgstr ""
 
@@ -2786,6 +2796,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
 msgid "Cache folder"
 msgstr ""
@@ -3103,10 +3114,12 @@ msgid "Caskade is built with {crates} Rust crates and {packages} JavaScript pack
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/general.rs
 msgid "Caskade is up to date."
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/general.rs
 msgid "Caskade is up to date. Checked {time}."
 msgstr ""
 
@@ -3185,6 +3198,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
 msgid "Caskade updates"
 msgstr ""
@@ -3192,6 +3206,7 @@ msgstr ""
 #: apps/desktop/src/shell/StatusBar.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 #: apps/native/src/frame/status_bar.rs
+#: apps/native/src/settings/general.rs
 msgid "Caskade v{version}"
 msgstr ""
 
@@ -3285,6 +3300,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Check automatically"
 msgstr ""
 
@@ -3315,6 +3331,7 @@ msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/general.rs
 msgid "Check now"
 msgstr ""
 
@@ -3341,6 +3358,7 @@ msgid "Checking background tasks…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/general.rs
 msgid "Checking for updates…"
 msgstr ""
 
@@ -3390,6 +3408,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Checking…"
 msgstr ""
 
@@ -3566,6 +3585,7 @@ msgid "Choose which save to play with"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Choose your games folder, what to look for and how you play again."
 msgstr ""
 
@@ -3638,6 +3658,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
 msgid "Close button"
 msgstr ""
@@ -3665,6 +3686,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/native/src/frame/sidebar.rs
 #: apps/native/src/frame/views.rs
+#: apps/native/src/settings/general.rs
 msgid "Collections"
 msgstr ""
 
@@ -3765,6 +3787,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
 msgid "Confirm before quitting"
 msgstr ""
@@ -3853,6 +3876,7 @@ msgstr ""
 #: apps/desktop/src/shell/AppShell.tsx
 #: apps/desktop/src/shell/console/ModeToggle.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Console mode"
 msgstr ""
 
@@ -4088,6 +4112,7 @@ msgid "Covers and images you chose or imported."
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Covers, descriptions and genres from IGDB and Hasheous, looked up in the background."
 msgstr ""
 
@@ -4376,6 +4401,7 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgctxt "mode"
 msgid "Desktop"
 msgstr ""
@@ -4645,6 +4671,7 @@ msgid "Download again"
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/general.rs
 msgid "Download and install"
 msgstr ""
 
@@ -4704,11 +4731,13 @@ msgid "Downloading the update… {percent}%"
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/general.rs
 msgid "Downloading version {version}…"
 msgstr ""
 
 #: apps/desktop/src/api/emulatorSetup.ts
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/general.rs
 msgid "Downloading…"
 msgstr ""
 
@@ -5206,6 +5235,7 @@ msgid "Failed with exit code {0}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Fan decompilations, recompilations and source ports on game pages, from Decomp Buddy's install plans, checked daily."
 msgstr ""
 
@@ -5232,6 +5262,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
 msgid "Fetch artwork and game info online"
 msgstr ""
@@ -5311,6 +5342,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
 msgid "First-run setup"
 msgstr ""
@@ -5576,6 +5608,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/general.rs
 msgid "Game storage"
 msgstr ""
 
@@ -5585,12 +5618,13 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/UpdateSettings.tsx
-#: apps/native/src/settings/panels.rs
+#: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
 msgid "Game updates"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Game updates, which has its own reset, settings on other pages and whether first-run setup is done stay as they are."
 msgstr ""
 
@@ -5676,7 +5710,7 @@ msgid "Games from your own RomM server."
 msgstr ""
 
 #: apps/desktop/src/views/settings/UpdateSettings.tsx
-#: apps/native/src/settings/panels.rs
+#: apps/native/src/settings/general.rs
 msgid "Games installed from GitHub are checked for new releases without an account. Updating keeps your saves and settings."
 msgstr ""
 
@@ -5758,6 +5792,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/SettingsView.tsx
+#: apps/native/src/settings/general.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "General"
@@ -5955,10 +5990,12 @@ msgid "Hide list"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Hide to tray"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Hiding keeps the guide button and downloads working."
 msgstr ""
 
@@ -5978,6 +6015,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/native/src/frame/sidebar.rs
 #: apps/native/src/frame/views.rs
+#: apps/native/src/settings/general.rs
 msgctxt "navigation"
 msgid "Home"
 msgstr ""
@@ -6046,6 +6084,7 @@ msgid "How often"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "How text, dates and times are shown."
 msgstr ""
 
@@ -6554,12 +6593,14 @@ msgid "Installing this game means running its installer program on this computer
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/general.rs
 msgid "Installing version {version}…"
 msgstr ""
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/game/PortsPanel.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/general.rs
 msgid "Installing…"
 msgstr ""
 
@@ -6912,11 +6953,13 @@ msgstr ""
 #: apps/desktop/src/onboarding/LanguageStep.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
 msgid "Language"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Language & Region"
 msgstr ""
 
@@ -6938,6 +6981,7 @@ msgid "Last checked {when}. It's checked once a day while online."
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Last opened view"
 msgstr ""
 
@@ -6993,6 +7037,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
 msgid "Launch on system startup"
 msgstr ""
@@ -7094,6 +7139,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/native/src/frame/sidebar.rs
 #: apps/native/src/library/view.rs
+#: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
 msgid "Library"
 msgstr ""
@@ -7390,6 +7436,7 @@ msgid "Location unknown"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Locations"
 msgstr ""
 
@@ -7441,6 +7488,7 @@ msgid "Look everywhere again each time Caskade starts."
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/general.rs
 msgid "Look for a new version when Caskade starts and every six hours."
 msgstr ""
 
@@ -7527,10 +7575,12 @@ msgid "Make your first one"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Manage"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Manage the default location and other game storage roots."
 msgstr ""
 
@@ -7699,6 +7749,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/native/src/frame/topbar.rs
 #: apps/native/src/frame/window.rs
+#: apps/native/src/settings/general.rs
 msgctxt "window"
 msgid "Minimize"
 msgstr ""
@@ -8008,6 +8059,7 @@ msgid "New tool"
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/general.rs
 msgid "New versions of Caskade itself. Updates are signed, and nothing installs until you ask."
 msgstr ""
 
@@ -8427,6 +8479,7 @@ msgid "Not checked yet"
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/general.rs
 msgid "Not checked yet."
 msgstr ""
 
@@ -8833,11 +8886,13 @@ msgid "online"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgctxt "settings section"
 msgid "Online"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Online lookups"
 msgstr ""
 
@@ -8932,10 +8987,12 @@ msgid "Open in library"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Open in the system tray instead of a window."
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Open in the system tray instead of a window. Needs Launch on system startup."
 msgstr ""
 
@@ -8983,6 +9040,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
 msgid "Open to"
 msgstr ""
@@ -9720,6 +9778,7 @@ msgid "Ports"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Ports of games"
 msgstr ""
 
@@ -9906,6 +9965,7 @@ msgid "Quick menu"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgctxt "close button setting"
 msgid "Quit"
 msgstr ""
@@ -10542,6 +10602,7 @@ msgid "Reset discovery settings"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Reset general settings"
 msgstr ""
 
@@ -10565,7 +10626,7 @@ msgid "Reset to defaults…"
 msgstr ""
 
 #: apps/desktop/src/views/settings/UpdateSettings.tsx
-#: apps/native/src/settings/panels.rs
+#: apps/native/src/settings/general.rs
 msgid "Reset update settings"
 msgstr ""
 
@@ -10600,6 +10661,7 @@ msgid "Restart for Caskade v{version}"
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/general.rs
 msgid "Restart now"
 msgstr ""
 
@@ -10865,6 +10927,7 @@ msgid "Run programs and change how games are launched"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Run setup again"
 msgstr ""
 
@@ -11607,6 +11670,7 @@ msgid "Settings sections it can change"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgctxt "settings section"
 msgid "Setup"
 msgstr ""
@@ -11718,6 +11782,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
 msgid "Show ports of games"
 msgstr ""
@@ -12017,6 +12082,7 @@ msgid "Standard"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Start Caskade when you log in."
 msgstr ""
 
@@ -12026,6 +12092,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
 msgid "Start in"
 msgstr ""
@@ -12037,6 +12104,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
 msgid "Start minimized"
 msgstr ""
@@ -12112,6 +12180,7 @@ msgid "starts the same program"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Startup"
 msgstr ""
 
@@ -12158,6 +12227,7 @@ msgid "Stay"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Stay open"
 msgstr ""
 
@@ -12290,6 +12360,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
 msgid "Storage locations"
 msgstr ""
@@ -12517,6 +12588,7 @@ msgstr ""
 
 #. The Language setting's first choice: the OS's language, then the one it means
 #: apps/desktop/src/locale/LocaleProvider.tsx
+#: apps/native/src/settings/general.rs
 msgid "System ({systemName})"
 msgstr ""
 
@@ -12657,6 +12729,7 @@ msgid "The first sync starts now. Your library, play history and collections sho
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "The first view you see."
 msgstr ""
 
@@ -12824,6 +12897,7 @@ msgid "The settings here show what's saved. Retry sends your change again."
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "The setup Caskade starts with."
 msgstr ""
 
@@ -12849,6 +12923,7 @@ msgid "The theme's surfaces are unknown"
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/general.rs
 msgid "The update failed."
 msgstr ""
 
@@ -13143,6 +13218,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
 msgid "Time format"
 msgstr ""
@@ -13266,6 +13342,7 @@ msgstr ""
 #: apps/native/src/frame/error.rs
 #: apps/native/src/frame/notifications.rs
 #: apps/native/src/library/view.rs
+#: apps/native/src/settings/general.rs
 #: apps/native/src/ui/failure.rs
 msgid "Try again"
 msgstr ""
@@ -13563,6 +13640,7 @@ msgid "Update Caskade to the newest version."
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/general.rs
 msgid "Update download"
 msgstr ""
 
@@ -13796,10 +13874,12 @@ msgid "Version"
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/general.rs
 msgid "Version {version} is available."
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/general.rs
 msgid "Version {version} is installed. Restart Caskade to use it."
 msgstr ""
 
@@ -13976,10 +14056,12 @@ msgid "Welcome back"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "What Caskade does with its window."
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "What Caskade looks up on the internet."
 msgstr ""
 
@@ -13997,6 +14079,7 @@ msgid "what happens after a game exits"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "What happens when Caskade opens."
 msgstr ""
 
@@ -14031,6 +14114,7 @@ msgid "What syncs"
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "What the window does while you play."
 msgstr ""
 
@@ -14057,6 +14141,7 @@ msgid "What's new"
 msgstr ""
 
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
+#: apps/native/src/settings/general.rs
 msgid "What's new in {version}"
 msgstr ""
 
@@ -14070,6 +14155,7 @@ msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
 msgid "When a game launches"
 msgstr ""
@@ -14079,6 +14165,7 @@ msgid "When another device asks to play from this one, it shows a code. An admin
 msgstr ""
 
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/settings/general.rs
 msgid "Where Caskade installs games and keeps its data."
 msgstr ""
 

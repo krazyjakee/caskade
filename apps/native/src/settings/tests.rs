@@ -677,3 +677,5 @@ mod guard {
         assert!(window.dialog().is_none());
     }
 }
+
+mod general;

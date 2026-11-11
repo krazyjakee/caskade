@@ -99,6 +99,25 @@ pub fn set_language(language: &str) -> String {
     }
 }
 
+/// How much of each language is translated, from 0 to 1, as of the build
+/// (every domain's messages, as the webview's `translated`).
+const COMPLETENESS: &[(&str, f64)] = include!(concat!(env!("OUT_DIR"), "/completeness.rs"));
+
+/// How much of `tag` is translated, from 0 to 1; `None` for English and a
+/// language without catalogs.
+pub fn translated(tag: &str) -> Option<f64> {
+    COMPLETENESS
+        .iter()
+        .find(|(known, _)| *known == tag)
+        .map(|(_, share)| *share)
+}
+
+/// A language by its own name ("Svenska"), or its tag without data for it,
+/// as the webview's `languageName`.
+pub fn language_name(tag: &str) -> String {
+    intl::language_name(tag).map_or_else(|| tag.to_owned(), str::to_owned)
+}
+
 /// The language in use, as asked for.
 pub fn language() -> String {
     observe();

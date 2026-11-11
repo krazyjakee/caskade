@@ -13,6 +13,7 @@
 //! what they will hold.
 
 mod drafts;
+mod general;
 mod panels;
 mod reset;
 mod schema;
