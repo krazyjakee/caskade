@@ -45,6 +45,18 @@ pub fn panel(tab: &'static str, sub: Option<String>) -> Element {
         "general" => rsx! {
             super::general::GeneralSettings { sub }
         },
+        "streaming" => rsx! {
+            super::streaming::StreamingSettings {}
+        },
+        "scripts" => rsx! {
+            super::scripts::ScriptsSettings {}
+        },
+        "about" => rsx! {
+            super::about::AboutSettings { section: sub }
+        },
+        "statistics" => rsx! {
+            super::statistics::StatisticsSettings {}
+        },
         _ => rsx! {
             Pending {}
         },

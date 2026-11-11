@@ -76,6 +76,8 @@ caskade-ui-theme = { path = "../../crates/caskade-ui-theme" }
 # The game and video windows (`--web-game`, `--video`), shared with the
 # Tauri app.
 caskade-player = { path = "../../crates/caskade-player" }
+# Settings → Statistics' sampler (#105).
+caskade-system-stats = { path = "../../crates/caskade-system-stats" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["rt", "sync", "time"] }

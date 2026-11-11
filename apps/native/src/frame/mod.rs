@@ -25,6 +25,7 @@ use crate::ui::ToastRegion;
 pub use anatomy::ANATOMY;
 use dioxus_native::prelude::dioxus_html::input_data::MouseButton;
 use dioxus_native::prelude::*;
+pub(crate) use sidebar::Brand;
 pub(crate) use type_search::PageSearch;
 
 /// The frame, holding navigation.

@@ -9,12 +9,14 @@
 pub mod add_game;
 mod anatomy;
 pub mod devices;
+pub mod fields;
 pub mod folder_browser;
 pub mod manual_game;
 pub mod pairing;
 pub mod paths;
 pub mod receive_share;
 pub mod remote_play;
+pub mod scripts;
 pub mod share_game;
 pub mod shares_common;
 pub mod shares_list;
@@ -37,6 +39,10 @@ pub const ANATOMY: &[Entry] = &[
     anatomy::SHARE,
     anatomy::RECEIVED_SHARE,
     anatomy::TOOL_FAILED,
+    anatomy::SCRIPTS,
+    anatomy::ABOUT,
+    anatomy::LEGAL,
+    anatomy::SYSTEM_STATS,
 ];
 
 /// The flows that come over any view: pairing (#226), games other devices

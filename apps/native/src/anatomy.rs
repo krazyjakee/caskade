@@ -124,6 +124,30 @@ mod tests {
             "#108: the webview's StopHostDialog isn't catalogued either",
         ),
         (
+            "streaming-settings",
+            "#105: the webview's StreamingSettings isn't catalogued either",
+        ),
+        (
+            "streaming-existing",
+            "#105: the webview's streaming ExistingDialog isn't catalogued either",
+        ),
+        (
+            "streaming-client",
+            "#105: the webview's streaming PairedDevices row isn't catalogued either",
+        ),
+        (
+            "streaming-program",
+            "#105: the webview's streaming UpdatesSection row isn't catalogued either",
+        ),
+        (
+            "stream-host",
+            "#105: the webview's streaming HostRow isn't catalogued either",
+        ),
+        (
+            "pair-dialog",
+            "#105: the webview's streaming PairDialog isn't catalogued either",
+        ),
+        (
             "schema-settings",
             "#103: the webview's SchemaSettings isn't catalogued either",
         ),

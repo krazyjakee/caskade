@@ -252,11 +252,13 @@ msgstr "{0} · {1}"
 
 #. placeholder {0}: reachLabel(host.reach)
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "{0} · Not paired"
 msgstr "{0} · Inte parkopplad"
 
 #. placeholder {0}: reachLabel(host.reach)
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "{0} · Paired · {games} games"
 msgstr "{0} · Parkopplad · {games} spel"
 
@@ -266,6 +268,7 @@ msgstr "{0} · Parkopplad · {games} spel"
 #. placeholder {0}: script.name
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "{0} (copy)"
 msgstr "{0} (kopia)"
 
@@ -306,6 +309,7 @@ msgstr "{0} kB"
 
 #. placeholder {0}: run.durationMs
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "{0} ms"
 msgstr "{0} ms"
 
@@ -340,6 +344,7 @@ msgstr "{0} visar beskrivningen när den är upplåst."
 
 #. placeholder {0}: scopeLabel(step.script.scope)
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "{0}, inherited"
 msgstr "{0}, ärvt"
 
@@ -426,6 +431,7 @@ msgstr[1] "# spel valda"
 
 #. js-lingui:icu=%7Bcount%2C+plural%2C+one+%7B%23+package%7D+other+%7B%23+packages%7D%7D&pluralize_on=count
 #: apps/desktop/src/views/settings/about/LegalView.tsx
+#: apps/native/src/settings/about.rs
 msgid "# package"
 msgid_plural "# packages"
 msgstr[0] "# paket"
@@ -472,10 +478,12 @@ msgid "{description} · {queued} queued"
 msgstr "{description} · {queued} i kö"
 
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "{device} declined."
 msgstr "{device} avböjde."
 
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "{device} is one of your devices, so it's pairing without a code. This takes a moment."
 msgstr "{device} är en av dina enheter, så den parkopplas utan kod. Det tar en liten stund."
 
@@ -593,6 +601,7 @@ msgid "{found}/{total} found · {unknown} not checked"
 msgstr "{found}/{total} hittade · {unknown} inte kontrollerade"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "{fps} frames a second"
 msgstr "{fps} bilder per sekund"
 
@@ -603,6 +612,7 @@ msgstr "{free} ledigt"
 
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "{free} free of {total}"
 msgstr "{free} ledigt av {total}"
 
@@ -681,6 +691,7 @@ msgstr[1] "# spel stannar, eftersom de är installerade, tillagda på annat sät
 
 #. placeholder {0}: index + 1
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/flows/fields.rs
 msgid "{label} {0}"
 msgstr "{label} {0}"
 
@@ -692,6 +703,7 @@ msgstr "{label}, {detail}"
 
 #. A graph: what it shows, the time it covers and its summary
 #: apps/desktop/src/views/settings/statistics/Graph.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "{label}, last {span}. {summary}."
 msgstr "{label}, senaste {span}. {summary}."
 
@@ -747,11 +759,13 @@ msgstr[1] "# spel matchar nu"
 
 #. Network speed of a game stream
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "{mbps} Mbit/s"
 msgstr "{mbps} Mbit/s"
 
 #. A span of time in minutes, abbreviated
 #: apps/desktop/src/views/settings/statistics/format.ts
+#: apps/native/src/settings/statistics.rs
 msgid "{minutes} min"
 msgstr "{minutes} min"
 
@@ -766,6 +780,7 @@ msgid "{name} ({device})"
 msgstr "{name} ({device})"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "{name} ({mount}) space used"
 msgstr "{name} ({mount}) använt utrymme"
 
@@ -818,6 +833,7 @@ msgid "{name} shows a code too. Pair only if it is the same as this one."
 msgstr "{name} visar också en kod. Parkoppla bara om den är samma som den här."
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "{name} usage"
 msgstr "Användning av {name}"
 
@@ -835,15 +851,18 @@ msgid "{name}, PIN locked"
 msgstr "{name}, låst med PIN"
 
 #: apps/desktop/src/views/settings/statistics/Graph.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "{name}: no readings"
 msgstr "{name}: inga mätvärden"
 
 #: apps/desktop/src/views/settings/statistics/Graph.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "{name}: now {now}, peak {peak}, low {low}"
 msgstr "{name}: nu {now}, topp {peak}, lägst {low}"
 
 #. A graph's summary; {missed} is how many samples couldn't be read
 #: apps/desktop/src/views/settings/statistics/Graph.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "{name}: now {now}, peak {peak}, low {low}, {missed} missed"
 msgstr "{name}: nu {now}, topp {peak}, lägst {low}, {missed} missade"
 
@@ -896,16 +915,19 @@ msgstr "{owned, plural, one {# spel ägt} other {# spel ägda}}, {installed} ins
 
 #. A drive's use
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "{percent} full"
 msgstr "{percent} fullt"
 
 #. A drive at or above 90 % full
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "{percent} full · almost out of space"
 msgstr "{percent} fullt · nästan slut på utrymme"
 
 #. A gauge's reading at or above 90 %
 #: apps/desktop/src/views/settings/statistics/Gauge.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "{percent}, high"
 msgstr "{percent}, högt"
 
@@ -995,6 +1017,7 @@ msgstr[1] "# spel som bara det här kontot tog med lämnar ditt bibliotek."
 
 #. A credit: 'Game metadata by IGDB (igdb.com)'
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
+#: apps/native/src/settings/about.rs
 msgid "{role} by {name} ({host})"
 msgstr "{role} från {name} ({host})"
 
@@ -1019,6 +1042,7 @@ msgstr "{scanners}: {games}"
 
 #. A span of time in seconds, abbreviated
 #: apps/desktop/src/views/settings/statistics/format.ts
+#: apps/native/src/settings/statistics.rs
 msgid "{seconds} s"
 msgstr "{seconds} s"
 
@@ -1056,6 +1080,7 @@ msgstr "{size} {unit}"
 
 #. Installed memory
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "{size} RAM"
 msgstr "{size} RAM"
 
@@ -1066,6 +1091,7 @@ msgstr "{size} att flytta, som ett jobb du kan följa eller avbryta under Aktivi
 
 #. A rate: bytes per second
 #: apps/desktop/src/views/settings/statistics/format.ts
+#: apps/native/src/settings/statistics.rs
 msgid "{size}/s"
 msgstr "{size}/s"
 
@@ -1076,15 +1102,18 @@ msgid "{source}: {games}"
 msgstr "{source}: {games}"
 
 #: apps/desktop/src/views/settings/about/LegalView.tsx
+#: apps/native/src/settings/about.rs
 msgid "{term} is one of the choices these packages offer; Caskade uses another, so its text isn't bundled."
 msgstr "{term} är ett av alternativen som de här paketen erbjuder; Caskade använder ett annat, så dess text medföljer inte."
 
 #: apps/desktop/src/views/settings/about/LegalView.tsx
+#: apps/native/src/settings/about.rs
 msgid "{term}: its text isn't bundled; see the packages' repositories."
 msgstr "{term}: texten medföljer inte; se paketens kodförråd."
 
 #. js-lingui:icu=%7Bthreads%2C+plural%2C+one+%7B%23+thread%7D+other+%7B%23+threads%7D%7D&pluralize_on=threads
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "# thread"
 msgid_plural "# threads"
 msgstr[0] "# tråd"
@@ -1252,14 +1281,17 @@ msgstr[1] "# uppdateringar"
 
 #. Video memory used of the GPU's total
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "{used} of {total}"
 msgstr "{used} av {total}"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "{used} used"
 msgstr "{used} använt"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "{used} used of {total}, {free} free"
 msgstr "{used} använt av {total}, {free} ledigt"
 
@@ -1414,6 +1446,7 @@ msgid "6th gen console"
 msgstr "Konsol, 6:e generationen"
 
 #: apps/desktop/src/views/settings/about/LegalView.tsx
+#: apps/native/src/settings/about.rs
 msgid "7-Zip {version} licence ({platforms})"
 msgstr "Licens för 7-Zip {version} ({platforms})"
 
@@ -1517,6 +1550,7 @@ msgid "A game launcher's link, like steam://rungameid/620."
 msgstr "En spelstartares länk, som steam://rungameid/620."
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
+#: apps/native/src/settings/about.rs
 msgid "A game library and launcher for Windows, Linux and macOS, with a desktop mode and a fullscreen console mode for gamepads."
 msgstr "Ett spelbibliotek och startprogram för Windows, Linux och macOS, med ett skrivbordsläge och ett konsolläge i helskärm för handkontroller."
 
@@ -1540,6 +1574,7 @@ msgid "A newer save from {device} hasn't arrived yet, so the game started with t
 msgstr "En nyare sparfil från {device} har inte kommit fram än, så spelet startade med sparfilen på den här enheten."
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "A newer version, {latest}, is ready."
 msgstr "En nyare version, {latest}, är klar."
 
@@ -1665,6 +1700,7 @@ msgid "a way to run games"
 msgstr "ett sätt att köra spel"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "a while ago"
 msgstr "för ett tag sedan"
 
@@ -1687,7 +1723,8 @@ msgstr "abc"
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 #: apps/desktop/src/views/settings/about/AboutSettings.tsx
-#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/mod.rs
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/about.rs
+#: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "About"
 msgstr "Om"
@@ -1836,12 +1873,13 @@ msgstr "Aktivitet"
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 #: apps/native/src/library/bulk_edit.rs apps/native/src/library/web.rs
+#: apps/native/src/settings/streaming.rs
 msgid "Add"
 msgstr "Lägg till"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/search.rs apps/native/src/settings/streaming.rs
 msgid "Add a device by its address"
 msgstr "Lägg till en enhet via dess adress"
 
@@ -1904,6 +1942,7 @@ msgstr "Lägg till ytterligare en lämplig lagringsplats i Inställningar → La
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Add argument"
 msgstr "Lägg till argument"
 
@@ -1984,6 +2023,7 @@ msgid "Add scanner"
 msgstr "Lägg till skanner"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Add script"
 msgstr "Lägg till skript"
 
@@ -2133,11 +2173,13 @@ msgid "After playing"
 msgstr "Efter spelande"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgctxt "script phase"
 msgid "After the game exits"
 msgstr "Efter att spelet avslutats"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgctxt "script phase"
 msgid "After the game starts"
 msgstr "Efter att spelet startat"
@@ -2459,6 +2501,7 @@ msgstr "är"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgctxt "a program's command-line argument"
 msgid "Argument"
 msgstr "Argument"
@@ -2519,6 +2562,7 @@ msgid "Ask while a game is running."
 msgstr "Fråga medan ett spel körs."
 
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Asking {device}…"
 msgstr "Frågar {device}…"
 
@@ -2535,7 +2579,7 @@ msgstr "Ber om"
 msgid "Asks for an emulator when launching"
 msgstr "Frågar efter en emulator vid start"
 
-#: apps/desktop/src/api/streaming.ts
+#: apps/desktop/src/api/streaming.ts apps/native/src/settings/streaming.rs
 msgctxt "streaming device"
 msgid "Asleep: it wakes when you stream"
 msgstr "Sover: den vaknar när du streamar"
@@ -2573,6 +2617,7 @@ msgid "Automatic"
 msgstr "Automatiskt"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgctxt "stream quality"
 msgid "Automatic"
 msgstr "Automatiskt"
@@ -2634,6 +2679,7 @@ msgid "Available"
 msgstr "Tillgänglig"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgctxt "memory"
 msgid "Available"
 msgstr "Tillgängligt"
@@ -2681,6 +2727,7 @@ msgid "Back to {name}"
 msgstr "Tillbaka till {name}"
 
 #: apps/desktop/src/views/settings/about/LegalView.tsx
+#: apps/native/src/settings/about.rs
 msgid "Back to About"
 msgstr "Tillbaka till Om"
 
@@ -2770,6 +2817,7 @@ msgid "Before launch"
 msgstr "Före start"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgctxt "script phase"
 msgid "Before launch"
 msgstr "Före start"
@@ -2814,7 +2862,7 @@ msgstr "BIOS, firmware, standardemulator, konsoler"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/search.rs apps/native/src/settings/streaming.rs
 msgid "Bitrate"
 msgstr "Bithastighet"
 
@@ -2867,8 +2915,8 @@ msgstr "Bläddra i biblioteket →"
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
-#: apps/native/src/flows/manual_game.rs apps/native/src/settings/discovery.rs
-#: apps/native/src/settings/storage.rs
+#: apps/native/src/flows/fields.rs apps/native/src/flows/manual_game.rs
+#: apps/native/src/settings/discovery.rs apps/native/src/settings/storage.rs
 msgid "Browse…"
 msgstr "Bläddra…"
 
@@ -2883,6 +2931,7 @@ msgid "Build"
 msgstr "Bygge"
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
+#: apps/native/src/settings/about.rs
 msgctxt "app build"
 msgid "Build"
 msgstr "Bygge"
@@ -2953,7 +3002,7 @@ msgstr "Kan inte säkerhetskopiera: mappen för säkerhetskopior har inte tillr�
 msgid "Can't back up: the backup folder isn't there."
 msgstr "Kan inte säkerhetskopiera: mappen för säkerhetskopior finns inte."
 
-#: apps/desktop/src/api/streaming.ts
+#: apps/desktop/src/api/streaming.ts apps/native/src/settings/streaming.rs
 msgctxt "streaming device"
 msgid "Can't be reached"
 msgstr "Kan inte nås"
@@ -3023,7 +3072,7 @@ msgstr "Avbryt inloggningen"
 #: apps/native/src/library/selection_bar.rs apps/native/src/library/web.rs
 #: apps/native/src/settings/plugins.rs apps/native/src/settings/reset.rs
 #: apps/native/src/settings/storage.rs apps/native/src/settings/stores.rs
-#: apps/native/src/ui/dialog.rs
+#: apps/native/src/settings/streaming.rs apps/native/src/ui/dialog.rs
 msgid "Cancel"
 msgstr "Avbryt"
 
@@ -3065,6 +3114,7 @@ msgid "Cancel sign-in"
 msgstr "Avbryt inloggningen"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgctxt "stops a running script test"
 msgid "Cancel test"
 msgstr "Avbryt test"
@@ -3094,6 +3144,7 @@ msgid "Cancelled"
 msgstr "Avbrutet"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgctxt "script test result"
 msgid "Cancelled"
 msgstr "Avbrutet"
@@ -3110,6 +3161,7 @@ msgstr "Kan inte köra program här"
 
 #. The storage card shows capacity, not speed
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Capacity"
 msgstr "Kapacitet"
 
@@ -3243,6 +3295,7 @@ msgid "Caskade installs what this shortcut opens, with the shortcut's options."
 msgstr "Caskade installerar det som den här genvägen öppnar, med genvägens alternativ."
 
 #: apps/desktop/src/views/settings/about/LegalView.tsx
+#: apps/native/src/settings/about.rs
 msgid "Caskade is built with {crates} Rust crates and {packages} JavaScript packages, grouped here by licence. Open a licence for its packages, their copyright holders and the licence's text. Where a licence reads \"A OR B\", the package may be used under either."
 msgstr "Caskade är byggt med {crates} Rust-crates och {packages} JavaScript-paket, grupperade här efter licens. Öppna en licens för att se dess paket, deras upphovsrättsinnehavare och licensens text. Där en licens lyder \"A OR B\" får paketet användas under vilken som helst av dem."
 
@@ -3266,6 +3319,7 @@ msgid "Caskade keeps a copy of the game. You'll play it for a minute so it can s
 msgstr "Caskade sparar en kopia av spelet. Du spelar det i en minut så att Caskade kan se vad spelet behöver."
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Caskade keeps streaming up to date when you say so, never in the middle of a game."
 msgstr "Caskade håller streaming uppdaterad när du säger till, aldrig mitt i ett spel."
 
@@ -3339,7 +3393,8 @@ msgstr "Caskade startar det där det ligger: inget kopieras, flyttas eller insta
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/general.rs apps/native/src/settings/search.rs
+#: apps/native/src/settings/about.rs apps/native/src/settings/general.rs
+#: apps/native/src/settings/search.rs
 msgid "Caskade updates"
 msgstr "Caskade-uppdateringar"
 
@@ -3553,7 +3608,7 @@ msgstr "Kontrollerar vad som skulle ändras…"
 #: apps/desktop/src/views/settings/AppUpdateSection.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/settings/general.rs
+#: apps/native/src/settings/general.rs apps/native/src/settings/streaming.rs
 msgid "Checking…"
 msgstr "Kontrollerar…"
 
@@ -3706,6 +3761,7 @@ msgstr "Välj den installerade mappen"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Choose the program"
 msgstr "Välj programmet"
 
@@ -3715,6 +3771,7 @@ msgstr "Välj versionsfilen som ska laddas ner och installeras."
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Choose the working folder"
 msgstr "Välj arbetsmappen"
 
@@ -3792,7 +3849,7 @@ msgstr "klocka, 24-timmars, 12-timmars"
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/native/src/flows/pairing.rs apps/native/src/game/launch.rs
 #: apps/native/src/library/selection_bar.rs apps/native/src/settings/plugins.rs
-#: apps/native/src/settings/reset.rs
+#: apps/native/src/settings/reset.rs apps/native/src/settings/streaming.rs
 msgid "Close"
 msgstr "Stäng"
 
@@ -3879,6 +3936,7 @@ msgid "Command line"
 msgstr "Kommandorad"
 
 #: apps/desktop/src/views/settings/ScriptsSettings.tsx
+#: apps/native/src/settings/scripts.rs
 msgid "Commands that run around every game's launch. Emulator profiles and games can add their own; see the order at launch below."
 msgstr "Kommandon som körs kring varje spels start. Emulatorprofiler och spel kan lägga till egna; se ordningen vid start nedan."
 
@@ -4256,6 +4314,7 @@ msgstr "Kunde inte läsa in dina webbspel"
 
 #. A network interface counted in the totals
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Counted"
 msgstr "Räknas"
 
@@ -4287,12 +4346,13 @@ msgstr "Omslag, beskrivningar och genrer, hämtade online."
 
 #. The processor's statistics card
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "CPU"
 msgstr "CPU"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/search.rs apps/native/src/settings/statistics.rs
 msgid "CPU usage"
 msgstr "CPU-användning"
 
@@ -4310,7 +4370,7 @@ msgstr "Inloggningsuppgifterna sparas i systemets nyckelring."
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/about.rs apps/native/src/settings/search.rs
 msgid "Credits"
 msgstr "Medverkande"
 
@@ -4408,6 +4468,7 @@ msgid "Dated"
 msgstr "Med datum"
 
 #: apps/desktop/src/views/settings/about/AboutSettings.tsx
+#: apps/native/src/settings/about.rs
 msgid "Debug build"
 msgstr "Felsökningsbygge"
 
@@ -4511,6 +4572,7 @@ msgstr "Radera"
 #. placeholder {0}: saved.name
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Delete “{0}”?"
 msgstr "Radera ”{0}”?"
 
@@ -4527,6 +4589,7 @@ msgstr "Radera {name}?"
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Delete…"
 msgstr "Radera…"
 
@@ -4696,6 +4759,7 @@ msgid "Devices out of reach"
 msgstr "Enheter utom räckhåll"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Devices that can play from this one"
 msgstr "Enheter som kan spela från den här"
 
@@ -4705,6 +4769,7 @@ msgid "Devices: open Settings → Devices"
 msgstr "Enheter: öppna Inställningar → Enheter"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Didn't start"
 msgstr "Startade inte"
 
@@ -4816,6 +4881,7 @@ msgstr "Försök inte igen automatiskt"
 #: apps/native/src/game_menu/collections.rs
 #: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/selection_bar.rs
+#: apps/native/src/settings/streaming.rs
 msgid "Done"
 msgstr "Klar"
 
@@ -4969,10 +5035,12 @@ msgstr "Dags nu: den startar inom några minuter."
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Duplicate"
 msgstr "Duplicera"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Each argument goes to the program as it is, with no shell: {PLACEHOLDERS} and the other values below are put in as text."
 msgstr "Varje argument går till programmet som det är, utan skal: {PLACEHOLDERS} och de andra värdena nedan sätts in som text."
 
@@ -5059,6 +5127,7 @@ msgstr "Tomt använder romm-cache på din standardlagringsplats. Nu: {folder}"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Empty: the game's install folder."
 msgstr "Tomt: spelets installationsmapp."
 
@@ -5148,6 +5217,7 @@ msgid "Emulator profile"
 msgstr "Emulatorprofil"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgctxt "script scope"
 msgid "Emulator profile"
 msgstr "Emulatorprofil"
@@ -5285,6 +5355,7 @@ msgid "equivalent result"
 msgstr "likvärdigt resultat"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Errors"
 msgstr "Fel"
 
@@ -5329,6 +5400,7 @@ msgid "Every backup is read back and checked before it's reported done, and a re
 msgstr "Varje säkerhetskopia läses tillbaka och kontrolleras innan den rapporteras som klar, och en återställning behåller biblioteket den ersätter tills det återställda öppnas."
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Every device then needs a new code to play from this one."
 msgstr "Alla enheter behöver då en ny kod för att spela från den här."
 
@@ -5426,6 +5498,7 @@ msgstr "Misslyckat jobb"
 
 #. placeholder {0}: run.exitCode
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgctxt "script test result"
 msgid "Failed with exit code {0}"
 msgstr "Misslyckades med slutkod {0}"
@@ -5520,6 +5593,7 @@ msgid "Finds the games your launchers and your system already know about. It rea
 msgstr "Hittar spelen som dina startprogram och ditt system redan känner till. Det läser deras register och startar aldrig ett startprogram."
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgctxt "script test result"
 msgid "Finished"
 msgstr "Klart"
@@ -5599,6 +5673,7 @@ msgid "For a day"
 msgstr "I ett dygn"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "For a device on another network, or one that isn't found by itself."
 msgstr "För en enhet i ett annat nätverk, eller en som inte hittas av sig själv."
 
@@ -5631,18 +5706,22 @@ msgstr "Glöm"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Forget {name}"
 msgstr "Glöm {name}"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Forget all paired devices…"
 msgstr "Glöm alla parkopplade enheter…"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Forget them all"
 msgstr "Glöm alla"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Forget…"
 msgstr "Glöm…"
 
@@ -5660,7 +5739,7 @@ msgstr "fps"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/search.rs apps/native/src/settings/streaming.rs
 msgid "Frame rate"
 msgstr "Bildfrekvens"
 
@@ -5776,6 +5855,7 @@ msgid "Game details you changed, favourites, hidden games, collections, matches 
 msgstr "Speldetaljer du har ändrat, favoriter, dolda spel, samlingar, matchningar du har angett och spel du har hållit isär."
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
+#: apps/native/src/settings/about.rs
 msgid "Game details, artwork and matches come from the Internet Game Database."
 msgstr "Speldetaljer, bilder och matchningar kommer från Internet Game Database."
 
@@ -5786,11 +5866,13 @@ msgid "Game Explorer"
 msgstr "Game Explorer"
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
+#: apps/native/src/settings/about.rs
 msgctxt "credit"
 msgid "Game identification"
 msgstr "Spelidentifiering"
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
+#: apps/native/src/settings/about.rs
 msgctxt "credit"
 msgid "Game metadata"
 msgstr "Spelmetadata"
@@ -5826,6 +5908,7 @@ msgid "Game storage"
 msgstr "Spellagring"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Game streaming was set up on this device before. Caskade can use it, adding only its own games. Enter the user name and password it was set up with."
 msgstr "Spelstreaming har konfigurerats på den här enheten tidigare. Caskade kan använda den och lägger bara till sina egna spel. Ange användarnamnet och lösenordet den konfigurerades med."
 
@@ -6080,6 +6163,7 @@ msgid "GiB"
 msgstr "GiB"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgctxt "script scope"
 msgid "Global"
 msgstr "Globalt"
@@ -6092,7 +6176,7 @@ msgstr "Globala undantag"
 
 #: apps/desktop/src/views/settings/ScriptsSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/scripts.rs apps/native/src/settings/search.rs
 msgid "Global scripts"
 msgstr "Globala skript"
 
@@ -6109,6 +6193,7 @@ msgstr "Hämtade {files}."
 #. A graphics card from an unknown vendor
 #. The graphics card statistics card
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "GPU"
 msgstr "GPU"
 
@@ -6168,6 +6253,7 @@ msgid "has the same title"
 msgstr "har samma titel"
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
+#: apps/native/src/settings/about.rs
 msgid "Hashes and titles that identify games and ROMs come from Hasheous."
 msgstr "Hashvärden och titlar som identifierar spel och ROM-filer kommer från Hasheous."
 
@@ -6232,11 +6318,13 @@ msgid "Hiding keeps the guide button and downloads working."
 msgstr "När fönstret är dolt fortsätter guideknappen och nedladdningar att fungera."
 
 #: apps/desktop/src/views/settings/statistics/Gauge.tsx
+#: apps/native/src/settings/statistics.rs
 msgctxt "gauge"
 msgid "High"
 msgstr "Hög"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Higher looks sharper and needs a faster network."
 msgstr "Högre ser skarpare ut och kräver ett snabbare nätverk."
 
@@ -6309,6 +6397,7 @@ msgid "how games install"
 msgstr "hur spel installeras"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "How games streamed to this device look. Automatic suits this screen and the network."
 msgstr "Hur spel som streamas till den här enheten ser ut. Automatiskt passar den här skärmen och nätverket."
 
@@ -6365,6 +6454,7 @@ msgid "If Caskade can't open its library, its error message offers Restore from 
 msgstr "Om Caskade inte kan öppna sitt bibliotek erbjuder felmeddelandet Återställ från säkerhetskopia…. Du kan också starta Caskade med --restore och en säkerhetskopia."
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "If it fails or runs out of time, the game doesn't start and the after-exit scripts clean up."
 msgstr "Om det misslyckas eller får slut på tid startar inte spelet, och skripten efter avslut städar upp."
 
@@ -7008,6 +7098,7 @@ msgid "It needs"
 msgstr "Den behöver"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "It needs a new code to play from this device again."
 msgstr "Den behöver en ny kod för att spela från den här enheten igen."
 
@@ -7086,6 +7177,7 @@ msgid "Japan"
 msgstr "Japan"
 
 #: apps/desktop/src/views/settings/about/LegalView.tsx
+#: apps/native/src/settings/about.rs
 msgid "JavaScript package"
 msgstr "JavaScript-paket"
 
@@ -7115,7 +7207,7 @@ msgstr "Hoppa till bokstav"
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/PluginsSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/settings/plugins.rs
+#: apps/native/src/settings/plugins.rs apps/native/src/settings/streaming.rs
 msgid "Keep"
 msgstr "Behåll"
 
@@ -7165,6 +7257,7 @@ msgid "Keep separate"
 msgstr "Håll isär"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Keep them"
 msgstr "Behåll dem"
 
@@ -7357,6 +7450,7 @@ msgid "Leave blank to match automatically. A name from the Ludusavi manifest set
 msgstr "Lämna tomt för automatisk matchning. Ett namn från Ludusavi-manifestet anger matchningen för hand."
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Leave it off"
 msgstr "Låt den vara av"
 
@@ -7366,10 +7460,12 @@ msgstr "Uteslut från biblioteksuppdateringar"
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
 #: apps/desktop/src/views/settings/about/LegalView.tsx
+#: apps/native/src/settings/about.rs
 msgid "Legal"
 msgstr "Juridiskt"
 
 #: apps/desktop/src/views/settings/about/LegalView.tsx
+#: apps/native/src/settings/about.rs
 msgid "Legal sections"
 msgstr "Juridiska avsnitt"
 
@@ -7379,13 +7475,13 @@ msgstr "Låt pakethanteraren installera det"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/search.rs apps/native/src/settings/streaming.rs
 msgid "Let other devices play"
 msgstr "Låt andra enheter spela"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/search.rs apps/native/src/settings/streaming.rs
 msgid "Let other devices stream games from this one"
 msgstr "Låt andra enheter streama spel från den här"
 
@@ -7454,6 +7550,7 @@ msgid "licences"
 msgstr "licenser"
 
 #: apps/desktop/src/views/settings/about/LegalView.tsx
+#: apps/native/src/settings/about.rs
 msgid "Licences"
 msgstr "Licenser"
 
@@ -7461,11 +7558,12 @@ msgstr "Licenser"
 #: apps/desktop/src/views/settings/about/legal.ts
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/about.rs apps/native/src/settings/search.rs
 msgid "Licenses"
 msgstr "Licenser"
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
+#: apps/native/src/settings/about.rs
 msgid "Licenses, terms and privacy. They read offline."
 msgstr "Licenser, villkor och integritet. De går att läsa offline."
 
@@ -7520,10 +7618,12 @@ msgid "Live"
 msgstr "Live"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Live: updates every {interval}, graphs show the last {span}."
 msgstr "Live: uppdateras var {interval}, graferna visar de senaste {span}."
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Live: updates every second, graphs show the last {span}."
 msgstr "Live: uppdateras varje sekund, graferna visar de senaste {span}."
 
@@ -7633,6 +7733,7 @@ msgid "Loading RomM servers…"
 msgstr "Läser in RomM-servrar…"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Loading scripts…"
 msgstr "Läser in skript…"
 
@@ -7754,7 +7855,7 @@ msgstr "Utseende"
 
 #: apps/desktop/src/views/settings/LaunchersSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/settings/launchers.rs
+#: apps/native/src/settings/launchers.rs apps/native/src/settings/streaming.rs
 msgid "Look again"
 msgstr "Sök igen"
 
@@ -7814,6 +7915,7 @@ msgid "Looking…"
 msgstr "Letar…"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Loopback, not counted"
 msgstr "Loopback, räknas inte"
 
@@ -7990,21 +8092,24 @@ msgid "Maybe already in your library"
 msgstr "Kanske redan i ditt bibliotek"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Measuring…"
 msgstr "Mäter…"
 
 #. The RAM statistics card
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Memory"
 msgstr "Minne"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Memory usage couldn't be read on this system."
 msgstr "Minnesanvändningen kunde inte läsas på det här systemet."
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/search.rs apps/native/src/settings/statistics.rs
 msgid "Memory used"
 msgstr "Använt minne"
 
@@ -8124,6 +8229,7 @@ msgstr "Flytten är klar. Biblioteksidentitet och speltid har bevarats."
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Move down"
 msgstr "Flytta ned"
 
@@ -8156,6 +8262,7 @@ msgstr "Flytt av plats"
 
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Move up"
 msgstr "Flytta upp"
 
@@ -8185,6 +8292,7 @@ msgstr "Min profil"
 
 #. A gauge without a reading
 #: apps/desktop/src/views/settings/statistics/Gauge.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "n/a"
 msgstr "–"
 
@@ -8216,6 +8324,7 @@ msgid "Name"
 msgstr "Namn"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgctxt "script"
 msgid "Name"
 msgstr "Namn"
@@ -8235,6 +8344,7 @@ msgid "Nearby devices"
 msgstr "Enheter i närheten"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Needs attention."
 msgstr "Kräver uppmärksamhet."
 
@@ -8261,12 +8371,13 @@ msgstr "nätverk"
 
 #. The network statistics card
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Network"
 msgstr "Nätverk"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/search.rs apps/native/src/settings/statistics.rs
 msgid "Network traffic"
 msgstr "Nätverkstrafik"
 
@@ -8333,6 +8444,7 @@ msgid "New scanner"
 msgstr "Ny skanner"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "New script"
 msgstr "Nytt skript"
 
@@ -8447,6 +8559,7 @@ msgid "No devices found on this network yet. Caskade keeps looking, and one that
 msgstr "Inga enheter hittades i det här nätverket än. Caskade fortsätter leta, och en enhet som dyker upp visas här. Annars kan du parkoppla med en länk nedan."
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "No devices found on this network yet. On another device running Caskade, turn on Let other devices stream games from this one, or add it by its address below."
 msgstr "Inga enheter hittades i det här nätverket än. Slå på Låt andra enheter streama spel från den här på en annan enhet som kör Caskade, eller lägg till den via dess adress nedan."
 
@@ -8455,6 +8568,7 @@ msgid "No devices paired yet."
 msgstr "Inga enheter parkopplade än."
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "No drives found."
 msgstr "Inga enheter hittades."
 
@@ -8502,6 +8616,7 @@ msgid "No games match your search."
 msgstr "Inga spel matchar din sökning."
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "No GPU found."
 msgstr "Ingen GPU hittades."
 
@@ -8550,6 +8665,7 @@ msgid "No matching emulators found. Try a portable emulator folder."
 msgstr "Inga matchande emulatorer hittades. Prova en mapp med en portabel emulator."
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "No network interfaces found."
 msgstr "Inga nätverksgränssnitt hittades."
 
@@ -8590,14 +8706,17 @@ msgid "No profiles yet. Add a built-in or custom profile before launching games.
 msgstr "Inga profiler än. Lägg till en inbyggd eller anpassad profil innan du startar spel."
 
 #: apps/desktop/src/views/settings/statistics/Graph.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "no reading"
 msgstr "ingen avläsning"
 
 #: apps/desktop/src/views/settings/statistics/Gauge.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "No reading"
 msgstr "Ingen avläsning"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "No reading this time."
 msgstr "Ingen avläsning den här gången."
 
@@ -8634,10 +8753,12 @@ msgid "No screenshots"
 msgstr "Inga skärmbilder"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "No scripts here yet."
 msgstr "Inga skript här ännu."
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "No scripts run at launch."
 msgstr "Inga skript körs vid start."
 
@@ -8683,6 +8804,7 @@ msgid "No web games yet. Add one with Add web game."
 msgstr "Inga webbspel än. Lägg till ett med Lägg till webbspel."
 
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Nobody entered the code on {device} in time. It takes an admin signed in there."
 msgstr "Ingen angav koden på {device} i tid. Det krävs en administratör som är inloggad där."
 
@@ -8728,6 +8850,7 @@ msgid "None selected"
 msgstr "Inga valda"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "None yet. On another device, open Settings → Streaming in Caskade and choose Pair with this one."
 msgstr "Inga än. Öppna Inställningar → Streaming i Caskade på en annan enhet och välj Parkoppla med den här."
 
@@ -8913,10 +9036,12 @@ msgstr "Inte den här sessionen"
 
 #. {reason} is the sampler's error
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Not updating: the last reading is from {when}. {reason}. Trying again."
 msgstr "Uppdateras inte: den senaste avläsningen är från {when}. {reason}. Försöker igen."
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Not updating: the last reading is from {when}. Trying again."
 msgstr "Uppdateras inte: den senaste avläsningen är från {when}. Försöker igen."
 
@@ -8938,10 +9063,12 @@ msgid "Nothing beyond its own storage"
 msgstr "Inget utöver sin egen lagring"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Nothing changed: the administrator's permission wasn't given."
 msgstr "Inget ändrades: administratörens tillåtelse gavs inte."
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Nothing changed: the system didn't allow it."
 msgstr "Inget ändrades: systemet tillät det inte."
 
@@ -9025,6 +9152,7 @@ msgstr "Avisera nya upplåsningar"
 
 #. The right end of a history graph's time axis
 #: apps/desktop/src/views/settings/statistics/Graph.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "now"
 msgstr "nu"
 
@@ -9034,6 +9162,7 @@ msgid "Numbers and symbols"
 msgstr "Siffror och symboler"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgctxt "a disabled script"
 msgid "Off"
 msgstr "Av"
@@ -9055,6 +9184,7 @@ msgid "Off stops every scan, Scan now included, and watching folders."
 msgstr "Av stoppar alla skanningar, även Skanna nu, och bevakning av mappar."
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Off."
 msgstr "Av."
 
@@ -9147,6 +9277,7 @@ msgid "On {device}"
 msgstr "På {device}"
 
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "On {device}, someone signed in to Caskade as an admin enters this code in Settings → Streaming:"
 msgstr "På {device} anger någon som är inloggad i Caskade som administratör den här koden i Inställningar → Streaming:"
 
@@ -9220,6 +9351,7 @@ msgid "Only a relay reaches {sharer}'s computer right now. The game waits for a 
 msgstr "Bara ett relä når {sharer}s dator just nu. Spelet väntar på en direkt anslutning: spelfiler går inte via reläer."
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Only an admin can let other devices stream from this one. Anyone can pair this device with another to play its games, and set the stream quality here."
 msgstr "Bara en administratör kan låta andra enheter streama från den här. Alla kan parkoppla den här enheten med en annan för att spela dess spel, och ställa in streamingkvaliteten här."
 
@@ -9368,7 +9500,7 @@ msgstr "Öppna på"
 #: apps/desktop/src/views/settings/about/legal.ts
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/about.rs apps/native/src/settings/search.rs
 msgid "Open-source packages"
 msgstr "Paket med öppen källkod"
 
@@ -9443,6 +9575,7 @@ msgid "Orange"
 msgstr "Orange"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Order at launch"
 msgstr "Ordning vid start"
 
@@ -9463,6 +9596,7 @@ msgid "Other names"
 msgstr "Andra namn"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Output"
 msgstr "Utdata"
 
@@ -9481,6 +9615,7 @@ msgid "Owned on {provider} ({account})"
 msgstr "Ägs på {provider} ({account})"
 
 #: apps/desktop/src/views/settings/about/LegalView.tsx
+#: apps/native/src/settings/about.rs
 msgid "Packages under {license}"
 msgstr "Paket under {license}"
 
@@ -9509,10 +9644,12 @@ msgid "Pair a device"
 msgstr "Parkoppla en enhet"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Pair once with a device that lets others play, and its games show in your library as Stream from that device."
 msgstr "Parkoppla en gång med en enhet som låter andra spela, så visas dess spel i ditt bibliotek som Streama från den enheten."
 
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Pair with {device}"
 msgstr "Parkoppla med {device}"
 
@@ -9536,6 +9673,7 @@ msgstr "Parkoppla med enheten från den här länken?"
 
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Pair…"
 msgstr "Parkoppla…"
 
@@ -9564,6 +9702,7 @@ msgid "Paired with {name}"
 msgstr "Parkopplad med {name}"
 
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Paired. {device}'s games show in your library as Stream from {device}."
 msgstr "Parkopplad. Spelen på {device} visas i ditt bibliotek som Streama från {device}."
 
@@ -9576,6 +9715,7 @@ msgid "Pairing link copied"
 msgstr "Parkopplingslänken kopierad"
 
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Pairing with {device} didn't work."
 msgstr "Parkopplingen med {device} fungerade inte."
 
@@ -9620,6 +9760,7 @@ msgstr "Delar som du lämnar omarkerade förblir som de är nu. Tillägg som åt
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Password"
 msgstr "Lösenord"
 
@@ -9855,7 +9996,7 @@ msgstr "Spela emulerade spel i helskärm även i skrivbordsläge. Konsolläget g
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/search.rs apps/native/src/settings/streaming.rs
 msgid "Play from other devices"
 msgstr "Spela från andra enheter"
 
@@ -9964,7 +10105,7 @@ msgstr "Spelar"
 msgid "Playing {games}"
 msgstr "Spelar {games}"
 
-#: apps/desktop/src/api/streaming.ts
+#: apps/desktop/src/api/streaming.ts apps/native/src/settings/streaming.rs
 msgctxt "streaming device"
 msgid "Playing another game"
 msgstr "Spelar ett annat spel"
@@ -10187,7 +10328,7 @@ msgstr "Föregående flik"
 #: apps/desktop/src/views/settings/about/legal.ts
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/about.rs apps/native/src/settings/search.rs
 msgid "Privacy policy"
 msgstr "Integritetspolicy"
 
@@ -10231,11 +10372,12 @@ msgstr "profiler, argument"
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/manualGame/ManualGameDialog.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
-#: apps/native/src/flows/manual_game.rs
+#: apps/native/src/flows/manual_game.rs apps/native/src/flows/scripts.rs
 msgid "Program"
 msgstr "Program"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgctxt "script kind"
 msgid "Program"
 msgstr "Program"
@@ -10273,6 +10415,7 @@ msgid "Progress it hasn't saved is lost."
 msgstr "Framsteg som inte har sparats går förlorade."
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
+#: apps/native/src/settings/about.rs
 msgid "Project page"
 msgstr "Projektsida"
 
@@ -10333,6 +10476,7 @@ msgid "RAM"
 msgstr "RAM"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Ran out of time"
 msgstr "Fick slut på tid"
 
@@ -10405,6 +10549,7 @@ msgid "Ready"
 msgstr "Redo"
 
 #: apps/desktop/src/api/streaming.ts apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/settings/streaming.rs
 msgctxt "streaming device"
 msgid "Ready"
 msgstr "Redo"
@@ -10420,6 +10565,7 @@ msgid "Ready to Install"
 msgstr "Redo att installera"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Ready. Devices on this network can pair and play."
 msgstr "Redo. Enheter i det här nätverket kan parkoppla och spela."
 
@@ -10453,6 +10599,7 @@ msgid "Received"
 msgstr "Mottaget"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgctxt "network"
 msgid "Receiving"
 msgstr "Tar emot"
@@ -10654,6 +10801,7 @@ msgid "Release"
 msgstr "Utgåva"
 
 #: apps/desktop/src/views/settings/about/AboutSettings.tsx
+#: apps/native/src/settings/about.rs
 msgid "Release build"
 msgstr "Releasebygge"
 
@@ -10688,6 +10836,7 @@ msgid "Releases"
 msgstr "Versioner"
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
+#: apps/native/src/settings/about.rs
 msgctxt "project link"
 msgid "Releases"
 msgstr "Versioner"
@@ -10719,6 +10868,7 @@ msgstr "fjärrspel"
 
 #. A removable drive
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Removable"
 msgstr "Flyttbar"
 
@@ -10767,6 +10917,7 @@ msgstr "Ta bort {folder}"
 
 #. placeholder {0}: index + 1
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
+#: apps/native/src/flows/fields.rs
 msgid "Remove {label} {0}"
 msgstr "Ta bort {label} {0}"
 
@@ -10891,10 +11042,12 @@ msgid "Removing…"
 msgstr "Tar bort…"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Repair"
 msgstr "Reparera"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Repairing…"
 msgstr "Reparerar…"
 
@@ -10924,6 +11077,7 @@ msgid "Replaces the installed version {installedVersion}."
 msgstr "Ersätter den installerade versionen {installedVersion}."
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
+#: apps/native/src/settings/about.rs
 msgid "Report a problem"
 msgstr "Rapportera ett problem"
 
@@ -11025,7 +11179,7 @@ msgstr "Återställer…"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/search.rs apps/native/src/settings/streaming.rs
 msgid "Resolution"
 msgstr "Upplösning"
 
@@ -11160,7 +11314,7 @@ msgstr "Visa"
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/flows/scripts.rs apps/native/src/settings/appearance.rs
 msgid "Revert"
 msgstr "Återgå"
 
@@ -11348,6 +11502,7 @@ msgid "Running installers"
 msgstr "Körning av installationsprogram"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Runs beside the game once it is found. A failure is noted; the game carries on."
 msgstr "Körs bredvid spelet när det har hittats. Ett fel noteras; spelet fortsätter."
 
@@ -11356,6 +11511,7 @@ msgid "Runs installer code"
 msgstr "Kör kod från installationsprogrammet"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Runs it once now, as a launch would, without a game starting."
 msgstr "Kör det en gång nu, som en start skulle, utan att ett spel startar."
 
@@ -11373,6 +11529,7 @@ msgid "Runs on {systems}, not on this computer's system."
 msgstr "Körs på {systems}, inte på den här datorns system."
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Runs once the game has ended, or a launch didn't start. A failure is noted."
 msgstr "Körs när spelet har avslutats, eller när en start inte blev av. Ett fel noteras."
 
@@ -11386,10 +11543,12 @@ msgid "Runs with"
 msgstr "Körs med"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Runs with launches"
 msgstr "Körs vid starter"
 
 #: apps/desktop/src/views/settings/about/LegalView.tsx
+#: apps/native/src/settings/about.rs
 msgid "Rust crate"
 msgstr "Rust-crate"
 
@@ -11455,6 +11614,7 @@ msgid "Save emulator"
 msgstr "Spara emulator"
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
+#: apps/native/src/settings/about.rs
 msgid "Save file and registry locations come from the Ludusavi manifest, an MIT-licensed project."
 msgstr "Platser för sparfiler och register kommer från Ludusavi-manifestet, ett MIT-licensierat projekt."
 
@@ -11469,6 +11629,7 @@ msgid "Save location"
 msgstr "Spara plats"
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
+#: apps/native/src/settings/about.rs
 msgctxt "credit"
 msgid "Save location data"
 msgstr "Data om sparplatser"
@@ -11478,6 +11639,7 @@ msgid "Save locations"
 msgstr "Sparplatser"
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
+#: apps/native/src/settings/about.rs
 msgctxt "credit"
 msgid "Save locations"
 msgstr "Sparplatser"
@@ -11514,6 +11676,7 @@ msgid "Save scanner"
 msgstr "Spara skanner"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Save script"
 msgstr "Spara skript"
 
@@ -11600,7 +11763,7 @@ msgstr "Sparar dina val innan biblioteket öppnas…"
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/unsavedChanges.tsx
 #: apps/desktop/src/views/settings/useSettings.tsx
-#: apps/native/src/library/bulk_edit.rs
+#: apps/native/src/flows/scripts.rs apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/settings/state.rs apps/native/src/settings/unsaved.rs
 msgid "Saving…"
@@ -11734,12 +11897,13 @@ msgstr "Skärmbilder"
 #. A notification's category
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 #: apps/desktop/src/views/activity/NotificationFeed.tsx
-#: apps/native/src/frame/notifications.rs
+#: apps/native/src/flows/scripts.rs apps/native/src/frame/notifications.rs
 msgid "Script"
 msgstr "Skript"
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Scripts"
 msgstr "Skript"
 
@@ -11937,6 +12101,7 @@ msgid "Send this link to whoever you're sharing {title} with. They open it, or p
 msgstr "Skicka den här länken till den du delar {title} med. Personen öppnar den eller klistrar in den i Lägg till spel → Ta emot ett delat spel. Håll Caskade öppet tills spelet har kommit fram."
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgctxt "network"
 msgid "Sending"
 msgstr "Skickar"
@@ -12017,6 +12182,7 @@ msgid "Set up ROM folders in Settings → Emulation."
 msgstr "Konfigurera ROM-mappar i Inställningar → Emulering."
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Sets it up again where something went missing or changed."
 msgstr "Konfigurerar det igen där något saknas eller har ändrats."
 
@@ -12025,6 +12191,7 @@ msgid "Setting things up"
 msgstr "Förbereder allt"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Setting up asks once for an administrator's permission."
 msgstr "Konfigurationen frågar en gång efter en administratörs tillåtelse."
 
@@ -12033,6 +12200,7 @@ msgid "Setting up…"
 msgstr "Konfigurerar…"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Setting up… The first time takes a few minutes."
 msgstr "Konfigurerar… Första gången tar några minuter."
 
@@ -12140,10 +12308,12 @@ msgid "Shared by someone"
 msgstr "Delad av någon"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Shell"
 msgstr "Skal"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgctxt "script kind"
 msgid "Shell script"
 msgstr "Skalskript"
@@ -12378,7 +12548,7 @@ msgstr "Hoppa över väljaren när standardplatsen är tillgänglig. En enda gil
 #: apps/desktop/src/views/game/UpdateBeforePlay.tsx
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/game/launch.rs
+#: apps/native/src/game/launch.rs apps/native/src/settings/streaming.rs
 msgid "Skip this version"
 msgstr "Hoppa över den här versionen"
 
@@ -12585,8 +12755,8 @@ msgstr "Startar uppdateringen…"
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 #: apps/native/src/flows/streaming.rs apps/native/src/game/launch.rs
 #: apps/native/src/game_menu/play.rs apps/native/src/game_menu/quick_look.rs
-#: apps/native/src/library/web.rs apps/native/src/ui/game_card.rs
-#: apps/native/src/ui/game_row.rs
+#: apps/native/src/library/web.rs apps/native/src/settings/streaming.rs
+#: apps/native/src/ui/game_card.rs apps/native/src/ui/game_row.rs
 msgid "Starting…"
 msgstr "Startar…"
 
@@ -12618,6 +12788,7 @@ msgid "Startup"
 msgstr "Uppstart"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Statistics"
 msgstr "Statistik"
 
@@ -12627,6 +12798,7 @@ msgid "Statistics"
 msgstr "Statistik"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Statistics aren't available: {reason}. Trying again."
 msgstr "Statistik är inte tillgänglig: {reason}. Försöker igen."
 
@@ -12749,6 +12921,7 @@ msgid "Stopped"
 msgstr "Stoppad"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Stopped by a signal"
 msgstr "Stoppades av en signal"
 
@@ -12765,6 +12938,7 @@ msgstr "Stoppar…"
 
 #. The drives statistics card
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Storage"
 msgstr "Lagring"
 
@@ -12867,7 +13041,7 @@ msgstr "Streama från en annan enhet"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/search.rs apps/native/src/settings/streaming.rs
 msgid "Stream quality"
 msgstr "Streamingkvalitet"
 
@@ -12893,12 +13067,13 @@ msgid "Streaming"
 msgstr "Streaming"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Streaming is already set up"
 msgstr "Streaming är redan konfigurerad"
 
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/search.rs apps/native/src/settings/streaming.rs
 msgid "Streaming updates"
 msgstr "Streaminguppdateringar"
 
@@ -13055,11 +13230,12 @@ msgstr "Tekniska detaljer"
 #: apps/desktop/src/views/settings/about/legal.ts
 #: apps/desktop/src/views/settings/about/LegalView.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/settings/search.rs
+#: apps/native/src/settings/about.rs apps/native/src/settings/search.rs
 msgid "Terms and conditions"
 msgstr "Allmänna villkor"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Test"
 msgstr "Testa"
 
@@ -13072,6 +13248,7 @@ msgid "Test the connection to see this server's platforms."
 msgstr "Testa anslutningen för att se den här serverns plattformar."
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Testing…"
 msgstr "Testar…"
 
@@ -13143,6 +13320,7 @@ msgid "The catalogue is empty."
 msgstr "Katalogen är tom."
 
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "The code entered on {device} didn't match. Try again with a new code."
 msgstr "Koden som angavs på {device} stämde inte. Försök igen med en ny kod."
 
@@ -13279,6 +13457,7 @@ msgid "The link works until you stop sharing."
 msgstr "Länken fungerar tills du slutar dela."
 
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
+#: apps/native/src/settings/about.rs
 msgid "The Ludusavi manifest includes data compiled from PCGamingWiki, licensed under CC BY-NC-SA 3.0."
 msgstr "Ludusavi-manifestet innehåller data sammanställda från PCGamingWiki, licensierade under CC BY-NC-SA 3.0."
 
@@ -13296,6 +13475,7 @@ msgid "The other side has trouble; try again in a while."
 msgstr "Den andra sidan har problem; försök igen om en stund."
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "The output was long; its end is shown."
 msgstr "Utdata var lång; slutet visas."
 
@@ -13327,6 +13507,7 @@ msgid "The same game on IGDB"
 msgstr "Samma spel på IGDB"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "the sampler didn't answer"
 msgstr "mätaren svarade inte"
 
@@ -13335,6 +13516,7 @@ msgid "The scan didn't finish."
 msgstr "Skanningen blev inte klar."
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "The script reads the launch's values from CASKADE_ variables, like \"$CASKADE_INSTALL_DIR\". Nothing is pasted into its text."
 msgstr "Skriptet läser startens värden från CASKADE_-variabler, som \"$CASKADE_INSTALL_DIR\". Inget klistras in i texten."
 
@@ -13521,6 +13703,7 @@ msgid "This device"
 msgstr "Den här enheten"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "This device can't share its games yet."
 msgstr "Den här enheten kan inte dela sina spel än."
 
@@ -13559,6 +13742,7 @@ msgid "This folder or file in the scan folder"
 msgstr "Den här mappen eller filen i skanningsmappen"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgctxt "script scope"
 msgid "This game"
 msgstr "Det här spelet"
@@ -13586,6 +13770,7 @@ msgid "This game was played on more than one device since they last shared saves
 msgstr "Spelet har spelats på mer än en enhet sedan de senast delade sparfiler. Sparfilen du inte väljer behålls som en version."
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "This GPU is gone."
 msgstr "Den här GPU:n finns inte längre."
 
@@ -13683,6 +13868,7 @@ msgid "Time format"
 msgstr "Tidsformat"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Time limit (seconds)"
 msgstr "Tidsgräns (sekunder)"
 
@@ -13752,11 +13938,13 @@ msgid "torrents, magnet, BitTorrent"
 msgstr "torrenter, magnet, BitTorrent"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgctxt "memory"
 msgid "Total"
 msgstr "Totalt"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Totals add up physical interfaces only, so traffic through a VPN, a container or loopback isn't counted twice. — means no rate yet."
 msgstr "Summorna räknar bara fysiska gränssnitt, så trafik via ett VPN, en container eller loopback räknas inte två gånger. — betyder att det inte finns någon hastighet än."
 
@@ -13801,7 +13989,8 @@ msgstr "systemfält, avsluta, stäng till systemfältet"
 #: apps/desktop/src/views/StoreView.tsx apps/native/src/flows/storage.rs
 #: apps/native/src/frame/error.rs apps/native/src/frame/notifications.rs
 #: apps/native/src/library/bulk_edit.rs apps/native/src/library/view.rs
-#: apps/native/src/settings/general.rs apps/native/src/ui/failure.rs
+#: apps/native/src/settings/general.rs apps/native/src/settings/streaming.rs
+#: apps/native/src/ui/failure.rs
 msgid "Try again"
 msgstr "Försök igen"
 
@@ -14065,6 +14254,7 @@ msgid "Up to date (checked {checked})."
 msgstr "Aktuell (kontrollerad {checked})."
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Up to date."
 msgstr "Uppdaterad."
 
@@ -14080,6 +14270,7 @@ msgstr "Kommande utgåvor"
 #. Button: installs the newer release
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Update"
 msgstr "Uppdatera"
 
@@ -14192,7 +14383,7 @@ msgstr "Uppdaterar biblioteket…"
 
 #: apps/desktop/src/views/settings/devices/SavesSection.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/game/launch.rs
+#: apps/native/src/game/launch.rs apps/native/src/settings/streaming.rs
 msgid "Updating…"
 msgstr "Uppdaterar…"
 
@@ -14201,6 +14392,7 @@ msgid "url({url}) is refused: custom CSS can't load anything from other origins.
 msgstr "url({url}) nekas: anpassad CSS kan inte läsa in något från andra ursprung."
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgctxt "statistics"
 msgid "Usage"
 msgstr "Användning"
@@ -14226,6 +14418,7 @@ msgid "Use {title}"
 msgstr "Använd {title}"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Use it"
 msgstr "Använd den"
 
@@ -14243,16 +14436,19 @@ msgid "Use this theme"
 msgstr "Använd det här temat"
 
 #: apps/desktop/src/views/settings/statistics/Gauge.tsx
+#: apps/native/src/settings/statistics.rs
 msgctxt "gauge"
 msgid "Used"
 msgstr "Använt"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgctxt "memory"
 msgid "Used"
 msgstr "Använt"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "User name"
 msgstr "Användarnamn"
 
@@ -14291,6 +14487,7 @@ msgid "Usually different on each device"
 msgstr "Oftast olika på varje enhet"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Values it saw"
 msgstr "Värden det såg"
 
@@ -14340,6 +14537,7 @@ msgstr "Verifierar"
 
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/views/settings/about/AboutPage.tsx
+#: apps/native/src/settings/about.rs
 msgid "Version"
 msgstr "Version"
 
@@ -14376,6 +14574,7 @@ msgid "Video {number}"
 msgstr "Video {number}"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Video memory"
 msgstr "Videominne"
 
@@ -14405,6 +14604,7 @@ msgid "Violet"
 msgstr "Violett"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Virtual, not counted"
 msgstr "Virtuell, räknas inte"
 
@@ -14414,6 +14614,7 @@ msgid "Waiting for {0} to finish installing it."
 msgstr "Väntar på att {0} ska bli klar med installationen."
 
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Waiting for {device}…"
 msgstr "Väntar på {device}…"
 
@@ -14435,6 +14636,7 @@ msgid "Waiting for progress"
 msgstr "Väntar på förlopp"
 
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/settings/statistics.rs
 msgid "Waiting for the first reading…"
 msgstr "Väntar på den första mätningen…"
 
@@ -14454,6 +14656,7 @@ msgid "Waiting for you to finish on the other device…"
 msgstr "Väntar på att du blir klar på den andra enheten…"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Waiting to pair"
 msgstr "Väntar på parkoppling"
 
@@ -14578,6 +14781,7 @@ msgid "What it does"
 msgstr "Vad den gör"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "What it runs"
 msgstr "Vad det kör"
 
@@ -14634,6 +14838,7 @@ msgid "What's new in {version}"
 msgstr "Nyheter i {version}"
 
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "When"
 msgstr "När"
 
@@ -14649,6 +14854,7 @@ msgid "When a game launches"
 msgstr "När ett spel startar"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "When another device asks to play from this one, it shows a code. An admin signs in here to enter it."
 msgstr "När en annan enhet ber om att få spela från den här visar den en kod. En administratör loggar in här för att ange den."
 
@@ -14811,6 +15017,7 @@ msgstr "Arbetskatalog: {0}"
 
 #: apps/desktop/src/components/gameActions/ActionForm.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
+#: apps/native/src/flows/scripts.rs
 msgid "Working folder"
 msgstr "Arbetsmapp"
 
@@ -14956,6 +15163,7 @@ msgid "Your library is here"
 msgstr "Ditt bibliotek är här"
 
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/settings/streaming.rs
 msgid "Your other devices at home can play this device's games, streamed over the network, with their own controller."
 msgstr "Dina andra enheter hemma kan spela den här enhetens spel, streamade över nätverket, med sin egen handkontroll."
 

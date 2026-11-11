@@ -887,7 +887,7 @@ React Aria interaction: `data-orientation`
 
 ## `about`
 
-Settings → About: the IGDB and Hasheous credits first, side by side, then the app, its version and build, project links, and the links into `legal`. Rendered by AboutPage (app).
+Settings → About: the IGDB and Hasheous credits first, side by side, then the app, its version and build, project links, and the links into `legal`. Rendered by AboutPage (apps/native/src/settings/about.rs); in the webview, AboutPage (app).
 
 Root: `[data-cs="about"]`
 
@@ -903,7 +903,7 @@ Root: `[data-cs="about"]`
 
 ## `legal`
 
-Settings → About → Legal: licences, open-source packages, terms and privacy policy, bundled for offline reading. One section shows at a time, at `/settings?tab=about&section=<id>`. Rendered by LegalView (app).
+Settings → About → Legal: licences, open-source packages, terms and privacy policy, bundled for offline reading. One section shows at a time, at `/settings?tab=about&section=<id>`. Rendered by LegalView (apps/native/src/settings/about.rs); in the webview, LegalView (app).
 
 Root: `[data-cs="legal"]`
 
@@ -917,7 +917,7 @@ Root: `[data-cs="legal"]`
 
 ## `system-stats`
 
-Settings → Statistics: this machine's CPU, GPUs, memory, network and storage capacity, live, as the same cards in desktop and console modes. `data-status` says whether readings are coming in. Rendered by StatisticsDashboard (app).
+Settings → Statistics: this machine's CPU, GPUs, memory, network and storage capacity, live, as the same cards in desktop and console modes. `data-status` says whether readings are coming in. Rendered by StatisticsDashboard (apps/native/src/settings/statistics.rs); in the webview, StatisticsDashboard (app).
 
 Root: `[data-cs="system-stats"]`
 
@@ -1248,7 +1248,7 @@ Contains: [`button`](#button), [`select`](#select), [`text-field`](#text-field)
 
 ## `scripts`
 
-One scope's lifecycle scripts (#180), in Settings → Scripts, an emulator profile and the game editor: the scripts, the chosen one's form, its test and the order a launch runs every scope's scripts in. Rendered by ScriptsPanel (app).
+One scope's lifecycle scripts (#180), in Settings → Scripts, an emulator profile and the game editor: the scripts, the chosen one's form, its test and the order a launch runs every scope's scripts in. Rendered by ScriptsPanel (apps/native/src/flows/scripts.rs); in the webview, ScriptsPanel (app).
 
 Root: `[data-cs="scripts"]`
 

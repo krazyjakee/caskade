@@ -678,10 +678,14 @@ mod guard {
     }
 }
 
+mod about;
 mod appearance;
 mod discovery;
 mod general;
 mod launchers;
 mod plugins;
+mod scripts;
+mod statistics;
 mod storage;
 mod stores;
+mod streaming;

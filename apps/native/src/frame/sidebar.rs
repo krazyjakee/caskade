@@ -150,12 +150,13 @@ pub fn Sidebar() -> Element {
     }
 }
 
-/// Caskade's mark (`public/caskade.svg`).
+/// Caskade's mark (`public/caskade.svg`), at `class`'s size (Settings →
+/// About shows it too).
 #[component]
-fn Brand() -> Element {
+pub(crate) fn Brand(#[props(default = "size-9".to_owned())] class: String) -> Element {
     rsx! {
         svg {
-            class: "size-9",
+            class: "{class}",
             "aria-hidden": "true",
             view_box: "112 112 800 800",
             circle {

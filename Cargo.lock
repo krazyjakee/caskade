@@ -2061,6 +2061,7 @@ dependencies = [
  "caskade-installer",
  "caskade-player",
  "caskade-share",
+ "caskade-system-stats",
  "caskade-test-desktop",
  "caskade-ui-data",
  "caskade-ui-i18n",

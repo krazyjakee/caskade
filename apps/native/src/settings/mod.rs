@@ -12,6 +12,7 @@
 //! The panels themselves come with #104 and #105; until then most show
 //! what they will hold.
 
+mod about;
 mod appearance;
 mod discovery;
 mod drafts;
@@ -21,10 +22,13 @@ mod panels;
 mod plugins;
 mod reset;
 mod schema;
+mod scripts;
 mod search;
 mod state;
+mod statistics;
 mod storage;
 mod stores;
+mod streaming;
 mod sync;
 #[cfg(test)]
 mod tests;
